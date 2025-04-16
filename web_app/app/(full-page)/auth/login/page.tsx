@@ -1,13 +1,14 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 import { useRouter } from 'next/navigation';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import { Checkbox } from 'primereact/checkbox';
 import { Button } from 'primereact/button';
 import { Password } from 'primereact/password';
 import { LayoutContext } from '../../../../layout/context/layoutcontext';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
+import { Messages } from "primereact/messages";
 
 const LoginPage = () => {
     const [password, setPassword] = useState('');
@@ -17,6 +18,7 @@ const LoginPage = () => {
     const router = useRouter();
     const containerClassName = classNames('surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden', { 'p-input-filled': layoutConfig.inputStyle === 'filled' });
 
+    const msgs = useRef<Messages>(null);
     return (
         <div className={containerClassName}>
             <div className="flex flex-column align-items-center justify-content-center">
@@ -50,15 +52,19 @@ const LoginPage = () => {
                                     <Checkbox inputId="rememberme1" checked={checked} onChange={(e) => setChecked(e.checked ?? false)} className="mr-2"></Checkbox>
                                     <label htmlFor="rememberme1">Remember me</label>
                                 </div>
-                                <a 
-                                    className="font-medium no-underline ml-2 text-right cursor-pointer" 
+                                <a
+                                    className="font-medium no-underline ml-2 text-right cursor-pointer"
                                     style={{ color: 'var(--primary-color)' }}
                                     onClick={() => router.push('/auth/forgot-password')}
                                 >
                                     Forgot password?
                                 </a>
                             </div>
+                            <Messages ref={msgs} />
                             <Button label="Sign In" className="w-full p-3 text-xl" onClick={() => router.push('/')}></Button>
+                            <div className="flex flex-column align-items-center justify-content-center">
+                                <Button icon="pi pi-arrow-left" label="Go to Home" text className="mt-4" onClick={() => router.push('/landing')} />
+                            </div>
                         </div>
                     </div>
                 </div>

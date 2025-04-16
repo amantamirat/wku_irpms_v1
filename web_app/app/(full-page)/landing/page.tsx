@@ -25,8 +25,8 @@ const LandingPage = () => {
             <div id="home" className="landing-wrapper overflow-hidden">
                 <div className="py-4 px-4 mx-0 md:mx-6 lg:mx-8 lg:px-8 flex align-items-center justify-content-between relative lg:static">
                     <Link href="/" className="flex align-items-center">
-                        <img src={`/layout/images/${layoutConfig.colorScheme === 'light' ? 'logo-dark' : 'logo-white'}.svg`} alt="Sakai Logo" height="50" className="mr-0 lg:mr-2" />
-                        <span className="text-900 font-medium text-2xl line-height-3 mr-8">SAKAI</span>
+                        <img src={`/images/wku_logo.png`} alt="WKU Logo" height="50" className="mr-0 lg:mr-2" />
+                        <span className="text-900 font-medium text-2xl line-height-3 mr-8">IRPMS</span>
                     </Link>
                     <StyleClass nodeRef={menuRef as NodeRef} selector="@next" enterClassName="hidden" leaveToClassName="hidden" hideOnOutsideClick>
                         <i ref={menuRef} className="pi pi-bars text-4xl cursor-pointer block lg:hidden text-700"></i>
@@ -59,7 +59,9 @@ const LandingPage = () => {
                             </li>
                         </ul>
                         <div className="flex justify-content-between lg:block border-top-1 lg:border-top-none surface-border py-3 lg:py-0 mt-3 lg:mt-0">
-                            <Button label="Login" text rounded className="border-none font-light line-height-2 text-blue-500"></Button>
+                            <Link href="/auth/login" passHref>
+                                <Button label="Login" text rounded className="border-none font-light line-height-2 text-blue-500"></Button>
+                            </Link>
                             <Button label="Register" rounded className="border-none ml-5 font-light line-height-2 bg-blue-500 text-white"></Button>
                         </div>
                     </div>
