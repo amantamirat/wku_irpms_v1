@@ -1,0 +1,16 @@
+{
+    "permissions": {
+        "role": [
+            "create",
+            "read",
+            "update",
+            "delete"
+        ],
+        "user": [
+            "create",
+            "read",
+            "update",
+            "delete"
+        ]
+    }
+}
