@@ -6,6 +6,7 @@ import { LayoutContext } from './context/layoutcontext';
 import { MenuProvider } from './context/menucontext';
 import Link from 'next/link';
 import { AppMenuItem } from '@/types';
+import { PrimeIcons } from 'primereact/api';
 
 const AppMenu = () => {
     const { layoutConfig } = useContext(LayoutContext);
@@ -14,7 +15,17 @@ const AppMenu = () => {
         {
             label: 'Home',
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
-        },        
+        },
+        {
+            label: 'Manage',
+            items: [
+                {
+                    label: 'Colleges',
+                    icon: PrimeIcons.BUILDING,
+                    to: '/pages/colleges'
+                }                
+            ]
+        },
         {
             label: 'Prime Blocks',
             items: [
@@ -24,7 +35,7 @@ const AppMenu = () => {
         },
         {
             label: 'Utilities',
-            items: [               
+            items: [
                 { label: 'PrimeFlex', icon: 'pi pi-fw pi-desktop', url: 'https://primeflex.org/', target: '_blank' }
             ]
         },

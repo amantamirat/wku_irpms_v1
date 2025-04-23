@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const User = require('./models/User');
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { prepareHash } = require('../services/userService');
@@ -9,18 +9,18 @@ exports.loginUser = async (req, res) => {
     try {
         const { name, password } = req.body;
         const user = await User.findOne({
-            $or: [{ email: name }, { name: name }]
+            $or: [{ email: name }, { user_name: name }]
         }).populate('roles');
         if (!user) return res.status(401).json({ message: "Invalid credentials." });
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({ message: "Invalid credentials." });
 
-        const token = jwt.sign({ _id: user._id, email: user.email, name: user.name }, process.env.KEY, { expiresIn: "2h" });
+        const token = jwt.sign({ _id: user._id, email: user.email, name: user.user_name }, process.env.KEY, { expiresIn: "2h" });
         res.status(200).json({
             token: token,
             user: {
                 _id: user._id,
-                name: user.name,
+                name: user.user_name,
                 email: user.email,
                 roles: user.roles,
                 status: user.status
@@ -36,10 +36,10 @@ exports.loginUser = async (req, res) => {
 // Create a new user
 exports.createUser = async (req, res) => {
     try {
-        const { name, password, email, roles, status } = req.body;
+        const { user_name, password, email, roles, status } = req.body;
         const hashedPassword = await prepareHash(password);
         const user = new User({
-            name, password: hashedPassword, email, roles, status
+            user_name, password: hashedPassword, email, roles, status
         });
         await user.save();
         res.status(201).json(user);

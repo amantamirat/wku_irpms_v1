@@ -5,27 +5,27 @@ const prepareHash = async (password) => {
     return await bcrypt.hash(password, salt);
 };
 
-const sendEmail = async (email, code) => {
+const emailCode = async (email, code) => {
     try {
         const transporter = nodemailer.createTransport({
             service: "Gmail",
             auth: {
-                user: process.env.USER,
+                user: process.env.EMAIL,
                 pass: process.env.PASS,
             }
         });
         const myOptions = {
-            from: process.env.USER,
+            from: process.env.EMAIL,
             to: email,
-            subject: "Email Verification",
+            subject: "Verification Code",
             text: "Hello Welcome, Here is Verfication Code to Activate Your Account ",
             html: " <h2>" + code + "</h2>"
         }
         transporter.sendMail(myOptions, function (error, info) {
             if (error) {
                 //if email is not found delete the user
-                console.log(error);
-                //throw error;
+                //console.log(error);
+                throw error;
             } else {
                 console.log("Email Sent:" + info.response);
             }

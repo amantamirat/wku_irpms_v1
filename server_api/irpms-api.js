@@ -6,6 +6,10 @@ app.use(cors());
 app.use(express.json());
 require('dotenv').config();
 
+
+const collegeRoutes = require("./routes/collegeRoutes");
+app.use("/api/colleges", collegeRoutes);
+
 mongoose.connect(process.env.MONGO_URL)
   .then(async () => {
     console.log('databased connection established');    
