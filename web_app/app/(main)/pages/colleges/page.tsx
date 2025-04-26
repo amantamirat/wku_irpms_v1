@@ -18,7 +18,7 @@ const CollegePage = () => {
     let emptyCollege: College = {
         college_name: ''
     };
-    const [colleges, setColleges] = useState<College[] | null>(null);
+    const [colleges, setColleges] = useState<College[]>([]);
     const [selectedCollege, setSelectedCollege] = useState<College>(emptyCollege);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -52,6 +52,7 @@ const CollegePage = () => {
         if (college.college_name.trim() === "") {
             return false;
         }
+        //check for uniqness here
         return true;
     };
 
@@ -63,8 +64,8 @@ const CollegePage = () => {
         let _colleges = [...(colleges as any)];
         try {
             if (selectedCollege._id) {
-                const updatedCollege = await CollegeService.updateCollege(selectedCollege);
-                const index = findIndexById(selectedCollege._id);
+                const updatedCollege = await CollegeService.updateCollege(selectedCollege);                
+                const index = colleges.findIndex((college) => college._id === updatedCollege._id);
                 _colleges[index] = updatedCollege;
             } else {
                 const newCollege = await CollegeService.createCollege(selectedCollege);
@@ -93,16 +94,7 @@ const CollegePage = () => {
     };
 
 
-    const findIndexById = (id: string) => {
-        let index = -1;
-        for (let i = 0; i < (colleges as any)?.length; i++) {
-            if ((colleges as any)[i]._id === id) {
-                index = i;
-                break;
-            }
-        }
-        return index;
-    };
+    
 
     const deleteCollege = async () => {
         try {

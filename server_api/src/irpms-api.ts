@@ -22,6 +22,8 @@ mongoose.connect(MONGO_URL)
   })
   .catch(err => {
     console.error('database connection error:', err);
+    console.error('exiting...');
+    process.exit(1);
   });
 
 app.listen(PORT, () => {
