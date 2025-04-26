@@ -25,7 +25,7 @@ export const CollegeService = {
         return updatedCollege as College;
     },
 
-    async deleteCollege(college: College): Promise<boolean> {
+    async deleteCollege(college: Partial<College>): Promise<boolean> {
         if (!college._id) {
             throw new Error("_id required.");
         }

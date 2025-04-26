@@ -1,50 +1,51 @@
-import { Request, Response, NextFunction } from 'express';
-import College from '../models/college'; 
+import { Request, Response } from 'express';
+import College from '../models/college';
+import { successResponse, errorResponse } from '../util/response';
 
-// Create a new college
- const createCollege = async (req: Request, res: Response): Promise<void> => {
+
+const createCollege = async (req: Request, res: Response): Promise<void> => {
   try {
     const { college_name } = req.body;
 
     const college = new College({ college_name });
     await college.save();
 
-    res.status(201).json({ message: 'College created successfully', college });
+    successResponse(res, 201, 'College created successfully', college);
   } catch (error: any) {
     if (error.code === 11000) {
-      res.status(400).json({ message: 'College name must be unique' });
+      errorResponse(res, 400, 'College name must be unique');
       return;
     }
-    res.status(500).json({ message: 'Server error', error });
+    errorResponse(res, 500, 'Server error', error.message);
   }
 };
 
-// Get all colleges
- const getAllColleges = async (req: Request, res: Response): Promise<void> => {
+
+const getAllColleges = async (req: Request, res: Response): Promise<void> => {
   try {
     const colleges = await College.find();
-    res.status(200).json(colleges);
+    successResponse(res, 200, 'Colleges fetched successfully', colleges);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
+    errorResponse(res, 500, 'Server error', (error as Error).message);
   }
 };
 
-// Get college by ID
- const getCollegeById = async (req: Request, res: Response): Promise<void> => {
+
+const getCollegeById = async (req: Request, res: Response): Promise<void> => {
   try {
     const college = await College.findById(req.params.id);
     if (!college) {
-      res.status(404).json({ message: 'College not found' });
+      errorResponse(res, 404, 'College not found');
       return;
     }
-    res.status(200).json(college);
+    successResponse(res, 200, 'College fetched successfully', college);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
+    errorResponse(res, 500, 'Server error', (error as Error).message);
   }
 };
 
-// Update college by ID
- const updateCollege = async (req: Request, res: Response): Promise<void> => {
+
+const updateCollege = async (req: Request, res: Response): Promise<void> => {
   try {
     const { college_name } = req.body;
 
@@ -55,32 +56,32 @@ import College from '../models/college';
     );
 
     if (!updatedCollege) {
-      res.status(404).json({ message: 'College not found' });
+      errorResponse(res, 404, 'College not found');
       return;
     }
 
-    res.status(200).json({ message: 'College updated successfully', college: updatedCollege });
+    successResponse(res, 200, 'College updated successfully', updatedCollege);
   } catch (error: any) {
     if (error.code === 11000) {
-      res.status(400).json({ message: 'College name must be unique' });
+      errorResponse(res, 400, 'College name must be unique');
       return;
     }
-    res.status(500).json({ message: 'Server error', error });
+    errorResponse(res, 500, 'Server error', error.message);
   }
 };
 
-// Delete college by ID
- const deleteCollege = async (req: Request, res: Response): Promise<void> => {
+
+const deleteCollege = async (req: Request, res: Response): Promise<void> => {
   try {
     const deletedCollege = await College.findByIdAndDelete(req.params.id);
     if (!deletedCollege) {
-      res.status(404).json({ message: 'College not found' });
+      errorResponse(res, 404, 'College not found');
       return;
     }
 
-    res.status(200).json({ message: 'College deleted successfully' });
+    successResponse(res, 200, 'College deleted successfully', true);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
+    errorResponse(res, 500, 'Server error', (error as Error).message);
   }
 };
 

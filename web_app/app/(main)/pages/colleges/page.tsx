@@ -1,7 +1,8 @@
 'use client';
-import { College } from '@/models/college';
+import DeleteDialog from '@/components/DeleteDialog';
+import { College, validateCollege } from '@/models/college';
 import { CollegeService } from '@/services/CollegeService';
-import { FilterMatchMode } from 'primereact/api';
+import { initFilters, handleGlobalFilterChange } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
@@ -19,53 +20,54 @@ const CollegePage = () => {
         college_name: ''
     };
     const [colleges, setColleges] = useState<College[]>([]);
+    const dt = useRef<DataTable<any>>(null);
+    const [globalFilter, setGlobalFilter] = useState('');
+    const [filters, setFilters] = useState<DataTableFilterMeta>({});
+
     const [selectedCollege, setSelectedCollege] = useState<College>(emptyCollege);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const toast = useRef<Toast>(null);
-    const dt = useRef<DataTable<any>>(null);
-    const [globalFilter, setGlobalFilter] = useState('');
-    const [filters, setFilters] = useState<DataTableFilterMeta>({});
+
 
     useEffect(() => {
-        initFilters();
+        setFilters(initFilters());
+        setGlobalFilter('');
         loadColleges();
     }, []);
 
+    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
+    };
+
     const loadColleges = async () => {
         try {
-            CollegeService.getColleges().then((data) => {
-                setColleges(data);
-            });
+            const data = await CollegeService.getColleges();
+            setColleges(data);
         } catch (err) {
+            console.error('Failed to load colleges:', err);
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to load colleges',
+                summary: 'Failed to load colleges data',
                 detail: '' + err,
                 life: 3000
             });
         }
     };
 
-    const validateCollege = (college: College) => {
-        if (college.college_name.trim() === "") {
-            return false;
-        }
-        //check for uniqness here
-        return true;
-    };
+
 
     const saveCollege = async () => {
         setSubmitted(true);
         if (!validateCollege(selectedCollege)) {
             return;
         }
-        let _colleges = [...(colleges as any)];
         try {
+            let _colleges = [...(colleges as any)];
             if (selectedCollege._id) {
-                const updatedCollege = await CollegeService.updateCollege(selectedCollege);                
-                const index = colleges.findIndex((college) => college._id === updatedCollege._id);
+                const updatedCollege = await CollegeService.updateCollege(selectedCollege);
+                const index = colleges.findIndex((college) => college._id === selectedCollege._id);
                 _colleges[index] = updatedCollege;
             } else {
                 const newCollege = await CollegeService.createCollege(selectedCollege);
@@ -77,6 +79,7 @@ const CollegePage = () => {
                 detail: `College ${selectedCollege._id ? "updated" : 'created'}`,
                 life: 3000
             });
+            setColleges(_colleges);
         } catch (error) {
             console.error(error);
             toast.current?.show({
@@ -85,31 +88,26 @@ const CollegePage = () => {
                 detail: '' + error,
                 life: 3000
             });
+        } finally {
+            setShowSaveDialog(false);
+            setSelectedCollege(emptyCollege);
         }
-
-        setColleges(_colleges as any);
-        setShowSaveDialog(false);
-        setSelectedCollege(emptyCollege);
 
     };
 
 
-    
-
     const deleteCollege = async () => {
         try {
-            if (selectedCollege._id) {
-                const deleted = await CollegeService.deleteCollege(selectedCollege);
-                if (deleted) {
-                    let _colleges = (colleges as any)?.filter((val: any) => val._id !== selectedCollege._id);
-                    setColleges(_colleges);
-                    toast.current?.show({
-                        severity: 'success',
-                        summary: 'Successful',
-                        detail: 'College Deleted',
-                        life: 3000
-                    });
-                }
+            const deleted = await CollegeService.deleteCollege(selectedCollege);
+            if (deleted) {
+                let _colleges = (colleges as any)?.filter((val: any) => val._id !== selectedCollege._id);
+                setColleges(_colleges);
+                toast.current?.show({
+                    severity: 'success',
+                    summary: 'Successful',
+                    detail: 'College Deleted',
+                    life: 3000
+                });
             }
         } catch (error) {
             console.error(error);
@@ -119,24 +117,22 @@ const CollegePage = () => {
                 detail: '' + error,
                 life: 3000
             });
+        } finally {
+            setShowDeleteDialog(false);
+            setSelectedCollege(emptyCollege);
         }
-        setShowDeleteDialog(false);
-        setSelectedCollege(emptyCollege);
+
     };
 
-    const openSaveDialog = () => {
-        setSelectedCollege(emptyCollege);
-        setSubmitted(false);
-        setShowSaveDialog(true);
-    };
-
-    const openEditDialog = (college: College) => {
+    const openSaveDialog = (college: College) => {
         setSelectedCollege({ ...college });
         setSubmitted(false);
         setShowSaveDialog(true);
     };
 
+
     const hideSaveDialog = () => {
+        setSelectedCollege(emptyCollege);
         setSubmitted(false);
         setShowSaveDialog(false);
     };
@@ -153,43 +149,20 @@ const CollegePage = () => {
         setShowDeleteDialog(true);
     };
 
-    const hideDeleteDialog = () => {
-        setShowDeleteDialog(false);
-    };
 
-    const deleteDialogFooter = (
-        <>
-            <Button label="Cancel" icon="pi pi-times" text onClick={hideDeleteDialog} />
-            <Button label="Delete" icon="pi pi-check" text onClick={deleteCollege} />
-        </>
-    );
 
 
     const startToolbarTemplate = () => {
-        //<React.Fragment> is simillar to <></>
         return (
             <React.Fragment>
                 <div className="my-2">
-                    <Button label="New College" icon="pi pi-plus" severity="success" className="mr-2" onClick={openSaveDialog} />
+                    <Button label="New College" icon="pi pi-plus" severity="success" className="mr-2" onClick={() => openSaveDialog(emptyCollege)} />
                 </div>
             </React.Fragment>
         );
     };
 
-    const initFilters = () => {
-        setFilters({
-            global: { value: null, matchMode: FilterMatchMode.CONTAINS }
-        });
-        setGlobalFilter('');
-    };
 
-    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        let _filters = { ...filters };
-        (_filters['global'] as any).value = value;
-        setFilters(_filters);
-        setGlobalFilter(value);
-    };
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
@@ -204,7 +177,7 @@ const CollegePage = () => {
     const actionBodyTemplate = (rowData: College) => {
         return (
             <>
-                <Button icon="pi pi-pencil" rounded severity="success" className="mr-2" onClick={() => openEditDialog(rowData)} />
+                <Button icon="pi pi-pencil" rounded severity="success" className="mr-2" onClick={() => openSaveDialog(rowData)} />
                 <Button icon="pi pi-trash" rounded severity="warning" onClick={() => confirmDeleteItem(rowData)} />
             </>
         );
@@ -235,10 +208,9 @@ const CollegePage = () => {
                         scrollable
                         filters={filters}
                         onRowDoubleClick={(e) => {
-                            const selected = e.data;  // The selected row data
+                            const selected = e.data;
                             if (selected) {
                                 setSelectedCollege(selected as College);
-                                // Perform any further logic like opening a modal or navigating
                             }
                         }}
                     >
@@ -279,23 +251,13 @@ const CollegePage = () => {
                         </>) : (<></>)}
                     </Dialog>
 
-                    <Dialog
-                        visible={showDeleteDialog}
-                        style={{ width: '450px' }}
-                        header="Confirm"
-                        modal
-                        footer={deleteDialogFooter}
-                        onHide={hideDeleteDialog}
-                    >
-                        <div className="flex align-items-center justify-content-center">
-                            <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                            {selectedCollege && (
-                                <span>
-                                    Are you sure you want to delete <b>{selectedCollege.college_name}</b>?
-                                </span>
-                            )}
-                        </div>
-                    </Dialog>
+                    <DeleteDialog
+                        showDeleteDialog={showDeleteDialog}
+                        selectedData={selectedCollege}
+                        onDelete={deleteCollege}
+                        onHide={() => setShowDeleteDialog(false)}
+                    />
+
                 </div>
             </div>
         </div>

@@ -19,7 +19,6 @@ export const MyService = {
     async get(endpoint: string): Promise<any> {
         const url = `${BASE_URL}${endpoint}`;
         const token = getAuthToken();
-        console.log(url);
         const response = await fetch(url, {
             headers: {
                 'Content-Type': 'application/json',
@@ -29,7 +28,8 @@ export const MyService = {
         });
 
         await handleError(response);
-        return response.json();
+        const result = await response.json();
+        return result.data; 
     },
 
     async post(endpoint: string, payload: any): Promise<any> {
@@ -46,7 +46,8 @@ export const MyService = {
         });
 
         await handleError(response);
-        return response.json();
+        const result = await response.json();
+        return result.data; 
     },
 
     async put(endpoint: string, payload: any): Promise<any> {
@@ -63,7 +64,8 @@ export const MyService = {
         });
 
         await handleError(response);
-        return response.json();
+        const result = await response.json();
+        return result.data; 
     },
 
     async delete(endpoint: string): Promise<boolean> {
@@ -79,6 +81,7 @@ export const MyService = {
         });
 
         await handleError(response);
-        return true;
+        const result = await response.json();
+        return result.data; 
     }
 };
