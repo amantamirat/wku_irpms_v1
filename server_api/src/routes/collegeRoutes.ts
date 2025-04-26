@@ -1,6 +1,6 @@
-const express = require('express');
-const router = express.Router();
-const collegeController = require('../controllers/collegeController'); // adjust path if needed
+import { Router } from 'express';
+import collegeController from '../controllers/collegeController'; 
+const router: Router = Router();
 
 // CREATE a new college
 router.post('/', collegeController.createCollege);
@@ -17,4 +17,4 @@ router.put('/:id', collegeController.updateCollege);
 // DELETE a college by ID
 router.delete('/:id', collegeController.deleteCollege);
 
-module.exports = router;
+export default router;
