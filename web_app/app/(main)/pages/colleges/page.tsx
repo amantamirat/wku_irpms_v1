@@ -204,7 +204,7 @@ const CollegePage = () => {
             <h5 className="m-0">Manage Colleges</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
-                <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search Dep't..." className="w-full md:w-1/3" />
+                <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search ..." className="w-full md:w-1/3" />
             </span>
         </div>
     );
@@ -256,7 +256,7 @@ const CollegePage = () => {
                             body={(rowData, options) => options.rowIndex + 1}
                             style={{ width: '50px' }}
                         />
-                        <Column field="name" header="College Name" sortable headerStyle={{ minWidth: '15rem' }}></Column>
+                        <Column field="college_name" header="College Name" sortable headerStyle={{ minWidth: '15rem' }}></Column>
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 

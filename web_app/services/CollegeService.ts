@@ -1,21 +1,18 @@
 import { College } from "@/models/college";
 import { MyService } from "./MyService";
 
-const get_endpoint = '/colleges/';
-const create_endpoint = '/colleges/create';
-const update_endpoint = '/colleges/update';
-const delete_endpoint = '/colleges/delete';
+const end_point = '/colleges/';
 
 
 export const CollegeService = {
 
     async getColleges(): Promise<College[]> {
-        const data = await MyService.get(get_endpoint);
+        const data = await MyService.get(end_point);
         return data as College[];
     },
 
     async createCollege(college: Partial<College>): Promise<College> {
-        const createdData = await MyService.post(create_endpoint, college);
+        const createdData = await MyService.post(end_point, college);
         return createdData as College;
     },
 
@@ -23,7 +20,8 @@ export const CollegeService = {
         if (!college._id) {
             throw new Error("_id required.");
         }
-        const updatedCollege = await MyService.put(update_endpoint, college);
+        const url = `${end_point}${college._id}`;
+        const updatedCollege = await MyService.put(url, college);
         return updatedCollege as College;
     },
 
@@ -31,7 +29,8 @@ export const CollegeService = {
         if (!college._id) {
             throw new Error("_id required.");
         }
-        const response = await MyService.delete(delete_endpoint);
+        const url = `${end_point}${college._id}`;
+        const response = await MyService.delete(url);
         return response;
     },
 };

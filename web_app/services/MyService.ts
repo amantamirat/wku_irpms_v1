@@ -19,7 +19,7 @@ export const MyService = {
     async get(endpoint: string): Promise<any> {
         const url = `${BASE_URL}${endpoint}`;
         const token = getAuthToken();
-
+        console.log(url);
         const response = await fetch(url, {
             headers: {
                 'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ export const MyService = {
     async post(endpoint: string, payload: any): Promise<any> {
         const url = `${BASE_URL}${endpoint}`;
         const token = getAuthToken();
-        
+
         const response = await fetch(url, {
             method: 'POST',
             headers: {
