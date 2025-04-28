@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import { prepareHash } from '../services/userService';
 import { User } from '../models/user';
 import dotenv from 'dotenv';
+import { errorResponse, successResponse } from '../util/response';
 
 dotenv.config();
 
@@ -17,13 +18,13 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
     }).populate('roles');
 
     if (!user) {
-      res.status(401).json({ message: "Invalid credentials." });
+      errorResponse(res, 401, 'Server error', "Invalid credentials.");
       return;
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      res.status(401).json({ message: "Invalid credentials." });
+      errorResponse(res, 401, 'Server error', "Invalid credentials.");
       return;
     }
 
@@ -45,7 +46,7 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: (error as Error).message });
+    errorResponse(res, 500, 'Server error', (error as Error).message);
   }
 };
 
@@ -65,9 +66,9 @@ const createUser = async (req: Request, res: Response): Promise<void> => {
     });
 
     await user.save();
-    res.status(201).json(user);
-  } catch (err) {
-    res.status(400).json({ error: (err as Error).message });
+    successResponse(res, 201, 'User created successfully', user);
+  } catch (err: any) {
+    errorResponse(res, 500, 'Server error', err.message);
   }
 };
 
@@ -75,9 +76,9 @@ const createUser = async (req: Request, res: Response): Promise<void> => {
 const getUsers = async (_req: Request, res: Response): Promise<void> => {
   try {
     const users = await User.find().populate('roles');
-    res.status(200).json(users);
+    successResponse(res, 200, 'users fetched successfully', users);
   } catch (err) {
-    res.status(500).json({ error: (err as Error).message });
+    errorResponse(res, 500, 'Server error', (err as Error).message);
   }
 };
 
@@ -86,12 +87,12 @@ const getUserById = async (req: Request, res: Response): Promise<void> => {
   try {
     const user = await User.findById(req.params.id).populate('roles');
     if (!user) {
-      res.status(404).json({ message: 'User not found' });
+      errorResponse(res, 404, 'College not found');
       return;
     }
-    res.status(200).json(user);
+    successResponse(res, 200, 'users fetched successfully', user);
   } catch (err) {
-    res.status(500).json({ error: (err as Error).message });
+    errorResponse(res, 500, 'Server error', (err as Error).message);
   }
 };
 
@@ -104,12 +105,12 @@ const updateUser = async (req: Request, res: Response): Promise<void> => {
       { new: true, runValidators: true }
     );
     if (!updatedUser) {
-      res.status(404).json({ message: 'User not found' });
+      errorResponse(res, 404, 'User not found');
       return;
     }
-    res.status(200).json(updatedUser);
+    successResponse(res, 200, 'User updated successfully', updateUser);
   } catch (err) {
-    res.status(400).json({ error: (err as Error).message });
+    errorResponse(res, 500, 'Server error', (err as Error).message);
   }
 };
 
@@ -118,12 +119,12 @@ const deleteUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const deletedUser = await User.findByIdAndDelete(req.params.id);
     if (!deletedUser) {
-      res.status(404).json({ message: 'User not found' });
+      errorResponse(res, 404, 'User not found');
       return;
     }
-    res.status(200).json({ message: 'User deleted successfully' });
+    successResponse(res, 200, 'User deleted successfully', true);
   } catch (err) {
-    res.status(500).json({ error: (err as Error).message });
+    errorResponse(res, 500, 'Server error', (err as Error).message);
   }
 };
 
