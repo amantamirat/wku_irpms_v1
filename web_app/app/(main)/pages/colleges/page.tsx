@@ -169,7 +169,7 @@ const CollegePage = () => {
             <h5 className="m-0">Manage Colleges</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
-                <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search ..." className="w-full md:w-1/3" />
+                <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
             </span>
         </div>
     );
@@ -203,7 +203,7 @@ const CollegePage = () => {
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} colleges"
                         globalFilter={globalFilter}
-                        emptyMessage="No colleges found."
+                        emptyMessage="No college data found."
                         header={header}
                         scrollable
                         filters={filters}
@@ -253,7 +253,7 @@ const CollegePage = () => {
 
                     <DeleteDialog
                         showDeleteDialog={showDeleteDialog}
-                        selectedData={selectedCollege}
+                        selectedDataInfo={selectedCollege.college_name}
                         onDelete={deleteCollege}
                         onHide={() => setShowDeleteDialog(false)}
                     />
