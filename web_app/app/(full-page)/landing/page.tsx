@@ -62,7 +62,9 @@ const LandingPage = () => {
                             <Link href="/auth/login" passHref>
                                 <Button label="Login" text rounded className="border-none font-light line-height-2 text-blue-500"></Button>
                             </Link>
-                            <Button label="Register" rounded className="border-none ml-5 font-light line-height-2 bg-blue-500 text-white"></Button>
+                            <Link href="/auth/register" passHref>
+                                <Button label="Register" rounded className="border-none ml-5 font-light line-height-2 bg-blue-500 text-white"></Button>
+                            </Link>
                         </div>
                     </div>
                 </div>
