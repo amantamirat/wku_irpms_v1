@@ -1,11 +1,10 @@
 import mongoose, { Schema, model, Document } from 'mongoose';
 
-// Define the Directorate interface
+
 export interface IDirectorate extends Document {
-    name: string; // Name of the directorate
+    name: string; 
 }
 
-// Define the Directorate schema
 const DirectorateSchema = new Schema<IDirectorate>({
     name: {
         type: String,
@@ -13,7 +12,5 @@ const DirectorateSchema = new Schema<IDirectorate>({
     }
 });
 
-// Create and export the Directorate model
 const Directorate = model<IDirectorate>('Directorate', DirectorateSchema);
-
 export default Directorate;

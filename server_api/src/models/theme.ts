@@ -1,9 +1,14 @@
 import mongoose, { Schema, model, Document } from 'mongoose';
 
+export enum ThemeStatus {
+    Active = 'Active',
+    Locked = 'Locked'
+}
+
 export interface ITheme extends Document {
     directorate: mongoose.Types.ObjectId;
     title: string;
-    status: 'Active' | 'Locked';
+    status: ThemeStatus;
 }
 
 const ThemeSchema = new Schema<ITheme>({
@@ -18,7 +23,7 @@ const ThemeSchema = new Schema<ITheme>({
     },
     status: {
         type: String,
-        enum: ['Active', 'Locked'],
+        enum: Object.values(ThemeStatus),
         required: true
     }
 });
