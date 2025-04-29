@@ -12,6 +12,7 @@ import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
+import SaveDialog from './components/SaveDialog';
 
 
 
@@ -224,32 +225,14 @@ const CollegePage = () => {
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
-                    <Dialog
+                    <SaveDialog
                         visible={showSaveDialog}
-                        style={{ width: '450px' }}
-                        header={selectedCollege?._id ? 'Edit College Details' : 'New College Details'}
-                        modal
-                        className="p-fluid"
-                        footer={saveDialogFooter}
+                        college={selectedCollege}
+                        submitted={submitted}
+                        onChange={setSelectedCollege}
+                        onSave={saveCollege}
                         onHide={hideSaveDialog}
-                    >
-                        {selectedCollege ? (<>
-                            <div className="field">
-                                <label htmlFor="name">College Name</label>
-                                <InputText
-                                    id="name"
-                                    value={selectedCollege.college_name}
-                                    onChange={(e) => setSelectedCollege({ ...selectedCollege, college_name: e.target.value })}
-                                    required
-                                    autoFocus
-                                    className={classNames({
-                                        'p-invalid': submitted && !selectedCollege.college_name,
-                                    })}
-                                />
-                                {submitted && !selectedCollege.college_name && <small className="p-invalid">College Name is required.</small>}
-                            </div>
-                        </>) : (<></>)}
-                    </Dialog>
+                    />
 
                     <DeleteDialog
                         showDeleteDialog={showDeleteDialog}
