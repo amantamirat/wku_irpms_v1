@@ -12,14 +12,12 @@ dotenv.config();
 // Create a new user
 const createUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { user_name, password, email, roles, status } = req.body;
+    const { user_name, email, password } = req.body;
     const hashedPassword = await prepareHash(password);
     const user = new User({
-      user_name,
-      password: hashedPassword,
+      user_name,      
       email,
-      //roles,
-      status
+      password: hashedPassword
     });
     await user.save();
     successResponse(res, 201, 'User created successfully', user);

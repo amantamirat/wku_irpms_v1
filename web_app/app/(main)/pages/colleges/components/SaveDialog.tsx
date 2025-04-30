@@ -1,28 +1,41 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { classNames } from 'primereact/utils';
-import { College } from '@/models/college';
+import { College, validateCollege } from '@/models/college';
 
 interface SaveDialogProps {
     visible: boolean;
     college: College;
-    submitted: boolean;
     onChange: (college: College) => void;
     onSave: () => void;
     onHide: () => void;
 }
 
 function SaveDialog(props: SaveDialogProps) {
-    const { visible, college, submitted, onChange, onSave, onHide } = props;
+    const { visible, college, onChange, onSave, onHide } = props;
+    const [submitted, setSubmitted] = useState(false);
+
+    const save = async () => {
+        setSubmitted(true);
+        if (!validateCollege(college)) {
+            return;
+        }
+        onSave();
+    }
+
+    const hide = async () => {
+        setSubmitted(false);
+        onHide();
+    }
 
     const footer = (
         <>
-            <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
-            <Button label="Save" icon="pi pi-check" text onClick={onSave} />
+            <Button label="Cancel" icon="pi pi-times" text onClick={hide} />
+            <Button label="Save" icon="pi pi-check" text onClick={save} />
         </>
     );
 
@@ -34,8 +47,8 @@ function SaveDialog(props: SaveDialogProps) {
             modal
             className="p-fluid"
             footer={footer}
-            onHide={onHide}
-            position={college._id ? 'right' : 'center'}
+            onHide={hide}
+        //position={college._id ? 'right' : 'center'}
         >
             {college && (
                 <div className="field">

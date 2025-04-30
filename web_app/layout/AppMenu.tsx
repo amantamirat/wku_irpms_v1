@@ -23,7 +23,12 @@ const AppMenu = () => {
                     label: 'Colleges',
                     icon: PrimeIcons.BUILDING,
                     to: '/pages/colleges'
-                }                
+                },
+                {
+                    label: 'Users',
+                    icon: PrimeIcons.USERS,
+                    to: '/pages/users'
+                }
             ]
         },
         {

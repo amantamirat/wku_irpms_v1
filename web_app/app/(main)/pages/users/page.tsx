@@ -1,7 +1,7 @@
 'use client';
 import DeleteDialog from '@/components/DeleteDialog';
-import { College } from '@/models/college';
-import { CollegeService } from '@/services/CollegeService';
+import { User, validateUser } from '@/models/user';
+import { UserService } from '@/services/UserService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -14,16 +14,18 @@ import SaveDialog from './components/SaveDialog';
 
 
 
-const CollegePage = () => {
-    let emptyCollege: College = {
-        college_name: ''
+const UserPage = () => {
+    let emptyUser: User = {
+        user_name: '',
+        email: '',
+        status: 'Pending'
     };
-    const [colleges, setColleges] = useState<College[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
 
-    const [selectedCollege, setSelectedCollege] = useState<College>(emptyCollege);
+    const [selectedUser, setSelectedUser] = useState<User>(emptyUser);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
@@ -32,22 +34,22 @@ const CollegePage = () => {
     useEffect(() => {
         setFilters(initFilters());
         setGlobalFilter('');
-        loadColleges();
+        loadUsers();
     }, []);
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
 
-    const loadColleges = async () => {
+    const loadUsers = async () => {
         try {
-            const data = await CollegeService.getColleges();
-            setColleges(data);
+            const data = await UserService.getUsers();
+            setUsers(data);
         } catch (err) {
-            console.error('Failed to load colleges:', err);
+            console.error('Failed to load users:', err);
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to load colleges data',
+                summary: 'Failed to load users data',
                 detail: '' + err,
                 life: 3000
             });
@@ -56,50 +58,50 @@ const CollegePage = () => {
 
 
 
-    const saveCollege = async () => {
+    const saveUser = async () => {
         try {
-            let _colleges = [...(colleges as any)];
-            if (selectedCollege._id) {
-                const updatedCollege = await CollegeService.updateCollege(selectedCollege);
-                const index = colleges.findIndex((college) => college._id === selectedCollege._id);
-                _colleges[index] = updatedCollege;
+            let _users = [...(users as any)];
+            if (selectedUser._id) {
+                const updatedUser = await UserService.updateUser(selectedUser);
+                const index = users.findIndex((user) => user._id === selectedUser._id);
+                _users[index] = updatedUser;
             } else {
-                const newCollege = await CollegeService.createCollege(selectedCollege);
-                _colleges.push(newCollege);
+                const newUser = await UserService.createUser(selectedUser);
+                _users.push(newUser);
             }
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',
-                detail: `College ${selectedCollege._id ? "updated" : 'created'}`,
+                detail: `User ${selectedUser._id ? "updated" : 'created'}`,
                 life: 3000
             });
-            setColleges(_colleges);
+            setUsers(_users);
         } catch (error) {
             console.error(error);
             toast.current?.show({
                 severity: 'error',
-                summary: `Failed to ${selectedCollege._id ? "update" : 'create'} college`,
+                summary: `Failed to ${selectedUser._id ? "update" : 'create'} user`,
                 detail: '' + error,
                 life: 3000
             });
         } finally {
             setShowSaveDialog(false);
-            setSelectedCollege(emptyCollege);
+            setSelectedUser(emptyUser);
         }
 
     };
 
 
-    const deleteCollege = async () => {
+    const deleteUser = async () => {
         try {
-            const deleted = await CollegeService.deleteCollege(selectedCollege);
+            const deleted = await UserService.deleteUser(selectedUser);
             if (deleted) {
-                let _colleges = (colleges as any)?.filter((val: any) => val._id !== selectedCollege._id);
-                setColleges(_colleges);
+                let _users = (users as any)?.filter((val: any) => val._id !== selectedUser._id);
+                setUsers(_users);
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Successful',
-                    detail: 'College Deleted',
+                    detail: 'User Deleted',
                     life: 3000
                 });
             }
@@ -107,30 +109,32 @@ const CollegePage = () => {
             console.error(error);
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to delete colleges',
+                summary: 'Failed to delete users',
                 detail: '' + error,
                 life: 3000
             });
         } finally {
             setShowDeleteDialog(false);
-            setSelectedCollege(emptyCollege);
+            setSelectedUser(emptyUser);
         }
 
     };
 
-    const openSaveDialog = (college: College) => {
-        setSelectedCollege({ ...college });
+    const openSaveDialog = (user: User) => {
+        setSelectedUser({ ...user });
         setShowSaveDialog(true);
     };
 
 
     const hideSaveDialog = () => {
         setShowSaveDialog(false);
-        setSelectedCollege(emptyCollege);
+        setSelectedUser(emptyUser);
     };
 
-    const confirmDeleteItem = (college: College) => {
-        setSelectedCollege(college);
+
+
+    const confirmDeleteItem = (user: User) => {
+        setSelectedUser(user);
         setShowDeleteDialog(true);
     };
 
@@ -138,7 +142,7 @@ const CollegePage = () => {
         return (
             <React.Fragment>
                 <div className="my-2">
-                    <Button label="New College" icon="pi pi-plus" severity="success" className="mr-2" onClick={() => openSaveDialog(emptyCollege)} />
+                    <Button label="New User" icon="pi pi-plus" severity="success" className="mr-2" onClick={() => openSaveDialog(emptyUser)} />
                 </div>
             </React.Fragment>
         );
@@ -148,7 +152,7 @@ const CollegePage = () => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage Colleges</h5>
+            <h5 className="m-0">Manage Users</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
@@ -156,7 +160,7 @@ const CollegePage = () => {
         </div>
     );
 
-    const actionBodyTemplate = (rowData: College) => {
+    const actionBodyTemplate = (rowData: User) => {
         return (
             <>
                 <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
@@ -176,25 +180,25 @@ const CollegePage = () => {
                     <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
                     <DataTable
                         ref={dt}
-                        value={colleges}
-                        selection={selectedCollege}
-                        onSelectionChange={(e) => setSelectedCollege(e.value as College)}
+                        value={users}
+                        selection={selectedUser}
+                        onSelectionChange={(e) => setSelectedUser(e.value as User)}
                         dataKey="_id"
                         paginator
                         rows={10}
                         rowsPerPageOptions={[5, 10, 25]}
                         className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} colleges"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
                         globalFilter={globalFilter}
-                        emptyMessage="No college data found."
+                        emptyMessage="No user data found."
                         header={header}
                         scrollable
                         filters={filters}
                         onRowDoubleClick={(e) => {
                             const selected = e.data;
                             if (selected) {
-                                setSelectedCollege(selected as College);
+                                setSelectedUser(selected as User);
                             }
                         }}
                     >
@@ -204,22 +208,22 @@ const CollegePage = () => {
                             body={(rowData, options) => options.rowIndex + 1}
                             style={{ width: '50px' }}
                         />
-                        <Column field="college_name" header="College Name" sortable headerStyle={{ minWidth: '15rem' }}></Column>
+                        <Column field="user_name" header="User Name" sortable headerStyle={{ minWidth: '15rem' }}></Column>
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
                     <SaveDialog
                         visible={showSaveDialog}
-                        college={selectedCollege}
-                        onChange={setSelectedCollege}
-                        onSave={saveCollege}
+                        user={selectedUser}
+                        onChange={setSelectedUser}
+                        onSave={saveUser}
                         onHide={hideSaveDialog}
                     />
 
                     <DeleteDialog
                         showDeleteDialog={showDeleteDialog}
-                        selectedDataInfo={selectedCollege.college_name}
-                        onDelete={deleteCollege}
+                        selectedDataInfo={selectedUser.user_name}
+                        onDelete={deleteUser}
                         onHide={() => setShowDeleteDialog(false)}
                     />
 
@@ -229,4 +233,4 @@ const CollegePage = () => {
     );
 };
 
-export default CollegePage;
+export default UserPage;
