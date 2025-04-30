@@ -1,6 +1,6 @@
 import { Role } from "./role";
 
-export type UserStatus = 'Pending' | 'Activated' | 'Suspended'
+export type UserStatus = 'Pending' | 'Active' | 'Suspended'
 export type User = {
     _id?: string;
     user_name: string;

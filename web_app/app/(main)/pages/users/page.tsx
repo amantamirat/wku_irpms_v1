@@ -171,6 +171,15 @@ const UserPage = () => {
         );
     };
 
+    const statusBodyTemplate = (rowData: User) => {
+        return (
+            <>
+                <span className="p-column-title">Status</span>
+                <span className={`user-badge status-${rowData.status?.toLowerCase()}`}>{rowData.status}</span>
+            </>
+        );
+    };
+
 
     return (
         <div className="grid">
@@ -210,7 +219,7 @@ const UserPage = () => {
                         />
                         <Column field="user_name" header="NAME" sortable headerStyle={{ minWidth: '15rem' }}></Column>
                         <Column field="email" header="EMAIL" sortable />
-                        <Column field="status" header="STATUS" sortable />
+                        <Column field="status" header="STATUS" sortable body={statusBodyTemplate} />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 

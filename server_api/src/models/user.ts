@@ -2,7 +2,7 @@ import mongoose, { Document, Schema, Model } from 'mongoose';
 
 export enum UserStatus {
   Pending = 'Pending',
-  Activated = 'Activated',
+  Active = 'Active',
   Suspended = 'Suspended'
 }
 
