@@ -2,15 +2,17 @@
 
 import Link from 'next/link';
 import { classNames } from 'primereact/utils';
-import React, { forwardRef, useContext, useImperativeHandle, useRef } from 'react';
+import React, { forwardRef, useContext, useImperativeHandle, useRef, useState } from 'react';
 import { AppTopbarRef } from '@/types';
 import { LayoutContext } from './context/layoutcontext';
+import AppUserProfileSidebar from './AppUserprofile';
 
 const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     const { layoutConfig, layoutState, onMenuToggle, showProfileSidebar } = useContext(LayoutContext);
     const menubuttonRef = useRef(null);
     const topbarmenuRef = useRef(null);
     const topbarmenubuttonRef = useRef(null);
+    const [showUserProfileSidebar, setShowUserProfileSidebar] = useState(false);
 
     useImperativeHandle(ref, () => ({
         menubutton: menubuttonRef.current,
@@ -40,7 +42,7 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
                     <i className="pi pi-bell"></i>
                     <span>Notification</span>
                 </button>
-                <button type="button" className="p-link layout-topbar-button">
+                <button type="button" className="p-link layout-topbar-button" onClick={() => setShowUserProfileSidebar(true)}>
                     <i className="pi pi-user"></i>
                     <span>Profile</span>
                 </button>
@@ -54,7 +56,10 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
                 </Link>
                      */
                 }
-                
+                <AppUserProfileSidebar
+                    visible={showUserProfileSidebar}
+                    setVisible={setShowUserProfileSidebar}
+                />
             </div>
         </div>
     );
