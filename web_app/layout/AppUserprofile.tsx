@@ -1,3 +1,5 @@
+import { Button } from "primereact/button";
+import { Divider } from "primereact/divider";
 import { Sidebar } from "primereact/sidebar";
 
 interface UserProfileSidebarProps {
@@ -13,6 +15,13 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                 Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
             </p>
+            <Divider />
+            <Button
+                label="Sign Out"
+                severity="danger"
+                icon="pi pi-sign-out"
+                className="w-full"
+            />
         </Sidebar>
     );
 }
