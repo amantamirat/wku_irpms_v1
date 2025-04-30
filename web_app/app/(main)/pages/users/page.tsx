@@ -1,6 +1,6 @@
 'use client';
 import DeleteDialog from '@/components/DeleteDialog';
-import { User, validateUser } from '@/models/user';
+import { User } from '@/models/user';
 import { UserService } from '@/services/UserService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
@@ -208,7 +208,9 @@ const UserPage = () => {
                             body={(rowData, options) => options.rowIndex + 1}
                             style={{ width: '50px' }}
                         />
-                        <Column field="user_name" header="User Name" sortable headerStyle={{ minWidth: '15rem' }}></Column>
+                        <Column field="user_name" header="NAME" sortable headerStyle={{ minWidth: '15rem' }}></Column>
+                        <Column field="email" header="EMAIL" sortable />
+                        <Column field="status" header="STATUS" sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 

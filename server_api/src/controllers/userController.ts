@@ -1,25 +1,15 @@
 import { Request, Response } from 'express';
-import { prepareHash } from '../services/userService';
+import { createUserAccount } from '../services/userService';
 import { User } from '../models/user';
-import dotenv from 'dotenv';
 import { errorResponse, successResponse } from '../util/response';
 
-dotenv.config();
 
-
-
-
-// Create a new user
 const createUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { user_name, email, password } = req.body;
-    const hashedPassword = await prepareHash(password);
-    const user = new User({
-      user_name,      
-      email,
-      password: hashedPassword
+    const user = await createUserAccount({
+      user_name, email, password
     });
-    await user.save();
     successResponse(res, 201, 'User created successfully', user);
   } catch (err: any) {
     errorResponse(res, 500, 'Server error', err.message);
@@ -29,7 +19,7 @@ const createUser = async (req: Request, res: Response): Promise<void> => {
 // Get all users
 const getUsers = async (_req: Request, res: Response): Promise<void> => {
   try {
-    const users = await User.find().populate('roles');
+    const users = await User.find();
     successResponse(res, 200, 'Users fetched successfully', users);
   } catch (err) {
     errorResponse(res, 500, 'Server error', (err as Error).message);
@@ -39,7 +29,7 @@ const getUsers = async (_req: Request, res: Response): Promise<void> => {
 // Get a single user by ID
 const getUserById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const user = await User.findById(req.params.id).populate('roles');
+    const user = await User.findById(req.params.id);
     if (!user) {
       errorResponse(res, 404, 'User not found');
       return;
