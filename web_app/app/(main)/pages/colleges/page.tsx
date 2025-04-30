@@ -2,15 +2,13 @@
 import DeleteDialog from '@/components/DeleteDialog';
 import { College, validateCollege } from '@/models/college';
 import { CollegeService } from '@/services/CollegeService';
-import { initFilters, handleGlobalFilterChange } from '@/utils/filterUtils';
+import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
-import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
-import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
 import SaveDialog from './components/SaveDialog';
 
@@ -138,12 +136,7 @@ const CollegePage = () => {
         setShowSaveDialog(false);
     };
 
-    const saveDialogFooter = (
-        <>
-            <Button label="Cancel" icon="pi pi-times" text onClick={hideSaveDialog} />
-            <Button label="Save" icon="pi pi-check" text onClick={saveCollege} />
-        </>
-    );
+
 
     const confirmDeleteItem = (college: College) => {
         setSelectedCollege(college);
@@ -178,8 +171,10 @@ const CollegePage = () => {
     const actionBodyTemplate = (rowData: College) => {
         return (
             <>
-                <Button icon="pi pi-pencil" rounded severity="success" className="mr-2" onClick={() => openSaveDialog(rowData)} />
-                <Button icon="pi pi-trash" rounded severity="warning" onClick={() => confirmDeleteItem(rowData)} />
+                <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
+                    style={{ fontSize: '2rem' }} onClick={() => openSaveDialog(rowData)} />
+                <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
+                    style={{ fontSize: '2rem' }} onClick={() => confirmDeleteItem(rowData)} />
             </>
         );
     };

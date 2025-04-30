@@ -35,6 +35,7 @@ function SaveDialog(props: SaveDialogProps) {
             className="p-fluid"
             footer={footer}
             onHide={onHide}
+            position='center'
         >
             {college && (
                 <div className="field">
