@@ -131,9 +131,9 @@ const CollegePage = () => {
 
 
     const hideSaveDialog = () => {
-        setSelectedCollege(emptyCollege);
-        setSubmitted(false);
         setShowSaveDialog(false);
+        setSubmitted(false);
+        setSelectedCollege(emptyCollege);
     };
 
 

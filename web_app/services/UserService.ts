@@ -1,21 +1,18 @@
 import { User } from "@/models/user";
 import { MyService } from "./MyService";
 
-const get_endpoint = '/users/';
-const create_endpoint = '/users/create';
-const update_endpoint = '/users/update';
-const delete_endpoint = '/users/delete';
+const end_point = '/users/';
 
 
 export const UserService = {
 
     async getUsers(): Promise<User[]> {
-        const data = await MyService.get(get_endpoint);
+        const data = await MyService.get(end_point);
         return data as User[];
     },
 
     async createUser(user: Partial<User>): Promise<User> {
-        const createdData = await MyService.post(create_endpoint, user);
+        const createdData = await MyService.post(end_point, user);
         return createdData as User;
     },
 
@@ -23,7 +20,8 @@ export const UserService = {
         if (!user._id) {
             throw new Error("_id required.");
         }
-        const updatedUser = await MyService.put(update_endpoint, user);
+        const url = `${end_point}${user._id}`;
+        const updatedUser = await MyService.put(url, user);
         return updatedUser as User;
     },
 
@@ -31,7 +29,8 @@ export const UserService = {
         if (!user._id) {
             throw new Error("_id required.");
         }
-        const response = await MyService.delete(delete_endpoint);
+        const url = `${end_point}${user._id}`;
+        const response = await MyService.delete(url);
         return response;
     },
 };
