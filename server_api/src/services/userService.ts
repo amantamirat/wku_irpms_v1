@@ -28,9 +28,9 @@ export const createUserAccount = async (user: CreateUserDTO): Promise<IUser> => 
 
 export const initAdminUser = async (): Promise<void> => {
     try {
-        const userName = process.env.USER_NAME;
-        const email = process.env.EMAIL;
-        const password = process.env.PASSWORD;
+        const userName = process.env.ADMIN_USER_NAME;
+        const email = process.env.ADMIN_EMAIL;
+        const password = process.env.ADMIN_PASSWORD;
 
         if (!userName || !email || !password) {
             throw new Error('Admin credentials are not set in environment variables.');
@@ -57,16 +57,18 @@ export const initAdminUser = async (): Promise<void> => {
 
 export const emailCode = async (email: string, code: string): Promise<void> => {
     try {
+        const system_email = process.env.SYS_EMAIL;
+        const password = process.env.EMAIL_PASSWORD;
         const transporter: Transporter = nodemailer.createTransport({
             service: 'Gmail',
             auth: {
-                user: process.env.EMAIL as string,
-                pass: process.env.PASS as string,
+                user: system_email as string,
+                pass: password as string,
             },
         });
 
         const myOptions = {
-            from: process.env.EMAIL as string,
+            from: system_email as string,
             to: email,
             subject: 'Verification Code',
             text: 'Hello Welcome, Here is Verification Code to Activate Your Account',

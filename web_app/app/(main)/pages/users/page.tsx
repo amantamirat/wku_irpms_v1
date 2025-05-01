@@ -217,7 +217,7 @@ const UserPage = () => {
                             body={(rowData, options) => options.rowIndex + 1}
                             style={{ width: '50px' }}
                         />
-                        <Column field="user_name" header="NAME" sortable headerStyle={{ minWidth: '15rem' }}></Column>
+                        <Column field="user_name" header="USER" sortable headerStyle={{ minWidth: '15rem' }}></Column>
                         <Column field="email" header="EMAIL" sortable />
                         <Column field="status" header="STATUS" sortable body={statusBodyTemplate} />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>

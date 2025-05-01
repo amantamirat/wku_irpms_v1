@@ -2,11 +2,11 @@ import mongoose, { Schema, model, Document } from 'mongoose';
 
 
 export interface IDirectorate extends Document {
-    name: string; 
+    directorate_name: string; 
 }
 
 const DirectorateSchema = new Schema<IDirectorate>({
-    name: {
+    directorate_name: {
         type: String,
         required: true
     }
