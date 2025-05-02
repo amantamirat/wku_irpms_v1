@@ -10,7 +10,7 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
-import SaveDialog from './components/saveDialog';
+import SaveDialog from './components/SaveDialog';
 
 
 
