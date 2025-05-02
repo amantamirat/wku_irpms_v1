@@ -25,6 +25,11 @@ const AppMenu = () => {
                     to: '/pages/colleges'
                 },
                 {
+                    label: 'Directorates',
+                    icon: 'pi pi-arrows-alt',
+                    to: '/pages/directorates'
+                },
+                {
                     label: 'Users',
                     icon: PrimeIcons.USERS,
                     to: '/pages/users'
