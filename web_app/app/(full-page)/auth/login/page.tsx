@@ -9,16 +9,45 @@ import { LayoutContext } from '../../../../layout/context/layoutcontext';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import { Messages } from "primereact/messages";
+import { AuthService } from '@/services/AuthService';
 
 const LoginPage = () => {
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [checked, setChecked] = useState(false);
     const { layoutConfig } = useContext(LayoutContext);
-
     const router = useRouter();
     const containerClassName = classNames('surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden', { 'p-input-filled': layoutConfig.inputStyle === 'filled' });
-
     const msgs = useRef<Messages>(null);
+
+    const handleLogin = async () => {
+        const user_name = email.trim();
+        const userPassword = password.trim();
+    
+        if (!user_name || !userPassword) {
+            msgs.current?.clear();
+            msgs.current?.show({ severity: 'warn', summary: 'Validation', detail: 'Email and password are required.' });
+            return;
+        }
+    
+        try {
+            const loggedIn = await AuthService.loginUser({ user_name, password: userPassword });
+            if (loggedIn) {
+                msgs.current?.clear();
+                msgs.current?.show({ severity: 'success', summary: 'Success', detail: 'Login successful!' });
+                setTimeout(() => router.push('/'), 1000);
+            }
+        } catch (err: any) {
+            console.error(err);
+            msgs.current?.clear();
+            msgs.current?.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: err.message || 'Login failed. Try again later.'
+            });
+        }
+    };
+    
     return (
         <div className={containerClassName}>
             <div className="flex flex-column align-items-center justify-content-center">
@@ -40,7 +69,8 @@ const LoginPage = () => {
                             <label htmlFor="email1" className="block text-900 text-xl font-medium mb-2">
                                 Email
                             </label>
-                            <InputText id="email1" type="text" placeholder="Email address" className="w-full md:w-30rem mb-5" style={{ padding: '1rem' }} />
+                            <InputText id="email1" value={email}
+                                onChange={(e) => setEmail(e.target.value)} type="text" placeholder="Email address" className="w-full md:w-30rem mb-5" style={{ padding: '1rem' }} />
 
                             <label htmlFor="password1" className="block text-900 font-medium text-xl mb-2">
                                 Password
@@ -61,9 +91,9 @@ const LoginPage = () => {
                                 </a>
                             </div>
                             <Messages ref={msgs} />
-                            <Button label="Sign In" className="w-full p-3 text-xl" onClick={() => router.push('/')}></Button>
+                            <Button label="Sign In" className="w-full p-3 text-xl" onClick={handleLogin}></Button>
                             <div className="flex flex-column align-items-center justify-content-center">
-                                <Button icon="pi pi-arrow-left" label="Go to Home" text className="mt-4" onClick={() => router.push('/landing')} />
+                                <Button icon="pi pi-arrow-left" label="Go to Landing" text className="mt-4" onClick={() => router.push('/landing')} />
                             </div>
                         </div>
                     </div>

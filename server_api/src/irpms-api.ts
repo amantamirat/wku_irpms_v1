@@ -2,6 +2,7 @@ import express, { Application } from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import collegeRoutes from './routes/collegeRoutes';
 import directorateRoutes from './routes/directorateRoutes';
@@ -16,6 +17,7 @@ const app: Application = express();
 app.use(cors());
 app.use(express.json());
 
+app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/colleges", collegeRoutes);
 app.use("/api/directorates", directorateRoutes);

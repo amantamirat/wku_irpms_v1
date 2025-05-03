@@ -10,25 +10,24 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
 
         const user = await User.findOne({
             $or: [{ email: user_name }, { user_name: user_name }]
-        }).populate('roles');
+        });
 
         if (!user) {
-            errorResponse(res, 401, 'Server error', "Invalid credentials.");
+            errorResponse(res, 401, "Invalid credentials.");
             return;
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            errorResponse(res, 401, 'Server error', "Invalid credentials.");
+            errorResponse(res, 401, "Invalid credentials.");
             return;
         }
 
         const token = jwt.sign(
-            { _id: user._id, email: user.email, name: user.user_name },
-            process.env.KEY as string,
+            { _id: user._id, email: user.email, user_name: user.user_name }, process.env.KEY as string,
             { expiresIn: '2h' }
         );
-
+        console.log("user:", user.user_name, " logged in.");
         successResponse(res, 201, 'Logged in successfully', {
             token,
             user: {
@@ -41,7 +40,7 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
         });
     } catch (error) {
         console.error(error);
-        errorResponse(res, 500, 'Server error', (error as Error).message);
+        errorResponse(res, 500, (error as Error).message, error);
     }
 };
 
