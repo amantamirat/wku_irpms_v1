@@ -1,3 +1,4 @@
+import { AuthService } from "@/services/AuthService";
 import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
 import { Sidebar } from "primereact/sidebar";
@@ -8,6 +9,12 @@ interface UserProfileSidebarProps {
 }
 
 function AppUserProfileSidebar(props: UserProfileSidebarProps) {
+
+    const handleLogout = () => {
+        AuthService.logoutUser();
+        props.setVisible(false);
+        window.location.href = '/auth/login';
+    };
     return (
         <Sidebar visible={props.visible} position="right" onHide={() => props.setVisible(false)}>
             <h2>Welcome, User</h2>
@@ -21,6 +28,7 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
                 severity="danger"
                 icon="pi pi-sign-out"
                 className="w-full"
+                onClick={handleLogout}
             />
         </Sidebar>
     );

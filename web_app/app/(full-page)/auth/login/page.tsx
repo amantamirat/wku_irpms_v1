@@ -35,7 +35,7 @@ const LoginPage = () => {
             if (loggedIn) {
                 msgs.current?.clear();
                 msgs.current?.show({ severity: 'success', summary: 'Success', detail: 'Login successful!' });
-                setTimeout(() => router.push('/'), 1000);
+                setTimeout(() => router.push('/'), 500);
             }
         } catch (err: any) {
             console.error(err);
