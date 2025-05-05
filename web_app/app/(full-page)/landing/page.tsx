@@ -10,11 +10,17 @@ import { Divider } from 'primereact/divider';
 import { LayoutContext } from '../../../layout/context/layoutcontext';
 import { NodeRef } from '@/types';
 import { classNames } from 'primereact/utils';
+import { useAuth } from '@/contexts/auth-context';
+import { ProgressSpinner } from 'primereact/progressspinner';
 
 const LandingPage = () => {
     const [isHidden, setIsHidden] = useState(false);
     const { layoutConfig } = useContext(LayoutContext);
     const menuRef = useRef<HTMLElement | null>(null);
+    const { user, loading } = useAuth();
+
+
+    if (loading) return <div><ProgressSpinner /></div>;
 
     const toggleMenuItemClick = () => {
         setIsHidden((prevState) => !prevState);
@@ -59,12 +65,18 @@ const LandingPage = () => {
                             </li>
                         </ul>
                         <div className="flex justify-content-between lg:block border-top-1 lg:border-top-none surface-border py-3 lg:py-0 mt-3 lg:mt-0">
-                            <Link href="/auth/login" passHref>
-                                <Button label="Login" text rounded className="border-none font-light line-height-2 text-blue-500"></Button>
-                            </Link>
-                            <Link href="/auth/register" passHref>
-                                <Button label="Register" rounded className="border-none ml-5 font-light line-height-2 bg-blue-500 text-white"></Button>
-                            </Link>
+                            {!user ? (
+                                <>
+                                    <Link href="/auth/login" passHref>
+                                        <Button label="Login" text rounded className="border-none font-light line-height-2 text-blue-500"></Button>
+                                    </Link>
+                                    <Link href="/auth/register" passHref>
+                                        <Button label="Register" rounded className="border-none ml-5 font-light line-height-2 bg-blue-500 text-white"></Button>
+                                    </Link>
+                                </>
+                            ) : (
+                                <p>Welcome back, {user.user_name}!</p>
+                            )}
                         </div>
                     </div>
                 </div>

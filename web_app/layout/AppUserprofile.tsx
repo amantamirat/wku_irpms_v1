@@ -1,4 +1,4 @@
-import { AuthService } from "@/services/AuthService";
+import { useAuth } from "@/contexts/auth-context";
 import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
 import { Sidebar } from "primereact/sidebar";
@@ -10,17 +10,17 @@ interface UserProfileSidebarProps {
 
 function AppUserProfileSidebar(props: UserProfileSidebarProps) {
 
+    const { user, logout } = useAuth();
+
     const handleLogout = () => {
-        AuthService.logoutUser();
         props.setVisible(false);
-        window.location.href = '/auth/login';
+        logout();
     };
     return (
         <Sidebar visible={props.visible} position="right" onHide={() => props.setVisible(false)}>
-            <h2>Welcome, User</h2>
+            <h2>Welcome, {user?.user_name || 'User'}</h2>
             <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                You are currently logged in. Use the button below to sign out.
             </p>
             <Divider />
             <Button

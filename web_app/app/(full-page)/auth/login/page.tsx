@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 import { useRouter } from 'next/navigation';
-import React, { useContext, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Checkbox } from 'primereact/checkbox';
 import { Button } from 'primereact/button';
 import { Password } from 'primereact/password';
@@ -10,6 +10,7 @@ import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import { Messages } from "primereact/messages";
 import { AuthService } from '@/services/AuthService';
+import { useAuth } from '@/contexts/auth-context';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -19,20 +20,30 @@ const LoginPage = () => {
     const router = useRouter();
     const containerClassName = classNames('surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden', { 'p-input-filled': layoutConfig.inputStyle === 'filled' });
     const msgs = useRef<Messages>(null);
+    const { user, loading, login } = useAuth();
+
+    useEffect(() => {
+        if (!loading && user) {
+            router.push('/');
+        }
+    }, [user, loading, router]);
+
+    if (loading || user) return null;
 
     const handleLogin = async () => {
         const user_name = email.trim();
         const userPassword = password.trim();
-    
+
         if (!user_name || !userPassword) {
             msgs.current?.clear();
             msgs.current?.show({ severity: 'warn', summary: 'Validation', detail: 'Email and password are required.' });
             return;
         }
-    
+
         try {
-            const loggedIn = await AuthService.loginUser({ user_name, password: userPassword });
-            if (loggedIn) {
+            const { token, user } = await AuthService.loginUser({ user_name, password: userPassword });
+            if (token) {
+                login(user, token);
                 msgs.current?.clear();
                 msgs.current?.show({ severity: 'success', summary: 'Success', detail: 'Login successful!' });
                 setTimeout(() => router.push('/'), 500);
@@ -47,7 +58,7 @@ const LoginPage = () => {
             });
         }
     };
-    
+
     return (
         <div className={containerClassName}>
             <div className="flex flex-column align-items-center justify-content-center">
