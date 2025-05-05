@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Layout from '../../layout/layout';
+import RequireAuth from '@/components/RequireAuth';
 
 interface AppLayoutProps {
     children: React.ReactNode;
@@ -28,5 +29,5 @@ export const viewport = {
 };
 
 export default function AppLayout({ children }: AppLayoutProps) {
-    return <Layout>{children}</Layout>;
+    return <RequireAuth><Layout>{children}</Layout></RequireAuth>;
 }

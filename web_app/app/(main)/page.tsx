@@ -7,7 +7,6 @@ import RequireAuth from "@/components/RequireAuth";
 
 const Dashboard = () => {
     return (
-        <RequireAuth>
             <div className="grid">
                 <div className="col-12 lg:col-6 xl:col-3">
                     <div className="card mb-0">
@@ -70,7 +69,6 @@ const Dashboard = () => {
                     </div>
                 </div>
             </div>
-        </RequireAuth>
     );
 };
 

@@ -37,18 +37,6 @@ const AppMenu = () => {
             ]
         },
         {
-            label: 'Prime Blocks',
-            items: [
-                { label: 'All Blocks', icon: 'pi pi-fw pi-globe', url: 'https://blocks.primereact.org', target: '_blank' }
-            ]
-        },
-        {
-            label: 'Utilities',
-            items: [
-                { label: 'PrimeFlex', icon: 'pi pi-fw pi-desktop', url: 'https://primeflex.org/', target: '_blank' }
-            ]
-        },
-        {
             label: 'Pages',
             icon: 'pi pi-fw pi-briefcase',
             to: '/pages',
@@ -57,22 +45,6 @@ const AppMenu = () => {
                     label: 'Landing',
                     icon: 'pi pi-fw pi-globe',
                     to: '/landing'
-                },
-                {
-                    label: 'Auth',
-                    icon: 'pi pi-fw pi-user',
-                    items: [
-                        {
-                            label: 'Login',
-                            icon: 'pi pi-fw pi-sign-in',
-                            to: '/auth/login'
-                        }
-                    ]
-                },
-                {
-                    label: 'Empty',
-                    icon: 'pi pi-fw pi-circle-off',
-                    to: '/pages/empty'
                 }
             ]
         },
