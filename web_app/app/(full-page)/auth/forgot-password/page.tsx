@@ -1,28 +1,63 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import { LayoutContext } from '../../../../layout/context/layoutcontext';
 import { useContext } from 'react';
+import { Messages } from 'primereact/messages';
+import { useAuth } from '@/contexts/auth-context';
+import { AuthService } from '@/services/AuthService';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [processing, setProcessing] = useState(false);
   const router = useRouter();
   const { layoutConfig } = useContext(LayoutContext);
   const containerClassName = classNames('surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden', { 'p-input-filled': layoutConfig.inputStyle === 'filled' });
+  const { user, loading } = useAuth();
+  const msgs = useRef<Messages>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSuccess(false);
+  useEffect(() => {
+    if (!loading && user) {
+      router.push('/');
+    }
+  }, [user, loading, router]);
+  if (loading || user) return null;
 
-    // Add your API call here
-    console.log('Email submitted:', email);
+  const sendCode = async () => {
+    try {
+      setSuccess(false);
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const trimmedEmail = email.trim();
+      if (!trimmedEmail) {
+        msgs.current?.clear();
+        msgs.current?.show({ severity: 'warn', summary: 'Validation', detail: 'Email is required.' });
+        return;
+      }
+      if (!emailRegex.test(trimmedEmail)) {
+        msgs.current?.clear();
+        msgs.current?.show({ severity: 'warn', summary: 'Validation', detail: 'Please enter a valid email address.' });
+        return;
+      }
+      setProcessing(true);
+      await AuthService.sendResetCode(email);
+      setProcessing(false);
+    } catch (err: any) {
+      console.error(err);
+      setSuccess(false);
+      setProcessing(false);
+      msgs.current?.clear();
+      msgs.current?.show({
+        severity: 'error',
+        summary: 'Error',
+        detail: err.message || 'Code Sending failed. Try again later.'
+      });
+    }
+
   };
 
   return (
@@ -54,7 +89,7 @@ export default function ForgotPassword() {
                 />
               </div>
             ) : (
-              <form onSubmit={handleSubmit}>
+              <>
                 <div className="mb-5">
                   <label htmlFor="email" className="block text-900 text-xl font-medium mb-2">
                     Email
@@ -68,21 +103,18 @@ export default function ForgotPassword() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
-                  {error && <small className="text-red-500">{error}</small>}
                 </div>
-
+                <Messages ref={msgs} />
                 <Button
-                  label="Send Reset Link"
-                  className="w-full p-3 text-xl mb-3"
-                  type="submit"
-                />
-                <Button
-                  label="Back to Login"
+                  loading={processing}
+                  label="Send Reset Code"
                   className="w-full p-3 text-xl"
-                  onClick={() => router.push('/auth/login')}
-                  text
+                  onClick={sendCode}
                 />
-              </form>
+                <div className="flex flex-column align-items-center justify-content-center">
+                  <Button icon="pi pi-arrow-left" label="Back to Login" text className="mt-4" onClick={() => router.push('/auth/login')} />
+                </div>
+              </>
             )}
           </div>
         </div>

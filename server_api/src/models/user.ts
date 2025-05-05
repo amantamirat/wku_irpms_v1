@@ -11,6 +11,8 @@ export interface IUser extends Document {
   password: string;
   email: string;
   status: UserStatus;
+  reset_code?: String;
+  reset_code_expires?: Date;
 }
 
 const UserSchema = new Schema<IUser>(
@@ -37,6 +39,12 @@ const UserSchema = new Schema<IUser>(
       enum: Object.values(UserStatus),
       default: UserStatus.Pending,
       required: true,
+    },
+    reset_code: {
+      type: String
+    },
+    reset_code_expires: {
+      type: Date
     },
   },
   { timestamps: true }
