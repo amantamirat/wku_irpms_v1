@@ -62,28 +62,34 @@ export const emailCode = async (email: string, code: string): Promise<void> => {
         const transporter: Transporter = nodemailer.createTransport({
             service: 'Gmail',
             auth: {
-                user: system_email as string,
-                pass: password as string,
+                user: system_email,
+                pass: password,
             },
         });
 
         const myOptions = {
-            from: system_email as string,
+            from: system_email,
             to: email,
             subject: 'Verification Code',
             text: 'Hello Welcome, Here is Verification Code to Activate Your Account',
             html: `<h2>${code}</h2>`,
         };
 
-        transporter.sendMail(myOptions, (error, info) => {
-            if (error) {
-                throw error;
-            } else {
+        await new Promise<void>((resolve, reject) => {
+            transporter.sendMail(myOptions, (error, info) => {
+                if (error) {
+                    console.error("Failed to send email:", error);
+                    return reject(error);
+                }
                 console.log('Email Sent: ' + info.response);
-            }
+                resolve();
+            });
         });
 
     } catch (error) {
-        console.error(error);
+        console.error("Error in emailCode:", error);
+        // Re-throw if you want to propagate it to controller
+        // or remove this if you want to silence it
+        throw error;
     }
 };
