@@ -94,7 +94,8 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
 
 const authController = {
     loginUser,
-    sendResetCode
+    sendResetCode, 
+    resetPassword
 };
 
 export default authController;
