@@ -9,72 +9,66 @@ import { classNames } from 'primereact/utils';
 import { LayoutContext } from '../../../../layout/context/layoutcontext';
 import { useContext } from 'react';
 import { Messages } from 'primereact/messages';
+import { AuthService } from '@/services/AuthService';
 
 export default function ResetPassword() {
+  const [progressing, setProgressing] = useState(false);
   const [resetCode, setResetCode] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const router = useRouter();
   const { layoutConfig } = useContext(LayoutContext);
   const containerClassName = classNames('surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden', { 'p-input-filled': layoutConfig.inputStyle === 'filled' });
-  const msgs = useRef<Messages>(null);  
-  const [expired, setExpired] = useState<boolean>(false);
+  const msgs = useRef<Messages>(null);
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
-  
+
   const resetPassword = async () => {
+    try {
+      setProgressing(true);
+      if (!email) {
+        msgs.current?.clear();
+        msgs.current?.show({ severity: 'error', summary: 'Missing Email', detail: 'Email information is missing.' });
+        return;
+      }
 
-    if (!email) {
-      msgs.current?.clear();
-      msgs.current?.show({ severity: 'error', summary: 'Missing Email', detail: 'Email information is missing.' });
-      return;
-    }
+      if (!resetCode) {
+        msgs.current?.clear();
+        msgs.current?.show({ severity: 'warn', summary: 'Validation', detail: 'Code is required.' });
+        return;
+      }
+      if (!password.trim() || !confirmPassword.trim()) {
+        msgs.current?.clear();
+        msgs.current?.show({ severity: 'warn', summary: 'Validation', detail: 'Password is required.' });
+        return;
+      }
+      if (password !== confirmPassword) {
+        msgs.current?.clear();
+        msgs.current?.show({ severity: 'error', summary: 'Password Mismatch', detail: 'Passwords do not match' });
+        return;
+      }
 
-    if (!resetCode) {
+      const data = await AuthService.resetPassword(email, resetCode, password);
+      if (data.success) {
+        msgs.current?.clear();
+        msgs.current?.show({ severity: 'success', summary: 'Success!', detail: 'Your password has been reset successfully. You can now log in with your new password.' });
+        setTimeout(() => router.push('/auth/login'), 3000);
+      }
+    } catch (err: any) {
+      console.error(err);
       msgs.current?.clear();
-      msgs.current?.show({ severity: 'warn', summary: 'Validation', detail: 'Code is required.' });
-      return;
+      msgs.current?.show({
+        severity: 'error',
+        summary: 'Error',
+        detail: err.message || 'Resetting password failed. Try again later.'
+      });
+    } finally {
+      setProgressing(false);
     }
-    if (!password.trim() || !confirmPassword.trim()) {
-      msgs.current?.clear();
-      msgs.current?.show({ severity: 'warn', summary: 'Validation', detail: 'Password is required.' });
-      return;
-    }
-    if (password !== confirmPassword) {
-      msgs.current?.clear();
-      msgs.current?.show({ severity: 'error', summary: 'Password Mismatch', detail: 'Passwords do not match' });
-      return;
-    }
-
-    // TODO: Replace with real API call
-    console.log('Submitted:', { resetCode, password });
-
-    // Simulate success    
-    setTimeout(() => router.push('/auth/login'), 3000);
   };
 
 
-  if (expired===true) {
-    return (
-      <div className={containerClassName}>
-        <div className="flex flex-column align-items-center justify-content-center">
-          <div
-            style={{
-              borderRadius: '56px',
-              padding: '0.3rem',
-              background: 'linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)'
-            }}
-          >
-            <div className="w-full surface-card py-8 px-5 sm:px-8" style={{ borderRadius: '53px' }}>
-              <div className="text-center">
-                <div className="text-red-500">Code is Expired!</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <div className={containerClassName}>
@@ -137,6 +131,7 @@ export default function ResetPassword() {
             </div>
             <Messages ref={msgs} />
             <Button
+              loading={progressing}
               label="Reset Password"
               className="w-full p-3 text-xl"
               type="submit"
