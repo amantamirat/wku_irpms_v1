@@ -16,7 +16,7 @@ export const AuthService = {
         return response;
     },
 
-    async resetPassword(email: string, resetCode: number, password: string): Promise<any> {
+    async resetPassword(email: string, resetCode: string, password: string): Promise<any> {
         const response = await MyService.post(reset_password_end_point, { email: email, resetCode: resetCode, password: password });
         return response;
     }

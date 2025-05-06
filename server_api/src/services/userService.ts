@@ -11,7 +11,7 @@ export interface CreateUserDTO {
     status?: UserStatus;
 }
 
-const prepareHash = async (password: string): Promise<string> => {
+export const prepareHash = async (password: string): Promise<string> => {
     const salt = await bcrypt.genSalt(10);
     return await bcrypt.hash(password, salt);
 };
