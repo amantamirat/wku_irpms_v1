@@ -129,7 +129,7 @@ export default function ResetPassword() {
                 inputClassName="w-full p-3 md:w-30rem"
               />
             </div>
-            <Messages ref={msgs} />
+            <Messages ref={msgs} style={{ width: '100%', wordBreak: 'break-word' }} />
             <Button
               loading={progressing}
               label="Reset Password"

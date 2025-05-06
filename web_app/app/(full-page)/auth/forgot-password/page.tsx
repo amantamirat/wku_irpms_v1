@@ -47,7 +47,7 @@ export default function ForgotPassword() {
       if (data.success) {
         msgs.current?.clear();
         msgs.current?.show({ severity: 'success', summary: 'Almost There!', detail: 'We sent a 9-digit reset code. Check your inbox to continue.' });
-        setTimeout(() => router.push(`/auth/reset-password?email=${encodeURIComponent(email)}`), 9000);
+        setTimeout(() => router.push(`/auth/reset-password?email=${encodeURIComponent(email)}`), 5000);
       }
     } catch (err: any) {
       console.error(err);
