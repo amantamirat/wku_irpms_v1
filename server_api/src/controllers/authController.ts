@@ -50,14 +50,14 @@ const sendResetCode = async (req: Request, res: Response): Promise<void> => {
             errorResponse(res, 401, "User with this email does not exist.");
             return;
         }
-        const code = crypto.randomInt(100000, 999999).toString(); // 6-digit code
+        const code = crypto.randomInt(100000000, 999999999).toString(); // 9-digit code
         const expiry = new Date(Date.now() + 10 * 60 * 1000);
-        
+
         user.reset_code = code;
         user.reset_code_expires = expiry;
         await user.save();
         await emailCode(email, code);
-        successResponse(res, 200, 'Reset code sent to email.');
+        successResponse(res, 200, 'Reset code sent to email.', { success: true });
     } catch (error) {
         console.error(error);
         errorResponse(res, 500, 'Failed to send reset code.');
