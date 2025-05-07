@@ -28,6 +28,15 @@ const getAllSpecializations = async (req: Request, res: Response): Promise<void>
   }
 };
 
+const getSpecializationsByDepartment = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const specializations = await Specialization.find({ department: req.params.id });
+    successResponse(res, 200, 'Specializations fetched successfully', specializations);
+  } catch (error) {
+    errorResponse(res, 500, 'Server error', (error as Error).message);
+  }
+};
+
 const updateSpecialization = async (req: Request, res: Response): Promise<void> => {
   try {
     const { department, specialization_name, academic_level } = req.body;
@@ -62,13 +71,14 @@ const deleteSpecialization = async (req: Request, res: Response): Promise<void> 
     }
     successResponse(res, 200, 'Specialization deleted successfully', true);
   } catch (error) {
-    errorResponse(res, 500, 'Server error', (error as Error).message);
+    errorResponse(res, 500, (error as Error).message, {});
   }
 };
 
 const specializationController = {
   createSpecialization,
   getAllSpecializations,
+  getSpecializationsByDepartment,
   updateSpecialization,
   deleteSpecialization,
 };

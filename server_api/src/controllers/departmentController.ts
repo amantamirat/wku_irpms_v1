@@ -44,7 +44,7 @@ const updateDepartment = async (req: Request, res: Response): Promise<void> => {
     if (!existingDepartment) {
       errorResponse(res, 404, 'Department not found');
       return;
-    }  
+    }
 
     const updatedDepartment = await Department.findByIdAndUpdate(
       req.params.id,
@@ -71,7 +71,7 @@ const deleteDepartment = async (req: Request, res: Response): Promise<void> => {
     }
     successResponse(res, 200, 'Department deleted successfully', true);
   } catch (error) {
-    errorResponse(res, 500, 'Server error', (error as Error).message);
+    errorResponse(res, 500, (error as Error).message, {});
   }
 };
 

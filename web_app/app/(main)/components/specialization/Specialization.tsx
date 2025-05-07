@@ -1,126 +1,115 @@
 'use client';
 import DeleteDialog from '@/components/DeleteDialog';
-import { Department } from '@/models/department';
-import { DepartmentService } from '@/services/DepartmentService';
+import { Specialization } from '@/models/specialization';
+import { SpecializationService } from '@/services/SpecializationService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
-import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
+import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
-import SaveDialog from './components/SaveDialog';
+import SaveDialog from './dialog/SaveDialog';
 import { CollegeService } from '@/services/CollegeService';
 import { College } from '@/models/college';
-import SpecializationComp from '../../components/specialization/Specialization';
+import { Department } from '@/models/department';
 
+interface SpecializationCompProps {
+    department: Department;
+}
 
-
-const DepartmentPage = () => {
-    let emptyDepartment: Department = {
-        college: '',
-        department_name: '',
+const SpecializationComp = (props: SpecializationCompProps) => {
+    let emptySpecialization: Specialization = {
+        department: props.department,
+        specialization_name: '',
+        academic_level: 'BA'
     };
-    const [colleges, setColleges] = useState<College[]>([]);
 
-    const [departments, setDepartments] = useState<Department[]>([]);
+
+    const [specializations, setSpecializations] = useState<Specialization[]>([]);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
-    const [selectedDepartment, setSelectedDepartment] = useState<Department>(emptyDepartment);
+    const [selectedSpecialization, setSelectedSpecialization] = useState<Specialization>(emptySpecialization);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
-    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
 
     useEffect(() => {
         setFilters(initFilters());
         setGlobalFilter('');
-        loadColleges();
-        loadDepartments();
+        loadSpecializations();
     }, []);
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
 
-    const loadColleges = async () => {
+
+
+    const loadSpecializations = async () => {
         try {
-            const data = await CollegeService.getColleges();
-            setColleges(data);
+            const data = await SpecializationService.getSpecializationsByDepartment(props.department);
+            setSpecializations(data);
         } catch (err) {
-            console.error('Failed to load colleges:', err);
+            console.error('Failed to load specializations:', err);
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to load college data',
+                summary: 'Failed to load specializations data',
                 detail: '' + err,
                 life: 3000
             });
         }
     };
 
-    const loadDepartments = async () => {
-        try {
-            const data = await DepartmentService.getDepartments();
-            setDepartments(data);
-        } catch (err) {
-            console.error('Failed to load departments:', err);
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load departments data',
-                detail: '' + err,
-                life: 3000
-            });
-        }
-    };
 
-    const saveDepartment = async () => {
+
+    const saveSpecialization = async () => {
         try {
-            let _departments = [...(departments as any)];
-            if (selectedDepartment._id) {
-                const updatedDepartment = await DepartmentService.updateDepartment(selectedDepartment);
-                const index = departments.findIndex((department) => department._id === selectedDepartment._id);
-                _departments[index] = updatedDepartment;
+            let _specializations = [...(specializations as any)];
+            if (selectedSpecialization._id) {
+                const updatedSpecialization = await SpecializationService.updateSpecialization(selectedSpecialization);
+                const index = specializations.findIndex((specialization) => specialization._id === selectedSpecialization._id);
+                _specializations[index] = updatedSpecialization;
             } else {
-                const newDepartment = await DepartmentService.createDepartment(selectedDepartment);
-                const department = { ...newDepartment, college: selectedDepartment.college }
-                _departments.push(department);
+                const newSpecialization = await SpecializationService.createSpecialization(selectedSpecialization);
+                _specializations.push(newSpecialization);
             }
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',
-                detail: `Department ${selectedDepartment._id ? "updated" : 'created'}`,
+                detail: `Specialization ${selectedSpecialization._id ? "updated" : 'created'}`,
                 life: 3000
             });
-            setDepartments(_departments);
+            setSpecializations(_specializations);
         } catch (error) {
             console.error(error);
             toast.current?.show({
                 severity: 'error',
-                summary: `Failed to ${selectedDepartment._id ? "update" : 'create'} department`,
+                summary: `Failed to ${selectedSpecialization._id ? "update" : 'create'} specialization`,
                 detail: '' + error,
                 life: 3000
             });
         } finally {
             setShowSaveDialog(false);
-            setSelectedDepartment(emptyDepartment);
+            setSelectedSpecialization(emptySpecialization);
         }
 
     };
 
 
-    const deleteDepartment = async () => {
+    const deleteSpecialization = async () => {
         try {
-            const deleted = await DepartmentService.deleteDepartment(selectedDepartment);
+            const deleted = await SpecializationService.deleteSpecialization(selectedSpecialization);
             if (deleted) {
-                let _departments = (departments as any)?.filter((val: any) => val._id !== selectedDepartment._id);
-                setDepartments(_departments);
+                let _specializations = (specializations as any)?.filter((val: any) => val._id !== selectedSpecialization._id);
+                setSpecializations(_specializations);
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Successful',
-                    detail: 'Department Deleted',
+                    detail: 'Specialization Deleted',
                     life: 3000
                 });
             }
@@ -128,30 +117,30 @@ const DepartmentPage = () => {
             console.error(error);
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to delete departments',
+                summary: 'Failed to delete specializations',
                 detail: '' + error,
                 life: 3000
             });
         } finally {
             setShowDeleteDialog(false);
-            setSelectedDepartment(emptyDepartment);
+            setSelectedSpecialization(emptySpecialization);
         }
 
     };
 
-    const openSaveDialog = (department: Department) => {
-        setSelectedDepartment({ ...department });
+    const openSaveDialog = (specialization: Specialization) => {
+        setSelectedSpecialization({ ...specialization });
         setShowSaveDialog(true);
     };
 
 
     const hideSaveDialog = () => {
         setShowSaveDialog(false);
-        setSelectedDepartment(emptyDepartment);
+        setSelectedSpecialization(emptySpecialization);
     };
 
-    const confirmDeleteItem = (department: Department) => {
-        setSelectedDepartment(department);
+    const confirmDeleteItem = (specialization: Specialization) => {
+        setSelectedSpecialization(specialization);
         setShowDeleteDialog(true);
     };
 
@@ -159,7 +148,7 @@ const DepartmentPage = () => {
         return (
             <React.Fragment>
                 <div className="my-2">
-                    <Button label="New Department" icon="pi pi-plus" severity="success" className="mr-2" onClick={() => openSaveDialog(emptyDepartment)} />
+                    <Button label="New Specialization" icon="pi pi-plus" severity="success" className="mr-2" onClick={() => openSaveDialog(emptySpecialization)} />
                 </div>
             </React.Fragment>
         );
@@ -169,7 +158,7 @@ const DepartmentPage = () => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage Departments</h5>
+            <h5 className="m-0">Manage Specializations</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
@@ -177,7 +166,7 @@ const DepartmentPage = () => {
         </div>
     );
 
-    const actionBodyTemplate = (rowData: Department) => {
+    const actionBodyTemplate = (rowData: Specialization) => {
         return (
             <>
                 <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
@@ -197,59 +186,50 @@ const DepartmentPage = () => {
                     <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
                     <DataTable
                         ref={dt}
-                        value={departments}
-                        selection={selectedDepartment}
-                        onSelectionChange={(e) => setSelectedDepartment(e.value as Department)}
+                        value={specializations}
+                        selection={selectedSpecialization}
+                        onSelectionChange={(e) => setSelectedSpecialization(e.value as Specialization)}
                         dataKey="_id"
                         paginator
                         rows={10}
                         rowsPerPageOptions={[5, 10, 25]}
                         className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} departments"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} specializations"
                         globalFilter={globalFilter}
-                        emptyMessage="No department data found."
+                        emptyMessage={`No specialization data found for ${props.department.department_name}.`}
                         header={header}
                         scrollable
                         filters={filters}
                         onRowDoubleClick={(e) => {
                             const selected = e.data;
                             if (selected) {
-                                setSelectedDepartment(selected as Department);
+                                setSelectedSpecialization(selected as Specialization);
                             }
                         }}
-                        expandedRows={expandedRows}
-                        onRowToggle={(e) => setExpandedRows(e.data)}
-                        rowExpansionTemplate={(data) => (
-                            <SpecializationComp
-                                department={data as Department}
-                            />
-                        )}
                     >
-                        <Column expander style={{ width: '3em' }} />
+                        <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column
                             header="#"
                             body={(rowData, options) => options.rowIndex + 1}
                             style={{ width: '50px' }}
                         />
-                        <Column field="department_name" header="Department Name" sortable headerStyle={{ minWidth: '15rem' }} />
-                        <Column field="college.college_name" header="College" sortable headerStyle={{ minWidth: '15rem' }} />
+                        <Column field="specialization_name" header="Specialization Name" sortable headerStyle={{ minWidth: '15rem' }} />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
                     <SaveDialog
                         visible={showSaveDialog}
-                        colleges={colleges}
-                        department={selectedDepartment}
-                        setDepartment={setSelectedDepartment}
-                        onSave={saveDepartment}
+                        specialization={selectedSpecialization}
+                        setSpecialization={setSelectedSpecialization}
+                        onSave={saveSpecialization}
                         onHide={hideSaveDialog}
                     />
 
                     <DeleteDialog
                         showDeleteDialog={showDeleteDialog}
-                        selectedDataInfo={selectedDepartment.department_name}
-                        onDelete={deleteDepartment}
+                        selectedDataInfo={selectedSpecialization.specialization_name}
+                        onDelete={deleteSpecialization}
                         onHide={() => setShowDeleteDialog(false)}
                     />
 
@@ -259,4 +239,4 @@ const DepartmentPage = () => {
     );
 };
 
-export default DepartmentPage;
+export default SpecializationComp;

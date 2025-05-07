@@ -5,6 +5,7 @@ import { authenticateToken } from "../middleware/auth";
 
 router.post('/', authenticateToken, specializationController.createSpecialization);
 router.get('/', authenticateToken, specializationController.getAllSpecializations);
+router.get('/:id', authenticateToken, specializationController.getSpecializationsByDepartment);
 router.put('/:id', authenticateToken, specializationController.updateSpecialization);
 router.delete('/:id', authenticateToken, specializationController.deleteSpecialization);
 
