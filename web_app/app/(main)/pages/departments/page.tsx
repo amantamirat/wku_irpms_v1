@@ -10,7 +10,7 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
-import SaveDialog from './components/SaveDialog';
+import SaveDialog from './dialogs/SaveDialog';
 import { CollegeService } from '@/services/CollegeService';
 import { College } from '@/models/college';
 import SpecializationComp from '../../components/specialization/Specialization';
