@@ -11,7 +11,7 @@ const CollegeSchema = new Schema<ICollege>({
     required: true,
     index: { unique: true }
   }
-});
+}, { timestamps: true });
 
 CollegeSchema.pre('findOneAndDelete', async function (next) {
   const college = await this.model.findOne(this.getQuery());

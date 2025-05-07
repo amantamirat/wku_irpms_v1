@@ -16,7 +16,7 @@ const DepartmentSchema = new Schema<IDepartment>({
         required: true,
         index: { unique: true }
     }
-});
+}, { timestamps: true });
 
 const Department = model<IDepartment>('Department', DepartmentSchema);
 
