@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import collegeRoutes from './routes/collegeRoutes';
+import departmentRoutes from './routes/departmentRoutes';
 import directorateRoutes from './routes/directorateRoutes';
 import { initAdminUser } from './services/userService';
 
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/colleges", collegeRoutes);
+app.use("/api/departments", departmentRoutes);
 app.use("/api/directorates", directorateRoutes);
 
 const MONGO_URL = process.env.MONGO_URL;

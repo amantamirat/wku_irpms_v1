@@ -1,6 +1,7 @@
 export type College = {
     _id?: string;
     college_name: string;
+    number_of_departments: number;
 };
 
 export const validateCollege = (college: College): boolean => {

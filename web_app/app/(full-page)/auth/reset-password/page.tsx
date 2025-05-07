@@ -51,7 +51,7 @@ export default function ResetPassword() {
       const data = await AuthService.resetPassword(email, resetCode, password);
       if (data.success) {
         msgs.current?.clear();
-        msgs.current?.show({ severity: 'success', summary: 'Success!', detail: 'Your password has been reset successfully. You can now log in with your new password.' });
+        msgs.current?.show({ severity: 'success', summary: 'Success!', detail: 'Your password has been reset successfully.' });
         setTimeout(() => router.push('/auth/login'), 3000);
       }
     } catch (err: any) {

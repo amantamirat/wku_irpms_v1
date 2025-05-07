@@ -1,11 +1,12 @@
 import { Router } from 'express';
-import collegeController from '../controllers/collegeController'; 
+import collegeController from '../controllers/collegeController';
 const router: Router = Router();
+import { authenticateToken } from "../middleware/auth";
 
-router.post('/', collegeController.createCollege);
-router.get('/', collegeController.getAllColleges);
-router.get('/:id', collegeController.getCollegeById);
-router.put('/:id', collegeController.updateCollege);
-router.delete('/:id', collegeController.deleteCollege);
+router.post('/', authenticateToken, collegeController.createCollege);
+router.get('/', authenticateToken, collegeController.getAllColleges);
+router.get('/:id', authenticateToken, collegeController.getCollegeById);
+router.put('/:id', authenticateToken, collegeController.updateCollege);
+router.delete('/:id', authenticateToken, collegeController.deleteCollege);
 
 export default router;

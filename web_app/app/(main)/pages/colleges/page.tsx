@@ -16,7 +16,8 @@ import SaveDialog from './components/SaveDialog';
 
 const CollegePage = () => {
     let emptyCollege: College = {
-        college_name: ''
+        college_name: '',
+        number_of_departments: 0
     };
     const [colleges, setColleges] = useState<College[]>([]);
     const dt = useRef<DataTable<any>>(null);
@@ -204,7 +205,8 @@ const CollegePage = () => {
                             body={(rowData, options) => options.rowIndex + 1}
                             style={{ width: '50px' }}
                         />
-                        <Column field="college_name" header="College Name" sortable headerStyle={{ minWidth: '15rem' }}></Column>
+                        <Column field="college_name" header="College Name" sortable headerStyle={{ minWidth: '15rem' }}/>
+                        <Column field="number_of_departments" header="Departments" sortable headerStyle={{ minWidth: '15rem' }}/>
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 

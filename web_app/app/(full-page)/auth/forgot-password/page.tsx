@@ -46,8 +46,8 @@ export default function ForgotPassword() {
       const data = await AuthService.sendResetCode(email);
       if (data.success) {
         msgs.current?.clear();
-        msgs.current?.show({ severity: 'success', summary: 'Almost There!', detail: 'We sent a 9-digit reset code. Check your inbox to continue.' });
-        setTimeout(() => router.push(`/auth/reset-password?email=${encodeURIComponent(email)}`), 5000);
+        msgs.current?.show({ severity: 'success', summary: 'Almost There!', detail: 'Reset code sent. Check your inbox.' });
+        setTimeout(() => router.push(`/auth/reset-password?email=${encodeURIComponent(email)}`), 3000);
       }
     } catch (err: any) {
       console.error(err);

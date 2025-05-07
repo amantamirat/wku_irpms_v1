@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
@@ -38,6 +38,12 @@ function SaveDialog(props: SaveDialogProps) {
             <Button label="Save" icon="pi pi-check" text onClick={save} />
         </>
     );
+
+    useEffect(() => {
+        if (!visible) {
+            setSubmitted(false);
+        }
+    }, [visible]);
 
     return (
         <Dialog
