@@ -31,19 +31,6 @@ const getAllColleges = async (req: Request, res: Response): Promise<void> => {
 };
 
 
-const getCollegeById = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const college = await College.findById(req.params.id);
-    if (!college) {
-      errorResponse(res, 404, 'College not found');
-      return;
-    }
-    successResponse(res, 200, 'College fetched successfully', college);
-  } catch (error) {
-    errorResponse(res, 500, 'Server error', (error as Error).message);
-  }
-};
-
 
 const updateCollege = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -73,23 +60,14 @@ const updateCollege = async (req: Request, res: Response): Promise<void> => {
 
 const deleteCollege = async (req: Request, res: Response): Promise<void> => {
   try {
-    const college = await College.findById(req.params.id);
-
-    if (!college) {
+    const deletedCollege = await College.findByIdAndDelete(req.params.id);
+    if (!deletedCollege) {
       errorResponse(res, 404, 'College not found');
       return;
     }
-
-    if (college.number_of_departments > 0) {
-      errorResponse(res, 400, 'Cannot delete college with existing departments');
-      return;
-    }
-
-    await College.findByIdAndDelete(req.params.id);
-
     successResponse(res, 200, 'College deleted successfully', true);
   } catch (error) {
-    errorResponse(res, 500, 'Server error', (error as Error).message);
+    errorResponse(res, 500, (error as Error).message, {});
   }
 };
 
@@ -97,7 +75,6 @@ const deleteCollege = async (req: Request, res: Response): Promise<void> => {
 const collegeController = {
   createCollege,
   getAllColleges,
-  getCollegeById,
   updateCollege,
   deleteCollege,
 };

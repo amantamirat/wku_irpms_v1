@@ -37,18 +37,7 @@ const getAllDepartments = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
-const getDepartmentById = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const department = await Department.findById(req.params.id).populate('college', 'college_name');
-    if (!department) {
-      errorResponse(res, 404, 'Department not found');
-      return;
-    }
-    successResponse(res, 200, 'Department fetched successfully', department);
-  } catch (error) {
-    errorResponse(res, 500, 'Server error', (error as Error).message);
-  }
-};
+
 
 const updateDepartment = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -106,7 +95,6 @@ const deleteDepartment = async (req: Request, res: Response): Promise<void> => {
 const departmentController = {
   createDepartment,
   getAllDepartments,
-  getDepartmentById,
   updateDepartment,
   deleteDepartment,
 };

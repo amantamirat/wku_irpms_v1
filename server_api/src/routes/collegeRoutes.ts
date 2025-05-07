@@ -5,7 +5,6 @@ import { authenticateToken } from "../middleware/auth";
 
 router.post('/', authenticateToken, collegeController.createCollege);
 router.get('/', authenticateToken, collegeController.getAllColleges);
-router.get('/:id', authenticateToken, collegeController.getCollegeById);
 router.put('/:id', authenticateToken, collegeController.updateCollege);
 router.delete('/:id', authenticateToken, collegeController.deleteCollege);
 
