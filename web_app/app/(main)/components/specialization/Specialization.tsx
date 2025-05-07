@@ -173,6 +173,14 @@ const SpecializationComp = (props: SpecializationCompProps) => {
         );
     };
 
+    const academicLevelBodyTemplate = (rowData: Specialization) => {
+        return (
+            <span className={`academic-badge level-${rowData.academic_level.toLowerCase()}`}>
+                {rowData.academic_level}
+            </span>
+        );
+    };
+
 
     return (
         <div className="grid">
@@ -211,7 +219,7 @@ const SpecializationComp = (props: SpecializationCompProps) => {
                             style={{ width: '50px' }}
                         />
                         <Column field="specialization_name" header="Specialization Name" sortable headerStyle={{ minWidth: '15rem' }} />
-                        <Column field="academic_level" header="Ac. Level" sortable />
+                        <Column field="academic_level" header="Ac. Level" body={academicLevelBodyTemplate} sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 

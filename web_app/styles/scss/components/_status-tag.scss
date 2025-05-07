@@ -1,4 +1,5 @@
 .user-badge,
+.academic-badge,
 .theme-badge {
     border-radius: var(--border-radius);
     padding: .25em .5rem;
@@ -22,5 +23,42 @@
     &.status-suspended {
         background: #FEEDAF;
         color: #5c1a1f;
+    }
+}
+
+.academic-badge {
+    &.level-certificate {
+        background: #E0F7FA;
+        color: #006064;
+    }
+
+    &.level-diploma {
+        background: #FFF3E0;
+        color: #E65100;
+    }
+
+    &.level-ba,
+    &.level-bsc,
+    &.level-bt {
+        background: #E8F5E9;
+        color: #1B5E20;
+    }
+
+    &.level-ma,
+    &.level-msc,
+    &.level-mphil,
+    &.level-mt {
+        background: #F3E5F5;
+        color: #4A148C;
+    }
+
+    &.level-phd {
+        background: #E3F2FD;
+        color: #0D47A1;
+    }
+
+    &.level-postdoc {
+        background: #FCE4EC;
+        color: #880E4F;
     }
 }
