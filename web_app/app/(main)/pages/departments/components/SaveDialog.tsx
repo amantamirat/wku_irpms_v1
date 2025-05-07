@@ -11,24 +11,23 @@ import { College } from '@/models/college';
 
 interface SaveDialogProps {
     visible: boolean;
-    department: Department;
     colleges: College[];
-    onChange: (department: Department) => void;
+    department: Department;
+    setDepartment: (department: Department) => void;
     onSave: () => void;
     onHide: () => void;
 }
 
 function SaveDialog(props: SaveDialogProps) {
-    const { visible, department, colleges, onChange, onSave, onHide } = props;
+    const { visible, department, colleges, setDepartment, onSave, onHide } = props;
     const [submitted, setSubmitted] = useState(false);
 
-    // On college change
-    const handleCollegeChange = (e: { value: string | College }) => {
-        const updatedDepartment = { ...department, college: e.value };
-        onChange(updatedDepartment);
-    };
+    useEffect(() => {
+        if (!visible) {
+            setSubmitted(false);
+        }
+    }, [visible]);   
 
-    // On save
     const save = async () => {
         setSubmitted(true);
         if (!validateDepartment(department)) {
@@ -37,7 +36,6 @@ function SaveDialog(props: SaveDialogProps) {
         onSave();
     };
 
-    // On hide dialog
     const hide = async () => {
         setSubmitted(false);
         onHide();
@@ -48,14 +46,7 @@ function SaveDialog(props: SaveDialogProps) {
             <Button label="Cancel" icon="pi pi-times" text onClick={hide} />
             <Button label="Save" icon="pi pi-check" text onClick={save} />
         </>
-    );
-
-    useEffect(() => {
-        // Reset the state when dialog is hidden
-        if (!visible) {
-            setSubmitted(false);
-        }
-    }, [visible]);
+    );   
 
     return (
         <Dialog
@@ -74,7 +65,7 @@ function SaveDialog(props: SaveDialogProps) {
                         <InputText
                             id="department_name"
                             value={department.department_name}
-                            onChange={(e) => onChange({ ...department, department_name: e.target.value })}
+                            onChange={(e) => setDepartment({ ...department, department_name: e.target.value })}
                             required
                             autoFocus
                             className={classNames({ 'p-invalid': submitted && !department.department_name })}
@@ -90,7 +81,13 @@ function SaveDialog(props: SaveDialogProps) {
                             id="college"
                             value={department.college}
                             options={colleges}
-                            onChange={handleCollegeChange}
+                            onChange={(e) =>
+                                setDepartment({
+                                    ...department,
+                                    college: e.value,
+                                })
+                            }
+                            optionValue="_id"
                             optionLabel="college_name"
                             placeholder="Select a College"
                             required

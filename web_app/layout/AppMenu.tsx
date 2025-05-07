@@ -25,6 +25,11 @@ const AppMenu = () => {
                     to: '/pages/colleges'
                 },
                 {
+                    label: 'Departments',
+                    icon: PrimeIcons.BOX,
+                    to: '/pages/departments'
+                },
+                {
                     label: 'Directorates',
                     icon: 'pi pi-arrows-alt',
                     to: '/pages/directorates'
