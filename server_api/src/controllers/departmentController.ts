@@ -30,7 +30,7 @@ const createDepartment = async (req: Request, res: Response): Promise<void> => {
 
 const getAllDepartments = async (req: Request, res: Response): Promise<void> => {
   try {
-    const departments = await Department.find().populate('college', 'college_name');
+    const departments = await Department.find().populate('college');
     successResponse(res, 200, 'Departments fetched successfully', departments);
   } catch (error) {
     errorResponse(res, 500, 'Server error', (error as Error).message);
@@ -60,7 +60,6 @@ const updateDepartment = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // If college is being changed
     if (college && String(existingDepartment.college) !== String(college)) {
       const newCollege = await College.findById(college);
       if (!newCollege) {

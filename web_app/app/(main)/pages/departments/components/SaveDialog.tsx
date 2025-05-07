@@ -87,7 +87,6 @@ function SaveDialog(props: SaveDialogProps) {
                                     college: e.value,
                                 })
                             }
-                            optionValue="_id"
                             optionLabel="college_name"
                             placeholder="Select a College"
                             required

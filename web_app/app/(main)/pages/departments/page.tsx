@@ -80,14 +80,13 @@ const DepartmentPage = () => {
         try {
             let _departments = [...(departments as any)];
             if (selectedDepartment._id) {
-                const updatedDepartment = await DepartmentService.updateDepartment(selectedDepartment);
-                const index = departments.findIndex((department) => department._id === selectedDepartment._id);
-                updatedDepartment.college = selectedDepartment.college;
+                const updatedDepartment = await DepartmentService.updateDepartment(selectedDepartment);                
+                const index = departments.findIndex((department) => department._id === selectedDepartment._id);                
                 _departments[index] = updatedDepartment;
             } else {
                 const newDepartment = await DepartmentService.createDepartment(selectedDepartment);
-                newDepartment.college = selectedDepartment.college;
-                _departments.push(newDepartment);
+                const department = { ...newDepartment, college: selectedDepartment.college }                   
+                _departments.push(department);
             }
             toast.current?.show({
                 severity: 'success',
