@@ -1,6 +1,6 @@
 'use client';
 import DeleteDialog from '@/components/DeleteDialog';
-import { Specialization } from '@/models/specialization';
+import { AcademicLevel, Specialization } from '@/models/specialization';
 import { SpecializationService } from '@/services/SpecializationService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
@@ -11,8 +11,6 @@ import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
 import SaveDialog from './dialog/SaveDialog';
-import { CollegeService } from '@/services/CollegeService';
-import { College } from '@/models/college';
 import { Department } from '@/models/department';
 
 interface SpecializationCompProps {
@@ -23,7 +21,7 @@ const SpecializationComp = (props: SpecializationCompProps) => {
     let emptySpecialization: Specialization = {
         department: props.department,
         specialization_name: '',
-        academic_level: 'BA'
+        academic_level: AcademicLevel.BA
     };
 
 
@@ -63,8 +61,6 @@ const SpecializationComp = (props: SpecializationCompProps) => {
             });
         }
     };
-
-
 
     const saveSpecialization = async () => {
         try {
@@ -215,6 +211,7 @@ const SpecializationComp = (props: SpecializationCompProps) => {
                             style={{ width: '50px' }}
                         />
                         <Column field="specialization_name" header="Specialization Name" sortable headerStyle={{ minWidth: '15rem' }} />
+                        <Column field="academic_level" header="Ac. Level" sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
