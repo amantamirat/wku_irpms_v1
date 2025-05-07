@@ -9,6 +9,7 @@ const CollegeSchema = new Schema<ICollege>({
   college_name: {
     type: String,
     required: true,
+    trim: true,
     index: { unique: true }
   }
 }, { timestamps: true });

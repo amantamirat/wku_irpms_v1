@@ -2,15 +2,21 @@ import mongoose, { Schema, model, Document } from 'mongoose';
 
 
 export enum AcademicLevel {
+    Certificate = 'Certificate',
+    Diploma = 'Diploma',
     BA = 'BA',
     BSc = 'BSc',
+    BT = 'BT',
     MA = 'MA',
     MSc = 'MSc',
+    MPhil = 'MPhil',
+    MT = 'MT',
     PhD = 'PhD',
+    PostDoc = 'PostDoc'
 }
 
 export interface ISpecialization extends Document {
-    department: mongoose.Types.ObjectId; // Reference to the Department model
+    department: mongoose.Types.ObjectId;
     specialization_name: string;
     academic_level: AcademicLevel
 }
@@ -18,7 +24,7 @@ export interface ISpecialization extends Document {
 
 const SpecializationSchema = new Schema<ISpecialization>({
     department: {
-        type: Schema.Types.ObjectId, 
+        type: Schema.Types.ObjectId,
         ref: 'Department',
         required: true
     },
@@ -26,7 +32,6 @@ const SpecializationSchema = new Schema<ISpecialization>({
         type: String,
         required: true,
         trim: true,
-        lowercase: true
     },
     academic_level: {
         type: String,

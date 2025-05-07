@@ -15,9 +15,6 @@ const createDepartment = async (req: Request, res: Response): Promise<void> => {
 
     const department = new Department({ college, department_name });
     await department.save();
-
-    await College.findByIdAndUpdate(college, { $inc: { number_of_departments: 1 } });
-
     successResponse(res, 201, 'Department created successfully', department);
   } catch (error: any) {
     if (error.code === 11000) {
@@ -47,24 +44,13 @@ const updateDepartment = async (req: Request, res: Response): Promise<void> => {
     if (!existingDepartment) {
       errorResponse(res, 404, 'Department not found');
       return;
-    }
-
-    if (college && String(existingDepartment.college) !== String(college)) {
-      const newCollege = await College.findById(college);
-      if (!newCollege) {
-        errorResponse(res, 400, 'New referenced college does not exist');
-        return;
-      }
-
-      await College.findByIdAndUpdate(existingDepartment.college, { $inc: { number_of_departments: -1 } });
-      await College.findByIdAndUpdate(college, { $inc: { number_of_departments: 1 } });
-    }
+    }  
 
     const updatedDepartment = await Department.findByIdAndUpdate(
       req.params.id,
       { college, department_name },
       { new: true, runValidators: true }
-    ).populate('college', 'college_name');
+    ).populate('college');
 
     successResponse(res, 200, 'Department updated successfully', updatedDepartment);
   } catch (error: any) {
@@ -83,9 +69,6 @@ const deleteDepartment = async (req: Request, res: Response): Promise<void> => {
       errorResponse(res, 404, 'Department not found');
       return;
     }
-
-    await College.findByIdAndUpdate(deletedDepartment.college, { $inc: { number_of_departments: -1 } });
-
     successResponse(res, 200, 'Department deleted successfully', true);
   } catch (error) {
     errorResponse(res, 500, 'Server error', (error as Error).message);
