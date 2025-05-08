@@ -6,6 +6,7 @@ import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import collegeRoutes from './routes/collegeRoutes';
 import departmentRoutes from './routes/departmentRoutes';
+import programRoutes from './routes/programRoutes';
 import specializationRoutes from './routes/specializationRoutes';
 import directorateRoutes from './routes/directorateRoutes';
 import { initAdminUser } from './services/userService';
@@ -24,6 +25,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/colleges", collegeRoutes);
 app.use("/api/departments", departmentRoutes);
 app.use("/api/specializations", specializationRoutes);
+app.use("/api/programs", programRoutes);
 app.use("/api/directorates", directorateRoutes);
 
 const MONGO_URL = process.env.MONGO_URL;
