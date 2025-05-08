@@ -1,5 +1,5 @@
 import mongoose, { Schema, model, Document } from 'mongoose';
-import Specialization from './specialization';
+import Program from './program';
 
 export interface IDepartment extends Document {
     college: mongoose.Types.ObjectId;
@@ -23,9 +23,9 @@ const DepartmentSchema = new Schema<IDepartment>({
 DepartmentSchema.pre('findOneAndDelete', async function (next) {
     const department = await this.model.findOne(this.getQuery());
     if (!department) return next();
-    const isReferenced = await Specialization.exists({ department: department._id });
+    const isReferenced = await Program.exists({ department: department._id });
     if (isReferenced) {
-        return next(new Error('Cannot delete department: it has specializations.'));
+        return next(new Error('Cannot delete department: it has programs.'));
     }
     next();
 });

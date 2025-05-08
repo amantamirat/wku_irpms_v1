@@ -1,6 +1,5 @@
 import { Specialization } from "@/models/specialization";
 import { MyService } from "./MyService";
-import { Department } from "@/models/department";
 
 const end_point = '/specializations/';
 
@@ -9,14 +8,6 @@ export const SpecializationService = {
 
     async getSpecializations(): Promise<Specialization[]> {
         const data = await MyService.get(end_point);
-        return data as Specialization[];
-    },
-
-    async getSpecializationsByDepartment(department: Department): Promise<Specialization[]> {
-        if (!department._id) {
-            throw new Error("_id required.");
-        }
-        const data = await MyService.get(`${end_point}${department._id}`);
         return data as Specialization[];
     },
 

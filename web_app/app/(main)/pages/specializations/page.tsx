@@ -1,7 +1,8 @@
 'use client';
 import DeleteDialog from '@/components/DeleteDialog';
-import { Directorate } from '@/models/directorate';
-import { DirectorateService } from '@/services/DirectorateService';
+import { AcademicLevel } from '@/models/program';
+import { Specialization } from '@/models/specialization';
+import { SpecializationService } from '@/services/SpecializationService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -10,19 +11,21 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
-import SaveDialog from './dialogs/SaveDialog';
+import SaveDialog from './dialog/SaveDialog';
 
 
-const DirectoratePage = () => {
-    let emptyDirectorate: Directorate = {
-        directorate_name: ''
+const SpecializationPage = () => {
+    let emptySpecialization: Specialization = {
+        specialization_name: '',
+        academic_level: AcademicLevel.BA
     };
-    const [directorates, setDirectorates] = useState<Directorate[]>([]);
+
+
+    const [specializations, setSpecializations] = useState<Specialization[]>([]);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
-
-    const [selectedDirectorate, setSelectedDirectorate] = useState<Directorate>(emptyDirectorate);
+    const [selectedSpecialization, setSelectedSpecialization] = useState<Specialization>(emptySpecialization);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
@@ -31,74 +34,74 @@ const DirectoratePage = () => {
     useEffect(() => {
         setFilters(initFilters());
         setGlobalFilter('');
-        loadDirectorates();
+        loadSpecializations();
     }, []);
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
 
-    const loadDirectorates = async () => {
+
+
+    const loadSpecializations = async () => {
         try {
-            const data = await DirectorateService.getDirectorates();
-            setDirectorates(data);
+            const data = await SpecializationService.getSpecializations();
+            setSpecializations(data);
         } catch (err) {
-            console.error('Failed to load directorates:', err);
+            console.error('Failed to load specializations:', err);
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to load directorates data',
+                summary: 'Failed to load specializations data',
                 detail: '' + err,
                 life: 3000
             });
         }
     };
 
-
-
-    const saveDirectorate = async () => {
+    const saveSpecialization = async () => {
         try {
-            let _directorates = [...(directorates as any)];
-            if (selectedDirectorate._id) {
-                const updatedDirectorate = await DirectorateService.updateDirectorate(selectedDirectorate);
-                const index = directorates.findIndex((directorate) => directorate._id === selectedDirectorate._id);
-                _directorates[index] = updatedDirectorate;
+            let _specializations = [...(specializations as any)];
+            if (selectedSpecialization._id) {
+                const updatedSpecialization = await SpecializationService.updateSpecialization(selectedSpecialization);
+                const index = specializations.findIndex((specialization) => specialization._id === selectedSpecialization._id);
+                _specializations[index] = updatedSpecialization;
             } else {
-                const newDirectorate = await DirectorateService.createDirectorate(selectedDirectorate);
-                _directorates.push(newDirectorate);
+                const newSpecialization = await SpecializationService.createSpecialization(selectedSpecialization);
+                _specializations.push(newSpecialization);
             }
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',
-                detail: `Directorate ${selectedDirectorate._id ? "updated" : 'created'}`,
+                detail: `Specialization ${selectedSpecialization._id ? "updated" : 'created'}`,
                 life: 3000
             });
-            setDirectorates(_directorates);
+            setSpecializations(_specializations);
         } catch (error) {
             console.error(error);
             toast.current?.show({
                 severity: 'error',
-                summary: `Failed to ${selectedDirectorate._id ? "update" : 'create'} directorate`,
+                summary: `Failed to ${selectedSpecialization._id ? "update" : 'create'} specialization`,
                 detail: '' + error,
                 life: 3000
             });
         } finally {
             setShowSaveDialog(false);
-            setSelectedDirectorate(emptyDirectorate);
+            setSelectedSpecialization(emptySpecialization);
         }
 
     };
 
 
-    const deleteDirectorate = async () => {
+    const deleteSpecialization = async () => {
         try {
-            const deleted = await DirectorateService.deleteDirectorate(selectedDirectorate);
+            const deleted = await SpecializationService.deleteSpecialization(selectedSpecialization);
             if (deleted) {
-                let _directorates = (directorates as any)?.filter((val: any) => val._id !== selectedDirectorate._id);
-                setDirectorates(_directorates);
+                let _specializations = (specializations as any)?.filter((val: any) => val._id !== selectedSpecialization._id);
+                setSpecializations(_specializations);
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Successful',
-                    detail: 'Directorate Deleted',
+                    detail: 'Specialization Deleted',
                     life: 3000
                 });
             }
@@ -106,30 +109,30 @@ const DirectoratePage = () => {
             console.error(error);
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to delete directorates',
+                summary: 'Failed to delete specializations',
                 detail: '' + error,
                 life: 3000
             });
         } finally {
             setShowDeleteDialog(false);
-            setSelectedDirectorate(emptyDirectorate);
+            setSelectedSpecialization(emptySpecialization);
         }
 
     };
 
-    const openSaveDialog = (directorate: Directorate) => {
-        setSelectedDirectorate({ ...directorate });
+    const openSaveDialog = (specialization: Specialization) => {
+        setSelectedSpecialization({ ...specialization });
         setShowSaveDialog(true);
     };
 
 
     const hideSaveDialog = () => {
         setShowSaveDialog(false);
-        setSelectedDirectorate(emptyDirectorate);
+        setSelectedSpecialization(emptySpecialization);
     };
 
-    const confirmDeleteItem = (directorate: Directorate) => {
-        setSelectedDirectorate(directorate);
+    const confirmDeleteItem = (specialization: Specialization) => {
+        setSelectedSpecialization(specialization);
         setShowDeleteDialog(true);
     };
 
@@ -137,7 +140,7 @@ const DirectoratePage = () => {
         return (
             <React.Fragment>
                 <div className="my-2">
-                    <Button label="New Directorate" icon="pi pi-plus" severity="success" className="mr-2" onClick={() => openSaveDialog(emptyDirectorate)} />
+                    <Button label="New Specialization" icon="pi pi-plus" severity="success" className="mr-2" onClick={() => openSaveDialog(emptySpecialization)} />
                 </div>
             </React.Fragment>
         );
@@ -147,7 +150,7 @@ const DirectoratePage = () => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage Directorates</h5>
+            <h5 className="m-0">Manage Specializations</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
@@ -155,7 +158,7 @@ const DirectoratePage = () => {
         </div>
     );
 
-    const actionBodyTemplate = (rowData: Directorate) => {
+    const actionBodyTemplate = (rowData: Specialization) => {
         return (
             <>
                 <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
@@ -163,6 +166,14 @@ const DirectoratePage = () => {
                 <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
                     style={{ fontSize: '2rem' }} onClick={() => confirmDeleteItem(rowData)} />
             </>
+        );
+    };
+
+    const academicLevelBodyTemplate = (rowData: Specialization) => {
+        return (
+            <span className={`academic-badge level-${rowData.academic_level.toLowerCase()}`}>
+                {rowData.academic_level}
+            </span>
         );
     };
 
@@ -175,25 +186,25 @@ const DirectoratePage = () => {
                     <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
                     <DataTable
                         ref={dt}
-                        value={directorates}
-                        selection={selectedDirectorate}
-                        onSelectionChange={(e) => setSelectedDirectorate(e.value as Directorate)}
+                        value={specializations}
+                        selection={selectedSpecialization}
+                        onSelectionChange={(e) => setSelectedSpecialization(e.value as Specialization)}
                         dataKey="_id"
                         paginator
                         rows={10}
                         rowsPerPageOptions={[5, 10, 25]}
                         className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} directorates"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} specializations"
                         globalFilter={globalFilter}
-                        emptyMessage="No directorate data found."
+                        emptyMessage={`No specialization data found.`}
                         header={header}
                         scrollable
                         filters={filters}
                         onRowDoubleClick={(e) => {
                             const selected = e.data;
                             if (selected) {
-                                setSelectedDirectorate(selected as Directorate);
+                                setSelectedSpecialization(selected as Specialization);
                             }
                         }}
                     >
@@ -203,22 +214,23 @@ const DirectoratePage = () => {
                             body={(rowData, options) => options.rowIndex + 1}
                             style={{ width: '50px' }}
                         />
-                        <Column field="directorate_name" header="Directorate Name" sortable headerStyle={{ minWidth: '15rem' }}></Column>
+                        <Column field="specialization_name" header="Specialization Name" sortable headerStyle={{ minWidth: '15rem' }} />
+                        <Column field="academic_level" header="Ac. Level" body={academicLevelBodyTemplate} sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
                     <SaveDialog
                         visible={showSaveDialog}
-                        directorate={selectedDirectorate}
-                        onChange={setSelectedDirectorate}
-                        onSave={saveDirectorate}
+                        specialization={selectedSpecialization}
+                        setSpecialization={setSelectedSpecialization}
+                        onSave={saveSpecialization}
                         onHide={hideSaveDialog}
                     />
 
                     <DeleteDialog
                         showDeleteDialog={showDeleteDialog}
-                        selectedDataInfo={selectedDirectorate.directorate_name}
-                        onDelete={deleteDirectorate}
+                        selectedDataInfo={selectedSpecialization.specialization_name}
+                        onDelete={deleteSpecialization}
                         onHide={() => setShowDeleteDialog(false)}
                     />
 
@@ -228,4 +240,4 @@ const DirectoratePage = () => {
     );
 };
 
-export default DirectoratePage;
+export default SpecializationPage;

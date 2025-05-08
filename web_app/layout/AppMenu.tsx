@@ -30,6 +30,11 @@ const AppMenu = () => {
                     to: '/pages/departments'
                 },
                 {
+                    label: 'Specializations',
+                    icon: PrimeIcons.BOOK,
+                    to: '/pages/specializations'
+                },
+                {
                     label: 'Directorates',
                     icon: 'pi pi-arrows-alt',
                     to: '/pages/directorates'

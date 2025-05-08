@@ -1,6 +1,7 @@
 'use client';
 import DeleteDialog from '@/components/DeleteDialog';
-import { AcademicLevel, Specialization } from '@/models/specialization';
+import { AcademicLevel } from '@/models/program';
+import { Specialization } from '@/models/specialization';
 import { SpecializationService } from '@/services/SpecializationService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
@@ -11,15 +12,10 @@ import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
 import SaveDialog from './dialog/SaveDialog';
-import { Department } from '@/models/department';
 
-interface SpecializationCompProps {
-    department: Department;
-}
 
-const SpecializationComp = (props: SpecializationCompProps) => {
+const SpecializationComp = () => {
     let emptySpecialization: Specialization = {
-        department: props.department,
         specialization_name: '',
         academic_level: AcademicLevel.BA
     };
@@ -49,7 +45,7 @@ const SpecializationComp = (props: SpecializationCompProps) => {
 
     const loadSpecializations = async () => {
         try {
-            const data = await SpecializationService.getSpecializationsByDepartment(props.department);
+            const data = await SpecializationService.getSpecializations();
             setSpecializations(data);
         } catch (err) {
             console.error('Failed to load specializations:', err);
@@ -201,7 +197,7 @@ const SpecializationComp = (props: SpecializationCompProps) => {
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} specializations"
                         globalFilter={globalFilter}
-                        emptyMessage={`No specialization data found for ${props.department.department_name}.`}
+                        emptyMessage={`No specialization data found.`}
                         header={header}
                         scrollable
                         filters={filters}

@@ -9,7 +9,7 @@ import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import SaveDialog from './dialog/SaveDialog';
 import { Department } from '@/models/department';
 
@@ -35,20 +35,7 @@ const ProgramComp = (props: ProgramCompProps) => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
 
-
-    useEffect(() => {
-        setFilters(initFilters());
-        setGlobalFilter('');
-        loadPrograms();
-    }, []);
-
-    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
-    };
-
-
-
-    const loadPrograms = async () => {
+    const loadPrograms = useCallback(async () => {
         try {
             const data = await ProgramService.getProgramsByDepartment(props.department);
             setPrograms(data);
@@ -61,6 +48,16 @@ const ProgramComp = (props: ProgramCompProps) => {
                 life: 3000
             });
         }
+    }, [props.department]);
+
+    useEffect(() => {
+        setFilters(initFilters());
+        setGlobalFilter('');
+        loadPrograms();
+    }, [loadPrograms]);
+
+    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
 
     const saveProgram = async () => {
