@@ -10,6 +10,7 @@ import { LayoutContext } from '../../../../layout/context/layoutcontext';
 import { useContext } from 'react';
 import { Messages } from 'primereact/messages';
 import { AuthService } from '@/services/AuthService';
+import { useAuth } from '@/contexts/auth-context';
 
 export default function ResetPassword() {
   const [progressing, setProgressing] = useState(false);
@@ -22,6 +23,11 @@ export default function ResetPassword() {
   const msgs = useRef<Messages>(null);
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
+  const { loading, logout, loggedIn } = useAuth();
+
+  if (loading) {
+    return <div>Loading ...</div>;
+  }
 
   const resetPassword = async () => {
     try {
@@ -50,9 +56,17 @@ export default function ResetPassword() {
 
       const data = await AuthService.resetPassword(email, resetCode, password);
       if (data.success) {
-        msgs.current?.clear();
-        msgs.current?.show({ severity: 'success', summary: 'Success!', detail: 'Your password has been reset successfully.' });
-        setTimeout(() => router.push('/auth/login'), 3000);
+        if (!loggedIn) {
+          msgs.current?.clear();
+          msgs.current?.show({ severity: 'success', summary: 'Success!', detail: 'Your password has been reset successfully.' });
+          setTimeout(() => router.push('/auth/login'), 3000);
+        }
+        if (loggedIn) {
+          msgs.current?.clear();
+          msgs.current?.show({ severity: 'success', summary: 'Success!', detail: 'Your account has been activated successfully.' });
+          setTimeout(() => logout(), 3000);
+        }
+
       }
     } catch (err: any) {
       console.error(err);
@@ -83,7 +97,7 @@ export default function ResetPassword() {
           <div className="w-full surface-card py-8 px-5 sm:px-8" style={{ borderRadius: '53px' }}>
             <div className="text-center mb-5">
               <img src={`/images/wku_logo.png`} alt="wku logo" className="mb-5 w-6rem flex-shrink-0" />
-              <div className="text-900 text-3xl font-medium mb-3">Reset Password</div>
+              <div className="text-900 text-3xl font-medium mb-3"> {loggedIn ? 'Activate Account' : 'Reset Password'}</div>
               <span className="text-600 font-medium">Enter the reset code and your new password</span>
             </div>
 
@@ -132,13 +146,13 @@ export default function ResetPassword() {
             <Messages ref={msgs} style={{ width: '100%', wordBreak: 'break-word' }} />
             <Button
               loading={progressing}
-              label="Reset Password"
+              label={loggedIn ? "Activate" : "Reset Password"}
               className="w-full p-3 text-xl"
               type="submit"
               onClick={resetPassword}
             />
             <div className="flex flex-column align-items-center justify-content-center">
-              <Button icon="pi pi-arrow-left" label="Back to Login" text className="mt-4" onClick={() => router.push('/auth/login')} />
+              <Button icon="pi pi-arrow-left" label="Back to Login" text className="mt-4" onClick={() => loggedIn ? logout() : router.push('/auth/login')} />
             </div>
           </div>
         </div>

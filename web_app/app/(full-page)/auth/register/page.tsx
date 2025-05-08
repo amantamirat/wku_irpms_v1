@@ -9,6 +9,7 @@ import { LayoutContext } from '../../../../layout/context/layoutcontext';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import { Messages } from 'primereact/messages';
+import NoAuthGuard from '@/components/NoAuthGuard';
 
 const SignUpPage = () => {
     const [username, setUsername] = useState('');
@@ -42,10 +43,11 @@ const SignUpPage = () => {
         }
 
         // Proceed with sign up logic
-        router.push('/'); // Redirect after signup (change this as needed)
+        // router.push('/'); // Redirect after signup (change this as needed)
     };
 
     return (
+        <NoAuthGuard>
         <div className={containerClassName}>
             <div className="flex flex-column align-items-center justify-content-center">
                 <div
@@ -99,6 +101,7 @@ const SignUpPage = () => {
                 </div>
             </div>
         </div>
+        </NoAuthGuard>
     );
 };
 

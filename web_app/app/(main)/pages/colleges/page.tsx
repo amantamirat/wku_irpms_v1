@@ -204,24 +204,26 @@ const CollegePage = () => {
                             body={(rowData, options) => options.rowIndex + 1}
                             style={{ width: '50px' }}
                         />
-                        <Column field="college_name" header="College Name" sortable headerStyle={{ minWidth: '15rem' }}/>
+                        <Column field="college_name" header="College Name" sortable headerStyle={{ minWidth: '15rem' }} />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
-                    <SaveDialog
-                        visible={showSaveDialog}
-                        college={selectedCollege}
-                        onChange={setSelectedCollege}
-                        onSave={saveCollege}
-                        onHide={hideSaveDialog}
-                    />
+                    {selectedCollege &&
+                        <SaveDialog
+                            visible={showSaveDialog}
+                            college={selectedCollege}
+                            onChange={setSelectedCollege}
+                            onSave={saveCollege}
+                            onHide={hideSaveDialog}
+                        />}
 
-                    <DeleteDialog
-                        showDeleteDialog={showDeleteDialog}
-                        selectedDataInfo={selectedCollege.college_name}
-                        onDelete={deleteCollege}
-                        onHide={() => setShowDeleteDialog(false)}
-                    />
+                    {selectedCollege &&
+                        <DeleteDialog
+                            showDeleteDialog={showDeleteDialog}
+                            selectedDataInfo={selectedCollege.college_name}
+                            onDelete={deleteCollege}
+                            onHide={() => setShowDeleteDialog(false)}
+                        />}
 
                 </div>
             </div>

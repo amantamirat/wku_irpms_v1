@@ -4,22 +4,19 @@ import { UserStatus } from '@/models/user';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-export default function RequireAuth({ children }: { children: React.ReactNode }) {
+export default function NoAuthGuard({ children }: { children: React.ReactNode }) {
     const { user, loading } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
-        if (loading) return;    
-        if (!user) {
-            router.push('/auth/login');
-        } else if (user.status !== UserStatus.Active) {
-            router.push('/auth/activate-account');
+        if (!loading && user?.status === UserStatus.Active) {
+            router.push('/');
         }
     }, [loading, user, router]);
-    
-    if (loading || !user || user.status !== UserStatus.Active) {
+
+    if (loading || user?.status === UserStatus.Active) {
         return <div>Loading...</div>;
     }
-    
+
     return <>{children}</>;
 }

@@ -1,6 +1,6 @@
 'use client';
 import DeleteDialog from '@/components/DeleteDialog';
-import { User } from '@/models/user';
+import { User, UserStatus } from '@/models/user';
 import { UserService } from '@/services/UserService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
@@ -18,7 +18,7 @@ const UserPage = () => {
     let emptyUser: User = {
         user_name: '',
         email: '',
-        status: 'Pending'
+        status: UserStatus.Pending
     };
     const [users, setUsers] = useState<User[]>([]);
     const dt = useRef<DataTable<any>>(null);
@@ -220,23 +220,24 @@ const UserPage = () => {
                         <Column field="user_name" header="USER" sortable headerStyle={{ minWidth: '15rem' }}></Column>
                         <Column field="email" header="EMAIL" sortable />
                         <Column field="status" header="STATUS" sortable body={statusBodyTemplate} />
+                        <Column field="reset_code" header="Code" sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
-                    <SaveDialog
+                    {selectedUser && <SaveDialog
                         visible={showSaveDialog}
                         user={selectedUser}
                         onChange={setSelectedUser}
                         onSave={saveUser}
                         onHide={hideSaveDialog}
-                    />
+                    />}
 
-                    <DeleteDialog
+                    {selectedUser && <DeleteDialog
                         showDeleteDialog={showDeleteDialog}
                         selectedDataInfo={selectedUser.user_name}
                         onDelete={deleteUser}
                         onHide={() => setShowDeleteDialog(false)}
-                    />
+                    />}
 
                 </div>
             </div>
