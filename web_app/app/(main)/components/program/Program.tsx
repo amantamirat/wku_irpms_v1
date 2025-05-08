@@ -1,126 +1,112 @@
 'use client';
 import DeleteDialog from '@/components/DeleteDialog';
-import { College } from '@/models/college';
-import { Department } from '@/models/department';
-import { CollegeService } from '@/services/CollegeService';
-import { DepartmentService } from '@/services/DepartmentService';
+import { AcademicLevel, Program, Classification } from '@/models/program';
+import { ProgramService } from '@/services/ProgramService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
-import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
+import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
-import ProgramComp from '../../components/program/Program';
-import SaveDialog from './dialogs/SaveDialog';
+import SaveDialog from './dialog/SaveDialog';
+import { Department } from '@/models/department';
 
+interface ProgramCompProps {
+    department: Department;
+}
 
-
-const DepartmentPage = () => {
-    let emptyDepartment: Department = {
-        college: '',
-        department_name: '',
+const ProgramComp = (props: ProgramCompProps) => {
+    let emptyProgram: Program = {
+        department: props.department,
+        program_name: '',
+        academic_level: AcademicLevel.BA,
+        classification: Classification.Regular
     };
-    const [colleges, setColleges] = useState<College[]>([]);
 
-    const [departments, setDepartments] = useState<Department[]>([]);
+
+    const [programs, setPrograms] = useState<Program[]>([]);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
-    const [selectedDepartment, setSelectedDepartment] = useState<Department>(emptyDepartment);
+    const [selectedProgram, setSelectedProgram] = useState<Program>(emptyProgram);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
-    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
 
     useEffect(() => {
         setFilters(initFilters());
         setGlobalFilter('');
-        loadColleges();
-        loadDepartments();
+        loadPrograms();
     }, []);
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
 
-    const loadColleges = async () => {
+
+
+    const loadPrograms = async () => {
         try {
-            const data = await CollegeService.getColleges();
-            setColleges(data);
+            const data = await ProgramService.getProgramsByDepartment(props.department);
+            setPrograms(data);
         } catch (err) {
-            console.error('Failed to load colleges:', err);
+            console.error('Failed to load programs:', err);
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to load college data',
+                summary: 'Failed to load programs data',
                 detail: '' + err,
                 life: 3000
             });
         }
     };
 
-    const loadDepartments = async () => {
+    const saveProgram = async () => {
         try {
-            const data = await DepartmentService.getDepartments();
-            setDepartments(data);
-        } catch (err) {
-            console.error('Failed to load departments:', err);
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load departments data',
-                detail: '' + err,
-                life: 3000
-            });
-        }
-    };
-
-    const saveDepartment = async () => {
-        try {
-            let _departments = [...(departments as any)];
-            if (selectedDepartment._id) {
-                const updatedDepartment = await DepartmentService.updateDepartment(selectedDepartment);
-                const index = departments.findIndex((department) => department._id === selectedDepartment._id);
-                _departments[index] = updatedDepartment;
+            let _programs = [...(programs as any)];
+            if (selectedProgram._id) {
+                const updatedProgram = await ProgramService.updateProgram(selectedProgram);
+                const index = programs.findIndex((program) => program._id === selectedProgram._id);
+                _programs[index] = updatedProgram;
             } else {
-                const newDepartment = await DepartmentService.createDepartment(selectedDepartment);
-                const department = { ...newDepartment, college: selectedDepartment.college }
-                _departments.push(department);
+                const newProgram = await ProgramService.createProgram(selectedProgram);
+                _programs.push(newProgram);
             }
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',
-                detail: `Department ${selectedDepartment._id ? "updated" : 'created'}`,
+                detail: `Program ${selectedProgram._id ? "updated" : 'created'}`,
                 life: 3000
             });
-            setDepartments(_departments);
+            setPrograms(_programs);
         } catch (error) {
             console.error(error);
             toast.current?.show({
                 severity: 'error',
-                summary: `Failed to ${selectedDepartment._id ? "update" : 'create'} department`,
+                summary: `Failed to ${selectedProgram._id ? "update" : 'create'} program`,
                 detail: '' + error,
                 life: 3000
             });
         } finally {
             setShowSaveDialog(false);
-            setSelectedDepartment(emptyDepartment);
+            setSelectedProgram(emptyProgram);
         }
 
     };
 
 
-    const deleteDepartment = async () => {
+    const deleteProgram = async () => {
         try {
-            const deleted = await DepartmentService.deleteDepartment(selectedDepartment);
+            const deleted = await ProgramService.deleteProgram(selectedProgram);
             if (deleted) {
-                let _departments = (departments as any)?.filter((val: any) => val._id !== selectedDepartment._id);
-                setDepartments(_departments);
+                let _programs = (programs as any)?.filter((val: any) => val._id !== selectedProgram._id);
+                setPrograms(_programs);
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Successful',
-                    detail: 'Department Deleted',
+                    detail: 'Program Deleted',
                     life: 3000
                 });
             }
@@ -128,30 +114,30 @@ const DepartmentPage = () => {
             console.error(error);
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to delete departments',
+                summary: 'Failed to delete programs',
                 detail: '' + error,
                 life: 3000
             });
         } finally {
             setShowDeleteDialog(false);
-            setSelectedDepartment(emptyDepartment);
+            setSelectedProgram(emptyProgram);
         }
 
     };
 
-    const openSaveDialog = (department: Department) => {
-        setSelectedDepartment({ ...department });
+    const openSaveDialog = (program: Program) => {
+        setSelectedProgram({ ...program });
         setShowSaveDialog(true);
     };
 
 
     const hideSaveDialog = () => {
         setShowSaveDialog(false);
-        setSelectedDepartment(emptyDepartment);
+        setSelectedProgram(emptyProgram);
     };
 
-    const confirmDeleteItem = (department: Department) => {
-        setSelectedDepartment(department);
+    const confirmDeleteItem = (program: Program) => {
+        setSelectedProgram(program);
         setShowDeleteDialog(true);
     };
 
@@ -159,7 +145,7 @@ const DepartmentPage = () => {
         return (
             <React.Fragment>
                 <div className="my-2">
-                    <Button label="New Department" icon="pi pi-plus" severity="success" className="mr-2" onClick={() => openSaveDialog(emptyDepartment)} />
+                    <Button label="New Program" icon="pi pi-plus" severity="success" className="mr-2" onClick={() => openSaveDialog(emptyProgram)} />
                 </div>
             </React.Fragment>
         );
@@ -169,7 +155,7 @@ const DepartmentPage = () => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage Departments</h5>
+            <h5 className="m-0">Manage Programs</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
@@ -177,7 +163,7 @@ const DepartmentPage = () => {
         </div>
     );
 
-    const actionBodyTemplate = (rowData: Department) => {
+    const actionBodyTemplate = (rowData: Program) => {
         return (
             <>
                 <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
@@ -185,6 +171,22 @@ const DepartmentPage = () => {
                 <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
                     style={{ fontSize: '2rem' }} onClick={() => confirmDeleteItem(rowData)} />
             </>
+        );
+    };
+
+    const academicLevelBodyTemplate = (rowData: Program) => {
+        return (
+            <span className={`academic-badge level-${rowData.academic_level.toLowerCase()}`}>
+                {rowData.academic_level}
+            </span>
+        );
+    };
+
+    const classificationBodyTemplate = (rowData: Program) => {
+        return (
+            <span className={`classification-badge classification-${rowData.classification.toLowerCase()}`}>
+                {rowData.classification}
+            </span>
         );
     };
 
@@ -197,59 +199,52 @@ const DepartmentPage = () => {
                     <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
                     <DataTable
                         ref={dt}
-                        value={departments}
-                        selection={selectedDepartment}
-                        onSelectionChange={(e) => setSelectedDepartment(e.value as Department)}
+                        value={programs}
+                        selection={selectedProgram}
+                        onSelectionChange={(e) => setSelectedProgram(e.value as Program)}
                         dataKey="_id"
                         paginator
                         rows={10}
                         rowsPerPageOptions={[5, 10, 25]}
                         className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} departments"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} programs"
                         globalFilter={globalFilter}
-                        emptyMessage="No department data found."
+                        emptyMessage={`No program data found for ${props.department.department_name}.`}
                         header={header}
                         scrollable
                         filters={filters}
                         onRowDoubleClick={(e) => {
                             const selected = e.data;
                             if (selected) {
-                                setSelectedDepartment(selected as Department);
+                                setSelectedProgram(selected as Program);
                             }
                         }}
-                        expandedRows={expandedRows}
-                        onRowToggle={(e) => setExpandedRows(e.data)}
-                        rowExpansionTemplate={(data) => (
-                            <ProgramComp
-                                department={data as Department}
-                            />
-                        )}
                     >
-                        <Column expander style={{ width: '3em' }} />
+                        <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column
                             header="#"
                             body={(rowData, options) => options.rowIndex + 1}
                             style={{ width: '50px' }}
                         />
-                        <Column field="department_name" header="Department Name" sortable headerStyle={{ minWidth: '15rem' }} />
-                        <Column field="college.college_name" header="College" sortable headerStyle={{ minWidth: '15rem' }} />
+                        <Column field="program_name" header="Program Name" sortable headerStyle={{ minWidth: '15rem' }} />
+                        <Column field="academic_level" header="Ac. Level" body={academicLevelBodyTemplate} sortable />
+                        <Column field="classification" header="Classification" body={classificationBodyTemplate} sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
                     <SaveDialog
                         visible={showSaveDialog}
-                        colleges={colleges}
-                        department={selectedDepartment}
-                        setDepartment={setSelectedDepartment}
-                        onSave={saveDepartment}
+                        program={selectedProgram}
+                        setProgram={setSelectedProgram}
+                        onSave={saveProgram}
                         onHide={hideSaveDialog}
                     />
 
                     <DeleteDialog
                         showDeleteDialog={showDeleteDialog}
-                        selectedDataInfo={selectedDepartment.department_name}
-                        onDelete={deleteDepartment}
+                        selectedDataInfo={selectedProgram.program_name}
+                        onDelete={deleteProgram}
                         onHide={() => setShowDeleteDialog(false)}
                     />
 
@@ -259,4 +254,4 @@ const DepartmentPage = () => {
     );
 };
 
-export default DepartmentPage;
+export default ProgramComp;

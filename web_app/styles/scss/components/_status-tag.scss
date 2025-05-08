@@ -1,5 +1,6 @@
 .user-badge,
 .academic-badge,
+.classification-badge,
 .theme-badge {
     border-radius: var(--border-radius);
     padding: .25em .5rem;
@@ -40,8 +41,8 @@
     &.level-ba,
     &.level-bsc,
     &.level-bt {
-        background: #E8F5E9;
-        color: #1B5E20;
+        background: #FFF9C4;
+        color: #F57F17;
     }
 
     &.level-ma,
@@ -60,5 +61,22 @@
     &.level-postdoc {
         background: #FCE4EC;
         color: #880E4F;
+    }
+}
+
+.classification-badge {
+    &.classification-regular {
+        background: #E8F5E9;
+        color: #2E7D32;
+    }
+
+    &.classification-evening {
+        background: #E3F2FD;
+        color: #1565C0;
+    }
+
+    &.classification-weekend {
+        background: #FFF3E0;
+        color: #EF6C00;
     }
 }
