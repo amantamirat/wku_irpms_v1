@@ -9,12 +9,16 @@ export default function NoAuthGuard({ children }: { children: React.ReactNode })
     const router = useRouter();
 
     useEffect(() => {
-        if (!loading && user?.status === UserStatus.Active) {
+        if (loading) return;
+
+        if (user?.status === UserStatus.Active) {
             router.push('/');
+        } else if (user?.status === UserStatus.Pending) {
+            router.push('/auth/request-activation');
         }
     }, [loading, user, router]);
 
-    if (loading || user?.status === UserStatus.Active) {
+    if (loading || user?.status === UserStatus.Active || user?.status === UserStatus.Pending) {
         return <div>Loading...</div>;
     }
 

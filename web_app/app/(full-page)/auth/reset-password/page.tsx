@@ -1,6 +1,5 @@
 'use client';
-
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from 'primereact/button';
 import { Password } from 'primereact/password';
@@ -10,7 +9,7 @@ import { LayoutContext } from '../../../../layout/context/layoutcontext';
 import { useContext } from 'react';
 import { Messages } from 'primereact/messages';
 import { AuthService } from '@/services/AuthService';
-import { useAuth } from '@/contexts/auth-context';
+import NoAuthGuard from '@/components/NoAuthGuard';
 
 export default function ResetPassword() {
   const [progressing, setProgressing] = useState(false);
@@ -23,11 +22,7 @@ export default function ResetPassword() {
   const msgs = useRef<Messages>(null);
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
-  const { loading, logout, loggedIn } = useAuth();
 
-  if (loading) {
-    return <div>Loading ...</div>;
-  }
 
   const resetPassword = async () => {
     try {
@@ -53,20 +48,11 @@ export default function ResetPassword() {
         msgs.current?.show({ severity: 'error', summary: 'Password Mismatch', detail: 'Passwords do not match' });
         return;
       }
-
       const data = await AuthService.resetPassword(email, resetCode, password);
       if (data.success) {
-        if (!loggedIn) {
-          msgs.current?.clear();
-          msgs.current?.show({ severity: 'success', summary: 'Success!', detail: 'Your password has been reset successfully.' });
-          setTimeout(() => router.push('/auth/login'), 3000);
-        }
-        if (loggedIn) {
-          msgs.current?.clear();
-          msgs.current?.show({ severity: 'success', summary: 'Success!', detail: 'Your account has been activated successfully.' });
-          setTimeout(() => logout(), 3000);
-        }
-
+        msgs.current?.clear();
+        msgs.current?.show({ severity: 'success', summary: 'Success!', detail: 'Your password has been reset successfully.' });
+        setTimeout(() => router.push('/auth/login'), 3000);
       }
     } catch (err: any) {
       console.error(err);
@@ -85,78 +71,80 @@ export default function ResetPassword() {
 
 
   return (
-    <div className={containerClassName}>
-      <div className="flex flex-column align-items-center justify-content-center">
-        <div
-          style={{
-            borderRadius: '56px',
-            padding: '0.3rem',
-            background: 'linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)'
-          }}
-        >
-          <div className="w-full surface-card py-8 px-5 sm:px-8" style={{ borderRadius: '53px' }}>
-            <div className="text-center mb-5">
-              <img src={`/images/wku_logo.png`} alt="wku logo" className="mb-5 w-6rem flex-shrink-0" />
-              <div className="text-900 text-3xl font-medium mb-3"> {loggedIn ? 'Activate Account' : 'Reset Password'}</div>
-              <span className="text-600 font-medium">Enter the reset code and your new password</span>
-            </div>
+    <NoAuthGuard>
+      <div className={containerClassName}>
+        <div className="flex flex-column align-items-center justify-content-center">
+          <div
+            style={{
+              borderRadius: '56px',
+              padding: '0.3rem',
+              background: 'linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)'
+            }}
+          >
+            <div className="w-full surface-card py-8 px-5 sm:px-8" style={{ borderRadius: '53px' }}>
+              <div className="text-center mb-5">
+                <img src={`/images/wku_logo.png`} alt="wku logo" className="mb-5 w-6rem flex-shrink-0" />
+                <div className="text-900 text-3xl font-medium mb-3">Reset Password</div>
+                <span className="text-600 font-medium">Enter the reset code and your new password</span>
+              </div>
 
-            <div className="mb-5">
-              <label htmlFor="resetCode" className="block text-900 text-xl font-medium mb-2">
-                Reset Code
-              </label>
-              <InputText
-                id="resetCode"
-                value={resetCode}
-                onChange={(e) => setResetCode(e.target.value)}
-                placeholder="Enter the 9-digit code you received"
-                className="w-full p-3 md:w-30rem"
-              />
-            </div>
+              <div className="mb-5">
+                <label htmlFor="resetCode" className="block text-900 text-xl font-medium mb-2">
+                  Reset Code
+                </label>
+                <InputText
+                  id="resetCode"
+                  value={resetCode}
+                  onChange={(e) => setResetCode(e.target.value)}
+                  placeholder="Enter the 9-digit code you received"
+                  className="w-full p-3 md:w-30rem"
+                />
+              </div>
 
-            <div className="mb-5">
-              <label htmlFor="password" className="block text-900 text-xl font-medium mb-2">
-                New Password
-              </label>
-              <Password
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="New password"
-                toggleMask
-                className="w-full"
-                inputClassName="w-full p-3 md:w-30rem"
-              />
-            </div>
+              <div className="mb-5">
+                <label htmlFor="password" className="block text-900 text-xl font-medium mb-2">
+                  New Password
+                </label>
+                <Password
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="New password"
+                  toggleMask
+                  className="w-full"
+                  inputClassName="w-full p-3 md:w-30rem"
+                />
+              </div>
 
-            <div className="mb-5">
-              <label htmlFor="confirmPassword" className="block text-900 text-xl font-medium mb-2">
-                Confirm New Password
-              </label>
-              <Password
-                id="confirmPassword"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm new password"
-                toggleMask
-                className="w-full"
-                inputClassName="w-full p-3 md:w-30rem"
+              <div className="mb-5">
+                <label htmlFor="confirmPassword" className="block text-900 text-xl font-medium mb-2">
+                  Confirm New Password
+                </label>
+                <Password
+                  id="confirmPassword"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm new password"
+                  toggleMask
+                  className="w-full"
+                  inputClassName="w-full p-3 md:w-30rem"
+                />
+              </div>
+              <Messages ref={msgs} style={{ width: '100%', wordBreak: 'break-word' }} />
+              <Button
+                loading={progressing}
+                label={"Reset Password"}
+                className="w-full p-3 text-xl"
+                type="submit"
+                onClick={resetPassword}
               />
-            </div>
-            <Messages ref={msgs} style={{ width: '100%', wordBreak: 'break-word' }} />
-            <Button
-              loading={progressing}
-              label={loggedIn ? "Activate" : "Reset Password"}
-              className="w-full p-3 text-xl"
-              type="submit"
-              onClick={resetPassword}
-            />
-            <div className="flex flex-column align-items-center justify-content-center">
-              <Button icon="pi pi-arrow-left" label="Back to Login" text className="mt-4" onClick={() => loggedIn ? logout() : router.push('/auth/login')} />
+              <div className="flex flex-column align-items-center justify-content-center">
+                <Button icon="pi pi-arrow-left" label="Back to Login" text className="mt-4" onClick={() => router.push('/auth/login')} />
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </NoAuthGuard>
   );
 }
