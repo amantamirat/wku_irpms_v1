@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import specializationController from '../controllers/specializationController';
 const router: Router = Router();
-import { authenticateToken } from "../middleware/auth";
+import { verifyActiveAccount } from "../middleware/auth";
 
-router.post('/', authenticateToken, specializationController.createSpecialization);
-router.get('/', authenticateToken, specializationController.getAllSpecializations);
-router.put('/:id', authenticateToken, specializationController.updateSpecialization);
-router.delete('/:id', authenticateToken, specializationController.deleteSpecialization);
+router.post('/', verifyActiveAccount, specializationController.createSpecialization);
+router.get('/', verifyActiveAccount, specializationController.getAllSpecializations);
+router.put('/:id', verifyActiveAccount, specializationController.updateSpecialization);
+router.delete('/:id', verifyActiveAccount, specializationController.deleteSpecialization);
 
 export default router;

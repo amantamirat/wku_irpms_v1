@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import departmentController from '../controllers/departmentController';
 const router: Router = Router();
-import { authenticateToken } from "../middleware/auth";
+import { verifyActiveAccount } from "../middleware/auth";
 
-router.post('/', authenticateToken, departmentController.createDepartment);
-router.get('/', authenticateToken, departmentController.getAllDepartments);
-router.put('/:id', authenticateToken, departmentController.updateDepartment);
-router.delete('/:id', authenticateToken, departmentController.deleteDepartment);
+router.post('/', verifyActiveAccount, departmentController.createDepartment);
+router.get('/', verifyActiveAccount, departmentController.getAllDepartments);
+router.put('/:id', verifyActiveAccount, departmentController.updateDepartment);
+router.delete('/:id', verifyActiveAccount, departmentController.deleteDepartment);
 
 export default router;

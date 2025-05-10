@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import directorateController from '../controllers/directorateController';
 const router: Router = Router();
-import { authenticateToken } from "../middleware/auth";
+import { verifyActiveAccount } from "../middleware/auth";
 
-router.post('/', authenticateToken, directorateController.createDirectorate);
-router.get('/', authenticateToken, directorateController.getAllDirectorates);
-router.get('/:id', authenticateToken, directorateController.getDirectorateById);
-router.put('/:id', authenticateToken, directorateController.updateDirectorate);
-router.delete('/:id', authenticateToken, directorateController.deleteDirectorate);
+router.post('/', verifyActiveAccount, directorateController.createDirectorate);
+router.get('/', verifyActiveAccount, directorateController.getAllDirectorates);
+router.get('/:id', verifyActiveAccount, directorateController.getDirectorateById);
+router.put('/:id', verifyActiveAccount, directorateController.updateDirectorate);
+router.delete('/:id', verifyActiveAccount, directorateController.deleteDirectorate);
 
 export default router;

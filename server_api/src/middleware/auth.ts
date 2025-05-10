@@ -23,6 +23,28 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
     const authHeader = req.header('Authorization');
     const token = authHeader?.split(' ')[1];
     if (!token) {
+      errorResponse(res, 401, "Access denied. Token missing or invalid.");
+      return;
+    }
+
+    const decoded = jwt.verify(token, process.env.KEY as string) as JwtPayload;
+    req.user = decoded;
+    next();
+  } catch (error: any) {
+    if (error.name === 'TokenExpiredError') {
+      errorResponse(res, 401, "Session expired. Please log in again.");
+    } else {
+      errorResponse(res, 401, "Invalid token. Please log in again.", error);
+    }
+  }
+};
+
+
+export const verifyActiveAccount = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+  try {
+    const authHeader = req.header('Authorization');
+    const token = authHeader?.split(' ')[1];
+    if (!token) {
       errorResponse(res, 401, "Access denied. Token missing or invalid.", {});
       return;
     }

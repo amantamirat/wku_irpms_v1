@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import userController from '../controllers/userController';
-import { authenticateToken } from "../middleware/auth";
+import { verifyActiveAccount } from "../middleware/auth";
 
 const router: Router = Router();
 
-router.get("/", authenticateToken,userController.getUsers);
-router.post("/", authenticateToken, userController.createUser);
-router.get('/:id', authenticateToken, userController.getUserById);
-router.put("/:id", authenticateToken, userController.updateUser);
-router.delete("/:id", authenticateToken, userController.deleteUser);
+router.get("/", verifyActiveAccount,userController.getUsers);
+router.post("/", verifyActiveAccount, userController.createUser);
+router.get('/:id', verifyActiveAccount, userController.getUserById);
+router.put("/:id", verifyActiveAccount, userController.updateUser);
+router.delete("/:id", verifyActiveAccount, userController.deleteUser);
 
 export default router;
