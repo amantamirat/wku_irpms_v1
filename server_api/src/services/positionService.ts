@@ -21,7 +21,7 @@ interface SeedFileFormat {
 
 export const seedPositionRankData = async () => {
     try {
-        const filePath = path.join(__dirname, 'data', '../data/position.json');
+        const filePath = path.join(__dirname, 'data', '../../data/positions.json');
         const fileContent = await fs.readFile(filePath, 'utf-8');
         const { positions, positionRanks }: SeedFileFormat = JSON.parse(fileContent);
 
@@ -47,5 +47,6 @@ export const seedPositionRankData = async () => {
         console.log('Database seeded successfully');
     } catch (err) {
         console.error('Error seeding data:', err);
+        //throw err;
     }
 };
