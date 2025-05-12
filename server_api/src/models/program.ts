@@ -50,6 +50,6 @@ const ProgramSchema = new Schema<IProgram>({
     }
 }, { timestamps: true });
 
-ProgramSchema.index({ department: 1, program_name: 1 }, { unique: true });
+ProgramSchema.index({ department: 1, program_name: 1, classification:1 }, { unique: true });
 const Program = model<IProgram>('Program', ProgramSchema);
 export default Program;
