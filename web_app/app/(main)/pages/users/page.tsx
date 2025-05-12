@@ -219,8 +219,7 @@ const UserPage = () => {
                         />
                         <Column field="user_name" header="USER" sortable headerStyle={{ minWidth: '15rem' }}></Column>
                         <Column field="email" header="EMAIL" sortable />
-                        <Column field="status" header="STATUS" sortable body={statusBodyTemplate} />
-                        <Column field="reset_code" header="Code" sortable />
+                        <Column field="status" header="STATUS" sortable body={statusBodyTemplate} />                        
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 

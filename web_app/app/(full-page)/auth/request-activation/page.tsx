@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { AuthService } from '@/services/AuthService';
 import RequireAuth from '@/components/RequireAuth';
 
+
 export default function RequestActivationPage() {
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -18,11 +19,11 @@ export default function RequestActivationPage() {
   const handleActivate = async () => {
     try {
       setActivating(true);
-      const res = await AuthService.sendResetCode(user?.email || '');
+      const res = await AuthService.sendActivationCode();
       if (res.success) {
         msgs.current?.clear();
-        msgs.current?.show({ severity: 'success', summary: 'Almost There!', detail: 'Reset code has been sent to your email.' });
-        setTimeout(() => router.push(`/auth/reset-password?email=${encodeURIComponent(user?.email || '-')}`), 3000);
+        msgs.current?.show({ severity: 'success', summary: 'Almost There!', detail: 'Activation code has been sent to your email.' });
+        setTimeout(() => router.push(`/auth/activate-account`), 3000);
       } else {
         throw new Error(res.message || 'Activation failed.');
       }
@@ -60,13 +61,21 @@ export default function RequestActivationPage() {
               <Messages ref={msgs} />
               <Button
                 loading={activating}
+                icon="pi pi-send"
                 label="Request Activation Code"
                 className="w-full p-3 text-xl"
                 onClick={handleActivate}
                 severity="success"
+                outlined
               />
               <div className="flex flex-column align-items-center justify-content-center">
-                <Button icon="pi pi-arrow-times" label="Cancel"  className="mt-4" severity="danger" onClick={logout} />
+                <Button
+                  icon="pi pi-sign-out"
+                  label="Log out"
+                  className="mt-4"
+                  severity="danger"
+                  outlined
+                  onClick={logout} />
               </div>
             </div>
           </div>

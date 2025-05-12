@@ -1,46 +1,58 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { AuthService } from '@/services/AuthService';
 import { useRouter } from 'next/navigation';
 import { Button } from 'primereact/button';
+import { InputText } from 'primereact/inputtext';
 import { Messages } from 'primereact/messages';
+import { classNames } from 'primereact/utils';
+import { useContext, useRef, useState } from 'react';
+import { LayoutContext } from '../../../../layout/context/layoutcontext';
 import { useAuth } from '@/contexts/auth-context';
-import { AuthService } from '@/services/AuthService';
 
 export default function ActivateAccountPage() {
-  const { user, loading, logout } = useAuth();
-  const router = useRouter();
-  const msgs = useRef<Messages>(null);
   const [activating, setActivating] = useState(false);
+  const [activationCode, setActivationCode] = useState('');
+  const router = useRouter();
+  const { layoutConfig } = useContext(LayoutContext);
+  const containerClassName = classNames('surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden', { 'p-input-filled': layoutConfig.inputStyle === 'filled' });
+  const msgs = useRef<Messages>(null);
+  const { logout } = useAuth();
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/auth/login');
-    }
-  }, [user, loading, router]);
 
-  if (loading || !user) return <div>Loading...</div>;
 
-  const handleActivate = async () => {
+
+  const activateAccount = async () => {
     try {
       setActivating(true);
-      const res = await AuthService.sendResetCode(user.email);
-      if (res.success) {
+      if (!activationCode) {
         msgs.current?.clear();
-        msgs.current?.show({ severity: 'success', summary: 'Almost There!', detail: 'Reset code sent. Check your inbox.' });
-        setTimeout(() => router.push(`/auth/reset-password?email=${encodeURIComponent(user.email)}`), 3000);
-      } else {
-        throw new Error(res.message || 'Activation failed.');
+        msgs.current?.show({ severity: 'warn', summary: 'Validation', detail: 'Code is required.' });
+        return;
+      }
+      const data = await AuthService.activateAccount(activationCode);
+      if (data.success) {
+        msgs.current?.clear();
+        msgs.current?.show({ severity: 'success', summary: 'Success!', detail: 'Your account has been activated successfully.' });
+        setTimeout(() => logout(), 3000);
       }
     } catch (err: any) {
+      console.error(err);
       msgs.current?.clear();
-      msgs.current?.show({ severity: 'error', summary: 'Error', detail: err.message || 'Activation failed.' });
+      msgs.current?.show({
+        severity: 'error',
+        summary: 'Error',
+        detail: err.message || 'Activating account failed. Try again later.'
+      });
     } finally {
       setActivating(false);
     }
   };
 
+
+
+
   return (
-    <div className="surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden">
+    <div className={containerClassName}>
       <div className="flex flex-column align-items-center justify-content-center">
         <div
           style={{
@@ -49,27 +61,44 @@ export default function ActivateAccountPage() {
             background: 'linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)'
           }}
         >
-          <div className="w-full surface-card py-8 px-5 sm:px-8" style={{ borderRadius: '53px', maxWidth: '600px' }}>
+          <div className="w-full surface-card py-8 px-5 sm:px-8" style={{ borderRadius: '53px' }}>
             <div className="text-center mb-5">
-              <img src="/images/wku_logo.png" alt="wku logo" className="mb-5 w-6rem" />
-              <div className="text-900 text-3xl font-medium mb-3">Account Activation Required</div>
-              <p className="text-600 font-medium">
-                Your account is currently not activated. To access all features, please click the <strong>Send Activation Code</strong> button below.
-              </p>
+              <img src={`/images/wku_logo.png`} alt="wku logo" className="mb-5 w-6rem flex-shrink-0" />
+              <div className="text-900 text-3xl font-medium mb-3">Account Activation</div>
+              <span className="text-600 font-medium">Enter the activation code and your new password</span>
             </div>
-            <div className="mb-4 text-center">
-              <div className="text-xl"><strong>Username:</strong> {user.user_name}</div>
-              <div className="text-xl mt-2"><strong>Email:</strong> {user.email}</div>
+
+            <div className="mb-5">
+              <label htmlFor="resetCode" className="block text-900 text-xl font-medium mb-2">
+                Activation Code
+              </label>
+              <InputText
+                id="resetCode"
+                value={activationCode}
+                onChange={(e) => setActivationCode(e.target.value)}
+                placeholder="Enter the 9-digit code you received"
+                className="w-full p-3 md:w-30rem"
+              />
             </div>
-            <Messages ref={msgs} />
+
+            <Messages ref={msgs} style={{ width: '100%', wordBreak: 'break-word' }} />
             <Button
               loading={activating}
-              label="Send Activation Code"
+              label={"Activate Account"}
               className="w-full p-3 text-xl"
-              onClick={handleActivate}
+              type="submit"
+              onClick={activateAccount}
+              severity="success"
+              outlined
             />
             <div className="flex flex-column align-items-center justify-content-center">
-              <Button icon="pi pi-arrow-left" label="Back to Login" text className="mt-4" onClick={logout} />
+              <Button
+                icon="pi pi-sign-out"
+                label="Log out"
+                className="mt-4"
+                severity="danger"
+                outlined
+                onClick={logout} />
             </div>
           </div>
         </div>
@@ -77,3 +106,5 @@ export default function ActivateAccountPage() {
     </div>
   );
 }
+
+

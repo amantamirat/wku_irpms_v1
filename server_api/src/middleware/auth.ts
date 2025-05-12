@@ -14,7 +14,7 @@ export interface JwtPayload {
   exp?: number;
 }
 
-interface AuthenticatedRequest extends Request {
+export interface AuthenticatedRequest extends Request {
   user?: JwtPayload;
 }
 
@@ -26,7 +26,6 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
       errorResponse(res, 401, "Access denied. Token missing or invalid.");
       return;
     }
-
     const decoded = jwt.verify(token, process.env.KEY as string) as JwtPayload;
     req.user = decoded;
     next();
