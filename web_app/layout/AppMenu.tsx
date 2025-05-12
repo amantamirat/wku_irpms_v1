@@ -20,6 +20,11 @@ const AppMenu = () => {
             label: 'Manage',
             items: [
                 {
+                    label: 'Calendars',
+                    icon: PrimeIcons.CALENDAR,
+                    to: '/pages/calendars'
+                },
+                {
                     label: 'Colleges',
                     icon: PrimeIcons.BUILDING,
                     to: '/pages/colleges'

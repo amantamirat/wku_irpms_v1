@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import academicCalendarController from '../controllers/academicController';
+import calendarController from '../controllers/calendarController';
 import { verifyActiveAccount } from '../middleware/auth';
 
 const router: Router = Router();
 
-router.post('/', verifyActiveAccount, academicCalendarController.createAcademicCalendar);
-router.get('/', verifyActiveAccount, academicCalendarController.getAllAcademicCalendars);
-router.put('/:id', verifyActiveAccount, academicCalendarController.updateAcademicCalendar);
-router.delete('/:id', verifyActiveAccount, academicCalendarController.deleteAcademicCalendar);
+router.post('/', verifyActiveAccount, calendarController.createCalendar);
+router.get('/', verifyActiveAccount, calendarController.getAllCalendars);
+router.put('/:id', verifyActiveAccount, calendarController.updateCalendar);
+router.delete('/:id', verifyActiveAccount, calendarController.deleteCalendar);
 
 export default router;

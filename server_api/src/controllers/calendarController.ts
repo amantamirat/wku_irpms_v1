@@ -4,7 +4,7 @@ import { successResponse, errorResponse } from '../util/response';
 
 
 
-const createAcademicCalendar = async (req: Request, res: Response): Promise<void> => {
+const createCalendar = async (req: Request, res: Response): Promise<void> => {
   try {
     const { year, start_date, end_date, status } = req.body;
 
@@ -27,7 +27,7 @@ const createAcademicCalendar = async (req: Request, res: Response): Promise<void
 };
 
 
-const getAllAcademicCalendars = async (_req: Request, res: Response): Promise<void> => {
+const getAllCalendars = async (_req: Request, res: Response): Promise<void> => {
   try {
     const calendars = await Calendar.find().sort({ year: -1 });
     successResponse(res, 200, 'Academic calendars fetched successfully', calendars);
@@ -37,7 +37,7 @@ const getAllAcademicCalendars = async (_req: Request, res: Response): Promise<vo
 };
 
 
-const updateAcademicCalendar = async (req: Request, res: Response): Promise<void> => {
+const updateCalendar = async (req: Request, res: Response): Promise<void> => {
   try {
     const { year, start_date, end_date, status } = req.body;
 
@@ -68,7 +68,7 @@ const updateAcademicCalendar = async (req: Request, res: Response): Promise<void
 };
 
 
-const deleteAcademicCalendar = async (req: Request, res: Response): Promise<void> => {
+const deleteCalendar = async (req: Request, res: Response): Promise<void> => {
   try {
     const deletedCalendar = await Calendar.findByIdAndDelete(req.params.id);
     if (!deletedCalendar) {
@@ -81,11 +81,11 @@ const deleteAcademicCalendar = async (req: Request, res: Response): Promise<void
   }
 };
 
-const academicCalendarController = {
-  createAcademicCalendar,
-  getAllAcademicCalendars,
-  updateAcademicCalendar,
-  deleteAcademicCalendar,
+const calendarController = {
+  createCalendar,
+  getAllCalendars,
+  updateCalendar,
+  deleteCalendar,
 };
 
-export default academicCalendarController;
+export default calendarController;

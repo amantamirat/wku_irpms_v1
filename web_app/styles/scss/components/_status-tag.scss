@@ -1,6 +1,7 @@
 .user-badge,
 .academic-badge,
 .classification-badge,
+.calendar-badge,
 .theme-badge {
     border-radius: var(--border-radius);
     padding: .25em .5rem;
@@ -78,5 +79,17 @@
     &.classification-weekend {
         background: #FFF3E0;
         color: #EF6C00;
+    }
+}
+
+.calendar-badge {
+    &.status-active {
+        background: #C8E6C9;
+        color: #256029;
+    }
+
+    &.status-closed {
+        background: #FFCDD2;
+        color: #C63737;
     }
 }
