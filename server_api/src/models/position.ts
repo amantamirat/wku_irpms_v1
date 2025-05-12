@@ -17,7 +17,11 @@ const PositionSchema = new Schema<IPosition>({
         enum: Object.values(Category),
         required: true
     },
-    title: { type: String, required: true }
+    title: {
+        type: String,
+        unique: true,
+        required: true
+    }
 }, {
     timestamps: true
 });

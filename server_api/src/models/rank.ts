@@ -15,6 +15,7 @@ const RankSchema = new Schema<IRank>({
     },
     rank: {
         type: String,
+        unique: true,
         required: true
     }
 }, {
