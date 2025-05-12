@@ -230,21 +230,21 @@ const ProgramComp = (props: ProgramCompProps) => {
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
-                    <SaveDialog
-                        visible={showSaveDialog}
-                        program={selectedProgram}
-                        setProgram={setSelectedProgram}
-                        onSave={saveProgram}
-                        onHide={hideSaveDialog}
-                    />
-
-                    <DeleteDialog
-                        showDeleteDialog={showDeleteDialog}
-                        selectedDataInfo={selectedProgram.program_name}
-                        onDelete={deleteProgram}
-                        onHide={() => setShowDeleteDialog(false)}
-                    />
-
+                    {selectedProgram &&
+                        <SaveDialog
+                            visible={showSaveDialog}
+                            program={selectedProgram}
+                            setProgram={setSelectedProgram}
+                            onSave={saveProgram}
+                            onHide={hideSaveDialog}
+                        />}
+                    {selectedProgram &&
+                        <DeleteDialog
+                            showDeleteDialog={showDeleteDialog}
+                            selectedDataInfo={selectedProgram.program_name}
+                            onDelete={deleteProgram}
+                            onHide={() => setShowDeleteDialog(false)}
+                        />}
                 </div>
             </div>
         </div>

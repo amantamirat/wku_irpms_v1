@@ -219,21 +219,22 @@ const SpecializationPage = () => {
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
-                    <SaveDialog
-                        visible={showSaveDialog}
-                        specialization={selectedSpecialization}
-                        setSpecialization={setSelectedSpecialization}
-                        onSave={saveSpecialization}
-                        onHide={hideSaveDialog}
-                    />
+                    {selectedSpecialization &&
+                        <SaveDialog
+                            visible={showSaveDialog}
+                            specialization={selectedSpecialization}
+                            setSpecialization={setSelectedSpecialization}
+                            onSave={saveSpecialization}
+                            onHide={hideSaveDialog}
+                        />}
 
-                    <DeleteDialog
-                        showDeleteDialog={showDeleteDialog}
-                        selectedDataInfo={selectedSpecialization.specialization_name}
-                        onDelete={deleteSpecialization}
-                        onHide={() => setShowDeleteDialog(false)}
-                    />
-
+                    {selectedSpecialization &&
+                        <DeleteDialog
+                            showDeleteDialog={showDeleteDialog}
+                            selectedDataInfo={selectedSpecialization.specialization_name}
+                            onDelete={deleteSpecialization}
+                            onHide={() => setShowDeleteDialog(false)}
+                        />}
                 </div>
             </div>
         </div>

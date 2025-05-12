@@ -207,20 +207,21 @@ const DirectoratePage = () => {
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
-                    <SaveDialog
-                        visible={showSaveDialog}
-                        directorate={selectedDirectorate}
-                        onChange={setSelectedDirectorate}
-                        onSave={saveDirectorate}
-                        onHide={hideSaveDialog}
-                    />
-
-                    <DeleteDialog
-                        showDeleteDialog={showDeleteDialog}
-                        selectedDataInfo={selectedDirectorate.directorate_name}
-                        onDelete={deleteDirectorate}
-                        onHide={() => setShowDeleteDialog(false)}
-                    />
+                    {selectedDirectorate &&
+                        <SaveDialog
+                            visible={showSaveDialog}
+                            directorate={selectedDirectorate}
+                            onChange={setSelectedDirectorate}
+                            onSave={saveDirectorate}
+                            onHide={hideSaveDialog}
+                        />}
+                    {selectedDirectorate &&
+                        <DeleteDialog
+                            showDeleteDialog={showDeleteDialog}
+                            selectedDataInfo={selectedDirectorate.directorate_name}
+                            onDelete={deleteDirectorate}
+                            onHide={() => setShowDeleteDialog(false)}
+                        />}
 
                 </div>
             </div>
