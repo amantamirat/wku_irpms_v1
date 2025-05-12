@@ -103,8 +103,7 @@ export const sendCode = async (email: string, reset: boolean): Promise<void> => 
                 ${code}
             </div>
             <p style="font-size: 14px; color: #666;">If you did not request this, you can safely ignore this email.</p>
-        </div>
-    `,
+        </div>`,
         };
         
         user.reset_code = code;
