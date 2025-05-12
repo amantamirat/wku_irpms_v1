@@ -1,9 +1,9 @@
 import { Document, Types } from 'mongoose';
 
 export interface IStudent extends Document {
-  applicant: Types.ObjectId;
   academic_calendar: Types.ObjectId;
   program: Types.ObjectId;
+  applicant: Types.ObjectId;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -11,11 +11,6 @@ export interface IStudent extends Document {
 import mongoose, { Schema } from 'mongoose';
 
 const StudentSchema = new Schema<IStudent>({
-  applicant: {
-    type: Schema.Types.ObjectId,
-    ref: 'Applicant',
-    required: true
-  },
   academic_calendar: {
     type: Schema.Types.ObjectId,
     ref: 'AcademicCalendar',
@@ -24,6 +19,11 @@ const StudentSchema = new Schema<IStudent>({
   program: {
     type: Schema.Types.ObjectId,
     ref: 'Program',
+    required: true
+  },
+  applicant: {
+    type: Schema.Types.ObjectId,
+    ref: 'Applicant',
     required: true
   }
 }, {

@@ -2,22 +2,22 @@ import mongoose, { Schema } from "mongoose";
 
 export enum Category {
     academic = 'academic',
-    administrative = 'administrative',
+    supportive = 'supportive',
 }
 export interface IPosition extends Document {
-    position_type: Category;
+    category: Category;
     title: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
 const PositionSchema = new Schema<IPosition>({
-    title: { type: String, required: true },
-    position_type: {
+    category: {
         type: String,
         enum: Object.values(Category),
         required: true
-    }
+    },
+    title: { type: String, required: true }
 }, {
     timestamps: true
 });

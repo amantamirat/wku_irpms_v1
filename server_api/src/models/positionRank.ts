@@ -1,19 +1,19 @@
 import mongoose, { Document, Types, Schema } from 'mongoose';
 
-export interface IPositionStatus extends Document {
+export interface IPositionRank extends Document {
     position: Types.ObjectId;
-    title: string;
+    rank: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
-const PositionStatusSchema = new Schema<IPositionStatus>({
+const PositionRankSchema = new Schema<IPositionRank>({
     position: {
         type: Schema.Types.ObjectId,
         ref: 'Position',
         required: true
     },
-    title: {
+    rank: {
         type: String,
         required: true
     }
@@ -21,7 +21,7 @@ const PositionStatusSchema = new Schema<IPositionStatus>({
     timestamps: true
 });
 
-const PositionStatus = mongoose.model<IPositionStatus>('PositionStatus', PositionStatusSchema);
+const PositionStatus = mongoose.model<IPositionRank>('PositionRank', PositionRankSchema);
 
 export default PositionStatus;
 
