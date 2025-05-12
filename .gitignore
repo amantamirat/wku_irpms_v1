@@ -1,5 +1,6 @@
 server_api/node_modules/
 server_api/uploads/
+server_api/dist/
 web_app/node_modules/
 web_app/.next/
 .env
