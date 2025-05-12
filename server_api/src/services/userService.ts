@@ -109,7 +109,6 @@ export const sendCode = async (email: string, reset: boolean): Promise<void> => 
         
         user.reset_code = code;
         user.reset_code_expires = expiry;
-        await user.save();
 
         await new Promise<void>((resolve, reject) => {
             transporter.sendMail(myOptions, (error, info) => {
@@ -121,6 +120,8 @@ export const sendCode = async (email: string, reset: boolean): Promise<void> => 
                 resolve();
             });
         });
+
+        await user.save();
     } catch (error) {
         console.error("Error in emailCode:", error);
         throw error;
