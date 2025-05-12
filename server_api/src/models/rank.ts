@@ -1,13 +1,13 @@
 import mongoose, { Document, Types, Schema } from 'mongoose';
 
-export interface IPositionRank extends Document {
+export interface IRank extends Document {
     position: Types.ObjectId;
     rank: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
-const PositionRankSchema = new Schema<IPositionRank>({
+const RankSchema = new Schema<IRank>({
     position: {
         type: Schema.Types.ObjectId,
         ref: 'Position',
@@ -21,7 +21,7 @@ const PositionRankSchema = new Schema<IPositionRank>({
     timestamps: true
 });
 
-const PositionStatus = mongoose.model<IPositionRank>('PositionRank', PositionRankSchema);
+const Rank = mongoose.model<IRank>('Rank', RankSchema);
 
-export default PositionStatus;
+export default Rank;
 

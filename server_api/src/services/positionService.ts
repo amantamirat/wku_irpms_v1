@@ -1,27 +1,27 @@
 import fs from 'fs/promises';
 import path from 'path';
 import mongoose from 'mongoose';
-import Position from '../models/position';
-import PositionRank from '../models/positionRank';
+import Position, { Category } from '../models/position';
+import PositionRank from '../models/rank';
 
-interface PositionDTO {
-    category: 'academic' | 'supportive';
+interface PositionData {
+    category: Category;
     title: string;
 }
 
-interface RankDTO {
+interface RankData {
     positionTitle: string;
     ranks: string[];
 }
 
 interface SeedFileFormat {
-    positions: PositionDTO[];
-    positionRanks: RankDTO[];
+    positions: PositionData[];
+    positionRanks: RankData[];
 }
 
 const seedData = async () => {
     try {
-        const filePath = path.join(__dirname, 'data', 'positions.json');
+        const filePath = path.join(__dirname, 'data', '../data/position.json');
         const fileContent = await fs.readFile(filePath, 'utf-8');
         const { positions, positionRanks }: SeedFileFormat = JSON.parse(fileContent);
 

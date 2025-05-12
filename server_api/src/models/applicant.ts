@@ -13,9 +13,12 @@ export interface IApplicant extends Document {
     gender: Gender;
     department?: mongoose.Types.ObjectId;
     position?: mongoose.Types.ObjectId;
-    positionRank?: mongoose.Types.ObjectId;
+    rank?: mongoose.Types.ObjectId;
     hire_date?: Date;
-    is_external: boolean;
+    institute?: mongoose.Types.ObjectId;
+    is_external?: boolean;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 const ApplicantSchema = new Schema<IApplicant>({
@@ -47,18 +50,22 @@ const ApplicantSchema = new Schema<IApplicant>({
         type: Schema.Types.ObjectId,
         ref: 'Position',
     },
-    positionRank: {
+    rank: {
         type: Schema.Types.ObjectId,
-        ref: 'PositionRank',
+        ref: 'Rank',
     },
     hire_date: {
         type: Date,
+    },
+    institute: {
+        type: Schema.Types.ObjectId,
+        ref: 'Institute',
     },
     is_external: {
         type: Boolean,
         default: false
     }
-});
+}, { timestamps: true });
 
 const Applicant = model<IApplicant>('Applicant', ApplicantSchema);
 export default Applicant;
