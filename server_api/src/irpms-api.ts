@@ -9,6 +9,7 @@ import departmentRoutes from './routes/departmentRoutes';
 import programRoutes from './routes/programRoutes';
 import specializationRoutes from './routes/specializationRoutes';
 import directorateRoutes from './routes/directorateRoutes';
+import calendarRoutes from './routes/calendarRoutes';
 import { initAdminUser } from './services/userService';
 import { seedPositionRankData } from './services/positionService';
 
@@ -28,6 +29,7 @@ app.use("/api/departments", departmentRoutes);
 app.use("/api/specializations", specializationRoutes);
 app.use("/api/programs", programRoutes);
 app.use("/api/directorates", directorateRoutes);
+app.use("/api/calendars", calendarRoutes);
 
 const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.SERVER_PORT || 5000;
