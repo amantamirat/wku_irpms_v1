@@ -19,7 +19,7 @@ interface SeedFileFormat {
     positionRanks: RankData[];
 }
 
-const seedData = async () => {
+export const seedPositionRankData = async () => {
     try {
         const filePath = path.join(__dirname, 'data', '../data/position.json');
         const fileContent = await fs.readFile(filePath, 'utf-8');

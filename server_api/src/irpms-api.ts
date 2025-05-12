@@ -10,6 +10,7 @@ import programRoutes from './routes/programRoutes';
 import specializationRoutes from './routes/specializationRoutes';
 import directorateRoutes from './routes/directorateRoutes';
 import { initAdminUser } from './services/userService';
+import { seedPositionRankData } from './services/positionService';
 
 
 
@@ -39,6 +40,7 @@ const PORT = process.env.SERVER_PORT || 5000;
     await mongoose.connect(MONGO_URL);
     console.log('database connection established');
     await initAdminUser();
+    await seedPositionRankData();
     app.listen(PORT, () => {
       console.log(`Server API is running at http://127.0.0.1:${PORT}`);
     });
