@@ -1,5 +1,4 @@
 /* eslint-disable @next/next/no-img-element */
-
 import React, { useContext } from 'react';
 import AppMenuitem from './AppMenuitem';
 import { LayoutContext } from './context/layoutcontext';
@@ -36,17 +35,39 @@ const AppMenu = () => {
                 },
                 {
                     label: 'Specializations',
-                    icon: PrimeIcons.BOOK,
+                    icon: PrimeIcons.FILTER,
                     to: '/pages/specializations'
                 },
                 {
+                    label: 'Applicants',
+                    icon: PrimeIcons.GLOBE,
+                    items: [
+                        {
+                            label: 'Academic',
+                            icon: PrimeIcons.USERS,
+                        },
+                        {
+                            label: 'Supportive',
+                            icon: 'pi pi-fw pi-bullseye',
+                        },
+                        {
+                            label: 'Students',
+                            icon: 'pi pi-fw pi-graduation-cap',
+                        },
+                        {
+                            label: 'External',
+                            icon: 'pi pi-fw pi-mars',
+                        }
+                    ]
+                },
+                {
                     label: 'Directorates',
-                    icon: 'pi pi-arrows-alt',
+                    icon: 'pi pi-sitemap',
                     to: '/pages/directorates'
                 },
                 {
                     label: 'Users',
-                    icon: PrimeIcons.USERS,
+                    icon: PrimeIcons.USER,
                     to: '/pages/users'
                 }
             ]
