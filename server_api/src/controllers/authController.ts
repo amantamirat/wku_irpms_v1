@@ -16,7 +16,6 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
             errorResponse(res, 401, "Invalid credentials.");
             return;
         }
-
         if (user.status === UserStatus.Suspended) {
             errorResponse(res, 401, "Suspended credentials.");
             return;
@@ -26,13 +25,11 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
             errorResponse(res, 401, "Invalid credentials.");
             return;
         }
-
         const payload: JwtPayload = {
             email: user.email,
             user_name: user.user_name,
             status: user.status
         };
-
         const token = jwt.sign(payload, process.env.KEY as string, { expiresIn: '2h' });
         console.log("user:", user.user_name, " logged in.");
         successResponse(res, 201, 'Logged in successfully', {
@@ -99,33 +96,27 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
 export const activateAccount = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
         const { activationCode } = req.body;
-
         const user = await User.findOne({ email: req.user?.email });
         if (!user) {
             errorResponse(res, 401, "User not found.");
             return;
         }
-
         if (user.status !== UserStatus.Pending) {
             errorResponse(res, 400, "Account is already active or suspended.");
             return;
         }
-
         if (!user.reset_code || user.reset_code !== activationCode) {
             errorResponse(res, 401, "Incorrect activation code.");
             return;
         }
-
         if (!user.reset_code_expires || user.reset_code_expires < new Date()) {
             errorResponse(res, 401, "Activation code has expired.");
             return;
         }
-
         user.status = UserStatus.Active;
         user.reset_code = undefined;
         user.reset_code_expires = undefined;
         await user.save();
-
         successResponse(res, 200, "Account activated successfully.", { success: true });
     } catch (error) {
         console.error(error);

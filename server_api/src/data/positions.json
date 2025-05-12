@@ -1,0 +1,22 @@
+{
+  "positions": [
+    {
+      "category": "academic",
+      "title": "Instructor"
+    },
+    {
+      "category": "supportive",
+      "title": "Lab Technician"
+    }
+  ],
+  "positionRanks": [
+    {
+      "positionTitle": "Instructor",
+      "ranks": ["Graduate Assistant I (GAI)", "Graduate Assistant II (GAII)", "Assistant Lecturer", "Lecturer", "Assistant Professor", "Associate Professor", "Professor"]
+    },
+    {
+      "positionTitle": "Lab Technician",
+      "ranks": ["Junior Lab Technician", "Lab Technician", "Senior Lab Technician", "Chief Lab Technician"]
+    }
+  ]
+}
