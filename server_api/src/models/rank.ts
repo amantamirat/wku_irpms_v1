@@ -2,7 +2,7 @@ import mongoose, { Document, Types, Schema } from 'mongoose';
 
 export interface IRank extends Document {
     position: Types.ObjectId;
-    rank: string;
+    rank_title: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -13,7 +13,7 @@ const RankSchema = new Schema<IRank>({
         ref: 'Position',
         required: true
     },
-    rank: {
+    rank_title: {
         type: String,
         unique: true,
         required: true

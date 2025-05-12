@@ -1,0 +1,9 @@
+[
+  { "sector_name": "Research" },
+  { "sector_name": "Educational" },
+  { "sector_name": "Medical" },
+  { "sector_name": "Agricultural" },
+  { "sector_name": "Technical" },
+  { "sector_name": "Communication" },
+  { "sector_name": "Finance" }
+]

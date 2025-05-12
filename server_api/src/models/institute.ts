@@ -1,19 +1,9 @@
-import { model, Schema } from "mongoose";
+import mongoose, { model, Schema } from "mongoose";
 
 export enum Ownership {
     public = 'public',
     private = 'private',
     NGO = 'NGO'
-}
-export enum Sector {
-    Research = 'Research',
-    Educational = 'Educational',
-    Medical = 'Medical',
-    Agricultural = 'Agricultural',
-    Technical = 'Technical',
-    Communication = 'Communication',
-    Finance = 'Finance',
-    Other = 'Other'
 }
 
 export interface IInstitute extends Document {
@@ -25,7 +15,7 @@ export interface IInstitute extends Document {
         country?: string;
         postal_code?: string;
     };
-    sector: Sector;
+    sector: mongoose.Types.ObjectId;
     ownership_type: Ownership
     createdAt?: Date;
     updatedAt?: Date;
@@ -46,10 +36,10 @@ const InstituteSchema = new Schema<IInstitute>({
         required: true
     },
     sector: {
-        type: String,
-        enum: Object.values(Sector),
+        type: Schema.Types.ObjectId,
+        ref: 'Sector',
         required: true
-    }
+    },
 }, {
     timestamps: true
 });

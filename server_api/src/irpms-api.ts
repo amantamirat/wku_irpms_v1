@@ -11,7 +11,7 @@ import specializationRoutes from './routes/specializationRoutes';
 import directorateRoutes from './routes/directorateRoutes';
 import calendarRoutes from './routes/calendarRoutes';
 import { initAdminUser } from './services/userService';
-import { seedPositionRankData } from './services/positionService';
+import { seedPositionRankData, seedSectorData } from './services/seedService';
 
 
 
@@ -43,6 +43,7 @@ const PORT = process.env.SERVER_PORT || 5000;
     console.log('database connection established');
     await initAdminUser();
     await seedPositionRankData();
+    await seedSectorData();
     app.listen(PORT, () => {
       console.log(`Server API is running at http://127.0.0.1:${PORT}`);
     });

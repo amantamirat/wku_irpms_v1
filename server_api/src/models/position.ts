@@ -6,7 +6,7 @@ export enum Category {
 }
 export interface IPosition extends Document {
     category: Category;
-    title: string;
+    position_title: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -17,7 +17,7 @@ const PositionSchema = new Schema<IPosition>({
         enum: Object.values(Category),
         required: true
     },
-    title: {
+    position_title: {
         type: String,
         unique: true,
         required: true

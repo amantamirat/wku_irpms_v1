@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
-import mongoose from 'mongoose';
+import Sector from '../models/sector';
 import Position, { Category } from '../models/position';
 import PositionRank from '../models/rank';
 
@@ -43,8 +43,29 @@ export const seedPositionRankData = async () => {
                 await PositionRank.insertMany(ranksToInsert);
             }
         }
+        console.log('Position Data seeded successfully');
+    } catch (err) {
+        console.error('Error seeding data:', err);
+        //throw err;
+    }
+};
 
-        console.log('Database seeded successfully');
+interface SectorData {
+    sector_name: string;
+}
+
+export const seedSectorData = async () => {
+    try {
+        const filePath = path.join(process.cwd(), 'data', 'sectors.json');
+        const fileContent = await fs.readFile(filePath, 'utf-8');
+        const sectors: SectorData[] = JSON.parse(fileContent);
+        const existing = await Sector.find({});
+        if (existing.length > 0) {
+            console.log('Sectors already exist. Skipping seed.');
+            return;
+        }
+        const savedPositions = await Sector.insertMany(sectors);
+        console.log('Sector data seeded successfully');
     } catch (err) {
         console.error('Error seeding data:', err);
         //throw err;
