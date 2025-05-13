@@ -6,6 +6,7 @@ import { MenuProvider } from './context/menucontext';
 import Link from 'next/link';
 import { AppMenuItem } from '@/types';
 import { PrimeIcons } from 'primereact/api';
+import { Category } from '@/models/position';
 
 const AppMenu = () => {
     const { layoutConfig } = useContext(LayoutContext);
@@ -44,20 +45,22 @@ const AppMenu = () => {
                     items: [
                         {
                             label: 'Academic',
-                            icon: PrimeIcons.USERS,
-                            to: '/pages/applicants'
+                            icon: 'pi pi-fw pi-crown',
+                            to: `/pages/applicants?category=${encodeURIComponent(Category.academic)}`
                         },
                         {
                             label: 'Supportive',
                             icon: 'pi pi-fw pi-bullseye',
-                        },
-                        {
-                            label: 'Students',
-                            icon: 'pi pi-fw pi-graduation-cap',
+                            to: `/pages/applicants?category=${encodeURIComponent(Category.supportive)}`
                         },
                         {
                             label: 'External',
                             icon: 'pi pi-fw pi-mars',
+                            to: `/pages/applicants?is_external=${encodeURIComponent(true)}`
+                        },
+                        {
+                            label: 'Students',
+                            icon: 'pi pi-fw pi-graduation-cap',
                         }
                     ]
                 },
@@ -68,7 +71,7 @@ const AppMenu = () => {
                 },
                 {
                     label: 'Users',
-                    icon: PrimeIcons.USER,
+                    icon: PrimeIcons.USERS,
                     to: '/pages/users'
                 }
             ]

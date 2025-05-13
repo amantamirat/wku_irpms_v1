@@ -12,15 +12,27 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Category } from '@/models/position';
 
 const ApplicantPage = () => {
+
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const isExternalParam = searchParams.get('is_external');
+    const categoryParam = searchParams.get('category');
+    const isExternal: boolean = isExternalParam === 'true';
+    const category = categoryParam as Category | null;
+    const validCategories = Object.values(Category);
+
     const emptyApplicant: Applicant = {
         first_name: '',
         last_name: '',
         birth_date: new Date(),
-        gender: Gender.Male
-    };
+        gender: Gender.Male,
+        is_external: isExternal,
 
+    };
     const [applicants, setApplicants] = useState<Applicant[]>([]);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
@@ -29,6 +41,14 @@ const ApplicantPage = () => {
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
+
+
+    useEffect(() => {
+        const categoryIsValid = !isExternal || (category && validCategories.includes(category));
+        if (!categoryIsValid) {
+            router.push('/');
+        }
+    }, [isExternal, category, router]);
 
     useEffect(() => {
         setFilters(initFilters());
@@ -121,9 +141,22 @@ const ApplicantPage = () => {
         </div>
     );
 
+    const getHeading = () => {
+        if (isExternal) return 'External Applicants';
+
+        switch (category) {
+            case Category.academic:
+                return 'Academic Applicants';
+            case Category.supportive:
+                return 'Supportive Applicants';
+            default:
+                return 'Applicants';
+        }
+    };
+
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage Applicants</h5>
+            <h5 className="m-0">Manage {getHeading()}</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
@@ -167,7 +200,7 @@ const ApplicantPage = () => {
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} applicants"
                         globalFilter={globalFilter}
-                        emptyMessage="No applicant data found."
+                        emptyMessage={`No ${getHeading()} data found.`}
                         header={header}
                         scrollable
                         filters={filters}
