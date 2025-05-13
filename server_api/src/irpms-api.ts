@@ -12,6 +12,7 @@ import directorateRoutes from './routes/directorateRoutes';
 import calendarRoutes from './routes/calendarRoutes';
 import positionRoutes from './routes/positionRoutes';
 import rankRoutes from './routes/rankRoutes';
+import applicantRoutes from './routes/applicantRoutes';
 import { initAdminUser } from './services/userService';
 import { seedPositionRankData, seedSectorData } from './services/seedService';
 
@@ -34,6 +35,8 @@ app.use("/api/directorates", directorateRoutes);
 app.use("/api/calendars", calendarRoutes);
 app.use("/api/positions", positionRoutes);
 app.use("/api/ranks", rankRoutes);
+app.use("/api/applicants", applicantRoutes);
+
 
 const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.SERVER_PORT || 5000;
