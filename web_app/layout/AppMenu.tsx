@@ -45,6 +45,7 @@ const AppMenu = () => {
                         {
                             label: 'Academic',
                             icon: PrimeIcons.USERS,
+                            to: '/pages/applicants'
                         },
                         {
                             label: 'Supportive',

@@ -3,7 +3,6 @@ import { MyService } from "./MyService";
 
 const end_point = '/applicants/';
 
-
 export const ApplicantService = {
 
     async getApplicants(): Promise<Applicant[]> {
