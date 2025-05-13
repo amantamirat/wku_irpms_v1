@@ -46,17 +46,17 @@ const AppMenu = () => {
                         {
                             label: 'Academic',
                             icon: 'pi pi-fw pi-crown',
-                            to: `/pages/applicants?category=${encodeURIComponent(Category.academic)}`
+                            to: '/pages/applicants?type=2'
                         },
                         {
                             label: 'Supportive',
                             icon: 'pi pi-fw pi-bullseye',
-                            to: `/pages/applicants?category=${encodeURIComponent(Category.supportive)}`
+                            to: '/pages/applicants?type=3'
                         },
                         {
                             label: 'External',
                             icon: 'pi pi-fw pi-mars',
-                            to: `/pages/applicants?is_external=${encodeURIComponent(true)}`
+                            to: '/pages/applicants?type=1'
                         },
                         {
                             label: 'Students',

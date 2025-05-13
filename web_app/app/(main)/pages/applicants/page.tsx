@@ -19,11 +19,24 @@ const ApplicantPage = () => {
 
     const router = useRouter();
     const searchParams = useSearchParams();
-    const isExternalParam = searchParams.get('is_external');
-    const categoryParam = searchParams.get('category');
-    const isExternal: boolean = isExternalParam === 'true';
-    const category = categoryParam as Category | null;
-    const validCategories = Object.values(Category);
+    const typeParam = searchParams.get('type');
+    const type = typeParam ? parseInt(typeParam, 10) : NaN;
+    
+    const isExternal = type === 1 ? true : type === 2 || type === 3 ? false : undefined;
+    const category =
+        type === 2 ? Category.academic :
+            type === 3 ? Category.supportive :
+                undefined;
+
+    const isValid = (isExternal === true) || (isExternal === false && category !== undefined);
+
+    useEffect(() => {
+        if (!isValid) {
+            router.push('/');
+        }
+    }, [isValid, router]);
+
+    if (!isValid) return null;
 
     const emptyApplicant: Applicant = {
         first_name: '',
@@ -41,14 +54,6 @@ const ApplicantPage = () => {
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
-
-
-    useEffect(() => {
-        const categoryIsValid = !isExternal || (category && validCategories.includes(category));
-        if (!categoryIsValid) {
-            router.push('/');
-        }
-    }, [isExternal, category, router]);
 
     useEffect(() => {
         setFilters(initFilters());
