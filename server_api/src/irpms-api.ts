@@ -10,6 +10,8 @@ import programRoutes from './routes/programRoutes';
 import specializationRoutes from './routes/specializationRoutes';
 import directorateRoutes from './routes/directorateRoutes';
 import calendarRoutes from './routes/calendarRoutes';
+import positionRoutes from './routes/positionRoutes';
+import rankRoutes from './routes/rankRoutes';
 import { initAdminUser } from './services/userService';
 import { seedPositionRankData, seedSectorData } from './services/seedService';
 
@@ -30,6 +32,8 @@ app.use("/api/specializations", specializationRoutes);
 app.use("/api/programs", programRoutes);
 app.use("/api/directorates", directorateRoutes);
 app.use("/api/calendars", calendarRoutes);
+app.use("/api/positions", positionRoutes);
+app.use("/api/ranks", rankRoutes);
 
 const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.SERVER_PORT || 5000;
