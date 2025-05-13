@@ -15,8 +15,7 @@ const createApplicant = async (req: Request, res: Response): Promise<void> => {
       position,
       rank,
       hire_date,
-      institute,
-      is_external,
+      institute
     } = req.body;
 
     const applicant = new Applicant({
@@ -29,8 +28,7 @@ const createApplicant = async (req: Request, res: Response): Promise<void> => {
       position,
       rank,
       hire_date,
-      institute,
-      is_external,
+      institute
     });
 
     await applicant.save();
@@ -69,7 +67,6 @@ const updateApplicant = async (req: Request, res: Response): Promise<void> => {
       rank,
       hire_date,
       institute,
-      is_external,
     } = req.body;
 
     const updatedApplicant = await Applicant.findByIdAndUpdate(
@@ -84,8 +81,7 @@ const updateApplicant = async (req: Request, res: Response): Promise<void> => {
         position,
         rank,
         hire_date,
-        institute,
-        is_external,
+        institute
       },
       { new: true, runValidators: true }
     )

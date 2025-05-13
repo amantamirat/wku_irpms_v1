@@ -20,7 +20,6 @@ export type Applicant = {
     rank?: string | Rank;
     hire_date?: Date;
     institute?: string | Institute;
-    is_external?: boolean;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -45,21 +44,19 @@ export const validateApplicant = (
     if (!applicant.gender) {
         return { valid: false, message: 'Gender is required.' };
     }
-   
-    if (!applicant.is_external) {
-        if (!applicant.position) {
-            return { valid: false, message: 'Position is required for internal applicants.' };
-        }
 
-        const positionObj = typeof applicant.position === 'string' ? null : applicant.position;
 
-        if (positionObj && positionObj.category === Category.academic && !applicant.department) {
-            return {
-                valid: false,
-                message: 'Department is required for academic positions.',
-            };
-        }
+
+
+    const positionObj = typeof applicant.position === 'string' ? null : applicant.position;
+
+    if (positionObj && positionObj.category === Category.academic && !applicant.department) {
+        return {
+            valid: false,
+            message: 'Department is required for academic positions.',
+        };
     }
+
 
     return { valid: true };
 };

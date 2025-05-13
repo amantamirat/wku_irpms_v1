@@ -21,30 +21,26 @@ const ApplicantPage = () => {
     const searchParams = useSearchParams();
     const typeParam = searchParams.get('type');
     const type = typeParam ? parseInt(typeParam, 10) : NaN;
-    
-    const isExternal = type === 1 ? true : type === 2 || type === 3 ? false : undefined;
-    const category =
-        type === 2 ? Category.academic :
-            type === 3 ? Category.supportive :
-                undefined;
 
-    const isValid = (isExternal === true) || (isExternal === false && category !== undefined);
+    const category =
+        type === 1 ? Category.academic :
+            type === 2 ? Category.supportive :
+                type === 3 ? Category.external :
+                    undefined;
 
     useEffect(() => {
-        if (!isValid) {
+        if (category === undefined) {
             router.push('/');
         }
-    }, [isValid, router]);
+    }, [category, router]);
 
-    if (!isValid) return null;
+    if (category === undefined) return null;
 
     const emptyApplicant: Applicant = {
         first_name: '',
         last_name: '',
         birth_date: new Date(),
-        gender: Gender.Male,
-        is_external: isExternal,
-
+        gender: Gender.Male
     };
     const [applicants, setApplicants] = useState<Applicant[]>([]);
     const dt = useRef<DataTable<any>>(null);
@@ -147,13 +143,13 @@ const ApplicantPage = () => {
     );
 
     const getHeading = () => {
-        if (isExternal) return 'External Applicants';
-
         switch (category) {
             case Category.academic:
                 return 'Academic Applicants';
             case Category.supportive:
                 return 'Supportive Applicants';
+            case Category.external:
+                return 'External Applicants'
             default:
                 return 'Applicants';
         }

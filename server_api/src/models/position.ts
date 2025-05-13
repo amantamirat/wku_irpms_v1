@@ -3,6 +3,7 @@ import mongoose, { Schema } from "mongoose";
 export enum Category {
     academic = 'academic',
     supportive = 'supportive',
+    external = 'external',
 }
 export interface IPosition extends Document {
     category: Category;

@@ -46,23 +46,23 @@ const AppMenu = () => {
                         {
                             label: 'Academic',
                             icon: 'pi pi-fw pi-crown',
-                            to: '/pages/applicants?type=2'
+                            to: '/pages/applicants?type=1'
                         },
                         {
                             label: 'Supportive',
                             icon: 'pi pi-fw pi-bullseye',
-                            to: '/pages/applicants?type=3'
+                            to: '/pages/applicants?type=2'
                         },
                         {
                             label: 'External',
                             icon: 'pi pi-fw pi-mars',
-                            to: '/pages/applicants?type=1'
-                        },
-                        {
-                            label: 'Students',
-                            icon: 'pi pi-fw pi-graduation-cap',
+                            to: '/pages/applicants?type=3'
                         }
                     ]
+                },
+                {
+                    label: 'Students',
+                    icon: 'pi pi-fw pi-graduation-cap',
                 },
                 {
                     label: 'Directorates',
