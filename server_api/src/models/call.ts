@@ -4,7 +4,7 @@ import mongoose, { Schema, model, Document } from 'mongoose';
 
 export interface ICall extends Document {
     directorate: mongoose.Types.ObjectId; 
-    academic_year: number; // Assuming Year is just a number (e.g., 2025)
+    calendar: mongoose.Types.ObjectId; 
     title: string;
     description: string;
     notes: string[]; 
@@ -20,8 +20,9 @@ const CallSchema = new Schema<ICall>({
         ref: 'Directorate', 
         required: true
     },
-    academic_year: {
-        type: Number,
+    calendar: {
+        type: Schema.Types.ObjectId,
+        ref: 'Calendar',
         required: true
     },
     title: {
