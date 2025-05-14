@@ -16,6 +16,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Category } from '@/models/position';
 import { RankService } from '@/services/RankService';
 import { Rank } from '@/models/rank';
+import { DepartmentService } from '@/services/DepartmentService';
+import { Department } from '@/models/department';
 
 const ApplicantPage = () => {
 
@@ -41,6 +43,7 @@ const ApplicantPage = () => {
 
     const [applicants, setApplicants] = useState<Applicant[]>([]);
     const [ranks, setRanks] = useState<Rank[]>([]);
+    const [departments, setDepartments] = useState<Department[]>([]);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
@@ -79,6 +82,22 @@ const ApplicantPage = () => {
         }
     }, [category]);
 
+    const loadDepartments = useCallback(async () => {
+        if (!category || category !== Category.academic) return;
+        try {
+            const data = await DepartmentService.getDepartments();
+            setDepartments(data);
+        } catch (err) {
+            console.error('Failed to load departments:', err);
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Failed to load departments data',
+                detail: '' + err,
+                life: 3000
+            });
+        }
+    }, [category]);
+
     useEffect(() => {
         if (category === undefined) {
             router.push('/');
@@ -86,7 +105,8 @@ const ApplicantPage = () => {
         }
         loadRanks();
         loadApplicants();
-    }, [category, router, loadRanks, loadApplicants]);
+        loadDepartments();
+    }, [category, router, loadRanks, loadApplicants, loadDepartments]);
 
     useEffect(() => {
         setFilters(initFilters());
@@ -233,18 +253,23 @@ const ApplicantPage = () => {
                         <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="first_name" header="First Name" sortable />
-                        <Column field="last_name" header="Lasst Name" sortable />
+                        <Column field="last_name" header="Last Name" sortable />
                         <Column field="gender" header="Gender" sortable />
                         <Column field="birth_date" header="Birth Date" body={(rowData) => new Date(rowData.birth_date!).toLocaleDateString()} />
                         <Column field="rank.rank_title" header="Rank" sortable />
+                        {
+                            category === Category.academic &&
+                            <Column field="department.department_name" header="Department" sortable />
+                        }
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
                     {selectedApplicant && (
                         <SaveDialog
                             visible={showSaveDialog}
-                            applicant={selectedApplicant}
                             ranks={ranks}
+                            departments={category === Category.academic ? departments : undefined}
+                            applicant={selectedApplicant}
                             setApplicant={setSelectedApplicant}
                             onSave={saveApplicant}
                             onHide={() => setShowSaveDialog(false)}

@@ -9,11 +9,13 @@ import { classNames } from 'primereact/utils';
 import { Dropdown } from 'primereact/dropdown';
 import { Applicant, Gender, validateApplicant } from '@/models/applicant';
 import { Rank } from '@/models/rank';
+import { Department } from '@/models/department';
 
 
 interface SaveApplicantDialogProps {
     visible: boolean;
     ranks: Rank[];
+    departments?: Department[];
     applicant: Applicant;
     setApplicant: (applicant: Applicant) => void;
     onSave: () => void;
@@ -21,12 +23,17 @@ interface SaveApplicantDialogProps {
 }
 
 function SaveApplicantDialog(props: SaveApplicantDialogProps) {
-    const { visible, applicant, ranks, setApplicant, onSave, onHide } = props;
 
+    const { visible, ranks, departments, applicant, setApplicant, onSave, onHide } = props;
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
-
+    useEffect(() => {
+        if (!visible) {
+            setSubmitted(false);
+            setErrorMessage(undefined);
+        }
+    }, [visible]);
 
     const save = () => {
         setSubmitted(true);
@@ -52,17 +59,10 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
         </>
     );
 
-    useEffect(() => {
-        if (!visible) {
-            setSubmitted(false);
-            setErrorMessage(undefined);
-        }
-    }, [visible]);
-
     return (
         <Dialog
             visible={visible}
-            style={{ width: '500px' }}
+            style={{ width: '600px' }}
             header={applicant._id ? 'Edit Applicant' : 'New Applicant'}
             modal
             className="p-fluid"
@@ -131,11 +131,13 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
                 <label htmlFor="rank">Rank</label>
                 <Dropdown
                     id="rank"
-                    optionValue="_id"
                     value={applicant.rank}
                     options={ranks}
                     onChange={(e) =>
-                        setApplicant({ ...applicant, rank: e.value})
+                        setApplicant({
+                            ...applicant,
+                            rank: e.value,
+                        })
                     }
                     optionLabel="rank_title"
                     placeholder="Select a Rank"
@@ -143,6 +145,26 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
                     className={classNames({ 'p-invalid': submitted && !applicant.rank })}
                 />
             </div>
+            {departments &&
+                <div className="field">
+                    <label htmlFor="department">Department</label>
+                    <Dropdown
+                        id="department"
+                        value={applicant.department}
+                        options={departments}
+                        onChange={(e) =>
+                            setApplicant({
+                                ...applicant,
+                                department: e.value,
+                            })
+                        }
+                        optionLabel="department_name"
+                        placeholder="Select a Department"
+                        required
+                        className={classNames({ 'p-invalid': submitted && !applicant.department })}
+                    />
+                </div>
+            }
 
             {errorMessage && (
                 <small className="p-error">{errorMessage}</small>
