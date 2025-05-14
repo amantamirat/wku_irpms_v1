@@ -61,9 +61,9 @@ const getRankByCategory = async (req: Request, res: Response): Promise<void> => 
         $project: {
           _id: 1,
           rank_title: 1,
+          position: 1,
           createdAt: 1,
-          updatedAt: 1,
-          position: 1
+          updatedAt: 1
         }
       }
     ]);

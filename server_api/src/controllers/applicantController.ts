@@ -32,7 +32,8 @@ const createApplicant = async (req: Request, res: Response): Promise<void> => {
     await applicant.save();
     successResponse(res, 201, 'Applicant created successfully', applicant);
   } catch (error: any) {
-    errorResponse(res, 500, 'Server error', error.message);
+    console.log(error);
+    errorResponse(res, 500, error.message,);
   }
 };
 
@@ -46,7 +47,8 @@ const getAllApplicants = async (_req: Request, res: Response): Promise<void> => 
 
     successResponse(res, 200, 'Applicants fetched successfully', applicants);
   } catch (error) {
-    errorResponse(res, 500, 'Server error', (error as Error).message);
+    console.log(error);
+    errorResponse(res, 500, (error as Error).message, 'Server error');
   }
 };
 
@@ -81,7 +83,6 @@ const updateApplicant = async (req: Request, res: Response): Promise<void> => {
       { new: true, runValidators: true }
     )
       .populate('department')
-      .populate('position')
       .populate('rank')
       .populate('institute');
 
@@ -92,6 +93,7 @@ const updateApplicant = async (req: Request, res: Response): Promise<void> => {
 
     successResponse(res, 200, 'Applicant updated successfully', updatedApplicant);
   } catch (error: any) {
+    console.log(error);
     errorResponse(res, 500, 'Server error', error.message);
   }
 };
@@ -106,6 +108,7 @@ const deleteApplicant = async (req: Request, res: Response): Promise<void> => {
     }
     successResponse(res, 200, 'Applicant deleted successfully', true);
   } catch (error) {
+    console.log(error);
     errorResponse(res, 500, (error as Error).message, {});
   }
 };

@@ -30,14 +30,6 @@ const ApplicantPage = () => {
                 type === 3 ? Category.external :
                     undefined;
 
-    useEffect(() => {
-        if (category === undefined) {
-            router.push('/');
-        }
-    }, [category, router]);
-
-    if (category === undefined) return null;
-
     const emptyApplicant: Applicant = {
         first_name: '',
         last_name: '',
@@ -45,6 +37,18 @@ const ApplicantPage = () => {
         gender: Gender.Male,
         rank: ''
     };
+
+    useEffect(() => {
+        if (category === undefined) {
+            router.push('/');
+        }
+        loadRanks();
+        setSelectedApplicant(emptyApplicant);
+    }, [category, router]);
+
+    if (category === undefined) return null;
+
+
     const [applicants, setApplicants] = useState<Applicant[]>([]);
     const [ranks, setRanks] = useState<Rank[]>([]);
     const dt = useRef<DataTable<any>>(null);
@@ -59,7 +63,6 @@ const ApplicantPage = () => {
         setFilters(initFilters());
         setGlobalFilter('');
         loadApplicants();
-        loadRanks();
     }, []);
 
     const loadApplicants = async () => {
@@ -83,7 +86,7 @@ const ApplicantPage = () => {
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to load applicant data',
+                summary: 'Failed to load rank data',
                 detail: '' + err,
                 life: 3000
             });
@@ -228,7 +231,10 @@ const ApplicantPage = () => {
                         <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="first_name" header="First Name" sortable />
+                        <Column field="last_name" header="Lasst Name" sortable />
+                        <Column field="gender" header="Gender" sortable />
                         <Column field="birth_date" header="Birth Date" body={(rowData) => new Date(rowData.birth_date!).toLocaleDateString()} />
+                        <Column field="rank.rank_title" header="Rank" sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
@@ -236,7 +242,8 @@ const ApplicantPage = () => {
                         <SaveDialog
                             visible={showSaveDialog}
                             applicant={selectedApplicant}
-                            onChange={setSelectedApplicant}
+                            ranks={ranks}
+                            setApplicant={setSelectedApplicant}
                             onSave={saveApplicant}
                             onHide={() => setShowSaveDialog(false)}
                         />

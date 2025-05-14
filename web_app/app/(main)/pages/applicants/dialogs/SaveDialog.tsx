@@ -8,18 +8,20 @@ import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import { Dropdown } from 'primereact/dropdown';
 import { Applicant, Gender, validateApplicant } from '@/models/applicant';
+import { Rank } from '@/models/rank';
 
 
 interface SaveApplicantDialogProps {
     visible: boolean;
+    ranks: Rank[];
     applicant: Applicant;
-    onChange: (applicant: Applicant) => void;
+    setApplicant: (applicant: Applicant) => void;
     onSave: () => void;
     onHide: () => void;
 }
 
 function SaveApplicantDialog(props: SaveApplicantDialogProps) {
-    const { visible, applicant, onChange, onSave, onHide } = props;
+    const { visible, applicant, ranks, setApplicant, onSave, onHide } = props;
 
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
@@ -72,7 +74,7 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
                 <InputText
                     id="first_name"
                     value={applicant.first_name}
-                    onChange={(e) => onChange({ ...applicant, first_name: e.target.value })}
+                    onChange={(e) => setApplicant({ ...applicant, first_name: e.target.value })}
                     className={classNames({ 'p-invalid': submitted && !applicant.first_name })}
                     required
                 />
@@ -83,7 +85,7 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
                 <InputText
                     id="middle_name"
                     value={applicant.middle_name || ''}
-                    onChange={(e) => onChange({ ...applicant, middle_name: e.target.value })}
+                    onChange={(e) => setApplicant({ ...applicant, middle_name: e.target.value })}
                 />
             </div>
 
@@ -92,7 +94,7 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
                 <InputText
                     id="last_name"
                     value={applicant.last_name}
-                    onChange={(e) => onChange({ ...applicant, last_name: e.target.value })}
+                    onChange={(e) => setApplicant({ ...applicant, last_name: e.target.value })}
                     className={classNames({ 'p-invalid': submitted && !applicant.last_name })}
                     required
                 />
@@ -103,7 +105,7 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
                 <PrimeCalendar
                     id="birth_date"
                     value={applicant.birth_date ? new Date(applicant.birth_date) : undefined}
-                    onChange={(e) => onChange({ ...applicant, birth_date: e.value! })}
+                    onChange={(e) => setApplicant({ ...applicant, birth_date: e.value! })}
                     dateFormat="yy-mm-dd"
                     showIcon
                     className={classNames({ 'p-invalid': submitted && !applicant.birth_date })}
@@ -118,10 +120,26 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
                     value={applicant.gender}
                     options={Object.values(Gender).map(g => ({ label: g, value: g }))}
                     onChange={(e) =>
-                        onChange({ ...applicant, gender: e.value })
+                        setApplicant({ ...applicant, gender: e.value })
                     }
                     placeholder="Select Gender"
                     className={classNames({ 'p-invalid': submitted && !applicant.gender })}
+                />
+            </div>
+
+            <div className="field">
+                <label htmlFor="rank">Rank</label>
+                <Dropdown
+                    id="rank"
+                    value={applicant.rank}
+                    options={ranks}
+                    onChange={(e) =>
+                        setApplicant({ ...applicant, rank: e.value})
+                    }
+                    optionLabel="rank_title"
+                    placeholder="Select a Rank"
+                    required
+                    className={classNames({ 'p-invalid': submitted && !applicant.rank })}
                 />
             </div>
 
