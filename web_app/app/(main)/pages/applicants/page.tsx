@@ -11,7 +11,7 @@ import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Category } from '@/models/position';
 import { RankService } from '@/services/RankService';
@@ -24,30 +24,20 @@ const ApplicantPage = () => {
     const typeParam = searchParams.get('type');
     const type = typeParam ? parseInt(typeParam, 10) : NaN;
 
-    const category =
-        type === 1 ? Category.academic :
+    const category = useMemo(() => {
+        return type === 1 ? Category.academic :
             type === 2 ? Category.supportive :
                 type === 3 ? Category.external :
                     undefined;
+    }, [type]);
 
-    const emptyApplicant: Applicant = {
+    const emptyApplicant: Applicant = useMemo(() => ({
         first_name: '',
         last_name: '',
         birth_date: new Date(),
         gender: Gender.Male,
         rank: ''
-    };
-
-    useEffect(() => {
-        if (category === undefined) {
-            router.push('/');
-        }
-        loadRanks();
-        setSelectedApplicant(emptyApplicant);
-    }, [category, router]);
-
-    if (category === undefined) return null;
-
+    }), []);
 
     const [applicants, setApplicants] = useState<Applicant[]>([]);
     const [ranks, setRanks] = useState<Rank[]>([]);
@@ -59,15 +49,10 @@ const ApplicantPage = () => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
 
-    useEffect(() => {
-        setFilters(initFilters());
-        setGlobalFilter('');
-        loadApplicants();
-    }, []);
-
-    const loadApplicants = async () => {
+    const loadApplicants = useCallback(async () => {
+        if (!category) return;
         try {
-            const data = await ApplicantService.getApplicants();
+            const data = await ApplicantService.getApplicantsByCategory(category);
             setApplicants(data);
         } catch (err) {
             toast.current?.show({
@@ -77,9 +62,10 @@ const ApplicantPage = () => {
                 life: 3000
             });
         }
-    };
+    }, [category]);
 
-    const loadRanks = async () => {
+    const loadRanks = useCallback(async () => {
+        if (!category) return;
         try {
             const data = await RankService.getRanksByCategory(category);
             setRanks(data);
@@ -91,7 +77,23 @@ const ApplicantPage = () => {
                 life: 3000
             });
         }
-    };
+    }, [category]);
+
+    useEffect(() => {
+        if (category === undefined) {
+            router.push('/');
+            return;
+        }
+        loadRanks();
+        loadApplicants();
+    }, [category, router, loadRanks, loadApplicants]);
+
+    useEffect(() => {
+        setFilters(initFilters());
+        setGlobalFilter('');
+    }, []);
+
+    if (category === undefined) return null;
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
@@ -103,10 +105,10 @@ const ApplicantPage = () => {
             if (selectedApplicant._id) {
                 const updated = await ApplicantService.updateApplicant(selectedApplicant);
                 const index = _applicants.findIndex((c) => c._id === selectedApplicant._id);
-                _applicants[index] = updated;
+                _applicants[index] = selectedApplicant;
             } else {
                 const created = await ApplicantService.createApplicant(selectedApplicant);
-                _applicants.push(created);
+                _applicants.push({ ...selectedApplicant, _id: created._id });
             }
             setApplicants(_applicants);
             toast.current?.show({

@@ -52,6 +52,83 @@ const getAllApplicants = async (_req: Request, res: Response): Promise<void> => 
   }
 };
 
+
+const getApplicantsByCategory = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { category } = req.params;
+    const applicants = await Applicant.aggregate([
+      {
+        $lookup: {
+          from: 'ranks',
+          localField: 'rank',
+          foreignField: '_id',
+          as: 'rank'
+        }
+      },
+      { $unwind: '$rank' },
+      {
+        $lookup: {
+          from: 'positions',
+          localField: 'rank.position',
+          foreignField: '_id',
+          as: 'rank.position'
+        }
+      },
+      { $unwind: '$rank.position' },
+      {
+        $match: {
+          'rank.position.category': category
+        }
+      },
+      {
+        $lookup: {
+          from: 'departments',
+          localField: 'department',
+          foreignField: '_id',
+          as: 'department'
+        }
+      },
+      { $unwind: { path: '$department', preserveNullAndEmptyArrays: true } },
+
+      {
+        $lookup: {
+          from: 'institutes',
+          localField: 'institute',
+          foreignField: '_id',
+          as: 'institute'
+        }
+      },
+      { $unwind: { path: '$institute', preserveNullAndEmptyArrays: true } },
+
+      {
+        $project: {
+          first_name: 1,
+          last_name: 1,
+          middle_name: 1,
+          gender: 1,
+          birth_date: 1,
+          'rank._id': 1,
+          'rank.rank_title': 1,
+          'rank.position._id': 1,
+          'rank.position.position_title': 1,
+          'rank.position.category': 1,
+          department: 1,
+          institute: 1,
+          hire_date: 1,
+          createdAt: 1,
+          updatedAt: 1
+        }
+      }
+    ]);
+
+    successResponse(res, 200, 'Applicants fetched successfully', applicants);
+  } catch (error) {
+    console.log(error);
+    errorResponse(res, 500, (error as Error).message, 'Server error');
+  }
+};
+
+
 // Update Applicant
 const updateApplicant = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -116,6 +193,7 @@ const deleteApplicant = async (req: Request, res: Response): Promise<void> => {
 const applicantController = {
   createApplicant,
   getAllApplicants,
+  getApplicantsByCategory,
   updateApplicant,
   deleteApplicant,
 };

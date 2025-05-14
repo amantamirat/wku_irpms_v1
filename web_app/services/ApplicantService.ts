@@ -1,5 +1,6 @@
 import { Applicant } from "@/models/applicant";
 import { MyService } from "./MyService";
+import { Category } from "@/models/position";
 
 const end_point = '/applicants/';
 
@@ -7,6 +8,11 @@ export const ApplicantService = {
 
     async getApplicants(): Promise<Applicant[]> {
         const data = await MyService.get(end_point);
+        return data as Applicant[];
+    },
+
+    async getApplicantsByCategory(category: Category): Promise<Applicant[]> {
+        const data = await MyService.get(`${end_point}${category}`);
         return data as Applicant[];
     },
 

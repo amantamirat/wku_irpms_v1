@@ -131,6 +131,7 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
                 <label htmlFor="rank">Rank</label>
                 <Dropdown
                     id="rank"
+                    optionValue="_id"
                     value={applicant.rank}
                     options={ranks}
                     onChange={(e) =>
