@@ -37,6 +37,44 @@ const getAllRanks = async (_req: Request, res: Response): Promise<void> => {
 };
 
 
+const getRankByCategory = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { category } = req.params;
+    const ranks = await Rank.aggregate([
+      {
+        $lookup: {
+          from: 'positions',
+          localField: 'position',
+          foreignField: '_id',
+          as: 'position'
+        }
+      },
+      {
+        $unwind: '$position'
+      },
+      {
+        $match: {
+          'position.category': category
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          rank_title: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          position: 1
+        }
+      }
+    ]);
+    successResponse(res, 200, 'Ranks fetched successfully', ranks);
+  } catch (error) {
+    errorResponse(res, 500, 'Server error', (error as Error).message);
+  }
+};
+
+
+
 const updateRank = async (req: Request, res: Response): Promise<void> => {
   try {
     const { position, rank_title } = req.body;
@@ -79,6 +117,7 @@ const deleteRank = async (req: Request, res: Response): Promise<void> => {
 const rankController = {
   createRank,
   getAllRanks,
+  getRankByCategory,
   updateRank,
   deleteRank,
 };

@@ -11,9 +11,8 @@ const createApplicant = async (req: Request, res: Response): Promise<void> => {
       last_name,
       birth_date,
       gender,
-      department,
-      position,
       rank,
+      department,
       hire_date,
       institute
     } = req.body;
@@ -25,7 +24,6 @@ const createApplicant = async (req: Request, res: Response): Promise<void> => {
       birth_date,
       gender,
       department,
-      position,
       rank,
       hire_date,
       institute
@@ -43,7 +41,6 @@ const getAllApplicants = async (_req: Request, res: Response): Promise<void> => 
   try {
     const applicants = await Applicant.find()
       .populate('department')
-      .populate('position')
       .populate('rank')
       .populate('institute');
 
@@ -63,7 +60,6 @@ const updateApplicant = async (req: Request, res: Response): Promise<void> => {
       birth_date,
       gender,
       department,
-      position,
       rank,
       hire_date,
       institute,
@@ -78,7 +74,6 @@ const updateApplicant = async (req: Request, res: Response): Promise<void> => {
         birth_date,
         gender,
         department,
-        position,
         rank,
         hire_date,
         institute

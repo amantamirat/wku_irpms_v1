@@ -2,11 +2,11 @@
   "positions": [
     {
       "category": "academic",
-      "title": "Instructor"
+      "position_title": "Instructor"
     },
     {
       "category": "supportive",
-      "title": "Lab Technician"
+      "position_title": "Lab Technician"
     }
   ],
   "positionRanks": [

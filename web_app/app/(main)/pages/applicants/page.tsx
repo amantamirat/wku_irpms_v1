@@ -14,6 +14,8 @@ import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Category } from '@/models/position';
+import { RankService } from '@/services/RankService';
+import { Rank } from '@/models/rank';
 
 const ApplicantPage = () => {
 
@@ -40,9 +42,11 @@ const ApplicantPage = () => {
         first_name: '',
         last_name: '',
         birth_date: new Date(),
-        gender: Gender.Male
+        gender: Gender.Male,
+        rank: ''
     };
     const [applicants, setApplicants] = useState<Applicant[]>([]);
+    const [ranks, setRanks] = useState<Rank[]>([]);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
@@ -55,12 +59,27 @@ const ApplicantPage = () => {
         setFilters(initFilters());
         setGlobalFilter('');
         loadApplicants();
+        loadRanks();
     }, []);
 
     const loadApplicants = async () => {
         try {
             const data = await ApplicantService.getApplicants();
             setApplicants(data);
+        } catch (err) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Failed to load applicant data',
+                detail: '' + err,
+                life: 3000
+            });
+        }
+    };
+
+    const loadRanks = async () => {
+        try {
+            const data = await RankService.getRanksByCategory(category);
+            setRanks(data);
         } catch (err) {
             toast.current?.show({
                 severity: 'error',

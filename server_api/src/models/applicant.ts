@@ -11,11 +11,10 @@ export interface IApplicant extends Document {
     last_name: string;
     birth_date: Date;
     gender: Gender;
+    rank: mongoose.Types.ObjectId;
     department?: mongoose.Types.ObjectId;
     institute?: mongoose.Types.ObjectId;
-    position?: mongoose.Types.ObjectId;
-    rank?: mongoose.Types.ObjectId;
-    hire_date?: Date;    
+    hire_date?: Date;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -41,17 +40,14 @@ const ApplicantSchema = new Schema<IApplicant>({
         enum: Object.values(Gender),
         required: true
     },
-    department: {
-        type: Schema.Types.ObjectId,
-        ref: 'Department',
-    },
-    position: {
-        type: Schema.Types.ObjectId,
-        ref: 'Position',
-    },
     rank: {
         type: Schema.Types.ObjectId,
         ref: 'Rank',
+        required: true
+    },
+    department: {
+        type: Schema.Types.ObjectId,
+        ref: 'Department',
     },
     hire_date: {
         type: Date,

@@ -6,7 +6,7 @@ import PositionRank from '../models/rank';
 
 interface PositionData {
     category: Category;
-    title: string;
+    position_title: string;
 }
 
 interface RankData {
@@ -34,11 +34,11 @@ export const seedPositionRankData = async () => {
         const savedPositions = await Position.insertMany(positions);
 
         for (const group of positionRanks) {
-            const pos = savedPositions.find(p => p.title === group.positionTitle);
+            const pos = savedPositions.find(p => p.position_title === group.positionTitle);
             if (pos) {
                 const ranksToInsert = group.ranks.map(rank => ({
                     position: pos._id,
-                    rank
+                    rank_title: rank
                 }));
                 await PositionRank.insertMany(ranksToInsert);
             }

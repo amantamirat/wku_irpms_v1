@@ -1,6 +1,5 @@
 import { Department } from "./department";
 import { Institute } from "./institute";
-import { Category, Position } from "./position";
 import { Rank } from "./rank";
 
 export enum Gender {
@@ -15,9 +14,8 @@ export type Applicant = {
     last_name: string;
     birth_date: Date;
     gender: Gender;
+    rank: string | Rank;
     department?: string | Department;
-    position?: string | Position;
-    rank?: string | Rank;
     hire_date?: Date;
     institute?: string | Institute;
     createdAt?: Date;
@@ -45,18 +43,9 @@ export const validateApplicant = (
         return { valid: false, message: 'Gender is required.' };
     }
 
-
-
-
-    const positionObj = typeof applicant.position === 'string' ? null : applicant.position;
-
-    if (positionObj && positionObj.category === Category.academic && !applicant.department) {
-        return {
-            valid: false,
-            message: 'Department is required for academic positions.',
-        };
+    if (!applicant.rank) {
+        return { valid: false, message: 'Rank is required.' };
     }
-
 
     return { valid: true };
 };

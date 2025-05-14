@@ -1,5 +1,6 @@
 import { Rank } from "@/models/rank";
 import { MyService } from "./MyService";
+import { Category } from "@/models/position";
 
 const end_point = '/ranks/';
 
@@ -8,6 +9,11 @@ export const RankService = {
 
     async getRanks(): Promise<Rank[]> {
         const data = await MyService.get(end_point);
+        return data as Rank[];
+    },
+
+    async getRanksByCategory(category: Category): Promise<Rank[]> {
+        const data = await MyService.get(`${end_point}${category}`);
         return data as Rank[];
     },
 
