@@ -11,6 +11,7 @@ export type User = {
     email: string;
     password?: string;
     status?: UserStatus;
+    roles: Role[];
     reset_code?: string;
     reset_code_expires?: Date;
 };

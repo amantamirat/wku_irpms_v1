@@ -1,108 +1,93 @@
 'use client';
 import DeleteDialog from '@/components/DeleteDialog';
-import { User, UserStatus } from '@/models/user';
-import { UserService } from '@/services/UserService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
-import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
+import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
-import SaveDialog from './dialogs/SaveDialog';
-import RoleComp from '../../components/role/Role';
+import { User } from '@/models/user';
+import { Role } from '@/models/role';
 
+interface RoleCompProps {
+    user: User;
+}
 
-
-const UserPage = () => {
-    let emptyUser: User = {
-        user_name: '',
-        email: '',
-        status: UserStatus.Pending,
-        roles: []
+const RoleComp = (props: RoleCompProps) => {
+    let emptyRole: Role = {
+        role_name: '',
+        permissions:[]
     };
-    const [users, setUsers] = useState<User[]>([]);
+
+
+    const [roles, setRoles] = useState<Role[]>([]);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
-
-    const [selectedUser, setSelectedUser] = useState<User>(emptyUser);
+    const [selectedRole, setSelectedRole] = useState<Role>(emptyRole);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
-    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
+    
 
     useEffect(() => {
         setFilters(initFilters());
         setGlobalFilter('');
-        loadUsers();
+        setRoles(props.user.roles);
     }, []);
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
 
-    const loadUsers = async () => {
+    const saveRole = async () => {
         try {
-            const data = await UserService.getUsers();
-            setUsers(data);
-        } catch (err) {
-            console.error('Failed to load users:', err);
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load users data',
-                detail: '' + err,
-                life: 3000
-            });
-        }
-    };
-
-    const saveUser = async () => {
-        try {
-            let _users = [...(users as any)];
-            if (selectedUser._id) {
-                const updatedUser = await UserService.updateUser(selectedUser);
-                const index = users.findIndex((user) => user._id === selectedUser._id);
-                _users[index] = selectedUser;
+            let _roles = [...(roles as any)];
+            if (selectedRole._id) {
+                //const updatedRole = await RoleService.updateRole(selectedRole);
+                //const index = roles.findIndex((role) => role._id === selectedRole._id);
+                //_roles[index] = updatedRole;
             } else {
-                const newUser = await UserService.createUser(selectedUser);
-                _users.push(newUser);
+                //const newRole = await RoleService.createRole(selectedRole);
+                //_roles.push(newRole);
             }
-            setUsers(_users);
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',
-                detail: `User ${selectedUser._id ? "updated" : 'created'}`,
+                detail: `Role ${selectedRole._id ? "updated" : 'created'}`,
                 life: 3000
             });
+            setRoles(_roles);
         } catch (error) {
             console.error(error);
             toast.current?.show({
                 severity: 'error',
-                summary: `Failed to ${selectedUser._id ? "update" : 'create'} user`,
+                summary: `Failed to ${selectedRole._id ? "update" : 'create'} role`,
                 detail: '' + error,
                 life: 3000
             });
         } finally {
             setShowSaveDialog(false);
-            setSelectedUser(emptyUser);
+            setSelectedRole(emptyRole);
         }
 
     };
 
 
-    const deleteUser = async () => {
+    const deleteRole = async () => {
         try {
-            const deleted = await UserService.deleteUser(selectedUser);
+            //const deleted = await RoleService.deleteRole(selectedRole);
+            const deleted = false;
             if (deleted) {
-                let _users = (users as any)?.filter((val: any) => val._id !== selectedUser._id);
-                setUsers(_users);
+                let _roles = (roles as any)?.filter((val: any) => val._id !== selectedRole._id);
+                setRoles(_roles);
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Successful',
-                    detail: 'User Deleted',
+                    detail: 'Role Deleted',
                     life: 3000
                 });
             }
@@ -110,32 +95,30 @@ const UserPage = () => {
             console.error(error);
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to delete users',
+                summary: 'Failed to delete roles',
                 detail: '' + error,
                 life: 3000
             });
         } finally {
             setShowDeleteDialog(false);
-            setSelectedUser(emptyUser);
+            setSelectedRole(emptyRole);
         }
 
     };
 
-    const openSaveDialog = (user: User) => {
-        setSelectedUser({ ...user });
+    const openSaveDialog = (role: Role) => {
+        setSelectedRole({ ...role });
         setShowSaveDialog(true);
     };
 
 
     const hideSaveDialog = () => {
         setShowSaveDialog(false);
-        setSelectedUser(emptyUser);
+        setSelectedRole(emptyRole);
     };
 
-
-
-    const confirmDeleteItem = (user: User) => {
-        setSelectedUser(user);
+    const confirmDeleteItem = (role: Role) => {
+        setSelectedRole(role);
         setShowDeleteDialog(true);
     };
 
@@ -143,7 +126,7 @@ const UserPage = () => {
         return (
             <React.Fragment>
                 <div className="my-2">
-                    <Button label="New User" icon="pi pi-plus" severity="success" className="mr-2" onClick={() => openSaveDialog(emptyUser)} />
+                    <Button label="New Role" icon="pi pi-plus" severity="success" className="mr-2" onClick={() => openSaveDialog(emptyRole)} />
                 </div>
             </React.Fragment>
         );
@@ -153,7 +136,7 @@ const UserPage = () => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage Users</h5>
+            <h5 className="m-0">Manage Roles</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
@@ -161,7 +144,7 @@ const UserPage = () => {
         </div>
     );
 
-    const actionBodyTemplate = (rowData: User) => {
+    const actionBodyTemplate = (rowData: Role) => {
         return (
             <>
                 <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
@@ -172,14 +155,7 @@ const UserPage = () => {
         );
     };
 
-    const statusBodyTemplate = (rowData: User) => {
-        return (
-            <>
-                <span className="p-column-title">Status</span>
-                <span className={`user-badge status-${rowData.status?.toLowerCase()}`}>{rowData.status}</span>
-            </>
-        );
-    };
+    
 
 
     return (
@@ -190,60 +166,44 @@ const UserPage = () => {
                     <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
                     <DataTable
                         ref={dt}
-                        value={users}
-                        selection={selectedUser}
-                        onSelectionChange={(e) => setSelectedUser(e.value as User)}
+                        value={roles}
+                        selection={selectedRole}
+                        onSelectionChange={(e) => setSelectedRole(e.value as Role)}
                         dataKey="_id"
                         paginator
                         rows={10}
                         rowsPerPageOptions={[5, 10, 25]}
                         className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} roles"
                         globalFilter={globalFilter}
-                        emptyMessage="No user data found."
+                        emptyMessage={`No role data found for ${props.user.user_name}.`}
                         header={header}
                         scrollable
                         filters={filters}
-                        expandedRows={expandedRows}
-                        onRowToggle={(e) => setExpandedRows(e.data)}
-                        rowExpansionTemplate={(data) => (
-                            <RoleComp
-                                user={data as User}
-                            />
-                        )}
+                        
                     >
-                        <Column expander style={{ width: '3em' }} />
+                        <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column
                             header="#"
                             body={(rowData, options) => options.rowIndex + 1}
                             style={{ width: '50px' }}
                         />
-                        <Column field="user_name" header="USER" sortable headerStyle={{ minWidth: '15rem' }}></Column>
-                        <Column field="email" header="EMAIL" sortable />
-                        <Column field="status" header="STATUS" sortable body={statusBodyTemplate} />
+                        <Column field="role_name" header="Role Name" sortable headerStyle={{ minWidth: '15rem' }} />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
-
-                    {selectedUser && <SaveDialog
-                        visible={showSaveDialog}
-                        user={selectedUser}
-                        onChange={setSelectedUser}
-                        onSave={saveUser}
-                        onHide={hideSaveDialog}
-                    />}
-
-                    {selectedUser && <DeleteDialog
-                        showDeleteDialog={showDeleteDialog}
-                        selectedDataInfo={selectedUser.user_name}
-                        onDelete={deleteUser}
-                        onHide={() => setShowDeleteDialog(false)}
-                    />}
-
+                    
+                    {selectedRole &&
+                        <DeleteDialog
+                            showDeleteDialog={showDeleteDialog}
+                            selectedDataInfo={selectedRole.role_name}
+                            onDelete={deleteRole}
+                            onHide={() => setShowDeleteDialog(false)}
+                        />}
                 </div>
             </div>
         </div>
     );
 };
 
-export default UserPage;
+export default RoleComp;

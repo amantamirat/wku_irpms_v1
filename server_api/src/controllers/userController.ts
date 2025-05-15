@@ -19,7 +19,7 @@ const createUser = async (req: Request, res: Response): Promise<void> => {
 
 const getUsers = async (_req: Request, res: Response): Promise<void> => {
   try {
-    const users = await User.find();
+    const users = await User.find().populate('roles');
     successResponse(res, 200, 'Users fetched successfully', users);
   } catch (err) {
     errorResponse(res, 500, 'Server error', (err as Error).message);
