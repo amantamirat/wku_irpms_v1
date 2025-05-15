@@ -2,8 +2,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import { Permission } from "../models/permission.model";
 import { Role } from '../models/role.model';
-import { User } from '../models/user';
-import { createUserAccount } from './userService';
+import { User, UserStatus } from '../models/user';
+import { createUserAccount, prepareHash } from './userService';
 
 
 export const initPermissions = async () => {
@@ -41,7 +41,7 @@ export const initRoles = async () => {
     }
 };
 
-export const initUser = async (): Promise<void> => {
+export const initAdminUser = async (): Promise<void> => {
     try {
         const userName = process.env.ADMIN_USER_NAME;
         const email = process.env.ADMIN_EMAIL;
@@ -51,20 +51,28 @@ export const initUser = async (): Promise<void> => {
             throw new Error('Admin credentials are not set in environment variables.');
         }
 
-        const existingAdmin = await User.exists({ email: email });
+        const existingAdmin = await User.findOne({ email: email });
 
         if (!existingAdmin) {
-            await createUserAccount({
-                user_name: userName,
-                email: email,
-                password: password,
+
+            const adminRole = await Role.findOne({ name: 'Administrator' });
+            if (!adminRole) {
+                throw new Error('Administrator role not found. Please run initRoles first.');
+            }
+
+            const hashedPassword = await prepareHash(password);
+            const adminUser = new User({
+                userName, email, password: hashedPassword, status: UserStatus.Active, roles: [adminRole]
             });
+
+            await adminUser.save();
+
             console.log('Admin user created successfully.');
         } else {
             console.log('Admin user already exists.');
         }
     } catch (error) {
         console.error('Error creating admin user:', error);
-        //throw error;
+        throw error;
     }
 };
