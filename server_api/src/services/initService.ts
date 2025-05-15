@@ -54,7 +54,7 @@ export const initAdminUser = async (): Promise<void> => {
         const existingAdmin = await User.findOne({ email: email });
 
         if (!existingAdmin) {
-            const adminRole = await Role.findOne({ name: 'Administrator' });
+            const adminRole = await Role.findOne({ role_name: 'Administrator' });
             if (!adminRole) {
                 throw new Error('Administrator role not found. Please run initRoles first.');
             }
