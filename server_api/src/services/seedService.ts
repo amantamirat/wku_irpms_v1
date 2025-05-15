@@ -76,7 +76,7 @@ export const seedSectorData = async () => {
 
 
 export const seedPermissions = async () => {
-    const filePath = path.join(__dirname, 'data', 'permissions.json');
+    const filePath = path.join(process.cwd(), 'data', 'permissions.json');
     const rawData = await fs.readFile(filePath, 'utf-8');
     const permissions = JSON.parse(rawData);
 
