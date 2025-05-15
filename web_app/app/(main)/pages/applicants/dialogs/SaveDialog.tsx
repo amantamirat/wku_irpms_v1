@@ -81,15 +81,6 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
             </div>
 
             <div className="field">
-                <label htmlFor="middle_name">Middle Name (Optional)</label>
-                <InputText
-                    id="middle_name"
-                    value={applicant.middle_name || ''}
-                    onChange={(e) => setApplicant({ ...applicant, middle_name: e.target.value })}
-                />
-            </div>
-
-            <div className="field">
                 <label htmlFor="last_name">Last Name</label>
                 <InputText
                     id="last_name"

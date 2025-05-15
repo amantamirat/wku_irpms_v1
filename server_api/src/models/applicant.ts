@@ -24,9 +24,6 @@ const ApplicantSchema = new Schema<IApplicant>({
         type: String,
         required: true
     },
-    middle_name: {
-        type: String,
-    },
     last_name: {
         type: String,
         required: true

@@ -103,15 +103,14 @@ const getApplicantsByCategory = async (req: Request, res: Response): Promise<voi
       {
         $project: {
           first_name: 1,
-          last_name: 1,
-          middle_name: 1,
+          last_name: 1,          
           gender: 1,
           birth_date: 1,
           'rank._id': 1,
-          'rank.rank_title': 1,
           'rank.position._id': 1,
           'rank.position.position_title': 1,
           'rank.position.category': 1,
+          'rank.rank_title': 1,
           department: 1,
           institute: 1,
           hire_date: 1,
