@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
+import { IRole } from './role.model';
 
 export enum UserStatus {
   Pending = 'Pending',
@@ -11,6 +12,7 @@ export interface IUser extends Document {
   password: string;
   email: string;
   status: UserStatus;
+  roles: mongoose.Types.ObjectId[] | IRole[];
   reset_code?: String;
   reset_code_expires?: Date;
 }
@@ -40,6 +42,7 @@ const UserSchema = new Schema<IUser>(
       default: UserStatus.Pending,
       required: true,
     },
+    roles: [{ type: Schema.Types.ObjectId, ref: 'Role' }],
     reset_code: {
       type: String
     },

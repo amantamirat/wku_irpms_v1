@@ -1,16 +1,18 @@
-{
-    "permissions": {
-        "role": [
-            "create",
-            "read",
-            "update",
-            "delete"
-        ],
-        "user": [
-            "create",
-            "read",
-            "update",
-            "delete"
-        ]
-    }
-}
+[
+  { "name": "user:create", "description": "Create new users" },
+  { "name": "user:read", "description": "View user list and details" },
+  { "name": "user:update", "description": "Edit user details" },
+  { "name": "user:delete", "description": "Delete users" },
+
+  { "name": "role:create", "description": "Create new roles" },
+  { "name": "role:read", "description": "View roles" },
+  { "name": "role:update", "description": "Edit roles" },
+  { "name": "role:delete", "description": "Delete roles" },
+
+  { "name": "permission:read", "description": "View permissions" },
+
+  { "name": "calendar:create", "description": "Create calendar entries" },
+  { "name": "calendar:read", "description": "Read calendar entries" },
+  { "name": "calendar:update", "description": "Update calendar entries" },
+  { "name": "calendar:delete", "description": "Delete calendar entries" }
+]

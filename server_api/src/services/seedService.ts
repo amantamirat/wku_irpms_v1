@@ -3,6 +3,7 @@ import path from 'path';
 import Sector from '../models/sector';
 import Position, { Category } from '../models/position';
 import PositionRank from '../models/rank';
+import { Permission } from '../models/permission.model';
 
 interface PositionData {
     category: Category;
@@ -70,4 +71,21 @@ export const seedSectorData = async () => {
         console.error('Error seeding data:', err);
         //throw err;
     }
+};
+
+
+
+export const seedPermissions = async () => {
+    const filePath = path.join(__dirname, 'data', 'permissions.json');
+    const rawData = await fs.readFile(filePath, 'utf-8');
+    const permissions = JSON.parse(rawData);
+
+    for (const perm of permissions) {
+        const exists = await Permission.findOne({ name: perm.name });
+        if (!exists) {
+            await new Permission(perm).save();
+        }
+    }
+
+    console.log('Permissions seeded from JSON');
 };
