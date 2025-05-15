@@ -28,33 +28,7 @@ export const createUserAccount = async (user: UserDTO): Promise<IUser> => {
 };
 
 
-export const initAdminUser = async (): Promise<void> => {
-    try {
-        const userName = process.env.ADMIN_USER_NAME;
-        const email = process.env.ADMIN_EMAIL;
-        const password = process.env.ADMIN_PASSWORD;
 
-        if (!userName || !email || !password) {
-            throw new Error('Admin credentials are not set in environment variables.');
-        }
-
-        const existingAdmin = await User.exists({ email: email });
-
-        if (!existingAdmin) {
-            await createUserAccount({
-                user_name: userName,
-                email: email,
-                password: password,
-            });
-            console.log('Admin user created successfully.');
-        } else {
-            console.log('Admin user already exists.');
-        }
-    } catch (error) {
-        console.error('Error creating admin user:', error);
-        //throw error;
-    }
-};
 
 
 export const sendCode = async (email: string, reset: boolean): Promise<void> => {

@@ -3,25 +3,25 @@ import path from 'path';
 import Sector from '../models/sector';
 import Position, { Category } from '../models/position';
 import PositionRank from '../models/rank';
-import { Permission } from '../models/permission.model';
-import { Role } from '../models/role.model';
 
-interface PositionData {
-    category: Category;
-    position_title: string;
-}
 
-interface RankData {
-    positionTitle: string;
-    ranks: string[];
-}
 
-interface SeedFileFormat {
-    positions: PositionData[];
-    positionRanks: RankData[];
-}
+export const seedPositions = async () => {
+    interface PositionData {
+        category: Category;
+        position_title: string;
+    }
 
-export const seedPositionRankData = async () => {
+    interface RankData {
+        positionTitle: string;
+        ranks: string[];
+    }
+
+    interface SeedFileFormat {
+        positions: PositionData[];
+        positionRanks: RankData[];
+    }
+
     try {
         const filePath = path.join(process.cwd(), 'data', 'positions.json');
         const fileContent = await fs.readFile(filePath, 'utf-8');
@@ -52,11 +52,11 @@ export const seedPositionRankData = async () => {
     }
 };
 
-interface SectorData {
-    sector_name: string;
-}
 
-export const seedSectorData = async () => {
+export const seedSectors = async () => {
+    interface SectorData {
+        sector_name: string;
+    }
     try {
         const filePath = path.join(process.cwd(), 'data', 'sectors.json');
         const fileContent = await fs.readFile(filePath, 'utf-8');
@@ -74,46 +74,6 @@ export const seedSectorData = async () => {
     }
 };
 
-export const seedPermissions = async () => {
-    const filePath = path.join(process.cwd(), 'data', 'permissions.json');
-    const rawData = await fs.readFile(filePath, 'utf-8');
-    const permissions = JSON.parse(rawData);
-
-    for (const perm of permissions) {
-        const exists = await Permission.findOne({ name: perm.name });
-        if (!exists) {
-            await new Permission(perm).save();
-        }
-    }
-
-    console.log('Permissions seeded from JSON');
-};
 
 
-export const seedRoles = async () => {
-    const allPermissions = await Permission.find({});
-    const rootRoleExists = await Role.findOne({ name: 'root' });
-    if (!rootRoleExists) {
-        await new Role({
-            name: 'root',
-            permissions: allPermissions.map(p => p._id)
-        }).save();
-        console.log('root role created');
-    }
 
-    
-    const adminPermissions = allPermissions.filter(p =>
-        p.name.startsWith('user:') ||
-        p.name.startsWith('role:') ||
-        p.name === 'permission:read'
-    );
-
-    const adminRoleExists = await Role.findOne({ name: 'Administrator' });
-    if (!adminRoleExists) {
-        await new Role({
-            name: 'Administrator',
-            permissions: adminPermissions.map(p => p._id)
-        }).save();
-        console.log('Administrator role created');
-    }
-};

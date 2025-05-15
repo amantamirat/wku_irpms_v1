@@ -13,8 +13,7 @@ import calendarRoutes from './routes/calendarRoutes';
 import positionRoutes from './routes/positionRoutes';
 import rankRoutes from './routes/rankRoutes';
 import applicantRoutes from './routes/applicantRoutes';
-import { initAdminUser } from './services/userService';
-import { seedPermissions, seedPositionRankData, seedSectorData } from './services/seedService';
+import { seedPositions, seedSectors } from './services/seedService';
 
 
 
@@ -47,11 +46,10 @@ const PORT = process.env.SERVER_PORT || 5000;
       throw new Error('mongo url is not set in environment variables.');
     }
     await mongoose.connect(MONGO_URL);
-    console.log('database connection established');
-    await initAdminUser();
-    await seedPermissions();
-    await seedPositionRankData();
-    await seedSectorData();
+    console.log('database connection established');    
+    
+    await seedPositions();
+    await seedSectors();
     app.listen(PORT, () => {
       console.log(`Server API is running at http://127.0.0.1:${PORT}`);
     });
