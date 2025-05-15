@@ -16,7 +16,7 @@ const createUser = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-// Get all users
+
 const getUsers = async (_req: Request, res: Response): Promise<void> => {
   try {
     const users = await User.find();
@@ -43,9 +43,9 @@ const getUserById = async (req: Request, res: Response): Promise<void> => {
 // Update user
 const updateUser = async (req: Request, res: Response): Promise<void> => {
   try {
+    const { user_name, email } = req.body;
     const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      req.body,
+      req.params.id, { user_name, email },
       { new: true, runValidators: true }
     );
     if (!updatedUser) {
@@ -54,7 +54,8 @@ const updateUser = async (req: Request, res: Response): Promise<void> => {
     }
     successResponse(res, 200, 'User updated successfully', updateUser);
   } catch (err) {
-    errorResponse(res, 500, 'Server error', (err as Error).message);
+    console.log(err);
+    errorResponse(res, 500, (err as Error).message);
   }
 };
 
@@ -68,7 +69,7 @@ const deleteUser = async (req: Request, res: Response): Promise<void> => {
     }
     successResponse(res, 200, 'User deleted successfully', true);
   } catch (err) {
-    errorResponse(res, 500, 'Server error', (err as Error).message);
+    errorResponse(res, 500, (err as Error).message);
   }
 };
 

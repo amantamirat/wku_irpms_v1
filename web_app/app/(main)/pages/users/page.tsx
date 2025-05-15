@@ -56,26 +56,24 @@ const UserPage = () => {
         }
     };
 
-
-
     const saveUser = async () => {
         try {
             let _users = [...(users as any)];
             if (selectedUser._id) {
                 const updatedUser = await UserService.updateUser(selectedUser);
                 const index = users.findIndex((user) => user._id === selectedUser._id);
-                _users[index] = updatedUser;
+                _users[index] = selectedUser;
             } else {
                 const newUser = await UserService.createUser(selectedUser);
                 _users.push(newUser);
             }
+            setUsers(_users);
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',
                 detail: `User ${selectedUser._id ? "updated" : 'created'}`,
                 life: 3000
-            });
-            setUsers(_users);
+            });            
         } catch (error) {
             console.error(error);
             toast.current?.show({

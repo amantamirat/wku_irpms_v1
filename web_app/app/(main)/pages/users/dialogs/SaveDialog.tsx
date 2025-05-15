@@ -20,21 +20,26 @@ function SaveDialog(props: SaveDialogProps) {
     const { visible, user, onChange, onSave, onHide } = props;
     const [submitted, setSubmitted] = useState(false);
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const isEmailValid = emailRegex.test(user.email);
+
     const passwordMismatch = user.password !== confirmPassword;
 
     const save = async () => {
         setSubmitted(true);
-        if (!validateUser(user) || !isEmailValid || passwordMismatch) {
+        const result = validateUser(user);
+        if (!result.valid || (!user._id && passwordMismatch)) {
+            setErrorMessage(result.message);
             return;
         }
+        setErrorMessage(undefined);
         onSave();
     }
 
     const hide = async () => {
         setSubmitted(false);
+        setConfirmPassword('');
+        setErrorMessage(undefined);        
         onHide();
     }
 
@@ -55,7 +60,7 @@ function SaveDialog(props: SaveDialogProps) {
             className="p-fluid"
             footer={footer}
             onHide={hide}
-            //position={user._id ? 'right' : 'center'}
+        //position={user._id ? 'right' : 'center'}
         >
             {user && (
                 <>
@@ -80,14 +85,11 @@ function SaveDialog(props: SaveDialogProps) {
                             value={user.email}
                             onChange={(e) => onChange({ ...user, email: e.target.value })}
                             className={classNames({
-                                'p-invalid': submitted && (!user.email || !isEmailValid),
+                                'p-invalid': submitted && (!user.email),
                             })}
                         />
                         {submitted && !user.email && (
                             <small className="p-invalid">Email is required.</small>
-                        )}
-                        {submitted && user.email && !isEmailValid && (
-                            <small className="p-invalid">Invalid email format.</small>
                         )}
                     </div>
 
@@ -130,6 +132,9 @@ function SaveDialog(props: SaveDialogProps) {
                         </>
                     )}
                 </>
+            )}
+            {errorMessage && (
+                <small className="p-error">{errorMessage}</small>
             )}
         </Dialog>
     );
