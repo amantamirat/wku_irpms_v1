@@ -52,20 +52,7 @@ const ApplicantPage = () => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
 
-    const loadApplicants = useCallback(async () => {
-        if (!category) return;
-        try {
-            const data = await ApplicantService.getApplicantsByCategory(category);
-            setApplicants(data);
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load applicant data',
-                detail: '' + err,
-                life: 3000
-            });
-        }
-    }, [category]);
+
 
     const loadRanks = useCallback(async () => {
         if (!category) return;
@@ -98,15 +85,30 @@ const ApplicantPage = () => {
         }
     }, [category]);
 
+    const loadApplicants = useCallback(async () => {
+        if (!category) return;
+        try {
+            const data = await ApplicantService.getApplicantsByCategory(category);
+            setApplicants(data);
+        } catch (err) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Failed to load applicant data',
+                detail: '' + err,
+                life: 3000
+            });
+        }
+    }, [category]);
+
     useEffect(() => {
         if (category === undefined) {
             router.push('/');
             return;
         }
         loadRanks();
-        loadApplicants();
         loadDepartments();
-    }, [category, router, loadRanks, loadApplicants, loadDepartments]);
+        loadApplicants();
+    }, [category, router, loadRanks, loadDepartments, loadApplicants]);
 
     useEffect(() => {
         setFilters(initFilters());
@@ -247,8 +249,9 @@ const ApplicantPage = () => {
                         globalFilter={globalFilter}
                         emptyMessage={`No ${getHeading()} data found.`}
                         header={header}
-                        scrollable
+                        scrollable                       
                         filters={filters}
+                        tableStyle={{ minWidth: '50rem' }}
                     >
                         <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />

@@ -26,12 +26,12 @@ const AppMenu = () => {
                 },
                 {
                     label: 'Colleges',
-                    icon: PrimeIcons.BUILDING,
+                    icon: 'pi pi-fw pi-shop',
                     to: '/pages/colleges'
                 },
                 {
                     label: 'Departments',
-                    icon: PrimeIcons.BOX,
+                    icon: 'pi pi-fw pi-th-large',
                     to: '/pages/departments'
                 },
                 {
@@ -56,14 +56,17 @@ const AppMenu = () => {
                         {
                             label: 'External',
                             icon: 'pi pi-fw pi-mars',
+                            disabled: true,
                             to: '/pages/applicants?type=3'
                         }
                     ]
                 },
-                {
+                /*
+                 {
                     label: 'Students',
                     icon: 'pi pi-fw pi-graduation-cap',
                 },
+                */
                 {
                     label: 'Directorates',
                     icon: 'pi pi-sitemap',

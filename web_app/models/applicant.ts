@@ -1,5 +1,6 @@
 import { Department } from "./department";
 import { Institute } from "./institute";
+import { Category } from "./position";
 import { Rank } from "./rank";
 
 export enum Gender {
@@ -45,6 +46,27 @@ export const validateApplicant = (
     if (!applicant.rank) {
         return { valid: false, message: 'Rank is required.' };
     }
+    if (typeof applicant.rank === 'object' && applicant.rank !== null) {
+        if (typeof applicant.rank.position === 'object' && applicant.rank.position !== null) {
+            const position = applicant.rank.position;
+            if (!position.category) {
+                return { valid: false, message: 'Position category is required in rank.' };
+            }
 
+            if (position.category === Category.academic && !applicant.department) {
+                return { valid: false, message: 'Department is required for academic category.' };
+            }
+
+            if (position.category === Category.external && !applicant.institute) {
+                return { valid: false, message: 'Institute is required for external category.' };
+            }
+        }
+        else {
+            return { valid: false, message: 'Position details are required in rank.' };
+        }
+    }
+    else {
+        return { valid: false, message: 'Rank details are required.' };
+    }
     return { valid: true };
 };
