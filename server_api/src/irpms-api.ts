@@ -14,6 +14,7 @@ import positionRoutes from './routes/positionRoutes';
 import rankRoutes from './routes/rankRoutes';
 import applicantRoutes from './routes/applicantRoutes';
 import { seedPositions, seedSectors } from './services/seedService';
+import { initAdminUser, initPermissions, initRoles } from './services/initService';
 
 
 
@@ -47,6 +48,9 @@ const PORT = process.env.SERVER_PORT || 5000;
     }
     await mongoose.connect(MONGO_URL);
     console.log('database connection established');    
+    await initPermissions();
+    await initRoles();
+    await initAdminUser();
     
     await seedPositions();
     await seedSectors();
