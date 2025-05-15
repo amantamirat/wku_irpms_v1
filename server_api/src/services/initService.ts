@@ -3,7 +3,7 @@ import path from 'path';
 import { Permission } from "../models/permission.model";
 import { Role } from '../models/role.model';
 import { User, UserStatus } from '../models/user';
-import { createUserAccount, prepareHash } from './userService';
+import { prepareHash } from './userService';
 
 
 export const initPermissions = async () => {
@@ -54,20 +54,17 @@ export const initAdminUser = async (): Promise<void> => {
         const existingAdmin = await User.findOne({ email: email });
 
         if (!existingAdmin) {
-
             const adminRole = await Role.findOne({ name: 'Administrator' });
             if (!adminRole) {
                 throw new Error('Administrator role not found. Please run initRoles first.');
             }
-
             const hashedPassword = await prepareHash(password);
             const adminUser = new User({
                 userName, email, password: hashedPassword, status: UserStatus.Active, roles: [adminRole]
             });
-
             await adminUser.save();
-
             console.log('Admin user created successfully.');
+
         } else {
             console.log('Admin user already exists.');
         }
