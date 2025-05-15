@@ -32,7 +32,7 @@ export const initRoles = async () => {
     const adminRoleExists = await Role.findOne({ name: 'Administrator' });
     if (!adminRoleExists) {
         await new Role({
-            name: 'Administrator',
+            role_name: 'Administrator',
             permissions: adminPermissions.map(p => p._id)
         }).save();
         console.log('Administrator role created with user, role, and permission:read permissions');
