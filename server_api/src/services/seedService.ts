@@ -23,7 +23,7 @@ export const seedPositions = async () => {
     }
 
     try {
-        const filePath = path.join(process.cwd(), 'data', 'positions.json');
+        const filePath = path.join(process.cwd(), 'demo/data', 'positions.json');
         const fileContent = await fs.readFile(filePath, 'utf-8');
         const { positions, positionRanks }: SeedFileFormat = JSON.parse(fileContent);
 
@@ -58,7 +58,7 @@ export const seedSectors = async () => {
         sector_name: string;
     }
     try {
-        const filePath = path.join(process.cwd(), 'data', 'sectors.json');
+        const filePath = path.join(process.cwd(), 'demo/data', 'sectors.json');
         const fileContent = await fs.readFile(filePath, 'utf-8');
         const sectors: SectorData[] = JSON.parse(fileContent);
         const existing = await Sector.find({});

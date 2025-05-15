@@ -60,7 +60,7 @@ export const initAdminUser = async (): Promise<void> => {
             }
             const hashedPassword = await prepareHash(password);
             const adminUser = new User({
-                userName, email, password: hashedPassword, status: UserStatus.Active, roles: [adminRole]
+                user_name: userName, email, password: hashedPassword, status: UserStatus.Active, roles: [adminRole]
             });
             await adminUser.save();
             console.log('Admin user created successfully.');
