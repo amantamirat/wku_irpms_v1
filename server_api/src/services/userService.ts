@@ -1,8 +1,7 @@
 import bcrypt from 'bcryptjs';
-import nodemailer from 'nodemailer';
-import { Transporter } from 'nodemailer';
-import { IUser, User, UserStatus } from '../models/user';
 import crypto from 'crypto';
+import nodemailer, { Transporter } from 'nodemailer';
+import { IUser, User, UserStatus } from '../models/user';
 
 
 export interface UserDTO {
@@ -20,7 +19,7 @@ export const prepareHash = async (password: string): Promise<string> => {
 };
 
 export const createUserAccount = async (user: UserDTO): Promise<IUser> => {
-    const { user_name, email, password, status = UserStatus.Pending } = user;
+    const { user_name, email, password, status} = user;
     const hashedPassword = await prepareHash(password);
     const newUser = new User({
         user_name, email, password: hashedPassword, status,
@@ -105,7 +104,7 @@ export const sendCode = async (email: string, reset: boolean): Promise<void> => 
             <p style="font-size: 14px; color: #666;">If you did not request this, you can safely ignore this email.</p>
         </div>`,
         };
-        
+
         user.reset_code = code;
         user.reset_code_expires = expiry;
 
@@ -126,3 +125,5 @@ export const sendCode = async (email: string, reset: boolean): Promise<void> => 
         throw error;
     }
 };
+
+

@@ -14,5 +14,10 @@
   { "name": "calendar:create", "description": "Create calendar entries" },
   { "name": "calendar:read", "description": "Read calendar entries" },
   { "name": "calendar:update", "description": "Update calendar entries" },
-  { "name": "calendar:delete", "description": "Delete calendar entries" }
+  { "name": "calendar:delete", "description": "Delete calendar entries" },
+  
+  { "name": "college:create", "description": "Create college entries" },
+  { "name": "college:read", "description": "Read college entries" },
+  { "name": "college:update", "description": "Update college entries" },
+  { "name": "college:delete", "description": "Delete college entries" }
 ]
