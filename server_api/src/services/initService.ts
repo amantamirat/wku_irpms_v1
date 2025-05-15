@@ -29,7 +29,7 @@ export const initRoles = async () => {
         p.name === 'permission:read'
     );
 
-    const adminRoleExists = await Role.findOne({ name: 'Administrator' });
+    const adminRoleExists = await Role.findOne({ role_name: 'Administrator' });
     if (!adminRoleExists) {
         await new Role({
             role_name: 'Administrator',
