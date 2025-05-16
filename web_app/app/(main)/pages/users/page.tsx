@@ -202,6 +202,12 @@ const UserPage = () => {
         );
     };
 
+    const handleUpdate = (updated: User) => {
+        let _users = [...users]
+        const index = users.findIndex((usr) => usr._id === updated._id);
+        _users[index] = { ...updated };
+        setUsers(_users);
+    };
 
     return (
         <div className="grid">
@@ -232,6 +238,7 @@ const UserPage = () => {
                             <UserRoleComp
                                 roles={roles}
                                 user={data as User}
+                                onUpdate={handleUpdate}
                             />
                         )}
                     >

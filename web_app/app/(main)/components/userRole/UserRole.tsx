@@ -15,6 +15,7 @@ import AddDialog from './dialog/AddDialog';
 interface UserRoleCompProps {
     roles: Role[];
     user: User;
+    onUpdate: (updated: User) => void;
 }
 
 const UserRoleComp = (props: UserRoleCompProps) => {
@@ -34,8 +35,6 @@ const UserRoleComp = (props: UserRoleCompProps) => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
 
-
-
     useEffect(() => {
         setFilters(initFilters());
         setGlobalFilter('');
@@ -47,7 +46,22 @@ const UserRoleComp = (props: UserRoleCompProps) => {
 
     const addRole = async () => {
         try {
-            //let _roles = [...(roles as any)];
+            const alreadyExists = user.roles.some((r: any) =>
+                (typeof r === 'string' ? r : r._id) === selectedRole._id);
+            if (alreadyExists) {
+                toast.current?.show({
+                    severity: 'warn',
+                    summary: 'Duplicate Role',
+                    detail: 'This role is already assigned to the user.',
+                    life: 3000
+                });
+                return;
+            }
+
+
+            let _roles = [...(user.roles)];
+
+
             if (selectedRole._id) {
                 //const updatedRole = await RoleService.updateRole(selectedRole);
                 //const index = roles.findIndex((role) => role._id === selectedRole._id);
