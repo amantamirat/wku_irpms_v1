@@ -23,6 +23,12 @@ const UserRoleComp = (props: UserRoleCompProps) => {
 
     const { roles, user, onUpdate } = props;
 
+    const unassignedRoles = roles.filter((role) => {
+        return !user.roles.some((r) =>
+            (typeof r === 'string' ? r : r._id) === role._id
+        );
+    });
+
     let emptyRole: Role = {
         role_name: '',
         permissions: []
@@ -88,17 +94,17 @@ const UserRoleComp = (props: UserRoleCompProps) => {
 
     const deleteRole = async () => {
         try {
-            if (selectedRole && selectedRole._id) {
-                await UserService.removeRole(user, selectedRole);
-                let _roles = (user.roles)?.filter((val) => val._id !== selectedRole._id);
-                onUpdate({ ...user, roles: _roles });
-                toast.current?.show({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: 'Role Removed',
-                    life: 3000
-                });
-            }
+
+            await UserService.removeRole(user, selectedRole);
+            let _roles = (user.roles)?.filter((val) => val._id !== selectedRole._id);
+            onUpdate({ ...user, roles: _roles });
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Successful',
+                detail: 'Role Removed',
+                life: 3000
+            });
+
         } catch (error) {
             console.error(error);
             toast.current?.show({
@@ -199,7 +205,7 @@ const UserRoleComp = (props: UserRoleCompProps) => {
                     {selectedRole &&
                         <AddDialog
                             visible={showAddDialog}
-                            roles={roles}
+                            roles={unassignedRoles}
                             role={selectedRole}
                             onChange={setSelectedRole}
                             onAdd={addRole}

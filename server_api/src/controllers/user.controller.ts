@@ -98,13 +98,13 @@ const addRole = async (req: Request, res: Response): Promise<void> => {
 
 const removeRole = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id, roleId } = req.params;
+    const { id, role_id } = req.params;
     const user = await User.findById(id);
     if (!user) {
       errorResponse(res, 404, 'User not found');
       return;
     }
-    user.roles = user.roles.filter(id => id.toString() !== roleId);
+    user.roles = user.roles.filter(id => id.toString() !== role_id);
     await user.save();
     successResponse(res, 200, 'Role removed from user', true);
   } catch (err) {
