@@ -126,7 +126,7 @@ const RoleComp = (props: RoleCompProps) => {
         return (
             <React.Fragment>
                 <div className="my-2">
-                    <Button label="New Role" icon="pi pi-plus" severity="success" className="mr-2" onClick={() => openSaveDialog(emptyRole)} />
+                    <Button label="Add Role" icon="pi pi-plus" severity="success" outlined className="mr-2" onClick={() => openSaveDialog(emptyRole)} />
                 </div>
             </React.Fragment>
         );

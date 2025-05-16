@@ -12,6 +12,7 @@ import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
 import SaveDialog from './dialogs/SaveDialog';
 import RoleComp from '../../components/role/Role';
+import { Role } from '@/models/role';
 
 
 
@@ -23,6 +24,8 @@ const UserPage = () => {
         roles: []
     };
     const [users, setUsers] = useState<User[]>([]);
+    const [roles, setRoles] = useState<Role[]>([]);
+    
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
@@ -45,6 +48,21 @@ const UserPage = () => {
     };
 
     const loadUsers = async () => {
+        try {
+            const data = await UserService.getUsers();
+            setUsers(data);
+        } catch (err) {
+            console.error('Failed to load users:', err);
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Failed to load users data',
+                detail: '' + err,
+                life: 3000
+            });
+        }
+    };
+
+    const loadRoles = async () => {
         try {
             const data = await UserService.getUsers();
             setUsers(data);
