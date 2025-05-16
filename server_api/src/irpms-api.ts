@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
+import roleRoutes from './routes/role.routes';
 import collegeRoutes from './routes/collegeRoutes';
 import departmentRoutes from './routes/departmentRoutes';
 import programRoutes from './routes/programRoutes';
@@ -27,6 +28,8 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/roles", roleRoutes);
+app.use("/api/roles", userRoutes);
 app.use("/api/colleges", collegeRoutes);
 app.use("/api/departments", departmentRoutes);
 app.use("/api/specializations", specializationRoutes);

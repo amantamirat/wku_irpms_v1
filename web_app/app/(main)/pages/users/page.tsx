@@ -13,6 +13,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import SaveDialog from './dialogs/SaveDialog';
 import RoleComp from '../../components/role/Role';
 import { Role } from '@/models/role';
+import { RoleService } from '@/services/RoleService';
 
 
 
@@ -25,7 +26,7 @@ const UserPage = () => {
     };
     const [users, setUsers] = useState<User[]>([]);
     const [roles, setRoles] = useState<Role[]>([]);
-    
+
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
@@ -41,6 +42,7 @@ const UserPage = () => {
         setFilters(initFilters());
         setGlobalFilter('');
         loadUsers();
+        loadRoles();
     }, []);
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,13 +66,13 @@ const UserPage = () => {
 
     const loadRoles = async () => {
         try {
-            const data = await UserService.getUsers();
-            setUsers(data);
+            const data = await RoleService.getRoles();
+            setRoles(data);
         } catch (err) {
-            console.error('Failed to load users:', err);
+            console.error('Failed to load roles:', err);
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to load users data',
+                summary: 'Failed to load roles data',
                 detail: '' + err,
                 life: 3000
             });
