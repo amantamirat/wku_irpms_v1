@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
-import userRoutes from './routes/userRoutes';
+import userRoutes from './routes/user.routes';
 import roleRoutes from './routes/role.routes';
 import collegeRoutes from './routes/collegeRoutes';
 import departmentRoutes from './routes/departmentRoutes';

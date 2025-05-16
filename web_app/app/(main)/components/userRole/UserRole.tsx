@@ -15,6 +15,7 @@ import AddDialog from './dialog/AddDialog';
 interface UserRoleCompProps {
     user: User;
     roles: Role[];
+    onSave: () => void;
 }
 
 const UserRoleComp = (props: UserRoleCompProps) => {
@@ -25,8 +26,6 @@ const UserRoleComp = (props: UserRoleCompProps) => {
         role_name: '',
         permissions: []
     };
-
-
 
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
@@ -47,7 +46,7 @@ const UserRoleComp = (props: UserRoleCompProps) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
 
-    const saveRole = async () => {
+    const addRole = async () => {
         try {
             //let _roles = [...(roles as any)];
             if (selectedRole._id) {
@@ -201,7 +200,7 @@ const UserRoleComp = (props: UserRoleCompProps) => {
                             roles={roles}
                             role={selectedRole}
                             onChange={setSelectedRole}
-                            onAdd={saveRole}
+                            onAdd={addRole}
                             onHide={hideAddDialog}
                         />}
 

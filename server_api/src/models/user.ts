@@ -12,7 +12,7 @@ export interface IUser extends Document {
   password: string;
   email: string;
   status: UserStatus;
-  roles: mongoose.Types.ObjectId[] | IRole[];
+  roles: mongoose.Types.ObjectId[];
   reset_code?: String;
   reset_code_expires?: Date;
 }

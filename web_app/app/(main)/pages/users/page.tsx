@@ -230,8 +230,9 @@ const UserPage = () => {
                         onRowToggle={(e) => setExpandedRows(e.data)}
                         rowExpansionTemplate={(data) => (
                             <UserRoleComp
-                                user={data as User}
+                                user={data as User}                                
                                 roles={roles}
+                                onSave={saveUser}
                             />
                         )}
                     >
