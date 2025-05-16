@@ -11,11 +11,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { User } from '@/models/user';
 import { Role } from '@/models/role';
 
-interface RoleCompProps {
+interface UserRoleCompProps {
     user: User;
 }
 
-const RoleComp = (props: RoleCompProps) => {
+const UserRoleComp = (props: UserRoleCompProps) => {
     let emptyRole: Role = {
         role_name: '',
         permissions:[]
@@ -126,7 +126,7 @@ const RoleComp = (props: RoleCompProps) => {
         return (
             <React.Fragment>
                 <div className="my-2">
-                    <Button label="Add Role" icon="pi pi-plus" severity="success" outlined className="mr-2" onClick={() => openSaveDialog(emptyRole)} />
+                    <Button label="Add Role" icon="pi pi-plus" severity="secondary" outlined className="mr-2" onClick={() => openSaveDialog(emptyRole)} />
                 </div>
             </React.Fragment>
         );
@@ -136,7 +136,7 @@ const RoleComp = (props: RoleCompProps) => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage Roles</h5>
+            <h5 className="m-0">User {props.user.user_name} Roles</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
@@ -189,7 +189,7 @@ const RoleComp = (props: RoleCompProps) => {
                             body={(rowData, options) => options.rowIndex + 1}
                             style={{ width: '50px' }}
                         />
-                        <Column field="role_name" header="Role Name" sortable headerStyle={{ minWidth: '15rem' }} />
+                        <Column field="role_name" header="Role" sortable headerStyle={{ minWidth: '15rem' }} />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
                     
@@ -206,4 +206,4 @@ const RoleComp = (props: RoleCompProps) => {
     );
 };
 
-export default RoleComp;
+export default UserRoleComp;

@@ -11,7 +11,7 @@ import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
 import SaveDialog from './dialogs/SaveDialog';
-import RoleComp from '../../components/role/Role';
+import UserRoleComp from '../../components/userRole/UserRole';
 import { Role } from '@/models/role';
 import { RoleService } from '@/services/RoleService';
 
@@ -228,7 +228,7 @@ const UserPage = () => {
                         expandedRows={expandedRows}
                         onRowToggle={(e) => setExpandedRows(e.data)}
                         rowExpansionTemplate={(data) => (
-                            <RoleComp
+                            <UserRoleComp
                                 user={data as User}
                             />
                         )}
