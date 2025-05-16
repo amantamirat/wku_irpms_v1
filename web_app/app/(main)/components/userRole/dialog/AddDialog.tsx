@@ -34,8 +34,8 @@ function AddDialog(props: AddDialogProps) {
 
     const footer = (
         <>
-            <Button label="Cancel" icon="pi pi-times" text onClick={hide} />
-            <Button label="Add" icon="pi pi-check" text onClick={save} />
+            <Button label="Cancel" icon="pi pi-times" severity='danger' text onClick={hide} />
+            <Button label="Add" icon="pi pi-check" severity='info' text onClick={save} />
         </>
     );
 
