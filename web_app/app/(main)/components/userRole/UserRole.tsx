@@ -14,16 +14,20 @@ import AddDialog from './dialog/AddDialog';
 
 interface UserRoleCompProps {
     user: User;
+    roles: Role[];
 }
 
 const UserRoleComp = (props: UserRoleCompProps) => {
+    
+    const { user, roles} = props;
+
     let emptyRole: Role = {
         role_name: '',
-        permissions:[]
+        permissions: []
     };
 
 
-    const [roles, setRoles] = useState<Role[]>([]);
+
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
@@ -32,12 +36,11 @@ const UserRoleComp = (props: UserRoleCompProps) => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
 
-    
+
 
     useEffect(() => {
         setFilters(initFilters());
         setGlobalFilter('');
-        setRoles(props.user.roles);
     }, []);
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,7 +49,7 @@ const UserRoleComp = (props: UserRoleCompProps) => {
 
     const saveRole = async () => {
         try {
-            let _roles = [...(roles as any)];
+            //let _roles = [...(roles as any)];
             if (selectedRole._id) {
                 //const updatedRole = await RoleService.updateRole(selectedRole);
                 //const index = roles.findIndex((role) => role._id === selectedRole._id);
@@ -61,7 +64,7 @@ const UserRoleComp = (props: UserRoleCompProps) => {
                 detail: `Role ${selectedRole._id ? "updated" : 'created'}`,
                 life: 3000
             });
-            setRoles(_roles);
+            //setRoles(_roles);
         } catch (error) {
             console.error(error);
             toast.current?.show({
@@ -84,7 +87,7 @@ const UserRoleComp = (props: UserRoleCompProps) => {
             const deleted = false;
             if (deleted) {
                 let _roles = (roles as any)?.filter((val: any) => val._id !== selectedRole._id);
-                setRoles(_roles);
+                //setRoles(_roles);
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Successful',
@@ -156,7 +159,7 @@ const UserRoleComp = (props: UserRoleCompProps) => {
         );
     };
 
-    
+
 
 
     return (
@@ -167,7 +170,7 @@ const UserRoleComp = (props: UserRoleCompProps) => {
                     <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
                     <DataTable
                         ref={dt}
-                        value={roles}
+                        value={user.roles}
                         selection={selectedRole}
                         onSelectionChange={(e) => setSelectedRole(e.value as Role)}
                         dataKey="_id"
@@ -182,7 +185,7 @@ const UserRoleComp = (props: UserRoleCompProps) => {
                         header={header}
                         scrollable
                         filters={filters}
-                        
+
                     >
                         <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column
@@ -194,7 +197,7 @@ const UserRoleComp = (props: UserRoleCompProps) => {
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
-                     {selectedRole &&
+                    {selectedRole &&
                         <AddDialog
                             visible={showAddDialog}
                             roles={roles}
@@ -203,7 +206,7 @@ const UserRoleComp = (props: UserRoleCompProps) => {
                             onAdd={saveRole}
                             onHide={hideAddDialog}
                         />}
-                    
+
                     {selectedRole &&
                         <DeleteDialog
                             showDeleteDialog={showDeleteDialog}

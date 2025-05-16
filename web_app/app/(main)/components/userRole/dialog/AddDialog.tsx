@@ -57,11 +57,14 @@ function AddDialog(props: AddDialogProps) {
         >
             {role && (
                 <div className="field">
-                    <label htmlFor="name">Role Name</label>
+                    <label htmlFor="role">Role Name</label>
                     <Dropdown
-                        id="role_name"
-                        value={props.roles}
+                        id="role"
+                        value={role}
+                        optionLabel='role_name'
+                        options={roles}                        
                         onChange={(e) => onChange({ ...e.target.value })}
+                         placeholder="Select a Role"
                         required
                         autoFocus
                         className={classNames({ 'p-invalid': submitted && !role })}

@@ -67,6 +67,7 @@ const UserPage = () => {
     const loadRoles = async () => {
         try {
             const data = await RoleService.getRoles();
+            //console.log(data);
             setRoles(data);
         } catch (err) {
             console.error('Failed to load roles:', err);
@@ -230,6 +231,7 @@ const UserPage = () => {
                         rowExpansionTemplate={(data) => (
                             <UserRoleComp
                                 user={data as User}
+                                roles={roles}
                             />
                         )}
                     >
