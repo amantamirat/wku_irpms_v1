@@ -13,14 +13,13 @@ import { Role } from '@/models/role';
 import AddDialog from './dialog/AddDialog';
 
 interface UserRoleCompProps {
-    user: User;
     roles: Role[];
-    onSave: () => void;
+    user: User;
 }
 
 const UserRoleComp = (props: UserRoleCompProps) => {
 
-    const { user, roles } = props;
+    const { roles, user } = props;
 
     let emptyRole: Role = {
         role_name: '',
