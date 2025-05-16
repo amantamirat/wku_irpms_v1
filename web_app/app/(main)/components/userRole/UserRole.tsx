@@ -18,8 +18,8 @@ interface UserRoleCompProps {
 }
 
 const UserRoleComp = (props: UserRoleCompProps) => {
-    
-    const { user, roles} = props;
+
+    const { user, roles } = props;
 
     let emptyRole: Role = {
         role_name: '',
@@ -151,9 +151,7 @@ const UserRoleComp = (props: UserRoleCompProps) => {
     const actionBodyTemplate = (rowData: Role) => {
         return (
             <>
-                <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
-                    style={{ fontSize: '2rem' }} onClick={() => openSaveDialog(rowData)} />
-                <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
+                <Button icon="pi pi-times" rounded severity="danger" className="p-button-rounded p-button-text"
                     style={{ fontSize: '2rem' }} onClick={() => confirmDeleteItem(rowData)} />
             </>
         );

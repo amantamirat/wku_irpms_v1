@@ -34,7 +34,7 @@ function AddDialog(props: AddDialogProps) {
 
     const footer = (
         <>
-            <Button label="Cancel" icon="pi pi-times" severity='danger' text onClick={hide} />
+            <Button label="Cancel" icon="pi pi-times" severity='warning' text onClick={hide} />
             <Button label="Add" icon="pi pi-check" severity='info' text onClick={save} />
         </>
     );
@@ -62,9 +62,9 @@ function AddDialog(props: AddDialogProps) {
                         id="role"
                         value={role}
                         optionLabel='role_name'
-                        options={roles}                        
+                        options={roles}
                         onChange={(e) => onChange({ ...e.target.value })}
-                         placeholder="Select a Role"
+                        placeholder="Select a Role"
                         required
                         autoFocus
                         className={classNames({ 'p-invalid': submitted && !role })}
