@@ -15,6 +15,8 @@ export interface IUser extends Document {
   roles: mongoose.Types.ObjectId[];
   reset_code?: String;
   reset_code_expires?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const UserSchema = new Schema<IUser>(

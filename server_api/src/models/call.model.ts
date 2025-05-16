@@ -1,23 +1,29 @@
 import mongoose, { Schema, model, Document } from 'mongoose';
 
-
-
-export interface ICall extends Document {
-    directorate: mongoose.Types.ObjectId; 
-    calendar: mongoose.Types.ObjectId; 
-    title: string;
-    description: string;
-    notes: string[]; 
-    dead_line: Date; 
-    total_allocated_budget?: number;
-    status: 'Planned' | 'Active' | 'Closed' | 'Locked'; 
+export enum CallStatus {
+    Planned = 'Planned',
+    Active = 'Active',
+    Closed = 'Closed',
+    Locked = 'Locked'
 }
 
+export interface ICall extends Document {
+    directorate: mongoose.Types.ObjectId;
+    calendar: mongoose.Types.ObjectId;
+    title: string;
+    dead_line: Date;
+    description?: string;
+    notes?: string[];
+    total_allocated_budget?: number;
+    status: CallStatus;
+    createdAt?: Date;
+    updatedAt?: Date;
+}
 
 const CallSchema = new Schema<ICall>({
     directorate: {
         type: Schema.Types.ObjectId,
-        ref: 'Directorate', 
+        ref: 'Directorate',
         required: true
     },
     calendar: {
@@ -29,29 +35,26 @@ const CallSchema = new Schema<ICall>({
         type: String,
         required: true
     },
+    dead_line: {
+        type: Date,
+        required: true
+    },
     description: {
         type: String,
-        required: true
     },
     notes: {
-        type: [String], 
-        required: true
-    },
-    dead_line: {
-        type: Date, 
-        required: true
+        type: [String],
     },
     total_allocated_budget: {
-        type: Number, // Float (nullable)
-        required: false, // This is nullable, so it's not required
-        default: null 
+        type: Number,
     },
     status: {
         type: String,
-        enum: ['Planned', 'Active', 'Closed', 'Locked'], 
+        enum: Object.values(CallStatus),
+        default: CallStatus.Planned,
         required: true
     }
-});
+}, { timestamps: true });
 
 
 const Call = model<ICall>('Call', CallSchema);
