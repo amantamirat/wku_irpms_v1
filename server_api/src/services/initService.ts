@@ -37,7 +37,7 @@ export const initRoles = async () => {
         }).save();
         console.log('Administrator role created with user, role, and permission:read permissions');
     } else {
-        console.log('ℹAdministrator role already exists');
+        console.log('Administrator role already exists');
     }
 };
 

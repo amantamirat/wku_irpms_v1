@@ -23,7 +23,9 @@ function AddDialog(props: AddDialogProps) {
 
     const save = async () => {
         setSubmitted(true);
-
+        if (!role._id) {
+            return;
+        }
         onAdd();
     }
 
@@ -67,9 +69,9 @@ function AddDialog(props: AddDialogProps) {
                         placeholder="Select a Role"
                         required
                         autoFocus
-                        className={classNames({ 'p-invalid': submitted && !role })}
+                        className={classNames({ 'p-invalid': submitted && !role._id })}
                     />
-                    {submitted && !role && (
+                    {submitted && !role._id && (
                         <small className="p-invalid">Role is required.</small>
                     )}
                 </div>

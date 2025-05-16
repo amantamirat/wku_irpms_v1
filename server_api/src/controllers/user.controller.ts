@@ -75,18 +75,18 @@ const deleteUser = async (req: Request, res: Response): Promise<void> => {
 
 const addRole = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { roleId } = req.body;
+    const { role } = req.body;
     const user = await User.findById(req.params.id);
     if (!user) {
       errorResponse(res, 404, 'User not found');
       return;
     }
     // Check if role already exists
-    if (user.roles.includes(roleId)) {
+    if (user.roles.includes(role)) {
       errorResponse(res, 400, 'Role already assigned to user');
       return;
     }
-    user.roles.push(roleId);
+    user.roles.push(role);
     await user.save();
     successResponse(res, 200, 'Role added to user', user);
   } catch (err) {
@@ -98,17 +98,15 @@ const addRole = async (req: Request, res: Response): Promise<void> => {
 
 const removeRole = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { roleId } = req.body;
-    const user = await User.findById(req.params.id);
+    const { id, roleId } = req.params;
+    const user = await User.findById(id);
     if (!user) {
       errorResponse(res, 404, 'User not found');
       return;
     }
-
     user.roles = user.roles.filter(id => id.toString() !== roleId);
     await user.save();
-
-    successResponse(res, 200, 'Role removed from user', user);
+    successResponse(res, 200, 'Role removed from user', true);
   } catch (err) {
     console.error(err);
     errorResponse(res, 500, (err as Error).message);

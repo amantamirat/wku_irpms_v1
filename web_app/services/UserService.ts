@@ -1,7 +1,9 @@
 import { User } from "@/models/user";
 import { MyService } from "./MyService";
+import { Role } from "@/models/role";
 
 const end_point = '/users/';
+
 
 
 export const UserService = {
@@ -13,6 +15,12 @@ export const UserService = {
 
     async createUser(user: Partial<User>): Promise<User> {
         const createdData = await MyService.post(end_point, user);
+        return createdData as User;
+    },
+
+    async addRole(user: User, role: Partial<Role>): Promise<User> {
+        const url = `${end_point}${user._id}/role`;
+        const createdData = await MyService.post(url, { role: role });
         return createdData as User;
     },
 
@@ -30,6 +38,15 @@ export const UserService = {
             throw new Error("_id required.");
         }
         const url = `${end_point}${user._id}`;
+        const response = await MyService.delete(url);
+        return response;
+    },
+
+    async removeRole(user: User, role: Role): Promise<boolean> {
+        if (!user._id || !role._id) {
+            throw new Error("_id required.");
+        }
+        const url = `${end_point}${user._id}/role/${role._id}`;
         const response = await MyService.delete(url);
         return response;
     },

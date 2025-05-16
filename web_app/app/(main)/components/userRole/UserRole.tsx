@@ -11,6 +11,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { User } from '@/models/user';
 import { Role } from '@/models/role';
 import AddDialog from './dialog/AddDialog';
+import { UserService } from '@/services/UserService';
 
 interface UserRoleCompProps {
     roles: Role[];
@@ -20,7 +21,7 @@ interface UserRoleCompProps {
 
 const UserRoleComp = (props: UserRoleCompProps) => {
 
-    const { roles, user } = props;
+    const { roles, user, onUpdate } = props;
 
     let emptyRole: Role = {
         role_name: '',
@@ -50,33 +51,26 @@ const UserRoleComp = (props: UserRoleCompProps) => {
                 (typeof r === 'string' ? r : r._id) === selectedRole._id);
             if (alreadyExists) {
                 toast.current?.show({
-                    severity: 'warn',
+                    severity: 'error',
                     summary: 'Duplicate Role',
                     detail: 'This role is already assigned to the user.',
                     life: 3000
                 });
                 return;
             }
-
-
             let _roles = [...(user.roles)];
-
-
             if (selectedRole._id) {
-                //const updatedRole = await RoleService.updateRole(selectedRole);
-                //const index = roles.findIndex((role) => role._id === selectedRole._id);
-                //_roles[index] = updatedRole;
-            } else {
-                //const newRole = await RoleService.createRole(selectedRole);
-                //_roles.push(newRole);
+                await UserService.addRole(user, selectedRole);
+                _roles.push(selectedRole);
+                onUpdate({ ...user, roles: _roles });
+                toast.current?.show({
+                    severity: 'success',
+                    summary: 'Successful',
+                    detail: 'Role Added!',
+                    life: 3000
+                });
+
             }
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Successful',
-                detail: `Role ${selectedRole._id ? "updated" : 'created'}`,
-                life: 3000
-            });
-            //setRoles(_roles);
         } catch (error) {
             console.error(error);
             toast.current?.show({
@@ -89,21 +83,19 @@ const UserRoleComp = (props: UserRoleCompProps) => {
             setShowAddDialog(false);
             setSelectedRole(emptyRole);
         }
-
     };
 
 
     const deleteRole = async () => {
         try {
-            //const deleted = await RoleService.deleteRole(selectedRole);
-            const deleted = false;
-            if (deleted) {
-                let _roles = (roles as any)?.filter((val: any) => val._id !== selectedRole._id);
-                //setRoles(_roles);
+            if (selectedRole && selectedRole._id) {
+                await UserService.removeRole(user, selectedRole);
+                let _roles = (user.roles)?.filter((val) => val._id !== selectedRole._id);
+                onUpdate({ ...user, roles: _roles });
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Successful',
-                    detail: 'Role Deleted',
+                    detail: 'Role Removed',
                     life: 3000
                 });
             }
@@ -119,10 +111,9 @@ const UserRoleComp = (props: UserRoleCompProps) => {
             setShowDeleteDialog(false);
             setSelectedRole(emptyRole);
         }
-
     };
 
-    const openSaveDialog = (role: Role) => {
+    const openAddDialog = (role: Role) => {
         setSelectedRole({ ...role });
         setShowAddDialog(true);
     };
@@ -142,7 +133,7 @@ const UserRoleComp = (props: UserRoleCompProps) => {
         return (
             <React.Fragment>
                 <div className="my-2">
-                    <Button label="Add Role" icon="pi pi-plus" severity="secondary" outlined className="mr-2" onClick={() => openSaveDialog(emptyRole)} />
+                    <Button label="Add Role" icon="pi pi-plus" severity="secondary" outlined className="mr-2" onClick={() => openAddDialog(emptyRole)} />
                 </div>
             </React.Fragment>
         );
@@ -170,8 +161,6 @@ const UserRoleComp = (props: UserRoleCompProps) => {
     };
 
 
-
-
     return (
         <div className="grid">
             <div className="col-12">
@@ -185,7 +174,7 @@ const UserRoleComp = (props: UserRoleCompProps) => {
                         onSelectionChange={(e) => setSelectedRole(e.value as Role)}
                         dataKey="_id"
                         paginator
-                        rows={10}
+                        rows={5}
                         rowsPerPageOptions={[5, 10, 25]}
                         className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
@@ -220,7 +209,7 @@ const UserRoleComp = (props: UserRoleCompProps) => {
                     {selectedRole &&
                         <DeleteDialog
                             showDeleteDialog={showDeleteDialog}
-                            selectedDataInfo={selectedRole.role_name}
+                            selectedDataInfo={`${selectedRole.role_name} role from ${user.user_name} user`}
                             onDelete={deleteRole}
                             onHide={() => setShowDeleteDialog(false)}
                         />}
