@@ -10,6 +10,7 @@ import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
 import { User } from '@/models/user';
 import { Role } from '@/models/role';
+import AddDialog from './dialog/AddDialog';
 
 interface UserRoleCompProps {
     user: User;
@@ -27,7 +28,7 @@ const UserRoleComp = (props: UserRoleCompProps) => {
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
     const [selectedRole, setSelectedRole] = useState<Role>(emptyRole);
-    const [showSaveDialog, setShowSaveDialog] = useState(false);
+    const [showAddDialog, setShowAddDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
 
@@ -70,7 +71,7 @@ const UserRoleComp = (props: UserRoleCompProps) => {
                 life: 3000
             });
         } finally {
-            setShowSaveDialog(false);
+            setShowAddDialog(false);
             setSelectedRole(emptyRole);
         }
 
@@ -108,12 +109,12 @@ const UserRoleComp = (props: UserRoleCompProps) => {
 
     const openSaveDialog = (role: Role) => {
         setSelectedRole({ ...role });
-        setShowSaveDialog(true);
+        setShowAddDialog(true);
     };
 
 
-    const hideSaveDialog = () => {
-        setShowSaveDialog(false);
+    const hideAddDialog = () => {
+        setShowAddDialog(false);
         setSelectedRole(emptyRole);
     };
 
@@ -192,6 +193,16 @@ const UserRoleComp = (props: UserRoleCompProps) => {
                         <Column field="role_name" header="Role" sortable headerStyle={{ minWidth: '15rem' }} />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
+
+                     {selectedRole &&
+                        <AddDialog
+                            visible={showAddDialog}
+                            roles={roles}
+                            role={selectedRole}
+                            onChange={setSelectedRole}
+                            onAdd={saveRole}
+                            onHide={hideAddDialog}
+                        />}
                     
                     {selectedRole &&
                         <DeleteDialog
