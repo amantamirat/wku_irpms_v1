@@ -16,8 +16,16 @@ export type Calendar = {
 export const validateCalendar = (
     calendar: Calendar
 ): { valid: boolean; message?: string } => {
-    if (!calendar.year || isNaN(calendar.year)) {
-        return { valid: false, message: "Year is required and must be a valid number." };
+    if (
+        !calendar.year ||
+        isNaN(calendar.year) ||
+        calendar.year < 1970 ||
+        calendar.year > 9999
+    ) {
+        return {
+            valid: false,
+            message: "Year is required and must be a four-digit number (1970-8888)."
+        };
     }
 
     if (!calendar.start_date || isNaN(new Date(calendar.start_date).getTime())) {

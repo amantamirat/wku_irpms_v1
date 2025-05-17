@@ -27,8 +27,7 @@ const OrganizationSchema = new Schema<IOrganization>({
         street: { type: String },
         city: { type: String },
         region: { type: String },
-        country: { type: String },
-        postal_code: { type: String }
+        country: { type: String }
     },
     ownership_type: {
         type: String,
