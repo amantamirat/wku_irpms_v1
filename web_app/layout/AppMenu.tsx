@@ -12,6 +12,7 @@ import { DirectorateService } from '@/services/DirectorateService';
 
 const AppMenu = () => {
     const { layoutConfig } = useContext(LayoutContext);
+    const icons = ['pi pi-mars', 'pi pi-microchip', 'pi pi-prime', 'pi pi-sparkles', 'pi pi-venus'];
     const [directorates, setDirectorates] = useState<Directorate[]>([]);
 
     useEffect(() => {
@@ -24,10 +25,10 @@ const AppMenu = () => {
     const directoratesMenu: AppMenuItem = {
         label: 'Directorates',
         icon: 'pi pi-sitemap',
-        items: directorates.map((dir) => ({
+        items: directorates.map((dir, index) => ({
             label: dir.directorate_name,
-            icon: 'pi pi-angle-right',
-            //to: `/pages/directorates/${dir._id}`
+            icon: icons[index % icons.length],
+            to: `/pages/directorates/${dir._id}`
         }))
     };
 
@@ -47,12 +48,12 @@ const AppMenu = () => {
                 },
                 {
                     label: 'Colleges',
-                    icon: 'pi pi-fw pi-shop',
+                    icon: 'pi pi-fw pi-warehouse',
                     to: '/pages/colleges'
                 },
                 {
                     label: 'Departments',
-                    icon: 'pi pi-fw pi-th-large',
+                    icon: 'pi pi-fw pi-shop',
                     to: '/pages/departments'
                 },
                 {
@@ -76,7 +77,7 @@ const AppMenu = () => {
                         },
                         {
                             label: 'External',
-                            icon: 'pi pi-fw pi-mars',
+                            icon: 'pi pi-fw pi-asterisk',
                             disabled: true,
                             to: '/pages/applicants?type=3'
                         }
