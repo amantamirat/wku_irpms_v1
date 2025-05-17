@@ -65,9 +65,9 @@ function SaveDialog(props: SaveDialogProps) {
             <div className="field">
                 <label htmlFor="year">Year</label>
                 <InputNumber
-                    id="year"                    
+                    id="year"
                     value={calendar.year}
-                    onChange={(e) => onChange({ ...calendar, year: e.value ?? 0 })}                    
+                    onChange={(e) => onChange({ ...calendar, year: e.value ?? 0 })}
                     mode="decimal" // Basic number mode
                     useGrouping={false} // No thousand separator
                     showButtons
@@ -80,10 +80,11 @@ function SaveDialog(props: SaveDialogProps) {
                 <label htmlFor="start_date">Start Date</label>
                 <PrimeCalendar
                     id="start_date"
-                    value={calendar.start_date ? new Date(calendar.start_date) : undefined}
-                    onChange={(e) => onChange({ ...calendar, start_date: e.value || undefined })}
+                    value={calendar.start_date}
+                    onChange={(e) => onChange({ ...calendar, start_date: e.value || null })}
                     dateFormat="yy-mm-dd"
                     showIcon
+                    className={classNames({ 'p-invalid': submitted && !calendar.start_date })}
                 />
             </div>
 
@@ -91,10 +92,11 @@ function SaveDialog(props: SaveDialogProps) {
                 <label htmlFor="end_date">End Date</label>
                 <PrimeCalendar
                     id="end_date"
-                    value={calendar.end_date ? new Date(calendar.end_date) : undefined}
-                    onChange={(e) => onChange({ ...calendar, end_date: e.value || undefined })}
+                    value={calendar.end_date}
+                    onChange={(e) => onChange({ ...calendar, end_date: e.value || null })}
                     dateFormat="yy-mm-dd"
                     showIcon
+                    className={classNames({ 'p-invalid': submitted && !calendar.end_date })}
                 />
             </div>
 

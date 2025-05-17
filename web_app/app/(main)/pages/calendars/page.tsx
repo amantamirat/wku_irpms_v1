@@ -17,8 +17,8 @@ const CalendarPage = () => {
     const emptyCalendar: Calendar = {
         year: new Date().getFullYear(),
         status: Status.active,
-        start_date: undefined,
-        end_date: undefined,
+        start_date: new Date(),
+        end_date: new Date(),
     };
 
     const [calendars, setCalendars] = useState<Calendar[]>([]);

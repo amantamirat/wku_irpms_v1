@@ -7,8 +7,8 @@ export enum Status {
 
 export interface ICalendar extends Document {
   year: number;
-  start_date?: Date;
-  end_date?: Date;
+  start_date: Date;
+  end_date: Date;
   status: Status;
   createdAt?: Date;
   updatedAt?: Date;
@@ -25,10 +25,12 @@ const CalendarSchema = new Schema<ICalendar>({
     unique: true
   },
   start_date: {
-    type: Date
+    type: Date,
+    required: true,
   },
   end_date: {
-    type: Date
+    type: Date,
+    required: true,
   },
   status: {
     type: String,
