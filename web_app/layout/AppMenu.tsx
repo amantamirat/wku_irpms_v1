@@ -28,7 +28,7 @@ const AppMenu = () => {
         items: directorates.map((dir, index) => ({
             label: dir.directorate_name,
             icon: icons[index % icons.length],
-            to: `/pages/directorates/${dir._id}`
+            //to: `/pages/directorates/${dir._id}`
         }))
     };
 
