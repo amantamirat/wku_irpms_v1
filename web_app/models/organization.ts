@@ -6,7 +6,7 @@ export enum Ownership {
     NGO = 'NGO'
 }
 
-export type Institute = {
+export type Organization = {
     name: string;
     address: {
         street?: string;

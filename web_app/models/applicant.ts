@@ -1,5 +1,5 @@
 import { Department } from "./department";
-import { Institute } from "./institute";
+import { Organization } from "./organization";
 import { Category } from "./position";
 import { Rank } from "./rank";
 
@@ -17,7 +17,7 @@ export type Applicant = {
     rank: string | Rank;
     department?: string | Department;
     hire_date?: Date;
-    institute?: string | Institute;
+    organization?: string | Organization;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -57,7 +57,7 @@ export const validateApplicant = (
                 return { valid: false, message: 'Department is required for academic category.' };
             }
 
-            if (position.category === Category.external && !applicant.institute) {
+            if (position.category === Category.external && !applicant.organization) {
                 return { valid: false, message: 'Institute is required for external category.' };
             }
         }

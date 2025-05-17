@@ -10,6 +10,7 @@ const getAuthToken = (): string | null => {
 const handleError = async (response: Response) => {
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.log("Error Data:", errorData); 
         throw new Error(errorData.message || `Request failed with status ${response.status}`);
     }
     return response;

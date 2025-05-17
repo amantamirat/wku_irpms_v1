@@ -6,7 +6,7 @@ export enum Ownership {
     NGO = 'NGO'
 }
 
-export interface IInstitute extends Document {
+export interface IOrganization extends Document {
     name: string;
     address: {
         street?: string;
@@ -21,7 +21,7 @@ export interface IInstitute extends Document {
     updatedAt?: Date;
 }
 
-const InstituteSchema = new Schema<IInstitute>({
+const OrganizationSchema = new Schema<IOrganization>({
     name: { type: String, required: true },
     address: {
         street: { type: String },
@@ -44,4 +44,4 @@ const InstituteSchema = new Schema<IInstitute>({
     timestamps: true
 });
 
-export const Institute = model<IInstitute>('Institute', InstituteSchema);
+export const Organization = model<IOrganization>('Organization', OrganizationSchema);

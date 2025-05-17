@@ -5,6 +5,15 @@ export enum Gender {
     Female = 'Female'
 }
 
+export enum DisabilityTypes {
+    Visual = 'Visual',
+    Hearing = 'Hearing',
+    Mobility = 'Mobility',
+    Speech = 'Speech',
+    Cognitive = 'Cognitive',
+    Other = 'Other'
+}
+
 export interface IApplicant extends Document {
     first_name: string;
     middle_name?: string;
@@ -13,7 +22,9 @@ export interface IApplicant extends Document {
     gender: Gender;
     rank: mongoose.Types.ObjectId;
     department?: mongoose.Types.ObjectId;
-    institute?: mongoose.Types.ObjectId;
+    organization?: mongoose.Types.ObjectId;
+    hasDisability?: boolean,
+    disabilityTypes?: DisabilityTypes,
     hire_date?: Date;
     createdAt?: Date;
     updatedAt?: Date;
@@ -46,12 +57,20 @@ const ApplicantSchema = new Schema<IApplicant>({
         type: Schema.Types.ObjectId,
         ref: 'Department',
     },
+    organization: {
+        type: Schema.Types.ObjectId,
+        ref: 'Organization',
+    },
+    hasDisability: {
+        type: Boolean,
+        default: false
+    },
+    disabilityTypes: {
+        type: String,
+        enum: Object.values(DisabilityTypes),
+    },
     hire_date: {
         type: Date,
-    },
-    institute: {
-        type: Schema.Types.ObjectId,
-        ref: 'Institute',
     }
 }, { timestamps: true });
 

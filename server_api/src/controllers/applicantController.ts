@@ -156,7 +156,7 @@ const updateApplicant = async (req: Request, res: Response): Promise<void> => {
         department,
         rank,
         hire_date,
-        institute
+        organization: institute
       },
       { new: true, runValidators: true }
     )
