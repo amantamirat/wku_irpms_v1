@@ -129,7 +129,7 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
                             ...applicant,
                             rank: e.value,
                         })
-                    }
+                    }                    
                     optionLabel="rank_title"
                     placeholder="Select a Rank"
                     required
@@ -138,7 +138,7 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
             </div>
             {departments &&
                 <div className="field">
-                    <label htmlFor="department">Department</label>
+                    <label htmlFor="department">Department </label>
                     <Dropdown
                         id="department"
                         value={applicant.department}

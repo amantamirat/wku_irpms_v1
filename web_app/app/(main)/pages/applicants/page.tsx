@@ -215,7 +215,9 @@ const ApplicantPage = () => {
         <>
             <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setSelectedApplicant(rowData);
+                    const matchedRank = ranks.find(r => r._id === (rowData.rank as Rank)?._id);
+                    const matchedDepartment = departments.find(d => d._id === (rowData.department as Department)?._id);
+                    setSelectedApplicant({ ...rowData, rank: matchedRank ?? '', department: matchedDepartment });
                     setShowSaveDialog(true);
                 }} />
             <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
@@ -225,8 +227,6 @@ const ApplicantPage = () => {
                 }} />
         </>
     );
-
-
 
     return (
         <div className="grid">
@@ -249,7 +249,7 @@ const ApplicantPage = () => {
                         globalFilter={globalFilter}
                         emptyMessage={`No ${getHeading()} data found.`}
                         header={header}
-                        scrollable                       
+                        scrollable
                         filters={filters}
                         tableStyle={{ minWidth: '50rem' }}
                     >
