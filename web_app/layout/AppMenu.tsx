@@ -1,21 +1,42 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import AppMenuitem from './AppMenuitem';
 import { LayoutContext } from './context/layoutcontext';
 import { MenuProvider } from './context/menucontext';
 import Link from 'next/link';
 import { AppMenuItem } from '@/types';
 import { PrimeIcons } from 'primereact/api';
-import { Category } from '@/models/position';
+import { Directorate } from '@/models/directorate';
+import { DirectorateService } from '@/services/DirectorateService';
+
 
 const AppMenu = () => {
     const { layoutConfig } = useContext(LayoutContext);
+    const [directorates, setDirectorates] = useState<Directorate[]>([]);
+
+    useEffect(() => {
+        DirectorateService.getDirectorates()
+            .then(data => setDirectorates(data))
+            .catch(err => console.error('Failed to fetch directorates', err));
+    }, []);
+
+
+    const directoratesMenu: AppMenuItem = {
+        label: 'Directorates',
+        icon: 'pi pi-sitemap',
+        items: directorates.map((dir) => ({
+            label: dir.directorate_name,
+            icon: 'pi pi-angle-right',
+            //to: `/pages/directorates/${dir._id}`
+        }))
+    };
 
     const model: AppMenuItem[] = [
         {
             label: 'Home',
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
         },
+        directoratesMenu,
         {
             label: 'Manage',
             items: [
@@ -67,11 +88,13 @@ const AppMenu = () => {
                     icon: 'pi pi-fw pi-graduation-cap',
                 },
                 */
-                {
-                    label: 'Directorates',
-                    icon: 'pi pi-sitemap',
-                    to: '/pages/directorates'
-                },
+                /*
+                 {
+                     label: 'Directorates',
+                     icon: 'pi pi-sitemap',
+                     to: '/pages/directorates'
+                 },
+                 */
                 {
                     label: 'User Accounts',
                     icon: PrimeIcons.USERS,
