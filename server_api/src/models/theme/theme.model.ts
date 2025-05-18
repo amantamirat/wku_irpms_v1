@@ -1,4 +1,5 @@
 import mongoose, { Schema, model, Document } from 'mongoose';
+import { PriorityArea } from './priorityArea.model';
 
 export enum ThemeStatus {
     Active = 'Active',
@@ -31,5 +32,15 @@ const ThemeSchema = new Schema<ITheme>({
         required: true
     }
 }, { timestamps: true });
+
+ThemeSchema.pre('findOneAndDelete', async function (next) {
+    const theme = await this.model.findOne(this.getQuery());
+    if (!theme) return next();
+    const isReferenced = await PriorityArea.exists({ theme: theme._id });
+    if (isReferenced) {
+        return next(new Error('Cannot delete Theme: it has priority Areas.'));
+    }
+    next();
+});
 
 export const Theme = model<ITheme>('Theme', ThemeSchema);
