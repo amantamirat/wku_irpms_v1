@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { Theme } from '../models/theme.model';
-import Directorate from '../models/directorate';
-import { successResponse, errorResponse } from '../util/response';
+import { Theme } from '../../models/theme/theme.model';
+import Directorate from '../../models/directorate';
+import { successResponse, errorResponse } from '../../util/response';
 
 const createTheme = async (req: Request, res: Response): Promise<void> => {
     try {

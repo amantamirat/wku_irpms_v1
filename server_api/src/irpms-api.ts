@@ -15,7 +15,7 @@ import positionRoutes from './routes/positionRoutes';
 import rankRoutes from './routes/rankRoutes';
 import applicantRoutes from './routes/applicantRoutes';
 import callRoutes from './routes/call.routes';
-import themeRoutes from './routes/theme.routes';
+import themeRoutes from './routes/theme/theme.routes';
 
 import { seedPositions, seedSectors } from './services/seedService';
 import { initAdminUser, initPermissions, initRoles } from './services/initService';
