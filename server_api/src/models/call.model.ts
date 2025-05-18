@@ -57,5 +57,4 @@ const CallSchema = new Schema<ICall>({
 }, { timestamps: true });
 
 
-const Call = model<ICall>('Call', CallSchema);
-export default Call;
+export const Call = model<ICall>('Call', CallSchema);
