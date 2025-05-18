@@ -41,6 +41,25 @@ const ThemePage = () => {
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
 
+    useEffect(() => {
+        if (directorateId) {
+            DirectorateService.getDirectorateByID(directorateId)
+                .then((result) => {
+                    if (!result) {
+                        router.push('/auth/error'); // redirect if not found
+                    } else {
+                        setDirectorate(result);
+                    }
+                })
+                .catch(() => {
+                    router.push('/auth/error'); // also handle fetch errors
+                });
+        } else {
+            // if no directorateId param, optionally redirect or handle differently
+            router.push('/auth/error');
+        }
+    }, [directorateId, router]);
+
     const loadThemes = async () => {
         try {
             if (!directorate) return;
@@ -56,27 +75,11 @@ const ThemePage = () => {
         }
     };
 
-
     useEffect(() => {
-        if (directorateId) {
-            DirectorateService.getDirectorateByID(directorateId)
-                .then((result) => {
-                    if (!result) {
-                        router.push('/auth/error'); // redirect if not found
-                    } else {
-                        setDirectorate(result);
-                        loadThemes();
-                    }
-                })
-                .catch(() => {
-                    router.push('/auth/error'); // also handle fetch errors
-                });
-        } else {
-            // if no directorateId param, optionally redirect or handle differently
-            router.push('/auth/error');
+        if (directorate) {
+            loadThemes();
         }
-    }, [directorateId, router]);
-
+    }, [directorate])
 
     useEffect(() => {
         setFilters(initFilters());
