@@ -15,7 +15,6 @@ export type Call = {
     title: string;
     dead_line: Date;
     description?: string;
-    notes?: string[];
     max_total_allocated_budget?: number;
     status: CallStatus;
     createdAt?: Date;

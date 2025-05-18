@@ -13,7 +13,6 @@ export interface ICall extends Document {
     title: string;
     dead_line: Date;
     description?: string;
-    notes?: string[];
     max_total_allocated_budget?: number;
     status: CallStatus;
     createdAt?: Date;
@@ -41,9 +40,6 @@ const CallSchema = new Schema<ICall>({
     },
     description: {
         type: String,
-    },
-    notes: {
-        type: [String],
     },
     max_total_allocated_budget: {
         type: Number,

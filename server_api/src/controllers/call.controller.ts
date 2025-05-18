@@ -10,7 +10,6 @@ const createCall = async (req: Request, res: Response): Promise<void> => {
             title,
             dead_line,
             description,
-            notes,
             max_total_allocated_budget,
             status
         } = req.body;
@@ -21,7 +20,6 @@ const createCall = async (req: Request, res: Response): Promise<void> => {
             title,
             dead_line,
             description,
-            notes,
             max_total_allocated_budget,
             status
         });
@@ -54,7 +52,6 @@ const updateCall = async (req: Request, res: Response): Promise<void> => {
             title,
             dead_line,
             description,
-            notes,
             max_total_allocated_budget,
             status
         } = req.body;
@@ -67,7 +64,6 @@ const updateCall = async (req: Request, res: Response): Promise<void> => {
                 title,
                 dead_line,
                 description,
-                notes,
                 max_total_allocated_budget,
                 status
             },
