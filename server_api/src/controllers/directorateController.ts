@@ -40,7 +40,7 @@ const getDirectorateById = async (req: Request, res: Response): Promise<void> =>
     }
     successResponse(res, 200, 'Directorate fetched successfully', directorate);
   } catch (error) {
-    errorResponse(res, 500, 'Server error', (error as Error).message);
+    errorResponse(res, 500, (error as Error).message, {});
   }
 };
 
