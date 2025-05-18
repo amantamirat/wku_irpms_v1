@@ -16,11 +16,12 @@ const createTheme = async (req: Request, res: Response): Promise<void> => {
         await theme.save();
         successResponse(res, 201, 'Theme created successfully', theme);
     } catch (error: any) {
+        console.log(error);
         if (error.code === 11000) {
             errorResponse(res, 400, 'Theme name must be unique');
             return;
         }
-        errorResponse(res, 500, 'Server error', error.message);
+        errorResponse(res, 500, error.message);
     }
 };
 
@@ -33,7 +34,15 @@ const getAllThemes = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
-
+const getThemesByDirectorate = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { directorate } = req.params;
+        const themes = await Theme.find({ directorate });
+        successResponse(res, 200, 'Themes fetched successfully', themes);
+    } catch (error) {
+        errorResponse(res, 500, 'Server error', (error as Error).message);
+    }
+};
 
 const updateTheme = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -77,6 +86,7 @@ const deleteTheme = async (req: Request, res: Response): Promise<void> => {
 const themeController = {
     createTheme,
     getAllThemes,
+    getThemesByDirectorate,
     updateTheme,
     deleteTheme,
 };

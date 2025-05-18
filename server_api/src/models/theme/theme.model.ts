@@ -27,6 +27,7 @@ const ThemeSchema = new Schema<ITheme>({
     status: {
         type: String,
         enum: Object.values(ThemeStatus),
+        default:ThemeStatus.Active,
         required: true
     }
 }, { timestamps: true });

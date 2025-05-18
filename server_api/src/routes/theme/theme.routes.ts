@@ -6,6 +6,7 @@ const router: Router = Router();
 
 router.post('/', verifyActiveAccount, themeController.createTheme);
 router.get('/', verifyActiveAccount, themeController.getAllThemes);
+router.get('/directorate/:directorate', verifyActiveAccount, themeController.getThemesByDirectorate);
 router.put('/:id', verifyActiveAccount, themeController.updateTheme);
 router.delete('/:id', verifyActiveAccount, themeController.deleteTheme);
 
