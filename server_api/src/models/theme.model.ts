@@ -19,6 +19,7 @@ const ThemeSchema = new Schema<ITheme>({
     },
     title: {
         type: String,
+        unique:true,
         required: true
     },
     status: {
@@ -28,5 +29,4 @@ const ThemeSchema = new Schema<ITheme>({
     }
 });
 
-const Theme = model<ITheme>('Theme', ThemeSchema);
-export default Theme;
+export const Theme = model<ITheme>('Theme', ThemeSchema);

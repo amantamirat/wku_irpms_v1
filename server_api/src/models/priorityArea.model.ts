@@ -1,5 +1,5 @@
 import mongoose, { Schema, model, Document } from 'mongoose';
-import { ITheme } from './theme'; 
+
 
 export interface IPriorityArea extends Document {
     theme: mongoose.Types.ObjectId;
@@ -18,5 +18,4 @@ const PriorityAreaSchema = new Schema<IPriorityArea>({
     }
 });
 
-const PriorityArea = model<IPriorityArea>('PriorityArea', PriorityAreaSchema);
-export default PriorityArea;
+export const PriorityArea = model<IPriorityArea>('PriorityArea', PriorityAreaSchema);

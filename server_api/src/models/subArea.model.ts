@@ -1,5 +1,4 @@
 import mongoose, { Schema, model, Document } from 'mongoose';
-import { IPriorityArea } from './priorityArea';
 
 export interface ISubArea extends Document {
     priority_area: mongoose.Types.ObjectId;
@@ -18,5 +17,4 @@ const SubAreaSchema = new Schema<ISubArea>({
     }
 });
 
-const SubArea = model<ISubArea>('SubArea', SubAreaSchema);
-export default SubArea;
+export const SubArea = model<ISubArea>('SubArea', SubAreaSchema);
