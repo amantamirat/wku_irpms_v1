@@ -11,6 +11,11 @@ export const DirectorateService = {
         return data as Directorate[];
     },
 
+    async getDirectorateByID(id: string): Promise<Directorate> {
+        const data = await MyService.get(`${end_point}${id}`);
+        return data as Directorate;
+    },
+
     async createDirectorate(directorate: Partial<Directorate>): Promise<Directorate> {
         const createdData = await MyService.post(end_point, directorate);
         return createdData as Directorate;

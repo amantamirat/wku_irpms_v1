@@ -98,21 +98,32 @@
 .call-badge {
     &.status-planned {
         background: #BBDEFB; // light blue
-        color: #0D47A1;      // dark blue
+        color: #0D47A1; // dark blue
     }
 
     &.status-active {
         background: #C8E6C9; // light green
-        color: #256029;      // dark green
+        color: #256029; // dark green
     }
 
     &.status-closed {
         background: #FFCDD2; // light red
-        color: #C63737;      // dark red
+        color: #C63737; // dark red
     }
 
     &.status-locked {
         background: #E0E0E0; // light grey
-        color: #424242;      // dark grey
+        color: #424242; // dark grey
+    }
+}
+
+.theme-badge {
+    &.status-active {
+        background: #C8E6C9; // light green
+        color: #256029; // dark green
+    }
+    &.status-locked {
+        background: #E0E0E0; // light grey
+        color: #424242; // dark grey
     }
 }
