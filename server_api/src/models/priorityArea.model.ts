@@ -4,6 +4,8 @@ import mongoose, { Schema, model, Document } from 'mongoose';
 export interface IPriorityArea extends Document {
     theme: mongoose.Types.ObjectId;
     title: string;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 const PriorityAreaSchema = new Schema<IPriorityArea>({
@@ -16,6 +18,6 @@ const PriorityAreaSchema = new Schema<IPriorityArea>({
         type: String,
         required: true
     }
-});
+}, { timestamps: true });
 
 export const PriorityArea = model<IPriorityArea>('PriorityArea', PriorityAreaSchema);

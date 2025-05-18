@@ -9,6 +9,8 @@ export interface ITheme extends Document {
     directorate: mongoose.Types.ObjectId;
     title: string;
     status: ThemeStatus;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
 const ThemeSchema = new Schema<ITheme>({
@@ -27,6 +29,6 @@ const ThemeSchema = new Schema<ITheme>({
         enum: Object.values(ThemeStatus),
         required: true
     }
-});
+}, { timestamps: true });
 
 export const Theme = model<ITheme>('Theme', ThemeSchema);
