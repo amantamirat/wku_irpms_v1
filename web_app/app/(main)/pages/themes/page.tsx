@@ -14,6 +14,7 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
+import SaveDialog from './dialogs/SaveDialog';
 
 const ThemePage = () => {
 
@@ -23,7 +24,7 @@ const ThemePage = () => {
     const router = useRouter();
 
     const emptyTheme: Theme = {
-        directorate: '',
+        directorate: directorate || '',
         title: '',
         status: ThemeStatus.Active,
     };
@@ -38,28 +39,10 @@ const ThemePage = () => {
     const toast = useRef<Toast>(null);
 
 
-    useEffect(() => {
-        if (directorateId) {
-            DirectorateService.getDirectorateByID(directorateId)
-                .then((result) => {
-                    if (!result) {
-                        router.push('/auth/error'); // redirect if not found
-                    } else {
-                        setDirectorate(result);
-                    }
-                })
-                .catch(() => {
-                    router.push('/auth/error'); // also handle fetch errors
-                });
-        } else {
-            // if no directorateId param, optionally redirect or handle differently
-            router.push('/auth/error');
-        }
-    }, [directorateId, router]);
-
     const loadThemes = async () => {
         try {
-            const data = await ThemeService.getThemes();
+            if (!directorate) return;
+            const data = await ThemeService.getThemesByDirectorate(directorate);
             setThemes(data);
         } catch (err) {
             toast.current?.show({
@@ -71,10 +54,31 @@ const ThemePage = () => {
         }
     };
 
+
+    useEffect(() => {
+        if (directorateId) {
+            DirectorateService.getDirectorateByID(directorateId)
+                .then((result) => {
+                    if (!result) {
+                        router.push('/auth/error'); // redirect if not found
+                    } else {
+                        setDirectorate(result);
+                        loadThemes();
+                    }
+                })
+                .catch(() => {
+                    router.push('/auth/error'); // also handle fetch errors
+                });
+        } else {
+            // if no directorateId param, optionally redirect or handle differently
+            router.push('/auth/error');
+        }
+    }, [directorateId, router]);
+
+
     useEffect(() => {
         setFilters(initFilters());
         setGlobalFilter('');
-        loadThemes();
     }, []);
 
 
@@ -205,7 +209,7 @@ const ThemePage = () => {
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} themes"
                         globalFilter={globalFilter}
-                        emptyMessage="No theme data found."
+                        emptyMessage={`No ${directorate.directorate_name} themes data found.`}
                         header={header}
                         scrollable
                         filters={filters}
@@ -217,7 +221,15 @@ const ThemePage = () => {
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
-
+                    {selectedTheme && (
+                        <SaveDialog
+                            visible={showSaveDialog}
+                            theme={selectedTheme}
+                            onChange={setSelectedTheme}
+                            onSave={saveTheme}
+                            onHide={() => setShowSaveDialog(false)}
+                        />
+                    )}
 
                     {selectedTheme && (
                         <DeleteDialog

@@ -15,6 +15,10 @@ export type Theme = {
 }
 
 export const validateTheme = (theme: Theme): { valid: boolean; message?: string } => {
+    
+    if (!theme.directorate) {
+        return { valid: false, message: 'Directorate is required.' };
+    }
 
     if (!theme.title || theme.title.trim().length === 0) {
         return { valid: false, message: 'Title is required.' };
