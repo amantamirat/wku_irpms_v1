@@ -15,9 +15,14 @@ import positionRoutes from './routes/positionRoutes';
 import rankRoutes from './routes/rankRoutes';
 import applicantRoutes from './routes/applicantRoutes';
 import callRoutes from './routes/call.routes';
+
 import themeRoutes from './routes/theme/theme.routes';
 import priorityAreaRoutes from './routes/theme/priorityArea.routes';
 import subAreaRoutes from './routes/theme/subArea.routes';
+
+import evaluationRoutes from './routes/evaluation/evaluation.routes';
+import stageRoutes from './routes/evaluation/stage.routes';
+import weightRoutes from './routes/evaluation/weight.routes';
 
 import { seedPositions, seedSectors } from './services/seedService';
 import { initAdminUser, initPermissions, initRoles } from './services/initService';
@@ -45,9 +50,14 @@ app.use("/api/positions", positionRoutes);
 app.use("/api/ranks", rankRoutes);
 app.use("/api/applicants", applicantRoutes);
 app.use("/api/calls", callRoutes);
+
 app.use("/api/themes", themeRoutes);
 app.use("/api/priorityAreas", priorityAreaRoutes);
 app.use("/api/subAreas", subAreaRoutes);
+
+app.use("/api/evaluations", evaluationRoutes);
+app.use("/api/stages", stageRoutes);
+app.use("/api/weights", weightRoutes);
 
 const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.SERVER_PORT || 5000;
