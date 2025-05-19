@@ -121,7 +121,7 @@ const SubAreaComp = (props: SubAreaCompProps) => {
 
     const startToolbarTemplate = () => (
         <div className="my-2">
-            <Button label="New SubArea" icon="pi pi-plus" severity="success" className="mr-2"
+            <Button label="New Sub Area" icon="pi pi-plus" severity="info" className="mr-2"
                 onClick={() => {
                     setSelectedSubArea(emptySubArea);
                     setShowSaveDialog(true);
@@ -132,7 +132,7 @@ const SubAreaComp = (props: SubAreaCompProps) => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage {priorityArea.title} SubAreas</h5>
+            <h5 className="m-0">{priorityArea.title} Sub Areas</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />

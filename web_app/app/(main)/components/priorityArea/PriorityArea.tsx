@@ -123,7 +123,7 @@ const PriorityAreaComp = (props: PriorityAreaCompProps) => {
 
     const startToolbarTemplate = () => (
         <div className="my-2">
-            <Button label="New PriorityArea" icon="pi pi-plus" severity="success" className="mr-2"
+            <Button label="New Priority Area" icon="pi pi-plus" severity="secondary" className="mr-2"
                 onClick={() => {
                     setSelectedPriorityArea(emptyPriorityArea);
                     setShowSaveDialog(true);
@@ -134,7 +134,7 @@ const PriorityAreaComp = (props: PriorityAreaCompProps) => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage {theme.title} PriorityAreas</h5>
+            <h5 className="m-0">Manage {theme.title} Priority Areas</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
