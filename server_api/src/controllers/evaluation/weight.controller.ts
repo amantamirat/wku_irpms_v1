@@ -5,14 +5,14 @@ import { successResponse, errorResponse } from '../../util/response';
 
 const createWeight = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { stage, title, weight_value} = req.body;
+        const { stage, title, weight_value } = req.body;
 
         const existingPriority = await Stage.findById(stage);
         if (!existingPriority) {
             errorResponse(res, 400, 'Referenced priority does not exist');
             return;
         }
-        const weight = new Weight({ stage, title });
+        const weight = new Weight({ stage, title, weight_value });
         await weight.save();
         successResponse(res, 201, 'Weight created successfully', weight);
     } catch (error: any) {
