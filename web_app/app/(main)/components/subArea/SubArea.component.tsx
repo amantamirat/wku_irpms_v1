@@ -1,8 +1,8 @@
 'use client';
 
 import DeleteDialog from '@/components/DeleteDialog';
-import { PriorityArea } from '@/models/priorityArea';
-import { PriorityAreaService } from '@/services/PriorityAreaService';
+import { SubArea } from '@/models/subArea';
+import { SubAreaService } from '@/services/SubAreaService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -11,41 +11,41 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
+import { PriorityArea } from '@/models/priorityArea';
 import SaveDialog from './dialog/SaveDialog';
-import { Theme } from '@/models/theme';
 
-interface PriorityAreaCompProps {
-    theme: Theme;
+interface SubAreaCompProps {
+    priorityArea: PriorityArea;
 }
 
-const PriorityAreaComp = (props: PriorityAreaCompProps) => {
+const SubAreaComp = (props: SubAreaCompProps) => {
 
-    const { theme } = props;
+    const { priorityArea } = props;
 
-    const emptyPriorityArea: PriorityArea = {
-        theme: theme,
+    const emptySubArea: SubArea = {
+        priorityArea: priorityArea,
         title: '',
     };
 
-    const [priorityAreas, setPriorityAreas] = useState<PriorityArea[]>([]);
+    const [subAreas, setSubAreas] = useState<SubArea[]>([]);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
-    const [selectedPriorityArea, setSelectedPriorityArea] = useState<PriorityArea>(emptyPriorityArea);
+    const [selectedSubArea, setSelectedSubArea] = useState<SubArea>(emptySubArea);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
 
 
-    const loadPriorityAreas = async () => {
+    const loadSubAreas = async () => {
         try {
-            if (!theme) return;
-            const data = await PriorityAreaService.getPriorityAreasByTheme(theme);
-            setPriorityAreas(data);
+            if (!priorityArea) return;
+            const data = await SubAreaService.getSubAreasByPriorityArea(priorityArea);
+            setSubAreas(data);
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to load priorityArea data',
+                summary: 'Failed to load subArea data',
                 detail: '' + err,
                 life: 3000
             });
@@ -55,7 +55,7 @@ const PriorityAreaComp = (props: PriorityAreaCompProps) => {
     useEffect(() => {
         setFilters(initFilters());
         setGlobalFilter('');
-        loadPriorityAreas();
+        loadSubAreas();
     }, []);
 
 
@@ -63,67 +63,67 @@ const PriorityAreaComp = (props: PriorityAreaCompProps) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
 
-    const savePriorityArea = async () => {
+    const saveSubArea = async () => {
         try {
-            let _priorityAreas = [...priorityAreas];
-            if (selectedPriorityArea._id) {
-                const updated = await PriorityAreaService.updatePriorityArea(selectedPriorityArea);
-                const index = _priorityAreas.findIndex((c) => c._id === selectedPriorityArea._id);
-                _priorityAreas[index] = updated;
+            let _subAreas = [...subAreas];
+            if (selectedSubArea._id) {
+                const updated = await SubAreaService.updateSubArea(selectedSubArea);
+                const index = _subAreas.findIndex((c) => c._id === selectedSubArea._id);
+                _subAreas[index] = updated;
             } else {
-                const created = await PriorityAreaService.createPriorityArea(selectedPriorityArea);
-                _priorityAreas.push(created);
+                const created = await SubAreaService.createSubArea(selectedSubArea);
+                _subAreas.push(created);
             }
-            setPriorityAreas(_priorityAreas);
+            setSubAreas(_subAreas);
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',
-                detail: `PriorityArea ${selectedPriorityArea._id ? 'updated' : 'created'}`,
+                detail: `SubArea ${selectedSubArea._id ? 'updated' : 'created'}`,
                 life: 3000
             });
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to save priorityArea',
+                summary: 'Failed to save subArea',
                 detail: '' + err,
                 life: 3000
             });
         } finally {
             setShowSaveDialog(false);
-            setSelectedPriorityArea(emptyPriorityArea);
+            setSelectedSubArea(emptySubArea);
         }
     };
 
-    const deletePriorityArea = async () => {
+    const deleteSubArea = async () => {
         try {
-            const deleted = await PriorityAreaService.deletePriorityArea(selectedPriorityArea);
+            const deleted = await SubAreaService.deleteSubArea(selectedSubArea);
             if (deleted) {
-                setPriorityAreas(priorityAreas.filter((c) => c._id !== selectedPriorityArea._id));
+                setSubAreas(subAreas.filter((c) => c._id !== selectedSubArea._id));
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Deleted',
-                    detail: 'PriorityArea deleted',
+                    detail: 'SubArea deleted',
                     life: 3000
                 });
             }
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to delete priorityArea',
+                summary: 'Failed to delete subArea',
                 detail: '' + err,
                 life: 3000
             });
         } finally {
             setShowDeleteDialog(false);
-            setSelectedPriorityArea(emptyPriorityArea);
+            setSelectedSubArea(emptySubArea);
         }
     };
 
     const startToolbarTemplate = () => (
         <div className="my-2">
-            <Button label="New PriorityArea" icon="pi pi-plus" severity="success" className="mr-2"
+            <Button label="New SubArea" icon="pi pi-plus" severity="success" className="mr-2"
                 onClick={() => {
-                    setSelectedPriorityArea(emptyPriorityArea);
+                    setSelectedSubArea(emptySubArea);
                     setShowSaveDialog(true);
                 }}
             />
@@ -132,7 +132,7 @@ const PriorityAreaComp = (props: PriorityAreaCompProps) => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage {theme.title} PriorityAreas</h5>
+            <h5 className="m-0">Manage {priorityArea.title} SubAreas</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
@@ -140,16 +140,16 @@ const PriorityAreaComp = (props: PriorityAreaCompProps) => {
         </div>
     );
 
-    const actionBodyTemplate = (rowData: PriorityArea) => (
+    const actionBodyTemplate = (rowData: SubArea) => (
         <>
             <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setSelectedPriorityArea(rowData);
+                    setSelectedSubArea(rowData);
                     setShowSaveDialog(true);
                 }} />
             <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setSelectedPriorityArea(rowData);
+                    setSelectedSubArea(rowData);
                     setShowDeleteDialog(true);
                 }} />
         </>
@@ -165,18 +165,18 @@ const PriorityAreaComp = (props: PriorityAreaCompProps) => {
                     <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
                     <DataTable
                         ref={dt}
-                        value={priorityAreas}
-                        selection={selectedPriorityArea}
-                        onSelectionChange={(e) => setSelectedPriorityArea(e.value as PriorityArea)}
+                        value={subAreas}
+                        selection={selectedSubArea}
+                        onSelectionChange={(e) => setSelectedSubArea(e.value as SubArea)}
                         dataKey="_id"
                         paginator
                         rows={10}
                         rowsPerPageOptions={[5, 10, 25]}
                         className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} priorityAreas"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} subAreas"
                         globalFilter={globalFilter}
-                        emptyMessage={`No ${theme.title} priorityAreas data found.`}
+                        emptyMessage={`No ${priorityArea.title} subAreas data found.`}
                         header={header}
                         scrollable
                         filters={filters}
@@ -187,21 +187,21 @@ const PriorityAreaComp = (props: PriorityAreaCompProps) => {
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
-                    {selectedPriorityArea && (
+                    {selectedSubArea && (
                         <SaveDialog
                             visible={showSaveDialog}
-                            priorityArea={selectedPriorityArea}
-                            onChange={setSelectedPriorityArea}
-                            onSave={savePriorityArea}
+                            subArea={selectedSubArea}
+                            onChange={setSelectedSubArea}
+                            onSave={saveSubArea}
                             onHide={() => setShowSaveDialog(false)}
                         />
                     )}
 
-                    {selectedPriorityArea && (
+                    {selectedSubArea && (
                         <DeleteDialog
                             showDeleteDialog={showDeleteDialog}
-                            selectedDataInfo={String(selectedPriorityArea.title)}
-                            onDelete={deletePriorityArea}
+                            selectedDataInfo={String(selectedSubArea.title)}
+                            onDelete={deleteSubArea}
                             onHide={() => setShowDeleteDialog(false)}
                         />
                     )}
@@ -211,4 +211,4 @@ const PriorityAreaComp = (props: PriorityAreaCompProps) => {
     );
 };
 
-export default PriorityAreaComp;
+export default SubAreaComp;
