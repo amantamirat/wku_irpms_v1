@@ -1,4 +1,5 @@
 import mongoose, { Schema, model, Document } from 'mongoose';
+import { SubArea } from './subArea.model';
 
 
 export interface IPriorityArea extends Document {
@@ -19,5 +20,15 @@ const PriorityAreaSchema = new Schema<IPriorityArea>({
         required: true
     }
 }, { timestamps: true });
+
+PriorityAreaSchema.pre('findOneAndDelete', async function (next) {
+    const priority = await this.model.findOne(this.getQuery());
+    if (!priority) return next();
+    const isReferenced = await SubArea.exists({ priorityArea: priority._id });
+    if (isReferenced) {
+        return next(new Error('Cannot delete Priority Area: it has Sub Areas.'));
+    }
+    next();
+});
 
 export const PriorityArea = model<IPriorityArea>('PriorityArea', PriorityAreaSchema);
