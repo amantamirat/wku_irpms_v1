@@ -6,7 +6,6 @@ import { successResponse, errorResponse } from '../../util/response';
 const createTheme = async (req: Request, res: Response): Promise<void> => {
     try {
         const { directorate, title } = req.body;
-
         const existingDirectorate = await Directorate.findById(directorate);
         if (!existingDirectorate) {
             errorResponse(res, 400, 'Referenced directorate does not exist');
