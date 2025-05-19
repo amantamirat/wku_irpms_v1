@@ -17,6 +17,7 @@ import applicantRoutes from './routes/applicantRoutes';
 import callRoutes from './routes/call.routes';
 import themeRoutes from './routes/theme/theme.routes';
 import priorityAreaRoutes from './routes/theme/priorityArea.routes';
+import subAreaRoutes from './routes/theme/subArea.routes';
 
 import { seedPositions, seedSectors } from './services/seedService';
 import { initAdminUser, initPermissions, initRoles } from './services/initService';
@@ -46,6 +47,7 @@ app.use("/api/applicants", applicantRoutes);
 app.use("/api/calls", callRoutes);
 app.use("/api/themes", themeRoutes);
 app.use("/api/priorityAreas", priorityAreaRoutes);
+app.use("/api/subAreas", subAreaRoutes);
 
 const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.SERVER_PORT || 5000;
