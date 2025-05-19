@@ -5,7 +5,7 @@ import { successResponse, errorResponse } from '../../util/response';
 
 const createSubArea = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { priority: priorityArea, title } = req.body;
+        const { priorityArea, title } = req.body;
 
         const existingPriority = await PriorityArea.findById(priorityArea);
         if (!existingPriority) {
