@@ -81,7 +81,7 @@ const deleteDirectorate = async (req: Request, res: Response): Promise<void> => 
 
     successResponse(res, 200, 'Directorate deleted successfully', true);
   } catch (error) {
-    errorResponse(res, 500, 'Server error', (error as Error).message);
+    errorResponse(res, 500, (error as Error).message, false);
   }
 };
 
