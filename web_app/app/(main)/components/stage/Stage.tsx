@@ -124,7 +124,7 @@ const StageComp = (props: StageCompProps) => {
 
     const startToolbarTemplate = () => (
         <div className="my-2">
-            <Button label="New Priority Area" icon="pi pi-plus" severity="secondary" className="mr-2"
+            <Button label="Add Stage" icon="pi pi-plus" severity="secondary" className="mr-2"
                 onClick={() => {
                     setSelectedStage(emptyStage);
                     setShowSaveDialog(true);
@@ -135,7 +135,7 @@ const StageComp = (props: StageCompProps) => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage {evaluation.title} Stages</h5>
+            <h5 className="m-0">{evaluation.title} Stages</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
@@ -195,6 +195,7 @@ const StageComp = (props: StageCompProps) => {
                         <Column expander style={{ width: '3em' }} />
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="title" header="Title" sortable />
+                        <Column field="level" header="Level" sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
                     </DataTable>
 
