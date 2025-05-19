@@ -37,8 +37,13 @@ const AppMenu = () => {
                 },
                 {
                     label: 'Themes',
-                    icon: 'pi pi-fw pi-tag',
+                    icon: 'pi pi-fw pi-tags',
                     to: `/pages/themes?directorate=${dir._id}`
+                },
+                {
+                    label: 'Evaluations',
+                    icon: 'pi pi-fw pi-calculator',
+                    to: `/pages/evaluations?directorate=${dir._id}`
                 },
             ]
         }))
