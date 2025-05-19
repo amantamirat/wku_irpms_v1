@@ -3,6 +3,7 @@
 import { Weight, validateWeight } from '@/models/evaluation/weight';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
+import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import { useEffect, useState } from 'react';
@@ -62,7 +63,7 @@ function SaveDialog(props: SaveDialogProps) {
             onHide={hide}
         >
             <div className="field">
-                <label htmlFor="title">Title</label>
+                <label htmlFor="title">Creteria</label>
                 <InputText
                     id="title"
                     value={weight.title}
@@ -70,6 +71,20 @@ function SaveDialog(props: SaveDialogProps) {
                     required
                     autoFocus
                     className={classNames({ 'p-invalid': submitted && !weight.title })}
+                />
+            </div>
+            <div className="field">
+                <label htmlFor="weight_value">Weight</label>
+                <InputNumber
+                    id="weight_value"
+                    value={weight.weight_value}
+                    onChange={(e) =>
+                        onChange({ ...weight, weight_value: e.value || 0 })
+                    }
+                    required
+                    className={classNames({
+                        'p-invalid': submitted && (weight.weight_value == null || weight.weight_value <= 0),
+                    })}
                 />
             </div>
             {errorMessage && (

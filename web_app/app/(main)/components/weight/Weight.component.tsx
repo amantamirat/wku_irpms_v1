@@ -122,7 +122,7 @@ const WeightComp = (props: WeightCompProps) => {
 
     const startToolbarTemplate = () => (
         <div className="my-2">
-            <Button label="New Sub Area" icon="pi pi-plus" severity="info" className="mr-2"
+            <Button label="Add Weight" icon="pi pi-plus" severity="info" className="mr-2"
                 onClick={() => {
                     setSelectedWeight(emptyWeight);
                     setShowSaveDialog(true);
@@ -133,7 +133,7 @@ const WeightComp = (props: WeightCompProps) => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">{stage.title} Sub Areas</h5>
+            <h5 className="m-0">{stage.title} Weights</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
@@ -184,7 +184,8 @@ const WeightComp = (props: WeightCompProps) => {
                     >
                         <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                        <Column field="title" header="Title" sortable />
+                        <Column field="title" header="Creteria" sortable />
+                        <Column field="weight_value" header="Weight" sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 

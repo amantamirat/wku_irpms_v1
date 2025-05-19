@@ -3,6 +3,7 @@
 import { Stage, validateStage } from '@/models/evaluation/stage';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
+import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import { useEffect, useState } from 'react';
@@ -70,6 +71,34 @@ function SaveDialog(props: SaveDialogProps) {
                     required
                     autoFocus
                     className={classNames({ 'p-invalid': submitted && !stage.title })}
+                />
+            </div>
+
+            <div className="field">
+                <label htmlFor="level">Level</label>
+                <InputNumber
+                    id="level"
+                    value={stage.level}
+                    onChange={(e) =>
+                        onChange({ ...stage, level: e.value || 0 })
+                    }
+                    required
+                    className={classNames({
+                        'p-invalid': submitted && (stage.level == null || stage.level <= 0),
+                    })}
+                />
+            </div>
+
+            <div className="field">
+                <label htmlFor="total_weight">Total Weight</label>
+                <InputNumber
+                    id="total_weight"
+                    value={stage.total_weight}
+                    onChange={(e) =>
+                        onChange({
+                            ...stage, total_weight: e.value || 0,
+                        })
+                    }
                 />
             </div>
             {errorMessage && (
