@@ -6,13 +6,14 @@ import { PriorityAreaService } from '@/services/PriorityAreaService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
-import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
+import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
 import SaveDialog from './dialog/SaveDialog';
 import { Theme } from '@/models/theme';
+import SubAreaComp from '../subArea/SubArea.component';
 
 interface PriorityAreaCompProps {
     theme: Theme;
@@ -35,6 +36,7 @@ const PriorityAreaComp = (props: PriorityAreaCompProps) => {
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
+    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
 
     const loadPriorityAreas = async () => {
@@ -180,11 +182,18 @@ const PriorityAreaComp = (props: PriorityAreaCompProps) => {
                         header={header}
                         scrollable
                         filters={filters}
+                        expandedRows={expandedRows}
+                        onRowToggle={(e) => setExpandedRows(e.data)}
+                        rowExpansionTemplate={(data) => (
+                            <SubAreaComp
+                                priorityArea={data as PriorityArea}
+                            />
+                        )}
                     >
-                        <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
+                        <Column expander style={{ width: '3em' }} />
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="title" header="Title" sortable />
-                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
+                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
                     </DataTable>
 
                     {selectedPriorityArea && (
