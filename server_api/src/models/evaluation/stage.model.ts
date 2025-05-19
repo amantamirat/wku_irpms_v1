@@ -1,17 +1,13 @@
 import mongoose, { Schema, model, Document } from 'mongoose';
 import { Weight } from './weight.model';
 
-export enum StageStatus {
-    Active = 'Active',
-    Locked = 'Locked'
-}
+
 
 export interface IStage extends Document {
     evaluation: mongoose.Types.ObjectId;
     title: string;
     level: number;
     total_weight: number;
-    status: StageStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -39,13 +35,6 @@ const StageSchema = new Schema<IStage>({
     total_weight: {
         type: Number,
         min: 0
-    },
-    
-    status: {
-        type: String,
-        enum: Object.values(StageStatus),
-        default: StageStatus.Active,
-        required: true
     }
 }, { timestamps: true });
 
