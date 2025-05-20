@@ -55,7 +55,7 @@ function SaveDialog(props: SaveDialogProps) {
     return (
         <Dialog
             visible={visible}
-            style={{ width: '500px' }}
+            style={{ width: '400px' }}
             header={criterionOption._id ? 'Edit Option' : 'New Option'}
             modal
             className="p-fluid"
