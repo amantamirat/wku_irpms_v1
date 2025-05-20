@@ -12,6 +12,7 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 import SaveDialog from './dialog/SaveDialog';
 
@@ -24,6 +25,7 @@ const CriterionOptionComp = (props: CriterionOptionCompProps) => {
     const { weight } = props;
 
     const emptyCriterionOption: CriterionOption = {
+        _id: uuidv4(),
         weight: weight,
         label: '',
         value: 0
@@ -67,20 +69,23 @@ const CriterionOptionComp = (props: CriterionOptionCompProps) => {
     const saveCriterionOption = async () => {
         try {
             let _criterionOptions = [...criterionOptions];
-            if (selectedCriterionOption._id) {
+            const index = _criterionOptions.findIndex((c) => c._id === selectedCriterionOption._id);
+            if (index === -1) {
+                //const created = await CriterionOptionService.createCriterionOption(selectedCriterionOption);
+                //_criterionOptions.push(created);
+                _criterionOptions.push(selectedCriterionOption);
+            }
+            else {
                 const updated = await CriterionOptionService.updateCriterionOption(selectedCriterionOption);
-                const index = _criterionOptions.findIndex((c) => c._id === selectedCriterionOption._id);
+                //const index = _criterionOptions.findIndex((c) => c._id === selectedCriterionOption._id);
                 _criterionOptions[index] = updated;
-            } else {
-                const created = await CriterionOptionService.createCriterionOption(selectedCriterionOption);
-                _criterionOptions.push(created);
             }
             setCriterionOptions(_criterionOptions);
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',
-                detail: `CriterionOption ${selectedCriterionOption._id ? 'updated' : 'created'}`,
-                life: 3000
+                detail: `CriterionOption ${index !== -1 ? 'edited' : 'added'}`,
+                life: 1000
             });
         } catch (err) {
             toast.current?.show({
@@ -163,11 +168,10 @@ const CriterionOptionComp = (props: CriterionOptionCompProps) => {
                         onSelectionChange={(e) => setSelectedCriterionOption(e.value as CriterionOption)}
                         dataKey="_id"
                         className="datatable-responsive"
-                        emptyMessage={`No criterion Options data found.`}
+                        emptyMessage={'No criterion Options data found.'}
                         header={header}
                         scrollable
                     >
-                        <Column expander style={{ width: '3em' }} />
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="label" header="Label" sortable />
                         <Column field="value" header="Value" sortable />

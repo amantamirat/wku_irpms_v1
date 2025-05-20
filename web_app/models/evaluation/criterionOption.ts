@@ -32,7 +32,7 @@ export const validateCriterionOption = (option: CriterionOption): { valid: boole
         return { valid: false, message: 'Value must be a non-negative number.' };
     }
 
-    if (option.value >= weight.weight_value) {
+    if (option.value > weight.weight_value) {
         return {
             valid: false,
             message: `Option value (${option.value}) must be less than the weight's max value (${weight.weight_value}).`
