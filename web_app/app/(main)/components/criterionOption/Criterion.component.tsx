@@ -1,17 +1,14 @@
 'use client';
 
 import DeleteDialog from '@/components/DeleteDialog';
-import { Weight } from '@/models/evaluation/weight';
 import { CriterionOption } from '@/models/evaluation/criterionOption';
+import { Weight } from '@/models/evaluation/weight';
 import { CriterionOptionService } from '@/services/evaluation/CriterionOptionService';
-import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
-import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
-import { InputText } from 'primereact/inputtext';
+import { DataTable } from 'primereact/datatable';
 import { Toast } from 'primereact/toast';
-import { Toolbar } from 'primereact/toolbar';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import SaveDialog from './dialog/SaveDialog';

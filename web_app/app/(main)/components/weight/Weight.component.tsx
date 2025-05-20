@@ -13,6 +13,8 @@ import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
 import { Stage } from '@/models/evaluation/stage';
 import SaveDialog from './dialog/SaveDialog';
+import { CriterionOption } from '@/models/evaluation/criterionOption';
+import { CriterionOptionService } from '@/services/evaluation/CriterionOptionService';
 
 interface WeightCompProps {
     stage: Stage;
@@ -37,6 +39,7 @@ const WeightComp = (props: WeightCompProps) => {
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
+    const [criterionOptions, setCriterionOptions] = useState<CriterionOption[]>([]);
 
 
     const loadWeights = async () => {
@@ -68,10 +71,6 @@ const WeightComp = (props: WeightCompProps) => {
     const saveWeight = async () => {
         try {
             let _weights = [...weights];
-
-
-
-            
             if (selectedWeight._id) {
                 const updated = await WeightService.updateWeight(selectedWeight);
                 const index = _weights.findIndex((c) => c._id === selectedWeight._id);
@@ -130,6 +129,7 @@ const WeightComp = (props: WeightCompProps) => {
             <Button label="Add Criterion" icon="pi pi-plus" severity="info" className="mr-2"
                 onClick={() => {
                     setSelectedWeight(emptyWeight);
+                    setCriterionOptions([]);
                     setShowSaveDialog(true);
                 }}
             />
@@ -149,9 +149,21 @@ const WeightComp = (props: WeightCompProps) => {
     const actionBodyTemplate = (rowData: Weight) => (
         <>
             <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setSelectedWeight(rowData);
-                    setShowSaveDialog(true);
+                style={{ fontSize: '1.2rem' }} onClick={async () => {
+                    try {
+                        setSelectedWeight(rowData);
+                        const data = await CriterionOptionService.getCriterionOptionsByWeight(rowData);
+                        setCriterionOptions(data);
+                        setShowSaveDialog(true);
+                    } catch (err) {
+                        toast.current?.show({
+                            severity: 'error',
+                            summary: 'Failed to edit criteria',
+                            detail: '' + err,
+                            life: 3000
+                        });
+                    }
+
                 }} />
             <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
@@ -198,7 +210,9 @@ const WeightComp = (props: WeightCompProps) => {
                         <SaveDialog
                             visible={showSaveDialog}
                             weight={selectedWeight}
-                            onChange={setSelectedWeight}
+                            setWeight={setSelectedWeight}
+                            criterionOptions={criterionOptions}
+                            setCriterionOptions={setCriterionOptions}
                             onSave={saveWeight}
                             onHide={() => setShowSaveDialog(false)}
                         />

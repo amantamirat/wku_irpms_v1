@@ -10,17 +10,20 @@ import { Steps } from 'primereact/steps';
 import { classNames } from 'primereact/utils';
 import { useEffect, useState } from 'react';
 import CriterionOptionComp from '../../criterionOption/Criterion.component';
+import { CriterionOption } from '@/models/evaluation/criterionOption';
 
 interface SaveDialogProps {
     visible: boolean;
     weight: Weight;
-    onChange: (weight: Weight) => void;
+    setWeight: (weight: Weight) => void;
+    criterionOptions: CriterionOption[];
+    setCriterionOptions: (options: CriterionOption[]) => void;
     onSave: () => void;
     onHide: () => void;
 }
 
 function SaveDialog(props: SaveDialogProps) {
-    const { visible, weight, onChange, onSave, onHide } = props;
+    const { visible, weight, setWeight, onSave, onHide } = props;
     const [activeStep, setActiveStep] = useState(0);
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
@@ -58,6 +61,7 @@ function SaveDialog(props: SaveDialogProps) {
             return;
         }
         setErrorMessage(undefined);
+        setActiveStep(0);
         onSave();
     };
 
@@ -102,7 +106,7 @@ function SaveDialog(props: SaveDialogProps) {
                     <InputText
                         id="title"
                         value={weight.title}
-                        onChange={(e) => onChange({ ...weight, title: e.target.value })}
+                        onChange={(e) => setWeight({ ...weight, title: e.target.value })}
                         required
                         autoFocus
                         className={classNames({ 'p-invalid': submitted && !weight.title })}
@@ -114,7 +118,7 @@ function SaveDialog(props: SaveDialogProps) {
                         id="weight_value"
                         value={weight.weight_value}
                         onChange={(e) =>
-                            onChange({ ...weight, weight_value: e.value || 0 })
+                            setWeight({ ...weight, weight_value: e.value || 0 })
                         }
                         required
                         className={classNames({
@@ -130,7 +134,7 @@ function SaveDialog(props: SaveDialogProps) {
                         value={weight.response_type}
                         options={Object.values(ResponseType).map(g => ({ label: g, value: g }))}
                         onChange={(e) =>
-                            onChange({ ...weight, response_type: e.value })
+                            setWeight({ ...weight, response_type: e.value })
                         }
                         placeholder="Select Form"
                         className={classNames({ 'p-invalid': submitted && !weight.response_type })}
@@ -139,7 +143,9 @@ function SaveDialog(props: SaveDialogProps) {
 
             </>}
             {activeStep === 1 && weight.response_type === ResponseType.Closed && (
-                <CriterionOptionComp weight={weight} />
+                <CriterionOptionComp
+                    weight={weight}
+                />
             )}
 
             {activeStep === 1 && weight.response_type === ResponseType.Open && (
