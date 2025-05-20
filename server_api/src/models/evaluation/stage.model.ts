@@ -38,6 +38,8 @@ const StageSchema = new Schema<IStage>({
     }
 }, { timestamps: true });
 
+StageSchema.index({ evaluation: 1, level: 1 }, { unique: true });
+
 StageSchema.pre('findOneAndDelete', async function (next) {
     const stage = await this.model.findOne(this.getQuery());
     if (!stage) return next();
