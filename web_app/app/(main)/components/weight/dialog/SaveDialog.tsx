@@ -143,7 +143,11 @@ function SaveDialog(props: SaveDialogProps) {
             )}
 
             {activeStep === 1 && weight.response_type === ResponseType.Open && (
-                <div className="p-4 text-center text-muted">No options required for open form.</div>
+                <div className="p-4 text-center text-muted">
+                    <div><strong>{weight.title}</strong>({weight.weight_value})</div>
+                    <div>is ready to create.</div>
+                    <div>click save to create it.</div>
+                </div>
             )}
 
             {errorMessage && (
