@@ -1,7 +1,7 @@
 'use client';
 
 import DeleteDialog from '@/components/DeleteDialog';
-import { Weight } from '@/models/evaluation/weight';
+import { ResponseType, Weight } from '@/models/evaluation/weight';
 import { WeightService } from '@/services/evaluation/WeightService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
@@ -25,7 +25,8 @@ const WeightComp = (props: WeightCompProps) => {
     const emptyWeight: Weight = {
         stage: stage,
         title: '',
-        weight_value: 0
+        weight_value: 0,
+        response_type: ResponseType.Open
     };
 
     const [weights, setWeights] = useState<Weight[]>([]);

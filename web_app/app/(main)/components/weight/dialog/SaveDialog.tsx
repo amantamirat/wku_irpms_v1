@@ -1,10 +1,12 @@
 'use client';
 
-import { Weight, validateWeight } from '@/models/evaluation/weight';
+import { ResponseType, Weight, validateWeight } from '@/models/evaluation/weight';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
+import { Dropdown } from 'primereact/dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
+import { Steps } from 'primereact/steps';
 import { classNames } from 'primereact/utils';
 import { useEffect, useState } from 'react';
 
@@ -18,8 +20,34 @@ interface SaveDialogProps {
 
 function SaveDialog(props: SaveDialogProps) {
     const { visible, weight, onChange, onSave, onHide } = props;
+    const [activeStep, setActiveStep] = useState(0);
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
+
+    useEffect(() => {
+        if (!visible) {
+            setSubmitted(false);
+            setErrorMessage(undefined);
+        }
+    }, [visible]);
+
+    const items = [
+        { label: 'Weight Info' },
+        { label: 'Options' }
+    ];
+
+    const nextStep = () => {
+        setSubmitted(true);
+        const result = validateWeight(weight);
+        if (!result.valid) {
+            setErrorMessage(result.message);
+            return;
+        }
+        setErrorMessage(undefined);
+        setActiveStep(1);
+    };
+
+    const prevStep = () => setActiveStep(0);
 
     const save = async () => {
         setSubmitted(true);
@@ -35,58 +63,80 @@ function SaveDialog(props: SaveDialogProps) {
     const hide = () => {
         setSubmitted(false);
         setErrorMessage(undefined);
+        setActiveStep(0);
         onHide();
     };
 
-    const footer = (
-        <>
-            <Button label="Cancel" icon="pi pi-times" text onClick={hide} />
-            <Button label="Save" icon="pi pi-check" text onClick={save} />
-        </>
-    );
 
-    useEffect(() => {
-        if (!visible) {
-            setSubmitted(false);
-            setErrorMessage(undefined);
-        }
-    }, [visible]);
+
+
+    const footer = (
+        <div className="flex justify-content-between">
+            {activeStep > 0 && (
+                <Button label="Back" icon="pi pi-angle-left" onClick={prevStep} text />
+            )}
+            {activeStep === 0 && (
+                <Button label="Next" icon="pi pi-angle-right" onClick={nextStep} text />
+            )}
+            {activeStep === 1 && (
+                <Button label="Save" icon="pi pi-check" onClick={save} text />
+            )}
+        </div>
+    );
 
     return (
         <Dialog
             visible={visible}
             style={{ width: '500px' }}
-            header={weight._id ? 'Edit Weight' : 'New Weight'}
+            header={weight._id ? 'Edit Criterion' : 'New Criterion'}
             modal
             className="p-fluid"
             footer={footer}
             onHide={hide}
         >
-            <div className="field">
-                <label htmlFor="title">Creteria</label>
-                <InputText
-                    id="title"
-                    value={weight.title}
-                    onChange={(e) => onChange({ ...weight, title: e.target.value })}
-                    required
-                    autoFocus
-                    className={classNames({ 'p-invalid': submitted && !weight.title })}
-                />
-            </div>
-            <div className="field">
-                <label htmlFor="weight_value">Weight</label>
-                <InputNumber
-                    id="weight_value"
-                    value={weight.weight_value}
-                    onChange={(e) =>
-                        onChange({ ...weight, weight_value: e.value || 0 })
-                    }
-                    required
-                    className={classNames({
-                        'p-invalid': submitted && (weight.weight_value == null || weight.weight_value <= 0),
-                    })}
-                />
-            </div>
+            <Steps model={items} activeIndex={activeStep} readOnly className="mb-4" />
+            {activeStep === 0 && <>
+                <div className="field">
+                    <label htmlFor="title">Criterion</label>
+                    <InputText
+                        id="title"
+                        value={weight.title}
+                        onChange={(e) => onChange({ ...weight, title: e.target.value })}
+                        required
+                        autoFocus
+                        className={classNames({ 'p-invalid': submitted && !weight.title })}
+                    />
+                </div>
+                <div className="field">
+                    <label htmlFor="weight_value">Weight</label>
+                    <InputNumber
+                        id="weight_value"
+                        value={weight.weight_value}
+                        onChange={(e) =>
+                            onChange({ ...weight, weight_value: e.value || 0 })
+                        }
+                        required
+                        className={classNames({
+                            'p-invalid': submitted && (weight.weight_value == null || weight.weight_value <= 0),
+                        })}
+                    />
+                </div>
+
+                <div className="field">
+                    <label htmlFor="type">Form</label>
+                    <Dropdown
+                        id="type"
+                        value={weight.response_type}
+                        options={Object.values(ResponseType).map(g => ({ label: g, value: g }))}
+                        onChange={(e) =>
+                            onChange({ ...weight, response_type: e.value })
+                        }
+                        placeholder="Select Form"
+                        className={classNames({ 'p-invalid': submitted && !weight.response_type })}
+                    />
+                </div>
+
+            </>}
             {errorMessage && (
                 <small className="p-error">{errorMessage}</small>
             )}

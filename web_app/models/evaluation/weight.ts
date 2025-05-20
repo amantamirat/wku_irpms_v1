@@ -1,10 +1,16 @@
 import { Stage } from "./stage";
 
+export enum ResponseType {
+    Open = 'Open',
+    Closed = 'Closed'
+}
+
 export type Weight = {
     _id?: string;
     stage: string | Stage;
     title: string;
     weight_value: number;
+    response_type: ResponseType;
     createdAt?: Date;
     updatedAt?: Date;
 }

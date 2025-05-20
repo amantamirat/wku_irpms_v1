@@ -1,5 +1,6 @@
 import mongoose, { Schema, model, Document } from 'mongoose';
 import { Weight } from './weight.model';
+import { title } from 'process';
 
 
 
@@ -21,7 +22,6 @@ const StageSchema = new Schema<IStage>({
 
     title: {
         type: String,
-        unique: true,
         required: true
     },
 
@@ -38,6 +38,7 @@ const StageSchema = new Schema<IStage>({
     }
 }, { timestamps: true });
 
+StageSchema.index({ evaluation: 1, title: 1 }, { unique: true });
 StageSchema.index({ evaluation: 1, level: 1 }, { unique: true });
 
 StageSchema.pre('findOneAndDelete', async function (next) {
