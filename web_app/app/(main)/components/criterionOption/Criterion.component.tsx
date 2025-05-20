@@ -171,6 +171,10 @@ const CriterionOptionComp = (props: CriterionOptionCompProps) => {
                         emptyMessage={'No criterion Options data found.'}
                         header={header}
                         scrollable
+                        rows={3}
+                        rowsPerPageOptions={[3, 5, 8]}
+                        paginator
+                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
                     >
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="label" header="Label" sortable />
