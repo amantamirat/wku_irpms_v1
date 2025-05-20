@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
-import { Weight } from '../../models/evaluation/weight.model';
+import { ResponseType, Weight } from '../../models/evaluation/weight.model';
 import { Stage } from '../../models/evaluation/stage.model';
 import { successResponse, errorResponse } from '../../util/response';
+import { CriterionOption } from '../../models/evaluation/criterionOption.model';
 
 const createWeight = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -19,6 +20,53 @@ const createWeight = async (req: Request, res: Response): Promise<void> => {
         console.log(error);
         if (error.code === 11000) {
             errorResponse(res, 400, 'Weight name must be unique');
+            return;
+        }
+        errorResponse(res, 500, error.message);
+    }
+};
+
+const createWeightWithCriterionOptions = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { weight, criterionOptions } = req.body;
+
+        if (!weight?.stage || !weight?.title || weight.weight_value === undefined || weight.response_type === undefined) {
+            errorResponse(res, 400, 'Missing weight fields');
+            return;
+        }
+
+        const existingStage = await Stage.findById(weight.stage);
+        if (!existingStage) {
+            errorResponse(res, 400, 'Referenced stage does not exist');
+            return;
+        }
+        const newWeight = new Weight(weight);
+
+        if (newWeight.response_type === ResponseType.Closed) {
+
+
+        }
+
+
+
+
+
+        const savedWeight = await newWeight.save();
+
+        // Save criterion options (if any)
+        if (Array.isArray(criterionOptions) && criterionOptions.length > 0) {
+            for (const option of criterionOptions) {
+                option.weight = savedWeight._id;
+                const newOption = new CriterionOption(option);
+                await newOption.save();
+            }
+        }
+
+        successResponse(res, 201, 'Weight and criterion options created successfully', savedWeight);
+    } catch (error: any) {
+        console.log(error);
+        if (error.code === 11000) {
+            errorResponse(res, 400, 'Weight title must be unique');
             return;
         }
         errorResponse(res, 500, error.message);

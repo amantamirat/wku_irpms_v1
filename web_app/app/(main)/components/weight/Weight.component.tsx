@@ -76,8 +76,11 @@ const WeightComp = (props: WeightCompProps) => {
                 const index = _weights.findIndex((c) => c._id === selectedWeight._id);
                 _weights[index] = updated;
             } else {
-                const created = await WeightService.createWeight(selectedWeight);
-                _weights.push(created);
+                if (selectedWeight.response_type === ResponseType.Open) {
+                    const created = await WeightService.createWeight(selectedWeight);
+                    _weights.push(created);
+                }
+
             }
             setWeights(_weights);
             toast.current?.show({

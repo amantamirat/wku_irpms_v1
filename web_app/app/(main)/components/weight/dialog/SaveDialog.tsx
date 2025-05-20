@@ -23,7 +23,7 @@ interface SaveDialogProps {
 }
 
 function SaveDialog(props: SaveDialogProps) {
-    const { visible, weight, setWeight, onSave, onHide } = props;
+    const { visible, weight, setWeight, criterionOptions, setCriterionOptions, onSave, onHide } = props;
     const [activeStep, setActiveStep] = useState(0);
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
@@ -145,6 +145,8 @@ function SaveDialog(props: SaveDialogProps) {
             {activeStep === 1 && weight.response_type === ResponseType.Closed && (
                 <CriterionOptionComp
                     weight={weight}
+                    criterionOptions={criterionOptions}
+                    setCriterionOptions={setCriterionOptions}
                 />
             )}
 

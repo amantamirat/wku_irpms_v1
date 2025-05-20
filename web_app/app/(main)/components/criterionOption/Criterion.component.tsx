@@ -15,6 +15,8 @@ import SaveDialog from './dialog/SaveDialog';
 
 interface CriterionOptionCompProps {
     weight: Weight;
+    criterionOptions: CriterionOption[];
+    setCriterionOptions: (options: CriterionOption[]) => void;
 }
 
 const CriterionOptionComp = (props: CriterionOptionCompProps) => {
@@ -28,39 +30,12 @@ const CriterionOptionComp = (props: CriterionOptionCompProps) => {
         value: 0
     };
 
-    const [criterionOptions, setCriterionOptions] = useState<CriterionOption[]>([]);
+    const { criterionOptions, setCriterionOptions } = props;
     const dt = useRef<DataTable<any>>(null);
     const [selectedCriterionOption, setSelectedCriterionOption] = useState<CriterionOption>(emptyCriterionOption);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
-
-
-
-    const loadCriterionOptions = async () => {
-        try {
-            if (!weight) return;
-            if (!weight._id) {
-                setCriterionOptions([]);
-                return;
-            }
-            const data = await CriterionOptionService.getCriterionOptionsByWeight(weight);
-            setCriterionOptions(data);
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load criterionOption data',
-                detail: '' + err,
-                life: 3000
-            });
-        }
-    };
-
-    useEffect(() => {
-        loadCriterionOptions();
-    }, []);
-
-
 
 
     const saveCriterionOption = async () => {

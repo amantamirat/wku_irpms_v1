@@ -1,6 +1,7 @@
 import { Weight } from "@/models/evaluation/weight";
 import { MyService } from "../MyService";
 import { Stage } from "@/models/evaluation/stage";
+import { CriterionOption } from "@/models/evaluation/criterionOption";
 
 const end_point = '/weights/';
 
@@ -22,6 +23,12 @@ export const WeightService = {
 
     async createWeight(weight: Partial<Weight>): Promise<Weight> {
         const createdData = await MyService.post(end_point, weight);
+        return createdData as Weight;
+    },
+
+    async createWeightWithCriterionOptions(weightWithOptions:
+        { weight: Partial<Weight>, criterionOptions: CriterionOption[] }): Promise<Weight> {
+        const createdData = await MyService.post(end_point, weightWithOptions);
         return createdData as Weight;
     },
 
