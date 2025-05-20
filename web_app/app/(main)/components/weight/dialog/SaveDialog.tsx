@@ -9,6 +9,7 @@ import { InputText } from 'primereact/inputtext';
 import { Steps } from 'primereact/steps';
 import { classNames } from 'primereact/utils';
 import { useEffect, useState } from 'react';
+import CriterionOptionComp from '../../criterionOption/Criterion.component';
 
 interface SaveDialogProps {
     visible: boolean;
@@ -137,6 +138,14 @@ function SaveDialog(props: SaveDialogProps) {
                 </div>
 
             </>}
+            {activeStep === 1 && weight.response_type === ResponseType.Closed && (
+                <CriterionOptionComp weight={weight} />
+            )}
+
+            {activeStep === 1 && weight.response_type === ResponseType.Open && (
+                <div className="p-4 text-center text-muted">No options required for open form.</div>
+            )}
+
             {errorMessage && (
                 <small className="p-error">{errorMessage}</small>
             )}

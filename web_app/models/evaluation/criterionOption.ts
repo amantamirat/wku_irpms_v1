@@ -1,6 +1,7 @@
 import { ResponseType, Weight } from "./weight";
 
 export type CriterionOption = {
+    _id?: string;
     weight: string | Weight;
     label: string;
     value: number;
