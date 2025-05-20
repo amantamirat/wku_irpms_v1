@@ -59,6 +59,8 @@ app.use("/api/evaluations", evaluationRoutes);
 app.use("/api/stages", stageRoutes);
 app.use("/api/weights", weightRoutes);
 
+//criterionOptions
+
 const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.SERVER_PORT || 5000;
 

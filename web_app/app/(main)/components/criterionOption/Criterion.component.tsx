@@ -119,21 +119,18 @@ const CriterionOptionComp = (props: CriterionOptionCompProps) => {
             setSelectedCriterionOption(emptyCriterionOption);
         }
     };
-    
+
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Options</h5>
-            <span className="block mt-2 md:mt-0 p-input-icon-left">
-                <div className="my-2">
-                    <Button icon="pi pi-plus" severity="secondary" className="mr-2"
-                        onClick={() => {
-                            setSelectedCriterionOption(emptyCriterionOption);
-                            setShowSaveDialog(true);
-                        }}
-                    />
-                </div>
-            </span>
+            <div className="my-2">
+                <Button icon="pi pi-plus" severity="secondary" className="mr-0"
+                    onClick={() => {
+                        setSelectedCriterionOption(emptyCriterionOption);
+                        setShowSaveDialog(true);
+                    }}
+                />
+            </div>
         </div>
     );
 
@@ -158,7 +155,7 @@ const CriterionOptionComp = (props: CriterionOptionCompProps) => {
         <div className="grid">
             <div className="col-12">
                 <div className="card">
-                    <Toast ref={toast} />                    
+                    <Toast ref={toast} />
                     <DataTable
                         ref={dt}
                         value={criterionOptions}
