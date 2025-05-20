@@ -1,4 +1,5 @@
 import mongoose, { Schema, model, Document } from 'mongoose';
+import { CriterionOption } from './criterionOption.model';
 
 export enum ResponseType {
     Open = 'Open',
@@ -40,5 +41,14 @@ const WeightSchema = new Schema<IWeight>({
 
 }, { timestamps: true });
 
+WeightSchema.pre('findOneAndDelete', async function (next) {
+    const weight = await this.model.findOne(this.getQuery());
+    if (!weight) return next();
+    const isReferenced = await CriterionOption.exists({ weight: weight._id });
+    if (isReferenced) {
+        return next(new Error('Cannot delete Evaluation: it has options.'));
+    }
+    next();
+});
 
 export const Weight = model<IWeight>('Weight', WeightSchema);

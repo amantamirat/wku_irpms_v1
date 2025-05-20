@@ -23,6 +23,7 @@ import subAreaRoutes from './routes/theme/subArea.routes';
 import evaluationRoutes from './routes/evaluation/evaluation.routes';
 import stageRoutes from './routes/evaluation/stage.routes';
 import weightRoutes from './routes/evaluation/weight.routes';
+import criterionOptionRoutes from './routes/evaluation/criterionOption.routes';
 
 import { seedPositions, seedSectors } from './services/seedService';
 import { initAdminUser, initPermissions, initRoles } from './services/initService';
@@ -58,8 +59,7 @@ app.use("/api/subAreas", subAreaRoutes);
 app.use("/api/evaluations", evaluationRoutes);
 app.use("/api/stages", stageRoutes);
 app.use("/api/weights", weightRoutes);
-
-//criterionOptions
+app.use("/api/criterionOptions", criterionOptionRoutes);
 
 const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.SERVER_PORT || 5000;
