@@ -126,7 +126,7 @@ const CriterionOptionComp = (props: CriterionOptionCompProps) => {
             <h5 className="m-0">Options</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <div className="my-2">
-                    <Button label="Option" icon="pi pi-plus" severity="secondary" className="p-button-sm mr-2"
+                    <Button icon="pi pi-plus" severity="secondary" className="mr-2"
                         onClick={() => {
                             setSelectedCriterionOption(emptyCriterionOption);
                             setShowSaveDialog(true);
@@ -135,7 +135,6 @@ const CriterionOptionComp = (props: CriterionOptionCompProps) => {
                 </div>
             </span>
         </div>
-
     );
 
     const actionBodyTemplate = (rowData: CriterionOption) => (
