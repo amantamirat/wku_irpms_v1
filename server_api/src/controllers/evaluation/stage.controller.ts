@@ -12,6 +12,17 @@ const createStage = async (req: Request, res: Response): Promise<void> => {
             errorResponse(res, 400, 'Referenced evaluation does not exist');
             return;
         }
+
+        if (level > 1) {
+            const preLevelExists = await Stage.exists({
+                evaluation: evaluation,
+                level: level - 1
+            });
+
+            if (!preLevelExists) {
+                throw new Error(`Level ${level - 1} must exist before adding higher levels.`);
+            }
+        }
         const stage = new Stage({ evaluation, title, level, total_weight });
         await stage.save();
         successResponse(res, 201, 'Stage created successfully', stage);
@@ -46,7 +57,7 @@ const getStagesByEvaluation = async (req: Request, res: Response): Promise<void>
 
 const updateStage = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { evaluation, title , level, total_weight} = req.body;
+        const { evaluation, title, total_weight } = req.body;
 
         const existingStage = await Stage.findById(req.params.id);
         if (!existingStage) {
@@ -56,7 +67,7 @@ const updateStage = async (req: Request, res: Response): Promise<void> => {
 
         const updatedStage = await Stage.findByIdAndUpdate(
             req.params.id,
-            { evaluation, title, level, total_weight },
+            { evaluation, title, total_weight },
             { new: true, runValidators: true }
         ).populate('evaluation');
 

@@ -74,20 +74,22 @@ function SaveDialog(props: SaveDialogProps) {
                 />
             </div>
 
-            <div className="field">
-                <label htmlFor="level">Level</label>
-                <InputNumber
-                    id="level"
-                    value={stage.level}
-                    onChange={(e) =>
-                        onChange({ ...stage, level: e.value || 0 })
-                    }
-                    required
-                    className={classNames({
-                        'p-invalid': submitted && (stage.level == null || stage.level <= 0),
-                    })}
-                />
-            </div>
+            {!stage._id &&
+                <div className="field">
+                    <label htmlFor="level">Level</label>
+                    <InputNumber
+                        id="level"
+                        value={stage.level}
+                        onChange={(e) =>
+                            onChange({ ...stage, level: e.value || 0 })
+                        }
+                        required
+                        className={classNames({
+                            'p-invalid': submitted && (stage.level == null || stage.level <= 0),
+                        })}
+                    />
+                </div>
+            }
 
             <div className="field">
                 <label htmlFor="total_weight">Total Weight</label>
