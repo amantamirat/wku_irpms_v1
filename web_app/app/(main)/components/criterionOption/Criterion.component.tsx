@@ -24,7 +24,6 @@ const CriterionOptionComp = (props: CriterionOptionCompProps) => {
     const { weight } = props;
 
     const emptyCriterionOption: CriterionOption = {
-        _id: uuidv4(),
         weight: weight,
         label: '',
         value: 0
@@ -45,7 +44,7 @@ const CriterionOptionComp = (props: CriterionOptionCompProps) => {
             if (index === -1) {
                 //const created = await CriterionOptionService.createCriterionOption(selectedCriterionOption);
                 //_criterionOptions.push(created);
-                _criterionOptions.push(selectedCriterionOption);
+                _criterionOptions.push({ ...selectedCriterionOption, _id: uuidv4() });
             }
             else {
                 const updated = await CriterionOptionService.updateCriterionOption(selectedCriterionOption);

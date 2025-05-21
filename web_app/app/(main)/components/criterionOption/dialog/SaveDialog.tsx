@@ -57,14 +57,14 @@ function SaveDialog(props: SaveDialogProps) {
         <Dialog
             visible={visible}
             style={{ width: '400px' }}
-            header={criterionOption._id ? 'Edit Option' : 'New Option'}
+            header={criterionOption._id ? 'Edit Option' : 'Add Option'}
             modal
             className="p-fluid"
             footer={footer}
             onHide={hide}
         >
             <div className="field">
-                <label htmlFor="label">label</label>
+                <label htmlFor="label">Label</label>
                 <InputText
                     id="label"
                     value={criterionOption.label}
@@ -74,8 +74,6 @@ function SaveDialog(props: SaveDialogProps) {
                     className={classNames({ 'p-invalid': submitted && !criterionOption.label })}
                 />
             </div>
-
-
 
             <div className="field">
                 <label htmlFor="value">Value</label>
