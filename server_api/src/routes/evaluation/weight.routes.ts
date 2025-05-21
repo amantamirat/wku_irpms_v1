@@ -4,7 +4,7 @@ import { verifyActiveAccount } from '../../middleware/auth';
 
 const router: Router = Router();
 
-router.post('/', verifyActiveAccount, weightController.createWeight);
+router.post('/', verifyActiveAccount, weightController.createWeightWithCriterionOptions);
 router.get('/', verifyActiveAccount, weightController.getAllWeights);
 router.get('/stage/:stage', verifyActiveAccount, weightController.getWeightsByStage);
 router.put('/:id', verifyActiveAccount, weightController.updateWeight);

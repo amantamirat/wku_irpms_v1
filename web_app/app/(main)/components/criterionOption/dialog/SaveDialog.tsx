@@ -1,6 +1,7 @@
 'use client';
 
 import { CriterionOption, validateCriterionOption } from '@/models/evaluation/criterionOption';
+import { Weight } from '@/models/evaluation/weight';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputNumber } from 'primereact/inputnumber';
@@ -41,7 +42,7 @@ function SaveDialog(props: SaveDialogProps) {
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={hide} />
-            <Button label="Save" icon="pi pi-check" text onClick={save} />
+            <Button label="Add" icon="pi pi-plus" text onClick={save} />
         </>
     );
 
@@ -77,7 +78,7 @@ function SaveDialog(props: SaveDialogProps) {
 
 
             <div className="field">
-                <label htmlFor="value">Total Weight</label>
+                <label htmlFor="value">Value</label>
                 <InputNumber
                     id="value"
                     value={criterionOption.value}
@@ -86,6 +87,7 @@ function SaveDialog(props: SaveDialogProps) {
                             ...criterionOption, value: e.value || 0,
                         })
                     }
+                    max={(criterionOption.weight as Weight).weight_value}
                     required
                     className={classNames({
                         'p-invalid': submitted && (criterionOption.value == null || criterionOption.value <= 0),

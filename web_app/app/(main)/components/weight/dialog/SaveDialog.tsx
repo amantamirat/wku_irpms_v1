@@ -72,9 +72,6 @@ function SaveDialog(props: SaveDialogProps) {
         onHide();
     };
 
-
-
-
     const footer = (
         <div className="flex justify-content-between">
             {activeStep > 0 && (

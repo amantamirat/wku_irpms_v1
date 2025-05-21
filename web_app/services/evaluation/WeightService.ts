@@ -21,11 +21,12 @@ export const WeightService = {
         return data as Weight[];
     },
 
+    /*
     async createWeight(weight: Partial<Weight>): Promise<Weight> {
         const createdData = await MyService.post(end_point, weight);
         return createdData as Weight;
     },
-
+    */
     async createWeightWithCriterionOptions(weightWithOptions:
         { weight: Partial<Weight>, criterionOptions: CriterionOption[] }): Promise<Weight> {
         const createdData = await MyService.post(end_point, weightWithOptions);

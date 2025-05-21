@@ -14,10 +14,7 @@ export const CriterionOptionService = {
     async getCriterionOptionsByWeight(weight: Weight): Promise<CriterionOption[]> {
         if (!weight._id) {
             throw new Error("_id required.");
-        }
-        if (weight.response_type !== ResponseType.Closed) {
-            throw new Error("Response Type is not Closed.");
-        }
+        }        
         const data = await MyService.get(`${end_point}weight/${weight._id}`);
         return data as CriterionOption[];
     },

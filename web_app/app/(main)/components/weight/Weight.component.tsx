@@ -76,11 +76,8 @@ const WeightComp = (props: WeightCompProps) => {
                 const index = _weights.findIndex((c) => c._id === selectedWeight._id);
                 _weights[index] = updated;
             } else {
-                if (selectedWeight.response_type === ResponseType.Open) {
-                    const created = await WeightService.createWeight(selectedWeight);
-                    _weights.push(created);
-                }
-
+                const created = await WeightService.createWeightWithCriterionOptions({ weight: selectedWeight, criterionOptions: criterionOptions });
+                _weights.push(created);
             }
             setWeights(_weights);
             toast.current?.show({
@@ -155,8 +152,10 @@ const WeightComp = (props: WeightCompProps) => {
                 style={{ fontSize: '1.2rem' }} onClick={async () => {
                     try {
                         setSelectedWeight(rowData);
-                        const data = await CriterionOptionService.getCriterionOptionsByWeight(rowData);
-                        setCriterionOptions(data);
+                        if (rowData.response_type === ResponseType.Closed) {
+                            const data = await CriterionOptionService.getCriterionOptionsByWeight(rowData);
+                            setCriterionOptions(data);
+                        }
                         setShowSaveDialog(true);
                     } catch (err) {
                         toast.current?.show({

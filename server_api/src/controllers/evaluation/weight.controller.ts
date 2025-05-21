@@ -29,49 +29,53 @@ const createWeight = async (req: Request, res: Response): Promise<void> => {
 const createWeightWithCriterionOptions = async (req: Request, res: Response): Promise<void> => {
     try {
         const { weight, criterionOptions } = req.body;
-
-        if (!weight?.stage || !weight?.title || weight.weight_value === undefined || weight.response_type === undefined) {
-            errorResponse(res, 400, 'Missing weight fields');
-            return;
+        // Validate weight fields
+        const { stage, title, weight_value, response_type } = weight || {};
+        if (!stage || !title || weight_value === undefined || response_type === undefined) {
+            return errorResponse(res, 400, 'Missing weight fields');
         }
 
-        const existingStage = await Stage.findById(weight.stage);
+        // Validate referenced stage
+        const existingStage = await Stage.findById(stage);
         if (!existingStage) {
-            errorResponse(res, 400, 'Referenced stage does not exist');
-            return;
-        }
-        const newWeight = new Weight(weight);
-
-        if (newWeight.response_type === ResponseType.Closed) {
-
-
+            return errorResponse(res, 400, 'Referenced stage does not exist');
         }
 
-
-
-
-
-        const savedWeight = await newWeight.save();
-
-        // Save criterion options (if any)
-        if (Array.isArray(criterionOptions) && criterionOptions.length > 0) {
+        // If response type is Closed, ensure valid criterion options
+        if (response_type === ResponseType.Closed) {
+            if (!Array.isArray(criterionOptions) || criterionOptions.length < 2) {
+                return errorResponse(res, 400, 'At least 2 options are required');
+            }
+            // Ensure each value is less than weight_value
             for (const option of criterionOptions) {
-                option.weight = savedWeight._id;
-                const newOption = new CriterionOption(option);
-                await newOption.save();
+                if (typeof option.value !== 'number' || option.value > weight_value) {
+                    return errorResponse(res, 400, 'Each option value must be a number less than weight value');
+                }
             }
         }
-
+        // Save the weight
+        const newWeight = new Weight(weight);
+        const savedWeight = await newWeight.save();
+        // Save criterion options if applicable
+        if (response_type === ResponseType.Closed) {
+            const optionsToSave = criterionOptions.map((option: any) => {
+                const { _id, ...rest } = option;
+                return new CriterionOption({ ...rest, weight: savedWeight._id }).save();
+            });
+            await Promise.all(optionsToSave);
+        }
+        //console.log("create", savedWeight);
         successResponse(res, 201, 'Weight and criterion options created successfully', savedWeight);
+
     } catch (error: any) {
-        console.log(error);
+        console.error(error);
         if (error.code === 11000) {
-            errorResponse(res, 400, 'Weight title must be unique');
-            return;
+            return errorResponse(res, 400, 'Weight title must be unique');
         }
         errorResponse(res, 500, error.message);
     }
 };
+
 
 const getAllWeights = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -133,6 +137,7 @@ const deleteWeight = async (req: Request, res: Response): Promise<void> => {
 
 const weightController = {
     createWeight,
+    createWeightWithCriterionOptions,
     getAllWeights,
     getWeightsByStage,
     updateWeight,
