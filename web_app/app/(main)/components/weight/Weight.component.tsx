@@ -176,6 +176,15 @@ const WeightComp = (props: WeightCompProps) => {
     );
 
 
+    const responseTypeBodyTemplate = (rowData: Weight) => {
+        return (
+            <span className={`weight-badge response_type-${rowData.response_type.toLowerCase()}`}>
+                {rowData.response_type}
+            </span>
+        );
+    };
+
+
 
     return (
         <div className="grid">
@@ -205,6 +214,7 @@ const WeightComp = (props: WeightCompProps) => {
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="title" header="Creteria" sortable />
                         <Column field="weight_value" header="Weight" sortable />
+                        <Column field="response_type" header="Type" body={responseTypeBodyTemplate} sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
