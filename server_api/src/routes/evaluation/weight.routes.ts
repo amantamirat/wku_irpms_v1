@@ -7,7 +7,7 @@ const router: Router = Router();
 router.post('/', verifyActiveAccount, weightController.createWeightWithCriterionOptions);
 router.get('/', verifyActiveAccount, weightController.getAllWeights);
 router.get('/stage/:stage', verifyActiveAccount, weightController.getWeightsByStage);
-router.put('/:id', verifyActiveAccount, weightController.updateWeight);
+router.put('/:id', verifyActiveAccount, weightController.updateWeightWithCriterionOptions);
 router.delete('/:id', verifyActiveAccount, weightController.deleteWeight);
 
 export default router;
