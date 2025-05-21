@@ -42,7 +42,7 @@ function SaveDialog(props: SaveDialogProps) {
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={hide} />
-            <Button label="Add" icon="pi pi-plus" text onClick={save} />
+            <Button label={criterionOption._id ? 'Edit' : 'Add'} icon={criterionOption._id ? 'pi pi-check' : 'pi pi-plus'} text onClick={save} />
         </>
     );
 

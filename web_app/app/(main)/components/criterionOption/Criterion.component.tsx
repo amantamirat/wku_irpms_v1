@@ -47,9 +47,9 @@ const CriterionOptionComp = (props: CriterionOptionCompProps) => {
                 _criterionOptions.push({ ...selectedCriterionOption, _id: uuidv4() });
             }
             else {
-                const updated = await CriterionOptionService.updateCriterionOption(selectedCriterionOption);
+                //const updated = await CriterionOptionService.updateCriterionOption(selectedCriterionOption);
                 //const index = _criterionOptions.findIndex((c) => c._id === selectedCriterionOption._id);
-                _criterionOptions[index] = updated;
+                _criterionOptions[index] = selectedCriterionOption;
             }
             setCriterionOptions(_criterionOptions);
             toast.current?.show({
