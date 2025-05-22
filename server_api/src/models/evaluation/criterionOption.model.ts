@@ -16,7 +16,6 @@ const CriterionOptionSchema = new Schema<ICriterionOption>({
     },
     label: {
         type: String,
-        unique: true,
         required: true
     },
     value: {
@@ -26,5 +25,6 @@ const CriterionOptionSchema = new Schema<ICriterionOption>({
     },
 }, { timestamps: true });
 
-
+CriterionOptionSchema.index({ weight: 1, label: 1 }, { unique: true });
+CriterionOptionSchema.index({ weight: 1, value: 1 }, { unique: true });
 export const CriterionOption = model<ICriterionOption>('CriterionOption', CriterionOptionSchema);

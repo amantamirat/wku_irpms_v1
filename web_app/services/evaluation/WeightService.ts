@@ -51,7 +51,7 @@ export const WeightService = {
             throw new Error("_id required.");
         }
         const url = `${end_point}${weight._id}`;
-        const updatedWeight = await MyService.put(url, weight);
+        const updatedWeight = await MyService.put(url, weightWithOptions);
         return updatedWeight as Weight;
     },
 

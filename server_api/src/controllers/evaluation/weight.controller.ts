@@ -135,6 +135,7 @@ const updateWeightWithCriterionOptions = async (req: Request, res: Response): Pr
         }
 
         const oldResponseType = existingWeight.response_type;
+        console.log(updatedWeightData);
         const newResponseType = updatedWeightData.response_type;
 
         // Validate fields (optional but recommended)
