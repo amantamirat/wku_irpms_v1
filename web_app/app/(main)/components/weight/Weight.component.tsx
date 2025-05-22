@@ -72,7 +72,7 @@ const WeightComp = (props: WeightCompProps) => {
         try {
             let _weights = [...weights];
             if (selectedWeight._id) {
-                const updated = await WeightService.updateWeight(selectedWeight);
+                const updated = await WeightService.updateWeightWithCriterionOptions({ weight: selectedWeight, criterionOptions: criterionOptions });
                 const index = _weights.findIndex((c) => c._id === selectedWeight._id);
                 _weights[index] = updated;
             } else {

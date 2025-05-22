@@ -33,6 +33,7 @@ export const WeightService = {
         return createdData as Weight;
     },
 
+    /*
     async updateWeight(weight: Partial<Weight>): Promise<Weight> {
         if (!weight._id) {
             throw new Error("_id required.");
@@ -40,7 +41,20 @@ export const WeightService = {
         const url = `${end_point}${weight._id}`;
         const updatedWeight = await MyService.put(url, weight);
         return updatedWeight as Weight;
+    },   
+    */
+
+    async updateWeightWithCriterionOptions(weightWithOptions:
+        { weight: Partial<Weight>, criterionOptions: CriterionOption[] }): Promise<Weight> {
+        const { weight } = weightWithOptions;
+        if (!weight._id) {
+            throw new Error("_id required.");
+        }
+        const url = `${end_point}${weight._id}`;
+        const updatedWeight = await MyService.put(url, weight);
+        return updatedWeight as Weight;
     },
+
 
     async deleteWeight(weight: Partial<Weight>): Promise<boolean> {
         if (!weight._id) {
