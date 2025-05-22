@@ -76,6 +76,9 @@ function SaveDialog(props: SaveDialogProps) {
         <div className="flex justify-content-between">
             {activeStep > 0 && (
                 <Button label="Back" icon="pi pi-angle-left" onClick={prevStep} text />
+            )}            
+            {activeStep === 0 && (
+                <Button label="Cancel" icon="pi pi-times" onClick={onHide} text severity='danger'/>
             )}
             {activeStep === 0 && (
                 <Button label="Next" icon="pi pi-angle-right" onClick={nextStep} text />

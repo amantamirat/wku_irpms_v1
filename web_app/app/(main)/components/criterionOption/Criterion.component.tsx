@@ -8,7 +8,7 @@ import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Toast } from 'primereact/toast';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import SaveDialog from './dialog/SaveDialog';
@@ -160,6 +160,7 @@ const CriterionOptionComp = (props: CriterionOptionCompProps) => {
                             visible={showSaveDialog}
                             criterionOption={selectedCriterionOption}
                             onChange={setSelectedCriterionOption}
+                            criterionOptions={criterionOptions}
                             onSave={saveCriterionOption}
                             onHide={() => setShowSaveDialog(false)}
                         />

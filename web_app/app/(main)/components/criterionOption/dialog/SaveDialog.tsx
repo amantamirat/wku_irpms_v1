@@ -13,12 +13,13 @@ interface SaveDialogProps {
     visible: boolean;
     criterionOption: CriterionOption;
     onChange: (criterionOption: CriterionOption) => void;
+    criterionOptions: CriterionOption[];
     onSave: () => void;
     onHide: () => void;
 }
 
 function SaveDialog(props: SaveDialogProps) {
-    const { visible, criterionOption, onChange, onSave, onHide } = props;
+    const { visible, criterionOption, onChange, criterionOptions, onSave, onHide } = props;
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
@@ -27,6 +28,11 @@ function SaveDialog(props: SaveDialogProps) {
         const result = validateCriterionOption(criterionOption);
         if (!result.valid) {
             setErrorMessage(result.message);
+            return;
+        }
+        const valid = validateOptions(criterionOptions, criterionOption);
+        if (!valid.valid) {
+            setErrorMessage(valid.message);
             return;
         }
         setErrorMessage(undefined);
@@ -52,6 +58,25 @@ function SaveDialog(props: SaveDialogProps) {
             setErrorMessage(undefined);
         }
     }, [visible]);
+
+
+    const validateOptions = (
+        criterionOptions: CriterionOption[],
+        newOption: CriterionOption
+    ): { valid: boolean; message?: string } => {
+        const labelExists = criterionOptions.some(option => option.label === newOption.label);
+        if (labelExists) {
+            return { valid: false, message: "Duplicate found in: label" };
+        }
+
+        const valueExists = criterionOptions.some(option => option.value === newOption.value);
+        if (valueExists) {
+            return { valid: false, message: "Duplicate found in: value" };
+        }
+
+        return { valid: true };
+    };
+
 
     return (
         <Dialog
