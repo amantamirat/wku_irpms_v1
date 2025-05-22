@@ -52,16 +52,18 @@ const CriterionOptionComp = (props: CriterionOptionCompProps) => {
                 _criterionOptions[index] = selectedCriterionOption;
             }
             setCriterionOptions(_criterionOptions);
+            /*
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',
                 detail: `CriterionOption ${index !== -1 ? 'edited' : 'added'}`,
                 life: 1000
             });
+            */
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to save criterionOption',
+                summary: 'Failed to merge criterionOption',
                 detail: '' + err,
                 life: 3000
             });
@@ -114,7 +116,7 @@ const CriterionOptionComp = (props: CriterionOptionCompProps) => {
         <>
             <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setSelectedCriterionOption(rowData);
+                    setSelectedCriterionOption({ ...rowData, weight: weight });
                     setShowSaveDialog(true);
                 }} />
             <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
