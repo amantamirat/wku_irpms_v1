@@ -1,7 +1,6 @@
 export enum Category {
     academic = 'academic',
-    supportive = 'supportive',
-    external = 'external'
+    supportive = 'supportive'
 }
 export type Position = {
     _id?: string;
