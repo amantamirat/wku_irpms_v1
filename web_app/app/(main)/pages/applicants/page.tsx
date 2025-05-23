@@ -2,7 +2,7 @@
 
 import DeleteDialog from '@/components/DeleteDialog';
 import SaveDialog from './dialogs/SaveDialog';
-import { Applicant, Gender } from '@/models/applicant';
+import { Applicant, Gender, Scope } from '@/models/applicant';
 import { ApplicantService } from '@/services/ApplicantService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
@@ -26,10 +26,10 @@ const ApplicantPage = () => {
     const typeParam = searchParams.get('type');
     const type = typeParam ? parseInt(typeParam, 10) : NaN;
 
-    const category = useMemo(() => {
-        return type === 1 ? Category.academic :
-            type === 2 ? Category.supportive :
-                type === 3 ? Category.external :
+    const scope = useMemo(() => {
+        return type === 1 ? Scope.academic :
+            type === 2 ? Scope.supportive :
+                type === 3 ? Scope.external :
                     undefined;
     }, [type]);
 
@@ -38,7 +38,7 @@ const ApplicantPage = () => {
         last_name: '',
         birth_date: new Date(),
         gender: Gender.Male,
-        rank: ''
+        scope: scope || Scope.academic,
     }), []);
 
     const [applicants, setApplicants] = useState<Applicant[]>([]);
@@ -55,10 +55,10 @@ const ApplicantPage = () => {
 
 
     const loadRanks = useCallback(async () => {
-        if (!category) return;
+        if (!scope) return;
         try {
-            const data = await RankService.getRanksByCategory(category);
-            setRanks(data);
+            //const data = await RankService.getRanksByCategory(scope);
+            //setRanks(data);
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
@@ -67,10 +67,10 @@ const ApplicantPage = () => {
                 life: 3000
             });
         }
-    }, [category]);
+    }, [scope]);
 
     const loadDepartments = useCallback(async () => {
-        if (!category || category !== Category.academic) return;
+        if (!scope || scope !== Scope.academic) return;
         try {
             const data = await DepartmentService.getDepartments();
             setDepartments(data);
@@ -83,12 +83,12 @@ const ApplicantPage = () => {
                 life: 3000
             });
         }
-    }, [category]);
+    }, [scope]);
 
     const loadApplicants = useCallback(async () => {
-        if (!category) return;
+        if (!scope) return;
         try {
-            const data = await ApplicantService.getApplicantsByCategory(category);
+            const data = await ApplicantService.getApplicantsByScope(scope);
             setApplicants(data);
         } catch (err) {
             toast.current?.show({
@@ -98,24 +98,24 @@ const ApplicantPage = () => {
                 life: 3000
             });
         }
-    }, [category]);
+    }, [scope]);
 
     useEffect(() => {
-        if (category === undefined) {
+        if (scope === undefined) {
             router.push('/');
             return;
         }
         loadRanks();
         loadDepartments();
         loadApplicants();
-    }, [category, router, loadRanks, loadDepartments, loadApplicants]);
+    }, [scope, router, loadRanks, loadDepartments, loadApplicants]);
 
     useEffect(() => {
         setFilters(initFilters());
         setGlobalFilter('');
     }, []);
 
-    if (category === undefined) return null;
+    if (scope === undefined) return null;
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
@@ -189,12 +189,12 @@ const ApplicantPage = () => {
     );
 
     const getHeading = () => {
-        switch (category) {
-            case Category.academic:
+        switch (scope) {
+            case Scope.academic:
                 return 'Academic Applicants';
-            case Category.supportive:
+            case Scope.supportive:
                 return 'Supportive Applicants';
-            case Category.external:
+            case Scope.external:
                 return 'External Applicants'
             default:
                 return 'Applicants';
@@ -215,9 +215,10 @@ const ApplicantPage = () => {
         <>
             <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
-                    const matchedRank = ranks.find(r => r._id === (rowData.rank as Rank)?._id);
-                    const matchedDepartment = departments.find(d => d._id === (rowData.department as Department)?._id);
-                    setSelectedApplicant({ ...rowData, rank: matchedRank ?? '', department: matchedDepartment });
+                    // const matchedRank = ranks.find(r => r._id === (rowData.rank as Rank)?._id);
+                    //const matchedDepartment = departments.find(d => d._id === (rowData.department as Department)?._id);
+                    //setSelectedApplicant({ ...rowData, rank: matchedRank ?? '', department: matchedDepartment });
+                    setSelectedApplicant(rowData);
                     setShowSaveDialog(true);
                 }} />
             <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
@@ -259,9 +260,9 @@ const ApplicantPage = () => {
                         <Column field="last_name" header="Last Name" sortable />
                         <Column field="gender" header="Gender" sortable />
                         <Column field="birth_date" header="Birth Date" body={(rowData) => new Date(rowData.birth_date!).toLocaleDateString()} />
-                        <Column field="rank.rank_title" header="Rank" sortable />
+
                         {
-                            category === Category.academic &&
+                            scope === Scope.academic &&
                             <Column field="department.department_name" header="Department" sortable />
                         }
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
@@ -271,7 +272,7 @@ const ApplicantPage = () => {
                         <SaveDialog
                             visible={showSaveDialog}
                             ranks={ranks}
-                            departments={category === Category.academic ? departments : undefined}
+                            departments={scope === Scope.academic ? departments : undefined}
                             applicant={selectedApplicant}
                             setApplicant={setSelectedApplicant}
                             onSave={saveApplicant}

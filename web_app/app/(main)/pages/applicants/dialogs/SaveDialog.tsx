@@ -117,25 +117,7 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
                     className={classNames({ 'p-invalid': submitted && !applicant.gender })}
                 />
             </div>
-
-            <div className="field">
-                <label htmlFor="rank">Rank</label>
-                <Dropdown
-                    id="rank"
-                    value={applicant.rank}
-                    options={ranks}
-                    onChange={(e) =>
-                        setApplicant({
-                            ...applicant,
-                            rank: e.value,
-                        })
-                    }                    
-                    optionLabel="rank_title"
-                    placeholder="Select a Rank"
-                    required
-                    className={classNames({ 'p-invalid': submitted && !applicant.rank })}
-                />
-            </div>
+            
             {departments &&
                 <div className="field">
                     <label htmlFor="department">Department </label>

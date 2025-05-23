@@ -193,7 +193,7 @@ const deleteApplicant = async (req: Request, res: Response): Promise<void> => {
 const applicantController = {
   createApplicant,
   getAllApplicants,
-  getApplicantsByCategory,
+  getAllApplicantsByScope,
   updateApplicant,
   deleteApplicant,
 };

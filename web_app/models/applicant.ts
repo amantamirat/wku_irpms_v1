@@ -8,16 +8,21 @@ export enum Gender {
     Female = 'Female'
 }
 
+export enum Scope {
+    academic = 'academic',
+    supportive = 'supportive',
+    external = 'external',
+}
+
+
 export type Applicant = {
     _id?: string;
     first_name: string;
     last_name: string;
     birth_date: Date;
     gender: Gender;
-    rank: string | Rank;
+    scope: Scope;
     department?: string | Department;
-    hire_date?: Date;
-    organization?: string | Organization;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -43,30 +48,9 @@ export const validateApplicant = (
         return { valid: false, message: 'Gender is required.' };
     }
 
-    if (!applicant.rank) {
-        return { valid: false, message: 'Rank is required.' };
+    if (applicant.scope === Scope.academic && !applicant.department) {
+        return { valid: false, message: 'Department is required for academic category.' };
     }
-    if (typeof applicant.rank === 'object' && applicant.rank !== null) {
-        if (typeof applicant.rank.position === 'object' && applicant.rank.position !== null) {
-            const position = applicant.rank.position;
-            if (!position.category) {
-                return { valid: false, message: 'Position category is required in rank.' };
-            }
-
-            if (position.category === Category.academic && !applicant.department) {
-                return { valid: false, message: 'Department is required for academic category.' };
-            }
-
-            if (position.category === Category.external && !applicant.organization) {
-                return { valid: false, message: 'Institute is required for external category.' };
-            }
-        }
-        else {
-            return { valid: false, message: 'Position details are required in rank.' };
-        }
-    }
-    else {
-        return { valid: false, message: 'Rank details are required.' };
-    }
+        
     return { valid: true };
 };

@@ -5,7 +5,7 @@ import { verifyActiveAccount } from "../middleware/auth";
 
 router.post('/', verifyActiveAccount, applicantController.createApplicant);
 router.get('/', verifyActiveAccount, applicantController.getAllApplicants);
-router.get('/:category', verifyActiveAccount, applicantController.getApplicantsByCategory);
+router.get('/:scope', verifyActiveAccount, applicantController.getAllApplicantsByScope);
 router.put('/:id', verifyActiveAccount, applicantController.updateApplicant);
 router.delete('/:id', verifyActiveAccount, applicantController.deleteApplicant);
 
