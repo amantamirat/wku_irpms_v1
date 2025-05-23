@@ -186,7 +186,7 @@ const EvaluationPage = () => {
 
     const statusBodyTemplate = (rowData: Evaluation) => {
         return (
-            <span className={`evaluation-badge status-${rowData.status.toLowerCase()}`}>
+            <span className={`theme-badge status-${rowData.status.toLowerCase()}`}>
                 {rowData.status}
             </span>
         );
