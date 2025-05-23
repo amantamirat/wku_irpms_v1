@@ -11,10 +11,8 @@ const createApplicant = async (req: Request, res: Response): Promise<void> => {
       last_name,
       birth_date,
       gender,
-      rank,
-      department,
-      hire_date,
-      institute
+      scope,
+      department
     } = req.body;
 
     const applicant = new Applicant({
@@ -24,9 +22,7 @@ const createApplicant = async (req: Request, res: Response): Promise<void> => {
       birth_date,
       gender,
       department,
-      rank,
-      hire_date,
-      institute
+      scope
     });
 
     await applicant.save();
@@ -41,10 +37,19 @@ const createApplicant = async (req: Request, res: Response): Promise<void> => {
 const getAllApplicants = async (_req: Request, res: Response): Promise<void> => {
   try {
     const applicants = await Applicant.find()
-      .populate('department')
-      .populate('rank')
-      .populate('institute');
+      .populate('department');
 
+    successResponse(res, 200, 'Applicants fetched successfully', applicants);
+  } catch (error) {
+    console.log(error);
+    errorResponse(res, 500, (error as Error).message, 'Server error');
+  }
+};
+
+const getAllApplicantsByScope = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { scope } = req.params;
+    const applicants = await Applicant.find({ scope }).populate('department');
     successResponse(res, 200, 'Applicants fetched successfully', applicants);
   } catch (error) {
     console.log(error);
@@ -140,9 +145,7 @@ const updateApplicant = async (req: Request, res: Response): Promise<void> => {
       birth_date,
       gender,
       department,
-      rank,
-      hire_date,
-      institute,
+      scope,
     } = req.body;
 
     const updatedApplicant = await Applicant.findByIdAndUpdate(
@@ -154,15 +157,11 @@ const updateApplicant = async (req: Request, res: Response): Promise<void> => {
         birth_date,
         gender,
         department,
-        rank,
-        hire_date,
-        organization: institute
+        scope
       },
       { new: true, runValidators: true }
     )
-      .populate('department')
-      .populate('rank')
-      .populate('institute');
+      .populate('department');
 
     if (!updatedApplicant) {
       errorResponse(res, 404, 'Applicant not found');
