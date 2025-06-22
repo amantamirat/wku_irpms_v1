@@ -4,19 +4,6 @@ import { User } from '../models/user';
 import { errorResponse, successResponse } from '../util/response';
 
 
-const createUser = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { user_name, email, password } = req.body;
-    const user = await createUserAccount({
-      user_name, email, password
-    });
-    successResponse(res, 201, 'User created successfully', user);
-  } catch (err: any) {
-    errorResponse(res, 500, 'Server error', err.message);
-  }
-};
-
-
 const getUsers = async (_req: Request, res: Response): Promise<void> => {
   try {
     const users = await User.find().populate('roles');
@@ -25,6 +12,7 @@ const getUsers = async (_req: Request, res: Response): Promise<void> => {
     errorResponse(res, 500, 'Server error', (err as Error).message);
   }
 };
+
 
 // Get a single user by ID
 const getUserById = async (req: Request, res: Response): Promise<void> => {
@@ -39,6 +27,21 @@ const getUserById = async (req: Request, res: Response): Promise<void> => {
     errorResponse(res, 500, 'Server error', (err as Error).message);
   }
 };
+
+
+
+const createUser = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { user_name, email, password } = req.body;
+    const user = await createUserAccount({
+      user_name, email, password
+    });
+    successResponse(res, 201, 'User created successfully', user);
+  } catch (err: any) {
+    errorResponse(res, 500, 'Server error', err.message);
+  }
+};
+
 
 // Update user
 const updateUser = async (req: Request, res: Response): Promise<void> => {

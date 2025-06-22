@@ -2,7 +2,8 @@ import mongoose, { Schema } from "mongoose";
 
 export enum Category {
     academic = 'academic',
-    supportive = 'supportive'
+    supportive = 'supportive',
+    other = 'other'
 }
 export interface IPosition extends Document {
     category: Category;
