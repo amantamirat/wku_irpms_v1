@@ -55,7 +55,7 @@ export const verifyActiveAccount = (req: AuthenticatedRequest, res: Response, ne
     }
     const decoded = jwt.verify(token, process.env.KEY as string) as JwtPayload;
     if (decoded.status !== UserStatus.Active) {
-      errorResponse(res, 403, "Account is not active. Please verify or contact admin.", {});
+      errorResponse(res, 403, "Account is not active. Please activate or contact admin.", {});
       return;
     }
     req.user = decoded;

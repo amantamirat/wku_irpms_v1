@@ -9,7 +9,7 @@ export enum OrganizationType {
     Center = 'Center',
     Supportive = 'Supportive',
     Sector = 'Sector',
-    External = 'Organization (External)',
+    External = 'External',
     Specialization = 'Specialization',
     Position = 'Position',
     Rank = 'Rank',
@@ -45,12 +45,6 @@ export enum Category {
     External = 'external',
 }
 
-// Permission interface (assumes you have a Permission model or sub-schema)
-interface Permission {
-    resource: string;
-    actions: string[];
-}
-
 // Address Sub-document
 const AddressSchema = new Schema({
     region: { type: String },
@@ -76,7 +70,6 @@ export interface IOrganization extends Document {
     };
     category?: Category;
     parent?: Types.ObjectId;
-    permissions?: Permission[];
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -94,14 +87,11 @@ const OrganizationSchema = new Schema<IOrganization>({
 
     category: { type: String, enum: Object.values(Category) },
 
-    parent: { type: Schema.Types.ObjectId, ref: 'Organization' },
-
-    permissions: [{
-        resource: { type: String },
-        actions: [{ type: String }]
-    }],
+    parent: { type: Schema.Types.ObjectId, ref: 'Organization' }
 
 }, { timestamps: true });
 
 
-export default mongoose.model<IOrganization>('Organization', OrganizationSchema);
+const Organization =  mongoose.model<IOrganization>('Organization', OrganizationSchema);
+
+export default Organization;
