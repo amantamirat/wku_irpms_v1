@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { validateOrganization } from './organization.validator';
-import Organization from './organization.model';
 import * as organizationService from './organization.service';
 import { successResponse, errorResponse } from '../../util/response';
 
@@ -22,12 +21,13 @@ const createOrganization = async (req: Request, res: Response): Promise<void> =>
 };
 
 /**
- * Get All Organizations
+ * Get Organizations By Type
  */
-const getAllOrganizations = async (_req: Request, res: Response): Promise<void> => {
+const getOrganizationsByType = async (req: Request, res: Response): Promise<void> => {
   try {
-    const organizations = await Organization.find().sort({ createdAt: -1 }).lean();
-    successResponse(res, 200, 'Organizations fetched successfully', organizations);
+    const type = req.params.type;
+    const result = await organizationService.getOrganizationsByType(type);
+    successResponse(res, result.status, `Organizations of type ${type} fetched successfully`, result.data);
   } catch (err: any) {
     errorResponse(res, 500, 'Server error', err.message);
   }
@@ -60,12 +60,12 @@ const updateOrganization = async (req: Request, res: Response): Promise<void> =>
  */
 const deleteOrganization = async (req: Request, res: Response): Promise<void> => {
   try {
-    const org = await Organization.findByIdAndDelete(req.params.id);
-    if (!org) {
-      errorResponse(res, 404, 'Organization not found');
+    const result = await organizationService.deleteOrganization(req.params.id);
+    if (!result.success) {
+      errorResponse(res, result.status, result.message || '');
       return;
     }
-    successResponse(res, 200, 'Organization deleted successfully', true);
+    successResponse(res, result.status, result.message);
   } catch (err: any) {
     errorResponse(res, 500, 'Server error', err.message);
   }
@@ -73,7 +73,7 @@ const deleteOrganization = async (req: Request, res: Response): Promise<void> =>
 
 const organizationController = {
   createOrganization,
-  getAllOrganizations,
+  getOrganizationsByType,
   updateOrganization,
   deleteOrganization,
 };

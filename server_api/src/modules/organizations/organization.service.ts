@@ -21,7 +21,7 @@ const validateParentOrganization = async (childType: OrganizationType, parentId?
   }
   const parentOrg = await Organization.findById(parentId);
   if (!parentOrg) {
-    return { success: false, message: 'Parent organization not found' };
+    return { success: false, message: `Parent (${expectedParentType}) organization not found` };
   }
   if (parentOrg.type !== expectedParentType) {
     return {
@@ -47,6 +47,11 @@ export const createOrganization = async (data: any) => {
 };
 
 
+export const getOrganizationsByType = async (type: string) => {
+  const organizations = await Organization.find({ type }).sort({ createdAt: -1 }).lean();
+  return { success: true, status: 200, data: organizations };
+};
+
 
 export const updateOrganization = async (id: string, data: any) => {
   const { error, value } = validateOrganization(data);
@@ -64,4 +69,14 @@ export const updateOrganization = async (id: string, data: any) => {
   Object.assign(org, data);
   await org.save();
   return { success: true, status: 200, data: org };
+};
+
+
+export const deleteOrganization = async (id: string) => {
+  const org = await Organization.findById(id);
+  if (!org) {
+    return { success: false, status: 404, message: 'Organization not found' };
+  }
+  await org.deleteOne();
+  return { success: true, status: 200, message: 'Organization deleted successfully' };
 };
