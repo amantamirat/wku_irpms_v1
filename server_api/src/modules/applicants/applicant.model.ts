@@ -27,7 +27,7 @@ export interface IApplicant extends Document {
     birth_date: Date;
     gender: Gender;
     scope: Scope;
-    department?: mongoose.Types.ObjectId;
+    organization: mongoose.Types.ObjectId;
     disability?: {
         hasDisability?: boolean,
         disabilityTypes?: DisabilityTypes,
@@ -59,9 +59,10 @@ const ApplicantSchema = new Schema<IApplicant>({
         enum: Object.values(Scope),
         required: true
     },
-    department: {
+    organization: {
         type: Schema.Types.ObjectId,
-        ref: 'Department',
+        ref: 'Organization',
+        required: true
     },
     disability: {
         hasDisability: {
