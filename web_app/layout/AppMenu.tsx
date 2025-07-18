@@ -100,6 +100,34 @@ const AppMenu = () => {
                         }
                     ]
                 },
+
+                {
+                    label: 'Organizations',
+                    icon: 'pi pi-sitemap',
+                    items: [
+                        {
+                            label: 'Colleges',
+                            icon: 'pi pi-fw pi-warehouse',
+                            to: '/pages/applicants?type=1'
+                        },
+                        {
+                            label: 'Directorates',
+                            icon: 'pi pi-fw pi-objects-column',                            
+                            to: '/pages/applicants?type=1'
+                        },
+                        {
+                            label: 'Offices',
+                            icon: 'pi pi-fw pi-shop',
+                            to: '/pages/applicants?type=2'
+                        },
+                        {
+                            label: 'External',
+                            icon: 'pi pi-fw pi-building-columns',
+                            disabled: true,
+                            to: '/pages/applicants?type=3'
+                        }
+                    ]
+                },
                 /*
                  {
                     label: 'Students',
