@@ -8,7 +8,6 @@ import { successResponse, errorResponse } from '../../util/response';
  */
 const createOrganization = async (req: Request, res: Response): Promise<void> => {
   try {
-
     const result = await organizationService.createOrganization(req.body);
     if (!result.success) {
       errorResponse(res, result.status, result.message || '');
@@ -48,7 +47,6 @@ const updateOrganization = async (req: Request, res: Response): Promise<void> =>
       errorResponse(res, result.status, result.message || '');
       return;
     }
-
     successResponse(res, result.status, 'Organization updated successfully', result.data);
   } catch (err: any) {
     errorResponse(res, 500, 'Server error', err.message);

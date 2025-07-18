@@ -6,7 +6,7 @@ import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/user.routes';
 import roleRoutes from './routes/role.routes';
 import organizationRoutes from './modules/organizations/organization.routes';
-
+import applicantRoutes from './modules/applicants/applicant.routes';
 
 import collegeRoutes from './routes/collegeRoutes';
 import departmentRoutes from './routes/departmentRoutes';
@@ -16,7 +16,7 @@ import directorateRoutes from './routes/directorateRoutes';
 import calendarRoutes from './routes/calendarRoutes';
 import positionRoutes from './routes/positionRoutes';
 import rankRoutes from './routes/rankRoutes';
-import applicantRoutes from './routes/applicantRoutes';
+
 import callRoutes from './routes/call.routes';
 
 import themeRoutes from './routes/theme/theme.routes';
