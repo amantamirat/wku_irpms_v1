@@ -8,6 +8,7 @@ import { AppMenuItem } from '@/types';
 import { PrimeIcons } from 'primereact/api';
 import { Directorate } from '@/models/directorate';
 import { DirectorateService } from '@/services/DirectorateService';
+import { OrganizationType } from '@/models/organization';
 
 
 const AppMenu = () => {
@@ -108,23 +109,27 @@ const AppMenu = () => {
                         {
                             label: 'Colleges',
                             icon: 'pi pi-fw pi-warehouse',
-                            to: '/pages/applicants?type=1'
+                            to: `/pages/organizations?type=${OrganizationType.College}`
                         },
                         {
                             label: 'Directorates',
-                            icon: 'pi pi-fw pi-objects-column',                            
-                            to: '/pages/applicants?type=1'
+                            icon: 'pi pi-fw pi-objects-column',
+                            to: `/pages/organizations?type=${OrganizationType.Directorate}`
                         },
                         {
                             label: 'Offices',
                             icon: 'pi pi-fw pi-shop',
-                            to: '/pages/applicants?type=2'
+                            to: `/pages/organizations?type=${OrganizationType.Supportive}`
                         },
                         {
                             label: 'External',
                             icon: 'pi pi-fw pi-building-columns',
-                            disabled: true,
-                            to: '/pages/applicants?type=3'
+                            to: `/pages/organizations?type=${OrganizationType.External}`
+                        },
+                        {
+                            label: 'Specialization',
+                            icon: 'pi pi-fw pi-building-columns',
+                            to: `/pages/organizations?type=${OrganizationType.Specialization}`
                         }
                     ]
                 },
@@ -159,7 +164,7 @@ const AppMenu = () => {
                     to: '/landing'
                 }
             ]
-        },        
+        },
         {
             label: 'Get Started',
             items: [

@@ -1,5 +1,4 @@
 import { Department } from "./department";
-import { Organization } from "./organization";
 import { Category } from "./position";
 import { Rank } from "./rank";
 
