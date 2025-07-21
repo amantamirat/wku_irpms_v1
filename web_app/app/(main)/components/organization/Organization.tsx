@@ -43,8 +43,13 @@ const OrganizationComp = (props: OrganizationCompProps) => {
 
     const loadOrganizations = async () => {
         try {
-            const data = await OrganizationService.getOrganizations(type);
-            setOrganizations(data);
+            if (props.parent?._id) {
+                const data = await OrganizationService.getOrganizationsByParent(props.parent._id);
+                setOrganizations(data);
+            } else {
+                const data = await OrganizationService.getOrganizationsByType(type);
+                setOrganizations(data);
+            }
         } catch (err) {
             console.error('Failed to load organizations:', err);
             toast.current?.show({
@@ -71,7 +76,7 @@ const OrganizationComp = (props: OrganizationCompProps) => {
                 _organizations[index] = updatedOrganization;
             } else {
                 const newOrganization = await OrganizationService.createOrganization(selectedOrganization);
-                _organizations.push(newOrganization);
+                _organizations.push({ ...selectedOrganization, _id: newOrganization._id });
             }
             toast.current?.show({
                 severity: 'success',

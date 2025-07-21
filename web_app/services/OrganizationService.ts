@@ -1,23 +1,27 @@
 import { Organization, OrganizationType } from "@/models/organization";
 import { MyService } from "./MyService";
 
-const end_point = '/organizations/';
+const end_point = '/organizations';
 
 function sanitizeOrganization(organization: Partial<Organization>): Partial<Organization> {
-  return {
-    ...organization,
-    parent:
-      typeof organization.parent === 'object' && organization.parent !== null
-        ? (organization.parent as Organization)._id
-        : organization.parent,
-  };
+    return {
+        ...organization,
+        parent:
+            typeof organization.parent === 'object' && organization.parent !== null
+                ? (organization.parent as Organization)._id
+                : organization.parent,
+    };
 }
-
 
 export const OrganizationService = {
 
-    async getOrganizations(type: OrganizationType): Promise<Organization[]> {
-        const data = await MyService.get(`${end_point}${type}`);
+    async getOrganizationsByType(type: OrganizationType): Promise<Organization[]> {
+        const data = await MyService.get(`${end_point}/type/${type}`);
+        return data as Organization[];
+    },
+
+    async getOrganizationsByParent(parent: string): Promise<Organization[]> {
+        const data = await MyService.get(`${end_point}/parent/${parent}`);
         return data as Organization[];
     },
 
@@ -31,7 +35,7 @@ export const OrganizationService = {
         if (!organization._id) {
             throw new Error("_id required.");
         }
-        const url = `${end_point}${organization._id}`;
+        const url = `${end_point}/${organization._id}`;
         const updatedOrganization = await MyService.put(url, organization);
         return updatedOrganization as Organization;
     },
@@ -40,7 +44,7 @@ export const OrganizationService = {
         if (!organization._id) {
             throw new Error("_id required.");
         }
-        const url = `${end_point}${organization._id}`;
+        const url = `${end_point}/${organization._id}`;
         const response = await MyService.delete(url);
         return response;
     },

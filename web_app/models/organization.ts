@@ -66,7 +66,6 @@ export type Organization = {
     updatedAt?: string;
 };
 
-
 export const getChildType = (current: OrganizationType): OrganizationType | null => {
     switch (current) {
         case OrganizationType.College:
@@ -100,9 +99,6 @@ export const getParentType = (current: OrganizationType): OrganizationType | nul
             return null; // Root-level types have no parent
     }
 };
-
-
-
 
 export const validateOrganization = (
     organization: Organization

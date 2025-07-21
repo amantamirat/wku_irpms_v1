@@ -47,12 +47,15 @@ export const createOrganization = async (data: any) => {
   return { success: true, status: 201, data: created };
 };
 
-
 export const getOrganizationsByType = async (type: string) => {
   const organizations = await Organization.find({ type }).sort({ createdAt: -1 }).lean();
   return { success: true, status: 200, data: organizations };
 };
 
+export const getOrganizationsByParent = async (parent: string) => {
+  const organizations = await Organization.find({ parent }).sort({ createdAt: -1 }).lean();
+  return { success: true, status: 200, data: organizations };
+};
 
 export const updateOrganization = async (id: string, data: any) => {
   const { error, value } = validateOrganization(data);
@@ -71,7 +74,6 @@ export const updateOrganization = async (id: string, data: any) => {
   await org.save();
   return { success: true, status: 200, data: org };
 };
-
 
 export const deleteOrganization = async (id: string) => {
   const org = await Organization.findById(id);

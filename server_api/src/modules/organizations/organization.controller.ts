@@ -32,6 +32,20 @@ const getOrganizationsByType = async (req: Request, res: Response): Promise<void
   }
 };
 
+
+/**
+ * Get Organizations By Parent
+ */
+const getOrganizationsByParent = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const parent = req.params.parent;
+    const result = await organizationService.getOrganizationsByParent(parent);
+    successResponse(res, result.status, `Organizations of type ${parent} fetched successfully`, result.data);
+  } catch (err: any) {
+    errorResponse(res, 500, err.message, err);
+  }
+};
+
 /**
  * Update Organization
  */
@@ -72,6 +86,7 @@ const deleteOrganization = async (req: Request, res: Response): Promise<void> =>
 const organizationController = {
   createOrganization,
   getOrganizationsByType,
+  getOrganizationsByParent,
   updateOrganization,
   deleteOrganization,
 };
