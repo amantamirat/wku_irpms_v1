@@ -87,7 +87,7 @@ const OrganizationPage = () => {
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',
-                detail: `Organization ${selectedOrganization._id ? "updated" : 'created'}`,
+                detail: `${type} ${selectedOrganization._id ? "updated" : 'created'}`,
                 life: 3000
             });
             setOrganizations(_organizations);
@@ -114,7 +114,7 @@ const OrganizationPage = () => {
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Successful',
-                    detail: 'Organization Deleted',
+                    detail: `${type} Deleted`,
                     life: 3000
                 });
             }
@@ -197,7 +197,7 @@ const OrganizationPage = () => {
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} organizations"
                         globalFilter={globalFilter}
-                        emptyMessage={`No ${type} data found.`}
+                        emptyMessage={`No ${type} organization data found.`}
                         header={header}
                         scrollable
                         filters={filters}
@@ -215,6 +215,10 @@ const OrganizationPage = () => {
                             style={{ width: '50px' }}
                         />
                         <Column field="name" header="Name" sortable headerStyle={{ minWidth: '15rem' }} />
+                        {
+                            type === OrganizationType.Specialization &&
+                            <Column field="academic_level" header="Ac. Level" sortable />
+                        }
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 

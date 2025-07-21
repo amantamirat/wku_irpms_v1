@@ -184,22 +184,11 @@ const ApplicantPage = () => {
         </div>
     );
 
-    const getHeading = () => {
-        switch (scope) {
-            case Scope.academic:
-                return 'Academic Applicants';
-            case Scope.supportive:
-                return 'Supportive Applicants';
-            case Scope.external:
-                return 'External Applicants'
-            default:
-                return 'Applicants';
-        }
-    };
+   
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage {getHeading()}</h5>
+            <h5 className="m-0">Manage {scope}</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
@@ -244,7 +233,7 @@ const ApplicantPage = () => {
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} applicants"
                         globalFilter={globalFilter}
-                        emptyMessage={`No ${getHeading()} data found.`}
+                        emptyMessage={`No ${scope} data found.`}
                         header={header}
                         scrollable
                         filters={filters}

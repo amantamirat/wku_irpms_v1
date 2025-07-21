@@ -123,15 +123,20 @@ const AppMenu = () => {
                             to: `/pages/organizations?type=${OrganizationType.Supportive}`
                         },
                         {
-                            label: 'External',
-                            icon: 'pi pi-fw pi-building-columns',
-                            to: `/pages/organizations?type=${OrganizationType.External}`
+                            label: 'Sectors',
+                            icon: 'pi pi-fw pi-flag',
+                            to: `/pages/organizations?type=${OrganizationType.Sector}`
                         },
                         {
                             label: 'Specialization',
                             icon: PrimeIcons.FILTER,
                             to: `/pages/organizations?type=${OrganizationType.Specialization}`
-                        }
+                        },
+                        {
+                            label: 'External',
+                            icon: 'pi pi-fw pi-building-columns',
+                            to: `/pages/organizations?type=${OrganizationType.External}`
+                        },
                     ]
                 },
                 /*
