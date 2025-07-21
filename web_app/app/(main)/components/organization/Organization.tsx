@@ -24,7 +24,8 @@ const OrganizationComp = (props: OrganizationCompProps) => {
 
     let emptyOrganization: Organization = {
         name: '',
-        type: type
+        type: type,
+        parent: props.parent
     };
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const dt = useRef<DataTable<any>>(null);

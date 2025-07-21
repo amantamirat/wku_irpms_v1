@@ -102,3 +102,54 @@ export const getParentType = (current: OrganizationType): OrganizationType | nul
 };
 
 
+
+
+export const validateOrganization = (
+    organization: Organization
+): { valid: boolean; message?: string } => {
+
+    if (!organization.name || organization.name.trim() === '') {
+        return { valid: false, message: 'Name is required.' };
+    }
+
+    if (!organization.type) {
+        return { valid: false, message: 'Type is required.' };
+    }
+
+    switch (organization.type) {
+        case OrganizationType.Program:
+            if (!organization.academic_level) {
+                return { valid: false, message: 'Academic level is required for Program.' };
+            }
+            if (!organization.classification) {
+                return { valid: false, message: 'Classification is required for Program.' };
+            }
+            break;
+
+        case OrganizationType.Specialization:
+            if (!organization.academic_level) {
+                return { valid: false, message: 'Academic level is required for Specialization.' };
+            }
+            break;
+
+        case OrganizationType.External:
+            if (!organization.ownership) {
+                return { valid: false, message: 'Ownership is required for External.' };
+            }
+            break;
+
+        case OrganizationType.Position:
+            if (!organization.category) {
+                return { valid: false, message: 'Category is required for Position.' };
+            }
+            break;
+    }
+    const parent = getParentType(organization.type);
+    if (parent && !organization.parent) {
+        return { valid: false, message: `${organization.type} requires  ${parent} as parent organization.` };
+    }
+    return { valid: true };
+};
+
+
+

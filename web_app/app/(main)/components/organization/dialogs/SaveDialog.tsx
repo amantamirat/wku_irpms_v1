@@ -5,7 +5,7 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { classNames } from 'primereact/utils';
-import { Organization, } from '@/models/organization';
+import { Organization, validateOrganization, } from '@/models/organization';
 
 interface SaveDialogProps {
     visible: boolean;
@@ -18,17 +18,29 @@ interface SaveDialogProps {
 function SaveDialog(props: SaveDialogProps) {
     const { visible, organization, onChange, onSave, onHide } = props;
     const [submitted, setSubmitted] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | undefined>();
+
+    useEffect(() => {
+        if (!visible) {
+            setSubmitted(false);
+            setErrorMessage(undefined);
+        }
+    }, [visible]);
 
     const save = async () => {
         setSubmitted(true);
-        // if (!validateOrganization(organization)) {
-        // return;
-        //}
+        const result = validateOrganization(organization);
+        if (!result.valid) {
+            setErrorMessage(result.message);
+            return;
+        }
+        //setErrorMessage(undefined);
         onSave();
     }
 
     const hide = async () => {
         setSubmitted(false);
+        setErrorMessage(undefined);
         onHide();
     }
 
@@ -39,12 +51,6 @@ function SaveDialog(props: SaveDialogProps) {
         </>
     );
 
-    useEffect(() => {
-        if (!visible) {
-            setSubmitted(false);
-        }
-    }, [visible]);
-
     return (
         <Dialog
             visible={visible}
@@ -54,7 +60,7 @@ function SaveDialog(props: SaveDialogProps) {
             className="p-fluid"
             footer={footer}
             onHide={hide}
-            //position={organization._id ? 'right' : 'center'}
+        //position={organization._id ? 'right' : 'center'}
         >
             {organization && (
                 <div className="field">
@@ -71,6 +77,9 @@ function SaveDialog(props: SaveDialogProps) {
                         <small className="p-invalid">Name is required.</small>
                     )}
                 </div>
+            )}
+            {errorMessage && (
+                <small className="p-error">{errorMessage}</small>
             )}
         </Dialog>
     );

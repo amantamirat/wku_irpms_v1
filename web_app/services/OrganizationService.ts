@@ -3,6 +3,16 @@ import { MyService } from "./MyService";
 
 const end_point = '/organizations/';
 
+function sanitizeOrganization(organization: Partial<Organization>): Partial<Organization> {
+  return {
+    ...organization,
+    parent:
+      typeof organization.parent === 'object' && organization.parent !== null
+        ? (organization.parent as Organization)._id
+        : organization.parent,
+  };
+}
+
 
 export const OrganizationService = {
 
@@ -12,7 +22,8 @@ export const OrganizationService = {
     },
 
     async createOrganization(organization: Partial<Organization>): Promise<Organization> {
-        const createdData = await MyService.post(end_point, organization);
+        const sanitized = sanitizeOrganization(organization);
+        const createdData = await MyService.post(end_point, sanitized);
         return createdData as Organization;
     },
 
