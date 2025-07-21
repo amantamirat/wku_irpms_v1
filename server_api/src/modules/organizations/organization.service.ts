@@ -4,6 +4,7 @@ import { validateOrganization } from './organization.validator';
 const parentTypeRules: Partial<Record<OrganizationType, OrganizationType>> = {
   [OrganizationType.Department]: OrganizationType.College,
   [OrganizationType.Program]: OrganizationType.Department,
+  [OrganizationType.Center]: OrganizationType.Directorate,
   [OrganizationType.External]: OrganizationType.Sector,
   [OrganizationType.Rank]: OrganizationType.Position
 };

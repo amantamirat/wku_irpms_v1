@@ -60,6 +60,7 @@ export const validateOrganization = (data: any) => {
   const parentRequiredTypes = [
     OrganizationType.Department,
     OrganizationType.Program,
+    OrganizationType.Center,
     OrganizationType.External,
     OrganizationType.Rank
   ];
