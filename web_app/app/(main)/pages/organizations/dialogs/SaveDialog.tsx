@@ -54,11 +54,11 @@ function SaveDialog(props: SaveDialogProps) {
             className="p-fluid"
             footer={footer}
             onHide={hide}
-        //position={organization._id ? 'right' : 'center'}
+            //position={organization._id ? 'right' : 'center'}
         >
             {organization && (
                 <div className="field">
-                    <label htmlFor="name">Organization Name</label>
+                    <label htmlFor="name">{organization.type} Name</label>
                     <InputText
                         id="name"
                         value={organization.name}

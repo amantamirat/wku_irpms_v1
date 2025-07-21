@@ -22,16 +22,9 @@ const OrganizationPage = () => {
     const isValidType = (value: string): value is OrganizationType =>
         Object.values(OrganizationType).includes(value as OrganizationType);
 
-    useEffect(() => {
-        if (!typeParam || !isValidType(typeParam)) {
-            router.push('/'); 
-        }
-    }, [typeParam, router]);
-
     if (!typeParam || !isValidType(typeParam)) return null; // don't render anything until redirected
 
-    const type = typeParam as OrganizationType;
-
+    const type = typeParam as OrganizationType;  
 
     let emptyOrganization: Organization = {
         name: '',
@@ -46,12 +39,6 @@ const OrganizationPage = () => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
 
-    useEffect(() => {
-        setFilters(initFilters());
-        setGlobalFilter('');
-        loadOrganizations();
-    }, []);
-
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
@@ -59,7 +46,7 @@ const OrganizationPage = () => {
     const loadOrganizations = async () => {
         try {
             const data = await OrganizationService.getOrganizations(type);
-            setOrganizations([]);
+            setOrganizations(data);
         } catch (err) {
             console.error('Failed to load organizations:', err);
             toast.current?.show({
@@ -70,6 +57,15 @@ const OrganizationPage = () => {
             });
         }
     };
+
+    useEffect(() => {
+        if (!typeParam || !isValidType(typeParam)) {
+            router.push('/');
+        }
+        setFilters(initFilters());
+        setGlobalFilter('');
+        loadOrganizations();
+    }, [typeParam, router]);
 
     const saveOrganization = async () => {
         try {
@@ -101,7 +97,6 @@ const OrganizationPage = () => {
             setShowSaveDialog(false);
             setSelectedOrganization(emptyOrganization);
         }
-
     };
 
     const deleteOrganization = async () => {
@@ -129,7 +124,6 @@ const OrganizationPage = () => {
             setShowDeleteDialog(false);
             setSelectedOrganization(emptyOrganization);
         }
-
     };
 
     const openSaveDialog = (organization: Organization) => {
@@ -159,7 +153,7 @@ const OrganizationPage = () => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage Organizations</h5>
+            <h5 className="m-0">Manage {type}s</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
@@ -177,7 +171,6 @@ const OrganizationPage = () => {
             </>
         );
     };
-
 
     return (
         <div className="grid">
@@ -198,7 +191,7 @@ const OrganizationPage = () => {
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} organizations"
                         globalFilter={globalFilter}
-                        emptyMessage="No organization data found."
+                        emptyMessage={`No ${type} data found.`}
                         header={header}
                         scrollable
                         filters={filters}
@@ -215,7 +208,7 @@ const OrganizationPage = () => {
                             body={(rowData, options) => options.rowIndex + 1}
                             style={{ width: '50px' }}
                         />
-                        <Column field="organization_name" header="Organization Name" sortable headerStyle={{ minWidth: '15rem' }} />
+                        <Column field="name" header="Name" sortable headerStyle={{ minWidth: '15rem' }} />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
