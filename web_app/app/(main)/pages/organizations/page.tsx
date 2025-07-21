@@ -21,13 +21,9 @@ const OrganizationPage = () => {
     const isValidType = (value: string): value is OrganizationType =>
         Object.values(OrganizationType).includes(value as OrganizationType);
 
-    if (!typeParam || !isValidType(typeParam)) return null; // don't render anything until redirected
-
-    const type = typeParam as OrganizationType;  
-
     let emptyOrganization: Organization = {
         name: '',
-        type: type
+        type: typeParam as OrganizationType
     };
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const dt = useRef<DataTable<any>>(null);
@@ -37,6 +33,20 @@ const OrganizationPage = () => {
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
+
+    const shouldRedirect = !typeParam || !isValidType(typeParam);
+
+    useEffect(() => {
+        if (shouldRedirect) {
+            router.push('/');
+        }
+    }, [shouldRedirect, router]);
+
+    if (shouldRedirect) {
+        return null;
+    }
+
+    const type = typeParam as OrganizationType;
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
@@ -58,13 +68,10 @@ const OrganizationPage = () => {
     };
 
     useEffect(() => {
-        if (!typeParam || !isValidType(typeParam)) {
-            router.push('/');
-        }
         setFilters(initFilters());
         setGlobalFilter('');
         loadOrganizations();
-    }, [typeParam, router]);
+    }, [type]);
 
     const saveOrganization = async () => {
         try {

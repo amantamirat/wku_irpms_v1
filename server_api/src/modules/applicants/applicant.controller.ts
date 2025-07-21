@@ -31,8 +31,8 @@ const updateApplicant = async (req: Request, res: Response): Promise<void> => {
 
 const getApplicants = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { scope } = req.query;
-    const result = await applicantService.getApplicants(scope as Scope);
+    const scope  = req.params.scope;
+    const result = await applicantService.getApplicants(scope);
     successResponse(res, result.status, 'Applicants fetched successfully', result.data);
   } catch (err: any) {    
     console.log(err);

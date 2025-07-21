@@ -23,18 +23,14 @@ const ApplicantPage = () => {
     const isValidScope = (value: string): value is Scope =>
         Object.values(Scope).includes(value as Scope);
 
-    if (!scopeParam || !isValidScope(scopeParam)) return null;
-
-    const scope = scopeParam as Scope;
-
-    const emptyApplicant: Applicant = useMemo(() => ({
+    const emptyApplicant: Applicant = {
         first_name: '',
         last_name: '',
         organization: '',
         birth_date: new Date(),
         gender: Gender.Male,
-        scope: scope,
-    }), []);
+        scope: scopeParam as Scope,
+    };
 
     const [applicants, setApplicants] = useState<Applicant[]>([]);
     //const [ranks, setRanks] = useState<Rank[]>([]);
@@ -46,6 +42,20 @@ const ApplicantPage = () => {
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
+
+    const shouldRedirect = !scopeParam || !isValidScope(scopeParam);
+
+    useEffect(() => {
+        if (shouldRedirect) {
+            router.push('/');
+        }
+    }, [shouldRedirect, router]);
+
+    if (shouldRedirect) {
+        return null;
+    }
+
+    const scope = scopeParam as Scope;
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
@@ -96,15 +106,11 @@ const ApplicantPage = () => {
         }
     }, [scope]);
 
-    useEffect(() => {
-        if (scope === undefined) {
-            router.push('/');
-            return;
-        }
-        loadRanks();
-        loadDepartments();
+    useEffect(() => {        
+        //loadRanks();
+        //loadDepartments();
         loadApplicants();
-    }, [scope, router, loadRanks, loadDepartments, loadApplicants]);
+    }, [scope]);
 
     useEffect(() => {
         setFilters(initFilters());

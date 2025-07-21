@@ -27,9 +27,9 @@ export const createApplicant = async (data: any) => {
 };
 
 // Get All Applicants (optional filter by scope)
-export const getApplicants = async (scope?: Scope) => {
-    const query = scope ? { scope } : {};
-    const applicants = await Applicant.find(query).populate('organization').sort({ createdAt: -1 });
+export const getApplicants = async (scope: string) => {
+    //const query = scope ? { scope } : {};
+    const applicants = await Applicant.find({scope}).populate('organization').sort({ createdAt: -1 }).lean();
     return { success: true, status: 200, data: applicants };
 };
 
