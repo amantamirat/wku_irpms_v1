@@ -1,16 +1,15 @@
 'use client';
 import DeleteDialog from '@/components/DeleteDialog';
-import { Organization, OrganizationType } from '@/models/organization';
+import { getChildType, Organization, OrganizationType } from '@/models/organization';
 import { OrganizationService } from '@/services/OrganizationService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
-import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
+import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import SaveDialog from './dialogs/SaveDialog';
 
 interface OrganizationCompProps {
@@ -18,11 +17,14 @@ interface OrganizationCompProps {
     parent?: Organization;
 }
 
-const OrganizationComp = (props: OrganizationCompProps) => {    
+const OrganizationComp = (props: OrganizationCompProps) => {
+
+    const type = props.type;
+    const childType = getChildType(type);
 
     let emptyOrganization: Organization = {
         name: '',
-        type: props.type
+        type: type
     };
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const dt = useRef<DataTable<any>>(null);
@@ -31,9 +33,8 @@ const OrganizationComp = (props: OrganizationCompProps) => {
     const [selectedOrganization, setSelectedOrganization] = useState<Organization>(emptyOrganization);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const toast = useRef<Toast>(null);    
-
-    const type = props.type;
+    const toast = useRef<Toast>(null);
+    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
@@ -182,7 +183,7 @@ const OrganizationComp = (props: OrganizationCompProps) => {
                         rowsPerPageOptions={[5, 10, 25]}
                         className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} organizations"
+                        currentPageReportTemplate={`Showing {first} to {last} of {totalRecords} ${type}s`}
                         globalFilter={globalFilter}
                         emptyMessage={`No ${type} organization data found.`}
                         header={header}
@@ -194,8 +195,22 @@ const OrganizationComp = (props: OrganizationCompProps) => {
                                 setSelectedOrganization(selected as Organization);
                             }
                         }}
+                        {...(childType && {
+                            expandedRows: expandedRows,
+                            onRowToggle: (e) => setExpandedRows(e.data),
+                            rowExpansionTemplate: (data) => (
+                                <OrganizationComp
+                                    type={childType}
+                                    parent={data as Organization}
+                                />
+                            )
+                        })}
                     >
-                        <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
+                        {
+                            childType
+                                ? <Column expander style={{ width: '3em' }} />
+                                : <Column selectionMode="single" headerStyle={{ width: '3em' }} />
+                        }
                         <Column
                             header="#"
                             body={(rowData, options) => options.rowIndex + 1}

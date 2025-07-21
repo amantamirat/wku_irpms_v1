@@ -53,7 +53,7 @@ export type Address = {
 };
 
 export type Organization = {
-    _id?: string; 
+    _id?: string;
     name: string;
     type: OrganizationType;
     academic_level?: AcademicLevel;
@@ -65,3 +65,40 @@ export type Organization = {
     createdAt?: string; // ISO string date
     updatedAt?: string;
 };
+
+
+export const getChildType = (current: OrganizationType): OrganizationType | null => {
+    switch (current) {
+        case OrganizationType.College:
+            return OrganizationType.Department;
+        case OrganizationType.Department:
+            return OrganizationType.Program;
+        case OrganizationType.Directorate:
+            return OrganizationType.Center;
+        case OrganizationType.Sector:
+            return OrganizationType.External;
+        case OrganizationType.Position:
+            return OrganizationType.Rank;
+        default:
+            return null; // No children
+    }
+};
+
+export const getParentType = (current: OrganizationType): OrganizationType | null => {
+    switch (current) {
+        case OrganizationType.Department:
+            return OrganizationType.College;
+        case OrganizationType.Program:
+            return OrganizationType.Department;
+        case OrganizationType.Center:
+            return OrganizationType.Directorate;
+        case OrganizationType.External:
+            return OrganizationType.Sector;
+        case OrganizationType.Rank:
+            return OrganizationType.Position;
+        default:
+            return null; // Root-level types have no parent
+    }
+};
+
+
