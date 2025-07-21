@@ -47,7 +47,7 @@ const deleteApplicant = async (req: Request, res: Response): Promise<void> => {
       errorResponse(res, result.status, result.message || '');
       return;
     }
-    successResponse(res, result.status, result.message);
+    successResponse(res, result.status, result.message, result.success);
   } catch (err: any) {
     errorResponse(res, 500, 'Server error', err.message);
   }
