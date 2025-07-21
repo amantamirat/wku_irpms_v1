@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import * as applicantService from './applicant.service';
 import { successResponse, errorResponse } from '../../util/response';
+import { Scope } from './applicant.model';
 
 const createApplicant = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -31,10 +32,11 @@ const updateApplicant = async (req: Request, res: Response): Promise<void> => {
 const getApplicants = async (req: Request, res: Response): Promise<void> => {
   try {
     const { scope } = req.query;
-    const result = await applicantService.getApplicants(scope as any);
+    const result = await applicantService.getApplicants(scope as Scope);
     successResponse(res, result.status, 'Applicants fetched successfully', result.data);
-  } catch (err: any) {
-    errorResponse(res, 500, 'Server error', err.message);
+  } catch (err: any) {    
+    console.log(err);
+    errorResponse(res, 500, err.message, err);
   }
 };
 

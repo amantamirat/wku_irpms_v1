@@ -1,6 +1,4 @@
-import { Department } from "./department";
-import { Category } from "./position";
-import { Rank } from "./rank";
+import { Organization } from "./organization";
 
 export enum Gender {
     Male = 'Male',
@@ -21,7 +19,7 @@ export type Applicant = {
     birth_date: Date;
     gender: Gender;
     scope: Scope;
-    department?: string | Department;
+    organization: string | Organization;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -47,7 +45,7 @@ export const validateApplicant = (
         return { valid: false, message: 'Gender is required.' };
     }
 
-    if (applicant.scope === Scope.academic && !applicant.department) {
+    if (applicant.scope === Scope.academic && !applicant.organization) {
         return { valid: false, message: 'Department is required for academic category.' };
     }
         

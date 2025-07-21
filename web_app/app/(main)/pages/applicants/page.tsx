@@ -13,37 +13,32 @@ import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Category } from '@/models/position';
-import { RankService } from '@/services/RankService';
-import { Rank } from '@/models/rank';
-import { DepartmentService } from '@/services/DepartmentService';
-import { Department } from '@/models/department';
 
 const ApplicantPage = () => {
 
-    const router = useRouter();
     const searchParams = useSearchParams();
-    const typeParam = searchParams.get('type');
-    const type = typeParam ? parseInt(typeParam, 10) : NaN;
+    const router = useRouter();
+    const scopeParam = searchParams.get('scope');
 
-    const scope = useMemo(() => {
-        return type === 1 ? Scope.academic :
-            type === 2 ? Scope.supportive :
-                type === 3 ? Scope.external :
-                    undefined;
-    }, [type]);
+    const isValidScope = (value: string): value is Scope =>
+        Object.values(Scope).includes(value as Scope);
+
+    if (!scopeParam || !isValidScope(scopeParam)) return null;
+
+    const scope = scopeParam as Scope;
 
     const emptyApplicant: Applicant = useMemo(() => ({
         first_name: '',
         last_name: '',
+        organization: '',
         birth_date: new Date(),
         gender: Gender.Male,
-        scope: scope || Scope.academic,
+        scope: scope,
     }), []);
 
     const [applicants, setApplicants] = useState<Applicant[]>([]);
-    const [ranks, setRanks] = useState<Rank[]>([]);
-    const [departments, setDepartments] = useState<Department[]>([]);
+    //const [ranks, setRanks] = useState<Rank[]>([]);
+    //const [departments, setDepartments] = useState<Department[]>([]);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
@@ -52,7 +47,23 @@ const ApplicantPage = () => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
 
+    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
+    };
 
+    const loadApplicants = async () => {
+        try {
+            const data = await ApplicantService.getApplicantsByScope(scope);
+            setApplicants(data);
+        } catch (err) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Failed to load applicant data',
+                detail: '' + err,
+                life: 3000
+            });
+        }
+    };
 
     const loadRanks = useCallback(async () => {
         if (!scope) return;
@@ -72,28 +83,13 @@ const ApplicantPage = () => {
     const loadDepartments = useCallback(async () => {
         if (!scope || scope !== Scope.academic) return;
         try {
-            const data = await DepartmentService.getDepartments();
-            setDepartments(data);
+            //const data = await DepartmentService.getDepartments();
+            //setDepartments(data);
         } catch (err) {
             console.error('Failed to load departments:', err);
             toast.current?.show({
                 severity: 'error',
                 summary: 'Failed to load departments data',
-                detail: '' + err,
-                life: 3000
-            });
-        }
-    }, [scope]);
-
-    const loadApplicants = useCallback(async () => {
-        if (!scope) return;
-        try {
-            const data = await ApplicantService.getApplicantsByScope(scope);
-            setApplicants(data);
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load applicant data',
                 detail: '' + err,
                 life: 3000
             });
@@ -114,12 +110,6 @@ const ApplicantPage = () => {
         setFilters(initFilters());
         setGlobalFilter('');
     }, []);
-
-    if (scope === undefined) return null;
-
-    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
-    };
 
     const saveApplicant = async () => {
         try {
@@ -271,8 +261,8 @@ const ApplicantPage = () => {
                     {selectedApplicant && (
                         <SaveDialog
                             visible={showSaveDialog}
-                            ranks={ranks}
-                            departments={scope === Scope.academic ? departments : undefined}
+                            ranks={[]}
+                            departments={scope === Scope.academic ? [] : undefined}
                             applicant={selectedApplicant}
                             setApplicant={setSelectedApplicant}
                             onSave={saveApplicant}

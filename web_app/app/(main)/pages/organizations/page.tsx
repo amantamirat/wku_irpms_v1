@@ -16,7 +16,6 @@ import SaveDialog from './dialogs/SaveDialog';
 const OrganizationPage = () => {
     const searchParams = useSearchParams();
     const router = useRouter();
-
     const typeParam = searchParams.get('type');
 
     const isValidType = (value: string): value is OrganizationType =>

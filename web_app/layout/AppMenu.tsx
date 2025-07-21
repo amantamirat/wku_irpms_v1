@@ -9,6 +9,7 @@ import { PrimeIcons } from 'primereact/api';
 import { Directorate } from '@/models/directorate';
 import { DirectorateService } from '@/services/DirectorateService';
 import { OrganizationType } from '@/models/organization';
+import { Scope } from '@/models/applicant';
 
 
 const AppMenu = () => {
@@ -86,18 +87,18 @@ const AppMenu = () => {
                         {
                             label: 'Academic',
                             icon: 'pi pi-fw pi-crown',
-                            to: '/pages/applicants?type=1'
+                            to: `/pages/applicants?scope=${Scope.academic}`
                         },
                         {
                             label: 'Supportive',
                             icon: 'pi pi-fw pi-bullseye',
-                            to: '/pages/applicants?type=2'
+                            to: `/pages/applicants?scope=${Scope.supportive}`
                         },
                         {
                             label: 'External',
                             icon: 'pi pi-fw pi-asterisk',
-                            disabled: true,
-                            to: '/pages/applicants?type=3'
+                            //disabled: true,
+                            to: `/pages/applicants?scope=${Scope.external}`
                         }
                     ]
                 },
@@ -128,7 +129,7 @@ const AppMenu = () => {
                         },
                         {
                             label: 'Specialization',
-                            icon: 'pi pi-fw pi-building-columns',
+                            icon: PrimeIcons.FILTER,
                             to: `/pages/organizations?type=${OrganizationType.Specialization}`
                         }
                     ]

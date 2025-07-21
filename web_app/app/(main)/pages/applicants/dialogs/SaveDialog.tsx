@@ -123,18 +123,18 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
                     <label htmlFor="department">Department </label>
                     <Dropdown
                         id="department"
-                        value={applicant.department}
+                        value={applicant.organization}
                         options={departments}
                         onChange={(e) =>
                             setApplicant({
                                 ...applicant,
-                                department: e.value,
+                                organization: e.value,
                             })
                         }
                         optionLabel="department_name"
                         placeholder="Select a Department"
                         required
-                        className={classNames({ 'p-invalid': submitted && !applicant.department })}
+                        className={classNames({ 'p-invalid': submitted && !applicant.organization })}
                     />
                 </div>
             }

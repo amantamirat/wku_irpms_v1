@@ -28,7 +28,7 @@ const getOrganizationsByType = async (req: Request, res: Response): Promise<void
     const result = await organizationService.getOrganizationsByType(type);
     successResponse(res, result.status, `Organizations of type ${type} fetched successfully`, result.data);
   } catch (err: any) {
-    errorResponse(res, 500, 'Server error', err.message);
+    errorResponse(res, 500, err.message, err);
   }
 };
 
