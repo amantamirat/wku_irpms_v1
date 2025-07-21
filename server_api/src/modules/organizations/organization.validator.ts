@@ -69,5 +69,5 @@ export const validateOrganization = (data: any) => {
       parent: Joi.string().hex().length(24).required()
     });
   }
-  return schema.validate(data, { abortEarly: false });
+  return schema.validate(data, { abortEarly: false, stripUnknown: true });
 };

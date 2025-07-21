@@ -39,7 +39,7 @@ const updateOrganization = async (req: Request, res: Response): Promise<void> =>
   try {
     const { error, value } = validateOrganization(req.body);
     if (error) {
-      errorResponse(res, 400, 'Validation failed', error.details.map(d => d.message));
+      errorResponse(res, 400, error.details.map(d => d.message).toString(), error);
       return;
     }
     const result = await organizationService.updateOrganization(req.params.id, value);
