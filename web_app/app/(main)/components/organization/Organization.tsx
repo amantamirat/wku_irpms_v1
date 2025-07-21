@@ -9,7 +9,7 @@ import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereac
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import SaveDialog from './dialogs/SaveDialog';
 
 interface OrganizationCompProps {
@@ -41,7 +41,7 @@ const OrganizationComp = (props: OrganizationCompProps) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
 
-    const loadOrganizations = async () => {
+    const loadOrganizations = useCallback(async () => {
         try {
             if (props.parent?._id) {
                 const data = await OrganizationService.getOrganizationsByParent(props.parent._id);
@@ -59,13 +59,13 @@ const OrganizationComp = (props: OrganizationCompProps) => {
                 life: 3000
             });
         }
-    };
+    }, [props.parent?._id, type, toast]);
 
     useEffect(() => {
         setFilters(initFilters());
         setGlobalFilter('');
         loadOrganizations();
-    }, [type]);
+    }, [type, loadOrganizations]);
 
     const saveOrganization = async () => {
         try {
