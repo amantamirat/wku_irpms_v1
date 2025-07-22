@@ -1,6 +1,6 @@
 'use client';
 import DeleteDialog from '@/components/DeleteDialog';
-import { getChildType, Organization, OrganizationType } from '@/models/organization';
+import { AcademicLevel, Classification, getChildType, Organization, OrganizationType } from '@/models/organization';
 import { OrganizationService } from '@/services/OrganizationService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
@@ -35,8 +35,8 @@ const OrganizationComp = (props: OrganizationCompProps) => {
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
-    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);    
-    
+    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
+
     const isProgram = props.type === OrganizationType.Program;
     const isSpecialization = props.type === OrganizationType.Specialization;
     const isPosition = props.type === OrganizationType.Position;
@@ -177,6 +177,22 @@ const OrganizationComp = (props: OrganizationCompProps) => {
         );
     };
 
+    const academicLevelBodyTemplate = (rowData: Organization) => {
+        return (
+            <span className={`academic-badge level-${rowData.academic_level?.toLowerCase()}`}>
+                {rowData.academic_level}
+            </span>
+        );
+    };
+
+    const classificationBodyTemplate = (rowData: Organization) => {
+        return (
+            <span className={`classification-badge classification-${rowData.classification?.toLowerCase()}`}>
+                {rowData.classification}
+            </span>
+        );
+    };
+
     return (
         <div className="grid">
             <div className="col-12">
@@ -229,10 +245,10 @@ const OrganizationComp = (props: OrganizationCompProps) => {
                         />
                         <Column field="name" header="Name" sortable headerStyle={{ minWidth: '15rem' }} />
                         {(isSpecialization || isProgram) && (
-                            <Column field="academic_level" header="Ac. Level" sortable />
+                            <Column field="academic_level" header="Ac. Level" body={academicLevelBodyTemplate} sortable />
                         )}
                         {isProgram && (
-                            <Column field="classification" header="Classification" sortable />
+                            <Column field="classification" header="Classification" body={classificationBodyTemplate} sortable />
                         )}
                         {isPosition && (
                             <Column field="category" header="Category" sortable />
