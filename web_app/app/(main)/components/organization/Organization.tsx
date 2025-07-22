@@ -193,6 +193,22 @@ const OrganizationComp = (props: OrganizationCompProps) => {
         );
     };
 
+    const categoryBodyTemplate = (rowData: Organization) => {
+        return (
+            <span className={`category-badge category-${rowData.category?.toLowerCase()}`}>
+                {rowData.category}
+            </span>
+        );
+    };
+
+    const ownershipBodyTemplate = (rowData: Organization) => {
+        return (
+            <span className={`ownership-badge ownership-${rowData.ownership?.toLowerCase()}`}>
+                {rowData.ownership}
+            </span>
+        );
+    };
+
     return (
         <div className="grid">
             <div className="col-12">
@@ -251,10 +267,10 @@ const OrganizationComp = (props: OrganizationCompProps) => {
                             <Column field="classification" header="Classification" body={classificationBodyTemplate} sortable />
                         )}
                         {isPosition && (
-                            <Column field="category" header="Category" sortable />
+                            <Column field="category" header="Category" body={categoryBodyTemplate} sortable />
                         )}
                         {isExternal && (
-                            <Column field="ownership" header="Ownership" sortable />
+                            <Column field="ownership" header="Ownership" body={ownershipBodyTemplate} sortable />
                         )}
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
