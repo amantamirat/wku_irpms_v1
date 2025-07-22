@@ -121,21 +121,21 @@ const AppMenu = () => {
                             label: 'Offices',
                             icon: 'pi pi-fw pi-shop',
                             to: `/pages/organizations?type=${OrganizationType.Supportive}`
-                        },
+                        },                        
                         {
                             label: 'Sectors',
-                            icon: 'pi pi-fw pi-flag',
+                            icon: 'pi pi-fw pi-building-columns',
                             to: `/pages/organizations?type=${OrganizationType.Sector}`
                         },
                         {
                             label: 'Specialization',
                             icon: PrimeIcons.FILTER,
                             to: `/pages/organizations?type=${OrganizationType.Specialization}`
-                        },
+                        },                        
                         {
-                            label: 'External',
-                            icon: 'pi pi-fw pi-building-columns',
-                            to: `/pages/organizations?type=${OrganizationType.External}`
+                            label: 'Positions',
+                            icon: 'pi pi-fw pi-flag',
+                            to: `/pages/organizations?type=${OrganizationType.Position}`
                         },
                     ]
                 },

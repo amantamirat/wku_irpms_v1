@@ -37,6 +37,10 @@ const OrganizationComp = (props: OrganizationCompProps) => {
     const toast = useRef<Toast>(null);
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
+    const isPosition = props.type === OrganizationType.Position;
+    const isSpecialization = props.type === OrganizationType.Specialization;
+    const isProgram = props.type === OrganizationType.Program;
+
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
@@ -223,10 +227,12 @@ const OrganizationComp = (props: OrganizationCompProps) => {
                             style={{ width: '50px' }}
                         />
                         <Column field="name" header="Name" sortable headerStyle={{ minWidth: '15rem' }} />
-                        {
-                            type === OrganizationType.Specialization &&
+                        {(isSpecialization || isProgram) && (
                             <Column field="academic_level" header="Ac. Level" sortable />
-                        }
+                        )}
+                        {isProgram && (
+                            <Column field="classification" header="Classification" sortable />
+                        )}
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
