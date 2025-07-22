@@ -35,11 +35,12 @@ const OrganizationComp = (props: OrganizationCompProps) => {
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
-    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
-
-    const isPosition = props.type === OrganizationType.Position;
-    const isSpecialization = props.type === OrganizationType.Specialization;
+    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);    
+    
     const isProgram = props.type === OrganizationType.Program;
+    const isSpecialization = props.type === OrganizationType.Specialization;
+    const isPosition = props.type === OrganizationType.Position;
+    const isExternal = props.type === OrganizationType.External;
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
@@ -232,6 +233,12 @@ const OrganizationComp = (props: OrganizationCompProps) => {
                         )}
                         {isProgram && (
                             <Column field="classification" header="Classification" sortable />
+                        )}
+                        {isPosition && (
+                            <Column field="category" header="Category" sortable />
+                        )}
+                        {isExternal && (
+                            <Column field="ownership" header="Ownership" sortable />
                         )}
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>

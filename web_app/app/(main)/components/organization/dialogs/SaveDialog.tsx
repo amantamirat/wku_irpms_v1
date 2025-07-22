@@ -5,7 +5,7 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { classNames } from 'primereact/utils';
-import { AcademicLevel, Category, Classification, Organization, OrganizationType, validateOrganization, } from '@/models/organization';
+import { AcademicLevel, Category, Classification, Organization, OrganizationType, Ownership, validateOrganization, } from '@/models/organization';
 import { Dropdown } from 'primereact/dropdown';
 
 interface SaveDialogProps {
@@ -21,9 +21,10 @@ function SaveDialog(props: SaveDialogProps) {
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
-    const isPosition = organization.type === OrganizationType.Position;
-    const isSpecialization = organization.type === OrganizationType.Specialization;
     const isProgram = organization.type === OrganizationType.Program;
+    const isSpecialization = organization.type === OrganizationType.Specialization;
+    const isPosition = organization.type === OrganizationType.Position;
+    const isExternal = organization.type === OrganizationType.External;
 
     useEffect(() => {
         if (!visible) {
@@ -83,23 +84,6 @@ function SaveDialog(props: SaveDialogProps) {
                             <small className="p-invalid">Name is required.</small>
                         )}
                     </div>
-                    {isPosition &&
-                        (<div className="field">
-                            <label htmlFor="category">Category</label>
-                            <Dropdown
-                                id="category"
-                                value={organization.category}
-                                options={Object.values(Category).map(level => ({ label: level, value: level }))}
-                                onChange={(e) =>
-                                    props.onChange({ ...organization, category: e.value })
-                                }
-                                placeholder="Select Category"
-                                className={classNames({ 'p-invalid': submitted && isPosition && !organization.category })}
-                            />
-                            {submitted && isPosition && !organization.category && (
-                                <small className="p-invalid">Category is required.</small>
-                            )}
-                        </div>)}
 
                     {(isSpecialization || isProgram) &&
                         (<>
@@ -139,6 +123,44 @@ function SaveDialog(props: SaveDialogProps) {
                                 </div>)}
                         </>
                         )}
+
+                    {isPosition &&
+                        (<div className="field">
+                            <label htmlFor="category">Category</label>
+                            <Dropdown
+                                id="category"
+                                value={organization.category}
+                                options={Object.values(Category).map(level => ({ label: level, value: level }))}
+                                onChange={(e) =>
+                                    props.onChange({ ...organization, category: e.value })
+                                }
+                                placeholder="Select Category"
+                                className={classNames({ 'p-invalid': submitted && isPosition && !organization.category })}
+                            />
+                            {submitted && isPosition && !organization.category && (
+                                <small className="p-invalid">Category is required.</small>
+                            )}
+                        </div>)
+                    }
+
+                    {isExternal &&
+                        (<div className="field">
+                            <label htmlFor="ownership">Ownership</label>
+                            <Dropdown
+                                id="ownership"
+                                value={organization.ownership}
+                                options={Object.values(Ownership).map(level => ({ label: level, value: level }))}
+                                onChange={(e) =>
+                                    props.onChange({ ...organization, ownership: e.value })
+                                }
+                                placeholder="Select Ownership"
+                                className={classNames({ 'p-invalid': submitted && isExternal && !organization.ownership })}
+                            />
+                            {submitted && isExternal && !organization.ownership && (
+                                <small className="p-invalid">Ownership is required.</small>
+                            )}
+                        </div>)
+                    }
                 </>
             )}
             {errorMessage && (
