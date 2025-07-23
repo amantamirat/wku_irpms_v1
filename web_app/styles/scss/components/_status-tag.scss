@@ -120,6 +120,26 @@
     }
 }
 
+.gender-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px; // pill shape
+    font-weight: 500;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+
+    &.gender-male {
+        background: #E3F2FD; // light blue
+        color: #1565C0; // deep blue
+    }
+
+    &.gender-female {
+        background: #FCE4EC; // soft pink
+        color: #AD1457; // elegant rose
+    }
+}
+
+
 .calendar-badge {
     &.status-active {
         background: #C8E6C9;

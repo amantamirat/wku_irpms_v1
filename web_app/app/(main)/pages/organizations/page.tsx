@@ -12,7 +12,6 @@ const OrganizationPage = () => {
     const isValidType = (value: string): value is OrganizationType =>
         Object.values(OrganizationType).includes(value as OrganizationType);
 
-
     const shouldRedirect = !typeParam || !isValidType(typeParam);
 
     useEffect(() => {
@@ -24,9 +23,8 @@ const OrganizationPage = () => {
     if (shouldRedirect) {
         return null;
     }
-
     const type = typeParam as OrganizationType;
-
+    
     return (
         <OrganizationComp type={type} />
     );

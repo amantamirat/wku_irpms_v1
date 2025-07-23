@@ -11,8 +11,7 @@ import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Organization, OrganizationType } from '@/models/organization';
 import { OrganizationService } from '@/services/OrganizationService';
 
@@ -46,6 +45,9 @@ const ApplicantComp = (props: ApplicantCompProps) => {
     };
 
     const scope = props.scope;
+    const isAcademic = scope === Scope.academic;
+    const isSupportive = scope === Scope.supportive;
+    const isExternal = scope === Scope.external;
 
     const loadApplicants = useCallback(async () => {
         try {
@@ -65,14 +67,14 @@ const ApplicantComp = (props: ApplicantCompProps) => {
 
     const loadOrganizations = useCallback(async () => {
         try {
-            if (scope === Scope.academic) {
+            if (isAcademic) {
                 const data = await OrganizationService.getOrganizationsByType(OrganizationType.Department);
                 setOrganizations(data);
-            } else if (scope === Scope.supportive) {
+            } else if (isSupportive) {
                 const data = await OrganizationService.getOrganizationsByType(OrganizationType.Supportive);
                 setOrganizations(data);
             }
-            else if (scope === Scope.external) {
+            else if (isExternal) {
                 const data = await OrganizationService.getOrganizationsByType(OrganizationType.External);
                 setOrganizations(data);
             }
@@ -91,7 +93,7 @@ const ApplicantComp = (props: ApplicantCompProps) => {
     useEffect(() => {
         loadApplicants();
         loadOrganizations();
-    }, [scope]);
+    }, [scope, loadApplicants, loadOrganizations]);
 
     useEffect(() => {
         setFilters(initFilters());
@@ -166,7 +168,6 @@ const ApplicantComp = (props: ApplicantCompProps) => {
     );
 
 
-
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
             <h5 className="m-0">Manage {scope}</h5>
@@ -181,9 +182,6 @@ const ApplicantComp = (props: ApplicantCompProps) => {
         <>
             <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
-                    // const matchedRank = ranks.find(r => r._id === (rowData.rank as Rank)?._id);
-                    //const matchedDepartment = departments.find(d => d._id === (rowData.department as Department)?._id);
-                    //setSelectedApplicant({ ...rowData, rank: matchedRank ?? '', department: matchedDepartment });
                     setSelectedApplicant(rowData);
                     setShowSaveDialog(true);
                 }} />
@@ -194,6 +192,14 @@ const ApplicantComp = (props: ApplicantCompProps) => {
                 }} />
         </>
     );
+
+    const genderBodyTemplate = (rowData: Applicant) => {
+        return (
+            <span className={`gender-badge gender-${rowData.gender.toLowerCase()}`}>
+                {rowData.gender}
+            </span>
+        );
+    };
 
     return (
         <div className="grid">
@@ -224,22 +230,17 @@ const ApplicantComp = (props: ApplicantCompProps) => {
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="first_name" header="First Name" sortable />
                         <Column field="last_name" header="Last Name" sortable />
-                        <Column field="gender" header="Gender" sortable />
+                        <Column field="gender" header="Gender" body={genderBodyTemplate} sortable />
                         <Column field="birth_date" header="Birth Date" body={(rowData) => new Date(rowData.birth_date!).toLocaleDateString()} />
-
-                        {
-                            scope === Scope.academic &&
-                            <Column field="department.department_name" header="Department" sortable />
-                        }
+                        <Column field="organization.name" header={isAcademic ? "Department" : isSupportive ? "Office" : "Organization"} sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
                     {selectedApplicant && (
                         <SaveDialog
                             visible={showSaveDialog}
-                            ranks={[]}
-                            departments={scope === Scope.academic ? [] : undefined}
                             applicant={selectedApplicant}
+                            organizations={organizations}
                             setApplicant={setSelectedApplicant}
                             onSave={saveApplicant}
                             onHide={() => setShowSaveDialog(false)}

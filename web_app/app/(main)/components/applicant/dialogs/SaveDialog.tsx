@@ -7,16 +7,14 @@ import { Calendar as PrimeCalendar } from 'primereact/calendar';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import { Dropdown } from 'primereact/dropdown';
-import { Applicant, Gender, validateApplicant } from '@/models/applicant';
-import { Rank } from '@/models/rank';
-import { Department } from '@/models/department';
+import { Applicant, Gender, Scope, validateApplicant } from '@/models/applicant';
+import { Organization } from '@/models/organization';
 
 
 interface SaveApplicantDialogProps {
     visible: boolean;
-    ranks: Rank[];
-    departments?: Department[];
     applicant: Applicant;
+    organizations?: Organization[];
     setApplicant: (applicant: Applicant) => void;
     onSave: () => void;
     onHide: () => void;
@@ -24,9 +22,13 @@ interface SaveApplicantDialogProps {
 
 function SaveApplicantDialog(props: SaveApplicantDialogProps) {
 
-    const { visible, ranks, departments, applicant, setApplicant, onSave, onHide } = props;
+    const { visible, organizations, applicant, setApplicant, onSave, onHide } = props;
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
+
+    const isAcademic = applicant.scope === Scope.academic;
+    const isSupportive = applicant.scope === Scope.supportive;
+    //const isExternal = applicant.scope === Scope.external;
 
     useEffect(() => {
         if (!visible) {
@@ -42,7 +44,7 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
             setErrorMessage(result.message);
             return;
         }
-        setErrorMessage(undefined);
+        //setErrorMessage(undefined);
         onSave();
     };
 
@@ -69,76 +71,75 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
             footer={footer}
             onHide={hide}
         >
-            <div className="field">
-                <label htmlFor="first_name">First Name</label>
-                <InputText
-                    id="first_name"
-                    value={applicant.first_name}
-                    onChange={(e) => setApplicant({ ...applicant, first_name: e.target.value })}
-                    className={classNames({ 'p-invalid': submitted && !applicant.first_name })}
-                    required
-                />
-            </div>
-
-            <div className="field">
-                <label htmlFor="last_name">Last Name</label>
-                <InputText
-                    id="last_name"
-                    value={applicant.last_name}
-                    onChange={(e) => setApplicant({ ...applicant, last_name: e.target.value })}
-                    className={classNames({ 'p-invalid': submitted && !applicant.last_name })}
-                    required
-                />
-            </div>
-
-            <div className="field">
-                <label htmlFor="birth_date">Birth Date</label>
-                <PrimeCalendar
-                    id="birth_date"
-                    value={applicant.birth_date ? new Date(applicant.birth_date) : undefined}
-                    onChange={(e) => setApplicant({ ...applicant, birth_date: e.value! })}
-                    dateFormat="yy-mm-dd"
-                    showIcon
-                    className={classNames({ 'p-invalid': submitted && !applicant.birth_date })}
-                    required
-                />
-            </div>
-
-            <div className="field">
-                <label htmlFor="gender">Gender</label>
-                <Dropdown
-                    id="gender"
-                    value={applicant.gender}
-                    options={Object.values(Gender).map(g => ({ label: g, value: g }))}
-                    onChange={(e) =>
-                        setApplicant({ ...applicant, gender: e.value })
-                    }
-                    placeholder="Select Gender"
-                    className={classNames({ 'p-invalid': submitted && !applicant.gender })}
-                />
-            </div>
-            
-            {departments &&
+            {applicant && (<>
                 <div className="field">
-                    <label htmlFor="department">Department </label>
+                    <label htmlFor="first_name">First Name</label>
+                    <InputText
+                        id="first_name"
+                        value={applicant.first_name}
+                        onChange={(e) => setApplicant({ ...applicant, first_name: e.target.value })}
+                        className={classNames({ 'p-invalid': submitted && !applicant.first_name })}
+                        required
+                    />
+                </div>
+
+                <div className="field">
+                    <label htmlFor="last_name">Last Name</label>
+                    <InputText
+                        id="last_name"
+                        value={applicant.last_name}
+                        onChange={(e) => setApplicant({ ...applicant, last_name: e.target.value })}
+                        className={classNames({ 'p-invalid': submitted && !applicant.last_name })}
+                        required
+                    />
+                </div>
+
+                <div className="field">
+                    <label htmlFor="birth_date">Birth Date</label>
+                    <PrimeCalendar
+                        id="birth_date"
+                        value={applicant.birth_date ? new Date(applicant.birth_date) : undefined}
+                        onChange={(e) => setApplicant({ ...applicant, birth_date: e.value! })}
+                        dateFormat="yy-mm-dd"
+                        showIcon
+                        className={classNames({ 'p-invalid': submitted && !applicant.birth_date })}
+                        required
+                    />
+                </div>
+
+                <div className="field">
+                    <label htmlFor="gender">Gender</label>
                     <Dropdown
-                        id="department"
+                        id="gender"
+                        value={applicant.gender}
+                        options={Object.values(Gender).map(g => ({ label: g, value: g }))}
+                        onChange={(e) =>
+                            setApplicant({ ...applicant, gender: e.value })
+                        }
+                        placeholder="Select Gender"
+                        className={classNames({ 'p-invalid': submitted && !applicant.gender })}
+                    />
+                </div>
+
+                <div className="field">
+                    <label htmlFor="organization">{isAcademic ? "Department" : isSupportive ? "Office" : "Organization"}</label>
+                    <Dropdown
+                        id="organization"
                         value={applicant.organization}
-                        options={departments}
+                        options={organizations}
                         onChange={(e) =>
                             setApplicant({
                                 ...applicant,
                                 organization: e.value,
                             })
                         }
-                        optionLabel="department_name"
-                        placeholder="Select a Department"
+                        optionLabel="name"
+                        placeholder="Select a Workspace"
                         required
                         className={classNames({ 'p-invalid': submitted && !applicant.organization })}
                     />
                 </div>
-            }
-
+            </>)}
             {errorMessage && (
                 <small className="p-error">{errorMessage}</small>
             )}
