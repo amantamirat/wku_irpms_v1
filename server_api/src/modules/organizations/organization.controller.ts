@@ -79,7 +79,7 @@ const deleteOrganization = async (req: Request, res: Response): Promise<void> =>
     }
     successResponse(res, result.status, result.message, result.success);
   } catch (err: any) {
-    errorResponse(res, 500, 'Server error', err.message);
+    errorResponse(res, 500, err.message, err);
   }
 };
 

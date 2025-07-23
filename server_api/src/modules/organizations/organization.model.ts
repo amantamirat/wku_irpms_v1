@@ -96,6 +96,21 @@ const OrganizationSchema = new Schema<IOrganization>({
 }, { timestamps: true });
 
 
-const Organization =  mongoose.model<IOrganization>('Organization', OrganizationSchema);
+OrganizationSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
+    const orgId = this._id;
+    const hasChildren = await mongoose.model('Organization').exists({ parent: orgId });
+    if (hasChildren) {
+        const err = new Error(`Cannot delete: ${this.name} ${this.type} it is a parent for other organizations.`);
+        return next(err);
+    }
+    const isReferenced = await mongoose.model('Applicant').exists({ organization: orgId });
+    if (isReferenced) {
+        const err = new Error(`Cannot delete: ${this.name} ${this.type} it is a workspace for some applicants.`);
+        return next(err);
+    }
+    next();
+});
+
+const Organization = mongoose.model<IOrganization>('Organization', OrganizationSchema);
 
 export default Organization;
