@@ -22,7 +22,6 @@ export enum DisabilityTypes {
 
 export interface IApplicant extends Document {
     first_name: string;
-    middle_name?: string;
     last_name: string;
     birth_date: Date;
     gender: Gender;
