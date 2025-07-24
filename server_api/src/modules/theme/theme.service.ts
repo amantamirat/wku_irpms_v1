@@ -42,13 +42,15 @@ export const validateThemeReferences = async (data: {
 
 // Create Theme
 export const createTheme = async (data: Partial<ITheme>) => {
-    try {
+    try {    
+        console.log("creation of theme started")    
         const { error, value } = validateTheme(data);
         if (error) throw new Error(error.details.map(d => d.message).join(', '));
         await validateThemeReferences(value);
         const theme = await Theme.create(value);
         return { success: true, status: 201, data: theme };
     } catch (err: any) {
+        console.log(err);
         return { success: false, status: 400, message: err.message };
     }
 };
@@ -61,8 +63,7 @@ export const getThemesByParent = async (parentId: string) => {
 };
 
 export const getThemesByDirectorate = async (directorateId: string) => {
-    const themes = await Theme.find({ directorate: directorateId })
-        .populate('parent directorate')
+    const themes = await Theme.find({ directorate: directorateId })        
         .sort({ createdAt: -1 })
         .lean();
     return { success: true, status: 200, data: themes };

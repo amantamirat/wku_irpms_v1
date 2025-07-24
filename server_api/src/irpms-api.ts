@@ -46,7 +46,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/organizations", organizationRoutes);
-app.use("/api/thems", themeRoutes);
+app.use("/api/themes", themeRoutes);
 
 
 
@@ -61,7 +61,7 @@ app.use("/api/ranks", rankRoutes);
 app.use("/api/applicants", applicantRoutes);
 app.use("/api/calls", callRoutes);
 
-app.use("/api/themes", thmRoutes);
+app.use("/api/thms", thmRoutes);
 app.use("/api/priorityAreas", priorityAreaRoutes);
 app.use("/api/subAreas", subAreaRoutes);
 

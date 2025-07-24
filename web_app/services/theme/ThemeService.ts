@@ -1,14 +1,30 @@
 import { Theme } from "@/models/theme/theme";
 import { MyService } from "../MyService";
+import { Organization } from "@/models/organization";
 
 
 const end_point = '/themes';
+
+function sanitizeTheme(theme: Partial<Theme>): Partial<Theme> {
+    return {
+        ...theme,
+        directorate:
+            typeof theme.directorate === 'object' && theme.directorate !== null
+                ? (theme.directorate as Organization)._id
+                : theme.directorate,
+        parent:
+            typeof theme.parent === 'object' && theme.parent !== null
+                ? (theme.parent as Theme)._id
+                : theme.parent,
+    };
+}
 
 
 export const ThemeService = {
 
     async createTheme(theme: Partial<Theme>): Promise<Theme> {
-        const createdData = await MyService.post(end_point, theme);
+        const sanitized = sanitizeTheme(theme);
+        const createdData = await MyService.post(end_point, sanitized);
         return createdData as Theme;
     },
 

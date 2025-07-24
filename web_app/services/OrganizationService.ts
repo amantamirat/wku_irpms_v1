@@ -36,8 +36,6 @@ export const OrganizationService = {
         return data as Organization[];
     },
 
-
-
     async updateOrganization(organization: Partial<Organization>): Promise<Organization> {
         if (!organization._id) {
             throw new Error("_id required.");

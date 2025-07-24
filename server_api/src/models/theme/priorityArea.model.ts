@@ -12,7 +12,7 @@ export interface IPriorityArea extends Document {
 const PriorityAreaSchema = new Schema<IPriorityArea>({
     theme: {
         type: Schema.Types.ObjectId,
-        ref: 'Theme',
+        ref: 'Theme2',
         required: true
     },
     title: {
