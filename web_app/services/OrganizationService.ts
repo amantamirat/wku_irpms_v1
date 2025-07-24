@@ -15,6 +15,17 @@ function sanitizeOrganization(organization: Partial<Organization>): Partial<Orga
 
 export const OrganizationService = {
 
+    async createOrganization(organization: Partial<Organization>): Promise<Organization> {
+        const sanitized = sanitizeOrganization(organization);
+        const createdData = await MyService.post(end_point, sanitized);
+        return createdData as Organization;
+    },
+
+    async getDirectorateByID(id: string): Promise<Organization> {
+        const data = await MyService.get(`${end_point}/${id}`);
+        return data as Organization;
+    },
+
     async getOrganizationsByType(type: OrganizationType): Promise<Organization[]> {
         const data = await MyService.get(`${end_point}/type/${type}`);
         return data as Organization[];
@@ -25,11 +36,7 @@ export const OrganizationService = {
         return data as Organization[];
     },
 
-    async createOrganization(organization: Partial<Organization>): Promise<Organization> {
-        const sanitized = sanitizeOrganization(organization);
-        const createdData = await MyService.post(end_point, sanitized);
-        return createdData as Organization;
-    },
+
 
     async updateOrganization(organization: Partial<Organization>): Promise<Organization> {
         if (!organization._id) {

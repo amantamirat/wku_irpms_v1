@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { validateOrganization } from './organization.validator';
 import * as organizationService from './organization.service';
 import { successResponse, errorResponse } from '../../util/response';
+import Organization, { OrganizationType } from './organization.model';
 
 /**
  * Create Organization
@@ -18,9 +19,21 @@ const createOrganization = async (req: Request, res: Response): Promise<void> =>
     errorResponse(res, 500, 'Server error', err.message);
   }
 };
-
+// Get Organization by Id
+const getDirectorateById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const directorate = await Organization.findOne({ _id: req.params.id, type: OrganizationType.Directorate }).lean();
+    if (!directorate) {
+      errorResponse(res, 404, 'Directorate not found');
+      return;
+    }
+    successResponse(res, 200, 'Directorate fetched successfully', directorate);
+  } catch (error) {
+    errorResponse(res, 500, (error as Error).message, {});
+  }
+};
 /**
- * Get Organizations By Type
+ * Get Organizations By Type and ID
  */
 const getOrganizationsByType = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -31,8 +44,6 @@ const getOrganizationsByType = async (req: Request, res: Response): Promise<void
     errorResponse(res, 500, err.message, err);
   }
 };
-
-
 /**
  * Get Organizations By Parent
  */
@@ -45,7 +56,6 @@ const getOrganizationsByParent = async (req: Request, res: Response): Promise<vo
     errorResponse(res, 500, err.message, err);
   }
 };
-
 /**
  * Update Organization
  */
@@ -85,6 +95,7 @@ const deleteOrganization = async (req: Request, res: Response): Promise<void> =>
 
 const organizationController = {
   createOrganization,
+  getDirectorateById,
   getOrganizationsByType,
   getOrganizationsByParent,
   updateOrganization,

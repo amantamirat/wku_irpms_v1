@@ -20,9 +20,22 @@ import PriorityAreaComp from '../../components/priorityArea/PriorityArea';
 const ThemePage = () => {
 
     const searchParams = useSearchParams();
+    const router = useRouter();
     const directorateId = searchParams.get('directorate');
     const [directorate, setDirectorate] = useState<Directorate | null>(null);
-    const router = useRouter();
+
+    const shouldRedirect = !directorateId;
+
+    useEffect(() => {
+        if (shouldRedirect) {
+            router.push('/');
+        }
+    }, [shouldRedirect, router]);
+
+    if (shouldRedirect) {
+        return null;
+    }
+
 
     const emptyTheme: Theme = {
         directorate: directorate || '',

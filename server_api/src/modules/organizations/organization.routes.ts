@@ -4,6 +4,8 @@ import { verifyActiveAccount } from '../../middleware/auth';
 const router = Router();
 // Create a new organization
 router.post('/', verifyActiveAccount, organizationController.createOrganization);
+// Get an organization of a type Directorate by ID
+router.get('/:id', verifyActiveAccount, organizationController.getDirectorateById);
 // Get organizations by type (e.g., Program, Department, etc.)
 router.get('/type/:type', verifyActiveAccount, organizationController.getOrganizationsByType);
 // Get organizations by parent 
