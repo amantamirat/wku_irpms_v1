@@ -38,7 +38,9 @@ const AppMenu = () => {
                 },
                 {
                     label: 'Themes',
-                    icon: 'pi pi-fw pi-tags',                   
+                    icon: 'pi pi-fw pi-tags',
+                    to: `/pages/themes?directorate=${dir._id}`
+
                 },
                 {
                     label: 'Evaluations',
