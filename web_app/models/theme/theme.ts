@@ -1,9 +1,9 @@
 import { Organization } from "../organization";
 
 export enum ThemeType {
-    theme = 'theme',
-    subArea = 'sub-area',
-    priorityArea = 'priority-area'
+    theme = 'Theme',
+    priorityArea = 'Priority Area',
+    subArea = 'Sub Area'    
 }
 
 export type Theme = {

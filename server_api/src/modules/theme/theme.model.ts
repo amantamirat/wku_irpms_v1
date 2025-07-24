@@ -1,9 +1,9 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 // Enum for theme Types
 export enum ThemeType {
-    theme = 'theme',
-    subArea = 'sub-area',
-    priorityArea = 'priority-area'
+    theme = 'Theme',
+    priorityArea = 'Priority Area',
+    subArea = 'Sub Area'    
 }
 
 export interface ITheme extends Document {    

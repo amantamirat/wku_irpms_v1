@@ -42,7 +42,7 @@ export const ThemeService = {
         if (!theme._id) {
             throw new Error("_id required.");
         }
-        const url = `${end_point}${theme._id}`;
+        const url = `${end_point}/${theme._id}`;
         const updatedTheme = await MyService.put(url, theme);
         return updatedTheme as Theme;
     },
@@ -51,7 +51,7 @@ export const ThemeService = {
         if (!theme._id) {
             throw new Error("_id required.");
         }
-        const url = `${end_point}${theme._id}`;
+        const url = `${end_point}/${theme._id}`;
         const response = await MyService.delete(url);
         return response;
     },
