@@ -26,9 +26,8 @@ export const createApplicant = async (data: any) => {
     }
 };
 
-// Get All Applicants (optional filter by scope)
-export const getApplicants = async (scope: string) => {
-    //const query = scope ? { scope } : {};
+// Get Applicants
+export const getApplicants = async (scope: string) => {    
     const applicants = await Applicant.find({scope}).populate('organization').sort({ createdAt: -1 }).lean();
     return { success: true, status: 200, data: applicants };
 };
@@ -54,7 +53,6 @@ export const deleteApplicant = async (id: string) => {
     if (!applicant) {
         return { success: false, status: 404, message: 'Applicant not found' };
     }
-
     await applicant.deleteOne();
     return { success: true, status: 200, message: 'Applicant deleted successfully' };
 };
