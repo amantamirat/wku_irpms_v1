@@ -43,7 +43,8 @@ export const ThemeService = {
             throw new Error("_id required.");
         }
         const url = `${end_point}/${theme._id}`;
-        const updatedTheme = await MyService.put(url, theme);
+        const sanitized = sanitizeTheme(theme);
+        const updatedTheme = await MyService.put(url, sanitized);
         return updatedTheme as Theme;
     },
 
