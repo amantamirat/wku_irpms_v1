@@ -12,7 +12,6 @@ import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import SaveDialog from './dialogs/SaveDialog';
-import PriorityAreaComp from '../../components/priorityArea/PriorityArea';
 import { Organization } from '@/models/organization';
 
 
@@ -136,7 +135,7 @@ const ThemeComponent = (props: ThemeCompProps) => {
 
     const startToolbarTemplate = () => (
         <div className="my-2">
-            <Button label="New Theme" icon="pi pi-plus" severity="success" className="mr-2"
+            <Button label={`New ${type}`} icon="pi pi-plus" severity="success" className="mr-2"
                 onClick={() => {
                     setSelectedTheme(emptyTheme);
                     setShowSaveDialog(true);

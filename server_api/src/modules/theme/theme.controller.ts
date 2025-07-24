@@ -23,7 +23,7 @@ const createTheme = async (req: Request, res: Response): Promise<void> => {
  */
 const getThemesByParent = async (req: Request, res: Response): Promise<void> => {
   try {
-    const parentId = req.params.parentId;
+    const parentId = req.params.parent;
     const result = await themeService.getThemesByParent(parentId);
     successResponse(res, result.status, `Themes under parent ${parentId} fetched successfully`, result.data);
   } catch (err: any) {

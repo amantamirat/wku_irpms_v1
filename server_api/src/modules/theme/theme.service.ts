@@ -43,7 +43,6 @@ export const validateThemeReferences = async (data: {
 // Create Theme
 export const createTheme = async (data: Partial<ITheme>) => {
     try {    
-        console.log("creation of theme started")    
         const { error, value } = validateTheme(data);
         if (error) throw new Error(error.details.map(d => d.message).join(', '));
         await validateThemeReferences(value);
