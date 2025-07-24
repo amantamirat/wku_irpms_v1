@@ -5,7 +5,7 @@ import { Directorate } from "@/models/directorate";
 const end_point = '/themes/';
 
 
-export const ThemeService = {
+export const ThemeService2 = {
 
     async getThemes(): Promise<Theme[]> {
         const data = await MyService.get(end_point);

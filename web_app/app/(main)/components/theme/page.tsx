@@ -1,33 +1,38 @@
 'use client';
 
 import DeleteDialog from '@/components/DeleteDialog';
-import { Directorate } from '@/models/directorate';
-import { Theme, ThemeStatus } from '@/models/theme';
-import { DirectorateService } from '@/services/DirectorateService';
-import { ThemeService2 } from '@/services/ThemeService';
+import { Theme, ThemeType } from '@/models/theme/theme';
+import { ThemeService } from '@/services/theme/ThemeService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import SaveDialog from './dialogs/SaveDialog';
 import PriorityAreaComp from '../../components/priorityArea/PriorityArea';
+import { Organization } from '@/models/organization';
 
-const ThemePage = () => {
 
-    const searchParams = useSearchParams();
-    const directorateId = searchParams.get('directorate');
-    const [directorate, setDirectorate] = useState<Directorate | null>(null);
-    const router = useRouter();
+interface ThemeCompProps {
+    type: ThemeType;
+    directorate?: Organization;
+    parent?: Theme;
+}
+
+const ThemeComponent = (props: ThemeCompProps) => {
+
+    const type = props.type;
+    const childType = type === ThemeType.theme ? ThemeType.priorityArea : type === ThemeType.priorityArea ? ThemeType.subArea : null;
+
 
     const emptyTheme: Theme = {
-        directorate: directorate || '',
         title: '',
-        status: ThemeStatus.Active,
+        type: props.type,
+        directorate: props.directorate,
+        parent: props.parent
     };
 
     const [themes, setThemes] = useState<Theme[]>([]);
@@ -41,74 +46,56 @@ const ThemePage = () => {
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
 
-    useEffect(() => {
-        if (directorateId) {
-            DirectorateService.getDirectorateByID(directorateId)
-                .then((result) => {
-                    if (!result) {
-                        router.push('/auth/error'); // redirect if not found
-                    } else {
-                        setDirectorate(result);
-                    }
-                })
-                .catch(() => {
-                    router.push('/auth/error'); // also handle fetch errors
-                });
-        } else {
-            // if no directorateId param, optionally redirect or handle differently
-            router.push('/auth/error');
-        }
-    }, [directorateId, router]);
-
-    const loadThemes = async () => {
-        try {
-            if (!directorate) return;
-            const data = await ThemeService2.getThemesByDirectorate(directorate);
-            setThemes(data);
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load theme data',
-                detail: '' + err,
-                life: 3000
-            });
-        }
-    };
-
-    useEffect(() => {
-        if (directorate) {
-            loadThemes();
-        }
-    }, [directorate])
-
-    useEffect(() => {
-        setFilters(initFilters());
-        setGlobalFilter('');
-    }, []);
-
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
 
+
+    const loadThemes = useCallback(async () => {
+        try {
+            if (props.directorate && props.type === ThemeType.theme) {
+                const data = await ThemeService.getThemesByDirectorate(props.directorate._id || '');
+                setThemes(data);
+            } else if (props.parent) {
+                const data = await ThemeService.getThemesByParent(props.parent._id || '');
+                setThemes(data);
+            }
+        } catch (err) {
+            console.error('Failed to load themes:', err);
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Failed to load themes data',
+                detail: '' + err,
+                life: 3000
+            });
+        }
+    }, [props.parent, props.directorate, toast]);
+
+    useEffect(() => {
+        setFilters(initFilters());
+        setGlobalFilter('');
+        loadThemes();
+    }, [loadThemes]);
+
     const saveTheme = async () => {
         try {
             let _themes = [...themes];
             if (selectedTheme._id) {
-                const updated = await ThemeService2.updateTheme(selectedTheme);
+                const updated = await ThemeService.updateTheme(selectedTheme);
                 const index = _themes.findIndex((c) => c._id === selectedTheme._id);
                 _themes[index] = updated;
             } else {
-                const created = await ThemeService2.createTheme(selectedTheme);
-                _themes.push(created);
+                const created = await ThemeService.createTheme(selectedTheme);
+                _themes.push({ ...selectedTheme, _id: created._id });
             }
-            setThemes(_themes);
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',
                 detail: `Theme ${selectedTheme._id ? 'updated' : 'created'}`,
                 life: 3000
             });
+            setThemes(_themes);
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
@@ -124,7 +111,7 @@ const ThemePage = () => {
 
     const deleteTheme = async () => {
         try {
-            const deleted = await ThemeService2.deleteTheme(selectedTheme);
+            const deleted = await ThemeService.deleteTheme(selectedTheme);
             if (deleted) {
                 setThemes(themes.filter((c) => c._id !== selectedTheme._id));
                 toast.current?.show({
@@ -160,7 +147,7 @@ const ThemePage = () => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage {directorate?.directorate_name} Themes</h5>
+            <h5 className="m-0">Manage {props.directorate?.name} Themes</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
@@ -183,18 +170,6 @@ const ThemePage = () => {
         </>
     );
 
-    const statusBodyTemplate = (rowData: Theme) => {
-        return (
-            <span className={`theme-badge status-${rowData.status.toLowerCase()}`}>
-                {rowData.status}
-            </span>
-        );
-    };
-
-    if (!directorate) {
-        return <p>Loading...</p>;
-    }
-
     return (
         <div className="grid">
             <div className="col-12">
@@ -214,22 +189,24 @@ const ThemePage = () => {
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} themes"
                         globalFilter={globalFilter}
-                        emptyMessage={`No ${directorate.directorate_name} themes data found.`}
+                        emptyMessage={`No themes data found.`}
                         header={header}
                         scrollable
                         filters={filters}
-                        expandedRows={expandedRows}
-                        onRowToggle={(e) => setExpandedRows(e.data)}
-                        rowExpansionTemplate={(data) => (
-                            <PriorityAreaComp
-                                theme={data as Theme}
-                            />
-                        )}
+                        {...(childType && {
+                            expandedRows: expandedRows,
+                            onRowToggle: (e) => setExpandedRows(e.data),
+                            rowExpansionTemplate: (data) => (
+                                <ThemeComponent
+                                    type={childType}
+                                    parent={data as Theme}
+                                />
+                            )
+                        })}
                     >
                         <Column expander style={{ width: '3em' }} />
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="title" header="Title" sortable />
-                        <Column field="status" header="Status" body={statusBodyTemplate} sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
@@ -257,4 +234,4 @@ const ThemePage = () => {
     );
 };
 
-export default ThemePage;
+export default ThemeComponent;
