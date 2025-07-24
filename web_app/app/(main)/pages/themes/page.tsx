@@ -6,7 +6,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { OrganizationService } from '@/services/OrganizationService';
 import { Organization } from '@/models/organization';
 import { ThemeType } from '@/models/theme/theme';
-import ThemeComponent from '../../components/theme/page';
+import ThemeComponent from '../../components/theme/Theme';
+
 
 const ThemePage = () => {
     const router = useRouter();
