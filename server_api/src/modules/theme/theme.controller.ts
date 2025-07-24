@@ -36,7 +36,7 @@ const getThemesByParent = async (req: Request, res: Response): Promise<void> => 
  */
 const getThemesByDirectorate = async (req: Request, res: Response): Promise<void> => {
   try {
-    const directorateId = req.params.directorateId;
+    const directorateId = req.params.directorate;
     const result = await themeService.getThemesByDirectorate(directorateId);
     successResponse(res, result.status, `Themes under directorate ${directorateId} fetched successfully`, result.data);
   } catch (err: any) {

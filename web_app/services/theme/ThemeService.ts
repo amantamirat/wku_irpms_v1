@@ -13,7 +13,7 @@ export const ThemeService = {
     },
 
     async getThemesByDirectorate(directorate: string): Promise<Theme[]> {
-        const data = await MyService.get(`${end_point}directorate/${directorate}`);
+        const data = await MyService.get(`${end_point}/directorate/${directorate}`);
         return data as Theme[];
     },
 
