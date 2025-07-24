@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
+import { Theme } from '../../models/theme/theme.model';
 
 // Enum for Organization Types
 export enum OrganizationType {
@@ -103,9 +104,14 @@ OrganizationSchema.pre('deleteOne', { document: true, query: false }, async func
         const err = new Error(`Cannot delete: ${this.name} ${this.type} it is a parent for other organizations.`);
         return next(err);
     }
-    const isReferenced = await mongoose.model('Applicant').exists({ organization: orgId });
-    if (isReferenced) {
+    const isReferencedByApplicant = await mongoose.model('Applicant').exists({ organization: orgId });
+    if (isReferencedByApplicant) {
         const err = new Error(`Cannot delete: ${this.name} ${this.type} it is a workspace for some applicants.`);
+        return next(err);
+    }
+    const isReferencedByTheme = await Theme.exists({ directorate: orgId });
+    if (isReferencedByTheme) {
+        const err = new Error(`Cannot delete: ${this.name} ${this.type} it is referenced in some themes.`);
         return next(err);
     }
     next();
