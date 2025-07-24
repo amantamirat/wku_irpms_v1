@@ -8,24 +8,30 @@ import { AppMenuItem } from '@/types';
 import { PrimeIcons } from 'primereact/api';
 import { Directorate } from '@/models/directorate';
 import { DirectorateService } from '@/services/DirectorateService';
-import { OrganizationType } from '@/models/organization';
+import { Organization, OrganizationType } from '@/models/organization';
 import { Scope } from '@/models/applicant';
+import { OrganizationService } from '@/services/OrganizationService';
 
 
 const AppMenu = () => {
     const { layoutConfig } = useContext(LayoutContext);
     const icons = ['pi pi-mars', 'pi pi-microchip', 'pi pi-prime', 'pi pi-sparkles', 'pi pi-venus'];
     const [directorates, setDirectorates] = useState<Directorate[]>([]);
+    const [organizations, setOrganizations] = useState<Organization[]>([]);
 
     useEffect(() => {
         DirectorateService.getDirectorates()
             .then(data => setDirectorates(data))
             .catch(err => console.error('Failed to fetch directorates', err));
+
+        OrganizationService.getOrganizationsByType(OrganizationType.Directorate)
+            .then(data => setOrganizations(data))
+            .catch(err => console.error('Failed to fetch organization of directorates', err));
     }, []);
 
 
-    const directoratesMenu: AppMenuItem = {
-        label: 'Directorates',
+    const dirMenuOld: AppMenuItem = {
+        label: 'Directorates Old',
         icon: 'pi pi-sitemap',
         items: directorates.map((dir, index) => ({
             label: dir.directorate_name,
@@ -51,11 +57,38 @@ const AppMenu = () => {
         }))
     };
 
+    const directoratesMenu: AppMenuItem = {
+        label: 'Directorates',
+        icon: 'pi pi-sitemap',
+        items: organizations.map((dir, index) => ({
+            label: dir.name,
+            icon: icons[index % icons.length],
+            //to: `/pages/directorates/${dir._id}`
+            items: [
+                {
+                    label: 'Calls',
+                    icon: 'pi pi-fw pi-megaphone',                   
+                },
+                {
+                    label: 'Themes',
+                    icon: 'pi pi-fw pi-tags',                   
+                },
+                {
+                    label: 'Evaluations',
+                    icon: 'pi pi-fw pi-calculator',
+                },
+            ]
+        }))
+    };
+
+    
+
     const model: AppMenuItem[] = [
         {
             label: 'Home',
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
         },
+        dirMenuOld,
         directoratesMenu,
         {
             label: 'Manage',
@@ -121,7 +154,7 @@ const AppMenu = () => {
                             label: 'Offices',
                             icon: 'pi pi-fw pi-shop',
                             to: `/pages/organizations?type=${OrganizationType.Supportive}`
-                        },                        
+                        },
                         {
                             label: 'Sectors',
                             icon: 'pi pi-fw pi-building-columns',
@@ -131,7 +164,7 @@ const AppMenu = () => {
                             label: 'Specialization',
                             icon: PrimeIcons.FILTER,
                             to: `/pages/organizations?type=${OrganizationType.Specialization}`
-                        },                        
+                        },
                         {
                             label: 'Positions',
                             icon: 'pi pi-fw pi-flag',

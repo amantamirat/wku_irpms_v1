@@ -43,4 +43,4 @@ ThemeSchema.pre('findOneAndDelete', async function (next) {
     next();
 });
 
-export const Theme = model<ITheme>('Theme', ThemeSchema);
+export const Theme = model<ITheme>('Theme2', ThemeSchema);

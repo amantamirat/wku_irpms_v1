@@ -7,6 +7,7 @@ import userRoutes from './routes/user.routes';
 import roleRoutes from './routes/role.routes';
 import organizationRoutes from './modules/organizations/organization.routes';
 import applicantRoutes from './modules/applicants/applicant.routes';
+import themeRoutes from './modules/theme/theme.routes';
 
 import collegeRoutes from './routes/collegeRoutes';
 import departmentRoutes from './routes/departmentRoutes';
@@ -19,7 +20,7 @@ import rankRoutes from './routes/rankRoutes';
 
 import callRoutes from './routes/call.routes';
 
-import themeRoutes from './routes/theme/theme.routes';
+import thmRoutes from './routes/theme/theme.routes';
 import priorityAreaRoutes from './routes/theme/priorityArea.routes';
 import subAreaRoutes from './routes/theme/subArea.routes';
 
@@ -45,6 +46,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/organizations", organizationRoutes);
+app.use("/api/thems", themeRoutes);
+
+
 
 app.use("/api/colleges", collegeRoutes);
 app.use("/api/departments", departmentRoutes);
@@ -57,7 +61,7 @@ app.use("/api/ranks", rankRoutes);
 app.use("/api/applicants", applicantRoutes);
 app.use("/api/calls", callRoutes);
 
-app.use("/api/themes", themeRoutes);
+app.use("/api/themes", thmRoutes);
 app.use("/api/priorityAreas", priorityAreaRoutes);
 app.use("/api/subAreas", subAreaRoutes);
 
