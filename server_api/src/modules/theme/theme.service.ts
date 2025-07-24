@@ -3,9 +3,6 @@ import Theme, { ITheme, ThemeType } from './theme.model';
 import mongoose from 'mongoose';
 import { validateTheme } from './theme.validator';
 
-
-
-
 export const validateThemeReferences = async (data: {
     type: ThemeType;
     parent?: mongoose.Types.ObjectId;
@@ -56,10 +53,18 @@ export const createTheme = async (data: Partial<ITheme>) => {
     }
 };
 
-// Get All Themes (with optional filter)
-export const getThemes = async (type?: ThemeType) => {
-    const filter = type ? { type } : {};
-    const themes = await Theme.find(filter).populate('parent directorate').sort({ createdAt: -1 }).lean();
+export const getThemesByParent = async (parentId: string) => {
+    const themes = await Theme.find({ parent: parentId })
+        .sort({ createdAt: -1 })
+        .lean();
+    return { success: true, status: 200, data: themes };
+};
+
+export const getThemesByDirectorate = async (directorateId: string) => {
+    const themes = await Theme.find({ directorate: directorateId })
+        .populate('parent directorate')
+        .sort({ createdAt: -1 })
+        .lean();
     return { success: true, status: 200, data: themes };
 };
 
@@ -70,8 +75,9 @@ export const updateTheme = async (id: string, data: Partial<ITheme>) => {
         if (!theme) {
             return { success: false, status: 404, message: 'Theme not found' };
         }
-        const updated = { ...theme.toObject(), ...data };
-        const { error, value } = validateTheme(updated);
+        // Merge with existing for validation
+        const merged = { ...theme.toObject(), ...data };
+        const { error, value } = validateTheme(merged);
         if (error) throw new Error(error.details.map(d => d.message).join(', '));
         await validateThemeReferences(value);
         Object.assign(theme, data);
