@@ -18,7 +18,8 @@ export interface IEvaluation extends Document {
     title: string;
     directorate?: mongoose.Types.ObjectId;
     parent?: Types.ObjectId;
-    stage_level:number;
+    stage_level?: number;
+    max_value?: number;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -42,7 +43,16 @@ const EvaluationSchema = new Schema<IEvaluation>({
     parent: {
         type: Schema.Types.ObjectId,
         ref: 'Theme'
-    }
+    },
+    stage_level: {
+        type: Number,
+        min: 1,
+        max: 10
+    },
+    max_value: {
+        type: Number,
+        min: 0
+    },
 
 }, { timestamps: true });
 
