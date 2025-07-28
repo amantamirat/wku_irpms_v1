@@ -3,11 +3,7 @@ import Theme, { ITheme, ThemeType } from './theme.model';
 import mongoose from 'mongoose';
 import { validateTheme } from './theme.validator';
 
-export const validateThemeReferences = async (data: {
-    type: ThemeType;
-    parent?: mongoose.Types.ObjectId;
-    directorate?: mongoose.Types.ObjectId;
-}) => {
+export const validateThemeReferences = async (data: Partial<ITheme>) => {
     const { type, parent, directorate } = data;
 
     if (type === ThemeType.theme) {
@@ -42,7 +38,7 @@ export const validateThemeReferences = async (data: {
 
 // Create Theme
 export const createTheme = async (data: Partial<ITheme>) => {
-    try {    
+    try {
         const { error, value } = validateTheme(data);
         if (error) throw new Error(error.details.map(d => d.message).join(', '));
         await validateThemeReferences(value);
@@ -62,7 +58,7 @@ export const getThemesByParent = async (parentId: string) => {
 };
 
 export const getThemesByDirectorate = async (directorateId: string) => {
-    const themes = await Theme.find({ directorate: directorateId })        
+    const themes = await Theme.find({ directorate: directorateId })
         .sort({ createdAt: -1 })
         .lean();
     return { success: true, status: 200, data: themes };

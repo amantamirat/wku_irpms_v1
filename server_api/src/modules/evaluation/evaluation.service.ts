@@ -1,30 +1,54 @@
 import Evaluation, { EvaluationType, IEvaluation } from './evaluation.model';
 import Organization, { OrganizationType } from '../organizations/organization.model';
 import { validateEvaluation } from './evaluation.validator';
-import mongoose from 'mongoose';
 
-// Validate references based on type
+
 export const validateEvaluationReferences = async (data: Partial<IEvaluation>) => {
     const { type, parent, directorate } = data;
     if (type === EvaluationType.evaluation || type === EvaluationType.validation) {
+        if (parent) {
+            throw new Error(`'${type}' must not include a 'parent'.`);
+        }
         if (!directorate) throw new Error(`'${type}' requires a 'directorate'.`);
-
         const org = await Organization.findById(directorate);
         if (!org || org.type !== OrganizationType.Directorate) {
             throw new Error(`'directorate' must reference an organization of type 'Directorate'.`);
-        }       
+        }        
     }
 
-    if ([EvaluationType.stage, EvaluationType.weight, EvaluationType.option].includes(type!)) {
+    if (
+        type === EvaluationType.stage ||
+        type === EvaluationType.weight ||
+        type === EvaluationType.option
+    ) {
+        if (directorate) {
+            throw new Error(`'${type}' must not include a 'directorate'.`);
+        }
         if (!parent) throw new Error(`'${type}' requires a parent.`);
+
         const parentEval = await Evaluation.findById(parent);
         if (!parentEval) throw new Error(`Parent evaluation not found for '${type}'.`);
-    }
 
-    if ([EvaluationType.stage, EvaluationType.weight, EvaluationType.option].includes(type!) && directorate) {
-        throw new Error(`'${type}' must not include a 'directorate'.`);
+        const expectedParentType =
+            type === EvaluationType.stage
+                ? [EvaluationType.evaluation, EvaluationType.validation]
+                : type === EvaluationType.weight
+                ? EvaluationType.stage
+                : EvaluationType.weight;
+
+        if (
+            Array.isArray(expectedParentType)
+                ? !expectedParentType.includes(parentEval.type)
+                : parentEval.type !== expectedParentType
+        ) {
+            throw new Error(
+                `'${type}' must have a parent of type '${Array.isArray(expectedParentType) ? expectedParentType.join("' or '") : expectedParentType}'.`
+            );
+        }
+        
     }
 };
+
 
 // Create Evaluation
 export const createEvaluation = async (data: Partial<IEvaluation>) => {
@@ -49,11 +73,9 @@ export const updateEvaluation = async (id: string, data: Partial<IEvaluation>) =
         if (!evaluation) {
             return { success: false, status: 404, message: 'Evaluation not found' };
         }
-
         const merged = { ...evaluation.toObject(), ...data };
         const { error, value } = validateEvaluation(merged);
         if (error) throw new Error(error.details.map(d => d.message).join(', '));
-
         await validateEvaluationReferences(value);
 
         Object.assign(evaluation, data);
