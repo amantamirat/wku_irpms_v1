@@ -56,7 +56,5 @@ const EvaluationSchema = new Schema<IEvaluation>({
 
 }, { timestamps: true });
 
-
-
-const Evaluation = model<IEvaluation>('Evaluation', EvaluationSchema);
+const Evaluation = model<IEvaluation>('Eval', EvaluationSchema);
  export default Evaluation;
