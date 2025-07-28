@@ -8,6 +8,9 @@ import roleRoutes from './routes/role.routes';
 import organizationRoutes from './modules/organizations/organization.routes';
 import applicantRoutes from './modules/applicants/applicant.routes';
 import themeRoutes from './modules/theme/theme.routes';
+import evalRoutes from './modules/evaluation/evaluation.routes';
+
+
 
 import collegeRoutes from './routes/collegeRoutes';
 import departmentRoutes from './routes/departmentRoutes';
@@ -47,6 +50,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/organizations", organizationRoutes);
 app.use("/api/themes", themeRoutes);
+app.use("/api/eval", evalRoutes);
 
 
 
