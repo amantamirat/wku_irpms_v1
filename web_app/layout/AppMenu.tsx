@@ -15,14 +15,45 @@ import { OrganizationService } from '@/services/OrganizationService';
 
 const AppMenu = () => {
     const { layoutConfig } = useContext(LayoutContext);
-    const icons = ['pi pi-mars', 'pi pi-microchip', 'pi pi-prime', 'pi pi-sparkles', 'pi pi-venus'];   
+    const icons = ['pi pi-mars', 'pi pi-microchip', 'pi pi-prime', 'pi pi-sparkles', 'pi pi-venus'];
     const [organizations, setOrganizations] = useState<Organization[]>([]);
-
-    useEffect(() => {       
+    const [directorates, setDirectorates] = useState<Directorate[]>([]);
+    useEffect(() => {
+        DirectorateService.getDirectorates()
+            .then(data => setDirectorates(data))
+            .catch(err => console.error('Failed to fetch directorates', err));
         OrganizationService.getOrganizationsByType(OrganizationType.Directorate)
             .then(data => setOrganizations(data))
             .catch(err => console.error('Failed to fetch organization of directorates', err));
-    }, []);    
+    }, []);
+
+
+     const directoratesMenu_old: AppMenuItem = {
+        label: 'Directorates OLD',
+        icon: 'pi pi-sitemap',
+        items: directorates.map((dir, index) => ({
+            label: dir.directorate_name,
+            icon: icons[index % icons.length],
+            //to: `/pages/directorates/${dir._id}`
+            items: [
+                {
+                    label: 'Calls',
+                    icon: 'pi pi-fw pi-megaphone',
+                    to: `/pages/calls?directorate=${dir._id}`
+                },
+                {
+                    label: 'Themes',
+                    icon: 'pi pi-fw pi-tags',
+                    to: `/pages/themes?directorate=${dir._id}`
+                },
+                {
+                    label: 'Evaluations',
+                    icon: 'pi pi-fw pi-calculator',
+                    to: `/pages/evaluations?directorate=${dir._id}`
+                },
+            ]
+        }))
+    };
 
     const directoratesMenu: AppMenuItem = {
         label: 'Directorates',
@@ -34,7 +65,7 @@ const AppMenu = () => {
             items: [
                 {
                     label: 'Calls',
-                    icon: 'pi pi-fw pi-megaphone',                   
+                    icon: 'pi pi-fw pi-megaphone',
                 },
                 {
                     label: 'Themes',
@@ -50,13 +81,14 @@ const AppMenu = () => {
         }))
     };
 
-    
+
 
     const model: AppMenuItem[] = [
         {
             label: 'Home',
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
-        },        
+        },
+        directoratesMenu_old,
         directoratesMenu,
         {
             label: 'Manage',

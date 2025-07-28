@@ -55,7 +55,7 @@ function SaveDialog(props: SaveDialogProps) {
         <Dialog
             visible={visible}
             style={{ width: '500px' }}
-            header={theme._id ? 'Edit Theme' : 'New Theme'}
+            header={theme._id ? `Edit ${theme.type}`  : `New ${theme.type}`}
             modal
             className="p-fluid"
             footer={footer}
