@@ -58,4 +58,5 @@ const EvaluationSchema = new Schema<IEvaluation>({
 
 
 
-export const Evaluation = model<IEvaluation>('Evaluation', EvaluationSchema);
+const Evaluation = model<IEvaluation>('Evaluation', EvaluationSchema);
+ export default Evaluation;

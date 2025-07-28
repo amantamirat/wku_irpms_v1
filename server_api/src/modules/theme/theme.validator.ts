@@ -12,14 +12,16 @@ export const validateTheme = (data: any) => {
   switch (data.type) {
     case ThemeType.theme:
       schema = schema.append({
-        directorate: Joi.string().hex().length(24).required()
+        directorate: Joi.string().hex().length(24).required(),
+        parent: Joi.forbidden(),
       });
       break;
 
     case ThemeType.priorityArea:
     case ThemeType.subArea:
       schema = schema.append({
-        parent: Joi.string().hex().length(24).required()
+        parent: Joi.string().hex().length(24).required(),
+        directorate: Joi.forbidden(),
       });
       break;
 
