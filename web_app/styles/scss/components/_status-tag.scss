@@ -6,7 +6,7 @@
 .calendar-badge,
 .call-badge,
 .theme-badge,
-.weight-badge {
+.form-badge {
     border-radius: var(--border-radius);
     padding: .25em .5rem;
     text-transform: uppercase;
@@ -140,6 +140,22 @@
 }
 
 
+.form-badge {
+    &.type-open {
+        background: #C8E6C9;
+        color: #256029;
+    }
+
+    &.type-closed {
+        background: #FCE4EC;
+        color: #880E4F;
+    }
+}
+
+
+///////////////
+
+
 .calendar-badge {
     &.status-active {
         background: #C8E6C9;
@@ -186,14 +202,3 @@
     }
 }
 
-.weight-badge {
-    &.response_type-open {
-        background: #C8E6C9;
-        color: #256029;
-    }
-
-    &.response_type-closed {
-        background: #FCE4EC;
-        color: #880E4F;
-    }
-}

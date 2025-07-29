@@ -178,7 +178,7 @@ const WeightComp = (props: WeightCompProps) => {
 
     const responseTypeBodyTemplate = (rowData: Weight) => {
         return (
-            <span className={`weight-badge response_type-${rowData.response_type.toLowerCase()}`}>
+            <span className={`form-badge form_type-${rowData.response_type.toLowerCase()}`}>
                 {rowData.response_type}
             </span>
         );

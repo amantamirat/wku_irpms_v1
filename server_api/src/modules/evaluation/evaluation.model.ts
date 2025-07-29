@@ -20,6 +20,7 @@ export interface IEvaluation extends Document {
     parent?: Types.ObjectId;
     stage_level?: number;
     weight_value?: number;
+    form_type?: FormType;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -51,9 +52,13 @@ const EvaluationSchema = new Schema<IEvaluation>({
     },
     weight_value: {
         type: Number,
-        min: 0
+        min: 0,
+        max: 100
     },
-
+    form_type: {
+        type: String,
+        enum: Object.values(FormType)
+    }
 }, { timestamps: true });
 
 const Evaluation = model<IEvaluation>('Eval', EvaluationSchema);

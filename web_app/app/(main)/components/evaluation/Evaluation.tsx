@@ -185,6 +185,13 @@ const EvalComponent = (props: EvaluationCompProps) => {
         </>
     );
 
+    const formTypeBodyTemplate = (rowData: Evaluation) => {
+        return (
+            <span className={`form-badge type-${rowData.form_type?.toLowerCase()}`}>
+                {rowData.form_type}
+            </span>
+        );
+    };
     return (
         <div className="grid">
             <div className="col-12">
@@ -229,6 +236,14 @@ const EvalComponent = (props: EvaluationCompProps) => {
                         {type === EvalType.stage && (
                             <Column field="stage_level" header="Level" sortable />
                         )}
+                        {type === EvalType.criterion && (
+                            <Column field="weight_value" header="Weight" sortable />
+                        )}
+                        {type === EvalType.criterion && (
+                            <Column field="form_type" header="Form Type" body={formTypeBodyTemplate} sortable />
+                        )}
+
+
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
