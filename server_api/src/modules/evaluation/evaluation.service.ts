@@ -120,7 +120,7 @@ export const getEvaluationsByDirectorate = async (directorateId: string) => {
 };
 
 
-export const reorderStage = async (id: string, direction: 'up' | 'down') => {
+export const reorderStage = async (id: string, direction: string) => {
     try {
         if (!['up', 'down'].includes(direction)) {
             throw new Error('Direction must be "up" or "down".');
