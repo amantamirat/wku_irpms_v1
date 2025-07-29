@@ -87,14 +87,14 @@ const EvalComponent = (props: EvaluationCompProps) => {
 
     const saveEvaluation = async () => {
         try {
-            let _themes = [...evaluations];
+            let _evlas = [...evaluations];
             if (selectedEvaluation._id) {
                 const updated = await EvalService.updateEvaluation(selectedEvaluation);
-                const index = _themes.findIndex((c) => c._id === selectedEvaluation._id);
-                _themes[index] = updated;
+                const index = _evlas.findIndex((c) => c._id === selectedEvaluation._id);
+                _evlas[index] = updated;
             } else {
                 const created = await EvalService.createEvaluation(selectedEvaluation);
-                _themes.push({ ...selectedEvaluation, _id: created._id });
+                _evlas.push({ ...selectedEvaluation, _id: created._id });
             }
             toast.current?.show({
                 severity: 'success',
@@ -102,7 +102,7 @@ const EvalComponent = (props: EvaluationCompProps) => {
                 detail: `Evaluation ${selectedEvaluation._id ? 'updated' : 'created'}`,
                 life: 3000
             });
-            setEvaluations(_themes);
+            setEvaluations(_evlas);
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
@@ -137,6 +137,44 @@ const EvalComponent = (props: EvaluationCompProps) => {
             });
         } finally {
             setShowDeleteDialog(false);
+            setSelectedEvaluation(emptyEval);
+        }
+    };
+
+    const reorderStage = async (evaluation: Evaluation, direction: "up" | "down") => {
+        try {
+            if (!evaluation.stage_level) {
+                throw new Error("Stage Level is Required");
+            }
+            let _evlas = [...evaluations];
+            const currentLevel = evaluation.stage_level;
+            const targetLevel = direction === "up" ? currentLevel - 1 : currentLevel + 1;
+            const currentIndex = _evlas.findIndex((c) => c._id === evaluation._id);
+            const targetIndex = _evlas.findIndex((c) => c.stage_level === targetLevel);
+            if (currentIndex === -1 || targetIndex === -1) {
+                throw new Error("Target or current stage not found in list.");
+            }
+            const moved = await EvalService.reorderStage(evaluation, direction);
+            if (moved) {
+                _evlas[currentIndex] = { ..._evlas[currentIndex], stage_level: targetLevel };
+                _evlas[targetIndex] = { ..._evlas[targetIndex], stage_level: currentLevel };
+                setEvaluations(_evlas);
+                toast.current?.show({
+                    severity: 'success',
+                    summary: 'Moved',
+                    detail: `Stage moved ${direction}`,
+                    life: 3000
+                });
+            }
+        } catch (err) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Failed to move stage',
+                detail: '' + err,
+                life: 3000
+            });
+        } finally {
+            //setShowDeleteDialog(false);
             setSelectedEvaluation(emptyEval);
         }
     };
@@ -189,13 +227,11 @@ const EvalComponent = (props: EvaluationCompProps) => {
         <>
             <Button icon="pi pi-sort-numeric-up" severity="success" className="p-button-rounded p-button-text"
                 tooltip="move the stage up" style={{ fontSize: '1.2rem' }} onClick={async () => {
-                    const data = await EvalService.reorderStage(rowData, "up");
-                    console.log(data);
+                    reorderStage(rowData, "up");
                 }} />
             <Button icon="pi pi-sort-numeric-down" severity="danger" className="p-button-rounded p-button-text"
                 tooltip="move the stage down" style={{ fontSize: '1.2rem' }} onClick={async () => {
-                   const data =  await EvalService.reorderStage(rowData, "down");
-                   console.log(data);
+                    reorderStage(rowData, "down");
                 }} />
 
         </>

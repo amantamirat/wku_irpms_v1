@@ -81,27 +81,9 @@ function SaveDialog(props: SaveDialogProps) {
                         />
                     </div>
 
-                    {isStage && evaluation._id &&
-                        (<div className="field">
-                            <label htmlFor="Level">Stage Level</label>
-                            <InputNumber
-                                id="stage_level"
-                                value={evaluation.stage_level}
-                                onChange={(e) =>
-                                    onChange({ ...evaluation, stage_level: e.value || 0 })
-                                }
-                                required
-                                className={classNames({
-                                    'p-invalid': submitted && isStage && (evaluation.stage_level == null || evaluation.stage_level <= 0),
-                                })}
-                            />
-                            {submitted && isStage && !(evaluation.stage_level == null || evaluation.stage_level <= 0) && (
-                                <small className="p-invalid">Stage Level is required.</small>
-                            )}
-                        </div>)}
                     {(isCreterion || isOption) && (<>
                         <div className="field">
-                            <label htmlFor="weight_value">{isCreterion?'Weight ':'Value'}</label>
+                            <label htmlFor="weight_value">{isCreterion ? 'Weight ' : 'Value'}</label>
                             <InputNumber
                                 id="weight_value"
                                 value={evaluation.weight_value}
