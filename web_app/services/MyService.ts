@@ -51,7 +51,7 @@ export const MyService = {
         return result.data; 
     },
 
-    async put(endpoint: string, payload: any): Promise<any> {
+    async put(endpoint: string, payload?: any): Promise<any> {
         const url = `${BASE_URL}${endpoint}`;
         const token = getAuthToken();
 
@@ -61,7 +61,7 @@ export const MyService = {
                 'Content-Type': 'application/json',
                 ...(token && { 'Authorization': `Bearer ${token}` }),
             },
-            body: JSON.stringify(payload),
+            body: payload ? JSON.stringify(payload) : undefined,
         });
 
         await handleError(response);
