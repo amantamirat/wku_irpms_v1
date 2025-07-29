@@ -190,10 +190,12 @@ const EvalComponent = (props: EvaluationCompProps) => {
             <Button icon="pi pi-sort-numeric-up" severity="success" className="p-button-rounded p-button-text"
                 tooltip="move the stage up" style={{ fontSize: '1.2rem' }} onClick={async () => {
                     const data = await EvalService.reorderStage(rowData, "up");
+                    console.log(data);
                 }} />
             <Button icon="pi pi-sort-numeric-down" severity="danger" className="p-button-rounded p-button-text"
                 tooltip="move the stage down" style={{ fontSize: '1.2rem' }} onClick={async () => {
                    const data =  await EvalService.reorderStage(rowData, "down");
+                   console.log(data);
                 }} />
 
         </>
