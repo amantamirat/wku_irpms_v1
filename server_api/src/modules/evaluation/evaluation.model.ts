@@ -4,7 +4,7 @@ export enum EvaluationType {
     evaluation = 'Evaluation',
     validation = 'Validation',
     stage = 'Stage',
-    weight = 'Weight',
+    criterion = 'Criterion',
     option = 'Option'
 }
 
@@ -19,7 +19,7 @@ export interface IEvaluation extends Document {
     directorate?: mongoose.Types.ObjectId;
     parent?: Types.ObjectId;
     stage_level?: number;
-    max_value?: number;
+    weight_value?: number;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -49,7 +49,7 @@ const EvaluationSchema = new Schema<IEvaluation>({
         min: 1,
         max: 10
     },
-    max_value: {
+    weight_value: {
         type: Number,
         min: 0
     },
@@ -57,4 +57,4 @@ const EvaluationSchema = new Schema<IEvaluation>({
 }, { timestamps: true });
 
 const Evaluation = model<IEvaluation>('Eval', EvaluationSchema);
- export default Evaluation;
+export default Evaluation;

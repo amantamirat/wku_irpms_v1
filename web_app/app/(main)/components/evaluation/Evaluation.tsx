@@ -14,6 +14,14 @@ import { Evaluation, EvalType } from '@/models/theme/evaluation';
 import { EvalService } from '@/services/theme/EvalService';
 
 
+const pluralMap = {
+    Evaluation: 'Evaluations',
+    Validation: 'Validations',
+    Stage: 'Stages',
+    Criterion: 'Criteria',
+    Option: 'Options'
+};
+
 interface EvaluationCompProps {
     type: EvalType;
     directorate?: Organization;
@@ -25,7 +33,7 @@ const EvalComponent = (props: EvaluationCompProps) => {
     const type = props.type;
     const childType = type === (EvalType.evaluation || EvalType.validation) ?
         EvalType.stage : type === EvalType.stage ?
-            EvalType.weight : type === EvalType.weight ?
+            EvalType.criterion : type === EvalType.criterion ?
                 EvalType.option : null;
 
 
@@ -45,8 +53,6 @@ const EvalComponent = (props: EvaluationCompProps) => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
-
-
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
@@ -139,7 +145,13 @@ const EvalComponent = (props: EvaluationCompProps) => {
         <div className="my-2">
             <Button label={`New ${type}`} icon="pi pi-plus" severity="success" className="mr-2"
                 onClick={() => {
-                    setSelectedEvaluation(emptyEval);
+                    let newEval = { ...emptyEval };
+                    if (type === EvalType.stage) {
+                        const stages = evaluations.filter(e => e.type === EvalType.stage);
+                        const maxLevel = Math.max(0, ...stages.map(e => e.stage_level ?? 0));
+                        newEval.stage_level = maxLevel + 1;
+                    }
+                    setSelectedEvaluation(newEval);
                     setShowSaveDialog(true);
                 }}
             />
@@ -148,7 +160,9 @@ const EvalComponent = (props: EvaluationCompProps) => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage {props.directorate?.name} {props.parent?.title} {type}s</h5>
+            <h5 className="m-0">
+                Manage {props.directorate?.name} {props.parent?.title} {pluralMap[type]}
+            </h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
@@ -188,9 +202,9 @@ const EvalComponent = (props: EvaluationCompProps) => {
                         rowsPerPageOptions={[5, 10, 25]}
                         className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} themes"
+                        currentPageReportTemplate={`Showing {first} to {last} of {totalRecords} ${pluralMap[type]}`}
                         globalFilter={globalFilter}
-                        emptyMessage={`No themes data found.`}
+                        emptyMessage={`No ${pluralMap[type]} data found.`}
                         header={header}
                         scrollable
                         filters={filters}
@@ -212,6 +226,9 @@ const EvalComponent = (props: EvaluationCompProps) => {
                         }
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="title" header="Title" sortable />
+                        {type === EvalType.stage && (
+                            <Column field="stage_level" header="Level" sortable />
+                        )}
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
@@ -221,7 +238,10 @@ const EvalComponent = (props: EvaluationCompProps) => {
                             evaluation={selectedEvaluation}
                             onChange={setSelectedEvaluation}
                             onSave={saveEvaluation}
-                            onHide={() => setShowSaveDialog(false)}
+                            onHide={() => {
+                                setShowSaveDialog(false);
+                                setSelectedEvaluation(emptyEval);
+                            }}
                         />
                     )}
 

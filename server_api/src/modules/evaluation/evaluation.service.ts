@@ -18,7 +18,7 @@ export const validateEvaluationReferences = async (data: Partial<IEvaluation>) =
 
     if (
         type === EvaluationType.stage ||
-        type === EvaluationType.weight ||
+        type === EvaluationType.criterion ||
         type === EvaluationType.option
     ) {
         if (directorate) {
@@ -32,9 +32,9 @@ export const validateEvaluationReferences = async (data: Partial<IEvaluation>) =
         const expectedParentType =
             type === EvaluationType.stage
                 ? [EvaluationType.evaluation, EvaluationType.validation]
-                : type === EvaluationType.weight
+                : type === EvaluationType.criterion
                 ? EvaluationType.stage
-                : EvaluationType.weight;
+                : EvaluationType.criterion;
 
         if (
             Array.isArray(expectedParentType)

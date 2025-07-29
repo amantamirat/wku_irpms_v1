@@ -8,7 +8,7 @@ export const validateEvaluation = (data: any) => {
     directorate: Joi.string().hex().length(24).optional(),
     parent: Joi.string().hex().length(24).optional(),
     stage_level: Joi.number().min(1).max(10).optional(),
-    max_value: Joi.number().min(0).optional(),
+    weight_value: Joi.number().min(0).optional(),
     form_type: Joi.string().valid(...Object.values(FormType)).optional()
   });
 
@@ -26,15 +26,14 @@ export const validateEvaluation = (data: any) => {
         parent: Joi.string().hex().length(24).required(),
         directorate: Joi.forbidden(),
         stage_level: Joi.number().min(1).max(10).required(),
-        //max_value: Joi.number().min(0).required()
       });
       break;
 
-    case EvaluationType.weight:
+    case EvaluationType.criterion:
       schema = schema.append({
         parent: Joi.string().hex().length(24).required(),
         directorate: Joi.forbidden(),
-        max_value: Joi.number().min(0).required(),
+        weight_value: Joi.number().min(0).required(),
         form_type: Joi.string().valid(...Object.values(FormType)).required()
       });
       break;
@@ -43,7 +42,7 @@ export const validateEvaluation = (data: any) => {
       schema = schema.append({
         parent: Joi.string().hex().length(24).required(),
         directorate: Joi.forbidden(),
-        max_value: Joi.number().min(0).required()
+        weight_value: Joi.number().min(0).required()
       });
       break;
 
