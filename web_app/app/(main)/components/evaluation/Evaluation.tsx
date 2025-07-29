@@ -215,7 +215,7 @@ const EvalComponent = (props: EvaluationCompProps) => {
                         header={header}
                         scrollable
                         filters={filters}
-                        {...(childType && {
+                        {...(childType &&  {
                             expandedRows: expandedRows,
                             onRowToggle: (e) => setExpandedRows(e.data),
                             rowExpansionTemplate: (data) => (

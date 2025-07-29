@@ -24,6 +24,7 @@ function SaveDialog(props: SaveDialogProps) {
 
     const isStage = evaluation.type === EvalType.stage;
     const isCreterion = evaluation.type === EvalType.criterion;
+    const isOption = evaluation.type === EvalType.option;
 
     const save = async () => {
         setSubmitted(true);
@@ -98,16 +99,16 @@ function SaveDialog(props: SaveDialogProps) {
                                 <small className="p-invalid">Stage Level is required.</small>
                             )}
                         </div>)}
-                    {isCreterion && (<>
-
+                    {(isCreterion || isOption) && (<>
                         <div className="field">
-                            <label htmlFor="weight_value">Weight</label>
+                            <label htmlFor="weight_value">{isCreterion?'Weight ':'Value'}</label>
                             <InputNumber
                                 id="weight_value"
                                 value={evaluation.weight_value}
                                 onChange={(e) =>
                                     onChange({ ...evaluation, weight_value: e.value || 0 })
                                 }
+                                //max={isOption?}
                                 required
                                 className={classNames({
                                     'p-invalid': submitted && (isCreterion) && (evaluation.weight_value == null || evaluation.weight_value <= 0),
@@ -115,22 +116,23 @@ function SaveDialog(props: SaveDialogProps) {
                             />
                         </div>
 
-                        <div className="field">
-                            <label htmlFor="form_type">Form Type</label>
-                            <Dropdown
-                                id="type"
-                                value={evaluation.form_type}
-                                options={Object.values(FormType).map(g => ({ label: g, value: g }))}
-                                onChange={(e) =>
-                                    onChange({ ...evaluation, form_type: e.value })
-                                }
-                                placeholder="Select Form"
-                                className={classNames({ 'p-invalid': submitted && isCreterion && !evaluation.form_type })}
-                            />
-                        </div>
+                        {isCreterion && (
+                            <div className="field">
+                                <label htmlFor="form_type">Form Type</label>
+                                <Dropdown
+                                    id="type"
+                                    value={evaluation.form_type}
+                                    options={Object.values(FormType).map(g => ({ label: g, value: g }))}
+                                    onChange={(e) =>
+                                        onChange({ ...evaluation, form_type: e.value })
+                                    }
+                                    placeholder="Select Form"
+                                    className={classNames({ 'p-invalid': submitted && isCreterion && !evaluation.form_type })}
+                                />
+                            </div>
+                        )}
                     </>)
                     }
-
                 </>)}
 
             {errorMessage && (
