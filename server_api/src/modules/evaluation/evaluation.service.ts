@@ -98,7 +98,6 @@ export const deleteEvaluation = async (id: string) => {
     if (!evaluation) {
         return { success: false, status: 404, message: 'Evaluation not found' };
     }
-
     await evaluation.deleteOne(); // Add pre-hook if needed
     return { success: true, status: 200, message: 'Evaluation deleted successfully' };
 };
