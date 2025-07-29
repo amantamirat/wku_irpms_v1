@@ -149,20 +149,15 @@ export const reorderStage = async (id: string, direction: string) => {
             { runValidators: false } // Bypass min/max validation
         );
         // Swap stage levels using bulkWrite
-        await Evaluation.bulkWrite([
-            {
-                updateOne: {
-                    filter: { _id: current._id },
-                    update: { $set: { stage_level: targetLevel} }
-                }
-            },
-            {
-                updateOne: {
-                    filter: { _id: target._id },
-                    update: { $set: { stage_level: currentLevel } }
-                }
-            }
-        ]);
+        await Evaluation.updateOne(
+            { _id: target._id },
+            { $set: { stage_level: currentLevel } }
+        );
+        // 3. Move current into target's position
+        await Evaluation.updateOne(
+            { _id: current._id },
+            { $set: { stage_level: targetLevel } }
+        );
         return {
             success: true,
             status: 200,

@@ -49,8 +49,7 @@ export const EvalService = {
 
     async reorderStage(evaluation: Partial<Evaluation>, direction: "up" | "down"): Promise<boolean> {
         if (!evaluation._id) throw new Error("_id is required.");
-        const response = await MyService.put(`${end_point}/reorder/${evaluation._id}/${direction}`);
-        console.log(response);
+        const response = await MyService.put(`${end_point}/reorder/${evaluation._id}/${direction}`);        
         return response;
     },
 };
