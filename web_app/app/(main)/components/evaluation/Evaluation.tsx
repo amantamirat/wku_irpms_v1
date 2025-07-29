@@ -185,6 +185,19 @@ const EvalComponent = (props: EvaluationCompProps) => {
         </>
     );
 
+    const orderBodyTemplate = (rowData: Evaluation) => (
+        <>
+            <Button icon="pi pi-sort-numeric-down" severity="info" className="p-button-rounded p-button-text"
+                tooltip="move the stage down" style={{ fontSize: '1.2rem' }} onClick={() => {
+//... here 
+                }} />
+            <Button icon="pi pi-sort-numeric-up" severity="help" className="p-button-rounded p-button-text"
+                tooltip="move the stage up" style={{ fontSize: '1.2rem' }} onClick={() => {
+// here
+                }} />
+        </>
+    );
+
     const formTypeBodyTemplate = (rowData: Evaluation) => {
         return (
             <span className={`form-badge type-${rowData.form_type?.toLowerCase()}`}>
@@ -192,6 +205,8 @@ const EvalComponent = (props: EvaluationCompProps) => {
             </span>
         );
     };
+
+
     return (
         <div className="grid">
             <div className="col-12">
@@ -215,7 +230,7 @@ const EvalComponent = (props: EvaluationCompProps) => {
                         header={header}
                         scrollable
                         filters={filters}
-                        {...(childType &&  {
+                        {...(childType && {
                             expandedRows: expandedRows,
                             onRowToggle: (e) => setExpandedRows(e.data),
                             rowExpansionTemplate: (data) => (
@@ -236,15 +251,19 @@ const EvalComponent = (props: EvaluationCompProps) => {
                         {type === EvalType.stage && (
                             <Column field="stage_level" header="Level" sortable />
                         )}
+                        {type === EvalType.stage && (
+                            <Column body={orderBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
+                        )}
                         {type === EvalType.criterion && (
                             <Column field="weight_value" header="Weight" sortable />
                         )}
                         {type === EvalType.criterion && (
                             <Column field="form_type" header="Form Type" body={formTypeBodyTemplate} sortable />
                         )}
-
-
-                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
+                        {type === EvalType.option && (
+                            <Column field="weight_value" header="Value" sortable />
+                        )}
+                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
                     </DataTable>
 
                     {selectedEvaluation && (

@@ -1,5 +1,4 @@
 import mongoose, { Schema, model, Document, Types } from 'mongoose';
-
 export enum EvaluationType {
     evaluation = 'Evaluation',
     validation = 'Validation',
@@ -34,7 +33,6 @@ const EvaluationSchema = new Schema<IEvaluation>({
     },
     title: {
         type: String,
-        unique: true,
         required: true
     },
     directorate: {
@@ -61,5 +59,8 @@ const EvaluationSchema = new Schema<IEvaluation>({
     }
 }, { timestamps: true });
 
+EvaluationSchema.index({ directorate: 1, title: 1 }, { unique: true });
+EvaluationSchema.index({ parent: 1, title: 1 }, { unique: true });
+EvaluationSchema.index({ parent: 1, stage_level: 1 }, { unique: true });
 const Evaluation = model<IEvaluation>('Eval', EvaluationSchema);
 export default Evaluation;

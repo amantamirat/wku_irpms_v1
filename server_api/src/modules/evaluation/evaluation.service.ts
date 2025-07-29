@@ -4,8 +4,15 @@ import { validateEvaluation } from './evaluation.validator';
 
 
 export const validateEvaluationReferences = async (data: Partial<IEvaluation>) => {
-    const { type, parent, directorate } = data;
-    if (type === EvaluationType.evaluation || type === EvaluationType.validation) {
+    const { type, parent, directorate, weight_value } = data;
+
+    const isEvaluation = type === EvaluationType.evaluation;
+    const isValidation = type === EvaluationType.evaluation;
+    const isStage = type === EvaluationType.stage;
+    const isCriterion = type === EvaluationType.criterion;
+    const isOption = type === EvaluationType.option;
+
+    if (isEvaluation || isValidation) {
         if (parent) {
             throw new Error(`'${type}' must not include a 'parent'.`);
         }
@@ -13,14 +20,9 @@ export const validateEvaluationReferences = async (data: Partial<IEvaluation>) =
         const org = await Organization.findById(directorate);
         if (!org || org.type !== OrganizationType.Directorate) {
             throw new Error(`'directorate' must reference an organization of type 'Directorate'.`);
-        }        
+        }
     }
-
-    if (
-        type === EvaluationType.stage ||
-        type === EvaluationType.criterion ||
-        type === EvaluationType.option
-    ) {
+    if (isStage || isCriterion || isOption) {
         if (directorate) {
             throw new Error(`'${type}' must not include a 'directorate'.`);
         }
@@ -30,22 +32,25 @@ export const validateEvaluationReferences = async (data: Partial<IEvaluation>) =
         if (!parentEval) throw new Error(`Parent evaluation not found for '${type}'.`);
 
         const expectedParentType =
-            type === EvaluationType.stage
-                ? [EvaluationType.evaluation, EvaluationType.validation]
-                : type === EvaluationType.criterion
-                ? EvaluationType.stage
-                : EvaluationType.criterion;
+            isStage ? [EvaluationType.evaluation, EvaluationType.validation]
+                : isCriterion ? EvaluationType.stage
+                    : isOption ? EvaluationType.criterion : null;
 
-        if (
-            Array.isArray(expectedParentType)
-                ? !expectedParentType.includes(parentEval.type)
-                : parentEval.type !== expectedParentType
-        ) {
+        if (Array.isArray(expectedParentType)
+            ? !expectedParentType.includes(parentEval.type)
+            : parentEval.type !== expectedParentType) {
             throw new Error(
                 `'${type}' must have a parent of type '${Array.isArray(expectedParentType) ? expectedParentType.join("' or '") : expectedParentType}'.`
             );
         }
-        
+        if (isOption) {
+            if (!weight_value || !parentEval.weight_value) {
+                throw new Error("Weight Value is Not Found");
+            }
+            if (weight_value > parentEval.weight_value) {
+                throw new Error(`Value ${weight_value} must be less that or equal to weight ${parentEval.weight_value}`);
+            }
+        }
     }
 };
 
