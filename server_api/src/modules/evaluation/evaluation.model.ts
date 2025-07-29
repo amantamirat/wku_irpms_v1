@@ -61,6 +61,14 @@ const EvaluationSchema = new Schema<IEvaluation>({
 
 EvaluationSchema.index({ directorate: 1, title: 1 }, { unique: true });
 EvaluationSchema.index({ parent: 1, title: 1 }, { unique: true });
-EvaluationSchema.index({ parent: 1, stage_level: 1 }, { unique: true });
+EvaluationSchema.index({ parent: 1, stage_level: 1 },
+    {
+        unique: true,
+        partialFilterExpression: {
+            stage_level: { $exists: true },
+            type: 'stage'
+        }
+    }
+);
 const Evaluation = model<IEvaluation>('Eval', EvaluationSchema);
 export default Evaluation;
