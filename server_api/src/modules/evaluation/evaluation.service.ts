@@ -118,3 +118,54 @@ export const getEvaluationsByDirectorate = async (directorateId: string) => {
         .lean();
     return { success: true, status: 200, data: items };
 };
+
+
+export const reorderStage = async (id: string, direction: 'up' | 'down') => {
+    try {
+        if (!['up', 'down'].includes(direction)) {
+            throw new Error('Direction must be "up" or "down".');
+        }
+        const current = await Evaluation.findById(id);
+        if (!current || current.type !== EvaluationType.stage) {
+            throw new Error('Evaluation not found or not a stage.');
+        }
+        const level = current.stage_level;
+        if (typeof level !== 'number') {
+            throw new Error('Current stage level is not defined.');
+        }
+        const target = await Evaluation.findOne({
+            parent: current.parent,
+            stage_level: direction === 'up' ? level - 1 : level + 1
+        });
+        if (!target) {
+            throw new Error(`Cannot move ${direction} any further.`);
+        }
+        // Swap stage levels using bulkWrite
+        await Evaluation.bulkWrite([
+            {
+                updateOne: {
+                    filter: { _id: current._id },
+                    update: { $set: { stage_level: target.stage_level } }
+                }
+            },
+            {
+                updateOne: {
+                    filter: { _id: target._id },
+                    update: { $set: { stage_level: current.stage_level } }
+                }
+            }
+        ]);
+        return {
+            success: true,
+            status: 200,
+            message: `Stage moved ${direction} successfully.`,
+        };
+    } catch (err: any) {
+        console.error(err);
+        return {
+            success: false,
+            status: 400,
+            message: err.message || 'Failed to reorder stage.',
+        };
+    }
+};
