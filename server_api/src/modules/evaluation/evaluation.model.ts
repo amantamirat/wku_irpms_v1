@@ -79,5 +79,17 @@ EvaluationSchema.index({ parent: 1, weight_value: 1 },
         }
     }
 );
+
+
+EvaluationSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
+    const evalId = this._id;
+    const hasChildren = await mongoose.model('Eval').exists({ parent: evalId });
+    if (hasChildren) {
+        const err = new Error(`Cannot delete: ${this.title} ${this.type} it is referenced.`);
+        return next(err);
+    }
+    next();
+});
+
 const Evaluation = model<IEvaluation>('Eval', EvaluationSchema);
 export default Evaluation;

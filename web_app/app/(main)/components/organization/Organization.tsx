@@ -121,7 +121,7 @@ const OrganizationComp = (props: OrganizationCompProps) => {
             console.error(error);
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to delete organizations',
+                summary: `Failed to delete ${type}`,
                 detail: '' + error,
                 life: 3000
             });

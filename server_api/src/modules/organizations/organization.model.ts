@@ -1,5 +1,8 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import { Theme } from '../../models/theme/theme.model';
+
+import Evaluation from '../evaluation/evaluation.model';
+import Applicant from '../applicants/applicant.model';
+import Theme from '../theme/theme.model';
 
 // Enum for Organization Types
 export enum OrganizationType {
@@ -104,14 +107,20 @@ OrganizationSchema.pre('deleteOne', { document: true, query: false }, async func
         const err = new Error(`Cannot delete: ${this.name} ${this.type} it is a parent for other organizations.`);
         return next(err);
     }
-    const isReferencedByApplicant = await mongoose.model('Applicant').exists({ organization: orgId });
+    const isReferencedByApplicant = await Applicant.exists({ organization: orgId });
     if (isReferencedByApplicant) {
-        const err = new Error(`Cannot delete: ${this.name} ${this.type} it is a workspace for some applicants.`);
+        const err = new Error(`Cannot delete: ${this.name} ${this.type} it is a workspace for applicants.`);
         return next(err);
     }
     const isReferencedByTheme = await Theme.exists({ directorate: orgId });
     if (isReferencedByTheme) {
-        const err = new Error(`Cannot delete: ${this.name} ${this.type} it is referenced in some themes.`);
+        const err = new Error(`Cannot delete: ${this.name} ${this.type} it is referenced in themes.`);
+        return next(err);
+    }
+
+    const isReferencedByEval = await Evaluation.exists({ directorate: orgId });
+    if (isReferencedByEval) {
+        const err = new Error(`Cannot delete: ${this.name} ${this.type} it is referenced in evaluations.`);
         return next(err);
     }
     next();

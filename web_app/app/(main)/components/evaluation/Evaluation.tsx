@@ -106,7 +106,7 @@ const EvalComponent = (props: EvaluationCompProps) => {
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to save theme',
+                summary: `Failed to save ${type}`,
                 detail: '' + err,
                 life: 3000
             });
@@ -131,7 +131,7 @@ const EvalComponent = (props: EvaluationCompProps) => {
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to delete theme',
+                summary: `Failed to delete ${type}`,
                 detail: '' + err,
                 life: 3000
             });
