@@ -1,7 +1,5 @@
 import { Applicant, Scope } from "@/models/applicant";
 import { MyService } from "./MyService";
-import { Category } from "@/models/position";
-
 const end_point = '/applicants/';
 
 export const ApplicantService = {

@@ -6,8 +6,6 @@ import { MenuProvider } from './context/menucontext';
 import Link from 'next/link';
 import { AppMenuItem } from '@/types';
 import { PrimeIcons } from 'primereact/api';
-import { Directorate } from '@/models/directorate';
-import { DirectorateService } from '@/services/DirectorateService';
 import { Organization, OrganizationType } from '@/models/organization';
 import { Scope } from '@/models/applicant';
 import { OrganizationService } from '@/services/OrganizationService';
@@ -16,52 +14,19 @@ import { OrganizationService } from '@/services/OrganizationService';
 const AppMenu = () => {
     const { layoutConfig } = useContext(LayoutContext);
     const icons = ['pi pi-mars', 'pi pi-microchip', 'pi pi-prime', 'pi pi-sparkles', 'pi pi-venus'];
-    const [organizations, setOrganizations] = useState<Organization[]>([]);
-    const [directorates, setDirectorates] = useState<Directorate[]>([]);
-    useEffect(() => {
-        DirectorateService.getDirectorates()
-            .then(data => setDirectorates(data))
-            .catch(err => console.error('Failed to fetch directorates', err));
+    const [organizations, setOrganizations] = useState<Organization[]>([]);    
+    useEffect(() => {        
         OrganizationService.getOrganizationsByType(OrganizationType.Directorate)
             .then(data => setOrganizations(data))
             .catch(err => console.error('Failed to fetch organization of directorates', err));
-    }, []);
-
-
-     const directoratesMenu_old: AppMenuItem = {
-        label: 'Directorates OLD',
-        icon: 'pi pi-sitemap',
-        items: directorates.map((dir, index) => ({
-            label: dir.directorate_name,
-            icon: icons[index % icons.length],
-            //to: `/pages/directorates/${dir._id}`
-            items: [
-                {
-                    label: 'Calls',
-                    icon: 'pi pi-fw pi-megaphone',
-                    to: `/pages/calls?directorate=${dir._id}`
-                },
-                {
-                    label: 'Themes',
-                    icon: 'pi pi-fw pi-tags',
-                    to: `/pages/themes?directorate=${dir._id}`
-                },
-                {
-                    label: 'Evaluations',
-                    icon: 'pi pi-fw pi-calculator',
-                    to: `/pages/evaluations?directorate=${dir._id}`
-                },
-            ]
-        }))
-    };
+    }, []);     
 
     const directoratesMenu: AppMenuItem = {
         label: 'Directorates',
         icon: 'pi pi-sitemap',
         items: organizations.map((dir, index) => ({
             label: dir.name,
-            icon: icons[index % icons.length],
-            //to: `/pages/directorates/${dir._id}`
+            icon: icons[index % icons.length],           
             items: [
                 {
                     label: 'Calls',
@@ -88,8 +53,7 @@ const AppMenu = () => {
         {
             label: 'Home',
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
-        },
-        directoratesMenu_old,
+        },        
         directoratesMenu,
         {
             label: 'Manage',
@@ -98,22 +62,7 @@ const AppMenu = () => {
                     label: 'Calendars',
                     icon: PrimeIcons.CALENDAR,
                     to: '/pages/calendars'
-                },
-                {
-                    label: 'Colleges',
-                    icon: 'pi pi-fw pi-warehouse',
-                    to: '/pages/colleges'
-                },
-                {
-                    label: 'Departments',
-                    icon: 'pi pi-fw pi-shop',
-                    to: '/pages/departments'
-                },
-                {
-                    label: 'Specializations',
-                    icon: PrimeIcons.FILTER,
-                    to: '/pages/specializations'
-                },
+                },                               
                 {
                     label: 'Applicants',
                     icon: PrimeIcons.GLOBE,
@@ -131,12 +80,10 @@ const AppMenu = () => {
                         {
                             label: 'External',
                             icon: 'pi pi-fw pi-asterisk',
-                            //disabled: true,
                             to: `/pages/applicants?scope=${Scope.external}`
                         }
                     ]
                 },
-
                 {
                     label: 'Organizations',
                     icon: 'pi pi-sitemap',
@@ -172,20 +119,7 @@ const AppMenu = () => {
                             to: `/pages/organizations?type=${OrganizationType.Position}`
                         },
                     ]
-                },
-                /*
-                 {
-                    label: 'Students',
-                    icon: 'pi pi-fw pi-graduation-cap',
-                },
-                */
-                /*
-                 {
-                     label: 'Directorates',
-                     icon: 'pi pi-sitemap',
-                     to: '/pages/directorates'
-                 },
-                 */
+                },                              
                 {
                     label: 'User Accounts',
                     icon: PrimeIcons.USERS,
