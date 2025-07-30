@@ -66,7 +66,16 @@ EvaluationSchema.index({ parent: 1, stage_level: 1 },
         unique: true,
         partialFilterExpression: {
             stage_level: { $exists: true },
-            type: 'stage'
+            type: 'Stage'
+        }
+    }
+);
+EvaluationSchema.index({ parent: 1, weight_value: 1 },
+    {
+        unique: true,
+        partialFilterExpression: {
+            weight_value: { $exists: true },
+            type: 'Option'
         }
     }
 );
