@@ -48,7 +48,7 @@ export const validateEvaluationReferences = async (data: Partial<IEvaluation>) =
                 throw new Error("Weight Value is Not Found");
             }
             if (weight_value > parentEval.weight_value) {
-                throw new Error(`Value ${weight_value} must be less that or equal to weight ${parentEval.weight_value}`);
+                throw new Error(`The provided value (${weight_value}) must be less than or equal to the criterion weight (${parentEval.weight_value}).`);
             }
         }
     }

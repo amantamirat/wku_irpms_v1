@@ -10,7 +10,7 @@ import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import SaveDialog from './dialogs/SaveDialog';
 import { Organization } from '@/models/organization';
-import { Evaluation, EvalType } from '@/models/theme/evaluation';
+import { Evaluation, EvalType, FormType } from '@/models/theme/evaluation';
 import { EvalService } from '@/services/theme/EvalService';
 
 
@@ -31,10 +31,10 @@ interface EvaluationCompProps {
 const EvalComponent = (props: EvaluationCompProps) => {
 
     const type = props.type;
-    const childType = type === (EvalType.evaluation || EvalType.validation) ?
-        EvalType.stage : type === EvalType.stage ?
-            EvalType.criterion : type === EvalType.criterion ?
-                EvalType.option : null;
+    const isCriterion = type === EvalType.criterion;
+    const childType = type === (EvalType.evaluation || EvalType.validation) ? EvalType.stage
+        : type === EvalType.stage ? EvalType.criterion
+            : isCriterion ? EvalType.option : null;
 
 
     const emptyEval: Evaluation = {
@@ -269,19 +269,20 @@ const EvalComponent = (props: EvaluationCompProps) => {
                         header={header}
                         scrollable
                         filters={filters}
-                        {...(childType && {
-                            expandedRows: expandedRows,
-                            onRowToggle: (e) => setExpandedRows(e.data),
-                            rowExpansionTemplate: (data) => (
-                                <EvalComponent
-                                    type={childType}
-                                    parent={data as Evaluation}
-                                />
-                            )
-                        })}
+                        expandedRows={expandedRows}
+                        onRowToggle={(e) => setExpandedRows(e.data)}
+                        rowExpansionTemplate={(rowData) => {
+                            if (!childType) {
+                                return null;
+                            }
+                            if (isCriterion && (rowData as Evaluation).form_type !== FormType.closed) {
+                                return null; // no expansion content for non closed
+                            }
+                            return <EvalComponent type={childType} parent={rowData as Evaluation} />;
+                        }}
                     >
                         {
-                            childType
+                            (childType)
                                 ? <Column expander style={{ width: '3em' }} />
                                 : <Column selectionMode="single" headerStyle={{ width: '3em' }} />
                         }
@@ -293,10 +294,10 @@ const EvalComponent = (props: EvaluationCompProps) => {
                         {type === EvalType.stage && (
                             <Column body={orderBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
                         )}
-                        {type === EvalType.criterion && (
+                        {isCriterion && (
                             <Column field="weight_value" header="Weight" sortable />
                         )}
-                        {type === EvalType.criterion && (
+                        {isCriterion && (
                             <Column field="form_type" header="Form Type" body={formTypeBodyTemplate} sortable />
                         )}
                         {type === EvalType.option && (
