@@ -53,6 +53,7 @@ const EvalComponent = (props: EvaluationCompProps) => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
+    const [loading, setLoading] = useState(false);
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
@@ -61,6 +62,7 @@ const EvalComponent = (props: EvaluationCompProps) => {
 
     const loadEvaluations = useCallback(async () => {
         try {
+            setLoading(true);
             if (props.directorate && (props.type === EvalType.evaluation || props.type === EvalType.validation)) {
                 const data = await EvalService.getEvaluationsByDirectorate(props.directorate._id || '');
                 setEvaluations(data);
@@ -76,6 +78,8 @@ const EvalComponent = (props: EvaluationCompProps) => {
                 detail: '' + err,
                 life: 3000
             });
+        }finally{
+            setLoading(false);
         }
     }, [props.parent, props.directorate, toast]);
 
@@ -87,6 +91,7 @@ const EvalComponent = (props: EvaluationCompProps) => {
 
     const saveEvaluation = async () => {
         try {
+            setLoading(true);
             let _evlas = [...evaluations];
             if (selectedEvaluation._id) {
                 const updated = await EvalService.updateEvaluation(selectedEvaluation);
@@ -113,11 +118,13 @@ const EvalComponent = (props: EvaluationCompProps) => {
         } finally {
             setShowSaveDialog(false);
             setSelectedEvaluation(emptyEval);
+            setLoading(false);
         }
     };
 
     const deleteEvaluation = async () => {
         try {
+            setLoading(true);
             const deleted = await EvalService.deleteEvaluation(selectedEvaluation);
             if (deleted) {
                 setEvaluations(evaluations.filter((c) => c._id !== selectedEvaluation._id));
@@ -138,11 +145,13 @@ const EvalComponent = (props: EvaluationCompProps) => {
         } finally {
             setShowDeleteDialog(false);
             setSelectedEvaluation(emptyEval);
+            setLoading(false);
         }
     };
 
     const reorderStage = async (evaluation: Evaluation, direction: "up" | "down") => {
         try {
+            setLoading(true);
             if (!evaluation.stage_level) {
                 throw new Error("Stage Level is Required");
             }
@@ -176,6 +185,7 @@ const EvalComponent = (props: EvaluationCompProps) => {
         } finally {
             //setShowDeleteDialog(false);
             setSelectedEvaluation(emptyEval);
+            setLoading(false);
         }
     };
 
@@ -269,6 +279,7 @@ const EvalComponent = (props: EvaluationCompProps) => {
                         header={header}
                         scrollable
                         filters={filters}
+                        loading={loading}
                         expandedRows={expandedRows}
                         onRowToggle={(e) => setExpandedRows(e.data)}
                         rowExpansionTemplate={(rowData) => {
