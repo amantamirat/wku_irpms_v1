@@ -2,7 +2,7 @@
 
 import DeleteDialog from '@/components/DeleteDialog';
 import SaveDialog from './dialogs/SaveDialog';
-import { Calendar, Status } from '@/models/calendar';
+import { Calendar } from '@/models/calendar';
 import { CalendarService } from '@/services/CalendarService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
@@ -16,7 +16,6 @@ import React, { useEffect, useRef, useState } from 'react';
 const CalendarPage = () => {
     const emptyCalendar: Calendar = {
         year: new Date().getFullYear(),
-        status: Status.active,
         start_date: new Date(),
         end_date: new Date(),
     };
@@ -146,13 +145,7 @@ const CalendarPage = () => {
         </>
     );
 
-    const statusBodyTemplate = (rowData: Calendar) => {
-        return (
-            <span className={`calendar-badge status-${rowData.status.toLowerCase()}`}>
-                {rowData.status}
-            </span>
-        );
-    };
+   
 
     return (
         <div className="grid">
@@ -183,8 +176,7 @@ const CalendarPage = () => {
                         <Column field="year" header="Year" sortable />
                         <Column field="start_date" header="Start Date" body={(rowData) => new Date(rowData.start_date!).toLocaleDateString()} />
                         <Column field="end_date" header="End Date" body={(rowData) => new Date(rowData.end_date!).toLocaleDateString()} />
-                        <Column field="status" header="Status" body={statusBodyTemplate} sortable />
-                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
+                       <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
                     {selectedCalendar && (

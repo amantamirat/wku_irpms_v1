@@ -1,14 +1,8 @@
-export enum Status {
-    active = 'active',
-    closed = 'closed'
-}
-
 export type Calendar = {
     _id?: string;
     year: number;
     start_date: Date | null;
     end_date: Date | null;
-    status: Status;
     createdAt?: Date;
     updatedAt?: Date;
 };
