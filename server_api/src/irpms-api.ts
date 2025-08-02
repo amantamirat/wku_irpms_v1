@@ -9,8 +9,10 @@ import organizationRoutes from './modules/organizations/organization.routes';
 import applicantRoutes from './modules/applicants/applicant.routes';
 import themeRoutes from './modules/theme/theme.routes';
 import evalRoutes from './modules/evaluation/evaluation.routes';
+import calendarRoutes from './modules/calendar/calendar.routes';
 
-import calendarRoutes from './routes/calendarRoutes';
+
+
 import callRoutes from './routes/call.routes';
 import { initAdminUser, initPermissions, initRoles } from './services/initService';
 
@@ -24,16 +26,18 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/roles", roleRoutes);
+
+app.use("/api/applicants", applicantRoutes);
 app.use("/api/organizations", organizationRoutes);
 app.use("/api/themes", themeRoutes);
 app.use("/api/eval", evalRoutes);
-
-
-
-
 app.use("/api/calendars", calendarRoutes);
 
-app.use("/api/applicants", applicantRoutes);
+
+
+
+
+
 app.use("/api/calls", callRoutes);
 
 

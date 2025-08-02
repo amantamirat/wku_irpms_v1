@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import Calendar from '../models/calendar';
-import { successResponse, errorResponse } from '../util/response';
+import Calendar from './calendar.model';
+import { errorResponse, successResponse } from '../../util/response';
 
 
 

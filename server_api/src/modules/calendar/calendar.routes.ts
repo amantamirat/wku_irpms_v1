@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import calendarController from '../controllers/calendarController';
-import { verifyActiveAccount } from '../middleware/auth';
+import calendarController from './calendar.controller';
+import { verifyActiveAccount } from '../../middleware/auth';
 
 const router: Router = Router();
 
