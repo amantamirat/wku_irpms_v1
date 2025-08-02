@@ -10,10 +10,10 @@ import applicantRoutes from './modules/applicants/applicant.routes';
 import themeRoutes from './modules/theme/theme.routes';
 import evalRoutes from './modules/evaluation/evaluation.routes';
 import calendarRoutes from './modules/calendar/calendar.routes';
+import callRoutes from './modules/call/call.routes';
 
 
 
-import callRoutes from './routes/call.routes';
 import { initAdminUser, initPermissions, initRoles } from './services/initService';
 
 
@@ -32,13 +32,13 @@ app.use("/api/organizations", organizationRoutes);
 app.use("/api/themes", themeRoutes);
 app.use("/api/eval", evalRoutes);
 app.use("/api/calendars", calendarRoutes);
-
-
-
-
-
-
 app.use("/api/calls", callRoutes);
+
+
+
+
+
+
 
 
 

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import { Call } from '../models/call.model'; 
-import { successResponse, errorResponse } from '../util/response';
+import { Call } from './call.model';
+import { errorResponse, successResponse } from '../../util/response';
+
 
 const createCall = async (req: Request, res: Response): Promise<void> => {
     try {

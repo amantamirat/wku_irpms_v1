@@ -31,6 +31,7 @@ const AppMenu = () => {
                 {
                     label: 'Calls',
                     icon: 'pi pi-fw pi-megaphone',
+                     to: `/pages/calls?directorate=${dir._id}`
                 },
                 {
                     label: 'Themes',
@@ -109,7 +110,7 @@ const AppMenu = () => {
                             to: `/pages/organizations?type=${OrganizationType.Sector}`
                         },
                         {
-                            label: 'Specialization',
+                            label: 'Specializations',
                             icon: PrimeIcons.FILTER,
                             to: `/pages/organizations?type=${OrganizationType.Specialization}`
                         },

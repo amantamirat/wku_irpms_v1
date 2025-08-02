@@ -22,7 +22,7 @@ export interface ICall extends Document {
 const CallSchema = new Schema<ICall>({
     directorate: {
         type: Schema.Types.ObjectId,
-        ref: 'Directorate',
+        ref: 'Organization',
         required: true
     },
     calendar: {

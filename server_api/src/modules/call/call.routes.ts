@@ -1,6 +1,7 @@
 import { Router } from 'express';
-import callController from '../controllers/call.controller';
-import { verifyActiveAccount } from '../middleware/auth';
+import callController from './call.controller';
+import { verifyActiveAccount } from '../../middleware/auth';
+
 
 const router: Router = Router();
 
