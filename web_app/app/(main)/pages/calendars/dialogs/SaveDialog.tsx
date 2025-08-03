@@ -79,8 +79,8 @@ function SaveDialog(props: SaveDialogProps) {
             <div className="field">
                 <label htmlFor="start_date">Start Date</label>
                 <PrimeCalendar
-                    id="start_date"
-                    value={calendar.start_date}
+                    id="start_date"                    
+                    value={calendar.start_date ? new Date(calendar.start_date) : undefined}
                     onChange={(e) => onChange({ ...calendar, start_date: e.value || null })}
                     dateFormat="yy-mm-dd"
                     showIcon
@@ -91,8 +91,8 @@ function SaveDialog(props: SaveDialogProps) {
             <div className="field">
                 <label htmlFor="end_date">End Date</label>
                 <PrimeCalendar
-                    id="end_date"
-                    value={calendar.end_date}
+                    id="end_date"                   
+                    value={calendar.end_date ? new Date(calendar.end_date) : undefined}
                     onChange={(e) => onChange({ ...calendar, end_date: e.value || null })}
                     dateFormat="yy-mm-dd"
                     showIcon

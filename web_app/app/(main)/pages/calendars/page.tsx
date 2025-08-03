@@ -174,8 +174,8 @@ const CalendarPage = () => {
                         <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="year" header="Year" sortable />
-                        <Column field="start_date" header="Start Date" body={(rowData) => new Date(rowData.start_date!).toLocaleDateString()} />
-                        <Column field="end_date" header="End Date" body={(rowData) => new Date(rowData.end_date!).toLocaleDateString()} />
+                        <Column field="start_date" header="Start Date" body={(rowData) => new Date(rowData.start_date!).toLocaleDateString('en-CA')} />
+                        <Column field="end_date" header="End Date" body={(rowData) => new Date(rowData.end_date!).toLocaleDateString('en-CA')} />
                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 

@@ -231,7 +231,7 @@ const ApplicantComp = (props: ApplicantCompProps) => {
                         <Column field="first_name" header="First Name" sortable />
                         <Column field="last_name" header="Last Name" sortable />
                         <Column field="gender" header="Gender" body={genderBodyTemplate} sortable />
-                        <Column field="birth_date" header="Birth Date" body={(rowData) => new Date(rowData.birth_date!).toLocaleDateString()} />
+                        <Column field="birth_date" header="Birth Date" body={(rowData) => new Date(rowData.birth_date!).toLocaleDateString('en-CA')} />
                         <Column field="organization.name" header={isAcademic ? "Department" : isSupportive ? "Office" : "Organization"} sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
