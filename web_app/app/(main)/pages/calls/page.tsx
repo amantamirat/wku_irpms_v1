@@ -146,13 +146,7 @@ const CallPage = () => {
         </>
     );
 
-    const statusBodyTemplate = (rowData: Call) => {
-        return (
-            <span className={`call-badge status-${rowData.status.toLowerCase()}`}>
-                {rowData.status}
-            </span>
-        );
-    };
+    
 
     return (
         <div className="grid">
@@ -181,8 +175,7 @@ const CallPage = () => {
                         <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="title" header="Title" sortable />
-                        <Column field="dead_line" header="Dead Line" body={(rowData) => new Date(rowData.dead_line!).toLocaleDateString()} />
-                         <Column field="status" header="Status" body={statusBodyTemplate} sortable />
+                        <Column field="dead_line" header="Dead Line" body={(rowData) => new Date(rowData.dead_line!).toLocaleDateString()} />                        
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
