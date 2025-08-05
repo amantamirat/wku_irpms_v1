@@ -1,15 +1,12 @@
 import mongoose, { Document, Schema, model } from 'mongoose';
+import { Category } from '../organizations/organization.model';
 
 export enum Gender {
     Male = 'Male',
     Female = 'Female'
 }
 
-export enum Scope {
-    academic = 'academic',
-    supportive = 'supportive',
-    external = 'external',
-}
+
 
 export enum DisabilityTypes {
     Visual = 'Visual',
@@ -25,7 +22,7 @@ export interface IApplicant extends Document {
     last_name: string;
     birth_date: Date;
     gender: Gender;
-    scope: Scope;
+    scope: Category;
     organization: mongoose.Types.ObjectId;
     disability?: {
         hasDisability?: boolean,
@@ -55,7 +52,7 @@ const ApplicantSchema = new Schema<IApplicant>({
     },
     scope: {
         type: String,
-        enum: Object.values(Scope),
+        enum: Object.values(Category),
         required: true
     },
     organization: {

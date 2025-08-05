@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import * as applicantService from './applicant.service';
 import { successResponse, errorResponse } from '../../util/response';
-import { Scope } from './applicant.model';
+
 
 const createApplicant = async (req: Request, res: Response): Promise<void> => {
   try {
