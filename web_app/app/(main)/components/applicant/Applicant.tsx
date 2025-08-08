@@ -2,7 +2,7 @@
 
 import DeleteDialog from '@/components/DeleteDialog';
 import SaveDialog from './dialogs/SaveDialog';
-import { Applicant, Gender, Scope } from '@/models/applicant';
+import { Applicant, Gender } from '@/models/applicant';
 import { ApplicantService } from '@/services/ApplicantService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
@@ -12,11 +12,11 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Organization, OrganizationType } from '@/models/organization';
+import { Category, Organization, OrganizationType } from '@/models/organization';
 import { OrganizationService } from '@/services/OrganizationService';
 
 interface ApplicantCompProps {
-    scope: Scope;
+    scope: Category;
 }
 
 const ApplicantComp = (props: ApplicantCompProps) => {
@@ -45,9 +45,9 @@ const ApplicantComp = (props: ApplicantCompProps) => {
     };
 
     const scope = props.scope;
-    const isAcademic = scope === Scope.academic;
-    const isSupportive = scope === Scope.supportive;
-    const isExternal = scope === Scope.external;
+    const isAcademic = scope === Category.academic;
+    const isSupportive = scope === Category.supportive;
+    const isExternal = scope === Category.external;
 
     const loadApplicants = useCallback(async () => {
         try {

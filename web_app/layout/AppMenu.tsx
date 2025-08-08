@@ -6,8 +6,7 @@ import { MenuProvider } from './context/menucontext';
 import Link from 'next/link';
 import { AppMenuItem } from '@/types';
 import { PrimeIcons } from 'primereact/api';
-import { Organization, OrganizationType } from '@/models/organization';
-import { Scope } from '@/models/applicant';
+import { Category, Organization, OrganizationType } from '@/models/organization';
 import { OrganizationService } from '@/services/OrganizationService';
 
 
@@ -71,17 +70,17 @@ const AppMenu = () => {
                         {
                             label: 'Academic',
                             icon: 'pi pi-fw pi-crown',
-                            to: `/pages/applicants?scope=${Scope.academic}`
+                            to: `/pages/applicants?scope=${Category.academic}`
                         },
                         {
                             label: 'Supportive',
                             icon: 'pi pi-fw pi-bullseye',
-                            to: `/pages/applicants?scope=${Scope.supportive}`
+                            to: `/pages/applicants?scope=${Category.supportive}`
                         },
                         {
                             label: 'External',
                             icon: 'pi pi-fw pi-asterisk',
-                            to: `/pages/applicants?scope=${Scope.external}`
+                            to: `/pages/applicants?scope=${Category.external}`
                         }
                     ]
                 },

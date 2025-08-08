@@ -42,9 +42,9 @@ export enum Ownership {
 
 // Enum for Category
 export enum Category {
-    Academic = 'academic',
-    Supportive = 'supportive',
-    External = 'external',
+    academic = 'academic',
+    supportive = 'supportive',
+    external = 'external',
 }
 
 // Address Type

@@ -7,8 +7,9 @@ import { Calendar as PrimeCalendar } from 'primereact/calendar';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import { Dropdown } from 'primereact/dropdown';
-import { Applicant, Gender, Scope, validateApplicant } from '@/models/applicant';
-import { Organization } from '@/models/organization';
+import { Accessibility, Applicant, Gender, validateApplicant } from '@/models/applicant';
+import { Category, Organization } from '@/models/organization';
+import { MultiSelect } from 'primereact/multiselect';
 
 
 interface SaveApplicantDialogProps {
@@ -26,9 +27,14 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
-    const isAcademic = applicant.scope === Scope.academic;
-    const isSupportive = applicant.scope === Scope.supportive;
+    const isAcademic = applicant.scope === Category.academic;
+    const isSupportive = applicant.scope === Category.supportive;
     //const isExternal = applicant.scope === Scope.external;
+
+    const accessibilityOptions = Object.values(Accessibility).map(a => ({
+        label: a,
+        value: a
+    }));
 
     useEffect(() => {
         if (!visible) {
@@ -137,6 +143,18 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
                         placeholder="Select a Workspace"
                         required
                         className={classNames({ 'p-invalid': submitted && !applicant.organization })}
+                    />
+                </div>
+                <div className="field">
+                    <label htmlFor="accessibility">Accessibility</label>
+                    <MultiSelect
+                        id="accessibility"
+                        value={applicant.accessibility || []}
+                        options={accessibilityOptions}
+                        onChange={(e) => setApplicant({ ...applicant, accessibility: e.value })}
+                        placeholder="Select Accessibility Types"
+                        display="chip"
+                        className={classNames({ 'p-invalid': submitted && !applicant.accessibility?.length })}
                     />
                 </div>
             </>)}
