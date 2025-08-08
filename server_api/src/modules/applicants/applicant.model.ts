@@ -12,10 +12,7 @@ export interface IApplicant extends Document {
     gender: Gender;
     scope: Category;
     organization: mongoose.Types.ObjectId;
-    disability?: {
-        hasDisability?: boolean,
-        disabilityTypes?: Accessibility,
-    }
+    accessibility?: Accessibility[];
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -48,15 +45,10 @@ const ApplicantSchema = new Schema<IApplicant>({
         ref: 'Organization',
         required: true
     },
-    disability: {
-        hasDisability: {
-            type: Boolean,
-            default: false
-        },
-        disabilityTypes: {
-            type: String,
-            enum: Object.values(Accessibility),
-        },
+    accessibility: {
+        type: [String],
+        enum: Object.values(Accessibility),
+        default: []
     }
 }, { timestamps: true });
 
