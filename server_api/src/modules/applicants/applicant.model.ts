@@ -1,21 +1,9 @@
 import mongoose, { Document, Schema, model } from 'mongoose';
-import { Category } from '../organizations/organization.model';
-
-export enum Gender {
-    Male = 'Male',
-    Female = 'Female'
-}
+import { Category } from '../organizations/enums/category.enum';
+import { Gender } from './enums/gender.enum';
+import { Accessibility } from './enums/accessibility.enum';
 
 
-
-export enum DisabilityTypes {
-    Visual = 'Visual',
-    Hearing = 'Hearing',
-    Mobility = 'Mobility',
-    Speech = 'Speech',
-    Cognitive = 'Cognitive',
-    Other = 'Other'
-}
 
 export interface IApplicant extends Document {
     first_name: string;
@@ -26,7 +14,7 @@ export interface IApplicant extends Document {
     organization: mongoose.Types.ObjectId;
     disability?: {
         hasDisability?: boolean,
-        disabilityTypes?: DisabilityTypes,
+        disabilityTypes?: Accessibility,
     }
     createdAt?: Date;
     updatedAt?: Date;
@@ -67,7 +55,7 @@ const ApplicantSchema = new Schema<IApplicant>({
         },
         disabilityTypes: {
             type: String,
-            enum: Object.values(DisabilityTypes),
+            enum: Object.values(Accessibility),
         },
     }
 }, { timestamps: true });

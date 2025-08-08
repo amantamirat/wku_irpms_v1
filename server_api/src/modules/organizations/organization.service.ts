@@ -1,18 +1,19 @@
-import Organization, { OrganizationType } from './organization.model';
+import Organization from './organization.model';
+import { Unit } from './enums/unit.enum';
 import { validateOrganization } from './organization.validator';
 
-const parentTypeRules: Partial<Record<OrganizationType, OrganizationType>> = {
-  [OrganizationType.Department]: OrganizationType.College,
-  [OrganizationType.Program]: OrganizationType.Department,
-  [OrganizationType.Center]: OrganizationType.Directorate,
-  [OrganizationType.External]: OrganizationType.Sector,
-  [OrganizationType.Rank]: OrganizationType.Position
+const parentTypeRules: Partial<Record<Unit, Unit>> = {
+  [Unit.Department]: Unit.College,
+  [Unit.Program]: Unit.Department,
+  [Unit.Center]: Unit.Directorate,
+  [Unit.External]: Unit.Sector,
+  [Unit.Rank]: Unit.Position
 };
 
 /**
  * Validate parent organization type and existence
  */
-const validateParentOrganization = async (childType: OrganizationType, parentId?: string) => {
+const validateParentOrganization = async (childType: Unit, parentId?: string) => {
   const expectedParentType = parentTypeRules[childType];
   if (!expectedParentType) return { success: true };
   if (!parentId) {

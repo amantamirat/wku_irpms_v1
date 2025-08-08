@@ -1,9 +1,13 @@
 import Joi from 'joi';
-import { OrganizationType, AcademicLevel, Classification, Ownership, Category } from './organization.model';
+import { AcademicLevel } from './enums/academicLevel.enum';
+import { Classification } from './enums/classification.enum';
+import { Ownership } from './enums/ownership.enum';
+import { Category } from './enums/category.enum';
+import { Unit } from './enums/unit.enum';
 
 const baseSchema = Joi.object({
   name: Joi.string().required(),
-  type: Joi.string().valid(...Object.values(OrganizationType)).required(),
+  type: Joi.string().valid(...Object.values(Unit)).required(),
 
   academic_level: Joi.string().valid(...Object.values(AcademicLevel)),
   classification: Joi.string().valid(...Object.values(Classification)),
@@ -28,26 +32,26 @@ export const validateOrganization = (data: any) => {
   let schema = baseSchema;
 
   switch (data.type) {
-    case OrganizationType.Program:
+    case Unit.Program:
       schema = schema.append({
         academic_level: Joi.string().valid(...Object.values(AcademicLevel)).required(),
         classification: Joi.string().valid(...Object.values(Classification)).required(),
       });
       break;
 
-    case OrganizationType.Specialization:
+    case Unit.Specialization:
       schema = schema.append({
         academic_level: Joi.string().valid(...Object.values(AcademicLevel)).required(),
       });
       break;
 
-    case OrganizationType.External:
+    case Unit.External:
       schema = schema.append({
         ownership: Joi.string().valid(...Object.values(Ownership)).required(),
       });
       break;
 
-    case OrganizationType.Position:
+    case Unit.Position:
       schema = schema.append({
         category: Joi.string().valid(...Object.values(Category)).required(),
       });
@@ -58,11 +62,11 @@ export const validateOrganization = (data: any) => {
   }
 
   const parentRequiredTypes = [
-    OrganizationType.Department,
-    OrganizationType.Program,
-    OrganizationType.Center,
-    OrganizationType.External,
-    OrganizationType.Rank
+    Unit.Department,
+    Unit.Program,
+    Unit.Center,
+    Unit.External,
+    Unit.Rank
   ];
 
   if (parentRequiredTypes.includes(data.type)) {

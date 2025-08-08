@@ -1,14 +1,16 @@
 import Applicant from './applicant.model';
-import Organization, { OrganizationType } from '../organizations/organization.model';
-import { Scope } from './applicant.model';
+import { Category } from '../organizations/enums/category.enum';
+import { Unit } from '../organizations/enums/unit.enum';
+import Organization from '../organizations/organization.model';
 
-const scopeToOrganizationType: Record<Scope, OrganizationType> = {
-    academic: OrganizationType.Department,
-    supportive: OrganizationType.Supportive,
-    external: OrganizationType.External,
+
+const scopeToOrganizationType: Record<Category, Unit> = {
+    academic: Unit.Department,
+    supportive: Unit.Supportive,
+    external: Unit.External,
 };
 
-const validateApplicantOrganization = async (scope: Scope, orgId: string) => {
+const validateApplicantOrganization = async (scope: Category, orgId: string) => {
     const expected = scopeToOrganizationType[scope];
     const org = await Organization.findById(orgId);
     if (!org || org.type !== expected) {

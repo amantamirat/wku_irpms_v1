@@ -1,6 +1,7 @@
 import Evaluation, { EvaluationType, IEvaluation } from './evaluation.model';
-import Organization, { OrganizationType } from '../organizations/organization.model';
+import Organization from '../organizations/organization.model';
 import { validateEvaluation } from './evaluation.validator';
+import { Unit } from '../organizations/enums/unit.enum';
 
 
 export const validateEvaluationReferences = async (data: Partial<IEvaluation>) => {
@@ -18,7 +19,7 @@ export const validateEvaluationReferences = async (data: Partial<IEvaluation>) =
         }
         if (!directorate) throw new Error(`'${type}' requires a 'directorate'.`);
         const org = await Organization.findById(directorate);
-        if (!org || org.type !== OrganizationType.Directorate) {
+        if (!org || org.type !== Unit.Directorate) {
             throw new Error(`'directorate' must reference an organization of type 'Directorate'.`);
         }
     }

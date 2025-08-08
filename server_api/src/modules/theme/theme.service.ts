@@ -1,7 +1,8 @@
-import Organization, { OrganizationType } from '../organizations/organization.model';
+import Organization from '../organizations/organization.model';
 import Theme, { ITheme, ThemeType } from './theme.model';
 import mongoose from 'mongoose';
 import { validateTheme } from './theme.validator';
+import { Unit } from '../organizations/enums/unit.enum';
 
 export const validateThemeReferences = async (data: Partial<ITheme>) => {
     const { type, parent, directorate } = data;
@@ -9,7 +10,7 @@ export const validateThemeReferences = async (data: Partial<ITheme>) => {
     if (type === ThemeType.theme) {
         if (!directorate) throw new Error(`'directorate' is required for theme type.`);
         const org = await Organization.findById(directorate);
-        if (!org || org.type !== OrganizationType.Directorate) {
+        if (!org || org.type !== Unit.Directorate) {
             throw new Error(`'directorate' must reference an organization of type 'Directorate'.`);
         }
         if (parent) {

@@ -2,7 +2,8 @@ import { Request, Response } from 'express';
 import { validateOrganization } from './organization.validator';
 import * as organizationService from './organization.service';
 import { successResponse, errorResponse } from '../../util/response';
-import Organization, { OrganizationType } from './organization.model';
+import Organization from './organization.model';
+import { Unit } from './enums/unit.enum';
 
 /**
  * Create Organization
@@ -22,7 +23,7 @@ const createOrganization = async (req: Request, res: Response): Promise<void> =>
 // Get Organization by Id
 const getDirectorateById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const directorate = await Organization.findOne({ _id: req.params.id, type: OrganizationType.Directorate }).lean();
+    const directorate = await Organization.findOne({ _id: req.params.id, type: Unit.Directorate }).lean();
     if (!directorate) {
       errorResponse(res, 404, 'Directorate not found');
       return;

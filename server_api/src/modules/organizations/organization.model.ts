@@ -3,55 +3,11 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 import Evaluation from '../evaluation/evaluation.model';
 import Applicant from '../applicants/applicant.model';
 import Theme from '../theme/theme.model';
-
-// Enum for Organization Types
-export enum OrganizationType {
-    College = 'College',
-    Department = 'Department',
-    Program = 'Program',
-    Directorate = 'Directorate',
-    Center = 'Center',
-    Supportive = 'Supportive',
-    Sector = 'Sector',
-    External = 'External',
-    Specialization = 'Specialization',
-    Position = 'Position',
-    Rank = 'Rank',
-}
-
-// Enum for Academic Levels
-export enum AcademicLevel {
-    BA = 'BA',
-    BSc = 'BSc',
-    BT = 'BT',
-    MA = 'MA',
-    MSc = 'MSc',
-    MPhil = 'MPhil',
-    MT = 'MT',
-    PhD = 'PhD',
-    PostDoc = 'PostDoc'
-}
-
-// Enum for Classification
-export enum Classification {
-    Regular = 'Regular',
-    Weekend = 'Weekend',
-    Evening = 'Evening',
-}
-
-// Enum for Ownership
-export enum Ownership {
-    Private = 'Private',
-    Public = 'Public',
-    NGO = 'NGO',
-}
-
-// Enum for Position Category
-export enum Category {
-    Academic = 'academic',
-    Supportive = 'supportive',
-    External = 'external',
-}
+import { AcademicLevel } from './enums/academicLevel.enum';
+import { Classification } from './enums/classification.enum';
+import { Ownership } from './enums/ownership.enum';
+import { Category } from './enums/category.enum';
+import { Unit } from './enums/unit.enum';
 
 // Address Sub-document
 const AddressSchema = new Schema({
@@ -65,7 +21,7 @@ const AddressSchema = new Schema({
 // Organization Interface
 export interface IOrganization extends Document {
     name: string;
-    type: OrganizationType;
+    type: Unit;
     academic_level?: AcademicLevel;
     classification?: Classification;
     ownership?: Ownership;
@@ -85,7 +41,7 @@ export interface IOrganization extends Document {
 // Organization Schema
 const OrganizationSchema = new Schema<IOrganization>({
     name: { type: String, required: true },
-    type: { type: String, enum: Object.values(OrganizationType), required: true, immutable: true },
+    type: { type: String, enum: Object.values(Unit), required: true, immutable: true },
 
     academic_level: { type: String, enum: Object.values(AcademicLevel) },
     classification: { type: String, enum: Object.values(Classification) },
