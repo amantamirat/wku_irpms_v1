@@ -5,6 +5,6 @@ export const successResponse = (res: Response, statusCode: number = 200, message
 };
 
 export const errorResponse = (res: Response, statusCode: number = 401, message: string, error?: any): void => {
-    console.log("Error Responded", message, error ? error : '');
+    console.log("Error:", message, error ? error : '');
     res.status(statusCode).json({ success: false, message, error });
 };
