@@ -1,9 +1,10 @@
 import { Response } from 'express';
 
 export const successResponse = (res: Response, statusCode: number = 200, message: string, data?: any): void => {
-    res.status(statusCode).json({ success:true, message, data });
+    res.status(statusCode).json({ success: true, message, data });
 };
 
 export const errorResponse = (res: Response, statusCode: number = 401, message: string, error?: any): void => {
-    res.status(statusCode).json({ success:false, message, error });
+    console.log("Error Responded", message, error ? error : '');
+    res.status(statusCode).json({ success: false, message, error });
 };
