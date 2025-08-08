@@ -20,7 +20,7 @@ export const validateEvaluationReferences = async (data: Partial<IEvaluation>) =
         if (!directorate) throw new Error(`'${type}' requires a 'directorate'.`);
         const org = await Organization.findById(directorate);
         if (!org || org.type !== Unit.Directorate) {
-            throw new Error(`'directorate' must reference an organization of type 'Directorate'.`);
+            throw new Error(`'directorate' must reference an organization of unit 'Directorate'.`);
         }
     }
     if (isStage || isCriterion || isOption) {
@@ -61,9 +61,18 @@ export const createEvaluation = async (data: Partial<IEvaluation>) => {
     try {
         const { error, value } = validateEvaluation(data);
         if (error) throw new Error(error.details.map(d => d.message).join(', '));
-
         await validateEvaluationReferences(value);
 
+        if (value.type === EvaluationType.stage) {
+            const maxStage = await Evaluation.findOne({
+                type: EvaluationType.stage,
+                parent: value.parent
+            })
+                .sort({ stage_level: -1 })
+                .select('stage_level')
+                .lean();
+            value.stage_level = maxStage ? (maxStage.stage_level ?? 0) + 1 : 1;
+        }
         const evaluation = await Evaluation.create(value);
         return { success: true, status: 201, data: evaluation };
     } catch (err: any) {
@@ -99,7 +108,23 @@ export const deleteEvaluation = async (id: string) => {
     if (!evaluation) {
         return { success: false, status: 404, message: 'Evaluation not found' };
     }
-    await evaluation.deleteOne(); // Add pre-hook if needed
+    if (evaluation.type === EvaluationType.stage) {
+        const parentId = evaluation.parent;
+        const deletedLevel = evaluation.stage_level!;
+        // 1. Delete first — removes the conflict
+        await evaluation.deleteOne();
+        // 2. Shift down all higher levels
+        await Evaluation.updateMany(
+            {
+                type: EvaluationType.stage,
+                parent: parentId,
+                stage_level: { $gt: deletedLevel }
+            },
+            { $inc: { stage_level: -1 } }
+        );
+    } else {
+         await evaluation.deleteOne(); // Add pre-hook if needed
+    }   
     return { success: true, status: 200, message: 'Evaluation deleted successfully' };
 };
 

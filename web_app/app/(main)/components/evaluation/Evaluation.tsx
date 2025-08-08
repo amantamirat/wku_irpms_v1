@@ -78,7 +78,7 @@ const EvalComponent = (props: EvaluationCompProps) => {
                 detail: '' + err,
                 life: 3000
             });
-        }finally{
+        } finally {
             setLoading(false);
         }
     }, [props.parent, props.directorate, toast]);
@@ -99,7 +99,7 @@ const EvalComponent = (props: EvaluationCompProps) => {
                 _evlas[index] = updated;
             } else {
                 const created = await EvalService.createEvaluation(selectedEvaluation);
-                _evlas.push({ ...selectedEvaluation, _id: created._id });
+                _evlas.push({ ...selectedEvaluation, _id: created._id, stage_level: created.stage_level });
             }
             toast.current?.show({
                 severity: 'success',
@@ -127,7 +127,31 @@ const EvalComponent = (props: EvaluationCompProps) => {
             setLoading(true);
             const deleted = await EvalService.deleteEvaluation(selectedEvaluation);
             if (deleted) {
-                setEvaluations(evaluations.filter((c) => c._id !== selectedEvaluation._id));
+                //setEvaluations(evaluations.filter((c) => c._id !== selectedEvaluation._id));
+                setEvaluations((prevEvals) => {
+                    let updated = prevEvals.filter((c) => c._id !== selectedEvaluation._id);
+                    // Explicitly check that stage_level is a number
+                    if (
+                        selectedEvaluation.type === 'Stage' &&
+                        selectedEvaluation.parent &&
+                        typeof selectedEvaluation.stage_level === 'number'
+                    ) {
+                        updated = updated.map((e) => {
+                            if (
+                                e.type === 'Stage' &&
+                                e.parent === selectedEvaluation.parent &&
+                                typeof e.stage_level === 'number' &&
+                                e.stage_level > selectedEvaluation.stage_level!
+                            ) {
+                                return { ...e, stage_level: e.stage_level - 1 };
+                            }
+                            return e;
+                        });
+                    }
+
+                    return updated;
+                });
+
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Deleted',
@@ -193,13 +217,15 @@ const EvalComponent = (props: EvaluationCompProps) => {
         <div className="my-2">
             <Button label={`New ${type}`} icon="pi pi-plus" severity="success" className="mr-2"
                 onClick={() => {
+                    /*
                     let newEval = { ...emptyEval };
                     if (type === EvalType.stage) {
                         const stages = evaluations.filter(e => e.type === EvalType.stage);
                         const maxLevel = Math.max(0, ...stages.map(e => e.stage_level ?? 0));
                         newEval.stage_level = maxLevel + 1;
                     }
-                    setSelectedEvaluation(newEval);
+                    */
+                    setSelectedEvaluation(emptyEval);
                     setShowSaveDialog(true);
                 }}
             />

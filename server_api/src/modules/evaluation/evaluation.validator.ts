@@ -7,7 +7,7 @@ export const validateEvaluation = (data: any) => {
     title: Joi.string().required(),
     directorate: Joi.string().hex().length(24).optional(),
     parent: Joi.string().hex().length(24).optional(),
-    stage_level: Joi.number().min(1).max(10).optional(),
+    stage_level: Joi.number().min(1).max(10).forbidden(),
     weight_value: Joi.number().min(0).optional(),
     form_type: Joi.string().valid(...Object.values(FormType)).optional()
   });
@@ -25,7 +25,7 @@ export const validateEvaluation = (data: any) => {
       schema = schema.append({
         parent: Joi.string().hex().length(24).required(),
         directorate: Joi.forbidden(),
-        stage_level: Joi.number().min(1).max(10).required(),
+        //stage_level: Joi.number().min(1).max(10).required(),
       });
       break;
 
