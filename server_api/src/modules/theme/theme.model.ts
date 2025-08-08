@@ -1,31 +1,39 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 // Enum for theme Types
 export enum ThemeType {
+    catalog = 'Catelog',
     theme = 'Theme',
     priorityArea = 'Priority Area',
-    subArea = 'Sub Area'    
+    subArea = 'Sub Area'
 }
 
-export interface ITheme extends Document {    
+export interface ITheme extends Document {
     type: ThemeType;
     title: string;
+    theme_level: number;
     directorate?: Types.ObjectId;
     parent?: Types.ObjectId;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
-const ThemeSchema = new Schema<ITheme>({    
+const ThemeSchema = new Schema<ITheme>({
     type: {
         type: String,
         enum: Object.values(ThemeType),
-        required:true,
+        required: true,
         immutable: true
     },
     title: {
         type: String,
         unique: true,
         required: true
+    },
+    theme_level: {
+        type: Number,
+        required: true,
+        min: 1,
+        max: 100
     },
     directorate: {
         type: Schema.Types.ObjectId,
