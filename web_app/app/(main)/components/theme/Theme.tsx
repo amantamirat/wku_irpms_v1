@@ -24,7 +24,11 @@ interface ThemeCompProps {
 const ThemeComponent = (props: ThemeCompProps) => {
 
     const type = props.type;
-    const childType = type === ThemeType.theme ? ThemeType.subTheme : type === ThemeType.subTheme ? ThemeType.focusArea : null;
+    const isCatalog = type === ThemeType.catalog;
+    const isTheme = type === ThemeType.theme;
+    const isSubTheme = type === ThemeType.subTheme;
+    const isFocusArea = type === ThemeType.focusArea;
+    const childType = isCatalog ? ThemeType.theme : isTheme ? ThemeType.subTheme : isSubTheme ? ThemeType.focusArea : null;
 
 
     const emptyTheme: Theme = {
@@ -210,6 +214,7 @@ const ThemeComponent = (props: ThemeCompProps) => {
                         }
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="title" header="Title" sortable />
+                        <Column field="priority" header={isCatalog ? "Level" : "Priority"} sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
@@ -217,7 +222,7 @@ const ThemeComponent = (props: ThemeCompProps) => {
                         <SaveDialog
                             visible={showSaveDialog}
                             theme={selectedTheme}
-                            isCatalog={props.type === ThemeType.catalog}
+                            isCatalog={isCatalog}
                             onChange={setSelectedTheme}
                             onSave={saveTheme}
                             onHide={() => setShowSaveDialog(false)}

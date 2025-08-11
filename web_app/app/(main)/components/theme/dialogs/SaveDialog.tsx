@@ -76,7 +76,7 @@ function SaveDialog(props: SaveDialogProps) {
             </div>
 
             <div className="field">
-                <label htmlFor="priority">{props.isCatalog ? 'Depth ' : 'Priority'}</label>
+                <label htmlFor="priority">{props.isCatalog ? 'Level ' : 'Priority'}</label>
                 <InputNumber
                     id="priority"
                     value={theme.priority}

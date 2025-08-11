@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 export enum ThemeType {
     catalog = 'Catalog',
     theme = 'Theme',
-    subTheme = 'Priority Area',
+    subTheme = 'Sub Theme',
     focusArea = 'Focus Area'
 }
 

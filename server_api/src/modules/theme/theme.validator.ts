@@ -14,9 +14,9 @@ export const validateTheme = (data: any) => {
     case ThemeType.catalog:
       schema = schema.append({
         priority: Joi.number().less(3).required().messages({
-          'any.required': 'Depth is required for a catalog',
-          'number.less': 'Depth for a catalog must be less than 3',
-          'number.base': 'Depth must be a number',
+          'any.required': 'Level is required for a catalog',
+          'number.less': 'Level for a catalog must be less than 3',
+          'number.base': 'Level must be a number',
         }),
         directorate: Joi.string().hex().length(24).required(),
         parent: Joi.forbidden(),

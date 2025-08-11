@@ -32,10 +32,10 @@ export const validateTheme = (theme: Theme): { valid: boolean; message?: string 
             return { valid: false, message: 'Directorate is required.' };
         }
         if (!theme.priority) {
-            return { valid: false, message: 'Depth is required.' };
+            return { valid: false, message: 'Level is required.' };
         }
         if (theme.priority > 3 || theme.priority <= 0) { 
-             return { valid: false, message: 'Invlaid Depth Input.' };
+             return { valid: false, message: 'Invlaid Level Input.' };
         }
     } else {
         if (!theme.parent) {
