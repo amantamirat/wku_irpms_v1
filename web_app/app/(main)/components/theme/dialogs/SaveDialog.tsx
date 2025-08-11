@@ -3,6 +3,7 @@
 import { Theme, validateTheme } from '@/models/theme/theme';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
+import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import { useEffect, useState } from 'react';
@@ -10,6 +11,7 @@ import { useEffect, useState } from 'react';
 interface SaveDialogProps {
     visible: boolean;
     theme: Theme;
+    isCatalog?: boolean;
     onChange: (theme: Theme) => void;
     onSave: () => void;
     onHide: () => void;
@@ -55,7 +57,7 @@ function SaveDialog(props: SaveDialogProps) {
         <Dialog
             visible={visible}
             style={{ width: '500px' }}
-            header={theme._id ? `Edit ${theme.type}`  : `New ${theme.type}`}
+            header={theme._id ? `Edit ${theme.type}` : `New ${theme.type}`}
             modal
             className="p-fluid"
             footer={footer}
@@ -70,6 +72,21 @@ function SaveDialog(props: SaveDialogProps) {
                     required
                     autoFocus
                     className={classNames({ 'p-invalid': submitted && !theme.title })}
+                />
+            </div>
+
+            <div className="field">
+                <label htmlFor="priority">{props.isCatalog ? 'Depth ' : 'Priority'}</label>
+                <InputNumber
+                    id="priority"
+                    value={theme.priority}
+                    onChange={(e) =>
+                        onChange({ ...theme, priority: e.value || 0 })
+                    }
+                    required
+                    className={classNames({
+                        'p-invalid': submitted && (props.isCatalog) && (theme.priority == null),
+                    })}
                 />
             </div>
             {errorMessage && (

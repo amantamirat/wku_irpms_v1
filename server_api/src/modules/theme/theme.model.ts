@@ -1,16 +1,16 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-// Enum for theme Types
+
 export enum ThemeType {
-    catalog = 'Catelog',
+    catalog = 'Catalog',
     theme = 'Theme',
-    priorityArea = 'Priority Area',
-    subArea = 'Sub Area'
+    subTheme = 'Priority Area',
+    focusArea = 'Focus Area'
 }
 
 export interface ITheme extends Document {
     type: ThemeType;
     title: string;
-    theme_level: number;
+    priority?: number;
     directorate?: Types.ObjectId;
     parent?: Types.ObjectId;
     createdAt?: Date;
@@ -29,9 +29,8 @@ const ThemeSchema = new Schema<ITheme>({
         unique: true,
         required: true
     },
-    theme_level: {
+    priority: {
         type: Number,
-        required: true,
         min: 1,
         max: 100
     },
@@ -43,6 +42,16 @@ const ThemeSchema = new Schema<ITheme>({
     parent: { type: Schema.Types.ObjectId, ref: 'Theme' }
 
 }, { timestamps: true });
+
+ThemeSchema.index({ parent: 1, priority: 1 },
+    {
+        unique: true,
+        partialFilterExpression: {
+            priority: { $exists: true, $ne: null },
+            parent: { $exists: true, $ne: null }
+        }
+    }
+);
 
 ThemeSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
     const themeId = this._id;

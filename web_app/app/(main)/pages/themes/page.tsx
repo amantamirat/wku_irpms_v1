@@ -46,7 +46,7 @@ const ThemePage = () => {
     }
 
     return (
-        <ThemeComponent type={ThemeType.theme} directorate={directorate} />
+        <ThemeComponent type={ThemeType.catalog} directorate={directorate} />
     );
 };
 

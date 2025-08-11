@@ -17,14 +17,14 @@ export const validateThemeReferences = async (data: Partial<ITheme>) => {
         }
     }
 
-    if (type === ThemeType.priorityArea || type === ThemeType.subArea) {
+    if (type === ThemeType.subTheme || type === ThemeType.focusArea) {
         if (!parent) throw new Error(`'${type}' requires a parent theme.`);
 
         const parentTheme = await Theme.findById(parent);
         if (!parentTheme) throw new Error(`Parent theme not found.`);
 
         const expectedParentType =
-            type === ThemeType.priorityArea ? ThemeType.theme : ThemeType.priorityArea;
+            type === ThemeType.subTheme ? ThemeType.theme : ThemeType.subTheme;
 
         if (parentTheme.type !== expectedParentType) {
             throw new Error(`'${type}' must have a parent of type '${expectedParentType}'.`);

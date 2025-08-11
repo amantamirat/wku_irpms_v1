@@ -5,7 +5,7 @@ export const validateTheme = (data: any) => {
   let schema = Joi.object({
     type: Joi.string().valid(...Object.values(ThemeType)).required(),
     title: Joi.string().required(),
-    theme_level: Joi.number().required(),
+    priority: Joi.number().optional(),
     parent: Joi.string().hex().length(24).optional(),
     directorate: Joi.string().hex().length(24).optional(),
   });
@@ -13,15 +13,19 @@ export const validateTheme = (data: any) => {
   switch (data.type) {
     case ThemeType.catalog:
       schema = schema.append({
-        theme_level: Joi.number().less(4).required(),
+        priority: Joi.number().less(3).required().messages({
+          'any.required': 'Depth is required for a catalog',
+          'number.less': 'Depth for a catalog must be less than 3',
+          'number.base': 'Depth must be a number',
+        }),
         directorate: Joi.string().hex().length(24).required(),
         parent: Joi.forbidden(),
       });
       break;
     case ThemeType.theme:
-    case ThemeType.priorityArea:
-    case ThemeType.subArea:
-      schema = schema.append({       
+    case ThemeType.subTheme:
+    case ThemeType.focusArea:
+      schema = schema.append({
         parent: Joi.string().hex().length(24).required(),
         directorate: Joi.forbidden(),
       });

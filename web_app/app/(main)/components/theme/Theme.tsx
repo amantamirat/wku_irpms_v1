@@ -24,7 +24,7 @@ interface ThemeCompProps {
 const ThemeComponent = (props: ThemeCompProps) => {
 
     const type = props.type;
-    const childType = type === ThemeType.theme ? ThemeType.priorityArea : type === ThemeType.priorityArea ? ThemeType.subArea : null;
+    const childType = type === ThemeType.theme ? ThemeType.subTheme : type === ThemeType.subTheme ? ThemeType.focusArea : null;
 
 
     const emptyTheme: Theme = {
@@ -185,7 +185,7 @@ const ThemeComponent = (props: ThemeCompProps) => {
                         rows={10}
                         rowsPerPageOptions={[5, 10, 25]}
                         className="datatable-responsive"
-                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"                        
+                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate={`Showing {first} to {last} of {totalRecords} ${type}s`}
                         globalFilter={globalFilter}
                         emptyMessage={`No themes data found.`}
@@ -217,6 +217,7 @@ const ThemeComponent = (props: ThemeCompProps) => {
                         <SaveDialog
                             visible={showSaveDialog}
                             theme={selectedTheme}
+                            isCatalog={props.type === ThemeType.catalog}
                             onChange={setSelectedTheme}
                             onSave={saveTheme}
                             onHide={() => setShowSaveDialog(false)}
