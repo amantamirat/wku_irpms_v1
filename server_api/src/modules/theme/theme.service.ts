@@ -7,31 +7,33 @@ export const validateThemeReferences = async (data: Partial<ITheme>) => {
     const { type, parent, directorate } = data;
 
     if (type === ThemeType.catalog) {
-        if (!directorate) throw new Error(`'directorate' is required for theme type.`);
+        if (!directorate) throw new Error(`'directorate' is required for catalog type.`);
         const org = await Organization.findById(directorate);
         if (!org || org.type !== Unit.Directorate) {
             throw new Error(`Theme Catelog must have an organization of unit 'Directorate'.`);
         }
-        if (parent) {
-            throw new Error(`'theme' type must not have a parent.`);
-        }
     }
-
-    if (type === ThemeType.subTheme || type === ThemeType.focusArea) {
+    else {
         if (!parent) throw new Error(`'${type}' requires a parent theme.`);
-
         const parentTheme = await Theme.findById(parent);
+
         if (!parentTheme) throw new Error(`Parent theme not found.`);
 
-        const expectedParentType =
+        const expectedParentType = type === ThemeType.theme ? ThemeType.catalog :
             type === ThemeType.subTheme ? ThemeType.theme : ThemeType.subTheme;
 
         if (parentTheme.type !== expectedParentType) {
             throw new Error(`'${type}' must have a parent of type '${expectedParentType}'.`);
         }
 
-        if (directorate) {
-            throw new Error(`'${type}' must not include a directorate.`);
+        const catalog = await getCatalogFromTheme(parentTheme);
+        if (!catalog) throw new Error('Catalog theme not found in the hierarchy.');
+
+        if (type === ThemeType.subTheme) {
+            if (catalog?.priority! < 2) throw new Error(`Catalog level.`);
+        }
+        if (type === ThemeType.focusArea) {            
+            if (catalog?.priority! < 3) throw new Error(`Catalog level.`);
         }
     }
 };
@@ -48,6 +50,15 @@ export const createTheme = async (data: Partial<ITheme>) => {
         console.log(err);
         return { success: false, status: 400, message: err.message };
     }
+};
+
+
+const getCatalogFromTheme = async (theme: ITheme): Promise<ITheme> => {
+    if (theme.type === ThemeType.catalog) return theme;
+    if (!theme.parent) throw new Error('Parent theme not found in hierarchy');
+    const parentTheme = await Theme.findById(theme.parent);
+    if (!parentTheme) throw new Error('Parent theme does not exist');
+    return getCatalogFromTheme(parentTheme);
 };
 
 export const getThemesByParent = async (parentId: string) => {

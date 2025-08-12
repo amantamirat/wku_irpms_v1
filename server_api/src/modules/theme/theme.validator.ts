@@ -13,7 +13,7 @@ export const validateTheme = (data: any) => {
   switch (data.type) {
     case ThemeType.catalog:
       schema = schema.append({
-        priority: Joi.number().less(3).required().messages({
+        priority: Joi.number().less(4).required().messages({
           'any.required': 'Level is required for a catalog',
           'number.less': 'Level for a catalog must be less than 3',
           'number.base': 'Level must be a number',
