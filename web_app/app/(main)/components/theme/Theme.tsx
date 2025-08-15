@@ -1,7 +1,7 @@
 'use client';
 
 import DeleteDialog from '@/components/DeleteDialog';
-import { Theme, ThemeType } from '@/models/theme/theme';
+import { Theme, ThemeLevel, ThemeType } from '@/models/theme/theme';
 import { ThemeService } from '@/services/theme/ThemeService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
@@ -19,6 +19,7 @@ interface ThemeCompProps {
     type: ThemeType;
     directorate?: Organization;
     parent?: Theme;
+    themeLevel?: ThemeLevel;
 }
 
 const ThemeComponent = (props: ThemeCompProps) => {
@@ -195,16 +196,40 @@ const ThemeComponent = (props: ThemeCompProps) => {
                         header={header}
                         scrollable
                         filters={filters}
-                        {...(childType && {
-                            expandedRows: expandedRows,
-                            onRowToggle: (e) => setExpandedRows(e.data),
-                            rowExpansionTemplate: (data) => (
+
+                        expandedRows={expandedRows}
+                        onRowToggle={(e) => setExpandedRows(e.data)}
+                        rowExpansionTemplate={(rowData) => {
+                            let rowTheme = rowData as Theme;
+                            let level = ThemeLevel.broad;
+                            if (props.themeLevel) {
+                                level = props.themeLevel;
+                            }
+                            else if (rowTheme.type === ThemeType.catalog && !props.themeLevel) {
+                                level = rowTheme.priority as ThemeLevel;
+                            }
+
+                            if (level != ThemeLevel.narrow) {
+                                if (level === ThemeLevel.componenet) {
+                                    if (childType === ThemeType.focusArea) {
+                                        return null;
+                                    }
+                                }
+                                else {
+                                    if (childType !== ThemeType.theme) {
+                                        return null;
+                                    }
+                                }
+                            }
+                            return (
                                 <ThemeComponent
-                                    type={childType}
-                                    parent={data as Theme}
+                                    type={childType ? childType : ThemeType.catalog}
+                                    parent={rowData as Theme}
+                                    themeLevel={level}
                                 />
-                            )
-                        })}
+                            );
+                        }}
+
                     >
                         {
                             childType
