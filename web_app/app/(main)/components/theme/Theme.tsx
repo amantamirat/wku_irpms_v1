@@ -139,7 +139,8 @@ const ThemeComponent = (props: ThemeCompProps) => {
 
     const startToolbarTemplate = () => (
         <div className="my-2">
-            <Button label={`New ${type}`} icon="pi pi-plus" severity="success" className="mr-2"
+            <Button label={`New ${type}`} icon="pi pi-plus"
+            className={`mr-2 theme-type-button ${type.split(' ')[0].toLowerCase()}`}
                 onClick={() => {
                     setSelectedTheme(emptyTheme);
                     setShowSaveDialog(true);
@@ -157,6 +158,16 @@ const ThemeComponent = (props: ThemeCompProps) => {
             </span>
         </div>
     );
+
+
+
+    const themeLevelBodyTemplate = (rowData: Theme) => {
+        return (
+            <span className={`theme-level-badge theme-${(rowData.priority as ThemeLevel)?.toLowerCase()}`}>
+                {rowData.priority}
+            </span>
+        );
+    };
 
     const actionBodyTemplate = (rowData: Theme) => (
         <>
@@ -237,8 +248,13 @@ const ThemeComponent = (props: ThemeCompProps) => {
                                 : <Column selectionMode="single" headerStyle={{ width: '3em' }} />
                         }
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                        <Column field="title" header={type+" Title"} sortable />
-                        <Column field="priority" header={isCatalog ? "Level" : "Priority"} sortable />
+                        <Column field="title" header={type + " Title"} sortable />
+                        {isCatalog && (
+                            <Column field="priority" header="Level" body={themeLevelBodyTemplate} sortable />
+                        )}
+                        {!isCatalog && (
+                            <Column field="priority" header="Priority" sortable />
+                        )}
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 

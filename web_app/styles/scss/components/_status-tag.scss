@@ -6,7 +6,8 @@
 .calendar-badge,
 .call-badge,
 .theme-badge,
-.form-badge {
+.form-badge,
+.theme-level-badge {
     border-radius: var(--border-radius);
     padding: .25em .5rem;
     text-transform: uppercase;
@@ -150,6 +151,31 @@
         background: #FCE4EC;
         color: #880E4F;
     }
+}
+
+
+.theme-level-badge {
+    &.theme-broad {
+        background: #FFF3E0; // light orange
+        color: #EF6C00; // dark orange
+    }
+
+    &.theme-componenet {
+        background: #E3F2FD; // light blue
+        color: #1565C0; // dark blue
+    }
+
+    &.theme-narrow {
+        background: #E8F5E9; // light green
+        color: #2E7D32; // dark green
+    }
+
+    // Optional: add common styles for all badges
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    display: inline-block;
 }
 
 
