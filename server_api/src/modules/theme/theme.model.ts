@@ -1,5 +1,12 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
+export enum ThemeLevel {
+    broad = 'Broad',
+    componenet = 'Componenet',
+    narrow = 'Narrow',
+    //deep = 'Deep'
+}
+
 export enum ThemeType {
     catalog = 'Catalog',
     theme = 'Theme',
@@ -10,7 +17,7 @@ export enum ThemeType {
 export interface ITheme extends Document {
     type: ThemeType;
     title: string;
-    priority?: number;
+    priority?: number | ThemeLevel;
     directorate?: Types.ObjectId;
     parent?: Types.ObjectId;
     createdAt?: Date;
@@ -30,9 +37,20 @@ const ThemeSchema = new Schema<ITheme>({
         required: true
     },
     priority: {
-        type: Number,
-        min: 1,
-        max: 100
+        type: Schema.Types.Mixed,
+        validate: {
+            validator: function (v: any) {
+                if (this.type === ThemeType.catalog) {
+                    return typeof v === 'string' && Object.values(ThemeLevel).includes(v as ThemeLevel);
+                }
+                if ([ThemeType.theme, ThemeType.subTheme, ThemeType.focusArea].includes(this.type)) {
+                    return v === undefined || (typeof v === 'number' && v >= 1 && v <= 30);
+                }
+                return false;
+            },
+            message: (props: any) =>
+                `Invalid priority for ${props.instance.type}`
+        }
     },
     directorate: {
         type: Schema.Types.ObjectId,

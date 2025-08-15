@@ -1,5 +1,12 @@
 import { Organization } from "../organization";
 
+export enum ThemeLevel {
+    broad = 'Broad',
+    componenet = 'Componenet',
+    narrow = 'Narrow',
+    //deep = 'Deep'
+}
+
 export enum ThemeType {
     catalog = 'Catalog',
     theme = 'Theme',
@@ -12,10 +19,14 @@ export type Theme = {
     type: ThemeType;
     directorate?: string | Organization;
     parent?: string | Theme;
-    priority?: number;
+    priority?: number | ThemeLevel;
     title: string;
     createdAt?: Date;
     updatedAt?: Date;
+}
+
+function isThemeLevel(value: unknown): value is ThemeLevel {
+    return Object.values(ThemeLevel).includes(value as ThemeLevel);
 }
 
 export const validateTheme = (theme: Theme): { valid: boolean; message?: string } => {
@@ -34,8 +45,14 @@ export const validateTheme = (theme: Theme): { valid: boolean; message?: string 
         if (!theme.priority) {
             return { valid: false, message: 'Level is required.' };
         }
-        if (theme.priority > 3 || theme.priority <= 0) { 
-             return { valid: false, message: 'Invlaid Level Input.' };
+        /**
+         * 
+         * if (theme.priority > 3 || theme.priority <= 0) {
+            return { valid: false, message: 'Invlaid Level Input.' };
+        }
+        */
+        if (!isThemeLevel(theme.priority)) {
+            return { valid: false, message: 'Invalid Level Input.' };
         }
     } else {
         if (!theme.parent) {

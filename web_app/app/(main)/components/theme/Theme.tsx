@@ -49,7 +49,6 @@ const ThemeComponent = (props: ThemeCompProps) => {
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
 
-
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
@@ -57,7 +56,7 @@ const ThemeComponent = (props: ThemeCompProps) => {
 
     const loadThemes = useCallback(async () => {
         try {
-            if (props.directorate && props.type === ThemeType.theme) {
+            if (props.directorate && props.type === ThemeType.catalog) {
                 const data = await ThemeService.getThemesByDirectorate(props.directorate._id || '');
                 setThemes(data);
             } else if (props.parent) {

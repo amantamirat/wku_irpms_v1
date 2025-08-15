@@ -1,11 +1,11 @@
 import Joi from 'joi';
-import { ThemeType } from './theme.model';
+import { ThemeLevel, ThemeType } from './theme.model';
 
 export const validateTheme = (data: any) => {
   let schema = Joi.object({
     type: Joi.string().valid(...Object.values(ThemeType)).required(),
     title: Joi.string().required(),
-    priority: Joi.number().optional(),
+    priority: Joi.any().optional(),
     parent: Joi.string().hex().length(24).optional(),
     directorate: Joi.string().hex().length(24).optional(),
   });
@@ -13,11 +13,7 @@ export const validateTheme = (data: any) => {
   switch (data.type) {
     case ThemeType.catalog:
       schema = schema.append({
-        priority: Joi.number().less(4).required().messages({
-          'any.required': 'Level is required for a catalog',
-          'number.less': 'Level for a catalog must be less than 3',
-          'number.base': 'Level must be a number',
-        }),
+        priority: Joi.string().valid(...Object.values(ThemeLevel)).required(),
         directorate: Joi.string().hex().length(24).required(),
         parent: Joi.forbidden(),
       });
@@ -27,6 +23,7 @@ export const validateTheme = (data: any) => {
     case ThemeType.focusArea:
       schema = schema.append({
         parent: Joi.string().hex().length(24).required(),
+        priority: Joi.number().integer().min(1).max(30).optional(),
         directorate: Joi.forbidden(),
       });
       break;

@@ -1,7 +1,15 @@
 import Organization from '../organizations/organization.model';
-import Theme, { ITheme, ThemeType } from './theme.model';
+import Theme, { ITheme, ThemeLevel, ThemeType } from './theme.model';
 import { validateTheme } from './theme.validator';
 import { Unit } from '../organizations/enums/unit.enum';
+
+
+const allowedTypesMap: Record<ThemeLevel, ThemeType[]> = {
+    Broad: [ThemeType.theme],
+    Componenet: [ThemeType.theme, ThemeType.subTheme],
+    Narrow: [ThemeType.theme, ThemeType.subTheme, ThemeType.focusArea],
+    // Deep: [ThemeType.theme, ThemeType.subTheme, ThemeType.focusArea] // adjust if needed
+};
 
 export const validateThemeReferences = async (data: Partial<ITheme>) => {
     const { type, parent, directorate } = data;
@@ -25,15 +33,15 @@ export const validateThemeReferences = async (data: Partial<ITheme>) => {
         if (parentTheme.type !== expectedParentType) {
             throw new Error(`'${type}' must have a parent of type '${expectedParentType}'.`);
         }
-
         const catalog = await getCatalogFromTheme(parentTheme);
         if (!catalog) throw new Error('Catalog theme not found in the hierarchy.');
-
-        if (type === ThemeType.subTheme) {
-            if (catalog?.priority! < 2) throw new Error(`Catalog level.`);
+        if (!catalog.priority || !Object.values(ThemeLevel).includes(catalog.priority as ThemeLevel)) {
+            throw new Error('Invalid catalog priority.');
         }
-        if (type === ThemeType.focusArea) {            
-            if (catalog?.priority! < 3) throw new Error(`Catalog level.`);
+        const allowedTypes = allowedTypesMap[catalog.priority as ThemeLevel];
+        if (!allowedTypes.includes(type as ThemeType)) {
+            throw new Error(`Cannot create a ${type} under a ${catalog.priority} catalog.`);
+            //throw new Error(`Cannot create a ${type} under a ${catalog.priority} catalog. Allowed types: ${allowedTypes.join(', ')}`);       
         }
     }
 };
