@@ -79,19 +79,20 @@ function SaveDialog(props: SaveDialogProps) {
             <div className="field">
                 {
                     props.isCatalog ? (
-                        <>
-                            <label htmlFor="priority">{'Level '}</label>
-                            <Dropdown
-                                id="level"
-                                value={theme.priority}
-                                options={Object.values(ThemeLevel).map(g => ({ label: g, value: g }))}
-                                onChange={(e) =>
-                                    onChange({ ...theme, priority: e.value })
-                                }
-                                placeholder="Select Level"
-                                className={classNames({ 'p-invalid': submitted && !theme.priority })}
-                            />
-                        </>
+                        props.theme._id ? <></> :
+                            <>
+                                <label htmlFor="priority">{'Level '}</label>
+                                <Dropdown
+                                    id="level"
+                                    value={theme.priority}
+                                    options={Object.values(ThemeLevel).map(g => ({ label: g, value: g }))}
+                                    onChange={(e) =>
+                                        onChange({ ...theme, priority: e.value })
+                                    }
+                                    placeholder="Select Level"
+                                    className={classNames({ 'p-invalid': submitted && !theme.priority })}
+                                />
+                            </>
                     )
                         : (
                             <>
