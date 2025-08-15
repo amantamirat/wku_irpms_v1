@@ -90,6 +90,11 @@ export const updateTheme = async (id: string, data: Partial<ITheme>) => {
         if (!theme) {
             return { success: false, status: 404, message: 'Theme not found' };
         }
+
+        // Prevent updating priority if type is catalog
+        if (theme.type === ThemeType.catalog && 'priority' in data) {
+            delete data.priority;
+        }
         // Merge with existing for validation
         const merged = { ...theme.toObject(), ...data };
         const { error, value } = validateTheme(merged);
