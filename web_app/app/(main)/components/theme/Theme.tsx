@@ -237,7 +237,7 @@ const ThemeComponent = (props: ThemeCompProps) => {
                                 : <Column selectionMode="single" headerStyle={{ width: '3em' }} />
                         }
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                        <Column field="title" header="Title" sortable />
+                        <Column field="title" header={type+" Title"} sortable />
                         <Column field="priority" header={isCatalog ? "Level" : "Priority"} sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
