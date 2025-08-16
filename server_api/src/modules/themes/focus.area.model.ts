@@ -23,4 +23,4 @@ FocusAreaSchema.pre("save", async function (next) {
     next();
 });
 
-//export const FocusArea = Theme.discriminator<FocusAreaDocument>(ThemeType.focusArea, FocusAreaSchema);
+export const FocusArea = Theme.discriminator<FocusAreaDocument>(ThemeType.focusArea, FocusAreaSchema);
