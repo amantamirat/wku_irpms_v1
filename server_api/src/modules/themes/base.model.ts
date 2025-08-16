@@ -14,7 +14,7 @@ const BaseThemeSchema = new Schema<BaseThemeDocument>(
         type: { type: String, enum: Object.values(ThemeType), required: true },
         title: { type: String, required: true }
     },
-    { timestamps: true, discriminatorKey: "type" } // discriminatorKey is required
+    { timestamps: true, discriminatorKey: "type" } // discriminatorKey
 );
 
 // Base model

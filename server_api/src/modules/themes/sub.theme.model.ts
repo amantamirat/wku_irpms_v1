@@ -23,4 +23,4 @@ SubThemeSchema.pre("save", async function (next) {
     next();
 });
 
-export const SubTheme = Theme.discriminator<SubThemeDocument>(ThemeType.subTheme, SubThemeSchema);
+//export const SubTheme = Theme.discriminator<SubThemeDocument>(ThemeType.subTheme, SubThemeSchema);

@@ -22,6 +22,7 @@ BroadThemeSchema.pre("save", async function (next) {
     }
     next();
 });
+
 // Create discriminators
-export const BroadTheme = Theme.discriminator<BroadThemeDocument>(ThemeType.broadTheme, BroadThemeSchema);
+// export const BroadTheme = Theme.discriminator<BroadThemeDocument>(ThemeType.broadTheme, BroadThemeSchema);
 

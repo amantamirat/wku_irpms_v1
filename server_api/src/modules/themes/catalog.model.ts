@@ -26,4 +26,4 @@ CatalogSchema.pre("save", async function (next) {
     next();
 });
 
-export const Catalog = Theme.discriminator<CatalogDocument>(ThemeType.catalog, CatalogSchema);
+//export const Catalog = Theme.discriminator<CatalogDocument>(ThemeType.catalog, CatalogSchema);
