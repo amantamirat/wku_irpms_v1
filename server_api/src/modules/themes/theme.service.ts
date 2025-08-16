@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
-import { ThemeLevel } from "./enums/themeLevel.enum";
-import { ThemeType } from "./enums/themeType.enum";
+import { ThemeLevel } from "./enums/theme.level.enum";
+import { ThemeType } from "./enums/theme.type.enum";
 import { Theme } from "./base.model";
 
 export interface GetThemesOptions {

@@ -1,5 +1,5 @@
 import { Schema, Types } from "mongoose";
-import { ThemeType } from "./enums/themeType.enum";
+import { ThemeType } from "./enums/theme.type.enum";
 import { COLLECTIONS } from "../../enums/collections.enum";
 import { BaseThemeDocument, Theme } from "./base.model";
 

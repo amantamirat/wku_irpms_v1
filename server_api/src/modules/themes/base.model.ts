@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 import { COLLECTIONS } from "../../enums/collections.enum";
-import { ThemeType } from "./enums/themeType.enum";
+import { ThemeType } from "./enums/theme.type.enum";
 
 export interface BaseThemeDocument extends Document {
     type: ThemeType;
