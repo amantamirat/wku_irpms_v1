@@ -1,9 +1,13 @@
-
 import { Types } from "mongoose";
 import { ThemeLevel } from "./enums/themeLevel.enum";
 import { ThemeType } from "./enums/themeType.enum";
 import { Theme } from "./base.model";
 
+export interface GetThemesOptions {
+    type?: ThemeType;
+    parent?: string;
+    directorate?: string;
+}
 
 export interface CreateThemeDto {
     type: ThemeType;
@@ -23,10 +27,12 @@ export class ThemeService {
         return model.create({ type, ...rest });
     }
 
-    static async getThemes(type?: ThemeType, parent?: Types.ObjectId) {
-        const filter: any = {};
-        if (type) filter.type = type;
-        if (parent) filter.parent = parent;
+    static async getThemes(options: GetThemesOptions) {
+        const filter: any = {};        
+        if (options.type) filter.type = options.type;
+        if (options.parent) filter.parent = options.parent;
+        if (options.directorate) filter.directorate = options.directorate;
+
         return Theme.find(filter).lean();
     }
 
