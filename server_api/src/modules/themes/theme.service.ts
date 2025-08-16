@@ -4,7 +4,7 @@ import { ThemeType } from "./enums/theme.type.enum";
 import { Theme } from "./base.theme.model";
 import { Catalog } from "./catalog.theme.model";
 import { BroadTheme } from "./broad.theme.model";
-import { SubTheme } from "./sub.theme.model";
+import { Componenet } from "./componenet.theme.model";
 import { FocusArea } from "./focus.area.theme.model";
 
 export interface GetThemesOptions {
@@ -29,10 +29,10 @@ export class ThemeService {
         switch (type) {
             case ThemeType.catalog:
                 return Catalog.create({ type, ...rest });
-            case ThemeType.broadTheme:
+            case ThemeType.theme:
                 return BroadTheme.create({ type, ...rest });
-            case ThemeType.subTheme:
-                return SubTheme.create({ type, ...rest });
+            case ThemeType.componenet:
+                return Componenet.create({ type, ...rest });
             case ThemeType.focusArea:
                 return FocusArea.create({ type, ...rest });
             default:

@@ -17,6 +17,19 @@ const BaseThemeSchema = new Schema<BaseThemeDocument>(
     { timestamps: true, discriminatorKey: "type" } // discriminatorKey
 );
 
+
+BaseThemeSchema.index(
+  { parent: 1, priority: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      type: { $in: [ThemeType.theme, ThemeType.componenet, ThemeType.focusArea] },
+      priority: { $exists: true },
+      parent: { $exists: true}
+    }
+  }
+);
+
 BaseThemeSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
     const themeId = this._id;
     const hasChildren = await Theme.exists({ parent: themeId });
@@ -29,3 +42,4 @@ BaseThemeSchema.pre('deleteOne', { document: true, query: false }, async functio
 
 // Base model
 export const Theme = model<BaseThemeDocument>(COLLECTIONS.THEME, BaseThemeSchema);
+Theme.createIndexes();

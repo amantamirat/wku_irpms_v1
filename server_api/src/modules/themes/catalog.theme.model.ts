@@ -19,7 +19,10 @@ const CatalogSchema = new Schema<CatalogDocument>({
 
 CatalogSchema.index(
     { title: 1, directorate: 1 },
-    { unique: true, partialFilterExpression: { type: ThemeType.catalog } }
+    {
+        unique: true,
+        partialFilterExpression: { type: ThemeType.catalog }
+    }
 );
 
 CatalogSchema.pre("save", async function (next) {
@@ -32,3 +35,4 @@ CatalogSchema.pre("save", async function (next) {
 });
 
 export const Catalog = Theme.discriminator<CatalogDocument>(ThemeType.catalog, CatalogSchema);
+Catalog.createIndexes();

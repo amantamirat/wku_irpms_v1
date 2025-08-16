@@ -17,7 +17,7 @@ const FocusAreaSchema = new Schema<FocusAreaDocument>({
 FocusAreaSchema.pre("save", async function (next) {
     const focusArea = this as any;
     const theme = await Theme.findById(focusArea.parent);
-    if (!theme || theme.type !== ThemeType.subTheme) {
+    if (!theme || theme.type !== ThemeType.componenet) {
         return next(new Error("Invalid reference: For Focus Area parent must be a Sub-Theme"));
     }
     next();

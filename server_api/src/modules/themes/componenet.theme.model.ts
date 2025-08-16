@@ -3,24 +3,24 @@ import { ThemeType } from "./enums/theme.type.enum";
 import { BaseThemeDocument, Theme } from "./base.theme.model";
 import { COLLECTIONS } from "../../enums/collections.enum";
 
-export interface SubThemeDocument extends BaseThemeDocument {
-    type: ThemeType.subTheme;
+export interface ComponenetDocument extends BaseThemeDocument {
+    type: ThemeType.componenet;
     priority?: number;
     parent: Types.ObjectId;
 }
 
-const SubThemeSchema = new Schema<SubThemeDocument>({
+const ComponenetSchema = new Schema<ComponenetDocument>({
     priority: { type: Number },
     parent: { type: Schema.Types.ObjectId, ref: COLLECTIONS.THEME, required: true },
 });
 
-SubThemeSchema.pre("save", async function (next) {
+ComponenetSchema.pre("save", async function (next) {
     const subTheme = this as any;
     const theme = await Theme.findById(subTheme.parent);
-    if (!theme || theme.type !== ThemeType.broadTheme) {
-        return next(new Error("Invalid reference: For Sub-Theme parent must be a Broad-Theme"));
+    if (!theme || theme.type !== ThemeType.theme) {
+        return next(new Error("Invalid reference: For Componenet parent must be a Broad Theme"));
     }
     next();
 });
 
-export const SubTheme = Theme.discriminator<SubThemeDocument>(ThemeType.subTheme, SubThemeSchema);
+export const Componenet = Theme.discriminator<ComponenetDocument>(ThemeType.componenet, ComponenetSchema);

@@ -4,7 +4,7 @@ import { COLLECTIONS } from "../../enums/collections.enum";
 import { BaseThemeDocument, Theme } from "./base.theme.model";
 
 export interface BroadThemeDocument extends BaseThemeDocument {
-  type: ThemeType.broadTheme;
+  type: ThemeType.theme;
   priority?: number;
   parent: Types.ObjectId;
 }
@@ -33,5 +33,5 @@ BroadThemeSchema.pre("save", async function (next) {
 });
 
 // Create discriminators
-export const BroadTheme = Theme.discriminator<BroadThemeDocument>(ThemeType.broadTheme, BroadThemeSchema);
+export const BroadTheme = Theme.discriminator<BroadThemeDocument>(ThemeType.theme, BroadThemeSchema);
 
