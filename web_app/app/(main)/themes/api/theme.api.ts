@@ -1,6 +1,6 @@
-import { Theme } from "@/models/theme/theme";
-import { MyService } from "../MyService";
 import { Organization } from "@/models/organization";
+import { ApiClient } from "@/api/ApiClient";
+import { Theme, ThemeType } from "../models/theme.model";
 
 
 const end_point = '/thms';
@@ -20,23 +20,30 @@ function sanitizeTheme(theme: Partial<Theme>): Partial<Theme> {
 }
 
 
-export const ThemeService = {
+export interface GetThemesOptions {
+    type?: ThemeType;
+    parent?: string;
+    directorate?: string;
+}
+
+export const ThemeApi = {
 
     async createTheme(theme: Partial<Theme>): Promise<Theme> {
         const sanitized = sanitizeTheme(theme);
-        const createdData = await MyService.post(end_point, sanitized);
+        const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as Theme;
     },
 
-    async getThemesByDirectorate(directorate: string): Promise<Theme[]> {
-        const data = await MyService.get(`${end_point}/directorate/${directorate}`);
+    async getThemes(options: GetThemesOptions): Promise<Theme[]> {
+        const query = new URLSearchParams();
+        if (options.type) query.append("type", options.type);
+        if (options.parent) query.append("parent", options.parent);
+        if (options.directorate) query.append("directorate", options.directorate);
+
+        const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Theme[];
     },
 
-    async getThemesByParent(parent: string): Promise<Theme[]> {
-        const data = await MyService.get(`${end_point}/parent/${parent}`);
-        return data as Theme[];
-    },
 
     async updateTheme(theme: Partial<Theme>): Promise<Theme> {
         if (!theme._id) {
@@ -44,7 +51,7 @@ export const ThemeService = {
         }
         const url = `${end_point}/${theme._id}`;
         const sanitized = sanitizeTheme(theme);
-        const updatedTheme = await MyService.put(url, sanitized);
+        const updatedTheme = await ApiClient.put(url, sanitized);
         return updatedTheme as Theme;
     },
 
@@ -53,7 +60,7 @@ export const ThemeService = {
             throw new Error("_id required.");
         }
         const url = `${end_point}/${theme._id}`;
-        const response = await MyService.delete(url);
+        const response = await ApiClient.delete(url);
         return response;
     },
 };

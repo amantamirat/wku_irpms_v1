@@ -32,10 +32,11 @@ const AppMenu = () => {
                     icon: 'pi pi-fw pi-megaphone',
                      to: `/pages/calls?directorate=${dir._id}`
                 },
+
                 {
                     label: 'Themes',
                     icon: 'pi pi-fw pi-tags',
-                    to: `/pages/themes?directorate=${dir._id}`
+                    to: `/themes?directorate=${dir._id}`
 
                 },
                 {

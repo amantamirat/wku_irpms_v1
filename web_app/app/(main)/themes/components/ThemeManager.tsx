@@ -1,8 +1,6 @@
 'use client';
 
 import DeleteDialog from '@/components/DeleteDialog';
-import { Theme, ThemeLevel, ThemeType } from '@/models/theme/theme';
-import { ThemeService } from '@/services/theme/ThemeService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -11,30 +9,36 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import SaveDialog from './dialogs/SaveDialog';
 import { Organization } from '@/models/organization';
+import SaveDialog from './dialogs/SaveDialog';
+import { Theme, ThemeLevel, ThemeType } from '../models/theme.model';
+import { ThemeApi } from '../api/theme.api';
 
 
-interface ThemeCompProps {
+interface ThemeManagerProps {
     type: ThemeType;
     directorate?: Organization;
     parent?: Theme;
     themeLevel?: ThemeLevel;
 }
 
-const ThemeComponent = (props: ThemeCompProps) => {
+const ThemeManager = (props: ThemeManagerProps) => {
 
     const type = props.type;
+    let level = props.themeLevel;
+    const isBroadLevel = level === ThemeLevel.broad;
+    const isComponenetLevel = level === ThemeLevel.componenet;
+    //const isNarrowLevel = level === ThemeLevel.narrow;
     const isCatalog = type === ThemeType.catalog;
-    const isTheme = type === ThemeType.theme;
-    const isSubTheme = type === ThemeType.subTheme;
-    const isFocusArea = type === ThemeType.focusArea;
-    const childType = isCatalog ? ThemeType.theme : isTheme ? ThemeType.subTheme : isSubTheme ? ThemeType.focusArea : null;
-
+    const isBroadTheme = type === ThemeType.broadTheme;
+    const isSubTheme = type === ThemeType.componenet;
+    //const isFocusArea = type === ThemeType.focusArea;
+    const childType = isCatalog ? ThemeType.broadTheme : isBroadTheme ? ThemeType.componenet : isSubTheme ? ThemeType.focusArea : null;
+    const isSelectionOnly = !childType || (isBroadLevel && isBroadTheme) || (isComponenetLevel && isSubTheme); // Non Expandable 
 
     const emptyTheme: Theme = {
         title: '',
-        type: props.type,
+        type: type,
         directorate: props.directorate,
         parent: props.parent
     };
@@ -57,11 +61,17 @@ const ThemeComponent = (props: ThemeCompProps) => {
 
     const loadThemes = useCallback(async () => {
         try {
-            if (props.directorate && props.type === ThemeType.catalog) {
-                const data = await ThemeService.getThemesByDirectorate(props.directorate._id || '');
+            if (props.directorate && isCatalog) {
+                const data = await ThemeApi.getThemes({
+                    type: props.type,
+                    directorate: props.directorate._id || ''
+                });
                 setThemes(data);
             } else if (props.parent) {
-                const data = await ThemeService.getThemesByParent(props.parent._id || '');
+                const data = await ThemeApi.getThemes({
+                    type: props.type,
+                    parent: props.parent._id || ''
+                });
                 setThemes(data);
             }
         } catch (err) {
@@ -85,24 +95,24 @@ const ThemeComponent = (props: ThemeCompProps) => {
         try {
             let _themes = [...themes];
             if (selectedTheme._id) {
-                const updated = await ThemeService.updateTheme(selectedTheme);
+                const updated = await ThemeApi.updateTheme(selectedTheme);
                 const index = _themes.findIndex((c) => c._id === selectedTheme._id);
                 _themes[index] = updated;
             } else {
-                const created = await ThemeService.createTheme(selectedTheme);
+                const created = await ThemeApi.createTheme(selectedTheme);
                 _themes.push({ ...selectedTheme, _id: created._id });
             }
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',
-                detail: `Theme ${selectedTheme._id ? 'updated' : 'created'}`,
+                detail: `${type} ${selectedTheme._id ? 'updated' : 'created'}`,
                 life: 3000
             });
             setThemes(_themes);
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to save theme',
+                summary: `Failed to save ${type}`,
                 detail: '' + err,
                 life: 3000
             });
@@ -114,20 +124,20 @@ const ThemeComponent = (props: ThemeCompProps) => {
 
     const deleteTheme = async () => {
         try {
-            const deleted = await ThemeService.deleteTheme(selectedTheme);
+            const deleted = await ThemeApi.deleteTheme(selectedTheme);
             if (deleted) {
                 setThemes(themes.filter((c) => c._id !== selectedTheme._id));
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Deleted',
-                    detail: 'Theme deleted',
+                    detail: `${type} deleted`,
                     life: 3000
                 });
             }
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to delete theme',
+                summary: `Failed to delete ${type}`,
                 detail: '' + err,
                 life: 3000
             });
@@ -140,7 +150,7 @@ const ThemeComponent = (props: ThemeCompProps) => {
     const startToolbarTemplate = () => (
         <div className="my-2">
             <Button label={`New ${type}`} icon="pi pi-plus"
-            className={`mr-2 theme-type-button ${type.split(' ')[0].toLowerCase()}`}
+                className={`mr-2 theme-type-button ${type.split('-')[0].toLowerCase()}`}
                 onClick={() => {
                     setSelectedTheme(emptyTheme);
                     setShowSaveDialog(true);
@@ -151,7 +161,7 @@ const ThemeComponent = (props: ThemeCompProps) => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage {props.directorate?.name} {props.parent?.title} {type}s</h5>
+            <h5 className="m-0">Manage {type}s of {props.directorate?.name} {props.parent?.title} </h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
@@ -163,8 +173,8 @@ const ThemeComponent = (props: ThemeCompProps) => {
 
     const themeLevelBodyTemplate = (rowData: Theme) => {
         return (
-            <span className={`theme-level-badge theme-${(rowData.priority as ThemeLevel)?.toLowerCase()}`}>
-                {rowData.priority}
+            <span className={`theme-level-badge theme-${rowData.level}`}>
+                {rowData.level}
             </span>
         );
     };
@@ -207,35 +217,19 @@ const ThemeComponent = (props: ThemeCompProps) => {
                         header={header}
                         scrollable
                         filters={filters}
-
                         expandedRows={expandedRows}
                         onRowToggle={(e) => setExpandedRows(e.data)}
                         rowExpansionTemplate={(rowData) => {
                             let rowTheme = rowData as Theme;
-                            let level = ThemeLevel.broad;
-                            if (props.themeLevel) {
-                                level = props.themeLevel;
-                            }
-                            else if (rowTheme.type === ThemeType.catalog && !props.themeLevel) {
-                                level = rowTheme.priority as ThemeLevel;
-                            }
-
-                            if (level != ThemeLevel.narrow) {
-                                if (level === ThemeLevel.componenet) {
-                                    if (childType === ThemeType.focusArea) {
-                                        return null;
-                                    }
-                                }
-                                else {
-                                    if (childType !== ThemeType.theme) {
-                                        return null;
-                                    }
-                                }
+                            if (isCatalog && rowTheme.level) {
+                                level = rowTheme.level
+                            } else if (isSelectionOnly) {
+                                return null;
                             }
                             return (
-                                <ThemeComponent
+                                <ThemeManager
                                     type={childType ? childType : ThemeType.catalog}
-                                    parent={rowData as Theme}
+                                    parent={rowTheme}
                                     themeLevel={level}
                                 />
                             );
@@ -243,14 +237,13 @@ const ThemeComponent = (props: ThemeCompProps) => {
 
                     >
                         {
-                            childType
-                                ? <Column expander style={{ width: '3em' }} />
-                                : <Column selectionMode="single" headerStyle={{ width: '3em' }} />
+                            isSelectionOnly ? <Column selectionMode="single" style={{ width: '3em' }} /> :
+                                <Column expander style={{ width: '3em' }} />
                         }
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="title" header={type + " Title"} sortable />
                         {isCatalog && (
-                            <Column field="priority" header="Level" body={themeLevelBodyTemplate} sortable />
+                            <Column field="level" header="Level" body={themeLevelBodyTemplate} sortable />
                         )}
                         {!isCatalog && (
                             <Column field="priority" header="Priority" sortable />
@@ -283,4 +276,4 @@ const ThemeComponent = (props: ThemeCompProps) => {
     );
 };
 
-export default ThemeComponent;
+export default ThemeManager;

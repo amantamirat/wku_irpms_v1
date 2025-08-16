@@ -1,4 +1,4 @@
-import { Organization } from "../organization";
+import { Organization } from "@/models/organization";
 
 export enum ThemeLevel {
     broad = 'broad',
@@ -8,8 +8,8 @@ export enum ThemeLevel {
 
 export enum ThemeType {
     catalog = 'catalog',
-    theme = 'theme',
-    subTheme = 'sub-theme',
+    broadTheme = 'theme',
+    componenet = 'componenet',
     focusArea = 'focus-area'
 }
 
@@ -17,8 +17,8 @@ export type Theme = {
     _id?: string;
     type: ThemeType;
     title: string;
-    level?: ThemeLevel;
     directorate?: string | Organization;
+    level?: ThemeLevel;
     parent?: string | Theme;
     priority?: number | ThemeLevel;
     createdAt?: Date;

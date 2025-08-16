@@ -1,6 +1,6 @@
 'use client';
 
-import { Theme, ThemeLevel, validateTheme } from '@/models/theme/theme';
+
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
@@ -8,6 +8,7 @@ import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import { useEffect, useState } from 'react';
+import { Theme,  ThemeLevel, validateTheme } from '../../models/theme.model';
 
 interface SaveDialogProps {
     visible: boolean;
@@ -84,13 +85,13 @@ function SaveDialog(props: SaveDialogProps) {
                                 <label htmlFor="priority">{'Level '}</label>
                                 <Dropdown
                                     id="level"
-                                    value={theme.priority}
+                                    value={theme.level}
                                     options={Object.values(ThemeLevel).map(g => ({ label: g, value: g }))}
                                     onChange={(e) =>
-                                        onChange({ ...theme, priority: e.value })
+                                        onChange({ ...theme, level: e.value })
                                     }
                                     placeholder="Select Level"
-                                    className={classNames({ 'p-invalid': submitted && !theme.priority })}
+                                    className={classNames({ 'p-invalid': submitted && !theme.level })}
                                 />
                             </>
                     )
@@ -105,7 +106,7 @@ function SaveDialog(props: SaveDialogProps) {
                                     }
                                     required
                                     className={classNames({
-                                        'p-invalid': submitted && (props.isCatalog) && (theme.priority == null),
+                                        'p-invalid': submitted && (!props.isCatalog) && (theme.priority == null),
                                     })}
                                 />
                             </>

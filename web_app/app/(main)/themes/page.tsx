@@ -5,15 +5,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import { OrganizationService } from '@/services/OrganizationService';
 import { Organization } from '@/models/organization';
-import { ThemeType } from '@/models/theme/theme';
-import ThemeComponent from '../../components/theme/Theme';
-
+import ThemeManager from './components/ThemeManager';
+import { ThemeType } from './models/theme.model';
 
 const ThemePage = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const directorateId = searchParams.get('directorate');
-
     const [directorate, setDirectorate] = useState<Organization | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -46,7 +44,7 @@ const ThemePage = () => {
     }
 
     return (
-        <ThemeComponent type={ThemeType.catalog} directorate={directorate} />
+        <ThemeManager type={ThemeType.catalog} directorate={directorate} />
     );
 };
 
