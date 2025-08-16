@@ -3,7 +3,7 @@ import { ApiClient } from "@/api/ApiClient";
 import { Theme, ThemeType } from "../models/theme.model";
 
 
-const end_point = '/thms';
+const end_point = '/themes';
 
 function sanitizeTheme(theme: Partial<Theme>): Partial<Theme> {
     return {
