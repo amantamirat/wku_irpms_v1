@@ -52,6 +52,7 @@ const ThemeManager = (props: ThemeManagerProps) => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
+    const [loading, setLoading] = useState(false);
 
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,6 +62,7 @@ const ThemeManager = (props: ThemeManagerProps) => {
 
     const loadThemes = useCallback(async () => {
         try {
+            setLoading(true);
             if (props.directorate && isCatalog) {
                 const data = await ThemeApi.getThemes({
                     type: props.type,
@@ -82,6 +84,8 @@ const ThemeManager = (props: ThemeManagerProps) => {
                 detail: '' + err,
                 life: 3000
             });
+        } finally {
+            setLoading(false);
         }
     }, [props.parent, props.directorate, toast]);
 
@@ -93,6 +97,7 @@ const ThemeManager = (props: ThemeManagerProps) => {
 
     const saveTheme = async () => {
         try {
+            setLoading(true);
             let _themes = [...themes];
             if (selectedTheme._id) {
                 const updated = await ThemeApi.updateTheme(selectedTheme);
@@ -119,11 +124,13 @@ const ThemeManager = (props: ThemeManagerProps) => {
         } finally {
             setShowSaveDialog(false);
             setSelectedTheme(emptyTheme);
+            setLoading(false);
         }
     };
 
     const deleteTheme = async () => {
         try {
+            setLoading(true);
             const deleted = await ThemeApi.deleteTheme(selectedTheme);
             if (deleted) {
                 setThemes(themes.filter((c) => c._id !== selectedTheme._id));
@@ -144,12 +151,13 @@ const ThemeManager = (props: ThemeManagerProps) => {
         } finally {
             setShowDeleteDialog(false);
             setSelectedTheme(emptyTheme);
+            setLoading(false);
         }
     };
 
     const startToolbarTemplate = () => (
         <div className="my-2">
-            <Button label={`New ${type}`} icon="pi pi-plus"
+            <Button label={`New ${type}`} icon="pi pi-plus" severity='success'
                 className={`mr-2 theme-type-button ${type.split('-')[0].toLowerCase()}`}
                 onClick={() => {
                     setSelectedTheme(emptyTheme);
@@ -168,8 +176,6 @@ const ThemeManager = (props: ThemeManagerProps) => {
             </span>
         </div>
     );
-
-
 
     const themeLevelBodyTemplate = (rowData: Theme) => {
         return (
@@ -217,6 +223,7 @@ const ThemeManager = (props: ThemeManagerProps) => {
                         header={header}
                         scrollable
                         filters={filters}
+                        loading={loading}
                         expandedRows={expandedRows}
                         onRowToggle={(e) => setExpandedRows(e.data)}
                         rowExpansionTemplate={(rowData) => {

@@ -1,21 +1,16 @@
 .theme-type-button {
-    &.catalog {
+    &.theme {
         background: #FFE0B2; 
         color: #EF6C00;
     }
 
-    &.theme {
+    &.componenet {
         background: #BBDEFB; 
         color: #1565C0;
     }
 
-    &.componenet {
+    &.focus {
         background: #C8E6C9; 
         color: #2E7D32;
-    }
-
-    &.focus {
-        background: #F3E5F5; 
-        color: #6A1B9A;
-    }
+    }    
 }

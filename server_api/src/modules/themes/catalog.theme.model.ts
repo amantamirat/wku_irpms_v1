@@ -13,7 +13,7 @@ export interface CatalogDocument extends BaseThemeDocument {
 }
 
 const CatalogSchema = new Schema<CatalogDocument>({
-    level: { type: String, enum: Object.values(ThemeLevel), required: true },
+    level: { type: String, enum: Object.values(ThemeLevel), required: true, immutable:true },
     directorate: { type: Schema.Types.ObjectId, ref: COLLECTIONS.ORGANIZATION, required: true, immutable: true },
 });
 
