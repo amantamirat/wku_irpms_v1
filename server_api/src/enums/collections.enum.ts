@@ -1,6 +1,7 @@
 export const COLLECTIONS = {
   ORGANIZATION: "organizations",
   THEME: "thms",
-  USER: "users",  
+  EVAL: "evls",
+  USER: "users",
   PROJECT: "projects"
 } as const;
