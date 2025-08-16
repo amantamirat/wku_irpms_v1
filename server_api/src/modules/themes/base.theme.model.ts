@@ -17,5 +17,15 @@ const BaseThemeSchema = new Schema<BaseThemeDocument>(
     { timestamps: true, discriminatorKey: "type" } // discriminatorKey
 );
 
+BaseThemeSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
+    const themeId = this._id;
+    const hasChildren = await Theme.exists({ parent: themeId });
+    if (hasChildren) {
+        const err = new Error(`Cannot delete: ${this.title} ${this.type}, it is a parent of other themes.`);
+        return next(err);
+    }
+    next();
+});
+
 // Base model
 export const Theme = model<BaseThemeDocument>(COLLECTIONS.THEME, BaseThemeSchema);

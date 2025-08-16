@@ -14,8 +14,13 @@ export interface CatalogDocument extends BaseThemeDocument {
 
 const CatalogSchema = new Schema<CatalogDocument>({
     level: { type: String, enum: Object.values(ThemeLevel), required: true },
-    directorate: { type: Schema.Types.ObjectId, ref: COLLECTIONS.ORGANIZATION, required: true },
+    directorate: { type: Schema.Types.ObjectId, ref: COLLECTIONS.ORGANIZATION, required: true, immutable: true },
 });
+
+CatalogSchema.index(
+    { title: 1, directorate: 1 },
+    { unique: true, partialFilterExpression: { type: ThemeType.catalog } }
+);
 
 CatalogSchema.pre("save", async function (next) {
     const catalog = this as any;

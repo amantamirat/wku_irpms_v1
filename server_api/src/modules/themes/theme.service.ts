@@ -2,6 +2,10 @@ import { Types } from "mongoose";
 import { ThemeLevel } from "./enums/theme.level.enum";
 import { ThemeType } from "./enums/theme.type.enum";
 import { Theme } from "./base.theme.model";
+import { Catalog } from "./catalog.theme.model";
+import { BroadTheme } from "./broad.theme.model";
+import { SubTheme } from "./sub.theme.model";
+import { FocusArea } from "./focus.area.theme.model";
 
 export interface GetThemesOptions {
     type?: ThemeType;
@@ -22,13 +26,22 @@ export class ThemeService {
 
     static async createTheme(data: CreateThemeDto) {
         const { type, ...rest } = data;
-        const model = (Theme.discriminators as any)[type];
-        if (!model) throw new Error(`Invalid theme type: ${type}`);
-        return model.create({ type, ...rest });
+        switch (type) {
+            case ThemeType.catalog:
+                return Catalog.create({ type, ...rest });
+            case ThemeType.broadTheme:
+                return BroadTheme.create({ type, ...rest });
+            case ThemeType.subTheme:
+                return SubTheme.create({ type, ...rest });
+            case ThemeType.focusArea:
+                return FocusArea.create({ type, ...rest });
+            default:
+                throw new Error(`Invalid theme type: ${type}`);
+        }
     }
 
     static async getThemes(options: GetThemesOptions) {
-        const filter: any = {};        
+        const filter: any = {};
         if (options.type) filter.type = options.type;
         if (options.parent) filter.parent = options.parent;
         if (options.directorate) filter.directorate = options.directorate;
@@ -47,8 +60,8 @@ export class ThemeService {
     }
 
     static async deleteTheme(id: string) {
-        const theme = await Theme.findByIdAndDelete(id);
+        const theme = await Theme.findById(id);
         if (!theme) throw new Error("Theme not found");
-        return theme;
+        return await theme.deleteOne();
     }
 }
