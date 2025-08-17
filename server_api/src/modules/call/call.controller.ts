@@ -65,7 +65,7 @@ const updateCall = async (req: Request, res: Response): Promise<void> => {
                 title,
                 dead_line,
                 description,
-                max_total_allocated_budget,
+                total_budget: max_total_allocated_budget,
                 status
             },
             { new: true, runValidators: true }

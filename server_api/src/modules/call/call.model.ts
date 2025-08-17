@@ -1,11 +1,7 @@
 import mongoose, { Schema, model, Document } from 'mongoose';
+import { CallStatus } from './enums/call.status.enum';
 
-export enum CallStatus {
-    Planned = 'Planned',
-    Active = 'Active',
-    Closed = 'Closed',
-    Locked = 'Locked'
-}
+
 
 export interface ICall extends Document {
     directorate: mongoose.Types.ObjectId;
@@ -13,7 +9,7 @@ export interface ICall extends Document {
     title: string;
     dead_line: Date;
     description?: string;
-    max_total_allocated_budget?: number;
+    total_budget?: number;
     status: CallStatus;
     createdAt?: Date;
     updatedAt?: Date;
@@ -41,13 +37,13 @@ const CallSchema = new Schema<ICall>({
     description: {
         type: String,
     },
-    max_total_allocated_budget: {
+    total_budget: {
         type: Number,
     },
     status: {
         type: String,
         enum: Object.values(CallStatus),
-        default: CallStatus.Planned,
+        default: CallStatus.planned,
         required: true
     }
 }, { timestamps: true });
