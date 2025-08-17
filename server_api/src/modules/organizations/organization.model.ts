@@ -2,12 +2,12 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 
 import Evaluation from '../evaluation/evaluation.model';
 import Applicant from '../applicants/applicant.model';
-import Theme from '../theme/theme.model';
 import { AcademicLevel } from './enums/academicLevel.enum';
 import { Classification } from './enums/classification.enum';
 import { Ownership } from './enums/ownership.enum';
 import { Category } from './enums/category.enum';
 import { Unit } from './enums/unit.enum';
+import { Theme } from '../themes/base.theme.model';
 
 // Address Sub-document
 const AddressSchema = new Schema({

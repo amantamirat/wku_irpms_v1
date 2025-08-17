@@ -2,7 +2,7 @@ import { Schema, Types } from "mongoose";
 import { BaseThemeDocument, Theme } from "./base.theme.model";
 import { ThemeType } from "./enums/theme.type.enum";
 import { COLLECTIONS } from "../../enums/collections.enum";
-import { ThemeLevel } from "../theme/theme.model";
+import { ThemeLevel } from "./enums/theme.level.enum";
 
 export interface FocusAreaDocument extends BaseThemeDocument {
     type: ThemeType.focusArea;
