@@ -1,4 +1,5 @@
 import { Calendar } from "@/models/calendar";
+import { Organization } from "@/models/organization";
 
 export enum CallStatus {
     planned = 'Planned',
@@ -8,7 +9,7 @@ export enum CallStatus {
 }
 export type Call = {
     _id?: string;
-    directorate: string;
+    directorate: string | Organization;
     calendar: string | Calendar;
     title: string;
     dead_line: Date;
