@@ -2,10 +2,8 @@ import { Types } from "mongoose";
 import { ThemeLevel } from "./enums/theme.level.enum";
 import { ThemeType } from "./enums/theme.type.enum";
 import { Theme } from "./base.theme.model";
-//import { Catalog } from "./catalog.theme.model";
-//import { BroadTheme } from "./broad.theme.model";
-//import { Componenet } from "./componenet.theme.model";
-//import { FocusArea } from "./focus.area.theme.model";
+import Organization from "../organizations/organization.model";
+import { Unit } from "../organizations/enums/unit.enum";
 
 export interface GetThemesOptions {
     type?: ThemeType;
@@ -23,6 +21,24 @@ export interface CreateThemeDto {
 }
 
 export class ThemeService {
+
+    private static async validateThemeHierarchy(theme: Partial<CreateThemeDto>) {
+        if (theme.type === ThemeType.catalog) {
+            const directorate = await Organization.findById(theme.directorate);
+            if (!directorate || directorate.type !== Unit.Directorate) {
+                return new Error("Directorate Not Found!");
+            }
+        }
+        else {
+            let parent = await Theme.findById(theme.parent).lean() as any;
+            if (!parent) {
+                return new Error("Parent Not Found!");
+            }
+            if (theme.type === ThemeType.theme && parent.type !== ThemeType.catalog) {
+                return new Error("Catalog Not Found!");
+            }
+        }
+    }
 
     static async createTheme(data: CreateThemeDto) {
         const { type, ...rest } = data;
