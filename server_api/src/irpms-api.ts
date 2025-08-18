@@ -15,6 +15,7 @@ import callRoutes from './modules/call/call.routes';
 
 
 import { initAdminUser, initPermissions, initRoles } from './services/initService';
+import { initializeThemeModels } from './modules/themes/init.models';
 
 
 dotenv.config();
@@ -53,7 +54,10 @@ const PORT = process.env.SERVER_PORT || 5000;
       throw new Error('mongo url is not set in environment variables.');
     }
     await mongoose.connect(MONGO_URL);
-    console.log('database connection established');    
+    console.log('database connection established');
+    initializeThemeModels();
+    
+
     await initPermissions();
     await initRoles();
     await initAdminUser();

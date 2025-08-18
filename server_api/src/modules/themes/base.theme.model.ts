@@ -23,7 +23,6 @@ BaseThemeSchema.index(
   {
     unique: true,
     partialFilterExpression: {
-      type: { $in: [ThemeType.theme, ThemeType.componenet, ThemeType.focusArea] },
       priority: { $exists: true },
       parent: { $exists: true}
     }

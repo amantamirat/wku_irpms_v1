@@ -2,10 +2,10 @@ import { Types } from "mongoose";
 import { ThemeLevel } from "./enums/theme.level.enum";
 import { ThemeType } from "./enums/theme.type.enum";
 import { Theme } from "./base.theme.model";
-import { Catalog } from "./catalog.theme.model";
-import { BroadTheme } from "./broad.theme.model";
-import { Componenet } from "./componenet.theme.model";
-import { FocusArea } from "./focus.area.theme.model";
+//import { Catalog } from "./catalog.theme.model";
+//import { BroadTheme } from "./broad.theme.model";
+//import { Componenet } from "./componenet.theme.model";
+//import { FocusArea } from "./focus.area.theme.model";
 
 export interface GetThemesOptions {
     type?: ThemeType;
@@ -26,18 +26,12 @@ export class ThemeService {
 
     static async createTheme(data: CreateThemeDto) {
         const { type, ...rest } = data;
-        switch (type) {
-            case ThemeType.catalog:
-                return Catalog.create({ type, ...rest });
-            case ThemeType.theme:
-                return BroadTheme.create({ type, ...rest });
-            case ThemeType.componenet:
-                return Componenet.create({ type, ...rest });
-            case ThemeType.focusArea:
-                return FocusArea.create({ type, ...rest });
-            default:
-                throw new Error(`Invalid theme type: ${type}`);
+        if (!Theme.discriminators || !Theme.discriminators[type]) {
+            throw new Error(`Invalid theme type: ${type}`);
         }
+        const model = Theme.discriminators[type];
+        const createdTheme = await model.create({ type, ...rest });
+        return createdTheme;
     }
 
     static async getThemes(options: GetThemesOptions) {
