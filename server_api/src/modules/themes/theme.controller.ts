@@ -15,6 +15,7 @@ export class ThemeController {
             errorResponse(res, 400, err.message, err);
         }
     }
+    
     static async getThemes(req: Request, res: Response) {
         try {
             const { type, parent, directorate } = req.query;

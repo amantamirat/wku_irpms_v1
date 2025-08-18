@@ -1,107 +1,55 @@
 import { Request, Response } from 'express';
-import { Call } from './call.model';
 import { errorResponse, successResponse } from '../../util/response';
+import { CallService, CreateCallDto, GetCallsOptions } from './call.service';
+import { Types } from 'mongoose';
 
+export class CallController {
 
-const createCall = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const {
-            directorate,
-            calendar,
-            title,
-            dead_line,
-            description,
-            max_total_allocated_budget,
-            status
-        } = req.body;
-
-        const call = new Call({
-            directorate,
-            calendar,
-            title,
-            dead_line,
-            description,
-            max_total_allocated_budget,
-            status
-        });
-
-        await call.save();
-
-        successResponse(res, 201, 'Call created successfully', call);
-    } catch (error: any) {
-        errorResponse(res, 500, 'Failed to create call', error.message);
-    }
-};
-
-const getAllCalls = async (_req: Request, res: Response): Promise<void> => {
-    try {
-        const calls = await Call.find()
-            .populate('directorate')
-            .populate('calendar');
-
-        successResponse(res, 200, 'Calls fetched successfully', calls);
-    } catch (error) {
-        errorResponse(res, 500, 'Server error', (error as Error).message);
-    }
-};
-
-const updateCall = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const {
-            directorate,
-            calendar,
-            title,
-            dead_line,
-            description,
-            max_total_allocated_budget,
-            status
-        } = req.body;
-
-        const updatedCall = await Call.findByIdAndUpdate(
-            req.params.id,
-            {
-                directorate,
-                calendar,
-                title,
-                dead_line,
-                description,
-                total_budget: max_total_allocated_budget,
-                status
-            },
-            { new: true, runValidators: true }
-        );
-
-        if (!updatedCall) {
-            errorResponse(res, 404, 'Call not found');
-            return;
+    static async createCall(req: Request, res: Response) {
+        try {
+            const data: CreateCallDto = req.body;
+            const theme = await CallService.createCall(data);
+            successResponse(res, 201, "Call created successfully", theme);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
         }
-
-        successResponse(res, 200, 'Call updated successfully', updatedCall);
-    } catch (error: any) {
-        errorResponse(res, 500, 'Failed to update call', error.message);
     }
-};
 
-const deleteCall = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const deletedCall = await Call.findByIdAndDelete(req.params.id);
-
-        if (!deletedCall) {
-            errorResponse(res, 404, 'Call not found');
-            return;
+    static async getCalls(req: Request, res: Response) {
+        try {
+            const { calendar, directorate } = req.query;
+            const filter = {
+                calendar: calendar ? new Types.ObjectId(calendar as string) : undefined,
+                directorate: directorate ? new Types.ObjectId(directorate as string) : undefined
+            } as GetCallsOptions;
+            const calls = await CallService.getCalls(filter);
+            successResponse(res, 200, 'Calls fetched successfully', calls);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
         }
-
-        successResponse(res, 200, 'Call deleted successfully', true);
-    } catch (error) {
-        errorResponse(res, 500, 'Failed to delete call', (error as Error).message);
     }
-};
 
-const callController = {
-    createCall,
-    getAllCalls,
-    updateCall,
-    deleteCall,
-};
+    static async updateCall(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+            const data: Partial<CreateCallDto> = req.body;
+            const updated = await CallService.updateCall(id, data);
+            successResponse(res, 201, "Call updated successfully", updated);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    }
 
-export default callController;
+    static async deleteCall(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+            const deleted = await CallService.deleteCall(id);
+            successResponse(res, 201, "Call deleted successfully", deleted);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    }
+
+}
+
+

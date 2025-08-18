@@ -1,13 +1,13 @@
 import { Router } from 'express';
-import callController from './call.controller';
 import { verifyActiveAccount } from '../../middleware/auth';
+import { CallController } from './call.controller';
 
 
 const router: Router = Router();
 
-router.post('/', verifyActiveAccount, callController.createCall);
-router.get('/', verifyActiveAccount, callController.getAllCalls);
-router.put('/:id', verifyActiveAccount, callController.updateCall);
-router.delete('/:id', verifyActiveAccount, callController.deleteCall);
+router.post('/', verifyActiveAccount, CallController.createCall);
+router.get('/', verifyActiveAccount, CallController.getCalls);
+router.put('/:id', verifyActiveAccount, CallController.updateCall);
+router.delete('/:id', verifyActiveAccount, CallController.deleteCall);
 
 export default router;
