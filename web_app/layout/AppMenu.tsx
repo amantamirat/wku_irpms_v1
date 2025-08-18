@@ -30,7 +30,7 @@ const AppMenu = () => {
                 {
                     label: 'Calls',
                     icon: 'pi pi-fw pi-megaphone',
-                     to: `/pages/calls?directorate=${dir._id}`
+                     to: `/calls?directorate=${dir._id}`
                 },
 
                 {

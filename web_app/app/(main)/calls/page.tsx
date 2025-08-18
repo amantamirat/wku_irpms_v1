@@ -1,8 +1,8 @@
 'use client';
 
 import DeleteDialog from '@/components/DeleteDialog';
-import { Call, CallStatus } from '@/models/call';
-import { CallService } from '@/services/CallService';
+
+
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -11,6 +11,11 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
+import { Call, CallStatus } from './models/call.model';
+import { CallApi } from './api/call.api';
+import SaveDialog from './components/SaveDialog';
+import { Calendar } from '@/models/calendar';
+import { CalendarService } from '@/services/CalendarService';
 
 const CallPage = () => {
     const emptyCall: Call = {
@@ -18,10 +23,11 @@ const CallPage = () => {
         directorate: '',
         title: '',
         dead_line: new Date(),
-        status: CallStatus.Planned,
+        status: CallStatus.planned,
     };
 
     const [calls, setCalls] = useState<Call[]>([]);
+    const [calendars, setCalendars] = useState<Calendar[]>([]);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
@@ -34,16 +40,31 @@ const CallPage = () => {
         setFilters(initFilters());
         setGlobalFilter('');
         loadCalls();
+        loadCalendars();
     }, []);
 
     const loadCalls = async () => {
         try {
-            const data = await CallService.getCalls();
+            const data =  await CallApi.getCalls({});
             setCalls(data);
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
                 summary: 'Failed to load call data',
+                detail: '' + err,
+                life: 3000
+            });
+        }
+    };
+
+    const loadCalendars = async () => {
+        try {
+            const data =  await CalendarService.getCalendars();
+            setCalendars(data);
+        } catch (err) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Failed to load calendars data',
                 detail: '' + err,
                 life: 3000
             });
@@ -58,11 +79,11 @@ const CallPage = () => {
         try {
             let _calls = [...calls];
             if (selectedCall._id) {
-                const updated = await CallService.updateCall(selectedCall);
+                const updated = await CallApi.updateCall(selectedCall);
                 const index = _calls.findIndex((c) => c._id === selectedCall._id);
                 _calls[index] = updated;
             } else {
-                const created = await CallService.createCall(selectedCall);
+                const created = await CallApi.createCall(selectedCall);
                 _calls.push(created);
             }
             setCalls(_calls);
@@ -87,7 +108,7 @@ const CallPage = () => {
 
     const deleteCall = async () => {
         try {
-            const deleted = await CallService.deleteCall(selectedCall);
+            const deleted = await CallApi.deleteCall(selectedCall);
             if (deleted) {
                 setCalls(calls.filter((c) => c._id !== selectedCall._id));
                 toast.current?.show({
@@ -146,7 +167,7 @@ const CallPage = () => {
         </>
     );
 
-    
+
 
     return (
         <div className="grid">
@@ -175,11 +196,20 @@ const CallPage = () => {
                         <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="title" header="Title" sortable />
-                        <Column field="dead_line" header="Dead Line" body={(rowData) => new Date(rowData.dead_line!).toLocaleDateString()} />                        
+                        <Column field="dead_line" header="Dead Line" body={(rowData) => new Date(rowData.dead_line!).toLocaleDateString()} />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
-                   
+                    {selectedCall && (
+                        <SaveDialog
+                            visible={showSaveDialog}
+                            call={selectedCall}
+                            calendars={calendars}
+                            onChange={setSelectedCall}
+                            onSave={saveCall}
+                            onHide={() => setShowSaveDialog(false)}
+                        />
+                    )}
 
                     {selectedCall && (
                         <DeleteDialog

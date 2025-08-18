@@ -1,7 +1,6 @@
 import mongoose, { Schema, model, Document } from 'mongoose';
 import { CallStatus } from './enums/call.status.enum';
-
-
+import { COLLECTIONS } from '../../enums/collections.enum';
 
 export interface ICall extends Document {
     directorate: mongoose.Types.ObjectId;
@@ -18,7 +17,7 @@ export interface ICall extends Document {
 const CallSchema = new Schema<ICall>({
     directorate: {
         type: Schema.Types.ObjectId,
-        ref: 'Organization',
+        ref: COLLECTIONS.ORGANIZATION,
         required: true
     },
     calendar: {
@@ -39,6 +38,7 @@ const CallSchema = new Schema<ICall>({
     },
     total_budget: {
         type: Number,
+        min: 0
     },
     status: {
         type: String,
@@ -49,4 +49,4 @@ const CallSchema = new Schema<ICall>({
 }, { timestamps: true });
 
 
-export const Call = model<ICall>('Call', CallSchema);
+export const Call = model<ICall>(COLLECTIONS.CALL, CallSchema);
