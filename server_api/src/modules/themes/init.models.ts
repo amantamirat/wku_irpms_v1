@@ -1,4 +1,3 @@
-import { Theme } from "./base.theme.model";
 import { BroadTheme } from "./broad.theme.model";
 import { Catalog } from "./catalog.theme.model";
 import { Componenet } from "./componenet.theme.model";

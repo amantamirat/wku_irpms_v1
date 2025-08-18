@@ -20,28 +20,57 @@ export interface CreateThemeDto {
     directorate?: Types.ObjectId;
 }
 
+type NonRootTypes = ThemeType.theme | ThemeType.componenet | ThemeType.focusArea;
+
 export class ThemeService {
+
+    private static readonly parentType: Record<NonRootTypes, ThemeType> = {
+        [ThemeType.theme]: ThemeType.catalog,
+        [ThemeType.componenet]: ThemeType.theme,
+        [ThemeType.focusArea]: ThemeType.componenet,
+    };
+
+    private static async getRootCatalog(theme: any): Promise<any> {
+        if (!theme) {
+            throw new Error("Catalog Not Found!");
+        }
+        if (theme.type === ThemeType.catalog) {
+            return theme;
+        }
+        const catalog = await Theme.findById(theme.parent).lean();
+        return this.getRootCatalog(catalog);
+    }
 
     private static async validateThemeHierarchy(theme: Partial<CreateThemeDto>) {
         if (theme.type === ThemeType.catalog) {
             const directorate = await Organization.findById(theme.directorate);
             if (!directorate || directorate.type !== Unit.Directorate) {
-                return new Error("Directorate Not Found!");
+                throw new Error("Directorate Not Found!");
             }
+            return
         }
-        else {
-            let parent = await Theme.findById(theme.parent).lean() as any;
-            if (!parent) {
-                return new Error("Parent Not Found!");
-            }
-            if (theme.type === ThemeType.theme && parent.type !== ThemeType.catalog) {
-                return new Error("Catalog Not Found!");
-            }
+        const parent = await Theme.findById(theme.parent).lean() as any;
+        if (!parent) {
+            throw new Error("Parent Not Found!");
+        }
+
+        const requiredParentType = this.parentType[theme.type as NonRootTypes];
+        if (parent.type !== requiredParentType) {
+            throw new Error(`${theme.type} must have parent of type ${requiredParentType}`);
+        }
+
+        const catalog = await ThemeService.getRootCatalog(parent);
+        if (theme.type === ThemeType.componenet && (catalog.level === ThemeLevel.broad)) {
+            throw new Error("Invalid hierarchy: Component must not trace back to Broad catalog");
+        }
+        if (theme.type === ThemeType.focusArea && (catalog.level === ThemeLevel.broad || catalog.level === ThemeLevel.componenet)) {
+            throw new Error("Invalid hierarchy: Focus Area must not trace back to Broad or Component catalog");
         }
     }
 
     static async createTheme(data: CreateThemeDto) {
         const { type, ...rest } = data;
+        await this.validateThemeHierarchy(data);
         if (!Theme.discriminators || !Theme.discriminators[type]) {
             throw new Error(`Invalid theme type: ${type}`);
         }
@@ -62,6 +91,7 @@ export class ThemeService {
     static async updateTheme(id: string, data: Partial<CreateThemeDto>) {
         const theme = await Theme.findById(id);
         if (!theme) throw new Error("Theme not found");
+        await this.validateThemeHierarchy(data);
         if (data.type && data.type !== theme.type) {
             throw new Error("Cannot change theme type");
         }

@@ -1,10 +1,8 @@
 import { Schema, Types } from "mongoose";
-import { BaseThemeDocument, Theme } from "./base.theme.model";
+import { COLLECTIONS } from "../../enums/collections.enum";
 import { ThemeLevel } from "./enums/theme.level.enum";
 import { ThemeType } from "./enums/theme.type.enum";
-import { COLLECTIONS } from "../../enums/collections.enum";
-import { Unit } from "../organizations/enums/unit.enum";
-import Organization from "../organizations/organization.model";
+import { BaseThemeDocument, Theme } from "./base.theme.model";
 
 export interface CatalogDocument extends BaseThemeDocument {
     type: ThemeType.catalog;
@@ -24,15 +22,6 @@ CatalogSchema.index(
         partialFilterExpression: { type: ThemeType.catalog }
     }
 );
-
-CatalogSchema.pre("save", async function (next) {
-    const catalog = this as any;
-    const directorate = await Organization.findById(catalog.directorate);
-    if (!directorate || directorate.type !== Unit.Directorate) {
-        return next(new Error("Invalid reference: must be a Directorate"));
-    }
-    next();
-});
 
 export const Catalog = Theme.discriminator<CatalogDocument>(ThemeType.catalog, CatalogSchema);
 Catalog.createIndexes();
