@@ -1,5 +1,6 @@
 import { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
+import { COLLECTIONS } from '../../enums/collections.enum';
 
 
 export interface ICalendar extends Document {
@@ -32,6 +33,6 @@ const CalendarSchema = new Schema<ICalendar>({
   timestamps: true
 });
 
-const Calendar = mongoose.model<ICalendar>('Calendar', CalendarSchema);
+const Calendar = mongoose.model<ICalendar>(COLLECTIONS.CALENDAR, CalendarSchema);
 
 export default Calendar;

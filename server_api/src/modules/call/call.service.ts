@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 import { CallStatus } from "./enums/call.status.enum";
 import { Call } from "./call.model";
+import { COLLECTIONS } from "../../enums/collections.enum";
 
 
 export interface GetCallsOptions {
@@ -31,7 +32,7 @@ export class CallService {
         const filter: any = {};
         if (options.calendar) filter.calendar = options.calendar;
         if (options.directorate) filter.directorate = options.directorate;
-        return Call.find(filter).lean();
+        return Call.find(filter).populate('calendar').lean();
     }
 
     static async updateCall(id: string, data: Partial<CreateCallDto>) {

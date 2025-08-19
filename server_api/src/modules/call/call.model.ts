@@ -22,7 +22,7 @@ const CallSchema = new Schema<ICall>({
     },
     calendar: {
         type: Schema.Types.ObjectId,
-        ref: 'Calendar',
+        ref: COLLECTIONS.CALENDAR,
         required: true
     },
     title: {
