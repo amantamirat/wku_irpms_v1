@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
-import Evaluation from '../evaluation/evaluation.model';
+
 import Applicant from '../applicants/applicant.model';
 import { AcademicLevel } from './enums/academicLevel.enum';
 import { Classification } from './enums/classification.enum';
@@ -9,6 +9,7 @@ import { Category } from './enums/category.enum';
 import { Unit } from './enums/unit.enum';
 import { Theme } from '../themes/base.theme.model';
 import { Call } from '../call/call.model';
+import { BaseEvaluation } from '../evals/base.evaluation.model';
 
 // Address Sub-document
 const AddressSchema = new Schema({
@@ -76,7 +77,7 @@ OrganizationSchema.pre('deleteOne', { document: true, query: false }, async func
             return next(err);
         }
 
-        const isReferencedByEval = await Evaluation.exists({ directorate: orgId });
+        const isReferencedByEval = await BaseEvaluation.exists({ directorate: orgId });
         if (isReferencedByEval) {
             const err = new Error(`Cannot delete: ${this.name} ${this.type} it is referenced in evaluations.`);
             return next(err);

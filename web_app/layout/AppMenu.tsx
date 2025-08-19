@@ -42,7 +42,7 @@ const AppMenu = () => {
                 {
                     label: 'Evaluations',
                     icon: 'pi pi-fw pi-calculator',
-                    to: `/pages/evals?directorate=${dir._id}`
+                    to: `/evals?directorate=${dir._id}`
                 },
             ]
         }))

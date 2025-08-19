@@ -10,8 +10,9 @@ import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import SaveDialog from './dialogs/SaveDialog';
 import { Organization } from '@/models/organization';
-import { Evaluation, EvalType, FormType } from '@/models/theme/evaluation';
-import { EvalService } from '@/services/theme/EvalService';
+import { EvalType, Evaluation, FormType } from '../models/eval.model';
+import { EvaluationApi } from '../api/eval.api';
+
 
 
 const pluralMap = {
@@ -22,13 +23,13 @@ const pluralMap = {
     Option: 'Options'
 };
 
-interface EvaluationCompProps {
+interface EvaluationManagerProps {
     type: EvalType;
     directorate?: Organization;
     parent?: Evaluation;
 }
 
-const EvalComponent = (props: EvaluationCompProps) => {
+const EvaluationManager = (props: EvaluationManagerProps) => {
 
     const type = props.type;
     const isCriterion = type === EvalType.criterion;
@@ -64,10 +65,16 @@ const EvalComponent = (props: EvaluationCompProps) => {
         try {
             setLoading(true);
             if (props.directorate && (props.type === EvalType.evaluation || props.type === EvalType.validation)) {
-                const data = await EvalService.getEvaluationsByDirectorate(props.directorate._id || '');
+                const data = await EvaluationApi.getEvaluations({
+                    type: props.type,
+                    directorate: props.directorate._id || ''
+                });
                 setEvaluations(data);
             } else if (props.parent) {
-                const data = await EvalService.getEvaluationsByParent(props.parent._id || '');
+                 const data = await EvaluationApi.getEvaluations({
+                    type: props.type,
+                    parent: props.parent._id || ''
+                });
                 setEvaluations(data);
             }
         } catch (err) {
@@ -94,17 +101,17 @@ const EvalComponent = (props: EvaluationCompProps) => {
             setLoading(true);
             let _evlas = [...evaluations];
             if (selectedEvaluation._id) {
-                const updated = await EvalService.updateEvaluation(selectedEvaluation);
+                const updated = await EvaluationApi.updateEvaluation(selectedEvaluation);
                 const index = _evlas.findIndex((c) => c._id === selectedEvaluation._id);
                 _evlas[index] = updated;
             } else {
-                const created = await EvalService.createEvaluation(selectedEvaluation);
+                const created = await EvaluationApi.createEvaluation(selectedEvaluation);
                 _evlas.push({ ...selectedEvaluation, _id: created._id, stage_level: created.stage_level });
             }
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',
-                detail: `Evaluation ${selectedEvaluation._id ? 'updated' : 'created'}`,
+                detail: `${type} ${selectedEvaluation._id ? 'updated' : 'created'}`,
                 life: 3000
             });
             setEvaluations(_evlas);
@@ -125,7 +132,7 @@ const EvalComponent = (props: EvaluationCompProps) => {
     const deleteEvaluation = async () => {
         try {
             setLoading(true);
-            const deleted = await EvalService.deleteEvaluation(selectedEvaluation);
+            const deleted = await EvaluationApi.deleteEvaluation(selectedEvaluation);
             if (deleted) {
                 //setEvaluations(evaluations.filter((c) => c._id !== selectedEvaluation._id));
                 setEvaluations((prevEvals) => {
@@ -155,7 +162,7 @@ const EvalComponent = (props: EvaluationCompProps) => {
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Deleted',
-                    detail: 'Evaluation deleted',
+                    detail: `${type} deleted`,
                     life: 3000
                 });
             }
@@ -187,7 +194,7 @@ const EvalComponent = (props: EvaluationCompProps) => {
             if (currentIndex === -1 || targetIndex === -1) {
                 throw new Error("Target or current stage not found in list.");
             }
-            const moved = await EvalService.reorderStage(evaluation, direction);
+            const moved = await EvaluationApi.reorderStage(evaluation, direction);
             if (moved) {
                 _evlas[currentIndex] = { ..._evlas[currentIndex], stage_level: targetLevel };
                 _evlas[targetIndex] = { ..._evlas[targetIndex], stage_level: currentLevel };
@@ -315,7 +322,7 @@ const EvalComponent = (props: EvaluationCompProps) => {
                             if (isCriterion && (rowData as Evaluation).form_type !== FormType.closed) {
                                 return null; // no expansion content for non closed
                             }
-                            return <EvalComponent type={childType} parent={rowData as Evaluation} />;
+                            return <EvaluationManager type={childType} parent={rowData as Evaluation} />;
                         }}
                     >
                         {
@@ -370,4 +377,4 @@ const EvalComponent = (props: EvaluationCompProps) => {
     );
 };
 
-export default EvalComponent;
+export default EvaluationManager;

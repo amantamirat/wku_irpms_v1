@@ -3,8 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { OrganizationService } from '@/services/OrganizationService';
 import { Organization } from '@/models/organization';
-import { EvalType } from '@/models/theme/evaluation';
-import EvalComponent from '../../components/evaluation/Evaluation';
+import EvaluationManager from './components/EvaluationManager';
+import { EvalType } from './models/eval.model';
+
 
 const EvalPage = () => {
     const router = useRouter();
@@ -42,7 +43,7 @@ const EvalPage = () => {
         return null; // Or redirecting already handled
     }
     return (
-        <EvalComponent type={EvalType.evaluation} directorate={directorate} />
+        <EvaluationManager type={EvalType.evaluation} directorate={directorate} />
     );
 };
 

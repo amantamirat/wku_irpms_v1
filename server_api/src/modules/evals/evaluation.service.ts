@@ -50,7 +50,7 @@ export class EvaluationService {
         }
 
         if (evl.type === EvalType.option) {
-            if (!evl.weight_value || !parentEval.weight_value) {
+            if (evl.weight_value === undefined || evl.weight_value === null || !parentEval.weight_value) {
                 throw new Error("Weight Value is Not Found");
             }
             if (evl.weight_value > parentEval.weight_value) {

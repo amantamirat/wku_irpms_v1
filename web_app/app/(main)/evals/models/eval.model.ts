@@ -1,4 +1,5 @@
-import { Organization } from "../organization";
+import { Organization } from "@/models/organization";
+
 
 export enum EvalType {
   evaluation = 'Evaluation',
@@ -59,8 +60,7 @@ export const validateEvaluation = (evaluation: Evaluation): { valid: boolean; me
         return { valid: false, message: `'Stage level' is required and must be between 1 and 10..` };
       }
     }
-    */
-    
+    */    
 
     if (type === EvalType.criterion || type === EvalType.option) {
       if (weight_value == null || weight_value < 0 || weight_value > 100) {
