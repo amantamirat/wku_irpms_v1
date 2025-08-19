@@ -16,6 +16,7 @@ import callRoutes from './modules/call/call.routes';
 
 import { initAdminUser, initPermissions, initRoles } from './services/initService';
 import { initializeThemeModels } from './modules/themes/init.models';
+import { initializeEvalModels } from './modules/evals/init.models';
 
 
 dotenv.config();
@@ -56,7 +57,7 @@ const PORT = process.env.SERVER_PORT || 5000;
     await mongoose.connect(MONGO_URL);
     console.log('database connection established');
     initializeThemeModels();
-    
+    initializeEvalModels();
 
     await initPermissions();
     await initRoles();

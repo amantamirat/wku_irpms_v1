@@ -3,14 +3,14 @@ import { COLLECTIONS } from "../../enums/collections.enum";
 import { EvalType } from "./enums/eval.type.enum";
 
 
-export interface BaseEvalDocument extends Document {
+export interface BaseEvaluationDocument extends Document {
     type: EvalType;
     title: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
-const BaseEvalSchema = new Schema<BaseEvalDocument>(
+const BaseEvalSchema = new Schema<BaseEvaluationDocument>(
     {
         type: { type: String, enum: Object.values(EvalType), required: true },
         title: { type: String, required: true }
@@ -19,4 +19,4 @@ const BaseEvalSchema = new Schema<BaseEvalDocument>(
 );
 
 // Base model
-export const Eval = model<BaseEvalDocument>(COLLECTIONS.THEME, BaseEvalSchema);
+export const BaseEvaluation = model<BaseEvaluationDocument>(COLLECTIONS.EVAL, BaseEvalSchema);
