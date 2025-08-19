@@ -8,6 +8,7 @@ import { Ownership } from './enums/ownership.enum';
 import { Category } from './enums/category.enum';
 import { Unit } from './enums/unit.enum';
 import { Theme } from '../themes/base.theme.model';
+import { Call } from '../call/call.model';
 
 // Address Sub-document
 const AddressSchema = new Schema({
@@ -68,16 +69,24 @@ OrganizationSchema.pre('deleteOne', { document: true, query: false }, async func
         const err = new Error(`Cannot delete: ${this.name} ${this.type} it is a workspace for applicants.`);
         return next(err);
     }
-    const isReferencedByTheme = await Theme.exists({ directorate: orgId });
-    if (isReferencedByTheme) {
-        const err = new Error(`Cannot delete: ${this.name} ${this.type} it is referenced in themes.`);
-        return next(err);
-    }
+    if (this.type === Unit.Directorate) {
+        const isReferencedByTheme = await Theme.exists({ directorate: orgId });
+        if (isReferencedByTheme) {
+            const err = new Error(`Cannot delete: ${this.name} ${this.type} it is referenced in themes.`);
+            return next(err);
+        }
 
-    const isReferencedByEval = await Evaluation.exists({ directorate: orgId });
-    if (isReferencedByEval) {
-        const err = new Error(`Cannot delete: ${this.name} ${this.type} it is referenced in evaluations.`);
-        return next(err);
+        const isReferencedByEval = await Evaluation.exists({ directorate: orgId });
+        if (isReferencedByEval) {
+            const err = new Error(`Cannot delete: ${this.name} ${this.type} it is referenced in evaluations.`);
+            return next(err);
+        }
+
+        const isReferencedByCall = await Call.exists({ directorate: orgId });
+        if (isReferencedByCall) {
+            const err = new Error(`Cannot delete: ${this.name} ${this.type} it is referenced in call.`);
+            return next(err);
+        }
     }
     next();
 });

@@ -1,7 +1,6 @@
 import { Types } from "mongoose";
 import { CallStatus } from "./enums/call.status.enum";
 import { Call } from "./call.model";
-import { COLLECTIONS } from "../../enums/collections.enum";
 
 
 export interface GetCallsOptions {

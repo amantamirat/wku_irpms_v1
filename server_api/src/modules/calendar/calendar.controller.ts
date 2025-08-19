@@ -1,91 +1,49 @@
 import { Request, Response } from 'express';
-import Calendar from './calendar.model';
 import { errorResponse, successResponse } from '../../util/response';
+import { CalendarService, CreateCalendarDto } from './calendar.service';
 
+export class CalendarController {
 
-
-const createCalendar = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { year, start_date, end_date, status } = req.body;
-
-    if (start_date && end_date && new Date(start_date) >= new Date(end_date)) {
-      errorResponse(res, 400, 'Start date must be before end date');
-      return;
+  static async createCalendar(req: Request, res: Response) {
+    try {
+      const data: CreateCalendarDto = req.body;
+      const theme = await CalendarService.createCalendar(data);
+      successResponse(res, 201, "Calendar created successfully", theme);
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
     }
-
-    const calendar = new Calendar({ year, start_date, end_date, status });
-    await calendar.save();
-
-    successResponse(res, 201, 'Academic calendar created successfully', calendar);
-  } catch (error: any) {
-    if (error.code === 11000) {
-      errorResponse(res, 400, 'Year must be unique');
-      return;
-    }
-    errorResponse(res, 500, 'Server error', error.message);
   }
-};
 
-
-const getAllCalendars = async (_req: Request, res: Response): Promise<void> => {
-  try {
-    const calendars = await Calendar.find().sort({ year: -1 });
-    successResponse(res, 200, 'Academic calendars fetched successfully', calendars);
-  } catch (error) {
-    errorResponse(res, 500, 'Server error', (error as Error).message);
+  static async getCalendars(req: Request, res: Response) {
+    try {
+      const calendars = await CalendarService.getCalendars();
+      successResponse(res, 200, 'Calendars fetched successfully', calendars);
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
+    }
   }
-};
 
-
-const updateCalendar = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { year, start_date, end_date, status } = req.body;
-
-    if (start_date && end_date && new Date(start_date) >= new Date(end_date)) {
-      errorResponse(res, 400, 'Start date must be before end date');
-      return;
+  static async updateCalendar(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const data: Partial<CreateCalendarDto> = req.body;
+      const updated = await CalendarService.updateCalendar(id, data);
+      successResponse(res, 201, "Calendar updated successfully", updated);
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
     }
-
-    const updatedCalendar = await Calendar.findByIdAndUpdate(
-      req.params.id,
-      { year, start_date, end_date, status },
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedCalendar) {
-      errorResponse(res, 404, 'Academic calendar not found');
-      return;
-    }
-
-    successResponse(res, 200, 'Academic calendar updated successfully', updatedCalendar);
-  } catch (error: any) {
-    if (error.code === 11000) {
-      errorResponse(res, 400, 'Year must be unique');
-      return;
-    }
-    errorResponse(res, 500, 'Server error', error.message);
   }
-};
 
-
-const deleteCalendar = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const deletedCalendar = await Calendar.findByIdAndDelete(req.params.id);
-    if (!deletedCalendar) {
-      errorResponse(res, 404, 'Academic calendar not found');
-      return;
+  static async deleteCalendar(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const deleted = await CalendarService.deleteCalendar(id);
+      successResponse(res, 201, "Calendar deleted successfully", deleted);
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
     }
-    successResponse(res, 200, 'Academic calendar deleted successfully', true);
-  } catch (error) {
-    errorResponse(res, 500, (error as Error).message, {});
   }
-};
 
-const calendarController = {
-  createCalendar,
-  getAllCalendars,
-  updateCalendar,
-  deleteCalendar,
-};
+}
 
-export default calendarController;
+
