@@ -6,7 +6,7 @@ export interface ICall extends Document {
     directorate: mongoose.Types.ObjectId;
     calendar: mongoose.Types.ObjectId;
     title: string;
-    dead_line: Date;
+    deadline: Date;
     description?: string;
     total_budget?: number;
     status: CallStatus;
@@ -29,7 +29,7 @@ const CallSchema = new Schema<ICall>({
         type: String,
         required: true
     },
-    dead_line: {
+    deadline: {
         type: Date,
         required: true
     },

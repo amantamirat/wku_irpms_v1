@@ -12,7 +12,7 @@ export type Call = {
     directorate: string | Organization;
     calendar: string | Calendar;
     title: string;
-    dead_line: Date;
+    deadline: Date;
     description?: string;
     total_budget?: number;
     status: CallStatus;
@@ -33,8 +33,8 @@ export const validateCall = (call: Call): { valid: boolean; message?: string } =
         return { valid: false, message: 'Calendar is required.' };
     }
 
-    const deadlineDate = new Date(call.dead_line);
-    if (!call.dead_line || isNaN(deadlineDate.getTime())) {
+    const deadlineDate = new Date(call.deadline);
+    if (!call.deadline || isNaN(deadlineDate.getTime())) {
         return { valid: false, message: 'Deadline must be a valid date.' };
     }
     const today = new Date();

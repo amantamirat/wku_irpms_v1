@@ -30,7 +30,7 @@ const CallManager = (props: CallManagerProps) => {
         calendar: '',
         directorate: props.directorate,
         title: '',
-        dead_line: new Date(),
+        deadline: new Date(),
         status: CallStatus.planned,
     };
 
@@ -209,7 +209,7 @@ const CallManager = (props: CallManagerProps) => {
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="title" header="Title" sortable />
                         <Column field="calendar.year" header="Calendar" sortable />
-                        <Column field="dead_line" header="Dead Line" body={(rowData) => new Date(rowData.dead_line!).toLocaleDateString('en-CA')} />
+                        <Column field="deadline" header="Deadline" body={(rowData) => new Date(rowData.deadline!).toLocaleDateString('en-CA')} />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 

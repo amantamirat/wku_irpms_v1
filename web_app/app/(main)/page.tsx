@@ -43,7 +43,7 @@ const Dashboard = () => {
                         </div>
                         <span className="text-500 ml-2">Deadline</span>
                         <span className="text-green-500 font-medium ml-2">
-                            {new Date(call.dead_line).toLocaleDateString()}
+                            {new Date(call.deadline).toLocaleDateString()}
                         </span>
                         
                     </div>

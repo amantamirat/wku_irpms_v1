@@ -98,14 +98,14 @@ function SaveDialog(props: SaveDialogProps) {
             </div>
 
             <div className="field">
-                <label htmlFor="dead_line">Dead Line</label>
+                <label htmlFor="deadline">Deadline</label>
                 <PrimeCalendar
-                    id="dead_line"
-                    value={call.dead_line ? new Date(call.dead_line) : undefined}
-                    onChange={(e) => onChange({ ...call, dead_line: e.value! })}
+                    id="deadline"
+                    value={call.deadline ? new Date(call.deadline) : undefined}
+                    onChange={(e) => onChange({ ...call, deadline: e.value! })}
                     dateFormat="yy-mm-dd"
                     showIcon
-                    className={classNames({ 'p-invalid': submitted && !call.dead_line })}
+                    className={classNames({ 'p-invalid': submitted && !call.deadline })}
                     required
                 />
             </div>
