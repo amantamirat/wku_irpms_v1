@@ -29,6 +29,7 @@ BaseThemeSchema.index(
   }
 );
 
+
 BaseThemeSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
     const themeId = this._id;
     const hasChildren = await Theme.exists({ parent: themeId });
