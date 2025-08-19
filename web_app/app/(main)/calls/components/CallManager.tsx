@@ -95,7 +95,7 @@ const CallManager = (props: CallManagerProps) => {
             if (selectedCall._id) {
                 const updated = await CallApi.updateCall(selectedCall);
                 const index = _calls.findIndex((c) => c._id === selectedCall._id);
-                _calls[index] = updated;
+                _calls[index] = {...updated, calendar:selectedCall.calendar};
             } else {
                 const created = await CallApi.createCall(selectedCall);
                 _calls.push({ ...selectedCall, _id: created._id });

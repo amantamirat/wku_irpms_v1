@@ -8,6 +8,8 @@ import { classNames } from 'primereact/utils';
 import { useEffect, useState } from 'react';
 import { Call, validateCall } from '../models/call.model';
 import { Calendar } from '../../calendars/models/calendar.model';
+import { InputTextarea } from 'primereact/inputtextarea';
+import { Editor } from 'primereact/editor';
 
 
 
@@ -59,12 +61,13 @@ function SaveDialog(props: SaveDialogProps) {
     return (
         <Dialog
             visible={visible}
-            style={{ width: '500px' }}
+            style={{ width: '800px', minHeight: '600px' }}
             header={call._id ? 'Edit Call' : 'Create New Call'}
             modal
             className="p-fluid"
             footer={footer}
             onHide={hide}
+            maximizable
         >
 
             <div className="field">
@@ -94,6 +97,16 @@ function SaveDialog(props: SaveDialogProps) {
                     required
                     autoFocus
                     className={classNames({ 'p-invalid': submitted && !call.title })}
+                />
+            </div>
+
+            <div className="field">
+                <label htmlFor="description">Description / Notes</label>
+                <Editor
+                    id="description"
+                    value={call.description || ""}
+                    onTextChange={(e) => onChange({ ...call, description: e.htmlValue })}
+                    style={{ height: '100px' }}
                 />
             </div>
 

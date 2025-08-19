@@ -13,7 +13,7 @@ export type Call = {
     calendar: string | Calendar;
     title: string;
     deadline: Date;
-    description?: string;
+    description?: string | null;
     total_budget?: number;
     status: CallStatus;
     createdAt?: Date;
