@@ -31,7 +31,7 @@ export class CallService {
         const filter: any = {};
         if (options.calendar) filter.calendar = options.calendar;
         if (options.directorate) filter.directorate = options.directorate;
-        return Call.find(filter).populate('calendar').lean();
+        return Call.find(filter).populate('calendar').populate('directorate').lean();
     }
 
     static async updateCall(id: string, data: Partial<CreateCallDto>) {
