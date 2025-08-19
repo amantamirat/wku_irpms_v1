@@ -16,7 +16,7 @@ interface ValidationDocument extends EValDocument {
 }
 
 const EValSchema = new Schema<EValDocument>({
-    directorate: { type: Schema.Types.ObjectId, ref: COLLECTIONS.ORGANIZATION, required: true },
+    directorate: { type: Schema.Types.ObjectId, ref: COLLECTIONS.ORGANIZATION, required: true, immutable: true },
 });
 
 // Create discriminators
