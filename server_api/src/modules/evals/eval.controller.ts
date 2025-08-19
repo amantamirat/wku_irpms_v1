@@ -51,4 +51,15 @@ export class EvaluationController {
             errorResponse(res, 400, err.message, err);
         }
     }
+
+
+    static async reorderStageLevel(req: Request, res: Response) {
+        try {
+            const { id, direction } = req.params;            
+            const data = await EvaluationService.reorderStageLevel(id, direction);
+            successResponse(res, 201, "Stage reorder successfully", data);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    }
 }

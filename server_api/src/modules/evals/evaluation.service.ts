@@ -109,55 +109,42 @@ export class EvaluationService {
 
 
     static async reorderStageLevel(id: string, direction: string) {
-        try {
-            if (!['up', 'down'].includes(direction)) {
-                throw new Error('Direction must be "up" or "down".');
-            }
-            const current = await Stage.findById(id).lean();
-            if (!current || current.type !== EvalType.stage) {
-                throw new Error('Stage not found.');
-            }
-            const level = current.stage_level;
-            if (typeof level !== 'number') {
-                throw new Error('Current stage level is not defined.');
-            }
-            const target = await Stage.findOne({
-                parent: current.parent,
-                stage_level: direction === 'up' ? level - 1 : level + 1
-            });
-            if (!target) {
-                throw new Error(`Cannot move ${direction} any further.`);
-            }
-            const currentLevel = current.stage_level!;
-            const targetLevel = target.stage_level!;
-
-            await Stage.updateOne(
-                { _id: current._id },
-                { $set: { stage_level: -1 } },
-                { runValidators: false } // Bypass min/max validation
-            );
-            // Swap stage levels using bulkWrite
-            await Stage.updateOne(
-                { _id: target._id },
-                { $set: { stage_level: currentLevel } }
-            );
-            // 3. Move current into target's position
-            await Stage.updateOne(
-                { _id: current._id },
-                { $set: { stage_level: targetLevel } }
-            );
-            return {
-                success: true,
-                status: 200,
-                message: `Stage moved ${direction} successfully.`,
-            };
-        } catch (err: any) {
-            console.error(err);
-            return {
-                success: false,
-                status: 400,
-                message: err.message || 'Failed to reorder stage.',
-            };
+        if (!['up', 'down'].includes(direction)) {
+            throw new Error('Direction must be "up" or "down".');
         }
+        const current = await Stage.findById(id).lean();
+        if (!current || current.type !== EvalType.stage) {
+            throw new Error('Stage not found.');
+        }
+        const level = current.stage_level;
+        if (typeof level !== 'number') {
+            throw new Error('Current stage level is not defined.');
+        }
+        const target = await Stage.findOne({
+            parent: current.parent,
+            stage_level: direction === 'up' ? level - 1 : level + 1
+        });
+        if (!target) {
+            throw new Error(`Cannot move ${direction} any further.`);
+        }
+        const currentLevel = current.stage_level!;
+        const targetLevel = target.stage_level!;
+
+        await Stage.updateOne(
+            { _id: current._id },
+            { $set: { stage_level: -1 } },
+            { runValidators: false } // Bypass min/max validation
+        );
+        // Swap stage levels using bulkWrite
+        await Stage.updateOne(
+            { _id: target._id },
+            { $set: { stage_level: currentLevel } }
+        );
+        // 3. Move current into target's position
+        await Stage.updateOne(
+            { _id: current._id },
+            { $set: { stage_level: targetLevel } }
+        );
+        return true;
     }
 }
