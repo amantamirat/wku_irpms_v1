@@ -1,18 +1,17 @@
-import { Calendar } from "@/models/calendar";
-import { MyService } from "./MyService";
-
+import { ApiClient } from "@/api/ApiClient";
+import { Calendar } from "../models/calendar.model";
 const end_point = '/calendars/';
 
 
-export const CalendarService = {
+export const CalendarApi = {
 
     async getCalendars(): Promise<Calendar[]> {
-        const data = await MyService.get(end_point);
+        const data = await ApiClient.get(end_point);
         return data as Calendar[];
     },
 
     async createCalendar(calendar: Partial<Calendar>): Promise<Calendar> {
-        const createdData = await MyService.post(end_point, calendar);
+        const createdData = await ApiClient.post(end_point, calendar);
         return createdData as Calendar;
     },
 
@@ -21,7 +20,7 @@ export const CalendarService = {
             throw new Error("_id required.");
         }
         const url = `${end_point}${calendar._id}`;
-        const updatedCalendar = await MyService.put(url, calendar);
+        const updatedCalendar = await ApiClient.put(url, calendar);
         return updatedCalendar as Calendar;
     },
 
@@ -30,7 +29,7 @@ export const CalendarService = {
             throw new Error("_id required.");
         }
         const url = `${end_point}${calendar._id}`;
-        const response = await MyService.delete(url);
+        const response = await ApiClient.delete(url);
         return response;
     },
 };

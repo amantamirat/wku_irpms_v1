@@ -2,8 +2,7 @@
 
 import DeleteDialog from '@/components/DeleteDialog';
 import SaveDialog from './dialogs/SaveDialog';
-import { Calendar } from '@/models/calendar';
-import { CalendarService } from '@/services/CalendarService';
+
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -12,6 +11,8 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
+import { Calendar } from './models/calendar.model';
+import { CalendarApi } from './api/calendar.api';
 
 const CalendarPage = () => {
     const emptyCalendar: Calendar = {
@@ -37,7 +38,7 @@ const CalendarPage = () => {
 
     const loadCalendars = async () => {
         try {
-            const data = await CalendarService.getCalendars();
+            const data = await CalendarApi.getCalendars();
             setCalendars(data);
         } catch (err) {
             toast.current?.show({
@@ -57,11 +58,11 @@ const CalendarPage = () => {
         try {
             let _calendars = [...calendars];
             if (selectedCalendar._id) {
-                const updated = await CalendarService.updateCalendar(selectedCalendar);
+                const updated = await CalendarApi.updateCalendar(selectedCalendar);
                 const index = _calendars.findIndex((c) => c._id === selectedCalendar._id);
                 _calendars[index] = updated;
             } else {
-                const created = await CalendarService.createCalendar(selectedCalendar);
+                const created = await CalendarApi.createCalendar(selectedCalendar);
                 _calendars.push(created);
             }
             setCalendars(_calendars);
@@ -86,7 +87,7 @@ const CalendarPage = () => {
 
     const deleteCalendar = async () => {
         try {
-            const deleted = await CalendarService.deleteCalendar(selectedCalendar);
+            const deleted = await CalendarApi.deleteCalendar(selectedCalendar);
             if (deleted) {
                 setCalendars(calendars.filter((c) => c._id !== selectedCalendar._id));
                 toast.current?.show({

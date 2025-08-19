@@ -1,5 +1,6 @@
-import { Applicant, Scope } from "@/models/applicant";
+import { Applicant } from "@/models/applicant";
 import { MyService } from "./MyService";
+import { Category } from "@/models/organization";
 const end_point = '/applicants/';
 
 export const ApplicantService = {
@@ -9,7 +10,7 @@ export const ApplicantService = {
         return data as Applicant[];
     },
 
-    async getApplicantsByScope(scope: Scope): Promise<Applicant[]> {
+    async getApplicantsByScope(scope: Category): Promise<Applicant[]> {
         const data = await MyService.get(`${end_point}${scope}`);
         return data as Applicant[];
     },

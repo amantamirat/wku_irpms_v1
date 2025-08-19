@@ -3,10 +3,12 @@ import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
+import { Calendar as PrimeCalendar } from 'primereact/calendar';
 import { classNames } from 'primereact/utils';
 import { useEffect, useState } from 'react';
 import { Call, validateCall } from '../models/call.model';
-import { Calendar } from '@/models/calendar';
+import { Calendar } from '../../calendars/models/calendar.model';
+
 
 
 interface SaveDialogProps {
@@ -64,17 +66,6 @@ function SaveDialog(props: SaveDialogProps) {
             footer={footer}
             onHide={hide}
         >
-            <div className="field">
-                <label htmlFor="title">Title</label>
-                <InputText
-                    id="title"
-                    value={call.title}
-                    onChange={(e) => onChange({ ...call, title: e.target.value })}
-                    required
-                    autoFocus
-                    className={classNames({ 'p-invalid': submitted && !call.title })}
-                />
-            </div>
 
             <div className="field">
                 <label htmlFor="calendar">Reserach Calendar</label>
@@ -94,6 +85,32 @@ function SaveDialog(props: SaveDialogProps) {
                     className={classNames({ 'p-invalid': submitted && !call.calendar })}
                 />
             </div>
+            <div className="field">
+                <label htmlFor="title">Title</label>
+                <InputText
+                    id="title"
+                    value={call.title}
+                    onChange={(e) => onChange({ ...call, title: e.target.value })}
+                    required
+                    autoFocus
+                    className={classNames({ 'p-invalid': submitted && !call.title })}
+                />
+            </div>
+
+            <div className="field">
+                <label htmlFor="dead_line">Dead Line</label>
+                <PrimeCalendar
+                    id="dead_line"
+                    value={call.dead_line ? new Date(call.dead_line) : undefined}
+                    onChange={(e) => onChange({ ...call, dead_line: e.value! })}
+                    dateFormat="yy-mm-dd"
+                    showIcon
+                    className={classNames({ 'p-invalid': submitted && !call.dead_line })}
+                    required
+                />
+            </div>
+
+
             {errorMessage && (
                 <small className="p-error">{errorMessage}</small>
             )}

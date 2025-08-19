@@ -10,14 +10,13 @@ import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
-import React, { useEffect, useRef, useState } from 'react';
-
-import { Calendar } from '@/models/calendar';
-import { CalendarService } from '@/services/CalendarService';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Organization } from '@/models/organization';
 import { Call, CallStatus } from '../models/call.model';
 import { CallApi } from '../api/call.api';
 import SaveDialog from './SaveDialog';
+import { Calendar } from '../../calendars/models/calendar.model';
+import { CalendarApi } from '../../calendars/api/calendar.api';
 
 
 interface CallManagerProps {
@@ -27,7 +26,7 @@ interface CallManagerProps {
 
 const CallManager = (props: CallManagerProps) => {
 
-    const emptyCall: Call = {       
+    const emptyCall: Call = {
         calendar: '',
         directorate: props.directorate,
         title: '',
@@ -45,14 +44,7 @@ const CallManager = (props: CallManagerProps) => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
 
-    useEffect(() => {
-        setFilters(initFilters());
-        setGlobalFilter('');
-        loadCalls();
-        loadCalendars();
-    }, []);
-
-    const loadCalls = async () => {
+    const loadCalls = useCallback(async () => {
         try {
             const data = await CallApi.getCalls({ directorate: props.directorate._id });
             setCalls(data);
@@ -63,12 +55,14 @@ const CallManager = (props: CallManagerProps) => {
                 detail: '' + err,
                 life: 3000
             });
+        } finally {
+
         }
-    };
+    }, [props.directorate, toast]);
 
     const loadCalendars = async () => {
         try {
-            const data = await CalendarService.getCalendars();
+            const data = await CalendarApi.getCalendars();
             setCalendars(data);
         } catch (err) {
             toast.current?.show({
@@ -79,6 +73,17 @@ const CallManager = (props: CallManagerProps) => {
             });
         }
     };
+
+    useEffect(() => {        
+        loadCalls();        
+    }, [loadCalls]);
+
+    useEffect(() => {
+        setFilters(initFilters());
+        setGlobalFilter('');
+        loadCalendars();
+    }, []);
+
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
@@ -93,7 +98,7 @@ const CallManager = (props: CallManagerProps) => {
                 _calls[index] = updated;
             } else {
                 const created = await CallApi.createCall(selectedCall);
-                _calls.push(created);
+                _calls.push({ ...selectedCall, _id: created._id });
             }
             setCalls(_calls);
             toast.current?.show({
@@ -176,8 +181,6 @@ const CallManager = (props: CallManagerProps) => {
         </>
     );
 
-
-
     return (
         <div className="grid">
             <div className="col-12">
@@ -205,7 +208,8 @@ const CallManager = (props: CallManagerProps) => {
                         <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="title" header="Title" sortable />
-                        <Column field="dead_line" header="Dead Line" body={(rowData) => new Date(rowData.dead_line!).toLocaleDateString()} />
+                        <Column field="calendar.year" header="Calendar" sortable />
+                        <Column field="dead_line" header="Dead Line" body={(rowData) => new Date(rowData.dead_line!).toLocaleDateString('en-CA')} />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 

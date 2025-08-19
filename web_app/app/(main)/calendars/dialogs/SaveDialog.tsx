@@ -5,8 +5,8 @@ import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { Calendar as PrimeCalendar } from 'primereact/calendar';
 import { classNames } from 'primereact/utils';
-import { Calendar, validateCalendar } from '@/models/calendar';
 import { InputNumber } from 'primereact/inputnumber';
+import { Calendar, validateCalendar } from '../models/calendar.model';
 
 interface SaveDialogProps {
     visible: boolean;

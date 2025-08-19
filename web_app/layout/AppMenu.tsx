@@ -62,7 +62,7 @@ const AppMenu = () => {
                 {
                     label: 'Calendars',
                     icon: PrimeIcons.CALENDAR,
-                    to: '/pages/calendars'
+                    to: '/calendars'
                 },                               
                 {
                     label: 'Applicants',
