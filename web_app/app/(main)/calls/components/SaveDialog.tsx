@@ -104,9 +104,9 @@ function SaveDialog(props: SaveDialogProps) {
                 <label htmlFor="description">Description / Notes</label>
                 <Editor
                     id="description"
-                    value={call.description || ""}
-                    onTextChange={(e) => onChange({ ...call, description: e.htmlValue })}
-                    style={{ height: '100px' }}
+                    value={call.description ?? ""}
+                    onTextChange={(e) => onChange({ ...call, description: e.htmlValue ?? "" })}
+                    style={{ height: '200px' }}
                 />
             </div>
 

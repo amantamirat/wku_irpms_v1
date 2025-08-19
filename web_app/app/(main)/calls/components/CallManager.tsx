@@ -74,8 +74,8 @@ const CallManager = (props: CallManagerProps) => {
         }
     };
 
-    useEffect(() => {        
-        loadCalls();        
+    useEffect(() => {
+        loadCalls();
     }, [loadCalls]);
 
     useEffect(() => {
@@ -95,7 +95,7 @@ const CallManager = (props: CallManagerProps) => {
             if (selectedCall._id) {
                 const updated = await CallApi.updateCall(selectedCall);
                 const index = _calls.findIndex((c) => c._id === selectedCall._id);
-                _calls[index] = {...updated, calendar:selectedCall.calendar};
+                _calls[index] = { ...updated, calendar: selectedCall.calendar };
             } else {
                 const created = await CallApi.createCall(selectedCall);
                 _calls.push({ ...selectedCall, _id: created._id });
@@ -170,7 +170,10 @@ const CallManager = (props: CallManagerProps) => {
         <>
             <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setSelectedCall(rowData);
+                    const description = rowData.description
+                        ? `<p>${rowData.description}</p>`
+                        : "";
+                    setSelectedCall({ ...rowData, description });
                     setShowSaveDialog(true);
                 }} />
             <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
