@@ -1,17 +1,14 @@
 'use client';
 import { Button } from 'primereact/button';
+import { Calendar as PrimeCalendar } from 'primereact/calendar';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
+import { Editor } from 'primereact/editor';
 import { InputText } from 'primereact/inputtext';
-import { Calendar as PrimeCalendar } from 'primereact/calendar';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
-import { Call, validateCall } from '../models/call.model';
 import { Calendar } from '../../calendars/models/calendar.model';
-import { InputTextarea } from 'primereact/inputtextarea';
-import { Editor } from 'primereact/editor';
-
-
+import { Call, validateCall } from '../models/call.model';
 
 interface SaveDialogProps {
     visible: boolean;
@@ -26,7 +23,6 @@ function SaveDialog(props: SaveDialogProps) {
     const { visible, call, calendars, onChange, onSave, onHide } = props;
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
-
 
     const [internalDescription, setInternalDescription] = useState(call.description || '');
     const [isEditorReady, setIsEditorReady] = useState(false);
@@ -60,6 +56,7 @@ function SaveDialog(props: SaveDialogProps) {
             }
         }
     }, [isEditorReady, internalDescription]);
+
 
     const save = async () => {
         setSubmitted(true);
@@ -161,6 +158,8 @@ function SaveDialog(props: SaveDialogProps) {
                                 }, 50);
                             }
                         }}
+
+                        placeholder='Enter description here...'
                     />
                 )}
             </div>
