@@ -96,6 +96,33 @@ function SaveDialog(props: SaveDialogProps) {
         onChange({ ...call, description: newDescription });
     };
 
+    const renderHeader = () => {
+        return (
+            <span className="ql-formats">
+                {/* Headings */}
+                <select className="ql-header" defaultValue="">
+                    <option value="1">Heading 1</option>
+                    <option value="2">Heading 2</option>
+                    <option value="">Normal</option>
+                </select>
+
+                {/* Text formatting */}
+                <button className="ql-bold" aria-label="Bold"></button>
+                <button className="ql-italic" aria-label="Italic"></button>
+                <button className="ql-underline" aria-label="Underline"></button>
+
+                {/* Lists */}
+                <button className="ql-list" value="ordered" aria-label="Ordered List"></button>
+                <button className="ql-list" value="bullet" aria-label="Bullet List"></button>
+
+                {/* Links */}
+                <button className="ql-link" aria-label="Insert Link"></button>
+            </span>
+        );
+    };
+
+    const editorHeader = renderHeader();
+
     return (
         <Dialog
             visible={visible}
@@ -146,6 +173,7 @@ function SaveDialog(props: SaveDialogProps) {
                         id="description"
                         value={internalDescription}
                         onTextChange={handleEditorChange}
+                        headerTemplate={editorHeader}
                         style={{ height: '200px' }}
                         onLoad={() => {
                             // Set content after editor is fully loaded
