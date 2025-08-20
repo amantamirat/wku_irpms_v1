@@ -5,7 +5,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { Calendar as PrimeCalendar } from 'primereact/calendar';
 import { classNames } from 'primereact/utils';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Call, validateCall } from '../models/call.model';
 import { Calendar } from '../../calendars/models/calendar.model';
 import { InputTextarea } from 'primereact/inputtextarea';
@@ -26,6 +26,40 @@ function SaveDialog(props: SaveDialogProps) {
     const { visible, call, calendars, onChange, onSave, onHide } = props;
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
+
+
+    const [internalDescription, setInternalDescription] = useState(call.description || '');
+    const [isEditorReady, setIsEditorReady] = useState(false);
+    const editorRef = useRef<any>(null);
+
+    // Sync internal description with call.description when dialog opens
+    useEffect(() => {
+        if (visible) {
+            setInternalDescription(call.description || '');
+            setIsEditorReady(false);
+
+            // Small delay to ensure editor is mounted before trying to set content
+            const timer = setTimeout(() => {
+                setIsEditorReady(true);
+            }, 100);
+
+            return () => clearTimeout(timer);
+        }
+    }, [visible, call.description]);
+
+    // Programmatically set editor content when it's ready
+    useEffect(() => {
+        if (isEditorReady && editorRef.current && internalDescription) {
+            try {
+                const quill = (editorRef.current as any).getQuill();
+                if (quill) {
+                    quill.root.innerHTML = internalDescription;
+                }
+            } catch (error) {
+                console.error('Error setting editor content:', error);
+            }
+        }
+    }, [isEditorReady, internalDescription]);
 
     const save = async () => {
         setSubmitted(true);
@@ -57,6 +91,13 @@ function SaveDialog(props: SaveDialogProps) {
             setErrorMessage(undefined);
         }
     }, [visible]);
+
+
+    const handleEditorChange = (e: any) => {
+        const newDescription = e.htmlValue || '';
+        setInternalDescription(newDescription);
+        onChange({ ...call, description: newDescription });
+    };
 
     return (
         <Dialog
@@ -102,12 +143,26 @@ function SaveDialog(props: SaveDialogProps) {
 
             <div className="field">
                 <label htmlFor="description">Description / Notes</label>
-                <Editor
-                    id="description"
-                    value={call.description ?? ""}
-                    onTextChange={(e) => onChange({ ...call, description: e.htmlValue ?? "" })}
-                    style={{ height: '200px' }}
-                />
+                {visible && ( // Only render editor when dialog is visible
+                    <Editor
+                        ref={editorRef}
+                        id="description"
+                        value={internalDescription}
+                        onTextChange={handleEditorChange}
+                        style={{ height: '200px' }}
+                        onLoad={() => {
+                            // Set content after editor is fully loaded
+                            if (editorRef.current && internalDescription) {
+                                setTimeout(() => {
+                                    const quill = editorRef.current.getQuill();
+                                    if (quill) {
+                                        quill.root.innerHTML = internalDescription;
+                                    }
+                                }, 50);
+                            }
+                        }}
+                    />
+                )}
             </div>
 
             <div className="field">
