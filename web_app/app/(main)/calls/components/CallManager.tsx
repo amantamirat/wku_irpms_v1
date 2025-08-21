@@ -170,10 +170,7 @@ const CallManager = (props: CallManagerProps) => {
         <>
             <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
-                    const description = rowData.description
-                        ? `<p>${rowData.description}</p>`
-                        : "";
-                    setSelectedCall({ ...rowData, description });
+                    setSelectedCall(rowData);
                     setShowSaveDialog(true);
                 }} />
             <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"

@@ -3,12 +3,12 @@ import { Button } from 'primereact/button';
 import { Calendar as PrimeCalendar } from 'primereact/calendar';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
-import { Editor } from 'primereact/editor';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 import { Calendar } from '../../calendars/models/calendar.model';
 import { Call, validateCall } from '../models/call.model';
+import { InputTextarea } from 'primereact/inputtextarea';
 
 interface SaveDialogProps {
     visible: boolean;
@@ -23,40 +23,6 @@ function SaveDialog(props: SaveDialogProps) {
     const { visible, call, calendars, onChange, onSave, onHide } = props;
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
-
-    const [internalDescription, setInternalDescription] = useState(call.description || '');
-    const [isEditorReady, setIsEditorReady] = useState(false);
-    const editorRef = useRef<any>(null);
-
-    // Sync internal description with call.description when dialog opens
-    useEffect(() => {
-        if (visible) {
-            setInternalDescription(call.description || '');
-            setIsEditorReady(false);
-
-            // Small delay to ensure editor is mounted before trying to set content
-            const timer = setTimeout(() => {
-                setIsEditorReady(true);
-            }, 100);
-
-            return () => clearTimeout(timer);
-        }
-    }, [visible, call.description]);
-
-    // Programmatically set editor content when it's ready
-    useEffect(() => {
-        if (isEditorReady && editorRef.current && internalDescription) {
-            try {
-                const quill = (editorRef.current as any).getQuill();
-                if (quill) {
-                    quill.root.innerHTML = internalDescription;
-                }
-            } catch (error) {
-                console.error('Error setting editor content:', error);
-            }
-        }
-    }, [isEditorReady, internalDescription]);
-
 
     const save = async () => {
         setSubmitted(true);
@@ -90,43 +56,10 @@ function SaveDialog(props: SaveDialogProps) {
     }, [visible]);
 
 
-    const handleEditorChange = (e: any) => {
-        const newDescription = e.htmlValue || '';
-        setInternalDescription(newDescription);
-        onChange({ ...call, description: newDescription });
-    };
-
-    const renderHeader = () => {
-        return (
-            <span className="ql-formats">
-                {/* Headings */}
-                <select className="ql-header" defaultValue="">
-                    <option value="1">Heading 1</option>
-                    <option value="2">Heading 2</option>
-                    <option value="">Normal</option>
-                </select>
-
-                {/* Text formatting */}
-                <button className="ql-bold" aria-label="Bold"></button>
-                <button className="ql-italic" aria-label="Italic"></button>
-                <button className="ql-underline" aria-label="Underline"></button>
-
-                {/* Lists */}
-                <button className="ql-list" value="ordered" aria-label="Ordered List"></button>
-                <button className="ql-list" value="bullet" aria-label="Bullet List"></button>
-
-                {/* Links */}
-                <button className="ql-link" aria-label="Insert Link"></button>
-            </span>
-        );
-    };
-
-    const editorHeader = renderHeader();
-
     return (
         <Dialog
             visible={visible}
-            style={{ width: '800px', minHeight: '600px' }}
+            style={{ width: '600px', minHeight: '600px' }}
             header={call._id ? 'Edit Call' : 'Create New Call'}
             modal
             className="p-fluid"
@@ -166,30 +99,12 @@ function SaveDialog(props: SaveDialogProps) {
             </div>
 
             <div className="field">
-                <label htmlFor="description">Description / Notes</label>
-                {visible && ( // Only render editor when dialog is visible
-                    <Editor
-                        ref={editorRef}
-                        id="description"
-                        value={internalDescription}
-                        onTextChange={handleEditorChange}
-                        headerTemplate={editorHeader}
-                        style={{ height: '200px' }}
-                        onLoad={() => {
-                            // Set content after editor is fully loaded
-                            if (editorRef.current && internalDescription) {
-                                setTimeout(() => {
-                                    const quill = editorRef.current.getQuill();
-                                    if (quill) {
-                                        quill.root.innerHTML = internalDescription;
-                                    }
-                                }, 50);
-                            }
-                        }}
-
-                        placeholder='Enter description here...'
-                    />
-                )}
+                <label htmlFor="description">Description </label>
+                <InputTextarea
+                    value={call.description ?? ""}
+                    onChange={(e) => onChange({ ...call, description: e.target.value })}
+                    rows={5}
+                    cols={30} />
             </div>
 
             <div className="field">
