@@ -1,0 +1,1 @@
+type SeverityType = "success" | "info" | "warning" | "danger";

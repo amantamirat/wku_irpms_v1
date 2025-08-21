@@ -15,6 +15,7 @@ export type Call = {
     deadline: Date;
     description?: string | null;
     total_budget?: number;
+    poster?: string | null;
     status: CallStatus;
     createdAt?: Date;
     updatedAt?: Date;
