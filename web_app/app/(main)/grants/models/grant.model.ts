@@ -12,3 +12,22 @@ export type Grant = {
     createdAt?: Date;
     updatedAt?: Date;
 }
+
+
+export const validateGrant = (grant: Grant): { valid: boolean; message?: string } => {
+    if (!grant.title || grant.title.trim().length === 0) {
+        return { valid: false, message: 'Title is required.' };
+    }
+    if (!grant.directorate) {
+        return { valid: false, message: 'Directorate is required.' };
+    }
+
+    if (!grant.theme) {
+        return { valid: false, message: 'Calendar is required.' };
+    }
+
+    if (!grant.evaluation) {
+        return { valid: false, message: 'Calendar is required.' };
+    }
+    return { valid: true };
+};
