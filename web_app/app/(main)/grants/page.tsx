@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { OrganizationService } from '@/services/OrganizationService';
 import { Organization } from '@/models/organization';
-//import GrantManager from './components/GrantManager';
+import GrantManager from './components/GrantManager';
 
 
 const GrantPage = () => {
@@ -43,8 +43,8 @@ const GrantPage = () => {
     }
 
     return (
-        //<GrantManager directorate={directorate} />
-        <>Welcome</>
+        <GrantManager directorate={directorate} />
+        
     );
 };
 

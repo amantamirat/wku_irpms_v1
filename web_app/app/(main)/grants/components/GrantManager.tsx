@@ -30,17 +30,18 @@ interface GrantManagerProps {
 
 const GrantManager = (props: GrantManagerProps) => {
 
-    const {directorate} = props
-    const emptyGrant: Grant = {        
+    const { directorate } = props
+    const emptyGrant: Grant = {
         directorate: props.directorate,
         title: '',
-        theme:'',
-        evaluation:''
+        theme: '',
+        evaluation: ''
     };
 
     const [grants, setGrants] = useState<Grant[]>([]);
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
     const [themes, setThemes] = useState<Theme[]>([]);
+    const [error, setError] = useState<string | null>(null);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
@@ -54,34 +55,16 @@ const GrantManager = (props: GrantManagerProps) => {
             const data = await GrantApi.getGrants({ directorate: props.directorate._id });
             setGrants(data);
         } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load grant data',
-                detail: '' + err,
-                life: 3000
-            });
+            setError(`Failed to load grant data ${err}`);
         } finally {
 
         }
-    }, [props.directorate, toast]);
+    }, [directorate, error]);
 
-    const loadEvaluations = async () => {
-        try {
-            const data = await EvaluationApi.getEvaluations({directorate:directorate._id});
-            setEvaluations(data);
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load evaluation data',
-                detail: '' + err,
-                life: 3000
-            });
-        }
-    };
 
-    const loadThemes = async () => {
+    const loadThemes = useCallback(async () => {
         try {
-            const data = await ThemeApi.getThemes({directorate:directorate._id});
+            const data = await ThemeApi.getThemes({ directorate: directorate._id });
             setThemes(data);
         } catch (err) {
             toast.current?.show({
@@ -91,17 +74,35 @@ const GrantManager = (props: GrantManagerProps) => {
                 life: 3000
             });
         }
-    };
+
+    }, [directorate]);
+
+
+    const loadEvaluations = useCallback(async () => {
+        try {
+            const data = await EvaluationApi.getEvaluations({ directorate: directorate._id });
+            setEvaluations(data);
+        } catch (err) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Failed to load evaluation data',
+                detail: '' + err,
+                life: 3000
+            });
+        }
+
+    }, [directorate]);
 
     useEffect(() => {
         loadGrants();
-    }, [loadGrants]);
+        loadThemes();
+        loadEvaluations();
+    }, [loadGrants, loadThemes, loadEvaluations]);
 
     useEffect(() => {
         setFilters(initFilters());
         setGlobalFilter('');
-        loadEvaluations();
-        loadThemes();
+
     }, []);
 
 
@@ -109,13 +110,30 @@ const GrantManager = (props: GrantManagerProps) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
 
+
+    if (error) {
+        return (
+            <div className="flex align-items-center justify-content-center py-6">
+                <div className="text-center">
+                    <i className="pi pi-exclamation-triangle text-4xl text-500 mb-3" />
+                    <p className="text-500 mb-4">{error}</p>
+                    <Button
+                        label="Retry"
+                        icon="pi pi-refresh"
+                        onClick={() => window.location.reload()}
+                    />
+                </div>
+            </div>
+        );
+    }
+
     const saveGrant = async () => {
         try {
             let _grants = [...grants];
             if (selectedGrant._id) {
                 const updated = await GrantApi.updateGrant(selectedGrant);
                 const index = _grants.findIndex((c) => c._id === selectedGrant._id);
-                _grants[index] = { ...updated, theme: selectedGrant.theme , evaluation: selectedGrant.evaluation};
+                _grants[index] = { ...updated, theme: selectedGrant.theme, evaluation: selectedGrant.evaluation };
             } else {
                 const created = await GrantApi.createGrant(selectedGrant);
                 _grants.push({ ...selectedGrant, _id: created._id });
@@ -228,8 +246,8 @@ const GrantManager = (props: GrantManagerProps) => {
                         <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="title" header="Title" sortable />
-                        <Column field="calendar.year" header="Calendar" sortable />
-                        <Column field="deadline" header="Deadline" body={(rowData) => new Date(rowData.deadline!).toLocaleDateString('en-CA')} />
+                        <Column field="theme.title" header="Theme" sortable />
+                        <Column field="evaluation.title" header="Evaluation" sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
@@ -237,7 +255,8 @@ const GrantManager = (props: GrantManagerProps) => {
                         <SaveDialog
                             visible={showSaveDialog}
                             grant={selectedGrant}
-                            
+                            themes={themes}
+                            evaluations={evaluations}
                             onChange={setSelectedGrant}
                             onSave={saveGrant}
                             onHide={() => setShowSaveDialog(false)}

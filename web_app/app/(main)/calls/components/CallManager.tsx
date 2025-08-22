@@ -17,6 +17,8 @@ import { CallApi } from '../api/call.api';
 import SaveDialog from './SaveDialog';
 import { Calendar } from '../../calendars/models/calendar.model';
 import { CalendarApi } from '../../calendars/api/calendar.api';
+import { GrantApi } from '../../grants/api/grant.api';
+import { Grant } from '../../grants/models/grant.model';
 
 
 interface CallManagerProps {
@@ -31,11 +33,14 @@ const CallManager = (props: CallManagerProps) => {
         directorate: props.directorate,
         title: '',
         deadline: new Date(),
+        grant:'',
         status: CallStatus.planned,
     };
 
     const [calls, setCalls] = useState<Call[]>([]);
     const [calendars, setCalendars] = useState<Calendar[]>([]);
+    const [grants, setGrants] = useState<Grant[]>([]);
+    const [error, setError] = useState<string | null>(null);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
@@ -49,16 +54,22 @@ const CallManager = (props: CallManagerProps) => {
             const data = await CallApi.getCalls({ directorate: props.directorate._id });
             setCalls(data);
         } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load call data',
-                detail: '' + err,
-                life: 3000
-            });
+            setError(`Failed to load grant data ${err}`);
         } finally {
 
         }
-    }, [props.directorate, toast]);
+    }, [props.directorate, error]);
+
+    const loadGrants = useCallback(async () => {
+        try {
+            const data = await GrantApi.getGrants({ directorate: props.directorate._id });
+            setGrants(data);
+        } catch (err) {
+            setError(`Failed to load grant data ${err}`);
+        } finally {
+
+        }
+    }, [props.directorate, error]);
 
     const loadCalendars = async () => {
         try {
@@ -76,7 +87,8 @@ const CallManager = (props: CallManagerProps) => {
 
     useEffect(() => {
         loadCalls();
-    }, [loadCalls]);
+        loadGrants();
+    }, [loadCalls, loadGrants]);
 
     useEffect(() => {
         setFilters(initFilters());
@@ -89,13 +101,29 @@ const CallManager = (props: CallManagerProps) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
 
+     if (error) {
+            return (
+                <div className="flex align-items-center justify-content-center py-6">
+                    <div className="text-center">
+                        <i className="pi pi-exclamation-triangle text-4xl text-500 mb-3" />
+                        <p className="text-500 mb-4">{error}</p>
+                        <Button
+                            label="Retry"
+                            icon="pi pi-refresh"
+                            onClick={() => window.location.reload()}
+                        />
+                    </div>
+                </div>
+            );
+        }
+
     const saveCall = async () => {
         try {
             let _calls = [...calls];
             if (selectedCall._id) {
                 const updated = await CallApi.updateCall(selectedCall);
                 const index = _calls.findIndex((c) => c._id === selectedCall._id);
-                _calls[index] = { ...updated, calendar: selectedCall.calendar };
+                _calls[index] = { ...updated, calendar: selectedCall.calendar, grant:selectedCall.grant };
             } else {
                 const created = await CallApi.createCall(selectedCall);
                 _calls.push({ ...selectedCall, _id: created._id });
@@ -208,8 +236,9 @@ const CallManager = (props: CallManagerProps) => {
                         <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="title" header="Title" sortable />
-                        <Column field="calendar.year" header="Calendar" sortable />
+                        <Column field="calendar.year" header="Calendar" sortable />                        
                         <Column field="deadline" header="Deadline" body={(rowData) => new Date(rowData.deadline!).toLocaleDateString('en-CA')} />
+                        <Column field="grant.title" header="Title" sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
@@ -218,6 +247,7 @@ const CallManager = (props: CallManagerProps) => {
                             visible={showSaveDialog}
                             call={selectedCall}
                             calendars={calendars}
+                            grants={grants}
                             onChange={setSelectedCall}
                             onSave={saveCall}
                             onHide={() => setShowSaveDialog(false)}

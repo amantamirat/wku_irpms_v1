@@ -9,18 +9,20 @@ import { useEffect, useRef, useState } from 'react';
 import { Calendar } from '../../calendars/models/calendar.model';
 import { Call, validateCall } from '../models/call.model';
 import { InputTextarea } from 'primereact/inputtextarea';
+import { Grant } from '../../grants/models/grant.model';
 
 interface SaveDialogProps {
     visible: boolean;
     call: Call;
     calendars?: Calendar[];
+    grants?: Grant[];
     onChange: (call: Call) => void;
     onSave: () => void;
     onHide: () => void;
 }
 
 function SaveDialog(props: SaveDialogProps) {
-    const { visible, call, calendars, onChange, onSave, onHide } = props;
+    const { visible, call, calendars, grants, onChange, onSave, onHide } = props;
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
@@ -76,8 +78,7 @@ function SaveDialog(props: SaveDialogProps) {
                     options={calendars}
                     onChange={(e) =>
                         onChange({
-                            ...call,
-                            calendar: e.value,
+                            ...call, calendar: e.value,
                         })
                     }
                     optionLabel="year"
@@ -117,6 +118,23 @@ function SaveDialog(props: SaveDialogProps) {
                     showIcon
                     className={classNames({ 'p-invalid': submitted && !call.deadline })}
                     required
+                />
+            </div>
+
+            <div className="field">
+                <label htmlFor="grant">Grant</label>
+                <Dropdown
+                    id="grant"
+                    value={call.grant}
+                    options={grants}
+                    onChange={(e) => onChange({
+                        ...call, grant: e.value,
+                    })
+                    }
+                    optionLabel="title"
+                    placeholder="Select a Grant"
+                    required
+                    className={classNames({ 'p-invalid': submitted && !call.grant })}
                 />
             </div>
 

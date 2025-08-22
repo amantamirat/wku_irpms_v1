@@ -60,7 +60,7 @@ function SaveDialog(props: SaveDialogProps) {
     return (
         <Dialog
             visible={visible}
-            style={{ width: '600px', minHeight: '600px' }}
+            style={{ width: '600px', height: '500px' }}
             header={grant._id ? 'Edit Grant' : 'Create New Grant'}
             modal
             className="p-fluid"

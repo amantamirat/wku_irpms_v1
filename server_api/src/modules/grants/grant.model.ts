@@ -1,5 +1,6 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../enums/collections.enum";
+import { Call } from "../call/call.model";
 
 interface IGrant extends Document {
     directorate: mongoose.Types.ObjectId;
@@ -35,6 +36,17 @@ const GrantSchema = new Schema<IGrant>({
         required: true
     },
 }, { timestamps: true });
+
+
+GrantSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
+    const grantId = this._id;
+    const isReferencedByCall = await Call.exists({ grant: grantId });
+    if (isReferencedByCall) {
+        const err = new Error(`Cannot delete: ${this.title} it is referenced in call.`);
+        return next(err);
+    }
+    next();
+});
 
 
 export const Grant = model<IGrant>(COLLECTIONS.GRANT, GrantSchema);
