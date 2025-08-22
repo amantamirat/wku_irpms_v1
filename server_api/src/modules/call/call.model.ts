@@ -9,6 +9,7 @@ export interface ICall extends Document {
     deadline: Date;
     description?: string;
     total_budget?: number;
+    grant: mongoose.Types.ObjectId;
     status: CallStatus;
     createdAt?: Date;
     updatedAt?: Date;
@@ -39,6 +40,11 @@ const CallSchema = new Schema<ICall>({
     total_budget: {
         type: Number,
         min: 0
+    },
+    grant: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.GRANT,
+        required: true
     },
     status: {
         type: String,

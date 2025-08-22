@@ -11,6 +11,7 @@ import themeRoutes from './modules/themes/theme.routes';
 import evalRoutes from './modules/evals/evaluation.routes';
 import calendarRoutes from './modules/calendar/calendar.routes';
 import callRoutes from './modules/call/call.routes';
+import grantRoutes from './modules/grants/grant.routes';
 
 
 
@@ -37,7 +38,7 @@ app.use("/api/evals", evalRoutes);
 
 app.use("/api/calendars", calendarRoutes);
 app.use("/api/calls", callRoutes);
-
+app.use("/api/grants", grantRoutes);
 
 
 

@@ -2,6 +2,7 @@ import { Schema, Types } from "mongoose";
 import { EvalType } from "./enums/eval.type.enum";
 import { COLLECTIONS } from "../../enums/collections.enum";
 import { BaseEvaluation, BaseEvaluationDocument } from "./base.evaluation.model";
+import { Grant } from "../grants/grant.model";
 
 interface EValDocument extends BaseEvaluationDocument {
     directorate: Types.ObjectId;
@@ -17,6 +18,16 @@ interface ValidationDocument extends EValDocument {
 
 const EValSchema = new Schema<EValDocument>({
     directorate: { type: Schema.Types.ObjectId, ref: COLLECTIONS.ORGANIZATION, required: true, immutable: true },
+});
+
+EValSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
+  const evalId = this._id;
+  const isReferencedByGrant = await Grant.exists({ evaluation: evalId });
+  if (isReferencedByGrant) {
+    const err = new Error(`Cannot delete: ${this.title} it is referenced in Grant.`);
+    return next(err);
+  }
+  next();
 });
 
 // Create discriminators

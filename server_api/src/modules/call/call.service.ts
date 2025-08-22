@@ -8,7 +8,6 @@ export interface GetCallsOptions {
     directorate?: string;
 }
 
-
 export interface CreateCallDto {
     directorate: Types.ObjectId | string;
     calendar: Types.ObjectId | string;
@@ -16,6 +15,7 @@ export interface CreateCallDto {
     dead_line: Date | string;
     description?: string;
     total_budget?: number;
+    grant: Types.ObjectId | string;
     status?: CallStatus;
 }
 
@@ -31,7 +31,7 @@ export class CallService {
         const filter: any = {};
         if (options.calendar) filter.calendar = options.calendar;
         if (options.directorate) filter.directorate = options.directorate;
-        return Call.find(filter).populate('calendar').populate('directorate').lean();
+        return Call.find(filter).populate('calendar').populate('directorate').populate('grant').lean();
     }
 
     static async updateCall(id: string, data: Partial<CreateCallDto>) {
