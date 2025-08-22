@@ -1,7 +1,7 @@
 import { Organization } from "@/models/organization";
 import { ApiClient } from "@/api/ApiClient";
-import { Calendar } from "@/models/calendar";
 import { Call } from "../models/call.model";
+import { Calendar } from "../../calendars/models/calendar.model";
 
 
 const end_point = '/calls';

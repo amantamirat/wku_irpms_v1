@@ -13,24 +13,30 @@ import { OrganizationService } from '@/services/OrganizationService';
 const AppMenu = () => {
     const { layoutConfig } = useContext(LayoutContext);
     const icons = ['pi pi-mars', 'pi pi-microchip', 'pi pi-prime', 'pi pi-sparkles', 'pi pi-venus'];
-    const [organizations, setOrganizations] = useState<Organization[]>([]);    
-    useEffect(() => {        
+    const [organizations, setOrganizations] = useState<Organization[]>([]);
+    useEffect(() => {
         OrganizationService.getOrganizationsByType(OrganizationType.Directorate)
             .then(data => setOrganizations(data))
             .catch(err => console.error('Failed to fetch organization of directorates', err));
-    }, []);     
+    }, []);
 
     const directoratesMenu: AppMenuItem = {
         label: 'Directorates',
         icon: 'pi pi-sitemap',
         items: organizations.map((dir, index) => ({
             label: dir.name,
-            icon: icons[index % icons.length],           
+            icon: icons[index % icons.length],
             items: [
                 {
                     label: 'Calls',
                     icon: 'pi pi-fw pi-megaphone',
-                     to: `/calls?directorate=${dir._id}`
+                    to: `/calls?directorate=${dir._id}`
+                },
+
+                {
+                    label: 'Grants',
+                    icon: 'pi pi-fw pi-wrench',
+                    to: `/grants?directorate=${dir._id}`
                 },
 
                 {
@@ -54,7 +60,7 @@ const AppMenu = () => {
         {
             label: 'Home',
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
-        },        
+        },
         directoratesMenu,
         {
             label: 'Manage',
@@ -63,7 +69,7 @@ const AppMenu = () => {
                     label: 'Calendars',
                     icon: PrimeIcons.CALENDAR,
                     to: '/calendars'
-                },                               
+                },
                 {
                     label: 'Applicants',
                     icon: PrimeIcons.GLOBE,
@@ -120,7 +126,7 @@ const AppMenu = () => {
                             to: `/pages/organizations?type=${OrganizationType.Position}`
                         },
                     ]
-                },                              
+                },
                 {
                     label: 'User Accounts',
                     icon: PrimeIcons.USERS,
