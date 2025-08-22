@@ -4,7 +4,7 @@ export const COLLECTIONS = {
   EVAL: "evls",
   CALENDAR:"calendars",
   CALL: "calls",
-  
+  GRANT: "grants",
 
 
   
