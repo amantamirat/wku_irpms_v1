@@ -79,16 +79,10 @@ export default function CallGrid() {
         );
     }
 
-
-
-
-
-
     return (
         <div className="grid">
             {calls.map((call) =>
             (
-
                 <div key={call._id} className="col-12 lg:col-6 xl:col-3">
                     <CallCard call={call} />
                 </div>
