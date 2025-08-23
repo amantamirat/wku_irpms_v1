@@ -12,8 +12,8 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { OrganizationService } from '@/services/OrganizationService';
 import { Category, Organization, OrganizationType } from '../../organizations/models/organization.model';
+import { OrganizationApi } from '../../organizations/api/organization.api';
 
 interface ApplicantCompProps {
     scope: Category;
@@ -68,14 +68,14 @@ const ApplicantComp = (props: ApplicantCompProps) => {
     const loadOrganizations = useCallback(async () => {
         try {
             if (isAcademic) {
-                const data = await OrganizationService.getOrganizationsByType(OrganizationType.Department);
+                const data = await OrganizationApi.getOrganizations({ type: OrganizationType.Department });
                 setOrganizations(data);
             } else if (isSupportive) {
-                const data = await OrganizationService.getOrganizationsByType(OrganizationType.Supportive);
+                const data = await OrganizationApi.getOrganizations({ type: OrganizationType.Supportive });
                 setOrganizations(data);
             }
             else if (isExternal) {
-                const data = await OrganizationService.getOrganizationsByType(OrganizationType.External);
+                const data = await OrganizationApi.getOrganizations({ type: OrganizationType.External });
                 setOrganizations(data);
             }
 

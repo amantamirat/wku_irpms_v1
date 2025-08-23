@@ -17,7 +17,7 @@ import { Organization } from '../../organizations/models/organization.model';
 
 interface ThemeManagerProps {
     type: ThemeType;
-    directorate?: Organization;
+    directorate?: any;
     parent?: Theme;
     themeLevel?: ThemeLevel;
 }

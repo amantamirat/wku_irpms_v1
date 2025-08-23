@@ -25,7 +25,7 @@ const pluralMap = {
 
 interface EvaluationManagerProps {
     type: EvalType;
-    directorate?: Organization;
+    directorate?: any;
     parent?: Evaluation;
 }
 

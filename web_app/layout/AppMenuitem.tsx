@@ -17,7 +17,17 @@ const AppMenuitem = (props: AppMenuItemProps) => {
     const key = props.parentKey ? props.parentKey + '-' + props.index : String(props.index);
     //const isActiveRoute = item!.to && pathname === item!.to;
     const fullPath = pathname + (searchParams.toString() ? `?${searchParams.toString()}` : '');
-    const isActiveRoute = item!.to && item!.to === fullPath;
+    //const isActiveRoute = item!.to && item!.to === fullPath;
+
+    // this is added for managing the color of the selected menu item
+    let isActiveRoute = false;
+    if (item?.to) {
+        const url = new URLSearchParams(item.to.split('?')[1] || '');
+        const id = url.get('id');
+        const idFromCurrent = searchParams.get('id');
+        isActiveRoute = pathname === item.to.split('?')[0] && id === idFromCurrent;
+    }
+
     const active = activeMenu === key || activeMenu.startsWith(key + '-');
     const onRouteChange = (url: string) => {
         if (item!.to && item!.to === url) {
@@ -48,7 +58,7 @@ const AppMenuitem = (props: AppMenuItemProps) => {
     };
 
     const subMenuRef = useRef(null);
-    
+
     const subMenu = item!.items && item!.visible !== false && (
         <CSSTransition timeout={{ enter: 1000, exit: 450 }} classNames="layout-submenu" in={props.root ? true : active} key={item!.label} nodeRef={subMenuRef}>
             <ul ref={subMenuRef}>

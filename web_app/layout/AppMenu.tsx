@@ -32,25 +32,25 @@ const AppMenu = () => {
                 {
                     label: 'Calls',
                     icon: 'pi pi-fw pi-megaphone',
-                    to: `/calls?directorate=${encodeURIComponent(JSON.stringify(dir))}`
+                    to: `/calls?id=${dir._id}&name=${encodeURIComponent(dir.name)}`                    
                 },
 
                 {
                     label: 'Grants',
                     icon: 'pi pi-fw pi-wrench',
-                    to: `/grants?directorate=${encodeURIComponent(JSON.stringify(dir))}`
+                    to: `/grants?id=${dir._id}&name=${encodeURIComponent(dir.name)}`
                 },
 
                 {
                     label: 'Themes',
                     icon: 'pi pi-fw pi-tags',
-                    to: `/themes?directorate=${encodeURIComponent(JSON.stringify(dir))}`
+                    to: `/themes?id=${dir._id}&name=${encodeURIComponent(dir.name)}`
 
                 },
                 {
                     label: 'Evaluations',
                     icon: 'pi pi-fw pi-calculator',
-                    to: `/evals?directorate=${encodeURIComponent(JSON.stringify(dir))}`
+                    to: `/evals?id=${dir._id}&name=${encodeURIComponent(dir.name)}`
                 },
             ]
         }))

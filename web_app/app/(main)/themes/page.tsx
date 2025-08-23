@@ -10,20 +10,19 @@ import { Organization } from '../organizations/models/organization.model';
 const ThemePage = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const directorate = JSON.parse(searchParams.get("directorate")!) as Organization;
-    
 
-    useEffect(() => {
-        if (!directorate) {
-            router.push('/auth/error');
-            return;
-        }        
-    }, [directorate, router]);
+    const directorateId = searchParams.get('id');
+    const directorateName = searchParams.get('name');
 
-
-    if (!directorate) {
-        return null; // Or redirecting already handled
+    if (!directorateId || !directorateName) {
+        router.push('/auth/error');
+        return null;
     }
+
+    const directorate = {
+        _id: directorateId,
+        name: directorateName
+    };
 
     return (
         <ThemeManager type={ThemeType.catalog} directorate={directorate} />

@@ -14,19 +14,15 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Grant } from '../models/grant.model';
 import { GrantApi } from '../api/grant.api';
 import SaveDialog from './SaveDialog';
-import { Calendar } from '../../calendars/models/calendar.model';
-import { CalendarApi } from '../../calendars/api/calendar.api';
 import { EvaluationApi } from '../../evals/api/eval.api';
 import { Evaluation } from '../../evals/models/eval.model';
 import { Theme } from '../../themes/models/theme.model';
 import { ThemeApi } from '../../themes/api/theme.api';
-import { Organization } from '../../organizations/models/organization.model';
 
 
 interface GrantManagerProps {
-    directorate: Organization;
+    directorate: any;
 }
-
 
 const GrantManager = (props: GrantManagerProps) => {
 
