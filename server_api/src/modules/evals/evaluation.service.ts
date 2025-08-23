@@ -2,9 +2,8 @@ import { Types } from "mongoose";
 import { EvalType } from "./enums/eval.type.enum";
 import { FormType } from "./enums/from.type.enum";
 import { BaseEvaluation } from "./base.evaluation.model";
-import Organization from "../organizations/organization.model";
-import { Unit } from "../organizations/enums/unit.enum";
 import { Stage } from "./stage.model";
+import { Directorate } from "../organs/base.organization.model";
 
 export interface GetEvalsOptions {
     type?: EvalType;
@@ -27,8 +26,8 @@ export class EvaluationService {
 
     private static async validateEval(evl: Partial<CreateEvaluationDto>) {
         if (evl.type === EvalType.evaluation || evl.type === EvalType.validation) {
-            const directorate = await Organization.findById(evl.directorate);
-            if (!directorate || directorate.type !== Unit.Directorate) {
+            const directorate = await Directorate.findById(evl.directorate);
+            if (!directorate) {
                 throw new Error("Directorate Not Found!");
             }
             return

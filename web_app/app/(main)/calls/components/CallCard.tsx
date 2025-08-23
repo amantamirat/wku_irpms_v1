@@ -2,11 +2,11 @@ import { Dialog } from "primereact/dialog";
 import { Call } from "../../calls/models/call.model";
 import { FileUpload } from "primereact/fileupload";
 import { Card } from "primereact/card";
-import { Organization } from "@/models/organization";
 import { Calendar } from "../../calendars/models/calendar.model";
 import { Button } from "primereact/button";
 import { useState } from "react";
 import ApplyWizard from "../../projects/components/ApplyWizard";
+import { Organization } from "../../organizations/models/organization.model";
 
 interface CallCardProps {
     call: Call;

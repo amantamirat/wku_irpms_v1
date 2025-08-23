@@ -11,7 +11,6 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Organization } from '@/models/organization';
 import { Call, CallStatus } from '../models/call.model';
 import { CallApi } from '../api/call.api';
 import SaveDialog from './SaveDialog';
@@ -19,6 +18,7 @@ import { Calendar } from '../../calendars/models/calendar.model';
 import { CalendarApi } from '../../calendars/api/calendar.api';
 import { GrantApi } from '../../grants/api/grant.api';
 import { Grant } from '../../grants/models/grant.model';
+import { Organization } from '../../organizations/models/organization.model';
 
 
 interface CallManagerProps {

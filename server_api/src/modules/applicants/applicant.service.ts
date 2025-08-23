@@ -1,7 +1,8 @@
+import { BaseOrganization } from '../organs/base.organization.model';
+import { Category } from '../organs/enums/category.enum';
+import { Unit } from '../organs/enums/unit.enum';
 import Applicant from './applicant.model';
-import { Category } from '../organizations/enums/category.enum';
-import { Unit } from '../organizations/enums/unit.enum';
-import Organization from '../organizations/organization.model';
+
 
 
 const scopeToOrganizationType: Record<Category, Unit> = {
@@ -12,7 +13,7 @@ const scopeToOrganizationType: Record<Category, Unit> = {
 
 const validateApplicantOrganization = async (scope: Category, orgId: string) => {
     const expected = scopeToOrganizationType[scope];
-    const org = await Organization.findById(orgId);
+    const org = await BaseOrganization.findById(orgId);
     if (!org || org.type !== expected) {
         throw new Error(`Scope ${scope} requires organization of type ${expected}`);
     }

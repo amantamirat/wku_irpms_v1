@@ -1,5 +1,5 @@
 export const COLLECTIONS = {
-  ORGANIZATION: "Organization",
+  ORGAN: "organs",
   THEME: "thms",
   EVAL: "evls",
   CALENDAR:"calendars",

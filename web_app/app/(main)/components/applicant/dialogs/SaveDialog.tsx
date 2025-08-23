@@ -8,8 +8,8 @@ import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import { Dropdown } from 'primereact/dropdown';
 import { Accessibility, Applicant, Gender, validateApplicant } from '@/models/applicant';
-import { Category, Organization } from '@/models/organization';
 import { MultiSelect } from 'primereact/multiselect';
+import { Category, Organization } from '@/app/(main)/organizations/models/organization.model';
 
 
 interface SaveApplicantDialogProps {

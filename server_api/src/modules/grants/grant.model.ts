@@ -15,7 +15,7 @@ interface IGrant extends Document {
 const GrantSchema = new Schema<IGrant>({
     directorate: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.ORGANIZATION,
+        ref: COLLECTIONS.ORGAN,
         required: true
     },
     title: {

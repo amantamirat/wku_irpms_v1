@@ -1,8 +1,9 @@
 'use client';
-import { OrganizationType } from '@/models/organization';
+
 import React, { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import OrganizationComp from '../../components/organization/Organization';
+import { OrganizationType } from './models/organization.model';
+import OrganizationManager from './components/OrganizationManager';
 
 const OrganizationPage = () => {
     const searchParams = useSearchParams();
@@ -26,7 +27,7 @@ const OrganizationPage = () => {
     const type = typeParam as OrganizationType;
     
     return (
-        <OrganizationComp type={type} />
+        <OrganizationManager type={type} />
     );
 };
 

@@ -18,7 +18,7 @@ export interface ICall extends Document {
 const CallSchema = new Schema<ICall>({
     directorate: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.ORGANIZATION,
+        ref: COLLECTIONS.ORGAN,
         required: true
     },
     calendar: {

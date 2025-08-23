@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 import { CallStatus } from "./enums/call.status.enum";
 import { Call } from "./call.model";
+import { Directorate } from "../organs/base.organization.model";
 
 
 export interface GetCallsOptions {
@@ -22,7 +23,16 @@ export interface CreateCallDto {
 
 export class CallService {
 
+    private static async validateCall(theme: Partial<CreateCallDto>) {
+        const directorate = await Directorate.findById(theme.directorate);
+        if (!directorate) {
+            throw new Error("Directorate Not Found!");
+        }
+        return
+    }
+
     static async createCall(data: CreateCallDto) {
+        await this.validateCall(data);
         const createdCall = await Call.create({ ...data });
         return createdCall;
     }

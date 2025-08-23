@@ -5,8 +5,8 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { classNames } from 'primereact/utils';
-import { AcademicLevel, Category, Classification, Organization, OrganizationType, Ownership, validateOrganization, } from '@/models/organization';
 import { Dropdown } from 'primereact/dropdown';
+import { AcademicLevel, Category, Classification, Organization, OrganizationType, Ownership, validateOrganization } from '../models/organization.model';
 
 interface SaveDialogProps {
     visible: boolean;

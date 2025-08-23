@@ -1,9 +1,8 @@
 import mongoose, { Document, Schema, model } from 'mongoose';
-import { Category } from '../organizations/enums/category.enum';
 import { Gender } from './enums/gender.enum';
 import { Accessibility } from './enums/accessibility.enum';
-
-
+import { COLLECTIONS } from '../../enums/collections.enum';
+import { Category } from '../organs/enums/category.enum';
 
 export interface IApplicant extends Document {
     first_name: string;
@@ -42,7 +41,7 @@ const ApplicantSchema = new Schema<IApplicant>({
     },
     organization: {
         type: Schema.Types.ObjectId,
-        ref: 'Organization',
+        ref: COLLECTIONS.ORGAN,
         required: true
     },
     accessibility: {

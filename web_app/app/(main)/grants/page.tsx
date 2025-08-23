@@ -2,41 +2,21 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { OrganizationService } from '@/services/OrganizationService';
-import { Organization } from '@/models/organization';
 import GrantManager from './components/GrantManager';
+import { Organization } from '../organizations/models/organization.model';
 
 
 const GrantPage = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const directorateId = searchParams.get('directorate');
-    const [directorate, setDirectorate] = useState<Organization | null>(null);
-    const [loading, setLoading] = useState(true);
-
+    const directorate = JSON.parse(searchParams.get("directorate")!) as Organization;
+    
     useEffect(() => {
-        if (!directorateId) {
+        if (!directorate) {
             router.push('/auth/error');
             return;
-        }
-
-        OrganizationService.getDirectorateByID(directorateId)
-            .then((result) => {
-                if (!result) {
-                    router.push('/auth/error');
-                } else {
-                    setDirectorate(result);
-                }
-            })
-            .catch(() => {
-                router.push('/auth/error');
-            })
-            .finally(() => setLoading(false));
-    }, [directorateId, router]);
-
-    if (loading) {
-        return <p>Loading...</p>;
-    }
+        }      
+    }, [directorate, router]);
 
     if (!directorate) {
         return null; // Or redirecting already handled
@@ -44,7 +24,6 @@ const GrantPage = () => {
 
     return (
         <GrantManager directorate={directorate} />
-        
     );
 };
 

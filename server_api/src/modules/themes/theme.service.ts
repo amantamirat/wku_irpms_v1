@@ -2,8 +2,7 @@ import { Types } from "mongoose";
 import { ThemeLevel } from "./enums/theme.level.enum";
 import { ThemeType } from "./enums/theme.type.enum";
 import { Theme } from "./base.theme.model";
-import Organization from "../organizations/organization.model";
-import { Unit } from "../organizations/enums/unit.enum";
+import { Directorate } from "../organs/base.organization.model";
 
 export interface GetThemesOptions {
     type?: ThemeType;
@@ -43,8 +42,8 @@ export class ThemeService {
 
     private static async validateThemeHierarchy(theme: Partial<CreateThemeDto>) {
         if (theme.type === ThemeType.catalog) {
-            const directorate = await Organization.findById(theme.directorate);
-            if (!directorate || directorate.type !== Unit.Directorate) {
+            const directorate = await Directorate.findById(theme.directorate);
+            if (!directorate) {
                 throw new Error("Directorate Not Found!");
             }
             return

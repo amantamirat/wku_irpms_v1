@@ -17,7 +17,7 @@ interface ValidationDocument extends EValDocument {
 }
 
 const EValSchema = new Schema<EValDocument>({
-    directorate: { type: Schema.Types.ObjectId, ref: COLLECTIONS.ORGANIZATION, required: true, immutable: true },
+    directorate: { type: Schema.Types.ObjectId, ref: COLLECTIONS.ORGAN, required: true, immutable: true },
 });
 
 EValSchema.pre('deleteOne', { document: true, query: false }, async function (next) {

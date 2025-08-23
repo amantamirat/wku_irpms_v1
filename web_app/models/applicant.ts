@@ -1,4 +1,5 @@
-import { Category, Organization } from "./organization";
+import { Category, Organization } from "@/app/(main)/organizations/models/organization.model";
+
 
 export enum Gender {
     Male = 'Male',

@@ -9,10 +9,10 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Organization } from '@/models/organization';
 import SaveDialog from './dialogs/SaveDialog';
 import { Theme, ThemeLevel, ThemeType } from '../models/theme.model';
 import { ThemeApi } from '../api/theme.api';
+import { Organization } from '../../organizations/models/organization.model';
 
 
 interface ThemeManagerProps {

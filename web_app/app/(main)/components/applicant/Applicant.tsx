@@ -12,8 +12,8 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Category, Organization, OrganizationType } from '@/models/organization';
 import { OrganizationService } from '@/services/OrganizationService';
+import { Category, Organization, OrganizationType } from '../../organizations/models/organization.model';
 
 interface ApplicantCompProps {
     scope: Category;

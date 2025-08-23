@@ -2,8 +2,6 @@ import { Organization } from "@/models/organization";
 import { ApiClient } from "@/api/ApiClient";
 import { EvalType, Evaluation } from "../models/eval.model";
 
-
-
 const end_point = '/evals';
 
 function sanitizeEvaluation(evaluation: Partial<Evaluation>): Partial<Evaluation> {
@@ -40,7 +38,6 @@ export const EvaluationApi = {
         if (options.type) query.append("type", options.type);
         if (options.parent) query.append("parent", options.parent);
         if (options.directorate) query.append("directorate", options.directorate);
-
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Evaluation[];
     },

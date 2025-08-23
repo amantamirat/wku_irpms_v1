@@ -2,7 +2,8 @@
 import React, { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ApplicantComp from '../../components/applicant/Applicant';
-import { Category } from '@/models/organization';
+import { Category } from '../../organizations/models/organization.model';
+
 
 const ApplicantPage = () => {
     const searchParams = useSearchParams();

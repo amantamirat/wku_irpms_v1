@@ -4,10 +4,7 @@ import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import { Call } from '../models/call.model';
 import { CallApi } from '../api/call.api';
-import { Calendar } from '../../calendars/models/calendar.model';
-import { Organization } from '@/models/organization';
 import { Skeleton } from 'primereact/skeleton';
-import { Badge } from 'primereact/badge';
 import CallCard from './CallCard';
 
 

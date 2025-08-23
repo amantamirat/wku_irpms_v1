@@ -6,8 +6,10 @@ import { MenuProvider } from './context/menucontext';
 import Link from 'next/link';
 import { AppMenuItem } from '@/types';
 import { PrimeIcons } from 'primereact/api';
-import { Category, Organization, OrganizationType } from '@/models/organization';
-import { OrganizationService } from '@/services/OrganizationService';
+
+
+import { Category, Organization, OrganizationType } from '@/app/(main)/organizations/models/organization.model';
+import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
 
 
 const AppMenu = () => {
@@ -15,7 +17,7 @@ const AppMenu = () => {
     const icons = ['pi pi-mars', 'pi pi-microchip', 'pi pi-prime', 'pi pi-sparkles', 'pi pi-venus'];
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     useEffect(() => {
-        OrganizationService.getOrganizationsByType(OrganizationType.Directorate)
+        OrganizationApi.getOrganizations({type:OrganizationType.Directorate})
             .then(data => setOrganizations(data))
             .catch(err => console.error('Failed to fetch organization of directorates', err));
     }, []);
@@ -30,25 +32,25 @@ const AppMenu = () => {
                 {
                     label: 'Calls',
                     icon: 'pi pi-fw pi-megaphone',
-                    to: `/calls?directorate=${dir._id}`
+                    to: `/calls?directorate=${encodeURIComponent(JSON.stringify(dir))}`
                 },
 
                 {
                     label: 'Grants',
                     icon: 'pi pi-fw pi-wrench',
-                    to: `/grants?directorate=${dir._id}`
+                    to: `/grants?directorate=${encodeURIComponent(JSON.stringify(dir))}`
                 },
 
                 {
                     label: 'Themes',
                     icon: 'pi pi-fw pi-tags',
-                    to: `/themes?directorate=${dir._id}`
+                    to: `/themes?directorate=${encodeURIComponent(JSON.stringify(dir))}`
 
                 },
                 {
                     label: 'Evaluations',
                     icon: 'pi pi-fw pi-calculator',
-                    to: `/evals?directorate=${dir._id}`
+                    to: `/evals?directorate=${encodeURIComponent(JSON.stringify(dir))}`
                 },
             ]
         }))
@@ -98,32 +100,32 @@ const AppMenu = () => {
                         {
                             label: 'Colleges',
                             icon: 'pi pi-fw pi-warehouse',
-                            to: `/pages/organizations?type=${OrganizationType.College}`
+                            to: `/organizations?type=${OrganizationType.College}`
                         },
                         {
                             label: 'Directorates',
                             icon: 'pi pi-fw pi-objects-column',
-                            to: `/pages/organizations?type=${OrganizationType.Directorate}`
+                            to: `/organizations?type=${OrganizationType.Directorate}`
                         },
                         {
                             label: 'Offices',
                             icon: 'pi pi-fw pi-shop',
-                            to: `/pages/organizations?type=${OrganizationType.Supportive}`
+                            to: `/organizations?type=${OrganizationType.Supportive}`
                         },
                         {
                             label: 'Sectors',
                             icon: 'pi pi-fw pi-building-columns',
-                            to: `/pages/organizations?type=${OrganizationType.Sector}`
+                            to: `/organizations?type=${OrganizationType.Sector}`
                         },
                         {
                             label: 'Specializations',
                             icon: PrimeIcons.FILTER,
-                            to: `/pages/organizations?type=${OrganizationType.Specialization}`
+                            to: `/organizations?type=${OrganizationType.Specialization}`
                         },
                         {
                             label: 'Positions',
                             icon: 'pi pi-fw pi-flag',
-                            to: `/pages/organizations?type=${OrganizationType.Position}`
+                            to: `/organizations?type=${OrganizationType.Position}`
                         },
                     ]
                 },

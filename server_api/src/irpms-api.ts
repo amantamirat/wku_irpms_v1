@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/user.routes';
 import roleRoutes from './routes/role.routes';
-import organizationRoutes from './modules/organizations/organization.routes';
+import organRoutes from './modules/organs/organization.routes';
 import applicantRoutes from './modules/applicants/applicant.routes';
 import themeRoutes from './modules/themes/theme.routes';
 import evalRoutes from './modules/evals/evaluation.routes';
@@ -18,6 +18,8 @@ import grantRoutes from './modules/grants/grant.routes';
 import { initAdminUser, initPermissions, initRoles } from './services/initService';
 import { initializeThemeModels } from './modules/themes/init.models';
 import { initializeEvalModels } from './modules/evals/init.models';
+import { initializeOrganModels } from './modules/organs/init.model';
+
 
 
 dotenv.config();
@@ -31,7 +33,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/roles", roleRoutes);
 
 app.use("/api/applicants", applicantRoutes);
-app.use("/api/organizations", organizationRoutes);
+app.use("/api/organs", organRoutes);
 app.use("/api/themes", themeRoutes);
 app.use("/api/evals", evalRoutes);
 
@@ -59,6 +61,7 @@ const PORT = process.env.SERVER_PORT || 5000;
     }
     await mongoose.connect(MONGO_URL);
     console.log('database connection established');
+    initializeOrganModels();
     initializeThemeModels();
     initializeEvalModels();
 

@@ -11,7 +11,6 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Organization } from '@/models/organization';
 import { Grant } from '../models/grant.model';
 import { GrantApi } from '../api/grant.api';
 import SaveDialog from './SaveDialog';
@@ -21,6 +20,7 @@ import { EvaluationApi } from '../../evals/api/eval.api';
 import { Evaluation } from '../../evals/models/eval.model';
 import { Theme } from '../../themes/models/theme.model';
 import { ThemeApi } from '../../themes/api/theme.api';
+import { Organization } from '../../organizations/models/organization.model';
 
 
 interface GrantManagerProps {

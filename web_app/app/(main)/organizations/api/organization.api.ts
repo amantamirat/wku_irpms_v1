@@ -1,7 +1,8 @@
-import { Organization, OrganizationType } from "@/models/organization";
-import { MyService } from "./MyService";
+import { ApiClient } from "@/api/ApiClient";
+import { Organization, OrganizationType } from "../models/organization.model";
 
-const end_point = '/organizations';
+
+const end_point = '/organs';
 
 function sanitizeOrganization(organization: Partial<Organization>): Partial<Organization> {
     return {
@@ -13,26 +14,34 @@ function sanitizeOrganization(organization: Partial<Organization>): Partial<Orga
     };
 }
 
-export const OrganizationService = {
+export interface GetOrganizationsOptions {
+    type?: OrganizationType;
+    parent?: string;
+}
+
+export const OrganizationApi = {
 
     async createOrganization(organization: Partial<Organization>): Promise<Organization> {
         const sanitized = sanitizeOrganization(organization);
-        const createdData = await MyService.post(end_point, sanitized);
+        const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as Organization;
     },
 
     async getDirectorateByID(id: string): Promise<Organization> {
-        const data = await MyService.get(`${end_point}/${id}`);
+        const data = await ApiClient.get(`${end_point}/${id}`);
         return data as Organization;
     },
 
-    async getOrganizationsByType(type: OrganizationType): Promise<Organization[]> {
-        const data = await MyService.get(`${end_point}/type/${type}`);
+    async getOrganizations(options: GetOrganizationsOptions): Promise<Organization[]> {
+        const query = new URLSearchParams();
+        if (options.type) query.append("type", options.type);
+        if (options.parent) query.append("parent", options.parent);
+        const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Organization[];
     },
 
     async getOrganizationsByParent(parent: string): Promise<Organization[]> {
-        const data = await MyService.get(`${end_point}/parent/${parent}`);
+        const data = await ApiClient.get(`${end_point}/parent/${parent}`);
         return data as Organization[];
     },
 
@@ -41,7 +50,7 @@ export const OrganizationService = {
             throw new Error("_id required.");
         }
         const url = `${end_point}/${organization._id}`;
-        const updatedOrganization = await MyService.put(url, organization);
+        const updatedOrganization = await ApiClient.put(url, organization);
         return updatedOrganization as Organization;
     },
 
@@ -50,7 +59,7 @@ export const OrganizationService = {
             throw new Error("_id required.");
         }
         const url = `${end_point}/${organization._id}`;
-        const response = await MyService.delete(url);
+        const response = await ApiClient.delete(url);
         return response;
     },
 };

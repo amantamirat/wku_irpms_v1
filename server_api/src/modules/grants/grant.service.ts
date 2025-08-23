@@ -1,9 +1,8 @@
 import { Types } from "mongoose";
 import { Evaluation } from "../evals/evaluation.model";
-import { Unit } from "../organizations/enums/unit.enum";
-import Organization from "../organizations/organization.model";
 import { Catalog } from "../themes/catalog.theme.model";
 import { Grant } from "./grant.model";
+import { Directorate } from "../organs/base.organization.model";
 
 
 export interface GetGrantsOptions {
@@ -23,8 +22,8 @@ export interface CreateGrantDto {
 export class GrantService {
 
     private static async validateGrant(grant: Partial<CreateGrantDto>) {
-        const directorate = await Organization.findById(grant.directorate).lean();
-        if (!directorate || directorate.type !== Unit.Directorate) {
+        const directorate = await Directorate.findById(grant.directorate).lean();
+        if (!directorate) {
             throw new Error("Directorate Not Found!");
         }
         const theme = await Catalog.findById(grant.theme).lean();

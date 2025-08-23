@@ -1,7 +1,5 @@
 'use client';
 import DeleteDialog from '@/components/DeleteDialog';
-import { AcademicLevel, Classification, getChildType, Organization, OrganizationType } from '@/models/organization';
-import { OrganizationService } from '@/services/OrganizationService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -10,14 +8,17 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import SaveDialog from './dialogs/SaveDialog';
+import SaveDialog from './SaveDialog';
+import { getChildType, Organization, OrganizationType } from '../models/organization.model';
+import { OrganizationApi } from '../api/organization.api';
 
-interface OrganizationCompProps {
+
+interface OrganizationMangerProps {
     type: OrganizationType;
     parent?: Organization;
 }
 
-const OrganizationComp = (props: OrganizationCompProps) => {
+const OrganizationManager = (props: OrganizationMangerProps) => {
 
     const type = props.type;
     const childType = getChildType(type);
@@ -28,6 +29,7 @@ const OrganizationComp = (props: OrganizationCompProps) => {
         parent: props.parent
     };
     const [organizations, setOrganizations] = useState<Organization[]>([]);
+    const [error, setError] = useState<string | null>(null);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
@@ -48,23 +50,18 @@ const OrganizationComp = (props: OrganizationCompProps) => {
 
     const loadOrganizations = useCallback(async () => {
         try {
-            if (props.parent?._id) {
-                const data = await OrganizationService.getOrganizationsByParent(props.parent._id);
+            if (props.parent) {
+                const data = await OrganizationApi.getOrganizations({ parent: props.parent._id });
                 setOrganizations(data);
             } else {
-                const data = await OrganizationService.getOrganizationsByType(type);
+                const data = await OrganizationApi.getOrganizations({ type: props.type });
                 setOrganizations(data);
             }
         } catch (err) {
             console.error('Failed to load organizations:', err);
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load organizations data',
-                detail: '' + err,
-                life: 3000
-            });
+            setError(`Failed to load calls. Please try again later. Error:${err}`);
         }
-    }, [props.parent?._id, type, toast]);
+        }, [props.parent?._id, type, error]);
 
     useEffect(() => {
         setFilters(initFilters());
@@ -76,11 +73,11 @@ const OrganizationComp = (props: OrganizationCompProps) => {
         try {
             let _organizations = [...(organizations as any)];
             if (selectedOrganization._id) {
-                const updatedOrganization = await OrganizationService.updateOrganization(selectedOrganization);
+                const updatedOrganization = await OrganizationApi.updateOrganization(selectedOrganization);
                 const index = organizations.findIndex((organization) => organization._id === selectedOrganization._id);
                 _organizations[index] = updatedOrganization;
             } else {
-                const newOrganization = await OrganizationService.createOrganization(selectedOrganization);
+                const newOrganization = await OrganizationApi.createOrganization(selectedOrganization);
                 _organizations.push({ ...selectedOrganization, _id: newOrganization._id });
             }
             toast.current?.show({
@@ -106,7 +103,7 @@ const OrganizationComp = (props: OrganizationCompProps) => {
 
     const deleteOrganization = async () => {
         try {
-            const deleted = await OrganizationService.deleteOrganization(selectedOrganization);
+            const deleted = await OrganizationApi.deleteOrganization(selectedOrganization);
             if (deleted) {
                 let _organizations = (organizations as any)?.filter((val: any) => val._id !== selectedOrganization._id);
                 setOrganizations(_organizations);
@@ -242,7 +239,7 @@ const OrganizationComp = (props: OrganizationCompProps) => {
                             expandedRows: expandedRows,
                             onRowToggle: (e) => setExpandedRows(e.data),
                             rowExpansionTemplate: (data) => (
-                                <OrganizationComp
+                                <OrganizationManager
                                     type={childType}
                                     parent={data as Organization}
                                 />
@@ -298,4 +295,4 @@ const OrganizationComp = (props: OrganizationCompProps) => {
     );
 };
 
-export default OrganizationComp;
+export default OrganizationManager;

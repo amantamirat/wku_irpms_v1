@@ -9,9 +9,9 @@ import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import SaveDialog from './dialogs/SaveDialog';
-import { Organization } from '@/models/organization';
 import { EvalType, Evaluation, FormType } from '../models/eval.model';
 import { EvaluationApi } from '../api/eval.api';
+import { Organization } from '../../organizations/models/organization.model';
 
 
 
