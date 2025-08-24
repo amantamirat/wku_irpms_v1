@@ -1,6 +1,6 @@
-import { Organization } from "@/models/organization";
 import { Calendar } from "../../calendars/models/calendar.model";
 import { Grant } from "../../grants/models/grant.model";
+import { Organization } from "../../organizations/models/organization.model";
 
 export enum CallStatus {
     planned = 'Planned',
