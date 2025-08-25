@@ -79,17 +79,17 @@ const AppMenu = () => {
                         {
                             label: 'Academic',
                             icon: 'pi pi-fw pi-crown',
-                            to: `/pages/applicants?scope=${Category.academic}`
+                            to: `/applicants?scope=${Category.academic}`
                         },
                         {
                             label: 'Supportive',
                             icon: 'pi pi-fw pi-bullseye',
-                            to: `/pages/applicants?scope=${Category.supportive}`
+                            to: `/applicants?scope=${Category.supportive}`
                         },
                         {
                             label: 'External',
                             icon: 'pi pi-fw pi-asterisk',
-                            to: `/pages/applicants?scope=${Category.external}`
+                            to: `/applicants?scope=${Category.external}`
                         }
                     ]
                 },

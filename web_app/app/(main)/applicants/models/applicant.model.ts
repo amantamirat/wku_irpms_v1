@@ -65,7 +65,7 @@ export const validateApplicant = (
 };
 
 //convert the applicant scope to the approprate unit umbrella
-export const typeMap: Record<Category, OrganizationalUnit> = {
+export const scopeToOrganizationUnit: Record<Category, OrganizationalUnit> = {
     [Category.academic]: OrganizationalUnit.Department,
     [Category.supportive]: OrganizationalUnit.Supportive,
     [Category.external]: OrganizationalUnit.External,

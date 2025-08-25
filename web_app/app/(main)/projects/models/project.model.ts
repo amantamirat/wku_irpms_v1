@@ -1,4 +1,4 @@
-import { Applicant } from "@/models/applicant";
+import { Applicant } from "../../applicants/models/applicant.model";
 import { Call } from "../../calls/models/call.model";
 import { Theme } from "../../themes/models/theme.model";
 

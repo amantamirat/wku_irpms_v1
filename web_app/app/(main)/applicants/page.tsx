@@ -1,8 +1,9 @@
 'use client';
 import React, { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import ApplicantComp from '../../components/applicant/Applicant';
-import { Category } from '../../organizations/models/organization.model';
+import { Category } from '../organizations/models/organization.model';
+import ApplicantManager from './components/ApplicantManager';
+
 
 
 const ApplicantPage = () => {
@@ -26,7 +27,7 @@ const ApplicantPage = () => {
     }
     const scope = scopeParam as Category;
     return (
-        <ApplicantComp scope={scope} />
+        <ApplicantManager scope={scope} />
     );
 };
 

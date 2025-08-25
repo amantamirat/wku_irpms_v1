@@ -2,8 +2,7 @@
 
 import DeleteDialog from '@/components/DeleteDialog';
 import SaveDialog from './dialogs/SaveDialog';
-import { Applicant, Gender, typeMap } from '@/models/applicant';
-import { ApplicantService } from '@/services/ApplicantService';
+import { Applicant, Gender, scopeToOrganizationUnit } from '../models/applicant.model';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -14,12 +13,13 @@ import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Category, Organization, OrganizationalUnit } from '../../organizations/models/organization.model';
 import { OrganizationApi } from '../../organizations/api/organization.api';
+import { ApplicantApi } from './api/applicant.api';
 
-interface ApplicantCompProps {
+interface ApplicantManagerProps {
     scope: Category;
 }
 
-const ApplicantComp = (props: ApplicantCompProps) => {
+const ApplicantManager = (props: ApplicantManagerProps) => {
 
     const emptyApplicant: Applicant = {
         first_name: '',
@@ -51,7 +51,7 @@ const ApplicantComp = (props: ApplicantCompProps) => {
 
     const loadApplicants = useCallback(async () => {
         try {
-            const data = await ApplicantService.getApplicantsByScope(scope);
+            const data = await ApplicantApi.getApplicants({ scope: scope });
             setApplicants(data);
         } catch (err) {
             toast.current?.show({
@@ -68,7 +68,7 @@ const ApplicantComp = (props: ApplicantCompProps) => {
     const loadOrganizations = useCallback(async () => {
         try {
             if (!scope) return;
-            const type = typeMap[scope];
+            const type = scopeToOrganizationUnit[scope];
             if (type) {
                 const data = await OrganizationApi.getOrganizations({ type });
                 setOrganizations(data);
@@ -98,11 +98,11 @@ const ApplicantComp = (props: ApplicantCompProps) => {
         try {
             let _applicants = [...applicants];
             if (selectedApplicant._id) {
-                const updated = await ApplicantService.updateApplicant(selectedApplicant);
+                const updated = await ApplicantApi.updateApplicant(selectedApplicant);
                 const index = _applicants.findIndex((c) => c._id === selectedApplicant._id);
                 _applicants[index] = selectedApplicant;
             } else {
-                const created = await ApplicantService.createApplicant(selectedApplicant);
+                const created = await ApplicantApi.createApplicant(selectedApplicant);
                 _applicants.push({ ...selectedApplicant, _id: created._id });
             }
             setApplicants(_applicants);
@@ -127,7 +127,7 @@ const ApplicantComp = (props: ApplicantCompProps) => {
 
     const deleteApplicant = async () => {
         try {
-            const deleted = await ApplicantService.deleteApplicant(selectedApplicant);
+            const deleted = await ApplicantApi.deleteApplicant(selectedApplicant);
             if (deleted) {
                 setApplicants(applicants.filter((c) => c._id !== selectedApplicant._id));
                 toast.current?.show({
@@ -255,4 +255,4 @@ const ApplicantComp = (props: ApplicantCompProps) => {
     );
 };
 
-export default ApplicantComp;
+export default ApplicantManager;

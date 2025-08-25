@@ -1,15 +1,15 @@
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import { Collaborator, Project } from "../models/project.model";
 import { Dropdown } from "primereact/dropdown";
 import { useEffect, useState } from "react";
-import { Category, Organization, OrganizationalUnit } from "../../organizations/models/organization.model";
-import { classNames } from "primereact/utils";
+import { ApplicantApi } from "../../applicants/components/api/applicant.api";
+import { Applicant, scopeToOrganizationUnit } from "../../applicants/models/applicant.model";
 import { OrganizationApi } from "../../organizations/api/organization.api";
-import { typeMap } from "@/models/applicant";
-import { ApplicantService } from "@/services/ApplicantService";
+import { Category, Organization } from "../../organizations/models/organization.model";
+import { Collaborator } from "../models/project.model";
 
-interface ProjectInfoStepProps {
+
+interface AddCollaboratorDialogProps {
     collaborator: Collaborator;
     setCollaborator: (collaborator: Collaborator) => void;
     visible: boolean;
@@ -17,18 +17,19 @@ interface ProjectInfoStepProps {
     onHide: () => void;
 }
 
-export default function AddCollaboratorDialog({ collaborator, setCollaborator, visible, onHide, onSave }: ProjectInfoStepProps) {
+export default function AddCollaboratorDialog({ collaborator, setCollaborator, visible, onHide, onSave }: AddCollaboratorDialogProps) {
 
     const [scope, setScope] = useState<Category>();
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [workspace, setWorkspace] = useState<Organization>();
+    const [applicants, setApplicants] = useState<Applicant[]>([]);
 
     useEffect(() => {
         let isMounted = true;
         const fetchOrganizations = async () => {
             try {
                 if (!scope) return;
-                const type = typeMap[scope];
+                const type = scopeToOrganizationUnit[scope];
                 if (type) {
                     const data = await OrganizationApi.getOrganizations({ type });
                     if (isMounted) {
@@ -45,30 +46,24 @@ export default function AddCollaboratorDialog({ collaborator, setCollaborator, v
         };
     }, [scope]);
 
-
     useEffect(() => {
         let isMounted = true;
-        const fetchOrganizations = async () => {
+        const fetchApplicants = async () => {
             try {
                 if (!workspace) return;
-               
-                
-                    //const data = await ApplicantService.getOrganizations({ type });
-                    if (isMounted) {
-                       // setOrganizations(data);
-                    }
-                
+                const data = await ApplicantApi.getApplicants({ organization: workspace._id });
+                if (isMounted) {
+                    setApplicants(data);
+                }
             } catch (err) {
-                console.error("Failed to fetch organizations:", err);
+                console.error("Failed to fetch applicants:", err);
             }
         };
-        fetchOrganizations();
+        fetchApplicants();
         return () => {
             isMounted = false;
         };
     }, [workspace]);
-
-
 
 
     const footer = (
@@ -113,7 +108,22 @@ export default function AddCollaboratorDialog({ collaborator, setCollaborator, v
                     }
                     optionLabel="name"
                     placeholder="Select a Workspace"
-                    //className={classNames({ 'p-invalid': submitted && !scope })}
+                //className={classNames({ 'p-invalid': submitted && !scope })}
+                />
+            </div>
+
+            <div className="field">
+                <label htmlFor="applicant">Collaborator</label>
+                <Dropdown
+                    id="applicant"
+                    value={collaborator.applicant}
+                    options={applicants}
+                    onChange={(e) =>
+                        setCollaborator({ ...collaborator, applicant: e.value })
+                    }
+                    optionLabel="first_name"
+                    placeholder="Select a Collaborator"
+                //className={classNames({ 'p-invalid': submitted && !scope })}
                 />
             </div>
 

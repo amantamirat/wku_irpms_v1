@@ -27,11 +27,13 @@ export const OrganizationApi = {
         return createdData as Organization;
     },
 
-    async getDirectorateByID(id: string): Promise<Organization> {
+    /**     
+     async getDirectorateByID(id: string): Promise<Organization> {
         const data = await ApiClient.get(`${end_point}/${id}`);
         return data as Organization;
     },
-
+    */
+   
     async getOrganizations(options: GetOrganizationsOptions): Promise<Organization[]> {
         const query = new URLSearchParams();
         if (options.type) query.append("type", options.type);
