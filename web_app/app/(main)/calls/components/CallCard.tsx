@@ -7,6 +7,7 @@ import { Button } from "primereact/button";
 import { useState } from "react";
 import ApplyWizard from "../../projects/components/ApplyWizard";
 import { Organization } from "../../organizations/models/organization.model";
+import { Project } from "../../projects/models/project.model";
 
 interface CallCardProps {
     call: Call;
@@ -17,6 +18,11 @@ export default function CallCard(props: CallCardProps) {
 
     const { call } = props;
 
+    const emptyProject: Project = {
+        title: "",
+        call: call
+    };
+    const [project, setProject] = useState<Project>(emptyProject);
     const [showApplyDialog, setShowApplyDialog] = useState(false);
 
     const header = <img alt="Call" src={call.poster || "/images/callcard.png"} />;
@@ -31,6 +37,7 @@ export default function CallCard(props: CallCardProps) {
                     label="Apply" icon="pi pi-check-circle" severity="success"
                     rounded raised outlined
                     onClick={() => {
+                        setProject(emptyProject);
                         setShowApplyDialog(true);
                     }}
                     disabled={new Date(call.deadline) < new Date()}
@@ -43,9 +50,6 @@ export default function CallCard(props: CallCardProps) {
         if (text.length <= maxLength) return text;
         return text.substring(0, maxLength) + '...';
     };
-
-
-
 
     return (
         <>
@@ -77,6 +81,7 @@ export default function CallCard(props: CallCardProps) {
                     visible={showApplyDialog}
                     call={call}
                     onHide={() => setShowApplyDialog(false)}
+                    project={project} setProject={setProject}
                 />
             )}
         </>

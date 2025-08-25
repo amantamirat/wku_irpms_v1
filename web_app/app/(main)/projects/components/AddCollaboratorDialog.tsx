@@ -13,11 +13,11 @@ interface AddCollaboratorDialogProps {
     collaborator: Collaborator;
     setCollaborator: (collaborator: Collaborator) => void;
     visible: boolean;
-    onSave: () => void;
+    onAdd: () => void;
     onHide: () => void;
 }
 
-export default function AddCollaboratorDialog({ collaborator, setCollaborator, visible, onHide, onSave }: AddCollaboratorDialogProps) {
+export default function AddCollaboratorDialog({ collaborator, setCollaborator, visible, onHide, onAdd }: AddCollaboratorDialogProps) {
 
     const [scope, setScope] = useState<Category>();
     const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -69,7 +69,7 @@ export default function AddCollaboratorDialog({ collaborator, setCollaborator, v
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
-            <Button label="Save" icon="pi pi-check" text onClick={onSave} />
+            <Button label="Add" icon="pi pi-check" text onClick={onAdd} />
         </>
     );
 
@@ -93,7 +93,7 @@ export default function AddCollaboratorDialog({ collaborator, setCollaborator, v
                         setScope(e.value)
                     }
                     placeholder="Select Scope"
-                //className={classNames({ 'p-invalid': submitted && !scope })}
+                    //className={classNames({ 'p-invalid': submitted && !scope })}
                 />
             </div>
 
@@ -108,7 +108,7 @@ export default function AddCollaboratorDialog({ collaborator, setCollaborator, v
                     }
                     optionLabel="name"
                     placeholder="Select a Workspace"
-                //className={classNames({ 'p-invalid': submitted && !scope })}
+                    //className={classNames({ 'p-invalid': submitted && !scope })}
                 />
             </div>
 
@@ -123,7 +123,7 @@ export default function AddCollaboratorDialog({ collaborator, setCollaborator, v
                     }
                     optionLabel="first_name"
                     placeholder="Select a Collaborator"
-                //className={classNames({ 'p-invalid': submitted && !scope })}
+                    //className={classNames({ 'p-invalid': submitted && !scope })}
                 />
             </div>
 

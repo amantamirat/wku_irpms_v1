@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Button } from "primereact/button";
 import { Steps } from "primereact/steps";
 import { Project } from "../models/project.model";
-
 import UploadDocumentStep from "./UploadDocumentStep";
 import ProjectInfoStep from "./ProjectInfoStep";
 import CollaboratorsStep from "./CollaboratorsStep";
@@ -12,20 +11,18 @@ import CollaboratorsStep from "./CollaboratorsStep";
 interface ApplyWizardProps {
     visible: boolean;
     call: Call;
+    project: Project;
+    setProject: (project: Project) => void;
     onHide: () => void;
 }
 
-export default function ApplyWizard({ visible, call, onHide: hideParent }: ApplyWizardProps) {
+export default function ApplyWizard({ visible, call, project, setProject, onHide: hideParent }: ApplyWizardProps) {
     const [activeStep, setActiveStep] = useState(0);
-    const items = [{ label: 'Upload Document' }, { label: 'Project Information' },
+    const items = [
+        { label: 'Upload Document' },
+        { label: 'Project Information' },
         { label: 'Collaborators' }
     ];
-
-    const emptyProject: Project = {
-        title: "",
-        call: call
-    };
-    const [project, setProject] = useState<Project>(emptyProject);
 
     const onHide = () => {
         setActiveStep(0);
@@ -37,11 +34,10 @@ export default function ApplyWizard({ visible, call, onHide: hideParent }: Apply
 
     const footer = (
         <div className="flex justify-content-center gap-2">
-           
             {activeStep === 0 && (
                 <Button label="Cancel" icon="pi pi-times" severity="secondary" outlined onClick={onHide} />
             )}
-             {activeStep > 0 && (
+            {activeStep > 0 && (
                 <Button label="Back" icon="pi pi-angle-left" onClick={prevStep} outlined severity="secondary" />
             )}
             {activeStep < 2 && (<Button label="Next" icon="pi pi-angle-right" onClick={nextStep} iconPos="right" outlined />
