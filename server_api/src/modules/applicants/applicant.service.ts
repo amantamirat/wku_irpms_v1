@@ -1,61 +1,67 @@
-import { BaseOrganization } from '../organs/base.organization.model';
-import { Category } from '../organs/enums/category.enum';
-import { Unit } from '../organs/enums/unit.enum';
-import Applicant from './applicant.model';
+import { Types } from "mongoose";
+import Applicant from "./applicant.model";
+import { Gender } from "./enums/gender.enum";
+import { Category } from "../organs/enums/category.enum";
+import { Accessibility } from "./enums/accessibility.enum";
+import { Unit } from "../organs/enums/unit.enum";
+import { BaseOrganization } from "../organs/base.organization.model";
 
 
+export interface GetApplicantsOptions {
+    organization?: Types.ObjectId | string;
+    scope?: Category;
+}
 
-const scopeToOrganizationType: Record<Category, Unit> = {
+export interface CreateApplicantDto {
+    first_name: string;
+    last_name: string;
+    birth_date: Date;
+    gender: Gender;
+    scope: Category;
+    organization: Types.ObjectId | string;
+    accessibility?: Accessibility[];
+}
+
+const scopeToOrganizationUnit: Record<Category, Unit> = {
     academic: Unit.Department,
     supportive: Unit.Supportive,
     external: Unit.External,
 };
 
-const validateApplicantOrganization = async (scope: Category, orgId: string) => {
-    const expected = scopeToOrganizationType[scope];
-    const org = await BaseOrganization.findById(orgId);
-    if (!org || org.type !== expected) {
-        throw new Error(`Scope ${scope} requires organization of type ${expected}`);
-    }
-};
+export class ApplicantService {
 
-export const createApplicant = async (data: any) => {
-    try {
-        await validateApplicantOrganization(data.scope, data.organization);
-        const applicant = await Applicant.create(data);
-        return { success: true, status: 201, data: applicant };
-    } catch (err: any) {
-        return { success: false, status: 400, message: err.message };
-    }
-};
-
-// Get Applicants
-export const getApplicants = async (scope: string) => {    
-    const applicants = await Applicant.find({scope}).populate('organization').sort({ createdAt: -1 }).lean();
-    return { success: true, status: 200, data: applicants };
-};
-
-export const updateApplicant = async (id: string, data: any) => {
-    try {
-        await validateApplicantOrganization(data.scope, data.organization);
-        const applicant = await Applicant.findById(id);
-        if (!applicant) {
-            return { success: false, status: 404, message: 'Applicant not found' };
+    private static async validateApplicant(applicant: Partial<CreateApplicantDto>) {
+        const expected = scopeToOrganizationUnit[applicant.scope!];
+        const org = await BaseOrganization.findById(applicant.organization);
+        if (!org || org.type !== expected) {
+            throw new Error(`Scope ${applicant.scope!} requires organization of unit ${expected}`);
         }
+    }
+
+    static async createApplicant(data: CreateApplicantDto) {
+        await this.validateApplicant(data);
+        const createdApplicant = await Applicant.create({ ...data });
+        return createdApplicant;
+    }
+
+    static async getApplicants(options: GetApplicantsOptions) {
+        const filter: any = {};
+        if (options.scope) filter.calendar = options.scope;
+        if (options.organization) filter.directorate = options.organization;
+        return Applicant.find(filter).populate('organization').lean();
+    }
+
+    static async updateApplicant(id: string, data: Partial<CreateApplicantDto>) {
+        await this.validateApplicant(data);
+        const applicant = await Applicant.findById(id);
+        if (!applicant) throw new Error("Applicant not found");
         Object.assign(applicant, data);
-        await applicant.save();
-        return { success: true, status: 200, data: applicant };
-    } catch (err: any) {
-        return { success: false, status: 400, message: err.message };
+        return applicant.save();
     }
-};
 
-
-export const deleteApplicant = async (id: string) => {
-    const applicant = await Applicant.findById(id);
-    if (!applicant) {
-        return { success: false, status: 404, message: 'Applicant not found' };
+    static async deleteApplicant(id: string) {
+        const applicant = await Applicant.findById(id);
+        if (!applicant) throw new Error("Applicant not found");
+        return await applicant.deleteOne();
     }
-    await applicant.deleteOne();
-    return { success: true, status: 200, message: 'Applicant deleted successfully' };
-};
+}

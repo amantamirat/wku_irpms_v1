@@ -1,63 +1,55 @@
 import { Request, Response } from 'express';
-import * as applicantService from './applicant.service';
-import { successResponse, errorResponse } from '../../util/response';
+import { errorResponse, successResponse } from '../../util/response';
+import { ApplicantService, CreateApplicantDto, GetApplicantsOptions } from './applicant.service';
+import { Types } from 'mongoose';
 
+export class ApplicantController {
 
-const createApplicant = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const result = await applicantService.createApplicant(req.body);
-    if (!result.success) {
-      errorResponse(res, result.status, result.message || '');
-      return;
+    static async createApplicant(req: Request, res: Response) {
+        try {
+            const data: CreateApplicantDto = req.body;
+            const theme = await ApplicantService.createApplicant(data);
+            successResponse(res, 201, "Applicant created successfully", theme);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
     }
-    successResponse(res, result.status, 'Applicant created successfully', result.data);
-  } catch (err: any) {
-    errorResponse(res, 500, 'Server error', err.message);
-  }
-};
 
-const updateApplicant = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const result = await applicantService.updateApplicant(req.params.id, req.body);
-    if (!result.success) {
-      errorResponse(res, result.status, result.message || '');
-      return;
+    static async getApplicants(req: Request, res: Response) {
+        try {
+            const { scope, organization } = req.query;
+            const filter = {
+                scope: scope ? scope : undefined,
+                organization: organization ? new Types.ObjectId(organization as string) : undefined
+            } as GetApplicantsOptions;
+            const applicants = await ApplicantService.getApplicants(filter);
+            successResponse(res, 200, 'Applicants fetched successfully', applicants);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
     }
-    successResponse(res, result.status, 'Applicant updated successfully', result.data);
-  } catch (err: any) {
-    errorResponse(res, 500, 'Server error', err.message);
-  }
-};
 
-const getApplicants = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const scope  = req.params.scope;
-    const result = await applicantService.getApplicants(scope);
-    successResponse(res, result.status, 'Applicants fetched successfully', result.data);
-  } catch (err: any) {    
-    console.log(err);
-    errorResponse(res, 500, err.message, err);
-  }
-};
-
-const deleteApplicant = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const result = await applicantService.deleteApplicant(req.params.id);
-    if (!result.success) {
-      errorResponse(res, result.status, result.message || '');
-      return;
+    static async updateApplicant(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+            const data: Partial<CreateApplicantDto> = req.body;
+            const updated = await ApplicantService.updateApplicant(id, data);
+            successResponse(res, 201, "Applicant updated successfully", updated);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
     }
-    successResponse(res, result.status, result.message, result.success);
-  } catch (err: any) {
-    errorResponse(res, 500, 'Server error', err.message);
-  }
-};
 
-const applicantController = {
-  createApplicant,
-  updateApplicant,
-  getApplicants,
-  deleteApplicant,
-};
+    static async deleteApplicant(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+            const deleted = await ApplicantService.deleteApplicant(id);
+            successResponse(res, 201, "Applicant deleted successfully", deleted);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    }
 
-export default applicantController;
+}
+
+
