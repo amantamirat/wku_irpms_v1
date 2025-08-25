@@ -117,8 +117,21 @@ export default function CollaboratorsStep({ project, setProject }: ProjectInfoSt
                 >
                     <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                     <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                    <Column field="applicant.first_name" header="First Name" sortable />
-                    <Column field="applicant.last_name" header="Last Name" sortable />
+                    <Column
+                        field="applicant.first_name"
+                        header="Collaborator"
+                        body={(rowData) => `${rowData.applicant.first_name} ${rowData.applicant.last_name}`}
+                        sortable
+                        headerStyle={{ minWidth: '15rem' }}
+                    />
+                    <Column field="applicant.gender" header="Gender" sortable headerStyle={{ minWidth: '8rem' }} />
+                    <Column
+                        field="applicant.organization.name"
+                        header="Workspace"
+                        sortable
+                        headerStyle={{ minWidth: '15rem' }} // use minWidth instead of width
+                        body={(rowData) => rowData.applicant.organization?.name || '-'} // safe access
+                    />
                     <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
 
                 </DataTable>
