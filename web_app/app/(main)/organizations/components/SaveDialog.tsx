@@ -6,7 +6,7 @@ import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { classNames } from 'primereact/utils';
 import { Dropdown } from 'primereact/dropdown';
-import { AcademicLevel, Category, Classification, Organization, OrganizationType, Ownership, validateOrganization } from '../models/organization.model';
+import { AcademicLevel, Category, Classification, Organization, OrganizationalUnit, Ownership, validateOrganization } from '../models/organization.model';
 
 interface SaveDialogProps {
     visible: boolean;
@@ -21,10 +21,10 @@ function SaveDialog(props: SaveDialogProps) {
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
-    const isProgram = organization.type === OrganizationType.Program;
-    const isSpecialization = organization.type === OrganizationType.Specialization;
-    const isPosition = organization.type === OrganizationType.Position;
-    const isExternal = organization.type === OrganizationType.External;
+    const isProgram = organization.type === OrganizationalUnit.Program;
+    const isSpecialization = organization.type === OrganizationalUnit.Specialization;
+    const isPosition = organization.type === OrganizationalUnit.Position;
+    const isExternal = organization.type === OrganizationalUnit.External;
 
     useEffect(() => {
         if (!visible) {

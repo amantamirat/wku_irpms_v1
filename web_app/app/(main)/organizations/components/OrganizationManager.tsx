@@ -9,12 +9,12 @@ import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import SaveDialog from './SaveDialog';
-import { getChildType, Organization, OrganizationType } from '../models/organization.model';
+import { getChildType, Organization, OrganizationalUnit } from '../models/organization.model';
 import { OrganizationApi } from '../api/organization.api';
 
 
 interface OrganizationMangerProps {
-    type: OrganizationType;
+    type: OrganizationalUnit;
     parent?: Organization;
 }
 
@@ -39,10 +39,10 @@ const OrganizationManager = (props: OrganizationMangerProps) => {
     const toast = useRef<Toast>(null);
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
-    const isProgram = props.type === OrganizationType.Program;
-    const isSpecialization = props.type === OrganizationType.Specialization;
-    const isPosition = props.type === OrganizationType.Position;
-    const isExternal = props.type === OrganizationType.External;
+    const isProgram = props.type === OrganizationalUnit.Program;
+    const isSpecialization = props.type === OrganizationalUnit.Specialization;
+    const isPosition = props.type === OrganizationalUnit.Position;
+    const isExternal = props.type === OrganizationalUnit.External;
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);

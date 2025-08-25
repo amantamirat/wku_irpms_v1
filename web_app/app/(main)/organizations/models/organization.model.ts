@@ -1,5 +1,5 @@
 // Enum for Organization Types
-export enum OrganizationType {
+export enum OrganizationalUnit {
     College = 'College',
     Department = 'Department',
     Program = 'Program',
@@ -59,7 +59,7 @@ export type Address = {
 export type Organization = {
     _id?: string;
     name: string;
-    type: OrganizationType;
+    type: OrganizationalUnit;
     academic_level?: AcademicLevel;
     classification?: Classification;
     ownership?: Ownership;
@@ -70,35 +70,35 @@ export type Organization = {
     updatedAt?: string;
 };
 
-export const getChildType = (current: OrganizationType): OrganizationType | null => {
+export const getChildType = (current: OrganizationalUnit): OrganizationalUnit | null => {
     switch (current) {
-        case OrganizationType.College:
-            return OrganizationType.Department;
-        case OrganizationType.Department:
-            return OrganizationType.Program;
-        case OrganizationType.Directorate:
-            return OrganizationType.Center;
-        case OrganizationType.Sector:
-            return OrganizationType.External;
-        case OrganizationType.Position:
-            return OrganizationType.Rank;
+        case OrganizationalUnit.College:
+            return OrganizationalUnit.Department;
+        case OrganizationalUnit.Department:
+            return OrganizationalUnit.Program;
+        case OrganizationalUnit.Directorate:
+            return OrganizationalUnit.Center;
+        case OrganizationalUnit.Sector:
+            return OrganizationalUnit.External;
+        case OrganizationalUnit.Position:
+            return OrganizationalUnit.Rank;
         default:
             return null; // No children
     }
 };
 
-export const getParentType = (current: OrganizationType): OrganizationType | null => {
+export const getParentType = (current: OrganizationalUnit): OrganizationalUnit | null => {
     switch (current) {
-        case OrganizationType.Department:
-            return OrganizationType.College;
-        case OrganizationType.Program:
-            return OrganizationType.Department;
-        case OrganizationType.Center:
-            return OrganizationType.Directorate;
-        case OrganizationType.External:
-            return OrganizationType.Sector;
-        case OrganizationType.Rank:
-            return OrganizationType.Position;
+        case OrganizationalUnit.Department:
+            return OrganizationalUnit.College;
+        case OrganizationalUnit.Program:
+            return OrganizationalUnit.Department;
+        case OrganizationalUnit.Center:
+            return OrganizationalUnit.Directorate;
+        case OrganizationalUnit.External:
+            return OrganizationalUnit.Sector;
+        case OrganizationalUnit.Rank:
+            return OrganizationalUnit.Position;
         default:
             return null; // Root-level types have no parent
     }
@@ -117,7 +117,7 @@ export const validateOrganization = (
     }
 
     switch (organization.type) {
-        case OrganizationType.Program:
+        case OrganizationalUnit.Program:
             if (!organization.academic_level) {
                 return { valid: false, message: 'Academic level is required for Program.' };
             }
@@ -126,19 +126,19 @@ export const validateOrganization = (
             }
             break;
 
-        case OrganizationType.Specialization:
+        case OrganizationalUnit.Specialization:
             if (!organization.academic_level) {
                 return { valid: false, message: 'Academic level is required for Specialization.' };
             }
             break;
 
-        case OrganizationType.External:
+        case OrganizationalUnit.External:
             if (!organization.ownership) {
                 return { valid: false, message: 'Ownership is required for External.' };
             }
             break;
 
-        case OrganizationType.Position:
+        case OrganizationalUnit.Position:
             if (!organization.category) {
                 return { valid: false, message: 'Category is required for Position.' };
             }

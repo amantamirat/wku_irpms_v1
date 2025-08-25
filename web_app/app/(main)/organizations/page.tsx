@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { OrganizationType } from './models/organization.model';
+import { OrganizationalUnit } from './models/organization.model';
 import OrganizationManager from './components/OrganizationManager';
 
 const OrganizationPage = () => {
@@ -10,8 +10,8 @@ const OrganizationPage = () => {
     const router = useRouter();
     const typeParam = searchParams.get('type');
 
-    const isValidType = (value: string): value is OrganizationType =>
-        Object.values(OrganizationType).includes(value as OrganizationType);
+    const isValidType = (value: string): value is OrganizationalUnit =>
+        Object.values(OrganizationalUnit).includes(value as OrganizationalUnit);
 
     const shouldRedirect = !typeParam || !isValidType(typeParam);
 
@@ -24,7 +24,7 @@ const OrganizationPage = () => {
     if (shouldRedirect) {
         return null;
     }
-    const type = typeParam as OrganizationType;
+    const type = typeParam as OrganizationalUnit;
     
     return (
         <OrganizationManager type={type} />

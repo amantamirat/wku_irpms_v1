@@ -22,11 +22,18 @@ const AppMenuitem = (props: AppMenuItemProps) => {
     // this is added for managing the color of the selected menu item
     let isActiveRoute = false;
     if (item?.to) {
-        const url = new URLSearchParams(item.to.split('?')[1] || '');
-        const id = url.get('id');
-        const idFromCurrent = searchParams.get('id');
-        isActiveRoute = pathname === item.to.split('?')[0] && id === idFromCurrent;
+        const [itemPath, itemQueryString] = item.to.split("?");
+        const itemParams = new URLSearchParams(itemQueryString || "");
+        const currentParams = new URLSearchParams(searchParams.toString());
+        let queriesMatch = true;
+        itemParams.forEach((value, key) => {
+            if (currentParams.get(key) !== value) {
+                queriesMatch = false;
+            }
+        });
+        isActiveRoute = pathname === itemPath && queriesMatch;
     }
+    //////////////
 
     const active = activeMenu === key || activeMenu.startsWith(key + '-');
     const onRouteChange = (url: string) => {

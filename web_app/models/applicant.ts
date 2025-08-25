@@ -1,4 +1,4 @@
-import { Category, Organization } from "@/app/(main)/organizations/models/organization.model";
+import { Category, Organization, OrganizationalUnit } from "@/app/(main)/organizations/models/organization.model";
 
 
 export enum Gender {
@@ -62,4 +62,11 @@ export const validateApplicant = (
     }
         
     return { valid: true };
+};
+
+//convert the applicant scope to the approprate unit umbrella
+export const typeMap: Record<Category, OrganizationalUnit> = {
+    [Category.academic]: OrganizationalUnit.Department,
+    [Category.supportive]: OrganizationalUnit.Supportive,
+    [Category.external]: OrganizationalUnit.External,
 };

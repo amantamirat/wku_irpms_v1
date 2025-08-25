@@ -1,5 +1,5 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Organization, OrganizationType } from "../models/organization.model";
+import { Organization, OrganizationalUnit } from "../models/organization.model";
 
 
 const end_point = '/organs';
@@ -15,7 +15,7 @@ function sanitizeOrganization(organization: Partial<Organization>): Partial<Orga
 }
 
 export interface GetOrganizationsOptions {
-    type?: OrganizationType;
+    type?: OrganizationalUnit;
     parent?: string;
 }
 

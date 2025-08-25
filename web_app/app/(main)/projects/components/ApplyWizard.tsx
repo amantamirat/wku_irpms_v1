@@ -7,6 +7,7 @@ import { Project } from "../models/project.model";
 
 import UploadDocumentStep from "./UploadDocumentStep";
 import ProjectInfoStep from "./ProjectInfoStep";
+import CollaboratorsStep from "./CollaboratorsStep";
 
 interface ApplyWizardProps {
     visible: boolean;
@@ -16,7 +17,9 @@ interface ApplyWizardProps {
 
 export default function ApplyWizard({ visible, call, onHide: hideParent }: ApplyWizardProps) {
     const [activeStep, setActiveStep] = useState(0);
-    const items = [{ label: 'Upload Document' }, { label: 'Project Information' }];
+    const items = [{ label: 'Upload Document' }, { label: 'Project Information' },
+        { label: 'Collaborators' }
+    ];
 
     const emptyProject: Project = {
         title: "",
@@ -34,22 +37,16 @@ export default function ApplyWizard({ visible, call, onHide: hideParent }: Apply
 
     const footer = (
         <div className="flex justify-content-center gap-2">
-            {activeStep > 0 && (
+           
+            {activeStep === 0 && (
+                <Button label="Cancel" icon="pi pi-times" severity="secondary" outlined onClick={onHide} />
+            )}
+             {activeStep > 0 && (
                 <Button label="Back" icon="pi pi-angle-left" onClick={prevStep} outlined severity="secondary" />
             )}
-            {activeStep === 0 && (
-                <>
-                    <Button
-                        label="Cancel"
-                        icon="pi pi-times"
-                        severity="secondary"
-                        outlined
-                        onClick={onHide}
-                    />
-                    <Button label="Next" icon="pi pi-angle-right" onClick={nextStep} iconPos="right" outlined />
-                </>
+            {activeStep < 2 && (<Button label="Next" icon="pi pi-angle-right" onClick={nextStep} iconPos="right" outlined />
             )}
-            {activeStep === 1 && (
+            {activeStep === 2 && (
                 <Button label="Submit" icon="pi pi-check" outlined />
             )}
         </div>
@@ -69,6 +66,7 @@ export default function ApplyWizard({ visible, call, onHide: hideParent }: Apply
 
             {activeStep === 0 && <UploadDocumentStep />}
             {activeStep === 1 && <ProjectInfoStep project={project} setProject={setProject} />}
+            {activeStep === 2 && <CollaboratorsStep project={project} setProject={setProject} />}
         </Dialog>
     );
 }

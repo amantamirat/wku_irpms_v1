@@ -2,7 +2,7 @@
 
 import DeleteDialog from '@/components/DeleteDialog';
 import SaveDialog from './dialogs/SaveDialog';
-import { Applicant, Gender } from '@/models/applicant';
+import { Applicant, Gender, typeMap } from '@/models/applicant';
 import { ApplicantService } from '@/services/ApplicantService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
@@ -12,7 +12,7 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Category, Organization, OrganizationType } from '../../organizations/models/organization.model';
+import { Category, Organization, OrganizationalUnit } from '../../organizations/models/organization.model';
 import { OrganizationApi } from '../../organizations/api/organization.api';
 
 interface ApplicantCompProps {
@@ -67,18 +67,12 @@ const ApplicantComp = (props: ApplicantCompProps) => {
 
     const loadOrganizations = useCallback(async () => {
         try {
-            if (isAcademic) {
-                const data = await OrganizationApi.getOrganizations({ type: OrganizationType.Department });
-                setOrganizations(data);
-            } else if (isSupportive) {
-                const data = await OrganizationApi.getOrganizations({ type: OrganizationType.Supportive });
-                setOrganizations(data);
-            }
-            else if (isExternal) {
-                const data = await OrganizationApi.getOrganizations({ type: OrganizationType.External });
+            if (!scope) return;
+            const type = typeMap[scope];
+            if (type) {
+                const data = await OrganizationApi.getOrganizations({ type });
                 setOrganizations(data);
             }
-
         } catch (err) {
             console.error('Failed to load oranizations:', err);
             toast.current?.show({

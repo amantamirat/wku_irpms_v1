@@ -8,7 +8,7 @@ import { AppMenuItem } from '@/types';
 import { PrimeIcons } from 'primereact/api';
 
 
-import { Category, Organization, OrganizationType } from '@/app/(main)/organizations/models/organization.model';
+import { Category, Organization, OrganizationalUnit } from '@/app/(main)/organizations/models/organization.model';
 import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
 
 
@@ -17,7 +17,7 @@ const AppMenu = () => {
     const icons = ['pi pi-mars', 'pi pi-microchip', 'pi pi-prime', 'pi pi-sparkles', 'pi pi-venus'];
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     useEffect(() => {
-        OrganizationApi.getOrganizations({type:OrganizationType.Directorate})
+        OrganizationApi.getOrganizations({type:OrganizationalUnit.Directorate})
             .then(data => setOrganizations(data))
             .catch(err => console.error('Failed to fetch organization of directorates', err));
     }, []);
@@ -100,32 +100,32 @@ const AppMenu = () => {
                         {
                             label: 'Colleges',
                             icon: 'pi pi-fw pi-warehouse',
-                            to: `/organizations?type=${OrganizationType.College}`
+                            to: `/organizations?type=${OrganizationalUnit.College}`
                         },
                         {
                             label: 'Directorates',
                             icon: 'pi pi-fw pi-objects-column',
-                            to: `/organizations?type=${OrganizationType.Directorate}`
+                            to: `/organizations?type=${OrganizationalUnit.Directorate}`
                         },
                         {
                             label: 'Offices',
                             icon: 'pi pi-fw pi-shop',
-                            to: `/organizations?type=${OrganizationType.Supportive}`
+                            to: `/organizations?type=${OrganizationalUnit.Supportive}`
                         },
                         {
                             label: 'Sectors',
                             icon: 'pi pi-fw pi-building-columns',
-                            to: `/organizations?type=${OrganizationType.Sector}`
+                            to: `/organizations?type=${OrganizationalUnit.Sector}`
                         },
                         {
                             label: 'Specializations',
                             icon: PrimeIcons.FILTER,
-                            to: `/organizations?type=${OrganizationType.Specialization}`
+                            to: `/organizations?type=${OrganizationalUnit.Specialization}`
                         },
                         {
                             label: 'Positions',
                             icon: 'pi pi-fw pi-flag',
-                            to: `/organizations?type=${OrganizationType.Position}`
+                            to: `/organizations?type=${OrganizationalUnit.Position}`
                         },
                     ]
                 },

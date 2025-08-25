@@ -7,11 +7,17 @@ export type Project = {
     call: string | Call;
     title: string;
     summary?: string;
-    themes?: Theme[];
     collaborators?: Collaborator[];
+    themes?: ProjectThemes[];    
     phases?:Phase[];
     createdAt?: Date;
     updatedAt?: Date;
+}
+
+export type ProjectThemes={
+    _id?: string;
+    project?: string | Project;
+    theme: string | Theme;
 }
 
 export type Collaborator = {
