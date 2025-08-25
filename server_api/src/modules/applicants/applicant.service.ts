@@ -46,8 +46,8 @@ export class ApplicantService {
 
     static async getApplicants(options: GetApplicantsOptions) {
         const filter: any = {};
-        if (options.scope) filter.calendar = options.scope;
-        if (options.organization) filter.directorate = options.organization;
+        if (options.scope) filter.scope = options.scope;
+        if (options.organization) filter.organization = options.organization;
         return Applicant.find(filter).populate('organization').lean();
     }
 
