@@ -148,7 +148,7 @@ export default function CollaboratorsStep({ project, setProject }: ProjectInfoSt
                 {collaborator && collaborator.applicant && (
                     <DeleteDialog
                         showDeleteDialog={showDeleteDialog}
-                        selectedDataInfo={String((collaborator.applicant as Applicant).first_name)}
+                        selectedDataInfo={String((collaborator.applicant as any).full_name)}
                         onDelete={removeCollaborator}
                         onHide={hideDialogs}
                     />

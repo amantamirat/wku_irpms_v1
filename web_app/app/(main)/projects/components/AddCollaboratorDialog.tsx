@@ -3,7 +3,7 @@ import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { useEffect, useState } from "react";
 import { ApplicantApi } from "../../applicants/components/api/applicant.api";
-import { Applicant, scopeToOrganizationUnit } from "../../applicants/models/applicant.model";
+import { Applicant, Gender, scopeToOrganizationUnit } from "../../applicants/models/applicant.model";
 import { OrganizationApi } from "../../organizations/api/organization.api";
 import { Category, Organization } from "../../organizations/models/organization.model";
 import { Collaborator } from "../models/project.model";
@@ -93,7 +93,7 @@ export default function AddCollaboratorDialog({ collaborator, setCollaborator, v
                         setScope(e.value)
                     }
                     placeholder="Select Scope"
-                    //className={classNames({ 'p-invalid': submitted && !scope })}
+                //className={classNames({ 'p-invalid': submitted && !scope })}
                 />
             </div>
 
@@ -108,7 +108,7 @@ export default function AddCollaboratorDialog({ collaborator, setCollaborator, v
                     }
                     optionLabel="name"
                     placeholder="Select a Workspace"
-                    //className={classNames({ 'p-invalid': submitted && !scope })}
+                //className={classNames({ 'p-invalid': submitted && !scope })}
                 />
             </div>
 
@@ -117,13 +117,16 @@ export default function AddCollaboratorDialog({ collaborator, setCollaborator, v
                 <Dropdown
                     id="applicant"
                     value={collaborator.applicant}
-                    options={applicants}
+                    options={applicants.map((item) => ({
+                        ...item,
+                        full_name: `${item.gender === Gender.Male ? 'Mr.' : 'Miss'} ${item.first_name} ${item.last_name}`,
+                    }))}
                     onChange={(e) =>
                         setCollaborator({ ...collaborator, applicant: e.value })
                     }
-                    optionLabel="first_name"
+                    optionLabel="full_name"
                     placeholder="Select a Collaborator"
-                    //className={classNames({ 'p-invalid': submitted && !scope })}
+                //className={classNames({ 'p-invalid': submitted && !scope })}
                 />
             </div>
 

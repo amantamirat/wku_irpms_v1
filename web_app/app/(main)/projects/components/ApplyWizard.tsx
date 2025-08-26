@@ -7,6 +7,7 @@ import { Project } from "../models/project.model";
 import UploadDocumentStep from "./UploadDocumentStep";
 import ProjectInfoStep from "./ProjectInfoStep";
 import CollaboratorsStep from "./CollaboratorsStep";
+import ThemeStep from "./ThemeStep";
 
 interface ApplyWizardProps {
     visible: boolean;
@@ -21,7 +22,8 @@ export default function ApplyWizard({ visible, call, project, setProject, onHide
     const items = [
         { label: 'Upload Document' },
         { label: 'Project Information' },
-        { label: 'Collaborators' }
+        { label: 'Collaborators' },
+        { label: 'Themes' }
     ];
 
     const onHide = () => {
@@ -40,9 +42,9 @@ export default function ApplyWizard({ visible, call, project, setProject, onHide
             {activeStep > 0 && (
                 <Button label="Back" icon="pi pi-angle-left" onClick={prevStep} outlined severity="secondary" />
             )}
-            {activeStep < 2 && (<Button label="Next" icon="pi pi-angle-right" onClick={nextStep} iconPos="right" outlined />
+            {activeStep < 3 && (<Button label="Next" icon="pi pi-angle-right" onClick={nextStep} iconPos="right" outlined />
             )}
-            {activeStep === 2 && (
+            {activeStep === 3 && (
                 <Button label="Submit" icon="pi pi-check" outlined />
             )}
         </div>
@@ -63,6 +65,7 @@ export default function ApplyWizard({ visible, call, project, setProject, onHide
             {activeStep === 0 && <UploadDocumentStep />}
             {activeStep === 1 && <ProjectInfoStep project={project} setProject={setProject} />}
             {activeStep === 2 && <CollaboratorsStep project={project} setProject={setProject} />}
+            {activeStep === 3 && <ThemeStep project={project} setProject={setProject} />}
         </Dialog>
     );
 }

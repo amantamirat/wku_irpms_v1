@@ -5,6 +5,7 @@ import { BaseThemeDocument, Theme } from "./base.theme.model";
 
 
 interface BaseChildTheme extends BaseThemeDocument {
+  catalog: Types.ObjectId;
   priority?: number;
   parent: Types.ObjectId;
 }
@@ -24,6 +25,7 @@ interface FocusAreaDocument extends BaseChildTheme {
 const ChildThemeSchema = new Schema<BaseChildTheme>({
   priority: { type: Number },
   parent: { type: Schema.Types.ObjectId, ref: COLLECTIONS.THEME, required: true },
+  catalog: { type: Schema.Types.ObjectId, ref: COLLECTIONS.THEME, required: true },
 });
 
 
@@ -33,4 +35,4 @@ export const BroadTheme = Theme.discriminator<ThemeDocument>(ThemeType.theme, Ch
 
 export const Componenet = Theme.discriminator<ComponentDocument>(ThemeType.componenet, ChildThemeSchema);
 
-export const FocusArea = Theme.discriminator<FocusAreaDocument>(ThemeType.focusArea,ChildThemeSchema);
+export const FocusArea = Theme.discriminator<FocusAreaDocument>(ThemeType.focusArea, ChildThemeSchema);

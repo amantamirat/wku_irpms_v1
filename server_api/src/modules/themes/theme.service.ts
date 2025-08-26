@@ -16,6 +16,7 @@ export interface CreateThemeDto {
     priority?: number;
     level?: ThemeLevel;
     parent?: Types.ObjectId;
+    catalog?: Types.ObjectId;
     directorate?: Types.ObjectId;
 }
 
@@ -29,17 +30,6 @@ export class ThemeService {
         [ThemeType.focusArea]: ThemeType.componenet,
     };
 
-    private static async getRootCatalog(theme: any): Promise<any> {
-        if (!theme) {
-            throw new Error("Catalog Not Found!");
-        }
-        if (theme.type === ThemeType.catalog) {
-            return theme;
-        }
-        const catalog = await Theme.findById(theme.parent).lean();
-        return this.getRootCatalog(catalog);
-    }
-
     private static async validateThemeHierarchy(theme: Partial<CreateThemeDto>) {
         if (theme.type === ThemeType.catalog) {
             const directorate = await Directorate.findById(theme.directorate);
@@ -52,13 +42,19 @@ export class ThemeService {
         if (!parent) {
             throw new Error("Parent Not Found!");
         }
-
         const requiredParentType = this.parentType[theme.type as NonRootTypes];
         if (parent.type !== requiredParentType) {
             throw new Error(`${theme.type} must have parent of type ${requiredParentType}`);
         }
 
-        const catalog = await ThemeService.getRootCatalog(parent);
+        // assign catalog
+       
+        (theme as any).catalog = theme.type === ThemeType.theme ? parent._id : parent.catalog;
+
+        const catalog = await Theme.findById(theme.catalog).lean() as any;
+        if (!catalog) {
+            throw new Error("Catalog Not Found!");
+        }
         if (theme.type === ThemeType.componenet && (catalog.level === ThemeLevel.broad)) {
             throw new Error("Invalid hierarchy: Component must not trace back to Broad catalog");
         }

@@ -1,6 +1,6 @@
-import { Organization } from "@/models/organization";
 import { ApiClient } from "@/api/ApiClient";
 import { Theme, ThemeType } from "../models/theme.model";
+import { Organization } from "../../organizations/models/organization.model";
 
 
 const end_point = '/themes';
