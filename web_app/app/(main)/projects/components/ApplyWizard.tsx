@@ -8,6 +8,7 @@ import UploadDocumentStep from "./UploadDocumentStep";
 import ProjectInfoStep from "./ProjectInfoStep";
 import CollaboratorsStep from "./CollaboratorsStep";
 import ThemeStep from "./ThemeStep";
+import { Grant } from "../../grants/models/grant.model";
 
 interface ApplyWizardProps {
     visible: boolean;
@@ -59,7 +60,7 @@ export default function ApplyWizard({ visible, call, project, setProject, onHide
             onHide={onHide}
             maximizable
         >
-            <h3>{call.title}</h3>
+            <h3>{call.title} ({(call.grant as Grant).title})</h3>
             <Steps model={items} activeIndex={activeStep} readOnly className="mb-4" />
 
             {activeStep === 0 && <UploadDocumentStep />}

@@ -18,10 +18,11 @@ export class ThemeController {
     
     static async getThemes(req: Request, res: Response) {
         try {
-            const { type, parent, directorate } = req.query;
+            const { type, parent, catalog, directorate } = req.query;
             const filter = {
                 type: type as ThemeType | undefined,
                 parent: parent ? new Types.ObjectId(parent as string) : undefined,
+                catalog: catalog ? new Types.ObjectId(catalog as string) : undefined,
                 directorate: directorate ? new Types.ObjectId(directorate as string) : undefined
             } as GetThemesOptions;
             const themes = await ThemeService.getThemes(filter);

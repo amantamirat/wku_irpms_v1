@@ -23,6 +23,7 @@ function sanitizeTheme(theme: Partial<Theme>): Partial<Theme> {
 export interface GetThemesOptions {
     type?: ThemeType;
     parent?: string;
+    catalog?: string;
     directorate?: string;
 }
 
@@ -38,8 +39,8 @@ export const ThemeApi = {
         const query = new URLSearchParams();
         if (options.type) query.append("type", options.type);
         if (options.parent) query.append("parent", options.parent);
+        if (options.catalog) query.append("catalog", options.catalog);
         if (options.directorate) query.append("directorate", options.directorate);
-
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Theme[];
     },

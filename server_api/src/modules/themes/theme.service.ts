@@ -49,8 +49,7 @@ export class ThemeService {
             throw new Error(`${theme.type} must have parent of type ${requiredParentType}`);
         }
         // assign catalog
-        if (!theme._id)
-            (theme as any).catalog = theme.type === ThemeType.theme ? parent._id : parent.catalog;
+        (theme as any).catalog = theme.type === ThemeType.theme ? parent._id : parent.catalog;
 
         const catalog = await Theme.findById(theme.catalog).lean() as any;
         if (!catalog) {
@@ -65,13 +64,13 @@ export class ThemeService {
     }
 
     static async createTheme(data: CreateThemeDto) {
-        const { type, ...rest } = data;
+        //const { type, ...rest } = data;
         await this.validateThemeHierarchy(data);
-        if (!Theme.discriminators || !Theme.discriminators[type]) {
-            throw new Error(`Invalid theme type: ${type}`);
+        if (!Theme.discriminators || !Theme.discriminators[data.type]) {
+            throw new Error(`Invalid theme type: ${data.type}`);
         }
-        const model = Theme.discriminators[type];
-        const createdTheme = await model.create({ type, ...rest });
+        const model = Theme.discriminators[data.type];
+        const createdTheme = await model.create(data);
         return createdTheme;
     }
 
@@ -81,8 +80,9 @@ export class ThemeService {
         if (options.parent) filter.parent = options.parent;
         if (options.catalog) filter.catalog = options.catalog;
         if (options.directorate) filter.directorate = options.directorate;
-
-        return Theme.find(filter).lean();
+        const themes = await Theme.find(filter).lean();
+        //console.log(themes);
+        return themes;
     }
 
     static async updateTheme(id: string, data: Partial<CreateThemeDto>) {
