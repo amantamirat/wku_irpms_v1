@@ -1,8 +1,6 @@
 'use client';
 
 import DeleteDialog from '@/components/DeleteDialog';
-
-
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -18,7 +16,6 @@ import { Calendar } from '../../calendars/models/calendar.model';
 import { CalendarApi } from '../../calendars/api/calendar.api';
 import { GrantApi } from '../../grants/api/grant.api';
 import { Grant } from '../../grants/models/grant.model';
-import { Organization } from '../../organizations/models/organization.model';
 
 
 interface CallManagerProps {
@@ -238,7 +235,7 @@ const CallManager = (props: CallManagerProps) => {
                         <Column field="title" header="Title" sortable />
                         <Column field="calendar.year" header="Calendar" sortable />                        
                         <Column field="deadline" header="Deadline" body={(rowData) => new Date(rowData.deadline!).toLocaleDateString('en-CA')} />
-                        <Column field="grant.title" header="Title" sortable />
+                        <Column field="grant.title" header="Grant" sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 

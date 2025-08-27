@@ -7,10 +7,12 @@ import { Directorate } from "../organs/base.organization.model";
 export interface GetThemesOptions {
     type?: ThemeType;
     parent?: string;
+    catalog?: string;
     directorate?: string;
 }
 
 export interface CreateThemeDto {
+    _id?: string;
     type: ThemeType;
     title: string;
     priority?: number;
@@ -46,10 +48,9 @@ export class ThemeService {
         if (parent.type !== requiredParentType) {
             throw new Error(`${theme.type} must have parent of type ${requiredParentType}`);
         }
-
         // assign catalog
-       
-        (theme as any).catalog = theme.type === ThemeType.theme ? parent._id : parent.catalog;
+        if (!theme._id)
+            (theme as any).catalog = theme.type === ThemeType.theme ? parent._id : parent.catalog;
 
         const catalog = await Theme.findById(theme.catalog).lean() as any;
         if (!catalog) {
@@ -78,6 +79,7 @@ export class ThemeService {
         const filter: any = {};
         if (options.type) filter.type = options.type;
         if (options.parent) filter.parent = options.parent;
+        if (options.catalog) filter.catalog = options.catalog;
         if (options.directorate) filter.directorate = options.directorate;
 
         return Theme.find(filter).lean();

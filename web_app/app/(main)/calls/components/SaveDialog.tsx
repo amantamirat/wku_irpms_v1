@@ -76,11 +76,7 @@ function SaveDialog(props: SaveDialogProps) {
                     id="calendar"
                     value={call.calendar}
                     options={calendars}
-                    onChange={(e) =>
-                        onChange({
-                            ...call, calendar: e.value,
-                        })
-                    }
+                    onChange={(e) => onChange({ ...call, calendar: e.value })}
                     optionLabel="year"
                     placeholder="Select a Calendar"
                     required
@@ -127,18 +123,13 @@ function SaveDialog(props: SaveDialogProps) {
                     id="grant"
                     value={call.grant}
                     options={grants}
-                    onChange={(e) => onChange({
-                        ...call, grant: e.value,
-                    })
-                    }
+                    onChange={(e) => onChange({ ...call, grant: e.value })}
                     optionLabel="title"
                     placeholder="Select a Grant"
                     required
                     className={classNames({ 'p-invalid': submitted && !call.grant })}
                 />
             </div>
-
-
             {errorMessage && (
                 <small className="p-error">{errorMessage}</small>
             )}
