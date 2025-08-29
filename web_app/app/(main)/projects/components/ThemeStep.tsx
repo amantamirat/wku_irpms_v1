@@ -1,4 +1,4 @@
-import { Project } from "../models/project.model";
+import { Project, ProjectThemes } from "../models/project.model";
 import { useEffect, useState } from "react";
 import { Tree } from "primereact/tree";
 import { ThemeApi } from "../../themes/api/theme.api";
@@ -36,6 +36,25 @@ function buildChildren(themes: Theme[], parentId: string): TreeNode[] {
         }));
 }
 
+
+// Convert project.themes[] into PrimeReact Tree selectionKeys
+function themesToSelectionKeys(themes: ProjectThemes[]): { [key: string]: any } {
+    const keys: { [key: string]: any } = {};
+    themes.forEach(t => {
+        const themeId = typeof t.theme === "string" ? t.theme : t.theme._id!;
+        keys[themeId] = { checked: true }; // Tree expects object with checked:true
+    });
+    return keys;
+}
+
+// Convert selectionKeys back to project.themes[]
+function selectionKeysToThemes(selectionKeys: { [key: string]: any }): ProjectThemes[] {
+    return Object.keys(selectionKeys)
+        .filter(k => selectionKeys[k].checked) // only checked nodes
+        .map(k => ({ theme: k })); // minimal ProjectThemes
+}
+
+
 interface ProjectInfoStepProps {
     project: Project;
     setProject: (project: Project) => void;
@@ -43,7 +62,7 @@ interface ProjectInfoStepProps {
 
 export default function ThemeStep({ project, setProject }: ProjectInfoStepProps) {
     const [nodes, setNodes] = useState([]);
-    const [selectedKeys, setSelectedKeys] = useState(null);
+    const [selectedKeys, setSelectedKeys] = useState<{ [key: string]: any }>({});
     //const [themes, setThemes] = useState<Theme[]>([]);
 
     useEffect(() => {
@@ -52,11 +71,18 @@ export default function ThemeStep({ project, setProject }: ProjectInfoStepProps)
                 catalog: (((project.call as Call).grant) as Grant).theme as string
             });
             const tree = buildTree(data);
-            // console.log(tree);
             setNodes(tree as any);
+            setSelectedKeys(themesToSelectionKeys(project.themes ?? [])); // init selection
         };
         fetchThemes();
     }, []);
+
+     const handleSelectionChange = (e: any) => {
+        setSelectedKeys(e.value);
+        console.log(e.value);
+        const updatedThemes = selectionKeysToThemes(e.value);
+        setProject({ ...project, themes: updatedThemes }); // push to project
+    };
 
     return (
         <div className="card p-4 space-y-4">
@@ -64,7 +90,11 @@ export default function ThemeStep({ project, setProject }: ProjectInfoStepProps)
             <p className="text-gray-600 text-sm">
                 Choose the themes relevant to your project.
             </p>
-            <Tree value={nodes} selectionMode="checkbox" selectionKeys={selectedKeys} onSelectionChange={(e) => setSelectedKeys(e.value as any)} className="w-full md:w-30rem" />
+            <Tree value={nodes}
+                selectionMode="checkbox"
+                selectionKeys={selectedKeys}                
+                onSelectionChange={handleSelectionChange}
+                className="w-full md:w-30rem" />
         </div>
     )
 }

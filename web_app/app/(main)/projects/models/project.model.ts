@@ -8,13 +8,13 @@ export type Project = {
     title: string;
     summary?: string;
     collaborators?: Collaborator[];
-    themes?: ProjectThemes[];    
-    phases?:Phase[];
+    themes?: ProjectThemes[];
+    phases?: Phase[];
     createdAt?: Date;
     updatedAt?: Date;
 }
 
-export type ProjectThemes={
+export type ProjectThemes = {
     _id?: string;
     project?: string | Project;
     theme: string | Theme;
@@ -29,12 +29,21 @@ export type Collaborator = {
     updatedAt?: Date;
 }
 
+
+export enum PhaseType {
+    phase = 'Phase',
+    breakdown = 'Breakdown'
+}
+
+
 export type Phase = {
-    _id?: string;
+    _id?: string;    
+    type: PhaseType;
     project?: string | Project;
-    phase: number;    
+    parent?: string | Phase;
+    phase: number;
     duration: number;
-    budget:number;
+    budget: number;
     description?: string;
     createdAt?: Date;
     updatedAt?: Date;

@@ -3,12 +3,13 @@ import { Call } from "../../calls/models/call.model";
 import { useState } from "react";
 import { Button } from "primereact/button";
 import { Steps } from "primereact/steps";
-import { Project } from "../models/project.model";
+import { PhaseType, Project } from "../models/project.model";
 import UploadDocumentStep from "./UploadDocumentStep";
 import ProjectInfoStep from "./ProjectInfoStep";
 import CollaboratorsStep from "./CollaboratorsStep";
 import ThemeStep from "./ThemeStep";
 import { Grant } from "../../grants/models/grant.model";
+import PhasesStep from "./PhaseStep";
 
 interface ApplyWizardProps {
     visible: boolean;
@@ -24,7 +25,8 @@ export default function ApplyWizard({ visible, call, project, setProject, onHide
         { label: 'Upload Document' },
         { label: 'Project Information' },
         { label: 'Collaborators' },
-        { label: 'Themes' }
+        { label: 'Themes' },
+        { label: 'Phases' }
     ];
 
     const onHide = () => {
@@ -43,9 +45,9 @@ export default function ApplyWizard({ visible, call, project, setProject, onHide
             {activeStep > 0 && (
                 <Button label="Back" icon="pi pi-angle-left" onClick={prevStep} outlined severity="secondary" />
             )}
-            {activeStep < 3 && (<Button label="Next" icon="pi pi-angle-right" onClick={nextStep} iconPos="right" outlined />
+            {activeStep < items.length && (<Button label="Next" icon="pi pi-angle-right" onClick={nextStep} iconPos="right" outlined />
             )}
-            {activeStep === 3 && (
+            {activeStep === items.length && (
                 <Button label="Submit" icon="pi pi-check" outlined />
             )}
         </div>
@@ -67,6 +69,7 @@ export default function ApplyWizard({ visible, call, project, setProject, onHide
             {activeStep === 1 && <ProjectInfoStep project={project} setProject={setProject} />}
             {activeStep === 2 && <CollaboratorsStep project={project} setProject={setProject} />}
             {activeStep === 3 && <ThemeStep project={project} setProject={setProject} />}
+            {activeStep === 4 && <PhasesStep project={project} setProject={setProject} phaseType={PhaseType.phase} />}
         </Dialog>
     );
 }
