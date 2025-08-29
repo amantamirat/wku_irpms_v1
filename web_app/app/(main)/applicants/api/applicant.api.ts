@@ -1,6 +1,6 @@
-import { Applicant } from "@/models/applicant";
 import { Category, Organization } from "@/app/(main)/organizations/models/organization.model";
 import { ApiClient } from "@/api/ApiClient";
+import { Applicant } from "../models/applicant.model";
 
 const end_point = '/applicants/';
 

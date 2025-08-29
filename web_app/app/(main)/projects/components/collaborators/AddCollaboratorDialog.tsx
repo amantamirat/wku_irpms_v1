@@ -1,12 +1,12 @@
+import { ApplicantApi } from "@/app/(main)/applicants/api/applicant.api";
+import { Applicant, scopeToOrganizationUnit, Gender } from "@/app/(main)/applicants/models/applicant.model";
+import { OrganizationApi } from "@/app/(main)/organizations/api/organization.api";
+import { Category, Organization } from "@/app/(main)/organizations/models/organization.model";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { useEffect, useState } from "react";
-import { ApplicantApi } from "../../applicants/components/api/applicant.api";
-import { Applicant, Gender, scopeToOrganizationUnit } from "../../applicants/models/applicant.model";
-import { OrganizationApi } from "../../organizations/api/organization.api";
-import { Category, Organization } from "../../organizations/models/organization.model";
-import { Collaborator } from "../models/project.model";
+import { Collaborator } from "../../models/project.model";
 
 
 interface AddCollaboratorDialogProps {

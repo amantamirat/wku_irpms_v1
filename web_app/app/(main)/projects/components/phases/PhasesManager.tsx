@@ -3,10 +3,8 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
 import { useState } from "react";
-import { Collaborator, Phase, PhaseType, Project } from "../models/project.model";
-import AddCollaboratorDialog from "./AddCollaboratorDialog";
-import { Applicant } from "../../applicants/models/applicant.model";
 import DeleteDialog from "@/components/DeleteDialog";
+import { Project, PhaseType, Phase, Collaborator } from "../../models/project.model";
 
 interface ProjectInfoStepProps {
     project: Project;
@@ -14,11 +12,11 @@ interface ProjectInfoStepProps {
     phaseType: PhaseType;
 }
 
-export default function PhasesStep({ project, setProject, phaseType }: ProjectInfoStepProps) {
+export default function PhasesManager({ project, setProject, phaseType }: ProjectInfoStepProps) {
 
     const emptyPhase: Phase = {
         type: phaseType,
-        phase: 0,
+        order: 0,
         duration: 0,
         budget: 0
     };
@@ -40,7 +38,7 @@ export default function PhasesStep({ project, setProject, phaseType }: ProjectIn
     };
 
 
-    const removeCollaborator = () => {
+    const removePhase = () => {
         try {
 
         } catch (err) {

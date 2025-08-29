@@ -3,17 +3,17 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
 import { useState } from "react";
-import { Collaborator, Project } from "../models/project.model";
-import AddCollaboratorDialog from "./AddCollaboratorDialog";
-import { Applicant } from "../../applicants/models/applicant.model";
 import DeleteDialog from "@/components/DeleteDialog";
+import { Collaborator, Project } from "../../models/project.model";
+import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
+import AddCollaboratorDialog from "./AddCollaboratorDialog";
 
 interface ProjectInfoStepProps {
     project: Project;
     setProject: (project: Project) => void;
 }
 
-export default function CollaboratorsStep({ project, setProject }: ProjectInfoStepProps) {
+export default function CollaboratorsManager({ project, setProject }: ProjectInfoStepProps) {
 
     const emptyCollaborator: Collaborator = {
         applicant: ""

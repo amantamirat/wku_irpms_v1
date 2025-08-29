@@ -41,7 +41,7 @@ export type Phase = {
     type: PhaseType;
     project?: string | Project;
     parent?: string | Phase;
-    phase: number;
+    order: number;
     duration: number;
     budget: number;
     description?: string;

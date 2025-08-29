@@ -1,10 +1,11 @@
-import { Project, ProjectThemes } from "../models/project.model";
 import { useEffect, useState } from "react";
 import { Tree } from "primereact/tree";
-import { ThemeApi } from "../../themes/api/theme.api";
-import { Call } from "../../calls/models/call.model";
-import { Grant } from "../../grants/models/grant.model";
-import { Theme, ThemeType } from "../../themes/models/theme.model";
+import { Theme, ThemeType } from "@/app/(main)/themes/models/theme.model";
+import { Call } from "@/app/(main)/calls/models/call.model";
+import { Grant } from "@/app/(main)/grants/models/grant.model";
+import { ThemeApi } from "@/app/(main)/themes/api/theme.api";
+import { ProjectThemes, Project } from "../../models/project.model";
+
 
 type TreeNode = {
     key?: string;
@@ -60,7 +61,7 @@ interface ProjectInfoStepProps {
     setProject: (project: Project) => void;
 }
 
-export default function ThemeStep({ project, setProject }: ProjectInfoStepProps) {
+export default function ThemeManager({ project, setProject }: ProjectInfoStepProps) {
     const [nodes, setNodes] = useState([]);
     const [selectedKeys, setSelectedKeys] = useState<{ [key: string]: any }>({});
     //const [themes, setThemes] = useState<Theme[]>([]);

@@ -6,10 +6,10 @@ import { Steps } from "primereact/steps";
 import { PhaseType, Project } from "../models/project.model";
 import UploadDocumentStep from "./UploadDocumentStep";
 import ProjectInfoStep from "./ProjectInfoStep";
-import CollaboratorsStep from "./CollaboratorsStep";
-import ThemeStep from "./ThemeStep";
 import { Grant } from "../../grants/models/grant.model";
-import PhasesStep from "./PhaseStep";
+import CollaboratorsManager from "./collaborators/CollaboratorsManager";
+import ThemeManager from "./themes/ThemeManager";
+import PhasesManager from "./phases/PhasesManager";
 
 interface ApplyWizardProps {
     visible: boolean;
@@ -67,9 +67,9 @@ export default function ApplyWizard({ visible, call, project, setProject, onHide
 
             {activeStep === 0 && <UploadDocumentStep />}
             {activeStep === 1 && <ProjectInfoStep project={project} setProject={setProject} />}
-            {activeStep === 2 && <CollaboratorsStep project={project} setProject={setProject} />}
-            {activeStep === 3 && <ThemeStep project={project} setProject={setProject} />}
-            {activeStep === 4 && <PhasesStep project={project} setProject={setProject} phaseType={PhaseType.phase} />}
+            {activeStep === 2 && <CollaboratorsManager project={project} setProject={setProject} />}
+            {activeStep === 3 && <ThemeManager project={project} setProject={setProject} />}
+            {activeStep === 4 && <PhasesManager project={project} setProject={setProject} phaseType={PhaseType.phase} />}
         </Dialog>
     );
 }

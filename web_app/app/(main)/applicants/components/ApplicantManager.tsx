@@ -13,7 +13,7 @@ import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Category, Organization, OrganizationalUnit } from '../../organizations/models/organization.model';
 import { OrganizationApi } from '../../organizations/api/organization.api';
-import { ApplicantApi } from './api/applicant.api';
+import { ApplicantApi } from '../api/applicant.api';
 
 interface ApplicantManagerProps {
     scope: Category;
