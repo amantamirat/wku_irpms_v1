@@ -5,6 +5,7 @@ import { Toolbar } from "primereact/toolbar";
 import { useState } from "react";
 import DeleteDialog from "@/components/DeleteDialog";
 import { Project, PhaseType, Phase, Collaborator } from "../../models/project.model";
+import AddPhaseDialog from "./AddPhaseDialog";
 
 interface ProjectInfoStepProps {
     project: Project;
@@ -28,7 +29,17 @@ export default function PhasesManager({ project, setProject, phaseType }: Projec
 
     const addPhase = () => {
         try {
-
+            if (!phase.order) {
+                throw new Error("Please provide valid order.");
+            }
+            const exists = project.phases?.some(
+                (p) => p.order === phase.order
+            );
+            if (exists) {
+                throw new Error("The order is already added!");
+            }
+            const updatedPhases = [...(project.phases || []), phase];
+            setProject({ ...project, phases: updatedPhases });
         } catch (err) {
             console.log(err);
             alert(err instanceof Error ? err.message : "Something went wrong");
@@ -40,6 +51,14 @@ export default function PhasesManager({ project, setProject, phaseType }: Projec
 
     const removePhase = () => {
         try {
+            if (!phase.order) {
+                throw new Error("Invalid phase.");
+            }
+            const updatedPhases = project.phases?.filter(
+                (p) => p.order !== phase.order
+            ) || [];
+
+            setProject({ ...project, phases: updatedPhases });
 
         } catch (err) {
             console.log(err);
@@ -60,20 +79,20 @@ export default function PhasesManager({ project, setProject, phaseType }: Projec
         <div className="my-2">
             <Button icon="pi pi-plus" severity="success" className="mr-2" tooltip={`Add ${phaseType}`}
                 onClick={() => {
-                    //  setCollaborator(emptyCollaborator);
-                    // setShowAddDialog(true);
+                    setPhase(emptyPhase);
+                    setShowAddDialog(true);
                 }}
             />
         </div>
     );
 
 
-    const actionBodyTemplate = (rowData: Collaborator) => (
+    const actionBodyTemplate = (rowData: Phase) => (
         <>
             <Button icon="pi pi-times" rounded severity="warning" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
-                    // setCollaborator(rowData);
-                    //  setShowDeleteDialog(true);
+                    setPhase(rowData);
+                    setShowDeleteDialog(true);
                 }} />
         </>
     );
@@ -87,7 +106,7 @@ export default function PhasesManager({ project, setProject, phaseType }: Projec
                     value={project.phases}
                     selection={phase}
                     onSelectionChange={(e) => setPhase(e.value as Phase)}
-                    dataKey="phase"
+                    dataKey="order"
                     paginator
                     rows={10}
                     rowsPerPageOptions={[5, 10, 25]}
@@ -99,20 +118,31 @@ export default function PhasesManager({ project, setProject, phaseType }: Projec
                 >
                     <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                     <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                    <Column
-                        field="phase"
-                        header="Phase"
-                        sortable
-                        headerStyle={{ minWidth: '15rem' }}
-                    />
-                    <Column field="duration" header="Duration" sortable headerStyle={{ minWidth: '8rem' }} />
-                    <Column field="budget" header="Budget" sortable headerStyle={{ minWidth: '15rem' }} />
+                    <Column field="order" header="Phase Order" sortable />
+                    <Column field="description" header="Description" sortable />
+                    <Column field="duration" header="Duration" sortable />
+                    <Column field="budget" header="Budget" sortable />
                     <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
 
                 </DataTable>
 
+                {phase &&
+                    <AddPhaseDialog
+                        phase={phase}
+                        setPhase={setPhase}
+                        visible={showAddDialog}
+                        onAdd={addPhase}
+                        onHide={hideDialogs}
+                    />}
 
-
+                {(phase) && (
+                    <DeleteDialog
+                        showDeleteDialog={showDeleteDialog}
+                        selectedDataInfo={`phase ${phase.order}`}
+                        onDelete={removePhase}
+                        onHide={hideDialogs}
+                    />
+                )}
             </div>
         </>
     );
