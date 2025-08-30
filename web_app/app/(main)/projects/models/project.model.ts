@@ -8,13 +8,13 @@ export type Project = {
     title: string;
     summary?: string;
     collaborators?: Collaborator[];
-    themes?: ProjectThemes[];
+    themes?: ProjectTheme[];
     phases?: Phase[];
     createdAt?: Date;
     updatedAt?: Date;
 }
 
-export type ProjectThemes = {
+export type ProjectTheme = {
     _id?: string;
     project?: string | Project;
     theme: string | Theme;

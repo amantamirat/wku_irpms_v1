@@ -4,7 +4,10 @@ import { Theme, ThemeType } from "@/app/(main)/themes/models/theme.model";
 import { Call } from "@/app/(main)/calls/models/call.model";
 import { Grant } from "@/app/(main)/grants/models/grant.model";
 import { ThemeApi } from "@/app/(main)/themes/api/theme.api";
-import { ProjectThemes, Project } from "../../models/project.model";
+import { ProjectTheme, Project } from "../../models/project.model";
+import { Toolbar } from "primereact/toolbar";
+import { Button } from "primereact/button";
+import AddThemeDialog from "./AddThemeDialog";
 
 
 type TreeNode = {
@@ -15,46 +18,6 @@ type TreeNode = {
     children?: TreeNode[];
 };
 
-function buildTree(themes: Theme[]): TreeNode[] {
-    return themes
-        .filter(t => t.type === ThemeType.broadTheme)
-        .map(t => ({
-            key: t._id!,
-            label: t.title,
-            data: t,
-            children: buildChildren(themes, t._id!)
-        }));
-}
-
-function buildChildren(themes: Theme[], parentId: string): TreeNode[] {
-    return themes
-        .filter(t => (t.parent ?? null) === parentId) // only by parent
-        .map(t => ({
-            key: t._id!,
-            label: t.title,
-            data: t,
-            children: buildChildren(themes, t._id!)
-        }));
-}
-
-
-// Convert project.themes[] into PrimeReact Tree selectionKeys
-function themesToSelectionKeys(themes: ProjectThemes[]): { [key: string]: any } {
-    const keys: { [key: string]: any } = {};
-    themes.forEach(t => {
-        const themeId = typeof t.theme === "string" ? t.theme : t.theme._id!;
-        keys[themeId] = { checked: true }; // Tree expects object with checked:true
-    });
-    return keys;
-}
-
-// Convert selectionKeys back to project.themes[]
-function selectionKeysToThemes(selectionKeys: { [key: string]: any }): ProjectThemes[] {
-    return Object.keys(selectionKeys)
-        .filter(k => selectionKeys[k].checked) // only checked nodes
-        .map(k => ({ theme: k })); // minimal ProjectThemes
-}
-
 
 interface ProjectInfoStepProps {
     project: Project;
@@ -62,40 +25,101 @@ interface ProjectInfoStepProps {
 }
 
 export default function ThemeManager({ project, setProject }: ProjectInfoStepProps) {
+
+    const emptyProjectTheme: ProjectTheme = {
+        theme: ""
+    };
+    const [projectTheme, setProjectTheme] = useState<ProjectTheme>(emptyProjectTheme);
+    const [showAddDialog, setShowAddDialog] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+
     const [nodes, setNodes] = useState([]);
     const [selectedKeys, setSelectedKeys] = useState<{ [key: string]: any }>({});
     //const [themes, setThemes] = useState<Theme[]>([]);
 
-    useEffect(() => {
-        const fetchThemes = async () => {
-            const data = await ThemeApi.getThemes({
-                catalog: (((project.call as Call).grant) as Grant).theme as string
-            });
-            const tree = buildTree(data);
-            setNodes(tree as any);
-            setSelectedKeys(themesToSelectionKeys(project.themes ?? [])); // init selection
-        };
-        fetchThemes();
-    }, []);
 
-     const handleSelectionChange = (e: any) => {
-        setSelectedKeys(e.value);
-        console.log(e.value);
-        const updatedThemes = selectionKeysToThemes(e.value);
-        setProject({ ...project, themes: updatedThemes }); // push to project
+
+
+
+    const addProjectTheme = () => {
+        try {
+            /**
+             * if (!phase.order) {
+                throw new Error("Please provide valid order.");
+            }
+            const exists = project.phases?.some(
+                (p) => p.order === phase.order
+            );
+            if (exists) {
+                throw new Error("The order is already added!");
+            }
+            const updatedPhases = [...(project.phases || []), phase];
+            setProject({ ...project, phases: updatedPhases });
+             * 
+             */
+
+        } catch (err) {
+            console.log(err);
+            alert(err instanceof Error ? err.message : "Something went wrong");
+        } finally {
+            hideDialogs();
+        }
     };
 
+
+    const removeProjectTheme = () => {
+        try {
+            /**
+             * 
+             *  if (!phase.order) {
+                throw new Error("Invalid phase.");
+            }
+            const updatedPhases = project.phases?.filter(
+                (p) => p.order !== phase.order
+            ) || [];
+
+            setProject({ ...project, phases: updatedPhases });
+             */
+
+
+        } catch (err) {
+            console.log(err);
+            alert(err instanceof Error ? err.message : "Something went wrong");
+        } finally {
+            hideDialogs();
+        }
+    };
+
+
+    const hideDialogs = () => {
+        setProjectTheme(emptyProjectTheme);
+        setShowAddDialog(false);
+        setShowDeleteDialog(false);
+    }
+
+    const startToolbarTemplate = () => (
+        <div className="my-2">
+            <Button icon="pi pi-plus" severity="success" className="mr-2" tooltip={"Add Theme"}
+                onClick={() => {
+                    setProjectTheme(emptyProjectTheme);
+                    setShowAddDialog(true);
+                }}
+            />
+        </div>
+    );
+
     return (
-        <div className="card p-4 space-y-4">
-            <h2 className="text-xl font-semibold">Select Themes</h2>
-            <p className="text-gray-600 text-sm">
-                Choose the themes relevant to your project.
-            </p>
-            <Tree value={nodes}
-                selectionMode="checkbox"
-                selectionKeys={selectedKeys}                
-                onSelectionChange={handleSelectionChange}
-                className="w-full md:w-30rem" />
+        <div className="card">
+            <Toolbar className="mb-4" start={startToolbarTemplate} />
+            {projectTheme &&
+                <AddThemeDialog
+                    theme={projectTheme}
+                    setTheme={setProjectTheme}
+                    visible={showAddDialog}
+                    onAdd={addProjectTheme}
+                    onHide={hideDialogs}
+                />}
         </div>
     )
 }

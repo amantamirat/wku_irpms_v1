@@ -135,7 +135,7 @@ export default function PhasesManager({ project, setProject, phaseType }: Projec
                         onHide={hideDialogs}
                     />}
 
-                {(phase) && (
+                {phase && (
                     <DeleteDialog
                         showDeleteDialog={showDeleteDialog}
                         selectedDataInfo={`phase ${phase.order}`}
