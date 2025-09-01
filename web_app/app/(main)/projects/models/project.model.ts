@@ -18,6 +18,7 @@ export type ProjectTheme = {
     _id?: string;
     project?: string | Project;
     theme: string | Theme;
+    co_pi?: string | Collaborator;
 }
 
 export type Collaborator = {
@@ -37,7 +38,7 @@ export enum PhaseType {
 
 
 export type Phase = {
-    _id?: string;    
+    _id?: string;
     type: PhaseType;
     project?: string | Project;
     parent?: string | Phase;
