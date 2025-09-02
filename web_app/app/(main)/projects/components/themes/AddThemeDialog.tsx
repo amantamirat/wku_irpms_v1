@@ -1,31 +1,23 @@
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import { InputNumber } from "primereact/inputnumber";
-import { InputTextarea } from "primereact/inputtextarea";
-import { ProjectTheme } from "../../models/project.model";
-import { CascadeSelect } from "primereact/cascadeselect";
 import { TreeSelect } from "primereact/treeselect";
-import { useState } from "react";
-import { Theme } from "@/app/(main)/themes/models/theme.model";
 
 
 interface AddThemeDialogProps {
-    theme: ProjectTheme;
-    setTheme: (theme: ProjectTheme) => void;
+    selectedNode: string;
+    setSelectedNode: (theme: string) => void;
     options: any;
     visible: boolean;
     onAdd: () => void;
     onHide: () => void;
 }
 
-export default function AddThemeDialog({ theme, setTheme, options, visible, onAdd, onHide }: AddThemeDialogProps) {
-
-    const [selectedNode, setSelectedNode] = useState(null);
+export default function AddThemeDialog({ selectedNode, setSelectedNode, options, visible, onAdd, onHide }: AddThemeDialogProps) {
     
-     const addTheme = () => {
+    const addTheme = () => {
         console.log(selectedNode);
         onAdd();
-     }
+    }
 
     const footer = (
         <>
@@ -57,7 +49,6 @@ export default function AddThemeDialog({ theme, setTheme, options, visible, onAd
                     display="chip"
                 />
             </div>
-
         </Dialog>
     );
 }

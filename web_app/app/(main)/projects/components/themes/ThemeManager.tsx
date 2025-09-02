@@ -1,15 +1,15 @@
-import { useEffect, useState } from "react";
-import { Tree } from "primereact/tree";
-import { Theme, ThemeType } from "@/app/(main)/themes/models/theme.model";
 import { Call } from "@/app/(main)/calls/models/call.model";
 import { Grant } from "@/app/(main)/grants/models/grant.model";
 import { ThemeApi } from "@/app/(main)/themes/api/theme.api";
-import { ProjectTheme, Project, Collaborator } from "../../models/project.model";
-import { Toolbar } from "primereact/toolbar";
+import { Theme, ThemeType } from "@/app/(main)/themes/models/theme.model";
+import DeleteDialog from "@/components/DeleteDialog";
 import { Button } from "primereact/button";
-import AddThemeDialog from "./AddThemeDialog";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
+import { Toolbar } from "primereact/toolbar";
+import { useEffect, useState } from "react";
+import { Project, ProjectTheme } from "../../models/project.model";
+import AddThemeDialog from "./AddThemeDialog";
 
 
 type Node = {
@@ -19,7 +19,6 @@ type Node = {
     icon?: string;
     children?: Node[];
 };
-
 
 interface ProjectInfoStepProps {
     project: Project;
@@ -53,9 +52,11 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
     const emptyProjectTheme: ProjectTheme = {
         theme: ""
     };
-    const [projectTheme, setProjectTheme] = useState<ProjectTheme>(emptyProjectTheme);
-    const [nodes, setNodes] = useState([]);
     const [themes, setThemes] = useState<Theme[]>([]);
+    const [nodes, setNodes] = useState([]);
+    const [selectedNode, setSelectedNode] = useState<string>("");
+    const [projectTheme, setProjectTheme] = useState<ProjectTheme>(emptyProjectTheme);
+
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -74,20 +75,25 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
 
     const addProjectTheme = () => {
         try {
-            /**
-             * if (!phase.order) {
-                throw new Error("Please provide valid order.");
+            if (!selectedNode || selectedNode.trim() === "") {
+                throw new Error("Please provide valid theme.");
             }
-            const exists = project.phases?.some(
-                (p) => p.order === phase.order
-            );
+            const theme = themes.find((thm) => thm._id === selectedNode);
+            if (!theme) {
+                throw new Error("Theme not found!");
+            }
+            const exists = project.themes?.some((pt) => {
+                if (!pt.theme) return false;
+                if (typeof pt.theme === "string") {
+                    return pt.theme === selectedNode;
+                }
+                return pt.theme._id === selectedNode;
+            }) ?? false;
             if (exists) {
-                throw new Error("The order is already added!");
+                throw new Error("The theme is already added!");
             }
-            const updatedPhases = [...(project.phases || []), phase];
-            setProject({ ...project, phases: updatedPhases });
-             * 
-             */
+            const updatedThemes = [...(project.themes || []), { theme: theme }];
+            setProject({ ...project, themes: updatedThemes });
 
         } catch (err) {
             console.log(err);
@@ -100,19 +106,14 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
 
     const removeProjectTheme = () => {
         try {
-            /**
-             * 
-             *  if (!phase.order) {
-                throw new Error("Invalid phase.");
+            if (!projectTheme.theme) {
+                throw new Error("Invalid project theme.");
             }
-            const updatedPhases = project.phases?.filter(
-                (p) => p.order !== phase.order
+            const updatedThemes = project.themes?.filter(
+                (pt) => (pt.theme as any)._id !== (projectTheme.theme as any)._id
             ) || [];
 
-            setProject({ ...project, phases: updatedPhases });
-             */
-
-
+            setProject({ ...project, themes: updatedThemes });
         } catch (err) {
             console.log(err);
             alert(err instanceof Error ? err.message : "Something went wrong");
@@ -127,6 +128,16 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
         setShowAddDialog(false);
         setShowDeleteDialog(false);
     }
+
+    const actionBodyTemplate = (rowData: ProjectTheme) => (
+        <>
+            <Button icon="pi pi-times" rounded severity="warning" className="p-button-rounded p-button-text"
+                style={{ fontSize: '1.2rem' }} onClick={() => {
+                    setProjectTheme(rowData);
+                    setShowDeleteDialog(true);
+                }} />
+        </>
+    );
 
     const startToolbarTemplate = () => (
         <div className="my-2">
@@ -158,22 +169,26 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
             >
                 <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                 <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                <Column
-                    field="theme.title"
-                    header="Title"
-                    sortable
-                    headerStyle={{ minWidth: '15rem' }}
-                />
+                <Column field="theme.title" header="Theme" sortable headerStyle={{ minWidth: '15rem' }} />
+                <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
             </DataTable>
             {projectTheme &&
                 <AddThemeDialog
-                    theme={projectTheme}
-                    setTheme={setProjectTheme}
+                    selectedNode={selectedNode}
+                    setSelectedNode={setSelectedNode}
                     visible={showAddDialog}
                     options={nodes}
                     onAdd={addProjectTheme}
                     onHide={hideDialogs}
                 />}
+            {projectTheme && (
+                <DeleteDialog
+                    showDeleteDialog={showDeleteDialog}
+                    selectedDataInfo={String((projectTheme.theme as any).title)}
+                    onDelete={removeProjectTheme}
+                    onHide={hideDialogs}
+                />
+            )}
         </div>
     )
 }

@@ -23,7 +23,6 @@ export default function CollaboratorsManager({ project, setProject }: ProjectInf
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-
     const addCollaborator = () => {
         try {
             const applicant = collaborator.applicant as Applicant;
@@ -46,7 +45,6 @@ export default function CollaboratorsManager({ project, setProject }: ProjectInf
         }
     };
 
-
     const removeCollaborator = () => {
         try {
             const applicant = collaborator.applicant as Applicant;
@@ -67,7 +65,6 @@ export default function CollaboratorsManager({ project, setProject }: ProjectInf
         }
     };
 
-
     const hideDialogs = () => {
         setCollaborator(emptyCollaborator);
         setShowAddDialog(false);
@@ -85,7 +82,6 @@ export default function CollaboratorsManager({ project, setProject }: ProjectInf
         </div>
     );
 
-
     const actionBodyTemplate = (rowData: Collaborator) => (
         <>
             <Button icon="pi pi-times" rounded severity="warning" className="p-button-rounded p-button-text"
@@ -95,7 +91,6 @@ export default function CollaboratorsManager({ project, setProject }: ProjectInf
                 }} />
         </>
     );
-
 
     return (
         <>
