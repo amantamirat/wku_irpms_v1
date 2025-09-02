@@ -12,12 +12,12 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 
 
-type CascadeNode = {
+type Node = {
     key?: string;
     label: string;
-    value?: any;
+    data?: any;
     icon?: string;
-    children?: CascadeNode[];
+    children?: Node[];
 };
 
 
@@ -27,7 +27,7 @@ interface ProjectInfoStepProps {
 }
 
 
-function buildCascade(themes: Theme[], parentId?: string): CascadeNode[] {
+function buildTree(themes: Theme[], parentId?: string): Node[] {
     return themes
         .filter(t => {
             if (parentId) {
@@ -36,11 +36,14 @@ function buildCascade(themes: Theme[], parentId?: string): CascadeNode[] {
             return t.type === ThemeType.broadTheme;
         })
         .map(t => {
-            const children = buildCascade(themes, t._id!);
+            const children = buildTree(themes, t._id!);
             return {
+                key:t._id,
                 label: t.title,
-                value: t,
-                ...(children.length > 0 ? { children } : {})
+                data: t,
+                ...(children.length > 0
+                    ? { children, selectable: false }
+                    : { selectable: true }   )
             };
         });
 }
@@ -65,7 +68,7 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
                 catalog: (((project.call as Call).grant) as Grant).theme as string
             });      
             console.log(data);      
-            const node = buildCascade(data);
+            const node = buildTree(data);
             setNodes(node as any);
         };
         fetchThemes();

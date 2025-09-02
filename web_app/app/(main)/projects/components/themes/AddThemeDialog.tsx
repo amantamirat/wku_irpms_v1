@@ -4,6 +4,9 @@ import { InputNumber } from "primereact/inputnumber";
 import { InputTextarea } from "primereact/inputtextarea";
 import { ProjectTheme } from "../../models/project.model";
 import { CascadeSelect } from "primereact/cascadeselect";
+import { TreeSelect } from "primereact/treeselect";
+import { useState } from "react";
+import { Theme } from "@/app/(main)/themes/models/theme.model";
 
 
 interface AddThemeDialogProps {
@@ -17,6 +20,7 @@ interface AddThemeDialogProps {
 
 export default function AddThemeDialog({ theme, setTheme, options, visible, onAdd, onHide }: AddThemeDialogProps) {
 
+    const [selectedNode, setSelectedNode] = useState(null);
     const updateField = (field: keyof ProjectTheme, value: any) => {
         setTheme({ ...theme, [field]: value });
     };
@@ -38,19 +42,17 @@ export default function AddThemeDialog({ theme, setTheme, options, visible, onAd
             footer={footer}
             onHide={onHide}
         >
-            <div className="card flex justify-content-center">
-                <CascadeSelect
+            <div className="field">
+                <label htmlFor="theme">Theme</label>
+                <TreeSelect
                     id="theme"
-                    value={null}
+                    value={selectedNode}
                     options={options}
-                    optionLabel="label"
-                    optionGroupLabel="label"
-                    optionGroupChildren={["children"]}
+                    onChange={(e) => setSelectedNode(e.value as any)}
                     placeholder="Select a Theme"
                     scrollHeight="400px"
-                    className="w-full md:w-14rem"
-                    breakpoint="767px"
-                    style={{ width: '100%' }}
+                    className="md:w-20rem w-full"
+                    display="chip"
                 />
             </div>
 
