@@ -15,7 +15,7 @@ import { DataTable } from "primereact/datatable";
 type Node = {
     key?: string;
     label: string;
-    data?: any;
+    value?: any;
     icon?: string;
     children?: Node[];
 };
@@ -40,7 +40,7 @@ function buildTree(themes: Theme[], parentId?: string): Node[] {
             return {
                 key:t._id,
                 label: t.title,
-                data: t,
+                value: t,
                 ...(children.length > 0
                     ? { children, selectable: false }
                     : { selectable: true }   )

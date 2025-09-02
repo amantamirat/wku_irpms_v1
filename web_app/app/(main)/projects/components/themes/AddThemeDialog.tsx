@@ -21,14 +21,16 @@ interface AddThemeDialogProps {
 export default function AddThemeDialog({ theme, setTheme, options, visible, onAdd, onHide }: AddThemeDialogProps) {
 
     const [selectedNode, setSelectedNode] = useState(null);
-    const updateField = (field: keyof ProjectTheme, value: any) => {
-        setTheme({ ...theme, [field]: value });
-    };
+    
+     const addTheme = () => {
+        console.log(selectedNode);
+        onAdd();
+     }
 
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
-            <Button label="Add" icon="pi pi-check" text onClick={onAdd} />
+            <Button label="Add" icon="pi pi-check" text onClick={addTheme} />
         </>
     );
 
@@ -51,7 +53,7 @@ export default function AddThemeDialog({ theme, setTheme, options, visible, onAd
                     onChange={(e) => setSelectedNode(e.value as any)}
                     placeholder="Select a Theme"
                     scrollHeight="400px"
-                    className="md:w-20rem w-full"
+                    className="w-full"
                     display="chip"
                 />
             </div>
