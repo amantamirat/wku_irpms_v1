@@ -17,7 +17,7 @@ export type Project = {
 export type ProjectTheme = {
     _id?: string;
     project?: string | Project;
-    theme: string | Theme;
+    theme: string | Theme ;
     Co_PI?: string | Collaborator;
 }
 

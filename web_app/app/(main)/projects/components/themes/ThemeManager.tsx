@@ -55,7 +55,6 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
     };
     const [themes, setThemes] = useState<Theme[]>([]);
     const [nodes, setNodes] = useState([]);
-    const [selectedNode, setSelectedNode] = useState<string>("");
     const [projectTheme, setProjectTheme] = useState<ProjectTheme>(emptyProjectTheme);
 
     const [showAddDialog, setShowAddDialog] = useState(false);
@@ -77,19 +76,19 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
 
     const addProjectTheme = () => {
         try {
-            if (!selectedNode || selectedNode.trim() === "") {
+            if (!projectTheme.theme || (projectTheme.theme as string).trim() === "") {
                 throw new Error("Please provide valid theme.");
             }
-            const theme = themes.find((thm) => thm._id === selectedNode);
+            const theme = themes.find((thm) => thm._id === (projectTheme.theme as string));
             if (!theme) {
                 throw new Error("Theme not found!");
             }
             const exists = project.themes?.some((pt) => {
                 if (!pt.theme) return false;
                 if (typeof pt.theme === "string") {
-                    return pt.theme === selectedNode;
+                    return pt.theme === (projectTheme.theme as string);
                 }
-                return pt.theme._id === selectedNode;
+                return pt.theme._id === theme._id;
             }) ?? false;
             if (exists) {
                 throw new Error("The theme is already added!");
@@ -107,10 +106,30 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
 
 
     const setCoPI = () => {
-        try { 
-            
-        } catch { }
-        finally { }
+        try {
+            if (!projectTheme.theme) {
+                throw new Error("No project theme selected.");
+            }
+            if (!projectTheme.Co_PI) {
+                throw new Error("Please select a Co-PI.");
+            }
+            const updatedThemes = project.themes?.map((pt) => {
+                if ((pt.theme as any)._id === (projectTheme.theme as any)._id) {
+                    return { ...pt, Co_PI: projectTheme.Co_PI };
+                }
+                return pt;
+            }) ?? [];
+            setProject({
+                ...project,
+                themes: updatedThemes,
+            });
+        } catch (err) {
+            console.log(err);
+            alert(err instanceof Error ? err.message : "Something went wrong");
+        }
+        finally {
+            hideDialogs();
+        }
     }
 
 
@@ -191,8 +210,8 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
             </DataTable>
             {projectTheme &&
                 <AddThemeDialog
-                    selectedNode={selectedNode}
-                    setSelectedNode={setSelectedNode}
+                    projectTheme={projectTheme}
+                    setProjectTheme={setProjectTheme}
                     visible={showAddDialog}
                     options={nodes}
                     onAdd={addProjectTheme}
@@ -201,13 +220,11 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
 
             {projectTheme && (
                 <CoPIDialog
-                    project={project}
                     projectTheme={projectTheme}
                     setProjectTheme={setProjectTheme}
                     visible={showCoPIDialog}
-                    onSet={function (): void {
-                        throw new Error("Function not implemented.");
-                    }}
+                    options={project.collaborators}
+                    onAdd={setCoPI}
                     onHide={hideDialogs}
                 />
             )}

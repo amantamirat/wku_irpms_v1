@@ -1,27 +1,26 @@
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
-import { Collaborator, Project, ProjectTheme } from "../../models/project.model";
-import { useState } from "react";
+import { ProjectTheme } from "../../models/project.model";
 
 
 interface CoPIDialogProps {
-    project: Project;
     projectTheme: ProjectTheme;
     setProjectTheme: (theme: ProjectTheme) => void;
+    options: any;
     visible: boolean;
-    onSet: () => void;
+    onAdd: () => void;
     onHide: () => void;
 }
 
-export default function CoPIDialog({ project, projectTheme, setProjectTheme, visible, onSet, onHide }: CoPIDialogProps) {
+export default function CoPIDialog({ projectTheme, setProjectTheme, options, visible, onAdd, onHide }: CoPIDialogProps) {
 
 
     
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
-            <Button label="Set" icon="pi pi-check" text onClick={onSet} />
+            <Button label="Set" icon="pi pi-check" text onClick={onAdd} />
         </>
     );
 
@@ -39,7 +38,7 @@ export default function CoPIDialog({ project, projectTheme, setProjectTheme, vis
                 <Dropdown
                     id="copi"
                     value={projectTheme.Co_PI}
-                    options={project.collaborators}
+                    options={options}
                     onChange={(e) => setProjectTheme({ ...projectTheme, Co_PI: e.value })}
                     optionLabel="applicant.full_name"
                     placeholder="Select Co PI"

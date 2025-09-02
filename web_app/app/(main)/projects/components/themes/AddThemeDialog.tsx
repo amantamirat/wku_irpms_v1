@@ -1,28 +1,26 @@
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { TreeSelect } from "primereact/treeselect";
+import { ProjectTheme } from "../../models/project.model";
 
 
 interface AddThemeDialogProps {
-    selectedNode: string;
-    setSelectedNode: (theme: string) => void;
+    projectTheme: ProjectTheme;
+    setProjectTheme: (theme: ProjectTheme) => void;
     options: any;
     visible: boolean;
     onAdd: () => void;
     onHide: () => void;
 }
 
-export default function AddThemeDialog({ selectedNode, setSelectedNode, options, visible, onAdd, onHide }: AddThemeDialogProps) {
-    
-    const addTheme = () => {
-        console.log(selectedNode);
-        onAdd();
-    }
+export default function AddThemeDialog({ projectTheme, setProjectTheme, options, visible, onAdd, onHide }: AddThemeDialogProps) {
+
+
 
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
-            <Button label="Add" icon="pi pi-check" text onClick={addTheme} />
+            <Button label="Add" icon="pi pi-check" text onClick={onAdd} />
         </>
     );
 
@@ -39,9 +37,9 @@ export default function AddThemeDialog({ selectedNode, setSelectedNode, options,
             <div className="field">
                 <TreeSelect
                     id="theme"
-                    value={selectedNode}
+                    value={projectTheme.theme as string}
                     options={options}
-                    onChange={(e) => setSelectedNode(e.value as any)}
+                    onChange={(e) => setProjectTheme({ ...projectTheme, theme: e.value as string })}
                     placeholder="Select a Theme"
                     scrollHeight="400px"
                     className="w-full"
