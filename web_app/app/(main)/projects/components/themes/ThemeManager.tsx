@@ -170,6 +170,7 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
                 <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                 <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                 <Column field="theme.title" header="Theme" sortable headerStyle={{ minWidth: '15rem' }} />
+                <Column field="Co_PI.applicant.first_name" header="Co-PI" sortable headerStyle={{ minWidth: '15rem' }} />
                 <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
             </DataTable>
             {projectTheme &&
