@@ -38,12 +38,12 @@ function buildTree(themes: Theme[], parentId?: string): Node[] {
         .map(t => {
             const children = buildTree(themes, t._id!);
             return {
-                key:t._id,
+                key: t._id,
                 label: t.title,
                 value: t,
                 ...(children.length > 0
                     ? { children, selectable: false }
-                    : { selectable: true }   )
+                    : { selectable: true })
             };
         });
 }
@@ -54,28 +54,22 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
         theme: ""
     };
     const [projectTheme, setProjectTheme] = useState<ProjectTheme>(emptyProjectTheme);
+    const [nodes, setNodes] = useState([]);
+    const [themes, setThemes] = useState<Theme[]>([]);
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const [nodes, setNodes] = useState([]);
-    const [selectedKeys, setSelectedKeys] = useState<{ [key: string]: any }>({});
-    //const [themes, setThemes] = useState<Theme[]>([]);
-
-
 
     useEffect(() => {
         const fetchThemes = async () => {
             const data = await ThemeApi.getThemes({
                 catalog: (((project.call as Call).grant) as Grant).theme as string
-            });      
-            console.log(data);      
+            });
+            setThemes(data);
             const node = buildTree(data);
             setNodes(node as any);
         };
         fetchThemes();
     }, []);
-
-
-
 
 
     const addProjectTheme = () => {
