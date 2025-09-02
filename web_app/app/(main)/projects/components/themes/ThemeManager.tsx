@@ -10,6 +10,7 @@ import { Toolbar } from "primereact/toolbar";
 import { useEffect, useState } from "react";
 import { Project, ProjectTheme } from "../../models/project.model";
 import AddThemeDialog from "./AddThemeDialog";
+import CoPIDialog from "./CoPIDialog";
 
 
 type Node = {
@@ -58,6 +59,7 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
     const [projectTheme, setProjectTheme] = useState<ProjectTheme>(emptyProjectTheme);
 
     const [showAddDialog, setShowAddDialog] = useState(false);
+    const [showCoPIDialog, setShowCoPIDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
     useEffect(() => {
@@ -126,11 +128,17 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
     const hideDialogs = () => {
         setProjectTheme(emptyProjectTheme);
         setShowAddDialog(false);
+        setShowCoPIDialog(false);
         setShowDeleteDialog(false);
     }
 
     const actionBodyTemplate = (rowData: ProjectTheme) => (
         <>
+            <Button icon="pi pi-user" rounded severity="success" className="p-button-rounded p-button-text"
+                style={{ fontSize: '1.2rem' }} onClick={() => {
+                    setProjectTheme(rowData);
+                    setShowCoPIDialog(true);
+                }} />
             <Button icon="pi pi-times" rounded severity="warning" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
                     setProjectTheme(rowData);
@@ -182,6 +190,19 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
                     onAdd={addProjectTheme}
                     onHide={hideDialogs}
                 />}
+
+            {projectTheme && (
+                <CoPIDialog
+                    project={project}
+                    projectTheme={projectTheme}
+                    setProjectTheme={setProjectTheme}
+                    visible={showCoPIDialog}
+                    onSet={function (): void {
+                        throw new Error("Function not implemented.");
+                    }}
+                    onHide={hideDialogs}
+                />
+            )}
             {projectTheme && (
                 <DeleteDialog
                     showDeleteDialog={showDeleteDialog}

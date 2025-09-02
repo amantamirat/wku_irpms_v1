@@ -37,7 +37,6 @@ export default function AddThemeDialog({ selectedNode, setSelectedNode, options,
             onHide={onHide}
         >
             <div className="field">
-                <label htmlFor="theme">Theme</label>
                 <TreeSelect
                     id="theme"
                     value={selectedNode}
