@@ -106,6 +106,14 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
     };
 
 
+    const setCoPI = () => {
+        try { 
+            
+        } catch { }
+        finally { }
+    }
+
+
     const removeProjectTheme = () => {
         try {
             if (!projectTheme.theme) {

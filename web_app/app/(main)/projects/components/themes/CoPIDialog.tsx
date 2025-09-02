@@ -17,9 +17,7 @@ interface CoPIDialogProps {
 export default function CoPIDialog({ project, projectTheme, setProjectTheme, visible, onSet, onHide }: CoPIDialogProps) {
 
 
-    const [coPI, setCoPI] = useState<Collaborator>();
-
-
+    
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
@@ -40,9 +38,9 @@ export default function CoPIDialog({ project, projectTheme, setProjectTheme, vis
             <div className="field">
                 <Dropdown
                     id="copi"
-                    value={coPI}
+                    value={projectTheme.Co_PI}
                     options={project.collaborators}
-                    onChange={(e) => setCoPI(e.value as any)}
+                    onChange={(e) => setProjectTheme({ ...projectTheme, Co_PI: e.value })}
                     optionLabel="applicant.full_name"
                     placeholder="Select Co PI"
                     scrollHeight="400px"
