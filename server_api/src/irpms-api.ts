@@ -12,7 +12,7 @@ import evalRoutes from './modules/evals/evaluation.routes';
 import calendarRoutes from './modules/calendar/calendar.routes';
 import callRoutes from './modules/call/call.routes';
 import grantRoutes from './modules/grants/grant.routes';
-
+import projectRoutes from './modules/project/project.routes';
 
 
 import { initAdminUser, initPermissions, initRoles } from './services/initService';
@@ -41,7 +41,7 @@ app.use("/api/evals", evalRoutes);
 app.use("/api/calendars", calendarRoutes);
 app.use("/api/calls", callRoutes);
 app.use("/api/grants", grantRoutes);
-
+app.use("/api/projects", projectRoutes);
 
 
 

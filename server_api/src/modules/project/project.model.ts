@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../enums/collections.enum";
 
 interface IProject extends Document {
@@ -23,3 +23,5 @@ const ProjectSchema = new Schema<IProject>({
         type: String,
     }
 }, { timestamps: true });
+
+export const Project = model<IProject>(COLLECTIONS.PROJECT, ProjectSchema);
