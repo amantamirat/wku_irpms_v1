@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { Role } from '../models/role.model';
 import { successResponse, errorResponse } from '../util/response';
+import { Role } from '../modules/users/roles/role.model';
 
 const createRole = async (req: Request, res: Response): Promise<void> => {
     try {

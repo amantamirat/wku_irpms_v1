@@ -4,7 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
 
-import roleRoutes from './routes/role.routes';
+
 import organRoutes from './modules/organs/organization.routes';
 import applicantRoutes from './modules/applicants/applicant.routes';
 import themeRoutes from './modules/themes/theme.routes';
@@ -14,6 +14,7 @@ import callRoutes from './modules/call/call.routes';
 import grantRoutes from './modules/grants/grant.routes';
 import projectRoutes from './modules/project/project.routes';
 import userRoutes from './modules/users/user.routes';
+import roleRoutes from './modules/users/roles/role.routes';
 
 
 import { initAdminUser, initPermissions, initRoles } from './services/initService';

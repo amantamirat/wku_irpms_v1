@@ -1,5 +1,6 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
 import { UserStatus } from './enums/status.enum';
+import { COLLECTIONS } from '../../enums/collections.enum';
 
 
 
@@ -40,7 +41,10 @@ const UserSchema = new Schema<IUser>(
       default: UserStatus.Pending,
       required: true,
     },
-    roles: [{ type: Schema.Types.ObjectId, ref: 'Role' }],
+    roles: [{
+      type: Schema.Types.ObjectId,
+      ref: COLLECTIONS.ROLE
+    }],
     reset_code: {
       type: String
     },
@@ -50,5 +54,4 @@ const UserSchema = new Schema<IUser>(
   },
   { timestamps: true }
 );
-
-export const User: Model<IUser> = mongoose.model<IUser>('User', UserSchema);
+export const User: Model<IUser> = mongoose.model<IUser>(COLLECTIONS.USER, UserSchema);

@@ -4,10 +4,9 @@ export const COLLECTIONS = {
   EVAL: "evls",
   CALENDAR:"calendars",
   CALL: "calls",
-  GRANT: "grants",
-
-
-  
+  GRANT: "grants",  
   USER: "users",
+  ROLE: "roles",
+  PERMISSION: "permissions",
   PROJECT: "projects"
 } as const;

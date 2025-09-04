@@ -1,6 +1,7 @@
 import { User } from "./user.model";
 import { UserStatus } from "./enums/status.enum";
 import bcrypt from "bcryptjs";
+import { Types } from "mongoose";
 
 
 
@@ -8,7 +9,7 @@ export interface CreateUserDto {
     user_name: string;
     password: string;
     email: string;
-    //roles: mongoose.Types.ObjectId[];
+    roles: Types.ObjectId[];
     reset_code?: String;
     reset_code_expires?: Date;
     status: UserStatus;
