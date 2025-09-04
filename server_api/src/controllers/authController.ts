@@ -1,10 +1,11 @@
-import { User, UserStatus } from '../models/user';
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { errorResponse, successResponse } from '../util/response';
 import { prepareHash, sendCode } from '../services/userService';
 import { AuthenticatedRequest, JwtPayload } from '../middleware/auth';
+import { User } from '../modules/users/user.model';
+import { UserStatus } from '../modules/users/enums/status.enum';
 
 const loginUser = async (req: Request, res: Response): Promise<void> => {
     try {

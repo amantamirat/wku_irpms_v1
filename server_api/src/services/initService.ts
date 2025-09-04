@@ -2,8 +2,10 @@ import fs from 'fs/promises';
 import path from 'path';
 import { Permission } from "../models/permission.model";
 import { Role } from '../models/role.model';
-import { User, UserStatus } from '../models/user';
+
 import { prepareHash } from './userService';
+import { User } from '../modules/users/user.model';
+import { UserStatus } from '../modules/users/enums/status.enum';
 
 
 export const initPermissions = async () => {

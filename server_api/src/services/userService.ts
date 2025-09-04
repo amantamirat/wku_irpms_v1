@@ -1,7 +1,9 @@
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import nodemailer, { Transporter } from 'nodemailer';
-import { IUser, User, UserStatus } from '../models/user';
+import { UserStatus } from '../modules/users/enums/status.enum';
+import { IUser, User } from '../modules/users/user.model';
+
 
 
 export interface UserDTO {

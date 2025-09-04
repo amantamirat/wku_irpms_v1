@@ -1,11 +1,7 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
-import { IRole } from './role.model';
+import { UserStatus } from './enums/status.enum';
 
-export enum UserStatus {
-  Pending = 'Pending',
-  Active = 'Active',
-  Suspended = 'Suspended'
-}
+
 
 export interface IUser extends Document {
   user_name: string;

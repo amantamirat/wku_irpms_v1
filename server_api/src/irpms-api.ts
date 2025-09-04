@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
-import userRoutes from './routes/user.routes';
+
 import roleRoutes from './routes/role.routes';
 import organRoutes from './modules/organs/organization.routes';
 import applicantRoutes from './modules/applicants/applicant.routes';
@@ -13,12 +13,14 @@ import calendarRoutes from './modules/calendar/calendar.routes';
 import callRoutes from './modules/call/call.routes';
 import grantRoutes from './modules/grants/grant.routes';
 import projectRoutes from './modules/project/project.routes';
+import userRoutes from './modules/users/user.routes';
 
 
 import { initAdminUser, initPermissions, initRoles } from './services/initService';
 import { initializeThemeModels } from './modules/themes/init.models';
 import { initializeEvalModels } from './modules/evals/init.models';
 import { initializeOrganModels } from './modules/organs/init.model';
+
 
 
 
