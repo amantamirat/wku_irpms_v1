@@ -12,8 +12,7 @@ interface IProject extends Document {
 const ProjectSchema = new Schema<IProject>({
     call: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.CALL,
-        required: true
+        ref: COLLECTIONS.CALL
     },
     title: {
         type: String,
