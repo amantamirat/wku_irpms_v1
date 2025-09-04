@@ -1,26 +1,27 @@
-import { User } from "@/models/user";
-import { MyService } from "./MyService";
+
+import { ApiClient } from "@/api/ApiClient";
+import { User } from "../models/user.model";
 import { Role } from "@/models/role";
 
 const end_point = '/users/';
 
 
 
-export const UserService = {
+export const UserApi = {
 
     async getUsers(): Promise<User[]> {
-        const data = await MyService.get(end_point);
+        const data = await ApiClient.get(end_point);
         return data as User[];
     },
 
     async createUser(user: Partial<User>): Promise<User> {
-        const createdData = await MyService.post(end_point, user);
+        const createdData = await ApiClient.post(end_point, user);
         return createdData as User;
     },
 
     async addRole(user: User, role: Partial<Role>): Promise<User> {
         const url = `${end_point}${user._id}/role`;
-        const createdData = await MyService.post(url, { role: role });
+        const createdData = await ApiClient.post(url, { role: role });
         return createdData as User;
     },
 
@@ -29,7 +30,7 @@ export const UserService = {
             throw new Error("_id required.");
         }
         const url = `${end_point}${user._id}`;
-        const updatedUser = await MyService.put(url, user);
+        const updatedUser = await ApiClient.put(url, user);
         return updatedUser as User;
     },
 
@@ -38,7 +39,7 @@ export const UserService = {
             throw new Error("_id required.");
         }
         const url = `${end_point}${user._id}`;
-        const response = await MyService.delete(url);
+        const response = await ApiClient.delete(url);
         return response;
     },
 
@@ -47,7 +48,7 @@ export const UserService = {
             throw new Error("_id required.");
         }
         const url = `${end_point}${user._id}/role/${role._id}`;
-        const response = await MyService.delete(url);
+        const response = await ApiClient.delete(url);
         return response;
     },
 };

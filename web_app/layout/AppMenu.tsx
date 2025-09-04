@@ -137,7 +137,7 @@ const AppMenu = () => {
                 {
                     label: 'User Accounts',
                     icon: PrimeIcons.USERS,
-                    to: '/pages/users'
+                    to: '/users'
                 }
             ]
         },

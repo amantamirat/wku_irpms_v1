@@ -1,4 +1,5 @@
-import { Role } from "./role";
+import { Role } from "@/models/role";
+
 
 export enum UserStatus {
     Pending = 'Pending',

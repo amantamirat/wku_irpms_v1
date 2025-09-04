@@ -8,10 +8,10 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
-import { User } from '@/models/user';
 import { Role } from '@/models/role';
 import AddDialog from './dialog/AddDialog';
-import { UserService } from '@/services/UserService';
+import { UserApi } from '@/services/UserService';
+import { User } from '../../users/models/user.model';
 
 interface UserRoleCompProps {
     roles: Role[];
@@ -66,7 +66,7 @@ const UserRoleComp = (props: UserRoleCompProps) => {
             }
             let _roles = [...(user.roles)];
             if (selectedRole._id) {
-                await UserService.addRole(user, selectedRole);
+                await UserApi.addRole(user, selectedRole);
                 _roles.push(selectedRole);
                 onUpdate({ ...user, roles: _roles });
                 toast.current?.show({
@@ -95,7 +95,7 @@ const UserRoleComp = (props: UserRoleCompProps) => {
     const deleteRole = async () => {
         try {
 
-            await UserService.removeRole(user, selectedRole);
+            await UserApi.removeRole(user, selectedRole);
             let _roles = (user.roles)?.filter((val) => val._id !== selectedRole._id);
             onUpdate({ ...user, roles: _roles });
             toast.current?.show({

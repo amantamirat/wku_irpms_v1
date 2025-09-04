@@ -1,6 +1,6 @@
 'use client';
+import { UserStatus } from '@/app/(main)/users/models/user.model';
 import { useAuth } from '@/contexts/auth-context';
-import { UserStatus } from '@/models/user';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 

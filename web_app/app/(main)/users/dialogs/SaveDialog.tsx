@@ -6,18 +6,22 @@ import { InputText } from 'primereact/inputtext';
 import { Password } from 'primereact/password';
 import { Button } from 'primereact/button';
 import { classNames } from 'primereact/utils';
-import { User, validateUser } from '@/models/user';
+import { User, validateUser } from '../models/user.model';
+import { Role } from '@/models/role';
+import { MultiSelect } from 'primereact/multiselect';
+
 
 interface SaveDialogProps {
     visible: boolean;
     user: User;
     onChange: (user: User) => void;
+    roles: Role[];
     onSave: () => void;
     onHide: () => void;
 }
 
 function SaveDialog(props: SaveDialogProps) {
-    const { visible, user, onChange, onSave, onHide } = props;
+    const { visible, user, roles, onChange, onSave, onHide } = props;
     const [submitted, setSubmitted] = useState(false);
     const [confirmPassword, setConfirmPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
@@ -39,7 +43,7 @@ function SaveDialog(props: SaveDialogProps) {
     const hide = async () => {
         setSubmitted(false);
         setConfirmPassword('');
-        setErrorMessage(undefined);        
+        setErrorMessage(undefined);
         onHide();
     }
 
@@ -131,6 +135,21 @@ function SaveDialog(props: SaveDialogProps) {
                             </div>
                         </>
                     )}
+
+
+                    <div className="field">
+                        <label htmlFor="roles">Roles</label>
+                        <MultiSelect
+                            id="roles"
+                            value={roles.filter(r => user.roles?.some(ur => ur._id === r._id))}
+                            options={roles}
+                            optionLabel='role_name'
+                            onChange={(e) => onChange({ ...user, roles: e.value })}
+                            placeholder="Select Roles"
+                            display="chip"
+                            className={classNames({ 'p-invalid': submitted && !user.roles?.length })}
+                        />
+                    </div>
                 </>
             )}
             {errorMessage && (

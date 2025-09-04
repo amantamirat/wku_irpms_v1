@@ -1,7 +1,5 @@
 'use client';
 import DeleteDialog from '@/components/DeleteDialog';
-import { User, UserStatus } from '@/models/user';
-import { UserService } from '@/services/UserService';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -11,9 +9,11 @@ import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
 import SaveDialog from './dialogs/SaveDialog';
-import UserRoleComp from '../../components/userRole/UserRole';
 import { Role } from '@/models/role';
 import { RoleService } from '@/services/RoleService';
+import UserRoleComp from '../components/userRole/UserRole';
+import { User, UserStatus } from './models/user.model';
+import { UserApi } from './api/UserService';
 
 
 
@@ -51,7 +51,7 @@ const UserPage = () => {
 
     const loadUsers = async () => {
         try {
-            const data = await UserService.getUsers();
+            const data = await UserApi.getUsers();
             setUsers(data);
         } catch (err) {
             console.error('Failed to load users:', err);
@@ -84,11 +84,11 @@ const UserPage = () => {
         try {
             let _users = [...(users as any)];
             if (selectedUser._id) {
-                const updatedUser = await UserService.updateUser(selectedUser);
+                const updatedUser = await UserApi.updateUser(selectedUser);
                 const index = users.findIndex((user) => user._id === selectedUser._id);
                 _users[index] = selectedUser;
             } else {
-                const newUser = await UserService.createUser(selectedUser);
+                const newUser = await UserApi.createUser(selectedUser);
                 _users.push(newUser);
             }
             setUsers(_users);
@@ -116,7 +116,7 @@ const UserPage = () => {
 
     const deleteUser = async () => {
         try {
-            const deleted = await UserService.deleteUser(selectedUser);
+            const deleted = await UserApi.deleteUser(selectedUser);
             if (deleted) {
                 let _users = (users as any)?.filter((val: any) => val._id !== selectedUser._id);
                 setUsers(_users);
@@ -235,11 +235,21 @@ const UserPage = () => {
                         expandedRows={expandedRows}
                         onRowToggle={(e) => setExpandedRows(e.data)}
                         rowExpansionTemplate={(data) => (
-                            <UserRoleComp
-                                roles={roles}
-                                user={data as User}
-                                onUpdate={handleUpdate}
-                            />
+                            <>
+                                <DataTable
+                                    value={(data as User).roles}
+                                    dataKey="_id"
+                                    emptyMessage={'No role data found.'}
+                                    header={"Roles"}
+                                >
+                                    <Column
+                                        header="#"
+                                        body={(rowData, options) => options.rowIndex + 1}
+                                        style={{ width: '50px' }}
+                                    />
+                                    <Column field="role_name" header="Role Name" sortable headerStyle={{ minWidth: '15rem' }} />
+                                </DataTable>
+                            </>
                         )}
                     >
                         <Column expander style={{ width: '3em' }} />
@@ -257,6 +267,7 @@ const UserPage = () => {
                     {selectedUser && <SaveDialog
                         visible={showSaveDialog}
                         user={selectedUser}
+                        roles={roles}
                         onChange={setSelectedUser}
                         onSave={saveUser}
                         onHide={hideSaveDialog}
