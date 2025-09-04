@@ -11,6 +11,7 @@ export interface IApplicant extends Document {
     gender: Gender;
     scope: Category;
     organization: mongoose.Types.ObjectId;
+    user?: mongoose.Types.ObjectId;
     accessibility?: Accessibility[];
     createdAt?: Date;
     updatedAt?: Date;
@@ -43,6 +44,13 @@ const ApplicantSchema = new Schema<IApplicant>({
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.ORGAN,
         required: true
+    },
+    user: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.USER,
+        unique: true,
+        immutable: true,
+        sparse: true
     },
     accessibility: {
         type: [String],

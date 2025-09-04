@@ -50,3 +50,10 @@ export type Phase = {
     updatedAt?: Date;
 }
 
+
+export const validateProject = (project: Project): { valid: boolean; message?: string } => {
+    if (!project.title || project.title.trim().length === 0) {
+        return { valid: false, message: 'Title is required.' };
+    }
+    return { valid: true };
+};

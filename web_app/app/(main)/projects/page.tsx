@@ -12,6 +12,7 @@ import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
 import { Project } from './models/project.model';
 import { ProjectApi } from './api/project.api';
+import SaveDialog from './components/dialogs/SaveDialog';
 
 const ProjectPage = () => {
     const emptyProject: Project = {
@@ -143,7 +144,7 @@ const ProjectPage = () => {
         </>
     );
 
-   
+
 
     return (
         <div className="grid">
@@ -171,12 +172,21 @@ const ProjectPage = () => {
                     >
                         <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                        <Column field="call.title" header="Call"/>
-                        <Column field="title" header="Title" sortable />                        
+                        <Column field="call.title" header="Call" />
+                        <Column field="title" header="Title" sortable />
                         <Column field="updatedAt" header="Updated At" body={(rowData) => new Date(rowData.updatedAt!).toLocaleDateString('en-CA')} />
-                       <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
+                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
-                    
+
+                    {selectedProject && (
+                        <SaveDialog
+                            visible={showSaveDialog}
+                            project={selectedProject}
+                            onChange={setSelectedProject}
+                            onSave={saveProject}
+                            onHide={() => setShowSaveDialog(false)}
+                        />
+                    )}
 
                     {selectedProject && (
                         <DeleteDialog
