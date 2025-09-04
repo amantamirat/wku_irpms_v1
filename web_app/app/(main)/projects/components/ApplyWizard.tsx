@@ -26,7 +26,8 @@ export default function ApplyWizard({ visible, call, project, setProject, onHide
         { label: 'Project Information' },
         { label: 'Collaborators' },
         { label: 'Themes' },
-        { label: 'Phases' }
+        { label: 'Phases' },
+        { label: 'Confirmation' }
     ];
 
     const onHide = () => {
@@ -45,9 +46,9 @@ export default function ApplyWizard({ visible, call, project, setProject, onHide
             {activeStep > 0 && (
                 <Button label="Back" icon="pi pi-angle-left" onClick={prevStep} outlined severity="secondary" />
             )}
-            {activeStep < items.length && (<Button label="Next" icon="pi pi-angle-right" onClick={nextStep} iconPos="right" outlined />
+            {activeStep < items.length - 1 && (<Button label="Next" icon="pi pi-angle-right" onClick={nextStep} iconPos="right" outlined />
             )}
-            {activeStep === items.length && (
+            {activeStep === items.length - 1 && (
                 <Button label="Submit" icon="pi pi-check" outlined />
             )}
         </div>

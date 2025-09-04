@@ -93,7 +93,7 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
             if (exists) {
                 throw new Error("The theme is already added!");
             }
-            const updatedThemes = [...(project.themes || []), { theme: theme }];
+            const updatedThemes = [...(project.themes || []), { theme: theme, Co_PI: projectTheme.Co_PI}];
             setProject({ ...project, themes: updatedThemes });
 
         } catch (err) {
@@ -213,7 +213,8 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
                     projectTheme={projectTheme}
                     setProjectTheme={setProjectTheme}
                     visible={showAddDialog}
-                    options={nodes}
+                    themeOptions={nodes}
+                    collaboratorOptions={project.collaborators}
                     onAdd={addProjectTheme}
                     onHide={hideDialogs}
                 />}

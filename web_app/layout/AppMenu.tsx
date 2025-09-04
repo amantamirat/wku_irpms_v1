@@ -68,6 +68,11 @@ const AppMenu = () => {
             label: 'Manage',
             items: [
                 {
+                    label: 'Projects',
+                    icon: PrimeIcons.BRIEFCASE,
+                    to: '/projects'
+                },
+                {
                     label: 'Calendars',
                     icon: PrimeIcons.CALENDAR,
                     to: '/calendars'

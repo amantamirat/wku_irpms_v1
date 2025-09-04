@@ -4,7 +4,7 @@ import { Theme } from "../../themes/models/theme.model";
 
 export type Project = {
     _id?: string;
-    call: string | Call;
+    call?: string | Call;
     title: string;
     summary?: string;
     collaborators?: Collaborator[];
