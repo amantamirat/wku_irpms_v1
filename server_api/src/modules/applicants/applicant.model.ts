@@ -49,7 +49,6 @@ const ApplicantSchema = new Schema<IApplicant>({
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.USER,
         unique: true,
-        immutable: true,
         sparse: true
     },
     accessibility: {

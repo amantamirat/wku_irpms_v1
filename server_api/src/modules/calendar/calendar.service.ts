@@ -17,7 +17,7 @@ export class CalendarService {
     }
 
     static async getCalendars() {        
-        return Calendar.find().lean();
+        return await Calendar.find().lean();
     }
 
     static async updateCalendar(id: string, data: Partial<CreateCalendarDto>) {

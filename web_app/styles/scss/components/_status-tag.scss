@@ -31,6 +31,16 @@
         background: #FEEDAF;
         color: #5c1a1f;
     }
+
+    &.linked {
+        background: #a0a7a0;
+        color: #77c002;
+    }
+
+    &.notlinked {
+        background: hsl(353, 80%, 6%);
+        color: #ecc7c7;
+    }
 }
 
 .academic-badge {

@@ -201,6 +201,11 @@ const UserPage = () => {
         );
     };
 
+    const linkedBodyTemplate = (rowData: any) => {
+        return rowData.linkedApplicant ? <span className='user-badge linked'>Linked</span> :
+            <span className='user-badge notlinked'>Not Linked</span>;
+    };
+
 
     return (
         <div className="grid">
@@ -251,10 +256,11 @@ const UserPage = () => {
                             body={(rowData, options) => options.rowIndex + 1}
                             style={{ width: '50px' }}
                         />
-                        <Column field="user_name" header="USER" sortable headerStyle={{ minWidth: '15rem' }}></Column>
-                        <Column field="email" header="EMAIL" sortable />
-                        <Column field="status" header="STATUS" sortable body={statusBodyTemplate} />
-                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
+                        <Column field="user_name" header="Username" sortable />
+                        <Column field="email" header="Email" sortable />
+                        <Column header="Linked" body={linkedBodyTemplate} sortable />
+                        <Column field="status" header="Status" sortable body={statusBodyTemplate} />
+                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
                     </DataTable>
 
                     {selectedUser && <SaveDialog

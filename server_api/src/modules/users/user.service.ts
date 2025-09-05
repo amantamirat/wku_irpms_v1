@@ -2,6 +2,7 @@ import { User } from "./user.model";
 import { UserStatus } from "./enums/status.enum";
 import bcrypt from "bcryptjs";
 import { Types } from "mongoose";
+import Applicant from "../applicants/applicant.model";
 
 
 
@@ -30,7 +31,15 @@ export class UserService {
     }
 
     static async getUsers() {
-        return User.find().populate("roles").lean();
+        const users = await User.find().populate("roles").lean();
+        const usersWithLink = await Promise.all(users.map(async user => {
+            const linkedApplicant = await Applicant.findOne({ user: user._id }).lean();
+            return {
+                ...user,
+                linkedApplicant: !!linkedApplicant
+            };
+        }));
+        return usersWithLink;
     }
 
     static async updateUser(id: string, data: Partial<CreateUserDto>) {

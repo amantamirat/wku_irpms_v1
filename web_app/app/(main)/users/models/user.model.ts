@@ -1,3 +1,4 @@
+import { Applicant } from "../../applicants/models/applicant.model";
 import { Role } from "../../roles/models/role.model";
 
 
@@ -12,10 +13,11 @@ export type User = {
     user_name: string;
     email: string;
     password?: string;
-    status?: UserStatus;
     roles: Role[];
     reset_code?: string;
     reset_code_expires?: Date;
+    linkedApplicant?: string | Applicant;
+    status: UserStatus;
 };
 
 
