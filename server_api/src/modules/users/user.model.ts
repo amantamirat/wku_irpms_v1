@@ -7,7 +7,7 @@ import { COLLECTIONS } from '../../enums/collections.enum';
 export interface IUser extends Document {
   user_name: string;
   password: string;
-  email: string;
+  email?: string;
   status: UserStatus;
   roles: mongoose.Types.ObjectId[];
   reset_code?: String;
@@ -33,7 +33,8 @@ const UserSchema = new Schema<IUser>(
       match: [
         /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
         'Please provide a valid email',
-      ]
+      ],
+      sparse: true
     },
     status: {
       type: String,
