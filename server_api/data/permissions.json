@@ -1,23 +1,67 @@
 [
-  { "category":"", "name": "user:create", "description": "Create new users" },
-  { "name": "user:read", "description": "View user list and details" },
-  { "name": "user:update", "description": "Edit user details" },
-  { "name": "user:delete", "description": "Delete users" },
-
-  { "name": "role:create", "description": "Create new roles" },
-  { "name": "role:read", "description": "View roles" },
-  { "name": "role:update", "description": "Edit roles" },
-  { "name": "role:delete", "description": "Delete roles" },
-
-  { "name": "permission:read", "description": "View permissions" },
-
-  { "name": "calendar:create", "description": "Create calendar entries" },
-  { "name": "calendar:read", "description": "Read calendar entries" },
-  { "name": "calendar:update", "description": "Update calendar entries" },
-  { "name": "calendar:delete", "description": "Delete calendar entries" },
-  
-  { "name": "college:create", "description": "Create college entries" },
-  { "name": "college:read", "description": "Read college entries" },
-  { "name": "college:update", "description": "Update college entries" },
-  { "name": "college:delete", "description": "Delete college entries" }
+  {
+    "category": "User Management",
+    "name": "user:create",
+    "description": "Create new users"
+  },
+  {
+    "category": "User Management",
+    "name": "user:read",
+    "description": "View user list and details"
+  },
+  {
+    "category": "User Management",
+    "name": "user:update",
+    "description": "Edit user details"
+  },
+  {
+    "category": "User Management",
+    "name": "user:delete",
+    "description": "Delete users"
+  },
+  {
+    "category": "Role Management",
+    "name": "role:create",
+    "description": "Create new roles"
+  },
+  {
+    "category": "Role Management",
+    "name": "role:read",
+    "description": "View roles"
+  },
+  {
+    "category": "Role Management",
+    "name": "role:update",
+    "description": "Edit roles"
+  },
+  {
+    "category": "Role Management",
+    "name": "role:delete",
+    "description": "Delete roles"
+  },
+  {
+    "category": "Permission Management",
+    "name": "permission:read",
+    "description": "View permissions"
+  },
+  {
+    "category": "Calendar Management",
+    "name": "calendar:create",
+    "description": "Create calendar entries"
+  },
+  {
+    "category": "Calendar Management",
+    "name": "calendar:read",
+    "description": "Read calendar entries"
+  },
+  {
+    "category": "Calendar Management",
+    "name": "calendar:update",
+    "description": "Update calendar entries"
+  },
+  {
+    "category": "Calendar Management",
+    "name": "calendar:delete",
+    "description": "Delete calendar entries"
+  }  
 ]

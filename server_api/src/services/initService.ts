@@ -8,18 +8,7 @@ import { Permission } from '../modules/users/permissions/permission.model';
 import { Role } from '../modules/users/roles/role.model';
 
 
-export const initPermissions = async () => {
-    const filePath = path.join(process.cwd(), 'data', 'permissions.json');
-    const rawData = await fs.readFile(filePath, 'utf-8');
-    const permissions = JSON.parse(rawData);
-    for (const perm of permissions) {
-        const exists = await Permission.findOne({ name: perm.name });
-        if (!exists) {
-            await new Permission(perm).save();
-        }
-    }
-    console.log('Permissions seeded from JSON');
-};
+
 
 
 export const initRoles = async () => {
