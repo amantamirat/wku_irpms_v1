@@ -16,8 +16,9 @@ import projectRoutes from './modules/project/project.routes';
 import userRoutes from './modules/users/user.routes';
 import roleRoutes from './modules/users/roles/role.routes';
 
+import { PermissionService } from './modules/users/permissions/permission.service';
 
-import { initAdminUser, initPermissions, initRoles } from './services/initService';
+import { initAdminUser, initRoles } from './services/initService';
 import { initializeThemeModels } from './modules/themes/init.models';
 import { initializeEvalModels } from './modules/evals/init.models';
 import { initializeOrganModels } from './modules/organs/init.model';
@@ -67,8 +68,7 @@ const PORT = process.env.SERVER_PORT || 5000;
     initializeOrganModels();
     initializeThemeModels();
     initializeEvalModels();
-
-    await initPermissions();
+    await PermissionService.initPermissions();
     await initRoles();
     await initAdminUser();
     app.listen(PORT, () => {
