@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
 import { Role } from "./role.model";
+import { User } from "../user.model";
 
 export interface CreateRoleDto {
     role_name: string;
@@ -28,6 +29,10 @@ export class RoleService {
     static async deleteRole(id: string) {
         const role = await Role.findById(id);
         if (!role) throw new Error("Role not found");
+        const isAssigned = await User.exists({ roles: id });
+        if (isAssigned) {
+            throw new Error("Cannot delete role: it is assigned to one or more users");
+        }
         return await role.deleteOne();
     }
 }
