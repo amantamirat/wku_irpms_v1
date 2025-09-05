@@ -145,6 +145,15 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
                         className={classNames({ 'p-invalid': submitted && !applicant.organization })}
                     />
                 </div>
+
+                <div className="field">
+                    <label htmlFor="email">Email Address</label>
+                    <InputText
+                        id="email"
+                        value={applicant.email?? ""}
+                        onChange={(e) => setApplicant({ ...applicant, email: e.target.value })}
+                    />
+                </div>
                 <div className="field">
                     <label htmlFor="accessibility">Accessibility</label>
                     <MultiSelect
@@ -154,8 +163,7 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
                         onChange={(e) => setApplicant({ ...applicant, accessibility: e.value })}
                         placeholder="Select Accessibility Types"
                         display="chip"
-                        className={classNames({ 'p-invalid': submitted && !applicant.accessibility?.length })}
-                    />
+                     />
                 </div>
             </>)}
             {errorMessage && (

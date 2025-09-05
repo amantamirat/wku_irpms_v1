@@ -1,4 +1,4 @@
-import { Category, Organization, OrganizationalUnit } from "@/app/(main)/organizations/models/organization.model";
+import { Category, Organization, OrganizationalUnit } from "../../organizations/models/organization.model";
 
 
 export enum Gender {
@@ -23,16 +23,14 @@ export type Applicant = {
     gender: Gender;
     scope: Category;
     organization: string | Organization;
-    accessibility? : Accessibility[];
+    email?: string;
+    accessibility?: Accessibility[];
     createdAt?: Date;
     updatedAt?: Date;
 }
 
 
-export const validateApplicant = (
-    applicant: Applicant
-): { valid: boolean; message?: string } => {
-
+export const validateApplicant = (applicant: Applicant): { valid: boolean; message?: string } => {
     if (!applicant.first_name) {
         return { valid: false, message: 'First name is required.' };
     }
@@ -49,6 +47,12 @@ export const validateApplicant = (
         return { valid: false, message: 'Gender is required.' };
     }
 
+    if (applicant.email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(applicant.email)) {
+            return { valid: false, message: "Email is not valid." };
+        }
+    }
     if (applicant.scope === Category.academic && !applicant.organization) {
         return { valid: false, message: 'Department is required for academic category.' };
     }
@@ -60,7 +64,7 @@ export const validateApplicant = (
     if (applicant.scope === Category.external && !applicant.organization) {
         return { valid: false, message: 'External Organization is required for external category.' };
     }
-        
+
     return { valid: true };
 };
 

@@ -11,6 +11,7 @@ export interface IApplicant extends Document {
     gender: Gender;
     scope: Category;
     organization: mongoose.Types.ObjectId;
+    email?: string;
     user?: mongoose.Types.ObjectId;
     accessibility?: Accessibility[];
     createdAt?: Date;
@@ -44,6 +45,15 @@ const ApplicantSchema = new Schema<IApplicant>({
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.ORGAN,
         required: true
+    },
+    email: {
+        type: String,
+        unique: true,
+        match: [
+            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+            'Please provide a valid email',
+        ],
+        sparse: true
     },
     user: {
         type: Schema.Types.ObjectId,

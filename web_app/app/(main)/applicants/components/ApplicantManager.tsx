@@ -227,6 +227,7 @@ const ApplicantManager = (props: ApplicantManagerProps) => {
                         <Column field="gender" header="Gender" body={genderBodyTemplate} sortable />
                         <Column field="birth_date" header="Birth Date" body={(rowData) => new Date(rowData.birth_date!).toLocaleDateString('en-CA')} />
                         <Column field="organization.name" header={isAcademic ? "Department" : isSupportive ? "Office" : "Organization"} sortable />
+                        <Column field="email" header="Email" sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 

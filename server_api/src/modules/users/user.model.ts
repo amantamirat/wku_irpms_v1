@@ -32,7 +32,7 @@ const UserSchema = new Schema<IUser>(
       unique: true,
       match: [
         /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-        'Please add a valid email',
+        'Please provide a valid email',
       ]
     },
     status: {
