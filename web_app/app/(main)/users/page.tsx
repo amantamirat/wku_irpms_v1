@@ -9,7 +9,6 @@ import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
 import SaveDialog from './dialogs/SaveDialog';
-import UserRoleComp from '../components/userRole/UserRole';
 import { User, UserStatus } from './models/user.model';
 import { UserApi } from './api/UserService';
 import { Role } from '../roles/models/role.model';
@@ -202,12 +201,6 @@ const UserPage = () => {
         );
     };
 
-    const handleUpdate = (updated: User) => {
-        let _users = [...users]
-        const index = users.findIndex((usr) => usr._id === updated._id);
-        _users[index] = { ...updated };
-        setUsers(_users);
-    };
 
     return (
         <div className="grid">
