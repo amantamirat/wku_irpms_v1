@@ -1,4 +1,5 @@
-import { Role } from "@/models/role";
+import { Role } from "../../roles/models/role.model";
+
 
 
 export enum UserStatus {

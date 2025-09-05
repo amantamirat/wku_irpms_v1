@@ -17,7 +17,7 @@ const AppMenu = () => {
     const icons = ['pi pi-mars', 'pi pi-microchip', 'pi pi-prime', 'pi pi-sparkles', 'pi pi-venus'];
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     useEffect(() => {
-        OrganizationApi.getOrganizations({type:OrganizationalUnit.Directorate})
+        OrganizationApi.getOrganizations({ type: OrganizationalUnit.Directorate })
             .then(data => setOrganizations(data))
             .catch(err => console.error('Failed to fetch organization of directorates', err));
     }, []);
@@ -32,7 +32,7 @@ const AppMenu = () => {
                 {
                     label: 'Calls',
                     icon: 'pi pi-fw pi-megaphone',
-                    to: `/calls?id=${dir._id}&name=${encodeURIComponent(dir.name)}`                    
+                    to: `/calls?id=${dir._id}&name=${encodeURIComponent(dir.name)}`
                 },
 
                 {
@@ -138,6 +138,11 @@ const AppMenu = () => {
                     label: 'User Accounts',
                     icon: PrimeIcons.USERS,
                     to: '/users'
+                },
+                {
+                    label: 'Roles &  Permissions',
+                    icon: PrimeIcons.LOCK,
+                    to: '/roles'
                 }
             ]
         },

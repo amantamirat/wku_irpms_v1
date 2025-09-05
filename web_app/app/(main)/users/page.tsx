@@ -9,11 +9,11 @@ import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
 import SaveDialog from './dialogs/SaveDialog';
-import { Role } from '@/models/role';
-import { RoleService } from '@/services/RoleService';
 import UserRoleComp from '../components/userRole/UserRole';
 import { User, UserStatus } from './models/user.model';
 import { UserApi } from './api/UserService';
+import { Role } from '../roles/models/role.model';
+import { RoleApi } from '../roles/api/role.api';
 
 
 
@@ -66,7 +66,7 @@ const UserPage = () => {
 
     const loadRoles = async () => {
         try {
-            const data = await RoleService.getRoles();
+            const data = await RoleApi.getRoles();
             //console.log(data);
             setRoles(data);
         } catch (err) {
@@ -240,7 +240,7 @@ const UserPage = () => {
                                     value={(data as User).roles}
                                     dataKey="_id"
                                     emptyMessage={'No role data found.'}
-                                    header={"Roles"}
+                                    header={"Assigned Roles"}
                                 >
                                     <Column
                                         header="#"

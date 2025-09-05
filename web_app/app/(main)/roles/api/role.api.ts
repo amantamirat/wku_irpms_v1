@@ -1,18 +1,19 @@
-import { Role } from "@/models/role";
-import { MyService } from "./MyService";
+import { ApiClient } from "@/api/ApiClient";
+import { Role } from "../models/role.model";
+
 
 const end_point = '/roles/';
 
 
-export const RoleService = {
+export const RoleApi = {
 
     async getRoles(): Promise<Role[]> {
-        const data = await MyService.get(end_point);
+        const data = await ApiClient.get(end_point);
         return data as Role[];
     },
 
     async createRole(role: Partial<Role>): Promise<Role> {
-        const createdData = await MyService.post(end_point, role);
+        const createdData = await ApiClient.post(end_point, role);
         return createdData as Role;
     },
 
@@ -21,7 +22,7 @@ export const RoleService = {
             throw new Error("_id required.");
         }
         const url = `${end_point}${role._id}`;
-        const updatedRole = await MyService.put(url, role);
+        const updatedRole = await ApiClient.put(url, role);
         return updatedRole as Role;
     },
 
@@ -30,7 +31,7 @@ export const RoleService = {
             throw new Error("_id required.");
         }
         const url = `${end_point}${role._id}`;
-        const response = await MyService.delete(url);
+        const response = await ApiClient.delete(url);
         return response;
     },
 };

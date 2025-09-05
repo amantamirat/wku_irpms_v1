@@ -1,5 +1,5 @@
 [
-  { "name": "user:create", "description": "Create new users" },
+  { "category":"", "name": "user:create", "description": "Create new users" },
   { "name": "user:read", "description": "View user list and details" },
   { "name": "user:update", "description": "Edit user details" },
   { "name": "user:delete", "description": "Delete users" },

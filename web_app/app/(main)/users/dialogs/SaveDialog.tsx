@@ -7,8 +7,8 @@ import { Password } from 'primereact/password';
 import { Button } from 'primereact/button';
 import { classNames } from 'primereact/utils';
 import { User, validateUser } from '../models/user.model';
-import { Role } from '@/models/role';
 import { MultiSelect } from 'primereact/multiselect';
+import { Role } from '../../roles/models/role.model';
 
 
 interface SaveDialogProps {
