@@ -8,7 +8,7 @@ import { classNames } from 'primereact/utils';
 import { LayoutContext } from '../../../../layout/context/layoutcontext';
 import { useContext } from 'react';
 import { Messages } from 'primereact/messages';
-import { AuthService } from '@/services/AuthService';
+import { AuthApi } from '@/services/AuthService';
 import NoAuthGuard from '@/components/NoAuthGuard';
 
 export default function ResetPassword() {
@@ -48,7 +48,7 @@ export default function ResetPassword() {
         msgs.current?.show({ severity: 'error', summary: 'Password Mismatch', detail: 'Passwords do not match' });
         return;
       }
-      const data = await AuthService.resetPassword(email, resetCode, password);
+      const data = await AuthApi.resetPassword(email, resetCode, password);
       if (data.success) {
         msgs.current?.clear();
         msgs.current?.show({ severity: 'success', summary: 'Success!', detail: 'Your password has been reset successfully.' });

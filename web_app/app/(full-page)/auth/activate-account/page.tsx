@@ -1,5 +1,5 @@
 'use client';
-import { AuthService } from '@/services/AuthService';
+import { AuthApi } from '@/services/AuthService';
 import { useRouter } from 'next/navigation';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
@@ -29,7 +29,7 @@ export default function ActivateAccountPage() {
         msgs.current?.show({ severity: 'warn', summary: 'Validation', detail: 'Code is required.' });
         return;
       }
-      const data = await AuthService.activateAccount(activationCode);
+      const data = await AuthApi.activateAccount(activationCode);
       if (data.success) {
         msgs.current?.clear();
         msgs.current?.show({ severity: 'success', summary: 'Success!', detail: 'Your account has been activated successfully.' });

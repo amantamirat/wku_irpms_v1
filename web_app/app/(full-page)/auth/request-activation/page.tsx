@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from 'primereact/button';
 import { Messages } from 'primereact/messages';
 import { useAuth } from '@/contexts/auth-context';
-import { AuthService } from '@/services/AuthService';
+import { AuthApi } from '@/services/AuthService';
 import RequireAuth from '@/components/RequireAuth';
 
 
@@ -19,7 +19,7 @@ export default function RequestActivationPage() {
   const handleActivate = async () => {
     try {
       setActivating(true);
-      const res = await AuthService.sendActivationCode();
+      const res = await AuthApi.sendActivationCode();
       if (res.success) {
         msgs.current?.clear();
         msgs.current?.show({ severity: 'success', summary: 'Almost There!', detail: 'Activation code has been sent to your email.' });

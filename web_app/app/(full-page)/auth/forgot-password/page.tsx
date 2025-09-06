@@ -7,8 +7,7 @@ import { classNames } from 'primereact/utils';
 import { LayoutContext } from '../../../../layout/context/layoutcontext';
 import { useContext } from 'react';
 import { Messages } from 'primereact/messages';
-import { useAuth } from '@/contexts/auth-context';
-import { AuthService } from '@/services/AuthService';
+import { AuthApi } from '@/services/AuthService';
 import NoAuthGuard from '@/components/NoAuthGuard';
 
 export default function ForgotPassword() {
@@ -37,7 +36,7 @@ export default function ForgotPassword() {
         msgs.current?.show({ severity: 'warn', summary: 'Validation', detail: 'Please enter a valid email address.' });
         return;
       }
-      const data = await AuthService.sendResetCode(email);
+      const data = await AuthApi.sendResetCode(email);
       if (data.success) {
         msgs.current?.clear();
         msgs.current?.show({ severity: 'success', summary: 'Almost There!', detail: 'Reset code sent. Check your inbox.' });

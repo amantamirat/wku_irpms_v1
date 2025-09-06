@@ -66,6 +66,7 @@ function LinkDialog(props: LinkDialogProps) {
                         <label htmlFor="email">Email</label>
                         <InputText
                             id="email"
+                            type="email"
                             value={user.email}
                             onChange={(e) => onChange({ ...user, email: e.target.value })}
                             className={classNames({

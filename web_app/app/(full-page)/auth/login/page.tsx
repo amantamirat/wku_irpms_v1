@@ -9,7 +9,7 @@ import { LayoutContext } from '../../../../layout/context/layoutcontext';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import { Messages } from "primereact/messages";
-import { AuthService } from '@/services/AuthService';
+import { AuthApi } from '@/services/AuthService';
 import { useAuth } from '@/contexts/auth-context';
 import NoAuthGuard from '@/components/NoAuthGuard';
 
@@ -34,7 +34,7 @@ const LoginPage = () => {
                 return;
             }
 
-            const { token, user } = await AuthService.loginUser({ user_name, password: userPassword });
+            const { token, user } = await AuthApi.loginUser({ user_name, password: userPassword });
             if (token) {
                 login(user, token);
                 msgs.current?.clear();

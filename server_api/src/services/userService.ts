@@ -21,7 +21,7 @@ export const prepareHash = async (password: string): Promise<string> => {
 };
 
 export const createUserAccount = async (user: UserDTO): Promise<IUser> => {
-    const { user_name, email, password, status} = user;
+    const { user_name, email, password, status } = user;
     const hashedPassword = await prepareHash(password);
     const newUser = new User({
         user_name, email, password: hashedPassword, status,
@@ -36,13 +36,11 @@ export const createUserAccount = async (user: UserDTO): Promise<IUser> => {
 export const sendCode = async (email: string, reset: boolean): Promise<void> => {
     try {
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email, status: { $ne: UserStatus.Suspended } });
         if (!user) {
             throw new Error("User with this email does not exist.");
         }
-        if (user.status === UserStatus.Suspended) {
-            throw new Error("Account has been suspended. Please contact the system administrator.");
-        }
+        
         const now = new Date();
         const bufferTime = 2 * 60 * 1000;
 

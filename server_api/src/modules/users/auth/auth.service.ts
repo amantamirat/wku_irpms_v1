@@ -33,11 +33,5 @@ export class AuthService {
         //console.log("user:", user.user_name, "logged in.");
         return { token, user: payload };
     }
-
-
-
-
-
-
-
+    
 }
