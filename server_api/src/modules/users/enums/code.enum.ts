@@ -1,5 +1,4 @@
-export enum CodeType {
-  Reset = 'Reset',
+export enum PendingType {
   Activation = 'Activation',
   Link = 'Linked'
 }
