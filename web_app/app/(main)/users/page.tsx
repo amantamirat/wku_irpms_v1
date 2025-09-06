@@ -13,6 +13,7 @@ import { User, UserStatus } from './models/user.model';
 import { UserApi } from './api/UserService';
 import { Role } from '../roles/models/role.model';
 import { RoleApi } from '../roles/api/role.api';
+import LinkDialog from './dialogs/LinkDialog';
 
 
 
@@ -32,6 +33,7 @@ const UserPage = () => {
 
     const [selectedUser, setSelectedUser] = useState<User>(emptyUser);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
+    const [showLinkDialog, setShowLinkDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
@@ -146,9 +148,15 @@ const UserPage = () => {
         setShowSaveDialog(true);
     };
 
+    const openLinkDialog = (user: User) => {
+        setSelectedUser({ ...user });
+        setShowLinkDialog(true);
+    };
 
-    const hideSaveDialog = () => {
+
+    const hideDialog = () => {
         setShowSaveDialog(false);
+        setShowLinkDialog(false);
         setSelectedUser(emptyUser);
     };
 
@@ -184,6 +192,8 @@ const UserPage = () => {
     const actionBodyTemplate = (rowData: User) => {
         return (
             <>
+                <Button icon="pi pi-paperclip" rounded severity="info" className="p-button-rounded p-button-text"
+                    style={{ fontSize: '2rem' }} onClick={() => openLinkDialog(rowData)} />
                 <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
                     style={{ fontSize: '2rem' }} onClick={() => openSaveDialog(rowData)} />
                 <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
@@ -269,7 +279,15 @@ const UserPage = () => {
                         roles={roles}
                         onChange={setSelectedUser}
                         onSave={saveUser}
-                        onHide={hideSaveDialog}
+                        onHide={hideDialog}
+                    />}
+
+                    {selectedUser && <LinkDialog
+                        visible={showLinkDialog}
+                        user={selectedUser}
+                        onChange={setSelectedUser}
+                        onSave={saveUser}
+                        onHide={hideDialog}
                     />}
 
                     {selectedUser && <DeleteDialog

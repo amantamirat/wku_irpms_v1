@@ -27,7 +27,7 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
             return;
         }
         const payload: JwtPayload = {
-            email: user.email,
+            email: user.email??'',
             user_name: user.user_name,
             status: user.status
         };
