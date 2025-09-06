@@ -25,7 +25,7 @@ export class UserService {
 
     static async createUser(data: CreateUserDto) {
         const hashed = await this.prepareHash(data.password);
-        const createdUser = await User.create({ ...data, password: hashed });
+        const createdUser = await User.create({ ...data, password: hashed, status: data.email ? UserStatus.Pending : UserStatus.Active });
         const { password, ...rest } = createdUser.toObject();;
         return rest;
     }
@@ -48,6 +48,13 @@ export class UserService {
         Object.assign(user, data);
         if (user.isModified("password") && data.password) {
             user.password = await this.prepareHash(user.password);
+        }
+        if (user.isModified("email")) {
+            if (!data.email) {
+                user.status = UserStatus.Active;
+            } else {
+                user.status = UserStatus.Pending;
+            }
         }
         const updatedUser = await user.save();
         const { password, ...rest } = updatedUser.toObject();

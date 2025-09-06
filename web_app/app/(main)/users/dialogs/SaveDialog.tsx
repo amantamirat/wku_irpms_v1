@@ -115,6 +115,22 @@ function SaveDialog(props: SaveDialogProps) {
                     </>
 
                     <div className="field">
+                        <label htmlFor="email">Email</label>
+                        <InputText
+                            id="email"
+                            type="email"
+                            value={user.email}
+                            onChange={(e) => onChange({ ...user, email: e.target.value })}
+                            className={classNames({
+                                'p-invalid': submitted && (!user.email),
+                            })}
+                        />
+                        {submitted && !user.email && (
+                            <small className="p-invalid">Email is required.</small>
+                        )}
+                    </div>
+
+                    <div className="field">
                         <label htmlFor="roles">Roles</label>
                         <MultiSelect
                             id="roles"
