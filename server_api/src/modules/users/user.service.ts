@@ -5,7 +5,6 @@ import { Types } from "mongoose";
 import Applicant from "../applicants/applicant.model";
 
 
-
 export interface CreateUserDto {
     user_name: string;
     password: string;
@@ -51,7 +50,7 @@ export class UserService {
             user.password = await this.prepareHash(user.password);
         }
         const updatedUser = await user.save();
-        const { password, ...rest } = updatedUser.toObject(); 
+        const { password, ...rest } = updatedUser.toObject();
         return rest;
     }
 
@@ -59,5 +58,20 @@ export class UserService {
         const user = await User.findById(id);
         if (!user) throw new Error("User not found");
         return await user.deleteOne();
+    }
+
+    static async initAdminUser() {
+        const userName = process.env.ADMIN_USER_NAME;
+        const email = process.env.SYS_EMAIL;
+        const password = process.env.ADMIN_PASSWORD;
+        if (!userName || !email || !password) {
+            throw new Error('Default Admin credentials are not found in environment variables.');
+        }
+        const exist = await User.exists({ user_name: userName });
+        if (!exist) {
+            const data: CreateUserDto = { user_name: userName, password: password, email: email, status: UserStatus.Active, roles: [] };
+            await this.createUser(data);
+            console.log('Default admin user created successfully.');
+        }
     }
 }

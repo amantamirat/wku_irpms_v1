@@ -2,7 +2,7 @@ import express, { Application } from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import authRoutes from './routes/authRoutes';
+import authRoutes from './modules/users/auth/auth.routes';
 
 
 import organRoutes from './modules/organs/organization.routes';
@@ -17,11 +17,10 @@ import userRoutes from './modules/users/user.routes';
 import roleRoutes from './modules/users/roles/role.routes';
 
 import { PermissionService } from './modules/users/permissions/permission.service';
-
-import { initAdminUser, initRoles } from './services/initService';
 import { initializeThemeModels } from './modules/themes/init.models';
 import { initializeEvalModels } from './modules/evals/init.models';
 import { initializeOrganModels } from './modules/organs/init.model';
+import { UserService } from './modules/users/user.service';
 
 
 
@@ -69,8 +68,8 @@ const PORT = process.env.SERVER_PORT || 5000;
     initializeThemeModels();
     initializeEvalModels();
     await PermissionService.initPermissions();
-    await initRoles();
-    await initAdminUser();
+    await UserService.initAdminUser();
+   
     app.listen(PORT, () => {
       console.log(`Server API is running at http://127.0.0.1:${PORT}`);
     });

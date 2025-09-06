@@ -3,9 +3,10 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { errorResponse, successResponse } from '../util/response';
 import { prepareHash, sendCode } from '../services/userService';
-import { AuthenticatedRequest, JwtPayload } from '../middleware/auth';
+import { AuthenticatedRequest } from '../middleware/auth';
 import { User } from '../modules/users/user.model';
 import { UserStatus } from '../modules/users/enums/status.enum';
+import JwtPayload from '../modules/users/auth/auth.model';
 
 const loginUser = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -27,7 +28,7 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
             return;
         }
         const payload: JwtPayload = {
-            email: user.email??'',
+            email: user.email ?? '',
             user_name: user.user_name,
             status: user.status
         };
