@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
 import { UserStatus } from './enums/status.enum';
 import { COLLECTIONS } from '../../enums/collections.enum';
-import { PendingType } from './enums/code.enum';
+
 
 
 
@@ -11,7 +11,6 @@ export interface IUser extends Document {
   email?: string;
   status: UserStatus;
   roles: mongoose.Types.ObjectId[];
-  code_type?: PendingType;
   reset_code?: String;
   reset_code_expires?: Date;
   createdAt?: Date;
