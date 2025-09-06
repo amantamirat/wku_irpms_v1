@@ -87,7 +87,7 @@ const UserPage = () => {
             if (selectedUser._id) {
                 const updatedUser = await UserApi.updateUser(selectedUser);
                 const index = users.findIndex((user) => user._id === selectedUser._id);
-                _users[index] = selectedUser;
+                _users[index] = updatedUser;
             } else {
                 const newUser = await UserApi.createUser(selectedUser);
                 _users.push(newUser);

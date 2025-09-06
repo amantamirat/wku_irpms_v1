@@ -13,6 +13,7 @@ export type User = {
     user_name: string;
     email: string;
     password?: string;
+    confirmed_password?: string;
     roles: Role[];
     reset_code?: string;
     reset_code_expires?: Date;
@@ -21,25 +22,29 @@ export type User = {
 };
 
 
-export const validateUser = (
-    user: User
-): { valid: boolean; message?: string } => {
+export const validateUser = (user: User): { valid: boolean; message?: string } => {
     if (!user.user_name || user.user_name.trim() === "") {
         return { valid: false, message: "Username is required." };
     }
-
-    if (!user.email || user.email.trim() === "") {
-        return { valid: false, message: "Email is required." };
+    if (user.email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(user.email)) {
+            return { valid: false, message: "Email is not valid." };
+        }
     }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(user.email)) {
-        return { valid: false, message: "Email is not valid." };
+    if (!user._id && !user.password) {
+        return { valid: false, message: "Password is required." };
     }
-
-    if (user.password !== undefined && user.password.trim().length < 6) {
-        return { valid: false, message: "Password must be at least 6 characters long." };
+    if (user.password) {
+        if (user.password.trim().length < 6) {
+            return { valid: false, message: "Password must be at least 6 characters long." };
+        }
+        if(!user.confirmed_password){
+            return { valid: false, message: "Password confirmation required" };
+        }
+        if (user.password !== user.confirmed_password) {
+            return { valid: false, message: "Password mismatch" };
+        }
     }
-
     return { valid: true };
 };

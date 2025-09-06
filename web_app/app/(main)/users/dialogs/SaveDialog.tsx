@@ -23,26 +23,21 @@ interface SaveDialogProps {
 function SaveDialog(props: SaveDialogProps) {
     const { visible, user, roles, onChange, onSave, onHide } = props;
     const [submitted, setSubmitted] = useState(false);
-    const [confirmPassword, setConfirmPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
-
-
-    const passwordMismatch = user.password !== confirmPassword;
 
     const save = async () => {
         setSubmitted(true);
         const result = validateUser(user);
-        if (!result.valid || (!user._id && passwordMismatch)) {
+        if (!result.valid) {
             setErrorMessage(result.message);
             return;
         }
-        setErrorMessage(undefined);
+
         onSave();
     }
 
     const hide = async () => {
         setSubmitted(false);
-        setConfirmPassword('');
         setErrorMessage(undefined);
         onHide();
     }
@@ -64,12 +59,11 @@ function SaveDialog(props: SaveDialogProps) {
             className="p-fluid"
             footer={footer}
             onHide={hide}
-        //position={user._id ? 'right' : 'center'}
         >
             {user && (
                 <>
                     <div className="field">
-                        <label htmlFor="user_name">User Name</label>
+                        <label htmlFor="user_name">Username</label>
                         <InputText
                             id="user_name"
                             value={user.user_name}
@@ -82,60 +76,43 @@ function SaveDialog(props: SaveDialogProps) {
                         )}
                     </div>
 
-                    <div className="field">
-                        <label htmlFor="email">Email</label>
-                        <InputText
-                            id="email"
-                            value={user.email}
-                            onChange={(e) => onChange({ ...user, email: e.target.value })}
-                            className={classNames({
-                                'p-invalid': submitted && (!user.email),
-                            })}
-                        />
-                        {submitted && !user.email && (
-                            <small className="p-invalid">Email is required.</small>
-                        )}
-                    </div>
 
-                    {!user._id && (
-                        <>
-                            <div className="field">
-                                <label htmlFor="password">Password</label>
-                                <Password
-                                    id="password"
-                                    value={user.password || ''}
-                                    onChange={(e) => onChange({ ...user, password: e.target.value })}
-                                    promptLabel="Enter a password"
-                                    feedback={false}
-                                    toggleMask
-                                    className={classNames({ 'p-invalid': submitted && !user.password })}
-                                />
-                                {submitted && !user.password && (
-                                    <small className="p-invalid">Password is required.</small>
-                                )}
-                            </div>
+                    <>
+                        <div className="field">
+                            <label htmlFor="password">Password</label>
+                            <Password
+                                id="password"
+                                value={user.password || ''}
+                                onChange={(e) => onChange({ ...user, password: e.target.value })}
+                                promptLabel="Enter a password"
+                                feedback={false}
+                                toggleMask
+                                className={classNames({ 'p-invalid': submitted && !user.password })}
+                            />
+                            {submitted && !user.password && (
+                                <small className="p-invalid">Password is required.</small>
+                            )}
+                        </div>
 
-                            <div className="field">
-                                <label htmlFor="confirmPassword">Confirm Password</label>
-                                <Password
-                                    id="confirmPassword"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    feedback={true}
-                                    promptLabel="Confirm a password"
-                                    weakLabel="Weak"
-                                    mediumLabel="Medium"
-                                    strongLabel="Strong"
-                                    toggleMask
-                                    className={classNames({ 'p-invalid': submitted && passwordMismatch })}
-                                />
-                                {submitted && passwordMismatch && (
-                                    <small className="p-invalid">Passwords do not match.</small>
-                                )}
-                            </div>
-                        </>
-                    )}
-
+                        <div className="field">
+                            <label htmlFor="confirmPassword">Confirm Password</label>
+                            <Password
+                                id="confirmPassword"
+                                value={user.confirmed_password || ''}
+                                onChange={(e) => onChange({ ...user, confirmed_password: e.target.value })}
+                                feedback={true}
+                                promptLabel="Confirm a password"
+                                weakLabel="Weak"
+                                mediumLabel="Medium"
+                                strongLabel="Strong"
+                                toggleMask
+                                className={classNames({ 'p-invalid': submitted && !user.confirmed_password })}
+                            />
+                            {submitted && !user.confirmed_password && (
+                                <small className="p-invalid">Password confirmation is required.</small>
+                            )}
+                        </div>
+                    </>
 
                     <div className="field">
                         <label htmlFor="roles">Roles</label>
