@@ -61,6 +61,14 @@ export class UserService {
         return rest;
     }
 
+    static async linkApplicant(email: string) {
+        const applicant = await Applicant.findOne({ email });
+        if (!applicant) return;
+        
+    }
+
+
+
     static async deleteUser(id: string) {
         const user = await User.findById(id);
         if (!user) throw new Error("User not found");
