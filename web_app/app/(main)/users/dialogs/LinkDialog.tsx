@@ -3,12 +3,9 @@
 import React, { useState } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
-import { Password } from 'primereact/password';
 import { Button } from 'primereact/button';
 import { classNames } from 'primereact/utils';
 import { User, validateUser } from '../models/user.model';
-import { MultiSelect } from 'primereact/multiselect';
-import { Role } from '../../roles/models/role.model';
 
 
 interface LinkDialogProps {
@@ -45,7 +42,7 @@ function LinkDialog(props: LinkDialogProps) {
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={hide} />
-            <Button label="Save" icon="pi pi-check" text onClick={save} />
+            <Button label="Link" icon="pi pi-check" text onClick={save} />
         </>
     );
 

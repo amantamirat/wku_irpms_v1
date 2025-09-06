@@ -286,7 +286,7 @@ const UserPage = () => {
                         visible={showLinkDialog}
                         user={selectedUser}
                         onChange={setSelectedUser}
-                        onSave={saveUser}
+                        onSave={()=>{}}
                         onHide={hideDialog}
                     />}
 
