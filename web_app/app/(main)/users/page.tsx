@@ -31,6 +31,7 @@ const UserPage = () => {
 
     const [selectedUser, setSelectedUser] = useState<User>(emptyUser);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
+    const [showLinkDialog, setShowLinkDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
@@ -83,8 +84,8 @@ const UserPage = () => {
             let _users = [...(users as any)];
             if (selectedUser._id) {
                 const updatedUser = await UserApi.updateUser(selectedUser);
-                const index = users.findIndex((user) => user._id === selectedUser._id);
-                _users[index] = updatedUser;
+                const index = users.findIndex((user) => user._id === updatedUser._id);
+                _users[index] = selectedUser;
             } else {
                 const newUser = await UserApi.createUser(selectedUser);
                 _users.push(newUser);
@@ -105,10 +106,8 @@ const UserPage = () => {
                 life: 3000
             });
         } finally {
-            setShowSaveDialog(false);
-            setSelectedUser(emptyUser);
+            hideDialog();
         }
-
     };
 
 
@@ -129,7 +128,7 @@ const UserPage = () => {
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Successful',
-                    detail: `User ${selectedUser.status===UserStatus.Pending?' Removed':' Updated'}.`,
+                    detail: `User ${selectedUser.status === UserStatus.Pending ? ' Removed' : ' Updated'}.`,
                     life: 3000
                 });
             }
@@ -142,8 +141,35 @@ const UserPage = () => {
                 life: 3000
             });
         } finally {
-            setShowDeleteDialog(false);
-            setSelectedUser(emptyUser);
+            hideDialog();
+        }
+
+    };
+
+
+    const linkUser = async () => {
+        try {
+            const updatedUser = await UserApi.linkUser(selectedUser);
+            let _users = [...(users as any)];
+            const index = users.findIndex((user) => user._id === selectedUser._id);
+            _users[index] = updatedUser;
+            setUsers(_users);
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Successful',
+                detail: 'User Linked',
+                life: 3000
+            });
+        } catch (error) {
+            console.error(error);
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Failed to link user',
+                detail: '' + error,
+                life: 3000
+            });
+        } finally {
+            hideDialog();
         }
 
     };
@@ -156,14 +182,19 @@ const UserPage = () => {
 
     const hideDialog = () => {
         setShowSaveDialog(false);
+        setShowDeleteDialog(false);
+        setShowLinkDialog(false);
         setSelectedUser(emptyUser);
     };
-
-
 
     const confirmDeleteItem = (user: User) => {
         setSelectedUser(user);
         setShowDeleteDialog(true);
+    };
+
+    const confirmLinkItem = (user: User) => {
+        setSelectedUser(user);
+        setShowLinkDialog(true);
     };
 
     const startToolbarTemplate = () => {
@@ -191,6 +222,10 @@ const UserPage = () => {
     const actionBodyTemplate = (rowData: User) => {
         return (
             <>
+                {!rowData.linkedApplicant && <>
+                    <Button icon="pi pi-paperclip" rounded severity="info" className="p-button-rounded p-button-text"
+                        style={{ fontSize: '2rem' }} onClick={() => confirmLinkItem(rowData)} />
+                </>}
                 <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
                     style={{ fontSize: '2rem' }} onClick={() => openSaveDialog(rowData)} />
                 <Button icon={rowData.status === UserStatus.Active ? "pi pi-user-minus" : rowData.status === UserStatus.Suspended ? "pi pi-user-plus" :
@@ -281,13 +316,21 @@ const UserPage = () => {
                         onHide={hideDialog}
                     />}
 
+                    {selectedUser && !selectedUser.linkedApplicant && <DeleteDialog
+                        showDeleteDialog={showLinkDialog}
+                        operation="link"
+                        selectedDataInfo={selectedUser.user_name}
+                        onDelete={linkUser}
+                        onHide={hideDialog}
+                    />}
+
                     {selectedUser && <DeleteDialog
                         showDeleteDialog={showDeleteDialog}
                         operation={selectedUser.status === UserStatus.Active ? 'suspend' :
                             selectedUser.status === UserStatus.Suspended ? 'activate' : 'remove'}
                         selectedDataInfo={selectedUser.user_name}
                         onDelete={deleteUser}
-                        onHide={() => setShowDeleteDialog(false)}
+                        onHide={hideDialog}
                     />}
 
                 </div>
