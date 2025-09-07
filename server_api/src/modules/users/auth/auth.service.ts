@@ -26,7 +26,7 @@ export class AuthService {
             throw new Error("Invalid credentials.");
         }
 
-        const linkedApplicant = await Applicant.findOne({ user: user._id }).lean();
+        const linkedApplicant = await Applicant.findOne({ user: user._id }).populate('organization').lean();
         const payload: JwtPayload = {
             email: user.email,
             user_name: user.user_name,

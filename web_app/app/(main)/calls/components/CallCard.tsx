@@ -7,7 +7,8 @@ import { Button } from "primereact/button";
 import { useState } from "react";
 import ApplyWizard from "../../projects/components/ApplyWizard";
 import { Organization } from "../../organizations/models/organization.model";
-import { Project } from "../../projects/models/project.model";
+import { Collaborator, Project } from "../../projects/models/project.model";
+import { useAuth } from "@/contexts/auth-context";
 
 interface CallCardProps {
     call: Call;
@@ -18,9 +19,19 @@ export default function CallCard(props: CallCardProps) {
 
     const { call } = props;
 
+    const { user } = useAuth();
+
     const emptyProject: Project = {
         title: "",
-        call: call
+        call: call,
+        collaborators: user?.linkedApplicant
+            ? [
+                {
+                    applicant: user.linkedApplicant,
+                    isLeadPI: true,
+                } as Collaborator,
+            ]
+            : [],
     };
     const [project, setProject] = useState<Project>(emptyProject);
     const [showApplyDialog, setShowApplyDialog] = useState(false);
