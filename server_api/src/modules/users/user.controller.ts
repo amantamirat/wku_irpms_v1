@@ -34,6 +34,16 @@ export class UserController {
     }
   }
 
+  static async linkUser(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const linked = await UserService.linkApplicant(id);
+      successResponse(res, 201, "User linked successfully", linked);
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
+    }
+  }
+
   static async deleteUser(req: Request, res: Response) {
     try {
       const { id } = req.params;

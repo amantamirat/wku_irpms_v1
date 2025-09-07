@@ -38,12 +38,16 @@ export class ApplicantService {
         if (!org || org.type !== expected) {
             throw new Error(`Scope ${applicant.scope!} requires organization of unit ${expected}`);
         }
-        if (applicant.email) {
+        /**
+         *
+         * if (applicant.email) {
             const userExist = await User.exists({ email: applicant.email });
             if (userExist) {
                 throw new Error('User with the provided email exist');
             }
-        }
+        } 
+         */
+        
     }
 
     static async createApplicant(data: CreateApplicantDto) {
@@ -56,7 +60,7 @@ export class ApplicantService {
         const filter: any = {};
         if (options.scope) filter.scope = options.scope;
         if (options.organization) filter.organization = options.organization;
-        return Applicant.find(filter).populate('organization').lean();
+        return await Applicant.find(filter).populate('organization').lean();
     }
 
     static async updateApplicant(id: string, data: Partial<CreateApplicantDto>) {
@@ -64,7 +68,7 @@ export class ApplicantService {
         const applicant = await Applicant.findById(id);
         if (!applicant) throw new Error("Applicant not found");
         Object.assign(applicant, data);
-        return applicant.save();
+        return await applicant.save();
     }
 
     static async deleteApplicant(id: string) {

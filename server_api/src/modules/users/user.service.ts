@@ -25,18 +25,15 @@ export class UserService {
     };
 
     static async createUser(data: CreateUserDto) {
-        const applicant = await Applicant.findOne({ email: data.email });
-        if (applicant?.user) {
-            throw new Error("This email is already associated with an applicant profile. Cannot create a new user.");
-        }
         const hashed = await this.prepareHash(data.password);
         const createdUser = await User.create({ ...data, password: hashed });
-        if (applicant) {
-            applicant.user = createdUser._id as Types.ObjectId;
-            await applicant.save();
-        }
+        try {
+            const linkedUser = await this.linkApplicant(createdUser._id as string);
+            const { password, ...rest } = linkedUser.toObject();
+            return rest;
+        } catch (err) { }
         const { password, ...rest } = createdUser.toObject();
-        return { ...rest, linkedApplicant: !!applicant };
+        return rest;
     }
 
     static async getUsers() {
@@ -62,6 +59,18 @@ export class UserService {
         const updatedUser = await user.save();
         const { password, ...rest } = updatedUser.toObject();
         return rest;
+    }
+
+    static async linkApplicant(id: string) {
+        const user = await User.findById(id).select("-password").lean();
+        if (!user) throw new Error("User not found");
+        const applicant = await Applicant.findOne({ email: user.email });
+        if (!applicant) throw new Error("Applicant not found");
+        //if applicant.user  Change email is possible//
+        if (applicant.user) throw new Error("Applicant already linked");
+        applicant.user = new Types.ObjectId(id);
+        await applicant.save();
+        return { ...user, linkedApplicant: !!applicant };
     }
 
     static async deleteUser(id: string) {
