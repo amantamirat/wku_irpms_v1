@@ -3,6 +3,7 @@ import { Dialog } from "primereact/dialog";
 
 interface DeleteDialogProps {
     showDeleteDialog: boolean;
+    operation?:string;
     selectedDataInfo: string;
     onDelete: () => void;
     onHide: () => void;
@@ -27,7 +28,7 @@ const DeleteDialog = (props: DeleteDialogProps) => {
                 <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
                 {props.selectedDataInfo && (
                     <span>
-                        Are you sure you want to delete <b>{props.selectedDataInfo}</b>?
+                        Are you sure you want to {props.operation??'delete'} <b>{props.selectedDataInfo}</b>?
                     </span>
                 )}
             </div>

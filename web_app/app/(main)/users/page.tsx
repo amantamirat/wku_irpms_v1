@@ -115,13 +115,21 @@ const UserPage = () => {
     const deleteUser = async () => {
         try {
             const deleted = await UserApi.deleteUser(selectedUser);
+            let _users = [];
             if (deleted) {
-                let _users = (users as any)?.filter((val: any) => val._id !== selectedUser._id);
+                if (selectedUser.status === UserStatus.Pending) {
+                    _users = users?.filter((val: any) => val._id !== selectedUser._id);
+                } else {
+                    _users = [...(users as any)];
+                    const index = users.findIndex((user) => user._id === selectedUser._id);
+                    const updatedStatus = selectedUser.status === UserStatus.Active ? UserStatus.Suspended : UserStatus.Active;
+                    _users[index] = { ...selectedUser, status: updatedStatus };
+                }
                 setUsers(_users);
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Successful',
-                    detail: 'User Deleted',
+                    detail: `User ${selectedUser.status===UserStatus.Pending?' Removed':' Updated'}.`,
                     life: 3000
                 });
             }
@@ -185,8 +193,8 @@ const UserPage = () => {
             <>
                 <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
                     style={{ fontSize: '2rem' }} onClick={() => openSaveDialog(rowData)} />
-                <Button icon={rowData.status === UserStatus.Active ? "pi pi-lock" : rowData.status === UserStatus.Suspended ? "pi pi-lock" :
-                    "pi pi-trash"}
+                <Button icon={rowData.status === UserStatus.Active ? "pi pi-user-minus" : rowData.status === UserStatus.Suspended ? "pi pi-user-plus" :
+                    "pi pi-times"}
                     rounded severity="warning" className="p-button-rounded p-button-text"
                     style={{ fontSize: '2rem' }} onClick={() => confirmDeleteItem(rowData)} />
             </>
@@ -275,9 +283,9 @@ const UserPage = () => {
 
                     {selectedUser && <DeleteDialog
                         showDeleteDialog={showDeleteDialog}
-                        selectedDataInfo={ ` ( ${selectedUser.status===UserStatus.Active?'Lock':
-                            selectedUser.status===UserStatus.Suspended?'Unlock':'Remove'
-                        }) ${selectedUser.user_name}` }
+                        operation={selectedUser.status === UserStatus.Active ? 'suspend' :
+                            selectedUser.status === UserStatus.Suspended ? 'activate' : 'remove'}
+                        selectedDataInfo={selectedUser.user_name}
                         onDelete={deleteUser}
                         onHide={() => setShowDeleteDialog(false)}
                     />}
