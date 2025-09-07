@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { UserStatus } from "../enums/status.enum";
 import { User } from "../user.model";
 import JwtPayload from "./auth.model";
+import Applicant from "../../applicants/applicant.model";
 
 
 export interface LoginUserDto {
@@ -24,14 +25,17 @@ export class AuthService {
         if (!isMatch) {
             throw new Error("Invalid credentials.");
         }
+
+        const linkedApplicant = await Applicant.findOne({ user: user._id }).lean();
         const payload: JwtPayload = {
             email: user.email,
             user_name: user.user_name,
+            linkedApplicant: linkedApplicant,
             status: user.status
         };
         const token = jwt.sign(payload, process.env.KEY as string, { expiresIn: '2h' });
         //console.log("user:", user.user_name, "logged in.");
         return { token, user: payload };
     }
-    
+
 }
