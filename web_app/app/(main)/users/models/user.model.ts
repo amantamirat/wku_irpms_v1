@@ -26,20 +26,21 @@ export const validateUser = (user: User): { valid: boolean; message?: string } =
     if (!user.user_name || user.user_name.trim() === "") {
         return { valid: false, message: "Username is required." };
     }
-    if (user.email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(user.email)) {
-            return { valid: false, message: "Email is not valid." };
-        }
+    if (!user.email || user.email.trim() === "") {
+        return { valid: false, message: "Email is required." };
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(user.email)) {
+        return { valid: false, message: "Email is not valid." };
     }
     if (!user._id && !user.password) {
         return { valid: false, message: "Password is required." };
     }
     if (user.password) {
-        if (user.password.trim().length < 6) {
-            return { valid: false, message: "Password must be at least 6 characters long." };
+        if (user.password.trim().length < 8) {
+            return { valid: false, message: "Password must be at least 8 characters long." };
         }
-        if(!user.confirmed_password){
+        if (!user.confirmed_password) {
             return { valid: false, message: "Password confirmation required" };
         }
         if (user.password !== user.confirmed_password) {

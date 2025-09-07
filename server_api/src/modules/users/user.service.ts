@@ -10,13 +10,28 @@ export interface CreateUserDto {
     password: string;
     email: string;
     roles: Types.ObjectId[];
-    reset_code?: String;
-    reset_code_expires?: Date;
     status: UserStatus;
 }
 
+export interface UpdateUserDto {
+    user_name: string;
+    roles: Types.ObjectId[];
+    //reset_code?: String;
+    //reset_code_expires?: Date;
+    //status: UserStatus;
+}
+
+
 
 export class UserService {
+
+    private static async linkApplicant(userId: Types.ObjectId, email: string) {
+        const applicant = await Applicant.findOne({ email });
+        if (!applicant) return null;
+        applicant.user = userId;
+        await applicant.save();
+        return applicant;
+    }
 
     private static async prepareHash(password: string): Promise<string> {
         const salt = await bcrypt.genSalt(10);
@@ -25,13 +40,17 @@ export class UserService {
 
     static async createUser(data: CreateUserDto) {
         const hashed = await this.prepareHash(data.password);
-        const createdUser = await User.create({ ...data, password: hashed, status: data.email ? UserStatus.Pending : UserStatus.Active });
-        const { password, ...rest } = createdUser.toObject();;
-        return rest;
+        const createdUser = await User.create({ ...data, password: hashed });
+        const { password, ...rest } = createdUser.toObject();
+        const applicant = await this.linkApplicant(createdUser._id as Types.ObjectId, createdUser.email ?? "");
+        return {
+            ...rest,
+            linkedApplicant: !!applicant
+        };
     }
 
     static async getUsers() {
-        const users = await User.find({}, { password: 0 }).populate("roles").lean();
+        const users = await User.find({ isDeleted: { $ne: true } }, { password: 0 }).populate("roles").lean();
         const usersWithLink = await Promise.all(users.map(async user => {
             const linkedApplicant = await Applicant.findOne({ user: user._id }).lean();
             return {
@@ -42,37 +61,31 @@ export class UserService {
         return usersWithLink;
     }
 
-    static async updateUser(id: string, data: Partial<CreateUserDto>) {
+    static async updateUser(id: string, data: Partial<UpdateUserDto>) {
         const user = await User.findById(id);
         if (!user) throw new Error("User not found");
         Object.assign(user, data);
-        if (user.isModified("password") && data.password) {
-            user.password = await this.prepareHash(user.password);
-        }
-        if (user.isModified("email")) {
-            if (!data.email) {
-                user.status = UserStatus.Active;
-            } else {
-                user.status = UserStatus.Pending;
-            }
-        }
         const updatedUser = await user.save();
         const { password, ...rest } = updatedUser.toObject();
         return rest;
     }
 
-    static async linkApplicant(email: string) {
-        const applicant = await Applicant.findOne({ email });
-        if (!applicant) return;
-        
-    }
-
-
-
     static async deleteUser(id: string) {
         const user = await User.findById(id);
         if (!user) throw new Error("User not found");
-        return await user.deleteOne();
+        if (user.status === UserStatus.Pending) {
+            const applicant = await Applicant.findOne({ user: id });
+            if (applicant) {
+                applicant.user = undefined;
+                await applicant.save();
+            }
+            return await user.deleteOne();
+        }
+        else {
+            user.isDeleted = true;
+            await user.save();
+            return user;
+        }
     }
 
     static async initAdminUser() {

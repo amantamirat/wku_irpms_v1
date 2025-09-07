@@ -2,9 +2,6 @@ import mongoose, { Document, Schema, Model } from 'mongoose';
 import { UserStatus } from './enums/status.enum';
 import { COLLECTIONS } from '../../enums/collections.enum';
 
-
-
-
 export interface IUser extends Document {
   user_name: string;
   password: string;
@@ -13,6 +10,7 @@ export interface IUser extends Document {
   roles: mongoose.Types.ObjectId[];
   reset_code?: String;
   reset_code_expires?: Date;
+  isDeleted?: Boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -31,11 +29,12 @@ const UserSchema = new Schema<IUser>(
     email: {
       type: String,
       unique: true,
+      required: true,
+      immutable: true,
       match: [
         /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
         'Please provide a valid email',
-      ],
-      sparse: true
+      ]
     },
     status: {
       type: String,
@@ -53,6 +52,9 @@ const UserSchema = new Schema<IUser>(
     reset_code_expires: {
       type: Date
     },
+    isDeleted: {
+      type: Boolean
+    }
   },
   { timestamps: true }
 );
