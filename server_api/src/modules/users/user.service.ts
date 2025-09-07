@@ -10,28 +10,14 @@ export interface CreateUserDto {
     password: string;
     email: string;
     roles: Types.ObjectId[];
-    status: UserStatus;
-}
-
-export interface UpdateUserDto {
-    user_name: string;
-    roles: Types.ObjectId[];
     //reset_code?: String;
     //reset_code_expires?: Date;
-    //status: UserStatus;
+    status: UserStatus;
 }
 
 
 
 export class UserService {
-
-    private static async linkApplicant(userId: Types.ObjectId, email: string) {
-        const applicant = await Applicant.findOne({ email });
-        if (!applicant) return null;
-        applicant.user = userId;
-        await applicant.save();
-        return applicant;
-    }
 
     private static async prepareHash(password: string): Promise<string> {
         const salt = await bcrypt.genSalt(10);
@@ -39,14 +25,18 @@ export class UserService {
     };
 
     static async createUser(data: CreateUserDto) {
+        const applicant = await Applicant.findOne({ email: data.email });
+        if (applicant?.user) {
+            throw new Error("This email is already associated with an applicant profile. Cannot create a new user.");
+        }
         const hashed = await this.prepareHash(data.password);
         const createdUser = await User.create({ ...data, password: hashed });
+        if (applicant) {
+            applicant.user = createdUser._id as Types.ObjectId;
+            await applicant.save();
+        }
         const { password, ...rest } = createdUser.toObject();
-        const applicant = await this.linkApplicant(createdUser._id as Types.ObjectId, createdUser.email ?? "");
-        return {
-            ...rest,
-            linkedApplicant: !!applicant
-        };
+        return { ...rest, linkedApplicant: !!applicant };
     }
 
     static async getUsers() {
@@ -61,9 +51,13 @@ export class UserService {
         return usersWithLink;
     }
 
-    static async updateUser(id: string, data: Partial<UpdateUserDto>) {
+    static async updateUser(id: string, data: Partial<CreateUserDto>) {
         const user = await User.findById(id);
         if (!user) throw new Error("User not found");
+        //incase of overposting
+        delete data.password;
+        delete data.status;
+        //
         Object.assign(user, data);
         const updatedUser = await user.save();
         const { password, ...rest } = updatedUser.toObject();

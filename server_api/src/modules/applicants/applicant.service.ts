@@ -5,6 +5,7 @@ import { Category } from "../organs/enums/category.enum";
 import { Accessibility } from "./enums/accessibility.enum";
 import { Unit } from "../organs/enums/unit.enum";
 import { BaseOrganization } from "../organs/base.organization.model";
+import { User } from "../users/user.model";
 
 
 export interface GetApplicantsOptions {
@@ -19,6 +20,7 @@ export interface CreateApplicantDto {
     gender: Gender;
     scope: Category;
     organization: Types.ObjectId | string;
+    email?: string;
     accessibility?: Accessibility[];
 }
 
@@ -35,6 +37,12 @@ export class ApplicantService {
         const org = await BaseOrganization.findById(applicant.organization);
         if (!org || org.type !== expected) {
             throw new Error(`Scope ${applicant.scope!} requires organization of unit ${expected}`);
+        }
+        if (applicant.email) {
+            const userExist = await User.exists({ email: applicant.email });
+            if (userExist) {
+                throw new Error('User with the provided email exist');
+            }
         }
     }
 

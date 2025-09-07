@@ -5,7 +5,7 @@ import { COLLECTIONS } from '../../enums/collections.enum';
 export interface IUser extends Document {
   user_name: string;
   password: string;
-  email?: string;
+  email: string;
   status: UserStatus;
   roles: mongoose.Types.ObjectId[];
   reset_code?: String;

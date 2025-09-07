@@ -20,14 +20,6 @@ export const prepareHash = async (password: string): Promise<string> => {
     return await bcrypt.hash(password, salt);
 };
 
-export const createUserAccount = async (user: UserDTO): Promise<IUser> => {
-    const { user_name, email, password, status } = user;
-    const hashedPassword = await prepareHash(password);
-    const newUser = new User({
-        user_name, email, password: hashedPassword, status,
-    });
-    return await newUser.save();
-};
 
 
 
