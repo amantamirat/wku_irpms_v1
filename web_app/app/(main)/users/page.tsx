@@ -13,8 +13,6 @@ import { User, UserStatus } from './models/user.model';
 import { UserApi } from './api/UserService';
 import { Role } from '../roles/models/role.model';
 import { RoleApi } from '../roles/api/role.api';
-import LinkDialog from './dialogs/LinkDialog';
-
 
 
 const UserPage = () => {
@@ -33,7 +31,6 @@ const UserPage = () => {
 
     const [selectedUser, setSelectedUser] = useState<User>(emptyUser);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [showLinkDialog, setShowLinkDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
@@ -148,15 +145,9 @@ const UserPage = () => {
         setShowSaveDialog(true);
     };
 
-    const openLinkDialog = (user: User) => {
-        setSelectedUser({ ...user });
-        setShowLinkDialog(true);
-    };
-
 
     const hideDialog = () => {
         setShowSaveDialog(false);
-        setShowLinkDialog(false);
         setSelectedUser(emptyUser);
     };
 
@@ -192,11 +183,11 @@ const UserPage = () => {
     const actionBodyTemplate = (rowData: User) => {
         return (
             <>
-                <Button icon="pi pi-paperclip" rounded severity="info" className="p-button-rounded p-button-text"
-                    style={{ fontSize: '2rem' }} onClick={() => openLinkDialog(rowData)} />
                 <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
                     style={{ fontSize: '2rem' }} onClick={() => openSaveDialog(rowData)} />
-                <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
+                <Button icon={rowData.status === UserStatus.Active ? "pi pi-lock" : rowData.status === UserStatus.Suspended ? "pi pi-lock" :
+                    "pi pi-trash"}
+                    rounded severity="warning" className="p-button-rounded p-button-text"
                     style={{ fontSize: '2rem' }} onClick={() => confirmDeleteItem(rowData)} />
             </>
         );
@@ -282,17 +273,11 @@ const UserPage = () => {
                         onHide={hideDialog}
                     />}
 
-                    {selectedUser && <LinkDialog
-                        visible={showLinkDialog}
-                        user={selectedUser}
-                        onChange={setSelectedUser}
-                        onSave={()=>{}}
-                        onHide={hideDialog}
-                    />}
-
                     {selectedUser && <DeleteDialog
                         showDeleteDialog={showDeleteDialog}
-                        selectedDataInfo={selectedUser.user_name}
+                        selectedDataInfo={ ` ( ${selectedUser.status===UserStatus.Active?'Lock':
+                            selectedUser.status===UserStatus.Suspended?'Unlock':'Remove'
+                        }) ${selectedUser.user_name}` }
                         onDelete={deleteUser}
                         onHide={() => setShowDeleteDialog(false)}
                     />}

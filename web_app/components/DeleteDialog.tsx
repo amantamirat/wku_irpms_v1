@@ -17,8 +17,8 @@ const DeleteDialog = (props: DeleteDialogProps) => {
             modal
             footer={
                 <>
-                    <Button label="Cancel" icon="pi pi-times" text onClick={props.onHide} />
-                    <Button label="Delete" icon="pi pi-check" text onClick={props.onDelete} />
+                    <Button label="No" icon="pi pi-times" text onClick={props.onHide} />
+                    <Button label="Yes" icon="pi pi-check" text onClick={props.onDelete} />
                 </>
             }
             onHide={props.onHide}

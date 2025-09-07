@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { errorResponse, successResponse } from '../../util/response';
-import { UserService, CreateUserDto, UpdateUserDto } from './user.service';
+import { UserService, CreateUserDto } from './user.service';
 
 export class UserController {
 
@@ -26,7 +26,7 @@ export class UserController {
   static async updateUser(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const data: Partial<UpdateUserDto> = req.body;
+      const data: Partial<CreateUserDto> = req.body;
       const updated = await UserService.updateUser(id, data);
       successResponse(res, 201, "User updated successfully", updated);
     } catch (err: any) {

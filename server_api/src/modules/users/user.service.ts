@@ -76,7 +76,7 @@ export class UserService {
             return await user.deleteOne();
         }
         else {
-            user.isDeleted = true;
+            user.status = user.status === UserStatus.Active ? UserStatus.Suspended : UserStatus.Active;
             await user.save();
             return user;
         }
@@ -91,7 +91,7 @@ export class UserService {
         }
         const exist = await User.exists({ user_name: userName });
         if (!exist) {
-            const data: CreateUserDto = { user_name: userName, password: password, email: email, status: UserStatus.Active, roles: [] };
+            const data = { user_name: userName, password: password, email: email, status: UserStatus.Active, roles: [], isDeleted: true };
             await this.createUser(data);
             console.log('Default admin user created successfully.');
         }
