@@ -1,5 +1,8 @@
+import { useAuth } from "@/contexts/auth-context";
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+// const { logout } = useAuth();
 const getAuthToken = (): string | null => {
     if (typeof window !== 'undefined') {
         return localStorage.getItem('authToken');
