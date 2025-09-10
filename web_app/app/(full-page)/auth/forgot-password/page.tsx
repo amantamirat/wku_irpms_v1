@@ -7,7 +7,7 @@ import { classNames } from 'primereact/utils';
 import { LayoutContext } from '../../../../layout/context/layoutcontext';
 import { useContext } from 'react';
 import { Messages } from 'primereact/messages';
-import { AuthApi } from '@/services/AuthService';
+import { AuthApi } from '@/app/(full-page)/auth/api/auth.api';
 import NoAuthGuard from '@/components/NoAuthGuard';
 
 export default function ForgotPassword() {
@@ -36,14 +36,14 @@ export default function ForgotPassword() {
         msgs.current?.show({ severity: 'warn', summary: 'Validation', detail: 'Please enter a valid email address.' });
         return;
       }
-      const data = await AuthApi.sendResetCode(email);
+      const data = await AuthApi.sendVerificationCode(email);
       if (data.success) {
         msgs.current?.clear();
-        msgs.current?.show({ severity: 'success', summary: 'Almost There!', detail: 'Reset code sent. Check your inbox.' });
-        setTimeout(() => router.push(`/auth/reset-password?email=${encodeURIComponent(email)}`), 3000);
+        msgs.current?.show({ severity: 'success', summary: 'Almost There!', detail: 'Verification code sent. Check your inbox.' });
+        setTimeout(() => router.push(`/auth/reset-password?email=${encodeURIComponent(email)}`), 2000);
       }
     } catch (err: any) {
-      console.error(err);
+      //console.error(err);
       msgs.current?.clear();
       msgs.current?.show({
         severity: 'error',
@@ -89,7 +89,7 @@ export default function ForgotPassword() {
               <Messages ref={msgs} style={{ width: '100%', wordBreak: 'break-word' }} />
               <Button
                 loading={progressing}
-                label="Send Reset Code"
+                label="Send Verification Code"
                 className="w-full p-3 text-xl"
                 onClick={sendCode}
               />

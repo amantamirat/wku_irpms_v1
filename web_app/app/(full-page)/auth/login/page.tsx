@@ -9,32 +9,38 @@ import { LayoutContext } from '../../../../layout/context/layoutcontext';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import { Messages } from "primereact/messages";
-import { AuthApi } from '@/services/AuthService';
+import { AuthApi } from '@/app/(full-page)/auth/api/auth.api';
 import { useAuth } from '@/contexts/auth-context';
 import NoAuthGuard from '@/components/NoAuthGuard';
+import { LoginDto, validateLogin } from './model/login.model';
 
 const LoginPage = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [checked, setChecked] = useState(false);
-    const { layoutConfig } = useContext(LayoutContext);
-    const router = useRouter();
-    const containerClassName = classNames('surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden', { 'p-input-filled': layoutConfig.inputStyle === 'filled' });
-    const msgs = useRef<Messages>(null);
+
+
+    let emptyLogin: LoginDto = {
+        user_name: '',
+        password: '',
+    };
+
+    const [loginDto, setLoginDto] = useState<LoginDto>(emptyLogin);
+    const [checked, setChecked] = useState(false);   
+     const msgs = useRef<Messages>(null); 
+    const router = useRouter();   
     const { login } = useAuth();
 
     const handleLogin = async () => {
         try {
-            const user_name = email.trim();
-            const userPassword = password.trim();
-
-            if (!user_name || !userPassword) {
+            const result = validateLogin(loginDto);
+            if (!result.valid) {
                 msgs.current?.clear();
-                msgs.current?.show({ severity: 'warn', summary: 'Validation', detail: 'Email and password are required.' });
+                msgs.current?.show({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: result.message || 'Login failed.'
+                });
                 return;
             }
-
-            const { token, user } = await AuthApi.loginUser({ user_name, password: userPassword });
+            const { token, user } = await AuthApi.loginUser(loginDto);
             if (token) {
                 login(user, token);
                 msgs.current?.clear();
@@ -51,6 +57,9 @@ const LoginPage = () => {
             });
         }
     };
+
+    const { layoutConfig } = useContext(LayoutContext);
+    const containerClassName = classNames('surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden', { 'p-input-filled': layoutConfig.inputStyle === 'filled' });
 
     return (
         <NoAuthGuard>
@@ -71,16 +80,25 @@ const LoginPage = () => {
                             </div>
 
                             <div>
-                                <label htmlFor="email1" className="block text-900 text-xl font-medium mb-2">
-                                    Email
+                                <label htmlFor="email" className="block text-900 text-xl font-medium mb-2">
+                                    Username or Email
                                 </label>
-                                <InputText id="email1" value={email}
-                                    onChange={(e) => setEmail(e.target.value)} type="text" placeholder="Email address" className="w-full md:w-30rem mb-5" style={{ padding: '1rem' }} />
+                                <InputText id="email" type="text"
+                                    value={loginDto.user_name}
+                                    onChange={(e) => setLoginDto({ ...loginDto, user_name: e.target.value })}
+                                    placeholder="Email address"
+                                    className="w-full md:w-30rem mb-5"
+                                    style={{ padding: '1rem' }} />
 
-                                <label htmlFor="password1" className="block text-900 font-medium text-xl mb-2">
+                                <label htmlFor="password" className="block text-900 font-medium text-xl mb-2">
                                     Password
                                 </label>
-                                <Password inputId="password1" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" toggleMask className="w-full mb-5" inputClassName="w-full p-3 md:w-30rem"></Password>
+                                <Password inputId="password"
+                                    value={loginDto.password}
+                                    onChange={(e) => setLoginDto({ ...loginDto, password: e.target.value })}
+                                    placeholder="Password" toggleMask
+                                    className="w-full mb-5"
+                                    inputClassName="w-full p-3 md:w-30rem"></Password>
 
                                 <div className="flex align-items-center justify-content-between mb-5 gap-5">
                                     <div className="flex align-items-center">

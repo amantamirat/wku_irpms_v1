@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from 'primereact/button';
 import { Messages } from 'primereact/messages';
 import { useAuth } from '@/contexts/auth-context';
-import { AuthApi } from '@/services/AuthService';
+import { AuthApi } from '@/app/(full-page)/auth/api/auth.api';
 import RequireAuth from '@/components/RequireAuth';
 
 
@@ -12,26 +12,27 @@ export default function RequestActivationPage() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const msgs = useRef<Messages>(null);
-  const [activating, setActivating] = useState(false);
+  const [processing, setProcessing] = useState(false);
 
 
 
   const handleActivate = async () => {
     try {
-      setActivating(true);
-      const res = await AuthApi.sendActivationCode();
+      setProcessing(true);
+      if (!user || !user.email) {
+        throw new Error('Activation failed.');
+      }
+      const res = await AuthApi.sendVerificationCode(user?.email ?? "");
       if (res.success) {
         msgs.current?.clear();
-        msgs.current?.show({ severity: 'success', summary: 'Almost There!', detail: 'Activation code has been sent to your email.' });
+        msgs.current?.show({ severity: 'success', summary: 'Almost There!', detail: 'Verfication code has been sent to your email.' });
         setTimeout(() => router.push(`/auth/activate-account`), 3000);
-      } else {
-        throw new Error(res.message || 'Activation failed.');
       }
     } catch (err: any) {
       msgs.current?.clear();
       msgs.current?.show({ severity: 'error', summary: 'Error', detail: err.message || 'Activation failed.' });
     } finally {
-      setActivating(false);
+      setProcessing(false);
     }
   };
 
@@ -60,9 +61,9 @@ export default function RequestActivationPage() {
               </div>
               <Messages ref={msgs} />
               <Button
-                loading={activating}
+                loading={processing}
                 icon="pi pi-send"
-                label="Request Activation Code"
+                label="Request Verification Code"
                 className="w-full p-3 text-xl"
                 onClick={handleActivate}
                 severity="success"

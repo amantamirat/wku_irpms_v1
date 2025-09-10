@@ -14,11 +14,11 @@ export type User = {
     email: string;
     password?: string;
     confirmed_password?: string;
-    roles: Role[];
+    roles?: Role[];
     reset_code?: string;
     reset_code_expires?: Date;
     linkedApplicant?: string | Applicant;
-    status: UserStatus;
+    status?: UserStatus;
 };
 
 
@@ -37,8 +37,13 @@ export const validateUser = (user: User): { valid: boolean; message?: string } =
         return { valid: false, message: "Password is required." };
     }
     if (user.password) {
-        if (user.password.trim().length < 8) {
-            return { valid: false, message: "Password must be at least 8 characters long." };
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
+        if (!passwordRegex.test(user.password)) {
+            return {
+                valid: false,
+                message:
+                    "Password must be at least 8 characters long, include uppercase, lowercase, number, and symbol."
+            };
         }
         if (!user.confirmed_password) {
             return { valid: false, message: "Password confirmation required" };

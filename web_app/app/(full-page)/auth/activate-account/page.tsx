@@ -1,5 +1,5 @@
 'use client';
-import { AuthApi } from '@/services/AuthService';
+import { AuthApi } from '@/app/(full-page)/auth/api/auth.api';
 import { useRouter } from 'next/navigation';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
@@ -16,7 +16,7 @@ export default function ActivateAccountPage() {
   const { layoutConfig } = useContext(LayoutContext);
   const containerClassName = classNames('surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden', { 'p-input-filled': layoutConfig.inputStyle === 'filled' });
   const msgs = useRef<Messages>(null);
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
 
 
@@ -29,7 +29,7 @@ export default function ActivateAccountPage() {
         msgs.current?.show({ severity: 'warn', summary: 'Validation', detail: 'Code is required.' });
         return;
       }
-      const data = await AuthApi.activateAccount(activationCode);
+      const data = await AuthApi.activateUser({ ...user, reset_code: activationCode });
       if (data.success) {
         msgs.current?.clear();
         msgs.current?.show({ severity: 'success', summary: 'Success!', detail: 'Your account has been activated successfully.' });
@@ -48,9 +48,6 @@ export default function ActivateAccountPage() {
     }
   };
 
-
-
-
   return (
     <div className={containerClassName}>
       <div className="flex flex-column align-items-center justify-content-center">
@@ -65,7 +62,7 @@ export default function ActivateAccountPage() {
             <div className="text-center mb-5">
               <img src={`/images/wku_logo.png`} alt="wku logo" className="mb-5 w-6rem flex-shrink-0" />
               <div className="text-900 text-3xl font-medium mb-3">Account Activation</div>
-              <span className="text-600 font-medium">Enter the activation code and your new password</span>
+              <span className="text-600 font-medium">Enter the verification code</span>
             </div>
 
             <div className="mb-5">

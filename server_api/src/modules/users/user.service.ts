@@ -10,8 +10,6 @@ export interface CreateUserDto {
     password: string;
     email: string;
     roles: Types.ObjectId[];
-    //reset_code?: String;
-    //reset_code_expires?: Date;
     status: UserStatus;
 }
 
@@ -19,7 +17,7 @@ export interface CreateUserDto {
 
 export class UserService {
 
-    private static async prepareHash(password: string): Promise<string> {
+    static async prepareHash(password: string): Promise<string> {
         const salt = await bcrypt.genSalt(10);
         return await bcrypt.hash(password, salt);
     };
