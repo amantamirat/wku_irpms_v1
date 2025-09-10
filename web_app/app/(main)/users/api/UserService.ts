@@ -4,7 +4,9 @@ import { Role } from "../../roles/models/role.model";
 
 const end_point = '/users/';
 
-function sanitizeUser(user: Partial<User>): Partial<User> {
+/**
+ * 
+ * function sanitizeUser(user: Partial<User>): Partial<User> {
     return {
         ...user,
         roles: user.roles
@@ -16,6 +18,8 @@ function sanitizeUser(user: Partial<User>): Partial<User> {
             .filter((r): r is string => typeof r === "string"),
     };
 }
+ */
+
 
 export const UserApi = {
 
@@ -25,8 +29,8 @@ export const UserApi = {
     },
 
     async createUser(user: Partial<User>): Promise<User> {
-        const sanitized = sanitizeUser(user);
-        const createdData = await ApiClient.post(end_point, sanitized);
+        //const sanitized = sanitizeUser(user);
+        const createdData = await ApiClient.post(end_point, user);
         return createdData as User;
     },
 
@@ -35,8 +39,8 @@ export const UserApi = {
             throw new Error("_id required.");
         }
         const url = `${end_point}${user._id}`;
-        const sanitized = sanitizeUser(user);
-        const updatedUser = await ApiClient.put(url, sanitized);
+        //const sanitized = sanitizeUser(user);
+        const updatedUser = await ApiClient.put(url, user);
         return updatedUser as User;
     },
 

@@ -28,9 +28,8 @@ export class UserService {
         const hashed = await this.prepareHash(data.password);
         const createdUser = await User.create({ ...data, password: hashed });
         try {
-            const linkedUser = await this.linkApplicant(createdUser._id as string);
-            const { password, ...rest } = linkedUser.toObject();
-            return rest;
+            const linkedUser = await this.linkApplicant(createdUser._id as string);            
+            return linkedUser;
         } catch (err) { }
         const { password, ...rest } = createdUser.toObject();
         return rest;
@@ -54,7 +53,6 @@ export class UserService {
         //incase of overposting
         delete data.password;
         delete data.status;
-        //
         Object.assign(user, data);
         const updatedUser = await user.save();
         const { password, ...rest } = updatedUser.toObject();
@@ -74,7 +72,7 @@ export class UserService {
     }
 
     static async deleteUser(id: string) {
-        const user = await User.findById(id);
+        const user = await User.findById(id).select("-password");
         if (!user) throw new Error("User not found");
         if (user.status === UserStatus.Pending) {
             const applicant = await Applicant.findOne({ user: id });

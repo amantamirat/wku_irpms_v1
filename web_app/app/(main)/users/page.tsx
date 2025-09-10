@@ -88,7 +88,7 @@ const UserPage = () => {
                 _users[index] = selectedUser;
             } else {
                 const newUser = await UserApi.createUser(selectedUser);
-                _users.push(newUser);
+                _users.push({ ...selectedUser, _id: newUser._id });
             }
             setUsers(_users);
             toast.current?.show({

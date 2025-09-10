@@ -1,6 +1,6 @@
-import { Organization } from "@/models/organization";
 import { ApiClient } from "@/api/ApiClient";
 import { EvalType, Evaluation } from "../models/eval.model";
+import { Organization } from "../../organizations/models/organization.model";
 
 const end_point = '/evals';
 

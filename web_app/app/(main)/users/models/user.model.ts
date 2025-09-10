@@ -14,7 +14,7 @@ export type User = {
     email: string;
     password?: string;
     confirmed_password?: string;
-    roles: Role[] | string[];
+    roles: Role[];
     reset_code?: string;
     reset_code_expires?: Date;
     linkedApplicant?: string | Applicant;

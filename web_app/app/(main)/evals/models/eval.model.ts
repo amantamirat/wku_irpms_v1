@@ -1,5 +1,4 @@
-import { Organization } from "@/models/organization";
-
+import { Organization } from "../../organizations/models/organization.model";
 
 export enum EvalType {
   evaluation = 'Evaluation',
