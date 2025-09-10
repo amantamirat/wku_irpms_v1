@@ -88,7 +88,7 @@ const UserPage = () => {
                 _users[index] = selectedUser;
             } else {
                 const newUser = await UserApi.createUser(selectedUser);
-                _users.push({ ...selectedUser, _id: newUser._id });
+                _users.push({ ...selectedUser, _id: newUser._id, linkedApplicant: newUser.linkedApplicant });
             }
             setUsers(_users);
             toast.current?.show({
@@ -152,7 +152,7 @@ const UserPage = () => {
             const updatedUser = await UserApi.linkUser(selectedUser);
             let _users = [...(users as any)];
             const index = users.findIndex((user) => user._id === selectedUser._id);
-            _users[index] = updatedUser;
+            _users[index] = { ...selectedUser, linkedApplicant: updatedUser.linkedApplicant };
             setUsers(_users);
             toast.current?.show({
                 severity: 'success',

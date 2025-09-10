@@ -10,6 +10,18 @@ interface ProjectInfoStepProps {
 export default function ProjectInfoStep({ project, setProject }: ProjectInfoStepProps) {
     return (
         <div className="p-fluid formgrid grid">
+            {!project.call &&
+                <div className="field col-12">
+                    <label htmlFor="call">Call</label>
+                    <InputText
+                        id="call"
+                        value={project.title}
+                        onChange={(e) => setProject({ ...project, title: e.target.value })}
+                        required
+                        className="w-full"
+                    />
+                </div>
+            }
             <div className="field col-12">
                 <label htmlFor="title">Title</label>
                 <InputText

@@ -26,9 +26,11 @@ export class UserService {
         const hashed = await this.prepareHash(data.password);
         const createdUser = await User.create({ ...data, password: hashed });
         try {
-            const linkedUser = await this.linkApplicant(createdUser._id as string);            
+            const linkedUser = await this.linkApplicant(createdUser._id as string);
             return linkedUser;
-        } catch (err) { }
+        } catch (err) {
+            //console.log(err);
+        }
         const { password, ...rest } = createdUser.toObject();
         return rest;
     }
