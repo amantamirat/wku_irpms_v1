@@ -68,5 +68,5 @@ const ApplicantSchema = new Schema<IApplicant>({
     }
 }, { timestamps: true });
 
-const Applicant = model<IApplicant>('Applicant', ApplicantSchema);
+const Applicant = model<IApplicant>(COLLECTIONS.APPLICANT, ApplicantSchema);
 export default Applicant;

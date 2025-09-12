@@ -1,4 +1,5 @@
 export const COLLECTIONS = {
+  APPLICANT:"applicants",
   ORGAN: "organs",
   THEME: "thms",
   EVAL: "evls",
@@ -8,5 +9,6 @@ export const COLLECTIONS = {
   USER: "users",
   ROLE: "roles",
   PERMISSION: "permissions",
-  PROJECT: "projects"
+  PROJECT: "projects",
+  COLLABORATOR: "collaborators"
 } as const;
