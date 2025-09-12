@@ -1,11 +1,11 @@
-import { useAuth } from "@/contexts/auth-context";
+import { AuthApi } from "@/app/(full-page)/auth/api/auth.api";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// const { logout } = useAuth();
+
 const getAuthToken = (): string | null => {
     if (typeof window !== 'undefined') {
-        return localStorage.getItem('authToken');
+        return AuthApi.getToken();
     }
     return null;
 };
@@ -13,7 +13,7 @@ const getAuthToken = (): string | null => {
 const handleError = async (response: Response) => {
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.log("Error Data:", errorData); 
+        console.log("Error Data:", errorData);
         throw new Error(errorData.message || `Request failed with status ${response.status}`);
     }
     return response;
@@ -33,7 +33,7 @@ export const ApiClient = {
 
         await handleError(response);
         const result = await response.json();
-        return result.data; 
+        return result.data;
     },
 
     async post(endpoint: string, payload: any): Promise<any> {
@@ -51,7 +51,7 @@ export const ApiClient = {
 
         await handleError(response);
         const result = await response.json();
-        return result.data; 
+        return result.data;
     },
 
     async put(endpoint: string, payload?: any): Promise<any> {
@@ -69,7 +69,7 @@ export const ApiClient = {
 
         await handleError(response);
         const result = await response.json();
-        return result.data; 
+        return result.data;
     },
 
     async delete(endpoint: string): Promise<boolean> {
@@ -86,6 +86,6 @@ export const ApiClient = {
 
         await handleError(response);
         const result = await response.json();
-        return result.data; 
+        return result.data;
     }
 };

@@ -2,29 +2,30 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { User } from '@/app/(main)/users/models/user.model';
+import { LoginDto } from '@/app/(full-page)/auth/login/model/login.model';
+import { AuthApi } from '@/app/(full-page)/auth/api/auth.api';
 
 
 interface AuthContextType {
     user: User | null;
     loading: boolean;
     loggedIn: boolean;
-    login: (user: User, token: string) => void;
+    login: (user: LoginDto) => Promise<boolean>;
     logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const router = useRouter();
+    //const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const token = localStorage.getItem('authToken');
-        const userInfo = localStorage.getItem('authUser');
-        if (token && userInfo) {
+        const userInfo = AuthApi.getLoggedInUser();
+        if (userInfo) {
             try {
-                setUser(JSON.parse(userInfo));
+                setUser(userInfo);
             } catch {
                 setUser(null);
             }
@@ -33,15 +34,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
 
-    const login = (user: User) => {
-        setUser(user);
+    const login = async (user: LoginDto) => {
+        const loggedInuser = await AuthApi.loginUser(user);
+        setUser(loggedInuser);
+        return true;
     };
 
     const logout = () => {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('authUser');
+        AuthApi.logout();
         setUser(null);
-        router.push('/auth/login');
+        //router.push('/auth/login');
     };
 
     return (

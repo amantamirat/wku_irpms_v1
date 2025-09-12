@@ -40,9 +40,8 @@ const LoginPage = () => {
                 });
                 return;
             }
-            const { token, user } = await AuthApi.loginUser(loginDto);
-            if (token) {
-                login(user, token);
+            const loggedIn  =  await login(loginDto);
+            if (loggedIn) {               
                 msgs.current?.clear();
                 msgs.current?.show({ severity: 'success', summary: 'Success', detail: 'Login successful!' });
                 setTimeout(() => router.push('/'), 500);

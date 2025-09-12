@@ -9,7 +9,7 @@ const tokenStorage = 'authToken';
 const userStorage = 'authUser';
 
 export const AuthApi = {
-    
+
     async loginUser(credentials: LoginDto): Promise<any> {
         const loggedInData = await ApiClient.post(end_point, credentials);
         const { token, user } = loggedInData;
@@ -37,5 +37,27 @@ export const AuthApi = {
         }
         const response = await ApiClient.post(activate_user_end_point, credential);
         return response;
-    }    
+    },
+
+    logout() {
+        localStorage.removeItem(tokenStorage);
+        localStorage.removeItem(userStorage);
+        //router.push('/auth/login');
+    },
+
+    getLoggedInUser(): User | null {
+        const userInfo = localStorage.getItem(userStorage);
+        if (userInfo) {
+            return JSON.parse(userInfo);
+        }
+        return null;
+    },
+
+    getToken(): string | null {
+        const tokenInfo = localStorage.getItem(tokenStorage);
+        if (tokenInfo) {
+            return tokenInfo
+        }
+        return null;
+    }
 };
