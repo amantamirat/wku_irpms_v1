@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { verifyActiveAccount } from '../../middleware/auth';
+import { verifyActiveAccount } from '../users/auth/auth.middleware';
 import { GrantController } from './grant.controller';
 
 

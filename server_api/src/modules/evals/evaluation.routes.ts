@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { EvaluationController } from './eval.controller';
-import { verifyActiveAccount } from '../../middleware/auth';
+import { verifyActiveAccount } from '../users/auth/auth.middleware';
 
 const router = Router();
 
