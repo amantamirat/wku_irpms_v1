@@ -13,12 +13,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Project } from './models/project.model';
 import { ProjectApi } from './api/project.api';
 import SaveDialog from './components/dialogs/SaveDialog';
+import { CallApi } from '../calls/api/call.api';
+import { Call } from '../calls/models/call.model';
 
 const ProjectPage = () => {
     const emptyProject: Project = {
+        call: '',
         title: ''
     };
 
+    const [calls, setCalls] = useState<Call[]>([]);
     const [projects, setProjects] = useState<Project[]>([]);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
@@ -31,8 +35,24 @@ const ProjectPage = () => {
     useEffect(() => {
         setFilters(initFilters());
         setGlobalFilter('');
+        loadCalls();
         loadProjects();
     }, []);
+
+
+    const loadCalls = async () => {
+        try {
+            const data = await CallApi.getCalls({});
+            setCalls(data);
+        } catch (err) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Failed to load call data',
+                detail: '' + err,
+                life: 3000
+            });
+        }
+    };
 
     const loadProjects = async () => {
         try {
@@ -57,11 +77,11 @@ const ProjectPage = () => {
             let _projects = [...projects];
             if (selectedProject._id) {
                 const updated = await ProjectApi.updateProject(selectedProject);
-                const index = _projects.findIndex((c) => c._id === selectedProject._id);
-                _projects[index] = updated;
+                const index = _projects.findIndex((c) => c._id === updated._id);
+                _projects[index] = selectedProject;
             } else {
                 const created = await ProjectApi.createProject(selectedProject);
-                _projects.push(created);
+                _projects.push({ ...selectedProject, _id: created._id });
             }
             setProjects(_projects);
             toast.current?.show({
@@ -185,6 +205,7 @@ const ProjectPage = () => {
                             onChange={setSelectedProject}
                             onSave={saveProject}
                             onHide={() => setShowSaveDialog(false)}
+                            calls={calls}
                         />
                     )}
 

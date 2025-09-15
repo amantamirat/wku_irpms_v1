@@ -4,7 +4,7 @@ import { Theme } from "../../themes/models/theme.model";
 
 export type Project = {
     _id?: string;
-    call?: string | Call;
+    call: string | Call;
     title: string;
     summary?: string;
     collaborators?: Collaborator[];
@@ -52,6 +52,9 @@ export type Phase = {
 
 
 export const validateProject = (project: Project): { valid: boolean; message?: string } => {
+    if (!project.call) {
+        return { valid: false, message: 'Call is required.' };
+    }
     if (!project.title || project.title.trim().length === 0) {
         return { valid: false, message: 'Title is required.' };
     }

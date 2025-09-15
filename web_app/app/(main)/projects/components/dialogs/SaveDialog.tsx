@@ -4,18 +4,21 @@ import { Dialog } from 'primereact/dialog';
 import { useEffect, useState } from 'react';
 import { Project, validateProject } from '../../models/project.model';
 import ProjectInfoStep from '../ProjectInfoStep';
+import { Call } from '@/app/(main)/calls/models/call.model';
+import { Dropdown } from 'primereact/dropdown';
 
 
 interface SaveDialogProps {
     visible: boolean;
     project: Project;
     onChange: (e: Project) => void;
+    calls: Call[];
     onSave: () => void;
     onHide: () => void;
 }
 
 function SaveDialog(props: SaveDialogProps) {
-    const { visible, project, onChange, onSave, onHide } = props;
+    const { visible, project, onChange, onSave, onHide, calls } = props;
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
@@ -60,7 +63,25 @@ function SaveDialog(props: SaveDialogProps) {
             footer={footer}
             onHide={hide}
         >
-            <ProjectInfoStep project={project} setProject={onChange} />
+            <div className="p-fluid formgrid grid">
+                <div className="field col-12">
+                    <label htmlFor="call">Call</label>
+                    <Dropdown
+                        id="call"
+                        options={calls}
+                        value={project.call}
+                        onChange={(e) => onChange({ ...project, call: e.value })}
+                        required
+                        optionLabel="title"
+                        placeholder="Select a Call"
+                        className="w-full"
+                    />
+                </div>
+            </div>
+            <ProjectInfoStep project={project} setProject={onChange} calls={calls} />
+            {errorMessage && (
+                <small className="p-error">{errorMessage}</small>
+            )}
 
         </Dialog>
     );
