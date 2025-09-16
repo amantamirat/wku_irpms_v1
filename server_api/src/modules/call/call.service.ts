@@ -1,23 +1,24 @@
-import { Types } from "mongoose";
+
 import { CallStatus } from "./enums/call.status.enum";
 import { Call } from "./call.model";
 import { Directorate } from "../organs/base.organization.model";
+import mongoose from "mongoose";
 
 
 export interface GetCallsOptions {
-    calendar?: Types.ObjectId | string;
+    calendar?: mongoose.Types.ObjectId;
     directorate?: string;
     status?: CallStatus;
 }
 
 export interface CreateCallDto {
-    directorate: Types.ObjectId;
-    calendar: Types.ObjectId;
+    directorate: mongoose.Types.ObjectId;
+    calendar: mongoose.Types.ObjectId;
     title: string;
     deadline: Date | string;
     description?: string;
     total_budget?: number;
-    grant: Types.ObjectId | string;
+    grant: mongoose.Types.ObjectId;
     status?: CallStatus;
 }
 
@@ -47,7 +48,7 @@ export class CallService {
     }
 
 
-    static async getCallById(id: Types.ObjectId | string) {
+    static async getCallById(id: mongoose.Types.ObjectId) {
         return await Call.findById(id).lean();
     }
 

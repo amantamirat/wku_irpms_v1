@@ -13,6 +13,7 @@ import calendarRoutes from './modules/calendar/calendar.routes';
 import callRoutes from './modules/call/call.routes';
 import grantRoutes from './modules/grants/grant.routes';
 import projectRoutes from './modules/project/project.routes';
+import collaboratorRoutes from './modules/project/collaborators/collaborator.routes';
 import userRoutes from './modules/users/user.routes';
 import roleRoutes from './modules/users/roles/role.routes';
 
@@ -45,7 +46,7 @@ app.use("/api/calendars", calendarRoutes);
 app.use("/api/calls", callRoutes);
 app.use("/api/grants", grantRoutes);
 app.use("/api/projects", projectRoutes);
-
+app.use("/api/collaborators", collaboratorRoutes);
 
 
 

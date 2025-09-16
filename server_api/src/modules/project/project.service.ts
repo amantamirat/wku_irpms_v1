@@ -33,6 +33,10 @@ export class ProjectService {
         return await Project.find().populate('call').lean();
     }
 
+    static async getProjectById(id: mongoose.Types.ObjectId) {
+        return await Project.findById(id).lean();
+    }
+
     static async updateProject(id: string, data: Partial<CreateProjectDto>) {
         const project = await Project.findById(id);
         if (!project) throw new Error("Project not found");
