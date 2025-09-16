@@ -2,10 +2,11 @@ import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import DeleteDialog from "@/components/DeleteDialog";
 import { Collaborator, Project } from "../../models/project.model";
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
+import { CollaboratorApi } from "../api/collaborator.api";
 
 interface CollaboratorProps {
     project: Project;
@@ -18,9 +19,25 @@ export default function CollaboratorsManager({ project }: CollaboratorProps) {
         applicant: ""
     };
 
+    const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
     const [collaborator, setCollaborator] = useState<Collaborator>(emptyCollaborator);
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+    const loadCollaborators = useCallback(async () => {
+        try {
+            const data = await CollaboratorApi.getCollaborators({ project: project._id });
+            setCollaborators(data);
+        } catch (err) {
+            console.log(err);
+        } finally {
+
+        }
+    }, [project]);
+
+    useEffect(() => {
+        loadCollaborators();
+    }, [loadCollaborators]);
 
     const addCollaborator = () => {
         try {
@@ -28,7 +45,7 @@ export default function CollaboratorsManager({ project }: CollaboratorProps) {
             if (!applicant || !applicant._id) {
                 throw new Error("Please select a valid collaborator.");
             }
-            
+
         } catch (err) {
             console.log(err);
             alert(err instanceof Error ? err.message : "Something went wrong");
@@ -44,7 +61,7 @@ export default function CollaboratorsManager({ project }: CollaboratorProps) {
             if (!applicant || !applicant._id) {
                 throw new Error("Invalid collaborator.");
             }
-            
+
         } catch (err) {
             console.log(err);
             alert(err instanceof Error ? err.message : "Something went wrong");
@@ -85,7 +102,7 @@ export default function CollaboratorsManager({ project }: CollaboratorProps) {
             <div className="card">
                 <Toolbar className="mb-4" start={startToolbarTemplate} />
                 <DataTable
-                    value={project.collaborators}
+                    value={collaborators}
                     selection={collaborator}
                     onSelectionChange={(e) => setCollaborator(e.value as Collaborator)}
                     dataKey="applicant._id"
@@ -94,7 +111,7 @@ export default function CollaboratorsManager({ project }: CollaboratorProps) {
                     rowsPerPageOptions={[5, 10, 25]}
                     className="datatable-responsive"
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                    emptyMessage={'No collaborator found.'}
+                    emptyMessage={'No collaborators found.'}
                     scrollable
                     tableStyle={{ minWidth: '50rem' }}
                 >
@@ -108,18 +125,12 @@ export default function CollaboratorsManager({ project }: CollaboratorProps) {
                         headerStyle={{ minWidth: '15rem' }}
                     />
                     <Column field="applicant.gender" header="Gender" sortable headerStyle={{ minWidth: '8rem' }} />
-                    <Column
-                        field="applicant.organization.name"
-                        header="Workspace"
-                        sortable
-                        headerStyle={{ minWidth: '15rem' }} // use minWidth instead of width
-                        body={(rowData) => rowData.applicant.organization?.name || '-'} // safe access
-                    />
+                    
                     <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
 
                 </DataTable>
 
-                
+
 
                 {collaborator && collaborator.applicant && (
                     <DeleteDialog

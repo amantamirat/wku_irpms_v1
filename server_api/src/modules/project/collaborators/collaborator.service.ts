@@ -31,7 +31,7 @@ export class CollaboratorService {
     static async getCollaborators(options: GetCollaboratorsOptions) {
         const filter: any = {};
         if (options.project) filter.project = options.project;
-        return await Collaborator.find(filter).lean();
+        return await Collaborator.find(filter).populate("applicant").lean();
     }
 
     static async updateCollaborator(id: string, data: Partial<CreateCollaboratorDto>) {
