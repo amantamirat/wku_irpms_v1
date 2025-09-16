@@ -28,7 +28,7 @@ export class AuthService {
                 { email: data.user_name },
                 { user_name: data.user_name }
             ],
-            status: { $ne: UserStatus.Suspended }
+            status: { $ne: UserStatus.suspended }
         }).populate('roles');
         if (!user) {
             throw new Error("User not found");
@@ -55,7 +55,7 @@ export class AuthService {
 
 
     static async sendVerificationCode(email: string): Promise<void> {
-        const user = await User.findOne({ email, status: { $ne: UserStatus.Suspended } });
+        const user = await User.findOne({ email, status: { $ne: UserStatus.suspended } });
         if (!user) {
             throw new Error("User does not exist.");
         }
@@ -118,7 +118,7 @@ export class AuthService {
         if (!password || password.trim() === "") {
             throw new Error("Password not found!");
         }
-        const user = await User.findOne({ email, status: { $ne: UserStatus.Suspended } });
+        const user = await User.findOne({ email, status: { $ne: UserStatus.suspended } });
         if (!user) {
             throw new Error("User not found");
         }
@@ -138,7 +138,7 @@ export class AuthService {
 
     static async activateUser(data: VerfyUserDto): Promise<void> {
         const { email, reset_code } = data;
-        const user = await User.findOne({ email, status: UserStatus.Pending });
+        const user = await User.findOne({ email, status: UserStatus.pending });
         if (!user) {
             throw new Error("User not found");
         }
@@ -148,7 +148,7 @@ export class AuthService {
         if (!user.reset_code || user.reset_code !== reset_code) {
             throw new Error("Invalid verification code.");
         }
-        user.status = UserStatus.Active;
+        user.status = UserStatus.active;
         user.reset_code = undefined;
         user.reset_code_expires = undefined;
         await user.save();

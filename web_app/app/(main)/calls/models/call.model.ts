@@ -3,10 +3,9 @@ import { Grant } from "../../grants/models/grant.model";
 import { Organization } from "../../organizations/models/organization.model";
 
 export enum CallStatus {
-    planned = 'Planned',
-    active = 'Active',
-    closed = 'Closed',
-    locked = 'Locked'
+    planned = 'planned',
+    active = 'active',
+    closed = 'closed'
 }
 export type Call = {
     _id?: string;

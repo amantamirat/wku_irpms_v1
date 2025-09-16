@@ -74,7 +74,7 @@ export class UserService {
     static async deleteUser(id: string) {
         const user = await User.findById(id).select("-password");
         if (!user) throw new Error("User not found");
-        if (user.status === UserStatus.Pending) {
+        if (user.status === UserStatus.pending) {
             const applicant = await Applicant.findOne({ user: id });
             if (applicant) {
                 applicant.user = undefined;
@@ -83,7 +83,7 @@ export class UserService {
             return await user.deleteOne();
         }
         else {
-            user.status = user.status === UserStatus.Active ? UserStatus.Suspended : UserStatus.Active;
+            user.status = user.status === UserStatus.active ? UserStatus.suspended : UserStatus.active;
             await user.save();
             return user;
         }
@@ -98,7 +98,7 @@ export class UserService {
         }
         const exist = await User.exists({ user_name: userName });
         if (!exist) {
-            const data = { user_name: userName, password: password, email: email, status: UserStatus.Active, roles: [], isDeleted: true };
+            const data = { user_name: userName, password: password, email: email, status: UserStatus.active, roles: [], isDeleted: true };
             await this.createUser(data);
             console.log('Default admin user created successfully.');
         }

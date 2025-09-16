@@ -1,5 +1,5 @@
 export enum CallStatus {
-    planned = 'Planned',
-    active = 'Active',
-    closed = 'Closed'
+    planned = 'planned',
+    active = 'active',
+    closed = 'closed'
 }

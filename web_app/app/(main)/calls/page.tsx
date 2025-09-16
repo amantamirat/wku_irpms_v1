@@ -1,6 +1,4 @@
 'use client';
-
-import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import CallManager from './components/CallManager';
 
@@ -9,7 +7,6 @@ import CallManager from './components/CallManager';
 const CallPage = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
-
 
     const directorateId = searchParams.get('id');
     const directorateName = searchParams.get('name');

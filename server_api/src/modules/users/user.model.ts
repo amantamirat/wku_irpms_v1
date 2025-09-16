@@ -39,7 +39,7 @@ const UserSchema = new Schema<IUser>(
     status: {
       type: String,
       enum: Object.values(UserStatus),
-      default: UserStatus.Pending,
+      default: UserStatus.pending,
       required: true,
     },
     roles: [{
