@@ -7,7 +7,7 @@ import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 import { Calendar } from '../../calendars/models/calendar.model';
-import { Call, validateCall } from '../models/call.model';
+import { Call, CallStatus, validateCall } from '../models/call.model';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { Grant } from '../../grants/models/grant.model';
 
@@ -130,6 +130,21 @@ function SaveDialog(props: SaveDialogProps) {
                     className={classNames({ 'p-invalid': submitted && !call.grant })}
                 />
             </div>
+            {call._id && <>
+                <div className="field">
+                    <label htmlFor="status">Status</label>
+                    <Dropdown
+                        id="gender"
+                        value={call.status}
+                        options={Object.values(CallStatus).map(g => ({ label: g, value: g }))}
+                        onChange={(e) =>
+                            onChange({ ...call, status: e.value })
+                        }
+                        placeholder="Select Status"
+                        className={classNames({ 'p-invalid': submitted && !call.status })}
+                    />
+                </div>
+            </>}
             {errorMessage && (
                 <small className="p-error">{errorMessage}</small>
             )}

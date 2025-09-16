@@ -210,6 +210,15 @@ const CallManager = (props: CallManagerProps) => {
         </>
     );
 
+    const statusBodyTemplate = (rowData: Call) => {
+        return (
+            <>
+                <span className="p-column-title">Status</span>
+                <span className={`call-badge status-${rowData.status}`}>{rowData.status}</span>
+            </>
+        );
+    };
+
     return (
         <div className="grid">
             <div className="col-12">
@@ -240,7 +249,7 @@ const CallManager = (props: CallManagerProps) => {
                         <Column field="calendar.year" header="Calendar" sortable />
                         <Column field="deadline" header="Deadline" body={(rowData) => new Date(rowData.deadline!).toLocaleDateString('en-CA')} />
                         <Column field="grant.title" header="Grant" sortable />
-                        <Column field="status" header="Status" sortable />
+                        <Column header="Status" body={statusBodyTemplate} sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 

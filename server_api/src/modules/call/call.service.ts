@@ -7,6 +7,7 @@ import { Directorate } from "../organs/base.organization.model";
 export interface GetCallsOptions {
     calendar?: Types.ObjectId | string;
     directorate?: string;
+    status?: CallStatus;
 }
 
 export interface CreateCallDto {
@@ -33,7 +34,7 @@ export class CallService {
 
     static async createCall(data: CreateCallDto) {
         await this.validateCall(data);
-        const createdCall = await Call.create({ ...data });
+        const createdCall = await Call.create({ ...data, status: CallStatus.planned });
         return createdCall;
     }
 
@@ -41,6 +42,7 @@ export class CallService {
         const filter: any = {};
         if (options.calendar) filter.calendar = options.calendar;
         if (options.directorate) filter.directorate = options.directorate;
+        if (options.status) filter.status = options.status;
         return await Call.find(filter).populate('calendar').populate('directorate').populate('grant').lean();
     }
 

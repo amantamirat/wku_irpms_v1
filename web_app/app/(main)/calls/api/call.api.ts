@@ -1,5 +1,5 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Call } from "../models/call.model";
+import { Call, CallStatus } from "../models/call.model";
 import { Calendar } from "../../calendars/models/calendar.model";
 import { Organization } from "../../organizations/models/organization.model";
 
@@ -23,6 +23,7 @@ function sanitizeCall(call: Partial<Call>): Partial<Call> {
 export interface GetCallsOptions {
     calendar?: string;
     directorate?: string;
+    status?: CallStatus;
 }
 
 export const CallApi = {
@@ -37,6 +38,7 @@ export const CallApi = {
         const query = new URLSearchParams();
         if (options.calendar) query.append("calendar", options.calendar);
         if (options.directorate) query.append("directorate", options.directorate);
+        if (options.status) query.append("status", options.status);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Call[];
     },

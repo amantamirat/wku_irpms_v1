@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
-import { Call } from '../models/call.model';
+import { Call, CallStatus } from '../models/call.model';
 import { CallApi } from '../api/call.api';
 import { Skeleton } from 'primereact/skeleton';
 import CallCard from './CallCard';
@@ -18,7 +18,7 @@ export default function CallGrid() {
         const fetchCalls = async () => {
             try {
                 setLoading(true);
-                const data = await CallApi.getCalls({});
+                const data = await CallApi.getCalls({status:CallStatus.active});
                 setCalls(data);
             } catch (err) {
                 console.error('Failed to fetch calls of directorates', err);

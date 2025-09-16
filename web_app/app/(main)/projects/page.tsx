@@ -14,7 +14,7 @@ import { Project } from './models/project.model';
 import { ProjectApi } from './api/project.api';
 import SaveDialog from './components/dialogs/SaveDialog';
 import { CallApi } from '../calls/api/call.api';
-import { Call } from '../calls/models/call.model';
+import { Call, CallStatus } from '../calls/models/call.model';
 
 const ProjectPage = () => {
     const emptyProject: Project = {
@@ -42,7 +42,7 @@ const ProjectPage = () => {
 
     const loadCalls = async () => {
         try {
-            const data = await CallApi.getCalls({});
+            const data = await CallApi.getCalls({status:CallStatus.active});
             setCalls(data);
         } catch (err) {
             toast.current?.show({

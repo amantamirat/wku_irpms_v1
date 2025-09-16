@@ -16,6 +16,23 @@
     letter-spacing: .3px;
 }
 
+.call-badge {
+    &.status-active {
+        background: #C8E6C9;
+        color: #256029;
+    }
+
+    &.status-planned {
+        background: #F3E5F5;
+        color: #4A148C;
+    }
+
+    &.status-closed {
+        background: #6ba19a;
+        color: #d80517;
+    }
+}
+
 .user-badge {
     &.status-active {
         background: #C8E6C9;
@@ -237,4 +254,3 @@
         color: #424242; // dark grey
     }
 }
-
