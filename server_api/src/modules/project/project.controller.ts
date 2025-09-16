@@ -1,12 +1,16 @@
 import { Request, Response } from 'express';
 import { errorResponse, successResponse } from '../../util/response';
 import { ProjectService, CreateProjectDto } from './project.service';
+import { AuthenticatedRequest } from '../users/auth/auth.middleware';
 
 export class ProjectController {
 
-  static async createProject(req: Request, res: Response) {
+  static async createProject(req: AuthenticatedRequest, res: Response) {
     try {
-      const data: CreateProjectDto = req.body;
+      const data: CreateProjectDto = {
+        ...req.body,
+        createdBy: req.user!.id,
+      };
       const theme = await ProjectService.createProject(data);
       successResponse(res, 201, "Project created successfully", theme);
     } catch (err: any) {

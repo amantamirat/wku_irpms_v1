@@ -5,7 +5,7 @@ interface IProject extends Document {
     call: mongoose.Types.ObjectId;
     title: string;
     summary?: string;
-    createdBy?: mongoose.Types.ObjectId;
+    createdBy: mongoose.Types.ObjectId;
     createdAt?: Date;
     updatedAt?: Date;
 }

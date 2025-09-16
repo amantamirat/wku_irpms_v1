@@ -10,10 +10,10 @@ export interface GetCallsOptions {
 }
 
 export interface CreateCallDto {
-    directorate: Types.ObjectId | string;
-    calendar: Types.ObjectId | string;
+    directorate: Types.ObjectId;
+    calendar: Types.ObjectId;
     title: string;
-    dead_line: Date | string;
+    deadline: Date | string;
     description?: string;
     total_budget?: number;
     grant: Types.ObjectId | string;
@@ -23,8 +23,8 @@ export interface CreateCallDto {
 
 export class CallService {
 
-    private static async validateCall(theme: Partial<CreateCallDto>) {
-        const directorate = await Directorate.findById(theme.directorate);
+    private static async validateCall(call: Partial<CreateCallDto>) {
+        const directorate = await Directorate.findById(call.directorate);
         if (!directorate) {
             throw new Error("Directorate Not Found!");
         }
@@ -41,7 +41,12 @@ export class CallService {
         const filter: any = {};
         if (options.calendar) filter.calendar = options.calendar;
         if (options.directorate) filter.directorate = options.directorate;
-        return Call.find(filter).populate('calendar').populate('directorate').populate('grant').lean();
+        return await Call.find(filter).populate('calendar').populate('directorate').populate('grant').lean();
+    }
+
+
+    static async getCallById(id: Types.ObjectId | string) {
+        return await Call.findById(id).lean();
     }
 
     static async updateCall(id: string, data: Partial<CreateCallDto>) {
