@@ -15,7 +15,7 @@ export class ProjectService {
     private static async validateProject(project: CreateProjectDto) {
         const call = await CallService.getCallById(project.call);
         if (!call) throw new Error("Call not found");
-        //if (call.status !== CallStatus.active) throw new Error("Call is not active.");
+        if (call.status !== CallStatus.active) throw new Error("Call is not active.");
         const now = new Date();
         if (call.deadline < now) {
             throw new Error("The deadline for this call has already passed");

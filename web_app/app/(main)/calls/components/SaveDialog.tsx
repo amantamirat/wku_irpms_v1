@@ -114,6 +114,8 @@ function SaveDialog(props: SaveDialogProps) {
                     showIcon
                     className={classNames({ 'p-invalid': submitted && !call.deadline })}
                     required
+                    showTime 
+                    hourFormat="12"
                 />
             </div>
 
