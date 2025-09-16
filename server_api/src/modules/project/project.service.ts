@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { Project } from "./project.model";
 import { CallService } from "../call/call.service";
 import { CallStatus } from "../call/enums/call.status.enum";
+import { ProjectStatus } from "./enums/project.status.enum";
 
 export interface CreateProjectDto {
     call: mongoose.Types.ObjectId;
@@ -24,7 +25,7 @@ export class ProjectService {
 
     static async createProject(data: CreateProjectDto) {
         await this.validateProject(data);
-        const createdProject = await Project.create({ ...data });
+        const createdProject = await Project.create({ ...data, status: ProjectStatus.pending });
         return createdProject;
     }
 
