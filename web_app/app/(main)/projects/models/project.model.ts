@@ -2,6 +2,11 @@ import { Applicant } from "../../applicants/models/applicant.model";
 import { Call } from "../../calls/models/call.model";
 import { Theme } from "../../themes/models/theme.model";
 
+export enum ProjectStatus {
+    pending = 'pending',
+    closed = 'closed'
+}
+
 export type Project = {
     _id?: string;
     call: string | Call;
@@ -10,6 +15,7 @@ export type Project = {
     collaborators?: Collaborator[];
     themes?: ProjectTheme[];
     phases?: Phase[];
+    status?: ProjectStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -17,7 +23,7 @@ export type Project = {
 export type ProjectTheme = {
     _id?: string;
     project?: string | Project;
-    theme: string | Theme ;
+    theme: string | Theme;
     Co_PI?: string | Collaborator;
 }
 

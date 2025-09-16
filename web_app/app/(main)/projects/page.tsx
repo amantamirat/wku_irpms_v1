@@ -42,7 +42,7 @@ const ProjectPage = () => {
 
     const loadCalls = async () => {
         try {
-            const data = await CallApi.getCalls({status:CallStatus.active});
+            const data = await CallApi.getCalls({ status: CallStatus.active });
             setCalls(data);
         } catch (err) {
             toast.current?.show({
@@ -165,6 +165,14 @@ const ProjectPage = () => {
     );
 
 
+    const statusBodyTemplate = (rowData: Project) => {
+        return (
+            <>
+                <span className={`project-badge status-${rowData.status}`}>{rowData.status}</span>
+            </>
+        );
+    };
+
 
     return (
         <div className="grid">
@@ -193,8 +201,9 @@ const ProjectPage = () => {
                         <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="call.title" header="Call" />
-                        <Column field="title" header="Title" sortable />
+                        <Column field="title" header="Title" sortable />                        
                         <Column field="updatedAt" header="Updated At" body={(rowData) => new Date(rowData.updatedAt!).toLocaleDateString('en-CA')} />
+                        <Column header="Status" body={statusBodyTemplate} sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 

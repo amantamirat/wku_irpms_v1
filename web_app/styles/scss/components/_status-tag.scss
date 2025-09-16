@@ -5,6 +5,7 @@
 .ownership-badge,
 .calendar-badge,
 .call-badge,
+.project-badge,
 .theme-badge,
 .form-badge,
 .theme-level-badge {
@@ -14,6 +15,19 @@
     font-weight: 700;
     font-size: 12px;
     letter-spacing: .3px;
+}
+
+.project-badge {   
+
+    &.status-pending {
+        background: #F3E5F5;
+        color: #4A148C;
+    }
+
+    &.status-closed {
+        background: #6ba19a;
+        color: #d80517;
+    }
 }
 
 .call-badge {
