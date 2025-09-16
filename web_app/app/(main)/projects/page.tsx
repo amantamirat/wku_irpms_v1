@@ -151,6 +151,10 @@ const ProjectPage = () => {
 
     const actionBodyTemplate = (rowData: Project) => (
         <>
+            <Button icon="pi pi-info" rounded severity="info" className="p-button-rounded p-button-text"
+                style={{ fontSize: '1.2rem' }} onClick={() => {
+                    
+                }} />
             <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
                     setSelectedProject(rowData);
@@ -201,7 +205,7 @@ const ProjectPage = () => {
                         <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="call.title" header="Call" />
-                        <Column field="title" header="Title" sortable />                        
+                        <Column field="title" header="Title" sortable />
                         <Column field="updatedAt" header="Updated At" body={(rowData) => new Date(rowData.updatedAt!).toLocaleDateString('en-CA')} />
                         <Column header="Status" body={statusBodyTemplate} sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
