@@ -29,7 +29,7 @@ export class ProjectService {
     }
 
     static async getProjects() {
-        return Project.find().lean();
+        return await Project.find().populate('call').lean();
     }
 
     static async updateProject(id: string, data: Partial<CreateProjectDto>) {

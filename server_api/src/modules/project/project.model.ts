@@ -26,6 +26,7 @@ const ProjectSchema = new Schema<IProject>({
     createdBy: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.USER,
+        immutable:true,
         required: true
     },
 }, { timestamps: true });

@@ -81,7 +81,7 @@ const ProjectPage = () => {
                 _projects[index] = selectedProject;
             } else {
                 const created = await ProjectApi.createProject(selectedProject);
-                _projects.push({ ...selectedProject, _id: created._id });
+                _projects.push({ ...selectedProject, _id: created._id, updatedAt: created.updatedAt });
             }
             setProjects(_projects);
             toast.current?.show({
