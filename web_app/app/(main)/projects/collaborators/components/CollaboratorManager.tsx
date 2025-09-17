@@ -7,6 +7,7 @@ import DeleteDialog from "@/components/DeleteDialog";
 import { Collaborator, Project } from "../../models/project.model";
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
 import { CollaboratorApi } from "../api/collaborator.api";
+import CollaboratorDialog from "./CollaboratorDialog";
 
 interface CollaboratorProps {
     project: Project;
@@ -21,7 +22,7 @@ export default function CollaboratorManager({ project }: CollaboratorProps) {
 
     const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
     const [collaborator, setCollaborator] = useState<Collaborator>(emptyCollaborator);
-    const [showAddDialog, setShowAddDialog] = useState(false);
+    const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
     const loadCollaborators = useCallback(async () => {
@@ -39,11 +40,16 @@ export default function CollaboratorManager({ project }: CollaboratorProps) {
         loadCollaborators();
     }, [loadCollaborators]);
 
-    const addCollaborator = () => {
+    const addCollaborator = async () => {
         try {
-            const applicant = collaborator.applicant as Applicant;
-            if (!applicant || !applicant._id) {
-                throw new Error("Please select a valid collaborator.");
+            let _collaborators = [...collaborators];
+            if (collaborator._id) {
+                const updated = await CollaboratorApi.updateCollaborator(collaborator);
+                const index = _collaborators.findIndex((c) => c._id === updated._id);
+                _collaborators[index] = { ...collaborator, updatedAt: updated.updatedAt, };
+            } else {
+                const created = await CollaboratorApi.createCollaborator(collaborator);
+                _collaborators.push({ ...collaborator, _id: created._id, updatedAt: created.updatedAt, createdAt: created.createdAt });
             }
 
         } catch (err) {
@@ -72,7 +78,7 @@ export default function CollaboratorManager({ project }: CollaboratorProps) {
 
     const hideDialogs = () => {
         setCollaborator(emptyCollaborator);
-        setShowAddDialog(false);
+        setShowSaveDialog(false);
         setShowDeleteDialog(false);
     }
 
@@ -81,7 +87,7 @@ export default function CollaboratorManager({ project }: CollaboratorProps) {
             <Button icon="pi pi-plus" severity="success" className="mr-2" tooltip="Add Collaborator"
                 onClick={() => {
                     setCollaborator(emptyCollaborator);
-                    setShowAddDialog(true);
+                    setShowSaveDialog(true);
                 }}
             />
         </div>
@@ -125,12 +131,19 @@ export default function CollaboratorManager({ project }: CollaboratorProps) {
                         headerStyle={{ minWidth: '15rem' }}
                     />
                     <Column field="applicant.gender" header="Gender" sortable headerStyle={{ minWidth: '8rem' }} />
-                    
+
                     <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
 
                 </DataTable>
 
-
+                {collaborator &&
+                    <CollaboratorDialog
+                        collaborator={collaborator}
+                        setCollaborator={setCollaborator}
+                        visible={showSaveDialog}
+                        onAdd={addCollaborator}
+                        onHide={hideDialogs}
+                    />}
 
                 {collaborator && collaborator.applicant && (
                     <DeleteDialog

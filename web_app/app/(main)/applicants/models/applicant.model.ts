@@ -74,3 +74,4 @@ export const scopeToOrganizationUnit: Record<Category, OrganizationalUnit> = {
     [Category.supportive]: OrganizationalUnit.Supportive,
     [Category.external]: OrganizationalUnit.External,
 };
+

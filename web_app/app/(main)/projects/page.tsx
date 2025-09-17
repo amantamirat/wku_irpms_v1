@@ -83,7 +83,7 @@ const ProjectPage = () => {
                 _projects[index] = selectedProject;
             } else {
                 const created = await ProjectApi.createProject(selectedProject);
-                _projects.push({ ...selectedProject, _id: created._id, updatedAt: created.updatedAt });
+                _projects.push({ ...selectedProject, _id: created._id, updatedAt: created.updatedAt,  createdAt: created.createdAt });
             }
             setProjects(_projects);
             toast.current?.show({
@@ -209,7 +209,6 @@ const ProjectPage = () => {
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="call.title" header="Call" />
                         <Column field="title" header="Title" sortable />
-                        <Column field="updatedAt" header="Updated At" body={(rowData) => new Date(rowData.updatedAt!).toLocaleDateString('en-CA')} />
                         <Column header="Status" body={statusBodyTemplate} sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
