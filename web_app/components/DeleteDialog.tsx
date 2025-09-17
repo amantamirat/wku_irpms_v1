@@ -30,25 +30,28 @@ const DeleteDialog = (props: DeleteDialogProps) => {
                     severity: 'success',
                     summary: `${props.operation} performed`,
                     detail: `${props.operation} performed on ${props.selectedDataInfo}`,
-                    life: 3000
+                    life: 2000
                 });
             } else {
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Deleted',
                     detail: `${props.selectedDataInfo} deleted`,
-                    life: 3000
+                    life: 2000
                 });
             }
              */
-            
+
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
                 summary: `Failed to ${props.operation ?? 'delete'} ${props.selectedDataInfo}`,
                 detail: '' + err,
-                life: 3000
+                life: 2000
             });
+        }
+        finally {
+            setTimeout(() => props.onHide(), 2000);
         }
     }
 

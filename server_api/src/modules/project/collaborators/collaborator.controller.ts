@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { CollaboratorService, CreateCollaboratorDto, GetCollaboratorsOptions } from './collaborator.service';
+import { CollaboratorService, CreateCollaboratorDto, GetCollaboratorsOptions, UpdateCollaboratorDto } from './collaborator.service';
 import { Types } from 'mongoose';
 import { errorResponse, successResponse } from '../../../util/response';
 
@@ -31,7 +31,10 @@ export class CollaboratorController {
     static async updateCollaborator(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const data: Partial<CreateCollaboratorDto> = req.body;
+            const data: Partial<UpdateCollaboratorDto> = {
+                isLeadPI: req.body.isLeadPI,
+                status: req.body.status
+            };
             const updated = await CollaboratorService.updateCollaborator(id, data);
             successResponse(res, 201, "Collaborator updated successfully", updated);
         } catch (err: any) {

@@ -14,6 +14,11 @@ export interface CreateCollaboratorDto {
     isLeadPI?: boolean;
 }
 
+export interface UpdateCollaboratorDto {
+    isLeadPI?: boolean;
+    status?: CollaboratorStatus;
+}
+
 export class CollaboratorService {
 
     private static async validateCollaborator(collaborator: CreateCollaboratorDto) {
@@ -34,7 +39,7 @@ export class CollaboratorService {
         return await Collaborator.find(filter).populate("applicant").lean();
     }
 
-    static async updateCollaborator(id: string, data: Partial<CreateCollaboratorDto>) {
+    static async updateCollaborator(id: string, data: Partial<UpdateCollaboratorDto>) {
         const collaborator = await Collaborator.findById(id);
         if (!collaborator) throw new Error("Collaborator not found");
         Object.assign(collaborator, data);
@@ -44,6 +49,9 @@ export class CollaboratorService {
     static async deleteCollaborator(id: string) {
         const collaborator = await Collaborator.findById(id);
         if (!collaborator) throw new Error("Collaborator not found");
+        if (collaborator.status !== CollaboratorStatus.pending) {
+            throw new Error("Can Not Delete Non Pending Collaborator");
+        }
         return await collaborator.deleteOne();
     }
 }

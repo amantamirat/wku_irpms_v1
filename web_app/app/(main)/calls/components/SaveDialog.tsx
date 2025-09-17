@@ -123,6 +123,7 @@ function SaveDialog(props: SaveDialogProps) {
                 <label htmlFor="grant">Grant</label>
                 <Dropdown
                     id="grant"
+                    dataKey="_id"
                     value={call.grant}
                     options={grants}
                     onChange={(e) => onChange({ ...call, grant: e.value })}
