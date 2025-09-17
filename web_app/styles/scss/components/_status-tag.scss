@@ -19,15 +19,13 @@
 }
 
 .collaborator-badge {
-
     &.status-pending {
         background: #FFCDD2;
         color: #d80517;
     }
-
-    &.status-closed {
-        background: #F3E5F5;
-        color: #4A148C;
+    &.status-active {
+        background: #C8E6C9;
+        color: #256029;
     }
 }
 

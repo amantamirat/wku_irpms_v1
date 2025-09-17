@@ -101,7 +101,7 @@ export default function CollaboratorDialog({ collaborator, setCollaborator, visi
             <Dialog
                 visible={visible}
                 style={{ width: '600px' }}
-                header={'Add Collaborator'}
+                header={'Collaborator Detail'}
                 modal
                 className="p-fluid"
                 footer={footer}

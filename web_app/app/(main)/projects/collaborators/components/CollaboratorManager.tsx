@@ -89,6 +89,11 @@ export default function CollaboratorManager({ project }: CollaboratorProps) {
 
     const actionBodyTemplate = (rowData: Collaborator) => (
         <>
+            <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
+                style={{ fontSize: '1.2rem' }} onClick={() => {
+                    setCollaborator(rowData);
+                    setShowSaveDialog(true);
+                }} />
             <Button icon="pi pi-times" rounded severity="warning" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
                     setCollaborator(rowData);
