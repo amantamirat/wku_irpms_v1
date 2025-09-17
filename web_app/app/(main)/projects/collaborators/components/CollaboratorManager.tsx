@@ -26,20 +26,22 @@ export default function CollaboratorManager({ project }: CollaboratorProps) {
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-    const loadCollaborators = useCallback(async () => {
-        try {
-            const data = await CollaboratorApi.getCollaborators({ project: project._id });
-            setCollaborators(data);
-        } catch (err) {
-            console.log(err);
-        } finally {
-
-        }
-    }, [project]);
+    
 
     useEffect(() => {
-        loadCollaborators();
-    }, [loadCollaborators, project]);
+        const fetchCollaborators = async () => {
+            try {
+                const data = await CollaboratorApi.getCollaborators({ project: project._id });
+                setCollaborators(data);
+            } catch (err) {
+                console.error("Failed to fetch collaborators:", err);
+            }
+        };
+
+        if (project?._id) {
+            fetchCollaborators();
+        }
+    }, [project?._id]);
 
 
     const addCollaborator = async () => {
