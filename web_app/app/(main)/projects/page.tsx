@@ -106,25 +106,9 @@ const ProjectPage = () => {
     };
 
     const deleteProject = async () => {
-        try {
-            const deleted = await ProjectApi.deleteProject(selectedProject);
-            if (deleted) {
-                setProjects(projects.filter((c) => c._id !== selectedProject._id));
-                toast.current?.show({
-                    severity: 'success',
-                    summary: 'Deleted',
-                    detail: 'Project deleted',
-                    life: 3000
-                });
-            }
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to delete project',
-                detail: '' + err,
-                life: 3000
-            });
-        } finally {
+        const deleted = await ProjectApi.deleteProject(selectedProject);
+        if (deleted) {
+            setProjects(projects.filter((c) => c._id !== selectedProject._id));
             setShowDeleteDialog(false);
             setSelectedProject(emptyProject);
         }

@@ -24,7 +24,8 @@ const DeleteDialog = (props: DeleteDialogProps) => {
                 props.onRemove();
             }
 
-            if (props.operation) {
+            /**
+             * if (props.operation) {
                 toast.current?.show({
                     severity: 'success',
                     summary: `${props.operation} performed`,
@@ -39,6 +40,8 @@ const DeleteDialog = (props: DeleteDialogProps) => {
                     life: 3000
                 });
             }
+             */
+            
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
@@ -51,6 +54,7 @@ const DeleteDialog = (props: DeleteDialogProps) => {
 
     return (
         <>
+            <Toast ref={toast} />
             <Dialog
                 visible={props.showDeleteDialog}
                 style={{ width: '450px' }}
@@ -58,7 +62,7 @@ const DeleteDialog = (props: DeleteDialogProps) => {
                 modal
                 footer={
                     <>
-                        <Button label="No" icon="pi pi-times" text onClick={props.onHide} />
+                        <Button label="Cancel" icon="pi pi-times" text onClick={props.onHide} />
                         <Button label="Yes" icon="pi pi-check" text onClick={onOK} />
                     </>
                 }
