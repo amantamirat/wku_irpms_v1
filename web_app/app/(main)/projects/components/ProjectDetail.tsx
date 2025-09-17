@@ -2,6 +2,8 @@ import { Card } from "primereact/card";
 import { Divider } from "primereact/divider";
 import { TabView, TabPanel } from "primereact/tabview";
 import { Project } from "../models/project.model";
+import CollaboratorManager from "../collaborators/components/CollaboratorManager";
+
 
 interface ProjectDetailProps {
     project: Project;
@@ -25,7 +27,7 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
             <>
                 <TabView>
                     <TabPanel header="Collaborators">
-                        {/* Collaborators list / Accept-Decline UI */}
+                        <CollaboratorManager project={project} />
                     </TabPanel>
                     <TabPanel header="Themes">
                         {/* Themes list / content */}

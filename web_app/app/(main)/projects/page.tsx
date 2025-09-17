@@ -153,10 +153,6 @@ const ProjectPage = () => {
 
     const actionBodyTemplate = (rowData: Project) => (
         <>
-            <Button icon="pi pi-info" rounded severity="info" className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }} onClick={() => {
-
-                }} />
             <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
                     setSelectedProject(rowData);

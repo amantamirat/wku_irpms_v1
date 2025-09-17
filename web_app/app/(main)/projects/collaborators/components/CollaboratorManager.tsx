@@ -12,7 +12,7 @@ interface CollaboratorProps {
     project: Project;
 }
 
-export default function CollaboratorsManager({ project }: CollaboratorProps) {
+export default function CollaboratorManager({ project }: CollaboratorProps) {
 
     const emptyCollaborator: Collaborator = {
         project: project,
