@@ -39,7 +39,8 @@ export default function CollaboratorManager({ project }: CollaboratorProps) {
 
     useEffect(() => {
         loadCollaborators();
-    }, [loadCollaborators]);
+    }, [loadCollaborators, project]);
+
 
     const addCollaborator = async () => {
         let _collaborators = [...collaborators];

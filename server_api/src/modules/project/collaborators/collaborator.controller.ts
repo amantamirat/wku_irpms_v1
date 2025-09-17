@@ -7,7 +7,11 @@ export class CollaboratorController {
 
     static async createCollaborator(req: Request, res: Response) {
         try {
-            const data: CreateCollaboratorDto = req.body;
+            const data: CreateCollaboratorDto = {
+                applicant:req.body.applicant,
+                project:req.body.project,
+                isLeadPI: req.body.isLeadPI
+            };;
             const theme = await CollaboratorService.createCollaborator(data);
             successResponse(res, 201, "Collaborator created successfully", theme);
         } catch (err: any) {

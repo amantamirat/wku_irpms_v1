@@ -1,15 +1,18 @@
-import { Types } from "mongoose";
+import mongoose from "mongoose";
 import Applicant from "./applicant.model";
 import { Gender } from "./enums/gender.enum";
 import { Category } from "../organs/enums/category.enum";
 import { Accessibility } from "./enums/accessibility.enum";
 import { Unit } from "../organs/enums/unit.enum";
 import { BaseOrganization } from "../organs/base.organization.model";
-import { User } from "../users/user.model";
+
 
 
 export interface GetApplicantsOptions {
-    organization?: Types.ObjectId | string;
+    _id?: string;
+    uid?: string | mongoose.Types.ObjectId;
+    email?: string;
+    organization?: string;
     scope?: Category;
 }
 
@@ -19,9 +22,10 @@ export interface CreateApplicantDto {
     birth_date: Date;
     gender: Gender;
     scope: Category;
-    organization: Types.ObjectId | string;
+    organization: mongoose.Types.ObjectId | string;
     email?: string;
     accessibility?: Accessibility[];
+    user?: mongoose.Types.ObjectId | string;
 }
 
 const scopeToOrganizationUnit: Record<Category, Unit> = {
@@ -47,7 +51,7 @@ export class ApplicantService {
             }
         } 
          */
-        
+
     }
 
     static async createApplicant(data: CreateApplicantDto) {
@@ -63,7 +67,15 @@ export class ApplicantService {
         return await Applicant.find(filter).populate('organization').lean();
     }
 
-    static async updateApplicant(id: string, data: Partial<CreateApplicantDto>) {
+    static async findApplicant(options: GetApplicantsOptions) {
+        const filter: any = {};
+        if (options.uid) filter.user = options.uid;
+        if (options.email) filter.email = options.email;
+        if (options._id) filter._id = options._id;
+        return await Applicant.findOne(filter).lean();
+    }
+
+    static async updateApplicant(id: string | mongoose.Types.ObjectId, data: Partial<CreateApplicantDto>) {
         await this.validateApplicant(data);
         const applicant = await Applicant.findById(id);
         if (!applicant) throw new Error("Applicant not found");

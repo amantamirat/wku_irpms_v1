@@ -5,13 +5,18 @@ import { ProjectStatus } from "../enums/project.status.enum";
 import { CollaboratorStatus } from "../enums/collaborator.status.enum";
 
 export interface GetCollaboratorsOptions {
+    _id?: string;
     project?: string;
+    applicant?: string;
 }
+
+
 
 export interface CreateCollaboratorDto {
     project: mongoose.Types.ObjectId;
     applicant: mongoose.Types.ObjectId;
     isLeadPI?: boolean;
+    status?: CollaboratorStatus;
 }
 
 export interface UpdateCollaboratorDto {
@@ -29,7 +34,7 @@ export class CollaboratorService {
 
     static async createCollaborator(data: CreateCollaboratorDto) {
         await this.validateCollaborator(data);
-        const createdCollaborator = await Collaborator.create({ ...data, status: CollaboratorStatus.pending });
+        const createdCollaborator = await Collaborator.create({ ...data, status: data.status ?? CollaboratorStatus.pending });
         return createdCollaborator;
     }
 
@@ -37,6 +42,14 @@ export class CollaboratorService {
         const filter: any = {};
         if (options.project) filter.project = options.project;
         return await Collaborator.find(filter).populate("applicant").lean();
+    }
+
+    static async findCollaborator(options: GetCollaboratorsOptions) {
+        const filter: any = {};
+        if (options.project) filter.project = options.project;
+        if (options.applicant) filter.applicant = options.applicant;
+        if (options._id) filter._id = options._id;
+        return await Collaborator.findOne(filter).lean();
     }
 
     static async updateCollaborator(id: string, data: Partial<UpdateCollaboratorDto>) {

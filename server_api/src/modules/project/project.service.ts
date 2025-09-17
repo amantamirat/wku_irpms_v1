@@ -3,7 +3,9 @@ import { Project } from "./project.model";
 import { CallService } from "../call/call.service";
 import { CallStatus } from "../call/enums/call.status.enum";
 import { ProjectStatus } from "./enums/project.status.enum";
-import { Collaborator } from "./collaborators/collaborator.model";
+import { CollaboratorService } from "./collaborators/collaborator.service";
+import { ApplicantService } from "../applicants/applicant.service";
+import { CollaboratorStatus } from "./enums/collaborator.status.enum";
 
 export interface CreateProjectDto {
     call: mongoose.Types.ObjectId;
@@ -26,7 +28,12 @@ export class ProjectService {
 
     static async createProject(data: CreateProjectDto) {
         await this.validateProject(data);
+        const applicant = await ApplicantService.findApplicant({ uid: data.createdBy }) as any;
+        if (!applicant) {
+            throw new Error("Default Applicant Data Not Found.");
+        }
         const createdProject = await Project.create({ ...data, status: ProjectStatus.pending });
+        await CollaboratorService.createCollaborator({ applicant: applicant._id, project: createdProject._id, isLeadPI: true, status: CollaboratorStatus.active });
         return createdProject;
     }
 
@@ -48,8 +55,8 @@ export class ProjectService {
     static async deleteProject(id: string) {
         const project = await Project.findById(id);
         if (!project) throw new Error("Project not found");
-        const isCollaboratorExist = await Collaborator.exists({ project: project._id });
-        if (isCollaboratorExist) {
+        const collaborator = await CollaboratorService.findCollaborator({ project: id });
+        if (collaborator) {
             throw new Error(`Cannot delete: ${project.title} collaborator exist.`);
         }
         return await project.deleteOne();

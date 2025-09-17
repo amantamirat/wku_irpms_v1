@@ -3,6 +3,7 @@ import { UserStatus } from "./enums/status.enum";
 import bcrypt from "bcryptjs";
 import { Types } from "mongoose";
 import Applicant from "../applicants/applicant.model";
+import { ApplicantService } from "../applicants/applicant.service";
 
 
 export interface CreateUserDto {
@@ -60,14 +61,13 @@ export class UserService {
     }
 
     static async linkApplicant(id: string) {
-        const user = await User.findById(id).select("-password").lean();
+        const user = await User.findById(id).select("-password").lean() as any;
         if (!user) throw new Error("User not found");
-        const applicant = await Applicant.findOne({ email: user.email });
+        const applicant = await ApplicantService.findApplicant({ email: user.email }) as any;
         if (!applicant) throw new Error("Applicant not found");
         //if applicant.user  Change email is possible//
         if (applicant.user) throw new Error("Applicant already linked");
-        applicant.user = new Types.ObjectId(id);
-        await applicant.save();
+        await ApplicantService.updateApplicant(applicant._id, { user: user._id });
         return { ...user, linkedApplicant: !!applicant };
     }
 
