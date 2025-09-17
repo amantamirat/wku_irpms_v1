@@ -16,11 +16,13 @@ const CollaboratorSchema = new Schema<ICollaborator>({
     project: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.PROJECT,
+        immutable: true,
         required: true
     },
     applicant: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.APPLICANT,
+        immutable: true,
         required: true
     },
     isLeadPI: {

@@ -3,6 +3,7 @@ import { Project } from "./project.model";
 import { CallService } from "../call/call.service";
 import { CallStatus } from "../call/enums/call.status.enum";
 import { ProjectStatus } from "./enums/project.status.enum";
+import { Collaborator } from "./collaborators/collaborator.model";
 
 export interface CreateProjectDto {
     call: mongoose.Types.ObjectId;
@@ -47,6 +48,10 @@ export class ProjectService {
     static async deleteProject(id: string) {
         const project = await Project.findById(id);
         if (!project) throw new Error("Project not found");
+        const isCollaboratorExist = await Collaborator.exists({ project: project._id });
+        if (isCollaboratorExist) {
+            throw new Error(`Cannot delete: ${project.title} collaborator exist.`);
+        }
         return await project.deleteOne();
     }
 }

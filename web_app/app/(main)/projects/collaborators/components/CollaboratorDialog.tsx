@@ -5,16 +5,17 @@ import { Category, Organization } from "@/app/(main)/organizations/models/organi
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
-import { useEffect, useState } from "react";
-import { Collaborator } from "../../models/project.model";
+import { useEffect, useRef, useState } from "react";
 import { applicantTemplate } from "@/app/(main)/applicants/models/applicant.template";
+import { Toast } from "primereact/toast";
+import { Collaborator, CollaboratorStatus } from "../models/collaborator.model";
 
 
 interface CollaboratorDialogProps {
     collaborator: Collaborator;
     setCollaborator: (collaborator: Collaborator) => void;
     visible: boolean;
-    onAdd: () => void;
+    onAdd: () => Promise<void>;
     onHide: () => void;
 }
 
@@ -24,6 +25,7 @@ export default function CollaboratorDialog({ collaborator, setCollaborator, visi
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [workspace, setWorkspace] = useState<Organization>();
     const [applicants, setApplicants] = useState<Applicant[]>([]);
+    const toast = useRef<Toast>(null);
 
     useEffect(() => {
         let isMounted = true;
@@ -66,75 +68,106 @@ export default function CollaboratorDialog({ collaborator, setCollaborator, visi
         };
     }, [workspace]);
 
+    const addCollaborator = async () => {
+        try {
+            await onAdd();
+        } catch (err) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Failed to save collaborator',
+                detail: '' + err,
+                life: 3000
+            });
+        }
+    }
 
 
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
-            <Button label="Add" icon="pi pi-check" text onClick={onAdd} />
+            <Button label="Add" icon="pi pi-check" text onClick={addCollaborator} />
         </>
     );
 
     return (
-        <Dialog
-            visible={visible}
-            style={{ width: '600px' }}
-            header={'Add Collaborator'}
-            modal
-            className="p-fluid"
-            footer={footer}
-            onHide={onHide}
-        >
-            <div className="field">
-                <label htmlFor="scope">Scope</label>
-                <Dropdown
-                    id="scope"
-                    value={scope}
-                    options={Object.values(Category).map(g => ({ label: g, value: g }))}
-                    onChange={(e) =>
-                        setScope(e.value)
-                    }
-                    placeholder="Select Scope"
-                />
-            </div>
+        <>
+            <Toast ref={toast} />
+            <Dialog
+                visible={visible}
+                style={{ width: '600px' }}
+                header={'Add Collaborator'}
+                modal
+                className="p-fluid"
+                footer={footer}
+                onHide={onHide}
+            >
+                {!collaborator._id ? <>
+                    <div className="field">
+                        <label htmlFor="scope">Scope</label>
+                        <Dropdown
+                            id="scope"
+                            value={scope}
+                            options={Object.values(Category).map(g => ({ label: g, value: g }))}
+                            onChange={(e) =>
+                                setScope(e.value)
+                            }
+                            placeholder="Select Scope"
+                        />
+                    </div>
 
-            <div className="field">
-                <label htmlFor="workspace">Workspace</label>
-                <Dropdown
-                    id="workspace"
-                    value={workspace}
-                    options={organizations}
-                    onChange={(e) =>
-                        setWorkspace(e.value)
-                    }
-                    optionLabel="name"
-                    placeholder="Select a Workspace"
-                />
-            </div>
+                    <div className="field">
+                        <label htmlFor="workspace">Workspace</label>
+                        <Dropdown
+                            id="workspace"
+                            value={workspace}
+                            options={organizations}
+                            onChange={(e) =>
+                                setWorkspace(e.value)
+                            }
+                            optionLabel="name"
+                            placeholder="Select a Workspace"
+                        />
+                    </div>
 
-            <div className="field">
-                <label htmlFor="applicant">Collaborator</label>
-                <Dropdown
-                    id="applicant"
-                    
-                    value={collaborator.applicant}
-                    options={applicants}
-                    onChange={(e) =>
-                        setCollaborator({ ...collaborator, applicant: e.value })
-                    }
-                    dataKey="_id"
-                    optionLabel="first_name"
-                    itemTemplate={(option) => applicantTemplate(option)}
-                    valueTemplate={(option) =>
-                        option
-                            ? applicantTemplate(option)
-                            : <span className="p-placeholder">Select a Collaborator</span>
-                    }
-                    placeholder="Select a Collaborator"
-                    //className={classNames({ 'p-invalid': submitted && !scope })}
-                />
-            </div>
+                    <div className="field">
+                        <label htmlFor="applicant">Collaborator</label>
+                        <Dropdown
+                            id="applicant"
+                            value={collaborator.applicant}
+                            options={applicants}
+                            onChange={(e) =>
+                                setCollaborator({ ...collaborator, applicant: e.value })
+                            }
+                            dataKey="_id"
+                            optionLabel="first_name"
+                            itemTemplate={(option) => applicantTemplate(option)}
+                            valueTemplate={(option) =>
+                                option
+                                    ? applicantTemplate(option)
+                                    : <span className="p-placeholder">Select a Collaborator</span>
+                            }
+                            placeholder="Select a Collaborator"
+                        //className={classNames({ 'p-invalid': submitted && !scope })}
+                        />
+                    </div>
 
-        </Dialog>
+                </> :
+                    <>
+                        <div className="field">
+                            <label htmlFor="status">Status</label>
+                            <Dropdown
+                                id="status"
+                                value={collaborator.status}
+                                options={Object.values(CollaboratorStatus).map(s => ({ label: s, value: s }))}
+                                onChange={(e) =>
+                                    setCollaborator({ ...collaborator, status: e.value })
+                                }
+                            />
+                        </div>
+                    </>}
+
+            </Dialog>
+        </>
+
     );
 }

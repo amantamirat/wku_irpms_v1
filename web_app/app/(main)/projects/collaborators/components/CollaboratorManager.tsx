@@ -4,10 +4,10 @@ import { DataTable } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
 import { useCallback, useEffect, useState } from "react";
 import DeleteDialog from "@/components/DeleteDialog";
-import { Collaborator, Project } from "../../models/project.model";
-import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
+import { Project } from "../../models/project.model";
 import { CollaboratorApi } from "../api/collaborator.api";
 import CollaboratorDialog from "./CollaboratorDialog";
+import { Collaborator, CollaboratorStatus } from "../models/collaborator.model";
 
 interface CollaboratorProps {
     project: Project;
@@ -17,7 +17,8 @@ export default function CollaboratorManager({ project }: CollaboratorProps) {
 
     const emptyCollaborator: Collaborator = {
         project: project,
-        applicant: ""
+        applicant: "",
+        status: CollaboratorStatus.pending
     };
 
     const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
@@ -41,37 +42,21 @@ export default function CollaboratorManager({ project }: CollaboratorProps) {
     }, [loadCollaborators]);
 
     const addCollaborator = async () => {
-        try {
-            let _collaborators = [...collaborators];
-            if (collaborator._id) {
-                const updated = await CollaboratorApi.updateCollaborator(collaborator);
-                const index = _collaborators.findIndex((c) => c._id === updated._id);
-                _collaborators[index] = { ...collaborator, updatedAt: updated.updatedAt, };
-            } else {
-                const created = await CollaboratorApi.createCollaborator(collaborator);
-                _collaborators.push({ ...collaborator, _id: created._id, updatedAt: created.updatedAt, createdAt: created.createdAt });
-            }
-
-        } catch (err) {
-            console.log(err);
-            alert(err instanceof Error ? err.message : "Something went wrong");
-        } finally {
-            hideDialogs();
+        let _collaborators = [...collaborators];
+        if (collaborator._id) {
+            const updated = await CollaboratorApi.updateCollaborator(collaborator);
+            const index = _collaborators.findIndex((c) => c._id === updated._id);
+            _collaborators[index] = { ...collaborator, updatedAt: updated.updatedAt };
+        } else {
+            const created = await CollaboratorApi.createCollaborator(collaborator);
+            _collaborators.push({ ...collaborator, _id: created._id, updatedAt: created.updatedAt, createdAt: created.createdAt });
         }
     };
 
-    const removeCollaborator = () => {
-        try {
-            const applicant = collaborator.applicant as Applicant;
-
-            if (!applicant || !applicant._id) {
-                throw new Error("Invalid collaborator.");
-            }
-
-        } catch (err) {
-            console.log(err);
-            alert(err instanceof Error ? err.message : "Something went wrong");
-        } finally {
+    const deleteCollaborator = async () => {
+        const deleted = await CollaboratorApi.deleteCollaborator(collaborator);
+        if (deleted) {
+            setCollaborators(collaborators.filter((c) => c._id !== collaborator._id));
             hideDialogs();
         }
     };
@@ -92,6 +77,13 @@ export default function CollaboratorManager({ project }: CollaboratorProps) {
             />
         </div>
     );
+
+
+    const statusBodyTemplate = (rowData: Project) => {
+        return (
+            <span className={`collaborator-badge status-${rowData.status}`}>{rowData.status}</span>
+        );
+    };
 
     const actionBodyTemplate = (rowData: Collaborator) => (
         <>
@@ -131,7 +123,7 @@ export default function CollaboratorManager({ project }: CollaboratorProps) {
                         headerStyle={{ minWidth: '15rem' }}
                     />
                     <Column field="applicant.gender" header="Gender" sortable headerStyle={{ minWidth: '8rem' }} />
-
+                    <Column header="Status" body={statusBodyTemplate} sortable />
                     <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
 
                 </DataTable>
@@ -148,8 +140,8 @@ export default function CollaboratorManager({ project }: CollaboratorProps) {
                 {collaborator && collaborator.applicant && (
                     <DeleteDialog
                         showDeleteDialog={showDeleteDialog}
-                        selectedDataInfo={String((collaborator.applicant as any).full_name)}
-                        onDelete={removeCollaborator}
+                        selectedDataInfo={String((collaborator.applicant as any).first_name)}
+                        onDelete={deleteCollaborator}
                         onHide={hideDialogs}
                     />
                 )}

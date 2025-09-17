@@ -11,7 +11,7 @@ export type Collaborator = {
     project: string | Project;
     applicant: string | Applicant;
     isLeadPI?: boolean;
-    status: CollaboratorStatus;
+    status?: CollaboratorStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }

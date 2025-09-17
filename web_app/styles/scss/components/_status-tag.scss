@@ -5,6 +5,7 @@
 .ownership-badge,
 .calendar-badge,
 .call-badge,
+.collaborator-badge,
 .project-badge,
 .theme-badge,
 .form-badge,
@@ -17,16 +18,30 @@
     letter-spacing: .3px;
 }
 
-.project-badge {   
+.collaborator-badge {
 
     &.status-pending {
-        background: #F3E5F5;
-        color: #4A148C;
+        background: #FFCDD2;
+        color: #d80517;
     }
 
     &.status-closed {
+        background: #F3E5F5;
+        color: #4A148C;
+    }
+}
+
+
+.project-badge {
+
+    &.status-pending {
         background: #6ba19a;
         color: #d80517;
+    }
+
+    &.status-closed {
+        background: #F3E5F5;
+        color: #4A148C;
     }
 }
 
@@ -37,13 +52,13 @@
     }
 
     &.status-planned {
-        background: #F3E5F5;
-        color: #4A148C;
+        background: #6ba19a;
+        color: #d80517;
     }
 
     &.status-closed {
-        background: #6ba19a;
-        color: #d80517;
+        background: #F3E5F5;
+        color: #4A148C;
     }
 }
 

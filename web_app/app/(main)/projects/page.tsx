@@ -83,7 +83,7 @@ const ProjectPage = () => {
                 _projects[index] = selectedProject;
             } else {
                 const created = await ProjectApi.createProject(selectedProject);
-                _projects.push({ ...selectedProject, _id: created._id, updatedAt: created.updatedAt,  createdAt: created.createdAt });
+                _projects.push({ ...selectedProject, _id: created._id, updatedAt: created.updatedAt, createdAt: created.createdAt });
             }
             setProjects(_projects);
             toast.current?.show({
@@ -169,9 +169,7 @@ const ProjectPage = () => {
 
     const statusBodyTemplate = (rowData: Project) => {
         return (
-            <>
-                <span className={`project-badge status-${rowData.status}`}>{rowData.status}</span>
-            </>
+            <span className={`project-badge status-${rowData.status}`}>{rowData.status}</span>
         );
     };
 
