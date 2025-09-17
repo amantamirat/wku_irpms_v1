@@ -1,6 +1,7 @@
 import { Applicant } from "../../applicants/models/applicant.model";
 import { Call } from "../../calls/models/call.model";
 import { Theme } from "../../themes/models/theme.model";
+import { User } from "../../users/models/user.model";
 
 export enum ProjectStatus {
     pending = 'pending',
@@ -16,6 +17,7 @@ export type Project = {
     themes?: ProjectTheme[];
     phases?: Phase[];
     status?: ProjectStatus;
+    createdBy?: string | User;
     createdAt?: Date;
     updatedAt?: Date;
 }

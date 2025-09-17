@@ -5,7 +5,7 @@ import DeleteDialog from '@/components/DeleteDialog';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
-import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
+import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
@@ -15,6 +15,7 @@ import { ProjectApi } from './api/project.api';
 import SaveDialog from './components/dialogs/SaveDialog';
 import { CallApi } from '../calls/api/call.api';
 import { Call, CallStatus } from '../calls/models/call.model';
+import ProjectDetail from './components/ProjectDetail';
 
 const ProjectPage = () => {
     const emptyProject: Project = {
@@ -31,6 +32,7 @@ const ProjectPage = () => {
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
+    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
     useEffect(() => {
         setFilters(initFilters());
@@ -153,7 +155,7 @@ const ProjectPage = () => {
         <>
             <Button icon="pi pi-info" rounded severity="info" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
-                    
+
                 }} />
             <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
@@ -201,8 +203,13 @@ const ProjectPage = () => {
                         header={header}
                         scrollable
                         filters={filters}
+                        expandedRows={expandedRows}
+                        onRowToggle={(e) => setExpandedRows(e.data)}
+                        rowExpansionTemplate={(rowData) => {
+                            return <ProjectDetail project={rowData as Project} />;
+                        }}
                     >
-                        <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
+                        <Column expander headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="call.title" header="Call" />
                         <Column field="title" header="Title" sortable />
