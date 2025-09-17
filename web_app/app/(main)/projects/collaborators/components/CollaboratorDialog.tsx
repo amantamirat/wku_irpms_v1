@@ -71,6 +71,12 @@ export default function CollaboratorDialog({ collaborator, setCollaborator, visi
     const addCollaborator = async () => {
         try {
             await onAdd();
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Successful',
+                detail: `Collaborator ${collaborator._id ? 'updated' : 'created'}`,
+                life: 2000
+            });
         } catch (err) {
             toast.current?.show({
                 severity: 'error',

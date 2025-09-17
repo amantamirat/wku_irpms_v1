@@ -51,6 +51,8 @@ export default function CollaboratorManager({ project }: CollaboratorProps) {
             const created = await CollaboratorApi.createCollaborator(collaborator);
             _collaborators.push({ ...collaborator, _id: created._id, updatedAt: created.updatedAt, createdAt: created.createdAt });
         }
+        setCollaborators(_collaborators);
+        hideDialogs();
     };
 
     const deleteCollaborator = async () => {
