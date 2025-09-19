@@ -144,7 +144,7 @@ export default function CollaboratorsManager({ project, setProject }: ProjectInf
                     <DeleteDialog
                         showDeleteDialog={showDeleteDialog}
                         selectedDataInfo={String((collaborator.applicant as any).full_name)}
-                        onDelete={removeCollaborator}
+                        onRemove={removeCollaborator}
                         onHide={hideDialogs}
                     />
                 )}

@@ -23,7 +23,7 @@ export class CollaboratorController {
         try {
             const { project } = req.query;
             const filter = {
-                calendar: project ? new Types.ObjectId(project as string) : undefined
+                project: project ? new Types.ObjectId(project as string) : undefined
             } as GetCollaboratorsOptions;
             const collaborators = await CollaboratorService.getCollaborators(filter);
             successResponse(res, 200, 'Collaborators fetched successfully', collaborators);

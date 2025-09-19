@@ -10,8 +10,6 @@ export interface GetCollaboratorsOptions {
     applicant?: string;
 }
 
-
-
 export interface CreateCollaboratorDto {
     project: mongoose.Types.ObjectId;
     applicant: mongoose.Types.ObjectId;
@@ -41,7 +39,9 @@ export class CollaboratorService {
     static async getCollaborators(options: GetCollaboratorsOptions) {
         const filter: any = {};
         if (options.project) filter.project = options.project;
-        return await Collaborator.find(filter).populate("applicant").lean();
+        const collaborators = await Collaborator.find(filter).populate("applicant").lean();
+        //console.log(collaborators, filter);
+        return collaborators;
     }
 
     static async findCollaborator(options: GetCollaboratorsOptions) {

@@ -37,21 +37,13 @@ const scopeToOrganizationUnit: Record<Category, Unit> = {
 export class ApplicantService {
 
     private static async validateApplicant(applicant: Partial<CreateApplicantDto>) {
-        const expected = scopeToOrganizationUnit[applicant.scope!];
-        const org = await BaseOrganization.findById(applicant.organization);
-        if (!org || org.type !== expected) {
-            throw new Error(`Scope ${applicant.scope!} requires organization of unit ${expected}`);
-        }
-        /**
-         *
-         * if (applicant.email) {
-            const userExist = await User.exists({ email: applicant.email });
-            if (userExist) {
-                throw new Error('User with the provided email exist');
+        if (applicant.scope && applicant.organization) {
+            const expected = scopeToOrganizationUnit[applicant.scope];
+            const org = await BaseOrganization.findById(applicant.organization);
+            if (!org || org.type !== expected) {
+                throw new Error(`Scope ${applicant.scope} requires organization of unit ${expected}`);
             }
-        } 
-         */
-
+        }
     }
 
     static async createApplicant(data: CreateApplicantDto) {
