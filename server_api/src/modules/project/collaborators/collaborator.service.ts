@@ -4,7 +4,7 @@ import { ProjectService } from "../project.service";
 import { ProjectStatus } from "../enums/project.status.enum";
 import { CollaboratorStatus } from "../enums/collaborator.status.enum";
 
-export interface GetCollaboratorsOptions {
+export interface GetCollaboratorOptions {
     _id?: string;
     project?: string;
     applicant?: string;
@@ -36,7 +36,7 @@ export class CollaboratorService {
         return createdCollaborator;
     }
 
-    static async getCollaborators(options: GetCollaboratorsOptions) {
+    static async getCollaborators(options: GetCollaboratorOptions) {
         const filter: any = {};
         if (options.project) filter.project = options.project;
         const collaborators = await Collaborator.find(filter).populate("applicant").lean();
@@ -44,7 +44,7 @@ export class CollaboratorService {
         return collaborators;
     }
 
-    static async findCollaborator(options: GetCollaboratorsOptions) {
+    static async findCollaborator(options: GetCollaboratorOptions) {
         const filter: any = {};
         if (options.project) filter.project = options.project;
         if (options.applicant) filter.applicant = options.applicant;

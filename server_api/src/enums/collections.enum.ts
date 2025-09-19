@@ -10,5 +10,6 @@ export const COLLECTIONS = {
   ROLE: "roles",
   PERMISSION: "permissions",
   PROJECT: "projects",
-  COLLABORATOR: "collaborators"
+  COLLABORATOR: "collaborators",
+  PROJECT_THEMEM: "prothemes"
 } as const;

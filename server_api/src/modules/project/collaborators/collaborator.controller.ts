@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { CollaboratorService, CreateCollaboratorDto, GetCollaboratorsOptions, UpdateCollaboratorDto } from './collaborator.service';
+import { CollaboratorService, CreateCollaboratorDto, GetCollaboratorOptions, UpdateCollaboratorDto } from './collaborator.service';
 import { Types } from 'mongoose';
 import { errorResponse, successResponse } from '../../../util/response';
 
@@ -24,7 +24,7 @@ export class CollaboratorController {
             const { project } = req.query;
             const filter = {
                 project: project ? new Types.ObjectId(project as string) : undefined
-            } as GetCollaboratorsOptions;
+            } as GetCollaboratorOptions;
             const collaborators = await CollaboratorService.getCollaborators(filter);
             successResponse(res, 200, 'Collaborators fetched successfully', collaborators);
         } catch (err: any) {
