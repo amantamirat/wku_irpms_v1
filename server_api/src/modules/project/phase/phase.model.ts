@@ -41,7 +41,7 @@ const BasePhaseSchema = new Schema<BasePhaseDocument>(
     { timestamps: true, discriminatorKey: "type" } // discriminatorKey
 );
 
-const BasePhase = model<BasePhaseDocument>(COLLECTIONS.PHASE, BasePhaseSchema);
+export const BasePhase = model<BasePhaseDocument>(COLLECTIONS.PHASE, BasePhaseSchema);
 
 interface PhaseDocument extends BasePhaseDocument {
     type: PhaseType.phase;
