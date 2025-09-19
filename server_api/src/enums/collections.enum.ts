@@ -11,5 +11,6 @@ export const COLLECTIONS = {
   PERMISSION: "permissions",
   PROJECT: "projects",
   COLLABORATOR: "collaborators",
+  PHASE: "phases",
   PROJECT_THEMEM: "prothemes"
 } as const;
