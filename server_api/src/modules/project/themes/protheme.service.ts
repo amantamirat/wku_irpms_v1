@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { ProTheme } from "./protheme.model";
+import { ProjectTheme } from "./protheme.model";
 
 
 export interface GetProThemeOptions {
@@ -13,36 +13,36 @@ export interface CreateProThemeDto {
     theme: mongoose.Types.ObjectId;
 }
 
-export class ProThemeService {   
+export class ProjectThemeService {   
 
-    static async createProTheme(data: CreateProThemeDto) {        
-        const createdProTheme = await ProTheme.create(data);
+    static async createProjectTheme(data: CreateProThemeDto) {        
+        const createdProTheme = await ProjectTheme.create(data);
         return createdProTheme;
     }
 
-    static async getProThemes(options: GetProThemeOptions) {
+    static async getProjectThemes(options: GetProThemeOptions) {
         const filter: any = {};
         if (options.project) filter.project = options.project;
-        const proThemes = await ProTheme.find(filter).populate("theme").lean();
+        const proThemes = await ProjectTheme.find(filter).populate("theme").lean();
         return proThemes;
     }
 
-    static async findProTheme(options: GetProThemeOptions) {
+    static async findProjectTheme(options: GetProThemeOptions) {
         const filter: any = {};
         if (options.project) filter.project = options.project;
         if (options._id) filter._id = options._id;
-        return await ProTheme.findOne(filter).lean();
+        return await ProjectTheme.findOne(filter).lean();
     }
 
-    static async updateProTheme(id: string, data: Partial<CreateProThemeDto>) {
-        const proTheme = await ProTheme.findById(id);
+    static async updateProjectTheme(id: string, data: Partial<CreateProThemeDto>) {
+        const proTheme = await ProjectTheme.findById(id);
         if (!proTheme) throw new Error("ProTheme not found");
         Object.assign(proTheme, data);
         return proTheme.save();
     }
 
-    static async deleteProTheme(id: string) {
-        const proTheme = await ProTheme.findById(id);
+    static async deleteProjectTheme(id: string) {
+        const proTheme = await ProjectTheme.findById(id);
         if (!proTheme) throw new Error("Project Theme not found");       
         return await proTheme.deleteOne();
     }
