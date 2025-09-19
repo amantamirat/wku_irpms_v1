@@ -17,7 +17,7 @@ export interface GetPhaseOptions {
     _id?: string;
     project?: string;
     parent?: string;
-    type?: PhaseType;
+    //type?: PhaseType;
 }
 
 export class PhaseService {
@@ -31,7 +31,7 @@ export class PhaseService {
         if (options._id) filter._id = options._id;
         if (options.project) filter.project = options.project;
         if (options.parent) filter.parent = options.parent;
-        if (options.type) filter.type = options.type;
+        //if (options.type) filter.type = options.type;
         return await BasePhase.find(filter)
             .lean();
     }
@@ -41,7 +41,7 @@ export class PhaseService {
         if (options._id) filter._id = options._id;
         if (options.project) filter.project = options.project;
         if (options.parent) filter.parent = options.parent;
-        if (options.type) filter.type = options.type;
+        //if (options.type) filter.type = options.type;
         //return await BasePhase.findOne(filter).populate("project parent").lean();
         return await BasePhase.findOne(filter).lean();
     }
