@@ -1,6 +1,8 @@
 import { Calendar } from "../../calendars/models/calendar.model";
+import { Evaluation } from "../../evals/models/eval.model";
 import { Grant } from "../../grants/models/grant.model";
 import { Organization } from "../../organizations/models/organization.model";
+import { Theme } from "../../themes/models/theme.model";
 
 export enum CallStatus {
     planned = 'planned',
@@ -17,6 +19,8 @@ export type Call = {
     total_budget?: number;
     poster?: string | null;
     grant: string | Grant;
+    theme: string | Theme;
+    evaluation: string | Evaluation;
     status: CallStatus;
     createdAt?: Date;
     updatedAt?: Date;
@@ -36,6 +40,14 @@ export const validateCall = (call: Call): { valid: boolean; message?: string } =
     }
 
     if (!call.grant) {
+        return { valid: false, message: 'Grant is required.' };
+    }
+
+    if (!call.theme) {
+        return { valid: false, message: 'Grant is required.' };
+    }
+
+    if (!call.evaluation) {
         return { valid: false, message: 'Grant is required.' };
     }
 

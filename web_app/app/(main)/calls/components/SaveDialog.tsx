@@ -10,19 +10,23 @@ import { Calendar } from '../../calendars/models/calendar.model';
 import { Call, CallStatus, validateCall } from '../models/call.model';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { Grant } from '../../grants/models/grant.model';
+import { Theme } from '../../themes/models/theme.model';
+import { Evaluation } from '../../evals/models/eval.model';
 
 interface SaveDialogProps {
     visible: boolean;
     call: Call;
     calendars?: Calendar[];
     grants?: Grant[];
+    themes?: Theme[];
+    evaluations?: Evaluation[];
     onChange: (call: Call) => void;
     onSave: () => void;
     onHide: () => void;
 }
 
 function SaveDialog(props: SaveDialogProps) {
-    const { visible, call, calendars, grants, onChange, onSave, onHide } = props;
+    const { visible, call, calendars, grants, themes, evaluations, onChange, onSave, onHide } = props;
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
@@ -114,8 +118,44 @@ function SaveDialog(props: SaveDialogProps) {
                     showIcon
                     className={classNames({ 'p-invalid': submitted && !call.deadline })}
                     required
-                    showTime 
+                    showTime
                     hourFormat="12"
+                />
+            </div>
+
+            <div className="field">
+                <label htmlFor="theme">Theme</label>
+                <Dropdown
+                    id="theme"
+                    value={call.theme}
+                    options={themes}
+                    onChange={(e) =>
+                        onChange({
+                            ...call,
+                            theme: e.value,
+                        })
+                    }
+                    optionLabel="title"
+                    placeholder="Select Theme"
+                />
+            </div>
+
+            <div className="field">
+                <label htmlFor="evaluation">Evaluation</label>
+                <Dropdown
+                    id="evaluation"
+                    value={call.evaluation}
+                    options={evaluations}
+                    onChange={(e) =>
+                        onChange({
+                            ...call,
+                            evaluation: e.value,
+                        })
+                    }
+                    optionLabel="title"
+                    placeholder="Select Evaluation"
+                    required
+                    className={classNames({ 'p-invalid': submitted && !call.evaluation })}
                 />
             </div>
 

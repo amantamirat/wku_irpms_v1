@@ -16,6 +16,10 @@ import { Calendar } from '../../calendars/models/calendar.model';
 import { CalendarApi } from '../../calendars/api/calendar.api';
 import { GrantApi } from '../../grants/api/grant.api';
 import { Grant } from '../../grants/models/grant.model';
+import { Evaluation } from '../../evals/models/eval.model';
+import { Theme } from '../../themes/models/theme.model';
+import { ThemeApi } from '../../themes/api/theme.api';
+import { EvaluationApi } from '../../evals/api/eval.api';
 
 
 interface CallManagerProps {
@@ -31,11 +35,15 @@ const CallManager = (props: CallManagerProps) => {
         title: '',
         deadline: new Date(),
         grant: '',
+        theme: '',
+        evaluation: '',
         status: CallStatus.planned,
     };
 
     const [calls, setCalls] = useState<Call[]>([]);
     const [calendars, setCalendars] = useState<Calendar[]>([]);
+    const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
+    const [themes, setThemes] = useState<Theme[]>([]);
     const [grants, setGrants] = useState<Grant[]>([]);
     const [error, setError] = useState<string | null>(null);
     const dt = useRef<DataTable<any>>(null);
@@ -60,6 +68,38 @@ const CallManager = (props: CallManagerProps) => {
         }
     };
 
+
+    const loadThemes = useCallback(async () => {
+        try {
+            const data = await ThemeApi.getThemes({ directorate: props.directorate._id });
+            setThemes(data);
+        } catch (err) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Failed to load theme data',
+                detail: '' + err,
+                life: 3000
+            });
+        }
+
+    }, [props.directorate]);
+
+
+    const loadEvaluations = useCallback(async () => {
+        try {
+            const data = await EvaluationApi.getEvaluations({ directorate: props.directorate._id });
+            setEvaluations(data);
+        } catch (err) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Failed to load evaluation data',
+                detail: '' + err,
+                life: 3000
+            });
+        }
+
+    }, [props.directorate]);
+
     const loadGrants = useCallback(async () => {
         try {
             const data = await GrantApi.getGrants({ directorate: props.directorate._id });
@@ -83,13 +123,12 @@ const CallManager = (props: CallManagerProps) => {
     }, [props.directorate, error]);
 
 
-
-
-
     useEffect(() => {
         loadCalls();
         loadGrants();
-    }, [loadCalls, loadGrants]);
+        loadThemes();
+        loadEvaluations();
+    }, [loadCalls, loadGrants, loadThemes, loadEvaluations]);
 
     useEffect(() => {
         setFilters(initFilters());
@@ -249,6 +288,8 @@ const CallManager = (props: CallManagerProps) => {
                         <Column field="calendar.year" header="Calendar" sortable />
                         <Column field="deadline" header="Deadline" body={(rowData) => new Date(rowData.deadline!).toLocaleDateString('en-CA')} />
                         <Column field="grant.title" header="Grant" sortable />
+                        <Column field="theme.title" header="Theme" sortable />
+                        <Column field="evaluation.title" header="Evaluation" sortable />
                         <Column header="Status" body={statusBodyTemplate} sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
@@ -259,6 +300,8 @@ const CallManager = (props: CallManagerProps) => {
                             call={selectedCall}
                             calendars={calendars}
                             grants={grants}
+                            themes={themes}
+                            evaluations={evaluations}
                             onChange={setSelectedCall}
                             onSave={saveCall}
                             onHide={() => setShowSaveDialog(false)}

@@ -46,7 +46,7 @@ export class CallService {
         if (options.calendar) filter.calendar = options.calendar;
         if (options.directorate) filter.directorate = options.directorate;
         if (options.status) filter.status = options.status;
-        return await Call.find(filter).populate('calendar').populate('directorate').populate('grant').lean();
+        return await Call.find(filter).populate('calendar').populate('directorate').populate('theme').populate('evaluation').populate('grant').lean();
     }
 
 
