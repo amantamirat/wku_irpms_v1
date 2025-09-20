@@ -8,7 +8,7 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
 import { useEffect, useState } from "react";
-import { Project} from "../../models/project.model";
+import { Project } from "../../models/project.model";
 import { ProjectTheme } from "../models/project.theme.model";
 import { ProjectThemeApi } from "../api/project.theme.api";
 import SaveThemeDialog from "./SaveThemeDialog";
@@ -93,7 +93,20 @@ export default function ThemeManager({ project }: ProjectInfoStepProps) {
 
 
     const saveProjectTheme = async () => {
+        const theme = themes.find((thm) => thm._id === (projectTheme.theme as string));
+        if (!theme) {
+            throw new Error("Theme not found!");
+        }
 
+        let _projectThemes = [...projectThemes];
+        if (projectTheme._id) {
+            const updated = await ProjectThemeApi.updateProjectTheme(projectTheme);
+            const index = _projectThemes.findIndex((p) => p._id === updated._id);
+            _projectThemes[index] = { ...updated, project: project, theme: theme };
+        } else {
+            const created = await ProjectThemeApi.createProjectTheme(projectTheme);
+            _projectThemes.push({ ...created, project: project, theme: theme });
+        }
     };
 
 
