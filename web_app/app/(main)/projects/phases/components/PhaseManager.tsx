@@ -7,6 +7,7 @@ import DeleteDialog from "@/components/DeleteDialog";
 import { Project } from "../../models/project.model";
 import { Phase, PhaseType } from "../models/phase.model";
 import { PhaseApi } from "../api/phase.api";
+import SavePhaseDialog from "./SavePhaseDialog";
 
 
 
@@ -19,6 +20,7 @@ interface ProjectInfoStepProps {
 export default function PhaseManager({ project, phaseType }: ProjectInfoStepProps) {
 
     const emptyPhase: Phase = {
+        project:project,
         type: phaseType,
         activity: '',
         order: 0,
@@ -43,43 +45,32 @@ export default function PhaseManager({ project, phaseType }: ProjectInfoStepProp
     }, [project?._id]);
 
 
-    const addPhase = () => {
-        try {
-            if (!phase.order) {
-                throw new Error("Please provide valid order.");
-            }
-            const exists = project.phases?.some(
-                (p) => p.order === phase.order
-            );
-            if (exists) {
-                throw new Error("The order is already added!");
-            }
-            const updatedPhases = [...(project.phases || []), phase];
-            setProject({ ...project, phases: updatedPhases });
-        } catch (err) {
-            console.log(err);
-            alert(err instanceof Error ? err.message : "Something went wrong");
-        } finally {
-            hideDialogs();
+    const addPhase = async () => {
+        const exists = phases?.some(
+            (p) => p.order === phase.order
+        );
+        if (exists) {
+            throw new Error("The order is already added!");
         }
+        let _phases = [...phases];
+
+        if (phase._id) {
+            const updated = await PhaseApi.updatePhase(phase);
+            const index = _phases.findIndex((c) => c._id === updated._id);
+            _phases[index] = { ...phase, updatedAt: updated.updatedAt };
+        } else {
+            const created = await PhaseApi.createPhase(phase);
+            _phases.push({ ...phase, _id: created._id, updatedAt: created.updatedAt, createdAt: created.createdAt });
+        }
+        setPhases(_phases);
+        hideDialogs();
     };
 
 
-    const removePhase = () => {
-        try {
-            if (!phase.order) {
-                throw new Error("Invalid phase.");
-            }
-            const updatedPhases = project.phases?.filter(
-                (p) => p.order !== phase.order
-            ) || [];
-
-            setProject({ ...project, phases: updatedPhases });
-
-        } catch (err) {
-            console.log(err);
-            alert(err instanceof Error ? err.message : "Something went wrong");
-        } finally {
+    const removePhase = async () => {
+        const deleted = await PhaseApi.deletePhase(phase);
+        if (deleted) {
+            setPhases(phases.filter((c) => c._id !== phase._id));
             hideDialogs();
         }
     };
@@ -119,10 +110,10 @@ export default function PhaseManager({ project, phaseType }: ProjectInfoStepProp
             <div className="card">
                 <Toolbar className="mb-4" start={startToolbarTemplate} />
                 <DataTable
-                    value={project.phases}
+                    value={phases}
                     selection={phase}
                     onSelectionChange={(e) => setPhase(e.value as Phase)}
-                    dataKey="order"
+                    dataKey="_id"
                     paginator
                     rows={10}
                     rowsPerPageOptions={[5, 10, 25]}
@@ -134,21 +125,29 @@ export default function PhaseManager({ project, phaseType }: ProjectInfoStepProp
                 >
                     <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                     <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                    <Column field="order" header="Phase Order" sortable />
-                    <Column field="description" header="Description" sortable />
+                    <Column field="activity" header="Activity" sortable />
+                    <Column field="order" header="Order" sortable />                    
                     <Column field="duration" header="Duration" sortable />
                     <Column field="budget" header="Budget" sortable />
+                    <Column field="description" header="Description" sortable />
                     <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
 
                 </DataTable>
 
-
+                {phase &&
+                    <SavePhaseDialog
+                        phase={phase}
+                        setPhase={setPhase}
+                        visible={showAddDialog}
+                        onAdd={addPhase}
+                        onHide={hideDialogs}
+                    />}
 
                 {phase && (
                     <DeleteDialog
                         showDeleteDialog={showDeleteDialog}
                         selectedDataInfo={`phase ${phase.order}`}
-                        onRemove={removePhase}
+                        onDelete={removePhase}
                         onHide={hideDialogs}
                     />
                 )}

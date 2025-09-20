@@ -91,7 +91,7 @@ export default function CollaboratorDialog({ collaborator, setCollaborator, visi
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
-            <Button label="Add" icon="pi pi-check" text onClick={addCollaborator} />
+            <Button label="Save" icon="pi pi-check" text onClick={addCollaborator} />
         </>
     );
 

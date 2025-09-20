@@ -4,6 +4,8 @@ import { TabView, TabPanel } from "primereact/tabview";
 import { Project } from "../models/project.model";
 import CollaboratorManager from "../collaborators/components/CollaboratorManager";
 import ThemeManager from "../themes/components/ThemeManager";
+import PhaseManager from "../phases/components/PhaseManager";
+import { PhaseType } from "../phases/models/phase.model";
 
 
 interface ProjectDetailProps {
@@ -22,7 +24,7 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
             </div>
             <Divider />
             <div className="summary">
-                <h4>Summary</h4>
+                <h4>{project.summary ?? "Summary"}</h4>
                 <p>{project.summary}</p>
             </div>
             <>
@@ -34,7 +36,7 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
                         <ThemeManager project={project} />
                     </TabPanel>
                     <TabPanel header="Phases">
-                        {/* Phases / timeline */}
+                        <PhaseManager project={project} phaseType={PhaseType.phase} />
                     </TabPanel>
                 </TabView>
             </>
