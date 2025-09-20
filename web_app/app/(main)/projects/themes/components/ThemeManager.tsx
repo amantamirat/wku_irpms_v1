@@ -65,8 +65,13 @@ export default function ThemeManager({ project }: ProjectInfoStepProps) {
 
     useEffect(() => {
         const fetchThemes = async () => {
+            const theme = (project.call as Call).theme;
+            const catalogId =
+                typeof theme === "object" && theme !== null
+                    ? (theme as any)._id
+                    : theme;
             const data = await ThemeApi.getThemes({
-                catalog: (project.call as Call).theme as string
+                catalog: catalogId
             });
             setThemes(data);
             const node = buildTree(data);

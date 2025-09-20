@@ -41,6 +41,7 @@ export const ThemeApi = {
         if (options.parent) query.append("parent", options.parent);
         if (options.catalog) query.append("catalog", options.catalog);
         if (options.directorate) query.append("directorate", options.directorate);
+        console.log(options);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Theme[];
     },
