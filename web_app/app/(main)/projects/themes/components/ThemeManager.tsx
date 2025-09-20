@@ -97,7 +97,6 @@ export default function ThemeManager({ project }: ProjectInfoStepProps) {
         if (!theme) {
             throw new Error("Theme not found!");
         }
-
         let _projectThemes = [...projectThemes];
         if (projectTheme._id) {
             const updated = await ProjectThemeApi.updateProjectTheme(projectTheme);
