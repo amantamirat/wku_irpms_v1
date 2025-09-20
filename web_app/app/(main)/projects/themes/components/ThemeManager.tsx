@@ -110,12 +110,13 @@ export default function ThemeManager({ project }: ProjectInfoStepProps) {
         hideDialogs();
     };
 
-
-
     const deleteProjectTheme = async () => {
-
+        const deleted = await ProjectThemeApi.deleteProjectTheme(projectTheme);
+        if (deleted) {
+            setProjectThemes(projectThemes.filter((pt) => pt._id !== projectTheme._id));
+            hideDialogs();
+        }
     };
-
 
     const hideDialogs = () => {
         setProjectTheme(emptyProjectTheme);
