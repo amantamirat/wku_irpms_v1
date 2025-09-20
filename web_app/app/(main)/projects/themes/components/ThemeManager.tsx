@@ -106,6 +106,8 @@ export default function ThemeManager({ project }: ProjectInfoStepProps) {
             const created = await ProjectThemeApi.createProjectTheme(projectTheme);
             _projectThemes.push({ ...created, project: project, theme: theme });
         }
+        setProjectThemes(_projectThemes);
+        hideDialogs();
     };
 
 
@@ -146,7 +148,7 @@ export default function ThemeManager({ project }: ProjectInfoStepProps) {
         <div className="card">
             <Toolbar className="mb-4" start={startToolbarTemplate} />
             <DataTable
-                value={project.themes}
+                value={projectThemes}
                 selection={projectTheme}
                 onSelectionChange={(e) => setProjectTheme(e.value as ProjectTheme)}
                 dataKey="_id"
