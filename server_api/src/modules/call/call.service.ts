@@ -19,6 +19,8 @@ export interface CreateCallDto {
     description?: string;
     total_budget?: number;
     grant: mongoose.Types.ObjectId;
+    theme: mongoose.Types.ObjectId;
+    evaluation: mongoose.Types.ObjectId;
     status?: CallStatus;
 }
 
