@@ -8,9 +8,12 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
 import { useEffect, useState } from "react";
-import { Project, ProjectTheme } from "../../models/project.model";
-import AddThemeDialog from "./AddThemeDialog";
-import CoPIDialog from "./CoPIDialog";
+import { Project} from "../../models/project.model";
+import { ProjectTheme } from "../models/project.theme.model";
+import { ProjectThemeApi } from "../api/project.theme.api";
+import SaveThemeDialog from "./SaveThemeDialog";
+
+
 
 
 type Node = {
@@ -23,7 +26,6 @@ type Node = {
 
 interface ProjectInfoStepProps {
     project: Project;
-    setProject: (project: Project) => void;
 }
 
 
@@ -48,17 +50,18 @@ function buildTree(themes: Theme[], parentId?: string): Node[] {
         });
 }
 
-export default function ThemeManager({ project, setProject }: ProjectInfoStepProps) {
+export default function ThemeManager({ project }: ProjectInfoStepProps) {
 
     const emptyProjectTheme: ProjectTheme = {
-        theme: ""
+        theme: "",
+        project: project
     };
     const [themes, setThemes] = useState<Theme[]>([]);
     const [nodes, setNodes] = useState([]);
-    const [projectTheme, setProjectTheme] = useState<ProjectTheme>(emptyProjectTheme);
 
-    const [showAddDialog, setShowAddDialog] = useState(false);
-    const [showCoPIDialog, setShowCoPIDialog] = useState(false);
+    const [projectThemes, setProjectThemes] = useState<ProjectTheme[]>([]);
+    const [projectTheme, setProjectTheme] = useState<ProjectTheme>(emptyProjectTheme);
+    const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
     useEffect(() => {
@@ -70,102 +73,44 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
             const node = buildTree(data);
             setNodes(node as any);
         };
-        fetchThemes();
-    }, []);
+        //fetchThemes();
+    }, [, [project?.call]]);
 
 
-    const addProjectTheme = () => {
-        try {
-            if (!projectTheme.theme || (projectTheme.theme as string).trim() === "") {
-                throw new Error("Please provide valid theme.");
+    useEffect(() => {
+        const fetchProjectThemes = async () => {
+            try {
+                const data = await ProjectThemeApi.getProjectThemes({ project: project._id });
+                setProjectThemes(data);
+            } catch (err) {
+                console.error("Failed to fetch project themes:", err);
             }
-            const theme = themes.find((thm) => thm._id === (projectTheme.theme as string));
-            if (!theme) {
-                throw new Error("Theme not found!");
-            }
-            const exists = project.themes?.some((pt) => {
-                if (!pt.theme) return false;
-                if (typeof pt.theme === "string") {
-                    return pt.theme === (projectTheme.theme as string);
-                }
-                return pt.theme._id === theme._id;
-            }) ?? false;
-            if (exists) {
-                throw new Error("The theme is already added!");
-            }
-            const updatedThemes = [...(project.themes || []), { theme: theme, Co_PI: projectTheme.Co_PI}];
-            setProject({ ...project, themes: updatedThemes });
-
-        } catch (err) {
-            console.log(err);
-            alert(err instanceof Error ? err.message : "Something went wrong");
-        } finally {
-            hideDialogs();
+        };
+        if (project?._id) {
+            fetchProjectThemes();
         }
+    }, [project?._id]);
+
+
+    const saveProjectTheme = async () => {
+
     };
 
 
-    const setCoPI = () => {
-        try {
-            if (!projectTheme.theme) {
-                throw new Error("No project theme selected.");
-            }
-            if (!projectTheme.Co_PI) {
-                throw new Error("Please select a Co-PI.");
-            }
-            const updatedThemes = project.themes?.map((pt) => {
-                if ((pt.theme as any)._id === (projectTheme.theme as any)._id) {
-                    return { ...pt, Co_PI: projectTheme.Co_PI };
-                }
-                return pt;
-            }) ?? [];
-            setProject({
-                ...project,
-                themes: updatedThemes,
-            });
-        } catch (err) {
-            console.log(err);
-            alert(err instanceof Error ? err.message : "Something went wrong");
-        }
-        finally {
-            hideDialogs();
-        }
-    }
 
+    const deleteProjectTheme = async () => {
 
-    const removeProjectTheme = () => {
-        try {
-            if (!projectTheme.theme) {
-                throw new Error("Invalid project theme.");
-            }
-            const updatedThemes = project.themes?.filter(
-                (pt) => (pt.theme as any)._id !== (projectTheme.theme as any)._id
-            ) || [];
-
-            setProject({ ...project, themes: updatedThemes });
-        } catch (err) {
-            console.log(err);
-            alert(err instanceof Error ? err.message : "Something went wrong");
-        } finally {
-            hideDialogs();
-        }
     };
 
 
     const hideDialogs = () => {
         setProjectTheme(emptyProjectTheme);
-        setShowAddDialog(false);
-        setShowCoPIDialog(false);
+        setShowSaveDialog(false);
         setShowDeleteDialog(false);
     }
 
     const actionBodyTemplate = (rowData: ProjectTheme) => (
         <>
-            <Button icon="pi pi-user" rounded severity="success" className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setProjectTheme(rowData);
-                    setShowCoPIDialog(true);
-                }} />
             <Button icon="pi pi-times" rounded severity="warning" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
                     setProjectTheme(rowData);
@@ -179,7 +124,7 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
             <Button icon="pi pi-plus" severity="success" className="mr-2" tooltip={"Add Theme"}
                 onClick={() => {
                     setProjectTheme(emptyProjectTheme);
-                    setShowAddDialog(true);
+                    setShowSaveDialog(true);
                 }}
             />
         </div>
@@ -192,7 +137,7 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
                 value={project.themes}
                 selection={projectTheme}
                 onSelectionChange={(e) => setProjectTheme(e.value as ProjectTheme)}
-                dataKey="theme._id"
+                dataKey="_id"
                 paginator
                 rows={10}
                 rowsPerPageOptions={[5, 10, 25]}
@@ -205,35 +150,24 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
                 <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                 <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                 <Column field="theme.title" header="Theme" sortable headerStyle={{ minWidth: '15rem' }} />
-                <Column field="Co_PI.applicant.first_name" header="Co-PI" sortable headerStyle={{ minWidth: '15rem' }} />
                 <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
             </DataTable>
-            {projectTheme &&
-                <AddThemeDialog
-                    projectTheme={projectTheme}
-                    setProjectTheme={setProjectTheme}
-                    visible={showAddDialog}
-                    themeOptions={nodes}
-                    collaboratorOptions={project.collaborators}
-                    onAdd={addProjectTheme}
-                    onHide={hideDialogs}
-                />}
+
 
             {projectTheme && (
-                <CoPIDialog
+                <SaveThemeDialog
                     projectTheme={projectTheme}
                     setProjectTheme={setProjectTheme}
-                    visible={showCoPIDialog}
-                    options={project.collaborators}
-                    onAdd={setCoPI}
+                    visible={showSaveDialog}
+                    onAdd={saveProjectTheme}
                     onHide={hideDialogs}
-                />
+                    themeOptions={themes} />
             )}
             {projectTheme && (
                 <DeleteDialog
                     showDeleteDialog={showDeleteDialog}
                     selectedDataInfo={String((projectTheme.theme as any).title)}
-                    onRemove={removeProjectTheme}
+                    onDelete={deleteProjectTheme}
                     onHide={hideDialogs}
                 />
             )}

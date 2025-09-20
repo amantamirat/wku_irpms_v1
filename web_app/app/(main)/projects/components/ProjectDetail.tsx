@@ -3,6 +3,7 @@ import { Divider } from "primereact/divider";
 import { TabView, TabPanel } from "primereact/tabview";
 import { Project } from "../models/project.model";
 import CollaboratorManager from "../collaborators/components/CollaboratorManager";
+import ThemeManager from "../themes/components/ThemeManager";
 
 
 interface ProjectDetailProps {
@@ -30,7 +31,7 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
                         <CollaboratorManager project={project} />
                     </TabPanel>
                     <TabPanel header="Themes">
-                        {/* Themes list / content */}
+                        <ThemeManager project={project} />
                     </TabPanel>
                     <TabPanel header="Phases">
                         {/* Phases / timeline */}
