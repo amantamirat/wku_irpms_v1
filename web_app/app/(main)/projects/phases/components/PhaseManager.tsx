@@ -2,29 +2,45 @@ import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DeleteDialog from "@/components/DeleteDialog";
-import { Project, PhaseType, Phase, Collaborator } from "../../models/project.model";
-import AddPhaseDialog from "./AddPhaseDialog";
+import { Project } from "../../models/project.model";
+import { Phase, PhaseType } from "../models/phase.model";
+import { PhaseApi } from "../api/phase.api";
+
+
+
 
 interface ProjectInfoStepProps {
     project: Project;
-    setProject: (project: Project) => void;
     phaseType: PhaseType;
 }
 
-export default function PhasesManager({ project, setProject, phaseType }: ProjectInfoStepProps) {
+export default function PhaseManager({ project, phaseType }: ProjectInfoStepProps) {
 
     const emptyPhase: Phase = {
         type: phaseType,
+        activity: '',
         order: 0,
         duration: 0,
         budget: 0
     };
 
     const [phase, setPhase] = useState<Phase>(emptyPhase);
+    const [phases, setPhases] = useState<Phase[]>([]);
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+
+    useEffect(() => {
+        const fetchPhases = async () => {
+            const data = await PhaseApi.getPhases({
+                project: project._id
+            });
+            setPhases(data);
+        };
+        fetchPhases();
+    }, [project?._id]);
 
 
     const addPhase = () => {
@@ -126,14 +142,7 @@ export default function PhasesManager({ project, setProject, phaseType }: Projec
 
                 </DataTable>
 
-                {phase &&
-                    <AddPhaseDialog
-                        phase={phase}
-                        setPhase={setPhase}
-                        visible={showAddDialog}
-                        onAdd={addPhase}
-                        onHide={hideDialogs}
-                    />}
+
 
                 {phase && (
                     <DeleteDialog

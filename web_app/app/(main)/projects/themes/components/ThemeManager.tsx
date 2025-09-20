@@ -1,5 +1,4 @@
 import { Call } from "@/app/(main)/calls/models/call.model";
-import { Grant } from "@/app/(main)/grants/models/grant.model";
 import { ThemeApi } from "@/app/(main)/themes/api/theme.api";
 import { Theme, ThemeType } from "@/app/(main)/themes/models/theme.model";
 import DeleteDialog from "@/components/DeleteDialog";
@@ -9,8 +8,8 @@ import { DataTable } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
 import { useEffect, useState } from "react";
 import { Project } from "../../models/project.model";
-import { ProjectTheme } from "../models/project.theme.model";
 import { ProjectThemeApi } from "../api/project.theme.api";
+import { ProjectTheme } from "../models/project.theme.model";
 import SaveThemeDialog from "./SaveThemeDialog";
 
 

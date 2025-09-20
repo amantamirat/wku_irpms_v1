@@ -12,7 +12,7 @@ export const validateProjectTheme = (pt: ProjectTheme): { valid: boolean; messag
         return { valid: false, message: 'Project is required.' };
     }
     if (!pt.theme || (pt.theme as string).trim().length === 0) {
-        return { valid: false, message: 'Theme is required.' };
+        return { valid: false, message: 'Title is required.' };
     }
     return { valid: true };
 };

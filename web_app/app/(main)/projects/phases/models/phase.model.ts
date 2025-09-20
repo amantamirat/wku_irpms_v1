@@ -19,3 +19,11 @@ export type Phase = {
     createdAt?: Date;
     updatedAt?: Date;
 }
+
+export const validatePhase = (pt: Phase): { valid: boolean; message?: string } => {
+    if (!pt.project) {
+        return { valid: false, message: 'Project is required.' };
+    }
+    
+    return { valid: true };
+};
