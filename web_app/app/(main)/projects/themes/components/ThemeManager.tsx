@@ -67,13 +67,13 @@ export default function ThemeManager({ project }: ProjectInfoStepProps) {
     useEffect(() => {
         const fetchThemes = async () => {
             const data = await ThemeApi.getThemes({
-                catalog: (((project.call as Call).grant) as Grant).theme as string
+                catalog: (project.call as Call).theme as string
             });
             setThemes(data);
             const node = buildTree(data);
             setNodes(node as any);
         };
-        //fetchThemes();
+        fetchThemes();
     }, [, [project?.call]]);
 
 
@@ -161,7 +161,7 @@ export default function ThemeManager({ project }: ProjectInfoStepProps) {
                     visible={showSaveDialog}
                     onAdd={saveProjectTheme}
                     onHide={hideDialogs}
-                    themeOptions={themes} />
+                    themeOptions={nodes} />
             )}
             {projectTheme && (
                 <DeleteDialog
