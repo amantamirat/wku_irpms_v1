@@ -74,7 +74,7 @@ export default function ThemeManager({ project }: ProjectInfoStepProps) {
             setNodes(node as any);
         };
         fetchThemes();
-    }, [, [project?.call]]);
+    }, [project?.call]);
 
 
     useEffect(() => {
