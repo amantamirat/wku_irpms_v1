@@ -2,8 +2,8 @@ import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { TreeSelect } from "primereact/treeselect";
 import { Toast } from "primereact/toast";
-import { useRef } from "react";
-import { ProjectTheme } from "../models/project.theme.model";
+import { useRef, useState } from "react";
+import { ProjectTheme, validateProjectTheme } from "../models/project.theme.model";
 
 
 interface SaveThemeDialogProps {
@@ -18,9 +18,16 @@ interface SaveThemeDialogProps {
 export default function SaveThemeDialog({ projectTheme, setProjectTheme, themeOptions, visible, onAdd, onHide }: SaveThemeDialogProps) {
 
     const toast = useRef<Toast>(null);
+    const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
     const addProjectTheme = async () => {
         try {
+            const result = validateProjectTheme(projectTheme);
+            if (!result.valid) {
+                setErrorMessage(result.message);
+                return;
+            }
+            setErrorMessage(undefined);
             await onAdd();
             toast.current?.show({
                 severity: 'success',
@@ -70,6 +77,9 @@ export default function SaveThemeDialog({ projectTheme, setProjectTheme, themeOp
                         display="chip"
                     />
                 </div>
+                {errorMessage && (
+                    <small className="p-error">{errorMessage}</small>
+                )}
             </Dialog>
         </>
     );
