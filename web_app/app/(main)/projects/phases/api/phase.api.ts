@@ -3,7 +3,7 @@ import { Phase } from "../models/phase.model";
 import { Project } from "../../models/project.model";
 
 
-const end_point = '/project/phases';
+const end_point = '/project/phases/';
 
 
 function sanitizePhase(phase: Partial<Phase>): Partial<Phase> {

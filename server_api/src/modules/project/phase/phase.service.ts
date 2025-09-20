@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
-import { BasePhase } from "./phase.model"; // only BasePhase import
+import { BasePhase, Breakdown, Phase } from "./phase.model"; // only BasePhase import
 import { PhaseType } from "../enums/phase.type.enum";
 
 // DTOs
 export interface CreatePhaseDto {
     activity: string;
     duration: number;
+    order: number;
     budget: number;
     description?: string;
     project?: mongoose.Types.ObjectId;  // only if phase
@@ -17,23 +18,25 @@ export interface GetPhaseOptions {
     _id?: string;
     project?: string;
     parent?: string;
-    //type?: PhaseType;
 }
 
 export class PhaseService {
-    
+
     static async createPhase(data: CreatePhaseDto) {
         return await BasePhase.create(data);
     }
 
     static async getPhases(options: GetPhaseOptions) {
         const filter: any = {};
-        if (options._id) filter._id = options._id;
         if (options.project) filter.project = options.project;
         if (options.parent) filter.parent = options.parent;
-        //if (options.type) filter.type = options.type;
-        return await BasePhase.find(filter)
-            .lean();
+        if (options.project) {
+            return await Phase.find(filter).lean();
+        }
+        if (options.parent) {
+            return await Breakdown.find(filter).lean();
+        }
+        return await BasePhase.find(filter).lean();
     }
 
     static async findPhase(options: GetPhaseOptions) {
@@ -41,8 +44,12 @@ export class PhaseService {
         if (options._id) filter._id = options._id;
         if (options.project) filter.project = options.project;
         if (options.parent) filter.parent = options.parent;
-        //if (options.type) filter.type = options.type;
-        //return await BasePhase.findOne(filter).populate("project parent").lean();
+        if (options.project) {
+            return await Phase.findOne(filter).lean();
+        }
+        if (options.parent) {
+            return await Breakdown.findOne(filter).lean();
+        }
         return await BasePhase.findOne(filter).lean();
     }
 

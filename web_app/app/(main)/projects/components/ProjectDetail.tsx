@@ -15,7 +15,6 @@ interface ProjectDetailProps {
 export default function ProjectDetail({ project }: ProjectDetailProps) {
     return (
         <div className="project-detail">
-
             <div className="header">
                 <h2>{project.title}</h2>
                 <p>Created At: {new Date(project.createdAt!).toLocaleDateString()}</p>
@@ -24,7 +23,7 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
             </div>
             <Divider />
             <div className="summary">
-                <h4>{project.summary ?? "Summary"}</h4>
+                <h4>{project.summary ? "Summary" : ""}</h4>
                 <p>{project.summary}</p>
             </div>
             <>
@@ -40,12 +39,6 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
                     </TabPanel>
                 </TabView>
             </>
-
-
-
-
-
-
         </div>
     );
 }

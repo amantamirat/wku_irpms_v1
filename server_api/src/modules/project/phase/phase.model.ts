@@ -5,6 +5,7 @@ import { COLLECTIONS } from "../../../enums/collections.enum";
 interface BasePhaseDocument extends Document {
     type: PhaseType;
     activity: string;
+    order: number;
     duration: number;
     budget: number;
     description?: string;
@@ -22,6 +23,11 @@ const BasePhaseSchema = new Schema<BasePhaseDocument>(
         },
         activity: {
             type: String,
+            required: true
+        },
+        order: {
+            type: Number,
+            min: 0,
             required: true
         },
         duration: {

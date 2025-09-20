@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { errorResponse, successResponse } from "../../../util/response";
-import {CreatePhaseDto, GetPhaseOptions, PhaseService } from "./phase.service";
+import { CreatePhaseDto, GetPhaseOptions, PhaseService } from "./phase.service";
 import { PhaseType } from "../enums/phase.type.enum";
 
 export class PhaseController {
@@ -9,6 +9,7 @@ export class PhaseController {
         try {
             const data: CreatePhaseDto = {
                 activity: req.body.activity,
+                order: req.body.order,
                 duration: req.body.duration,
                 budget: req.body.budget,
                 description: req.body.description,
@@ -25,7 +26,7 @@ export class PhaseController {
 
     static async getPhases(req: Request, res: Response) {
         try {
-            const { _id, project, parent, type } = req.query;
+            const { project, parent } = req.query;
             const filter: GetPhaseOptions = {
                 project: project ? String(project) : undefined,
                 parent: parent ? String(parent) : undefined
@@ -42,6 +43,7 @@ export class PhaseController {
             const { id } = req.params;
             const data: Partial<CreatePhaseDto> = {
                 activity: req.body.activity,
+                order: req.body.order,
                 duration: req.body.duration,
                 budget: req.body.budget,
                 description: req.body.description,

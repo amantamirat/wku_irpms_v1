@@ -63,7 +63,7 @@ export default function SavePhaseDialog({ phase, setPhase, visible, onAdd, onHid
             <Dialog
                 visible={visible}
                 style={{ width: "600px" }}
-                header="Add Phase"
+                header="Phase Details"
                 modal
                 className="p-fluid"
                 footer={footer}

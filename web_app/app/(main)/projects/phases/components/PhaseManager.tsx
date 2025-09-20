@@ -20,7 +20,7 @@ interface ProjectInfoStepProps {
 export default function PhaseManager({ project, phaseType }: ProjectInfoStepProps) {
 
     const emptyPhase: Phase = {
-        project:project,
+        project: project,
         type: phaseType,
         activity: '',
         order: 0,
@@ -45,9 +45,11 @@ export default function PhaseManager({ project, phaseType }: ProjectInfoStepProp
     }, [project?._id]);
 
 
-    const addPhase = async () => {
+    const savePhase = async () => {
         const exists = phases?.some(
-            (p) => p.order === phase.order
+            (p) =>
+                p.order === phase.order && // same order
+                p._id?.toString() !== phase._id?.toString() // but not the same phase
         );
         if (exists) {
             throw new Error("The order is already added!");
@@ -96,6 +98,11 @@ export default function PhaseManager({ project, phaseType }: ProjectInfoStepProp
 
     const actionBodyTemplate = (rowData: Phase) => (
         <>
+            <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
+                style={{ fontSize: '1.2rem' }} onClick={() => {
+                    setPhase(rowData);
+                    setShowAddDialog(true);
+                }} />
             <Button icon="pi pi-times" rounded severity="warning" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
                     setPhase(rowData);
@@ -126,7 +133,7 @@ export default function PhaseManager({ project, phaseType }: ProjectInfoStepProp
                     <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                     <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                     <Column field="activity" header="Activity" sortable />
-                    <Column field="order" header="Order" sortable />                    
+                    <Column field="order" header="Order" sortable />
                     <Column field="duration" header="Duration" sortable />
                     <Column field="budget" header="Budget" sortable />
                     <Column field="description" header="Description" sortable />
@@ -139,14 +146,14 @@ export default function PhaseManager({ project, phaseType }: ProjectInfoStepProp
                         phase={phase}
                         setPhase={setPhase}
                         visible={showAddDialog}
-                        onAdd={addPhase}
+                        onAdd={savePhase}
                         onHide={hideDialogs}
                     />}
 
                 {phase && (
                     <DeleteDialog
                         showDeleteDialog={showDeleteDialog}
-                        selectedDataInfo={`phase ${phase.order}`}
+                        selectedDataInfo={`phase ${phase.activity}`}
                         onDelete={removePhase}
                         onHide={hideDialogs}
                     />
