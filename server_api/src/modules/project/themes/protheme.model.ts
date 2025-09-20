@@ -25,5 +25,5 @@ const ProThemeSchema: Schema<IProjectTheme> = new Schema(
         timestamps: true,
     }
 );
-
+ProThemeSchema.index({ project: 1, theme: 1 }, { unique: true });
 export const ProjectTheme = mongoose.model<IProjectTheme>(COLLECTIONS.PROJECT_THEMEM, ProThemeSchema);
