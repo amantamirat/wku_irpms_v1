@@ -1,3 +1,5 @@
+import { COLLECTIONS } from "../../../../enums/collections.enum";
+
 export enum CollaboratorRole {
   PI = "PI",
   CO_PI = "CO_PI",
@@ -9,8 +11,7 @@ export enum CollaboratorRole {
 }
 
 export enum AssignmentType {
-  PROJECT = "project",
-  THEME = "theme",
-  PHASE = "phase",
-  OBJECTIVE = "objective",
+  PROJECT = COLLECTIONS.PROJECT,
+  THEME = COLLECTIONS.PROJECT_THEMEM,
+  PHASE = COLLECTIONS.PHASE
 }
