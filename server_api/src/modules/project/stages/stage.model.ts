@@ -7,6 +7,7 @@ interface IProjectStage extends Document {
     project: mongoose.Types.ObjectId;
     stage: mongoose.Types.ObjectId;
     status: StageStatus;
+    documentPath: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -22,6 +23,10 @@ const ProjectStageSchema = new Schema<IProjectStage>({
         type: Schema.Types.ObjectId,
         ref: Stage.modelName,
         immutable: true,
+        required: true
+    },
+    documentPath: {
+        type: String, 
         required: true
     },
     status: {
