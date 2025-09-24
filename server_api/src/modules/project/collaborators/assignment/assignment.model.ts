@@ -38,3 +38,4 @@ const CollaboratorAssignmentSchema = new Schema<ICollaboratorAssignment>(
     },
     { timestamps: true }
 );
+export const Assignment = mongoose.model<ICollaboratorAssignment>(COLLECTIONS.COLLABORATOR_ASSIGNMENT,  CollaboratorAssignmentSchema);
