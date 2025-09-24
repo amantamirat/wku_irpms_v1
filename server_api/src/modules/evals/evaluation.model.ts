@@ -18,7 +18,7 @@ const BaseEvaluationSchema = new Schema<BaseEvaluationDocument>(
   { timestamps: true, discriminatorKey: "type" } // discriminatorKey
 );
 
-export const BaseEvaluation = model<BaseEvaluationDocument>(COLLECTIONS.EVAL, BaseEvaluationSchema);
+export const BaseEvaluation = model<BaseEvaluationDocument>(COLLECTIONS.EVALUATION, BaseEvaluationSchema);
 
 interface EvaluationDocument extends BaseEvaluationDocument {
   type: EvaluationType.evaluation;
@@ -31,11 +31,18 @@ const EvaluationSchema = new Schema<EvaluationDocument>({
 
 export const Evaluation = BaseEvaluation.discriminator<EvaluationDocument>(EvaluationType.evaluation, EvaluationSchema);
 
+/**
+ * interface ValidationDocument extends BaseEvaluationDocument {
+    type: EvaluationType.validation;
+}
+ */
+
 
 interface StageDocument extends BaseEvaluationDocument {
   type: EvaluationType.stage;
   parent: Types.ObjectId;
   order: number;
+  //isValidation?:boolean;
 }
 
 const StageSchema = new Schema<StageDocument>({
@@ -74,14 +81,14 @@ const OptionSchema = new Schema<OptionDocument>({
   weight_value: { type: Number, min: 0, max: 100, required: true }
 });
 
+
+OptionSchema.index({ parent: 1, weight_value: 1 }, { unique: true });
+
 export const Option = BaseEvaluation.discriminator<OptionDocument>(EvaluationType.option, OptionSchema);
 
 
 /*
 
-interface ValidationDocument extends EValDocument {
-    type: EvalType.validation;
-}
 
 EValSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
   const evalId = this._id;
@@ -92,10 +99,8 @@ EValSchema.pre('deleteOne', { document: true, query: false }, async function (ne
   }
   next();
 });
-export const Validation = BaseEvaluation.discriminator<ValidationDocument>(EvalType.validation, EvaluationSchema);
 
 */
 
-// Create discriminators
 
 

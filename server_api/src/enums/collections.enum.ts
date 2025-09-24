@@ -2,7 +2,7 @@ export enum COLLECTIONS {
   APPLICANT = "applicants",
   ORGAN = "organs",
   THEME = "thms",
-  EVAL = "evls",
+  EVALUATION = "evaluations",
   CALENDAR = "calendars",
   CALL = "calls",
   GRANT = "grants",

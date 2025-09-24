@@ -54,7 +54,7 @@ const CallSchema = new Schema<ICall>({
     },
     evaluation: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.EVAL
+        ref: COLLECTIONS.EVALUATION
     },
     status: {
         type: String,

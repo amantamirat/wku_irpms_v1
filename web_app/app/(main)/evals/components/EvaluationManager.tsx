@@ -71,7 +71,7 @@ const EvaluationManager = (props: EvaluationManagerProps) => {
                 });
                 setEvaluations(data);
             } else if (props.parent) {
-                 const data = await EvaluationApi.getEvaluations({
+                const data = await EvaluationApi.getEvaluations({
                     type: props.type,
                     parent: props.parent._id || ''
                 });
@@ -224,15 +224,13 @@ const EvaluationManager = (props: EvaluationManagerProps) => {
         <div className="my-2">
             <Button label={`New ${type}`} icon="pi pi-plus" severity="success" className="mr-2"
                 onClick={() => {
-                    /*
-                    let newEval = { ...emptyEval };
+                    let nextEval = { ...emptyEval };
                     if (type === EvalType.stage) {
                         const stages = evaluations.filter(e => e.type === EvalType.stage);
-                        const maxLevel = Math.max(0, ...stages.map(e => e.stage_level ?? 0));
-                        newEval.stage_level = maxLevel + 1;
+                        const maxLevel = Math.max(0, ...stages.map(e => e.order ?? 0));
+                        nextEval = { ...emptyEval, order: maxLevel + 1 };
                     }
-                    */
-                    setSelectedEvaluation(emptyEval);
+                    setSelectedEvaluation(nextEval);  
                     setShowSaveDialog(true);
                 }}
             />

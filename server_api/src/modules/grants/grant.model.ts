@@ -32,7 +32,7 @@ const GrantSchema = new Schema<IGrant>({
     },
     evaluation: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.EVAL,
+        ref: COLLECTIONS.EVALUATION,
         required: true
     },
 }, { timestamps: true });
