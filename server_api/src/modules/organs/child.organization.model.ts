@@ -1,5 +1,5 @@
 import { Schema, Types } from "mongoose";
-import { BaseOrganization, BaseOrganizationDocument } from "./base.organization.model";
+import { BaseOrganization, BaseOrganizationDocument } from "./organization.model";
 import { COLLECTIONS } from "../../enums/collections.enum";
 import { AcademicLevel } from "./enums/academicLevel.enum";
 import { Classification } from "./enums/classification.enum";

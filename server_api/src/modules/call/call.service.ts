@@ -1,7 +1,7 @@
 
 import { CallStatus } from "./enums/call.status.enum";
 import { Call } from "./call.model";
-import { Directorate } from "../organs/base.organization.model";
+import { Directorate } from "../organs/organization.model";
 import mongoose from "mongoose";
 
 

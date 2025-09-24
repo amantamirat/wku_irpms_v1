@@ -1,5 +1,5 @@
 
-import { BaseOrganization } from "./base.organization.model";
+import { BaseOrganization } from "./organization.model";
 import { AcademicLevel } from "./enums/academicLevel.enum";
 import { Category } from "./enums/category.enum";
 import { Classification } from "./enums/classification.enum";

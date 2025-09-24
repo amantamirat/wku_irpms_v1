@@ -1,10 +1,10 @@
-import { model, Schema } from "mongoose";
+import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../enums/collections.enum";
 import { AcademicLevel } from "./enums/academicLevel.enum";
 import { Category } from "./enums/category.enum";
 import { Unit } from "./enums/unit.enum";
 
-export interface BaseOrganizationDocument extends Document {
+interface BaseOrganizationDocument extends Document {
     type: Unit;
     name: string;
     createdAt?: Date;
@@ -63,3 +63,24 @@ export const Sector = BaseOrganization.discriminator<SectorDocument>(Unit.Sector
 export const Specialization = BaseOrganization.discriminator<SpecializationDocument>(Unit.Specialization, SpecializationSchema);
 export const Position = BaseOrganization.discriminator<PositionDocument>(Unit.Position, PositionSchema);
 
+interface ChildOrganizationDocument extends BaseOrganizationDocument {
+    parent: mongoose.Types.ObjectId;
+}
+
+interface DepartmentDocument extends ChildOrganizationDocument {
+    type: Unit.Department;
+}
+
+const DepartmentSchema = new Schema<DepartmentDocument>({
+    parent: { type: Schema.Types.ObjectId, ref: College.modelName, required: true }
+});
+
+export const Department = BaseOrganization.discriminator<DepartmentDocument>(Unit.Department, DepartmentSchema);
+
+interface CenterDocument extends ChildOrganizationDocument {
+    type: Unit.Center;
+}
+
+const CenterSchema = new Schema<CenterDocument>({
+    parent: { type: Schema.Types.ObjectId, ref: Directorate.modelName, required: true }
+});
