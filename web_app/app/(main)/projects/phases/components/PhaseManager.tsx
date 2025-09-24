@@ -88,7 +88,10 @@ export default function PhaseManager({ project, phaseType }: ProjectInfoStepProp
         <div className="my-2">
             <Button icon="pi pi-plus" severity="success" className="mr-2" tooltip={`Add ${phaseType}`}
                 onClick={() => {
-                    setPhase(emptyPhase);
+                    let newPhase = { ...emptyPhase };
+                    const maxLevel = Math.max(0, ...phases.map(e => e.order ?? 0));
+                    newPhase.order = maxLevel + 1;
+                    setPhase(newPhase);
                     setShowAddDialog(true);
                 }}
             />
