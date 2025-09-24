@@ -1,9 +1,9 @@
 import { Types } from "mongoose";
 import { EvalType } from "./enums/eval.type.enum";
 import { FormType } from "./enums/from.type.enum";
-import { BaseEvaluation } from "./base.evaluation.model";
-import { Stage } from "./stage.model";
+
 import { Directorate } from "../organs/base.organization.model";
+import { BaseEvaluation, Stage } from "./evaluation.model";
 
 export interface GetEvalsOptions {
     type?: EvalType;
@@ -16,7 +16,7 @@ export interface CreateEvaluationDto {
     title: string;
     directorate?: Types.ObjectId;
     parent?: Types.ObjectId;
-    stage_level?: number;
+    order?: number;
     weight_value?: number;
     form_type?: FormType;
 }
@@ -68,10 +68,10 @@ export class EvaluationService {
             const maxStage = await Stage.findOne({
                 parent: data.parent
             })
-                .sort({ stage_level: -1 })
+                .sort({ order: -1 })
                 .select('stage_level')
                 .lean();
-            rest.stage_level = maxStage ? (maxStage.stage_level ?? 0) + 1 : 1;
+            rest.order = maxStage ? (maxStage.order ?? 0) + 1 : 1;
         }
 
         const createdEvaluation = await BaseEvaluation.create({ type, ...rest });
@@ -94,7 +94,7 @@ export class EvaluationService {
             throw new Error("Cannot change theme type");
         }
         if (data.type === EvalType.stage) {
-            delete data.stage_level;
+            delete data.order;
         }
         Object.assign(evaluation, data);
         return evaluation.save();
@@ -115,7 +115,7 @@ export class EvaluationService {
         if (!current || current.type !== EvalType.stage) {
             throw new Error('Stage not found.');
         }
-        const level = current.stage_level;
+        const level = current.order;
         if (typeof level !== 'number') {
             throw new Error('Current stage level is not defined.');
         }
@@ -126,8 +126,8 @@ export class EvaluationService {
         if (!target) {
             throw new Error(`Cannot move ${direction} any further.`);
         }
-        const currentLevel = current.stage_level!;
-        const targetLevel = target.stage_level!;
+        const currentLevel = current.order!;
+        const targetLevel = target.order!;
 
         await Stage.updateOne(
             { _id: current._id },

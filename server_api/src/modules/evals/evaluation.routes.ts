@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { EvaluationController } from './eval.controller';
+import { EvaluationController } from './evaluation.controller';
 import { verifyActiveAccount } from '../users/auth/auth.middleware';
 
 const router = Router();
