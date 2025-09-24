@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import { AssignmentType, CollaboratorRole } from "./assignment.enum";
 import { COLLECTIONS } from "../../../../enums/collections.enum";
 
-export interface ICollaboratorAssignment extends Document {
+interface ICollaboratorAssignment extends Document {
     collaborator: mongoose.Types.ObjectId;
     role: CollaboratorRole;
     assignmentType: AssignmentType;
@@ -17,6 +17,7 @@ const CollaboratorAssignmentSchema = new Schema<ICollaboratorAssignment>(
             type: Schema.Types.ObjectId,
             ref: COLLECTIONS.COLLABORATOR,
             required: true,
+            immutable: true,
         },
         role: {
             type: String,
@@ -26,16 +27,15 @@ const CollaboratorAssignmentSchema = new Schema<ICollaboratorAssignment>(
         assignmentType: {
             type: String,
             enum: Object.values(AssignmentType),
+            immutable: true,
             required: true,
         },
         assignmentId: {
             type: Schema.Types.ObjectId,
-            required: function () {
-                return this.assignmentType !== AssignmentType.PROJECT;
-            },
+            required: true,
             refPath: "assignmentType",
         },
     },
     { timestamps: true }
 );
-export const Assignment = mongoose.model<ICollaboratorAssignment>(COLLECTIONS.COLLABORATOR_ASSIGNMENT,  CollaboratorAssignmentSchema);
+export const Assignment = mongoose.model<ICollaboratorAssignment>(COLLECTIONS.COLLABORATOR_ASSIGNMENT, CollaboratorAssignmentSchema);
