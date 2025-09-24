@@ -3,7 +3,8 @@ import { Types } from "mongoose";
 import { OrganizationService, CreateOrganizationDto, GetOrganizationsOptions } from "./organization.service";
 
 import { errorResponse, successResponse } from "../../util/response";
-import { Unit } from "./enums/unit.enum";
+import { Unit } from "./organization.enum";
+
 
 
 export class OrganizationController {

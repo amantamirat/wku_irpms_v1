@@ -1,8 +1,7 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../enums/collections.enum";
-import { AcademicLevel } from "./enums/academicLevel.enum";
-import { Category } from "./enums/category.enum";
-import { Unit } from "./enums/unit.enum";
+import { AcademicLevel, Category, Classification, Ownership, Unit } from "./organization.enum";
+
 
 interface BaseOrganizationDocument extends Document {
     type: Unit;
@@ -84,3 +83,42 @@ interface CenterDocument extends ChildOrganizationDocument {
 const CenterSchema = new Schema<CenterDocument>({
     parent: { type: Schema.Types.ObjectId, ref: Directorate.modelName, required: true }
 });
+
+export const Center = BaseOrganization.discriminator<CenterDocument>(Unit.Center, CenterSchema);
+
+interface RankDocument extends ChildOrganizationDocument {
+    type: Unit.Rank;
+}
+
+const RankSchema = new Schema<RankDocument>({
+    parent: { type: Schema.Types.ObjectId, ref: Position.modelName, required: true }
+});
+
+export const Rank = BaseOrganization.discriminator<RankDocument>(Unit.Rank, RankSchema);
+
+interface ProgramDocument extends ChildOrganizationDocument {
+    type: Unit.Program;
+    academic_level: AcademicLevel;
+    classification: Classification;
+}
+
+const ProgramSchema = new Schema<ProgramDocument>({
+    parent: { type: Schema.Types.ObjectId, ref: Rank.modelName, required: true },
+    academic_level: { type: String, enum: Object.values(AcademicLevel), required: true },
+    classification: { type: String, enum: Object.values(Classification), required: true },
+});
+
+export const Program = BaseOrganization.discriminator<ProgramDocument>(Unit.Program, ProgramSchema);
+
+interface ExternalDocument extends ChildOrganizationDocument {
+    type: Unit.External;
+    ownership: Ownership;
+}
+
+const ExternalSchema = new Schema<ExternalDocument>({
+    parent: { type: Schema.Types.ObjectId, ref: Sector.modelName, required: true },
+    ownership: { type: String, enum: Object.values(Ownership), required: true }
+});
+
+export const External = BaseOrganization.discriminator<ExternalDocument>(Unit.External, ExternalSchema);
+

@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import { EvaluationType, FormType } from "./evaluation.enum";
 
-import { Directorate } from "../organs/organization.model";
+import { Directorate } from "../organization/organization.model";
 import { BaseEvaluation, Stage } from "./evaluation.model";
 
 export interface GetEvalsOptions {

@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 import { ThemeLevel } from "./enums/theme.level.enum";
 import { ThemeType } from "./enums/theme.type.enum";
 import { Theme } from "./base.theme.model";
-import { Directorate } from "../organs/organization.model";
+import { Directorate } from "../organization/organization.model";
 
 export interface GetThemesOptions {
     type?: ThemeType;

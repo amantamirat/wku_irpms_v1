@@ -1,10 +1,8 @@
-
+import { Unit, AcademicLevel, Classification, Ownership, Category } from "./organization.enum";
 import { BaseOrganization } from "./organization.model";
-import { AcademicLevel } from "./enums/academicLevel.enum";
-import { Category } from "./enums/category.enum";
-import { Classification } from "./enums/classification.enum";
-import { Ownership } from "./enums/ownership.enum";
-import { Unit } from "./enums/unit.enum";
+
+
+
 
 export interface GetOrganizationsOptions {
     type?: Unit;
