@@ -1,6 +1,7 @@
 import { model, Schema, Types } from "mongoose";
 import { EvaluationType, FormType } from "./evaluation.enum";
 import { COLLECTIONS } from "../../enums/collections.enum";
+import { Directorate } from "../organization/organization.model";
 
 
 interface BaseEvaluationDocument extends Document {
@@ -26,7 +27,7 @@ interface EvaluationDocument extends BaseEvaluationDocument {
 }
 
 const EvaluationSchema = new Schema<EvaluationDocument>({
-  directorate: { type: Schema.Types.ObjectId, ref: COLLECTIONS.ORGAN, required: true, immutable: true },
+  directorate: { type: Schema.Types.ObjectId, ref: Directorate.modelName, required: true, immutable: true },
 });
 
 export const Evaluation = BaseEvaluation.discriminator<EvaluationDocument>(EvaluationType.evaluation, EvaluationSchema);
@@ -35,8 +36,7 @@ export const Evaluation = BaseEvaluation.discriminator<EvaluationDocument>(Evalu
  * interface ValidationDocument extends BaseEvaluationDocument {
     type: EvaluationType.validation;
 }
- */
-
+*/
 
 interface StageDocument extends BaseEvaluationDocument {
   type: EvaluationType.stage;
@@ -88,8 +88,6 @@ export const Option = BaseEvaluation.discriminator<OptionDocument>(EvaluationTyp
 
 
 /*
-
-
 EValSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
   const evalId = this._id;
   const isReferencedByGrant = await Grant.exists({ evaluation: evalId });
@@ -99,7 +97,6 @@ EValSchema.pre('deleteOne', { document: true, query: false }, async function (ne
   }
   next();
 });
-
 */
 
 
