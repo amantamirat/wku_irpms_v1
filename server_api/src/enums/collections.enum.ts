@@ -13,5 +13,6 @@ export enum COLLECTIONS {
   COLLABORATOR = "collaborators",
   PHASE = "phases",
   PROJECT_THEMEM = "prothemes",
-  COLLABORATOR_ASSIGNMENT = "collaboratorassignments"
+  COLLABORATOR_ASSIGNMENT = "collaboratorassignments",
+  PROJECT_STAGE = "projectstages"
 }
