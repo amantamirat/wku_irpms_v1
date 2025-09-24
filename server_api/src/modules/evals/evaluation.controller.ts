@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { EvaluationService, CreateEvaluationDto, GetEvalsOptions } from "./evaluation.service";
-import { EvalType } from "./enums/eval.type.enum";
+import { EvaluationType } from "./evaluation.enum";
 import { errorResponse, successResponse } from "../../util/response";
 
 export class EvaluationController {
@@ -20,7 +20,7 @@ export class EvaluationController {
         try {
             const { type, parent, directorate } = req.query;
             const filter = {
-                type: type as EvalType | undefined,
+                type: type as EvaluationType | undefined,
                 parent: parent ? new Types.ObjectId(parent as string) : undefined,
                 directorate: directorate ? new Types.ObjectId(directorate as string) : undefined
             } as GetEvalsOptions;

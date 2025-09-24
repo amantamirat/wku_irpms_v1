@@ -1,18 +1,17 @@
 import { Types } from "mongoose";
-import { EvalType } from "./enums/eval.type.enum";
-import { FormType } from "./enums/from.type.enum";
+import { EvaluationType, FormType } from "./evaluation.enum";
 
 import { Directorate } from "../organs/base.organization.model";
 import { BaseEvaluation, Stage } from "./evaluation.model";
 
 export interface GetEvalsOptions {
-    type?: EvalType;
+    type?: EvaluationType;
     parent?: string;
     directorate?: string;
 }
 
 export interface CreateEvaluationDto {
-    type: EvalType;
+    type: EvaluationType;
     title: string;
     directorate?: Types.ObjectId;
     parent?: Types.ObjectId;
@@ -25,7 +24,7 @@ export interface CreateEvaluationDto {
 export class EvaluationService {
 
     private static async validateEval(evl: Partial<CreateEvaluationDto>) {
-        if (evl.type === EvalType.evaluation || evl.type === EvalType.validation) {
+        if (evl.type === EvaluationType.evaluation || evl.type === EvaluationType.validation) {
             const directorate = await Directorate.findById(evl.directorate);
             if (!directorate) {
                 throw new Error("Directorate Not Found!");
@@ -33,9 +32,9 @@ export class EvaluationService {
             return
         }
         const expectedParentType =
-            evl.type === EvalType.stage ? [EvalType.evaluation, EvalType.validation]
-                : evl.type === EvalType.criterion ? EvalType.stage
-                    : EvalType.criterion;
+            evl.type === EvaluationType.stage ? [EvaluationType.evaluation, EvaluationType.validation]
+                : evl.type === EvaluationType.criterion ? EvaluationType.stage
+                    : EvaluationType.criterion;
 
         const parentEval = await BaseEvaluation.findById(evl.parent).lean() as any;
         if (!parentEval) throw new Error(`Parent evaluation not found for '${evl.type}'.`);
@@ -48,7 +47,7 @@ export class EvaluationService {
             );
         }
 
-        if (evl.type === EvalType.option) {
+        if (evl.type === EvaluationType.option) {
             if (evl.weight_value === undefined || evl.weight_value === null || !parentEval.weight_value) {
                 throw new Error("Weight Value is Not Found");
             }
@@ -64,7 +63,7 @@ export class EvaluationService {
         if (!BaseEvaluation.discriminators || !BaseEvaluation.discriminators[type]) {
             throw new Error(`Invalid Evaluation type: ${type}`);
         }
-        if (type === EvalType.stage) {
+        if (type === EvaluationType.stage) {
             const maxStage = await Stage.findOne({
                 parent: data.parent
             })
@@ -93,7 +92,7 @@ export class EvaluationService {
         if (data.type && data.type !== evaluation.type) {
             throw new Error("Cannot change theme type");
         }
-        if (data.type === EvalType.stage) {
+        if (data.type === EvaluationType.stage) {
             delete data.order;
         }
         Object.assign(evaluation, data);
@@ -112,7 +111,7 @@ export class EvaluationService {
             throw new Error('Direction must be "up" or "down".');
         }
         const current = await Stage.findById(id).lean();
-        if (!current || current.type !== EvalType.stage) {
+        if (!current || current.type !== EvaluationType.stage) {
             throw new Error('Stage not found.');
         }
         const level = current.order;

@@ -1,29 +1,27 @@
 import { model, Schema, Types } from "mongoose";
-import { EvalType } from "./enums/eval.type.enum";
+import { EvaluationType, FormType } from "./evaluation.enum";
 import { COLLECTIONS } from "../../enums/collections.enum";
-import { Grant } from "../grants/grant.model";
-import { FormType } from "./enums/from.type.enum";
 
 
 interface BaseEvaluationDocument extends Document {
-  type: EvalType;
+  type: EvaluationType;
   title: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-const BaseEvalSchema = new Schema<BaseEvaluationDocument>(
+const BaseEvaluationSchema = new Schema<BaseEvaluationDocument>(
   {
-    type: { type: String, enum: Object.values(EvalType), required: true },
+    type: { type: String, enum: Object.values(EvaluationType), required: true },
     title: { type: String, required: true }
   },
   { timestamps: true, discriminatorKey: "type" } // discriminatorKey
 );
 
-export const BaseEvaluation = model<BaseEvaluationDocument>(COLLECTIONS.EVAL, BaseEvalSchema);
+export const BaseEvaluation = model<BaseEvaluationDocument>(COLLECTIONS.EVAL, BaseEvaluationSchema);
 
 interface EvaluationDocument extends BaseEvaluationDocument {
-  type: EvalType.evaluation;
+  type: EvaluationType.evaluation;
   directorate: Types.ObjectId;
 }
 
@@ -31,11 +29,11 @@ const EvaluationSchema = new Schema<EvaluationDocument>({
   directorate: { type: Schema.Types.ObjectId, ref: COLLECTIONS.ORGAN, required: true, immutable: true },
 });
 
-export const Evaluation = BaseEvaluation.discriminator<EvaluationDocument>(EvalType.evaluation, EvaluationSchema);
+export const Evaluation = BaseEvaluation.discriminator<EvaluationDocument>(EvaluationType.evaluation, EvaluationSchema);
 
 
 interface StageDocument extends BaseEvaluationDocument {
-    type: EvalType.stage;
+    type: EvaluationType.stage;
     parent: Types.ObjectId;
     order: number;
 }
@@ -45,10 +43,16 @@ const StageSchema = new Schema<StageDocument>({
     order: { type: Number, min: 1, max: 10, required: true },
 });
 
-export const Stage = BaseEvaluation.discriminator<StageDocument>(EvalType.stage, StageSchema);
+StageSchema.index({ parent: 1, stage_level: 1 },
+    {
+        unique: true
+    }
+);
+
+export const Stage = BaseEvaluation.discriminator<StageDocument>(EvaluationType.stage, StageSchema);
 
 interface CriterionDocument extends BaseEvaluationDocument {
-    type: EvalType.criterion;
+    type: EvaluationType.criterion;
     parent: Types.ObjectId;
     weight_value: number;
     form_type: FormType;
@@ -60,11 +64,11 @@ const CriterionSchema = new Schema<CriterionDocument>({
     form_type: { type: String, enum: Object.values(FormType), required: true }
 });
 
-export const Criterion = BaseEvaluation.discriminator<CriterionDocument>(EvalType.criterion, CriterionSchema);
+export const Criterion = BaseEvaluation.discriminator<CriterionDocument>(EvaluationType.criterion, CriterionSchema);
 
 
 interface OptionDocument extends BaseEvaluationDocument {
-    type: EvalType.option;
+    type: EvaluationType.option;
     parent: Types.ObjectId;
     weight_value: number;
 }
@@ -74,7 +78,7 @@ const OptionSchema = new Schema<OptionDocument>({
     weight_value: { type: Number, min: 0, max: 100, required: true }
 });
 
-export const Option = BaseEvaluation.discriminator<OptionDocument>(EvalType.option, OptionSchema);
+export const Option = BaseEvaluation.discriminator<OptionDocument>(EvaluationType.option, OptionSchema);
 
 
 /*
