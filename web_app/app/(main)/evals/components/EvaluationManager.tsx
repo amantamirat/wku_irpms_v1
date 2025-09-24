@@ -106,7 +106,7 @@ const EvaluationManager = (props: EvaluationManagerProps) => {
                 _evlas[index] = updated;
             } else {
                 const created = await EvaluationApi.createEvaluation(selectedEvaluation);
-                _evlas.push({ ...selectedEvaluation, _id: created._id, stage_level: created.stage_level });
+                _evlas.push({ ...selectedEvaluation, _id: created._id, order: created.order });
             }
             toast.current?.show({
                 severity: 'success',
@@ -141,16 +141,16 @@ const EvaluationManager = (props: EvaluationManagerProps) => {
                     if (
                         selectedEvaluation.type === 'Stage' &&
                         selectedEvaluation.parent &&
-                        typeof selectedEvaluation.stage_level === 'number'
+                        typeof selectedEvaluation.order === 'number'
                     ) {
                         updated = updated.map((e) => {
                             if (
                                 e.type === 'Stage' &&
                                 e.parent === selectedEvaluation.parent &&
-                                typeof e.stage_level === 'number' &&
-                                e.stage_level > selectedEvaluation.stage_level!
+                                typeof e.order === 'number' &&
+                                e.order > selectedEvaluation.order!
                             ) {
-                                return { ...e, stage_level: e.stage_level - 1 };
+                                return { ...e, order: e.order - 1 };
                             }
                             return e;
                         });
@@ -183,21 +183,21 @@ const EvaluationManager = (props: EvaluationManagerProps) => {
     const reorderStage = async (evaluation: Evaluation, direction: "up" | "down") => {
         try {
             setLoading(true);
-            if (!evaluation.stage_level) {
+            if (!evaluation.order) {
                 throw new Error("Stage Level is Required");
             }
             let _evlas = [...evaluations];
-            const currentLevel = evaluation.stage_level;
+            const currentLevel = evaluation.order;
             const targetLevel = direction === "up" ? currentLevel - 1 : currentLevel + 1;
             const currentIndex = _evlas.findIndex((c) => c._id === evaluation._id);
-            const targetIndex = _evlas.findIndex((c) => c.stage_level === targetLevel);
+            const targetIndex = _evlas.findIndex((c) => c.order === targetLevel);
             if (currentIndex === -1 || targetIndex === -1) {
                 throw new Error("Target or current stage not found in list.");
             }
             const moved = await EvaluationApi.reorderStage(evaluation, direction);
             if (moved) {
-                _evlas[currentIndex] = { ..._evlas[currentIndex], stage_level: targetLevel };
-                _evlas[targetIndex] = { ..._evlas[targetIndex], stage_level: currentLevel };
+                _evlas[currentIndex] = { ..._evlas[currentIndex], order: targetLevel };
+                _evlas[targetIndex] = { ..._evlas[targetIndex], order: currentLevel };
                 setEvaluations(_evlas);
                 toast.current?.show({
                     severity: 'success',
@@ -333,7 +333,7 @@ const EvaluationManager = (props: EvaluationManagerProps) => {
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="title" header="Title" sortable />
                         {type === EvalType.stage && (
-                            <Column field="stage_level" header="Level" sortable />
+                            <Column field="order" header="Order" sortable />
                         )}
                         {type === EvalType.stage && (
                             <Column body={orderBodyTemplate} headerStyle={{ minWidth: '10rem' }} />

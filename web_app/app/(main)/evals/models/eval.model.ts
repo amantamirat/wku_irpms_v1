@@ -19,7 +19,7 @@ export type Evaluation = {
   title: string;
   directorate?: string | Organization;
   parent?: string | Evaluation;
-  stage_level?: number;
+  order?: number;
   weight_value?: number;
   form_type?: FormType;
   createdAt?: Date;
@@ -27,7 +27,7 @@ export type Evaluation = {
 };
 
 export const validateEvaluation = (evaluation: Evaluation): { valid: boolean; message?: string } => {
-  const { type, title, directorate, parent, stage_level, weight_value, form_type } = evaluation;
+  const { type, title, directorate, parent, order, weight_value, form_type } = evaluation;
 
   if (!type) {
     return { valid: false, message: 'Evaluation type is required.' };
