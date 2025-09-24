@@ -33,49 +33,45 @@ export const Evaluation = BaseEvaluation.discriminator<EvaluationDocument>(Evalu
 
 
 interface StageDocument extends BaseEvaluationDocument {
-    type: EvaluationType.stage;
-    parent: Types.ObjectId;
-    order: number;
+  type: EvaluationType.stage;
+  parent: Types.ObjectId;
+  order: number;
 }
 
 const StageSchema = new Schema<StageDocument>({
-    parent: { type: Schema.Types.ObjectId, ref: Evaluation.modelName, required: true },
-    order: { type: Number, min: 1, max: 10, required: true },
+  parent: { type: Schema.Types.ObjectId, ref: Evaluation.modelName, required: true },
+  order: { type: Number, min: 1, max: 10, required: true },
 });
 
-StageSchema.index({ parent: 1, stage_level: 1 },
-    {
-        unique: true
-    }
-);
+StageSchema.index({ parent: 1, order: 1 }, { unique: true });
 
 export const Stage = BaseEvaluation.discriminator<StageDocument>(EvaluationType.stage, StageSchema);
 
 interface CriterionDocument extends BaseEvaluationDocument {
-    type: EvaluationType.criterion;
-    parent: Types.ObjectId;
-    weight_value: number;
-    form_type: FormType;
+  type: EvaluationType.criterion;
+  parent: Types.ObjectId;
+  weight_value: number;
+  form_type: FormType;
 }
 
 const CriterionSchema = new Schema<CriterionDocument>({
-    parent: { type: Schema.Types.ObjectId, ref: Stage.modelName, required: true },
-    weight_value: { type: Number, min: 1, max: 100, required: true },
-    form_type: { type: String, enum: Object.values(FormType), required: true }
+  parent: { type: Schema.Types.ObjectId, ref: Stage.modelName, required: true },
+  weight_value: { type: Number, min: 1, max: 100, required: true },
+  form_type: { type: String, enum: Object.values(FormType), required: true }
 });
 
 export const Criterion = BaseEvaluation.discriminator<CriterionDocument>(EvaluationType.criterion, CriterionSchema);
 
 
 interface OptionDocument extends BaseEvaluationDocument {
-    type: EvaluationType.option;
-    parent: Types.ObjectId;
-    weight_value: number;
+  type: EvaluationType.option;
+  parent: Types.ObjectId;
+  weight_value: number;
 }
 
 const OptionSchema = new Schema<OptionDocument>({
-    parent: { type: Schema.Types.ObjectId, ref: Criterion.modelName, required: true },
-    weight_value: { type: Number, min: 0, max: 100, required: true }
+  parent: { type: Schema.Types.ObjectId, ref: Criterion.modelName, required: true },
+  weight_value: { type: Number, min: 0, max: 100, required: true }
 });
 
 export const Option = BaseEvaluation.discriminator<OptionDocument>(EvaluationType.option, OptionSchema);
