@@ -12,6 +12,7 @@ export interface GetProjectStageOptions {
 export interface CreateProjectStageDto {
     project: mongoose.Types.ObjectId;
     stage: mongoose.Types.ObjectId;
+    documentPath:string;
     status?: StageStatus;
 }
 
