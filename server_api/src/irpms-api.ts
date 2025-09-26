@@ -17,6 +17,7 @@ import collaboratorRoutes from './modules/project/collaborators/collaborator.rou
 import assignmentRoutes from './modules/project/collaborators/assignment/assignment.routes';
 import projectThemeRoutes from './modules/project/themes/protheme.routes';
 import phaseRoutes from './modules/project/phase/phase.routes';
+import stageRoutes from './modules/project/stages/stage.routes';
 import userRoutes from './modules/users/user.routes';
 import roleRoutes from './modules/users/roles/role.routes';
 
@@ -52,6 +53,7 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/collaborators", collaboratorRoutes);
 app.use("/api/project/themes", projectThemeRoutes);
 app.use("/api/project/phases", phaseRoutes);
+app.use("/api/project/stages", stageRoutes);
 app.use("/api/collaborator/assignments", assignmentRoutes);
 
 

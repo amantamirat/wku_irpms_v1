@@ -20,6 +20,7 @@
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.13.2",
+    "multer": "^2.0.2",
     "nodemailer": "^6.10.1"
   },
   "devDependencies": {
