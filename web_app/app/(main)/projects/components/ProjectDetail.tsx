@@ -6,6 +6,7 @@ import CollaboratorManager from "../collaborators/components/CollaboratorManager
 import ThemeManager from "../themes/components/ThemeManager";
 import PhaseManager from "../phases/components/PhaseManager";
 import { PhaseType } from "../phases/models/phase.model";
+import ProjectStageManager from "../stages/components/StageManager";
 
 
 interface ProjectDetailProps {
@@ -36,6 +37,9 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
                     </TabPanel>
                     <TabPanel header="Phases">
                         <PhaseManager project={project} phaseType={PhaseType.phase} />
+                    </TabPanel>
+                    <TabPanel header="Documents">
+                        <ProjectStageManager project={project} />
                     </TabPanel>
                 </TabView>
             </>

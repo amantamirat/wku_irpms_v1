@@ -9,9 +9,6 @@ import { Phase, PhaseType } from "../models/phase.model";
 import { PhaseApi } from "../api/phase.api";
 import SavePhaseDialog from "./SavePhaseDialog";
 
-
-
-
 interface ProjectInfoStepProps {
     project: Project;
     phaseType: PhaseType;
@@ -48,8 +45,8 @@ export default function PhaseManager({ project, phaseType }: ProjectInfoStepProp
     const savePhase = async () => {
         const exists = phases?.some(
             (p) =>
-                p.order === phase.order && // same order
-                p._id?.toString() !== phase._id?.toString() // but not the same phase
+                p.order === phase.order &&
+                p._id?.toString() !== phase._id?.toString()
         );
         if (exists) {
             throw new Error("The order is already added!");
