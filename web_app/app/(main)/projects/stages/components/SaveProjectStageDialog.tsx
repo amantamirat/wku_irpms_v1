@@ -21,9 +21,7 @@ export default function SaveProjectStageDialog({ projectStage, setProjectStage, 
 
     const toast = useRef<Toast>(null);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
-    const updateField = (field: keyof ProjectStage, value: any) => {
-        setProjectStage({ ...projectStage, [field]: value });
-    };
+    
 
     const saveProjectStage = async () => {
         try {

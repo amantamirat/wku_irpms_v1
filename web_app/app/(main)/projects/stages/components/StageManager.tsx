@@ -8,6 +8,9 @@ import { Project } from "../../models/project.model";
 import { ProjectStage } from "../models/stage.model";
 import { ProjectStageApi } from "../api/stage.api";
 import SaveProjectStageDialog from "./SaveProjectStageDialog";
+import { EvalType, Evaluation } from "@/app/(main)/evals/models/eval.model";
+import { Call } from "@/app/(main)/calls/models/call.model";
+import { EvaluationApi } from "@/app/(main)/evals/api/eval.api";
 
 
 interface ProjectInfoStepProps {
@@ -21,6 +24,7 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
         stage: ''
     };
 
+    const [evaluaionStages, setEvaluationStages] = useState<Evaluation[]>([]);
     const [projectStage, setProjectStage] = useState<ProjectStage>(emptyProjectStage);
     const [projectStages, setProjectStages] = useState<ProjectStage[]>([]);
     const [showAddDialog, setShowAddDialog] = useState(false);
@@ -37,9 +41,25 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
         fetchProjectStages();
     }, [project?._id]);
 
+    useEffect(() => {
+        const fetchThemes = async () => {
+            const evaluation = (project.call as Call).evaluation;
+            const evaluationId =
+                typeof evaluation === "object" && evaluation !== null
+                    ? (evaluation as any)._id
+                    : evaluation;
+            const data = await EvaluationApi.getEvaluations({
+                type: EvalType.stage,
+                parent: evaluationId
+            });
+            setEvaluationStages(data);
+        };
+        fetchThemes();
+    }, [project?.call]);
+
 
     const saveProjectStage = async () => {
-       
+
         let _projectStages = [...projectStages];
 
         if (projectStage._id) {
@@ -72,8 +92,8 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
 
     const startToolbarTemplate = () => (
         <div className="my-2">
-            <Button icon="pi pi-plus" severity="success" className="mr-2" 
-                onClick={() => {                    
+            <Button icon="pi pi-plus" severity="success" className="mr-2"
+                onClick={() => {
                     setProjectStage(emptyProjectStage);
                     setShowAddDialog(true);
                 }}
@@ -118,7 +138,7 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
                 >
                     <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                     <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                    
+
                     <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
 
                 </DataTable>
