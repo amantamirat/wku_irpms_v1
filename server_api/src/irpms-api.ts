@@ -26,6 +26,8 @@ import { initializeThemeModels } from './modules/themes/init.models';
 import { initializeEvalModels } from './modules/evaluations/init.models';
 import { initializeOrganModels } from './modules/organization/init.model';
 import { UserService } from './modules/users/user.service';
+import path from 'path';
+import { verifyActiveAccount } from './modules/users/auth/auth.middleware';
 
 
 
@@ -55,8 +57,7 @@ app.use("/api/project/themes", projectThemeRoutes);
 app.use("/api/project/phases", phaseRoutes);
 app.use("/api/project/stages", stageRoutes);
 app.use("/api/collaborator/assignments", assignmentRoutes);
-
-
+app.use("/api/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.SERVER_PORT || 5000;

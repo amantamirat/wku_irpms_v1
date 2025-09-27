@@ -1,6 +1,7 @@
 import { ApiClient } from "@/api/ApiClient";
 import { Project } from "../../models/project.model";
 import { ProjectStage } from "../models/stage.model";
+import { Evaluation } from "@/app/(main)/evals/models/eval.model";
 
 const end_point = '/project/stages/';
 
@@ -14,7 +15,7 @@ function sanitizeProjectStage(projectStage: Partial<ProjectStage>): Partial<Proj
                 : projectStage.project,
         stage:
             typeof projectStage.stage === "object" && projectStage.stage !== null
-                ? (projectStage.stage as ProjectStage)._id
+                ? (projectStage.stage as Evaluation)._id
                 : projectStage.stage,
     };
 }
@@ -33,7 +34,12 @@ export const ProjectStageApi = {
     },
 
     async createProjectStage(projectStage: Partial<ProjectStage>): Promise<ProjectStage> {
-        const createdData = await ApiClient.post(end_point, sanitizeProjectStage(projectStage));
+        const sanitized = sanitizeProjectStage(projectStage);
+        const formData = new FormData();
+        formData.append("project", sanitized.project as string);
+        formData.append("stage", sanitized.stage as string);
+        if (projectStage.file) formData.append("document", projectStage.file);
+        const createdData = await ApiClient.post(end_point, formData);
         return createdData as ProjectStage;
     },
 

@@ -1,6 +1,6 @@
 import { AuthApi } from "@/app/(full-page)/auth/api/auth.api";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+export const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 
 const getAuthToken = (): string | null => {
@@ -40,13 +40,16 @@ export const ApiClient = {
         const url = `${BASE_URL}${endpoint}`;
         const token = getAuthToken();
 
+        const isFormData = payload instanceof FormData;
+
         const response = await fetch(url, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
                 ...(token && { 'Authorization': `Bearer ${token}` }),
+                // Do NOT set Content-Type if sending FormData
+                ...(!isFormData && { 'Content-Type': 'application/json' }),
             },
-            body: JSON.stringify(payload),
+            body: isFormData ? payload : JSON.stringify(payload),
         });
 
         await handleError(response);

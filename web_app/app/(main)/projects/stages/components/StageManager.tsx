@@ -11,6 +11,7 @@ import SaveProjectStageDialog from "./SaveProjectStageDialog";
 import { EvalType, Evaluation } from "@/app/(main)/evals/models/eval.model";
 import { Call } from "@/app/(main)/calls/models/call.model";
 import { EvaluationApi } from "@/app/(main)/evals/api/eval.api";
+import { BASE_URL } from "@/api/ApiClient";
 
 
 interface ProjectInfoStepProps {
@@ -24,7 +25,7 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
         stage: ''
     };
 
-    const [evaluaionStages, setEvaluationStages] = useState<Evaluation[]>([]);
+
     const [projectStage, setProjectStage] = useState<ProjectStage>(emptyProjectStage);
     const [projectStages, setProjectStages] = useState<ProjectStage[]>([]);
     const [showAddDialog, setShowAddDialog] = useState(false);
@@ -41,21 +42,7 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
         fetchProjectStages();
     }, [project?._id]);
 
-    useEffect(() => {
-        const fetchStages = async () => {
-            const evaluation = (project.call as Call).evaluation;
-            const evaluationId =
-                typeof evaluation === "object" && evaluation !== null
-                    ? (evaluation as any)._id
-                    : evaluation;
-            const data = await EvaluationApi.getEvaluations({
-                type: EvalType.stage,
-                parent: evaluationId
-            });
-            setEvaluationStages(data);
-        };
-        fetchStages();
-    }, [project?.call]);
+
 
 
     const saveProjectStage = async () => {
@@ -68,7 +55,7 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
             _projectStages[index] = { ...projectStage, updatedAt: updated.updatedAt };
         } else {
             const created = await ProjectStageApi.createProjectStage(projectStage);
-            _projectStages.push({ ...projectStage, _id: created._id, updatedAt: created.updatedAt, createdAt: created.createdAt });
+            _projectStages.push({ ...projectStage, _id: created._id, documentPath: created.documentPath, updatedAt: created.updatedAt, createdAt: created.createdAt });
         }
         setProjectStages(_projectStages);
         hideDialogs();
@@ -138,13 +125,28 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
                 >
                     <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                     <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-
+                    <Column field="stage.title" header="Stage" sortable />
+                    <Column header="Document"
+                        body={(rowData: ProjectStage) => {
+                            if (!rowData.documentPath) return "No document";
+                            const url = `${BASE_URL}/${rowData.documentPath.replace(/^\\/, "")}`;
+                            return (
+                                <Button
+                                    label="View"
+                                    icon="pi pi-eye"
+                                    className="p-button-text"
+                                    onClick={() => window.open(url, "_blank")}
+                                />
+                            );
+                        }}
+                    />
                     <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
 
                 </DataTable>
 
                 {projectStage &&
                     <SaveProjectStageDialog
+                        project={project}
                         projectStage={projectStage}
                         setProjectStage={setProjectStage}
                         visible={showAddDialog}

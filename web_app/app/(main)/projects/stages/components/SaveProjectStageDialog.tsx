@@ -3,13 +3,20 @@ import { Dialog } from "primereact/dialog";
 import { InputNumber } from "primereact/inputnumber";
 import { InputTextarea } from "primereact/inputtextarea";
 import { InputText } from "primereact/inputtext";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Toast } from "primereact/toast";
 import { ProjectStage, validateProjectStage } from "../models/stage.model";
+import { Project } from "../../models/project.model";
+import { Call } from "@/app/(main)/calls/models/call.model";
+import { EvaluationApi } from "@/app/(main)/evals/api/eval.api";
+import { EvalType, Evaluation } from "@/app/(main)/evals/models/eval.model";
+import { Dropdown } from "primereact/dropdown";
+import { FileUpload } from "primereact/fileupload";
 
 
 
 interface SaveProjectStageDialogProps {
+    project: Project;
     projectStage: ProjectStage;
     setProjectStage: (projectStage: ProjectStage) => void;
     visible: boolean;
@@ -17,11 +24,29 @@ interface SaveProjectStageDialogProps {
     onHide: () => void;
 }
 
-export default function SaveProjectStageDialog({ projectStage, setProjectStage, visible, onAdd, onHide }: SaveProjectStageDialogProps) {
+export default function SaveProjectStageDialog({ project, projectStage, setProjectStage, visible, onAdd, onHide }: SaveProjectStageDialogProps) {
 
     const toast = useRef<Toast>(null);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
-    
+
+    const [evaluaionStages, setEvaluationStages] = useState<Evaluation[]>([]);
+
+    useEffect(() => {
+        const fetchStages = async () => {
+            const evaluation = (project.call as Call).evaluation;
+            const evaluationId =
+                typeof evaluation === "object" && evaluation !== null
+                    ? (evaluation as any)._id
+                    : evaluation;
+            const data = await EvaluationApi.getEvaluations({
+                type: EvalType.stage,
+                parent: evaluationId
+            });
+            setEvaluationStages(data);
+        };
+        fetchStages();
+    }, [project?.call]);
+
 
     const saveProjectStage = async () => {
         try {
@@ -66,9 +91,40 @@ export default function SaveProjectStageDialog({ projectStage, setProjectStage, 
                 className="p-fluid"
                 footer={footer}
                 onHide={onHide}
-            >                
+            >
 
-                
+                <div className="field">
+                    <label htmlFor="stage">Stage</label>
+                    <Dropdown
+                        id="stage"
+                        value={projectStage.stage}
+                        options={evaluaionStages}
+                        onChange={(e) =>
+                            setProjectStage({ ...projectStage, stage: e.value })
+                        }
+                        placeholder="Select Stage"
+                        optionLabel="title"
+                    />
+                </div>
+
+                <div className="field">
+                    <label htmlFor="upload">Please upload your application PDF:</label>
+                    <FileUpload
+                        id="upload"
+                        name="document"
+                        accept=".pdf"
+                        maxFileSize={10000000} // 10MB
+                        chooseLabel="Select PDF"
+                        uploadLabel="Upload"
+                        mode="advanced"
+                        customUpload
+                        onSelect={(event) =>
+                            setProjectStage({ ...projectStage, file: event.files[0] })
+                        }
+                        emptyTemplate={<p className="m-0">Drag and drop files to here to upload.</p>}
+                    />
+                </div>
+
                 {errorMessage && (
                     <small className="p-error">{errorMessage}</small>
                 )}

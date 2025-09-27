@@ -18,7 +18,7 @@ export class ProjectStageController {
                 project: req.body.project,
                 stage: req.body.stage,
                 status: req.body.status,
-                documentPath: req.file.path, // uploaded file path
+                documentPath: `uploads/${req.file.filename}`, 
             };
 
             const projectStage = await ProjectStageService.createProjectStage(data);
