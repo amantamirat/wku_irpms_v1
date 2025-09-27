@@ -42,7 +42,7 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
     }, [project?._id]);
 
     useEffect(() => {
-        const fetchThemes = async () => {
+        const fetchStages = async () => {
             const evaluation = (project.call as Call).evaluation;
             const evaluationId =
                 typeof evaluation === "object" && evaluation !== null
@@ -54,7 +54,7 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
             });
             setEvaluationStages(data);
         };
-        fetchThemes();
+        fetchStages();
     }, [project?.call]);
 
 
