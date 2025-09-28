@@ -1,7 +1,6 @@
-import { Types } from "mongoose";
+import mongoose from "mongoose";
 import { ThemeType, ThemeLevel } from "./theme.enum";
 import { BaseTheme } from "./theme.model";
-import { Directorate } from "../organization/organization.model";
 
 export interface GetThemesOptions {
     type?: ThemeType;
@@ -14,11 +13,11 @@ export interface CreateThemeDto {
     _id?: string;
     type: ThemeType;
     title: string;
-    directorate?: Types.ObjectId;
+    directorate?: mongoose.Types.ObjectId;
     level?: ThemeLevel;
     priority?: number;
-    parent?: Types.ObjectId;
-    catalog?: Types.ObjectId;
+    parent?: mongoose.Types.ObjectId;
+    catalog?: mongoose.Types.ObjectId;
 }
 
 //type NonRootTypes = ThemeType.theme | ThemeType.componenet | ThemeType.focusArea;
