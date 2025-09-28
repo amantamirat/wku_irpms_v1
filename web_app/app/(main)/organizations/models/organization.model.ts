@@ -66,7 +66,7 @@ export type Organization = {
     address?: Address;
     category?: Category;
     parent?: string | Organization;
-    createdAt?: string; // ISO string date
+    createdAt?: string;
     updatedAt?: string;
 };
 

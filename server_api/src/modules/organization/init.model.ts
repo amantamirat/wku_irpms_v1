@@ -1,6 +1,6 @@
 import { College, Directorate, Office, Position, Sector, Specialization, Center, Department, Program, Rank, External } from "./organization.model";
 
-export function initializeOrganModels() {
+export function initializeOrganizationModels() {
   return {
     College,
     Directorate,
