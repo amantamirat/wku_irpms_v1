@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 
 export interface GetCallsOptions {
     calendar?: mongoose.Types.ObjectId;
-    directorate?: string;
+    directorate?: mongoose.Types.ObjectId;
     status?: CallStatus;
 }
 
