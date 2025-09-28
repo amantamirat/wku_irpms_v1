@@ -1,4 +1,4 @@
-import { model, Schema, Types } from "mongoose";
+import mongoose, { model, Schema, Types } from "mongoose";
 import { EvaluationType, FormType } from "./evaluation.enum";
 import { COLLECTIONS } from "../../enums/collections.enum";
 import { Directorate } from "../organization/organization.model";
@@ -13,7 +13,11 @@ interface BaseEvaluationDocument extends Document {
 
 const BaseEvaluationSchema = new Schema<BaseEvaluationDocument>(
   {
-    type: { type: String, enum: Object.values(EvaluationType), required: true },
+    type: {
+      type: String,
+      enum: Object.values(EvaluationType),
+      required: true
+    },
     title: { type: String, required: true }
   },
   { timestamps: true, discriminatorKey: "type" } // discriminatorKey
@@ -31,7 +35,13 @@ const EvaluationSchema = new Schema<EvaluationDocument>({
     type: Schema.Types.ObjectId,
     ref: Directorate.modelName,
     required: true,
-    immutable: true
+    immutable: true,
+    validate: {
+      validator: async function (directorateId: mongoose.Types.ObjectId) {
+        const exist = await Directorate.exists({ _id: directorateId });
+        return !!exist;
+      }
+    },
   },
 });
 
@@ -51,8 +61,22 @@ interface StageDocument extends BaseEvaluationDocument {
 }
 
 const StageSchema = new Schema<StageDocument>({
-  parent: { type: Schema.Types.ObjectId, ref: Evaluation.modelName, required: true },
-  order: { type: Number, min: 1, max: 10, required: true },
+  parent: {
+    type: Schema.Types.ObjectId,
+    ref: Evaluation.modelName,
+    required: true,
+    validate: {
+      validator: async function (parentId: mongoose.Types.ObjectId) {
+        const exist = await Evaluation.exists({ _id: parentId });
+        return !!exist;
+      },
+      message: "Stage must belong to a Evaluation",
+    },
+  },
+  order: { type: Number, 
+    min: 1, 
+    max: 10, 
+    required: true },
 });
 
 StageSchema.index({ parent: 1, order: 1 }, { unique: true });
@@ -67,9 +91,29 @@ interface CriterionDocument extends BaseEvaluationDocument {
 }
 
 const CriterionSchema = new Schema<CriterionDocument>({
-  parent: { type: Schema.Types.ObjectId, ref: Stage.modelName, required: true },
-  weight_value: { type: Number, min: 1, max: 100, required: true },
-  form_type: { type: String, enum: Object.values(FormType), required: true }
+  parent: {
+    type: Schema.Types.ObjectId,
+    ref: Stage.modelName,
+    required: true,
+    validate: {
+      validator: async function (parentId: mongoose.Types.ObjectId) {
+        const exist = await Stage.exists({ _id: parentId });
+        return !!exist;
+      },
+      message: "Criterion must belong to a Stage",
+    },
+  },
+  weight_value: {
+    type: Number,
+    min: 1,
+    max: 100,
+    required: true
+  },
+  form_type: {
+    type: String,
+    enum: Object.values(FormType),
+    required: true
+  }
 });
 
 export const Criterion = BaseEvaluation.discriminator<CriterionDocument>(EvaluationType.criterion, CriterionSchema);
@@ -82,27 +126,30 @@ interface OptionDocument extends BaseEvaluationDocument {
 }
 
 const OptionSchema = new Schema<OptionDocument>({
-  parent: { type: Schema.Types.ObjectId, ref: Criterion.modelName, required: true },
-  weight_value: { type: Number, min: 0, max: 100, required: true }
+  parent: {
+    type: Schema.Types.ObjectId,
+    ref: Criterion.modelName,
+    required: true,
+    validate: {
+      validator: async function (parentId: mongoose.Types.ObjectId) {
+        const exist = await Criterion.exists({ _id: parentId });
+        return !!exist;
+      },
+      message: "Option must belong to a Criterion",
+    },
+  },
+  weight_value: {
+    type: Number,
+    min: 0,
+    max: 100,
+    required: true
+  }
 });
-
 
 OptionSchema.index({ parent: 1, weight_value: 1 }, { unique: true });
 
 export const Option = BaseEvaluation.discriminator<OptionDocument>(EvaluationType.option, OptionSchema);
 
-
-/*
-EValSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
-  const evalId = this._id;
-  const isReferencedByGrant = await Grant.exists({ evaluation: evalId });
-  if (isReferencedByGrant) {
-    const err = new Error(`Cannot delete: ${this.title} it is referenced in Grant.`);
-    return next(err);
-  }
-  next();
-});
-*/
 
 
 

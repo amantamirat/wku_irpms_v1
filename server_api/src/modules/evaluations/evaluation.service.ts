@@ -1,7 +1,7 @@
 import { EvaluationType, FormType } from "./evaluation.enum";
 
 import { Directorate } from "../organization/organization.model";
-import { BaseEvaluation, Stage } from "./evaluation.model";
+import { BaseEvaluation, Criterion, Stage } from "./evaluation.model";
 import mongoose from "mongoose";
 
 export interface GetEvalsOptions {
@@ -24,35 +24,14 @@ export interface CreateEvaluationDto {
 export class EvaluationService {
 
     private static async validateEvaluation(evl: Partial<CreateEvaluationDto>) {
-        if (evl.type === EvaluationType.evaluation || evl.type === EvaluationType.validation) {
-            const directorate = await Directorate.findById(evl.directorate);
-            if (!directorate) {
-                throw new Error("Directorate Not Found!");
-            }
-            return
-        }
-        const expectedParentType =
-            evl.type === EvaluationType.stage ? [EvaluationType.evaluation, EvaluationType.validation]
-                : evl.type === EvaluationType.criterion ? EvaluationType.stage
-                    : EvaluationType.criterion;
-
-        const parentEval = await BaseEvaluation.findById(evl.parent).lean() as any;
-        if (!parentEval) throw new Error(`Parent evaluation not found for '${evl.type}'.`);
-
-        if (Array.isArray(expectedParentType)
-            ? !expectedParentType.includes(parentEval.type)
-            : parentEval.type !== expectedParentType) {
-            throw new Error(
-                `'${evl.type}' must have a parent of type '${Array.isArray(expectedParentType) ? expectedParentType.join("' or '") : expectedParentType}'.`
-            );
-        }
-
         if (evl.type === EvaluationType.option) {
-            if (evl.weight_value === undefined || evl.weight_value === null || !parentEval.weight_value) {
+            if (evl.weight_value === undefined || evl.weight_value === null) {
                 throw new Error("Weight Value is Not Found");
             }
-            if (evl.weight_value > parentEval.weight_value) {
-                throw new Error(`The provided value (${evl.weight_value}) must be less than or equal to the criterion weight (${parentEval.weight_value}).`);
+            const creterion = await Criterion.findById(evl.parent).lean();
+            if (!creterion) throw new Error('Creterion not found.');
+            if (evl.weight_value > creterion.weight_value) {
+                throw new Error(`The provided value (${evl.weight_value}) must be less than or equal to the criterion weight (${creterion.weight_value}).`);
             }
         }
     }
@@ -72,7 +51,6 @@ export class EvaluationService {
                 .lean();
             rest.order = maxStage ? (maxStage.order ?? 0) + 1 : 1;
         }
-        console.log(rest);
         const createdEvaluation = await BaseEvaluation.create({ type, ...rest });
         return createdEvaluation;
     }

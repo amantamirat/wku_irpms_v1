@@ -7,15 +7,17 @@ import { PhaseType } from "../enums/phase.type.enum";
 export class PhaseController {
     static async createPhase(req: Request, res: Response) {
         try {
+            const { type, activity, order, duration, budget, description, project, parent } = req.body;
             const data: CreatePhaseDto = {
-                activity: req.body.activity,
-                order: req.body.order,
-                duration: req.body.duration,
-                budget: req.body.budget,
-                description: req.body.description,
-                project: req.body.project ? new mongoose.Types.ObjectId(req.body.project) : undefined,
-                parent: req.body.parent ? new mongoose.Types.ObjectId(req.body.parent) : undefined,
-                type: req.body.type as PhaseType,
+                type: type as PhaseType,
+                activity: activity,
+                order: order,
+                duration: duration,
+                budget: budget,
+                description: description ? description : undefined,
+                project: type === PhaseType.phase ? new mongoose.Types.ObjectId(project as string) : undefined,
+                parent: type === PhaseType.breakdown ? new mongoose.Types.ObjectId(parent as string) : undefined,
+
             };
             const created = await PhaseService.createPhase(data);
             successResponse(res, 201, "Phase created successfully", created);
@@ -43,13 +45,11 @@ export class PhaseController {
             const { id } = req.params;
             const data: Partial<CreatePhaseDto> = {
                 activity: req.body.activity,
-                order: req.body.order,
                 duration: req.body.duration,
                 budget: req.body.budget,
                 description: req.body.description,
                 project: req.body.project,
                 parent: req.body.parent,
-                type: req.body.type as PhaseType,
             };
             const updated = await PhaseService.updatePhase(id, data);
             successResponse(res, 200, "Phase updated successfully", updated);
