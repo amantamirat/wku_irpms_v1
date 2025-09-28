@@ -67,12 +67,7 @@ export class EvaluationService {
         const evaluation = await BaseEvaluation.findById(id);
         if (!evaluation) throw new Error("Evaluation not found");
         await this.validateEvaluation(data);
-        if (data.type && data.type !== evaluation.type) {
-            throw new Error("Cannot change theme type");
-        }
-        if (data.type === EvaluationType.stage) {
-            delete data.order;
-        }
+        //updation of creterion if there is options that greter than the weight value of the creterion 
         Object.assign(evaluation, data);
         return evaluation.save();
     }
@@ -80,6 +75,8 @@ export class EvaluationService {
     static async deleteEvaluation(id: string) {
         const evaluation = await BaseEvaluation.findById(id);
         if (!evaluation) throw new Error("Evaluation not found");
+        const isParent = await BaseEvaluation.exists({ parent: evaluation._id });
+        if (isParent) throw new Error(`Can not delete parent ${evaluation.type} ${evaluation.title}`);
         return await evaluation.deleteOne();
     }
 

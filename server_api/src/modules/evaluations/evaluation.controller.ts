@@ -43,7 +43,12 @@ export class EvaluationController {
     static async updateEvaluation(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const data: Partial<CreateEvaluationDto> = req.body;
+            const { title, form_type, weight_value } = req.body;
+            const data: Partial<CreateEvaluationDto> = {
+                title: title,
+                form_type: form_type,
+                weight_value: weight_value
+            }
             const updated = await EvaluationService.updateEvaluation(id, data);
             successResponse(res, 201, "Evaluation updated successfully", updated);
         } catch (err: any) {
