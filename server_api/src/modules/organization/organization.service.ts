@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { Unit, AcademicLevel, Classification, Ownership, Category } from "./organization.enum";
 import { BaseOrganization } from "./organization.model";
 import { Evaluation } from "../evaluations/evaluation.model";
+import { Catalog } from "../themes/theme.model";
 
 
 export interface GetOrganizationsOptions {
@@ -65,6 +66,10 @@ export class OrganizationService {
         if (organization.type === Unit.Directorate) {
             const isEvaluationExist = await Evaluation.exists({ directorate: organization._id });
             if (isEvaluationExist) throw new Error(`Can not delete ${organization.type} ${organization.name}, Evaluation data exist.`);
+
+             const isThemeExist = await Catalog.exists({ directorate: organization._id });
+            if (isThemeExist) throw new Error(`Can not delete ${organization.type} ${organization.name}, Theme data exist.`);
+ 
         }
         return await organization.deleteOne();
     }

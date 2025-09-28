@@ -150,16 +150,3 @@ BaseThemeSchema.index(
 
 BaseTheme.createIndexes();
 
-
-/*
-BaseThemeSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
-  const themeId = this._id;
-  const hasChildren = await BaseTheme.exists({ parent: themeId });
-  if (hasChildren) {
-    const err = new Error(`Cannot delete: ${this.title} ${this.type}, it is a parent of other themes.`);
-    return next(err);
-  }
-  next();
-});
-*/
-

@@ -14,11 +14,11 @@ export interface CreateThemeDto {
     _id?: string;
     type: ThemeType;
     title: string;
-    priority?: number;
+    directorate?: Types.ObjectId;
     level?: ThemeLevel;
+    priority?: number;
     parent?: Types.ObjectId;
     catalog?: Types.ObjectId;
-    directorate?: Types.ObjectId;
 }
 
 //type NonRootTypes = ThemeType.theme | ThemeType.componenet | ThemeType.focusArea;
