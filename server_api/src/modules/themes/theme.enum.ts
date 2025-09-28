@@ -4,3 +4,9 @@ export enum ThemeType {
     componenet = 'componenet',
     focusArea = 'focus-area'
 }
+
+export enum ThemeLevel {
+    broad = 'broad',
+    componenet = 'componenet',
+    narrow = 'narrow',
+}

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { ThemeService, CreateThemeDto, GetThemesOptions } from "./theme.service";
-import { ThemeType } from "./enums/theme.type.enum";
+import { ThemeType } from "./theme.enum";
 import { errorResponse, successResponse } from "../../util/response";
 
 export class ThemeController {

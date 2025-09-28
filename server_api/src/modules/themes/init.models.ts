@@ -1,12 +1,9 @@
-import { BroadTheme, Componenet, FocusArea } from "./child.theme.model";
-import { Catalog } from "./catalog.theme.model";
-
+import { Catalog, Theme, Componenet, FocusArea } from "./theme.model";
 
 export function initializeThemeModels() {
-  // Just importing them is enough to register the discriminators
   return {
     Catalog,
-    BroadTheme,
+    Theme,
     Componenet,
     FocusArea
   };

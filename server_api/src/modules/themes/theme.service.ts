@@ -1,7 +1,6 @@
 import { Types } from "mongoose";
-import { ThemeLevel } from "./enums/theme.level.enum";
-import { ThemeType } from "./enums/theme.type.enum";
-import { Theme } from "./base.theme.model";
+import { ThemeType, ThemeLevel } from "./theme.enum";
+import { BaseTheme } from "./theme.model";
 import { Directorate } from "../organization/organization.model";
 
 export interface GetThemesOptions {
@@ -22,36 +21,23 @@ export interface CreateThemeDto {
     directorate?: Types.ObjectId;
 }
 
-type NonRootTypes = ThemeType.theme | ThemeType.componenet | ThemeType.focusArea;
+//type NonRootTypes = ThemeType.theme | ThemeType.componenet | ThemeType.focusArea;
 
 export class ThemeService {
 
-    private static readonly parentType: Record<NonRootTypes, ThemeType> = {
-        [ThemeType.theme]: ThemeType.catalog,
-        [ThemeType.componenet]: ThemeType.theme,
-        [ThemeType.focusArea]: ThemeType.componenet,
-    };
 
     private static async validateThemeHierarchy(theme: Partial<CreateThemeDto>) {
         if (theme.type === ThemeType.catalog) {
-            const directorate = await Directorate.findById(theme.directorate);
-            if (!directorate) {
-                throw new Error("Directorate Not Found!");
-            }
             return
         }
-        const parent = await Theme.findById(theme.parent).lean() as any;
+        const parent = await BaseTheme.findById(theme.parent).lean() as any;
         if (!parent) {
             throw new Error("Parent Not Found!");
-        }
-        const requiredParentType = this.parentType[theme.type as NonRootTypes];
-        if (parent.type !== requiredParentType) {
-            throw new Error(`${theme.type} must have parent of type ${requiredParentType}`);
-        }
+        }        
         // assign catalog
         (theme as any).catalog = theme.type === ThemeType.theme ? parent._id : parent.catalog;
 
-        const catalog = await Theme.findById(theme.catalog).lean() as any;
+        const catalog = await BaseTheme.findById(theme.catalog).lean() as any;
         if (!catalog) {
             throw new Error("Catalog Not Found!");
         }
@@ -66,10 +52,10 @@ export class ThemeService {
     static async createTheme(data: CreateThemeDto) {
         //const { type, ...rest } = data;
         await this.validateThemeHierarchy(data);
-        if (!Theme.discriminators || !Theme.discriminators[data.type]) {
+        if (!BaseTheme.discriminators || !BaseTheme.discriminators[data.type]) {
             throw new Error(`Invalid theme type: ${data.type}`);
         }
-        const model = Theme.discriminators[data.type];
+        const model = BaseTheme.discriminators[data.type];
         const createdTheme = await model.create(data);
         return createdTheme;
     }
@@ -80,13 +66,12 @@ export class ThemeService {
         if (options.parent) filter.parent = options.parent;
         if (options.catalog) filter.catalog = options.catalog;
         if (options.directorate) filter.directorate = options.directorate;
-        const themes = await Theme.find(filter).lean();
-        //console.log(themes);
+        const themes = await BaseTheme.find(filter).lean();
         return themes;
     }
 
     static async updateTheme(id: string, data: Partial<CreateThemeDto>) {
-        const theme = await Theme.findById(id);
+        const theme = await BaseTheme.findById(id);
         if (!theme) throw new Error("Theme not found");
         await this.validateThemeHierarchy(data);
         if (data.type && data.type !== theme.type) {
@@ -97,8 +82,10 @@ export class ThemeService {
     }
 
     static async deleteTheme(id: string) {
-        const theme = await Theme.findById(id);
+        const theme = await BaseTheme.findById(id);
         if (!theme) throw new Error("Theme not found");
+        const isParentExist = await BaseTheme.exists({ parent: theme._id });
+        if (isParentExist) throw new Error(`Can not delete parent ${theme.type} ${theme.title}`);
         return await theme.deleteOne();
     }
 }
