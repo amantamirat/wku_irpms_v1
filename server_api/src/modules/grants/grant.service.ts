@@ -1,8 +1,8 @@
 import { Types } from "mongoose";
 import { Evaluation } from "../evaluations/evaluation.model";
-import { Catalog } from "../themes/catalog.theme.model";
 import { Grant } from "./grant.model";
 import { Directorate } from "../organization/organization.model";
+import { Catalog } from "../themes/theme.model";
 
 
 export interface GetGrantsOptions {
