@@ -37,4 +37,5 @@ const ProjectStageSchema = new Schema<IProjectStage>({
     },
 }, { timestamps: true });
 
+ProjectStageSchema.index({ project: 1, stage: 1 }, { unique: true });
 export const ProjectStage = model<IProjectStage>(COLLECTIONS.PROJECT_STAGE, ProjectStageSchema);

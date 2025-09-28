@@ -1,8 +1,8 @@
-import { Types } from "mongoose";
 import { EvaluationType, FormType } from "./evaluation.enum";
 
 import { Directorate } from "../organization/organization.model";
 import { BaseEvaluation, Stage } from "./evaluation.model";
+import mongoose from "mongoose";
 
 export interface GetEvalsOptions {
     type?: EvaluationType;
@@ -13,8 +13,8 @@ export interface GetEvalsOptions {
 export interface CreateEvaluationDto {
     type: EvaluationType;
     title: string;
-    directorate?: Types.ObjectId;
-    parent?: Types.ObjectId;
+    directorate?: mongoose.Types.ObjectId;
+    parent?: mongoose.Types.ObjectId;
     order?: number;
     weight_value?: number;
     form_type?: FormType;
@@ -23,7 +23,7 @@ export interface CreateEvaluationDto {
 
 export class EvaluationService {
 
-    private static async validateEval(evl: Partial<CreateEvaluationDto>) {
+    private static async validateEvaluation(evl: Partial<CreateEvaluationDto>) {
         if (evl.type === EvaluationType.evaluation || evl.type === EvaluationType.validation) {
             const directorate = await Directorate.findById(evl.directorate);
             if (!directorate) {
@@ -59,7 +59,7 @@ export class EvaluationService {
 
     static async createEvaluation(data: CreateEvaluationDto) {
         const { type, ...rest } = data;
-        await this.validateEval(data);
+        await this.validateEvaluation(data);
         if (!BaseEvaluation.discriminators || !BaseEvaluation.discriminators[type]) {
             throw new Error(`Invalid Evaluation type: ${type}`);
         }
@@ -68,11 +68,11 @@ export class EvaluationService {
                 parent: data.parent
             })
                 .sort({ order: -1 })
-                .select('stage_level')
+                .select('order')
                 .lean();
             rest.order = maxStage ? (maxStage.order ?? 0) + 1 : 1;
         }
-
+        console.log(rest);
         const createdEvaluation = await BaseEvaluation.create({ type, ...rest });
         return createdEvaluation;
     }
@@ -88,7 +88,7 @@ export class EvaluationService {
     static async updateEvaluation(id: string, data: Partial<CreateEvaluationDto>) {
         const evaluation = await BaseEvaluation.findById(id);
         if (!evaluation) throw new Error("Evaluation not found");
-        await this.validateEval(data);
+        await this.validateEvaluation(data);
         if (data.type && data.type !== evaluation.type) {
             throw new Error("Cannot change theme type");
         }

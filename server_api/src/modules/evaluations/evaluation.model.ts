@@ -27,7 +27,12 @@ interface EvaluationDocument extends BaseEvaluationDocument {
 }
 
 const EvaluationSchema = new Schema<EvaluationDocument>({
-  directorate: { type: Schema.Types.ObjectId, ref: Directorate.modelName, required: true, immutable: true },
+  directorate: {
+    type: Schema.Types.ObjectId,
+    ref: Directorate.modelName,
+    required: true,
+    immutable: true
+  },
 });
 
 export const Evaluation = BaseEvaluation.discriminator<EvaluationDocument>(EvaluationType.evaluation, EvaluationSchema);

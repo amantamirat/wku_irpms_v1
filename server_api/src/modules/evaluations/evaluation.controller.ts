@@ -1,21 +1,30 @@
 import { Request, Response } from "express";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { EvaluationService, CreateEvaluationDto, GetEvalsOptions } from "./evaluation.service";
 import { EvaluationType } from "./evaluation.enum";
 import { errorResponse, successResponse } from "../../util/response";
+import { title } from "process";
 
 export class EvaluationController {
 
     static async createEvaluation(req: Request, res: Response) {
         try {
-            const data: CreateEvaluationDto = req.body;
+            const { type, title, directorate, parent, form_type, weight_value } = req.body;
+            const data: CreateEvaluationDto = {
+                type: type,
+                title: title,
+                directorate: type === EvaluationType.evaluation ? new mongoose.Types.ObjectId(directorate) : undefined,
+                parent: type !== EvaluationType.evaluation ? new mongoose.Types.ObjectId(parent) : undefined,
+                form_type: type === EvaluationType.criterion ? form_type : undefined,
+                weight_value: type === EvaluationType.criterion || type === EvaluationType.option ? weight_value : undefined
+            };
             const evaluation = await EvaluationService.createEvaluation(data);
             successResponse(res, 201, "Evaluation created successfully", evaluation);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
-    
+
     static async getEvaluations(req: Request, res: Response) {
         try {
             const { type, parent, directorate } = req.query;
@@ -55,7 +64,7 @@ export class EvaluationController {
 
     static async reorderStageLevel(req: Request, res: Response) {
         try {
-            const { id, direction } = req.params;            
+            const { id, direction } = req.params;
             const data = await EvaluationService.reorderStageLevel(id, direction);
             successResponse(res, 201, "Stage reorder successfully", data);
         } catch (err: any) {
