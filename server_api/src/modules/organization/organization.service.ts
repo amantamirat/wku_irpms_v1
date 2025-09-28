@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Unit, AcademicLevel, Classification, Ownership, Category } from "./organization.enum";
 import { BaseOrganization } from "./organization.model";
+import { Evaluation } from "../evaluations/evaluation.model";
 
 
 export interface GetOrganizationsOptions {
@@ -11,7 +12,7 @@ export interface GetOrganizationsOptions {
 
 export interface CreateOrganizationDto {
     type: Unit;
-    name: string;    
+    name: string;
     academic_level?: AcademicLevel;
     classification?: Classification;
     ownership?: Ownership;
@@ -59,8 +60,12 @@ export class OrganizationService {
     static async deleteOrganization(id: string) {
         const organization = await BaseOrganization.findById(id);
         if (!organization) throw new Error("Organization not found");
-        const isParent = await BaseOrganization.exists({ parent: organization._id });
-        if (isParent) throw new Error(`Can not delete parent ${organization.type} ${organization.name}`);
+        const isParentExist = await BaseOrganization.exists({ parent: organization._id });
+        if (isParentExist) throw new Error(`Can not delete parent ${organization.type} ${organization.name}`);
+        if (organization.type === Unit.Directorate) {
+            const isEvaluationExist = await Evaluation.exists({ directorate: organization._id });
+            if (isEvaluationExist) throw new Error(`Can not delete ${organization.type} ${organization.name}, Evaluation data exist.`);
+        }
         return await organization.deleteOne();
     }
 }
