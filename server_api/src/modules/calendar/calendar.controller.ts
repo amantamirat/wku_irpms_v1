@@ -7,8 +7,8 @@ export class CalendarController {
   static async createCalendar(req: Request, res: Response) {
     try {
       const data: CreateCalendarDto = req.body;
-      const theme = await CalendarService.createCalendar(data);
-      successResponse(res, 201, "Calendar created successfully", theme);
+      const calendar = await CalendarService.createCalendar(data);
+      successResponse(res, 201, "Calendar created successfully", calendar);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }

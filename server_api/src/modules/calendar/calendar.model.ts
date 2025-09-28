@@ -2,12 +2,14 @@ import { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import { COLLECTIONS } from '../../enums/collections.enum';
 import { Call } from '../call/call.model';
+import { CalendarStatus } from './calendar.enum';
 
 
 interface ICalendar extends Document {
   year: number;
   start_date: Date;
   end_date: Date;
+  status: CalendarStatus;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -27,7 +29,13 @@ const CalendarSchema = new Schema<ICalendar>({
   end_date: {
     type: Date,
     required: true,
-  }
+  },
+  status: {
+    type: String,
+    enum: Object.values(CalendarStatus),
+    default: CalendarStatus.active,
+    required: true
+  },
 }, {
   timestamps: true
 });

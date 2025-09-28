@@ -1,11 +1,13 @@
+import { CalendarStatus } from "./calendar.enum";
 import { Calendar } from "./calendar.model";
 
 
 
 export interface CreateCalendarDto {
-  year: number;
-  start_date: Date | string; 
-  end_date: Date | string;
+    year: number;
+    start_date: Date | string;
+    end_date: Date | string;
+    status?: CalendarStatus;
 }
 
 
@@ -16,7 +18,7 @@ export class CalendarService {
         return createdCalendar;
     }
 
-    static async getCalendars() {        
+    static async getCalendars() {
         return await Calendar.find().lean();
     }
 
