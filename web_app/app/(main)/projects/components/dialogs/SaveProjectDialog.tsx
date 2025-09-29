@@ -4,23 +4,32 @@ import { Dialog } from 'primereact/dialog';
 import { useEffect, useState } from 'react';
 import { Project, validateProject } from '../../models/project.model';
 import ProjectInfoStep from '../ProjectInfoStep';
-import { Call } from '@/app/(main)/calls/models/call.model';
+import { Call, CallStatus } from '@/app/(main)/calls/models/call.model';
 import { Dropdown } from 'primereact/dropdown';
+import { CallApi } from '@/app/(main)/calls/api/call.api';
 
 
 interface SaveDialogProps {
     visible: boolean;
     project: Project;
     onChange: (e: Project) => void;
-    calls: Call[];
     onSave: () => void;
     onHide: () => void;
 }
 
 function SaveProjectDialog(props: SaveDialogProps) {
-    const { visible, project, onChange, onSave, onHide, calls } = props;
+    const { visible, project, onChange, onSave, onHide } = props;
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
+    const [calls, setCalls] = useState<Call[]>([]);
+
+    useEffect(() => {
+        const fetchCalls = async () => {
+            const data = await CallApi.getCalls({ status: CallStatus.active });
+            setCalls(data);
+        };
+        fetchCalls();
+    }, []);
 
     const save = async () => {
         setSubmitted(true);

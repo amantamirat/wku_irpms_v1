@@ -10,20 +10,17 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
-import { Project } from './models/project.model';
 import { ProjectApi } from './api/project.api';
 import SaveProjectDialog from './components/dialogs/SaveProjectDialog';
-import { CallApi } from '../calls/api/call.api';
-import { Call, CallStatus } from '../calls/models/call.model';
 import ProjectDetail from './components/ProjectDetail';
+import { Project } from './models/project.model';
 
 const ProjectPage = () => {
     const emptyProject: Project = {
         call: '',
         title: ''
     };
-
-    const [calls, setCalls] = useState<Call[]>([]);
+    
     const [projects, setProjects] = useState<Project[]>([]);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
@@ -37,24 +34,11 @@ const ProjectPage = () => {
     useEffect(() => {
         setFilters(initFilters());
         setGlobalFilter('');
-        loadCalls();
         loadProjects();
     }, []);
 
 
-    const loadCalls = async () => {
-        try {
-            const data = await CallApi.getCalls({ status: CallStatus.active });
-            setCalls(data);
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load call data',
-                detail: '' + err,
-                life: 3000
-            });
-        }
-    };
+    
 
     const loadProjects = async () => {
         try {
@@ -202,7 +186,6 @@ const ProjectPage = () => {
                             onChange={setSelectedProject}
                             onSave={saveProject}
                             onHide={() => setShowSaveDialog(false)}
-                            calls={calls}
                         />
                     )}
 
