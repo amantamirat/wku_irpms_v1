@@ -1,16 +1,13 @@
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Project } from "../models/project.model";
-import { Call } from "../../calls/models/call.model";
-import { Dropdown } from "primereact/dropdown";
 
 interface ProjectInfoStepProps {
     project: Project;
     setProject: (project: Project) => void;
-    calls?: Call[];
 }
 
-export default function ProjectInfoStep({ project, setProject, calls }: ProjectInfoStepProps) {
+export default function ProjectForm({ project, setProject }: ProjectInfoStepProps) {
     return (
         <div className="p-fluid formgrid grid">            
             <div className="field col-12">

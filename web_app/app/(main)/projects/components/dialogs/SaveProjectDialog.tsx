@@ -3,7 +3,7 @@ import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { useEffect, useState } from 'react';
 import { Project, validateProject } from '../../models/project.model';
-import ProjectInfoStep from '../ProjectInfoStep';
+import ProjectForm from '../ProjectForm';
 import { Call, CallStatus } from '@/app/(main)/calls/models/call.model';
 import { Dropdown } from 'primereact/dropdown';
 import { CallApi } from '@/app/(main)/calls/api/call.api';
@@ -12,13 +12,13 @@ import { CallApi } from '@/app/(main)/calls/api/call.api';
 interface SaveDialogProps {
     visible: boolean;
     project: Project;
-    onChange: (e: Project) => void;
+    setProject: (e: Project) => void;
     onSave: () => void;
     onHide: () => void;
 }
 
 function SaveProjectDialog(props: SaveDialogProps) {
-    const { visible, project, onChange, onSave, onHide } = props;
+    const { visible, project, setProject, onSave, onHide } = props;
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
     const [calls, setCalls] = useState<Call[]>([]);
@@ -79,7 +79,7 @@ function SaveProjectDialog(props: SaveDialogProps) {
                         id="call"
                         options={calls}
                         value={project.call}
-                        onChange={(e) => onChange({ ...project, call: e.value })}
+                        onChange={(e) => setProject({ ...project, call: e.value })}
                         required
                         optionLabel="title"
                         placeholder="Select a Call"
@@ -87,7 +87,7 @@ function SaveProjectDialog(props: SaveDialogProps) {
                     />
                 </div>
             </div>
-            <ProjectInfoStep project={project} setProject={onChange} calls={calls} />
+            <ProjectForm project={project} setProject={setProject} />
             {errorMessage && (
                 <small className="p-error">{errorMessage}</small>
             )}

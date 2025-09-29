@@ -25,8 +25,7 @@ export class CallController {
     }
 
     static async getCalls(req: Request, res: Response) {
-        try {
-            console.log("accepted");
+        try {            
             const { calendar, directorate, status } = req.query;
             const filter = {
                 calendar: calendar ? new mongoose.Types.ObjectId(calendar as string) : undefined,

@@ -183,7 +183,7 @@ const ProjectPage = () => {
                         <SaveProjectDialog
                             visible={showSaveDialog}
                             project={selectedProject}
-                            onChange={setSelectedProject}
+                            setProject={setSelectedProject}
                             onSave={saveProject}
                             onHide={() => setShowSaveDialog(false)}
                         />
