@@ -12,7 +12,7 @@ import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
 import { Project } from './models/project.model';
 import { ProjectApi } from './api/project.api';
-import SaveDialog from './components/dialogs/SaveDialog';
+import SaveProjectDialog from './components/dialogs/SaveProjectDialog';
 import { CallApi } from '../calls/api/call.api';
 import { Call, CallStatus } from '../calls/models/call.model';
 import ProjectDetail from './components/ProjectDetail';
@@ -196,7 +196,7 @@ const ProjectPage = () => {
                     </DataTable>
 
                     {selectedProject && (
-                        <SaveDialog
+                        <SaveProjectDialog
                             visible={showSaveDialog}
                             project={selectedProject}
                             onChange={setSelectedProject}

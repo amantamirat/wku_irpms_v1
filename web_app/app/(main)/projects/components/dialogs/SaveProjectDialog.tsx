@@ -17,7 +17,7 @@ interface SaveDialogProps {
     onHide: () => void;
 }
 
-function SaveDialog(props: SaveDialogProps) {
+function SaveProjectDialog(props: SaveDialogProps) {
     const { visible, project, onChange, onSave, onHide, calls } = props;
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
@@ -87,4 +87,4 @@ function SaveDialog(props: SaveDialogProps) {
     );
 }
 
-export default SaveDialog;
+export default SaveProjectDialog;
