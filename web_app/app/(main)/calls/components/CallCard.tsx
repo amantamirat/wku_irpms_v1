@@ -5,7 +5,7 @@ import { Card } from "primereact/card";
 import { Calendar } from "../../calendars/models/calendar.model";
 import { Button } from "primereact/button";
 import { useState } from "react";
-import ApplyWizard from "../../projects/components/ApplyWizard";
+import ApplyWizard from "../../projects/apply/ApplyWizard";
 import { Organization } from "../../organizations/models/organization.model";
 import { Collaborator, Project } from "../../projects/models/project.model";
 import { useAuth } from "@/contexts/auth-context";

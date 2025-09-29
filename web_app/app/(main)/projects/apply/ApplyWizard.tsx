@@ -4,12 +4,12 @@ import { useState } from "react";
 import { Button } from "primereact/button";
 import { Steps } from "primereact/steps";
 import { PhaseType, Project } from "../models/project.model";
-import UploadDocumentStep from "./UploadDocumentStep";
-import ProjectInfoStep from "./ProjectInfoStep";
+import UploadDocumentStep from "../components/UploadDocumentStep";
+import ProjectInfoStep from "../components/ProjectInfoStep";
 import { Grant } from "../../grants/models/grant.model";
-import CollaboratorsManager from "./collaborators/CollaboratorsManager";
-import ThemeManager from "./themes/ThemeManager";
-import PhasesManager from "./phases/PhasesManager";
+import CollaboratorsManager from "../components/collaborators/CollaboratorsManager";
+import ThemeManager from "../components/themes/ThemeManager";
+import PhasesManager from "../components/phases/PhasesManager";
 
 interface ApplyWizardProps {
     visible: boolean;
