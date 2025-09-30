@@ -33,7 +33,7 @@ export class GrantService {
     static async getGrants(options: GetGrantsOptions) {
         const filter: any = {};
         if (options.directorate) filter.directorate = options.directorate;
-        return Grant.find(filter).populate('theme').populate('evaluation').lean();
+        return Grant.find(filter).lean();
     }
 
     static async updateGrant(id: string, data: Partial<CreateGrantDto>) {
