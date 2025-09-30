@@ -1,5 +1,5 @@
 
-import { CallStatus } from "./enums/call.status.enum";
+import { CallStatus } from "./call.enum";
 import { Call } from "./call.model";
 import { Directorate } from "../organization/organization.model";
 import mongoose from "mongoose";
@@ -7,6 +7,7 @@ import { Catalog } from "../themes/theme.model";
 import { Calendar } from "../calendar/calendar.model";
 import { Evaluation } from "../evaluations/evaluation.model";
 import { Grant } from "../grants/grant.model";
+import { Project } from "../project/project.model";
 
 
 export interface GetCallsOptions {
@@ -50,7 +51,7 @@ export class CallService {
         const evaluation = await Evaluation.findById(call.evaluation);
         if (!evaluation) {
             throw new Error("Evaluation Not Found!");
-        }        
+        }
         return
     }
 
@@ -89,6 +90,8 @@ export class CallService {
     static async deleteCall(id: string) {
         const call = await Call.findById(id);
         if (!call) throw new Error("Call not found");
+        const referencedByProject = await Project.exists({ call: call._id });
+        if (referencedByProject) throw new Error(`Can not delete ${call.title}, it is referenced in projects.`);
         return await call.deleteOne();
     }
 }

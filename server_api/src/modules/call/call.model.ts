@@ -1,10 +1,9 @@
 import mongoose, { Schema, model, Document } from 'mongoose';
-import { CallStatus } from './enums/call.status.enum';
+import { CallStatus } from './call.enum';
 import { COLLECTIONS } from '../../enums/collections.enum';
 import { Directorate } from '../organization/organization.model';
 import { Catalog } from '../themes/theme.model';
 import { Evaluation } from '../evaluations/evaluation.model';
-import { required } from 'joi';
 
 interface ICall extends Document {
     directorate: mongoose.Types.ObjectId;
@@ -12,7 +11,6 @@ interface ICall extends Document {
     title: string;
     deadline: Date;
     description?: string;
-    total_budget?: number;
     grant: mongoose.Types.ObjectId;
     theme?: mongoose.Types.ObjectId;
     evaluation: mongoose.Types.ObjectId;
@@ -25,13 +23,8 @@ const CallSchema = new Schema<ICall>({
     directorate: {
         type: Schema.Types.ObjectId,
         ref: Directorate.modelName,
-        required: true,
-        validate: {
-            validator: async function (directorateId: mongoose.Types.ObjectId) {
-                const exist = await Directorate.exists({ _id: directorateId });
-                return !!exist;
-            }
-        },
+        immutable: true,
+        required: true
     },
     calendar: {
         type: Schema.Types.ObjectId,
@@ -70,6 +63,5 @@ const CallSchema = new Schema<ICall>({
         required: true
     }
 }, { timestamps: true });
-
 
 export const Call = model<ICall>(COLLECTIONS.CALL, CallSchema);

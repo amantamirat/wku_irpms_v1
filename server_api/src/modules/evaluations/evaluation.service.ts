@@ -1,6 +1,5 @@
 import { EvaluationType, FormType } from "./evaluation.enum";
 
-import { Directorate } from "../organization/organization.model";
 import { BaseEvaluation, Criterion, Stage } from "./evaluation.model";
 import mongoose from "mongoose";
 import { Call } from "../call/call.model";

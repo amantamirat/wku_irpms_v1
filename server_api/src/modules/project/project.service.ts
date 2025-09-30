@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { Project } from "./project.model";
 import { CallService } from "../call/call.service";
-import { CallStatus } from "../call/enums/call.status.enum";
+import { CallStatus } from "../call/call.enum";
 import { ProjectStatus } from "./project.enum";
 import { CollaboratorService } from "./collaborators/collaborator.service";
 import { ApplicantService } from "../applicants/applicant.service";
