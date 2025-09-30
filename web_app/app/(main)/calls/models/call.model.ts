@@ -16,10 +16,9 @@ export type Call = {
     title: string;
     deadline: Date;
     description?: string | null;
-    total_budget?: number;
     poster?: string | null;
     grant: string | Grant;
-    theme: string | Theme;
+    theme?: string | Theme;
     evaluation: string | Evaluation;
     status: CallStatus;
     createdAt?: Date;
