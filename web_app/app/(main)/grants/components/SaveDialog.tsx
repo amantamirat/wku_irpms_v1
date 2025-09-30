@@ -1,27 +1,22 @@
 'use client';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
-import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { classNames } from 'primereact/utils';
 import { useEffect, useState } from 'react';
-import { Evaluation } from '../../evals/models/eval.model';
-import { Theme } from '../../themes/models/theme.model';
 import { Grant, validateGrant } from '../models/grant.model';
 
 interface SaveDialogProps {
     visible: boolean;
     grant: Grant;
-    themes?: Theme[];
-    evaluations?: Evaluation[];
-    onChange: (grant: Grant) => void;
+    setGrant: (grant: Grant) => void;
     onSave: () => void;
     onHide: () => void;
 }
 
 function SaveDialog(props: SaveDialogProps) {
-    const { visible, grant, themes, evaluations, onChange, onSave, onHide } = props;
+    const { visible, grant, setGrant, onSave, onHide } = props;
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
@@ -60,7 +55,7 @@ function SaveDialog(props: SaveDialogProps) {
     return (
         <Dialog
             visible={visible}
-            style={{ width: '600px', height: '500px' }}
+            style={{ width: '600px', height: '400px' }}
             header={grant._id ? 'Edit Grant' : 'Create New Grant'}
             modal
             className="p-fluid"
@@ -74,7 +69,7 @@ function SaveDialog(props: SaveDialogProps) {
                 <InputText
                     id="title"
                     value={grant.title}
-                    onChange={(e) => onChange({ ...grant, title: e.target.value })}
+                    onChange={(e) => setGrant({ ...grant, title: e.target.value })}
                     required
                     autoFocus
                     className={classNames({ 'p-invalid': submitted && !grant.title })}
@@ -85,49 +80,10 @@ function SaveDialog(props: SaveDialogProps) {
                 <label htmlFor="description">Description </label>
                 <InputTextarea
                     value={grant.description ?? ""}
-                    onChange={(e) => onChange({ ...grant, description: e.target.value })}
+                    onChange={(e) => setGrant({ ...grant, description: e.target.value })}
                     rows={5}
                     cols={30} />
-            </div>
-
-             <div className="field">
-                <label htmlFor="theme">Theme</label>
-                <Dropdown
-                    id="theme"
-                    value={grant.theme}
-                    options={themes}
-                    onChange={(e) =>
-                        onChange({
-                            ...grant,
-                            theme: e.value,
-                        })
-                    }
-                    optionLabel="title"
-                    placeholder="Select Theme"
-                    required
-                    className={classNames({ 'p-invalid': submitted && !grant.theme })}
-                />
-            </div>
-
-            <div className="field">
-                <label htmlFor="evaluation">Evaluation</label>
-                <Dropdown
-                    id="evaluation"
-                    value={grant.evaluation}
-                    options={evaluations}
-                    onChange={(e) =>
-                        onChange({
-                            ...grant,
-                            evaluation: e.value,
-                        })
-                    }
-                    optionLabel="title"
-                    placeholder="Select Evaluation"
-                    required
-                    className={classNames({ 'p-invalid': submitted && !grant.evaluation })}
-                />
-            </div>          
-
+            </div>   
             {errorMessage && (
                 <small className="p-error">{errorMessage}</small>
             )}

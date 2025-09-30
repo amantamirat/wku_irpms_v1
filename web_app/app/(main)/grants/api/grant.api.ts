@@ -14,15 +14,7 @@ function sanitizeGrant(grant: Partial<Grant>): Partial<Grant> {
         directorate:
             typeof grant.directorate === 'object' && grant.directorate !== null
                 ? (grant.directorate as Organization)._id
-                : grant.directorate,
-        evaluation:
-            typeof grant.evaluation === 'object' && grant.evaluation !== null
-                ? (grant.evaluation as Evaluation)._id
-                : grant.evaluation,
-        theme:
-            typeof grant.theme === 'object' && grant.theme !== null
-                ? (grant.theme as Theme)._id
-                : grant.theme,
+                : grant.directorate
     };
 }
 

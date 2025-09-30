@@ -29,14 +29,10 @@ const GrantManager = (props: GrantManagerProps) => {
     const { directorate } = props
     const emptyGrant: Grant = {
         directorate: props.directorate,
-        title: '',
-        theme: '',
-        evaluation: ''
+        title: ''
     };
 
     const [grants, setGrants] = useState<Grant[]>([]);
-    const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
-    const [themes, setThemes] = useState<Theme[]>([]);
     const [error, setError] = useState<string | null>(null);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
@@ -46,7 +42,7 @@ const GrantManager = (props: GrantManagerProps) => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
 
-    const loadGrants = useCallback(async () => {
+    const fetchGrants = useCallback(async () => {
         try {
             const data = await GrantApi.getGrants({ directorate: props.directorate._id });
             setGrants(data);
@@ -55,45 +51,11 @@ const GrantManager = (props: GrantManagerProps) => {
         } finally {
 
         }
-    }, [directorate, error]);
-
-
-    const loadThemes = useCallback(async () => {
-        try {
-            const data = await ThemeApi.getThemes({ directorate: directorate._id });
-            setThemes(data);
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load theme data',
-                detail: '' + err,
-                life: 3000
-            });
-        }
-
-    }, [directorate]);
-
-
-    const loadEvaluations = useCallback(async () => {
-        try {
-            const data = await EvaluationApi.getEvaluations({ directorate: directorate._id });
-            setEvaluations(data);
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load evaluation data',
-                detail: '' + err,
-                life: 3000
-            });
-        }
-
-    }, [directorate]);
+    }, [directorate, error]);    
 
     useEffect(() => {
-        loadGrants();
-        loadThemes();
-        loadEvaluations();
-    }, [loadGrants, loadThemes, loadEvaluations]);
+        fetchGrants();        
+    }, [fetchGrants]);
 
     useEffect(() => {
         setFilters(initFilters());
@@ -129,7 +91,7 @@ const GrantManager = (props: GrantManagerProps) => {
             if (selectedGrant._id) {
                 const updated = await GrantApi.updateGrant(selectedGrant);
                 const index = _grants.findIndex((c) => c._id === selectedGrant._id);
-                _grants[index] = { ...updated, theme: selectedGrant.theme, evaluation: selectedGrant.evaluation };
+                _grants[index] = { ...updated };
             } else {
                 const created = await GrantApi.createGrant(selectedGrant);
                 _grants.push({ ...selectedGrant, _id: created._id });
@@ -242,8 +204,7 @@ const GrantManager = (props: GrantManagerProps) => {
                         <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="title" header="Title" sortable />
-                        <Column field="theme.title" header="Theme" sortable />
-                        <Column field="evaluation.title" header="Evaluation" sortable />
+                        <Column field="description" header="Description" sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
@@ -251,9 +212,7 @@ const GrantManager = (props: GrantManagerProps) => {
                         <SaveDialog
                             visible={showSaveDialog}
                             grant={selectedGrant}
-                            themes={themes}
-                            evaluations={evaluations}
-                            onChange={setSelectedGrant}
+                            setGrant={setSelectedGrant}
                             onSave={saveGrant}
                             onHide={() => setShowSaveDialog(false)}
                         />
