@@ -19,7 +19,7 @@ interface ProjectInfoStepProps {
 
 
 
-export default function ThemeManager({ project, setProject }: ProjectInfoStepProps) {
+export default function ProjectThemeManager({ project, setProject }: ProjectInfoStepProps) {
 
     const emptyProjectTheme: ProjectTheme = {
         theme: "",
@@ -123,7 +123,7 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
                 value={projectThemes}
                 selection={projectTheme}
                 onSelectionChange={(e) => setProjectTheme(e.value as ProjectTheme)}
-                dataKey="_id"
+                dataKey="theme._id"
                 paginator
                 rows={10}
                 rowsPerPageOptions={[5, 10, 25]}

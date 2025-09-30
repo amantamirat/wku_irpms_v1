@@ -1,9 +1,8 @@
-import { Card } from "primereact/card";
 import { Divider } from "primereact/divider";
 import { TabView, TabPanel } from "primereact/tabview";
 import { Project } from "../models/project.model";
 import CollaboratorManager from "../collaborators/components/CollaboratorManager";
-import ThemeManager from "../themes/components/ThemeManager";
+import ProjectThemeManager from "../themes/components/ThemeManager";
 import PhaseManager from "../phases/components/PhaseManager";
 import { PhaseType } from "../phases/models/phase.model";
 import ProjectStageManager from "../stages/components/StageManager";
@@ -33,7 +32,7 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
                         <CollaboratorManager project={project} />
                     </TabPanel>
                     <TabPanel header="Themes">
-                        <ThemeManager project={project} />
+                        <ProjectThemeManager project={project} />
                     </TabPanel>
                     <TabPanel header="Phases">
                         <PhaseManager project={project} phaseType={PhaseType.phase} />

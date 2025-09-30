@@ -7,9 +7,9 @@ import { Grant } from "../../grants/models/grant.model";
 import CollaboratorManager from "../collaborators/components/CollaboratorManager";
 import PhasesManager from "../components/phases/PhasesManager";
 import ProjectForm from "../components/dialogs/ProjectForm";
-import ThemeManager from "../components/themes/ThemeManager";
 import UploadDocumentStep from "../components/UploadDocumentStep";
 import { Project } from "../models/project.model";
+import ProjectThemeManager from "../themes/components/ThemeManager";
 
 
 interface ApplyWizardProps {
@@ -69,9 +69,12 @@ export default function ApplyWizard({ visible, call, project, setProject, onHide
 
             {activeStep === 0 && <UploadDocumentStep />}
             {activeStep === 1 && <ProjectForm project={project} setProject={setProject} />}
-            {activeStep === 2 && <CollaboratorManager project={project} setProject={setProject}/>}
+            {activeStep === 2 && <CollaboratorManager project={project} setProject={setProject} />}
+            {activeStep === 3 && <ProjectThemeManager project={project} setProject={setProject} />}
+
             {/**
-             *            {activeStep === 3 && <ThemeManager project={project} setProject={setProject} />}
+             * 
+             *            
             {activeStep === 4 && <PhasesManager project={project} setProject={setProject} phaseType={PhaseType.phase} />}
  
              */}
