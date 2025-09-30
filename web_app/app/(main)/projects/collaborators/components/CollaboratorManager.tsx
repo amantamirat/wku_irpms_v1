@@ -93,27 +93,19 @@ export default function CollaboratorManager({ project, setProject }: Collaborato
     };
 
     const removeCollaborator = () => {
-        try {
-            const applicant = collaborator.applicant as Applicant;
-
-            if (!applicant || !applicant._id) {
-                throw new Error("Invalid collaborator.");
-            }
-            const updatedCollaborators = project.collaborators?.filter(
-                (c) => (c.applicant as Applicant)._id !== applicant._id
-            ) || [];
-
-            if (setProject) {
-                 setProject({ ...project, collaborators: updatedCollaborators });
-            }
-
-           
-        } catch (err) {
-            console.log(err);
-            alert(err instanceof Error ? err.message : "Something went wrong");
-        } finally {
-            hideDialogs();
+        const applicant = collaborator.applicant as Applicant;
+        if (!applicant || !applicant._id) {
+            throw new Error("Invalid collaborator.");
         }
+        const updatedCollaborators = project.collaborators?.filter(
+            (c) => (c.applicant as Applicant)._id !== applicant._id
+        ) || [];
+
+        if (setProject) {
+            setProject({ ...project, collaborators: updatedCollaborators });
+        }
+        setCollaborators(updatedCollaborators);
+        hideDialogs();
     };
 
 
@@ -203,7 +195,8 @@ export default function CollaboratorManager({ project, setProject }: Collaborato
                     <DeleteDialog
                         showDeleteDialog={showDeleteDialog}
                         selectedDataInfo={String((collaborator.applicant as any).first_name)}
-                        onDelete={deleteCollaborator}
+                        onDelete={project._id ? deleteCollaborator : undefined}
+                        onRemove={!project._id ? removeCollaborator : undefined}
                         onHide={hideDialogs}
                     />
                 )}
