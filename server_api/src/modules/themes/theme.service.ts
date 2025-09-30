@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { ThemeType, ThemeLevel } from "./theme.enum";
 import { BaseTheme } from "./theme.model";
 import { Call } from "../call/call.model";
+import { ProjectTheme } from "../project/themes/protheme.model";
 
 export interface GetThemesOptions {
     type?: ThemeType;
@@ -90,6 +91,8 @@ export class ThemeService {
             const referencedByCall = await Call.exists({ theme: theme._id });
             if (referencedByCall) throw new Error(`Can not delete ${theme.title}, it is referenced in call.`);
         }
+        const referencedByProject = await ProjectTheme.exists({ theme: theme._id });
+        if (referencedByProject) throw new Error(`Can not delete ${theme.title}, it is referenced in project.`);
         return await theme.deleteOne();
     }
 }
