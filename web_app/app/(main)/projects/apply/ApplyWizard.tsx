@@ -1,15 +1,16 @@
-import { Dialog } from "primereact/dialog";
-import { Call } from "../../calls/models/call.model";
-import { useState } from "react";
 import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
 import { Steps } from "primereact/steps";
-import { PhaseType, Project } from "../models/project.model";
-import UploadDocumentStep from "../components/UploadDocumentStep";
-import ProjectForm from "../components/ProjectForm";
+import { useState } from "react";
+import { Call } from "../../calls/models/call.model";
 import { Grant } from "../../grants/models/grant.model";
-import CollaboratorsManager from "../components/collaborators/CollaboratorsManager";
-import ThemeManager from "../components/themes/ThemeManager";
+import CollaboratorManager from "../collaborators/components/CollaboratorManager";
 import PhasesManager from "../components/phases/PhasesManager";
+import ProjectForm from "../components/ProjectForm";
+import ThemeManager from "../components/themes/ThemeManager";
+import UploadDocumentStep from "../components/UploadDocumentStep";
+import { Project } from "../models/project.model";
+
 
 interface ApplyWizardProps {
     visible: boolean;
@@ -68,9 +69,12 @@ export default function ApplyWizard({ visible, call, project, setProject, onHide
 
             {activeStep === 0 && <UploadDocumentStep />}
             {activeStep === 1 && <ProjectForm project={project} setProject={setProject} />}
-            {activeStep === 2 && <CollaboratorsManager project={project} setProject={setProject} />}
-            {activeStep === 3 && <ThemeManager project={project} setProject={setProject} />}
+            {activeStep === 2 && <CollaboratorManager project={project} setProject={setProject}/>}
+            {/**
+             *            {activeStep === 3 && <ThemeManager project={project} setProject={setProject} />}
             {activeStep === 4 && <PhasesManager project={project} setProject={setProject} phaseType={PhaseType.phase} />}
+ 
+             */}
         </Dialog>
     );
 }

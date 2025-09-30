@@ -1,7 +1,8 @@
-import { Applicant } from "../../applicants/models/applicant.model";
 import { Call } from "../../calls/models/call.model";
-import { Theme } from "../../themes/models/theme.model";
 import { User } from "../../users/models/user.model";
+import { Collaborator } from "../collaborators/models/collaborator.model";
+import { Phase } from "../phases/models/phase.model";
+import { ProjectTheme } from "../themes/models/project.theme.model";
 
 export enum ProjectStatus {
     pending = 'pending',
@@ -18,42 +19,6 @@ export type Project = {
     phases?: Phase[];
     status?: ProjectStatus;
     createdBy?: string | User;
-    createdAt?: Date;
-    updatedAt?: Date;
-}
-
-export type ProjectTheme = {
-    _id?: string;
-    project?: string | Project;
-    theme: string | Theme;
-    Co_PI?: string | Collaborator;
-}
-
-export type Collaborator = {
-    _id?: string;
-    project?: string | Project;
-    applicant: string | Applicant;
-    isLeadPI?: boolean;
-    createdAt?: Date;
-    updatedAt?: Date;
-}
-
-
-export enum PhaseType {
-    phase = 'Phase',
-    breakdown = 'Breakdown'
-}
-
-
-export type Phase = {
-    _id?: string;
-    type: PhaseType;
-    project?: string | Project;
-    parent?: string | Phase;
-    order: number;
-    duration: number;
-    budget: number;
-    description?: string;
     createdAt?: Date;
     updatedAt?: Date;
 }

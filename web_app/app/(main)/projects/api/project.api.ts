@@ -1,6 +1,17 @@
 import { ApiClient } from "@/api/ApiClient";
 import { Project } from "../models/project.model";
+import { Call } from "../../calls/models/call.model";
 const end_point = '/projects/';
+
+function sanitizeProject(project: Partial<Project>): Partial<Project> {
+    return {
+        ...project,
+        call:
+            typeof project.call === 'object' && project.call !== null
+                ? (project.call as Call)._id
+                : project.call,
+    };
+}
 
 
 export const ProjectApi = {

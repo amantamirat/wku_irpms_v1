@@ -2,18 +2,20 @@ import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import DeleteDialog from "@/components/DeleteDialog";
 import { Project } from "../../models/project.model";
 import { CollaboratorApi } from "../api/collaborator.api";
 import CollaboratorDialog from "./CollaboratorDialog";
 import { Collaborator, CollaboratorStatus } from "../models/collaborator.model";
+import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
 
 interface CollaboratorProps {
     project: Project;
+    setProject?: (project: Project) => void;
 }
 
-export default function CollaboratorManager({ project }: CollaboratorProps) {
+export default function CollaboratorManager({ project, setProject }: CollaboratorProps) {
 
     const emptyCollaborator: Collaborator = {
         project: project,
@@ -25,8 +27,6 @@ export default function CollaboratorManager({ project }: CollaboratorProps) {
     const [collaborator, setCollaborator] = useState<Collaborator>(emptyCollaborator);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-
-    
 
     useEffect(() => {
         const fetchCollaborators = async () => {
@@ -41,10 +41,13 @@ export default function CollaboratorManager({ project }: CollaboratorProps) {
         if (project?._id) {
             fetchCollaborators();
         }
+        else {
+            setCollaborators(project.collaborators ?? []);
+        }
     }, [project?._id]);
 
 
-    const addCollaborator = async () => {
+    const saveCollaborator = async () => {
         let _collaborators = [...collaborators];
         if (collaborator._id) {
             const updated = await CollaboratorApi.updateCollaborator(collaborator);
@@ -65,6 +68,54 @@ export default function CollaboratorManager({ project }: CollaboratorProps) {
             hideDialogs();
         }
     };
+
+    const addCollaborator = () => {
+        const applicant = collaborator.applicant as Applicant;
+        if (!applicant || !applicant._id) {
+            throw new Error("Please select a valid collaborator.");
+        }
+        const exists =
+            project.collaborators?.some(
+                (c) => (c.applicant as Applicant)._id === applicant._id
+            ) ?? false;
+
+        if (exists) {
+            throw new Error("This collaborator is already added!");
+        }
+        const updatedCollaborators = [...(project.collaborators || []), collaborator];
+        const updatedProject = { ...project, collaborators: updatedCollaborators };
+        // notify parent
+        if (setProject) {
+            setProject(updatedProject);
+        }
+        setCollaborators(updatedCollaborators);
+        hideDialogs();
+    };
+
+    const removeCollaborator = () => {
+        try {
+            const applicant = collaborator.applicant as Applicant;
+
+            if (!applicant || !applicant._id) {
+                throw new Error("Invalid collaborator.");
+            }
+            const updatedCollaborators = project.collaborators?.filter(
+                (c) => (c.applicant as Applicant)._id !== applicant._id
+            ) || [];
+
+            if (setProject) {
+                 setProject({ ...project, collaborators: updatedCollaborators });
+            }
+
+           
+        } catch (err) {
+            console.log(err);
+            alert(err instanceof Error ? err.message : "Something went wrong");
+        } finally {
+            hideDialogs();
+        }
+    };
+
 
     const hideDialogs = () => {
         setCollaborator(emptyCollaborator);
@@ -143,7 +194,8 @@ export default function CollaboratorManager({ project }: CollaboratorProps) {
                         collaborator={collaborator}
                         setCollaborator={setCollaborator}
                         visible={showSaveDialog}
-                        onAdd={addCollaborator}
+                        onSave={project._id ? saveCollaborator : undefined}
+                        onAdd={!project._id ? addCollaborator : undefined}
                         onHide={hideDialogs}
                     />}
 

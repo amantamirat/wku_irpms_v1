@@ -15,11 +15,12 @@ interface CollaboratorDialogProps {
     collaborator: Collaborator;
     setCollaborator: (collaborator: Collaborator) => void;
     visible: boolean;
-    onAdd: () => Promise<void>;
+    onSave?: () => Promise<void>;
+    onAdd?: () => void;
     onHide: () => void;
 }
 
-export default function CollaboratorDialog({ collaborator, setCollaborator, visible, onHide, onAdd }: CollaboratorDialogProps) {
+export default function CollaboratorDialog({ collaborator, setCollaborator, visible, onHide, onSave, onAdd }: CollaboratorDialogProps) {
 
     const [scope, setScope] = useState<Category>();
     const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -68,13 +69,18 @@ export default function CollaboratorDialog({ collaborator, setCollaborator, visi
         };
     }, [workspace]);
 
-    const addCollaborator = async () => {
+    const saveCollaborator = async () => {
         try {
-            await onAdd();
+            if (onSave) {
+                await onSave();
+            }
+            if (onAdd) {
+                onAdd();
+            }
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',
-                detail: `Collaborator ${collaborator._id ? 'updated' : 'created'}`,
+                detail: 'Collaborator Saved',
                 life: 2000
             });
         } catch (err) {
@@ -82,7 +88,7 @@ export default function CollaboratorDialog({ collaborator, setCollaborator, visi
                 severity: 'error',
                 summary: 'Failed to save collaborator',
                 detail: '' + err,
-                life: 3000
+                life: 2000
             });
         }
     }
@@ -91,7 +97,7 @@ export default function CollaboratorDialog({ collaborator, setCollaborator, visi
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
-            <Button label="Save" icon="pi pi-check" text onClick={addCollaborator} />
+            <Button label="Save" icon="pi pi-check" text onClick={saveCollaborator} />
         </>
     );
 
@@ -177,3 +183,7 @@ export default function CollaboratorDialog({ collaborator, setCollaborator, visi
 
     );
 }
+function onAdd() {
+    throw new Error("Function not implemented.");
+}
+
