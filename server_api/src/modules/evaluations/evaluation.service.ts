@@ -3,6 +3,7 @@ import { EvaluationType, FormType } from "./evaluation.enum";
 import { Directorate } from "../organization/organization.model";
 import { BaseEvaluation, Criterion, Stage } from "./evaluation.model";
 import mongoose from "mongoose";
+import { Call } from "../call/call.model";
 
 export interface GetEvalsOptions {
     type?: EvaluationType;
@@ -77,6 +78,10 @@ export class EvaluationService {
         if (!evaluation) throw new Error("Evaluation not found");
         const isParent = await BaseEvaluation.exists({ parent: evaluation._id });
         if (isParent) throw new Error(`Can not delete parent ${evaluation.type} ${evaluation.title}`);
+        if (evaluation.type === EvaluationType.evaluation) {
+            const referencedByCall = await Call.exists({ evaluation: evaluation._id });
+            if (referencedByCall) throw new Error(`Can not delete ${evaluation.title}, it is referenced in call.`);
+        }
         return await evaluation.deleteOne();
     }
 

@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { ThemeType, ThemeLevel } from "./theme.enum";
 import { BaseTheme } from "./theme.model";
+import { Call } from "../call/call.model";
 
 export interface GetThemesOptions {
     type?: ThemeType;
@@ -32,7 +33,7 @@ export class ThemeService {
         const parent = await BaseTheme.findById(theme.parent).lean() as any;
         if (!parent) {
             throw new Error("Parent Not Found!");
-        }        
+        }
         // assign catalog
         (theme as any).catalog = theme.type === ThemeType.theme ? parent._id : parent.catalog;
 
@@ -85,6 +86,10 @@ export class ThemeService {
         if (!theme) throw new Error("Theme not found");
         const isParentExist = await BaseTheme.exists({ parent: theme._id });
         if (isParentExist) throw new Error(`Can not delete parent ${theme.type} ${theme.title}`);
+        if (theme.type === ThemeType.catalog) {
+            const referencedByCall = await Call.exists({ theme: theme._id });
+            if (referencedByCall) throw new Error(`Can not delete ${theme.title}, it is referenced in call.`);
+        }
         return await theme.deleteOne();
     }
 }
