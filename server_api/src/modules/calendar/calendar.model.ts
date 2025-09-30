@@ -1,7 +1,6 @@
 import { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import { COLLECTIONS } from '../../enums/collections.enum';
-import { Call } from '../call/call.model';
 import { CalendarStatus } from './calendar.enum';
 
 
@@ -38,16 +37,6 @@ const CalendarSchema = new Schema<ICalendar>({
   },
 }, {
   timestamps: true
-});
-
-CalendarSchema.pre('deleteOne', { document: true, query: false }, async function (next) {
-  const callId = this._id;
-  const isReferencedByCall = await Call.exists({ calendar: callId });
-  if (isReferencedByCall) {
-    const err = new Error(`Cannot delete: ${this.year} it is referenced in call.`);
-    return next(err);
-  }
-  next();
 });
 
 
