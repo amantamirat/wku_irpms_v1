@@ -21,7 +21,7 @@ interface ApplyWizardProps {
     onHide: () => void;
 }
 
-export default function ApplyWizard({ visible, call, project, setProject, onHide: hideParent }: ApplyWizardProps) {
+const ApplyWizard = ({ visible, call, project, setProject, onHide: hideParent }: ApplyWizardProps) => {
     const [activeStep, setActiveStep] = useState(0);
     const items = [
         { label: 'Upload Document' },
@@ -81,3 +81,5 @@ export default function ApplyWizard({ visible, call, project, setProject, onHide
         </Dialog>
     );
 }
+
+export default ApplyWizard;
