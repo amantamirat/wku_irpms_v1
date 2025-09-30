@@ -2,10 +2,10 @@ import mongoose from "mongoose";
 import { Project } from "./project.model";
 import { CallService } from "../call/call.service";
 import { CallStatus } from "../call/enums/call.status.enum";
-import { ProjectStatus } from "./enums/project.status.enum";
+import { ProjectStatus } from "./project.enum";
 import { CollaboratorService } from "./collaborators/collaborator.service";
 import { ApplicantService } from "../applicants/applicant.service";
-import { CollaboratorStatus } from "./enums/collaborator.status.enum";
+import { CollaboratorStatus } from "./collaborators/collaborator.enum";
 
 export interface CreateProjectDto {
     call: mongoose.Types.ObjectId;

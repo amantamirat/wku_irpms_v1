@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { BasePhase, Breakdown, Phase } from "./phase.model"; // only BasePhase import
-import { PhaseType } from "../enums/phase.type.enum";
+import { PhaseType } from "./phase.enum";
 
 // DTOs
 export interface CreatePhaseDto {

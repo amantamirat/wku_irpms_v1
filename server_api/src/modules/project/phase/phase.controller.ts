@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { errorResponse, successResponse } from "../../../util/response";
 import { CreatePhaseDto, GetPhaseOptions, PhaseService } from "./phase.service";
-import { PhaseType } from "../enums/phase.type.enum";
+import { PhaseType } from "./phase.enum";
 
 export class PhaseController {
     static async createPhase(req: Request, res: Response) {

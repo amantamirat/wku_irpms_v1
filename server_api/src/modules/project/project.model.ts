@@ -1,6 +1,6 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../enums/collections.enum";
-import { ProjectStatus } from "./enums/project.status.enum";
+import { ProjectStatus } from "./project.enum";
 
 interface IProject extends Document {
     call: mongoose.Types.ObjectId;

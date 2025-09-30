@@ -1,6 +1,6 @@
 import mongoose, { model, Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../../enums/collections.enum";
-import { CollaboratorStatus } from "../enums/collaborator.status.enum";
+import { CollaboratorStatus } from "./collaborator.enum";
 
 
 interface ICollaborator extends Document {

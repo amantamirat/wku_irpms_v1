@@ -1,5 +1,5 @@
 import mongoose, { model, Schema } from "mongoose";
-import { PhaseType } from "../enums/phase.type.enum";
+import { PhaseType } from "./phase.enum";
 import { COLLECTIONS } from "../../../enums/collections.enum";
 
 interface BasePhaseDocument extends Document {

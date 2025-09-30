@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 import { Collaborator } from "./collaborator.model";
 import { ProjectService } from "../project.service";
-import { ProjectStatus } from "../enums/project.status.enum";
-import { CollaboratorStatus } from "../enums/collaborator.status.enum";
+import { CollaboratorStatus } from "./collaborator.enum";
+import { ProjectStatus } from "../project.enum";
 
 export interface GetCollaboratorOptions {
     _id?: string;
