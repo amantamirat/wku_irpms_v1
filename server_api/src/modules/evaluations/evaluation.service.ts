@@ -1,13 +1,13 @@
 import { EvaluationType, FormType } from "./evaluation.enum";
-
-import { BaseEvaluation, Criterion, Stage } from "./evaluation.model";
+import { BaseEvaluation, Criterion, Evaluation, Stage } from "./evaluation.model";
 import mongoose from "mongoose";
 import { Call } from "../call/call.model";
+import { Directorate } from "../organization/organization.model";
 
 export interface GetEvalsOptions {
     type?: EvaluationType;
-    parent?: string;
-    directorate?: string;
+    parent?: mongoose.Types.ObjectId;
+    directorate?: mongoose.Types.ObjectId;
 }
 
 export interface CreateEvaluationDto {
@@ -24,14 +24,36 @@ export interface CreateEvaluationDto {
 export class EvaluationService {
 
     private static async validateEvaluation(evl: Partial<CreateEvaluationDto>) {
-        if (evl.type === EvaluationType.option) {
-            if (evl.weight_value === undefined || evl.weight_value === null) {
-                throw new Error("Weight Value is Not Found");
+        if (evl.type === EvaluationType.evaluation) {
+            const directorate = await Directorate.findById(evl.directorate);
+            if (!directorate) {
+                throw new Error("Directorate Not Found!");
             }
-            const creterion = await Criterion.findById(evl.parent).lean();
-            if (!creterion) throw new Error('Creterion not found.');
-            if (evl.weight_value > creterion.weight_value) {
-                throw new Error(`The provided value (${evl.weight_value}) must be less than or equal to the criterion weight (${creterion.weight_value}).`);
+        }
+        else {
+            if (evl.type === EvaluationType.stage) {
+                const parent = await Evaluation.findById(evl.parent);
+                if (!parent) {
+                    throw new Error("Evaluation Not Found!");
+                }
+            }
+            else if (evl.type === EvaluationType.criterion) {
+                const parent = await Stage.findById(evl.parent);
+                if (!parent) {
+                    throw new Error("Stage Not Found!");
+                }
+            }
+            else if (evl.type === EvaluationType.option) {
+                if (evl.weight_value === undefined || evl.weight_value === null) {
+                    throw new Error("Weight Value is Not Found");
+                }
+                const creterion = await Criterion.findById(evl.parent);
+                if (!creterion) {
+                    throw new Error("Criterion Not Found!");
+                }
+                if (evl.weight_value > creterion.weight_value) {
+                    throw new Error(`Option value (${evl.weight_value}) must be less than or equal to the criterion weight (${creterion.weight_value}).`);
+                }
             }
         }
     }

@@ -1,9 +1,8 @@
 import { Request, Response } from "express";
-import mongoose, { Types } from "mongoose";
+import mongoose from "mongoose";
 import { EvaluationService, CreateEvaluationDto, GetEvalsOptions } from "./evaluation.service";
 import { EvaluationType } from "./evaluation.enum";
 import { errorResponse, successResponse } from "../../util/response";
-import { title } from "process";
 
 export class EvaluationController {
 
@@ -13,8 +12,8 @@ export class EvaluationController {
             const data: CreateEvaluationDto = {
                 type: type,
                 title: title,
-                directorate: type === EvaluationType.evaluation ? new mongoose.Types.ObjectId(directorate) : undefined,
-                parent: type !== EvaluationType.evaluation ? new mongoose.Types.ObjectId(parent) : undefined,
+                directorate: type === EvaluationType.evaluation ? new mongoose.Types.ObjectId(directorate as string) : undefined,
+                parent: type !== EvaluationType.evaluation ? new mongoose.Types.ObjectId(parent as string) : undefined,
                 form_type: type === EvaluationType.criterion ? form_type : undefined,
                 weight_value: type === EvaluationType.criterion || type === EvaluationType.option ? weight_value : undefined
             };
@@ -30,8 +29,8 @@ export class EvaluationController {
             const { type, parent, directorate } = req.query;
             const filter = {
                 type: type as EvaluationType | undefined,
-                parent: parent ? new Types.ObjectId(parent as string) : undefined,
-                directorate: directorate ? new Types.ObjectId(directorate as string) : undefined
+                parent: parent ? new mongoose.Types.ObjectId(parent as string) : undefined,
+                directorate: directorate ? new mongoose.Types.ObjectId(directorate as string) : undefined
             } as GetEvalsOptions;
             const evaluations = await EvaluationService.getEvaluations(filter);
             successResponse(res, 200, 'Evaluations fetched successfully', evaluations);

@@ -1,4 +1,4 @@
-import mongoose, { model, Schema, Types } from "mongoose";
+import mongoose, { model, Schema } from "mongoose";
 import { EvaluationType, FormType } from "./evaluation.enum";
 import { COLLECTIONS } from "../../enums/collections.enum";
 import { Directorate } from "../organization/organization.model";
@@ -27,7 +27,7 @@ export const BaseEvaluation = model<BaseEvaluationDocument>(COLLECTIONS.EVALUATI
 
 interface EvaluationDocument extends BaseEvaluationDocument {
   type: EvaluationType.evaluation;
-  directorate: Types.ObjectId;
+  directorate: mongoose.Types.ObjectId;
 }
 
 const EvaluationSchema = new Schema<EvaluationDocument>({
@@ -36,42 +36,25 @@ const EvaluationSchema = new Schema<EvaluationDocument>({
     ref: Directorate.modelName,
     required: true,
     immutable: true,
-    validate: {
-      validator: async function (directorateId: mongoose.Types.ObjectId) {
-        const exist = await Directorate.exists({ _id: directorateId });
-        return !!exist;
-      }
-    },
   },
 });
 
 export const Evaluation = BaseEvaluation.discriminator<EvaluationDocument>(EvaluationType.evaluation, EvaluationSchema);
 
-/**
- * interface ValidationDocument extends BaseEvaluationDocument {
-    type: EvaluationType.validation;
+interface ChildEvaluationDocument extends BaseEvaluationDocument {  
+  parent: mongoose.Types.ObjectId;
 }
-*/
 
-interface StageDocument extends BaseEvaluationDocument {
+interface StageDocument extends ChildEvaluationDocument {
   type: EvaluationType.stage;
-  parent: Types.ObjectId;
   order: number;
-  //isValidation?:boolean;
 }
 
 const StageSchema = new Schema<StageDocument>({
   parent: {
     type: Schema.Types.ObjectId,
     ref: Evaluation.modelName,
-    required: true,
-    validate: {
-      validator: async function (parentId: mongoose.Types.ObjectId) {
-        const exist = await Evaluation.exists({ _id: parentId });
-        return !!exist;
-      },
-      message: "Stage must belong to a Evaluation",
-    },
+    required: true
   },
   order: { type: Number, 
     min: 1, 
@@ -83,9 +66,8 @@ StageSchema.index({ parent: 1, order: 1 }, { unique: true });
 
 export const Stage = BaseEvaluation.discriminator<StageDocument>(EvaluationType.stage, StageSchema);
 
-interface CriterionDocument extends BaseEvaluationDocument {
+interface CriterionDocument extends ChildEvaluationDocument {
   type: EvaluationType.criterion;
-  parent: Types.ObjectId;
   weight_value: number;
   form_type: FormType;
 }
@@ -94,14 +76,7 @@ const CriterionSchema = new Schema<CriterionDocument>({
   parent: {
     type: Schema.Types.ObjectId,
     ref: Stage.modelName,
-    required: true,
-    validate: {
-      validator: async function (parentId: mongoose.Types.ObjectId) {
-        const exist = await Stage.exists({ _id: parentId });
-        return !!exist;
-      },
-      message: "Criterion must belong to a Stage",
-    },
+    required: true
   },
   weight_value: {
     type: Number,
@@ -119,9 +94,8 @@ const CriterionSchema = new Schema<CriterionDocument>({
 export const Criterion = BaseEvaluation.discriminator<CriterionDocument>(EvaluationType.criterion, CriterionSchema);
 
 
-interface OptionDocument extends BaseEvaluationDocument {
+interface OptionDocument extends ChildEvaluationDocument {
   type: EvaluationType.option;
-  parent: Types.ObjectId;
   weight_value: number;
 }
 
@@ -129,14 +103,7 @@ const OptionSchema = new Schema<OptionDocument>({
   parent: {
     type: Schema.Types.ObjectId,
     ref: Criterion.modelName,
-    required: true,
-    validate: {
-      validator: async function (parentId: mongoose.Types.ObjectId) {
-        const exist = await Criterion.exists({ _id: parentId });
-        return !!exist;
-      },
-      message: "Option must belong to a Criterion",
-    },
+    required: true
   },
   weight_value: {
     type: Number,
@@ -147,7 +114,6 @@ const OptionSchema = new Schema<OptionDocument>({
 });
 
 OptionSchema.index({ parent: 1, weight_value: 1 }, { unique: true });
-
 export const Option = BaseEvaluation.discriminator<OptionDocument>(EvaluationType.option, OptionSchema);
 
 
