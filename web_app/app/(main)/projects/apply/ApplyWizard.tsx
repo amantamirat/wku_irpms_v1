@@ -6,11 +6,11 @@ import { Call } from "../../calls/models/call.model";
 import { Grant } from "../../grants/models/grant.model";
 import CollaboratorManager from "../collaborators/components/CollaboratorManager";
 import ProjectForm from "../components/dialogs/ProjectForm";
-import UploadDocumentStep from "../components/UploadDocumentStep";
 import { Project } from "../models/project.model";
 import ProjectThemeManager from "../themes/components/ThemeManager";
 import { PhaseType } from "../phases/models/phase.model";
 import PhaseManager from "../phases/components/PhaseManager";
+import UploadForm from "../components/UploadForm";
 
 
 interface ApplyWizardProps {
@@ -56,6 +56,10 @@ export default function ApplyWizard({ visible, call, project, setProject, onHide
         </div>
     );
 
+    const updateFile = (file: File) => {
+        setProject({ ...project, ["file"]: file });
+    }
+
     return (
         <Dialog
             header="Apply for Call"
@@ -68,7 +72,7 @@ export default function ApplyWizard({ visible, call, project, setProject, onHide
             <h3>{call.title} ({(call.grant as Grant).title})</h3>
             <Steps model={items} activeIndex={activeStep} readOnly className="mb-4" />
 
-            {activeStep === 0 && <UploadDocumentStep />}
+            {activeStep === 0 && <UploadForm file={project.file} onUpload={updateFile} />}
             {activeStep === 1 && <ProjectForm project={project} setProject={setProject} />}
             {activeStep === 2 && <CollaboratorManager project={project} setProject={setProject} />}
             {activeStep === 3 && <ProjectThemeManager project={project} setProject={setProject} />}

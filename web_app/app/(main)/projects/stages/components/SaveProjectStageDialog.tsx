@@ -4,12 +4,11 @@ import { EvalType, Evaluation } from "@/app/(main)/evals/models/eval.model";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
-import { FileUpload } from "primereact/fileupload";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { Project } from "../../models/project.model";
 import { ProjectStage, validateProjectStage } from "../models/stage.model";
-import UploadProjectForm from "./UploadForm";
+import UploadForm from "../../components/UploadForm";
 
 
 
@@ -27,6 +26,8 @@ export default function SaveProjectStageDialog({ project, projectStage, setProje
     const toast = useRef<Toast>(null);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
     const [evaluaionStages, setEvaluationStages] = useState<Evaluation[]>([]);
+
+
 
     useEffect(() => {
         const fetchStages = async () => {
@@ -77,6 +78,10 @@ export default function SaveProjectStageDialog({ project, projectStage, setProje
         </>
     );
 
+    const updateFile = (file: File) => {
+        setProjectStage({ ...projectStage, ["file"]: file });
+    }
+
     return (
         <>
             <Toast ref={toast} />
@@ -104,7 +109,7 @@ export default function SaveProjectStageDialog({ project, projectStage, setProje
                     />
                 </div>
 
-                <UploadProjectForm projectStage={projectStage} setProjectStage={setProjectStage}/>
+                <UploadForm onUpload={updateFile} />
 
                 {errorMessage && (
                     <small className="p-error">{errorMessage}</small>
