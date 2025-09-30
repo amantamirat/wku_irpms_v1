@@ -18,16 +18,6 @@ type Node = {
 };
 
 
-interface SaveThemeDialogProps {
-    project: Project;
-    projectTheme: ProjectTheme;
-    setProjectTheme: (theme: ProjectTheme) => void;
-    visible: boolean;
-    onAdd: () => Promise<void>;
-    onHide: () => void;
-}
-
-
 function buildTree(themes: Theme[], parentId?: string): Node[] {
     return themes
         .filter(t => {
@@ -50,7 +40,17 @@ function buildTree(themes: Theme[], parentId?: string): Node[] {
 }
 
 
-export default function SaveThemeDialog({ project, projectTheme, setProjectTheme, visible, onAdd, onHide }: SaveThemeDialogProps) {
+interface SaveThemeDialogProps {
+    project: Project;
+    projectTheme: ProjectTheme;
+    setProjectTheme: (theme: ProjectTheme) => void;
+    visible: boolean;
+    onSave: () => Promise<void>;
+    onHide: () => void;
+}
+
+
+export default function SaveThemeDialog({ project, projectTheme, setProjectTheme, visible, onSave: onAdd, onHide }: SaveThemeDialogProps) {
 
     const toast = useRef<Toast>(null);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
@@ -83,6 +83,12 @@ export default function SaveThemeDialog({ project, projectTheme, setProjectTheme
                 return;
             }
             setErrorMessage(undefined);
+
+            const theme = themes.find((thm) => thm._id === (projectTheme.theme as string));
+            if (!theme) {
+                throw new Error("Theme not found!");
+            }
+            projectTheme.theme= theme;
             await onAdd();
             toast.current?.show({
                 severity: 'success',

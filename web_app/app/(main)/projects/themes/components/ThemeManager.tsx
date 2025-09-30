@@ -1,6 +1,3 @@
-import { Call } from "@/app/(main)/calls/models/call.model";
-import { ThemeApi } from "@/app/(main)/themes/api/theme.api";
-import { Theme, ThemeType } from "@/app/(main)/themes/models/theme.model";
 import DeleteDialog from "@/components/DeleteDialog";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
@@ -11,6 +8,7 @@ import { Project } from "../../models/project.model";
 import { ProjectThemeApi } from "../api/project.theme.api";
 import { ProjectTheme } from "../models/project.theme.model";
 import SaveThemeDialog from "./SaveThemeDialog";
+import { Theme } from "@/app/(main)/themes/models/theme.model";
 
 
 
@@ -61,7 +59,7 @@ export default function ThemeManager({ project }: ProjectInfoStepProps) {
             // _projectThemes[index] = { ...updated, project: project, theme: theme };
         } else {
             const created = await ProjectThemeApi.createProjectTheme(projectTheme);
-            //_projectThemes.push({ ...created, project: project, theme: theme });
+            _projectThemes.push({ ...created, project: project, theme: projectTheme.theme});
         }
         setProjectThemes(_projectThemes);
         hideDialogs();
@@ -132,7 +130,7 @@ export default function ThemeManager({ project }: ProjectInfoStepProps) {
                     projectTheme={projectTheme}
                     setProjectTheme={setProjectTheme}
                     visible={showSaveDialog}
-                    onAdd={saveProjectTheme}
+                    onSave={saveProjectTheme}
                     onHide={hideDialogs} />
             )}
             {projectTheme && (
