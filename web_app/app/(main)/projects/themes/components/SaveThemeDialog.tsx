@@ -44,12 +44,13 @@ interface SaveThemeDialogProps {
     projectTheme: ProjectTheme;
     setProjectTheme: (theme: ProjectTheme) => void;
     visible: boolean;
-    onSave: () => Promise<void>;
+    onSave?: () => Promise<void>;
+    onAdd?: () => void;
     onHide: () => void;
 }
 
 
-export default function SaveThemeDialog({ project, projectTheme, setProjectTheme, visible, onSave: onAdd, onHide }: SaveThemeDialogProps) {
+export default function SaveThemeDialog({ project, projectTheme, setProjectTheme, visible, onSave, onAdd, onHide }: SaveThemeDialogProps) {
 
     const toast = useRef<Toast>(null);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
@@ -86,8 +87,13 @@ export default function SaveThemeDialog({ project, projectTheme, setProjectTheme
             if (!theme) {
                 throw new Error("Theme not found!");
             }
-            projectTheme.theme= theme;
-            await onAdd();
+            projectTheme.theme = theme;
+            if (onSave) {
+                await onSave();
+            }
+            if (onAdd) {
+                onAdd();
+            }
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',

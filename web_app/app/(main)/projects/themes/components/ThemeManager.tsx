@@ -78,7 +78,6 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
             project.themes?.some(
                 (c) => (c.theme as Theme)._id === projectTheme._id
             ) ?? false;
-
         if (exists) {
             throw new Error("The theme is already added!");
         }
@@ -147,7 +146,8 @@ export default function ThemeManager({ project, setProject }: ProjectInfoStepPro
                     projectTheme={projectTheme}
                     setProjectTheme={setProjectTheme}
                     visible={showSaveDialog}
-                    onSave={saveProjectTheme}
+                    onSave={project._id ? saveProjectTheme : undefined}
+                    onAdd={!project._id ? addProjectTheme : undefined}
                     onHide={hideDialogs} />
             )}
             {projectTheme && (
