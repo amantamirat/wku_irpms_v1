@@ -47,7 +47,7 @@ export class GrantService {
         const grant = await Grant.findById(id);
         if (!grant) throw new Error("Grant not found");
         const referencedByCall = await Call.exists({ grant: grant._id });
-        if (referencedByCall) throw new Error(`Can not delete ${grant.title}, it is used by Call.`);
+        if (referencedByCall) throw new Error(`Can not delete ${grant.title}, it is referenced in call.`);
         return await grant.deleteOne();
     }
 }
