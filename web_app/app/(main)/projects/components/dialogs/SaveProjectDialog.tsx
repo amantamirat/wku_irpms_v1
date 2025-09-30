@@ -3,7 +3,7 @@ import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { useEffect, useState } from 'react';
 import { Project, validateProject } from '../../models/project.model';
-import ProjectForm from '../ProjectForm';
+import ProjectForm from './ProjectForm';
 import { Call, CallStatus } from '@/app/(main)/calls/models/call.model';
 import { Dropdown } from 'primereact/dropdown';
 import { CallApi } from '@/app/(main)/calls/api/call.api';

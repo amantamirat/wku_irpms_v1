@@ -6,7 +6,7 @@ import { Call } from "../../calls/models/call.model";
 import { Grant } from "../../grants/models/grant.model";
 import CollaboratorManager from "../collaborators/components/CollaboratorManager";
 import PhasesManager from "../components/phases/PhasesManager";
-import ProjectForm from "../components/ProjectForm";
+import ProjectForm from "../components/dialogs/ProjectForm";
 import ThemeManager from "../components/themes/ThemeManager";
 import UploadDocumentStep from "../components/UploadDocumentStep";
 import { Project } from "../models/project.model";

@@ -1,6 +1,6 @@
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
-import { Project } from "../models/project.model";
+import { Project } from "../../models/project.model";
 
 interface ProjectInfoStepProps {
     project: Project;
