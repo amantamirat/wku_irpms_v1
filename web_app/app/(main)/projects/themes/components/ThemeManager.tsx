@@ -89,6 +89,18 @@ export default function ProjectThemeManager({ project, setProject }: ProjectInfo
         hideDialogs();
     };
 
+    const removeProjectTheme = () => {
+        const updatedCollaborators = project.themes?.filter(
+            (c) => (c.theme as Theme)._id !== (projectTheme.theme as Theme)._id
+        ) || [];
+
+        if (setProject) {
+            setProject({ ...project, themes: updatedCollaborators });
+        }
+        setProjectThemes(updatedCollaborators);
+        hideDialogs();
+    };
+
     const hideDialogs = () => {
         setProjectTheme(emptyProjectTheme);
         setShowSaveDialog(false);
@@ -154,7 +166,8 @@ export default function ProjectThemeManager({ project, setProject }: ProjectInfo
                 <DeleteDialog
                     showDeleteDialog={showDeleteDialog}
                     selectedDataInfo={String((projectTheme.theme as any).title)}
-                    onDelete={deleteProjectTheme}
+                    onDelete={project._id ? deleteProjectTheme : undefined}
+                    onRemove={!project._id ? removeProjectTheme : undefined}
                     onHide={hideDialogs}
                 />
             )}

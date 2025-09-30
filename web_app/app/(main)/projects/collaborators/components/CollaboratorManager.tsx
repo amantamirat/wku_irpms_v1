@@ -82,7 +82,7 @@ export default function CollaboratorManager({ project, setProject }: Collaborato
         if (exists) {
             throw new Error("This collaborator is already added!");
         }
-        const updatedCollaborators = [...(project.collaborators || []), collaborator];        
+        const updatedCollaborators = [...(project.collaborators || []), collaborator];
         // notify parent
         if (setProject) {
             setProject({ ...project, collaborators: updatedCollaborators });
@@ -92,12 +92,8 @@ export default function CollaboratorManager({ project, setProject }: Collaborato
     };
 
     const removeCollaborator = () => {
-        const applicant = collaborator.applicant as Applicant;
-        if (!applicant || !applicant._id) {
-            throw new Error("Invalid collaborator.");
-        }
         const updatedCollaborators = project.collaborators?.filter(
-            (c) => (c.applicant as Applicant)._id !== applicant._id
+            (c) => (c.applicant as Applicant)._id !== (collaborator.applicant as Applicant)._id
         ) || [];
 
         if (setProject) {
