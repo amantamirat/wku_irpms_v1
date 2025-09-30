@@ -6,18 +6,18 @@ import { Phase, validatePhase } from "../models/phase.model";
 import { InputText } from "primereact/inputtext";
 import { useRef, useState } from "react";
 import { Toast } from "primereact/toast";
-import { validateProjectTheme } from "../../themes/models/project.theme.model";
 
 
 interface SavePhaseDialogProps {
     phase: Phase;
     setPhase: (phase: Phase) => void;
     visible: boolean;
-    onAdd: () => Promise<void>;
+    onSave?: () => Promise<void>;
+    onAdd?: () => void;
     onHide: () => void;
 }
 
-export default function SavePhaseDialog({ phase, setPhase, visible, onAdd, onHide }: SavePhaseDialogProps) {
+export default function SavePhaseDialog({ phase, setPhase, visible, onSave, onAdd, onHide }: SavePhaseDialogProps) {
 
     const toast = useRef<Toast>(null);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
@@ -33,17 +33,23 @@ export default function SavePhaseDialog({ phase, setPhase, visible, onAdd, onHid
                 return;
             }
             setErrorMessage(undefined);
-            await onAdd();
+            if (onAdd) {
+                onAdd();
+            }
+            if (onSave) {
+                await onSave();
+            }
+
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',
-                detail: "Phase Saved.",
+                detail: `Phase ${onSave ? 'Saved' : 'Added'}.`,
                 life: 2000
             });
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to save project theme',
+                summary: `Failed to ${onSave ? 'Save' : 'Add'} project theme`,
                 detail: '' + err,
                 life: 3000
             });

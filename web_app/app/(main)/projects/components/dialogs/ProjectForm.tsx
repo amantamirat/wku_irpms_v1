@@ -2,12 +2,12 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Project } from "../../models/project.model";
 
-interface ProjectInfoStepProps {
+interface ProjectFormProps {
     project: Project;
     setProject: (project: Project) => void;
 }
 
-export default function ProjectForm({ project, setProject }: ProjectInfoStepProps) {
+export default function ProjectForm({ project, setProject }: ProjectFormProps) {
     return (
         <div className="p-fluid formgrid grid">            
             <div className="field col-12">

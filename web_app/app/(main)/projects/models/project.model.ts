@@ -17,6 +17,7 @@ export type Project = {
     collaborators?: Collaborator[];
     themes?: ProjectTheme[];
     phases?: Phase[];
+    file?: File;
     status?: ProjectStatus;
     createdBy?: string | User;
     createdAt?: Date;

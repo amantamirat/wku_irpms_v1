@@ -5,11 +5,12 @@ import { useState } from "react";
 import { Call } from "../../calls/models/call.model";
 import { Grant } from "../../grants/models/grant.model";
 import CollaboratorManager from "../collaborators/components/CollaboratorManager";
-import PhasesManager from "../components/phases/PhasesManager";
 import ProjectForm from "../components/dialogs/ProjectForm";
 import UploadDocumentStep from "../components/UploadDocumentStep";
 import { Project } from "../models/project.model";
 import ProjectThemeManager from "../themes/components/ThemeManager";
+import { PhaseType } from "../phases/models/phase.model";
+import PhaseManager from "../phases/components/PhaseManager";
 
 
 interface ApplyWizardProps {
@@ -71,13 +72,8 @@ export default function ApplyWizard({ visible, call, project, setProject, onHide
             {activeStep === 1 && <ProjectForm project={project} setProject={setProject} />}
             {activeStep === 2 && <CollaboratorManager project={project} setProject={setProject} />}
             {activeStep === 3 && <ProjectThemeManager project={project} setProject={setProject} />}
+            {activeStep === 4 && <PhaseManager project={project} setProject={setProject} phaseType={PhaseType.phase} />}
 
-            {/**
-             * 
-             *            
-            {activeStep === 4 && <PhasesManager project={project} setProject={setProject} phaseType={PhaseType.phase} />}
- 
-             */}
         </Dialog>
     );
 }

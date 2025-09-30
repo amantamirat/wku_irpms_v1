@@ -10,15 +10,16 @@ import { PhaseApi } from "../api/phase.api";
 import SavePhaseDialog from "./SavePhaseDialog";
 
 interface ProjectInfoStepProps {
-    project: Project;
     phaseType: PhaseType;
+    project: Project;
+    setProject?: (project: Project) => void;
 }
 
-export default function PhaseManager({ project, phaseType }: ProjectInfoStepProps) {
+export default function PhaseManager({ phaseType, project, setProject }: ProjectInfoStepProps) {
 
     const emptyPhase: Phase = {
-        project: project,
         type: phaseType,
+        project: project,
         activity: '',
         order: 0,
         duration: 0,
@@ -38,7 +39,13 @@ export default function PhaseManager({ project, phaseType }: ProjectInfoStepProp
             });
             setPhases(data);
         };
-        fetchPhases();
+        if (project._id) {
+            fetchPhases();
+        }
+        else {
+            setPhases(project.phases ?? []);
+        }
+
     }, [project?._id]);
 
 
@@ -59,14 +66,14 @@ export default function PhaseManager({ project, phaseType }: ProjectInfoStepProp
             _phases[index] = { ...phase, updatedAt: updated.updatedAt };
         } else {
             const created = await PhaseApi.createPhase(phase);
-            _phases.push({ ...phase, _id: created._id, updatedAt: created.updatedAt, createdAt: created.createdAt });
+            _phases.push({ ...created, project: phase.project });
         }
         setPhases(_phases);
         hideDialogs();
     };
 
 
-    const removePhase = async () => {
+    const deletePhase = async () => {
         const deleted = await PhaseApi.deletePhase(phase);
         if (deleted) {
             setPhases(phases.filter((c) => c._id !== phase._id));
@@ -74,6 +81,27 @@ export default function PhaseManager({ project, phaseType }: ProjectInfoStepProp
         }
     };
 
+    const addPhase = () => {
+        const exists = project.phases?.some((p) => p.order === phase.order);
+        if (exists) {
+            throw new Error("The order is already added!");
+        }
+        const updatedPhases = [...(project.phases || []), phase];
+        if (setProject) {
+            setProject({ ...project, phases: updatedPhases });
+        }
+        setPhases(updatedPhases);
+        hideDialogs();
+    };
+
+    const removePhase = () => {
+        const updatedPhases = project.phases?.filter((p) => p.order !== phase.order) || [];
+        if (setProject) {
+            setProject({ ...project, phases: updatedPhases });
+        }
+        setPhases(updatedPhases);
+        hideDialogs();
+    }
 
     const hideDialogs = () => {
         setPhase(emptyPhase);
@@ -120,7 +148,7 @@ export default function PhaseManager({ project, phaseType }: ProjectInfoStepProp
                     value={phases}
                     selection={phase}
                     onSelectionChange={(e) => setPhase(e.value as Phase)}
-                    dataKey="_id"
+                    dataKey="order"
                     paginator
                     rows={10}
                     rowsPerPageOptions={[5, 10, 25]}
@@ -136,7 +164,9 @@ export default function PhaseManager({ project, phaseType }: ProjectInfoStepProp
                     <Column field="order" header="Order" sortable />
                     <Column field="duration" header="Duration" sortable />
                     <Column field="budget" header="Budget" sortable />
-                    <Column field="description" header="Description" sortable />
+                    {
+                        //<Column field="description" header="Description" sortable />
+                    }
                     <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
 
                 </DataTable>
@@ -146,15 +176,17 @@ export default function PhaseManager({ project, phaseType }: ProjectInfoStepProp
                         phase={phase}
                         setPhase={setPhase}
                         visible={showAddDialog}
-                        onAdd={savePhase}
+                        onSave={project._id ? savePhase : undefined}
+                        onAdd={!project._id ? addPhase : undefined}
                         onHide={hideDialogs}
                     />}
 
                 {phase && (
                     <DeleteDialog
                         showDeleteDialog={showDeleteDialog}
-                        selectedDataInfo={`phase ${phase.activity}`}
-                        onDelete={removePhase}
+                        selectedDataInfo={`phase ${phase.activity} (order ${phase.order})`}
+                        onDelete={project._id ? deletePhase : undefined}
+                        onRemove={!project._id ? removePhase : undefined}
                         onHide={hideDialogs}
                     />
                 )}

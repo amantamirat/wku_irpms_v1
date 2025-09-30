@@ -9,6 +9,7 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { Project } from "../../models/project.model";
 import { ProjectStage, validateProjectStage } from "../models/stage.model";
+import UploadProjectForm from "./UploadForm";
 
 
 
@@ -103,23 +104,7 @@ export default function SaveProjectStageDialog({ project, projectStage, setProje
                     />
                 </div>
 
-                <div className="field">
-                    <label htmlFor="upload">Please upload your application PDF:</label>
-                    <FileUpload
-                        id="upload"
-                        name="document"
-                        accept=".pdf"
-                        maxFileSize={10000000} // 10MB
-                        chooseLabel="Select PDF"
-                        uploadLabel="Upload"
-                        mode="advanced"
-                        customUpload
-                        onSelect={(event) =>
-                            setProjectStage({ ...projectStage, file: event.files[0] })
-                        }
-                        emptyTemplate={<p className="m-0">Drag and drop files to here to upload.</p>}
-                    />
-                </div>
+                <UploadProjectForm projectStage={projectStage} setProjectStage={setProjectStage}/>
 
                 {errorMessage && (
                     <small className="p-error">{errorMessage}</small>
