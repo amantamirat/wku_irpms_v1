@@ -55,7 +55,7 @@ export default function CollaboratorManager({ project, setProject }: Collaborato
             _collaborators[index] = { ...collaborator, updatedAt: updated.updatedAt };
         } else {
             const created = await CollaboratorApi.createCollaborator(collaborator);
-            _collaborators.push({ ...collaborator, _id: created._id, updatedAt: created.updatedAt, createdAt: created.createdAt });
+            _collaborators.push({ ...created, project: collaborator.project, applicant: collaborator.applicant });
         }
         setCollaborators(_collaborators);
         hideDialogs();

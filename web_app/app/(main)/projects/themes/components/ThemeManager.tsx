@@ -47,6 +47,9 @@ export default function ThemeManager({ project }: ProjectInfoStepProps) {
         if (project?._id) {
             fetchProjectThemes();
         }
+        else {
+            setProjectThemes(project.themes ?? []);
+        }
     }, [project?._id]);
 
 
