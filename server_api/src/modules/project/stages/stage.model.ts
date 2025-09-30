@@ -1,12 +1,12 @@
 import mongoose, { model, Schema } from "mongoose";
-import { StageStatus } from "./stage.enum";
+import { ProjectStageStatus } from "./stage.enum";
 import { COLLECTIONS } from "../../../enums/collections.enum";
 import { Stage } from "../../evaluations/evaluation.model";
 
 interface IProjectStage extends Document {
     project: mongoose.Types.ObjectId;
     stage: mongoose.Types.ObjectId;
-    status: StageStatus;
+    status: ProjectStageStatus;
     documentPath: string;
     createdAt?: Date;
     updatedAt?: Date;
@@ -31,8 +31,8 @@ const ProjectStageSchema = new Schema<IProjectStage>({
     },
     status: {
         type: String,
-        enum: Object.values(StageStatus),
-        default: StageStatus.pending,
+        enum: Object.values(ProjectStageStatus),
+        default: ProjectStageStatus.pending,
         required: true
     },
 }, { timestamps: true });

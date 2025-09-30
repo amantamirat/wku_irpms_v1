@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { StageStatus } from "./stage.enum";
+import { ProjectStageStatus } from "./stage.enum";
 import { ProjectStage } from "./stage.model";
 import { Project } from "../project.model";
 import { Stage } from "../../evaluations/evaluation.model";
@@ -8,32 +8,44 @@ export interface GetProjectStageOptions {
     _id?: string;
     project?: mongoose.Types.ObjectId;
     stage?: mongoose.Types.ObjectId;
-    status?: StageStatus;
+    status?: ProjectStageStatus;
 }
 
 export interface CreateProjectStageDto {
     project: mongoose.Types.ObjectId;
     stage: mongoose.Types.ObjectId;
     documentPath: string;
-    status?: StageStatus;
+    status?: ProjectStageStatus;
 }
 
 export interface UpdateProjectStageDto {
-    status?: StageStatus;
+    status?: ProjectStageStatus;
 }
 
 export class ProjectStageService {
 
     private static async validateProjectStage(ps: Partial<CreateProjectStageDto>) {
-        const project = await Project.findById(ps.project);
+        const project = await Project.findById(ps.project).lean();
         if (!project) {
             throw new Error("Project Not Found!");
         }
-        const stage = await Stage.findById(ps.stage);
+        const stage = await Stage.findById(ps.stage).lean();
         if (!stage) {
             throw new Error("Stage Not Found!");
         }
-        //use stage prev
+        if (stage.order > 1) {
+            const prevStage = await Stage.findOne({ order: stage.order - 1, parent: stage.parent }).lean();
+            if (!prevStage) {
+                throw new Error("Previous Stage Not Found!");
+            }
+            const prevProjectStage = await ProjectStage.findOne({ project: ps.project, stage: prevStage._id }).lean();
+            if (!prevProjectStage) {
+                throw new Error("Previous Project Stage Not Found!");
+            }
+            if (prevProjectStage.status !== ProjectStageStatus.accepted) {
+                throw new Error("Previous Project Stage is Not Accepted!");
+            }
+        }
     }
 
     static async createProjectStage(data: CreateProjectStageDto) {
@@ -55,18 +67,7 @@ export class ProjectStageService {
         return projectStages;
     }
 
-    static async findProjectStage(options: GetProjectStageOptions) {
-        const filter: any = {};
-        if (options._id) filter._id = options._id;
-        if (options.project) filter.project = options.project;
-        if (options.stage) filter.stage = options.stage;
-        if (options.status) filter.status = options.status;
 
-        return await ProjectStage.findOne(filter)
-            .populate("project")
-            .populate("stage")
-            .lean();
-    }
 
     static async updateProjectStage(id: string, data: Partial<UpdateProjectStageDto>) {
         const projectStage = await ProjectStage.findById(id);
@@ -78,6 +79,11 @@ export class ProjectStageService {
     static async deleteProjectStage(id: string) {
         const projectStage = await ProjectStage.findById(id);
         if (!projectStage) throw new Error("Project stage not found");
-        return projectStage.deleteOne();
+        if (projectStage.status !== ProjectStageStatus.pending) {
+            throw new Error(`Can not delete ${projectStage.status} project stage`);
+        }
+        const deletedDoc = projectStage.toObject();
+        await projectStage.deleteOne();
+        return { documentPath: deletedDoc.documentPath };
     }
 }

@@ -50,7 +50,7 @@ export class ProjectStageController {
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }    
+    }
 
     static async updateProjectStage(req: Request, res: Response) {
         try {
@@ -70,7 +70,15 @@ export class ProjectStageController {
         try {
             const { id } = req.params;
             const deleted = await ProjectStageService.deleteProjectStage(id);
-            successResponse(res, 200, "Project stage deleted successfully", deleted);
+            /** 
+             * 
+             *  fs.unlink(deleted.documentPath, (unlinkErr) => {
+                if (unlinkErr) {
+                    console.error("Failed to delete uploaded file:", unlinkErr);
+                }
+            });
+            */           
+            successResponse(res, 200, "Project stage deleted successfully", { deleted: true });
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }

@@ -41,11 +41,11 @@ const EvaluationSchema = new Schema<EvaluationDocument>({
 
 export const Evaluation = BaseEvaluation.discriminator<EvaluationDocument>(EvaluationType.evaluation, EvaluationSchema);
 
-interface ChildEvaluationDocument extends BaseEvaluationDocument {  
+interface ChildEvaluationDocument extends BaseEvaluationDocument {
   parent: mongoose.Types.ObjectId;
 }
 
-interface StageDocument extends ChildEvaluationDocument {
+export interface StageDocument extends ChildEvaluationDocument {
   type: EvaluationType.stage;
   order: number;
 }
@@ -56,10 +56,12 @@ const StageSchema = new Schema<StageDocument>({
     ref: Evaluation.modelName,
     required: true
   },
-  order: { type: Number, 
-    min: 1, 
-    max: 10, 
-    required: true },
+  order: {
+    type: Number,
+    min: 1,
+    max: 10,
+    required: true
+  },
 });
 
 StageSchema.index({ parent: 1, order: 1 }, { unique: true });

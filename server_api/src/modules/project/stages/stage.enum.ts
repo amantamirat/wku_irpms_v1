@@ -1,4 +1,5 @@
-export enum StageStatus {
+export enum ProjectStageStatus {
   pending = 'pending',
-  submitted = 'submitted'
+  submitted = 'submitted',
+  accepted = 'accepted'
 }

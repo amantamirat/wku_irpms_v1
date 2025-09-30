@@ -1,8 +1,9 @@
 import { EvaluationType, FormType } from "./evaluation.enum";
-import { BaseEvaluation, Criterion, Evaluation, Stage } from "./evaluation.model";
+import { BaseEvaluation, Criterion, Evaluation, Stage, StageDocument } from "./evaluation.model";
 import mongoose from "mongoose";
 import { Call } from "../call/call.model";
 import { Directorate } from "../organization/organization.model";
+import { ProjectStage } from "../project/stages/stage.model";
 
 export interface GetEvalsOptions {
     type?: EvaluationType;
@@ -82,7 +83,7 @@ export class EvaluationService {
         if (options.type) filter.type = options.type;
         if (options.parent) filter.parent = options.parent;
         if (options.directorate) filter.directorate = options.directorate;
-        return BaseEvaluation.find(filter).lean();
+        return await BaseEvaluation.find(filter).lean();
     }
 
     static async updateEvaluation(id: string, data: Partial<CreateEvaluationDto>) {
@@ -97,24 +98,42 @@ export class EvaluationService {
     static async deleteEvaluation(id: string) {
         const evaluation = await BaseEvaluation.findById(id);
         if (!evaluation) throw new Error("Evaluation not found");
-        const isParent = await BaseEvaluation.exists({ parent: evaluation._id });
-        if (isParent) throw new Error(`Can not delete parent ${evaluation.type} ${evaluation.title}`);
+        if (evaluation.type !== EvaluationType.option) {
+            const isParent = await BaseEvaluation.exists({ parent: evaluation._id });
+            if (isParent) throw new Error(`Can not delete parent ${evaluation.type} ${evaluation.title}`);
+        }
         if (evaluation.type === EvaluationType.evaluation) {
             const referencedByCall = await Call.exists({ evaluation: evaluation._id });
             if (referencedByCall) throw new Error(`Can not delete ${evaluation.title}, it is referenced in call.`);
+        } else if (evaluation.type === EvaluationType.stage) {
+            const referencedByProject = await ProjectStage.exists({ stage: evaluation._id });
+            if (referencedByProject) throw new Error(`Can not delete ${evaluation.title}, it is referenced in projects.`);
+            const stage = evaluation as unknown as StageDocument;
+            const deleted = await evaluation.deleteOne();
+            await Stage.updateMany({
+                parent: stage.parent,
+                order: { $gt: stage.order },
+            },
+                { $inc: { order: -1 } }
+            );
+            return deleted;
         }
         return await evaluation.deleteOne();
     }
 
 
-    static async reorderStageLevel(id: string, direction: string) {
+    static async reorderStage(id: string, direction: string) {
         if (!['up', 'down'].includes(direction)) {
             throw new Error('Direction must be "up" or "down".');
         }
         const current = await Stage.findById(id).lean();
-        if (!current || current.type !== EvaluationType.stage) {
+        if (!current) {
             throw new Error('Stage not found.');
         }
+
+        const referencedByProject = await ProjectStage.exists({ stage: current._id });
+        if (referencedByProject) throw new Error(`Can not reorder ${current.title}, it is used in projects.`);
+
         const level = current.order;
         if (typeof level !== 'number') {
             throw new Error('Current stage level is not defined.');
