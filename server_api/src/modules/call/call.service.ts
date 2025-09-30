@@ -3,6 +3,10 @@ import { CallStatus } from "./enums/call.status.enum";
 import { Call } from "./call.model";
 import { Directorate } from "../organization/organization.model";
 import mongoose from "mongoose";
+import { Catalog } from "../themes/theme.model";
+import { Calendar } from "../calendar/calendar.model";
+import { Evaluation } from "../evaluations/evaluation.model";
+import { Grant } from "../grants/grant.model";
 
 
 export interface GetCallsOptions {
@@ -17,7 +21,6 @@ export interface CreateCallDto {
     title: string;
     deadline: Date | string;
     description?: string;
-    total_budget?: number;
     grant: mongoose.Types.ObjectId;
     theme: mongoose.Types.ObjectId;
     evaluation: mongoose.Types.ObjectId;
@@ -32,6 +35,22 @@ export class CallService {
         if (!directorate) {
             throw new Error("Directorate Not Found!");
         }
+        const calendar = await Calendar.findById(call.calendar);
+        if (!calendar) {
+            throw new Error("Calendar Not Found!");
+        }
+        const grant = await Grant.findById(call.grant);
+        if (!grant) {
+            throw new Error("Grant Not Found!");
+        }
+        const catalog = await Catalog.findById(call.theme);
+        if (!catalog) {
+            throw new Error("Theme Catalog Not Found!");
+        }
+        const evaluation = await Evaluation.findById(call.evaluation);
+        if (!evaluation) {
+            throw new Error("Evaluation Not Found!");
+        }        
         return
     }
 

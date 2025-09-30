@@ -2,6 +2,9 @@ import mongoose, { Schema, model, Document } from 'mongoose';
 import { CallStatus } from './enums/call.status.enum';
 import { COLLECTIONS } from '../../enums/collections.enum';
 import { Directorate } from '../organization/organization.model';
+import { Catalog } from '../themes/theme.model';
+import { Evaluation } from '../evaluations/evaluation.model';
+import { required } from 'joi';
 
 interface ICall extends Document {
     directorate: mongoose.Types.ObjectId;
@@ -12,7 +15,7 @@ interface ICall extends Document {
     total_budget?: number;
     grant: mongoose.Types.ObjectId;
     theme?: mongoose.Types.ObjectId;
-    evaluation?: mongoose.Types.ObjectId;
+    evaluation: mongoose.Types.ObjectId;
     status: CallStatus;
     createdAt?: Date;
     updatedAt?: Date;
@@ -46,10 +49,6 @@ const CallSchema = new Schema<ICall>({
     description: {
         type: String,
     },
-    total_budget: {
-        type: Number,
-        min: 0
-    },
     grant: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.GRANT,
@@ -57,11 +56,12 @@ const CallSchema = new Schema<ICall>({
     },
     theme: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.THEME
+        ref: Catalog.modelName
     },
     evaluation: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.EVALUATION
+        ref: Evaluation.modelName,
+        required: true
     },
     status: {
         type: String,

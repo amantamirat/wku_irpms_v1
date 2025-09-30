@@ -8,24 +8,26 @@ export class CallController {
 
     static async createCall(req: Request, res: Response) {
         try {
+            const { calendar, directorate, title, deadline, description, grant, theme, evaluation } = req.body;
             const data: CreateCallDto = {
-                calendar: req.body.calendar,
-                directorate: req.body.directorate,
-                title: req.body.title,
-                deadline: req.body.deadline,
-                grant: req.body.grant,
-                theme: req.body.theme,
-                evaluation: req.body.evaluation
+                calendar: new mongoose.Types.ObjectId(calendar as string),
+                directorate: new mongoose.Types.ObjectId(directorate as string),
+                title: title,
+                deadline: deadline,
+                description: description ?? undefined,
+                grant: new mongoose.Types.ObjectId(grant as string),
+                theme: new mongoose.Types.ObjectId(theme as string),
+                evaluation: new mongoose.Types.ObjectId(evaluation as string)
             };
-            const theme = await CallService.createCall(data);
-            successResponse(res, 201, "Call created successfully", theme);
+            const created = await CallService.createCall(data);
+            successResponse(res, 201, "Call created successfully", created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
     static async getCalls(req: Request, res: Response) {
-        try {            
+        try {
             const { calendar, directorate, status } = req.query;
             const filter = {
                 calendar: calendar ? new mongoose.Types.ObjectId(calendar as string) : undefined,
@@ -41,8 +43,17 @@ export class CallController {
 
     static async updateCall(req: Request, res: Response) {
         try {
+            const { calendar, title, deadline, description, grant, theme, evaluation } = req.body;            
             const { id } = req.params;
-            const data: Partial<CreateCallDto> = req.body;
+            const data: Partial<CreateCallDto>  = {
+                calendar: new mongoose.Types.ObjectId(calendar as string),                
+                title: title,
+                deadline: deadline,
+                description: description ?? undefined,
+                grant: new mongoose.Types.ObjectId(grant as string),
+                theme: new mongoose.Types.ObjectId(theme as string),
+                evaluation: new mongoose.Types.ObjectId(evaluation as string)
+            };
             const updated = await CallService.updateCall(id, data);
             successResponse(res, 201, "Call updated successfully", updated);
         } catch (err: any) {
