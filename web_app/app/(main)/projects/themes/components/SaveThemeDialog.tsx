@@ -2,23 +2,78 @@ import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { TreeSelect } from "primereact/treeselect";
 import { Toast } from "primereact/toast";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ProjectTheme, validateProjectTheme } from "../models/project.theme.model";
+import { Project } from "../../models/project.model";
+import { Theme, ThemeType } from "@/app/(main)/themes/models/theme.model";
+import { Call } from "@/app/(main)/calls/models/call.model";
+import { ThemeApi } from "@/app/(main)/themes/api/theme.api";
+
+type Node = {
+    key?: string;
+    label: string;
+    value?: any;
+    icon?: string;
+    children?: Node[];
+};
 
 
 interface SaveThemeDialogProps {
+    project: Project;
     projectTheme: ProjectTheme;
     setProjectTheme: (theme: ProjectTheme) => void;
-    themeOptions: any;
     visible: boolean;
     onAdd: () => Promise<void>;
     onHide: () => void;
 }
 
-export default function SaveThemeDialog({ projectTheme, setProjectTheme, themeOptions, visible, onAdd, onHide }: SaveThemeDialogProps) {
+
+function buildTree(themes: Theme[], parentId?: string): Node[] {
+    return themes
+        .filter(t => {
+            if (parentId) {
+                return (t.parent ?? null) === parentId;
+            }
+            return t.type === ThemeType.broadTheme;
+        })
+        .map(t => {
+            const children = buildTree(themes, t._id!);
+            return {
+                key: t._id,
+                label: t.title,
+                value: t,
+                ...(children.length > 0
+                    ? { children, selectable: false }
+                    : { selectable: true })
+            };
+        });
+}
+
+
+export default function SaveThemeDialog({ project, projectTheme, setProjectTheme, visible, onAdd, onHide }: SaveThemeDialogProps) {
 
     const toast = useRef<Toast>(null);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
+    const [nodes, setNodes] = useState([]);
+    const [themes, setThemes] = useState<Theme[]>([]);
+
+
+    useEffect(() => {
+        const fetchThemes = async () => {
+            const theme = (project.call as Call).theme;
+            const catalogId =
+                typeof theme === "object" && theme !== null
+                    ? (theme as any)._id
+                    : theme;
+            const data = await ThemeApi.getThemes({
+                catalog: catalogId
+            });
+            setThemes(data);
+            const node = buildTree(data);
+            setNodes(node as any);
+        };
+        fetchThemes();
+    }, [project?.call]);
 
     const addProjectTheme = async () => {
         try {
@@ -69,7 +124,7 @@ export default function SaveThemeDialog({ projectTheme, setProjectTheme, themeOp
                     <TreeSelect
                         id="theme"
                         value={projectTheme.theme as string}
-                        options={themeOptions}
+                        options={nodes}
                         onChange={(e) => setProjectTheme({ ...projectTheme, theme: e.value as string })}
                         placeholder="Select a Theme"
                         scrollHeight="400px"

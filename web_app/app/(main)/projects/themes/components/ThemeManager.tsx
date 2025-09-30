@@ -15,39 +15,13 @@ import SaveThemeDialog from "./SaveThemeDialog";
 
 
 
-type Node = {
-    key?: string;
-    label: string;
-    value?: any;
-    icon?: string;
-    children?: Node[];
-};
+
 
 interface ProjectInfoStepProps {
     project: Project;
 }
 
 
-function buildTree(themes: Theme[], parentId?: string): Node[] {
-    return themes
-        .filter(t => {
-            if (parentId) {
-                return (t.parent ?? null) === parentId;
-            }
-            return t.type === ThemeType.broadTheme;
-        })
-        .map(t => {
-            const children = buildTree(themes, t._id!);
-            return {
-                key: t._id,
-                label: t.title,
-                value: t,
-                ...(children.length > 0
-                    ? { children, selectable: false }
-                    : { selectable: true })
-            };
-        });
-}
 
 export default function ThemeManager({ project }: ProjectInfoStepProps) {
 
@@ -55,30 +29,13 @@ export default function ThemeManager({ project }: ProjectInfoStepProps) {
         theme: "",
         project: project
     };
-    const [themes, setThemes] = useState<Theme[]>([]);
-    const [nodes, setNodes] = useState([]);
 
-    const [projectThemes, setProjectThemes] = useState<ProjectTheme[]>([]);
+
     const [projectTheme, setProjectTheme] = useState<ProjectTheme>(emptyProjectTheme);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [projectThemes, setProjectThemes] = useState<ProjectTheme[]>([]);
 
-    useEffect(() => {
-        const fetchThemes = async () => {
-            const theme = (project.call as Call).theme;
-            const catalogId =
-                typeof theme === "object" && theme !== null
-                    ? (theme as any)._id
-                    : theme;
-            const data = await ThemeApi.getThemes({
-                catalog: catalogId
-            });
-            setThemes(data);
-            const node = buildTree(data);
-            setNodes(node as any);
-        };
-        fetchThemes();
-    }, [project?.call]);
 
 
     useEffect(() => {
@@ -97,18 +54,14 @@ export default function ThemeManager({ project }: ProjectInfoStepProps) {
 
 
     const saveProjectTheme = async () => {
-        const theme = themes.find((thm) => thm._id === (projectTheme.theme as string));
-        if (!theme) {
-            throw new Error("Theme not found!");
-        }
         let _projectThemes = [...projectThemes];
         if (projectTheme._id) {
             const updated = await ProjectThemeApi.updateProjectTheme(projectTheme);
             const index = _projectThemes.findIndex((p) => p._id === updated._id);
-            _projectThemes[index] = { ...updated, project: project, theme: theme };
+            // _projectThemes[index] = { ...updated, project: project, theme: theme };
         } else {
             const created = await ProjectThemeApi.createProjectTheme(projectTheme);
-            _projectThemes.push({ ...created, project: project, theme: theme });
+            //_projectThemes.push({ ...created, project: project, theme: theme });
         }
         setProjectThemes(_projectThemes);
         hideDialogs();
@@ -175,12 +128,12 @@ export default function ThemeManager({ project }: ProjectInfoStepProps) {
 
             {projectTheme && (
                 <SaveThemeDialog
+                    project={project}
                     projectTheme={projectTheme}
                     setProjectTheme={setProjectTheme}
                     visible={showSaveDialog}
                     onAdd={saveProjectTheme}
-                    onHide={hideDialogs}
-                    themeOptions={nodes} />
+                    onHide={hideDialogs} />
             )}
             {projectTheme && (
                 <DeleteDialog
