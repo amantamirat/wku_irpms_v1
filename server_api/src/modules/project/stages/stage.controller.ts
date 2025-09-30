@@ -5,6 +5,7 @@ import {
     GetProjectStageOptions,
     UpdateProjectStageDto
 } from "./stage.service";
+import fs from "fs";
 import { errorResponse, successResponse } from "../../../util/response";
 
 export class ProjectStageController {
@@ -18,12 +19,19 @@ export class ProjectStageController {
                 project: req.body.project,
                 stage: req.body.stage,
                 status: req.body.status,
-                documentPath: `uploads/${req.file.filename}`, 
+                documentPath: `uploads/${req.file.filename}`,
             };
 
             const projectStage = await ProjectStageService.createProjectStage(data);
             successResponse(res, 201, "Project stage created successfully", projectStage);
         } catch (err: any) {
+            if (req.file) {
+                fs.unlink(`uploads/${req.file.filename}`, (unlinkErr) => {
+                    if (unlinkErr) {
+                        console.error("Failed to delete uploaded file:", unlinkErr);
+                    }
+                });
+            }
             errorResponse(res, 400, err.message, err);
         }
     }
