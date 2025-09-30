@@ -28,7 +28,6 @@ export default function ThemeManager({ project }: ProjectInfoStepProps) {
         project: project
     };
 
-
     const [projectTheme, setProjectTheme] = useState<ProjectTheme>(emptyProjectTheme);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -56,7 +55,7 @@ export default function ThemeManager({ project }: ProjectInfoStepProps) {
         if (projectTheme._id) {
             const updated = await ProjectThemeApi.updateProjectTheme(projectTheme);
             const index = _projectThemes.findIndex((p) => p._id === updated._id);
-            // _projectThemes[index] = { ...updated, project: project, theme: theme };
+            _projectThemes[index] = { ...updated, project: project, theme: projectTheme.theme };
         } else {
             const created = await ProjectThemeApi.createProjectTheme(projectTheme);
             _projectThemes.push({ ...created, project: project, theme: projectTheme.theme});

@@ -39,7 +39,6 @@ function buildTree(themes: Theme[], parentId?: string): Node[] {
         });
 }
 
-
 interface SaveThemeDialogProps {
     project: Project;
     projectTheme: ProjectTheme;
@@ -83,7 +82,6 @@ export default function SaveThemeDialog({ project, projectTheme, setProjectTheme
                 return;
             }
             setErrorMessage(undefined);
-
             const theme = themes.find((thm) => thm._id === (projectTheme.theme as string));
             if (!theme) {
                 throw new Error("Theme not found!");
