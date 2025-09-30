@@ -7,26 +7,27 @@ import {
 } from "./stage.service";
 import fs from "fs";
 import { errorResponse, successResponse } from "../../../util/response";
+import mongoose from "mongoose";
 
 export class ProjectStageController {
 
     static async createProjectStage(req: Request, res: Response) {
+        if (!req.file) {
+            return errorResponse(res, 400, "Document is required");
+        }
+        const documentPath = `uploads/${req.file.filename}`;
         try {
-            if (!req.file) {
-                return errorResponse(res, 400, "Document is required");
-            }
+            const { project, stage } = req.body;
             const data: CreateProjectStageDto = {
-                project: req.body.project,
-                stage: req.body.stage,
-                status: req.body.status,
-                documentPath: `uploads/${req.file.filename}`,
+                project: new mongoose.Types.ObjectId(project as string),
+                stage: new mongoose.Types.ObjectId(stage as string),
+                documentPath: documentPath,
             };
-
-            const projectStage = await ProjectStageService.createProjectStage(data);
-            successResponse(res, 201, "Project stage created successfully", projectStage);
+            const created = await ProjectStageService.createProjectStage(data);
+            successResponse(res, 201, "Project stage created successfully", created);
         } catch (err: any) {
             if (req.file) {
-                fs.unlink(`uploads/${req.file.filename}`, (unlinkErr) => {
+                fs.unlink(documentPath, (unlinkErr) => {
                     if (unlinkErr) {
                         console.error("Failed to delete uploaded file:", unlinkErr);
                     }
@@ -40,41 +41,24 @@ export class ProjectStageController {
         try {
             const { project, stage, status } = req.query;
             const filter: GetProjectStageOptions = {
-                project: project as string ?? undefined,
-                stage: stage as string ?? undefined,
+                project: project ? new mongoose.Types.ObjectId(project as string) : undefined,
+                stage: stage ? new mongoose.Types.ObjectId(stage as string) : undefined,
                 status: status as any ?? undefined,
             };
-
             const stages = await ProjectStageService.getProjectStages(filter);
             successResponse(res, 200, "Project stages fetched successfully", stages);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
-
-    static async findProjectStage(req: Request, res: Response) {
-        try {
-            const { id, project, stage } = req.query;
-            const filter: GetProjectStageOptions = {
-                _id: id as string ?? undefined,
-                project: project as string ?? undefined,
-                stage: stage as string ?? undefined,
-            };
-
-            const projectStage = await ProjectStageService.findProjectStage(filter);
-            successResponse(res, 200, "Project stage fetched successfully", projectStage);
-        } catch (err: any) {
-            errorResponse(res, 400, err.message, err);
-        }
-    }
+    }    
 
     static async updateProjectStage(req: Request, res: Response) {
         try {
             const { id } = req.params;
+            const { status } = req.body;
             const data: Partial<UpdateProjectStageDto> = {
-                status: req.body.status,
+                status: status,
             };
-
             const updated = await ProjectStageService.updateProjectStage(id, data);
             successResponse(res, 200, "Project stage updated successfully", updated);
         } catch (err: any) {

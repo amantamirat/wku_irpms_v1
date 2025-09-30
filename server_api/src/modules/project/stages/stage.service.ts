@@ -1,18 +1,20 @@
 import mongoose from "mongoose";
 import { StageStatus } from "./stage.enum";
 import { ProjectStage } from "./stage.model";
+import { Project } from "../project.model";
+import { Stage } from "../../evaluations/evaluation.model";
 
 export interface GetProjectStageOptions {
     _id?: string;
-    project?: string;
-    stage?: string;
+    project?: mongoose.Types.ObjectId;
+    stage?: mongoose.Types.ObjectId;
     status?: StageStatus;
 }
 
 export interface CreateProjectStageDto {
     project: mongoose.Types.ObjectId;
     stage: mongoose.Types.ObjectId;
-    documentPath:string;
+    documentPath: string;
     status?: StageStatus;
 }
 
@@ -22,7 +24,20 @@ export interface UpdateProjectStageDto {
 
 export class ProjectStageService {
 
+    private static async validateProjectStage(ps: Partial<CreateProjectStageDto>) {
+        const project = await Project.findById(ps.project);
+        if (!project) {
+            throw new Error("Project Not Found!");
+        }
+        const stage = await Stage.findById(ps.stage);
+        if (!stage) {
+            throw new Error("Stage Not Found!");
+        }
+        //use stage prev
+    }
+
     static async createProjectStage(data: CreateProjectStageDto) {
+        await this.validateProjectStage(data);
         const createdStage = await ProjectStage.create(data);
         return createdStage;
     }
@@ -56,7 +71,6 @@ export class ProjectStageService {
     static async updateProjectStage(id: string, data: Partial<UpdateProjectStageDto>) {
         const projectStage = await ProjectStage.findById(id);
         if (!projectStage) throw new Error("Project stage not found");
-
         Object.assign(projectStage, data);
         return projectStage.save();
     }
@@ -64,7 +78,6 @@ export class ProjectStageService {
     static async deleteProjectStage(id: string) {
         const projectStage = await ProjectStage.findById(id);
         if (!projectStage) throw new Error("Project stage not found");
-
         return projectStage.deleteOne();
     }
 }
