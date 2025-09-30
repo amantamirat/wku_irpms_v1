@@ -122,6 +122,7 @@ export class EvaluationService {
     }
 
 
+    
     static async reorderStage(id: string, direction: string) {
         if (!['up', 'down'].includes(direction)) {
             throw new Error('Direction must be "up" or "down".');
@@ -131,37 +132,42 @@ export class EvaluationService {
             throw new Error('Stage not found.');
         }
 
-        const referencedByProject = await ProjectStage.exists({ stage: current._id });
-        if (referencedByProject) throw new Error(`Can not reorder ${current.title}, it is used in projects.`);
+        const currentReferencedByProject = await ProjectStage.exists({ stage: current._id });
+        if (currentReferencedByProject) throw new Error(`Can not reorder ${current.title}, it is used in projects.`);
 
-        const level = current.order;
-        if (typeof level !== 'number') {
+        const order = current.order;
+        if (typeof order !== 'number') {
             throw new Error('Current stage level is not defined.');
         }
         const target = await Stage.findOne({
             parent: current.parent,
-            stage_level: direction === 'up' ? level - 1 : level + 1
+            order: direction === 'up' ? order - 1 : order + 1
         });
         if (!target) {
             throw new Error(`Cannot move ${direction} any further.`);
         }
+
+        const targetReferencedByProject = await ProjectStage.exists({ stage: target._id });
+        if (targetReferencedByProject) throw new Error(`Can not reorder ${target.title}, it is used in projects.`);
+
+
         const currentLevel = current.order!;
         const targetLevel = target.order!;
 
         await Stage.updateOne(
             { _id: current._id },
-            { $set: { stage_level: -1 } },
+            { $set: { order: -1 } },
             { runValidators: false } // Bypass min/max validation
         );
         // Swap stage levels using bulkWrite
         await Stage.updateOne(
             { _id: target._id },
-            { $set: { stage_level: currentLevel } }
+            { $set: { order: currentLevel } }
         );
         // 3. Move current into target's position
         await Stage.updateOne(
             { _id: current._id },
-            { $set: { stage_level: targetLevel } }
+            { $set: { order: targetLevel } }
         );
         return true;
     }
