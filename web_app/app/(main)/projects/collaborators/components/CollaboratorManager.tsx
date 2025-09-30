@@ -82,11 +82,10 @@ export default function CollaboratorManager({ project, setProject }: Collaborato
         if (exists) {
             throw new Error("This collaborator is already added!");
         }
-        const updatedCollaborators = [...(project.collaborators || []), collaborator];
-        const updatedProject = { ...project, collaborators: updatedCollaborators };
+        const updatedCollaborators = [...(project.collaborators || []), collaborator];        
         // notify parent
         if (setProject) {
-            setProject(updatedProject);
+            setProject({ ...project, collaborators: updatedCollaborators });
         }
         setCollaborators(updatedCollaborators);
         hideDialogs();

@@ -12,16 +12,14 @@ import { Theme } from "@/app/(main)/themes/models/theme.model";
 
 
 
-
-
-
 interface ProjectInfoStepProps {
     project: Project;
+    setProject?: (project: Project) => void;
 }
 
 
 
-export default function ThemeManager({ project }: ProjectInfoStepProps) {
+export default function ThemeManager({ project, setProject }: ProjectInfoStepProps) {
 
     const emptyProjectTheme: ProjectTheme = {
         theme: "",
@@ -61,7 +59,7 @@ export default function ThemeManager({ project }: ProjectInfoStepProps) {
             _projectThemes[index] = { ...updated, project: project, theme: projectTheme.theme };
         } else {
             const created = await ProjectThemeApi.createProjectTheme(projectTheme);
-            _projectThemes.push({ ...created, project: project, theme: projectTheme.theme});
+            _projectThemes.push({ ...created, project: project, theme: projectTheme.theme });
         }
         setProjectThemes(_projectThemes);
         hideDialogs();
@@ -73,6 +71,23 @@ export default function ThemeManager({ project }: ProjectInfoStepProps) {
             setProjectThemes(projectThemes.filter((pt) => pt._id !== projectTheme._id));
             hideDialogs();
         }
+    };
+
+    const addProjectTheme = () => {
+        const exists =
+            project.themes?.some(
+                (c) => (c.theme as Theme)._id === projectTheme._id
+            ) ?? false;
+
+        if (exists) {
+            throw new Error("The theme is already added!");
+        }
+        const updatedProjectThemes = [...(project.themes || []), projectTheme];
+        if (setProject) {
+            setProject({ ...project, themes: updatedProjectThemes });
+        }
+        setProjectThemes(updatedProjectThemes);
+        hideDialogs();
     };
 
     const hideDialogs = () => {
