@@ -1,15 +1,20 @@
 import { Request, Response } from 'express';
 import { errorResponse, successResponse } from '../../util/response';
 import { GrantService, CreateGrantDto, GetGrantsOptions } from './grant.service';
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 
 export class GrantController {
 
     static async createGrant(req: Request, res: Response) {
         try {
-            const data: CreateGrantDto = req.body;
-            const theme = await GrantService.createGrant(data);
-            successResponse(res, 201, "Grant created successfully", theme);
+            const { directorate, title, description } = req.body;
+            const data: CreateGrantDto = {
+                directorate: new mongoose.Types.ObjectId(directorate as string),
+                title: title,
+                description: description ?? undefined
+            };
+            const grant = await GrantService.createGrant(data);
+            successResponse(res, 201, "Grant created successfully", grant);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
@@ -18,7 +23,7 @@ export class GrantController {
     static async getGrants(req: Request, res: Response) {
         try {
             const { directorate } = req.query;
-            const filter = {                
+            const filter = {
                 directorate: directorate ? new Types.ObjectId(directorate as string) : undefined
             } as GetGrantsOptions;
             const grants = await GrantService.getGrants(filter);
@@ -31,7 +36,11 @@ export class GrantController {
     static async updateGrant(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const data: Partial<CreateGrantDto> = req.body;
+            const { title, description } = req.body;
+            const data: Partial<CreateGrantDto> = {
+                title: title,
+                description: description ?? undefined
+            };
             const updated = await GrantService.updateGrant(id, data);
             successResponse(res, 201, "Grant updated successfully", updated);
         } catch (err: any) {

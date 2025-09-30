@@ -1,21 +1,17 @@
-import { Types } from "mongoose";
-import { Evaluation } from "../evaluations/evaluation.model";
 import { Grant } from "./grant.model";
 import { Directorate } from "../organization/organization.model";
-import { Catalog } from "../themes/theme.model";
+import mongoose from "mongoose";
+import { Call } from "../call/call.model";
 
 
 export interface GetGrantsOptions {
-    directorate?: string;
+    directorate?: mongoose.Types.ObjectId;
 }
 
-
 export interface CreateGrantDto {
-    directorate: Types.ObjectId | string;
+    directorate: mongoose.Types.ObjectId;
     title: string;
     description?: string;
-    theme: Types.ObjectId | string;
-    evaluation: Types.ObjectId | string;
 }
 
 
@@ -25,14 +21,6 @@ export class GrantService {
         const directorate = await Directorate.findById(grant.directorate).lean();
         if (!directorate) {
             throw new Error("Directorate Not Found!");
-        }
-        const theme = await Catalog.findById(grant.theme).lean();
-        if (!theme) {
-            throw new Error("Theme Not Found!");
-        }
-        const evaluation = await Evaluation.findById(grant.evaluation).lean();
-        if (!evaluation) {
-            throw new Error("Evaluation Not Found!");
         }
     }
 
@@ -51,7 +39,6 @@ export class GrantService {
     static async updateGrant(id: string, data: Partial<CreateGrantDto>) {
         const grant = await Grant.findById(id);
         if (!grant) throw new Error("Grant not found");
-        await this.validateGrant(data);
         Object.assign(grant, data);
         return grant.save();
     }
@@ -59,6 +46,8 @@ export class GrantService {
     static async deleteGrant(id: string) {
         const grant = await Grant.findById(id);
         if (!grant) throw new Error("Grant not found");
+        const referencedByCall = await Call.exists({ grant: grant._id });
+        if (referencedByCall) throw new Error(`Can not delete ${grant.title}, it is used by Call.`);
         return await grant.deleteOne();
     }
 }

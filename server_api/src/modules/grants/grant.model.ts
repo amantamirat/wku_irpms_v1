@@ -6,8 +6,6 @@ interface IGrant extends Document {
     directorate: mongoose.Types.ObjectId;
     title: string;
     description?: string;
-    theme: mongoose.Types.ObjectId;
-    evaluation: mongoose.Types.ObjectId;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -16,7 +14,8 @@ const GrantSchema = new Schema<IGrant>({
     directorate: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.ORGAN,
-        required: true
+        required: true,
+        immutable:true
     },
     title: {
         type: String,
@@ -24,17 +23,7 @@ const GrantSchema = new Schema<IGrant>({
     },
     description: {
         type: String,
-    },
-    theme: {
-        type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.THEME,
-        required: true
-    },
-    evaluation: {
-        type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.EVALUATION,
-        required: true
-    },
+    }
 }, { timestamps: true });
 
 
