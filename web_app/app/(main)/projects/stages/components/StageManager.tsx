@@ -111,28 +111,18 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
                         setShowDeleteDialog(true);
                     }}
                 />
-                <Button icon="pi pi-times" rounded severity="warning" className="p-button-rounded p-button-text"
-                    style={{ fontSize: '1.2rem' }} onClick={() => {
-                        setProjectStage(rowData);
-                        setShowDeleteDialog(true);
-                    }} />
             </>
         );
     };
 
 
     const actionBodyTemplate = (rowData: ProjectStage) => (
-
         <>
-
-            <Button label="Submit" severity="success" className="p-button-text"
+            <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
-                    //setProjectStage(rowData);
-                    //setShowAddDialog(true);
+                    setProjectStage(rowData);
+                    setShowAddDialog(true);
                 }} />
-
-
-
 
             <Button icon="pi pi-times" rounded severity="warning" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
@@ -179,7 +169,7 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
                         }}
                     />
                     <Column field="status" header="Status" sortable />
-                    <Column body={actionBodyTemplate2} headerStyle={{ minWidth: '10rem' }} />
+                    <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
 
                 </DataTable>
 
@@ -202,14 +192,7 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
                     />
                 )}
 
-                {projectStage && (
-                    <ConfirmDialog
-                        showDialog={showConfirmationDialog}
-                        message={`Ready to Proceed?`}                        
-                        onConfirmAsync={removeProjectStage}
-                        onHide={hideDialogs}
-                    />
-                )}
+                
             </div>
         </>
     );
