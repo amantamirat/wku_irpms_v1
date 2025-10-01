@@ -7,7 +7,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { Project } from "../../models/project.model";
-import { ProjectStage, ProjectStageStatus, validateProjectStage } from "../models/stage.model";
+import { ProjectStage, StageStatus, validateProjectStage } from "../models/stage.model";
 import UploadForm from "../../components/UploadForm";
 
 interface SaveProjectStageDialogProps {
@@ -113,7 +113,7 @@ export default function SaveProjectStageDialog({ project, projectStage, setProje
                             <Dropdown
                                 id="status"
                                 value={projectStage.status}
-                                options={Object.values(ProjectStageStatus).map(s => ({ label: s, value: s }))}
+                                options={Object.values(StageStatus).map(s => ({ label: s, value: s }))}
                                 onChange={(e) =>
                                     setProjectStage({ ...projectStage, status: e.value })
                                 }

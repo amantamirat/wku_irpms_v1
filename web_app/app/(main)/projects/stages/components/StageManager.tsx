@@ -7,7 +7,7 @@ import { Toolbar } from "primereact/toolbar";
 import { useEffect, useState } from "react";
 import { Project } from "../../models/project.model";
 import { ProjectStageApi } from "../api/stage.api";
-import { ProjectStage, ProjectStageStatus } from "../models/stage.model";
+import { ProjectStage, StageStatus } from "../models/stage.model";
 import SaveProjectStageDialog from "./SaveProjectStageDialog";
 
 
@@ -20,7 +20,7 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
     const emptyProjectStage: ProjectStage = {
         project: project,
         stage: '',
-        status:ProjectStageStatus.pending
+        status: StageStatus.pending
     };
 
 
@@ -28,6 +28,7 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
     const [projectStages, setProjectStages] = useState<ProjectStage[]>([]);
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [showConfirmationDialog, setShowshowConfirmationDialog] = useState(false);
 
 
     useEffect(() => {
@@ -86,14 +87,53 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
         </div>
     );
 
+    const actionBodyTemplate2 = (rowData: ProjectStage) => {
+        let label = "";
+        let severity: "success" | "danger" = "success";
+
+        if (rowData.status === StageStatus.pending) {
+            label = "Submit";
+            severity = "success";
+
+        } else if (rowData.status === StageStatus.submitted) {
+            label = "Withdraw";
+            severity = "danger";
+        }
+
+        return (
+            <>
+                <Button
+                    label={label}
+                    severity={severity}
+                    className="p-button-text"
+                    onClick={() => {
+                        setProjectStage(rowData);
+                        setShowDeleteDialog(true);
+                    }}
+                />
+                <Button icon="pi pi-times" rounded severity="warning" className="p-button-rounded p-button-text"
+                    style={{ fontSize: '1.2rem' }} onClick={() => {
+                        setProjectStage(rowData);
+                        setShowDeleteDialog(true);
+                    }} />
+            </>
+        );
+    };
+
 
     const actionBodyTemplate = (rowData: ProjectStage) => (
+
         <>
-            <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
+
+            <Button label="Submit" severity="success" className="p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setProjectStage(rowData);
-                    setShowAddDialog(true);
+                    //setProjectStage(rowData);
+                    //setShowAddDialog(true);
                 }} />
+
+
+
+
             <Button icon="pi pi-times" rounded severity="warning" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
                     setProjectStage(rowData);
@@ -138,8 +178,8 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
                             );
                         }}
                     />
-                     <Column field="status" header="Status" sortable />
-                    <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
+                    <Column field="status" header="Status" sortable />
+                    <Column body={actionBodyTemplate2} headerStyle={{ minWidth: '10rem' }} />
 
                 </DataTable>
 
@@ -157,6 +197,15 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
                     <DeleteDialog
                         showDeleteDialog={showDeleteDialog}
                         selectedDataInfo={`projectStage ${projectStage._id}`}
+                        onDelete={removeProjectStage}
+                        onHide={hideDialogs}
+                    />
+                )}
+
+                {projectStage && (
+                    <DeleteDialog
+                        showDeleteDialog={showConfirmationDialog}
+                        message={`Ready to Proceed?`}                        
                         onDelete={removeProjectStage}
                         onHide={hideDialogs}
                     />

@@ -1,7 +1,7 @@
 import { Evaluation } from "../../../evals/models/eval.model";
 import { Project } from "../../models/project.model";
 
-export enum ProjectStageStatus {
+export enum StageStatus {
     pending = 'pending',
     submitted = 'submitted',
     accepted = 'accepted'
@@ -13,7 +13,7 @@ export type ProjectStage = {
     stage: string | Evaluation;
     documentPath?: string;
     file?: File;
-    status: ProjectStageStatus;
+    status: StageStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }

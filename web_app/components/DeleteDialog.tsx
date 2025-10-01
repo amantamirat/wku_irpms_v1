@@ -6,7 +6,8 @@ import { useRef } from "react";
 interface DeleteDialogProps {
     showDeleteDialog: boolean;
     operation?: string;
-    selectedDataInfo: string;
+    selectedDataInfo?: string;
+    message?: string;
     onRemove?: () => void;
     onDelete?: () => Promise<void>;
     onHide: () => void;
@@ -76,6 +77,11 @@ const DeleteDialog = (props: DeleteDialogProps) => {
                     {props.selectedDataInfo && (
                         <span>
                             Are you sure you want to {props.operation ?? 'delete'} <b>{props.selectedDataInfo}</b>?
+                        </span>
+                    )}
+                    {props.message && (
+                        <span>
+                            {props.message}?
                         </span>
                     )}
                 </div>
