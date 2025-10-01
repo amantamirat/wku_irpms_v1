@@ -18,7 +18,7 @@ export interface CreateThemeDto {
     directorate?: mongoose.Types.ObjectId;
     level?: ThemeLevel;
     parent?: mongoose.Types.ObjectId;
-    priority?: number;    
+    priority?: number;
     catalog?: mongoose.Types.ObjectId;
 }
 
@@ -37,25 +37,25 @@ export class ThemeService {
             throw new Error("Parent Not Found!");
         }
 
-        if (theme.type === ThemeType.theme) {
-            if (parent.type !== ThemeType.catalog) {
-                throw new Error(`Invalid Theme Parent (${parent.type}) Found!`);
-            }
-        }
-
         const catalog = await Catalog.findById(theme.type === ThemeType.theme ? parent._id : parent.catalog).lean();
         if (!catalog) {
             throw new Error("Catalog Not Found!");
         }
 
-        if (theme.type === ThemeType.componenet) {
+        if (theme.type === ThemeType.theme) {
+            if (parent.type !== ThemeType.catalog) {
+                throw new Error(`Invalid Theme Parent (${parent.type}) Found!`);
+            }
+        }
+        else if (theme.type === ThemeType.componenet) {
             if (parent.type !== ThemeType.theme) {
                 throw new Error(`Invalid Componenet Parent (${parent.type}) Found!`);
             }
             if (catalog.level === ThemeLevel.broad) {
                 throw new Error("Invalid hierarchy: Component must not trace back to Broad catalog");
             }
-        } else {
+        }
+        else {
             if (parent.type !== ThemeType.componenet) {
                 throw new Error(`Invalid Focus Area Parent (${parent.type}) Found!`);
             }
