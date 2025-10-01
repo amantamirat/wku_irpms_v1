@@ -1,6 +1,6 @@
 'use client';
 
-import DeleteDialog from '@/components/DeleteDialog';
+import ConfirmDialog from '@/components/ConfirmationDialog';
 import SaveDialog from './dialogs/SaveDialog';
 import { Applicant, Gender, scopeToOrganizationUnit } from '../models/applicant.model';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
@@ -243,10 +243,10 @@ const ApplicantManager = (props: ApplicantManagerProps) => {
                     )}
 
                     {selectedApplicant && (
-                        <DeleteDialog
-                            showDeleteDialog={showDeleteDialog}
+                        <ConfirmDialog
+                            showDialog={showDeleteDialog}
                             selectedDataInfo={`${selectedApplicant.first_name} ${selectedApplicant.last_name}`}
-                            onDelete={deleteApplicant}
+                            onConfirmAsync={deleteApplicant}
                             onHide={() => setShowDeleteDialog(false)}
                         />
                     )}

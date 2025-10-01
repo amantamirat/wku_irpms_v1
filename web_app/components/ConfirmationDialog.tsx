@@ -3,26 +3,26 @@ import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
 import { useRef } from "react";
 
-interface DeleteDialogProps {
-    showDeleteDialog: boolean;
+interface ConfirmDialogProps {
+    showDialog: boolean;
     operation?: string;
     selectedDataInfo?: string;
     message?: string;
-    onRemove?: () => void;
-    onDelete?: () => Promise<void>;
+    onConfirm?: () => void;
+    onConfirmAsync?: () => Promise<void>;
     onHide: () => void;
 }
 
-const DeleteDialog = (props: DeleteDialogProps) => {
+const ConfirmDialog = (props: ConfirmDialogProps) => {
     const toast = useRef<Toast>(null);
 
     const onOK = async () => {
         try {
-            if (props.onDelete) {
-                await props.onDelete();
+            if (props.onConfirmAsync) {
+                await props.onConfirmAsync();
             }
-            if (props.onRemove) {
-                props.onRemove();
+            if (props.onConfirm) {
+                props.onConfirm();
             }
 
             /**
@@ -60,7 +60,7 @@ const DeleteDialog = (props: DeleteDialogProps) => {
         <>
             <Toast ref={toast} />
             <Dialog
-                visible={props.showDeleteDialog}
+                visible={props.showDialog}
                 style={{ width: '450px' }}
                 header="Confirm"
                 modal
@@ -91,4 +91,4 @@ const DeleteDialog = (props: DeleteDialogProps) => {
     );
 };
 
-export default DeleteDialog;
+export default ConfirmDialog;

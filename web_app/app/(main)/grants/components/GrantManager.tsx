@@ -1,6 +1,6 @@
 'use client';
 
-import DeleteDialog from '@/components/DeleteDialog';
+import ConfirmDialog from '@/components/ConfirmationDialog';
 
 
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
@@ -215,10 +215,10 @@ const GrantManager = (props: GrantManagerProps) => {
                     )}
 
                     {selectedGrant && (
-                        <DeleteDialog
-                            showDeleteDialog={showDeleteDialog}
+                        <ConfirmDialog
+                            showDialog={showDeleteDialog}
                             selectedDataInfo={String(selectedGrant.title)}
-                            onDelete={deleteGrant}
+                            onConfirmAsync={deleteGrant}
                             onHide={() => setShowDeleteDialog(false)}
                         />
                     )}

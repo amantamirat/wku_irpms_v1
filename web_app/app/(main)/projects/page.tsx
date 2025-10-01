@@ -1,6 +1,6 @@
 'use client';
 
-import DeleteDialog from '@/components/DeleteDialog';
+import ConfirmDialog from '@/components/ConfirmationDialog';
 
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
@@ -190,10 +190,10 @@ const ProjectPage = () => {
                     )}
 
                     {selectedProject && (
-                        <DeleteDialog
-                            showDeleteDialog={showDeleteDialog}
+                        <ConfirmDialog
+                            showDialog={showDeleteDialog}
                             selectedDataInfo={String(selectedProject.title)}
-                            onDelete={deleteProject}
+                            onConfirmAsync={deleteProject}
                             onHide={() => setShowDeleteDialog(false)}
                         />
                     )}

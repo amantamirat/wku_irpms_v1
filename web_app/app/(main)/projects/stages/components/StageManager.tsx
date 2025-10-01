@@ -1,5 +1,5 @@
 import { BASE_URL } from "@/api/ApiClient";
-import DeleteDialog from "@/components/DeleteDialog";
+import ConfirmDialog from "@/components/ConfirmationDialog";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
@@ -194,19 +194,19 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
                     />}
 
                 {projectStage && (
-                    <DeleteDialog
-                        showDeleteDialog={showDeleteDialog}
+                    <ConfirmDialog
+                        showDialog={showDeleteDialog}
                         selectedDataInfo={`projectStage ${projectStage._id}`}
-                        onDelete={removeProjectStage}
+                        onConfirmAsync={removeProjectStage}
                         onHide={hideDialogs}
                     />
                 )}
 
                 {projectStage && (
-                    <DeleteDialog
-                        showDeleteDialog={showConfirmationDialog}
+                    <ConfirmDialog
+                        showDialog={showConfirmationDialog}
                         message={`Ready to Proceed?`}                        
-                        onDelete={removeProjectStage}
+                        onConfirmAsync={removeProjectStage}
                         onHide={hideDialogs}
                     />
                 )}

@@ -1,5 +1,5 @@
 'use client';
-import DeleteDialog from '@/components/DeleteDialog';
+import ConfirmDialog from '@/components/ConfirmationDialog';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -282,10 +282,10 @@ const OrganizationManager = (props: OrganizationMangerProps) => {
                         />}
 
                     {selectedOrganization &&
-                        <DeleteDialog
-                            showDeleteDialog={showDeleteDialog}
+                        <ConfirmDialog
+                            showDialog={showDeleteDialog}
                             selectedDataInfo={selectedOrganization.name}
-                            onDelete={deleteOrganization}
+                            onConfirmAsync={deleteOrganization}
                             onHide={() => setShowDeleteDialog(false)}
                         />}
 

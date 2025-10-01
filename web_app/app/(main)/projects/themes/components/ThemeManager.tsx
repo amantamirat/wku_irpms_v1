@@ -1,4 +1,4 @@
-import DeleteDialog from "@/components/DeleteDialog";
+import ConfirmDialog from "@/components/ConfirmationDialog";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
@@ -163,11 +163,11 @@ export default function ProjectThemeManager({ project, setProject }: ProjectInfo
                     onHide={hideDialogs} />
             )}
             {projectTheme && (
-                <DeleteDialog
-                    showDeleteDialog={showDeleteDialog}
+                <ConfirmDialog
+                    showDialog={showDeleteDialog}
                     selectedDataInfo={String((projectTheme.theme as any).title)}
-                    onDelete={project._id ? deleteProjectTheme : undefined}
-                    onRemove={!project._id ? removeProjectTheme : undefined}
+                    onConfirmAsync={project._id ? deleteProjectTheme : undefined}
+                    onConfirm={!project._id ? removeProjectTheme : undefined}
                     onHide={hideDialogs}
                 />
             )}

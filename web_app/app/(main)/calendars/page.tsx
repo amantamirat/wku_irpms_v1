@@ -1,6 +1,6 @@
 'use client';
 
-import DeleteDialog from '@/components/DeleteDialog';
+import ConfirmDialog from '@/components/ConfirmationDialog';
 import SaveDialog from './dialogs/SaveDialog';
 
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
@@ -191,10 +191,10 @@ const CalendarPage = () => {
                     )}
 
                     {selectedCalendar && (
-                        <DeleteDialog
-                            showDeleteDialog={showDeleteDialog}
+                        <ConfirmDialog
+                            showDialog={showDeleteDialog}
                             selectedDataInfo={String(selectedCalendar.year)}
-                            onDelete={deleteCalendar}
+                            onConfirmAsync={deleteCalendar}
                             onHide={() => setShowDeleteDialog(false)}
                         />
                     )}

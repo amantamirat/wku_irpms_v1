@@ -1,6 +1,6 @@
 'use client';
 
-import DeleteDialog from '@/components/DeleteDialog';
+import ConfirmDialog from '@/components/ConfirmationDialog';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -309,10 +309,10 @@ const CallManager = (props: CallManagerProps) => {
                     )}
 
                     {selectedCall && (
-                        <DeleteDialog
-                            showDeleteDialog={showDeleteDialog}
+                        <ConfirmDialog
+                            showDialog={showDeleteDialog}
                             selectedDataInfo={String(selectedCall.title)}
-                            onDelete={deleteCall}
+                            onConfirmAsync={deleteCall}
                             onHide={() => setShowDeleteDialog(false)}
                         />
                     )}

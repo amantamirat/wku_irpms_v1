@@ -1,6 +1,6 @@
 'use client';
 
-import DeleteDialog from '@/components/DeleteDialog';
+import ConfirmDialog from '@/components/ConfirmationDialog';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -208,10 +208,10 @@ const RoleManager = () => {
                     )}
 
                     {selectedRole && (
-                        <DeleteDialog
-                            showDeleteDialog={showDeleteDialog}
+                        <ConfirmDialog
+                            showDialog={showDeleteDialog}
                             selectedDataInfo={String(selectedRole.role_name)}
-                            onDelete={deleteRole}
+                            onConfirmAsync={deleteRole}
                             onHide={() => setShowDeleteDialog(false)}
                         />
                     )}

@@ -1,5 +1,5 @@
 'use client';
-import DeleteDialog from '@/components/DeleteDialog';
+import ConfirmDialog from '@/components/ConfirmationDialog';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -316,20 +316,20 @@ const UserPage = () => {
                         onHide={hideDialog}
                     />}
 
-                    {selectedUser && !selectedUser.linkedApplicant && <DeleteDialog
-                        showDeleteDialog={showLinkDialog}
+                    {selectedUser && !selectedUser.linkedApplicant && <ConfirmDialog
+                        showDialog={showLinkDialog}
                         operation="link"
                         selectedDataInfo={selectedUser.user_name}
-                        onDelete={linkUser}
+                        onConfirmAsync={linkUser}
                         onHide={hideDialog}
                     />}
 
-                    {selectedUser && <DeleteDialog
-                        showDeleteDialog={showDeleteDialog}
+                    {selectedUser && <ConfirmDialog
+                        showDialog={showDeleteDialog}
                         operation={selectedUser.status === UserStatus.Active ? 'suspend' :
                             selectedUser.status === UserStatus.Suspended ? 'activate' : 'remove'}
                         selectedDataInfo={selectedUser.user_name}
-                        onDelete={deleteUser}
+                        onConfirmAsync={deleteUser}
                         onHide={hideDialog}
                     />}
 

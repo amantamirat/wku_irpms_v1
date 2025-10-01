@@ -3,7 +3,7 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
 import { useEffect, useState } from "react";
-import DeleteDialog from "@/components/DeleteDialog";
+import ConfirmDialog from "@/components/ConfirmationDialog";
 import { Project } from "../../models/project.model";
 import { CollaboratorApi } from "../api/collaborator.api";
 import CollaboratorDialog from "./CollaboratorDialog";
@@ -187,11 +187,11 @@ export default function CollaboratorManager({ project, setProject }: Collaborato
                     />}
 
                 {collaborator && collaborator.applicant && (
-                    <DeleteDialog
-                        showDeleteDialog={showDeleteDialog}
+                    <ConfirmDialog
+                        showDialog={showDeleteDialog}
                         selectedDataInfo={String((collaborator.applicant as any).first_name)}
-                        onDelete={project._id ? deleteCollaborator : undefined}
-                        onRemove={!project._id ? removeCollaborator : undefined}
+                        onConfirmAsync={project._id ? deleteCollaborator : undefined}
+                        onConfirm={!project._id ? removeCollaborator : undefined}
                         onHide={hideDialogs}
                     />
                 )}

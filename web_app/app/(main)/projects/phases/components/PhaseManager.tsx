@@ -3,7 +3,7 @@ import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
 import { useEffect, useState } from "react";
-import DeleteDialog from "@/components/DeleteDialog";
+import ConfirmDialog from "@/components/ConfirmationDialog";
 import { Project } from "../../models/project.model";
 import { Phase, PhaseType } from "../models/phase.model";
 import { PhaseApi } from "../api/phase.api";
@@ -182,11 +182,11 @@ export default function PhaseManager({ phaseType, project, setProject }: Project
                     />}
 
                 {phase && (
-                    <DeleteDialog
-                        showDeleteDialog={showDeleteDialog}
+                    <ConfirmDialog
+                        showDialog={showDeleteDialog}
                         selectedDataInfo={`phase ${phase.activity} (order ${phase.order})`}
-                        onDelete={project._id ? deletePhase : undefined}
-                        onRemove={!project._id ? removePhase : undefined}
+                        onConfirmAsync={project._id ? deletePhase : undefined}
+                        onConfirm={!project._id ? removePhase : undefined}
                         onHide={hideDialogs}
                     />
                 )}
