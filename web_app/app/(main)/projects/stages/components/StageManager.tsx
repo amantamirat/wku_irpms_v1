@@ -1,17 +1,14 @@
+import { BASE_URL } from "@/api/ApiClient";
+import DeleteDialog from "@/components/DeleteDialog";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
 import { useEffect, useState } from "react";
-import DeleteDialog from "@/components/DeleteDialog";
 import { Project } from "../../models/project.model";
-import { ProjectStage } from "../models/stage.model";
 import { ProjectStageApi } from "../api/stage.api";
+import { ProjectStage, ProjectStageStatus } from "../models/stage.model";
 import SaveProjectStageDialog from "./SaveProjectStageDialog";
-import { EvalType, Evaluation } from "@/app/(main)/evals/models/eval.model";
-import { Call } from "@/app/(main)/calls/models/call.model";
-import { EvaluationApi } from "@/app/(main)/evals/api/eval.api";
-import { BASE_URL } from "@/api/ApiClient";
 
 
 interface ProjectInfoStepProps {
@@ -22,7 +19,8 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
 
     const emptyProjectStage: ProjectStage = {
         project: project,
-        stage: ''
+        stage: '',
+        status:ProjectStageStatus.pending
     };
 
 
@@ -140,6 +138,7 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
                             );
                         }}
                     />
+                     <Column field="status" header="Status" sortable />
                     <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
 
                 </DataTable>

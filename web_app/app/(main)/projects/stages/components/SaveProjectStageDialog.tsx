@@ -7,10 +7,8 @@ import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { Project } from "../../models/project.model";
-import { ProjectStage, validateProjectStage } from "../models/stage.model";
+import { ProjectStage, ProjectStageStatus, validateProjectStage } from "../models/stage.model";
 import UploadForm from "../../components/UploadForm";
-
-
 
 interface SaveProjectStageDialogProps {
     project: Project;
@@ -26,8 +24,6 @@ export default function SaveProjectStageDialog({ project, projectStage, setProje
     const toast = useRef<Toast>(null);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
     const [evaluaionStages, setEvaluationStages] = useState<Evaluation[]>([]);
-
-
 
     useEffect(() => {
         const fetchStages = async () => {
@@ -88,28 +84,43 @@ export default function SaveProjectStageDialog({ project, projectStage, setProje
             <Dialog
                 visible={visible}
                 style={{ width: "600px" }}
-                header="ProjectStage Details"
+                header="Project Documents Details"
                 modal
                 className="p-fluid"
                 footer={footer}
                 onHide={onHide}
             >
-
-                <div className="field">
-                    <label htmlFor="stage">Stage</label>
-                    <Dropdown
-                        id="stage"
-                        value={projectStage.stage}
-                        options={evaluaionStages}
-                        onChange={(e) =>
-                            setProjectStage({ ...projectStage, stage: e.value })
-                        }
-                        placeholder="Select Stage"
-                        optionLabel="title"
-                    />
-                </div>
-
-                <UploadForm onUpload={updateFile} />
+                {!projectStage._id ?
+                    <>
+                        <div className="field">
+                            <label htmlFor="stage">Stage</label>
+                            <Dropdown
+                                id="stage"
+                                value={projectStage.stage}
+                                options={evaluaionStages}
+                                onChange={(e) =>
+                                    setProjectStage({ ...projectStage, stage: e.value })
+                                }
+                                placeholder="Select Stage"
+                                optionLabel="title"
+                            />
+                        </div>
+                        <UploadForm onUpload={updateFile} />
+                    </>
+                    : <>
+                        <div className="field">
+                            <label htmlFor="status">Status</label>
+                            <Dropdown
+                                id="status"
+                                value={projectStage.status}
+                                options={Object.values(ProjectStageStatus).map(s => ({ label: s, value: s }))}
+                                onChange={(e) =>
+                                    setProjectStage({ ...projectStage, status: e.value })
+                                }
+                                placeholder="Select Status"
+                            />
+                        </div>
+                    </>}
 
                 {errorMessage && (
                     <small className="p-error">{errorMessage}</small>

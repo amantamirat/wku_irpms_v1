@@ -72,6 +72,20 @@ export class ProjectStageService {
     static async updateProjectStage(id: string, data: Partial<UpdateProjectStageDto>) {
         const projectStage = await ProjectStage.findById(id);
         if (!projectStage) throw new Error("Project stage not found");
+        if (data.status && data.status !== projectStage.status) {
+            const allowedTransitions: Record<ProjectStageStatus, ProjectStageStatus[]> = {
+                [ProjectStageStatus.pending]: [ProjectStageStatus.submitted],
+                [ProjectStageStatus.submitted]: [ProjectStageStatus.pending, ProjectStageStatus.accepted],
+                [ProjectStageStatus.accepted]: [ProjectStageStatus.submitted],
+            };
+
+            const currentStatus = projectStage.status;
+            const newStatus = data.status;
+
+            if (!allowedTransitions[currentStatus].includes(newStatus)) {
+                throw new Error(`Invalid status transition from '${currentStatus}' to '${newStatus}'`);
+            }
+        }
         Object.assign(projectStage, data);
         return projectStage.save();
     }
