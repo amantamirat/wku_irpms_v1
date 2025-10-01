@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { ThemeType, ThemeLevel } from "./theme.enum";
-import { BaseTheme, Catalog, Theme } from "./theme.model";
+import { BaseTheme, Catalog } from "./theme.model";
 import { Call } from "../call/call.model";
 import { ProjectTheme } from "../project/themes/protheme.model";
 import { Directorate } from "../organization/organization.model";
@@ -87,9 +87,6 @@ export class ThemeService {
         const theme = await BaseTheme.findById(id);
         if (!theme) throw new Error("Theme not found");
         await this.validateTheme(data);
-        if (data.type && data.type !== theme.type) {
-            throw new Error("Cannot change theme type");
-        }
         Object.assign(theme, data);
         return theme.save(); // triggers pre-save hooks
     }

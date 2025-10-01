@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { ThemeController } from "./theme.controller";
+import { verifyActiveAccount } from "../users/auth/auth.middleware";
 
 const router = Router();
 
-router.get("/", ThemeController.getThemes);
-router.post("/", ThemeController.createTheme);
-router.put("/:id", ThemeController.updateTheme);
-router.delete("/:id", ThemeController.deleteTheme);
+router.get("/", verifyActiveAccount, ThemeController.getThemes);
+router.post("/", verifyActiveAccount, ThemeController.createTheme);
+router.put("/:id", verifyActiveAccount, ThemeController.updateTheme);
+router.delete("/:id", verifyActiveAccount, ThemeController.deleteTheme);
 
 export default router;

@@ -27,12 +27,12 @@ export class ThemeController {
     static async getThemes(req: Request, res: Response) {
         try {
             const { type, parent, catalog, directorate } = req.query;
-            const filter = {
+            const filter: GetThemesOptions = {
                 type: type as ThemeType | undefined,
                 parent: parent ? new mongoose.Types.ObjectId(parent as string) : undefined,
                 catalog: catalog ? new mongoose.Types.ObjectId(catalog as string) : undefined,
                 directorate: directorate ? new mongoose.Types.ObjectId(directorate as string) : undefined
-            } as GetThemesOptions;
+            };
             const themes = await ThemeService.getThemes(filter);
             successResponse(res, 200, 'Themes fetched successfully', themes);
         } catch (err: any) {
@@ -43,7 +43,11 @@ export class ThemeController {
     static async updateTheme(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const data: Partial<CreateThemeDto> = req.body;
+            const { title, parent } = req.body;
+            const data: Partial<CreateThemeDto> = {
+                title: title,
+                parent: parent ? new mongoose.Types.ObjectId(parent as string) : undefined
+            };
             const updated = await ThemeService.updateTheme(id, data);
             successResponse(res, 201, "Theme updated successfully", updated);
         } catch (err: any) {
