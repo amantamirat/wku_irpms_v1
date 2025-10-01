@@ -28,24 +28,18 @@ export interface CatalogDocument extends BaseThemeDocument {
 }
 
 const CatalogSchema = new Schema<CatalogDocument>({
+  directorate: {
+    type: Schema.Types.ObjectId,
+    ref: Directorate.modelName,
+    required: true,
+    immutable: true
+  },
   level: {
     type: String,
     enum: Object.values(ThemeLevel),
     required: true,
     immutable: true
-  },
-  directorate: {
-    type: Schema.Types.ObjectId,
-    ref: Directorate.modelName,
-    required: true,
-    immutable: true,
-    validate: {
-      validator: async function (directorateId: mongoose.Types.ObjectId) {
-        const exist = await Directorate.exists({ _id: directorateId });
-        return !!exist;
-      }
-    },
-  },
+  }  
 });
 
 export const Catalog = BaseTheme.discriminator<CatalogDocument>(ThemeType.catalog, CatalogSchema);
@@ -60,13 +54,7 @@ const childThemeFields = {
   catalog: {
     type: Schema.Types.ObjectId,
     ref: Catalog.modelName,
-    required: true,
-    validate: {
-      validator: async function (catalogId: mongoose.Types.ObjectId) {
-        const exist = await Catalog.exists({ _id: catalogId });
-        return !!exist;
-      }
-    },
+    required: true
   },
   priority: { type: Number }
 };
@@ -80,14 +68,7 @@ const ThemeSchema = new Schema<ThemeDocument>({
   parent: {
     type: Schema.Types.ObjectId,
     ref: Catalog.modelName,
-    required: true,
-    validate: {
-      validator: async function (parentId: mongoose.Types.ObjectId) {
-        const exist = await Catalog.exists({ _id: parentId });
-        return !!exist;
-      },
-      message: "Theme must belong to a Catalog",
-    },
+    required: true
   }
 });
 
@@ -102,14 +83,7 @@ const ComponenetSchema = new Schema<ComponentDocument>({
   parent: {
     type: Schema.Types.ObjectId,
     ref: Theme.modelName,
-    required: true,
-    validate: {
-      validator: async function (parentId: mongoose.Types.ObjectId) {
-        const exist = await Catalog.exists({ _id: parentId });
-        return !!exist;
-      },
-      message: "Componenet must belong to a Theme",
-    },
+    required: true
   }
 });
 
@@ -124,29 +98,11 @@ const FocusAreaSchema = new Schema<FocusAreaDocument>({
   parent: {
     type: Schema.Types.ObjectId,
     ref: Componenet.modelName,
-    required: true,
-    validate: {
-      validator: async function (parentId: mongoose.Types.ObjectId) {
-        const exist = await Componenet.exists({ _id: parentId });
-        return !!exist;
-      },
-      message: "Focus Area must belong to a Component",
-    },
+    required: true
   }
 });
 
 export const FocusArea = BaseTheme.discriminator<FocusAreaDocument>(ThemeType.focusArea, FocusAreaSchema);
 
-BaseThemeSchema.index(
-  { parent: 1, priority: 1 },
-  {
-    unique: true,
-    partialFilterExpression: {
-      priority: { $exists: true },
-      parent: { $exists: true }
-    }
-  }
-);
-
-BaseTheme.createIndexes();
+//BaseTheme.createIndexes();
 

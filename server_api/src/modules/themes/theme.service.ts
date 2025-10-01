@@ -1,63 +1,75 @@
 import mongoose from "mongoose";
 import { ThemeType, ThemeLevel } from "./theme.enum";
-import { BaseTheme } from "./theme.model";
+import { BaseTheme, Catalog, Theme } from "./theme.model";
 import { Call } from "../call/call.model";
 import { ProjectTheme } from "../project/themes/protheme.model";
+import { Directorate } from "../organization/organization.model";
 
 export interface GetThemesOptions {
     type?: ThemeType;
-    parent?: string;
-    catalog?: string;
-    directorate?: string;
+    parent?: mongoose.Types.ObjectId;
+    catalog?: mongoose.Types.ObjectId;
+    directorate?: mongoose.Types.ObjectId;
 }
 
 export interface CreateThemeDto {
-    _id?: string;
     type: ThemeType;
     title: string;
     directorate?: mongoose.Types.ObjectId;
     level?: ThemeLevel;
-    priority?: number;
     parent?: mongoose.Types.ObjectId;
+    priority?: number;    
     catalog?: mongoose.Types.ObjectId;
 }
 
-//type NonRootTypes = ThemeType.theme | ThemeType.componenet | ThemeType.focusArea;
-
 export class ThemeService {
 
-
-    private static async validateThemeHierarchy(theme: Partial<CreateThemeDto>) {
+    private static async validateTheme(theme: Partial<CreateThemeDto>) {
         if (theme.type === ThemeType.catalog) {
+            const directorate = await Directorate.findById(theme.directorate);
+            if (!directorate) {
+                throw new Error("Directorate Not Found!");
+            }
             return
         }
         const parent = await BaseTheme.findById(theme.parent).lean() as any;
         if (!parent) {
             throw new Error("Parent Not Found!");
         }
-        // assign catalog
-        (theme as any).catalog = theme.type === ThemeType.theme ? parent._id : parent.catalog;
 
-        const catalog = await BaseTheme.findById(theme.catalog).lean() as any;
+        if (theme.type === ThemeType.theme) {
+            if (parent.type !== ThemeType.catalog) {
+                throw new Error(`Invalid Theme Parent (${parent.type}) Found!`);
+            }
+        }
+
+        const catalog = await Catalog.findById(theme.type === ThemeType.theme ? parent._id : parent.catalog).lean();
         if (!catalog) {
             throw new Error("Catalog Not Found!");
         }
-        if (theme.type === ThemeType.componenet && (catalog.level === ThemeLevel.broad)) {
-            throw new Error("Invalid hierarchy: Component must not trace back to Broad catalog");
+
+        if (theme.type === ThemeType.componenet) {
+            if (parent.type !== ThemeType.theme) {
+                throw new Error(`Invalid Componenet Parent (${parent.type}) Found!`);
+            }
+            if (catalog.level === ThemeLevel.broad) {
+                throw new Error("Invalid hierarchy: Component must not trace back to Broad catalog");
+            }
+        } else {
+            if (parent.type !== ThemeType.componenet) {
+                throw new Error(`Invalid Focus Area Parent (${parent.type}) Found!`);
+            }
+            if ((catalog.level === ThemeLevel.broad || catalog.level === ThemeLevel.componenet)) {
+                throw new Error("Invalid hierarchy: Focus Area must not trace back to Broad or Component catalog");
+            }
         }
-        if (theme.type === ThemeType.focusArea && (catalog.level === ThemeLevel.broad || catalog.level === ThemeLevel.componenet)) {
-            throw new Error("Invalid hierarchy: Focus Area must not trace back to Broad or Component catalog");
-        }
+        // assign catalog
+        (theme as any).catalog = catalog._id;
     }
 
     static async createTheme(data: CreateThemeDto) {
-        //const { type, ...rest } = data;
-        await this.validateThemeHierarchy(data);
-        if (!BaseTheme.discriminators || !BaseTheme.discriminators[data.type]) {
-            throw new Error(`Invalid theme type: ${data.type}`);
-        }
-        const model = BaseTheme.discriminators[data.type];
-        const createdTheme = await model.create(data);
+        await this.validateTheme(data);
+        const createdTheme = await BaseTheme.create(data);
         return createdTheme;
     }
 
@@ -74,7 +86,7 @@ export class ThemeService {
     static async updateTheme(id: string, data: Partial<CreateThemeDto>) {
         const theme = await BaseTheme.findById(id);
         if (!theme) throw new Error("Theme not found");
-        await this.validateThemeHierarchy(data);
+        await this.validateTheme(data);
         if (data.type && data.type !== theme.type) {
             throw new Error("Cannot change theme type");
         }
