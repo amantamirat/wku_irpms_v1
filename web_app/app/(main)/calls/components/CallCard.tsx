@@ -7,8 +7,9 @@ import { Button } from "primereact/button";
 import { useState } from "react";
 import ApplyWizard from "../../projects/apply/ApplyWizard";
 import { Organization } from "../../organizations/models/organization.model";
-import { Collaborator, Project } from "../../projects/models/project.model";
+import { Project } from "../../projects/models/project.model";
 import { useAuth } from "@/contexts/auth-context";
+import { Collaborator, CollaboratorStatus } from "../../projects/collaborators/models/collaborator.model";
 
 interface CallCardProps {
     call: Call;
@@ -28,6 +29,7 @@ export default function CallCard(props: CallCardProps) {
             ? [
                 {
                     applicant: user.linkedApplicant,
+                    status:CollaboratorStatus.active,
                     isLeadPI: true,
                 } as Collaborator,
             ]
