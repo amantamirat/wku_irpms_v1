@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 import { ProjectTheme } from "./protheme.model";
+import { Project } from "../project.model";
+import { BaseTheme } from "../../call/themes/theme.model";
+import { ThemeType } from "../../call/themes/theme.enum";
 
 
 export interface GetProThemeOptions {
@@ -13,9 +16,21 @@ export interface CreateProThemeDto {
     theme: mongoose.Types.ObjectId;
 }
 
-export class ProjectThemeService {   
+export class ProjectThemeService {
 
-    static async createProjectTheme(data: CreateProThemeDto) {        
+    private static async validateProjectTheme(pt: CreateProThemeDto) {
+        const project = await Project.findById(pt.project).populate("call").lean();
+        if (!project) throw new Error("Project not found");
+        const theme = await BaseTheme.findById(pt.theme).lean();
+        if (!theme) throw new Error("Theme not found");
+        if (theme.type === ThemeType.catalog) throw new Error("Catalog Theme Found");
+        if ((project.call as any).theme?.toString() !== (theme as any).catalog?.toString()) {
+            throw new Error("Selected theme is not valid for this project's call.");
+        }
+    }
+
+    static async createProjectTheme(data: CreateProThemeDto) {
+        await this.validateProjectTheme(data);
         const createdProTheme = await ProjectTheme.create(data);
         return createdProTheme;
     }
@@ -43,7 +58,7 @@ export class ProjectThemeService {
 
     static async deleteProjectTheme(id: string) {
         const proTheme = await ProjectTheme.findById(id);
-        if (!proTheme) throw new Error("Project Theme not found");       
+        if (!proTheme) throw new Error("Project Theme not found");
         return await proTheme.deleteOne();
     }
 }

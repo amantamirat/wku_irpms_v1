@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { ThemeService, CreateThemeDto, GetThemesOptions } from "./theme.service";
 import { ThemeType } from "./theme.enum";
-import { errorResponse, successResponse } from "../../util/response";
+import { errorResponse, successResponse } from "../../../util/response";
 
 export class ThemeController {
 

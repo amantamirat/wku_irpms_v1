@@ -1,7 +1,7 @@
 import mongoose, { Schema, model } from "mongoose";
-import { COLLECTIONS } from "../../enums/collections.enum";
+import { COLLECTIONS } from "../../../enums/collections.enum";
 import { ThemeType, ThemeLevel } from "./theme.enum";
-import { Directorate } from "../organization/organization.model";
+import { Directorate } from "../../organization/organization.model";
 
 export interface BaseThemeDocument extends Document {
   type: ThemeType;

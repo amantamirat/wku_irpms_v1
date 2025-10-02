@@ -7,7 +7,7 @@ import authRoutes from './modules/users/auth/auth.routes';
 
 import organRoutes from './modules/organization/organization.routes';
 import applicantRoutes from './modules/applicants/applicant.routes';
-import themeRoutes from './modules/themes/theme.routes';
+import themeRoutes from './modules/call/themes/theme.routes';
 import evalRoutes from './modules/call/evaluations/evaluation.routes';
 import calendarRoutes from './modules/calendar/calendar.routes';
 import callRoutes from './modules/call/call.routes';
@@ -22,7 +22,7 @@ import userRoutes from './modules/users/user.routes';
 import roleRoutes from './modules/users/roles/role.routes';
 
 import { PermissionService } from './modules/users/permissions/permission.service';
-import { initializeThemeModels } from './modules/themes/init.models';
+import { initializeThemeModels } from './modules/call/themes/init.models';
 import { initializeEvalModels } from './modules/call/evaluations/init.models';
 import { initializeOrganizationModels } from './modules/organization/init.model';
 import { UserService } from './modules/users/user.service';

@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 import { ThemeType, ThemeLevel } from "./theme.enum";
 import { BaseTheme, Catalog } from "./theme.model";
-import { Call } from "../call/call.model";
-import { ProjectTheme } from "../project/themes/protheme.model";
-import { Directorate } from "../organization/organization.model";
+import { Call } from "../call.model";
+import { ProjectTheme } from "../../project/themes/protheme.model";
+import { Directorate } from "../../organization/organization.model";
 
 export interface GetThemesOptions {
     type?: ThemeType;

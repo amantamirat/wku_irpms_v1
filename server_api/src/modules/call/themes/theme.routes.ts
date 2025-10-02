@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { ThemeController } from "./theme.controller";
-import { verifyActiveAccount } from "../users/auth/auth.middleware";
+import { verifyActiveAccount } from "../../users/auth/auth.middleware";
 
 const router = Router();
 
