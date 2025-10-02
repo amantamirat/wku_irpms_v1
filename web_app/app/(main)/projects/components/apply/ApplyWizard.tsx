@@ -41,7 +41,7 @@ const ApplyWizard = ({ visible, call, project, setProject, onCancel }: ApplyWiza
                 detail: 'Your Application Submitted Successfully',
                 life: 2500
             });
-            setTimeout(() => onHide, 2500);
+            setTimeout(() => onHide(), 2500);
         } catch (err) {
             toast.current?.show({
                 severity: 'error',

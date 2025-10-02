@@ -13,7 +13,7 @@ export class ProjectStageController {
 
     static async createProjectStage(req: Request, res: Response) {
         if (!req.file) {
-            return errorResponse(res, 400, "Document is required");
+            return errorResponse(res, 400, "Document required");
         }
         const documentPath = `uploads/${req.file.filename}`;
         try {

@@ -15,8 +15,25 @@ export class ProjectController {
         summary: summary,
         createdBy: new mongoose.Types.ObjectId(req.user!.id),
       };
-      const theme = await ProjectService.createProject(data);
-      successResponse(res, 201, "Project created successfully", theme);
+      const created = await ProjectService.createProject(data);
+      successResponse(res, 201, "Project created successfully", created);
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
+    }
+  }
+
+
+  static async submitProject(req: AuthenticatedRequest, res: Response) {
+    try {
+      if (!req.file) {
+        return errorResponse(res, 400, "Document required");
+      }
+      const { project } = req.body;
+
+      const parsedProject = JSON.parse(project);
+      //console.log("Project", parsedProject);
+
+      successResponse(res, 201, "Project created successfully");
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
@@ -35,7 +52,7 @@ export class ProjectController {
     try {
       const { id } = req.params;
       const { call, title, summary } = req.body;
-      const data:  Partial<CreateProjectDto> = {
+      const data: Partial<CreateProjectDto> = {
         call: new mongoose.Types.ObjectId(call as string),
         title: title,
         summary: summary
