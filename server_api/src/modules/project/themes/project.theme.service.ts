@@ -17,21 +17,13 @@ export interface CreateProjectThemeDto {
     theme: mongoose.Types.ObjectId;
 }
 
-export class ProjectThemeService {
-
-    static async validateThemeCall(themeId: mongoose.Types.ObjectId, call: CreateCallDto) {
-        const theme = await BaseTheme.findById(themeId).lean();
-        if (!theme) throw new Error("Theme not found");
-        if (theme.type === ThemeType.catalog) throw new Error("Invalid theme (catalog) found");
-        if (call.theme?.toString() !== (theme as any).catalog?.toString()) {
-            throw new Error("Selected theme is not valid for this project's call.");
-        }
-    }
+export class ProjectThemeService {    
 
     private static async validateProjectTheme(pt: CreateProjectThemeDto) {
         const project = await Project.findById(pt.project).populate<{ call: CreateCallDto }>("call").lean();
         if (!project) throw new Error("Project not found");
-        await this.validateThemeCall(pt.theme, project.call);
+        const theme = await BaseTheme.findOne({ _id: pt.theme, catalog: project.call.theme }).lean();
+        if (!theme) throw new Error("Theme not found");
     }
 
     static async createProjectTheme(data: CreateProjectThemeDto) {
