@@ -77,6 +77,7 @@ function SaveProjectDialog(props: SaveDialogProps) {
                     <label htmlFor="call">Call</label>
                     <Dropdown
                         id="call"
+                        dataKey="_id"
                         options={calls}
                         value={project.call}
                         onChange={(e) => setProject({ ...project, call: e.value })}
