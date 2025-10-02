@@ -38,7 +38,8 @@ export const ProjectStageApi = {
         const formData = new FormData();
         formData.append("project", sanitized.project as string);
         formData.append("stage", sanitized.stage as string);
-        if (projectStage.file) formData.append("document", projectStage.file);
+        if (projectStage.file) 
+            formData.append("document", projectStage.file);
         const createdData = await ApiClient.post(end_point, formData);
         return createdData as ProjectStage;
     },

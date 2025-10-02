@@ -22,7 +22,8 @@ export const ProjectApi = {
     },
 
     async createProject(project: Partial<Project>): Promise<Project> {
-        const createdData = await ApiClient.post(end_point, project);
+        const sanitized = sanitizeProject(project);
+        const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as Project;
     },
 

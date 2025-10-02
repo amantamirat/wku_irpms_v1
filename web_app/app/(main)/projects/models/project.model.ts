@@ -13,15 +13,15 @@ export type Project = {
     _id?: string;
     call: string | Call;
     title: string;
-    summary?: string;
-    collaborators?: Collaborator[];
-    themes?: ProjectTheme[];
-    phases?: Phase[];
-    file?: File;
+    summary?: string;    
     status?: ProjectStatus;
     createdBy?: string | User;
     createdAt?: Date;
     updatedAt?: Date;
+    collaborators?: Collaborator[];
+    themes?: ProjectTheme[];
+    phases?: Phase[];
+    file?: File;
 }
 
 

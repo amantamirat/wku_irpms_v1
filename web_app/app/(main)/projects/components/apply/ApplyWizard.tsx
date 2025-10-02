@@ -2,15 +2,16 @@ import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Steps } from "primereact/steps";
 import { useState } from "react";
-import { Call } from "../../calls/models/call.model";
-import { Grant } from "../../grants/models/grant.model";
-import CollaboratorManager from "../collaborators/components/CollaboratorManager";
-import ProjectForm from "../components/dialogs/ProjectForm";
-import { Project } from "../models/project.model";
-import ProjectThemeManager from "../themes/components/ThemeManager";
-import { PhaseType } from "../phases/models/phase.model";
-import PhaseManager from "../phases/components/PhaseManager";
-import UploadForm from "../components/UploadForm";
+import { Call } from "../../../calls/models/call.model";
+import { Grant } from "../../../grants/models/grant.model";
+import CollaboratorManager from "../../collaborators/components/CollaboratorManager";
+import ProjectForm from "../dialogs/ProjectForm";
+import { Project } from "../../models/project.model";
+import ProjectThemeManager from "../../themes/components/ThemeManager";
+import { PhaseType } from "../../phases/models/phase.model";
+import PhaseManager from "../../phases/components/PhaseManager";
+import UploadForm from "../UploadForm";
+import Confirmation from "./Confirmation";
 
 
 interface ApplyWizardProps {
@@ -71,12 +72,12 @@ const ApplyWizard = ({ visible, call, project, setProject, onHide: hideParent }:
         >
             <h3>{call.title} ({(call.grant as Grant).title})</h3>
             <Steps model={items} activeIndex={activeStep} readOnly className="mb-4" />
-
             {activeStep === 0 && <UploadForm file={project.file} onUpload={updateFile} />}
             {activeStep === 1 && <ProjectForm project={project} setProject={setProject} />}
             {activeStep === 2 && <CollaboratorManager project={project} setProject={setProject} />}
             {activeStep === 3 && <ProjectThemeManager project={project} setProject={setProject} />}
             {activeStep === 4 && <PhaseManager project={project} setProject={setProject} phaseType={PhaseType.phase} />}
+            {activeStep === items.length - 1 && <Confirmation project={project} />}
 
         </Dialog>
     );
