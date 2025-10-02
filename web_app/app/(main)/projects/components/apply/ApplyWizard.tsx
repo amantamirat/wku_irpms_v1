@@ -77,7 +77,7 @@ const ApplyWizard = ({ visible, call, project, setProject, onHide: hideParent }:
             {activeStep === 2 && <CollaboratorManager project={project} setProject={setProject} />}
             {activeStep === 3 && <ProjectThemeManager project={project} setProject={setProject} />}
             {activeStep === 4 && <PhaseManager project={project} setProject={setProject} phaseType={PhaseType.phase} />}
-            {activeStep === items.length - 1 && <Confirmation project={project} />}
+            {activeStep === items.length - 1 && <Confirmation project={project} call={project.call as Call}/>}
 
         </Dialog>
     );
