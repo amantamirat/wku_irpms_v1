@@ -93,7 +93,7 @@ export default function CallCard(props: CallCardProps) {
                 <ApplyWizard
                     visible={showApplyDialog}
                     call={call}
-                    onHide={() => setShowApplyDialog(false)}
+                    onCancel={() => setShowApplyDialog(false)}
                     project={project} setProject={setProject}
                 />
             )}

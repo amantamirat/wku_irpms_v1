@@ -6,9 +6,8 @@ import { Project } from "../../models/project.model";
 interface ConfirmationProps {
     project: Project;
     call: any;
-    errorMessage?: string;
 }
-const Confirmation = ({ project, call, errorMessage }: ConfirmationProps) => {
+const Confirmation = ({ project, call }: ConfirmationProps) => {
     return (<>
         <div className="p-3">
             <h4 className="mb-3">Review Your Application Information</h4>
@@ -28,9 +27,6 @@ const Confirmation = ({ project, call, errorMessage }: ConfirmationProps) => {
                 <p>
                     Please review the above information. If everything looks good, click{" "}
                     <strong>Submit</strong> to finalize your application.
-                </p>
-                <p className="p-error">
-                    {errorMessage}
                 </p>
             </Card>
         </div>

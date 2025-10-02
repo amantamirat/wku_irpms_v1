@@ -1,7 +1,7 @@
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Steps } from "primereact/steps";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Call } from "../../../calls/models/call.model";
 import { Grant } from "../../../grants/models/grant.model";
 import CollaboratorManager from "../../collaborators/components/CollaboratorManager";
@@ -12,6 +12,8 @@ import { PhaseType } from "../../phases/models/phase.model";
 import PhaseManager from "../../phases/components/PhaseManager";
 import UploadForm from "../UploadForm";
 import Confirmation from "./Confirmation";
+import { ProjectApi } from "../../api/project.api";
+import { Toast } from "primereact/toast";
 
 
 interface ApplyWizardProps {
@@ -19,20 +21,35 @@ interface ApplyWizardProps {
     call: Call;
     project: Project;
     setProject: (project: Project) => void;
-    onHide: () => void;
+    onCancel: () => void;
 }
 
-const ApplyWizard = ({ visible, call, project, setProject, onHide: hideParent }: ApplyWizardProps) => {
+const ApplyWizard = ({ visible, call, project, setProject, onCancel }: ApplyWizardProps) => {
 
-    const [errorMessage, setErrorMessage] = useState<string | undefined>();
+
+    const toast = useRef<Toast>(null);
     const submit = async () => {
-        const result = validateApplyProject(project);
-        if (!result.valid) {
-            setErrorMessage(result.message);
-            return;
+        try {
+            const result = validateApplyProject(project);
+            if (!result.valid) {
+                throw new Error(result.message);
+            }
+            const submitted = await ProjectApi.submitProject(project);
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Successful',
+                detail: 'Your Application Submitted Successfully',
+                life: 2500
+            });
+            setTimeout(() => onHide, 2500);
+        } catch (err) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Failed to submit project',
+                detail: '' + err,
+                life: 3000
+            });
         }
-        setErrorMessage(undefined);
-        //onSave();
     };
 
     const [activeStep, setActiveStep] = useState(0);
@@ -47,14 +64,11 @@ const ApplyWizard = ({ visible, call, project, setProject, onHide: hideParent }:
 
     const onHide = () => {
         setActiveStep(0);
-        hideParent();
+        onCancel();
     };
 
     const nextStep = () => {
-        if (activeStep === items.length - 2) {
-            setErrorMessage(undefined);
-        }
-        setActiveStep(activeStep + 1);        
+        setActiveStep(activeStep + 1);
     };
     const prevStep = () => {
         setActiveStep(activeStep - 1)
@@ -81,23 +95,26 @@ const ApplyWizard = ({ visible, call, project, setProject, onHide: hideParent }:
     }
 
     return (
-        <Dialog
-            header="Apply for Call"
-            visible={visible}
-            style={{ width: '700px', height: '600px' }}
-            footer={footer}
-            onHide={onHide}
-            maximizable
-        >
-            <h3>{call.title} ({(call.grant as Grant).title})</h3>
-            <Steps model={items} activeIndex={activeStep} readOnly className="mb-4" />
-            {activeStep === 0 && <UploadForm file={project.file} onUpload={updateFile} />}
-            {activeStep === 1 && <ProjectForm project={project} setProject={setProject} />}
-            {activeStep === 2 && <CollaboratorManager project={project} setProject={setProject} />}
-            {activeStep === 3 && <ProjectThemeManager project={project} setProject={setProject} />}
-            {activeStep === 4 && <PhaseManager project={project} setProject={setProject} phaseType={PhaseType.phase} />}
-            {activeStep === items.length - 1 && <Confirmation project={project} call={project.call as Call} errorMessage={errorMessage} />}
-        </Dialog>
+        <>
+            <Toast ref={toast} />
+            <Dialog
+                header="Apply for Call"
+                visible={visible}
+                style={{ width: '700px', height: '600px' }}
+                footer={footer}
+                onHide={onHide}
+                maximizable
+            >
+                <h3>{call.title} ({(call.grant as Grant).title})</h3>
+                <Steps model={items} activeIndex={activeStep} readOnly className="mb-4" />
+                {activeStep === 0 && <UploadForm file={project.file} onUpload={updateFile} />}
+                {activeStep === 1 && <ProjectForm project={project} setProject={setProject} />}
+                {activeStep === 2 && <CollaboratorManager project={project} setProject={setProject} />}
+                {activeStep === 3 && <ProjectThemeManager project={project} setProject={setProject} />}
+                {activeStep === 4 && <PhaseManager project={project} setProject={setProject} phaseType={PhaseType.phase} />}
+                {activeStep === items.length - 1 && <Confirmation project={project} call={project.call as Call} />}
+            </Dialog>
+        </>
     );
 }
 
