@@ -1,19 +1,20 @@
 import { Request, Response } from 'express';
 import { CollaboratorService, CreateCollaboratorDto, GetCollaboratorOptions, UpdateCollaboratorDto } from './collaborator.service';
-import { Types } from 'mongoose';
+import mongoose from 'mongoose';
 import { errorResponse, successResponse } from '../../../util/response';
 
 export class CollaboratorController {
 
     static async createCollaborator(req: Request, res: Response) {
         try {
+            //const {applicant}= req.body;
             const data: CreateCollaboratorDto = {
                 applicant:req.body.applicant,
                 project:req.body.project,
                 isLeadPI: req.body.isLeadPI
-            };;
-            const theme = await CollaboratorService.createCollaborator(data);
-            successResponse(res, 201, "Collaborator created successfully", theme);
+            };
+            const created = await CollaboratorService.createCollaborator(data);
+            successResponse(res, 201, "Collaborator created successfully", created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
@@ -23,7 +24,7 @@ export class CollaboratorController {
         try {
             const { project } = req.query;
             const filter = {
-                project: project ? new Types.ObjectId(project as string) : undefined
+                project: project ? new mongoose.Types.ObjectId(project as string) : undefined
             } as GetCollaboratorOptions;
             const collaborators = await CollaboratorService.getCollaborators(filter);
             successResponse(res, 200, 'Collaborators fetched successfully', collaborators);

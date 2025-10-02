@@ -3,6 +3,7 @@ import { Collaborator } from "./collaborator.model";
 import { ProjectService } from "../project.service";
 import { CollaboratorStatus } from "./collaborator.enum";
 import { ProjectStatus } from "../project.enum";
+import { Project } from "../project.model";
 
 export interface GetCollaboratorOptions {
     _id?: string;
@@ -11,7 +12,7 @@ export interface GetCollaboratorOptions {
 }
 
 export interface CreateCollaboratorDto {
-    project: mongoose.Types.ObjectId;
+    project?: mongoose.Types.ObjectId;
     applicant: mongoose.Types.ObjectId;
     isLeadPI?: boolean;
     status?: CollaboratorStatus;
@@ -25,7 +26,7 @@ export interface UpdateCollaboratorDto {
 export class CollaboratorService {
 
     private static async validateCollaborator(collaborator: CreateCollaboratorDto) {
-        const project = await ProjectService.getProjectById(collaborator.project);
+        const project = await Project.findById(collaborator.project).lean();
         if (!project) throw new Error("Project not found");
         if (project.status !== ProjectStatus.pending) throw new Error("Project is not pending.");
     }

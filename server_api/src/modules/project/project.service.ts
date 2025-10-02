@@ -2,16 +2,21 @@ import mongoose from "mongoose";
 import { Project } from "./project.model";
 import { CallStatus } from "../call/call.enum";
 import { ProjectStatus } from "./project.enum";
-import { CollaboratorService } from "./collaborators/collaborator.service";
+import { CollaboratorService, CreateCollaboratorDto } from "./collaborators/collaborator.service";
 import { ApplicantService } from "../applicants/applicant.service";
 import { CollaboratorStatus } from "./collaborators/collaborator.enum";
 import { Call } from "../call/call.model";
+import { CreatePhaseDto } from "./phase/phase.service";
+import { CreateProjectThemeDto } from "./themes/project.theme.service";
 
 export interface CreateProjectDto {
     call: mongoose.Types.ObjectId;
     title: string;
     summary?: string;
     createdBy: mongoose.Types.ObjectId;
+    collaborators: CreateCollaboratorDto[];
+    phases?: CreatePhaseDto[];
+    themes?: CreateProjectThemeDto[];
 }
 
 export class ProjectService {
@@ -41,10 +46,7 @@ export class ProjectService {
         return await Project.find().populate('call').lean();
     }
 
-    static async getProjectById(id: mongoose.Types.ObjectId) {
-        return await Project.findById(id).lean();
-    }
-
+   
     static async updateProject(id: string, data: Partial<CreateProjectDto>) {
         const project = await Project.findById(id);
         if (!project) throw new Error("Project not found");

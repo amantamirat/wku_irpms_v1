@@ -8,8 +8,8 @@ export interface CreatePhaseDto {
     duration: number;
     budget: number;
     description?: string;
-    project?: mongoose.Types.ObjectId;  // only if phase
-    parent?: mongoose.Types.ObjectId;   // only if breakdown
+    project?: mongoose.Types.ObjectId;
+    parent?: mongoose.Types.ObjectId;
     type: PhaseType;
 }
 

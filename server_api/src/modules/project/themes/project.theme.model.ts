@@ -8,7 +8,7 @@ interface IProjectTheme extends Document {
     updatedAt?: Date;
 }
 
-const ProThemeSchema: Schema<IProjectTheme> = new Schema(
+const ProjectThemeSchema: Schema<IProjectTheme> = new Schema(
     {
         project: {
             type: Schema.Types.ObjectId,
@@ -25,5 +25,5 @@ const ProThemeSchema: Schema<IProjectTheme> = new Schema(
         timestamps: true,
     }
 );
-ProThemeSchema.index({ project: 1, theme: 1 }, { unique: true });
-export const ProjectTheme = mongoose.model<IProjectTheme>(COLLECTIONS.PROJECT_THEMEM, ProThemeSchema);
+ProjectThemeSchema.index({ project: 1, theme: 1 }, { unique: true });
+export const ProjectTheme = mongoose.model<IProjectTheme>(COLLECTIONS.PROJECT_THEMEM, ProjectThemeSchema);
