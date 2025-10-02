@@ -19,10 +19,10 @@ const Confirmation = ({ project, call, errorMessage }: ConfirmationProps) => {
                 <p><strong>Calendar:</strong> {call.calendar.year}</p>
                 <p><strong>Project Title:</strong> {project.title}</p>
                 <div className="flex flex-wrap gap-2">
-                    <Tag value={`Collaborators: ${project.collaborators?.length ?? 0}`} severity={project.collaborators?.length ? "success" : "warning"} />
+                    <Tag value={`Collaborators: ${project.collaborators?.length ?? 0}`} severity={project.collaborators?.length ? "success" : "danger"} />
                     <Tag value={`Themes: ${project.themes?.length ?? 0}`} severity={project.themes?.length ? "success" : "warning"} />
-                    <Tag value={`Phases: ${project.phases?.length ?? 0}`} severity={project.phases?.length ? "success" : "warning"} />
-                    <Tag value={project.file ? `File: ${project.file.name}` : "No file"} severity={project.file ? "success" : "warning"} />
+                    <Tag value={`Phases: ${project.phases?.length ?? 0}`} severity={project.phases?.length ? "success" : "danger"} />
+                    <Tag value={project.file ? `File: ${project.file.name}` : "No file"} severity={project.file ? "success" : "danger"} />
                 </div>
                 <Divider />
                 <p>
