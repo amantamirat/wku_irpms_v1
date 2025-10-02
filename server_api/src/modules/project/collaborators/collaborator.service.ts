@@ -4,6 +4,7 @@ import { ProjectService } from "../project.service";
 import { CollaboratorStatus } from "./collaborator.enum";
 import { ProjectStatus } from "../project.enum";
 import { Project } from "../project.model";
+import Applicant from "../../applicants/applicant.model";
 
 export interface GetCollaboratorOptions {
     _id?: string;
@@ -26,6 +27,8 @@ export interface UpdateCollaboratorDto {
 export class CollaboratorService {
 
     private static async validateCollaborator(collaborator: CreateCollaboratorDto) {
+        const applicant = await Applicant.findById(collaborator.applicant).lean();
+        if (!applicant) throw new Error("Applicant not found");
         const project = await Project.findById(collaborator.project).lean();
         if (!project) throw new Error("Project not found");
         if (project.status !== ProjectStatus.pending) throw new Error("Project is not pending.");

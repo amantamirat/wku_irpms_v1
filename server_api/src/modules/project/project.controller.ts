@@ -28,12 +28,12 @@ export class ProjectController {
       if (!req.file) {
         return errorResponse(res, 400, "Document required");
       }
-      const { project } = req.body;
-
-      const parsedProject = JSON.parse(project);
-      //console.log("Project", parsedProject);
-
-      successResponse(res, 201, "Project created successfully");
+      const project = JSON.parse(req.body.project);
+      const data: CreateProjectDto = {
+        ...project,
+        createdBy: new mongoose.Types.ObjectId(req.user!.id),
+      };
+      successResponse(res, 201, "Project submitted successfully.");
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
