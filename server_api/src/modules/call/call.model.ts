@@ -3,7 +3,7 @@ import { CallStatus } from './call.enum';
 import { COLLECTIONS } from '../../enums/collections.enum';
 import { Directorate } from '../organization/organization.model';
 import { Catalog } from '../themes/theme.model';
-import { Evaluation } from '../evaluations/evaluation.model';
+import { Evaluation } from './evaluations/evaluation.model';
 
 interface ICall extends Document {
     directorate: mongoose.Types.ObjectId;

@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
-import { Unit, AcademicLevel, Classification, Ownership, Category } from "./organization.enum";
+import { Call } from "../call/call.model";
+import { AcademicLevel, Category, Classification, Ownership, Unit } from "./organization.enum";
 import { BaseOrganization } from "./organization.model";
-import { Evaluation } from "../evaluations/evaluation.model";
-import { Catalog } from "../themes/theme.model";
 
 
 export interface GetOrganizationsOptions {
@@ -63,13 +62,19 @@ export class OrganizationService {
         if (!organization) throw new Error("Organization not found");
         const isParentExist = await BaseOrganization.exists({ parent: organization._id });
         if (isParentExist) throw new Error(`Can not delete parent ${organization.type} ${organization.name}`);
+
         if (organization.type === Unit.Directorate) {
-            const isEvaluationExist = await Evaluation.exists({ directorate: organization._id });
+            const isCallExist = await Call.exists({ directorate: organization._id });
+            if (isCallExist) throw new Error(`Can not delete ${organization.type} ${organization.name}, Call data exist.`);
+            /**
+             * const isEvaluationExist = await Evaluation.exists({ directorate: organization._id });
             if (isEvaluationExist) throw new Error(`Can not delete ${organization.type} ${organization.name}, Evaluation data exist.`);
 
              const isThemeExist = await Catalog.exists({ directorate: organization._id });
             if (isThemeExist) throw new Error(`Can not delete ${organization.type} ${organization.name}, Theme data exist.`);
  
+             */
+
         }
         return await organization.deleteOne();
     }

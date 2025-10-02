@@ -5,7 +5,7 @@ import { Directorate } from "../organization/organization.model";
 import mongoose from "mongoose";
 import { Catalog } from "../themes/theme.model";
 import { Calendar } from "../calendar/calendar.model";
-import { Evaluation } from "../evaluations/evaluation.model";
+import { Evaluation } from "./evaluations/evaluation.model";
 import { Grant } from "../grants/grant.model";
 import { Project } from "../project/project.model";
 

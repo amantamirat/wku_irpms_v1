@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 import { Project } from "./project.model";
-import { CallService } from "../call/call.service";
 import { CallStatus } from "../call/call.enum";
 import { ProjectStatus } from "./project.enum";
 import { CollaboratorService } from "./collaborators/collaborator.service";
 import { ApplicantService } from "../applicants/applicant.service";
 import { CollaboratorStatus } from "./collaborators/collaborator.enum";
+import { Call } from "../call/call.model";
 
 export interface CreateProjectDto {
     call: mongoose.Types.ObjectId;
@@ -17,7 +17,7 @@ export interface CreateProjectDto {
 export class ProjectService {
 
     private static async validateProject(project: CreateProjectDto) {
-        const call = await CallService.getCallById(project.call);
+        const call = await Call.findById(project.call);
         if (!call) throw new Error("Call not found");
         if (call.status !== CallStatus.active) throw new Error("Call is not active.");
         const now = new Date();

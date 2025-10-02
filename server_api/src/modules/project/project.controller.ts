@@ -2,14 +2,18 @@ import { Request, Response } from 'express';
 import { errorResponse, successResponse } from '../../util/response';
 import { ProjectService, CreateProjectDto } from './project.service';
 import { AuthenticatedRequest } from '../users/auth/auth.middleware';
+import mongoose from 'mongoose';
 
 export class ProjectController {
 
   static async createProject(req: AuthenticatedRequest, res: Response) {
     try {
+      const { call, title, summary } = req.body;
       const data: CreateProjectDto = {
-        ...req.body,
-        createdBy: req.user!.id,
+        call: new mongoose.Types.ObjectId(call as string),
+        title: title,
+        summary: summary,
+        createdBy: new mongoose.Types.ObjectId(req.user!.id),
       };
       const theme = await ProjectService.createProject(data);
       successResponse(res, 201, "Project created successfully", theme);
@@ -30,7 +34,12 @@ export class ProjectController {
   static async updateProject(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const data: Partial<CreateProjectDto> = req.body;
+      const { call, title, summary } = req.body;
+      const data:  Partial<CreateProjectDto> = {
+        call: new mongoose.Types.ObjectId(call as string),
+        title: title,
+        summary: summary
+      };
       const updated = await ProjectService.updateProject(id, data);
       successResponse(res, 201, "Project updated successfully", updated);
     } catch (err: any) {

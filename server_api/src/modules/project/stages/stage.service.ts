@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { ProjectStageStatus } from "./stage.enum";
 import { ProjectStage } from "./stage.model";
 import { Project } from "../project.model";
-import { Stage } from "../../evaluations/evaluation.model";
+import { Stage } from "../../call/evaluations/evaluation.model";
 
 export interface GetProjectStageOptions {
     _id?: string;

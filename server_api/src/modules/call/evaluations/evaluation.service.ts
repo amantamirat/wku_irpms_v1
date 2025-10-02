@@ -1,9 +1,9 @@
 import { EvaluationType, FormType } from "./evaluation.enum";
 import { BaseEvaluation, Criterion, Evaluation, Stage, StageDocument } from "./evaluation.model";
 import mongoose from "mongoose";
-import { Call } from "../call/call.model";
-import { Directorate } from "../organization/organization.model";
-import { ProjectStage } from "../project/stages/stage.model";
+import { Call } from "../call.model";
+import { Directorate } from "../../organization/organization.model";
+import { ProjectStage } from "../../project/stages/stage.model";
 
 export interface GetEvalsOptions {
     type?: EvaluationType;

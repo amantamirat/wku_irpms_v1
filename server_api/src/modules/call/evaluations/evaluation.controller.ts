@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { EvaluationService, CreateEvaluationDto, GetEvalsOptions } from "./evaluation.service";
 import { EvaluationType } from "./evaluation.enum";
-import { errorResponse, successResponse } from "../../util/response";
+import { errorResponse, successResponse } from "../../../util/response";
 
 export class EvaluationController {
 
