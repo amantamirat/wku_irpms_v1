@@ -8,6 +8,14 @@ import { Project } from "./project.model";
 import { CreateProjectThemeDto } from "./themes/project.theme.service";
 import Applicant from "../applicants/applicant.model";
 import { Collaborator } from "./collaborators/collaborator.model";
+import { CollaboratorStatus } from "./collaborators/collaborator.enum";
+import { Phase } from "./phase/phase.model";
+import { PhaseType } from "./phase/phase.enum";
+import { ProjectTheme } from "./themes/project.theme.model";
+import { Stage } from "../call/evaluations/evaluation.model";
+import { BaseTheme } from "../call/themes/theme.model";
+import { ProjectStage } from "./stages/stage.model";
+import { CreateProjectStageDto } from "./stages/stage.service";
 
 export interface CreateProjectDto {
     call: mongoose.Types.ObjectId;
@@ -17,6 +25,7 @@ export interface CreateProjectDto {
     collaborators?: CreateCollaboratorDto[];
     phases?: CreatePhaseDto[];
     themes?: CreateProjectThemeDto[];
+    documentPath?: string;
 }
 
 export class ProjectService {
@@ -44,7 +53,21 @@ export class ProjectService {
     }
 
     static async submitProject(dto: CreateProjectDto) {
-        await this.validateProject(dto);
+        //Check the call existance and deadline
+        if (!dto.documentPath) {
+            throw new Error("Document path not found");
+        }
+        const call = await Call.findOne({ _id: dto.call, status: CallStatus.active }).lean();
+        if (!call) throw new Error("Call not found");
+        const now = new Date();
+        if (call.deadline < now) {
+            throw new Error("The deadline for this call has already passed");
+        }
+        //Find the first stage
+        const stage = await Stage.findOne({ parent: call.evaluation, order: 1 }).lean();
+        if (!stage) throw new Error("Stage not found");
+
+        //Check collaborator applicants
         let hasLeadPI = false;
         for (const collab of dto.collaborators ?? []) {
             const applicant = await Applicant.findById(collab.applicant).lean();
@@ -58,8 +81,41 @@ export class ProjectService {
                 hasLeadPI = true;
             }
         }
+        //check themes
+        for (const t of dto.themes ?? []) {
+            const theme = await BaseTheme.findOne({ _id: t.theme, catalog: call.theme }).lean();
+            if (!theme) {
+                throw new Error(`Theme not found: ${t.theme}`);
+            }
+        }
         const submittedProject = await Project.create({ ...dto, status: ProjectStatus.pending });
-
+        const collaborators = dto.collaborators?.filter((c, index, self) =>
+            index === self.findIndex(cc => cc.applicant.toString() === c.applicant.toString())
+        ).map(c => ({
+            ...c,
+            project: submittedProject._id,
+            status: c.isLeadPI ? CollaboratorStatus.active : CollaboratorStatus.pending
+        }));
+        const themes = dto.themes?.filter((t, index, self) =>
+            index === self.findIndex(tt => tt.theme.toString() === t.theme.toString())
+        ).map(theme => ({
+            ...theme,
+            project: submittedProject._id
+        }));
+        const phases = dto.phases?.map(phase => ({
+            ...phase,
+            type: PhaseType.phase,
+            project: submittedProject._id
+        }));
+        const projectStage: CreateProjectStageDto = {
+            project: submittedProject._id,
+            stage: stage._id,
+            documentPath: dto.documentPath
+        }
+        await Collaborator.insertMany(collaborators);
+        await ProjectTheme.insertMany(themes);
+        await Phase.insertMany(phases);
+        await ProjectStage.create(projectStage);
         return submittedProject;
     }
 

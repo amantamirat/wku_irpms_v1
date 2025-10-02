@@ -28,12 +28,15 @@ export class ProjectController {
       if (!req.file) {
         return errorResponse(res, 400, "Document required");
       }
+      const documentPath = `uploads/${req.file.filename}`;
       const project = JSON.parse(req.body.project);
       const data: CreateProjectDto = {
         ...project,
         createdBy: new mongoose.Types.ObjectId(req.user!.id),
+        documentPath:documentPath
       };
-      successResponse(res, 201, "Project submitted successfully.");
+      const submitted = await ProjectService.submitProject(data);
+      successResponse(res, 201, "Project submitted successfully", submitted);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
