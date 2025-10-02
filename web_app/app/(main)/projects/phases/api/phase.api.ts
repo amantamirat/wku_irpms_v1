@@ -1,24 +1,9 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Phase } from "../models/phase.model";
-import { Project } from "../../models/project.model";
-
+import { Phase, sanitizePhase } from "../models/phase.model";
 
 const end_point = '/project/phases/';
 
 
-function sanitizePhase(phase: Partial<Phase>): Partial<Phase> {
-    return {
-        ...phase,
-        project:
-            typeof phase.project === "object" && phase.project !== null
-                ? (phase.project as Project)._id
-                : phase.project,
-        parent:
-            typeof phase.parent === "object" && phase.parent !== null
-                ? (phase.parent as Phase)._id
-                : phase.parent,
-    };
-}
 
 export interface GetPhaseOptions {
     project?: string;

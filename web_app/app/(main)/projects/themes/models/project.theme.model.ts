@@ -16,3 +16,17 @@ export const validateProjectTheme = (pt: ProjectTheme): { valid: boolean; messag
     }
     return { valid: true };
 };
+
+export const sanitizeProjectTheme = (pt: Partial<ProjectTheme>): ProjectTheme => {
+    return {
+        ...pt,
+        project:
+            typeof pt.project === "object" && pt.project !== null
+                ? (pt.project as Project)._id
+                : pt.project,
+        theme:
+            typeof pt.theme === "object" && pt.theme !== null
+                ? (pt.theme as Theme)._id
+                : pt.theme,
+    } as ProjectTheme;
+}

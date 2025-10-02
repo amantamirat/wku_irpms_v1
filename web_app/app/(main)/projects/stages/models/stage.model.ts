@@ -18,12 +18,27 @@ export type ProjectStage = {
     updatedAt?: Date;
 }
 
-export const validateProjectStage = (pt: ProjectStage): { valid: boolean; message?: string } => {
-    if (!pt.stage) {
+export const validateProjectStage = (ps: ProjectStage): { valid: boolean; message?: string } => {
+    if (!ps.stage) {
         return { valid: false, message: "Stage is required." };
     }
-    if (!pt.file && !pt._id) {
+    if (!ps.file && !ps._id) {
         return { valid: false, message: "Document (PDF) file is required." };
     }
     return { valid: true };
+}
+
+
+export const sanitizeProjectStage = (ps: Partial<ProjectStage>): Partial<ProjectStage> => {
+    return {
+        ...ps,
+        project:
+            typeof ps.project === "object" && ps.project !== null
+                ? (ps.project as Project)._id
+                : ps.project,
+        stage:
+            typeof ps.stage === "object" && ps.stage !== null
+                ? (ps.stage as Evaluation)._id
+                : ps.stage,
+    };
 }

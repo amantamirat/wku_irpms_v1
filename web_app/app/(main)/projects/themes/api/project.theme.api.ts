@@ -1,22 +1,8 @@
 import { ApiClient } from "@/api/ApiClient";
-import { ProjectTheme } from "../models/project.theme.model";
-import { Project } from "../../models/project.model";
-import { Theme } from "@/app/(main)/themes/models/theme.model";
+import { ProjectTheme, sanitizeProjectTheme } from "../models/project.theme.model";
 const end_point = '/project/themes/';
 
-function sanitizeProjectTheme(projectTheme: Partial<ProjectTheme>): Partial<ProjectTheme> {
-    return {
-        ...projectTheme,
-        project:
-            typeof projectTheme.project === "object" && projectTheme.project !== null
-                ? (projectTheme.project as Project)._id
-                : projectTheme.project,
-        theme:
-            typeof projectTheme.theme === "object" && projectTheme.theme !== null
-                ? (projectTheme.theme as Theme)._id
-                : projectTheme.theme,
-    };
-}
+
 
 export interface GetProjectThemeOptions {
     project?: string;

@@ -50,8 +50,15 @@ const ApplyWizard = ({ visible, call, project, setProject, onHide: hideParent }:
         hideParent();
     };
 
-    const nextStep = () => setActiveStep(activeStep + 1);
-    const prevStep = () => setActiveStep(activeStep - 1);
+    const nextStep = () => {
+        if (activeStep === items.length - 2) {
+            setErrorMessage(undefined);
+        }
+        setActiveStep(activeStep + 1);        
+    };
+    const prevStep = () => {
+        setActiveStep(activeStep - 1)
+    };
 
     const footer = (
         <div className="flex justify-content-center gap-2">

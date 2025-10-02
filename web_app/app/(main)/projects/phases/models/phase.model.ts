@@ -45,3 +45,18 @@ export const validatePhase = (pt: Phase): { valid: boolean; message?: string } =
     }
     return { valid: true };
 };
+
+
+export const sanitizePhase = (phase: Partial<Phase>): Phase => {
+    return {
+        ...phase,
+        project:
+            typeof phase.project === "object" && phase.project !== null
+                ? (phase.project as Project)._id
+                : phase.project,
+        parent:
+            typeof phase.parent === "object" && phase.parent !== null
+                ? (phase.parent as Phase)._id
+                : phase.parent,
+    } as Phase;
+}

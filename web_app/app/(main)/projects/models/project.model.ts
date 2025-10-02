@@ -1,8 +1,8 @@
 import { Call } from "../../calls/models/call.model";
 import { User } from "../../users/models/user.model";
-import { Collaborator } from "../collaborators/models/collaborator.model";
-import { Phase } from "../phases/models/phase.model";
-import { ProjectTheme } from "../themes/models/project.theme.model";
+import { Collaborator, sanitizeCollaborator } from "../collaborators/models/collaborator.model";
+import { Phase, sanitizePhase } from "../phases/models/phase.model";
+import { ProjectTheme, sanitizeProjectTheme } from "../themes/models/project.theme.model";
 
 export enum ProjectStatus {
     pending = 'pending',
@@ -49,3 +49,17 @@ export const validateApplyProject = (project: Project): { valid: boolean; messag
     }
     return { valid: true };
 };
+
+
+export const sanitizeProject=(project: Partial<Project>): Partial<Project> => {
+    return {
+        ...project,
+        call:
+            typeof project.call === 'object' && project.call !== null
+                ? (project.call as Call)._id
+                : project.call,
+        collaborators: project.collaborators?.map(c => sanitizeCollaborator(c)),
+        themes: project.themes?.map(t => sanitizeProjectTheme(t)),
+        phases: project.phases?.map(p => sanitizePhase(p)),
+    };
+}

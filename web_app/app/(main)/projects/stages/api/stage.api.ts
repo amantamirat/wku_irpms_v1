@@ -1,24 +1,9 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Project } from "../../models/project.model";
-import { ProjectStage } from "../models/stage.model";
-import { Evaluation } from "@/app/(main)/evals/models/eval.model";
-
+import { ProjectStage, sanitizeProjectStage } from "../models/stage.model";
 const end_point = '/project/stages/';
 
 
-function sanitizeProjectStage(projectStage: Partial<ProjectStage>): Partial<ProjectStage> {
-    return {
-        ...projectStage,
-        project:
-            typeof projectStage.project === "object" && projectStage.project !== null
-                ? (projectStage.project as Project)._id
-                : projectStage.project,
-        stage:
-            typeof projectStage.stage === "object" && projectStage.stage !== null
-                ? (projectStage.stage as Evaluation)._id
-                : projectStage.stage,
-    };
-}
+
 
 export interface GetProjectStageOptions {
     project?: string;

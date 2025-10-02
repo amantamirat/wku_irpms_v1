@@ -1,18 +1,6 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Project } from "../models/project.model";
-import { Call } from "../../calls/models/call.model";
+import { Project, sanitizeProject } from "../models/project.model";
 const end_point = '/projects/';
-
-function sanitizeProject(project: Partial<Project>): Partial<Project> {
-    return {
-        ...project,
-        call:
-            typeof project.call === 'object' && project.call !== null
-                ? (project.call as Call)._id
-                : project.call,
-    };
-}
-
 
 export const ProjectApi = {
     
@@ -22,6 +10,12 @@ export const ProjectApi = {
     },
 
     async createProject(project: Partial<Project>): Promise<Project> {
+        const sanitized = sanitizeProject(project);
+        const createdData = await ApiClient.post(end_point, sanitized);
+        return createdData as Project;
+    },
+
+     async submitProject(project: Partial<Project>): Promise<Project> {
         const sanitized = sanitizeProject(project);
         const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as Project;
@@ -45,3 +39,5 @@ export const ProjectApi = {
         return response;
     },
 };
+
+
