@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { ProThemeController } from './protheme.controller';
+import { ProThemeController } from './project.theme.controller';
 import { verifyActiveAccount } from '../../users/auth/auth.middleware';
 
 

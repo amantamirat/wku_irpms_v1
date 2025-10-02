@@ -15,7 +15,7 @@ import grantRoutes from './modules/grants/grant.routes';
 import projectRoutes from './modules/project/project.routes';
 import collaboratorRoutes from './modules/project/collaborators/collaborator.routes';
 import assignmentRoutes from './modules/project/collaborators/assignment/assignment.routes';
-import projectThemeRoutes from './modules/project/themes/protheme.routes';
+import projectThemeRoutes from './modules/project/themes/project.theme.routes';
 import phaseRoutes from './modules/project/phase/phase.routes';
 import stageRoutes from './modules/project/stages/stage.routes';
 import userRoutes from './modules/users/user.routes';

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
 import { errorResponse, successResponse } from '../../../util/response';
-import { CreateProThemeDto, GetProThemeOptions, ProjectThemeService } from './protheme.service';
+import { CreateProThemeDto, GetProThemeOptions, ProjectThemeService } from './project.theme.service';
 import mongoose from 'mongoose';
 
 export class ProThemeController {

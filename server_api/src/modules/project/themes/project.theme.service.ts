@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { ProjectTheme } from "./protheme.model";
+import { ProjectTheme } from "./project.theme.model";
 import { Project } from "../project.model";
 import { BaseTheme } from "../../call/themes/theme.model";
 import { ThemeType } from "../../call/themes/theme.enum";
