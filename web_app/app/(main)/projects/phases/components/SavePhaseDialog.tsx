@@ -4,7 +4,7 @@ import { InputNumber } from "primereact/inputnumber";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Phase, validatePhase } from "../models/phase.model";
 import { InputText } from "primereact/inputtext";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { Toast } from "primereact/toast";
 
 
@@ -20,7 +20,7 @@ interface SavePhaseDialogProps {
 export default function SavePhaseDialog({ phase, setPhase, visible, onSave, onAdd, onHide }: SavePhaseDialogProps) {
 
     const toast = useRef<Toast>(null);
-    const [errorMessage, setErrorMessage] = useState<string | undefined>();
+    //const [errorMessage, setErrorMessage] = useState<string | undefined>();
     const updateField = (field: keyof Phase, value: any) => {
         setPhase({ ...phase, [field]: value });
     };
@@ -29,10 +29,9 @@ export default function SavePhaseDialog({ phase, setPhase, visible, onSave, onAd
         try {
             const result = validatePhase(phase);
             if (!result.valid) {
-                setErrorMessage(result.message);
-                return;
+                throw new Error(result.message);
             }
-            setErrorMessage(undefined);
+            //setErrorMessage(undefined);
             if (onAdd) {
                 onAdd();
             }
@@ -51,7 +50,7 @@ export default function SavePhaseDialog({ phase, setPhase, visible, onSave, onAd
                 severity: 'error',
                 summary: `Failed to ${onSave ? 'Save' : 'Add'} project theme`,
                 detail: '' + err,
-                life: 3000
+                life: 2000
             });
         }
     }
@@ -83,16 +82,6 @@ export default function SavePhaseDialog({ phase, setPhase, visible, onSave, onAd
                         onChange={(e) => updateField("activity", e.target.value)}
                         required
                         autoFocus
-                    />
-                </div>
-                <div className="field">
-                    <label htmlFor="order">Order</label>
-                    <InputNumber
-                        id="order"
-                        value={phase.order}
-                        onValueChange={(e) => updateField("order", e.value ?? 0)}
-                        min={1}
-                        placeholder="Enter phase order"
                     />
                 </div>
 
@@ -131,9 +120,6 @@ export default function SavePhaseDialog({ phase, setPhase, visible, onSave, onAd
                         placeholder="Enter description (optional)"
                     />
                 </div>
-                {errorMessage && (
-                    <small className="p-error">{errorMessage}</small>
-                )}
             </Dialog>
         </>
     );

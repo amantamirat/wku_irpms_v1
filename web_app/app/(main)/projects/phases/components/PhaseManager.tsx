@@ -21,7 +21,6 @@ export default function PhaseManager({ phaseType, project, setProject }: Project
         type: phaseType,
         project: project,
         activity: '',
-        order: 0,
         duration: 0,
         budget: 0
     };
@@ -148,7 +147,7 @@ export default function PhaseManager({ phaseType, project, setProject }: Project
                     value={phases}
                     selection={phase}
                     onSelectionChange={(e) => setPhase(e.value as Phase)}
-                    dataKey="order"
+                    dataKey={phases?.some(p => p._id) ? "_id" : "order"}
                     paginator
                     rows={10}
                     rowsPerPageOptions={[5, 10, 25]}
@@ -160,8 +159,7 @@ export default function PhaseManager({ phaseType, project, setProject }: Project
                 >
                     <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                     <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                    <Column field="activity" header="Activity" sortable />
-                    <Column field="order" header="Order" sortable />
+                    <Column field="activity" header="Activity" sortable />                    
                     <Column field="duration" header="Duration" sortable />
                     <Column field="budget" header="Budget" sortable />
                     {

@@ -6,7 +6,6 @@ import { PhaseType } from "./phase.enum";
 export interface CreatePhaseDto {
     activity: string;
     duration: number;
-    order: number;
     budget: number;
     description?: string;
     project?: mongoose.Types.ObjectId;  // only if phase

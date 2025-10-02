@@ -7,11 +7,10 @@ import { PhaseType } from "./phase.enum";
 export class PhaseController {
     static async createPhase(req: Request, res: Response) {
         try {
-            const { type, activity, order, duration, budget, description, project, parent } = req.body;
+            const { type, activity, duration, budget, description, project, parent } = req.body;
             const data: CreatePhaseDto = {
                 type: type as PhaseType,
                 activity: activity,
-                order: order,
                 duration: duration,
                 budget: budget,
                 description: description ? description : undefined,
@@ -43,13 +42,13 @@ export class PhaseController {
     static async updatePhase(req: Request, res: Response) {
         try {
             const { id } = req.params;
+            const { activity, duration, budget, description, parent } = req.body;
             const data: Partial<CreatePhaseDto> = {
-                activity: req.body.activity,
-                duration: req.body.duration,
-                budget: req.body.budget,
-                description: req.body.description,
-                project: req.body.project,
-                parent: req.body.parent,
+                activity: activity ?? undefined,
+                duration: duration ?? undefined,
+                budget: budget ?? undefined,
+                description: description ?? undefined,
+                parent: parent ? new mongoose.Types.ObjectId(parent as string) : undefined,
             };
             const updated = await PhaseService.updatePhase(id, data);
             successResponse(res, 200, "Phase updated successfully", updated);

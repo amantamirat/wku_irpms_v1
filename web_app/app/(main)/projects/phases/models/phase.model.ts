@@ -10,13 +10,13 @@ export type Phase = {
     type: PhaseType;
     project?: string | Project;
     activity: string;
-    order: number;
     duration: number;
     budget: number;
     description?: string;
     parent?: string | Phase;
     createdAt?: Date;
     updatedAt?: Date;
+    order?: number;
 }
 
 export const validatePhase = (pt: Phase): { valid: boolean; message?: string } => {
@@ -29,9 +29,11 @@ export const validatePhase = (pt: Phase): { valid: boolean; message?: string } =
     if (!pt.activity || pt.activity.trim().length === 0) {
         return { valid: false, message: 'Activity is required.' };
     }
+    /*
     if (!pt.order) {
         return { valid: false, message: 'Order is required.' };
     }
+    */
     if (!pt.duration) {
         return { valid: false, message: 'Duration is required.' };
     }
