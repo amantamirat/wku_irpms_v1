@@ -4,9 +4,6 @@ import { Dialog } from 'primereact/dialog';
 import { useEffect, useState } from 'react';
 import { Project, validateProject } from '../../models/project.model';
 import ProjectForm from './ProjectForm';
-import { Call, CallStatus } from '@/app/(main)/calls/models/call.model';
-import { Dropdown } from 'primereact/dropdown';
-import { CallApi } from '@/app/(main)/calls/api/call.api';
 
 
 interface SaveDialogProps {
@@ -19,23 +16,11 @@ interface SaveDialogProps {
 
 function SaveProjectDialog(props: SaveDialogProps) {
     const { visible, project, setProject, onSave, onHide } = props;
-    const [submitted, setSubmitted] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | undefined>();
-    const [calls, setCalls] = useState<Call[]>([]);
-
-    useEffect(() => {
-        const fetchCalls = async () => {
-            const data = await CallApi.getCalls({ status: CallStatus.active });
-            setCalls(data);
-        };
-        if (!project._id) {
-            fetchCalls();
-        }
-
-    }, [project._id]);
+    //const [submitted, setSubmitted] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | undefined>();    
 
     const save = async () => {
-        setSubmitted(true);
+        //setSubmitted(true);
         const result = validateProject(project);
         if (!result.valid) {
             setErrorMessage(result.message);
@@ -46,7 +31,7 @@ function SaveProjectDialog(props: SaveDialogProps) {
     };
 
     const hide = () => {
-        setSubmitted(false);
+        //setSubmitted(false);
         setErrorMessage(undefined);
         onHide();
     };
@@ -60,7 +45,7 @@ function SaveProjectDialog(props: SaveDialogProps) {
 
     useEffect(() => {
         if (!visible) {
-            setSubmitted(false);
+            //setSubmitted(false);
             setErrorMessage(undefined);
         }
     }, [visible]);
@@ -74,25 +59,7 @@ function SaveProjectDialog(props: SaveDialogProps) {
             className="p-fluid"
             footer={footer}
             onHide={hide}
-        >
-            {!project._id && <>
-                <div className="p-fluid formgrid grid">
-                    <div className="field col-12">
-                        <label htmlFor="call">Call</label>
-                        <Dropdown
-                            id="call"
-                            dataKey="_id"
-                            options={calls}
-                            value={project.call}
-                            onChange={(e) => setProject({ ...project, call: e.value })}
-                            required
-                            optionLabel="title"
-                            placeholder="Select a Call"
-                            className="w-full"
-                        />
-                    </div>
-                </div>
-            </>}
+        >            
             <ProjectForm project={project} setProject={setProject} />
             {errorMessage && (
                 <small className="p-error">{errorMessage}</small>

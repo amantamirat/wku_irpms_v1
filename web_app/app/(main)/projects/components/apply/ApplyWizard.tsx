@@ -28,8 +28,10 @@ const ApplyWizard = ({ visible, call, project, setProject, onCancel }: ApplyWiza
 
 
     const toast = useRef<Toast>(null);
+    const [loading, setLoading] = useState(false); 
     const submit = async () => {
         try {
+            setLoading(true);
             const result = validateApplyProject(project);
             if (!result.valid) {
                 throw new Error(result.message);
@@ -49,6 +51,9 @@ const ApplyWizard = ({ visible, call, project, setProject, onCancel }: ApplyWiza
                 detail: '' + err,
                 life: 3000
             });
+        }
+        finally{
+            setLoading(false);
         }
     };
 
@@ -85,7 +90,7 @@ const ApplyWizard = ({ visible, call, project, setProject, onCancel }: ApplyWiza
             {activeStep < items.length - 1 && (<Button label="Next" icon="pi pi-angle-right" onClick={nextStep} iconPos="right" outlined />
             )}
             {activeStep === items.length - 1 && (
-                <Button label="Submit" icon="pi pi-check" outlined onClick={submit} />
+                <Button label="Submit" icon="pi pi-check" loading={loading} outlined onClick={submit} />
             )}
         </div>
     );

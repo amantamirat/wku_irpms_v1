@@ -82,6 +82,9 @@ export class ProjectService {
                 hasLeadPI = true;
             }
         }
+        if(!hasLeadPI){
+            throw new Error("Lead PI not found");
+        }
         //check themes
         for (const t of dto.themes ?? []) {
             const theme = await BaseTheme.findOne({ _id: t.theme, catalog: call.theme }).lean();
