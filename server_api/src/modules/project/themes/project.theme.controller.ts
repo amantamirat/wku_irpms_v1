@@ -32,19 +32,6 @@ export class ProThemeController {
         }
     }
 
-    static async updateProTheme(req: Request, res: Response) {
-        try {
-            //Can be removed
-            const { id } = req.params;
-            const data: Partial<CreateProjectThemeDto> = {
-                 //theme: req.body.theme
-            };
-            const updated = await ProjectThemeService.updateProjectTheme(id, data);
-            successResponse(res, 201, "ProTheme updated successfully", updated);
-        } catch (err: any) {
-            errorResponse(res, 400, err.message, err);
-        }
-    }
 
     static async deleteProTheme(req: Request, res: Response) {
         try {
