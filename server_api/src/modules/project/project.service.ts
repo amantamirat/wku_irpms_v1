@@ -16,6 +16,7 @@ import { Stage } from "../call/evaluations/evaluation.model";
 import { BaseTheme } from "../call/themes/theme.model";
 import { ProjectStage } from "./stages/stage.model";
 import { CreateProjectStageDto } from "./stages/stage.service";
+import { ProjectStageStatus } from "./stages/stage.enum";
 
 export interface CreateProjectDto {
     call: mongoose.Types.ObjectId;
@@ -110,7 +111,8 @@ export class ProjectService {
         const projectStage: CreateProjectStageDto = {
             project: submittedProject._id,
             stage: stage._id,
-            documentPath: dto.documentPath
+            documentPath: dto.documentPath,
+            status:ProjectStageStatus.submitted
         }
         await Collaborator.insertMany(collaborators);
         await ProjectTheme.insertMany(themes);
