@@ -10,14 +10,10 @@ import { ProjectTheme } from "../models/project.theme.model";
 import SaveThemeDialog from "./SaveThemeDialog";
 import { Theme } from "@/app/(main)/themes/models/theme.model";
 
-
-
 interface ProjectInfoStepProps {
     project: Project;
     setProject?: (project: Project) => void;
 }
-
-
 
 export default function ProjectThemeManager({ project, setProject }: ProjectInfoStepProps) {
 
@@ -30,8 +26,6 @@ export default function ProjectThemeManager({ project, setProject }: ProjectInfo
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [projectThemes, setProjectThemes] = useState<ProjectTheme[]>([]);
-
-
 
     useEffect(() => {
         const fetchProjectThemes = async () => {
@@ -76,7 +70,7 @@ export default function ProjectThemeManager({ project, setProject }: ProjectInfo
     const addProjectTheme = () => {
         const exists =
             project.themes?.some(
-                (c) => (c.theme as Theme)._id === projectTheme._id
+                (c) => (c.theme as Theme)._id === (projectTheme.theme as Theme)._id
             ) ?? false;
         if (exists) {
             throw new Error("The theme is already added!");
