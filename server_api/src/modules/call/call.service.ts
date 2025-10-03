@@ -8,6 +8,7 @@ import { Calendar } from "../calendar/calendar.model";
 import { Evaluation } from "./evaluations/evaluation.model";
 import { Grant } from "../grants/grant.model";
 import { Project } from "../project/project.model";
+import { CalendarStatus } from "../calendar/calendar.enum";
 
 
 export interface GetCallsOptions {
@@ -36,7 +37,7 @@ export class CallService {
         if (!directorate) {
             throw new Error("Directorate Not Found!");
         }
-        const calendar = await Calendar.findById(call.calendar);
+        const calendar = await Calendar.findOne({ _id: call.calendar, status: CalendarStatus.active });
         if (!calendar) {
             throw new Error("Calendar Not Found!");
         }

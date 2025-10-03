@@ -11,12 +11,13 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
-import { Calendar } from './models/calendar.model';
+import { Calendar, CalendarStatus } from './models/calendar.model';
 import { CalendarApi } from './api/calendar.api';
 
 const CalendarPage = () => {
     const emptyCalendar: Calendar = {
         year: new Date().getFullYear(),
+        status:CalendarStatus.active,
         start_date: new Date(),
         end_date: new Date(),
     };
@@ -146,6 +147,11 @@ const CalendarPage = () => {
         </>
     );
 
+    const statusBodyTemplate = (rowData: Calendar) => {
+            return (
+                <span className={`status-badge status-${rowData.status}`}>{rowData.status}</span>
+            );
+        };
    
 
     return (
@@ -177,6 +183,7 @@ const CalendarPage = () => {
                         <Column field="year" header="Year" sortable />
                         <Column field="start_date" header="Start Date" body={(rowData) => new Date(rowData.start_date!).toLocaleDateString('en-CA')} />
                         <Column field="end_date" header="End Date" body={(rowData) => new Date(rowData.end_date!).toLocaleDateString('en-CA')} />
+                        <Column header="Status" body={statusBodyTemplate} sortable />
                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
@@ -184,7 +191,7 @@ const CalendarPage = () => {
                         <SaveDialog
                             visible={showSaveDialog}
                             calendar={selectedCalendar}
-                            onChange={setSelectedCalendar}
+                            setCalendar={setSelectedCalendar}
                             onSave={saveCalendar}
                             onHide={() => setShowSaveDialog(false)}
                         />

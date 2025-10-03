@@ -2,8 +2,6 @@ import { Call } from "../call/call.model";
 import { CalendarStatus } from "./calendar.enum";
 import { Calendar } from "./calendar.model";
 
-
-
 export interface CreateCalendarDto {
     year: number;
     start_date: Date | string;

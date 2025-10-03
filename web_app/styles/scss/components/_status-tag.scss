@@ -1,3 +1,4 @@
+.status-badge,
 .user-badge,
 .academic-badge,
 .classification-badge,
@@ -18,11 +19,31 @@
     letter-spacing: .3px;
 }
 
+.status-badge {
+    &.status-pending,
+    &.status-planned {
+        background: #FFF9C4;
+        color: #8A6D3B;
+    }
+
+    &.status-active{
+        background: #C8E6C9;
+        color: #256029;
+    }
+
+    &.status-closed,
+    &.status-suspended {
+        background: #FFCDD2;
+        color: #d80517;
+    }
+}
+
 .collaborator-badge {
     &.status-pending {
         background: #FFCDD2;
         color: #d80517;
     }
+
     &.status-active {
         background: #C8E6C9;
         color: #256029;
