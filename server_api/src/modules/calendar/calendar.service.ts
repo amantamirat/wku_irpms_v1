@@ -9,6 +9,9 @@ export interface CreateCalendarDto {
     status?: CalendarStatus;
 }
 
+export interface GetCalendarOptions {
+    status?: CalendarStatus;
+}
 
 export class CalendarService {
 
@@ -17,8 +20,10 @@ export class CalendarService {
         return createdCalendar;
     }
 
-    static async getCalendars() {
-        return await Calendar.find().lean();
+    static async getCalendars(options: GetCalendarOptions) {
+        const filter: any = {};
+        if (options.status) filter.status = options.status;
+        return await Calendar.find(filter).lean();
     }
 
     static async updateCalendar(id: string, data: Partial<CreateCalendarDto>) {

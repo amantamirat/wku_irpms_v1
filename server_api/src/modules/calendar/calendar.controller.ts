@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { errorResponse, successResponse } from '../../util/response';
-import { CalendarService, CreateCalendarDto } from './calendar.service';
+import { CalendarService, CreateCalendarDto, GetCalendarOptions } from './calendar.service';
+import { CalendarStatus } from './calendar.enum';
 
 export class CalendarController {
 
@@ -16,7 +17,11 @@ export class CalendarController {
 
   static async getCalendars(req: Request, res: Response) {
     try {
-      const calendars = await CalendarService.getCalendars();
+      const { status } = req.query;
+      const options: GetCalendarOptions = {
+        status: status as CalendarStatus ?? undefined
+      }
+      const calendars = await CalendarService.getCalendars(options);
       successResponse(res, 200, 'Calendars fetched successfully', calendars);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
