@@ -6,6 +6,7 @@ export enum COLLECTIONS {
   CALENDAR = "calendars",
   CALL = "calls",
   GRANT = "grants",
+  CONSTRAINT = "constraints",
   USER = "users",
   ROLE = "roles",
   PERMISSION = "permissions",
