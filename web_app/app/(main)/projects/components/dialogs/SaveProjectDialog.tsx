@@ -28,8 +28,11 @@ function SaveProjectDialog(props: SaveDialogProps) {
             const data = await CallApi.getCalls({ status: CallStatus.active });
             setCalls(data);
         };
-        fetchCalls();
-    }, []);
+        if (!project._id) {
+            fetchCalls();
+        }
+
+    }, [project._id]);
 
     const save = async () => {
         setSubmitted(true);
@@ -72,22 +75,24 @@ function SaveProjectDialog(props: SaveDialogProps) {
             footer={footer}
             onHide={hide}
         >
-            <div className="p-fluid formgrid grid">
-                <div className="field col-12">
-                    <label htmlFor="call">Call</label>
-                    <Dropdown
-                        id="call"
-                        dataKey="_id"
-                        options={calls}
-                        value={project.call}
-                        onChange={(e) => setProject({ ...project, call: e.value })}
-                        required
-                        optionLabel="title"
-                        placeholder="Select a Call"
-                        className="w-full"
-                    />
+            {!project._id && <>
+                <div className="p-fluid formgrid grid">
+                    <div className="field col-12">
+                        <label htmlFor="call">Call</label>
+                        <Dropdown
+                            id="call"
+                            dataKey="_id"
+                            options={calls}
+                            value={project.call}
+                            onChange={(e) => setProject({ ...project, call: e.value })}
+                            required
+                            optionLabel="title"
+                            placeholder="Select a Call"
+                            className="w-full"
+                        />
+                    </div>
                 </div>
-            </div>
+            </>}
             <ProjectForm project={project} setProject={setProject} />
             {errorMessage && (
                 <small className="p-error">{errorMessage}</small>

@@ -16,7 +16,8 @@ const ProjectSchema = new Schema<IProject>({
     call: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.CALL,
-        required: true
+        required: true,
+        immutable:true
     },
     title: {
         type: String,

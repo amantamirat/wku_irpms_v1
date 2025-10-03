@@ -21,7 +21,7 @@ export const ProjectApi = {
         const sanitized = sanitizeProject(project);
         const url = `${end_point}/submit`;
         const formData = new FormData();
-        formData.append("project", JSON.stringify(sanitized));        
+        formData.append("project", JSON.stringify(sanitized));
         formData.append("document", project.file);
         const submittedData = await ApiClient.post(url, formData);
         return submittedData as Project;
@@ -31,8 +31,9 @@ export const ProjectApi = {
         if (!project._id) {
             throw new Error("_id required.");
         }
+        const sanitized = sanitizeProject(project);
         const url = `${end_point}/${project._id}`;
-        const updatedProject = await ApiClient.put(url, project);
+        const updatedProject = await ApiClient.put(url, sanitized);
         return updatedProject as Project;
     },
 

@@ -54,9 +54,8 @@ export class ProjectController {
   static async updateProject(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { call, title, summary } = req.body;
+      const { title, summary } = req.body;
       const data: Partial<CreateProjectDto> = {
-        call: new mongoose.Types.ObjectId(call as string),
         title: title,
         summary: summary
       };
