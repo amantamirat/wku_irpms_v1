@@ -4,6 +4,8 @@ import { Dialog } from 'primereact/dialog';
 import { useEffect, useState } from 'react';
 import { Project, validateProject } from '../../models/project.model';
 import ProjectForm from './ProjectForm';
+import { CallApi } from '@/app/(main)/calls/api/call.api';
+import { Call, CallStatus } from '@/app/(main)/calls/models/call.model';
 
 
 interface SaveDialogProps {
@@ -17,7 +19,20 @@ interface SaveDialogProps {
 function SaveProjectDialog(props: SaveDialogProps) {
     const { visible, project, setProject, onSave, onHide } = props;
     //const [submitted, setSubmitted] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | undefined>();    
+    const [errorMessage, setErrorMessage] = useState<string | undefined>();
+
+    const [calls, setCalls] = useState<Call[]|undefined>(undefined);
+
+    useEffect(() => {
+        const fetchCalls = async () => {
+            const data = await CallApi.getCalls({ status: CallStatus.active });
+            setCalls(data);
+        };
+        if (!project.call) {
+            fetchCalls();
+            console.log("fetched.... call")
+        }
+    }, [project.call]);
 
     const save = async () => {
         //setSubmitted(true);
@@ -59,8 +74,8 @@ function SaveProjectDialog(props: SaveDialogProps) {
             className="p-fluid"
             footer={footer}
             onHide={hide}
-        >            
-            <ProjectForm project={project} setProject={setProject} />
+        >
+            <ProjectForm project={project} setProject={setProject} calls={calls} />
             {errorMessage && (
                 <small className="p-error">{errorMessage}</small>
             )}

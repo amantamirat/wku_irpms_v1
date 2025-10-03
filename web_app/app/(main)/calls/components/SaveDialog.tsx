@@ -1,43 +1,67 @@
 'use client';
 import { Button } from 'primereact/button';
-import { Calendar as PrimeCalendar } from 'primereact/calendar';
 import { Dialog } from 'primereact/dialog';
-import { Dropdown } from 'primereact/dropdown';
-import { InputText } from 'primereact/inputtext';
-import { classNames } from 'primereact/utils';
-import { useEffect, useRef, useState } from 'react';
-import { Calendar, CalendarStatus } from '../../calendars/models/calendar.model';
-import { Call, CallStatus, validateCall } from '../models/call.model';
-import { InputTextarea } from 'primereact/inputtextarea';
-import { Grant } from '../../grants/models/grant.model';
-import { Theme } from '../../themes/models/theme.model';
-import { Evaluation } from '../../evals/models/eval.model';
+import { useCallback, useEffect, useState } from 'react';
 import { CalendarApi } from '../../calendars/api/calendar.api';
+import { Calendar, CalendarStatus } from '../../calendars/models/calendar.model';
+import { EvaluationApi } from '../../evals/api/eval.api';
+import { Evaluation } from '../../evals/models/eval.model';
+import { GrantApi } from '../../grants/api/grant.api';
+import { Grant } from '../../grants/models/grant.model';
+import { ThemeApi } from '../../themes/api/theme.api';
+import { Theme } from '../../themes/models/theme.model';
+import { Call, validateCall } from '../models/call.model';
+import CallForm from './CallForm';
 
 interface SaveDialogProps {
     visible: boolean;
     call: Call;
     setCall: (call: Call) => void;
-    grants?: Grant[];
-    themes?: Theme[];
-    evaluations?: Evaluation[];    
     onSave: () => void;
     onHide: () => void;
 }
 
-function SaveDialog(props: SaveDialogProps) {
-    const { visible, call, grants, themes, evaluations, setCall: onChange, onSave, onHide } = props;
+const SaveDialog = (props: SaveDialogProps) => {
+    const { visible, call, setCall, onSave, onHide } = props;
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
-    
+
     const [calendars, setCalendars] = useState<Calendar[]>([]);
+    const [grants, setGrants] = useState<Grant[]>([]);
+    const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
+    const [themes, setThemes] = useState<Theme[]>([]);
+
     useEffect(() => {
         const fetchCalendars = async () => {
             const data = await CalendarApi.getCalendars({ status: CalendarStatus.active });
             setCalendars(data);
         };
-        fetchCalendars();
+        if (!call.calendar)
+            fetchCalendars();
     }, []);
+
+
+    const fetchGrants = useCallback(async () => {
+        const data = await GrantApi.getGrants({ directorate: (call.directorate as any)._id });
+        setGrants(data);
+    }, [(call.directorate as any)._id]);
+
+    const fetchEvaluations = useCallback(async () => {
+        const data = await EvaluationApi.getEvaluations({ directorate: (call.directorate as any)._id });
+        setEvaluations(data);
+    }, [(call.directorate as any)._id]);
+
+    const fetchThemes = useCallback(async () => {
+        const data = await ThemeApi.getThemes({ directorate: (call.directorate as any)._id });
+        setThemes(data);
+    }, [(call.directorate as any)._id]);
+
+    useEffect(() => {
+        fetchGrants();
+        fetchEvaluations();
+        fetchThemes();
+    }, [fetchGrants, fetchEvaluations, fetchThemes]);
+
 
     const save = async () => {
         setSubmitted(true);
@@ -53,6 +77,7 @@ function SaveDialog(props: SaveDialogProps) {
     const hide = () => {
         setSubmitted(false);
         setErrorMessage(undefined);
+        //setShowCalendars(false);
         onHide();
     };
 
@@ -75,7 +100,7 @@ function SaveDialog(props: SaveDialogProps) {
         <Dialog
             visible={visible}
             style={{ width: '600px', minHeight: '600px' }}
-            header={call._id ? 'Edit Call' : 'Create New Call'}
+            header={call._id ? 'Edit Call' : 'New Call'}
             modal
             className="p-fluid"
             footer={footer}
@@ -83,125 +108,20 @@ function SaveDialog(props: SaveDialogProps) {
             maximizable
         >
 
-            <div className="field">
-                <label htmlFor="calendar">Reserach Calendar</label>
-                <Dropdown
-                    id="calendar"
-                    value={call.calendar}
-                    options={calendars}
-                    onChange={(e) => onChange({ ...call, calendar: e.value })}
-                    optionLabel="year"
-                    placeholder="Select a Calendar"
-                    required
-                    className={classNames({ 'p-invalid': submitted && !call.calendar })}
-                />
-            </div>
-            <div className="field">
-                <label htmlFor="title">Title</label>
-                <InputText
-                    id="title"
-                    value={call.title}
-                    onChange={(e) => onChange({ ...call, title: e.target.value })}
-                    required
-                    autoFocus
-                    className={classNames({ 'p-invalid': submitted && !call.title })}
-                />
-            </div>
-
-            <div className="field">
-                <label htmlFor="description">Description </label>
-                <InputTextarea
-                    value={call.description ?? ""}
-                    onChange={(e) => onChange({ ...call, description: e.target.value })}
-                    rows={5}
-                    cols={30} />
-            </div>
-
-            <div className="field">
-                <label htmlFor="deadline">Deadline</label>
-                <PrimeCalendar
-                    id="deadline"
-                    value={call.deadline ? new Date(call.deadline) : undefined}
-                    onChange={(e) => onChange({ ...call, deadline: e.value! })}
-                    dateFormat="yy-mm-dd"
-                    showIcon
-                    className={classNames({ 'p-invalid': submitted && !call.deadline })}
-                    required
-                    showTime
-                    hourFormat="12"
-                />
-            </div>
-
-            <div className="field">
-                <label htmlFor="theme">Theme</label>
-                <Dropdown
-                    id="theme"
-                    value={call.theme}
-                    options={themes}
-                    onChange={(e) =>
-                        onChange({
-                            ...call,
-                            theme: e.value,
-                        })
-                    }
-                    optionLabel="title"
-                    placeholder="Select Theme"
-                />
-            </div>
-
-            <div className="field">
-                <label htmlFor="evaluation">Evaluation</label>
-                <Dropdown
-                    id="evaluation"
-                    value={call.evaluation}
-                    options={evaluations}
-                    onChange={(e) =>
-                        onChange({
-                            ...call,
-                            evaluation: e.value,
-                        })
-                    }
-                    optionLabel="title"
-                    placeholder="Select Evaluation"
-                    required
-                    className={classNames({ 'p-invalid': submitted && !call.evaluation })}
-                />
-            </div>
-
-            <div className="field">
-                <label htmlFor="grant">Grant</label>
-                <Dropdown
-                    id="grant"
-                    dataKey="_id"
-                    value={call.grant}
-                    options={grants}
-                    onChange={(e) => onChange({ ...call, grant: e.value })}
-                    optionLabel="title"
-                    placeholder="Select a Grant"
-                    required
-                    className={classNames({ 'p-invalid': submitted && !call.grant })}
-                />
-            </div>
-            {call._id && <>
-                <div className="field">
-                    <label htmlFor="status">Status</label>
-                    <Dropdown
-                        id="gender"
-                        value={call.status}
-                        options={Object.values(CallStatus).map(g => ({ label: g, value: g }))}
-                        onChange={(e) =>
-                            onChange({ ...call, status: e.value })
-                        }
-                        placeholder="Select Status"
-                        className={classNames({ 'p-invalid': submitted && !call.status })}
-                    />
-                </div>
-            </>}
+            <CallForm call={call} setCall={setCall}
+                calendars={calendars}
+                grants={grants}
+                evaluations={evaluations}
+                themes={themes}
+                submitted={submitted} />
             {errorMessage && (
                 <small className="p-error">{errorMessage}</small>
             )}
+
         </Dialog>
     );
 }
 
 export default SaveDialog;
+
+

@@ -1,36 +1,23 @@
+import { Call } from "@/app/(main)/calls/models/call.model";
+import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
+import { useState } from "react";
 import { Project } from "../../models/project.model";
-import { useEffect, useState } from "react";
-import { Call, CallStatus } from "@/app/(main)/calls/models/call.model";
-import { CallApi } from "@/app/(main)/calls/api/call.api";
-import { Dropdown } from "primereact/dropdown";
 
 interface ProjectFormProps {
+    calls?: Call[];
     project: Project;
-    setProject: (project: Project) => void;
+    setProject: (project: Project) => void;    
 }
 
-const ProjectForm = ({ project, setProject }: ProjectFormProps) => {
+const ProjectForm = ({ calls, project, setProject }: ProjectFormProps) => {
 
-    const [showCallDropdown, setShowCallDropdown] = useState(() => !project.call);
-    const [calls, setCalls] = useState<Call[]>([]);
-
-    useEffect(() => {
-        const fetchCalls = async () => {
-            const data = await CallApi.getCalls({ status: CallStatus.active });
-            setCalls(data);
-        };
-        if (!project.call) {
-            fetchCalls();
-        }
-
-    }, [project.call]);
+    const [showCallDropdown] = useState(() => !project.call);
 
     return (
         <div className="p-fluid formgrid grid">
-            {(showCallDropdown) && <>
-
+            {showCallDropdown && 
                 <div className="field col-12">
                     <label htmlFor="call">Call</label>
                     <Dropdown
@@ -40,7 +27,6 @@ const ProjectForm = ({ project, setProject }: ProjectFormProps) => {
                         value={project.call}
                         onChange={(e) => {
                             setProject({ ...project, call: e.value });
-                            setShowCallDropdown(true);
                         }}
                         required
                         optionLabel="title"
@@ -48,8 +34,7 @@ const ProjectForm = ({ project, setProject }: ProjectFormProps) => {
                         className="w-full"
                     />
                 </div>
-
-            </>}
+            }
             <div className="field col-12">
                 <label htmlFor="title">Title</label>
                 <InputText

@@ -30,7 +30,6 @@ interface CallManagerProps {
 const CallManager = (props: CallManagerProps) => {
 
     const emptyCall: Call = {
-        calendar: '',
         directorate: props.directorate,
         title: '',
         deadline: new Date(),
@@ -41,9 +40,6 @@ const CallManager = (props: CallManagerProps) => {
     };
 
     const [calls, setCalls] = useState<Call[]>([]);
-    const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
-    const [themes, setThemes] = useState<Theme[]>([]);
-    const [grants, setGrants] = useState<Grant[]>([]);
     const [error, setError] = useState<string | null>(null);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
@@ -52,51 +48,6 @@ const CallManager = (props: CallManagerProps) => {
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
-
-    
-
-
-    const loadThemes = useCallback(async () => {
-        try {
-            const data = await ThemeApi.getThemes({ directorate: props.directorate._id });
-            setThemes(data);
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load theme data',
-                detail: '' + err,
-                life: 3000
-            });
-        }
-
-    }, [props.directorate]);
-
-
-    const loadEvaluations = useCallback(async () => {
-        try {
-            const data = await EvaluationApi.getEvaluations({ directorate: props.directorate._id });
-            setEvaluations(data);
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load evaluation data',
-                detail: '' + err,
-                life: 3000
-            });
-        }
-
-    }, [props.directorate]);
-
-    const loadGrants = useCallback(async () => {
-        try {
-            const data = await GrantApi.getGrants({ directorate: props.directorate._id });
-            setGrants(data);
-        } catch (err) {
-            setError(`Failed to load grant data ${err}`);
-        } finally {
-
-        }
-    }, [props.directorate, error]);
 
     const loadCalls = useCallback(async () => {
         try {
@@ -112,10 +63,7 @@ const CallManager = (props: CallManagerProps) => {
 
     useEffect(() => {
         loadCalls();
-        loadGrants();
-        loadThemes();
-        loadEvaluations();
-    }, [loadCalls, loadGrants, loadThemes, loadEvaluations]);
+    }, [loadCalls]);
 
     useEffect(() => {
         setFilters(initFilters());
@@ -149,7 +97,7 @@ const CallManager = (props: CallManagerProps) => {
             if (selectedCall._id) {
                 const updated = await CallApi.updateCall(selectedCall);
                 const index = _calls.findIndex((c) => c._id === selectedCall._id);
-                _calls[index] = { ...updated, calendar: selectedCall.calendar, grant: selectedCall.grant, theme:selectedCall.theme, evaluation:selectedCall.evaluation };
+                _calls[index] = { ...updated, calendar: selectedCall.calendar, grant: selectedCall.grant, theme: selectedCall.theme, evaluation: selectedCall.evaluation };
             } else {
                 const created = await CallApi.createCall(selectedCall);
                 _calls.push({ ...selectedCall, _id: created._id });
@@ -270,12 +218,12 @@ const CallManager = (props: CallManagerProps) => {
                     >
                         <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                        <Column field="title" header="Title" sortable />
                         <Column field="calendar.year" header="Calendar" sortable />
+                        <Column field="title" header="Title" sortable />                        
                         <Column field="deadline" header="Deadline" body={(rowData) => new Date(rowData.deadline!).toLocaleDateString('en-CA')} />
                         <Column field="grant.title" header="Grant" sortable />
-                        <Column field="theme.title" header="Theme" sortable />
                         <Column field="evaluation.title" header="Evaluation" sortable />
+                        <Column field="theme.title" header="Theme" sortable />
                         <Column header="Status" body={statusBodyTemplate} sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
@@ -284,9 +232,6 @@ const CallManager = (props: CallManagerProps) => {
                         <SaveDialog
                             visible={showSaveDialog}
                             call={selectedCall}
-                            grants={grants}
-                            themes={themes}
-                            evaluations={evaluations}
                             setCall={setSelectedCall}
                             onSave={saveCall}
                             onHide={() => setShowSaveDialog(false)}

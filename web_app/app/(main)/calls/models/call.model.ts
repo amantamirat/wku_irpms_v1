@@ -12,7 +12,7 @@ export enum CallStatus {
 export type Call = {
     _id?: string;
     directorate: string | Organization;
-    calendar: string | Calendar;
+    calendar?: string | Calendar;
     title: string;
     deadline: Date;
     description?: string | null;
