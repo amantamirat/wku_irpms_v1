@@ -6,29 +6,38 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
-import { Calendar } from '../../calendars/models/calendar.model';
+import { Calendar, CalendarStatus } from '../../calendars/models/calendar.model';
 import { Call, CallStatus, validateCall } from '../models/call.model';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { Grant } from '../../grants/models/grant.model';
 import { Theme } from '../../themes/models/theme.model';
 import { Evaluation } from '../../evals/models/eval.model';
+import { CalendarApi } from '../../calendars/api/calendar.api';
 
 interface SaveDialogProps {
     visible: boolean;
     call: Call;
-    calendars?: Calendar[];
+    setCall: (call: Call) => void;
     grants?: Grant[];
     themes?: Theme[];
-    evaluations?: Evaluation[];
-    onChange: (call: Call) => void;
+    evaluations?: Evaluation[];    
     onSave: () => void;
     onHide: () => void;
 }
 
 function SaveDialog(props: SaveDialogProps) {
-    const { visible, call, calendars, grants, themes, evaluations, onChange, onSave, onHide } = props;
+    const { visible, call, grants, themes, evaluations, setCall: onChange, onSave, onHide } = props;
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
+    
+    const [calendars, setCalendars] = useState<Calendar[]>([]);
+    useEffect(() => {
+        const fetchCalendars = async () => {
+            const data = await CalendarApi.getCalendars({ status: CalendarStatus.active });
+            setCalendars(data);
+        };
+        fetchCalendars();
+    }, []);
 
     const save = async () => {
         setSubmitted(true);

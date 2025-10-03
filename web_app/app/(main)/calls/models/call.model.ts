@@ -65,3 +65,30 @@ export const validateCall = (call: Call): { valid: boolean; message?: string } =
     }
     return { valid: true };
 };
+
+
+export const sanitizeCall = (call: Partial<Call>): Partial<Call> => {
+    return {
+        ...call,
+        directorate:
+            typeof call.directorate === "object" && call.directorate !== null
+                ? (call.directorate as Organization)._id
+                : call.directorate,
+        calendar:
+            typeof call.calendar === "object" && call.calendar !== null
+                ? (call.calendar as Calendar)._id
+                : call.calendar,
+        grant:
+            typeof call.grant === "object" && call.grant !== null
+                ? (call.grant as Grant)._id
+                : call.grant,
+        theme:
+            typeof call.theme === "object" && call.theme !== null
+                ? (call.theme as Theme)._id
+                : call.theme,
+        evaluation:
+            typeof call.evaluation === "object" && call.evaluation !== null
+                ? (call.evaluation as Evaluation)._id
+                : call.evaluation,
+    };
+}

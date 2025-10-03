@@ -17,7 +17,7 @@ import { CalendarApi } from './api/calendar.api';
 const CalendarPage = () => {
     const emptyCalendar: Calendar = {
         year: new Date().getFullYear(),
-        status:CalendarStatus.active,
+        status: CalendarStatus.active,
         start_date: new Date(),
         end_date: new Date(),
     };
@@ -39,7 +39,7 @@ const CalendarPage = () => {
 
     const loadCalendars = async () => {
         try {
-            const data = await CalendarApi.getCalendars();
+            const data = await CalendarApi.getCalendars({});
             setCalendars(data);
         } catch (err) {
             toast.current?.show({
@@ -148,11 +148,11 @@ const CalendarPage = () => {
     );
 
     const statusBodyTemplate = (rowData: Calendar) => {
-            return (
-                <span className={`status-badge status-${rowData.status}`}>{rowData.status}</span>
-            );
-        };
-   
+        return (
+            <span className={`status-badge status-${rowData.status}`}>{rowData.status}</span>
+        );
+    };
+
 
     return (
         <div className="grid">
@@ -184,7 +184,7 @@ const CalendarPage = () => {
                         <Column field="start_date" header="Start Date" body={(rowData) => new Date(rowData.start_date!).toLocaleDateString('en-CA')} />
                         <Column field="end_date" header="End Date" body={(rowData) => new Date(rowData.end_date!).toLocaleDateString('en-CA')} />
                         <Column header="Status" body={statusBodyTemplate} sortable />
-                       <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
+                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
                     {selectedCalendar && (

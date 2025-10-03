@@ -1,39 +1,10 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Call, CallStatus } from "../models/call.model";
-import { Calendar } from "../../calendars/models/calendar.model";
-import { Organization } from "../../organizations/models/organization.model";
-import { Evaluation } from "../../evals/models/eval.model";
-import { Theme } from "../../themes/models/theme.model";
-import { Grant } from "../../grants/models/grant.model";
+import { Call, CallStatus, sanitizeCall } from "../models/call.model";
 
 
 const end_point = '/calls';
 
-function sanitizeCall(call: Partial<Call>): Partial<Call> {
-    return {
-        ...call,
-        directorate:
-            typeof call.directorate === "object" && call.directorate !== null
-                ? (call.directorate as Organization)._id
-                : call.directorate,
-        calendar:
-            typeof call.calendar === "object" && call.calendar !== null
-                ? (call.calendar as Calendar)._id
-                : call.calendar,
-        grant:
-            typeof call.grant === "object" && call.grant !== null
-                ? (call.grant as Grant)._id
-                : call.grant,
-        theme:
-            typeof call.theme === "object" && call.theme !== null
-                ? (call.theme as Theme)._id
-                : call.theme,
-        evaluation:
-            typeof call.evaluation === "object" && call.evaluation !== null
-                ? (call.evaluation as Evaluation)._id
-                : call.evaluation,
-    };
-}
+
 
 export interface GetCallsOptions {
     calendar?: string;

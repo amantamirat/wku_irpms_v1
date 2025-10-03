@@ -41,7 +41,6 @@ const CallManager = (props: CallManagerProps) => {
     };
 
     const [calls, setCalls] = useState<Call[]>([]);
-    const [calendars, setCalendars] = useState<Calendar[]>([]);
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
     const [themes, setThemes] = useState<Theme[]>([]);
     const [grants, setGrants] = useState<Grant[]>([]);
@@ -54,19 +53,7 @@ const CallManager = (props: CallManagerProps) => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
 
-    const loadCalendars = async () => {
-        try {
-            const data = await CalendarApi.getCalendars();
-            setCalendars(data);
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load calendars data',
-                detail: '' + err,
-                life: 3000
-            });
-        }
-    };
+    
 
 
     const loadThemes = useCallback(async () => {
@@ -133,7 +120,6 @@ const CallManager = (props: CallManagerProps) => {
     useEffect(() => {
         setFilters(initFilters());
         setGlobalFilter('');
-        loadCalendars();
     }, []);
 
 
@@ -298,11 +284,10 @@ const CallManager = (props: CallManagerProps) => {
                         <SaveDialog
                             visible={showSaveDialog}
                             call={selectedCall}
-                            calendars={calendars}
                             grants={grants}
                             themes={themes}
                             evaluations={evaluations}
-                            onChange={setSelectedCall}
+                            setCall={setSelectedCall}
                             onSave={saveCall}
                             onHide={() => setShowSaveDialog(false)}
                         />
