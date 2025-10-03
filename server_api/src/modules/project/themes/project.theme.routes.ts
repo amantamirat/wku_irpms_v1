@@ -1,13 +1,12 @@
 import { Router } from 'express';
-import { ProThemeController } from './project.theme.controller';
+import { ProjectThemeController } from './project.theme.controller';
 import { verifyActiveAccount } from '../../users/auth/auth.middleware';
 
 
 const router: Router = Router();
 
-router.post('/', verifyActiveAccount, ProThemeController.createProTheme);
-router.get('/', verifyActiveAccount, ProThemeController.getProThemes);
-router.put('/:id', verifyActiveAccount, ProThemeController.updateProTheme);
-router.delete('/:id', verifyActiveAccount, ProThemeController.deleteProTheme);
+router.post('/', verifyActiveAccount, ProjectThemeController.createProjectTheme);
+router.get('/', verifyActiveAccount, ProjectThemeController.getProjectThemes);
+router.delete('/:id', verifyActiveAccount, ProjectThemeController.deleteProjectTheme);
 
 export default router;

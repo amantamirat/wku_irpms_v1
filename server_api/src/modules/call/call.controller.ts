@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { errorResponse, successResponse } from '../../util/response';
 import { CallService, CreateCallDto, GetCallsOptions } from './call.service';
 import mongoose from 'mongoose';
+import { CallStatus } from './call.enum';
 
 
 export class CallController {
@@ -43,16 +44,17 @@ export class CallController {
 
     static async updateCall(req: Request, res: Response) {
         try {
-            const { calendar, title, deadline, description, grant, theme, evaluation } = req.body;            
+            const { calendar, title, deadline, description, grant, theme, evaluation, status } = req.body;
             const { id } = req.params;
-            const data: Partial<CreateCallDto>  = {
-                calendar: new mongoose.Types.ObjectId(calendar as string),                
+            const data: Partial<CreateCallDto> = {
+                calendar: new mongoose.Types.ObjectId(calendar as string),
                 title: title,
                 deadline: deadline,
                 description: description ?? undefined,
                 grant: new mongoose.Types.ObjectId(grant as string),
                 theme: new mongoose.Types.ObjectId(theme as string),
-                evaluation: new mongoose.Types.ObjectId(evaluation as string)
+                evaluation: new mongoose.Types.ObjectId(evaluation as string),
+                status: status as CallStatus
             };
             const updated = await CallService.updateCall(id, data);
             successResponse(res, 201, "Call updated successfully", updated);

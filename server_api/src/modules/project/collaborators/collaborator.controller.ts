@@ -1,16 +1,15 @@
 import { Request, Response } from 'express';
-import { CollaboratorService, GetCollaboratorOptions } from './collaborator.service';
+import { CollaboratorService, CreateCollaboratorDto, GetCollaboratorOptions } from './collaborator.service';
 import mongoose from 'mongoose';
 import { errorResponse, successResponse } from '../../../util/response';
 import { CollaboratorStatus } from './collaborator.enum';
-import { CollaboratorDto } from './collaborator.dto';
 
 export class CollaboratorController {
 
     static async createCollaborator(req: Request, res: Response) {
         try {
             const { project, applicant, isLeadPI } = req.query;
-            const data: CollaboratorDto = {
+            const data: CreateCollaboratorDto = {
                 applicant: new mongoose.Types.ObjectId(applicant as string),
                 project: new mongoose.Types.ObjectId(project as string),
                 isLeadPI: isLeadPI ? true : undefined
@@ -40,7 +39,7 @@ export class CollaboratorController {
         try {
             const { id } = req.params;
             const { isLeadPI, status } = req.query;
-            const data: Partial<CollaboratorDto> = {
+            const data: Partial<CreateCollaboratorDto> = {
                 isLeadPI: isLeadPI ? true : undefined,
                 status: status as CollaboratorStatus
             };
