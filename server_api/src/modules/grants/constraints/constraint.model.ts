@@ -1,18 +1,20 @@
 import mongoose, { model, Schema } from "mongoose";
-import { ConstraintType, OperationMode } from "./constraint.enum";
+import { ApplicantConstraint, ConstraintType, OperationMode } from "./constraint.enum";
 import { COLLECTIONS } from "../../../enums/collections.enum";
 
-export interface IConstraint extends Document {
-    grant: mongoose.Types.ObjectId;
+export interface IBaseConstraint extends Document {
     type: ConstraintType;
-    parent?: mongoose.Types.ObjectId;
-    mode?: OperationMode;
+    grant: mongoose.Types.ObjectId;
+    parent?: mongoose.Types.ObjectId; //
+    mode?: OperationMode; //
     value?: string;  // String or ObjectIds (stored as string)
     max?: number;
     min?: number;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
-const ConstraintSchema = new Schema<IConstraint>(
+const BaseConstraintSchema = new Schema<IBaseConstraint>(
     {
         grant: {
             type: Schema.Types.ObjectId,
@@ -22,7 +24,7 @@ const ConstraintSchema = new Schema<IConstraint>(
         },
         type: {
             type: String,
-            enum: Object.values(ConstraintType),
+            enum: Object.values(ApplicantConstraint),
             required: true,
             immutable: true,
         },
@@ -46,8 +48,8 @@ const ConstraintSchema = new Schema<IConstraint>(
         },
     },
     {
-        timestamps: true,
+        timestamps: true, discriminatorKey: "type"
     }
 );
 
-export const Constraint = model<IConstraint>("Constraint", ConstraintSchema);
+export const Constraint = model<IBaseConstraint>(COLLECTIONS.CONSTRAINT, BaseConstraintSchema);
