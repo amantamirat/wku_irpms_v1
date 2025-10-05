@@ -4,7 +4,7 @@ import { COLLECTIONS } from "../../../enums/collections.enum";
 
 export interface IBaseConstraint extends Document {
     type: ConstraintType;
-    grant: mongoose.Types.ObjectId;
+    grant?: mongoose.Types.ObjectId; //
     parent?: mongoose.Types.ObjectId; //
     mode?: OperationMode; //
     value?: string;  // String or ObjectIds (stored as string)
@@ -52,4 +52,14 @@ const BaseConstraintSchema = new Schema<IBaseConstraint>(
     }
 );
 
-export const Constraint = model<IBaseConstraint>(COLLECTIONS.CONSTRAINT, BaseConstraintSchema);
+export const BaseConstraint = model<IBaseConstraint>(COLLECTIONS.CONSTRAINT, BaseConstraintSchema);
+
+interface IProjectConstraint extends IBaseConstraint {
+    type: ConstraintType.PROJECT
+}
+
+const ProjectConstraintSchema = new Schema<IProjectConstraint>({
+
+});
+
+export const ProjectConstraint = BaseConstraint.discriminator<IProjectConstraint>(ConstraintType.PROJECT, ProjectConstraintSchema);

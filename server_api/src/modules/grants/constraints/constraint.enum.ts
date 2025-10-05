@@ -19,17 +19,19 @@ export enum ProjectConstraint {
 
 export enum ApplicantConstraint {
     GENDER = "GENDER",                    // Gender constraint
-    AGE = "AGE",                          // Age constraint
+    ACCESSIBILITY = "ACCESSIBILITY",      // Disability constraint
+    AGE = "AGE",                          // Age constraint    
+    EXPERIENCE = "EXPERIENCE",            // Experience-based constraint
+    
+    SUBMITTED = "SUBMITTED",              // Submitted projects
     ONGOING = "ONGOING",                  // Ongoing projects
     COMPLETED = "COMPLETED",              // Completed projects
-    SUBMITTED = "SUBMITTED",              // Submitted projects
     INCOMPLETE = "INCOMPLETE",            // Incomplete projects
+
     ACADEMIC = "ACADEMIC",                // Academic staff
     STUDENT = "STUDENT",                  // Student participants
     SUPPORTIVE = "SUPPORTIVE",            // Supportive staff/students
-    EXTERNAL = "EXTERNAL",                // External applicants
-    ACCESSIBILITY = "ACCESSIBILITY",      // Disability constraint
-    EXPERIENCE = "EXPERIENCE",            // Experience-based constraint
+    EXTERNAL = "EXTERNAL",                // External applicants    
     //CO_PI_COUNT = "CO-PI-COUNT",          // Number of Co-PIs
 }
 
