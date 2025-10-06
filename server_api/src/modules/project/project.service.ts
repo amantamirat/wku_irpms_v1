@@ -70,12 +70,12 @@ export class ProjectService {
 
         //Check collaborator applicants
         let hasLeadPI = false;
-        for (const collab of dto.collaborators ?? []) {
-            const applicant = await Applicant.findById(collab.applicant).lean();
+        for (const collaborator of dto.collaborators ?? []) {
+            const applicant = await Applicant.findById(collaborator.applicant).lean();
             if (!applicant) {
-                throw new Error(`Applicant not found: ${collab.applicant}`);
+                throw new Error(`Applicant not found: ${collaborator.applicant}`);
             }
-            if (collab.isLeadPI) {
+            if (collaborator.isLeadPI) {
                 if (hasLeadPI) {
                     throw new Error("A project can have only one Lead PI");
                 }
