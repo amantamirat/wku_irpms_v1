@@ -25,7 +25,6 @@ export enum OperationMode {
     //FILTER = "FILTER"
 }
 
-
 export type Constraint = {
     _id?: string;
     grant?: string | Grant; //
@@ -39,4 +38,8 @@ export type Constraint = {
     value?: string;
     createdAt?: Date;
     updatedAt?: Date;
+}
+
+export const validateConstraint = (constraint: Constraint): { valid: boolean; message?: string } => {
+    return { valid: true };
 }
