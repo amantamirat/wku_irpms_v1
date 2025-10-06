@@ -1,5 +1,3 @@
-import { Theme } from "../../themes/models/theme.model";
-import { Evaluation } from "../../evals/models/eval.model";
 import { Organization } from "../../organizations/models/organization.model";
 
 export type Grant = {

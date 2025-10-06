@@ -1,59 +1,53 @@
 'use client';
-
 import ConfirmDialog from '@/components/ConfirmationDialog';
-
-
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
-import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
+import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { GrantApi } from '../api/grant.api';
-import { Grant } from '../models/grant.model';
-import SaveDialog from './SaveDialog';
-import ConstraintManager from '../constraints/components/ConstraintManager';
+import { Grant } from '../../models/grant.model';
+import { ConstraintApi } from '../api/constraint.api';
+import { Constraint } from '../models/constraint.model';
 
 
-interface GrantManagerProps {
-    directorate: any;
+interface ConstraintManagerProps {
+    grant: Grant;
 }
 
-const GrantManager = (props: GrantManagerProps) => {
+const ConstraintManager = (props: ConstraintManagerProps) => {
 
-    const { directorate } = props
-    const emptyGrant: Grant = {
-        directorate: props.directorate,
-        title: ''
+    const { grant } = props
+    const emptyConstraint: Constraint = {
+        grant: grant
     };
 
-    const [grants, setGrants] = useState<Grant[]>([]);
+    const [constraints, setConstraints] = useState<Constraint[]>([]);
     const [error, setError] = useState<string | null>(null);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
-    const [selectedGrant, setSelectedGrant] = useState<Grant>(emptyGrant);
+    const [selectedConstraint, setSelectedConstraint] = useState<Constraint>(emptyConstraint);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);    
     const toast = useRef<Toast>(null);
 
-    const fetchGrants = useCallback(async () => {
+    const fetchConstraints = useCallback(async () => {
         try {
-            const data = await GrantApi.getGrants({ directorate: props.directorate._id });
-            setGrants(data);
+            const data = await ConstraintApi.getConstraints({ grant: props.grant._id });
+            setConstraints(data);
         } catch (err) {
-            setError(`Failed to load grant data ${err}`);
+            // setError(`Failed to load constraint data ${err}`);
         } finally {
 
         }
-    }, [directorate, error]);
+    }, [grant]);
 
     useEffect(() => {
-        fetchGrants();
-    }, [fetchGrants]);
+        fetchConstraints();
+    }, [fetchConstraints]);
 
     useEffect(() => {
         setFilters(initFilters());
@@ -83,67 +77,67 @@ const GrantManager = (props: GrantManagerProps) => {
         );
     }
 
-    const saveGrant = async () => {
+    const saveConstraint = async () => {
         try {
-            let _grants = [...grants];
-            if (selectedGrant._id) {
-                const updated = await GrantApi.updateGrant(selectedGrant);
-                const index = _grants.findIndex((c) => c._id === selectedGrant._id);
-                _grants[index] = { ...updated };
+            let _constraints = [...constraints];
+            if (selectedConstraint._id) {
+                const updated = await ConstraintApi.updateConstraint(selectedConstraint);
+                const index = _constraints.findIndex((c) => c._id === selectedConstraint._id);
+                _constraints[index] = { ...updated };
             } else {
-                const created = await GrantApi.createGrant(selectedGrant);
-                _grants.push({ ...selectedGrant, _id: created._id });
+                const created = await ConstraintApi.createConstraint(selectedConstraint);
+                _constraints.push({ ...selectedConstraint, _id: created._id });
             }
-            setGrants(_grants);
+            setConstraints(_constraints);
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',
-                detail: `Grant ${selectedGrant._id ? 'updated' : 'created'}`,
+                detail: `Constraint ${selectedConstraint._id ? 'updated' : 'created'}`,
                 life: 3000
             });
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to save grant',
+                summary: 'Failed to save constraint',
                 detail: '' + err,
                 life: 3000
             });
         } finally {
             setShowSaveDialog(false);
-            setSelectedGrant(emptyGrant);
+            setSelectedConstraint(emptyConstraint);
         }
     };
 
-    const deleteGrant = async () => {
+    const deleteConstraint = async () => {
         try {
-            const deleted = await GrantApi.deleteGrant(selectedGrant);
+            const deleted = await ConstraintApi.deleteConstraint(selectedConstraint);
             if (deleted) {
-                setGrants(grants.filter((c) => c._id !== selectedGrant._id));
+                setConstraints(constraints.filter((c) => c._id !== selectedConstraint._id));
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Deleted',
-                    detail: 'Grant deleted',
+                    detail: 'Constraint deleted',
                     life: 3000
                 });
             }
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to delete grant',
+                summary: 'Failed to delete constraint',
                 detail: '' + err,
                 life: 3000
             });
         } finally {
             setShowDeleteDialog(false);
-            setSelectedGrant(emptyGrant);
+            setSelectedConstraint(emptyConstraint);
         }
     };
 
     const startToolbarTemplate = () => (
         <div className="my-2">
-            <Button label="New Grant" icon="pi pi-plus" severity="success" className="mr-2"
+            <Button label="New Constraint" icon="pi pi-plus" severity="success" className="mr-2"
                 onClick={() => {
-                    setSelectedGrant(emptyGrant);
+                    setSelectedConstraint(emptyConstraint);
                     setShowSaveDialog(true);
                 }}
             />
@@ -152,7 +146,7 @@ const GrantManager = (props: GrantManagerProps) => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage Grants</h5>
+            <h5 className="m-0">Manage Constraints</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
@@ -160,16 +154,16 @@ const GrantManager = (props: GrantManagerProps) => {
         </div>
     );
 
-    const actionBodyTemplate = (rowData: Grant) => (
+    const actionBodyTemplate = (rowData: Constraint) => (
         <>
             <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setSelectedGrant(rowData);
+                    setSelectedConstraint(rowData);
                     setShowSaveDialog(true);
                 }} />
             <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setSelectedGrant(rowData);
+                    setSelectedConstraint(rowData);
                     setShowDeleteDialog(true);
                 }} />
         </>
@@ -183,49 +177,33 @@ const GrantManager = (props: GrantManagerProps) => {
                     <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
                     <DataTable
                         ref={dt}
-                        value={grants}
-                        selection={selectedGrant}
-                        onSelectionChange={(e) => setSelectedGrant(e.value as Grant)}
+                        value={constraints}
+                        selection={selectedConstraint}
+                        onSelectionChange={(e) => setSelectedConstraint(e.value as Constraint)}
                         dataKey="_id"
                         paginator
                         rows={10}
                         rowsPerPageOptions={[5, 10, 25]}
                         className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} grants"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} constraints"
                         globalFilter={globalFilter}
-                        emptyMessage="No grant data found."
+                        emptyMessage="No constraint data found."
                         header={header}
                         scrollable
-                        filters={filters}
-                        expandedRows={expandedRows}
-                        onRowToggle={(e) => setExpandedRows(e.data)}
-                        rowExpansionTemplate={(rowData) => {
-                            return <ConstraintManager grant={rowData as Grant} />;
-                        }}
+                        filters={filters}                        
                     >
-                        <Column expander style={{ width: '3em' }} />
+                        <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                        <Column field="title" header="Title" sortable />
-                        <Column field="description" header="Description" sortable />
+                        <Column field="grant.title" header="Title" sortable />
+                        <Column field="type" header="Type" sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
-
-                    {selectedGrant && (
-                        <SaveDialog
-                            visible={showSaveDialog}
-                            grant={selectedGrant}
-                            setGrant={setSelectedGrant}
-                            onSave={saveGrant}
-                            onHide={() => setShowSaveDialog(false)}
-                        />
-                    )}
-
-                    {selectedGrant && (
+                    {selectedConstraint && (
                         <ConfirmDialog
                             showDialog={showDeleteDialog}
-                            selectedDataInfo={String(selectedGrant.title)}
-                            onConfirmAsync={deleteGrant}
+                            selectedDataInfo={String(selectedConstraint.type)}
+                            onConfirmAsync={deleteConstraint}
                             onHide={() => setShowDeleteDialog(false)}
                         />
                     )}
@@ -235,4 +213,4 @@ const GrantManager = (props: GrantManagerProps) => {
     );
 };
 
-export default GrantManager;
+export default ConstraintManager;
