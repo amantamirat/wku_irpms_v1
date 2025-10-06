@@ -1,21 +1,23 @@
 import { Constraint } from "./constraint.model";
-import { ConstraintType } from "./constraint.enum";
+import { ConstraintType, OperationMode } from "./constraint.enum";
 import { Grant } from "../grant.model";
+import mongoose from "mongoose";
 
 export interface CreateConstraintDto {
-    grant: string; // ObjectId as string
-    type: ConstraintType;
-    parent?: string; // ObjectId as string
-    mode_filter?: string; // "OBEY" | "DENY" | "FILTER" | etc.
-    value?: string;
+    grant?: mongoose.Types.ObjectId; //
+    type?: ConstraintType;
     max?: number;
     min?: number;
+    parent?: mongoose.Types.ObjectId; //
+    mode?: OperationMode; //
+    valueType?: string;
+    value?: string;
 }
 
 export interface GetConstraintOptions {
-    grantType?: string;
+    grant?: mongoose.Types.ObjectId; //
     type?: ConstraintType;
-    parent?: string | null;
+    parent?: mongoose.Types.ObjectId;
 }
 
 export class ConstraintService {
@@ -39,9 +41,9 @@ export class ConstraintService {
     /** Retrieve constraints by optional filters */
     static async getConstraints(options: GetConstraintOptions = {}) {
         const filter: any = {};
-        if (options.grantType) filter.grantType = options.grantType;
+        if (options.grant) filter.grant = options.grant;
         if (options.type) filter.type = options.type;
-        if (options.parent !== undefined) filter.parent = options.parent;
+        if (options.parent) filter.parent = options.parent;
         return await Constraint.find(filter).lean();
     }
 
@@ -51,7 +53,7 @@ export class ConstraintService {
         if (!constraint) throw new Error("Constraint not found");
 
         // Protect immutable fields
-        const immutableFields = ["grantType", "type", "parent"];
+        const immutableFields = ["grant", "type", "parent"];
         for (const field of immutableFields) {
             if (data[field as keyof CreateConstraintDto]) {
                 throw new Error(`Field ${field} is immutable and cannot be updated`);

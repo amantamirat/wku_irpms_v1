@@ -1,8 +1,4 @@
 export enum ConstraintType {
-    PROJECT = "PROJECT",
-    APPLICANT = "APPLICANT"
-}
-export enum ProjectConstraint {
     PHASE_COUNT = "PHASE-COUNT",          // Logical project phases
     BUDGET_TOTAL = "BUDGET-TOTAL",        // Total project budget
     BUDGET_PHASE = "BUDGET-PHASE",        // Budget per phase
@@ -14,15 +10,12 @@ export enum ProjectConstraint {
     THEME = "THEME",                      // Number of themes
     COMPONENT = "COMPONENT",              // Number of sub-themes
     FOCUS_AREA = "FOCUS-AREA",            // Number of focus areas
-}
-
-
-export enum ApplicantConstraint {
+    //////////////////////////////////////////////////////////
     GENDER = "GENDER",                    // Gender constraint
     ACCESSIBILITY = "ACCESSIBILITY",      // Disability constraint
     AGE = "AGE",                          // Age constraint    
     EXPERIENCE = "EXPERIENCE",            // Experience-based constraint
-    
+
     SUBMITTED = "SUBMITTED",              // Submitted projects
     ONGOING = "ONGOING",                  // Ongoing projects
     COMPLETED = "COMPLETED",              // Completed projects
