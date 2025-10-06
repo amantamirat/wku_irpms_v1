@@ -49,9 +49,10 @@ export class ProjectService {
         //throw new Error("Default Applicant Data Not Found.");
         //}
         const createdProject = await Project.create({ ...data, status: ProjectStatus.pending });
-        //await CollaboratorService.createCollaborator({ applicant: applicant._id, project: createdProject._id, isLeadPI: true, status: CollaboratorStatus.active });
         return createdProject;
     }
+
+    
 
     static async submitProject(dto: CreateProjectDto) {
         //Check the call existance and deadline
@@ -82,7 +83,7 @@ export class ProjectService {
                 hasLeadPI = true;
             }
         }
-        if(!hasLeadPI){
+        if (!hasLeadPI) {
             throw new Error("Lead PI not found");
         }
         //check themes
@@ -115,7 +116,7 @@ export class ProjectService {
             project: submittedProject._id,
             stage: stage._id,
             documentPath: dto.documentPath,
-            status:ProjectStageStatus.submitted
+            status: ProjectStageStatus.submitted
         }
         await Collaborator.insertMany(collaborators);
         await ProjectTheme.insertMany(themes);
