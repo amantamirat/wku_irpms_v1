@@ -1,6 +1,66 @@
 import mongoose, { model, Schema } from "mongoose";
-import { ConstraintType, OperationMode } from "./constraint.enum";
+import { BaseType, ProjectConstraintType } from "./constraint.enum";
 import { COLLECTIONS } from "../../../enums/collections.enum";
+
+export interface IBaseConstraint extends Document {
+    grant: mongoose.Types.ObjectId;
+    type: BaseType;
+    createdAt?: Date;
+    updatedAt?: Date;
+}
+const BaseConstraintSchema = new Schema<IBaseConstraint>(
+    {
+        grant: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.GRANT,
+            required: true,
+            immutable: true,
+        },
+        type: {
+            type: String,
+            enum: Object.values(BaseType),
+            required: true,
+            immutable: true,
+        }
+    },
+    {
+        timestamps: true, discriminatorKey: "type"
+    }
+);
+
+export const BaseConstraint = model<IBaseConstraint>(COLLECTIONS.CONSTRAINT, BaseConstraintSchema);
+
+
+export interface IProjectConstraint extends IBaseConstraint {
+    type: BaseType.PROJECT;
+    constraint: ProjectConstraintType;
+    max: number;
+    min: number;
+}
+
+const ProjectConstraintSchema = new Schema<IProjectConstraint>({
+    constraint: {
+        type: String,
+        enum: Object.values(ProjectConstraintType),
+        required: true,
+        immutable: true,
+    },
+    max: {
+        type: Number,
+        required: true
+    },
+    min: {
+        type: Number,
+        required: true
+    },
+});
+
+export const ProjectConstraint = BaseConstraint.discriminator<IProjectConstraint>(BaseType.PROJECT, ProjectConstraintSchema);
+
+
+
+/*
+
 
 export interface IConstraint extends Document {
     grant?: mongoose.Types.ObjectId; //
@@ -57,5 +117,5 @@ const ConstraintSchema = new Schema<IConstraint>(
     }
 );
 
-export const Constraint = model<IConstraint>(COLLECTIONS.CONSTRAINT, ConstraintSchema);
+*/
 

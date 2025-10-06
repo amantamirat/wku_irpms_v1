@@ -1,4 +1,9 @@
-export enum ConstraintType {
+export enum BaseType {
+    PROJECT = "Project",
+    APPLICANTS = "Applicant",
+}
+
+export enum ProjectConstraintType {
     PHASE_COUNT = "PHASE-COUNT",          // Logical project phases
     BUDGET_TOTAL = "BUDGET-TOTAL",        // Total project budget
     BUDGET_PHASE = "BUDGET-PHASE",        // Budget per phase
@@ -9,7 +14,11 @@ export enum ConstraintType {
     PURCHASE_PHASE = "PURCHASE-PHASE",    // Purchases per phase
     THEME = "THEME",                      // Number of themes
     COMPONENT = "COMPONENT",              // Number of sub-themes
-    FOCUS_AREA = "FOCUS-AREA",            // Number of focus areas
+    FOCUS_AREA = "FOCUS-AREA",
+}
+
+export enum ConstraintType {
+    // Number of focus areas
     //////////////////////////////////////////////////////////
     GENDER = "GENDER",                    // Gender constraint
     ACCESSIBILITY = "ACCESSIBILITY",      // Disability constraint

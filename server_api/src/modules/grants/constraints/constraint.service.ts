@@ -1,11 +1,12 @@
-import { Constraint } from "./constraint.model";
-import { ConstraintType, OperationMode } from "./constraint.enum";
+import { BaseType, OperationMode, ProjectConstraintType } from "./constraint.enum";
 import { Grant } from "../grant.model";
 import mongoose from "mongoose";
+import { BaseConstraint } from "./constraint.model";
 
 export interface CreateConstraintDto {
-    grant?: mongoose.Types.ObjectId; //
-    type?: ConstraintType;
+    grant: mongoose.Types.ObjectId; //
+    type: BaseType;
+    constraint?: ProjectConstraintType
     max?: number;
     min?: number;
     parent?: mongoose.Types.ObjectId; //
@@ -16,7 +17,7 @@ export interface CreateConstraintDto {
 
 export interface GetConstraintOptions {
     grant?: mongoose.Types.ObjectId; //
-    type?: ConstraintType;
+    type?: BaseType;
     parent?: mongoose.Types.ObjectId;
 }
 
@@ -25,16 +26,10 @@ export class ConstraintService {
     /** Create a new constraint */
     static async createConstraint(data: CreateConstraintDto) {
         // Validate grantType exists
-        const grantTypeExists = await Grant.exists({ _id: data.grant });
-        if (!grantTypeExists) throw new Error("Grant type not found");
+        const grantExists = await Grant.exists({ _id: data.grant });
+        if (!grantExists) throw new Error("Grant type not found");        
 
-        // If parent exists, ensure it's valid
-        if (data.parent) {
-            const parentConstraint = await Constraint.findById(data.parent);
-            if (!parentConstraint) throw new Error("Parent constraint not found");
-        }
-
-        const createdConstraint = await Constraint.create({ ...data });
+        const createdConstraint = await BaseConstraint.create({ ...data });
         return createdConstraint;
     }
 
@@ -44,12 +39,12 @@ export class ConstraintService {
         if (options.grant) filter.grant = options.grant;
         if (options.type) filter.type = options.type;
         if (options.parent) filter.parent = options.parent;
-        return await Constraint.find(filter).lean();
+        return await BaseConstraint.find(filter).lean();
     }
 
     /** Update a constraint (non-immutable fields only) */
     static async updateConstraint(id: string, data: Partial<CreateConstraintDto>) {
-        const constraint = await Constraint.findById(id);
+        const constraint = await BaseConstraint.findById(id);
         if (!constraint) throw new Error("Constraint not found");
 
         // Protect immutable fields
@@ -66,12 +61,12 @@ export class ConstraintService {
 
     /** Delete a constraint safely (ensure no child constraints exist) */
     static async deleteConstraint(id: string) {
-        const constraint = await Constraint.findById(id);
+        const constraint = await BaseConstraint.findById(id);
         if (!constraint) throw new Error("Constraint not found");
 
         // Check if this constraint has children
-        const hasChildren = await Constraint.exists({ parent: constraint._id });
-        if (hasChildren) throw new Error("Cannot delete constraint with child constraints");
+        //const hasChildren = await Constraint.exists({ parent: constraint._id });
+        //if (hasChildren) throw new Error("Cannot delete constraint with child constraints");
 
         return await constraint.deleteOne();
     }
