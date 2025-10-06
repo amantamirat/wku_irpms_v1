@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { Constraint, ProjectConstraintType, validateConstraint } from '../models/constraint.model';
 import { Dropdown } from 'primereact/dropdown';
 import { classNames } from 'primereact/utils';
+import { InputNumber } from 'primereact/inputnumber';
 
 
 interface SaveDialogProps {
@@ -55,7 +56,7 @@ function SaveDialog(props: SaveDialogProps) {
     return (
         <Dialog
             visible={visible}
-            style={{ width: '600px', height: '400px' }}
+            style={{ width: '500px', height: '400px' }}
             header={constraint._id ? `Edit ${constraint.type} Constraint` : `Create New ${constraint.type} Constraint`}
             modal
             className="p-fluid"
@@ -63,7 +64,6 @@ function SaveDialog(props: SaveDialogProps) {
             onHide={hide}
             maximizable
         >
-
             <div className="field">
                 <label htmlFor="constraint">Constraint</label>
                 <Dropdown
@@ -79,7 +79,33 @@ function SaveDialog(props: SaveDialogProps) {
             </div>
 
             <div className="field">
+                <label htmlFor="min">Minimum {constraint.constarint}</label>
+                <InputNumber
+                    id="min"
+                    value={constraint.min}
+                    onChange={(e) =>
+                        setConstraint({ ...constraint, min: e.value || 0 })
+                    }
+                    required
+                    className={classNames({
+                        'p-invalid': submitted && (constraint.min == null || constraint.min <= 0),
+                    })}
+                />
+            </div>
 
+            <div className="field">
+                <label htmlFor="max">Maximum {constraint.constarint}</label>
+                <InputNumber
+                    id="max"
+                    value={constraint.max}
+                    onChange={(e) =>
+                        setConstraint({ ...constraint, max: e.value || 0 })
+                    }
+                    required
+                    className={classNames({
+                        'p-invalid': submitted && (constraint.max == null || constraint.max <= 0),
+                    })}
+                />
             </div>
             {errorMessage && (
                 <small className="p-error">{errorMessage}</small>
