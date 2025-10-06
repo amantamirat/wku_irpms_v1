@@ -11,6 +11,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Grant } from '../../models/grant.model';
 import { ConstraintApi } from '../api/constraint.api';
 import { BaseConstraintType, Constraint } from '../models/constraint.model';
+import SaveDialog from './SaveDialog';
 
 
 interface ConstraintManagerProps {
@@ -63,7 +64,7 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
     };
 
 
-    
+
 
     const saveConstraint = async () => {
         try {
@@ -187,6 +188,15 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
                         <Column field="type" header="Type" sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
+                    {selectedConstraint && (
+                        <SaveDialog
+                            visible={showSaveDialog}
+                            constraint={selectedConstraint}
+                            setConstraint={setSelectedConstraint}
+                            onSave={saveConstraint}
+                            onHide={() => setShowSaveDialog(false)}
+                        />
+                    )}
                     {selectedConstraint && (
                         <ConfirmDialog
                             showDialog={showDeleteDialog}
