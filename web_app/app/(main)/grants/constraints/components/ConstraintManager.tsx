@@ -39,14 +39,14 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
 
     const fetchConstraints = useCallback(async () => {
         try {
-            const data = await ConstraintApi.getConstraints({ grant: props.grant._id });
+            const data = await ConstraintApi.getConstraints({ grant: props.grant._id, type: type });
             setConstraints(data);
         } catch (err) {
             // setError(`Failed to load constraint data ${err}`);
         } finally {
 
         }
-    }, [grant]);
+    }, [grant, type]);
 
     useEffect(() => {
         fetchConstraints();
@@ -183,9 +183,11 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
                         filters={filters}
                     >
                         <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
-                        <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                        <Column field="grant.title" header="Title" sortable />
+                        <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />                        
                         <Column field="type" header="Type" sortable />
+                        <Column field="constraint" header="Constraint" sortable />
+                        <Column field="min" header="Min" sortable />
+                        <Column field="max" header="Max" sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
                     {selectedConstraint && (

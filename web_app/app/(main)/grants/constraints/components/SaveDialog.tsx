@@ -68,18 +68,18 @@ function SaveDialog(props: SaveDialogProps) {
                 <label htmlFor="constraint">Constraint</label>
                 <Dropdown
                     id="constraint"
-                    value={constraint.constarint}
+                    value={constraint.constraint}
                     options={Object.values(ProjectConstraintType).map(c => ({ label: c, value: c }))}
                     onChange={(e) =>
-                        setConstraint({ ...constraint, constarint: e.value })
+                        setConstraint({ ...constraint, constraint: e.value })
                     }
                     placeholder="Select Constarint"
-                    className={classNames({ 'p-invalid': submitted && !constraint.constarint })}
+                    className={classNames({ 'p-invalid': submitted && !constraint.constraint })}
                 />
             </div>
 
             <div className="field">
-                <label htmlFor="min">Minimum {constraint.constarint}</label>
+                <label htmlFor="min">Minimum {constraint.constraint}</label>
                 <InputNumber
                     id="min"
                     value={constraint.min}
@@ -94,7 +94,7 @@ function SaveDialog(props: SaveDialogProps) {
             </div>
 
             <div className="field">
-                <label htmlFor="max">Maximum {constraint.constarint}</label>
+                <label htmlFor="max">Maximum {constraint.constraint}</label>
                 <InputNumber
                     id="max"
                     value={constraint.max}

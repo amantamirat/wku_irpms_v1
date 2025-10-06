@@ -29,7 +29,7 @@ export type Constraint = {
     _id?: string;
     grant?: string | Grant; //
     type: BaseConstraintType;
-    constarint?: ProjectConstraintType;
+    constraint?: ProjectConstraintType;
     max?: number;
     min?: number;
     parent?: string | Constraint; //
