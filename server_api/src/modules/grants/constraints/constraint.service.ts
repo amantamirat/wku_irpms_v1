@@ -1,11 +1,11 @@
-import { BaseType, OperationMode, ProjectConstraintType } from "./constraint.enum";
+import { BaseConstraintType, OperationMode, ProjectConstraintType } from "./constraint.enum";
 import { Grant } from "../grant.model";
 import mongoose from "mongoose";
 import { BaseConstraint } from "./constraint.model";
 
 export interface CreateConstraintDto {
     grant: mongoose.Types.ObjectId; //
-    type: BaseType;
+    type: BaseConstraintType;
     constraint?: ProjectConstraintType
     max?: number;
     min?: number;
@@ -17,7 +17,7 @@ export interface CreateConstraintDto {
 
 export interface GetConstraintOptions {
     grant?: mongoose.Types.ObjectId; //
-    type?: BaseType;
+    type?: BaseConstraintType;
     parent?: mongoose.Types.ObjectId;
 }
 

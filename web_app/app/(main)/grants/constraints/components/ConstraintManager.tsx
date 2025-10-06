@@ -10,18 +10,20 @@ import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Grant } from '../../models/grant.model';
 import { ConstraintApi } from '../api/constraint.api';
-import { Constraint } from '../models/constraint.model';
+import { BaseConstraintType, Constraint } from '../models/constraint.model';
 
 
 interface ConstraintManagerProps {
+    type: BaseConstraintType;
     grant: Grant;
 }
 
 const ConstraintManager = (props: ConstraintManagerProps) => {
 
-    const { grant } = props
+    const { type, grant } = props
     const emptyConstraint: Constraint = {
-        grant: grant
+        grant: grant,
+        type: type
     };
 
     const [constraints, setConstraints] = useState<Constraint[]>([]);
@@ -31,7 +33,7 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
     const [selectedConstraint, setSelectedConstraint] = useState<Constraint>(emptyConstraint);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false);    
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
 
     const fetchConstraints = useCallback(async () => {
@@ -61,21 +63,7 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
     };
 
 
-    if (error) {
-        return (
-            <div className="flex align-items-center justify-content-center py-6">
-                <div className="text-center">
-                    <i className="pi pi-exclamation-triangle text-4xl text-500 mb-3" />
-                    <p className="text-500 mb-4">{error}</p>
-                    <Button
-                        label="Retry"
-                        icon="pi pi-refresh"
-                        onClick={() => window.location.reload()}
-                    />
-                </div>
-            </div>
-        );
-    }
+    
 
     const saveConstraint = async () => {
         try {
@@ -135,7 +123,7 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
 
     const startToolbarTemplate = () => (
         <div className="my-2">
-            <Button label="New Constraint" icon="pi pi-plus" severity="success" className="mr-2"
+            <Button label={`New ${type} Constraint`} icon="pi pi-plus" severity="success" className="mr-2"
                 onClick={() => {
                     setSelectedConstraint(emptyConstraint);
                     setShowSaveDialog(true);
@@ -146,7 +134,7 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage Constraints</h5>
+            <h5 className="m-0">Manage {type} Constraints</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
@@ -191,7 +179,7 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
                         emptyMessage="No constraint data found."
                         header={header}
                         scrollable
-                        filters={filters}                        
+                        filters={filters}
                     >
                         <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />

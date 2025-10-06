@@ -1,4 +1,5 @@
-export enum BaseType {
+
+export enum BaseConstraintType {
     PROJECT = "Project",
     APPLICANTS = "Applicant",
 }

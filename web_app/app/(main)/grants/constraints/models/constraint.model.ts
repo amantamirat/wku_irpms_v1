@@ -1,6 +1,11 @@
 import { Grant } from "../../models/grant.model";
 
-export enum ConstraintType {
+export enum BaseConstraintType {
+    PROJECT = "Project",
+    APPLICANTS = "Applicant",
+}
+
+export enum ProjectConstraintType {
     PHASE_COUNT = "PHASE-COUNT",          // Logical project phases
     BUDGET_TOTAL = "BUDGET-TOTAL",        // Total project budget
     BUDGET_PHASE = "BUDGET-PHASE",        // Budget per phase
@@ -24,7 +29,8 @@ export enum OperationMode {
 export type Constraint = {
     _id?: string;
     grant?: string | Grant; //
-    type?: ConstraintType;
+    type: BaseConstraintType;
+    constarint?: ProjectConstraintType;
     max?: number;
     min?: number;
     parent?: string | Constraint; //

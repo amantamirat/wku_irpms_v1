@@ -1,10 +1,10 @@
 import mongoose, { model, Schema } from "mongoose";
-import { BaseType, ProjectConstraintType } from "./constraint.enum";
+import { BaseConstraintType, ProjectConstraintType } from "./constraint.enum";
 import { COLLECTIONS } from "../../../enums/collections.enum";
 
 export interface IBaseConstraint extends Document {
     grant: mongoose.Types.ObjectId;
-    type: BaseType;
+    type: BaseConstraintType;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -18,7 +18,7 @@ const BaseConstraintSchema = new Schema<IBaseConstraint>(
         },
         type: {
             type: String,
-            enum: Object.values(BaseType),
+            enum: Object.values(BaseConstraintType),
             required: true,
             immutable: true,
         }
@@ -32,7 +32,7 @@ export const BaseConstraint = model<IBaseConstraint>(COLLECTIONS.CONSTRAINT, Bas
 
 
 export interface IProjectConstraint extends IBaseConstraint {
-    type: BaseType.PROJECT;
+    type: BaseConstraintType.PROJECT;
     constraint: ProjectConstraintType;
     max: number;
     min: number;
@@ -55,7 +55,7 @@ const ProjectConstraintSchema = new Schema<IProjectConstraint>({
     },
 });
 
-export const ProjectConstraint = BaseConstraint.discriminator<IProjectConstraint>(BaseType.PROJECT, ProjectConstraintSchema);
+export const ProjectConstraint = BaseConstraint.discriminator<IProjectConstraint>(BaseConstraintType.PROJECT, ProjectConstraintSchema);
 
 
 

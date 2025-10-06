@@ -15,6 +15,8 @@ import { GrantApi } from '../api/grant.api';
 import { Grant } from '../models/grant.model';
 import SaveDialog from './SaveDialog';
 import ConstraintManager from '../constraints/components/ConstraintManager';
+import { TabPanel, TabView } from 'primereact/tabview';
+import { BaseConstraintType } from '../constraints/models/constraint.model';
 
 
 interface GrantManagerProps {
@@ -201,9 +203,19 @@ const GrantManager = (props: GrantManagerProps) => {
                         expandedRows={expandedRows}
                         onRowToggle={(e) => setExpandedRows(e.data)}
                         rowExpansionTemplate={(rowData) => {
-                            return <ConstraintManager grant={rowData as Grant} />;
+                            return (<>
+                                <TabView>
+                                    <TabPanel header="Project">
+                                        <ConstraintManager grant={rowData as Grant} type={BaseConstraintType.PROJECT} />
+                                    </TabPanel>
+                                    <TabPanel header="Applicant">
+                                        <ConstraintManager grant={rowData as Grant} type={BaseConstraintType.APPLICANTS} />
+                                    </TabPanel>
+                                </TabView>
+                            </>)
                         }}
                     >
+
                         <Column expander style={{ width: '3em' }} />
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="title" header="Title" sortable />
