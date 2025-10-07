@@ -33,17 +33,17 @@ export class ConstraintService {
         const totalBudget = (data.phases ?? []).reduce((sum, p) => sum + (p.budget ?? 0), 0);
         const totalDuration = (data.phases ?? []).reduce((sum, p) => sum + (p.duration ?? 0), 0);
 
-
         for (const constraint of constraints) {
+            
             const { min, max } = constraint;
-            switch (constraint.constraint) {
 
+            switch (constraint.constraint) {
                 case ProjectConstraintType.PARTICIPANT:
                     if (numParticipants < min || numParticipants > max) {
                         throw new Error(`Participant count (${numParticipants}) must be between ${constraint.min} and ${constraint.max}`);
                     }
                     break;
-                    
+
                 case ProjectConstraintType.PHASE_COUNT:
                     if (numPhases < min || numPhases > max) {
                         throw new Error(`Phase count (${numPhases}) must be between ${min} and ${max}`);
@@ -59,6 +59,23 @@ export class ConstraintService {
                 case ProjectConstraintType.TIME_TOTAL:
                     if (totalDuration < min || totalDuration > max) {
                         throw new Error(`Total project duration (${totalDuration}) must be between ${min} and ${max}`);
+                    }
+                    break;
+
+                // --- Per-phase constraints ---
+                case ProjectConstraintType.BUDGET_PHASE:
+                    for (const [i, phase] of (data.phases ?? []).entries()) {
+                        if (phase.budget < min || phase.budget > max) {
+                            throw new Error(`Phase ${i + 1} budget (${phase.budget}) must be between ${min} and ${max}`);
+                        }
+                    }
+                    break;
+
+                case ProjectConstraintType.TIME_PHASE:
+                    for (const [i, phase] of (data.phases ?? []).entries()) {
+                        if (phase.duration < min || phase.duration > max) {
+                            throw new Error(`Phase ${i + 1} duration (${phase.duration}) must be between ${min} and ${max}`);
+                        }
                     }
                     break;
                 default:
