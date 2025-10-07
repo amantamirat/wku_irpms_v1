@@ -18,12 +18,24 @@ export enum ProjectConstraintType {
     //FOCUS_AREA = "FOCUS-AREA",            // Number of focus areas
 }
 
+
+
 export enum ApplicantConstraintType {
     GENDER = "GENDER",                    // Gender constraint   (female, male) 
     ACCESSIBILITY = "ACCESSIBILITY",      // Disability constraint  (visual, hearing, mobility, cognitive)
     SCOPE = "SCOPE",                      // Scope constraint (academic, supportive, external)  
-    AGE = "AGE",                          // Age constraint 
+    AGE = "AGE",                          // Age constraint (min age, max age)
     EXPERIENCE = "EXPERIENCE",            // Experience-based constraint  
+}
+
+const rangeApplicantConstraints = [ApplicantConstraintType.AGE, ApplicantConstraintType.EXPERIENCE];
+const enumApplicantConstraints = [ApplicantConstraintType.GENDER, ApplicantConstraintType.ACCESSIBILITY, ApplicantConstraintType.SCOPE];
+
+function isRangeConstraint(type: ApplicantConstraintType) {
+    return rangeApplicantConstraints.includes(type);
+}
+function isEnumConstraint(type: ApplicantConstraintType) {
+    return enumApplicantConstraints.includes(type);
 }
 
 export enum ConstraintType {

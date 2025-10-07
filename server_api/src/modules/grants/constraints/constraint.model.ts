@@ -67,6 +67,8 @@ export interface IApplicantConstraint extends IBaseConstraint {
     constraint: ApplicantConstraintType;
     max: number; //maximum number of applicants allowed for this constraint
     min: number; //minimum number of applicants required for this constraint
+    values?: string[]; // Allowed values for enum-based constraints
+    range?: { min: number; max: number }; // Range for age/experience constraints
 }
 
 const ApplicantConstraintSchema = new Schema<IApplicantConstraint>({
@@ -84,6 +86,15 @@ const ApplicantConstraintSchema = new Schema<IApplicantConstraint>({
         type: Number,
         required: true
     },
+    values: {
+        type: [String],
+        default: undefined // Only used for enum-based constraints
+    },
+    range: {
+        min: { type: Number },
+        max: { type: Number }
+        // Only used for range-based constraints
+    }
 });
 
 ApplicantConstraintSchema.index({ grant: 1, constraint: 1 }, { unique: true });
