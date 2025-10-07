@@ -183,7 +183,5 @@ export default function CollaboratorDialog({ collaborator, setCollaborator, visi
 
     );
 }
-function onAdd() {
-    throw new Error("Function not implemented.");
-}
+
 

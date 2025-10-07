@@ -1,6 +1,6 @@
 import { ApiClient } from "@/api/ApiClient";
 import { Collaborator } from "../models/collaborator.model";
-const end_point = '/collaborators/';
+const end_point = '/project/collaborators/';
 
 export interface GetCollaboratorsOptions {
     project?: string;

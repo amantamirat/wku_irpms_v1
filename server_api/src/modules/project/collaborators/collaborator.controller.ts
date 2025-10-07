@@ -8,7 +8,7 @@ export class CollaboratorController {
 
     static async createCollaborator(req: Request, res: Response) {
         try {
-            const { project, applicant, isLeadPI } = req.query;
+            const { project, applicant, isLeadPI } = req.body;
             const data: CreateCollaboratorDto = {
                 applicant: new mongoose.Types.ObjectId(applicant as string),
                 project: new mongoose.Types.ObjectId(project as string),
@@ -38,11 +38,12 @@ export class CollaboratorController {
     static async updateCollaborator(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const { isLeadPI, status } = req.query;
+            const { isLeadPI, status } = req.body;
             const data: Partial<CreateCollaboratorDto> = {
                 isLeadPI: isLeadPI ? true : undefined,
                 status: status as CollaboratorStatus
             };
+            console.log("updation of collaborator");
             const updated = await CollaboratorService.updateCollaborator(id, data);
             successResponse(res, 201, "Collaborator updated successfully", updated);
         } catch (err: any) {

@@ -54,7 +54,7 @@ app.use("/api/calls", callRoutes);
 app.use("/api/grants", grantRoutes);
 app.use("/api/grants/constraints", constraintRoutes);
 app.use("/api/projects", projectRoutes);
-app.use("/api/collaborators", collaboratorRoutes);
+app.use("/api/project/collaborators", collaboratorRoutes);
 app.use("/api/project/themes", projectThemeRoutes);
 app.use("/api/project/phases", phaseRoutes);
 app.use("/api/project/stages", stageRoutes);
