@@ -29,6 +29,11 @@ export type Applicant = {
     updatedAt?: Date;
 }
 
+export const accessibilityOptions = Object.values(Accessibility).map(a => ({
+    label: a,
+    value: a
+}));
+
 
 export const validateApplicant = (applicant: Applicant): { valid: boolean; message?: string } => {
     if (!applicant.first_name) {

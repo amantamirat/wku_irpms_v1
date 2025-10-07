@@ -19,6 +19,24 @@ export enum ProjectConstraintType {
     //FOCUS_AREA = "FOCUS-AREA",
 }
 
+export enum ApplicantConstraintType {
+    GENDER = "GENDER",                    // Gender constraint   (female, male) 
+    ACCESSIBILITY = "ACCESSIBILITY",      // Disability constraint  (visual, hearing, mobility, cognitive)
+    SCOPE = "SCOPE",                      // Scope constraint (academic, supportive, external)  
+    AGE = "AGE",                          // Age constraint (min age, max age)
+    EXPERIENCE = "EXPERIENCE",            // Experience-based constraint  
+}
+
+const rangeApplicantConstraints = [ApplicantConstraintType.AGE, ApplicantConstraintType.EXPERIENCE];
+const enumApplicantConstraints = [ApplicantConstraintType.GENDER, ApplicantConstraintType.ACCESSIBILITY, ApplicantConstraintType.SCOPE];
+
+export function isRangeConstraint(type: ApplicantConstraintType) {
+    return rangeApplicantConstraints.includes(type);
+}
+export function isEnumConstraint(type: ApplicantConstraintType) {
+    return enumApplicantConstraints.includes(type);
+}
+
 export enum OperationMode {
     OBEY = "OBEY",
     DENY = "DENY",
@@ -29,13 +47,11 @@ export type Constraint = {
     _id?: string;
     grant?: string | Grant; //
     type: BaseConstraintType;
-    constraint?: ProjectConstraintType;
+    constraint?: ProjectConstraintType | ApplicantConstraintType;
     max?: number;
-    min?: number;
-    parent?: string | Constraint; //
-    mode?: OperationMode; //
-    valueType?: string;
-    value?: string;
+    min?: number;    
+    values?: string[];
+    range?: { min: number; max: number };
     createdAt?: Date;
     updatedAt?: Date;
 }

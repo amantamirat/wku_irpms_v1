@@ -2,10 +2,12 @@
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { useEffect, useState } from 'react';
-import { Constraint, ProjectConstraintType, validateConstraint } from '../models/constraint.model';
+import { ApplicantConstraintType, BaseConstraintType, Constraint, isEnumConstraint, ProjectConstraintType, validateConstraint } from '../models/constraint.model';
 import { Dropdown } from 'primereact/dropdown';
 import { classNames } from 'primereact/utils';
 import { InputNumber } from 'primereact/inputnumber';
+import { MultiSelect } from 'primereact/multiselect';
+import { accessibilityOptions } from '@/app/(main)/applicants/models/applicant.model';
 
 
 interface SaveDialogProps {
@@ -69,7 +71,11 @@ function SaveDialog(props: SaveDialogProps) {
                 <Dropdown
                     id="constraint"
                     value={constraint.constraint}
-                    options={Object.values(ProjectConstraintType).map(c => ({ label: c, value: c }))}
+                    options={Object.values(
+                        constraint.type === BaseConstraintType.PROJECT
+                            ? ProjectConstraintType
+                            : ApplicantConstraintType
+                    ).map(c => ({ label: c, value: c }))}
                     onChange={(e) =>
                         setConstraint({ ...constraint, constraint: e.value })
                     }
@@ -107,6 +113,23 @@ function SaveDialog(props: SaveDialogProps) {
                     })}
                 />
             </div>
+            {constraint.type === BaseConstraintType.APPLICANTS &&
+                <>
+                    {isEnumConstraint(constraint.constraint as ApplicantConstraintType) &&
+                        <>
+                            <div className="field">
+                                <label htmlFor="values">Values</label>
+                                <MultiSelect
+                                    id="values"
+                                    value={constraint.values || []}
+                                    options={accessibilityOptions}
+                                    onChange={(e) => setConstraint({ ...constraint, values: e.value })}
+                                    placeholder="Select Values"
+                                    display="chip"
+                                />
+                            </div>
+                        </>}
+                </>}
             {errorMessage && (
                 <small className="p-error">{errorMessage}</small>
             )}

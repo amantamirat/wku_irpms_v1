@@ -9,7 +9,7 @@ import { classNames } from 'primereact/utils';
 import { Dropdown } from 'primereact/dropdown';
 import { MultiSelect } from 'primereact/multiselect';
 import { Category, Organization } from '@/app/(main)/organizations/models/organization.model';
-import { Accessibility, Applicant, Gender, validateApplicant } from '../../models/applicant.model';
+import { Accessibility, accessibilityOptions, Applicant, Gender, validateApplicant } from '../../models/applicant.model';
 
 
 interface SaveApplicantDialogProps {
@@ -31,10 +31,7 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
     const isSupportive = applicant.scope === Category.supportive;
     //const isExternal = applicant.scope === Scope.external;
 
-    const accessibilityOptions = Object.values(Accessibility).map(a => ({
-        label: a,
-        value: a
-    }));
+    
 
     useEffect(() => {
         if (!visible) {
