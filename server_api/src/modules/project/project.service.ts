@@ -32,39 +32,28 @@ export interface CreateProjectDto {
 export class ProjectService {
 
     private static async validateProject(project: CreateProjectDto) {
-        const call = await Call.findById(project.call).lean();
+        const call = await Call.findOne({ _id: project.call, status: CallStatus.active }).lean();
         if (!call) throw new Error("Call not found");
-        if (call.status !== CallStatus.active) throw new Error("Call is not active.");
         const now = new Date();
         if (call.deadline < now) {
             throw new Error("The deadline for this call has already passed");
         }
+        return call;
     }
 
     static async createProject(data: CreateProjectDto) {
         await this.validateProject(data);
-        //is it mandatory....?
-        //const applicant = await ApplicantService.findApplicant({ uid: data.createdBy }) as any;
-        //if (!applicant) {
-        //throw new Error("Default Applicant Data Not Found.");
-        //}
         const createdProject = await Project.create({ ...data, status: ProjectStatus.pending });
         return createdProject;
     }
 
-    
+
 
     static async submitProject(dto: CreateProjectDto) {
-        //Check the call existance and deadline
         if (!dto.documentPath) {
             throw new Error("Document path not found");
         }
-        const call = await Call.findOne({ _id: dto.call, status: CallStatus.active }).lean();
-        if (!call) throw new Error("Call not found");
-        const now = new Date();
-        if (call.deadline < now) {
-            throw new Error("The deadline for this call has already passed");
-        }
+        const call = await this.validateProject(dto);
         //Find the first stage
         const stage = await Stage.findOne({ parent: call.evaluation, order: 1 }).lean();
         if (!stage) throw new Error("Stage not found");

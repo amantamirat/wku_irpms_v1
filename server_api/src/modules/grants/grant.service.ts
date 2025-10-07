@@ -2,6 +2,7 @@ import { Grant } from "./grant.model";
 import { Directorate } from "../organization/organization.model";
 import mongoose from "mongoose";
 import { Call } from "../call/call.model";
+import { CreateProjectDto } from "../project/project.service";
 
 
 export interface GetGrantsOptions {
@@ -49,5 +50,9 @@ export class GrantService {
         const referencedByCall = await Call.exists({ grant: grant._id });
         if (referencedByCall) throw new Error(`Can not delete ${grant.title}, it is referenced in call.`);
         return await grant.deleteOne();
+    }
+
+    static async validateProjectConstraints(grantId: mongoose.Types.ObjectId, data: CreateProjectDto) {
+
     }
 }

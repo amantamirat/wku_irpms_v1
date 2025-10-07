@@ -25,10 +25,8 @@ export class ConstraintService {
 
     /** Create a new constraint */
     static async createConstraint(data: CreateConstraintDto) {
-        // Validate grantType exists
         const grantExists = await Grant.exists({ _id: data.grant });
-        if (!grantExists) throw new Error("Grant type not found");        
-
+        if (!grantExists) throw new Error("Grant type not found");      
         const createdConstraint = await BaseConstraint.create({ ...data });
         return createdConstraint;
     }
@@ -46,7 +44,6 @@ export class ConstraintService {
     static async updateConstraint(id: string, data: Partial<CreateConstraintDto>) {
         const constraint = await BaseConstraint.findById(id);
         if (!constraint) throw new Error("Constraint not found");
-
         // Protect immutable fields
         const immutableFields = ["grant", "type", "parent"];
         for (const field of immutableFields) {
