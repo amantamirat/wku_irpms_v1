@@ -48,7 +48,7 @@ const ProjectConstraintSchema = new Schema<IProjectConstraint>({
     max: {
         type: Number,
         min: 0,
-        default: Number.MAX_SAFE_INTEGER
+        default: Infinity
     },
     min: {
         type: Number,

@@ -15,11 +15,11 @@ export enum ProjectConstraintType {
     //PURCHASE_PHASE = "PURCHASE-PHASE",    // Purchases per phase
     //THEME = "THEME",                      // Number of themes
     //COMPONENT = "COMPONENT",              // Number of sub-themes
-    //FOCUS_AREA = "FOCUS-AREA",
+    //FOCUS_AREA = "FOCUS-AREA",            // Number of focus areas
 }
 
 export enum ConstraintType {
-    // Number of focus areas
+    
     //////////////////////////////////////////////////////////
     GENDER = "GENDER",                    // Gender constraint
     ACCESSIBILITY = "ACCESSIBILITY",      // Disability constraint
