@@ -1,5 +1,5 @@
 import mongoose, { model, Schema } from "mongoose";
-import { BaseConstraintType, ProjectConstraintType } from "./constraint.enum";
+import { ApplicantConstraintType, BaseConstraintType, ProjectConstraintType } from "./constraint.enum";
 import { COLLECTIONS } from "../../../enums/collections.enum";
 
 export interface IBaseConstraint extends Document {
@@ -30,7 +30,7 @@ const BaseConstraintSchema = new Schema<IBaseConstraint>(
 
 export const BaseConstraint = model<IBaseConstraint>(COLLECTIONS.CONSTRAINT, BaseConstraintSchema);
 
-
+//Project Constraints Model
 export interface IProjectConstraint extends IBaseConstraint {
     type: BaseConstraintType.PROJECT;
     constraint: ProjectConstraintType;
@@ -61,10 +61,40 @@ ProjectConstraintSchema.index({ grant: 1, constraint: 1 }, { unique: true });
 export const ProjectConstraint = BaseConstraint.discriminator<IProjectConstraint>(BaseConstraintType.PROJECT, ProjectConstraintSchema);
 
 
+// Applicant Constraint Model
+export interface IApplicantConstraint extends IBaseConstraint {
+    type: BaseConstraintType.APPLICANTS;
+    constraint: ApplicantConstraintType;
+    max: number; //maximum number of applicants allowed for this constraint
+    min: number; //minimum number of applicants required for this constraint
+}
+
+const ApplicantConstraintSchema = new Schema<IApplicantConstraint>({
+    constraint: {
+        type: String,
+        enum: Object.values(ApplicantConstraintType),
+        required: true,
+        immutable: true,
+    },
+    max: {
+        type: Number,
+        required: true
+    },
+    min: {
+        type: Number,
+        required: true
+    },
+});
+
+ApplicantConstraintSchema.index({ grant: 1, constraint: 1 }, { unique: true });
+export const ApplicantConstraint = BaseConstraint.discriminator<IApplicantConstraint>(BaseConstraintType.APPLICANTS, ApplicantConstraintSchema);
+
+
+
+
+
 
 /*
-
-
 export interface IConstraint extends Document {
     grant?: mongoose.Types.ObjectId; //
     type?: ConstraintType;

@@ -11,7 +11,7 @@ export enum ProjectConstraintType {
     TIME_TOTAL = "TIME-TOTAL",            // Total project duration
     BUDGET_PHASE = "BUDGET-PHASE",        // Budget per phase    
     TIME_PHASE = "TIME-PHASE",            // Time per phase    
-    //PURCHASE_TOTAL = "PURCHASE-TOTAL",    // Total purchases budget
+    //PURCHASE_TOTAL = "PURCHASE-TOTAL",   // Total purchases budget
     //PURCHASE_PHASE = "PURCHASE-PHASE",    // Purchases per phase
     //THEME = "THEME",                      // Number of themes
     //COMPONENT = "COMPONENT",              // Number of sub-themes
@@ -19,9 +19,8 @@ export enum ProjectConstraintType {
 }
 
 export enum ApplicantConstraintType {
-    // Applicant Constraints
-    GENDER = "GENDER",                    // Gender constraint    
-    ACCESSIBILITY = "ACCESSIBILITY",      // Disability constraint  
+    GENDER = "GENDER",                    // Gender constraint   (female, male) 
+    ACCESSIBILITY = "ACCESSIBILITY",      // Disability constraint  (visual, hearing, mobility, cognitive)
     SCOPE = "SCOPE",                      // Scope constraint (academic, supportive, external)  
     AGE = "AGE",                          // Age constraint 
     EXPERIENCE = "EXPERIENCE",            // Experience-based constraint  
