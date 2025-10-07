@@ -50,9 +50,5 @@ export class GrantService {
         const referencedByCall = await Call.exists({ grant: grant._id });
         if (referencedByCall) throw new Error(`Can not delete ${grant.title}, it is referenced in call.`);
         return await grant.deleteOne();
-    }
-
-    static async validateProjectConstraints(grantId: mongoose.Types.ObjectId, data: CreateProjectDto) {
-
-    }
+    }    
 }

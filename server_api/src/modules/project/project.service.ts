@@ -17,6 +17,7 @@ import { BaseTheme } from "../call/themes/theme.model";
 import { ProjectStage } from "./stages/stage.model";
 import { CreateProjectStageDto } from "./stages/stage.service";
 import { ProjectStageStatus } from "./stages/stage.enum";
+import { ConstraintService } from "../grants/constraints/constraint.service";
 
 export interface CreateProjectDto {
     call: mongoose.Types.ObjectId;
@@ -54,6 +55,8 @@ export class ProjectService {
             throw new Error("Document path not found");
         }
         const call = await this.validateProject(dto);
+        await  ConstraintService.validateProjectConstraints(call.grant, dto);
+        
         //Find the first stage
         const stage = await Stage.findOne({ parent: call.evaluation, order: 1 }).lean();
         if (!stage) throw new Error("Stage not found");
@@ -136,3 +139,5 @@ export class ProjectService {
         return await project.deleteOne();
     }
 }
+
+
