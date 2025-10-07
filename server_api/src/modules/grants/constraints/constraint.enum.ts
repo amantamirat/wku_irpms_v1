@@ -18,14 +18,19 @@ export enum ProjectConstraintType {
     //FOCUS_AREA = "FOCUS-AREA",            // Number of focus areas
 }
 
-export enum ConstraintType {
-    
-    //////////////////////////////////////////////////////////
+export enum ApplicantConstraintType {
     // Applicant Constraints
-    GENDER = "GENDER",                    // Gender constraint
-    ACCESSIBILITY = "ACCESSIBILITY",      // Disability constraint
-    AGE = "AGE",                          // Age constraint    
-    EXPERIENCE = "EXPERIENCE",            // Experience-based constraint
+    GENDER = "GENDER",                    // Gender constraint    
+    ACCESSIBILITY = "ACCESSIBILITY",      // Disability constraint  
+    SCOPE = "SCOPE",                      // Scope constraint (academic, supportive, external)  
+    AGE = "AGE",                          // Age constraint 
+    EXPERIENCE = "EXPERIENCE",            // Experience-based constraint  
+}
+
+export enum ConstraintType {
+
+    //////////////////////////////////////////////////////////
+
 
     // Project Status Constraints
     SUBMITTED = "SUBMITTED",              // Submitted projects
