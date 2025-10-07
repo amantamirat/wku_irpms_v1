@@ -7,7 +7,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { classNames } from 'primereact/utils';
 import { InputNumber } from 'primereact/inputnumber';
 import { MultiSelect } from 'primereact/multiselect';
-import { accessibilityOptions } from '@/app/(main)/applicants/models/applicant.model';
+import { accessibilityOptions , genderOptions} from '@/app/(main)/applicants/models/applicant.model';
 
 
 interface SaveDialogProps {
@@ -122,7 +122,7 @@ function SaveDialog(props: SaveDialogProps) {
                                 <MultiSelect
                                     id="values"
                                     value={constraint.values || []}
-                                    options={accessibilityOptions}
+                                    options={constraint.constraint === ApplicantConstraintType.ACCESSIBILITY ? accessibilityOptions : genderOptions}
                                     onChange={(e) => setConstraint({ ...constraint, values: e.value })}
                                     placeholder="Select Values"
                                     display="chip"

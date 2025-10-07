@@ -9,7 +9,7 @@ import { classNames } from 'primereact/utils';
 import { Dropdown } from 'primereact/dropdown';
 import { MultiSelect } from 'primereact/multiselect';
 import { Category, Organization } from '@/app/(main)/organizations/models/organization.model';
-import { Accessibility, accessibilityOptions, Applicant, Gender, validateApplicant } from '../../models/applicant.model';
+import { Accessibility, accessibilityOptions, Applicant, Gender, genderOptions, validateApplicant } from '../../models/applicant.model';
 
 
 interface SaveApplicantDialogProps {
@@ -115,7 +115,7 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
                     <Dropdown
                         id="gender"
                         value={applicant.gender}
-                        options={Object.values(Gender).map(g => ({ label: g, value: g }))}
+                        options={genderOptions}
                         onChange={(e) =>
                             setApplicant({ ...applicant, gender: e.value })
                         }

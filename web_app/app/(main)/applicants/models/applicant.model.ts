@@ -11,8 +11,8 @@ export enum Accessibility {
     Hearing = 'Hearing',
     Mobility = 'Mobility',
     Speech = 'Speech',
-    Cognitive = 'Cognitive',
-    Other = 'Other'
+    Cognitive = 'Cognitive'
+    //Other = 'Other'
 }
 
 export type Applicant = {
@@ -32,6 +32,11 @@ export type Applicant = {
 export const accessibilityOptions = Object.values(Accessibility).map(a => ({
     label: a,
     value: a
+}));
+
+export const genderOptions = Object.values(Gender).map(g => ({
+    label: g,
+    value: g
 }));
 
 
