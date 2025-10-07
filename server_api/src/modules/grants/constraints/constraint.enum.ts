@@ -21,16 +21,19 @@ export enum ProjectConstraintType {
 export enum ConstraintType {
     
     //////////////////////////////////////////////////////////
+    // Applicant Constraints
     GENDER = "GENDER",                    // Gender constraint
     ACCESSIBILITY = "ACCESSIBILITY",      // Disability constraint
     AGE = "AGE",                          // Age constraint    
     EXPERIENCE = "EXPERIENCE",            // Experience-based constraint
 
+    // Project Status Constraints
     SUBMITTED = "SUBMITTED",              // Submitted projects
     ONGOING = "ONGOING",                  // Ongoing projects
     COMPLETED = "COMPLETED",              // Completed projects
     INCOMPLETE = "INCOMPLETE",            // Incomplete projects
 
+    // Participant Type Constraints
     ACADEMIC = "ACADEMIC",                // Academic staff
     STUDENT = "STUDENT",                  // Student participants
     SUPPORTIVE = "SUPPORTIVE",            // Supportive staff/students
