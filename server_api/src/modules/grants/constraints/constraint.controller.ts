@@ -12,8 +12,8 @@ export class ConstraintController {
     try {
       const { grant, type, constraint, min, max } = req.body;
       const data: CreateConstraintDto = {
-        grant: grant,
         type: type,
+        grant: grant,        
         constraint: constraint,
         min: min,
         max: max

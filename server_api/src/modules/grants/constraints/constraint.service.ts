@@ -5,8 +5,8 @@ import { BaseConstraint, ProjectConstraint } from "./constraint.model";
 import { CreateProjectDto } from "../../project/project.service";
 
 export interface CreateConstraintDto {
-    grant: mongoose.Types.ObjectId; //
     type: BaseConstraintType;
+    grant: mongoose.Types.ObjectId; //    
     constraint?: ProjectConstraintType
     max?: number;
     min?: number;
@@ -17,7 +17,7 @@ export interface CreateConstraintDto {
 }
 
 export interface GetConstraintOptions {
-    grant?: mongoose.Types.ObjectId; //
+    grant?: mongoose.Types.ObjectId;
     type?: BaseConstraintType;
     parent?: mongoose.Types.ObjectId;
 }
@@ -86,15 +86,14 @@ export class ConstraintService {
 
     }
 
-    /** Create a new constraint */
+    
     static async createConstraint(data: CreateConstraintDto) {
         const grantExists = await Grant.exists({ _id: data.grant });
         if (!grantExists) throw new Error("Grant type not found");
         const createdConstraint = await BaseConstraint.create({ ...data });
         return createdConstraint;
     }
-
-    /** Retrieve constraints by optional filters */
+    
     static async getConstraints(options: GetConstraintOptions = {}) {
         const filter: any = {};
         if (options.grant) filter.grant = options.grant;
@@ -103,7 +102,7 @@ export class ConstraintService {
         return await BaseConstraint.find(filter).lean();
     }
 
-    /** Update a constraint (non-immutable fields only) */
+    
     static async updateConstraint(id: string, data: Partial<CreateConstraintDto>) {
         const constraint = await BaseConstraint.findById(id);
         if (!constraint) throw new Error("Constraint not found");
@@ -114,11 +113,7 @@ export class ConstraintService {
     /** Delete a constraint safely (ensure no child constraints exist) */
     static async deleteConstraint(id: string) {
         const constraint = await BaseConstraint.findById(id);
-        if (!constraint) throw new Error("Constraint not found");
-        // Check if this constraint has children
-        //const hasChildren = await Constraint.exists({ parent: constraint._id });
-        //if (hasChildren) throw new Error("Cannot delete constraint with child constraints");
-
+        if (!constraint) throw new Error("Constraint not found");        
         return await constraint.deleteOne();
     }
 }
