@@ -27,20 +27,38 @@ export class ConstraintService {
     static async validateProjectConstraints(grantId: mongoose.Types.ObjectId, data: CreateProjectDto) {
         const constraints = await ProjectConstraint.find({ grant: grantId }).lean();
         if (!constraints || constraints.length === 0) return;
+
         const numParticipants = data.collaborators?.length ?? 0;
         const numPhases = data.phases?.length ?? 0;
+        const totalBudget = (data.phases ?? []).reduce((sum, p) => sum + (p.budget ?? 0), 0);
+        const totalDuration = (data.phases ?? []).reduce((sum, p) => sum + (p.duration ?? 0), 0);
 
 
         for (const constraint of constraints) {
+            const { min, max } = constraint;
             switch (constraint.constraint) {
+
                 case ProjectConstraintType.PARTICIPANT:
-                    if (numParticipants < constraint.min || numParticipants > constraint.max) {
+                    if (numParticipants < min || numParticipants > max) {
                         throw new Error(`Participant count (${numParticipants}) must be between ${constraint.min} and ${constraint.max}`);
                     }
                     break;
+                    
                 case ProjectConstraintType.PHASE_COUNT:
-                    if (numPhases < constraint.min || numPhases > constraint.max) {
-                        throw new Error(`Phase count (${numPhases}) must be between ${constraint.min} and ${constraint.max}`);
+                    if (numPhases < min || numPhases > max) {
+                        throw new Error(`Phase count (${numPhases}) must be between ${min} and ${max}`);
+                    }
+                    break;
+
+                case ProjectConstraintType.BUDGET_TOTAL:
+                    if (totalBudget < min || totalBudget > max) {
+                        throw new Error(`Total project budget (${totalBudget}) must be between ${min} and ${max}`);
+                    }
+                    break;
+
+                case ProjectConstraintType.TIME_TOTAL:
+                    if (totalDuration < min || totalDuration > max) {
+                        throw new Error(`Total project duration (${totalDuration}) must be between ${min} and ${max}`);
                     }
                     break;
                 default:
