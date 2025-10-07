@@ -43,7 +43,6 @@ export class CollaboratorController {
                 isLeadPI: isLeadPI ? true : undefined,
                 status: status as CollaboratorStatus
             };
-            console.log("updation of collaborator");
             const updated = await CollaboratorService.updateCollaborator(id, data);
             successResponse(res, 201, "Collaborator updated successfully", updated);
         } catch (err: any) {
