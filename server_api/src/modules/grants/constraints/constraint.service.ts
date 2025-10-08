@@ -6,6 +6,15 @@ import { ApplicantConstraintType, BaseConstraintType, isListConstraint, isRangeC
 import { BaseConstraint, ProjectConstraint } from "./constraint.model";
 
 
+
+export interface CreateProjectConstraintDto {
+    type: BaseConstraintType.PROJECT;
+    grant: mongoose.Types.ObjectId;
+    constraint: ProjectConstraintType;
+    min: number;
+    max: number;
+}
+
 export interface CreateConstraintDto {
     type: BaseConstraintType;
     grant: mongoose.Types.ObjectId;
