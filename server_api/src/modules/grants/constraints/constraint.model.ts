@@ -1,5 +1,5 @@
 import mongoose, { model, Schema } from "mongoose";
-import { ApplicantConstraintType, BaseConstraintType, ProjectConstraintType } from "./constraint.enum";
+import { ApplicantConstraintMode, ApplicantConstraintType, BaseConstraintType, ProjectConstraintType } from "./constraint.enum";
 import { COLLECTIONS } from "../../../enums/collections.enum";
 
 export interface IBaseConstraint extends Document {
@@ -63,12 +63,12 @@ export const ProjectConstraint = BaseConstraint.discriminator<IProjectConstraint
 
 // Applicant Constraint Model
 export interface IApplicantConstraint extends IBaseConstraint {
-    type: BaseConstraintType.APPLICANTS;
+    type: BaseConstraintType.APPLICANT;
     constraint: ApplicantConstraintType;
-    max: number; //maximum number of applicants allowed for this constraint
-    min: number; //minimum number of applicants required for this constraint
-    values?: string[]; // Allowed values for enum-based constraints
-    range?: { min: number; max: number }; // Range for age/experience constraints
+    mode: ApplicantConstraintMode; // Mode of applying the constraint (count or ratio)
+    value: number; // Required number or ratio of applicants
+    list?: string[]; // Allowed values for enum-based constraints
+    range?: { min: number; max: number }; // Range for numeric (age/experience) constraints
 }
 
 const ApplicantConstraintSchema = new Schema<IApplicantConstraint>({
@@ -78,27 +78,27 @@ const ApplicantConstraintSchema = new Schema<IApplicantConstraint>({
         required: true,
         immutable: true,
     },
-    max: {
+    mode: {
+        type: String,
+        enum: Object.values(ApplicantConstraintMode),
+        required: true
+    },
+    value: {
         type: Number,
         required: true
     },
-    min: {
-        type: Number,
-        required: true
-    },
-    values: {
+    list: {
         type: [String],
-        default: undefined // Only used for enum-based constraints
+        default: undefined // Only used for list-based constraints
     },
     range: {
         min: { type: Number },
-        max: { type: Number }
-        // Only used for range-based constraints
+        max: { type: Number } // Only used for range-based constraints
     }
 });
 
 ApplicantConstraintSchema.index({ grant: 1, constraint: 1 }, { unique: true });
-export const ApplicantConstraint = BaseConstraint.discriminator<IApplicantConstraint>(BaseConstraintType.APPLICANTS, ApplicantConstraintSchema);
+export const ApplicantConstraint = BaseConstraint.discriminator<IApplicantConstraint>(BaseConstraintType.APPLICANT, ApplicantConstraintSchema);
 
 
 

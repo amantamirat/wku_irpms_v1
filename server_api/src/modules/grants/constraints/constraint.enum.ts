@@ -1,7 +1,7 @@
 
 export enum BaseConstraintType {
     PROJECT = "Project",
-    APPLICANTS = "Applicant",
+    APPLICANT = "Applicant",
 }
 
 export enum ProjectConstraintType {
@@ -27,13 +27,18 @@ export enum ApplicantConstraintType {
 }
 
 const rangeApplicantConstraints = [ApplicantConstraintType.AGE, ApplicantConstraintType.EXPERIENCE];
-const enumApplicantConstraints = [ApplicantConstraintType.GENDER, ApplicantConstraintType.ACCESSIBILITY, ApplicantConstraintType.SCOPE];
+const listApplicantConstraints = [ApplicantConstraintType.GENDER, ApplicantConstraintType.ACCESSIBILITY, ApplicantConstraintType.SCOPE];
 
 export function isRangeConstraint(type: ApplicantConstraintType) {
     return rangeApplicantConstraints.includes(type);
 }
-export function isEnumConstraint(type: ApplicantConstraintType) {
-    return enumApplicantConstraints.includes(type);
+export function isListConstraint(type: ApplicantConstraintType) {
+    return listApplicantConstraints.includes(type);
+}
+
+export enum ApplicantConstraintMode {
+    COUNT = "COUNT",
+    RATIO = "RATIO"
 }
 
 

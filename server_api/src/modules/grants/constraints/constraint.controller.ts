@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { ConstraintService, CreateConstraintDto, GetConstraintOptions } from './constraint.service';
 import { errorResponse, successResponse } from '../../../util/response';
 import mongoose from 'mongoose';
-import { BaseConstraintType, isEnumConstraint, isRangeConstraint } from './constraint.enum';
+import { BaseConstraintType, isListConstraint, isRangeConstraint } from './constraint.enum';
 
 
 
@@ -10,19 +10,22 @@ export class ConstraintController {
 
   static async createConstraint(req: Request, res: Response) {
     try {
-      const { grant, type, constraint, min, max, values, range } = req.body;
+      const { grant, type, constraint, min, max, mode, value, list, range } = req.body;
       let data: CreateConstraintDto = {
         type: type,
         grant: grant,
         constraint: constraint,
-        min: min,
-        max: max
+        min: type === BaseConstraintType.PROJECT ? min : undefined,
+        max: type === BaseConstraintType.PROJECT ? max : undefined,
+        mode: type === BaseConstraintType.APPLICANT ? mode : undefined,
+        value: type === BaseConstraintType.APPLICANT ? value : undefined,
       };
-      if (type === BaseConstraintType.APPLICANTS) {
-        if (isEnumConstraint(constraint)) {
-          data.values = Array.isArray(values) ? values : (values ? [values] : undefined);
-        } else if (isRangeConstraint(constraint)) {
-          data.range = range ?? undefined;
+      if (type === BaseConstraintType.APPLICANT) {
+        if (isListConstraint(constraint)) {
+          data.list = list;
+        }
+        else if (isRangeConstraint(constraint)) {
+          data.range = range;
         }
       }
       const created = await ConstraintService.createConstraint(data);
