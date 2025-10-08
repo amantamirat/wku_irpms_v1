@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { ConstraintService, CreateConstraintDto, GetConstraintOptions } from './constraint.service';
 import { errorResponse, successResponse } from '../../../util/response';
 import mongoose from 'mongoose';
-import { BaseConstraintType } from './constraint.enum';
+import { BaseConstraintType, isEnumConstraint, isRangeConstraint } from './constraint.enum';
 
 
 
@@ -10,14 +10,21 @@ export class ConstraintController {
 
   static async createConstraint(req: Request, res: Response) {
     try {
-      const { grant, type, constraint, min, max } = req.body;
-      const data: CreateConstraintDto = {
+      const { grant, type, constraint, min, max, values, range } = req.body;
+      let data: CreateConstraintDto = {
         type: type,
-        grant: grant,        
+        grant: grant,
         constraint: constraint,
         min: min,
         max: max
       };
+      if (type === BaseConstraintType.APPLICANTS) {
+        if (isEnumConstraint(constraint)) {
+          data.values = Array.isArray(values) ? values : (values ? [values] : undefined);
+        } else if (isRangeConstraint(constraint)) {
+          data.range = range ?? undefined;
+        }
+      }
       const created = await ConstraintService.createConstraint(data);
       successResponse(res, 201, "Constraint created successfully", created);
     } catch (err: any) {

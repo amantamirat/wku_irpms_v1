@@ -1,4 +1,4 @@
-import { BaseConstraintType, OperationMode, ProjectConstraintType } from "./constraint.enum";
+import { BaseConstraintType, OperationMode, ProjectConstraintType, ApplicantConstraintType } from "./constraint.enum";
 import { Grant } from "../grant.model";
 import mongoose from "mongoose";
 import { BaseConstraint, ProjectConstraint } from "./constraint.model";
@@ -6,14 +6,13 @@ import { CreateProjectDto } from "../../project/project.service";
 
 export interface CreateConstraintDto {
     type: BaseConstraintType;
-    grant: mongoose.Types.ObjectId; //    
-    constraint?: ProjectConstraintType
+    grant: mongoose.Types.ObjectId;
+    constraint?: ProjectConstraintType | ApplicantConstraintType;
     max?: number;
     min?: number;
-    parent?: mongoose.Types.ObjectId; //
-    mode?: OperationMode; //
-    valueType?: string;
-    value?: string;
+    values?: string[];
+    range?: { min: number; max: number };
+
 }
 
 export interface GetConstraintOptions {
@@ -34,7 +33,7 @@ export class ConstraintService {
         const totalDuration = (data.phases ?? []).reduce((sum, p) => sum + (p.duration ?? 0), 0);
 
         for (const constraint of constraints) {
-            
+
             const { min, max } = constraint;
 
             switch (constraint.constraint) {
@@ -86,14 +85,22 @@ export class ConstraintService {
 
     }
 
-    
-    static async createConstraint(data: CreateConstraintDto) {
+    static async validateConstraint(data: Partial<CreateConstraintDto>) {
         const grantExists = await Grant.exists({ _id: data.grant });
         if (!grantExists) throw new Error("Grant type not found");
+        if (data.type === BaseConstraintType.APPLICANTS) {
+            if (data.constraint === ApplicantConstraintType.GENDER) {
+
+            }
+        }
+    }
+
+    static async createConstraint(data: CreateConstraintDto) {
+        await this.validateConstraint(data);
         const createdConstraint = await BaseConstraint.create({ ...data });
         return createdConstraint;
     }
-    
+
     static async getConstraints(options: GetConstraintOptions = {}) {
         const filter: any = {};
         if (options.grant) filter.grant = options.grant;
@@ -102,7 +109,7 @@ export class ConstraintService {
         return await BaseConstraint.find(filter).lean();
     }
 
-    
+
     static async updateConstraint(id: string, data: Partial<CreateConstraintDto>) {
         const constraint = await BaseConstraint.findById(id);
         if (!constraint) throw new Error("Constraint not found");
@@ -113,7 +120,7 @@ export class ConstraintService {
     /** Delete a constraint safely (ensure no child constraints exist) */
     static async deleteConstraint(id: string) {
         const constraint = await BaseConstraint.findById(id);
-        if (!constraint) throw new Error("Constraint not found");        
+        if (!constraint) throw new Error("Constraint not found");
         return await constraint.deleteOne();
     }
 }
