@@ -96,6 +96,11 @@ export class ConstraintService {
             if (!participantConstraint) {
                 throw new Error("Applicant constraints require a corresponding Participant constraint to be set first.");
             }
+            if (
+                (typeof data.min === "number" && data.min > participantConstraint.max)
+            ) {
+                throw new Error(`Applicant constraint min less than Participant constraint  ${participantConstraint.max}`);
+            }
             if (isRangeConstraint(data.constraint as ApplicantConstraintType)) {
                 if (!data.range) {
                     throw new Error("Project constraints must specify a 'range' with 'min' and 'max' values.");
