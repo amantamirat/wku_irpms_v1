@@ -52,7 +52,6 @@ export type Constraint = {
     mode?: OperationMode;
     value?: number;
     list?: string[];
-    range?: { min: number; max: number };
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -64,14 +63,6 @@ export const validateConstraint = (constraint: Constraint): { valid: boolean; me
     if (!constraint.grant) {
         return { valid: false, message: 'Grant is required.' };
     }
-    if (constraint.type === BaseConstraintType.PROJECT) {
-        if (constraint.min == null || isNaN(constraint.min)) {
-            return { valid: false, message: 'Minimum value is required for project constraints.' };
-        }
-        if (constraint.max == null || isNaN(constraint.max)) {
-            return { valid: false, message: 'Maximum value is required for project constraints.' };
-        }
-    }
     if (constraint.type === BaseConstraintType.APPLICANT) {
         if (!constraint.mode) {
             return { valid: false, message: 'Operation mode is required for applicant constraints.' };
@@ -79,10 +70,8 @@ export const validateConstraint = (constraint: Constraint): { valid: boolean; me
         if (constraint.value == null || isNaN(constraint.value)) {
             return { valid: false, message: 'Value is required for applicant constraints.' };
         }
-        if (isRangeConstraint(constraint.constraint as ApplicantConstraintType)) {
-            if (!constraint.range) {
-                return { valid: false, message: 'Range is required for range-based constraints.' };
-            }
+        if (constraint.value > 100 && constraint.mode === OperationMode.RATIO) {
+            return { valid: false, message: 'Value cannot exceed 100 for RATIO mode.' };
         }
         if (isListConstraint(constraint.constraint as ApplicantConstraintType)) {
             if (!constraint.list || constraint.list.length === 0) {
@@ -90,5 +79,14 @@ export const validateConstraint = (constraint: Constraint): { valid: boolean; me
             }
         }
     }
+    if (constraint.type === BaseConstraintType.PROJECT || (constraint.type === BaseConstraintType.APPLICANT && isRangeConstraint(constraint.constraint as ApplicantConstraintType))) {
+        if (constraint.min == null || isNaN(constraint.min)) {
+            return { valid: false, message: 'Minimum value is required.' };
+        }
+        if (constraint.max == null || isNaN(constraint.max)) {
+            return { valid: false, message: 'Maximum value is required.' };
+        }
+    }
+
     return { valid: true };
 }

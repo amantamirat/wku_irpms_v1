@@ -16,7 +16,6 @@ export interface CreateConstraintDto {
     mode?: OperationMode;
     value?: number;
     list?: string[];
-    range?: { min: number; max: number };
 }
 
 export interface GetConstraintOptions {
@@ -91,7 +90,7 @@ export class ConstraintService {
 
     static async validateConstraint(data: Partial<CreateConstraintDto>) {
         if (data.type === BaseConstraintType.APPLICANT) {
-            if (isRangeConstraint(data.constraint as ApplicantConstraintType) && !data.range) {
+            if (isRangeConstraint(data.constraint as ApplicantConstraintType) && (!data.max || !data.min) ) {
                 throw new Error(`Range must be specified for ${data.constraint} constraint.`);
             }
             if(isListConstraint(data.constraint as ApplicantConstraintType) && (!data.list || data.list.length === 0)) {
