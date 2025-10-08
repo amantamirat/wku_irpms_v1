@@ -66,24 +66,25 @@ function SaveDialog(props: SaveDialogProps) {
             onHide={hide}
             maximizable
         >
-            <div className="field">
-                <label htmlFor="constraint">Constraint</label>
-                <Dropdown
-                    id="constraint"
-                    value={constraint.constraint}
-                    options={Object.values(
-                        constraint.type === BaseConstraintType.PROJECT
-                            ? ProjectConstraintType
-                            : ApplicantConstraintType
-                    ).map(c => ({ label: c, value: c }))}
-                    onChange={(e) =>
-                        setConstraint({ ...constraint, constraint: e.value })
-                    }
-                    placeholder="Select Constarint"
-                    className={classNames({ 'p-invalid': submitted && !constraint.constraint })}
-                />
-            </div>
-
+            {!constraint._id &&
+                <div className="field">
+                    <label htmlFor="constraint">Constraint</label>
+                    <Dropdown
+                        id="constraint"
+                        value={constraint.constraint}
+                        options={Object.values(
+                            constraint.type === BaseConstraintType.PROJECT
+                                ? ProjectConstraintType
+                                : ApplicantConstraintType
+                        ).map(c => ({ label: c, value: c }))}
+                        onChange={(e) =>
+                            setConstraint({ ...constraint, constraint: e.value })
+                        }
+                        placeholder="Select Constarint"
+                        className={classNames({ 'p-invalid': submitted && !constraint.constraint })}
+                    />
+                </div>
+            }
             <div className="field">
                 <label htmlFor="min">Minimum {constraint.type === BaseConstraintType.PROJECT ? constraint.constraint : 'Required'}</label>
                 <InputNumber
