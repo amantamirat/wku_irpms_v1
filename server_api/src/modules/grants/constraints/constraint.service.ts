@@ -1,8 +1,11 @@
-import { BaseConstraintType, OperationMode, ProjectConstraintType, ApplicantConstraintType } from "./constraint.enum";
+import { BaseConstraintType, OperationMode, ProjectConstraintType, ApplicantConstraintType, isRangeConstraint } from "./constraint.enum";
 import { Grant } from "../grant.model";
 import mongoose from "mongoose";
 import { BaseConstraint, ProjectConstraint } from "./constraint.model";
 import { CreateProjectDto } from "../../project/project.service";
+import { Gender } from "../../applicants/applicant.enum";
+import { Category } from "../../organization/organization.enum";
+import { isNumberObject } from "util/types";
 
 export interface CreateConstraintDto {
     type: BaseConstraintType;
@@ -89,8 +92,27 @@ export class ConstraintService {
         const grantExists = await Grant.exists({ _id: data.grant });
         if (!grantExists) throw new Error("Grant type not found");
         if (data.type === BaseConstraintType.APPLICANTS) {
+            if (isRangeConstraint(data.constraint as ApplicantConstraintType)) {
+                if (!data.range) {
+                    throw new Error("Project constraints must specify a 'range' with 'min' and 'max' values.");
+                }
+            }
             if (data.constraint === ApplicantConstraintType.GENDER) {
-
+                const allowedGenders = Object.values(Gender);
+                if (!Array.isArray(data.values) || data.values.length === 0) {
+                    throw new Error("Gender constraint must specify 'values' as a non-empty array.");
+                }
+                const invalidValues = data.values.filter(v => !allowedGenders.includes(v as Gender));
+                if (invalidValues.length > 0) {
+                    throw new Error(`Invalid gender value(s): ${invalidValues.join(', ')}. Allowed: ${allowedGenders.join(', ')}`);
+                }
+            }
+            else if (data.constraint === ApplicantConstraintType.SCOPE) {
+                const allowedScopes = Object.values(Category);
+                const invalidValues = data.values?.filter(v => !allowedScopes.includes(v as Category));
+                if (invalidValues && invalidValues.length > 0) {
+                    throw new Error(`Invalid scope value(s): ${invalidValues.join(', ')}. Allowed: ${allowedScopes.join(', ')}`);
+                }
             }
         }
     }
