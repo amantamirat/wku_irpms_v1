@@ -2,7 +2,7 @@
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { useEffect, useState } from 'react';
-import { ApplicantConstraintType, BaseConstraintType, Constraint, isListConstraint, isRangeConstraint, ProjectConstraintType, validateConstraint } from '../models/constraint.model';
+import { ApplicantConstraintType, BaseConstraintType, Constraint, isListConstraint, isRangeConstraint, OperationMode, ProjectConstraintType, validateConstraint } from '../models/constraint.model';
 import { Dropdown } from 'primereact/dropdown';
 import { classNames } from 'primereact/utils';
 import { InputNumber } from 'primereact/inputnumber';
@@ -85,7 +85,54 @@ function SaveDialog(props: SaveDialogProps) {
                     />
                 </div>
             }
-            {constraint.type === BaseConstraintType.PROJECT && <>
+
+
+            {constraint.type === BaseConstraintType.APPLICANT && <>
+                <div className="field">
+                    <label htmlFor="mode">Mode</label>
+                    <Dropdown
+                        id="mode"
+                        value={constraint.mode}
+                        options={Object.values(OperationMode).map(op => ({ label: op, value: op }))}
+                        onChange={(e) =>
+                            setConstraint({ ...constraint, mode: e.value })
+                        }
+                        placeholder="Select Mode"
+                        className={classNames({ 'p-invalid': submitted && !constraint.mode && constraint.type === BaseConstraintType.APPLICANT })}
+                    />
+                </div>
+                <div className="field">
+                    <label htmlFor="value">Value</label>
+                    <InputNumber
+                        id="value"
+                        value={constraint.value}
+                        onChange={(e) =>
+                            setConstraint({ ...constraint, value: e.value || 0 })
+                        }
+                        required
+                        className={classNames({
+                            'p-invalid': submitted && (constraint.value == null || constraint.value <= 0) && constraint.type === BaseConstraintType.APPLICANT
+                        })}
+                    />
+                </div>
+            </>}
+
+            {constraint.type === BaseConstraintType.APPLICANT && isListConstraint(constraint.constraint as ApplicantConstraintType) &&
+                <div className="field">
+                    <label htmlFor="list">List</label>
+                    <MultiSelect
+                        id="list"
+                        value={constraint.list || []}
+                        options={constraint.constraint === ApplicantConstraintType.GENDER ? genderOptions :
+                            constraint.constraint === ApplicantConstraintType.ACCESSIBILITY ? accessibilityOptions : scopeOptions}
+                        onChange={(e) => setConstraint({ ...constraint, list: e.value })}
+                        placeholder="Select Items"
+                        display="chip"
+                    />
+                </div>
+            }
+
+            {(constraint.type === BaseConstraintType.PROJECT || constraint.type === BaseConstraintType.APPLICANT && isRangeConstraint(constraint.constraint as ApplicantConstraintType)) && <>
                 <div className="field">
                     <label htmlFor="min">Minimum {constraint.constraint}</label>
                     <InputNumber
@@ -117,74 +164,12 @@ function SaveDialog(props: SaveDialogProps) {
                 </div>
             </>
             }
-
-            {constraint.type === BaseConstraintType.APPLICANT &&
-                <>
-                    {isListConstraint(constraint.constraint as ApplicantConstraintType) &&
-                        <div className="field">
-                            <label htmlFor="values">Values</label>
-                            <MultiSelect
-                                id="values"
-                                value={constraint.list || []}
-                                options={constraint.constraint === ApplicantConstraintType.GENDER ? genderOptions :
-                                    constraint.constraint === ApplicantConstraintType.ACCESSIBILITY ? accessibilityOptions : scopeOptions}
-                                onChange={(e) => setConstraint({ ...constraint, list: e.value })}
-                                placeholder="Select Values"
-                                display="chip"
-                            />
-                        </div>
-                    }
-                    {isRangeConstraint(constraint.constraint as ApplicantConstraintType) &&
-                        <>
-                            <div className="field">
-                                <label htmlFor="min">Minimum {constraint.constraint}</label>
-                                <InputNumber
-                                    id="min"
-                                    value={constraint.range?.min}
-                                    onChange={(e) =>
-                                        setConstraint({
-                                            ...constraint,
-                                            range: {
-                                                max: constraint.range?.max ?? 0,
-                                                min: e.value || 0
-                                            }
-                                        })
-                                    }
-                                    required
-                                    className={classNames({
-                                        'p-invalid': submitted && (constraint.range?.min == null || constraint.range?.min <= 0),
-                                    })}
-                                />
-                            </div>
-
-                            <div className="field">
-                                <label htmlFor="max">Maximum {constraint.constraint}</label>
-                                <InputNumber
-                                    id="max"
-                                    value={constraint.range?.max}
-                                    onChange={(e) =>
-                                        setConstraint({
-                                            ...constraint,
-                                            range: {
-                                                min: constraint.range?.min ?? 0,
-                                                max: e.value || 0
-                                            }
-                                        })
-                                    }
-                                    required
-                                    className={classNames({
-                                        'p-invalid': submitted && (constraint.range?.max == null || constraint.range?.max <= 0),
-                                    })}
-                                />
-                            </div>
-                        </>
-                    }
-                </>
+            {
+                errorMessage && (
+                    <small className="p-error">{errorMessage}</small>
+                )
             }
-            {errorMessage && (
-                <small className="p-error">{errorMessage}</small>
-            )}
-        </Dialog>
+        </Dialog >
     );
 }
 
