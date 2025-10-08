@@ -1,23 +1,23 @@
 import mongoose from "mongoose";
+import Applicant from "../applicants/applicant.model";
 import { CallStatus } from "../call/call.enum";
 import { Call } from "../call/call.model";
-import { CollaboratorService, CreateCollaboratorDto } from "./collaborators/collaborator.service";
+import { Stage } from "../call/evaluations/evaluation.model";
+import { BaseTheme } from "../call/themes/theme.model";
+import { ConstraintValidator } from "../grants/constraints/constraint.validator";
+import { CollaboratorStatus } from "./collaborators/collaborator.enum";
+import { Collaborator } from "./collaborators/collaborator.model";
+import { CreateCollaboratorDto } from "./collaborators/collaborator.service";
+import { PhaseType } from "./phase/phase.enum";
+import { Phase } from "./phase/phase.model";
 import { CreatePhaseDto } from "./phase/phase.service";
 import { ProjectStatus } from "./project.enum";
 import { Project } from "./project.model";
-import { CreateProjectThemeDto } from "./themes/project.theme.service";
-import Applicant from "../applicants/applicant.model";
-import { Collaborator } from "./collaborators/collaborator.model";
-import { CollaboratorStatus } from "./collaborators/collaborator.enum";
-import { Phase } from "./phase/phase.model";
-import { PhaseType } from "./phase/phase.enum";
-import { ProjectTheme } from "./themes/project.theme.model";
-import { Stage } from "../call/evaluations/evaluation.model";
-import { BaseTheme } from "../call/themes/theme.model";
+import { ProjectStageStatus } from "./stages/stage.enum";
 import { ProjectStage } from "./stages/stage.model";
 import { CreateProjectStageDto } from "./stages/stage.service";
-import { ProjectStageStatus } from "./stages/stage.enum";
-import { ConstraintService } from "../grants/constraints/constraint.service";
+import { ProjectTheme } from "./themes/project.theme.model";
+import { CreateProjectThemeDto } from "./themes/project.theme.service";
 
 export interface CreateProjectDto {
     call: mongoose.Types.ObjectId;
@@ -55,8 +55,8 @@ export class ProjectService {
             throw new Error("Document path not found");
         }
         const call = await this.validateProject(dto);
-        await  ConstraintService.validateProjectConstraints(call.grant, dto);
-        
+        await  ConstraintValidator.validateProjectConstraints(call.grant, dto);
+        await  ConstraintValidator.validateApplicantConstraints(call.grant, dto);        
         //Find the first stage
         const stage = await Stage.findOne({ parent: call.evaluation, order: 1 }).lean();
         if (!stage) throw new Error("Stage not found");
