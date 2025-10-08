@@ -89,9 +89,13 @@ export class ConstraintService {
     }
 
     static async validateConstraint(data: Partial<CreateConstraintDto>) {
-        const grantExists = await Grant.exists({ _id: data.grant });
-        if (!grantExists) throw new Error("Grant type not found");
+        const grant = await Grant.findById(data.grant).lean();
+        if (!grant) throw new Error("Grant type not found");
         if (data.type === BaseConstraintType.APPLICANTS) {
+            const participantConstraint = await ProjectConstraint.findOne({ grant: data.grant, constraint: ProjectConstraintType.PARTICIPANT }).lean();
+            if (!participantConstraint) {
+                throw new Error("Applicant constraints require a corresponding Participant constraint to be set first.");
+            }
             if (isRangeConstraint(data.constraint as ApplicantConstraintType)) {
                 if (!data.range) {
                     throw new Error("Project constraints must specify a 'range' with 'min' and 'max' values.");
