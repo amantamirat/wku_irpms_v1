@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import Applicant from "./applicant.model";
-import { Gender } from "./enums/gender.enum";
-import { Accessibility } from "./enums/accessibility.enum";
+import { Gender, Accessibility} from "./applicant.enum";
 import { BaseOrganization } from "../organization/organization.model";
 import { Category, Unit } from "../organization/organization.enum";
 

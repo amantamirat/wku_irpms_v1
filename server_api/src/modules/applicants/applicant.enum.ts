@@ -1,3 +1,8 @@
+export enum Gender {
+    Male = 'Male',
+    Female = 'Female'
+}
+
 export enum Accessibility {
     Visual = 'Visual',
     Hearing = 'Hearing',
