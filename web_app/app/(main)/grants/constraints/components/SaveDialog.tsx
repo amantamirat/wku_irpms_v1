@@ -1,42 +1,59 @@
 'use client';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ApplicantConstraintType, BaseConstraintType, Constraint, isListConstraint, isRangeConstraint, OperationMode, ProjectConstraintType, validateConstraint } from '../models/constraint.model';
 import { Dropdown } from 'primereact/dropdown';
 import { classNames } from 'primereact/utils';
 import { InputNumber } from 'primereact/inputnumber';
 import { MultiSelect } from 'primereact/multiselect';
 import { accessibilityOptions, genderOptions, scopeOptions } from '@/app/(main)/applicants/models/applicant.model';
+import { Toast } from 'primereact/toast';
 
 
 interface SaveDialogProps {
     visible: boolean;
     constraint: Constraint;
     setConstraint: (constraint: Constraint) => void;
-    onSave: () => void;
+    onSave: () => Promise<void>;
     onHide: () => void;
 }
 
 function SaveDialog(props: SaveDialogProps) {
     const { visible, constraint, setConstraint, onSave, onHide } = props;
     const [submitted, setSubmitted] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | undefined>();
+    const toast = useRef<Toast>(null);
 
     const save = async () => {
-        setSubmitted(true);
-        const result = validateConstraint(constraint);
-        if (!result.valid) {
-            setErrorMessage(result.message);
-            return;
+        try {
+            setSubmitted(true);
+            const result = validateConstraint(constraint);
+            if (!result.valid) {
+                throw new Error(result.message);
+            }
+            await onSave();          
+            
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Successful',
+                detail: 'Constraint saved',
+                life: 2000
+            });
+            setTimeout(() => hide(), 2000);
+        } catch (err) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Failed to save constraint',
+                detail: '' + err,
+                life: 3000
+            });
+        } finally {
+            setSubmitted(false);
         }
-        setErrorMessage(undefined);
-        onSave();
     };
 
     const hide = () => {
         setSubmitted(false);
-        setErrorMessage(undefined);
         onHide();
     };
 
@@ -50,7 +67,6 @@ function SaveDialog(props: SaveDialogProps) {
     useEffect(() => {
         if (!visible) {
             setSubmitted(false);
-            setErrorMessage(undefined);
         }
     }, [visible]);
 
@@ -66,6 +82,7 @@ function SaveDialog(props: SaveDialogProps) {
             onHide={hide}
             maximizable
         >
+            <Toast ref={toast} />
             {!constraint._id &&
                 <div className="field">
                     <label htmlFor="constraint">Constraint</label>
@@ -163,11 +180,6 @@ function SaveDialog(props: SaveDialogProps) {
                     />
                 </div>
             </>
-            }
-            {
-                errorMessage && (
-                    <small className="p-error">{errorMessage}</small>
-                )
             }
         </Dialog >
     );

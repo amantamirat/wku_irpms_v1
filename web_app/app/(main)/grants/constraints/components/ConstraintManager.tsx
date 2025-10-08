@@ -35,7 +35,7 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
     const [selectedConstraint, setSelectedConstraint] = useState<Constraint>(emptyConstraint);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const toast = useRef<Toast>(null);
+
 
     const fetchConstraints = useCallback(async () => {
         try {
@@ -67,60 +67,33 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
 
 
     const saveConstraint = async () => {
-        try {
-            let _constraints = [...constraints];
-            if (selectedConstraint._id) {
-                const updated = await ConstraintApi.updateConstraint(selectedConstraint);
-                const index = _constraints.findIndex((c) => c._id === selectedConstraint._id);
-                _constraints[index] = { ...updated };
-            } else {
-                const created = await ConstraintApi.createConstraint(selectedConstraint);
-                _constraints.push({ ...selectedConstraint, _id: created._id });
-            }
-            setConstraints(_constraints);
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Successful',
-                detail: `Constraint ${selectedConstraint._id ? 'updated' : 'created'}`,
-                life: 3000
-            });
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to save constraint',
-                detail: '' + err,
-                life: 3000
-            });
-        } finally {
-            setShowSaveDialog(false);
-            setSelectedConstraint(emptyConstraint);
+        let _constraints = [...constraints];
+        if (selectedConstraint._id) {
+            const updated = await ConstraintApi.updateConstraint(selectedConstraint);
+            const index = _constraints.findIndex((c) => c._id === selectedConstraint._id);
+            _constraints[index] = { ...updated };
+        } else {
+            const created = await ConstraintApi.createConstraint(selectedConstraint);
+            _constraints.push({ ...selectedConstraint, _id: created._id });
         }
+        setConstraints(_constraints);
+        //setSelectedConstraint(emptyConstraint);
     };
 
     const deleteConstraint = async () => {
-        try {
-            const deleted = await ConstraintApi.deleteConstraint(selectedConstraint);
-            if (deleted) {
-                setConstraints(constraints.filter((c) => c._id !== selectedConstraint._id));
-                toast.current?.show({
-                    severity: 'success',
-                    summary: 'Deleted',
-                    detail: 'Constraint deleted',
-                    life: 3000
-                });
-            }
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to delete constraint',
-                detail: '' + err,
-                life: 3000
-            });
-        } finally {
-            setShowDeleteDialog(false);
-            setSelectedConstraint(emptyConstraint);
+        const deleted = await ConstraintApi.deleteConstraint(selectedConstraint);
+        if (deleted) {
+            setConstraints(constraints.filter((c) => c._id !== selectedConstraint._id));
+            //setShowDeleteDialog(false);
+            //setSelectedConstraint(emptyConstraint);
         }
     };
+
+     const hideDialogs = () => {
+        setSelectedConstraint(emptyConstraint);
+        setShowSaveDialog(false);
+        setShowDeleteDialog(false);
+    }
 
     const startToolbarTemplate = () => (
         <div className="my-2">
@@ -162,7 +135,6 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
         <div className="grid">
             <div className="col-12">
                 <div className="card">
-                    <Toast ref={toast} />
                     <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
                     <DataTable
                         ref={dt}
@@ -198,7 +170,7 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
                             constraint={selectedConstraint}
                             setConstraint={setSelectedConstraint}
                             onSave={saveConstraint}
-                            onHide={() => setShowSaveDialog(false)}
+                            onHide={hideDialogs}
                         />
                     )}
                     {selectedConstraint && (
@@ -206,7 +178,7 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
                             showDialog={showDeleteDialog}
                             selectedDataInfo={String(selectedConstraint.type)}
                             onConfirmAsync={deleteConstraint}
-                            onHide={() => setShowDeleteDialog(false)}
+                            onHide={hideDialogs}
                         />
                     )}
                 </div>

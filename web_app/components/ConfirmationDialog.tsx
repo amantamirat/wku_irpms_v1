@@ -25,8 +25,8 @@ const ConfirmDialog = (props: ConfirmDialogProps) => {
                 props.onConfirm();
             }
 
-            /**
-             * if (props.operation) {
+
+            if (props.operation) {
                 toast.current?.show({
                     severity: 'success',
                     summary: `${props.operation} performed`,
@@ -41,7 +41,7 @@ const ConfirmDialog = (props: ConfirmDialogProps) => {
                     life: 2000
                 });
             }
-             */
+
 
         } catch (err) {
             toast.current?.show({
