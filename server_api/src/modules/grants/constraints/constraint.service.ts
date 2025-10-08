@@ -107,7 +107,11 @@ export class ConstraintService {
                 }
 
                 if (data.constraint === ApplicantConstraintType.GENDER) {
-
+                    const allowedGender = Object.values(Gender);
+                    const invalidValues = data.list.filter(v => !allowedGender.includes(v as Gender));
+                    if (invalidValues && invalidValues.length > 0) {
+                        throw new Error(`Invalid gender value(s): ${invalidValues.join(', ')}. Allowed: ${allowedGender.join(', ')}`);
+                    }
                 }
                 else if (data.constraint === ApplicantConstraintType.SCOPE) {
                     const allowedScopes = Object.values(Category);
