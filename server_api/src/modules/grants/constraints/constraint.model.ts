@@ -66,10 +66,6 @@ export interface IApplicantConstraint extends IBaseConstraint {
     type: BaseConstraintType.APPLICANT;
     constraint: ApplicantConstraintType;
     mode: OperationMode; // Mode of applying the constraint (count or ratio)
-    value: number; // Required number or ratio of applicants
-    max?: number;
-    min?: number;
-    list?: string[]; // Allowed values for enum-based constraints
 }
 
 const ApplicantConstraintSchema = new Schema<IApplicantConstraint>({
@@ -83,6 +79,31 @@ const ApplicantConstraintSchema = new Schema<IApplicantConstraint>({
         type: String,
         enum: Object.values(OperationMode),
         required: true
+    }
+
+});
+
+ApplicantConstraintSchema.index({ grant: 1, type: 1, constraint: 1 }, { unique: true });
+export const ApplicantConstraint = BaseConstraint.discriminator<IApplicantConstraint>(BaseConstraintType.APPLICANT, ApplicantConstraintSchema);
+
+
+// Composition Constraint Model
+export interface ICompositionConstraint extends Document {
+    type: BaseConstraintType.COMPOSITION;
+    parent: mongoose.Types.ObjectId;
+    value: number; // Required number or ratio of applicants
+    max?: number; // value for range-based constraints
+    min?: number; // value for range-based constraints
+    item?: string; // Allowed values for enum-based constraints
+}
+
+
+const CompositionConstraintSchema = new Schema<ICompositionConstraint>({
+    parent: {
+        type: Schema.Types.ObjectId,
+        ref: ApplicantConstraint.modelName,
+        required: true,
+        immutable: true
     },
     value: {
         type: Number,
@@ -98,75 +119,11 @@ const ApplicantConstraintSchema = new Schema<IApplicantConstraint>({
         min: 0,
         default: 0
     },
-    list: {
-        type: [String],
-        default: undefined // Only used for list-based constraints
+    item: {
+        type: String,
     }
 });
 
-ApplicantConstraintSchema.index({ grant: 1, type: 1, constraint: 1 }, { unique: true });
-export const ApplicantConstraint = BaseConstraint.discriminator<IApplicantConstraint>(BaseConstraintType.APPLICANT, ApplicantConstraintSchema);
+export const CompositionConstraint = BaseConstraint.discriminator<ICompositionConstraint>(BaseConstraintType.COMPOSITION, CompositionConstraintSchema);
 
-
-
-
-
-
-/*
-export interface IConstraint extends Document {
-    grant?: mongoose.Types.ObjectId; //
-    type?: ConstraintType;
-    max?: number;
-    min?: number;
-    parent?: mongoose.Types.ObjectId; //
-    mode?: OperationMode; //
-    valueType?: string;
-    value?: string;  // String or ObjectIds (stored as string)    
-    createdAt?: Date;
-    updatedAt?: Date;
-}
-
-const ConstraintSchema = new Schema<IConstraint>(
-    {
-        grant: {
-            type: Schema.Types.ObjectId,
-            ref: COLLECTIONS.GRANT,
-            //required: true,
-            immutable: true,
-        },
-        type: {
-            type: String,
-            enum: Object.values(ConstraintType),
-            //required: true,
-            immutable: true,
-        },
-        max: {
-            type: Number,
-        },
-        min: {
-            type: Number,
-        },
-        parent: {
-            type: Schema.Types.ObjectId,
-            ref: COLLECTIONS.CONSTRAINT,
-            immutable: true,
-        },
-        mode: {
-            type: String,
-            enum: Object.values(OperationMode),
-        },
-        valueType: {
-            type: String,
-        },
-        value: {
-            type: String,
-        },
-
-    },
-    {
-        timestamps: true
-    }
-);
-
-*/
 

@@ -2,6 +2,7 @@
 export enum BaseConstraintType {
     PROJECT = "Project",
     APPLICANT = "Applicant",
+    COMPOSITION = "Composition"
 }
 
 export enum ProjectConstraintType {
