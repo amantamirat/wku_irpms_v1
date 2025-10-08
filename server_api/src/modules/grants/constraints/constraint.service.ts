@@ -125,8 +125,8 @@ export class ConstraintService {
                 if (!participant) {
                     throw new Error("Applicant constraints require a corresponding Participant constraint to be set first.");
                 }
-                if (participant.max > data.value!) {
-                    throw new Error("Applicant constraint value cannot exceed Participant constraint max value.");
+                if (participant.max < data.value!) {
+                    throw new Error(`Applicant constraint value cannot exceed Participant constraint max value (${participant.max}).`);
                 }
             }
         }
