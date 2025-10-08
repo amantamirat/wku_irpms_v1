@@ -2,7 +2,7 @@ import { Grant } from "../../models/grant.model";
 
 export enum BaseConstraintType {
     PROJECT = "Project",
-    APPLICANTS = "Applicant",
+    APPLICANT = "Applicant",
 }
 
 export enum ProjectConstraintType {
@@ -28,19 +28,18 @@ export enum ApplicantConstraintType {
 }
 
 const rangeApplicantConstraints = [ApplicantConstraintType.AGE, ApplicantConstraintType.EXPERIENCE];
-const enumApplicantConstraints = [ApplicantConstraintType.GENDER, ApplicantConstraintType.ACCESSIBILITY, ApplicantConstraintType.SCOPE];
+const listApplicantConstraints = [ApplicantConstraintType.GENDER, ApplicantConstraintType.ACCESSIBILITY, ApplicantConstraintType.SCOPE];
 
 export function isRangeConstraint(type: ApplicantConstraintType) {
     return rangeApplicantConstraints.includes(type);
 }
-export function isEnumConstraint(type: ApplicantConstraintType) {
-    return enumApplicantConstraints.includes(type);
+export function isListConstraint(type: ApplicantConstraintType) {
+    return listApplicantConstraints.includes(type);
 }
 
 export enum OperationMode {
-    OBEY = "OBEY",
-    DENY = "DENY",
-    //FILTER = "FILTER"
+    COUNT = "COUNT",
+    RATIO = "RATIO"
 }
 
 export type Constraint = {
@@ -50,24 +49,43 @@ export type Constraint = {
     constraint?: ProjectConstraintType | ApplicantConstraintType;
     max?: number;
     min?: number;
-    values?: string[];
+    mode?: OperationMode;
+    value?: number;
+    list?: string[];
     range?: { min: number; max: number };
     createdAt?: Date;
     updatedAt?: Date;
 }
 
 export const validateConstraint = (constraint: Constraint): { valid: boolean; message?: string } => {
+    if (!constraint.type) {
+        return { valid: false, message: 'Grant is required.' };
+    }
     if (!constraint.grant) {
         return { valid: false, message: 'Grant is required.' };
     }
-    if (constraint.type === BaseConstraintType.APPLICANTS) {
+    if (constraint.type === BaseConstraintType.PROJECT) {
+        if (constraint.min == null || isNaN(constraint.min)) {
+            return { valid: false, message: 'Minimum value is required for project constraints.' };
+        }
+        if (constraint.max == null || isNaN(constraint.max)) {
+            return { valid: false, message: 'Maximum value is required for project constraints.' };
+        }
+    }
+    if (constraint.type === BaseConstraintType.APPLICANT) {
+        if (!constraint.mode) {
+            return { valid: false, message: 'Operation mode is required for applicant constraints.' };
+        }
+        if (constraint.value == null || isNaN(constraint.value)) {
+            return { valid: false, message: 'Value is required for applicant constraints.' };
+        }
         if (isRangeConstraint(constraint.constraint as ApplicantConstraintType)) {
             if (!constraint.range) {
                 return { valid: false, message: 'Range is required for range-based constraints.' };
             }
         }
-        if (isEnumConstraint(constraint.constraint as ApplicantConstraintType)) {
-            if (!constraint.values || constraint.values.length === 0) {
+        if (isListConstraint(constraint.constraint as ApplicantConstraintType)) {
+            if (!constraint.list || constraint.list.length === 0) {
                 return { valid: false, message: 'At least one value is required for enum-based constraints.' };
             }
         }

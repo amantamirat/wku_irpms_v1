@@ -209,7 +209,7 @@ const GrantManager = (props: GrantManagerProps) => {
                                         <ConstraintManager grant={rowData as Grant} type={BaseConstraintType.PROJECT} />
                                     </TabPanel>
                                     <TabPanel header="Applicant">
-                                        <ConstraintManager grant={rowData as Grant} type={BaseConstraintType.APPLICANTS} />
+                                        <ConstraintManager grant={rowData as Grant} type={BaseConstraintType.APPLICANT} />
                                     </TabPanel>
                                 </TabView>
                             </>)

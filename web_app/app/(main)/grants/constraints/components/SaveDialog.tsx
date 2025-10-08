@@ -2,7 +2,7 @@
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { useEffect, useState } from 'react';
-import { ApplicantConstraintType, BaseConstraintType, Constraint, isEnumConstraint, isRangeConstraint, ProjectConstraintType, validateConstraint } from '../models/constraint.model';
+import { ApplicantConstraintType, BaseConstraintType, Constraint, isListConstraint, isRangeConstraint, ProjectConstraintType, validateConstraint } from '../models/constraint.model';
 import { Dropdown } from 'primereact/dropdown';
 import { classNames } from 'primereact/utils';
 import { InputNumber } from 'primereact/inputnumber';
@@ -85,46 +85,50 @@ function SaveDialog(props: SaveDialogProps) {
                     />
                 </div>
             }
-            <div className="field">
-                <label htmlFor="min">Minimum {constraint.type === BaseConstraintType.PROJECT ? constraint.constraint : 'Required'}</label>
-                <InputNumber
-                    id="min"
-                    value={constraint.min}
-                    onChange={(e) =>
-                        setConstraint({ ...constraint, min: e.value || 0 })
-                    }
-                    required
-                    className={classNames({
-                        'p-invalid': submitted && (constraint.min == null || constraint.min <= 0),
-                    })}
-                />
-            </div>
+            {constraint.type === BaseConstraintType.PROJECT && <>
+                <div className="field">
+                    <label htmlFor="min">Minimum {constraint.constraint}</label>
+                    <InputNumber
+                        id="min"
+                        value={constraint.min}
+                        onChange={(e) =>
+                            setConstraint({ ...constraint, min: e.value || 0 })
+                        }
+                        required
+                        className={classNames({
+                            'p-invalid': submitted && (constraint.min == null || constraint.min <= 0),
+                        })}
+                    />
+                </div>
 
-            <div className="field">
-                <label htmlFor="max">Maximum {constraint.type === BaseConstraintType.PROJECT ? constraint.constraint : 'Required'}</label>
-                <InputNumber
-                    id="max"
-                    value={constraint.max}
-                    onChange={(e) =>
-                        setConstraint({ ...constraint, max: e.value || 0 })
-                    }
-                    required
-                    className={classNames({
-                        'p-invalid': submitted && (constraint.max == null || constraint.max <= 0),
-                    })}
-                />
-            </div>
-            {constraint.type === BaseConstraintType.APPLICANTS &&
+                <div className="field">
+                    <label htmlFor="max">Maximum {constraint.constraint}</label>
+                    <InputNumber
+                        id="max"
+                        value={constraint.max}
+                        onChange={(e) =>
+                            setConstraint({ ...constraint, max: e.value || 0 })
+                        }
+                        required
+                        className={classNames({
+                            'p-invalid': submitted && (constraint.max == null || constraint.max <= 0),
+                        })}
+                    />
+                </div>
+            </>
+            }
+
+            {constraint.type === BaseConstraintType.APPLICANT &&
                 <>
-                    {isEnumConstraint(constraint.constraint as ApplicantConstraintType) &&
+                    {isListConstraint(constraint.constraint as ApplicantConstraintType) &&
                         <div className="field">
                             <label htmlFor="values">Values</label>
                             <MultiSelect
                                 id="values"
-                                value={constraint.values || []}
+                                value={constraint.list || []}
                                 options={constraint.constraint === ApplicantConstraintType.GENDER ? genderOptions :
                                     constraint.constraint === ApplicantConstraintType.ACCESSIBILITY ? accessibilityOptions : scopeOptions}
-                                onChange={(e) => setConstraint({ ...constraint, values: e.value })}
+                                onChange={(e) => setConstraint({ ...constraint, list: e.value })}
                                 placeholder="Select Values"
                                 display="chip"
                             />
