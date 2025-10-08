@@ -57,7 +57,7 @@ const ProjectConstraintSchema = new Schema<IProjectConstraint>({
     },
 });
 
-ProjectConstraintSchema.index({ grant: 1, constraint: 1 }, { unique: true });
+ProjectConstraintSchema.index({ grant: 1, type: 1, constraint: 1 }, { unique: true });
 export const ProjectConstraint = BaseConstraint.discriminator<IProjectConstraint>(BaseConstraintType.PROJECT, ProjectConstraintSchema);
 
 
@@ -104,7 +104,7 @@ const ApplicantConstraintSchema = new Schema<IApplicantConstraint>({
     }
 });
 
-ApplicantConstraintSchema.index({ grant: 1, constraint: 1 }, { unique: true });
+ApplicantConstraintSchema.index({ grant: 1, type: 1, constraint: 1 }, { unique: true });
 export const ApplicantConstraint = BaseConstraint.discriminator<IApplicantConstraint>(BaseConstraintType.APPLICANT, ApplicantConstraintSchema);
 
 
