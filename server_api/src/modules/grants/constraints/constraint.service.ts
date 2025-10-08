@@ -90,24 +90,43 @@ export class ConstraintService {
 
     static async validateConstraint(data: Partial<CreateConstraintDto>) {
         if (data.type === BaseConstraintType.APPLICANT) {
-            if (isRangeConstraint(data.constraint as ApplicantConstraintType) && (!data.max || !data.min) ) {
-                throw new Error(`Range must be specified for ${data.constraint} constraint.`);
+            if (!data.mode) {
+                throw new Error("Operation mode must be specified for applicant constraints.");
             }
-            if(isListConstraint(data.constraint as ApplicantConstraintType) && (!data.list || data.list.length === 0)) {
-                throw new Error(`List of allowed values must be specified for ${data.constraint} constraint.`);
+            if (!data.value && data.value !== 0) {
+                throw new Error("Value must be specified for applicant constraints.");
             }
-            const participantConstraint = await ProjectConstraint.findOne({ grant: data.grant, constraint: ProjectConstraintType.PARTICIPANT }).lean();
-            if (!participantConstraint) {
-                throw new Error("Applicant constraints require a corresponding Participant constraint to be set first.");
+            if (isRangeConstraint(data.constraint as ApplicantConstraintType)) {
+                if ((!data.max || !data.min)) {
+                    throw new Error(`Range must be specified for ${data.constraint} constraint.`);
+                }
             }
-            if (data.constraint === ApplicantConstraintType.GENDER) {
+            else if (isListConstraint(data.constraint as ApplicantConstraintType)) {
+                if (!data.list || data.list.length === 0) {
+                    throw new Error(`List of allowed values must be specified for ${data.constraint} constraint.`);
+                }
 
+                if (data.constraint === ApplicantConstraintType.GENDER) {
+
+                }
+                else if (data.constraint === ApplicantConstraintType.SCOPE) {
+                    const allowedScopes = Object.values(Category);
+                    const invalidValues = data.list.filter(v => !allowedScopes.includes(v as Category));
+                    if (invalidValues && invalidValues.length > 0) {
+                        throw new Error(`Invalid scope value(s): ${invalidValues.join(', ')}. Allowed: ${allowedScopes.join(', ')}`);
+                    }
+                }
             }
-            else if (data.constraint === ApplicantConstraintType.SCOPE) {
-                const allowedScopes = Object.values(Category);
-                const invalidValues = data.list?.filter(v => !allowedScopes.includes(v as Category));
-                if (invalidValues && invalidValues.length > 0) {
-                    throw new Error(`Invalid scope value(s): ${invalidValues.join(', ')}. Allowed: ${allowedScopes.join(', ')}`);
+            if (data.mode === OperationMode.RATIO && data.value > 100) {
+                throw new Error("Ratio value cannot exceed 100%.");
+            }
+            else if (data.mode === OperationMode.COUNT) {
+                const participant = await ProjectConstraint.findOne({ grant: data.grant, constraint: ProjectConstraintType.PARTICIPANT }).lean();
+                if (!participant) {
+                    throw new Error("Applicant constraints require a corresponding Participant constraint to be set first.");
+                }
+                if (participant.max > data.value!) {
+                    throw new Error("Applicant constraint value cannot exceed Participant constraint max value.");
                 }
             }
         }
