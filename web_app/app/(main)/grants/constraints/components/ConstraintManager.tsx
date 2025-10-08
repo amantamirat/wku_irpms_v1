@@ -89,7 +89,7 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
         }
     };
 
-     const hideDialogs = () => {
+    const hideDialogs = () => {
         setSelectedConstraint(emptyConstraint);
         setShowSaveDialog(false);
         setShowDeleteDialog(false);
@@ -156,12 +156,19 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
                     >
                         <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                        {
-                            //<Column field="type" header="Type" sortable />
-                        }
                         <Column field="constraint" header="Constraint" sortable />
-                        <Column field="min" header="Min" sortable />
-                        <Column field="max" header="Max" sortable />
+                        {
+                            type === BaseConstraintType.APPLICANT && (<Column field="mode" header="Mode" sortable />)
+                        }
+                        {
+                            type === BaseConstraintType.APPLICANT && (<Column field="value" header="Value" sortable />)
+                        }
+                        {
+                            type === BaseConstraintType.PROJECT && (<Column field="min" header="Min" sortable />)
+                        }
+                        {
+                            type === BaseConstraintType.PROJECT && (<Column field="max" header="Max" sortable />)
+                        }
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
                     {selectedConstraint && (
