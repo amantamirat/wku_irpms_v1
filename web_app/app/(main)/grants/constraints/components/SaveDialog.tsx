@@ -2,12 +2,12 @@
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { useEffect, useState } from 'react';
-import { ApplicantConstraintType, BaseConstraintType, Constraint, isEnumConstraint, ProjectConstraintType, validateConstraint } from '../models/constraint.model';
+import { ApplicantConstraintType, BaseConstraintType, Constraint, isEnumConstraint, isRangeConstraint, ProjectConstraintType, validateConstraint } from '../models/constraint.model';
 import { Dropdown } from 'primereact/dropdown';
 import { classNames } from 'primereact/utils';
 import { InputNumber } from 'primereact/inputnumber';
 import { MultiSelect } from 'primereact/multiselect';
-import { accessibilityOptions , genderOptions} from '@/app/(main)/applicants/models/applicant.model';
+import { accessibilityOptions, genderOptions, scopeOptions } from '@/app/(main)/applicants/models/applicant.model';
 
 
 interface SaveDialogProps {
@@ -85,7 +85,7 @@ function SaveDialog(props: SaveDialogProps) {
             </div>
 
             <div className="field">
-                <label htmlFor="min">Minimum {constraint.constraint}</label>
+                <label htmlFor="min">Minimum {constraint.type === BaseConstraintType.PROJECT ? constraint.constraint : 'Required'}</label>
                 <InputNumber
                     id="min"
                     value={constraint.min}
@@ -100,7 +100,7 @@ function SaveDialog(props: SaveDialogProps) {
             </div>
 
             <div className="field">
-                <label htmlFor="max">Maximum {constraint.constraint}</label>
+                <label htmlFor="max">Maximum {constraint.type === BaseConstraintType.PROJECT ? constraint.constraint : 'Required'}</label>
                 <InputNumber
                     id="max"
                     value={constraint.max}
@@ -116,20 +116,66 @@ function SaveDialog(props: SaveDialogProps) {
             {constraint.type === BaseConstraintType.APPLICANTS &&
                 <>
                     {isEnumConstraint(constraint.constraint as ApplicantConstraintType) &&
+                        <div className="field">
+                            <label htmlFor="values">Values</label>
+                            <MultiSelect
+                                id="values"
+                                value={constraint.values || []}
+                                options={constraint.constraint === ApplicantConstraintType.GENDER ? genderOptions :
+                                    constraint.constraint === ApplicantConstraintType.ACCESSIBILITY ? accessibilityOptions : scopeOptions}
+                                onChange={(e) => setConstraint({ ...constraint, values: e.value })}
+                                placeholder="Select Values"
+                                display="chip"
+                            />
+                        </div>
+                    }
+                    {isRangeConstraint(constraint.constraint as ApplicantConstraintType) &&
                         <>
                             <div className="field">
-                                <label htmlFor="values">Values</label>
-                                <MultiSelect
-                                    id="values"
-                                    value={constraint.values || []}
-                                    options={constraint.constraint === ApplicantConstraintType.ACCESSIBILITY ? accessibilityOptions : genderOptions}
-                                    onChange={(e) => setConstraint({ ...constraint, values: e.value })}
-                                    placeholder="Select Values"
-                                    display="chip"
+                                <label htmlFor="min">Minimum {constraint.constraint}</label>
+                                <InputNumber
+                                    id="min"
+                                    value={constraint.range?.min}
+                                    onChange={(e) =>
+                                        setConstraint({
+                                            ...constraint,
+                                            range: {
+                                                max: constraint.range?.max ?? 0,
+                                                min: e.value || 0
+                                            }
+                                        })
+                                    }
+                                    required
+                                    className={classNames({
+                                        'p-invalid': submitted && (constraint.range?.min == null || constraint.range?.min <= 0),
+                                    })}
                                 />
                             </div>
-                        </>}
-                </>}
+
+                            <div className="field">
+                                <label htmlFor="max">Maximum {constraint.constraint}</label>
+                                <InputNumber
+                                    id="max"
+                                    value={constraint.range?.max}
+                                    onChange={(e) =>
+                                        setConstraint({
+                                            ...constraint,
+                                            range: {
+                                                min: constraint.range?.min ?? 0,
+                                                max: e.value || 0
+                                            }
+                                        })
+                                    }
+                                    required
+                                    className={classNames({
+                                        'p-invalid': submitted && (constraint.range?.max == null || constraint.range?.max <= 0),
+                                    })}
+                                />
+                            </div>
+                        </>
+                    }
+                </>
+            }
             {errorMessage && (
                 <small className="p-error">{errorMessage}</small>
             )}

@@ -49,7 +49,7 @@ export type Constraint = {
     type: BaseConstraintType;
     constraint?: ProjectConstraintType | ApplicantConstraintType;
     max?: number;
-    min?: number;    
+    min?: number;
     values?: string[];
     range?: { min: number; max: number };
     createdAt?: Date;
@@ -57,5 +57,20 @@ export type Constraint = {
 }
 
 export const validateConstraint = (constraint: Constraint): { valid: boolean; message?: string } => {
+    if (!constraint.grant) {
+        return { valid: false, message: 'Grant is required.' };
+    }
+    if (constraint.type === BaseConstraintType.APPLICANTS) {
+        if (isRangeConstraint(constraint.constraint as ApplicantConstraintType)) {
+            if (!constraint.range) {
+                return { valid: false, message: 'Range is required for range-based constraints.' };
+            }
+        }
+        if (isEnumConstraint(constraint.constraint as ApplicantConstraintType)) {
+            if (!constraint.values || constraint.values.length === 0) {
+                return { valid: false, message: 'At least one value is required for enum-based constraints.' };
+            }
+        }
+    }
     return { valid: true };
 }

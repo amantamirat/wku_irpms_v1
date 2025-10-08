@@ -39,6 +39,11 @@ export const genderOptions = Object.values(Gender).map(g => ({
     value: g
 }));
 
+export const scopeOptions = Object.values(Category).map(s => ({
+    label: s,
+    value: s
+}));
+
 
 export const validateApplicant = (applicant: Applicant): { valid: boolean; message?: string } => {
     if (!applicant.first_name) {
