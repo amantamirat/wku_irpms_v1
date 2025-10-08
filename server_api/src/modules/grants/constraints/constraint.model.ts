@@ -1,5 +1,5 @@
 import mongoose, { model, Schema } from "mongoose";
-import { ApplicantConstraintMode, ApplicantConstraintType, BaseConstraintType, ProjectConstraintType } from "./constraint.enum";
+import { OperationMode, ApplicantConstraintType, BaseConstraintType, ProjectConstraintType } from "./constraint.enum";
 import { COLLECTIONS } from "../../../enums/collections.enum";
 
 export interface IBaseConstraint extends Document {
@@ -65,7 +65,7 @@ export const ProjectConstraint = BaseConstraint.discriminator<IProjectConstraint
 export interface IApplicantConstraint extends IBaseConstraint {
     type: BaseConstraintType.APPLICANT;
     constraint: ApplicantConstraintType;
-    mode: ApplicantConstraintMode; // Mode of applying the constraint (count or ratio)
+    mode: OperationMode; // Mode of applying the constraint (count or ratio)
     value: number; // Required number or ratio of applicants
     list?: string[]; // Allowed values for enum-based constraints
     range?: { min: number; max: number }; // Range for numeric (age/experience) constraints
@@ -80,7 +80,7 @@ const ApplicantConstraintSchema = new Schema<IApplicantConstraint>({
     },
     mode: {
         type: String,
-        enum: Object.values(ApplicantConstraintMode),
+        enum: Object.values(OperationMode),
         required: true
     },
     value: {

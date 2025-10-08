@@ -1,4 +1,4 @@
-import { BaseConstraintType, OperationMode, ProjectConstraintType, ApplicantConstraintType, isRangeConstraint, ApplicantConstraintMode } from "./constraint.enum";
+import { BaseConstraintType, OperationMode, ProjectConstraintType, ApplicantConstraintType, isRangeConstraint, isListConstraint } from "./constraint.enum";
 import { Grant } from "../grant.model";
 import mongoose from "mongoose";
 import { BaseConstraint, ProjectConstraint } from "./constraint.model";
@@ -11,9 +11,9 @@ export interface CreateConstraintDto {
     type: BaseConstraintType;
     grant: mongoose.Types.ObjectId;
     constraint: ProjectConstraintType | ApplicantConstraintType;
-    min?: number; 
+    min?: number;
     max?: number;
-    mode?: ApplicantConstraintMode;
+    mode?: OperationMode;
     value?: number;
     list?: string[];
     range?: { min: number; max: number };
@@ -90,28 +90,19 @@ export class ConstraintService {
     }
 
     static async validateConstraint(data: Partial<CreateConstraintDto>) {
-        const grant = await Grant.findById(data.grant).lean();
-        if (!grant) throw new Error("Grant type not found");
         if (data.type === BaseConstraintType.APPLICANT) {
+            if (isRangeConstraint(data.constraint as ApplicantConstraintType) && !data.range) {
+                throw new Error(`Range must be specified for ${data.constraint} constraint.`);
+            }
+            if(isListConstraint(data.constraint as ApplicantConstraintType) && (!data.list || data.list.length === 0)) {
+                throw new Error(`List of allowed values must be specified for ${data.constraint} constraint.`);
+            }
             const participantConstraint = await ProjectConstraint.findOne({ grant: data.grant, constraint: ProjectConstraintType.PARTICIPANT }).lean();
             if (!participantConstraint) {
                 throw new Error("Applicant constraints require a corresponding Participant constraint to be set first.");
             }
-            
-            if (isRangeConstraint(data.constraint as ApplicantConstraintType)) {
-                if (!data.range) {
-                    throw new Error("Project constraints must specify a 'range' with 'min' and 'max' values.");
-                }
-            }
             if (data.constraint === ApplicantConstraintType.GENDER) {
-                const allowedGenders = Object.values(Gender);
-                if (!Array.isArray(data.list) || data.list.length === 0) {
-                    throw new Error("Gender constraint must specify 'values' as a non-empty array.");
-                }
-                const invalidValues = data.list.filter(v => !allowedGenders.includes(v as Gender));
-                if (invalidValues.length > 0) {
-                    throw new Error(`Invalid gender value(s): ${invalidValues.join(', ')}. Allowed: ${allowedGenders.join(', ')}`);
-                }
+
             }
             else if (data.constraint === ApplicantConstraintType.SCOPE) {
                 const allowedScopes = Object.values(Category);
@@ -124,6 +115,8 @@ export class ConstraintService {
     }
 
     static async createConstraint(data: CreateConstraintDto) {
+        const grant = await Grant.findById(data.grant).lean();
+        if (!grant) throw new Error("Grant type not found");
         await this.validateConstraint(data);
         const createdConstraint = await BaseConstraint.create({ ...data });
         return createdConstraint;

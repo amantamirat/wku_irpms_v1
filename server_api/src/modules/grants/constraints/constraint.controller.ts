@@ -11,7 +11,7 @@ export class ConstraintController {
   static async createConstraint(req: Request, res: Response) {
     try {
       const { grant, type, constraint, min, max, mode, value, list, range } = req.body;
-      let data: CreateConstraintDto = {
+      const data: CreateConstraintDto = {
         type: type,
         grant: grant,
         constraint: constraint,
@@ -19,15 +19,9 @@ export class ConstraintController {
         max: type === BaseConstraintType.PROJECT ? max : undefined,
         mode: type === BaseConstraintType.APPLICANT ? mode : undefined,
         value: type === BaseConstraintType.APPLICANT ? value : undefined,
+        list: type === BaseConstraintType.APPLICANT && isListConstraint(constraint) ? list : undefined,
+        range: type === BaseConstraintType.APPLICANT && isRangeConstraint(constraint) ? range : undefined
       };
-      if (type === BaseConstraintType.APPLICANT) {
-        if (isListConstraint(constraint)) {
-          data.list = list;
-        }
-        else if (isRangeConstraint(constraint)) {
-          data.range = range;
-        }
-      }
       const created = await ConstraintService.createConstraint(data);
       successResponse(res, 201, "Constraint created successfully", created);
     } catch (err: any) {
@@ -52,10 +46,14 @@ export class ConstraintController {
   static async updateConstraint(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { min, max } = req.body;
+      const {type, constraint, min, max, mode, value, list, range } = req.body;
       const data: Partial<CreateConstraintDto> = {
-        min: min,
-        max: max
+        min: type === BaseConstraintType.PROJECT ? min : undefined,
+        max: type === BaseConstraintType.PROJECT ? max : undefined,
+        mode: type === BaseConstraintType.APPLICANT ? mode : undefined,
+        value: type === BaseConstraintType.APPLICANT ? value : undefined,
+        list: type === BaseConstraintType.APPLICANT && isListConstraint(constraint) ? list : undefined,
+        range: type === BaseConstraintType.APPLICANT && isRangeConstraint(constraint) ? range : undefined
       };
       const updated = await ConstraintService.updateConstraint(id, data);
       successResponse(res, 201, "Constraint updated successfully", updated);

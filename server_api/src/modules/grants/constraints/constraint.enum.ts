@@ -36,23 +36,18 @@ export function isListConstraint(type: ApplicantConstraintType) {
     return listApplicantConstraints.includes(type);
 }
 
-export enum ApplicantConstraintMode {
+export enum OperationMode {
     COUNT = "COUNT",
     RATIO = "RATIO"
 }
 
-
-
 //////////////////////////////////////////////////////////
-export enum ConstraintType {   
-
-
+export enum ConstraintType {
     // Project Status Constraints
     SUBMITTED = "SUBMITTED",              // Submitted projects
     ONGOING = "ONGOING",                  // Ongoing projects
     COMPLETED = "COMPLETED",              // Completed projects
     INCOMPLETE = "INCOMPLETE",            // Incomplete projects
-
     // Participant Type Constraints
     ACADEMIC = "ACADEMIC",                // Academic staff
     STUDENT = "STUDENT",                  // Student participants
@@ -61,8 +56,4 @@ export enum ConstraintType {
     //CO_PI_COUNT = "CO-PI-COUNT",          // Number of Co-PIs
 }
 
-export enum OperationMode {
-    OBEY = "OBEY",
-    DENY = "DENY",
-    FILTER = "FILTER"
-}
+
