@@ -3,9 +3,8 @@ import ConfirmDialog from '@/components/ConfirmationDialog';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
-import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
+import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
-import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Grant } from '../../models/grant.model';
@@ -26,7 +25,7 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
     const emptyConstraint: Constraint = {
         grant: grant,
         type: type,
-        parent: parent ? parent._id : undefined
+        parent: parent ?? undefined
     };
 
     const [constraints, setConstraints] = useState<Constraint[]>([]);
@@ -37,6 +36,8 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
     const [selectedConstraint, setSelectedConstraint] = useState<Constraint>(emptyConstraint);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
+
 
 
     const fetchConstraints = useCallback(async () => {
@@ -155,23 +156,41 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
                         header={header}
                         scrollable
                         filters={filters}
+                        expandedRows={expandedRows}
+                        onRowToggle={(e) => setExpandedRows(e.data)}
+                        rowExpansionTemplate={(rowData) => {
+                            if (type === BaseConstraintType.APPLICANT) {
+                                return (
+                                    <ConstraintManager parent={rowData as Constraint} grant={grant} type={BaseConstraintType.COMPOSITION} />
+                                )
+                            }
+                        }}
+
                     >
-                        <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
+                        {
+                            type === BaseConstraintType.APPLICANT &&
+                            <Column expander style={{ width: '3em' }} />
+                        }
+                        {
+                            type !== BaseConstraintType.APPLICANT &&
+                            <Column selectionMode="single" style={{ width: '3em' }} />
+
+                        }
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         {
                             type !== BaseConstraintType.COMPOSITION &&
                             (<Column field="constraint" header="Constraint" sortable />)
                         }
                         {
-                            type === BaseConstraintType.APPLICANT && 
+                            type === BaseConstraintType.APPLICANT &&
                             (<Column field="mode" header="Mode" sortable />)
                         }
                         {
-                            type === BaseConstraintType.PROJECT && 
+                            type === BaseConstraintType.PROJECT &&
                             (<Column field="min" header="Min" sortable />)
                         }
                         {
-                            type === BaseConstraintType.PROJECT && 
+                            type === BaseConstraintType.PROJECT &&
                             (<Column field="max" header="Max" sortable />)
                         }
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
@@ -181,6 +200,7 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
                             visible={showSaveDialog}
                             constraint={selectedConstraint}
                             setConstraint={setSelectedConstraint}
+                            parent={parent}
                             onSave={saveConstraint}
                             onHide={hideDialogs}
                         />
