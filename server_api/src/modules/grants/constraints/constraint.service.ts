@@ -42,11 +42,11 @@ export class ConstraintService {
             }
         }
         if (data.type === BaseConstraintType.COMPOSITION) {
-            const appConstraint = await ApplicantConstraint.findById(data.parent);
-            if (!appConstraint) {
+            const parentConstraint = await ApplicantConstraint.findById(data.parent);
+            if (!parentConstraint) {
                 throw new Error("Parent applicant constraint not found for composition constraint.");
             }
-            const mode = appConstraint.mode;
+            const mode = parentConstraint.mode;
             if (mode === OperationMode.RATIO) {
                 if ((!data.value && data.value !== 0) || data.value < 0 || data.value > 1) {
                     throw new Error("Value must be a ratio (between 0 and 1) for ratio-based composition constraints.");
@@ -57,9 +57,7 @@ export class ConstraintService {
                     throw new Error("Value must be specified for count-based composition constraints.");
                 }
             }
-
-
-            const applicantType = appConstraint.constraint;
+            const applicantType = parentConstraint.constraint;
             if (isRangeConstraint(applicantType as ApplicantConstraintType)) {
                 if ((!data.max || !data.min)) {
                     throw new Error(`Range must be specified for ${applicantType} constraint.`);
@@ -70,7 +68,6 @@ export class ConstraintService {
                     throw new Error(`Item must be specified for ${applicantType} constraint.`);
                 }
             }
-
         }
     }
 

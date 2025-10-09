@@ -45,15 +45,17 @@ export class ConstraintController {
   static async updateConstraint(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { type, constraint, min, max, mode, value, list, range } = req.body;
+      const { type, constraint, min, max, mode, value, item } = req.body;
       const data: Partial<CreateConstraintDto> = {
+        constraint: type === BaseConstraintType.PROJECT ||
+          type === BaseConstraintType.APPLICANT ? constraint : undefined,
         min: type === BaseConstraintType.PROJECT ||
-          (type === BaseConstraintType.APPLICANT && isRangeConstraint(constraint)) ? min : undefined,
+          type === BaseConstraintType.COMPOSITION ? min : undefined,
         max: type === BaseConstraintType.PROJECT ||
-          (type === BaseConstraintType.APPLICANT && isRangeConstraint(constraint)) ? max : undefined,
+          type === BaseConstraintType.COMPOSITION ? max : undefined,
         mode: type === BaseConstraintType.APPLICANT ? mode : undefined,
-        value: type === BaseConstraintType.APPLICANT ? value : undefined,
-        //list: type === BaseConstraintType.APPLICANT && isListConstraint(constraint) ? list : undefined,
+        value: type === BaseConstraintType.COMPOSITION ? value : undefined,
+        item: type === BaseConstraintType.COMPOSITION ? item : undefined,
       };
       const updated = await ConstraintService.updateConstraint(id, data);
       successResponse(res, 201, "Constraint updated successfully", updated);

@@ -78,7 +78,8 @@ const ApplicantConstraintSchema = new Schema<IApplicantConstraint>({
     mode: {
         type: String,
         enum: Object.values(OperationMode),
-        required: true
+        required: true,
+        immutable: true,
     }
 
 });
@@ -88,7 +89,7 @@ export const ApplicantConstraint = BaseConstraint.discriminator<IApplicantConstr
 
 
 // Composition Constraint Model
-export interface ICompositionConstraint extends Document {
+export interface ICompositionConstraint extends IBaseConstraint {
     type: BaseConstraintType.COMPOSITION;
     parent: mongoose.Types.ObjectId;
     value: number; // Required number or ratio of applicants
@@ -107,7 +108,6 @@ const CompositionConstraintSchema = new Schema<ICompositionConstraint>({
     },
     value: {
         type: Number,
-        min: 0,
         required: true
     },
     max: {
