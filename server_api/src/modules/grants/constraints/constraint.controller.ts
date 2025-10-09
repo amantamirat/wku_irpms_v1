@@ -53,7 +53,7 @@ export class ConstraintController {
           (type === BaseConstraintType.APPLICANT && isRangeConstraint(constraint)) ? max : undefined,
         mode: type === BaseConstraintType.APPLICANT ? mode : undefined,
         value: type === BaseConstraintType.APPLICANT ? value : undefined,
-        list: type === BaseConstraintType.APPLICANT && isListConstraint(constraint) ? list : undefined,
+        //list: type === BaseConstraintType.APPLICANT && isListConstraint(constraint) ? list : undefined,
       };
       const updated = await ConstraintService.updateConstraint(id, data);
       successResponse(res, 201, "Constraint updated successfully", updated);

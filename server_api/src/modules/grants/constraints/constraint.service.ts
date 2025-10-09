@@ -3,7 +3,7 @@ import { Gender } from "../../applicants/applicant.enum";
 import { Category } from "../../organization/organization.enum";
 import { Grant } from "../grant.model";
 import { ApplicantConstraintType, BaseConstraintType, isListConstraint, isRangeConstraint, OperationMode, ProjectConstraintType } from "./constraint.enum";
-import { BaseConstraint, ProjectConstraint } from "./constraint.model";
+import { ApplicantConstraint, BaseConstraint, ProjectConstraint } from "./constraint.model";
 
 
 
@@ -22,8 +22,9 @@ export interface CreateConstraintDto {
     min?: number;
     max?: number;
     mode?: OperationMode;
+    parent?: mongoose.Types.ObjectId;
     value?: number;
-    list?: string[];
+    item?: string;
 }
 
 export interface GetConstraintOptions {
@@ -39,6 +40,37 @@ export class ConstraintService {
             if (!data.mode) {
                 throw new Error("Operation mode must be specified for applicant constraints.");
             }
+        }
+        if (data.type === BaseConstraintType.COMPOSITION) {
+            const appConstraint = await ApplicantConstraint.findById(data.parent);
+            if (!appConstraint) {
+                throw new Error("Parent applicant constraint not found for composition constraint.");
+            }
+            const mode = appConstraint.mode;
+            if (mode === OperationMode.RATIO) {
+                if ((!data.value && data.value !== 0) || data.value < 0 || data.value > 1) {
+                    throw new Error("Value must be a ratio (between 0 and 1) for ratio-based composition constraints.");
+                }
+            }
+            else if (mode === OperationMode.COUNT) {
+                if ((!data.value && data.value !== 0)) {
+                    throw new Error("Value must be specified for count-based composition constraints.");
+                }
+            }
+
+
+            const applicantType = appConstraint.constraint;
+            if (isRangeConstraint(applicantType as ApplicantConstraintType)) {
+                if ((!data.max || !data.min)) {
+                    throw new Error(`Range must be specified for ${applicantType} constraint.`);
+                }
+            }
+            else if (isListConstraint(applicantType as ApplicantConstraintType)) {
+                if (!data.item) {
+                    throw new Error(`Item must be specified for ${applicantType} constraint.`);
+                }
+            }
+
         }
     }
 
