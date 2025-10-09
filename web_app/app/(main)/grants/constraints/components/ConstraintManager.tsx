@@ -162,7 +162,6 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
                             type !== BaseConstraintType.COMPOSITION &&
                             (<Column field="constraint" header="Constraint" sortable />)
                         }
-
                         {
                             type === BaseConstraintType.APPLICANT && 
                             (<Column field="mode" header="Mode" sortable />)
