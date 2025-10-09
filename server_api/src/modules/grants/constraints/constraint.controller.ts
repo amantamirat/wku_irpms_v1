@@ -15,13 +15,11 @@ export class ConstraintController {
         type: type,
         grant: grant,
         constraint: constraint,
-        min: type === BaseConstraintType.PROJECT ||
-          (type === BaseConstraintType.APPLICANT && isRangeConstraint(constraint)) ? min : undefined,
-        max: type === BaseConstraintType.PROJECT ||
-          (type === BaseConstraintType.APPLICANT && isRangeConstraint(constraint)) ? max : undefined,
+        min: type === BaseConstraintType.PROJECT ? min : undefined,
+        max: type === BaseConstraintType.PROJECT ? max : undefined,
         mode: type === BaseConstraintType.APPLICANT ? mode : undefined,
-        value: type === BaseConstraintType.APPLICANT ? value : undefined,
-        list: type === BaseConstraintType.APPLICANT && isListConstraint(constraint) ? list : undefined,
+        //value: type === BaseConstraintType.APPLICANT ? value : undefined,
+        //list: type === BaseConstraintType.APPLICANT && isListConstraint(constraint) ? list : undefined,
       };
       const created = await ConstraintService.createConstraint(data);
       successResponse(res, 201, "Constraint created successfully", created);

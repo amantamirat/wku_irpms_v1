@@ -70,6 +70,8 @@ export class ConstraintValidator {
 
     }
 
+    /*
+
     static async validateApplicantConstraints(grantId: mongoose.Types.ObjectId, data: CreateProjectDto) {
         const collaborators = data.collaborators ?? [];
         if (collaborators.length === 0) {
@@ -168,4 +170,5 @@ export class ConstraintValidator {
             }
         }
     }
+        */
 }

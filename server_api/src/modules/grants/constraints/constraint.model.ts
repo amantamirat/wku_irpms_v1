@@ -107,6 +107,7 @@ const CompositionConstraintSchema = new Schema<ICompositionConstraint>({
     },
     value: {
         type: Number,
+        min: 0,
         required: true
     },
     max: {
