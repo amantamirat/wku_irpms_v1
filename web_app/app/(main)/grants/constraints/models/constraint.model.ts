@@ -62,7 +62,7 @@ export const validateConstraint = (constraint: Constraint): { valid: boolean; me
     if (!constraint.type) {
         return { valid: false, message: 'Grant is required.' };
     }
-    if (!constraint.grant) {
+    if (!constraint.grant && constraint.type !== BaseConstraintType.COMPOSITION) {
         return { valid: false, message: 'Grant is required.' };
     }
     if (constraint.type === BaseConstraintType.APPLICANT) {
@@ -70,7 +70,7 @@ export const validateConstraint = (constraint: Constraint): { valid: boolean; me
             return { valid: false, message: 'Operation mode is required for applicant constraints.' };
         }
     }
-    if (constraint.type === BaseConstraintType.PROJECT || (constraint.type === BaseConstraintType.APPLICANT && isRangeConstraint(constraint.constraint as ApplicantConstraintType))) {
+    if (constraint.type === BaseConstraintType.PROJECT || (constraint.type === BaseConstraintType.COMPOSITION && constraint.parent&&isRangeConstraint((constraint.parent as Constraint).constraint as ApplicantConstraintType))) {
         if (constraint.min == null || isNaN(constraint.min)) {
             return { valid: false, message: 'Minimum value is required.' };
         }
@@ -78,6 +78,5 @@ export const validateConstraint = (constraint: Constraint): { valid: boolean; me
             return { valid: false, message: 'Maximum value is required.' };
         }
     }
-
     return { valid: true };
 }

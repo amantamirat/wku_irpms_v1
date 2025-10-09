@@ -37,8 +37,6 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
-
-
     const fetchConstraints = useCallback(async () => {
         try {
             const data = await ConstraintApi.getConstraints({ grant: grant._id, type: type, parent: parent ? parent._id : undefined });

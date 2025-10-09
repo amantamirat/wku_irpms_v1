@@ -10,7 +10,7 @@ export class ConstraintController {
 
   static async createConstraint(req: Request, res: Response) {
     try {
-      const { grant, type, constraint, min, max, mode, value, item } = req.body;
+      const { grant, type, constraint, min, max, mode, value, item, parent } = req.body;
       const data: CreateConstraintDto = {
         type: type,
         grant: grant,
@@ -20,6 +20,7 @@ export class ConstraintController {
         mode: type === BaseConstraintType.APPLICANT ? mode : undefined,
         value: value ?? undefined,
         item: item ?? undefined,
+        parent: parent ? new mongoose.Types.ObjectId(parent as string) : undefined,
       };
       const created = await ConstraintService.createConstraint(data);
       successResponse(res, 201, "Constraint created successfully", created);
