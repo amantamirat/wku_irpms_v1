@@ -95,7 +95,7 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
 
     const startToolbarTemplate = () => (
         <div className="my-2">
-            <Button label={`New ${type} Constraint`} icon="pi pi-plus" severity="success" className="mr-2"
+            <Button label={`${type} Constraint`} icon="pi pi-plus" severity="success" className="mr-2"
                 onClick={() => {
                     setSelectedConstraint(emptyConstraint);
                     setShowSaveDialog(true);

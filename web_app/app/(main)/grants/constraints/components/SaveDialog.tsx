@@ -80,7 +80,6 @@ function SaveDialog(props: SaveDialogProps) {
             className="p-fluid"
             footer={footer}
             onHide={hide}
-            maximizable
         >
             <Toast ref={toast} />
             {!constraint._id && (constraint.type !== BaseConstraintType.COMPOSITION) &&
@@ -174,13 +173,23 @@ function SaveDialog(props: SaveDialogProps) {
             {
                 parent &&
                 <div className="field">
-                    <label htmlFor="value">Value</label>
+                    <label htmlFor="value">{parent.mode} Value</label>
                     <InputNumber
                         id="value"
                         value={constraint.value}
-                        onChange={(e) =>
-                            setConstraint({ ...constraint, value: e.value || 0 })
-                        }
+                        onChange={(e) => {
+                            let val = e.value ?? 0;
+                            if (parent.mode === "COUNT") {
+                                val = Math.max(0, Math.floor(val)); // only positive integers
+                            } else if (parent.mode === "RATIO") {
+                                val = Math.min(1, Math.max(0, parseFloat(val.toFixed(2)))); // clamp between 0 and 1
+                            }
+                            setConstraint({ ...constraint, value: val });
+                        }}
+                        min={parent.mode === OperationMode.RATIO ? 0 : 1}
+                        max={parent.mode === OperationMode.RATIO ? 1 : undefined}
+                        step={parent.mode === OperationMode.RATIO ? 0.01 : 1}
+                        mode="decimal"
                         required
                         className={classNames({
                             'p-invalid': submitted && (constraint.value == null) && constraint.type === BaseConstraintType.COMPOSITION
