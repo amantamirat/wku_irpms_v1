@@ -56,7 +56,7 @@ export class ProjectService {
         }
         const call = await this.validateProject(dto);
         await  ConstraintValidator.validateProjectConstraints(call.grant, dto);
-        //await  ConstraintValidator.validateApplicantConstraints(call.grant, dto);        
+        await  ConstraintValidator.validateApplicantConstraints(call.grant, dto);        
         //Find the first stage
         const stage = await Stage.findOne({ parent: call.evaluation, order: 1 }).lean();
         if (!stage) throw new Error("Stage not found");
