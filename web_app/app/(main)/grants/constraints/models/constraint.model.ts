@@ -3,6 +3,7 @@ import { Grant } from "../../models/grant.model";
 export enum BaseConstraintType {
     PROJECT = "Project",
     APPLICANT = "Applicant",
+    COMPOSITION = "Composition"
 }
 
 export enum ProjectConstraintType {
@@ -50,8 +51,9 @@ export type Constraint = {
     max?: number;
     min?: number;
     mode?: OperationMode;
+    parent?: string | Constraint; // For composition constraints
     value?: number;
-    list?: string[];
+    item?: string;
     createdAt?: Date;
     updatedAt?: Date;
 }

@@ -17,18 +17,20 @@ import SaveDialog from './SaveDialog';
 interface ConstraintManagerProps {
     type: BaseConstraintType;
     grant: Grant;
+    parent?: Constraint; // For composition constraints
 }
 
 const ConstraintManager = (props: ConstraintManagerProps) => {
 
-    const { type, grant } = props
+    const { type, grant, parent } = props
     const emptyConstraint: Constraint = {
         grant: grant,
-        type: type
+        type: type,
+        parent: parent ? parent._id : undefined
     };
 
     const [constraints, setConstraints] = useState<Constraint[]>([]);
-    const [error, setError] = useState<string | null>(null);
+
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
@@ -156,15 +158,22 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
                     >
                         <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                        <Column field="constraint" header="Constraint" sortable />
                         {
-                            type === BaseConstraintType.APPLICANT && (<Column field="mode" header="Mode" sortable />)
+                            type !== BaseConstraintType.COMPOSITION &&
+                            (<Column field="constraint" header="Constraint" sortable />)
+                        }
+
+                        {
+                            type === BaseConstraintType.APPLICANT && 
+                            (<Column field="mode" header="Mode" sortable />)
                         }
                         {
-                            type === BaseConstraintType.PROJECT && (<Column field="min" header="Min" sortable />)
+                            type === BaseConstraintType.PROJECT && 
+                            (<Column field="min" header="Min" sortable />)
                         }
                         {
-                            type === BaseConstraintType.PROJECT && (<Column field="max" header="Max" sortable />)
+                            type === BaseConstraintType.PROJECT && 
+                            (<Column field="max" header="Max" sortable />)
                         }
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
