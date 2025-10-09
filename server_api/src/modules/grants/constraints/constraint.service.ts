@@ -82,6 +82,7 @@ export class ConstraintService {
     }
 
     static async getConstraints(options: GetConstraintOptions = {}) {
+        console.log(options);
         const filter: any = {};
         if (options.parent) {
             filter.parent = options.parent;

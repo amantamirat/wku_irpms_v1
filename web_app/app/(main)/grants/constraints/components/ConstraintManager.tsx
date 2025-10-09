@@ -29,7 +29,6 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
     };
 
     const [constraints, setConstraints] = useState<Constraint[]>([]);
-
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
@@ -42,14 +41,14 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
 
     const fetchConstraints = useCallback(async () => {
         try {
-            const data = await ConstraintApi.getConstraints({ grant: props.grant._id, type: type });
+            const data = await ConstraintApi.getConstraints({ grant: grant._id, type: type, parent: parent ? parent._id : undefined });
             setConstraints(data);
         } catch (err) {
             // setError(`Failed to load constraint data ${err}`);
         } finally {
 
         }
-    }, [grant, type]);
+    }, [grant, type, parent]);
 
     useEffect(() => {
         fetchConstraints();
@@ -65,8 +64,6 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
-
-
 
 
     const saveConstraint = async () => {
