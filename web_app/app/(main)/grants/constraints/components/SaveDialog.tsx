@@ -75,7 +75,7 @@ function SaveDialog(props: SaveDialogProps) {
         <Dialog
             visible={visible}
             style={{ width: '500px' }}
-            header={constraint._id ? `Edit ${constraint.type} Constraint` : `Create New ${constraint.type} Constraint`}
+            header={constraint._id ? `Edit Constraint` : `Create New Constraint`}
             modal
             className="p-fluid"
             footer={footer}
@@ -172,7 +172,7 @@ function SaveDialog(props: SaveDialogProps) {
                 </div>
             }
             {
-                constraint.type === BaseConstraintType.COMPOSITION &&
+                parent &&
                 <div className="field">
                     <label htmlFor="value">Value</label>
                     <InputNumber

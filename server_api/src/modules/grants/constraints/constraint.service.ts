@@ -85,7 +85,7 @@ export class ConstraintService {
         const filter: any = {};
         if (options.parent) {
             filter.parent = options.parent;
-            return await Composition.find(filter).lean();
+            return await Composition.find(filter).populate("parent").lean();
         }
         if (options.grant) filter.grant = options.grant;
         if (options.type) filter.type = options.type;
