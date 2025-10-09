@@ -67,17 +67,6 @@ export const validateConstraint = (constraint: Constraint): { valid: boolean; me
         if (!constraint.mode) {
             return { valid: false, message: 'Operation mode is required for applicant constraints.' };
         }
-        if (constraint.value == null || isNaN(constraint.value)) {
-            return { valid: false, message: 'Value is required for applicant constraints.' };
-        }
-        if (constraint.value > 100 && constraint.mode === OperationMode.RATIO) {
-            return { valid: false, message: 'Value cannot exceed 100 for RATIO mode.' };
-        }
-        if (isListConstraint(constraint.constraint as ApplicantConstraintType)) {
-            if (!constraint.list || constraint.list.length === 0) {
-                return { valid: false, message: 'At least one value is required for enum-based constraints.' };
-            }
-        }
     }
     if (constraint.type === BaseConstraintType.PROJECT || (constraint.type === BaseConstraintType.APPLICANT && isRangeConstraint(constraint.constraint as ApplicantConstraintType))) {
         if (constraint.min == null || isNaN(constraint.min)) {

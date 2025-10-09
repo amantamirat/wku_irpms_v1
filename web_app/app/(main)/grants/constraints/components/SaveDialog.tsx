@@ -31,8 +31,8 @@ function SaveDialog(props: SaveDialogProps) {
             if (!result.valid) {
                 throw new Error(result.message);
             }
-            await onSave();          
-            
+            await onSave();
+
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',
@@ -74,7 +74,7 @@ function SaveDialog(props: SaveDialogProps) {
     return (
         <Dialog
             visible={visible}
-            style={{ width: '500px', height: '400px' }}
+            style={{ width: '500px' }}
             header={constraint._id ? `Edit ${constraint.type} Constraint` : `Create New ${constraint.type} Constraint`}
             modal
             className="p-fluid"
@@ -103,8 +103,40 @@ function SaveDialog(props: SaveDialogProps) {
                 </div>
             }
 
+            {constraint.type === BaseConstraintType.PROJECT &&
+                <>
+                    <div className="field">
+                        <label htmlFor="min">Minimum {constraint.constraint}</label>
+                        <InputNumber
+                            id="min"
+                            value={constraint.min}
+                            onChange={(e) =>
+                                setConstraint({ ...constraint, min: e.value || 0 })
+                            }
+                            required
+                            className={classNames({
+                                'p-invalid': submitted && (constraint.min == null || constraint.min <= 0),
+                            })}
+                        />
+                    </div>
 
-            {constraint.type === BaseConstraintType.APPLICANT && <>
+                    <div className="field">
+                        <label htmlFor="max">Maximum {constraint.constraint}</label>
+                        <InputNumber
+                            id="max"
+                            value={constraint.max}
+                            onChange={(e) =>
+                                setConstraint({ ...constraint, max: e.value || 0 })
+                            }
+                            required
+                            className={classNames({
+                                'p-invalid': submitted && (constraint.max == null || constraint.max <= 0),
+                            })}
+                        />
+                    </div>
+                </>
+            }
+            {constraint.type === BaseConstraintType.APPLICANT &&
                 <div className="field">
                     <label htmlFor="mode">Mode</label>
                     <Dropdown
@@ -118,68 +150,6 @@ function SaveDialog(props: SaveDialogProps) {
                         className={classNames({ 'p-invalid': submitted && !constraint.mode && constraint.type === BaseConstraintType.APPLICANT })}
                     />
                 </div>
-                <div className="field">
-                    <label htmlFor="value">Value</label>
-                    <InputNumber
-                        id="value"
-                        value={constraint.value}
-                        onChange={(e) =>
-                            setConstraint({ ...constraint, value: e.value || 0 })
-                        }
-                        required
-                        className={classNames({
-                            'p-invalid': submitted && (constraint.value == null || constraint.value <= 0) && constraint.type === BaseConstraintType.APPLICANT
-                        })}
-                    />
-                </div>
-            </>}
-
-            {constraint.type === BaseConstraintType.APPLICANT && isListConstraint(constraint.constraint as ApplicantConstraintType) &&
-                <div className="field">
-                    <label htmlFor="list">List</label>
-                    <MultiSelect
-                        id="list"
-                        value={constraint.list || []}
-                        options={constraint.constraint === ApplicantConstraintType.GENDER ? genderOptions :
-                            constraint.constraint === ApplicantConstraintType.ACCESSIBILITY ? accessibilityOptions : scopeOptions}
-                        onChange={(e) => setConstraint({ ...constraint, list: e.value })}
-                        placeholder="Select Items"
-                        display="chip"
-                    />
-                </div>
-            }
-
-            {(constraint.type === BaseConstraintType.PROJECT || constraint.type === BaseConstraintType.APPLICANT && isRangeConstraint(constraint.constraint as ApplicantConstraintType)) && <>
-                <div className="field">
-                    <label htmlFor="min">Minimum {constraint.constraint}</label>
-                    <InputNumber
-                        id="min"
-                        value={constraint.min}
-                        onChange={(e) =>
-                            setConstraint({ ...constraint, min: e.value || 0 })
-                        }
-                        required
-                        className={classNames({
-                            'p-invalid': submitted && (constraint.min == null || constraint.min <= 0),
-                        })}
-                    />
-                </div>
-
-                <div className="field">
-                    <label htmlFor="max">Maximum {constraint.constraint}</label>
-                    <InputNumber
-                        id="max"
-                        value={constraint.max}
-                        onChange={(e) =>
-                            setConstraint({ ...constraint, max: e.value || 0 })
-                        }
-                        required
-                        className={classNames({
-                            'p-invalid': submitted && (constraint.max == null || constraint.max <= 0),
-                        })}
-                    />
-                </div>
-            </>
             }
         </Dialog >
     );

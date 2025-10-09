@@ -161,9 +161,6 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
                             type === BaseConstraintType.APPLICANT && (<Column field="mode" header="Mode" sortable />)
                         }
                         {
-                            type === BaseConstraintType.APPLICANT && (<Column field="value" header="Value" sortable />)
-                        }
-                        {
                             type === BaseConstraintType.PROJECT && (<Column field="min" header="Min" sortable />)
                         }
                         {
