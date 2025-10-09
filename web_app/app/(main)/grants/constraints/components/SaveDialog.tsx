@@ -189,7 +189,8 @@ function SaveDialog(props: SaveDialogProps) {
                         min={parent.mode === OperationMode.RATIO ? 0 : 1}
                         max={parent.mode === OperationMode.RATIO ? 1 : undefined}
                         step={parent.mode === OperationMode.RATIO ? 0.01 : 1}
-                        mode="decimal"
+                        useGrouping={false} 
+                        maxFractionDigits={parent.mode === OperationMode.RATIO ? 2 : 0}
                         required
                         className={classNames({
                             'p-invalid': submitted && (constraint.value == null) && constraint.type === BaseConstraintType.COMPOSITION
