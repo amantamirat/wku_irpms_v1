@@ -83,9 +83,12 @@ export class ConstraintService {
 
     static async getConstraints(options: GetConstraintOptions = {}) {
         const filter: any = {};
+        if (options.parent) {
+            filter.parent = options.parent;
+            return await Composition.find(filter).lean();
+        }
         if (options.grant) filter.grant = options.grant;
         if (options.type) filter.type = options.type;
-        if (options.parent) filter.parent = options.parent;
         return await BaseConstraint.find(filter).lean();
     }
 

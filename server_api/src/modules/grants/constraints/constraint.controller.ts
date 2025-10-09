@@ -30,10 +30,11 @@ export class ConstraintController {
 
   static async getConstraints(req: Request, res: Response) {
     try {
-      const { grant, type } = req.query;
+      const { grant, type, parent} = req.query;
       const options: GetConstraintOptions = {
         grant: new mongoose.Types.ObjectId(grant as string),
-        type: type as BaseConstraintType
+        type: type as BaseConstraintType,
+        parent: new mongoose.Types.ObjectId(parent as string),
       }
       const constraints = await ConstraintService.getConstraints(options);
       successResponse(res, 200, 'Constraints fetched successfully', constraints);
