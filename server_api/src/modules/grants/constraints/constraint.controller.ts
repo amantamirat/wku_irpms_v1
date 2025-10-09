@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { ConstraintService, CreateConstraintDto, GetConstraintOptions } from './constraint.service';
 import { errorResponse, successResponse } from '../../../util/response';
 import mongoose from 'mongoose';
-import { BaseConstraintType, isListConstraint, isRangeConstraint } from './constraint.enum';
+import { BaseConstraintType } from './constraint.enum';
 
 
 
@@ -10,16 +10,16 @@ export class ConstraintController {
 
   static async createConstraint(req: Request, res: Response) {
     try {
-      const { grant, type, constraint, min, max, mode, value, list, range } = req.body;
+      const { grant, type, constraint, min, max, mode, value, item } = req.body;
       const data: CreateConstraintDto = {
         type: type,
         grant: grant,
         constraint: constraint,
-        min: type === BaseConstraintType.PROJECT ? min : undefined,
-        max: type === BaseConstraintType.PROJECT ? max : undefined,
+        min: type !== BaseConstraintType.APPLICANT ? min : undefined,
+        max: type !== BaseConstraintType.APPLICANT ? max : undefined,
         mode: type === BaseConstraintType.APPLICANT ? mode : undefined,
-        //value: type === BaseConstraintType.APPLICANT ? value : undefined,
-        //list: type === BaseConstraintType.APPLICANT && isListConstraint(constraint) ? list : undefined,
+        value: value ?? undefined,
+        item: item ?? undefined,
       };
       const created = await ConstraintService.createConstraint(data);
       successResponse(res, 201, "Constraint created successfully", created);
@@ -47,15 +47,12 @@ export class ConstraintController {
       const { id } = req.params;
       const { type, constraint, min, max, mode, value, item } = req.body;
       const data: Partial<CreateConstraintDto> = {
-        constraint: type === BaseConstraintType.PROJECT ||
-          type === BaseConstraintType.APPLICANT ? constraint : undefined,
-        min: type === BaseConstraintType.PROJECT ||
-          type === BaseConstraintType.COMPOSITION ? min : undefined,
-        max: type === BaseConstraintType.PROJECT ||
-          type === BaseConstraintType.COMPOSITION ? max : undefined,
-        mode: type === BaseConstraintType.APPLICANT ? mode : undefined,
-        value: type === BaseConstraintType.COMPOSITION ? value : undefined,
-        item: type === BaseConstraintType.COMPOSITION ? item : undefined,
+        constraint: constraint ?? undefined,
+        min: min ?? undefined,
+        max: max ?? undefined,
+        mode: mode ?? undefined,
+        value: value ?? undefined,
+        item: item ?? undefined,
       };
       const updated = await ConstraintService.updateConstraint(id, data);
       successResponse(res, 201, "Constraint updated successfully", updated);

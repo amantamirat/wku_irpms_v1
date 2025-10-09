@@ -28,6 +28,7 @@ const BaseConstraintSchema = new Schema<IBaseConstraint>(
     }
 );
 
+BaseConstraintSchema.index({ grant: 1, constraint: 1 }, { unique: true });
 export const BaseConstraint = model<IBaseConstraint>(COLLECTIONS.CONSTRAINT, BaseConstraintSchema);
 
 //Project Constraints Model
@@ -84,47 +85,7 @@ const ApplicantConstraintSchema = new Schema<IApplicantConstraint>({
 
 });
 
-ApplicantConstraintSchema.index({ grant: 1, type: 1, constraint: 1 }, { unique: true });
 export const ApplicantConstraint = BaseConstraint.discriminator<IApplicantConstraint>(BaseConstraintType.APPLICANT, ApplicantConstraintSchema);
 
-
-// Composition Constraint Model
-export interface ICompositionConstraint extends IBaseConstraint {
-    type: BaseConstraintType.COMPOSITION;
-    parent: mongoose.Types.ObjectId;
-    value: number; // Required number or ratio of applicants
-    max?: number; // value for range-based constraints
-    min?: number; // value for range-based constraints
-    item?: string; // Allowed values for enum-based constraints
-}
-
-
-const CompositionConstraintSchema = new Schema<ICompositionConstraint>({
-    parent: {
-        type: Schema.Types.ObjectId,
-        ref: ApplicantConstraint.modelName,
-        required: true,
-        immutable: true
-    },
-    value: {
-        type: Number,
-        required: true
-    },
-    max: {
-        type: Number,
-        min: 0,
-        default: Number.MAX_SAFE_INTEGER, //Infinity
-    },
-    min: {
-        type: Number,
-        min: 0,
-        default: 0
-    },
-    item: {
-        type: String,
-    }
-});
-
-export const CompositionConstraint = BaseConstraint.discriminator<ICompositionConstraint>(BaseConstraintType.COMPOSITION, CompositionConstraintSchema);
 
 

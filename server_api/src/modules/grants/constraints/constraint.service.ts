@@ -1,10 +1,8 @@
 import mongoose from "mongoose";
-import { Gender } from "../../applicants/applicant.enum";
-import { Category } from "../../organization/organization.enum";
 import { Grant } from "../grant.model";
+import { Composition } from "./composition.model";
 import { ApplicantConstraintType, BaseConstraintType, isListConstraint, isRangeConstraint, OperationMode, ProjectConstraintType } from "./constraint.enum";
-import { ApplicantConstraint, BaseConstraint, ProjectConstraint } from "./constraint.model";
-
+import { ApplicantConstraint, BaseConstraint } from "./constraint.model";
 
 
 export interface CreateProjectConstraintDto {
@@ -16,7 +14,7 @@ export interface CreateProjectConstraintDto {
 }
 
 export interface CreateConstraintDto {
-    type: BaseConstraintType;
+    type: BaseConstraintType | "Composition";
     grant: mongoose.Types.ObjectId;
     constraint: ProjectConstraintType | ApplicantConstraintType;
     min?: number;
@@ -41,7 +39,7 @@ export class ConstraintService {
                 throw new Error("Operation mode must be specified for applicant constraints.");
             }
         }
-        if (data.type === BaseConstraintType.COMPOSITION) {
+        if (data.type === "Composition") {
             const parentConstraint = await ApplicantConstraint.findById(data.parent);
             if (!parentConstraint) {
                 throw new Error("Parent applicant constraint not found for composition constraint.");
@@ -75,6 +73,10 @@ export class ConstraintService {
         const grant = await Grant.findById(data.grant).lean();
         if (!grant) throw new Error("Grant type not found");
         await this.validateConstraint(data);
+        if (data.type === "Composition") {
+            const createdComposition = await Composition.create({ ...data });
+            return createdComposition;
+        }
         const createdConstraint = await BaseConstraint.create({ ...data });
         return createdConstraint;
     }
