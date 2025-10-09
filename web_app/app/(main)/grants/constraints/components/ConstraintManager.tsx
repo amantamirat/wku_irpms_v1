@@ -9,7 +9,7 @@ import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Grant } from '../../models/grant.model';
 import { ConstraintApi } from '../api/constraint.api';
-import { BaseConstraintType, Constraint } from '../models/constraint.model';
+import { ApplicantConstraintType, BaseConstraintType, Constraint, isListConstraint, isRangeConstraint } from '../models/constraint.model';
 import SaveDialog from './SaveDialog';
 
 
@@ -180,13 +180,26 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
                             type === BaseConstraintType.APPLICANT &&
                             (<Column field="mode" header="Mode" sortable />)
                         }
+                        
                         {
-                            type === BaseConstraintType.PROJECT &&
+                            (type === BaseConstraintType.PROJECT ||
+                                (parent && isRangeConstraint(parent.constraint as ApplicantConstraintType))
+                            ) &&
                             (<Column field="min" header="Min" sortable />)
                         }
                         {
-                            type === BaseConstraintType.PROJECT &&
+                            (type === BaseConstraintType.PROJECT ||
+                                (parent && isRangeConstraint(parent.constraint as ApplicantConstraintType))
+                            ) &&
                             (<Column field="max" header="Max" sortable />)
+                        }
+                        {(parent && isListConstraint(parent.constraint as ApplicantConstraintType))
+                            &&
+                            (<Column field="item" header="Item" sortable />)
+                        }
+                        {
+                            type === BaseConstraintType.COMPOSITION &&
+                            (<Column field="value" header="Value" sortable />)
                         }
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
