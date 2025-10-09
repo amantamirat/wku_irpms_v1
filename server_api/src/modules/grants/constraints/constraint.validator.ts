@@ -5,6 +5,7 @@ import { ApplicantConstraintType, OperationMode, ProjectConstraintType } from ".
 import { ApplicantConstraint, ProjectConstraint } from "./constraint.model";
 import { Gender } from "../../applicants/applicant.enum";
 import { CreateProjectDto } from "../../project/project.service";
+import { Composition } from "./composition.model";
 
 export class ConstraintValidator {
 
@@ -70,18 +71,20 @@ export class ConstraintValidator {
 
     }
 
-    /*
+
 
     static async validateApplicantConstraints(grantId: mongoose.Types.ObjectId, data: CreateProjectDto) {
         const collaborators = data.collaborators ?? [];
         if (collaborators.length === 0) {
-            throw new Error("Empty Collaborators.");
+            throw new Error("Empty collaborators.");
         }
+
         const applicants: mongoose.Types.ObjectId[] = collaborators.map(c => c.applicant);
         const leadPICount = collaborators.filter(c => c.isLeadPI === true).length;
         if (leadPICount !== 1) {
             throw new Error(`Each project must have exactly one Lead Principal Investigator (found ${leadPICount}).`);
         }
+
         const applicantConstraints = await ApplicantConstraint.find({ grant: grantId }).lean();
         if (!applicantConstraints || applicantConstraints.length === 0) return;
 
@@ -91,84 +94,123 @@ export class ConstraintValidator {
         }
 
         for (const constraint of applicantConstraints) {
-            const { mode, value, min, max, list } = constraint;
+            const compositions = await Composition.find({ parent: constraint._id }).lean();
+            if (!compositions || compositions.length === 0) continue; // No subrules to check
 
-            switch (constraint.constraint) {
+            for (const comp of compositions) {
+                const { item, value, min, max } = comp;
+                const { mode } = constraint;
 
-                case ApplicantConstraintType.GENDER: {
-                    const genderCount = applicantData.filter(a => (list as Gender[]).includes(a.gender)).length;
-                    if (mode === OperationMode.COUNT) {
-                        if (genderCount < value) {
-                            throw new Error(`At least ${value} gender[${list}] applicants are required (found ${genderCount}).`);
+                switch (constraint.constraint) {
+                    // ---------------- GENDER ----------------
+                    case ApplicantConstraintType.GENDER: {
+                        const filtered = applicantData.filter(a => a.gender === item);
+                        const count = filtered.length;
+
+                        if (value === 0 && count > 0) {
+                            throw new Error(`No applicants of gender [${item}] are allowed (found ${count}).`);
                         }
-                    } else if (mode === OperationMode.RATIO) {
-                        const ratio = genderCount / applicantData.length;
-                        if (ratio < value / 100) {
-                            throw new Error(`gender[${list}] applicant ratio (${(ratio * 100).toFixed(1)}%) must be at least ${(value * 100).toFixed(1)}%.`);
+
+                        if (mode === OperationMode.COUNT && value > 0) {
+                            if (count < value) {
+                                throw new Error(`At least ${value} ${item} applicants are required (found ${count}).`);
+                            }
+                        } else if (mode === OperationMode.RATIO && value > 0) {
+                            const ratio = count / applicantData.length;
+                            if (ratio < value ) {
+                                throw new Error(`${item} applicants ratio (${(ratio * 100).toFixed(1)}%) must be at least ${(value).toFixed(1)}%.`);
+                            }
                         }
+                        break;
                     }
-                    break;
+
+                    // ---------------- ACCESSIBILITY ----------------
+                    case ApplicantConstraintType.ACCESSIBILITY: {
+                        const filtered = applicantData.filter(a =>
+                            Array.isArray(a.accessibility) && a.accessibility.includes(item as any)
+                        );
+                        const count = filtered.length;
+
+                        if (value === 0 && count > 0) {
+                            throw new Error(`Applicants with accessibility type [${item}] are not allowed (found ${count}).`);
+                        }
+
+                        if (mode === OperationMode.COUNT && value > 0) {
+                            if (count < value) {
+                                throw new Error(`At least ${value} applicants with accessibility [${item}] are required (found ${count}).`);
+                            }
+                        } else if (mode === OperationMode.RATIO && value > 0) {
+                            const ratio = count / applicantData.length;
+                            if (ratio < value) {
+                                throw new Error(`Applicants with accessibility [${item}] ratio (${(ratio * 100).toFixed(1)}%) must be at least ${(value).toFixed(1)}%.`);
+                            }
+                        }
+                        break;
+                    }
+
+                    // ---------------- SCOPE ----------------
+                    case ApplicantConstraintType.SCOPE: {
+                        const filtered = applicantData.filter(a => a.scope === item);
+                        const count = filtered.length;
+
+                        if (value === 0 && count > 0) {
+                            throw new Error(`Applicants with scope [${item}] are not allowed (found ${count}).`);
+                        }
+
+                        if (mode === OperationMode.COUNT && value > 0) {
+                            if (count < value) {
+                                throw new Error(`At least ${value} applicants with scope [${item}] are required (found ${count}).`);
+                            }
+                        } else if (mode === OperationMode.RATIO && value > 0) {
+                            const ratio = count / applicantData.length;
+                            if (ratio < value) {
+                                throw new Error(`Applicants with scope [${item}] ratio (${(ratio * 100).toFixed(1)}%) must be at least ${(value).toFixed(1)}%.`);
+                            }
+                        }
+                        break;
+                    }
+
+                    // ---------------- AGE ----------------
+                    case ApplicantConstraintType.AGE: {
+                        const now = new Date();
+                        const minAge = min ?? 0;
+                        const maxAge = max ?? Number.MAX_SAFE_INTEGER;
+
+                        const filtered = applicantData.filter(app => {
+                            const age = now.getFullYear() - app.birth_date.getFullYear() -
+                                (now < new Date(now.getFullYear(), app.birth_date.getMonth(), app.birth_date.getDate()) ? 1 : 0);
+                            return age >= minAge && age <= maxAge;
+                        });
+
+                        const count = filtered.length;
+
+                        if (value === 0 && count > 0) {
+                            throw new Error(`No applicants should fall within the age range ${minAge}–${maxAge} years (found ${count}).`);
+                        }
+
+                        if (mode === OperationMode.COUNT && value > 0) {
+                            if (count < value) {
+                                throw new Error(`At least ${value} applicants must be within the age range ${minAge}–${maxAge} years (found ${count}).`);
+                            }
+                        } else if (mode === OperationMode.RATIO && value > 0) {
+                            const ratio = count / applicantData.length;
+                            if (ratio < value) {
+                                throw new Error(
+                                    `Applicants within the age range ${minAge}–${maxAge} years are ${(ratio * 100).toFixed(1)}%, ` +
+                                    `but required ratio is at least ${(value).toFixed(1)}%.`
+                                );
+                            }
+                        }
+                        break;
+                    }
+
+                    default:
+                        // EXPERIENCE or unimplemented constraints
+                        break;
                 }
-
-                case ApplicantConstraintType.ACCESSIBILITY: {
-                    const accessibleCount = applicantData.filter(a => Array.isArray(a.accessibility) && a.accessibility.length > 0).length;
-                    if (mode === OperationMode.COUNT) {
-                        if (accessibleCount < value) {
-                            throw new Error(`At least ${value} in accessible applicants are required (found ${accessibleCount}).`);
-                        }
-                    } else if (mode === OperationMode.RATIO) {
-                        const ratio = accessibleCount / applicantData.length;
-                        if (ratio < value / 100) {
-                            throw new Error(`Accessible applicant ratio (${(ratio * 100).toFixed(1)}%) must be at least ${(value * 100).toFixed(1)}%.`);
-                        }
-                    }
-
-                    break;
-                }
-
-                case ApplicantConstraintType.SCOPE: {
-                    //the ratio of academic, external and supporitive
-                    if (list && list.length > 0) {
-                        const invalidScopes = applicantData.filter(a => !list.includes(a.scope));
-                        if (invalidScopes.length > 0) {
-                            const names = invalidScopes.map(a => `${a.first_name} ${a.last_name}`).join(", ");
-                            throw new Error(`Applicants [${names}] have invalid scope. Allowed: ${list.join(", ")}.`);
-                        }
-                    }
-                    break;
-                }
-                case ApplicantConstraintType.AGE: {
-                    const now = new Date();
-                    let ageCount = 0;
-                    const minAge = min ?? 0;
-                    const maxAge = max ?? Number.MAX_SAFE_INTEGER;
-                    for (const app of applicantData) {
-                        const age = now.getFullYear() - app.birth_date.getFullYear() -
-                            (now < new Date(now.getFullYear(), app.birth_date.getMonth(), app.birth_date.getDate()) ? 1 : 0);
-                        if (minAge < age && age < maxAge) {
-                            ageCount++;
-                        }
-                    }
-                    if (mode === OperationMode.COUNT) {
-                        if (ageCount < value) {
-                            throw new Error(`At least ${value} applicants must be within the age range of ${minAge}–${maxAge} years (found ${ageCount}).`);
-                        }
-                    } else if (mode === OperationMode.RATIO) {
-                        const ratio = ageCount / applicantData.length;
-                        if (ratio < value / 100) {
-                            throw new Error(
-                                `Applicants within the age range (${minAge}–${maxAge} years) are ${(ratio * 100).toFixed(1)}%, ` +
-                                `but the required ratio is at least ${(value).toFixed(1)}%.`
-                            );
-                        }
-                    }
-                    break;
-                }
-                default:
-                    // Skip EXPERIENCE for now
-                    break;
             }
         }
     }
-        */
+
+
 }
