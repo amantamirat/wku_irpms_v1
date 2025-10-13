@@ -117,7 +117,7 @@ export class ConstraintValidator {
                             }
                         } else if (mode === OperationMode.RATIO && value > 0) {
                             const ratio = count / applicantData.length;
-                            if (ratio < value ) {
+                            if (ratio < value) {
                                 throw new Error(`${item} applicants ratio (${(ratio * 100).toFixed(1)}%) must be at least ${(value).toFixed(1)}%.`);
                             }
                         }
@@ -164,7 +164,7 @@ export class ConstraintValidator {
                         } else if (mode === OperationMode.RATIO && value > 0) {
                             const ratio = count / applicantData.length;
                             if (ratio < value) {
-                                throw new Error(`Applicants with scope [${item}] ratio (${(ratio * 100).toFixed(1)}%) must be at least ${(value).toFixed(1)}%.`);
+                                throw new Error(`Applicants with scope [${item}] ratio (${(ratio * 100).toFixed(1)}%) must be  ${(value * 100).toFixed(1)}%.`);
                             }
                         }
                         break;
