@@ -11,6 +11,7 @@ import { Grant } from '../../models/grant.model';
 import { ConstraintApi } from '../api/constraint.api';
 import { ApplicantConstraintType, BaseConstraintType, Constraint, isListConstraint, isRangeConstraint } from '../models/constraint.model';
 import SaveDialog from './SaveDialog';
+import CompositionManager from '../compositions/components/CompositionManager';
 
 
 interface ConstraintManagerProps {
@@ -156,7 +157,7 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
                         rowExpansionTemplate={(rowData) => {
                             if (type === BaseConstraintType.APPLICANT) {
                                 return (
-                                    <ConstraintManager parent={rowData as Constraint} grant={grant} type={BaseConstraintType.COMPOSITION} />
+                                    <CompositionManager parent={rowData as Constraint} />
                                 )
                             }
                         }}

@@ -138,7 +138,7 @@ function SaveDialog(props: SaveDialogProps) {
             {
                 parent && isListConstraint(parent.constraint as ApplicantConstraintType) &&
                 <>
-                    < div className="field">
+                    <div className="field">
                         <label htmlFor="item">Item</label>
                         <Dropdown
                             id="item"
