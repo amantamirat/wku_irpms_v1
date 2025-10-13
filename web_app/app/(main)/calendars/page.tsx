@@ -87,25 +87,9 @@ const CalendarPage = () => {
     };
 
     const deleteCalendar = async () => {
-        try {
-            const deleted = await CalendarApi.deleteCalendar(selectedCalendar);
-            if (deleted) {
-                setCalendars(calendars.filter((c) => c._id !== selectedCalendar._id));
-                toast.current?.show({
-                    severity: 'success',
-                    summary: 'Deleted',
-                    detail: 'Calendar deleted',
-                    life: 3000
-                });
-            }
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to delete calendar',
-                detail: '' + err,
-                life: 3000
-            });
-        } finally {
+        const deleted = await CalendarApi.deleteCalendar(selectedCalendar);
+        if (deleted) {
+            setCalendars(calendars.filter((c) => c._id !== selectedCalendar._id));
             setShowDeleteDialog(false);
             setSelectedCalendar(emptyCalendar);
         }
