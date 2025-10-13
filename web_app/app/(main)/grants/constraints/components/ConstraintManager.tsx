@@ -171,7 +171,7 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
 
                         }
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-
+                        <Column field="constraint" header="Constraint" sortable />
                         {
                             type === BaseConstraintType.APPLICANT &&
                             (<Column field="mode" header="Mode" sortable />)

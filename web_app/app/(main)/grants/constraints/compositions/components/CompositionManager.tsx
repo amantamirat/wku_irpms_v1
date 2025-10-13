@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CompositionApi } from '../api/composition.api';
 import { Composition, validateComposition } from '../models/composition.model';
 
-import { Constraint } from '../../models/constraint.model';
+import { ApplicantConstraintType, Constraint, isListConstraint, isRangeConstraint } from '../../models/constraint.model';
 import SaveDialog from './SaveDialog';
 
 interface CompositionManagerProps {
@@ -143,9 +143,15 @@ const CompositionManager = (props: CompositionManagerProps) => {
                         onRowToggle={(e) => setExpandedRows(e.data)}
                     >
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                        <Column field="min" header="Min" sortable />
-                        <Column field="max" header="Max" sortable />
-                        <Column field="item" header="Item" sortable />
+                        {isRangeConstraint(parent.constraint as ApplicantConstraintType) &&
+                            <Column field="min" header="Min" sortable />
+                        }
+                        {isRangeConstraint(parent.constraint as ApplicantConstraintType) &&
+                            <Column field="max" header="Max" sortable />
+                        }
+                        {isListConstraint(parent.constraint as ApplicantConstraintType) &&
+                            <Column field="item" header="Item" sortable />
+                        }
                         <Column field="value" header="Value" sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
