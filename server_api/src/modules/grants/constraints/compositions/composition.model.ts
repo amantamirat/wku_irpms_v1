@@ -36,7 +36,17 @@ const CompositionSchema = new Schema<IComposition>({
     item: {
         type: String,
     }
+
 });
+
+// Unique compound index on parent and item, but allow multiple docs with item=null
+CompositionSchema.index(
+    { parent: 1, item: 1 },
+    {
+        unique: true,
+        partialFilterExpression: { item: { $type: "string" } }
+    }
+);
 
 export const Composition = model<IComposition>(COLLECTIONS.COMPOSITION, CompositionSchema);
 
