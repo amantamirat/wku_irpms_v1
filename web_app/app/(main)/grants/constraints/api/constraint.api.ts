@@ -22,7 +22,6 @@ function sanitizeConstraint(constraint: Partial<Constraint>): Partial<Constraint
 export interface GetConstraintsOptions {
     grant?: string;
     type?: BaseConstraintType;
-    parent?: string;
 }
 
 export const ConstraintApi = {
@@ -37,7 +36,6 @@ export const ConstraintApi = {
         const query = new URLSearchParams();
         if (options.grant) query.append("grant", options.grant);
         if (options.type) query.append("type", options.type);
-        if (options.parent) query.append("parent", options.parent);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Constraint[];
     },

@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Composition } from "./composition.model";
 import { ApplicantConstraint } from "../constraint.model";
+import { ApplicantConstraintType, isListConstraint, isRangeConstraint, OperationMode } from "../constraint.enum";
 
 export interface CreateCompositionDto {
     parent: mongoose.Types.ObjectId;
@@ -23,8 +24,29 @@ export class CompositionService {
         if (!parentConstraint) {
             throw new Error("Parent applicant constraint not found for composition.");
         }
-        // Add more validation logic as needed (similar to ConstraintService)
-        // For example, check value, min, max, item based on parentConstraint.mode
+        const mode = parentConstraint.mode;
+        if (mode === OperationMode.RATIO) {
+            if ((!data.value && data.value !== 0) || data.value < 0 || data.value > 1) {
+                throw new Error("Value must be a ratio (between 0 and 1) for ratio-based composition constraints.");
+            }
+        }
+        else if (mode === OperationMode.COUNT) {
+            if ((!data.value && data.value !== 0)) {
+                throw new Error("Value must be specified for count-based composition constraints.");
+            }
+        }
+
+        const applicantType = parentConstraint.constraint;
+        if (isRangeConstraint(applicantType as ApplicantConstraintType)) {
+            if ((!data.max || !data.min)) {
+                throw new Error(`Range must be specified for ${applicantType} constraint.`);
+            }
+        }
+        else if (isListConstraint(applicantType as ApplicantConstraintType)) {
+            if (!data.item) {
+                throw new Error(`Item must be specified for ${applicantType} constraint.`);
+            }
+        }
     }
 
     static async createComposition(data: CreateCompositionDto) {

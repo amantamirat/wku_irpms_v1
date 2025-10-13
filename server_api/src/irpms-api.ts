@@ -13,6 +13,7 @@ import calendarRoutes from './modules/calendar/calendar.routes';
 import callRoutes from './modules/call/call.routes';
 import grantRoutes from './modules/grants/grant.routes';
 import constraintRoutes from './modules/grants/constraints/constraint.routes';
+import compositionRoutes from './modules/grants/constraints/compositions/composition.routes';
 import projectRoutes from './modules/project/project.routes';
 import collaboratorRoutes from './modules/project/collaborators/collaborator.routes';
 import assignmentRoutes from './modules/project/collaborators/assignment/assignment.routes';
@@ -28,7 +29,6 @@ import { initializeEvalModels } from './modules/call/evaluations/init.models';
 import { initializeOrganizationModels } from './modules/organization/init.model';
 import { UserService } from './modules/users/user.service';
 import path from 'path';
-import { verifyActiveAccount } from './modules/users/auth/auth.middleware';
 
 
 
@@ -47,12 +47,11 @@ app.use("/api/applicants", applicantRoutes);
 app.use("/api/organs", organRoutes);
 app.use("/api/themes", themeRoutes);
 app.use("/api/evals", evalRoutes);
-
-
 app.use("/api/calendars", calendarRoutes);
 app.use("/api/calls", callRoutes);
 app.use("/api/grants", grantRoutes);
 app.use("/api/grants/constraints", constraintRoutes);
+app.use("/api/grants/compositions", compositionRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/project/collaborators", collaboratorRoutes);
 app.use("/api/project/themes", projectThemeRoutes);

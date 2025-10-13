@@ -3,7 +3,7 @@ import { COLLECTIONS } from "../../../../enums/collections.enum";
 import { ApplicantConstraint } from "../constraint.model";
 
 
-export interface IComposition extends Document {    
+export interface IComposition extends Document {
     parent: mongoose.Types.ObjectId;
     value: number; // Required number or ratio of applicants
     max?: number; // value for range-based constraints

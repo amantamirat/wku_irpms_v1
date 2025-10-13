@@ -17,16 +17,14 @@ import CompositionManager from '../compositions/components/CompositionManager';
 interface ConstraintManagerProps {
     type: BaseConstraintType;
     grant: Grant;
-    parent?: Constraint; // For composition constraints
 }
 
 const ConstraintManager = (props: ConstraintManagerProps) => {
 
-    const { type, grant, parent } = props
+    const { type, grant } = props
     const emptyConstraint: Constraint = {
         grant: grant,
-        type: type,
-        parent: parent ?? undefined
+        type: type
     };
 
     const [constraints, setConstraints] = useState<Constraint[]>([]);
@@ -40,7 +38,7 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
 
     const fetchConstraints = useCallback(async () => {
         try {
-            const data = await ConstraintApi.getConstraints({ grant: grant._id, type: type, parent: parent ? parent._id : undefined });
+            const data = await ConstraintApi.getConstraints({ grant: grant._id, type: type });
             setConstraints(data);
         } catch (err) {
             // setError(`Failed to load constraint data ${err}`);
@@ -173,35 +171,23 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
 
                         }
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                        {
-                            type !== BaseConstraintType.COMPOSITION &&
-                            (<Column field="constraint" header="Constraint" sortable />)
-                        }
+
                         {
                             type === BaseConstraintType.APPLICANT &&
                             (<Column field="mode" header="Mode" sortable />)
                         }
-                        
+
                         {
-                            (type === BaseConstraintType.PROJECT ||
-                                (parent && isRangeConstraint(parent.constraint as ApplicantConstraintType))
+                            (type === BaseConstraintType.PROJECT
                             ) &&
                             (<Column field="min" header="Min" sortable />)
                         }
                         {
-                            (type === BaseConstraintType.PROJECT ||
-                                (parent && isRangeConstraint(parent.constraint as ApplicantConstraintType))
-                            ) &&
+                            (type === BaseConstraintType.PROJECT) &&
                             (<Column field="max" header="Max" sortable />)
                         }
-                        {(parent && isListConstraint(parent.constraint as ApplicantConstraintType))
-                            &&
-                            (<Column field="item" header="Item" sortable />)
-                        }
-                        {
-                            type === BaseConstraintType.COMPOSITION &&
-                            (<Column field="value" header="Value" sortable />)
-                        }
+
+
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
                     {selectedConstraint && (
@@ -209,7 +195,6 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
                             visible={showSaveDialog}
                             constraint={selectedConstraint}
                             setConstraint={setSelectedConstraint}
-                            parent={parent}
                             onSave={saveConstraint}
                             onHide={hideDialogs}
                         />

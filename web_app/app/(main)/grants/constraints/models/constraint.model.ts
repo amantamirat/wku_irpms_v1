@@ -2,8 +2,7 @@ import { Grant } from "../../models/grant.model";
 
 export enum BaseConstraintType {
     PROJECT = "Project",
-    APPLICANT = "Applicant",
-    COMPOSITION = "Composition"
+    APPLICANT = "Applicant"
 }
 
 export enum ProjectConstraintType {
@@ -51,9 +50,6 @@ export type Constraint = {
     max?: number;
     min?: number;
     mode?: OperationMode;
-    parent?: string | Constraint; // For composition constraints
-    value?: number;
-    item?: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -62,7 +58,7 @@ export const validateConstraint = (constraint: Constraint): { valid: boolean; me
     if (!constraint.type) {
         return { valid: false, message: 'Grant is required.' };
     }
-    if (!constraint.grant && constraint.type !== BaseConstraintType.COMPOSITION) {
+    if (!constraint.grant) {
         return { valid: false, message: 'Grant is required.' };
     }
     if (constraint.type === BaseConstraintType.APPLICANT) {
@@ -70,7 +66,7 @@ export const validateConstraint = (constraint: Constraint): { valid: boolean; me
             return { valid: false, message: 'Operation mode is required for applicant constraints.' };
         }
     }
-    if (constraint.type === BaseConstraintType.PROJECT || (constraint.type === BaseConstraintType.COMPOSITION && constraint.parent&&isRangeConstraint((constraint.parent as Constraint).constraint as ApplicantConstraintType))) {
+    if (constraint.type === BaseConstraintType.PROJECT) {
         if (constraint.min == null || isNaN(constraint.min)) {
             return { valid: false, message: 'Minimum value is required.' };
         }

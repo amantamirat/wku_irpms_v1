@@ -13,14 +13,13 @@ import { accessibilityOptions, genderOptions, scopeOptions } from '@/app/(main)/
 interface SaveDialogProps {
     visible: boolean;
     constraint: Constraint;
-    parent?: Constraint;
     setConstraint: (constraint: Constraint) => void;
     onSave: () => Promise<void>;
     onHide: () => void;
 }
 
 function SaveDialog(props: SaveDialogProps) {
-    const { visible, constraint, setConstraint, onSave, onHide, parent } = props;
+    const { visible, constraint, setConstraint, onSave, onHide } = props;
     const [submitted, setSubmitted] = useState(false);
     const toast = useRef<Toast>(null);
 
@@ -82,7 +81,7 @@ function SaveDialog(props: SaveDialogProps) {
             onHide={hide}
         >
             <Toast ref={toast} />
-            {!constraint._id && (constraint.type !== BaseConstraintType.COMPOSITION) &&
+            {!constraint._id && 
                 <div className="field">
                     <label htmlFor="constraint">Constraint</label>
                     <Dropdown
@@ -103,8 +102,7 @@ function SaveDialog(props: SaveDialogProps) {
             }
 
             {(
-                constraint.type === BaseConstraintType.PROJECT ||
-                (parent && isRangeConstraint(parent.constraint as ApplicantConstraintType))
+                constraint.type === BaseConstraintType.PROJECT 
             ) && (
                     <>
                         <div className="field">
@@ -135,24 +133,7 @@ function SaveDialog(props: SaveDialogProps) {
                     </>
                 )}
 
-            {
-                parent && isListConstraint(parent.constraint as ApplicantConstraintType) &&
-                <>
-                    <div className="field">
-                        <label htmlFor="item">Item</label>
-                        <Dropdown
-                            id="item"
-                            value={constraint.item}
-                            options={parent.constraint === ApplicantConstraintType.GENDER ? genderOptions :
-                                parent.constraint === ApplicantConstraintType.ACCESSIBILITY ? accessibilityOptions : scopeOptions}
-                            onChange={(e) => setConstraint({ ...constraint, item: e.value })}
-                            placeholder="Select Item"
-
-                        />
-                    </div>
-                </>
-
-            }
+           
 
             {
                 constraint.type === BaseConstraintType.APPLICANT &&
@@ -170,34 +151,7 @@ function SaveDialog(props: SaveDialogProps) {
                     />
                 </div>
             }
-            {
-                parent &&
-                <div className="field">
-                    <label htmlFor="value">{parent.mode} Value</label>
-                    <InputNumber
-                        id="value"
-                        value={constraint.value}
-                        onChange={(e) => {
-                            let val = e.value ?? 0;
-                            if (parent.mode === "COUNT") {
-                                val = Math.max(0, Math.floor(val)); // only positive integers
-                            } else if (parent.mode === "RATIO") {
-                                val = Math.min(1, Math.max(0, parseFloat(val.toFixed(2)))); // clamp between 0 and 1
-                            }
-                            setConstraint({ ...constraint, value: val });
-                        }}
-                        min={parent.mode === OperationMode.RATIO ? 0 : 1}
-                        max={parent.mode === OperationMode.RATIO ? 1 : undefined}
-                        step={parent.mode === OperationMode.RATIO ? 0.01 : 1}
-                        useGrouping={false} 
-                        maxFractionDigits={parent.mode === OperationMode.RATIO ? 2 : 0}
-                        required
-                        className={classNames({
-                            'p-invalid': submitted && (constraint.value == null) && constraint.type === BaseConstraintType.COMPOSITION
-                        })}
-                    />
-                </div>
-            }
+            
         </Dialog >
     );
 }

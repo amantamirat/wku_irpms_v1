@@ -15,12 +15,9 @@ export class ConstraintController {
         type: type,
         grant: grant,
         constraint: constraint,
-        min: type !== BaseConstraintType.APPLICANT ? min : undefined,
-        max: type !== BaseConstraintType.APPLICANT ? max : undefined,
+        min: type !== BaseConstraintType.PROJECT ? min : undefined,
+        max: type !== BaseConstraintType.PROJECT ? max : undefined,
         mode: type === BaseConstraintType.APPLICANT ? mode : undefined,
-        value: value ?? undefined,
-        item: item ?? undefined,
-        parent: parent ? new mongoose.Types.ObjectId(parent as string) : undefined,
       };
       const created = await ConstraintService.createConstraint(data);
       successResponse(res, 201, "Constraint created successfully", created);
@@ -31,11 +28,10 @@ export class ConstraintController {
 
   static async getConstraints(req: Request, res: Response) {
     try {
-      const { grant, type, parent } = req.query;
+      const { grant, type } = req.query;
       const options: GetConstraintOptions = {
         grant: grant ? new mongoose.Types.ObjectId(grant as string) : undefined,
         type: type ? type as BaseConstraintType : undefined,
-        parent: parent ? new mongoose.Types.ObjectId(parent as string) : undefined,
       }
       const constraints = await ConstraintService.getConstraints(options);
       successResponse(res, 200, 'Constraints fetched successfully', constraints);
@@ -47,14 +43,12 @@ export class ConstraintController {
   static async updateConstraint(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { type, constraint, min, max, mode, value, item } = req.body;
+      const { type, constraint, min, max, mode } = req.body;
       const data: Partial<CreateConstraintDto> = {
         constraint: constraint ?? undefined,
         min: min ?? undefined,
         max: max ?? undefined,
         mode: mode ?? undefined,
-        value: value ?? undefined,
-        item: item ?? undefined,
       };
       const updated = await ConstraintService.updateConstraint(id, data);
       successResponse(res, 201, "Constraint updated successfully", updated);
