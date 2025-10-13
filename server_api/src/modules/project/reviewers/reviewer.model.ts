@@ -14,7 +14,8 @@ const ReviewerSchema = new Schema<IReviewer>({
     projectStage: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.PROJECT_STAGE,
-        required: true
+        required: true,
+        immutable: true,
     },
     applicant: {
         type: Schema.Types.ObjectId,

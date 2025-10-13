@@ -20,6 +20,7 @@ import assignmentRoutes from './modules/project/collaborators/assignment/assignm
 import projectThemeRoutes from './modules/project/themes/project.theme.routes';
 import phaseRoutes from './modules/project/phase/phase.routes';
 import stageRoutes from './modules/project/stages/stage.routes';
+import reviewerRoutes from './modules/project/reviewers/reviewer.routes';
 import userRoutes from './modules/users/user.routes';
 import roleRoutes from './modules/users/roles/role.routes';
 
@@ -57,6 +58,7 @@ app.use("/api/project/collaborators", collaboratorRoutes);
 app.use("/api/project/themes", projectThemeRoutes);
 app.use("/api/project/phases", phaseRoutes);
 app.use("/api/project/stages", stageRoutes);
+app.use("/api/project/reviewers", reviewerRoutes);
 app.use("/api/collaborator/assignments", assignmentRoutes);
 app.use("/api/uploads", express.static(path.join(process.cwd(), "uploads")));
 

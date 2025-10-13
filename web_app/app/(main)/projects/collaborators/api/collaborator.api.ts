@@ -1,5 +1,5 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Collaborator } from "../models/collaborator.model";
+import { Collaborator, sanitizeCollaborator } from "../models/collaborator.model";
 const end_point = '/project/collaborators/';
 
 export interface GetCollaboratorsOptions {
@@ -16,7 +16,7 @@ export const CollaboratorApi = {
     },
 
     async createCollaborator(collaborator: Partial<Collaborator>): Promise<Collaborator> {
-        const createdData = await ApiClient.post(end_point, collaborator);
+        const createdData = await ApiClient.post(end_point, sanitizeCollaborator(collaborator));
         return createdData as Collaborator;
     },
 
@@ -25,7 +25,7 @@ export const CollaboratorApi = {
             throw new Error("_id required.");
         }
         const url = `${end_point}${collaborator._id}`;
-        const updatedCollaborator = await ApiClient.put(url, collaborator);
+        const updatedCollaborator = await ApiClient.put(url, sanitizeCollaborator(collaborator));
         return updatedCollaborator as Collaborator;
     },
 

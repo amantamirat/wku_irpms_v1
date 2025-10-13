@@ -2,13 +2,14 @@ import { BASE_URL } from "@/api/ApiClient";
 import ConfirmDialog from "@/components/ConfirmationDialog";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
-import { DataTable } from "primereact/datatable";
+import { DataTable, DataTableExpandedRows } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
 import { useEffect, useState } from "react";
 import { Project } from "../../models/project.model";
 import { ProjectStageApi } from "../api/stage.api";
 import { ProjectStage, StageStatus } from "../models/stage.model";
 import SaveProjectStageDialog from "./SaveProjectStageDialog";
+import ReviewerManager from "../../reviewers/components/ReviewerManager";
 
 
 interface ProjectInfoStepProps {
@@ -28,7 +29,7 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
     const [projectStages, setProjectStages] = useState<ProjectStage[]>([]);
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const [showConfirmationDialog, setShowshowConfirmationDialog] = useState(false);
+    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
 
     useEffect(() => {
@@ -150,8 +151,13 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
                     emptyMessage={'No projectStage found.'}
                     scrollable
                     tableStyle={{ minWidth: '50rem' }}
+                    expandedRows={expandedRows}
+                    onRowToggle={(e) => setExpandedRows(e.data)}
+                    rowExpansionTemplate={(rowData: ProjectStage) => (
+                        <ReviewerManager projectStage={rowData} />
+                    )}
                 >
-                    <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
+                    <Column expander style={{ width: '3em' }} />
                     <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                     <Column field="stage.title" header="Stage" sortable />
                     <Column header="Document"
@@ -170,7 +176,6 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
                     />
                     <Column field="status" header="Status" sortable />
                     <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
-
                 </DataTable>
 
                 {projectStage &&
@@ -192,7 +197,7 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
                     />
                 )}
 
-                
+
             </div>
         </>
     );
