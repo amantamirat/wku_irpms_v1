@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { errorResponse, successResponse } from '../../util/response';
-import { ProjectService, CreateProjectDto } from './project.service';
+import { ProjectService, CreateProjectDto, GetProjectsOptions } from './project.service';
 import { AuthenticatedRequest } from '../users/auth/auth.middleware';
 import mongoose from 'mongoose';
 
@@ -33,7 +33,7 @@ export class ProjectController {
       const data: CreateProjectDto = {
         ...project,
         createdBy: new mongoose.Types.ObjectId(req.user!.id),
-        documentPath:documentPath
+        documentPath: documentPath
       };
       const submitted = await ProjectService.submitProject(data);
       successResponse(res, 201, "Project submitted successfully", submitted);
@@ -44,7 +44,11 @@ export class ProjectController {
 
   static async getProjects(req: Request, res: Response) {
     try {
-      const projects = await ProjectService.getProjects();
+      const { call } = req.query;
+      const filter: GetProjectsOptions = {
+        call: call ? new mongoose.Types.ObjectId(call as string) : undefined,
+      };
+      const projects = await ProjectService.getProjects(filter);
       successResponse(res, 200, 'Projects fetched successfully', projects);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);

@@ -4,7 +4,7 @@ import ConfirmDialog from '@/components/ConfirmationDialog';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
-import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
+import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
@@ -20,6 +20,7 @@ import { Evaluation } from '../../evals/models/eval.model';
 import { Theme } from '../../themes/models/theme.model';
 import { ThemeApi } from '../../themes/api/theme.api';
 import { EvaluationApi } from '../../evals/api/eval.api';
+import ProjectManager from '../../projects/components/ProjectManager';
 
 
 interface CallManagerProps {
@@ -47,6 +48,7 @@ const CallManager = (props: CallManagerProps) => {
     const [selectedCall, setSelectedCall] = useState<Call>(emptyCall);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
     const toast = useRef<Toast>(null);
 
     const loadCalls = useCallback(async () => {
@@ -215,11 +217,16 @@ const CallManager = (props: CallManagerProps) => {
                         header={header}
                         scrollable
                         filters={filters}
+                        expandedRows={expandedRows}
+                        onRowToggle={(e) => setExpandedRows(e.data)}
+                        rowExpansionTemplate={(rowData: Call) => (
+                            <ProjectManager call={rowData} />
+                        )}
                     >
-                        <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
+                        <Column expander style={{ width: '3em' }} /> 
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="calendar.year" header="Calendar" sortable />
-                        <Column field="title" header="Title" sortable />                        
+                        <Column field="title" header="Title" sortable />
                         <Column field="deadline" header="Deadline" body={(rowData) => new Date(rowData.deadline!).toLocaleDateString('en-CA')} />
                         <Column field="grant.title" header="Grant" sortable />
                         <Column field="evaluation.title" header="Evaluation" sortable />

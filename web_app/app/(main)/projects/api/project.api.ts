@@ -2,10 +2,17 @@ import { ApiClient } from "@/api/ApiClient";
 import { Project, sanitizeProject } from "../models/project.model";
 const end_point = '/projects';
 
+
+export interface GetProjectsOptions {
+    call?: string;
+}
+
 export const ProjectApi = {
 
-    async getProjects(): Promise<Project[]> {
-        const data = await ApiClient.get(end_point);
+    async getProjects(options: GetProjectsOptions): Promise<Project[]> {
+        const query = new URLSearchParams();
+        if (options.call) query.append("call", options.call);
+        const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Project[];
     },
 
@@ -19,7 +26,7 @@ export const ProjectApi = {
         if (!project.file)
             throw new Error("File required.");
         const sanitized = sanitizeProject(project);
-        const url = `${end_point}/submit`;
+        const url = `${end_point}submit`;
         const formData = new FormData();
         formData.append("project", JSON.stringify(sanitized));
         formData.append("document", project.file);
@@ -41,7 +48,7 @@ export const ProjectApi = {
         if (!project._id) {
             throw new Error("_id required.");
         }
-        const url = `${end_point}/${project._id}`;
+        const url = `${end_point}${project._id}`;
         const response = await ApiClient.delete(url);
         return response;
     },

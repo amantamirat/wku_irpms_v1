@@ -27,8 +27,7 @@ export class ReviewerController {
             const filter: GetReviewerOptions = {
                 applicant: applicant ? new mongoose.Types.ObjectId(applicant as string) : undefined,
                 projectStage: projectStage ? new mongoose.Types.ObjectId(projectStage as string) : undefined
-            };
-            console.log("Filter:", filter);
+            };            
             const reviewers = await ReviewerService.getReviewers(filter);
             successResponse(res, 200, 'Reviewers fetched successfully', reviewers);
         } catch (err: any) {

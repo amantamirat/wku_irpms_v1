@@ -19,6 +19,11 @@ import { CreateProjectStageDto } from "./stages/stage.service";
 import { ProjectTheme } from "./themes/project.theme.model";
 import { CreateProjectThemeDto } from "./themes/project.theme.service";
 
+
+export interface GetProjectsOptions {
+    call?: mongoose.Types.ObjectId;
+}
+
 export interface CreateProjectDto {
     call: mongoose.Types.ObjectId;
     title: string;
@@ -117,8 +122,10 @@ export class ProjectService {
         return submittedProject;
     }
 
-    static async getProjects() {
-        return await Project.find().populate('call').lean();
+    static async getProjects(options: GetProjectsOptions) {
+        const filter: any = {};
+        if (options.call) filter.call = options.call;        
+        return await Project.find(filter).populate('call').lean();
     }
 
 
