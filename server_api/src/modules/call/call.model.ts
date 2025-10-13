@@ -29,6 +29,7 @@ const CallSchema = new Schema<ICall>({
     calendar: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.CALENDAR,
+        immutable: true,
         required: true
     },
     title: {
@@ -45,15 +46,18 @@ const CallSchema = new Schema<ICall>({
     grant: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.GRANT,
+        immutable: true,
         required: true
     },
     theme: {
         type: Schema.Types.ObjectId,
-        ref: Catalog.modelName
+        ref: Catalog.modelName,
+        immutable: true,
     },
     evaluation: {
         type: Schema.Types.ObjectId,
         ref: Evaluation.modelName,
+        immutable: true,
         required: true
     },
     status: {

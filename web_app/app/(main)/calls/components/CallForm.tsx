@@ -87,59 +87,61 @@ const CallForm = (props: CallFormProps) => {
                     hourFormat="12"
                 />
             </div>
+            {!call._id && <>
 
-            <div className="field">
-                <label htmlFor="grant">Grant</label>
-                <Dropdown
-                    id="grant"
-                    dataKey="_id"
-                    value={call.grant}
-                    options={grants}
-                    onChange={(e) => setCall({ ...call, grant: e.value })}
-                    optionLabel="title"
-                    placeholder="Select a Grant"
-                    required
-                    className={classNames({ 'p-invalid': submitted && !call.grant })}
-                />
-            </div>
+                <div className="field">
+                    <label htmlFor="grant">Grant</label>
+                    <Dropdown
+                        id="grant"
+                        dataKey="_id"
+                        value={call.grant}
+                        options={grants}
+                        onChange={(e) => setCall({ ...call, grant: e.value })}
+                        optionLabel="title"
+                        placeholder="Select a Grant"
+                        required
+                        className={classNames({ 'p-invalid': submitted && !call.grant })}
+                    />
+                </div>
 
-            <div className="field">
-                <label htmlFor="evaluation">Evaluation</label>
-                <Dropdown
-                    id="evaluation"
-                    value={call.evaluation}
-                    options={evaluations}
-                    onChange={(e) =>
-                        setCall({
-                            ...call,
-                            evaluation: e.value,
-                        })
-                    }
-                    optionLabel="title"
-                    placeholder="Select Evaluation"
-                    required
-                    className={classNames({ 'p-invalid': submitted && !call.evaluation })}
-                />
-            </div>
+                <div className="field">
+                    <label htmlFor="evaluation">Evaluation</label>
+                    <Dropdown
+                        id="evaluation"
+                        value={call.evaluation}
+                        options={evaluations}
+                        onChange={(e) =>
+                            setCall({
+                                ...call,
+                                evaluation: e.value,
+                            })
+                        }
+                        optionLabel="title"
+                        placeholder="Select Evaluation"
+                        required
+                        className={classNames({ 'p-invalid': submitted && !call.evaluation })}
+                    />
+                </div>
 
 
 
-            <div className="field">
-                <label htmlFor="theme">Theme</label>
-                <Dropdown
-                    id="theme"
-                    value={call.theme}
-                    options={themes}
-                    onChange={(e) =>
-                        setCall({
-                            ...call,
-                            theme: e.value,
-                        })
-                    }
-                    optionLabel="title"
-                    placeholder="Select Theme"
-                />
-            </div>
+                <div className="field">
+                    <label htmlFor="theme">Theme</label>
+                    <Dropdown
+                        id="theme"
+                        value={call.theme}
+                        options={themes}
+                        onChange={(e) =>
+                            setCall({
+                                ...call,
+                                theme: e.value,
+                            })
+                        }
+                        optionLabel="title"
+                        placeholder="Select Theme"
+                    />
+                </div>
+            </>}
             {call._id && <>
                 <div className="field">
                     <label htmlFor="status">Status</label>

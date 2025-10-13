@@ -99,7 +99,7 @@ const SaveDialog = (props: SaveDialogProps) => {
     return (
         <Dialog
             visible={visible}
-            style={{ width: '600px', minHeight: '600px' }}
+            style={{ width: '500px' }}
             header={call._id ? 'Edit Call' : 'New Call'}
             modal
             className="p-fluid"

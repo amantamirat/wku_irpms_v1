@@ -47,13 +47,13 @@ export class CallController {
             const { calendar, title, deadline, description, grant, theme, evaluation, status } = req.body;
             const { id } = req.params;
             const data: Partial<CreateCallDto> = {
-                calendar: new mongoose.Types.ObjectId(calendar as string),
+                //calendar: new mongoose.Types.ObjectId(calendar as string),
                 title: title,
                 deadline: deadline,
                 description: description ?? undefined,
-                grant: new mongoose.Types.ObjectId(grant as string),
-                theme: new mongoose.Types.ObjectId(theme as string),
-                evaluation: new mongoose.Types.ObjectId(evaluation as string),
+                //grant: new mongoose.Types.ObjectId(grant as string),
+                //theme: new mongoose.Types.ObjectId(theme as string),
+                //evaluation: new mongoose.Types.ObjectId(evaluation as string),
                 status: status as CallStatus
             };
             const updated = await CallService.updateCall(id, data);
