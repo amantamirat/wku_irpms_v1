@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { ReviewerService, CreateReviewerDto, GetReviewerOptions } from './reviewer.service';
 import mongoose from 'mongoose';
 import { errorResponse, successResponse } from '../../../util/response';
+import { ReviewerStatus } from './reviewer.enum';
 
 export class ReviewerController {
 
@@ -10,7 +11,7 @@ export class ReviewerController {
             const { projectStage, applicant } = req.body;
             const data: CreateReviewerDto = {
                 applicant: new mongoose.Types.ObjectId(applicant as string),
-                project: new mongoose.Types.ObjectId(projectStage as string)
+                projectStage: new mongoose.Types.ObjectId(projectStage as string)
             };
             const created = await ReviewerService.createReviewer(data);
             successResponse(res, 201, "Reviewer created successfully", created);
@@ -21,11 +22,13 @@ export class ReviewerController {
 
     static async getReviewers(req: Request, res: Response) {
         try {
+
             const { projectStage, applicant } = req.query;
             const filter: GetReviewerOptions = {
-                applicant: new mongoose.Types.ObjectId(applicant as string),
-                projectStage: new mongoose.Types.ObjectId(projectStage as string)
+                applicant: applicant ? new mongoose.Types.ObjectId(applicant as string) : undefined,
+                projectStage: projectStage ? new mongoose.Types.ObjectId(projectStage as string) : undefined
             };
+            console.log("Filter:", filter);
             const reviewers = await ReviewerService.getReviewers(filter);
             successResponse(res, 200, 'Reviewers fetched successfully', reviewers);
         } catch (err: any) {
@@ -36,10 +39,9 @@ export class ReviewerController {
     static async updateReviewer(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const { projectStage, applicant } = req.body;
-            const data: CreateReviewerDto = {
-                applicant: new mongoose.Types.ObjectId(applicant as string),
-                project: new mongoose.Types.ObjectId(projectStage as string)
+            const { status } = req.body;
+            const data: Partial<CreateReviewerDto> = {
+                status: status as ReviewerStatus
             };
             const updated = await ReviewerService.updateReviewer(id, data);
             successResponse(res, 201, "Reviewer updated successfully", updated);

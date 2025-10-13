@@ -18,8 +18,8 @@ interface ReviewerManagerProps {
 
 export default function ReviewerManager({ applicant, projectStage }: ReviewerManagerProps) {
     const emptyReviewer: Reviewer = {
-        applicant: applicant || "",
-        projectStage: projectStage || "",
+        applicant: applicant ?? undefined,
+        projectStage: projectStage ?? undefined,
         status: ReviewerStatus.pending
     };
 
@@ -32,8 +32,8 @@ export default function ReviewerManager({ applicant, projectStage }: ReviewerMan
     const fetchReviewers = useCallback(async () => {
         try {
             const options: GetReviewersOptions = {};
-            if (applicant) options.applicant = applicant._id;
-            if (projectStage) options.projectStage = projectStage._id;
+            options.applicant = applicant ? applicant._id : undefined;
+            options.projectStage = projectStage ? projectStage._id : undefined;            
             const data = await ReviewerApi.getReviewers(options);
             setReviewers(data);
         } catch (err) {
@@ -50,10 +50,10 @@ export default function ReviewerManager({ applicant, projectStage }: ReviewerMan
         if (reviewer._id) {
             const updated = await ReviewerApi.updateReviewer(reviewer);
             const index = _reviewers.findIndex((c) => c._id === reviewer._id);
-            _reviewers[index] = { ...updated };
+            _reviewers[index] = { ...updated, applicant: reviewer.applicant, projectStage: reviewer.projectStage };
         } else {
             const created = await ReviewerApi.createReviewer(reviewer);
-            _reviewers.push({ ...created });
+            _reviewers.push({ ...created, applicant: reviewer.applicant, projectStage: reviewer.projectStage });
         }
         setReviewers(_reviewers);
         hideDialogs();

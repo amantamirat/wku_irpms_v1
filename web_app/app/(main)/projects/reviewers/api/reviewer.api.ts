@@ -1,5 +1,6 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Reviewer } from "../models/reviewer.model";
+import { Reviewer, sanitizeReviewer } from "../models/reviewer.model";
+
 const end_point = '/project/reviewers/';
 
 export interface GetReviewersOptions {
@@ -8,6 +9,7 @@ export interface GetReviewersOptions {
 }
 
 export const ReviewerApi = {
+    
     async getReviewers(options: GetReviewersOptions): Promise<Reviewer[]> {
         const query = new URLSearchParams();
         if (options.applicant) query.append("applicant", options.applicant);
@@ -17,7 +19,8 @@ export const ReviewerApi = {
     },
 
     async createReviewer(reviewer: Partial<Reviewer>): Promise<Reviewer> {
-        const createdData = await ApiClient.post(end_point, reviewer);
+        const sanitized = sanitizeReviewer(reviewer);
+        const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as Reviewer;
     },
 
@@ -25,8 +28,9 @@ export const ReviewerApi = {
         if (!reviewer._id) {
             throw new Error("_id required.");
         }
+        const sanitized = sanitizeReviewer(reviewer);
         const url = `${end_point}${reviewer._id}`;
-        const updatedReviewer = await ApiClient.put(url, reviewer);
+        const updatedReviewer = await ApiClient.put(url, sanitized);
         return updatedReviewer as Reviewer;
     },
 

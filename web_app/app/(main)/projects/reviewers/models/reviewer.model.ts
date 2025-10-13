@@ -9,8 +9,8 @@ export enum ReviewerStatus {
 
 export type Reviewer = {
     _id?: string;
-    projectStage: string | ProjectStage;
-    applicant: string | Applicant;
+    projectStage?: string | ProjectStage;
+    applicant?: string | Applicant;
     status?: ReviewerStatus;
     createdAt?: Date;
     updatedAt?: Date;
