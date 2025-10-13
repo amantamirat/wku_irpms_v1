@@ -6,7 +6,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 import { Composition, validateComposition } from '../models/composition.model';
-import { ApplicantConstraintType, Constraint } from '../../models/constraint.model';
+import { ApplicantConstraintType, Constraint, isListConstraint, isRangeConstraint } from '../../models/constraint.model';
 import { Toast } from 'primereact/toast';
 import { accessibilityOptions, genderOptions, scopeOptions } from '@/app/(main)/applicants/models/applicant.model';
 
@@ -80,38 +80,45 @@ function SaveDialog(props: SaveDialogProps) {
             onHide={hide}
         >
             <Toast ref={toast} />
-            <div className="field">
-                <label htmlFor="min">Minimum</label>
-                <InputNumber
-                    id="min"
-                    value={composition.min}
-                    onChange={(e) => setComposition({ ...composition, min: e.value ?? 0 })}
-                    required
-                    className={classNames({ 'p-invalid': submitted && (composition.min == null) })}
-                />
-            </div>
-            <div className="field">
-                <label htmlFor="max">Maximum</label>
-                <InputNumber
-                    id="max"
-                    value={composition.max}
-                    onChange={(e) => setComposition({ ...composition, max: e.value ?? 0 })}
-                    required
-                    className={classNames({ 'p-invalid': submitted && (composition.max == null) })}
-                />
-            </div>
-            <div className="field">
-                <label htmlFor="item">Item</label>
-                <Dropdown
-                    id="item"
-                    value={composition.item}
-                    options={parent.constraint === ApplicantConstraintType.GENDER ? genderOptions :
-                        parent.constraint === ApplicantConstraintType.ACCESSIBILITY ? accessibilityOptions : scopeOptions}
-                    onChange={(e) => setComposition({ ...composition, item: e.value })}
-                    placeholder="Select Item"
+            {isRangeConstraint(parent.constraint as ApplicantConstraintType) &&
+                <>
+                    <div className="field">
+                        <label htmlFor="min">Minimum</label>
+                        <InputNumber
+                            id="min"
+                            value={composition.min}
+                            onChange={(e) => setComposition({ ...composition, min: e.value ?? 0 })}
+                            required
+                            className={classNames({ 'p-invalid': submitted && (composition.min == null) })}
+                        />
+                    </div>
+                    <div className="field">
+                        <label htmlFor="max">Maximum</label>
+                        <InputNumber
+                            id="max"
+                            value={composition.max}
+                            onChange={(e) => setComposition({ ...composition, max: e.value ?? 0 })}
+                            required
+                            className={classNames({ 'p-invalid': submitted && (composition.max == null) })}
+                        />
+                    </div>
+                </>}
+            {
+                isListConstraint(parent.constraint as ApplicantConstraintType) &&
+                <div className="field">
+                    <label htmlFor="item">Item</label>
+                    <Dropdown
+                        id="item"
+                        value={composition.item}
+                        options={parent.constraint === ApplicantConstraintType.GENDER ? genderOptions :
+                            parent.constraint === ApplicantConstraintType.ACCESSIBILITY ? accessibilityOptions : scopeOptions}
+                        onChange={(e) => setComposition({ ...composition, item: e.value })}
+                        placeholder="Select Item"
 
-                />
-            </div>
+                    />
+                </div>
+            }
+
             <div className="field">
                 <label htmlFor="value">Value</label>
                 <InputNumber
