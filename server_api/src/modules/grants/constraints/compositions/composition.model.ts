@@ -1,6 +1,6 @@
 import mongoose, { model, Schema } from "mongoose";
-import { COLLECTIONS } from "../../../enums/collections.enum";
-import { ApplicantConstraint } from "./constraint.model";
+import { COLLECTIONS } from "../../../../enums/collections.enum";
+import { ApplicantConstraint } from "../constraint.model";
 
 
 export interface IComposition extends Document {    

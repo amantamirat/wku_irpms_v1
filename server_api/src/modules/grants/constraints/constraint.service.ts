@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { Grant } from "../grant.model";
-import { Composition } from "./composition.model";
+import { Composition } from "./compositions/composition.model";
 import { ApplicantConstraintType, BaseConstraintType, isListConstraint, isRangeConstraint, OperationMode, ProjectConstraintType } from "./constraint.enum";
 import { ApplicantConstraint, BaseConstraint } from "./constraint.model";
 

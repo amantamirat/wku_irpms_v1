@@ -5,7 +5,7 @@ import { ApplicantConstraintType, OperationMode, ProjectConstraintType } from ".
 import { ApplicantConstraint, ProjectConstraint } from "./constraint.model";
 import { Gender } from "../../applicants/applicant.enum";
 import { CreateProjectDto } from "../../project/project.service";
-import { Composition } from "./composition.model";
+import { Composition } from "./compositions/composition.model";
 
 export class ConstraintValidator {
 
