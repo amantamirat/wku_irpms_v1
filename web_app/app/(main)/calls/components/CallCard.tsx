@@ -10,10 +10,10 @@ import { Organization } from "../../organizations/models/organization.model";
 import { Project } from "../../projects/models/project.model";
 import { useAuth } from "@/contexts/auth-context";
 import { Collaborator, CollaboratorStatus } from "../../projects/collaborators/models/collaborator.model";
+import CallViewDialog from "./CallViewDialog";
 
 interface CallCardProps {
     call: Call;
-
 }
 
 export default function CallCard(props: CallCardProps) {
@@ -37,6 +37,7 @@ export default function CallCard(props: CallCardProps) {
     };
     const [project, setProject] = useState<Project>(emptyProject);
     const [showApplyDialog, setShowApplyDialog] = useState(false);
+    const [showViewDialog, setShowViewDialog] = useState(false);
 
     const header = <img alt="Call" src={call.poster || "/images/callcard.png"} />;
 
@@ -45,6 +46,9 @@ export default function CallCard(props: CallCardProps) {
             <div className="flex gap-2">
                 <Button label="View" icon="pi pi-eye" severity="info"
                     rounded raised outlined
+                    onClick={() => {
+                        setShowViewDialog(true);
+                    }}
                 />
                 <Button
                     label="Apply" icon="pi pi-check-circle" severity="success"
@@ -95,6 +99,14 @@ export default function CallCard(props: CallCardProps) {
                     call={call}
                     onCancel={() => setShowApplyDialog(false)}
                     project={project} setProject={setProject}
+                />
+            )}
+
+            {call && (
+                <CallViewDialog
+                    visible={showViewDialog}
+                    call={call}
+                    onHide={() => setShowViewDialog(false)}
                 />
             )}
         </>
