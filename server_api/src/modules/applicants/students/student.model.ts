@@ -1,29 +1,31 @@
-import { Document, Types } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
+import { COLLECTIONS } from '../../../enums/collections.enum';
+import { Program } from '../../organization/organization.model';
 
 export interface IStudent extends Document {
-  academic_calendar: Types.ObjectId;
-  program: Types.ObjectId;
-  applicant: Types.ObjectId;
+  academic_calendar: mongoose.Types.ObjectId;
+  program: mongoose.Types.ObjectId;
+  applicant: mongoose.Types.ObjectId;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-import mongoose, { Schema } from 'mongoose';
+
 
 const StudentSchema = new Schema<IStudent>({
   academic_calendar: {
     type: Schema.Types.ObjectId,
-    ref: 'AcademicCalendar',
+    ref: COLLECTIONS.CALENDAR,
     required: true
   },
   program: {
     type: Schema.Types.ObjectId,
-    ref: 'Program',
+    ref: Program.modelName,
     required: true
   },
   applicant: {
     type: Schema.Types.ObjectId,
-    ref: 'Applicant',
+    ref: COLLECTIONS.APPLICANT,
     required: true
   }
 }, {
