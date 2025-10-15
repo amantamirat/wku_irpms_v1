@@ -1,5 +1,5 @@
 import { EvaluationType, FormType } from "./evaluation.enum";
-import { BaseEvaluation, Criterion, Evaluation, Stage, StageDocument } from "./evaluation.model";
+import { BaseEvaluation, Criterion, Evaluation, Stage, IStage } from "./evaluation.model";
 import mongoose from "mongoose";
 import { Call } from "../call.model";
 import { Directorate } from "../../organization/organization.model";
@@ -62,9 +62,6 @@ export class EvaluationService {
     static async createEvaluation(data: CreateEvaluationDto) {
         const { type, ...rest } = data;
         await this.validateEvaluation(data);
-        if (!BaseEvaluation.discriminators || !BaseEvaluation.discriminators[type]) {
-            throw new Error(`Invalid Evaluation type: ${type}`);
-        }
         if (type === EvaluationType.stage) {
             const maxStage = await Stage.findOne({
                 parent: data.parent
@@ -108,7 +105,7 @@ export class EvaluationService {
         } else if (evaluation.type === EvaluationType.stage) {
             const referencedByProject = await ProjectStage.exists({ stage: evaluation._id });
             if (referencedByProject) throw new Error(`Can not delete ${evaluation.title}, it is referenced in projects.`);
-            const stage = evaluation as unknown as StageDocument;
+            const stage = evaluation as unknown as IStage;
             const deleted = await evaluation.deleteOne();
             await Stage.updateMany({
                 parent: stage.parent,

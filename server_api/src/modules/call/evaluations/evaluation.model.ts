@@ -4,14 +4,14 @@ import { COLLECTIONS } from "../../../enums/collections.enum";
 import { Directorate } from "../../organization/organization.model";
 
 
-interface BaseEvaluationDocument extends Document {
+interface IBaseEvaluation extends Document {
   type: EvaluationType;
   title: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-const BaseEvaluationSchema = new Schema<BaseEvaluationDocument>(
+const BaseEvaluationSchema = new Schema<IBaseEvaluation>(
   {
     type: {
       type: String,
@@ -23,14 +23,14 @@ const BaseEvaluationSchema = new Schema<BaseEvaluationDocument>(
   { timestamps: true, discriminatorKey: "type" } // discriminatorKey
 );
 
-export const BaseEvaluation = model<BaseEvaluationDocument>(COLLECTIONS.EVALUATION, BaseEvaluationSchema);
+export const BaseEvaluation = model<IBaseEvaluation>(COLLECTIONS.EVALUATION, BaseEvaluationSchema);
 
-interface EvaluationDocument extends BaseEvaluationDocument {
+interface IEvaluation extends IBaseEvaluation {
   type: EvaluationType.evaluation;
   directorate: mongoose.Types.ObjectId;
 }
 
-const EvaluationSchema = new Schema<EvaluationDocument>({
+const EvaluationSchema = new Schema<IEvaluation>({
   directorate: {
     type: Schema.Types.ObjectId,
     ref: Directorate.modelName,
@@ -39,18 +39,18 @@ const EvaluationSchema = new Schema<EvaluationDocument>({
   },
 });
 
-export const Evaluation = BaseEvaluation.discriminator<EvaluationDocument>(EvaluationType.evaluation, EvaluationSchema);
+export const Evaluation = BaseEvaluation.discriminator<IEvaluation>(EvaluationType.evaluation, EvaluationSchema);
 
-interface ChildEvaluationDocument extends BaseEvaluationDocument {
+interface ChildEvaluationDocument extends IBaseEvaluation {
   parent: mongoose.Types.ObjectId;
 }
 
-export interface StageDocument extends ChildEvaluationDocument {
+export interface IStage extends ChildEvaluationDocument {
   type: EvaluationType.stage;
   order: number;
 }
 
-const StageSchema = new Schema<StageDocument>({
+const StageSchema = new Schema<IStage>({
   parent: {
     type: Schema.Types.ObjectId,
     ref: Evaluation.modelName,
@@ -66,15 +66,15 @@ const StageSchema = new Schema<StageDocument>({
 
 StageSchema.index({ parent: 1, order: 1 }, { unique: true });
 
-export const Stage = BaseEvaluation.discriminator<StageDocument>(EvaluationType.stage, StageSchema);
+export const Stage = BaseEvaluation.discriminator<IStage>(EvaluationType.stage, StageSchema);
 
-interface CriterionDocument extends ChildEvaluationDocument {
+interface ICriterion extends ChildEvaluationDocument {
   type: EvaluationType.criterion;
   weight_value: number;
   form_type: FormType;
 }
 
-const CriterionSchema = new Schema<CriterionDocument>({
+const CriterionSchema = new Schema<ICriterion>({
   parent: {
     type: Schema.Types.ObjectId,
     ref: Stage.modelName,
@@ -93,15 +93,15 @@ const CriterionSchema = new Schema<CriterionDocument>({
   }
 });
 
-export const Criterion = BaseEvaluation.discriminator<CriterionDocument>(EvaluationType.criterion, CriterionSchema);
+export const Criterion = BaseEvaluation.discriminator<ICriterion>(EvaluationType.criterion, CriterionSchema);
 
 
-interface OptionDocument extends ChildEvaluationDocument {
+interface IOption extends ChildEvaluationDocument {
   type: EvaluationType.option;
   weight_value: number;
 }
 
-const OptionSchema = new Schema<OptionDocument>({
+const OptionSchema = new Schema<IOption>({
   parent: {
     type: Schema.Types.ObjectId,
     ref: Criterion.modelName,
@@ -116,7 +116,7 @@ const OptionSchema = new Schema<OptionDocument>({
 });
 
 OptionSchema.index({ parent: 1, weight_value: 1 }, { unique: true });
-export const Option = BaseEvaluation.discriminator<OptionDocument>(EvaluationType.option, OptionSchema);
+export const Option = BaseEvaluation.discriminator<IOption>(EvaluationType.option, OptionSchema);
 
 
 

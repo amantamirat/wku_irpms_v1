@@ -26,7 +26,6 @@ import roleRoutes from './modules/users/roles/role.routes';
 
 import { PermissionService } from './modules/users/permissions/permission.service';
 import { initializeThemeModels } from './modules/call/themes/init.models';
-import { initializeEvalModels } from './modules/call/evaluations/init.models';
 import { initializeOrganizationModels } from './modules/organization/init.model';
 import { UserService } from './modules/users/user.service';
 import path from 'path';
@@ -74,7 +73,6 @@ const PORT = process.env.SERVER_PORT || 5000;
     console.log('database connection established');
     initializeOrganizationModels();
     initializeThemeModels();
-    initializeEvalModels();
     await PermissionService.initPermissions();
     await UserService.initAdminUser();
    
