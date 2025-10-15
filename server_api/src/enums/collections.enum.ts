@@ -18,4 +18,5 @@ export enum COLLECTIONS {
   COLLABORATOR_ASSIGNMENT = "collaboratorassignments",
   PROJECT_STAGE = "projectstages",
   REVIEWER = "reviewers",
+  RESULT = "results",
 }
