@@ -1,16 +1,15 @@
+import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
+import ConfirmDialog from "@/components/ConfirmationDialog";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable, DataTableExpandedRows } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
-import { Toast } from "primereact/toast";
-import { useCallback, useEffect, useRef, useState } from "react";
-import ConfirmDialog from "@/components/ConfirmationDialog";
-import { ReviewerApi, GetReviewersOptions } from "../api/reviewer.api";
-import { Reviewer, ReviewerStatus } from "../models/reviewer.model";
-import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
-import { ProjectStage } from "../../stages/models/stage.model";
-import SaveReviewerDialog from "./ReviewerDialog";
+import { useCallback, useEffect, useState } from "react";
 import ResultManager from "../../results/components/ResultManager";
+import { ProjectStage } from "../../stages/models/stage.model";
+import { GetReviewersOptions, ReviewerApi } from "../api/reviewer.api";
+import { Reviewer, ReviewerStatus } from "../models/reviewer.model";
+import SaveReviewerDialog from "./SaveReviewerDialog";
 
 interface ReviewerManagerProps {
     applicant?: Applicant;
@@ -29,14 +28,12 @@ export default function ReviewerManager({ applicant, projectStage }: ReviewerMan
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
-    
-
 
     const fetchReviewers = useCallback(async () => {
         try {
             const options: GetReviewersOptions = {};
             options.applicant = applicant ? applicant._id : undefined;
-            options.projectStage = projectStage ? projectStage._id : undefined;            
+            options.projectStage = projectStage ? projectStage._id : undefined;
             const data = await ReviewerApi.getReviewers(options);
             setReviewers(data);
         } catch (err) {
@@ -48,19 +45,19 @@ export default function ReviewerManager({ applicant, projectStage }: ReviewerMan
         fetchReviewers();
     }, [fetchReviewers]);
 
-    const saveReviewer = async () => {
+
+    const onSaveCompelete = (savedReviewer: Reviewer) => {
         let _reviewers = [...reviewers];
-        if (reviewer._id) {
-            const updated = await ReviewerApi.updateReviewer(reviewer);
-            const index = _reviewers.findIndex((c) => c._id === reviewer._id);
-            _reviewers[index] = { ...updated, applicant: reviewer.applicant, projectStage: reviewer.projectStage };
+        const index = _reviewers.findIndex((c) => c._id === savedReviewer._id);
+        if (index !== -1) {
+            _reviewers[index] = { ...savedReviewer };
         } else {
-            const created = await ReviewerApi.createReviewer(reviewer);
-            _reviewers.push({ ...created, applicant: reviewer.applicant, projectStage: reviewer.projectStage });
+            _reviewers.push({ ...savedReviewer });
         }
         setReviewers(_reviewers);
         hideDialogs();
     };
+
 
     const deleteReviewer = async () => {
         const deleted = await ReviewerApi.deleteReviewer(reviewer);
@@ -111,7 +108,7 @@ export default function ReviewerManager({ applicant, projectStage }: ReviewerMan
         return (
             <div className="p-3">
                 <h6>
-                    Results for Reviewer: 
+                    Results for Reviewer:
                     {typeof rowData.applicant === "object" && rowData.applicant !== null
                         ? `${rowData.applicant.first_name ?? ""} ${rowData.applicant.last_name ?? ""}`
                         : ""}
@@ -138,7 +135,7 @@ export default function ReviewerManager({ applicant, projectStage }: ReviewerMan
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         emptyMessage="No reviewers found."
                         scrollable
-                        tableStyle={{ minWidth: '50rem' }}                        
+                        tableStyle={{ minWidth: '50rem' }}
                         expandedRows={expandedRows}
                         onRowToggle={(e) => setExpandedRows(e.data)}
                         rowExpansionTemplate={resultExpansionTemplate}
@@ -158,10 +155,9 @@ export default function ReviewerManager({ applicant, projectStage }: ReviewerMan
 
                     {reviewer && projectStage &&
                         <SaveReviewerDialog
-                            reviewer={reviewer}
-                            setReviewer={setReviewer}
                             visible={showSaveDialog}
-                            onSave={saveReviewer}
+                            reviewer={reviewer}
+                            onCompelete={onSaveCompelete}
                             onHide={hideDialogs}
                         />}
 

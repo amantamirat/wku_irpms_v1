@@ -1,13 +1,13 @@
+import ConfirmDialog from "@/components/ConfirmationDialog";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
 import { useEffect, useState } from "react";
-import ConfirmDialog from "@/components/ConfirmationDialog";
-import { Result } from "../models/result.model";
-import { ResultApi } from "../api/result.api";
-import SaveResultDialog from "./SaveResultDialog";
 import { Reviewer } from "../../reviewers/models/reviewer.model";
+import { ResultApi } from "../api/result.api";
+import { Result } from "../models/result.model";
+import SaveResultDialog from "./SaveResultDialog";
 
 interface ResultManagerProps {
     criterion?: string;
@@ -29,24 +29,22 @@ export default function ResultManager({ criterion, evaluator }: ResultManagerPro
 
     useEffect(() => {
         const fetchResults = async () => {
-            const data = await ResultApi.getResults({ 
-                criterion, 
-                evaluator: evaluator && evaluator._id ? evaluator._id : undefined 
+            const data = await ResultApi.getResults({
+                criterion,
+                evaluator: evaluator && evaluator._id ? evaluator._id : undefined
             });
             setResults(data);
         };
         fetchResults();
     }, [criterion, evaluator]);
 
-    const saveResult = async () => {
+    const onSaveCompelete = () => {
         let _results = [...results];
-        if (result._id) {
-            const updated = await ResultApi.updateResult(result);
-            const index = _results.findIndex((c) => c._id === updated._id);
-            _results[index] = { ...result, updatedAt: updated.updatedAt };
+        const index = _results.findIndex((c) => c._id === result._id);
+        if (index !== -1) {
+            _results[index] = { ...result }
         } else {
-            const created = await ResultApi.createResult(result);
-            _results.push({ ...created });
+            _results.push({ ...result });
         }
         setResults(_results);
         hideDialogs();
@@ -120,10 +118,10 @@ export default function ResultManager({ criterion, evaluator }: ResultManagerPro
 
                 {result &&
                     <SaveResultDialog
+                        visible={showAddDialog}
                         result={result}
                         setResult={setResult}
-                        visible={showAddDialog}
-                        onSave={saveResult}
+                        onCompelete={onSaveCompelete}
                         onHide={hideDialogs}
                     />}
 

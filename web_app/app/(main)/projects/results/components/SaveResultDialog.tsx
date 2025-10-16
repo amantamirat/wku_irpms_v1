@@ -2,24 +2,22 @@ import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputNumber } from "primereact/inputnumber";
 import { InputTextarea } from "primereact/inputtextarea";
-import { Result, validateResult } from "../models/result.model";
-import { InputText } from "primereact/inputtext";
-import { useRef } from "react";
 import { Toast } from "primereact/toast";
+import { useRef } from "react";
+import { ResultApi } from "../api/result.api";
+import { Result, validateResult } from "../models/result.model";
 
 interface SaveResultDialogProps {
+    visible: boolean;
     result: Result;
     setResult: (result: Result) => void;
-    visible: boolean;
     onSave?: () => Promise<void>;
+    onCompelete?: () => void;
     onHide: () => void;
 }
 
-export default function SaveResultDialog({ result, setResult, visible, onSave, onHide }: SaveResultDialogProps) {
+const SaveResultDialog = ({ visible, result, setResult, onSave, onCompelete, onHide }: SaveResultDialogProps) => {
     const toast = useRef<Toast>(null);
-    const updateField = (field: keyof Result, value: any) => {
-        setResult({ ...result, [field]: value });
-    };
 
     const saveResult = async () => {
         try {
@@ -29,6 +27,14 @@ export default function SaveResultDialog({ result, setResult, visible, onSave, o
             }
             if (onSave) {
                 await onSave();
+            } else {
+                if (result._id) {
+                    const updated = await ResultApi.updateResult(result);
+                    setResult({ ...result, updatedAt: updated.updatedAt });
+                } else {
+                    const created = await ResultApi.createResult(result);
+                    setResult({ ...result, _id: created._id, createdAt: created.createdAt, updatedAt: created.updatedAt });
+                }
             }
             toast.current?.show({
                 severity: 'success',
@@ -36,6 +42,9 @@ export default function SaveResultDialog({ result, setResult, visible, onSave, o
                 detail: `Result Saved.`,
                 life: 2000
             });
+            if (onCompelete) {
+                setTimeout(() => onCompelete(), 2000);
+            }
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
@@ -70,7 +79,7 @@ export default function SaveResultDialog({ result, setResult, visible, onSave, o
                     <InputNumber
                         id="score"
                         value={result.score}
-                        onValueChange={(e) => updateField("score", e.value ?? 0)}
+                        onValueChange={(e) => setResult({ ...result, score: e.value ?? 0 })}
                         min={0}
                         placeholder="Enter score"
                     />
@@ -81,21 +90,15 @@ export default function SaveResultDialog({ result, setResult, visible, onSave, o
                         id="comment"
                         rows={3}
                         value={result.comment}
-                        onChange={(e) => updateField("comment", e.target.value)}
+                        onChange={(e) => setResult({ ...result, comment: e.target.value })}
                         autoResize
                         placeholder="Enter comment (optional)"
                     />
                 </div>
-                <div className="field">
-                    <label htmlFor="status">Status</label>
-                    <InputText
-                        id="status"
-                        value={result.status}
-                        onChange={(e) => updateField("status", e.target.value)}
-                        placeholder="Enter status (optional)"
-                    />
-                </div>
+
             </Dialog>
         </>
     );
 }
+
+export default SaveResultDialog;

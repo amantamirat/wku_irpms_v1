@@ -32,7 +32,7 @@ export class ReviewerService {
 
     static async createReviewer(data: CreateReviewerDto) {
         await this.validateReviewer(data);
-        const createdReviewer = await Reviewer.create({ ...data, status: data.status ?? ReviewerStatus.pending });
+        const createdReviewer = await Reviewer.create({ ...data, status: data.status ?? ReviewerStatus.pending });       
         return createdReviewer;
     }
 
@@ -40,7 +40,7 @@ export class ReviewerService {
         const filter: any = {};
         if (options.projectStage) filter.projectStage = options.projectStage;
         if (options.applicant) filter.applicant = options.applicant;
-        const reviewers = await Reviewer.find(filter).populate("applicant").lean();
+        const reviewers = await Reviewer.find(filter).populate("applicant").populate("projectStage").lean();
         return reviewers;
     }
 

@@ -9,22 +9,27 @@ import { Reviewer, ReviewerStatus, validateReviewer } from "../models/reviewer.m
 import { OrganizationApi } from "@/app/(main)/organizations/api/organization.api";
 import { Category, Organization } from "@/app/(main)/organizations/models/organization.model";
 import { applicantTemplate } from "@/app/(main)/applicants/models/applicant.template";
+import { ReviewerApi } from "../api/reviewer.api";
 
 interface ReviewerDialogProps {
-    reviewer: Reviewer;
-    setReviewer: (reviewer: Reviewer) => void;
     visible: boolean;
-    onSave: () => Promise<void>;
+    reviewer: Reviewer;
+    onCompelete?: (savedReviewer: Reviewer) => void;
     onHide: () => void;
 }
 
-export default function SaveReviewerDialog({ reviewer, setReviewer, visible, onHide, onSave }: ReviewerDialogProps) {
+export default function SaveReviewerDialog({ visible, reviewer, onCompelete, onHide }: ReviewerDialogProps) {
 
+    const toast = useRef<Toast>(null);
     const [scope, setScope] = useState<Category>();
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [workspace, setWorkspace] = useState<Organization>();
     const [applicants, setApplicants] = useState<Applicant[]>([]);
-    const toast = useRef<Toast>(null);
+    const [localReviewer, setLocalReviewer] = useState(reviewer || {});
+
+    useEffect(() => {
+        setLocalReviewer(reviewer || {});
+    }, [reviewer]);
 
     useEffect(() => {
         let isMounted = true;
@@ -69,18 +74,30 @@ export default function SaveReviewerDialog({ reviewer, setReviewer, visible, onH
 
     const saveReviewer = async () => {
         try {
-            const result = validateReviewer(reviewer);
-            if (!result.valid) {
-                throw new Error(result.message);
+            const validation = validateReviewer(localReviewer);
+            if (!validation.valid) {
+                throw new Error(validation.message);
             }
-            await onSave();
+            let saved: Reviewer;
+            if (localReviewer._id) {
+                saved = await ReviewerApi.updateReviewer(localReviewer);
+            } else {
+                saved = await ReviewerApi.createReviewer(localReviewer);
+            }
+            saved = {
+                ...saved,
+                projectStage: localReviewer.projectStage,
+                applicant: localReviewer.applicant
+            };
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',
                 detail: 'Reviewer Saved',
                 life: 2000
             });
-            setTimeout(() => onHide(), 2000);
+            if (onCompelete) {
+                setTimeout(() => onCompelete(saved), 2000);
+            }
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
@@ -143,10 +160,10 @@ export default function SaveReviewerDialog({ reviewer, setReviewer, visible, onH
                         <label htmlFor="applicant">Applicant</label>
                         <Dropdown
                             id="applicant"
-                            value={reviewer.applicant}
+                            value={localReviewer.applicant}
                             options={applicants}
                             onChange={(e) =>
-                                setReviewer({ ...reviewer, applicant: e.value })
+                                setLocalReviewer({ ...localReviewer, applicant: e.value })
                             }
                             dataKey="_id"
                             optionLabel="first_name"
@@ -165,10 +182,10 @@ export default function SaveReviewerDialog({ reviewer, setReviewer, visible, onH
                             <label htmlFor="status">Status</label>
                             <Dropdown
                                 id="status"
-                                value={reviewer.status}
+                                value={localReviewer.status}
                                 options={Object.values(ReviewerStatus).map(s => ({ label: s, value: s }))}
                                 onChange={(e) =>
-                                    setReviewer({ ...reviewer, status: e.value })
+                                    setLocalReviewer({ ...localReviewer, status: e.value })
                                 }
                             />
                         </div>
