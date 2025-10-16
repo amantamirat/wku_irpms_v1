@@ -19,7 +19,7 @@ import { Grant } from '../../grants/models/grant.model';
 import { Evaluation } from '../../evals/models/eval.model';
 import { Theme } from '../../themes/models/theme.model';
 import { ThemeApi } from '../../themes/api/theme.api';
-import { EvaluationApi } from '../../evals/api/eval.api';
+import { EvaluationApi } from '../../evals/api/evaluation.api';
 import ProjectManager from '../../projects/components/ProjectManager';
 
 

@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { ResultApi } from "../api/result.api";
 import { Result, validateResult } from "../models/result.model";
 import { EvalType, Evaluation } from "@/app/(main)/evals/models/eval.model";
-import { EvaluationApi } from "@/app/(main)/evals/api/eval.api";
+import { EvaluationApi } from "@/app/(main)/evals/api/evaluation.api";
 import { Dropdown } from "primereact/dropdown";
 
 interface SaveResultDialogProps {

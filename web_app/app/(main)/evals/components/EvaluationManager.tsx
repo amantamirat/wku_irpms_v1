@@ -10,7 +10,7 @@ import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import SaveDialog from './dialogs/SaveDialog';
 import { EvalType, Evaluation, FormType } from '../models/eval.model';
-import { EvaluationApi } from '../api/eval.api';
+import { EvaluationApi } from '../api/evaluation.api';
 import { Organization } from '../../organizations/models/organization.model';
 import { FileUpload } from 'primereact/fileupload';
 

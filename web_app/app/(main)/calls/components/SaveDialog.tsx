@@ -4,7 +4,7 @@ import { Dialog } from 'primereact/dialog';
 import { useCallback, useEffect, useState } from 'react';
 import { CalendarApi } from '../../calendars/api/calendar.api';
 import { Calendar, CalendarStatus } from '../../calendars/models/calendar.model';
-import { EvaluationApi } from '../../evals/api/eval.api';
+import { EvaluationApi } from '../../evals/api/evaluation.api';
 import { Evaluation } from '../../evals/models/eval.model';
 import { GrantApi } from '../../grants/api/grant.api';
 import { Grant } from '../../grants/models/grant.model';
