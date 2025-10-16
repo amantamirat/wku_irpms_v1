@@ -1,6 +1,6 @@
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
-import { DataTable } from "primereact/datatable";
+import { DataTable, DataTableExpandedRows } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
 import { Toast } from "primereact/toast";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -10,6 +10,7 @@ import { Reviewer, ReviewerStatus } from "../models/reviewer.model";
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
 import { ProjectStage } from "../../stages/models/stage.model";
 import SaveReviewerDialog from "./ReviewerDialog";
+import ResultManager from "../../results/components/ResultManager";
 
 interface ReviewerManagerProps {
     applicant?: Applicant;
@@ -27,6 +28,8 @@ export default function ReviewerManager({ applicant, projectStage }: ReviewerMan
     const [reviewer, setReviewer] = useState<Reviewer>(emptyReviewer);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
+    
 
 
     const fetchReviewers = useCallback(async () => {
@@ -103,6 +106,21 @@ export default function ReviewerManager({ applicant, projectStage }: ReviewerMan
         </>
     );
 
+    // Row expansion template for results
+    const resultExpansionTemplate = (rowData: Reviewer) => {
+        return (
+            <div className="p-3">
+                <h6>
+                    Results for Reviewer: 
+                    {typeof rowData.applicant === "object" && rowData.applicant !== null
+                        ? `${rowData.applicant.first_name ?? ""} ${rowData.applicant.last_name ?? ""}`
+                        : ""}
+                </h6>
+                <ResultManager evaluator={rowData} />
+            </div>
+        );
+    };
+
     return (
         <div className="grid">
             <div className="col-12">
@@ -120,9 +138,12 @@ export default function ReviewerManager({ applicant, projectStage }: ReviewerMan
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         emptyMessage="No reviewers found."
                         scrollable
-                        tableStyle={{ minWidth: '50rem' }}
+                        tableStyle={{ minWidth: '50rem' }}                        
+                        expandedRows={expandedRows}
+                        onRowToggle={(e) => setExpandedRows(e.data)}
+                        rowExpansionTemplate={resultExpansionTemplate}
                     >
-                        <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
+                        <Column expander style={{ width: '3em' }} />
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column
                             field="applicant.first_name"
