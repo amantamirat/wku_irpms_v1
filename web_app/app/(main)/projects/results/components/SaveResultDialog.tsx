@@ -6,6 +6,9 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { ResultApi } from "../api/result.api";
 import { Result, validateResult } from "../models/result.model";
+import { EvalType, Evaluation } from "@/app/(main)/evals/models/eval.model";
+import { EvaluationApi } from "@/app/(main)/evals/api/eval.api";
+import { Dropdown } from "primereact/dropdown";
 
 interface SaveResultDialogProps {
     visible: boolean;
@@ -15,13 +18,27 @@ interface SaveResultDialogProps {
 }
 
 const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDialogProps) => {
-    const toast = useRef<Toast>(null);
 
+    const toast = useRef<Toast>(null);
+    const [criteria, setCriteria] = useState<Evaluation[]>([]);
     const [localResult, setLocalResult] = useState(result || {});
 
     useEffect(() => {
         setLocalResult(result || {});
     }, [result]);
+
+
+    useEffect(() => {
+        const fetchCriteria = async () => {
+            try {
+                const data = await EvaluationApi.getEvaluations({ type: EvalType.criterion });
+                setCriteria(data);
+            } catch (err) {
+                // Optionally handle error
+            }
+        };
+        fetchCriteria();
+    }, []);
 
     const saveResult = async () => {
         try {
@@ -80,6 +97,20 @@ const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDi
                 footer={footer}
                 onHide={onHide}
             >
+                <div className="field">
+                    <label htmlFor="criterion">Criterion</label>
+                    <Dropdown
+                        id="criterion"
+                        dataKey="_id"
+                        value={localResult.criterion}
+                        options={criteria}
+                        onChange={(e) =>
+                            setLocalResult({ ...localResult, criterion: e.value })
+                        }
+                        optionLabel="title"
+                        placeholder="Select Criterion"
+                    />
+                </div>
                 <div className="field">
                     <label htmlFor="score">Score</label>
                     <InputNumber
