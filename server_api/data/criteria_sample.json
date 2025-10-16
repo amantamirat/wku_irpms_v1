@@ -1,0 +1,59 @@
+[
+  {
+    "title": "Relevance to Institutional Priorities",
+    "weight_value": 20,
+    "form_type": "Closed",
+    "options": [
+      { "title": "Highly Relevant", "weight_value": 20 },
+      { "title": "Moderately Relevant", "weight_value": 15 },
+      { "title": "Somewhat Relevant", "weight_value": 10 },
+      { "title": "Not Relevant", "weight_value": 5 }
+    ]
+  },
+  {
+    "title": "Research Quality and Innovation",
+    "weight_value": 25,
+    "form_type": "Closed",
+    "options": [
+      { "title": "Excellent – strong originality and sound methodology", "weight_value": 25 },
+      { "title": "Good – some innovation, adequate methodology", "weight_value": 20 },
+      { "title": "Fair – limited innovation, weak methodology", "weight_value": 15 },
+      { "title": "Poor – lacks originality or clear research design", "weight_value": 10 }
+    ]
+  },
+  {
+    "title": "Team Capacity and Experience",
+    "weight_value": 15,
+    "form_type": "Closed",
+    "options": [
+      { "title": "Highly Experienced – demonstrated track record", "weight_value": 15 },
+      { "title": "Moderately Experienced", "weight_value": 10 },
+      { "title": "Limited Experience", "weight_value": 5 }
+    ]
+  },
+  {
+    "title": "Budget Justification and Feasibility",
+    "weight_value": 15,
+    "form_type": "Closed",
+    "options": [
+      { "title": "Well-justified and realistic", "weight_value": 15 },
+      { "title": "Partially justified", "weight_value": 10 },
+      { "title": "Weak or unclear justification", "weight_value": 5 }
+    ]
+  },
+  {
+    "title": "Expected Impact and Sustainability",
+    "weight_value": 15,
+    "form_type": "Closed",
+    "options": [
+      { "title": "High – strong long-term benefit", "weight_value": 15 },
+      { "title": "Moderate – some lasting benefits", "weight_value": 10 },
+      { "title": "Low – limited or unclear benefit", "weight_value": 5 }
+    ]
+  },
+  {
+    "title": "Comments and Recommendations",
+    "weight_value": 10,
+    "form_type": "Open"
+  }
+]

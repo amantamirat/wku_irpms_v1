@@ -75,4 +75,21 @@ export class EvaluationController {
             errorResponse(res, 400, err.message, err);
         }
     }
+
+    /**
+     * Batch import criteria (with options) under a given stage
+     * Expects: { stageId: string, criteriaData: Array<{ title, weight_value, form_type, options? }> }
+     */
+    static async importCriteriaBatch(req: Request, res: Response) {
+        try {
+            const { stageId, criteriaData } = req.body;
+            if (!stageId || !Array.isArray(criteriaData)) {
+                return errorResponse(res, 400, "stageId and criteriaData are required");
+            }
+            const result = await EvaluationService.importCriteriaBatch(new mongoose.Types.ObjectId(stageId as string), criteriaData);
+            successResponse(res, 201, "Criteria imported successfully", result);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    }
 }

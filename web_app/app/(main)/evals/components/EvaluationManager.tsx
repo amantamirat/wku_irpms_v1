@@ -12,6 +12,7 @@ import SaveDialog from './dialogs/SaveDialog';
 import { EvalType, Evaluation, FormType } from '../models/eval.model';
 import { EvaluationApi } from '../api/eval.api';
 import { Organization } from '../../organizations/models/organization.model';
+import { FileUpload } from 'primereact/fileupload';
 
 
 
@@ -220,6 +221,52 @@ const EvaluationManager = (props: EvaluationManagerProps) => {
         }
     };
 
+
+    const endToolbarTemplate = () => {
+        if (type !== EvalType.criterion) {
+            return null;
+        }
+        // Handler for file upload and import
+        const handleImport = async (event: any) => {
+            try {
+                setLoading(true);
+                const file = event.files[0];
+                if (!file) return;
+                const text = await file.text();
+                const json = JSON.parse(text);
+                // Expecting { criteriaData: [...], stageId: ... } or just array
+                let criteriaData, stageId;
+                if (Array.isArray(json)) {
+                    criteriaData = json;
+                    stageId = props.parent?._id;
+                } else {
+                    criteriaData = json.criteriaData;
+                    stageId = json.stageId || props.parent?._id;
+                }
+                if (!stageId || !Array.isArray(criteriaData)) {
+                    toast.current?.show({ severity: 'error', summary: 'Import Error', detail: 'Invalid import data', life: 3000 });
+                    return;
+                }
+                // Call API
+                const result = await EvaluationApi.importCriteriaBatch(stageId, criteriaData);
+                // Reload evaluations
+                await loadEvaluations();
+                toast.current?.show({ severity: 'success', summary: 'Import Successful', detail: `Imported ${result.length} criteria`, life: 3000 });
+            } catch (err) {
+                toast.current?.show({ severity: 'error', summary: 'Import Failed', detail: '' + err, life: 3000 });
+            } finally {
+                setLoading(false);
+            }
+        };
+        return (
+            <div className="my-2">
+                <FileUpload mode="basic" accept="application/json" maxFileSize={1000000} chooseLabel="Import" className="mr-2 inline-block"
+                    customUpload uploadHandler={handleImport}
+                />
+            </div>
+        );
+    };
+
     const startToolbarTemplate = () => (
         <div className="my-2">
             <Button label={`New ${type}`} icon="pi pi-plus" severity="success" className="mr-2"
@@ -230,7 +277,7 @@ const EvaluationManager = (props: EvaluationManagerProps) => {
                         const maxLevel = Math.max(0, ...stages.map(e => e.order ?? 0));
                         nextEval = { ...emptyEval, order: maxLevel + 1 };
                     }
-                    setSelectedEvaluation(nextEval);  
+                    setSelectedEvaluation(nextEval);
                     setShowSaveDialog(true);
                 }}
             />
@@ -292,7 +339,7 @@ const EvaluationManager = (props: EvaluationManagerProps) => {
             <div className="col-12">
                 <div className="card">
                     <Toast ref={toast} />
-                    <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
+                    <Toolbar className="mb-4" start={startToolbarTemplate} end={endToolbarTemplate}></Toolbar>
                     <DataTable
                         ref={dt}
                         value={evaluations}

@@ -1,5 +1,5 @@
 import { EvaluationType, FormType } from "./evaluation.enum";
-import { BaseEvaluation, Criterion, Evaluation, Stage, IStage } from "./evaluation.model";
+import { BaseEvaluation, Criterion, Evaluation, Stage, IStage, Option } from "./evaluation.model";
 import mongoose from "mongoose";
 import { Call } from "../call.model";
 import { Directorate } from "../../organization/organization.model";
@@ -119,7 +119,7 @@ export class EvaluationService {
     }
 
 
-    
+
     static async reorderStage(id: string, direction: string) {
         if (!['up', 'down'].includes(direction)) {
             throw new Error('Direction must be "up" or "down".');
@@ -167,5 +167,54 @@ export class EvaluationService {
             { $set: { order: targetLevel } }
         );
         return true;
+    }
+
+    /**
+     * Batch import criteria (with optional options) under a given stage.
+     * @param stageId - The parent stage ObjectId
+     * @param criteriaData - Array of criteria objects, each may include options for closed form type
+     * @returns Array of created criteria and their options
+     */
+    static async importCriteriaBatch(stageId: mongoose.Types.ObjectId, criteriaData: Array<{
+        title: string;
+        weight_value: number;
+        form_type: FormType;
+        options?: Array<{ title: string; weight_value: number }>;
+    }>) {
+        // Validate stage exists
+        const stage = await Stage.findById(stageId);
+        if (!stage) throw new Error('Stage not found');
+
+        const createdCriteria = [];
+        for (const criterion of criteriaData) {
+            // Create criterion
+            const criterionDoc = await Criterion.create({
+                type: EvaluationType.criterion,
+                title: criterion.title,
+                parent: stageId,
+                weight_value: criterion.weight_value,
+                form_type: criterion.form_type
+            });
+
+            let createdOptions = [];
+            // If closed form, create options if provided
+            if (criterion.form_type === FormType.closed && Array.isArray(criterion.options)) {
+                for (const option of criterion.options) {
+                    // Only create option if weight_value is valid
+                    if (option.weight_value > criterion.weight_value) {
+                        throw new Error(`Option value (${option.weight_value}) must be less than or equal to the criterion weight (${criterion.weight_value}).`);
+                    }
+                    const optionDoc = await Option.create({
+                        type: EvaluationType.option,
+                        title: option.title,
+                        parent: criterionDoc._id,
+                        weight_value: option.weight_value
+                    });
+                    createdOptions.push(optionDoc);
+                }
+            }
+            createdCriteria.push({ criterion: criterionDoc, options: createdOptions });
+        }
+        return createdCriteria;
     }
 }

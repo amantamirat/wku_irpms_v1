@@ -67,4 +67,16 @@ export const EvaluationApi = {
         const response = await ApiClient.put(`${end_point}/reorder/${evaluation._id}/${direction}`);
         return response;
     },
+    /**
+     * Batch import criteria with options under a stage
+     * @param stageId - string
+     * @param criteriaData - array of criteria objects
+     */
+    async importCriteriaBatch(stageId: string, criteriaData: any[]): Promise<any> {
+        const response = await ApiClient.post(`${end_point}/import-criteria`, {
+            stageId,
+            criteriaData
+        });
+        return response;
+    },
 };
