@@ -14,7 +14,7 @@ interface ResultManagerProps {
     evaluator?: Reviewer;
 }
 
-export default function ResultManager({ criterion, evaluator }: ResultManagerProps) {
+const ResultManager = ({ criterion, evaluator }: ResultManagerProps) => {
     const emptyResult: Result = {
         evaluator: evaluator || "",
         criterion: criterion || "",
@@ -38,13 +38,13 @@ export default function ResultManager({ criterion, evaluator }: ResultManagerPro
         fetchResults();
     }, [criterion, evaluator]);
 
-    const onSaveCompelete = () => {
+    const onSaveCompelete = (savedResult: Result) => {
         let _results = [...results];
-        const index = _results.findIndex((c) => c._id === result._id);
+        const index = _results.findIndex((c) => c._id === savedResult._id);
         if (index !== -1) {
-            _results[index] = { ...result }
+            _results[index] = { ...savedResult }
         } else {
-            _results.push({ ...result });
+            _results.push({ ...savedResult });
         }
         setResults(_results);
         hideDialogs();
@@ -98,7 +98,7 @@ export default function ResultManager({ criterion, evaluator }: ResultManagerPro
                     value={results}
                     selection={result}
                     onSelectionChange={(e) => setResult(e.value as Result)}
-                    dataKey={results?.some(r => r._id) ? "_id" : "score"}
+                    dataKey={"_id"}
                     paginator
                     rows={10}
                     rowsPerPageOptions={[5, 10, 25]}
@@ -120,7 +120,6 @@ export default function ResultManager({ criterion, evaluator }: ResultManagerPro
                     <SaveResultDialog
                         visible={showAddDialog}
                         result={result}
-                        setResult={setResult}
                         onCompelete={onSaveCompelete}
                         onHide={hideDialogs}
                     />}
@@ -137,3 +136,5 @@ export default function ResultManager({ criterion, evaluator }: ResultManagerPro
         </>
     );
 }
+
+export default ResultManager;

@@ -3,39 +3,43 @@ import { Dialog } from "primereact/dialog";
 import { InputNumber } from "primereact/inputnumber";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ResultApi } from "../api/result.api";
 import { Result, validateResult } from "../models/result.model";
 
 interface SaveResultDialogProps {
     visible: boolean;
     result: Result;
-    setResult: (result: Result) => void;
-    onSave?: () => Promise<void>;
-    onCompelete?: () => void;
+    onCompelete?: (savedResult: Result) => void;
     onHide: () => void;
 }
 
-const SaveResultDialog = ({ visible, result, setResult, onSave, onCompelete, onHide }: SaveResultDialogProps) => {
+const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDialogProps) => {
     const toast = useRef<Toast>(null);
+
+    const [localResult, setLocalResult] = useState(result || {});
+
+    useEffect(() => {
+        setLocalResult(result || {});
+    }, [result]);
 
     const saveResult = async () => {
         try {
-            const validation = validateResult(result);
+            const validation = validateResult(localResult);
             if (!validation.valid) {
                 throw new Error(validation.message);
             }
-            if (onSave) {
-                await onSave();
+            let saved: Result;
+            if (localResult._id) {
+                saved = await ResultApi.updateResult(localResult);
             } else {
-                if (result._id) {
-                    const updated = await ResultApi.updateResult(result);
-                    setResult({ ...result, updatedAt: updated.updatedAt });
-                } else {
-                    const created = await ResultApi.createResult(result);
-                    setResult({ ...result, _id: created._id, createdAt: created.createdAt, updatedAt: created.updatedAt });
-                }
+                saved = await ResultApi.createResult(localResult);
             }
+            saved = {
+                ...saved,
+                evaluator: localResult.evaluator,
+                criterion: localResult.criterion
+            };
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',
@@ -43,7 +47,7 @@ const SaveResultDialog = ({ visible, result, setResult, onSave, onCompelete, onH
                 life: 2000
             });
             if (onCompelete) {
-                setTimeout(() => onCompelete(), 2000);
+                setTimeout(() => onCompelete(saved), 2000);
             }
         } catch (err) {
             toast.current?.show({
@@ -52,6 +56,8 @@ const SaveResultDialog = ({ visible, result, setResult, onSave, onCompelete, onH
                 detail: '' + err,
                 life: 2000
             });
+        } finally {
+            // Any cleanup if necessary
         }
     };
 
@@ -78,8 +84,8 @@ const SaveResultDialog = ({ visible, result, setResult, onSave, onCompelete, onH
                     <label htmlFor="score">Score</label>
                     <InputNumber
                         id="score"
-                        value={result.score}
-                        onValueChange={(e) => setResult({ ...result, score: e.value ?? 0 })}
+                        value={localResult.score}
+                        onValueChange={(e) => setLocalResult({ ...localResult, score: e.value ?? 0 })}
                         min={0}
                         placeholder="Enter score"
                     />
@@ -89,8 +95,8 @@ const SaveResultDialog = ({ visible, result, setResult, onSave, onCompelete, onH
                     <InputTextarea
                         id="comment"
                         rows={3}
-                        value={result.comment}
-                        onChange={(e) => setResult({ ...result, comment: e.target.value })}
+                        value={localResult.comment}
+                        onChange={(e) => setLocalResult({ ...localResult, comment: e.target.value })}
                         autoResize
                         placeholder="Enter comment (optional)"
                     />
