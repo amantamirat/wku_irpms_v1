@@ -1,13 +1,12 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../../enums/collections.enum";
-import { Criterion } from "../../call/evaluations/evaluation.model";
+import { Criterion, Option } from "../../call/evaluations/evaluation.model";
 
 interface IResult extends Document {
     evaluator: mongoose.Types.ObjectId;
     criterion: mongoose.Types.ObjectId;
-    score: number;
-    comment?: string;
-    status?: string;
+    score?: number;
+    selected_option?: mongoose.Types.ObjectId;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -27,15 +26,13 @@ const ResultSchema = new Schema<IResult>({
     },
     score: {
         type: Number,
-        min: 0,
-        required: true
+        min: 0
     },
-    comment: {
-        type: String,
+    selected_option: {
+        type: Schema.Types.ObjectId,
+        ref: Option.modelName
     },
-    status: {
-        type: String,
-    }
+    
 }, { timestamps: true });
 ResultSchema.index({ evaluator: 1, criterion: 1 }, { unique: true });
 export const Result = model<IResult>(COLLECTIONS.RESULT, ResultSchema);

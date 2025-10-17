@@ -6,12 +6,12 @@ import { CreateResultDto, GetResultOptions, ResultService } from "./result.servi
 export class ResultController {
     static async createResult(req: Request, res: Response) {
         try {
-            const { evaluator, criterion, score, comment, status } = req.body;
+            const { evaluator, criterion, score, selected_option } = req.body;
             const data: CreateResultDto = {
                 evaluator: new mongoose.Types.ObjectId(evaluator as string),
                 criterion: new mongoose.Types.ObjectId(criterion as string),
                 score: score,
-                comment: comment ?? undefined
+                selected_option: selected_option ? new mongoose.Types.ObjectId(selected_option as string) : undefined
             };
             const created = await ResultService.createResult(data);
             successResponse(res, 201, "Result created successfully", created);
@@ -37,11 +37,11 @@ export class ResultController {
     static async updateResult(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const { score, comment, status, criterion } = req.body;
+            const { score, selected_option } = req.body;
             const data: Partial<CreateResultDto> = {
                 score: score ?? undefined,
-                comment: comment ?? undefined
-             };
+                selected_option: selected_option ?? undefined
+            };
             const updated = await ResultService.updateResult(id, data);
             successResponse(res, 200, "Result updated successfully", updated);
         } catch (err: any) {

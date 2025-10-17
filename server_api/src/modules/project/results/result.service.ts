@@ -1,15 +1,14 @@
 import mongoose from "mongoose";
 import { Result } from "./result.model";
-import { Criterion } from "../../call/evaluations/evaluation.model";
+import { Criterion, Option } from "../../call/evaluations/evaluation.model";
 import { Reviewer } from "../reviewers/reviewer.model";
 import { FormType } from "../../call/evaluations/evaluation.enum";
 
 export interface CreateResultDto {
     evaluator: mongoose.Types.ObjectId;
     criterion: mongoose.Types.ObjectId;
-    score: number;
-    comment?: string;
-    status?: string;
+    score?: number;
+    selected_option?: mongoose.Types.ObjectId;
 }
 
 export interface GetResultOptions {
@@ -27,12 +26,23 @@ export class ResultService {
         if (!stage) throw new Error("Project stage not found");
         const criterion = await Criterion.findOne({ _id: result.criterion, parent: stage }).lean();
         if (!criterion) throw new Error("Criterion not found");
-        const maxScore = criterion.weight_value;
-        if (result.score < 0 || result.score > maxScore) {
-            throw new Error(`Score must be between 0 and ${maxScore}`);
+        if (criterion.form_type === FormType.open) {
+            if (result.score === undefined || result.score === null) {
+                throw new Error("Score is required");
+            }
+            const maxScore = criterion.weight_value;
+            if (result.score < 0 || result.score > maxScore) {
+                throw new Error(`Score must be between 0 and ${maxScore}`);
+            }
         }
         if (criterion.form_type === FormType.closed) {
-            // For closed form, score must be from one of the predefined options
+            if (!result.selected_option) {
+                throw new Error("Selected option is required for closed form type");
+            }
+            const option = await Option.findById(result.selected_option).lean();
+            if (!option) {
+                throw new Error("Selected option is not found.");
+            }
         }
     }
 
