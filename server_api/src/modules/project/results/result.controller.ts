@@ -11,8 +11,7 @@ export class ResultController {
                 evaluator: new mongoose.Types.ObjectId(evaluator as string),
                 criterion: new mongoose.Types.ObjectId(criterion as string),
                 score: score,
-                comment: comment ?? undefined,
-                status: status ?? undefined
+                comment: comment ?? undefined
             };
             const created = await ResultService.createResult(data);
             successResponse(res, 201, "Result created successfully", created);
@@ -41,10 +40,8 @@ export class ResultController {
             const { score, comment, status, criterion } = req.body;
             const data: Partial<CreateResultDto> = {
                 score: score ?? undefined,
-                comment: comment ?? undefined,
-                status: status ?? undefined,
-                criterion: criterion ? new mongoose.Types.ObjectId(criterion as string) : undefined
-            };
+                comment: comment ?? undefined
+             };
             const updated = await ResultService.updateResult(id, data);
             successResponse(res, 200, "Result updated successfully", updated);
         } catch (err: any) {

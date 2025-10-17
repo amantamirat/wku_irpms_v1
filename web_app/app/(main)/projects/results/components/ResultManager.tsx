@@ -110,9 +110,8 @@ const ResultManager = ({ criterion, evaluator }: ResultManagerProps) => {
                 >
                     <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                     <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                    <Column field="score" header="Score" sortable />
-                    <Column field="comment" header="Comment" sortable />
-                    <Column field="status" header="Status" sortable />
+                    <Column field="criterion.title" header="Criterion" sortable />
+                    <Column field="score" header="Score" sortable />                                      
                     <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
                 </DataTable>
 
