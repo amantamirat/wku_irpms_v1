@@ -8,6 +8,7 @@ import { Reviewer } from "../../reviewers/models/reviewer.model";
 import { ResultApi } from "../api/result.api";
 import { Result } from "../models/result.model";
 import SaveResultDialog from "./SaveResultDialog";
+import ResultWizard from "./ResultWizard";
 
 interface ResultManagerProps {
     criterion?: string;
@@ -111,17 +112,19 @@ const ResultManager = ({ criterion, evaluator }: ResultManagerProps) => {
                     <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                     <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                     <Column field="criterion.title" header="Criterion" sortable />
-                    <Column field="score" header="Score" sortable />                                      
+                    <Column field="score" header="Score" sortable />
                     <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
                 </DataTable>
 
-                {result &&
-                    <SaveResultDialog
+                {
+                    result &&
+                    <ResultWizard
                         visible={showAddDialog}
-                        result={result}
-                        onCompelete={onSaveCompelete}
-                        onHide={hideDialogs}
-                    />}
+                        onCancel={hideDialogs}
+                    />
+                }
+
+                
 
                 {result && (
                     <ConfirmDialog
