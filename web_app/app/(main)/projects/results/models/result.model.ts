@@ -6,9 +6,8 @@ export type Result = {
     _id?: string;
     evaluator: string | Reviewer;
     criterion: string | Evaluation;
-    score: number;
-    comment?: string;
-    status?: string;
+    score?: number;
+    selected_option?: string|Evaluation;
     createdAt?: Date;
     updatedAt?: Date;
 };

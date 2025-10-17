@@ -5,7 +5,7 @@ import { Column } from "primereact/column";
 import { DataTable, DataTableExpandedRows } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
 import { useCallback, useEffect, useState } from "react";
-import ResultManager from "../../results/components/ResultManager";
+import ResultManager from "../../results/components/RManager";
 import { ProjectStage } from "../../stages/models/stage.model";
 import { GetReviewersOptions, ReviewerApi } from "../api/reviewer.api";
 import { Reviewer, ReviewerStatus } from "../models/reviewer.model";
