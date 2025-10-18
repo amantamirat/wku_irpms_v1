@@ -41,10 +41,10 @@ export enum Ownership {
 }
 
 // Enum for Category
-export enum Category {
-    academic = 'academic',
-    supportive = 'supportive',
-    external = 'external',
+export enum Scope {
+    academic = 'Academic',
+    supportive = 'Supportive',
+    external = 'External',
 }
 
 // Address Type
@@ -64,7 +64,7 @@ export type Organization = {
     classification?: Classification;
     ownership?: Ownership;
     address?: Address;
-    category?: Category;
+    category?: Scope;
     parent?: string | Organization;
     createdAt?: string;
     updatedAt?: string;

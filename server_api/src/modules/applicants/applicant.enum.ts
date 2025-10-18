@@ -3,6 +3,12 @@ export enum Gender {
     Female = 'Female'
 }
 
+export enum Scope {
+  academic = 'Academic',
+  supportive = 'Supportive',
+  external = 'External',
+}
+
 export enum Accessibility {
     Visual = 'Visual',
     Hearing = 'Hearing',

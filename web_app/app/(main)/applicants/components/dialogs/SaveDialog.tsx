@@ -8,7 +8,7 @@ import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import { Dropdown } from 'primereact/dropdown';
 import { MultiSelect } from 'primereact/multiselect';
-import { Category, Organization } from '@/app/(main)/organizations/models/organization.model';
+import { Scope, Organization } from '@/app/(main)/organizations/models/organization.model';
 import { Accessibility, accessibilityOptions, Applicant, Gender, genderOptions, validateApplicant } from '../../models/applicant.model';
 
 
@@ -27,8 +27,8 @@ function SaveApplicantDialog(props: SaveApplicantDialogProps) {
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
-    const isAcademic = applicant.scope === Category.academic;
-    const isSupportive = applicant.scope === Category.supportive;
+    const isAcademic = applicant.scope === Scope.academic;
+    const isSupportive = applicant.scope === Scope.supportive;
     //const isExternal = applicant.scope === Scope.external;
 
     

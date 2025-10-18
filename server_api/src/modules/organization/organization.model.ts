@@ -1,6 +1,7 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../enums/collections.enum";
-import { AcademicLevel, Category, Classification, Ownership, Unit } from "./organization.enum";
+import { AcademicLevel, Classification, Ownership, Unit } from "./organization.enum";
+import { Scope } from "../applicants/applicant.enum";
 
 
 interface BaseOrganizationDocument extends Document {
@@ -58,11 +59,11 @@ export const Specialization = BaseOrganization.discriminator<SpecializationDocum
 
 interface PositionDocument extends BaseOrganizationDocument {
     type: Unit.Position;
-    category: Category;
+    category: Scope;
 }
 
 const PositionSchema = new Schema<PositionDocument>({
-    category: { type: String, enum: Object.values(Category), required: true },
+    category: { type: String, enum: Object.values(Scope), required: true },
 });
 
 export const Position = BaseOrganization.discriminator<PositionDocument>(Unit.Position, PositionSchema);

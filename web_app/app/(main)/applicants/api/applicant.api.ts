@@ -1,4 +1,4 @@
-import { Category, Organization } from "@/app/(main)/organizations/models/organization.model";
+import { Scope, Organization } from "@/app/(main)/organizations/models/organization.model";
 import { ApiClient } from "@/api/ApiClient";
 import { Applicant } from "../models/applicant.model";
 
@@ -17,7 +17,7 @@ function sanitizeApplicant(applicant: Partial<Applicant>): Partial<Applicant> {
 
 export interface GetApplicantsOptions {
     organization?: string;
-    scope?: Category;
+    scope?: Scope;
 }
 
 

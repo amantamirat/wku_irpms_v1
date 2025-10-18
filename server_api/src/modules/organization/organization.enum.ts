@@ -25,11 +25,7 @@ export enum AcademicLevel {
     PostDoc = 'PostDoc'
 }
 
-export enum Category {
-  academic = 'academic',
-  supportive = 'supportive',
-  external = 'external',
-}
+
 
 export enum Classification {
     Regular = 'Regular',

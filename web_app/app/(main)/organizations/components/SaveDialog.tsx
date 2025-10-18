@@ -6,7 +6,7 @@ import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { classNames } from 'primereact/utils';
 import { Dropdown } from 'primereact/dropdown';
-import { AcademicLevel, Category, Classification, Organization, OrganizationalUnit, Ownership, validateOrganization } from '../models/organization.model';
+import { AcademicLevel, Scope, Classification, Organization, OrganizationalUnit, Ownership, validateOrganization } from '../models/organization.model';
 
 interface SaveDialogProps {
     visible: boolean;
@@ -130,7 +130,7 @@ function SaveDialog(props: SaveDialogProps) {
                             <Dropdown
                                 id="category"
                                 value={organization.category}
-                                options={Object.values(Category).map(level => ({ label: level, value: level }))}
+                                options={Object.values(Scope).map(level => ({ label: level, value: level }))}
                                 onChange={(e) =>
                                     props.onChange({ ...organization, category: e.value })
                                 }

@@ -8,7 +8,7 @@ import { AppMenuItem } from '@/types';
 import { PrimeIcons } from 'primereact/api';
 
 
-import { Category, Organization, OrganizationalUnit } from '@/app/(main)/organizations/models/organization.model';
+import { Scope, Organization, OrganizationalUnit } from '@/app/(main)/organizations/models/organization.model';
 import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
 
 
@@ -84,17 +84,17 @@ const AppMenu = () => {
                         {
                             label: 'Academic',
                             icon: 'pi pi-fw pi-crown',
-                            to: `/applicants?scope=${Category.academic}`
+                            to: `/applicants?scope=${Scope.academic}`
                         },
                         {
                             label: 'Supportive',
                             icon: 'pi pi-fw pi-bullseye',
-                            to: `/applicants?scope=${Category.supportive}`
+                            to: `/applicants?scope=${Scope.supportive}`
                         },
                         {
                             label: 'External',
                             icon: 'pi pi-fw pi-asterisk',
-                            to: `/applicants?scope=${Category.external}`
+                            to: `/applicants?scope=${Scope.external}`
                         }
                     ]
                 },

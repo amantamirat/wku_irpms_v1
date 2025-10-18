@@ -11,12 +11,12 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Category, Organization, OrganizationalUnit } from '../../organizations/models/organization.model';
+import { Scope, Organization, OrganizationalUnit } from '../../organizations/models/organization.model';
 import { OrganizationApi } from '../../organizations/api/organization.api';
 import { ApplicantApi } from '../api/applicant.api';
 
 interface ApplicantManagerProps {
-    scope: Category;
+    scope: Scope;
 }
 
 const ApplicantManager = (props: ApplicantManagerProps) => {
@@ -45,9 +45,9 @@ const ApplicantManager = (props: ApplicantManagerProps) => {
     };
 
     const scope = props.scope;
-    const isAcademic = scope === Category.academic;
-    const isSupportive = scope === Category.supportive;
-    const isExternal = scope === Category.external;
+    const isAcademic = scope === Scope.academic;
+    const isSupportive = scope === Scope.supportive;
+    const isExternal = scope === Scope.external;
 
     const loadApplicants = useCallback(async () => {
         try {

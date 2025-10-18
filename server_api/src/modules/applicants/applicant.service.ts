@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 import Applicant from "./applicant.model";
-import { Gender, Accessibility} from "./applicant.enum";
+import { Gender, Accessibility, Scope} from "./applicant.enum";
 import { BaseOrganization } from "../organization/organization.model";
-import { Category, Unit } from "../organization/organization.enum";
+import {  Unit } from "../organization/organization.enum";
 
 
 
@@ -11,7 +11,7 @@ export interface GetApplicantsOptions {
     uid?: string | mongoose.Types.ObjectId;
     email?: string;
     organization?: string;
-    scope?: Category;
+    scope?: Scope;
 }
 
 export interface CreateApplicantDto {
@@ -19,17 +19,17 @@ export interface CreateApplicantDto {
     last_name: string;
     birth_date: Date;
     gender: Gender;
-    scope: Category;
+    scope: Scope;
     organization: mongoose.Types.ObjectId | string;
     email?: string;
     accessibility?: Accessibility[];
     user?: mongoose.Types.ObjectId | string;
 }
 
-const scopeToOrganizationUnit: Record<Category, Unit> = {
-    academic: Unit.Department,
-    supportive: Unit.Supportive,
-    external: Unit.External,
+const scopeToOrganizationUnit: Record<Scope, Unit> = {
+    Academic: Unit.Department,
+    Supportive: Unit.Supportive,
+    External: Unit.External,
 };
 
 export class ApplicantService {

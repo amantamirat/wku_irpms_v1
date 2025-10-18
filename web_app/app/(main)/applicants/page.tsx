@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Category } from '../organizations/models/organization.model';
+import { Scope } from '../organizations/models/organization.model';
 import ApplicantManager from './components/ApplicantManager';
 
 
@@ -11,8 +11,8 @@ const ApplicantPage = () => {
     const router = useRouter();
     const scopeParam = searchParams.get('scope');
 
-    const isValidScope = (value: string): value is Category =>
-        Object.values(Category).includes(value as Category);
+    const isValidScope = (value: string): value is Scope =>
+        Object.values(Scope).includes(value as Scope);
 
     const shouldRedirect = !scopeParam || !isValidScope(scopeParam);
 
@@ -25,7 +25,7 @@ const ApplicantPage = () => {
     if (shouldRedirect) {
         return null;
     }
-    const scope = scopeParam as Category;
+    const scope = scopeParam as Scope;
     return (
         <ApplicantManager scope={scope} />
     );

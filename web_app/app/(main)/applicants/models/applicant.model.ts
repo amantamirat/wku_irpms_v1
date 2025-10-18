@@ -1,4 +1,4 @@
-import { Category, Organization, OrganizationalUnit } from "../../organizations/models/organization.model";
+import { Scope, Organization, OrganizationalUnit } from "../../organizations/models/organization.model";
 
 
 export enum Gender {
@@ -21,7 +21,7 @@ export type Applicant = {
     last_name: string;
     birth_date: Date;
     gender: Gender;
-    scope: Category;
+    scope: Scope;
     organization: string | Organization;
     email?: string;
     accessibility?: Accessibility[];
@@ -39,7 +39,7 @@ export const genderOptions = Object.values(Gender).map(g => ({
     value: g
 }));
 
-export const scopeOptions = Object.values(Category).map(s => ({
+export const scopeOptions = Object.values(Scope).map(s => ({
     label: s,
     value: s
 }));
@@ -68,15 +68,15 @@ export const validateApplicant = (applicant: Applicant): { valid: boolean; messa
             return { valid: false, message: "Email is not valid." };
         }
     }
-    if (applicant.scope === Category.academic && !applicant.organization) {
+    if (applicant.scope === Scope.academic && !applicant.organization) {
         return { valid: false, message: 'Department is required for academic category.' };
     }
 
-    if (applicant.scope === Category.supportive && !applicant.organization) {
+    if (applicant.scope === Scope.supportive && !applicant.organization) {
         return { valid: false, message: 'Office is required for supportive category.' };
     }
 
-    if (applicant.scope === Category.external && !applicant.organization) {
+    if (applicant.scope === Scope.external && !applicant.organization) {
         return { valid: false, message: 'External Organization is required for external category.' };
     }
 
@@ -84,9 +84,9 @@ export const validateApplicant = (applicant: Applicant): { valid: boolean; messa
 };
 
 //convert the applicant scope to the approprate unit umbrella
-export const scopeToOrganizationUnit: Record<Category, OrganizationalUnit> = {
-    [Category.academic]: OrganizationalUnit.Department,
-    [Category.supportive]: OrganizationalUnit.Supportive,
-    [Category.external]: OrganizationalUnit.External,
+export const scopeToOrganizationUnit: Record<Scope, OrganizationalUnit> = {
+    [Scope.academic]: OrganizationalUnit.Department,
+    [Scope.supportive]: OrganizationalUnit.Supportive,
+    [Scope.external]: OrganizationalUnit.External,
 };
 
