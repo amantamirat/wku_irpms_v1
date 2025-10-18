@@ -16,25 +16,21 @@ interface ResultManagerProps {
 }
 
 const ResultManager = ({ evaluator }: ResultManagerProps) => {
-    const [criteria, setCriteria] = useState<Evaluation[]>([]);
+    //const [criteria, setCriteria] = useState<Evaluation[]>([]);
     const [results, setResults] = useState<Result[]>([]);
     const [selectedResult, setSelectedResult] = useState<Result | null>(null);
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-    // Fetch criteria and merge with existing results
+
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // 1️⃣ Fetch all criteria
-                const fetchedCriteria = await EvaluationApi.getEvaluations({ type: EvalType.criterion });
+                const fetchedCriteria =
+                    await EvaluationApi.getEvaluations({ type: EvalType.criterion });
+                const fetchedResults =
+                    await ResultApi.getResults({ evaluator: evaluator && evaluator._id ? evaluator._id : undefined });
 
-                // 2️⃣ Fetch existing results for this evaluator
-                const fetchedResults = await ResultApi.getResults({
-                    evaluator: evaluator && evaluator._id ? evaluator._id : undefined
-                });
-
-                // 3️⃣ Merge: ensure all criteria have corresponding result entries
                 const mergedResults: Result[] = fetchedCriteria.map((criterion: Evaluation) => {
                     const existing = fetchedResults.find(
                         (r: Result) => (r.criterion as Evaluation)?._id === criterion._id
@@ -47,8 +43,6 @@ const ResultManager = ({ evaluator }: ResultManagerProps) => {
                         }
                     );
                 });
-
-                setCriteria(fetchedCriteria);
                 setResults(mergedResults);
             } catch (err) {
                 console.error("Error fetching criteria or results:", err);
@@ -58,7 +52,7 @@ const ResultManager = ({ evaluator }: ResultManagerProps) => {
         fetchData();
     }, [evaluator]);
 
-    // 🔹 Save completed
+
     const onSaveComplete = (savedResult: Result) => {
         const updatedResults = results.map((r) =>
             (r.criterion as Evaluation)._id === (savedResult.criterion as Evaluation)._id
@@ -88,24 +82,31 @@ const ResultManager = ({ evaluator }: ResultManagerProps) => {
         setShowDeleteDialog(false);
     };
 
-    const endToolbarTemplate = () => (
-        <div className="my-2">
-            <Button label="Submit" icon="pi pi-check" outlined severity="success" />
-        </div>
-    );
+    const calculateTotalScore = () => {
+        return results.reduce((sum, r) => {
+            const criterion = r.criterion as Evaluation;
+            if (!criterion) return sum;
+
+            if (criterion.form_type === FormType.closed && r.selected_option) {
+                const optionEval = r.selected_option as Evaluation;
+                return sum + (optionEval.weight_value || 0);
+            } else if (criterion.form_type !== FormType.closed && r.score) {
+                return sum + r.score;
+            }
+            return sum;
+        }, 0);
+    };
+
+
 
     const scoreTemplate = (rowData: Result) => {
         const criterion = rowData.criterion as Evaluation;
         if (!criterion) return "";
-
-        // If the criterion is Closed, show the selected option title
         if (criterion.form_type === FormType.closed) {
             return rowData.selected_option
                 ? evaluationTemplate(rowData.selected_option as Evaluation)
                 : "-";
         }
-
-        // Otherwise, show the numeric score
         return rowData.score ?? "-";
     };
 
@@ -136,6 +137,12 @@ const ResultManager = ({ evaluator }: ResultManagerProps) => {
         </>
     );
 
+    const endToolbarTemplate = () => (
+        <div className="my-2">
+            <Button label="Submit" icon="pi pi-check" outlined severity="success" />
+        </div>
+    );
+
     return (
         <div className="card">
             <Toolbar className="mb-4" end={endToolbarTemplate} />
@@ -154,10 +161,9 @@ const ResultManager = ({ evaluator }: ResultManagerProps) => {
             >
                 <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: "50px" }} />
                 <Column field="criterion.title" header="Criterion" sortable />
-                <Column body={scoreTemplate} header="Score" sortable />
+                <Column body={scoreTemplate} header="Score" sortable footer={<strong>Total: {calculateTotalScore()}</strong>} />
                 <Column body={actionBodyTemplate} headerStyle={{ minWidth: "10rem" }} />
             </DataTable>
-
 
             {
                 selectedResult &&
@@ -169,14 +175,15 @@ const ResultManager = ({ evaluator }: ResultManagerProps) => {
                 />
             }
 
-            {selectedResult && (
+            {
+                selectedResult &&
                 <ConfirmDialog
                     showDialog={showDeleteDialog}
                     selectedDataInfo={`result (score ${selectedResult.score})`}
                     onConfirmAsync={deleteResult}
                     onHide={hideDialogs}
                 />
-            )}
+            }
         </div>
     );
 };
