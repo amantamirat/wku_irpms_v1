@@ -1,44 +1,45 @@
+import { Evaluation, FormType } from "@/app/(main)/evals/models/eval.model";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputNumber } from "primereact/inputnumber";
-import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { ResultApi } from "../api/result.api";
 import { Result, validateResult } from "../models/result.model";
-import { EvalType, Evaluation } from "@/app/(main)/evals/models/eval.model";
 import { EvaluationApi } from "@/app/(main)/evals/api/evaluation.api";
 import { Dropdown } from "primereact/dropdown";
 
-interface SaveResultDialogProps {
+interface EditResultDialogProps {
     visible: boolean;
     result: Result;
     onCompelete?: (savedResult: Result) => void;
     onHide: () => void;
 }
 
-const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDialogProps) => {
+const EditResultDialog = ({ visible, result, onCompelete, onHide }: EditResultDialogProps) => {
 
     const toast = useRef<Toast>(null);
-    const [criteria, setCriteria] = useState<Evaluation[]>([]);
+    const [options, setOptions] = useState<Evaluation[]>([]);
     const [localResult, setLocalResult] = useState(result || {});
 
     useEffect(() => {
         setLocalResult(result || {});
     }, [result]);
 
-
     useEffect(() => {
-        const fetchCriteria = async () => {
-            try {
-                const data = await EvaluationApi.getEvaluations({ type: EvalType.criterion });
-                setCriteria(data);
-            } catch (err) {
-                // Optionally handle error
-            }
-        };
-        fetchCriteria();
-    }, []);
+        if (result.criterion && (result.criterion as Evaluation).form_type === FormType.closed) {
+            const fetchOptions = async () => {
+                try {
+                    const data = await EvaluationApi.getEvaluations({ parent: (result.criterion as Evaluation)._id });
+                    setOptions(data);
+                } catch (err) {
+                    console.error("Failed to fetch options:", err);
+                }
+            };
+            fetchOptions();
+        }
+    }, [result]);
+
 
     const saveResult = async () => {
         try {
@@ -55,7 +56,8 @@ const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDi
             saved = {
                 ...saved,
                 evaluator: localResult.evaluator,
-                criterion: localResult.criterion
+                criterion: localResult.criterion,
+                selected_option: localResult.selected_option
             };
             toast.current?.show({
                 severity: 'success',
@@ -97,45 +99,41 @@ const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDi
                 footer={footer}
                 onHide={onHide}
             >
-                <div className="field">
-                    <label htmlFor="criterion">Criterion</label>
-                    <Dropdown
-                        id="criterion"
-                        dataKey="_id"
-                        value={localResult.criterion}
-                        options={criteria}
-                        onChange={(e) =>
-                            setLocalResult({ ...localResult, criterion: e.value })
-                        }
-                        optionLabel="title"
-                        placeholder="Select Criterion"
-                    />
-                </div>
-                <div className="field">
-                    <label htmlFor="score">Score</label>
-                    <InputNumber
-                        id="score"
-                        value={localResult.score}
-                        onValueChange={(e) => setLocalResult({ ...localResult, score: e.value ?? 0 })}
-                        min={0}
-                        placeholder="Enter score"
-                    />
-                </div>
-                <div className="field">
-                    <label htmlFor="comment">Comment</label>
-                    <InputTextarea
-                        id="comment"
-                        rows={3}
-                        value={localResult.comment}
-                        onChange={(e) => setLocalResult({ ...localResult, comment: e.target.value })}
-                        autoResize
-                        placeholder="Enter comment (optional)"
-                    />
-                </div>
+                <h3 className="mb-3 text-center">{(result.criterion as Evaluation).title}</h3>
+                {
+                    (result.criterion && (result.criterion as Evaluation).form_type === FormType.closed) &&
+                    <div className="field">
+                        <label htmlFor="option">Option</label>
+                        <Dropdown
+                            id="option"
+                            dataKey="_id"
+                            value={localResult.selected_option}
+                            options={options}
+                            onChange={(e) =>
+                                setLocalResult({ ...localResult, selected_option: e.value })
+                            }
+                            optionLabel="title"
+                            placeholder="Select Option"
+                        />
+                    </div>
+                }
+                {
+                    (result.criterion && (result.criterion as Evaluation).form_type === FormType.open) &&
+                    <div className="field">
+                        <label htmlFor="score">Score</label>
+                        <InputNumber
+                            id="score"
+                            value={localResult.score}
+                            onValueChange={(e) => setLocalResult({ ...localResult, score: e.value ?? 0 })}
+                            min={0}
+                            placeholder="Enter score"
+                        />
+                    </div>
+                }
 
             </Dialog>
         </>
     );
 }
 
-export default SaveResultDialog;
+export default EditResultDialog;

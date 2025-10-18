@@ -7,136 +7,184 @@ import { useEffect, useState } from "react";
 import { Reviewer } from "../../reviewers/models/reviewer.model";
 import { ResultApi } from "../api/result.api";
 import { Result } from "../models/result.model";
-import SaveResultDialog from "./SaveResultDialog";
-import ResultWizard from "./ResultWizard";
+import { EvalType, Evaluation, FormType } from "@/app/(main)/evals/models/eval.model";
+import { EvaluationApi } from "@/app/(main)/evals/api/evaluation.api";
+import EditResultDialog from "./EditResultDialog";
 
 interface ResultManagerProps {
-    criterion?: string;
     evaluator?: Reviewer;
 }
 
-const ResultManager = ({ criterion, evaluator }: ResultManagerProps) => {
-    const emptyResult: Result = {
-        evaluator: evaluator || "",
-        criterion: criterion || "",
-        score: 0,
-        comment: ""
-    };
-
-    const [result, setResult] = useState<Result>(emptyResult);
+const ResultManager = ({ evaluator }: ResultManagerProps) => {
+    const [criteria, setCriteria] = useState<Evaluation[]>([]);
     const [results, setResults] = useState<Result[]>([]);
+    const [selectedResult, setSelectedResult] = useState<Result | null>(null);
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
+    // Fetch criteria and merge with existing results
     useEffect(() => {
-        const fetchResults = async () => {
-            const data = await ResultApi.getResults({
-                criterion,
-                evaluator: evaluator && evaluator._id ? evaluator._id : undefined
-            });
-            setResults(data);
-        };
-        fetchResults();
-    }, [criterion, evaluator]);
+        const fetchData = async () => {
+            try {
+                // 1️⃣ Fetch all criteria
+                const fetchedCriteria = await EvaluationApi.getEvaluations({ type: EvalType.criterion });
 
-    const onSaveCompelete = (savedResult: Result) => {
-        let _results = [...results];
-        const index = _results.findIndex((c) => c._id === savedResult._id);
-        if (index !== -1) {
-            _results[index] = { ...savedResult }
-        } else {
-            _results.push({ ...savedResult });
-        }
-        setResults(_results);
+                // 2️⃣ Fetch existing results for this evaluator
+                const fetchedResults = await ResultApi.getResults({
+                    evaluator: evaluator && evaluator._id ? evaluator._id : undefined
+                });
+
+                // 3️⃣ Merge: ensure all criteria have corresponding result entries
+                const mergedResults: Result[] = fetchedCriteria.map((criterion: Evaluation) => {
+                    const existing = fetchedResults.find(
+                        (r: Result) => (r.criterion as Evaluation)?._id === criterion._id
+                    );
+                    return (
+                        existing || {
+                            criterion,
+                            score: 0,
+                            evaluator: evaluator || "",
+                        }
+                    );
+                });
+
+                setCriteria(fetchedCriteria);
+                setResults(mergedResults);
+            } catch (err) {
+                console.error("Error fetching criteria or results:", err);
+            }
+        };
+
+        fetchData();
+    }, [evaluator]);
+
+    // 🔹 Save completed
+    const onSaveComplete = (savedResult: Result) => {
+        const updatedResults = results.map((r) =>
+            (r.criterion as Evaluation)._id === (savedResult.criterion as Evaluation)._id
+                ? savedResult
+                : r
+        );
+        setResults(updatedResults);
         hideDialogs();
     };
 
     const deleteResult = async () => {
-        const deleted = await ResultApi.deleteResult(result);
+        if (!selectedResult?._id) return;
+        const deleted = await ResultApi.deleteResult(selectedResult);
         if (deleted) {
-            setResults(results.filter((c) => c._id !== result._id));
+            setResults(results.map(r =>
+                (r.criterion as Evaluation)._id === (selectedResult.criterion as Evaluation)._id
+                    ? { ...r, _id: undefined, score: 0 } // reset instead of removing
+                    : r
+            ));
             hideDialogs();
         }
     };
 
     const hideDialogs = () => {
-        setResult(emptyResult);
+        setSelectedResult(null);
         setShowAddDialog(false);
         setShowDeleteDialog(false);
     };
 
     const startToolbarTemplate = () => (
         <div className="my-2">
-            <Button icon="pi pi-plus" severity="success" className="mr-2" tooltip="Add Result"
-                onClick={() => {
-                    setResult(emptyResult);
-                    setShowAddDialog(true);
-                }}
+            <Button
+                icon="pi pi-refresh"
+                severity="info"
+                className="mr-2"
+                tooltip="Reload Data"
+                onClick={() => window.location.reload()}
             />
         </div>
     );
 
+    const scoreTemplate = (rowData: Result) => {
+        const criterion = rowData.criterion as Evaluation;
+        if (!criterion) return "";
+
+        // If the criterion is Closed, show the selected option title
+        if (criterion.form_type === FormType.closed) {
+            return rowData.selected_option
+                ? (rowData.selected_option as Evaluation).title
+                : "-";
+        }
+
+        // Otherwise, show the numeric score
+        return rowData.score ?? "-";
+    };
+
     const actionBodyTemplate = (rowData: Result) => (
         <>
-            <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setResult(rowData);
+            <Button
+                icon="pi pi-pencil"
+                rounded
+                severity="success"
+                className="p-button-rounded p-button-text"
+                onClick={() => {
+                    setSelectedResult(rowData);
                     setShowAddDialog(true);
-                }} />
-            <Button icon="pi pi-times" rounded severity="warning" className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setResult(rowData);
-                    setShowDeleteDialog(true);
-                }} />
+                }}
+            />
+            {rowData._id && (
+                <Button
+                    icon="pi pi-times"
+                    rounded
+                    severity="warning"
+                    className="p-button-rounded p-button-text"
+                    onClick={() => {
+                        setSelectedResult(rowData);
+                        setShowDeleteDialog(true);
+                    }}
+                />
+            )}
         </>
     );
 
     return (
-        <>
-            <div className="card">
-                <Toolbar className="mb-4" start={startToolbarTemplate} />
-                <DataTable
-                    value={results}
-                    selection={result}
-                    onSelectionChange={(e) => setResult(e.value as Result)}
-                    dataKey={"_id"}
-                    paginator
-                    rows={10}
-                    rowsPerPageOptions={[5, 10, 25]}
-                    className="datatable-responsive"
-                    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                    emptyMessage={'No result found.'}
-                    scrollable
-                    tableStyle={{ minWidth: '50rem' }}
-                >
-                    <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
-                    <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                    <Column field="criterion.title" header="Criterion" sortable />
-                    <Column field="score" header="Score" sortable />
-                    <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
-                </DataTable>
+        <div className="card">
+            <Toolbar className="mb-4"  />
+            <DataTable
+                value={results}
+                selection={selectedResult}
+                onSelectionChange={(e) => setSelectedResult(e.value as Result)}
+                dataKey={"criterion._id"}
+                paginator
+                rows={10}
+                rowsPerPageOptions={[5, 10, 25]}
+                className="datatable-responsive"
+                emptyMessage={"No criteria or results found."}
+                scrollable
+                tableStyle={{ minWidth: "50rem" }}
+            >
+                <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: "50px" }} />
+                <Column field="criterion.title" header="Criterion" sortable />
+                <Column body={scoreTemplate} header="Score" sortable />
+                <Column body={actionBodyTemplate} headerStyle={{ minWidth: "10rem" }} />
+            </DataTable>
 
-                {
-                    result &&
-                    <ResultWizard
-                        visible={showAddDialog}
-                        onCancel={hideDialogs}
-                    />
-                }
 
-                
+            {
+                selectedResult &&
+                <EditResultDialog
+                    visible={showAddDialog}
+                    result={selectedResult}
+                    onCompelete={onSaveComplete}
+                    onHide={hideDialogs}
+                />
+            }
 
-                {result && (
-                    <ConfirmDialog
-                        showDialog={showDeleteDialog}
-                        selectedDataInfo={`result (score ${result.score})`}
-                        onConfirmAsync={deleteResult}
-                        onHide={hideDialogs}
-                    />
-                )}
-            </div>
-        </>
+            {selectedResult && (
+                <ConfirmDialog
+                    showDialog={showDeleteDialog}
+                    selectedDataInfo={`result (score ${selectedResult.score})`}
+                    onConfirmAsync={deleteResult}
+                    onHide={hideDialogs}
+                />
+            )}
+        </div>
     );
-}
+};
 
 export default ResultManager;
