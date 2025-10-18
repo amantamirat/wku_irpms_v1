@@ -1,7 +1,7 @@
 'use client';
 import { useRouter, useSearchParams } from 'next/navigation';
 import EvaluationManager from './components/EvaluationManager';
-import { EvalType } from './models/eval.model';
+import { EvalType } from './models/evaluation.model';
 
 
 const EvalPage = () => {

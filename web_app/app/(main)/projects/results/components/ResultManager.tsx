@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { Reviewer } from "../../reviewers/models/reviewer.model";
 import { ResultApi } from "../api/result.api";
 import { Result } from "../models/result.model";
-import { EvalType, Evaluation, FormType } from "@/app/(main)/evals/models/eval.model";
+import { EvalType, Evaluation, evaluationTemplate, FormType } from "@/app/(main)/evals/models/evaluation.model";
 import { EvaluationApi } from "@/app/(main)/evals/api/evaluation.api";
 import EditResultDialog from "./EditResultDialog";
 
@@ -88,15 +88,9 @@ const ResultManager = ({ evaluator }: ResultManagerProps) => {
         setShowDeleteDialog(false);
     };
 
-    const startToolbarTemplate = () => (
+    const endToolbarTemplate = () => (
         <div className="my-2">
-            <Button
-                icon="pi pi-refresh"
-                severity="info"
-                className="mr-2"
-                tooltip="Reload Data"
-                onClick={() => window.location.reload()}
-            />
+            <Button label="Submit" icon="pi pi-check" outlined severity="success" />
         </div>
     );
 
@@ -107,7 +101,7 @@ const ResultManager = ({ evaluator }: ResultManagerProps) => {
         // If the criterion is Closed, show the selected option title
         if (criterion.form_type === FormType.closed) {
             return rowData.selected_option
-                ? (rowData.selected_option as Evaluation).title
+                ? evaluationTemplate(rowData.selected_option as Evaluation)
                 : "-";
         }
 
@@ -144,7 +138,7 @@ const ResultManager = ({ evaluator }: ResultManagerProps) => {
 
     return (
         <div className="card">
-            <Toolbar className="mb-4"  />
+            <Toolbar className="mb-4" end={endToolbarTemplate} />
             <DataTable
                 value={results}
                 selection={selectedResult}

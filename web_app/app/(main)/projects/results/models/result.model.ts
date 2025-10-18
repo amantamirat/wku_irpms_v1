@@ -1,4 +1,4 @@
-import { Evaluation } from "@/app/(main)/evals/models/eval.model";
+import { Evaluation } from "@/app/(main)/evals/models/evaluation.model";
 import { Reviewer } from "../../reviewers/models/reviewer.model";
 
 
@@ -10,6 +10,11 @@ export type Result = {
     selected_option?: string | Evaluation;
     createdAt?: Date;
     updatedAt?: Date;
+};
+
+export const resultTemplate = (result: Result) => {
+    if (!result) return null;
+    throw new Error("resultTemplate not implemented yet.");
 };
 
 export const validateResult = (result: Result): { valid: boolean; message?: string } => {

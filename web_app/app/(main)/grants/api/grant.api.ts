@@ -1,9 +1,6 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Grant } from "../models/grant.model";
-import { Calendar } from "../../calendars/models/calendar.model";
-import { Evaluation } from "../../evals/models/eval.model";
-import { Theme } from "../../themes/models/theme.model";
 import { Organization } from "../../organizations/models/organization.model";
+import { Grant } from "../models/grant.model";
 
 
 const end_point = '/grants';

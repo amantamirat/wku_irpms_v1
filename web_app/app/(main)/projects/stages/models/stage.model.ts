@@ -1,4 +1,4 @@
-import { Evaluation } from "../../../evals/models/eval.model";
+import { Evaluation } from "../../../evals/models/evaluation.model";
 import { Project } from "../../models/project.model";
 
 export enum StageStatus {

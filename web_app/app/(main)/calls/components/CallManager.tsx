@@ -16,7 +16,7 @@ import { Calendar } from '../../calendars/models/calendar.model';
 import { CalendarApi } from '../../calendars/api/calendar.api';
 import { GrantApi } from '../../grants/api/grant.api';
 import { Grant } from '../../grants/models/grant.model';
-import { Evaluation } from '../../evals/models/eval.model';
+import { Evaluation } from '../../evals/models/evaluation.model';
 import { Theme } from '../../themes/models/theme.model';
 import { ThemeApi } from '../../themes/api/theme.api';
 import { EvaluationApi } from '../../evals/api/evaluation.api';

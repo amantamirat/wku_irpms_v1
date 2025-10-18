@@ -26,6 +26,15 @@ export type Evaluation = {
   updatedAt?: Date;
 };
 
+export const evaluationTemplate = (evaluation: Evaluation): string | null => {
+    if (!evaluation) return null;
+    if (evaluation.type === EvalType.option) {
+        return `${evaluation.title} (${evaluation.weight_value})`;
+    }
+    return evaluation.title;
+};
+
+
 export const validateEvaluation = (evaluation: Evaluation): { valid: boolean; message?: string } => {
   const { type, title, directorate, parent, order, weight_value, form_type } = evaluation;
 
@@ -52,14 +61,6 @@ export const validateEvaluation = (evaluation: Evaluation): { valid: boolean; me
     if (directorate) {
       return { valid: false, message: `'${type}' must not have a directorate.` };
     }
-
-    /*
-    if (type === EvalType.stage) {
-      if (stage_level == null || (stage_level < 1 || stage_level > 10)) {
-        return { valid: false, message: `'Stage level' is required and must be between 1 and 10..` };
-      }
-    }
-    */    
 
     if (type === EvalType.criterion || type === EvalType.option) {
       if (weight_value == null || weight_value < 0 || weight_value > 100) {

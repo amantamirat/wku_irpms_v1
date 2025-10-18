@@ -6,7 +6,7 @@ import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import { useEffect, useState } from 'react';
-import { EvalType, Evaluation, FormType, validateEvaluation } from '../../models/eval.model';
+import { EvalType, Evaluation, FormType, validateEvaluation } from '../../models/evaluation.model';
 
 interface SaveDialogProps {
     visible: boolean;

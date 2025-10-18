@@ -11,7 +11,7 @@ import { Call, CallStatus, validateCall } from '../models/call.model';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { Grant } from '../../grants/models/grant.model';
 import { Theme } from '../../themes/models/theme.model';
-import { Evaluation } from '../../evals/models/eval.model';
+import { Evaluation } from '../../evals/models/evaluation.model';
 import { CalendarApi } from '../../calendars/api/calendar.api';
 
 interface CallFormProps {

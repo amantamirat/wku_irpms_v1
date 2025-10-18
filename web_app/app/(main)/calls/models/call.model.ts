@@ -1,5 +1,5 @@
 import { Calendar } from "../../calendars/models/calendar.model";
-import { Evaluation } from "../../evals/models/eval.model";
+import { Evaluation } from "../../evals/models/evaluation.model";
 import { Grant } from "../../grants/models/grant.model";
 import { Organization } from "../../organizations/models/organization.model";
 import { Theme } from "../../themes/models/theme.model";

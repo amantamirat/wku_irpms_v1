@@ -1,6 +1,6 @@
 import { Call } from "@/app/(main)/calls/models/call.model";
 import { EvaluationApi } from "@/app/(main)/evals/api/evaluation.api";
-import { EvalType, Evaluation } from "@/app/(main)/evals/models/eval.model";
+import { EvalType, Evaluation } from "@/app/(main)/evals/models/evaluation.model";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";

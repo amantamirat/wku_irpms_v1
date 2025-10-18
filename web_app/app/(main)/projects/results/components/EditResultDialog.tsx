@@ -1,4 +1,4 @@
-import { Evaluation, FormType } from "@/app/(main)/evals/models/eval.model";
+import { Evaluation, evaluationTemplate, FormType } from "@/app/(main)/evals/models/evaluation.model";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputNumber } from "primereact/inputnumber";
@@ -113,6 +113,7 @@ const EditResultDialog = ({ visible, result, onCompelete, onHide }: EditResultDi
                                 setLocalResult({ ...localResult, selected_option: e.value })
                             }
                             optionLabel="title"
+                            itemTemplate={evaluationTemplate}
                             placeholder="Select Option"
                         />
                     </div>
