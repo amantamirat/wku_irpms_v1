@@ -55,7 +55,7 @@ export class ResultService {
         const filter: any = {};
         if (options.evaluator) filter.evaluator = options.evaluator;
         if (options.criterion) filter.criterion = options.criterion;
-        return await Result.find(filter).populate("evaluator").populate("criterion").lean();
+        return await Result.find(filter).populate("evaluator").populate("criterion").populate("selected_option").lean();
     }
 
     static async findResult(options: GetResultOptions) {

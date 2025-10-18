@@ -7,7 +7,7 @@ export type Result = {
     evaluator: string | Reviewer;
     criterion: string | Evaluation;
     score?: number;
-    selected_option?: string|Evaluation;
+    selected_option?: string | Evaluation;
     createdAt?: Date;
     updatedAt?: Date;
 };
@@ -36,5 +36,9 @@ export const sanitizeResult = (result: Partial<Result>): Result => {
             typeof result.evaluator === "object" && result.evaluator !== null
                 ? (result.evaluator as any)._id
                 : result.evaluator,
+        selected_option:
+            typeof result.selected_option === "object" && result.selected_option !== null
+                ? (result.selected_option as any)._id
+                : result.selected_option,
     } as Result;
 };
