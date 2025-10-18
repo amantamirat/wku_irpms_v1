@@ -43,7 +43,7 @@ const ApplicantSchema = new Schema<IApplicant>({
     },
     organization: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.ORGAN,
+        ref: COLLECTIONS.ORGANIZATION,
         required: true
     },
     email: {

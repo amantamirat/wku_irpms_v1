@@ -18,7 +18,7 @@ const BaseOrganizationSchema = new Schema<BaseOrganizationDocument>(
     { timestamps: true, discriminatorKey: "type" } // discriminatorKey
 );
 
-export const BaseOrganization = model<BaseOrganizationDocument>(COLLECTIONS.ORGAN, BaseOrganizationSchema);
+export const BaseOrganization = model<BaseOrganizationDocument>(COLLECTIONS.ORGANIZATION, BaseOrganizationSchema);
 
 interface CollegeDocument extends BaseOrganizationDocument {
     type: Unit.College;
