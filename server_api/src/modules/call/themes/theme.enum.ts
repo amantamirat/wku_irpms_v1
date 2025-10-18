@@ -1,12 +1,12 @@
 export enum ThemeType {
-    catalog = 'catalog',
-    theme = 'theme',
-    componenet = 'componenet',
-    focusArea = 'focus-area'
+    catalog = 'Catalog',
+    theme = 'Theme',
+    componenet = 'Componenet',
+    focusArea = 'Focus-area'
 }
 
 export enum ThemeLevel {
-    broad = 'broad',
-    componenet = 'componenet',
-    narrow = 'narrow',
+    broad = 'Broad',
+    componenet = 'Componenet',
+    narrow = 'Narrow',
 }

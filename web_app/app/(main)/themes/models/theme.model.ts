@@ -2,16 +2,16 @@ import { Organization } from "../../organizations/models/organization.model";
 
 
 export enum ThemeLevel {
-    broad = 'broad',
-    componenet = 'componenet',
-    narrow = 'narrow'
+    broad = 'Broad',
+    componenet = 'Componenet',
+    narrow = 'Narrow'
 }
 
 export enum ThemeType {
-    catalog = 'catalog',
-    broadTheme = 'theme',
-    componenet = 'componenet',
-    focusArea = 'focus-area'
+    catalog = 'Catalog',
+    broadTheme = 'Theme',
+    componenet = 'Componenet',
+    focusArea = 'Focus-area'
 }
 
 export type Theme = {
