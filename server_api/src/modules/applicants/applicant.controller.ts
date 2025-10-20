@@ -1,15 +1,34 @@
 import { Request, Response } from 'express';
+import mongoose from 'mongoose';
 import { errorResponse, successResponse } from '../../util/response';
 import { ApplicantService, CreateApplicantDto, GetApplicantsOptions } from './applicant.service';
-import { Types } from 'mongoose';
 
 export class ApplicantController {
 
     static async createApplicant(req: Request, res: Response) {
         try {
-            const data: CreateApplicantDto = req.body;
-            const theme = await ApplicantService.createApplicant(data);
-            successResponse(res, 201, "Applicant created successfully", theme);
+            const {
+                first_name,
+                last_name,
+                birth_date,
+                gender,
+                scope,
+                organization,
+                email,
+                accessibility
+            } = req.body;
+            const data: CreateApplicantDto = {
+                first_name,
+                last_name,
+                birth_date: new Date(birth_date),
+                gender,
+                scope,
+                organization: new mongoose.Types.ObjectId(organization as string),
+                email,
+                accessibility: accessibility || []
+            };
+            const created = await ApplicantService.createApplicant(data);
+            successResponse(res, 201, "Applicant created successfully", created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
@@ -20,7 +39,7 @@ export class ApplicantController {
             const { scope, organization } = req.query;
             const filter = {
                 scope: scope ? scope : undefined,
-                organization: organization ? new Types.ObjectId(organization as string) : undefined
+                organization: organization ? new mongoose.Types.ObjectId(organization as string) : undefined
             } as GetApplicantsOptions;
             const applicants = await ApplicantService.getApplicants(filter);
             successResponse(res, 200, 'Applicants fetched successfully', applicants);

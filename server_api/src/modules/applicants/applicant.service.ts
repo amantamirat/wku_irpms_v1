@@ -1,16 +1,11 @@
 import mongoose from "mongoose";
 import Applicant from "./applicant.model";
-import { Gender, Accessibility, Scope} from "./applicant.enum";
+import { Gender, Accessibility, Scope } from "./applicant.enum";
 import { BaseOrganization } from "../organization/organization.model";
-import {  Unit } from "../organization/organization.enum";
-
-
+import { Unit } from "../organization/organization.enum";
 
 export interface GetApplicantsOptions {
-    _id?: string;
-    uid?: string | mongoose.Types.ObjectId;
-    email?: string;
-    organization?: string;
+    organization?: mongoose.Types.ObjectId;
     scope?: Scope;
 }
 
@@ -20,10 +15,10 @@ export interface CreateApplicantDto {
     birth_date: Date;
     gender: Gender;
     scope: Scope;
-    organization: mongoose.Types.ObjectId | string;
+    organization: mongoose.Types.ObjectId;
     email?: string;
     accessibility?: Accessibility[];
-    user?: mongoose.Types.ObjectId | string;
+    user?: mongoose.Types.ObjectId;
 }
 
 const scopeToOrganizationUnit: Record<Scope, Unit> = {
@@ -57,6 +52,7 @@ export class ApplicantService {
         return await Applicant.find(filter).populate('organization').lean();
     }
 
+    /*
     static async findApplicant(options: GetApplicantsOptions) {
         const filter: any = {};
         if (options.uid) filter.user = options.uid;
@@ -64,8 +60,9 @@ export class ApplicantService {
         if (options._id) filter._id = options._id;
         return await Applicant.findOne(filter).lean();
     }
+    */
 
-    static async updateApplicant(id: string | mongoose.Types.ObjectId, data: Partial<CreateApplicantDto>) {
+    static async updateApplicant(id: string, data: Partial<CreateApplicantDto>) {
         await this.validateApplicant(data);
         const applicant = await Applicant.findById(id);
         if (!applicant) throw new Error("Applicant not found");
