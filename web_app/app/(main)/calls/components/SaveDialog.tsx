@@ -99,7 +99,7 @@ const SaveDialog = ({ visible, call, onHide, onComplete }: SaveDialogProps) => {
                 life: 2000,
             });
 
-            if (onComplete) setTimeout(() => onComplete(saved), 2000);
+            if (onComplete) onComplete(saved);
         } catch (err: any) {
             toast.current?.show({
                 severity: 'error',

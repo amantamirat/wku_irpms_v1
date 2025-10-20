@@ -61,7 +61,7 @@ const OrganizationManager = (props: OrganizationMangerProps) => {
             console.error('Failed to load organizations:', err);
             setError(`Failed to load calls. Please try again later. Error:${err}`);
         }
-        }, [props.parent?._id, type, error]);
+    }, [props.parent?._id, type, error]);
 
     useEffect(() => {
         setFilters(initFilters());
@@ -69,62 +69,26 @@ const OrganizationManager = (props: OrganizationMangerProps) => {
         loadOrganizations();
     }, [type, loadOrganizations]);
 
-    const saveOrganization = async () => {
-        try {
-            let _organizations = [...(organizations as any)];
-            if (selectedOrganization._id) {
-                const updatedOrganization = await OrganizationApi.updateOrganization(selectedOrganization);
-                const index = organizations.findIndex((organization) => organization._id === selectedOrganization._id);
-                _organizations[index] = updatedOrganization;
-            } else {
-                const newOrganization = await OrganizationApi.createOrganization(selectedOrganization);
-                _organizations.push({ ...selectedOrganization, _id: newOrganization._id });
-            }
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Successful',
-                detail: `${type} ${selectedOrganization._id ? "updated" : 'created'}`,
-                life: 3000
-            });
-            setOrganizations(_organizations);
-        } catch (error) {
-            console.error(error);
-            toast.current?.show({
-                severity: 'error',
-                summary: `Failed to ${selectedOrganization._id ? "update" : 'create'} organization`,
-                detail: '' + error,
-                life: 3000
-            });
-        } finally {
-            setShowSaveDialog(false);
-            setSelectedOrganization(emptyOrganization);
+    const onSaveComplete = (savedOrganization: Organization) => {
+        let _organizations = [...organizations];
+        const index = _organizations.findIndex((o) => o._id === savedOrganization._id);
+
+        if (index !== -1) {
+            _organizations[index] = { ...savedOrganization };
+        } else {
+            _organizations.push({ ...savedOrganization });
         }
+
+        setOrganizations(_organizations);
+        hideDialogs();
     };
 
+
     const deleteOrganization = async () => {
-        try {
-            const deleted = await OrganizationApi.deleteOrganization(selectedOrganization);
-            if (deleted) {
-                let _organizations = (organizations as any)?.filter((val: any) => val._id !== selectedOrganization._id);
-                setOrganizations(_organizations);
-                toast.current?.show({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: `${type} Deleted`,
-                    life: 3000
-                });
-            }
-        } catch (error) {
-            console.error(error);
-            toast.current?.show({
-                severity: 'error',
-                summary: `Failed to delete ${type}`,
-                detail: '' + error,
-                life: 3000
-            });
-        } finally {
-            setShowDeleteDialog(false);
-            setSelectedOrganization(emptyOrganization);
+        const deleted = await OrganizationApi.deleteOrganization(selectedOrganization);
+        if (deleted) {
+            let _organizations = (organizations as any)?.filter((val: any) => val._id !== selectedOrganization._id);
+            setOrganizations(_organizations);
         }
     };
 
@@ -133,14 +97,16 @@ const OrganizationManager = (props: OrganizationMangerProps) => {
         setShowSaveDialog(true);
     };
 
-    const hideSaveDialog = () => {
-        setShowSaveDialog(false);
-        setSelectedOrganization(emptyOrganization);
-    };
 
     const confirmDeleteItem = (organization: Organization) => {
         setSelectedOrganization(organization);
         setShowDeleteDialog(true);
+    };
+
+    const hideDialogs = () => {
+        setShowSaveDialog(false);
+        setShowDeleteDialog(false);
+        setSelectedOrganization(emptyOrganization);
     };
 
     const startToolbarTemplate = () => {
@@ -276,9 +242,8 @@ const OrganizationManager = (props: OrganizationMangerProps) => {
                         <SaveDialog
                             visible={showSaveDialog}
                             organization={selectedOrganization}
-                            onChange={setSelectedOrganization}
-                            onSave={saveOrganization}
-                            onHide={hideSaveDialog}
+                            onComplete={onSaveComplete}
+                            onHide={hideDialogs}
                         />}
 
                     {selectedOrganization &&
@@ -286,7 +251,7 @@ const OrganizationManager = (props: OrganizationMangerProps) => {
                             showDialog={showDeleteDialog}
                             selectedDataInfo={selectedOrganization.name}
                             onConfirmAsync={deleteOrganization}
-                            onHide={() => setShowDeleteDialog(false)}
+                            onHide={hideDialogs}
                         />}
 
                 </div>
