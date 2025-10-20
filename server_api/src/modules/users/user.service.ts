@@ -1,16 +1,16 @@
 import { User } from "./user.model";
-import { UserStatus } from "./enums/status.enum";
+import { UserStatus } from "./user.enum";
 import bcrypt from "bcryptjs";
-import { Types } from "mongoose";
 import Applicant from "../applicants/applicant.model";
 import { ApplicantService } from "../applicants/applicant.service";
+import mongoose from "mongoose";
 
 
 export interface CreateUserDto {
     user_name: string;
     password: string;
     email: string;
-    roles: Types.ObjectId[];
+    roles: mongoose.Types.ObjectId[];
     status: UserStatus;
 }
 
@@ -26,72 +26,60 @@ export class UserService {
     static async createUser(data: CreateUserDto) {
         const hashed = await this.prepareHash(data.password);
         const createdUser = await User.create({ ...data, password: hashed });
-        try {
-            const linkedUser = await this.linkApplicant(createdUser._id as string);
-            return linkedUser;
-        } catch (err) {
-            //console.log(err);
-        }
         const { password, ...rest } = createdUser.toObject();
         return rest;
     }
 
     static async getUsers() {
-        const users = await User.find({ isDeleted: { $ne: true } }, { password: 0 }).populate("roles").lean();
-        const usersWithLink = await Promise.all(users.map(async user => {
-            const linkedApplicant = await Applicant.findOne({ user: user._id }).lean();
-            return {
-                ...user,
-                linkedApplicant: !!linkedApplicant
-            };
-        }));
-        return usersWithLink;
+        const users = await User.find({ isHidden: { $ne: true } }, { password: 0 }).populate("roles").lean();
+        return users;
     }
 
     static async updateUser(id: string, data: Partial<CreateUserDto>) {
         const user = await User.findById(id);
         if (!user) throw new Error("User not found");
-        //incase of overposting
-        delete data.password;
-        delete data.status;
+        if (data.password) {
+            data.password = await this.prepareHash(data.password);
+        }
         Object.assign(user, data);
         const updatedUser = await user.save();
         const { password, ...rest } = updatedUser.toObject();
         return rest;
     }
 
-    static async linkApplicant(id: string) {
-        const user = await User.findById(id).select("-password").lean() as any;
-        if (!user) throw new Error("User not found");
-        const applicant = await ApplicantService.findApplicant({ email: user.email }) as any;
-        if (!applicant) throw new Error("Applicant not found");
-        //if applicant.user  Change email is possible//
-        if (applicant.user) throw new Error("Applicant already linked");
-        await ApplicantService.updateApplicant(applicant._id, { user: user._id });
-        return { ...user, linkedApplicant: !!applicant };
-    }
+
 
     static async deleteUser(id: string) {
         const user = await User.findById(id).select("-password");
         if (!user) throw new Error("User not found");
-        if (user.status === UserStatus.pending) {
-            const applicant = await Applicant.findOne({ user: id });
-            if (applicant) {
-                applicant.user = undefined;
-                await applicant.save();
-            }
-            return await user.deleteOne();
+
+        // Deny deletion of active users
+        if (user.status === UserStatus.active) {
+            throw new Error("Active users cannot be deleted");
         }
-        else {
-            user.status = user.status === UserStatus.active ? UserStatus.suspended : UserStatus.active;
-            await user.save();
-            return user;
+        // Unlink applicant if any (works for pending and deleted)
+        const applicant = await Applicant.findOne({ user: id });
+        if (applicant) {
+            applicant.user = undefined;
+            await applicant.save();
         }
+        // If user is already soft-deleted, perform permanent deletion
+        if (user.status === UserStatus.deleted) {
+            await user.deleteOne();
+            return { message: "User permanently deleted" };
+        }
+
+        // If pending or other non-active/non-deleted statuses, mark as deleted
+        user.status = UserStatus.deleted;
+        await user.save();
+        return { message: "User marked as deleted successfully" };
     }
+
+
 
     static async initAdminUser() {
         const userName = process.env.ADMIN_USER_NAME;
-        const email = process.env.SYS_EMAIL;
+        const email = process.env.ADMIN_EMAIL;
         const password = process.env.ADMIN_PASSWORD;
         if (!userName || !email || !password) {
             throw new Error('Default Admin credentials are not found in environment variables.');

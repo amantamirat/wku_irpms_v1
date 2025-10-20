@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import { errorResponse } from '../../../util/response';
-import { UserStatus } from '../enums/status.enum';
+import { UserStatus } from '../user.enum';
 import JwtPayload from './auth.model';
 
 dotenv.config();

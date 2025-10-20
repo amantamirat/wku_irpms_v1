@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { UserStatus } from "../enums/status.enum";
+import { UserStatus } from "../user.enum";
 
 export default interface JwtPayload {
   id: string;

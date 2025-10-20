@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import nodemailer, { Transporter } from 'nodemailer';
-import { UserStatus } from "../enums/status.enum";
+import { UserStatus } from "../user.enum";
 import { User } from "../user.model";
 import JwtPayload from "./auth.model";
 import Applicant from "../../applicants/applicant.model";

@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
-import { UserStatus } from './enums/status.enum';
+import { UserStatus } from './user.enum';
 import { COLLECTIONS } from '../../enums/collections.enum';
 
 export interface IUser extends Document {
@@ -10,7 +10,7 @@ export interface IUser extends Document {
   roles: mongoose.Types.ObjectId[];
   reset_code?: String;
   reset_code_expires?: Date;
-  isDeleted?: Boolean;
+  isHidden?: Boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -52,7 +52,7 @@ const UserSchema = new Schema<IUser>(
     reset_code_expires: {
       type: Date
     },
-    isDeleted: {
+    isHidden: {
       type: Boolean
     }
   },
