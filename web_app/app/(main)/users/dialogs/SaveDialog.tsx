@@ -1,160 +1,178 @@
 'use client';
-
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Password } from 'primereact/password';
 import { Button } from 'primereact/button';
-import { classNames } from 'primereact/utils';
-import { User, validateUser } from '../models/user.model';
 import { MultiSelect } from 'primereact/multiselect';
+import { classNames } from 'primereact/utils';
+import { Toast } from 'primereact/toast';
+import { User, validateUser } from '../models/user.model';
 import { Role } from '../../roles/models/role.model';
+import { RoleApi } from '../../roles/api/role.api';
+import { UserApi } from '../api/UserService';
 
-
-interface SaveDialogProps {
+interface SaveUserDialogProps {
     visible: boolean;
     user: User;
-    onChange: (user: User) => void;
-    roles: Role[];
-    onSave: () => void;
     onHide: () => void;
+    onComplete?: (savedUser: User) => void;
+    changePassword?: boolean;
 }
 
-function SaveDialog(props: SaveDialogProps) {
-    const { visible, user, roles, onChange, onSave, onHide } = props;
+export default function SaveUserDialog({ visible, user, onHide, onComplete, changePassword }: SaveUserDialogProps) {
+    const toast = useRef<Toast>(null);
+    const [localUser, setLocalUser] = useState<User>({ ...user });
+    const [roles, setRoles] = useState<Role[]>([]);
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
-    const save = async () => {
+    useEffect(() => {
+        setLocalUser({ ...user });
+    }, [user]);
+
+    useEffect(() => {
+        const fetchRoles = async () => {
+            try {
+                const data = await RoleApi.getRoles();
+                setRoles(data);
+            } catch (err) {
+                console.error("Failed to fetch roles:", err);
+            }
+        };
+        fetchRoles();
+    }, []);
+
+    const saveUser = async () => {
         setSubmitted(true);
-        const result = validateUser(user);
-        if (!result.valid) {
-            setErrorMessage(result.message);
+        const validation = validateUser(localUser);
+        if (!validation.valid) {
+            setErrorMessage(validation.message);
             return;
         }
 
-        onSave();
-    }
+        try {
+            let saved: User;
+            if (localUser._id) {
+                saved = await UserApi.updateUser(localUser);
+            } else {
+                saved = await UserApi.createUser(localUser);
+            }
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'User saved successfully',
+                life: 2000,
+            });
 
-    const hide = async () => {
-        setSubmitted(false);
-        setErrorMessage(undefined);
-        onHide();
-    }
+            if (onComplete) setTimeout(() => onComplete(saved), 2000);
+        } catch (err) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Failed to save user',
+                detail: '' + err,
+                life: 2000,
+            });
+        }
+    };
 
     const footer = (
         <>
-            <Button label="Cancel" icon="pi pi-times" text onClick={hide} />
-            <Button label="Save" icon="pi pi-check" text onClick={save} />
+            <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
+            <Button label="Save" icon="pi pi-check" text onClick={saveUser} />
         </>
     );
 
-    const isEdit = !!user._id;
+    const isEdit = !!localUser._id;
 
     return (
-        <Dialog
-            visible={visible}
-            style={{ width: '450px' }}
-            header={user._id ? 'Edit User Details' : 'New User Details'}
-            modal
-            className="p-fluid"
-            footer={footer}
-            onHide={hide}
-        >
-            {user && (
-                <>
-                    <div className="field">
-                        <label htmlFor="user_name">Username</label>
-                        <InputText
-                            id="user_name"
-                            value={user.user_name}
-                            onChange={(e) => onChange({ ...user, user_name: e.target.value })}
-                            className={classNames({ 'p-invalid': submitted && !user.user_name })}
-                            autoFocus
-                        />
-                        {submitted && !user.user_name && (
-                            <small className="p-invalid">User Name is required.</small>
-                        )}
-                    </div>
-                    {!isEdit && (
-                        <>
-                            <div className="field">
-                                <label htmlFor="password">Password</label>
-                                <Password
-                                    id="password"
-                                    value={user.password || ''}
-                                    onChange={(e) => onChange({ ...user, password: e.target.value })}
-                                    promptLabel="Enter a password"
-                                    feedback={false}
-                                    toggleMask
-                                    className={classNames({ 'p-invalid': submitted && !user.password })}
-                                />
-                                {submitted && !user.password && (
-                                    <small className="p-invalid">Password is required.</small>
-                                )}
-                            </div>
+        <>
+            <Toast ref={toast} />
+            <Dialog
+                visible={visible}
+                style={{ width: '500px' }}
+                header={isEdit ? 'Edit User' : 'New User'}
+                modal
+                className="p-fluid"
+                footer={footer}
+                onHide={onHide}
+            >
+                <div className="field">
+                    <label htmlFor="user_name">Username</label>
+                    <InputText
+                        id="user_name"
+                        value={localUser.user_name}
+                        onChange={(e) => setLocalUser({ ...localUser, user_name: e.target.value })}
+                        className={classNames({ 'p-invalid': submitted && !localUser.user_name })}
+                        autoFocus
+                    />
+                    {submitted && !localUser.user_name && (
+                        <small className="p-invalid">User Name is required.</small>
+                    )}
+                </div>
 
-                            <div className="field">
-                                <label htmlFor="confirmPassword">Confirm Password</label>
-                                <Password
-                                    id="confirmPassword"
-                                    value={user.confirmed_password || ''}
-                                    onChange={(e) => onChange({ ...user, confirmed_password: e.target.value })}
-                                    feedback={true}
-                                    promptLabel="Confirm a password"
-                                    weakLabel="Weak"
-                                    mediumLabel="Medium"
-                                    strongLabel="Strong"
-                                    toggleMask
-                                    className={classNames({ 'p-invalid': submitted && !user.confirmed_password })}
-                                />
-                                {submitted && !user.confirmed_password && (
-                                    <small className="p-invalid">Password confirmation is required.</small>
-                                )}
-                            </div>
-                        </>
-                    )
-                    }
-                    < div className="field">
-                        <label htmlFor="email">Email</label>
-                        <InputText
-                            id="email"
-                            type="email"
-                            disabled={isEdit}
-                            value={user.email}
-                            onChange={(e) => onChange({ ...user, email: e.target.value })}
-                            className={classNames({
-                                'p-invalid': submitted && (!user.email),
-                            })}
-                        />
-                        {submitted && !user.email && (
-                            <small className="p-invalid">Email is required.</small>
-                        )}
-                    </div>
+                {(!isEdit || (isEdit && changePassword)) && (
+                    <>
+                        <div className="field">
+                            <label htmlFor="password">Password</label>
+                            <Password
+                                id="password"
+                                value={localUser.password || ''}
+                                onChange={(e) => setLocalUser({ ...localUser, password: e.target.value })}
+                                toggleMask
+                                className={classNames({ 'p-invalid': submitted && !localUser.password })}
+                            />
+                            {submitted && !localUser.password && (
+                                <small className="p-invalid">Password is required.</small>
+                            )}
+                        </div>
+                        <div className="field">
+                            <label htmlFor="confirmPassword">Confirm Password</label>
+                            <Password
+                                id="confirmPassword"
+                                value={localUser.confirmed_password || ''}
+                                onChange={(e) => setLocalUser({ ...localUser, confirmed_password: e.target.value })}
+                                toggleMask
+                                className={classNames({ 'p-invalid': submitted && !localUser.confirmed_password })}
+                            />
+                            {submitted && !localUser.confirmed_password && (
+                                <small className="p-invalid">Password confirmation is required.</small>
+                            )}
+                        </div>
+                    </>
+                )}
 
-                    <div className="field">
-                        <label htmlFor="roles">Roles</label>
-                        <MultiSelect
-                            id="roles"
-                            value={roles.filter(r => user.roles?.some(ur => ur._id === r._id))}
-                            options={roles}
-                            optionLabel='role_name'
-                            onChange={(e) => onChange({ ...user, roles: e.value })}
-                            placeholder="Select Roles"
-                            display="chip"
-                            className={classNames({ 'p-invalid': submitted && !user.roles?.length })}
-                        />
-                    </div>
-                </>
-            )
-            }
-            {
-                errorMessage && (
-                    <small className="p-error">{errorMessage}</small>
-                )
-            }
-        </Dialog >
+                <div className="field">
+                    <label htmlFor="email">Email</label>
+                    <InputText
+                        id="email"
+                        type="email"
+                        value={localUser.email}
+                        disabled={isEdit}
+                        onChange={(e) => setLocalUser({ ...localUser, email: e.target.value })}
+                        className={classNames({ 'p-invalid': submitted && !localUser.email })}
+                    />
+                    {submitted && !localUser.email && (
+                        <small className="p-invalid">Email is required.</small>
+                    )}
+                </div>
+
+                <div className="field">
+                    <label htmlFor="roles">Roles</label>
+                    <MultiSelect
+                        id="roles"
+                        value={localUser.roles}
+                        options={roles}
+                        optionLabel="role_name"
+                        onChange={(e) => setLocalUser({ ...localUser, roles: e.value })}
+                        placeholder="Select Roles"
+                        display="chip"
+                        className={classNames({ 'p-invalid': submitted && !localUser.roles?.length })}
+                    />
+                </div>
+
+                {errorMessage && <small className="p-error">{errorMessage}</small>}
+            </Dialog>
+        </>
     );
 }
-
-export default SaveDialog;

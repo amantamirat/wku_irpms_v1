@@ -3,16 +3,13 @@ import ConfirmDialog from '@/components/ConfirmationDialog';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
-import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
+import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
-import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
+import { UserApi } from './api/UserService';
 import SaveDialog from './dialogs/SaveDialog';
 import { User, UserStatus } from './models/user.model';
-import { UserApi } from './api/UserService';
-import { Role } from '../roles/models/role.model';
-import { RoleApi } from '../roles/api/role.api';
 
 
 const UserPage = () => {
@@ -23,7 +20,7 @@ const UserPage = () => {
         roles: []
     };
     const [users, setUsers] = useState<User[]>([]);
-    const [roles, setRoles] = useState<Role[]>([]);
+
 
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
@@ -31,121 +28,84 @@ const UserPage = () => {
 
     const [selectedUser, setSelectedUser] = useState<User>(emptyUser);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [showLinkDialog, setShowLinkDialog] = useState(false);
+    //const [showLinkDialog, setShowLinkDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const toast = useRef<Toast>(null);
-    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
-
-
-    useEffect(() => {
-        setFilters(initFilters());
-        setGlobalFilter('');
-        loadUsers();
-        loadRoles();
-    }, []);
+    //const toast = useRef<Toast>(null);
+    //const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
 
-    const loadUsers = async () => {
-        try {
-            const data = await UserApi.getUsers();
-            setUsers(data);
-        } catch (err) {
-            console.error('Failed to load users:', err);
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load users data',
-                detail: '' + err,
-                life: 3000
-            });
-        }
-    };
+    useEffect(() => {
+        setFilters(initFilters());
+        setGlobalFilter('');
+    }, []);
 
-    const loadRoles = async () => {
-        try {
-            const data = await RoleApi.getRoles();
-            //console.log(data);
-            setRoles(data);
-        } catch (err) {
-            console.error('Failed to load roles:', err);
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load roles data',
-                detail: '' + err,
-                life: 3000
-            });
-        }
-    };
 
-    const saveUser = async () => {
-        try {
-            let _users = [...(users as any)];
-            if (selectedUser._id) {
-                const updatedUser = await UserApi.updateUser(selectedUser);
-                const index = users.findIndex((user) => user._id === updatedUser._id);
-                _users[index] = selectedUser;
-            } else {
-                const newUser = await UserApi.createUser(selectedUser);
-                _users.push({ ...selectedUser, _id: newUser._id, linkedApplicant: newUser.linkedApplicant });
+
+
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const data = await UserApi.getUsers();
+                setUsers(data);
+            } catch (err) {
+                console.error("Failed to fetch users:", err);
             }
-            setUsers(_users);
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Successful',
-                detail: `User ${selectedUser._id ? "updated" : 'created'}`,
-                life: 3000
-            });
-        } catch (error) {
-            console.error(error);
-            toast.current?.show({
-                severity: 'error',
-                summary: `Failed to ${selectedUser._id ? "update" : 'create'} user`,
-                detail: '' + error,
-                life: 3000
-            });
-        } finally {
-            hideDialog();
+        };
+        fetchUsers();
+    }, []);
+
+
+
+    const onSaveComplete = (savedUser: User) => {
+        let _users = [...users]; // users is your local state array of User
+        const index = _users.findIndex((u) => u._id === savedUser._id);
+
+        if (index !== -1) {
+            // Replace existing user
+            _users[index] = { ...savedUser };
+        } else {
+            // Add new user
+            _users.push({ ...savedUser });
         }
+
+        setUsers(_users); // update state
+        hideDialogs();    // close your SaveUserDialog
     };
+
 
 
     const deleteUser = async () => {
-        try {
-            const deleted = await UserApi.deleteUser(selectedUser);
-            let _users = [];
-            if (deleted) {
-                if (selectedUser.status === UserStatus.Pending) {
-                    _users = users?.filter((val: any) => val._id !== selectedUser._id);
-                } else {
-                    _users = [...(users as any)];
-                    const index = users.findIndex((user) => user._id === selectedUser._id);
-                    const updatedStatus = selectedUser.status === UserStatus.Active ? UserStatus.Suspended : UserStatus.Active;
-                    _users[index] = { ...selectedUser, status: updatedStatus };
-                }
-                setUsers(_users);
-                toast.current?.show({
-                    severity: 'success',
-                    summary: 'Successful',
-                    detail: `User ${selectedUser.status === UserStatus.Pending ? ' Removed' : ' Updated'}.`,
-                    life: 3000
-                });
-            }
-        } catch (error) {
-            console.error(error);
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to delete users',
-                detail: '' + error,
-                life: 3000
-            });
-        } finally {
-            hideDialog();
-        }
+        const deleted = await UserApi.deleteUser(selectedUser);
+        if (deleted) {
+            let _users = [...users];
 
+            if (selectedUser.status === UserStatus.Active) {
+                // Active users cannot be deleted, do nothing
+                return;
+            }
+
+            if (selectedUser.status === UserStatus.Pending) {
+                // Mark pending user as deleted locally
+                const index = _users.findIndex(u => u._id === selectedUser._id);
+                if (index !== -1) {
+                    _users[index] = { ..._users[index], status: UserStatus.Deleted };
+                }
+            } else if (selectedUser.status === UserStatus.Deleted) {
+                // Permanent deletion
+                _users = _users.filter(u => u._id !== selectedUser._id);
+            }
+
+            setUsers(_users);
+            hideDialogs();
+        }
     };
 
+
+    /*
 
     const linkUser = async () => {
         try {
@@ -174,16 +134,18 @@ const UserPage = () => {
 
     };
 
+    */
+
     const openSaveDialog = (user: User) => {
         setSelectedUser({ ...user });
         setShowSaveDialog(true);
     };
 
 
-    const hideDialog = () => {
+    const hideDialogs = () => {
         setShowSaveDialog(false);
         setShowDeleteDialog(false);
-        setShowLinkDialog(false);
+        //setShowLinkDialog(false);
         setSelectedUser(emptyUser);
     };
 
@@ -194,7 +156,7 @@ const UserPage = () => {
 
     const confirmLinkItem = (user: User) => {
         setSelectedUser(user);
-        setShowLinkDialog(true);
+        //setShowLinkDialog(true);
     };
 
     const startToolbarTemplate = () => {
@@ -222,10 +184,6 @@ const UserPage = () => {
     const actionBodyTemplate = (rowData: User) => {
         return (
             <>
-                {!rowData.linkedApplicant && <>
-                    <Button icon="pi pi-paperclip" rounded severity="info" className="p-button-rounded p-button-text"
-                        style={{ fontSize: '2rem' }} onClick={() => confirmLinkItem(rowData)} />
-                </>}
                 <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
                     style={{ fontSize: '2rem' }} onClick={() => openSaveDialog(rowData)} />
                 <Button icon={rowData.status === UserStatus.Active ? "pi pi-user-minus" : rowData.status === UserStatus.Suspended ? "pi pi-user-plus" :
@@ -240,7 +198,7 @@ const UserPage = () => {
         return (
             <>
                 <span className="p-column-title">Status</span>
-                <span className={`user-badge status-${rowData.status?.toLowerCase()}`}>{rowData.status}</span>
+                <span className={`status-badge status-${rowData.status?.toLowerCase()}`}>{rowData.status}</span>
             </>
         );
     };
@@ -255,7 +213,6 @@ const UserPage = () => {
         <div className="grid">
             <div className="col-12">
                 <div className="card">
-                    <Toast ref={toast} />
                     <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
                     <DataTable
                         ref={dt}
@@ -274,35 +231,13 @@ const UserPage = () => {
                         header={header}
                         scrollable
                         filters={filters}
-                        expandedRows={expandedRows}
-                        onRowToggle={(e) => setExpandedRows(e.data)}
-                        rowExpansionTemplate={(data) => (
-                            <>
-                                <DataTable
-                                    value={(data as User).roles}
-                                    dataKey="_id"
-                                    emptyMessage={'No role data found.'}
-                                    header={"Assigned Roles"}
-                                >
-                                    <Column
-                                        header="#"
-                                        body={(rowData, options) => options.rowIndex + 1}
-                                        style={{ width: '50px' }}
-                                    />
-                                    <Column field="role_name" header="Role Name" sortable headerStyle={{ minWidth: '15rem' }} />
-                                </DataTable>
-                            </>
-                        )}
                     >
-                        <Column expander style={{ width: '3em' }} />
                         <Column
-                            header="#"
-                            body={(rowData, options) => options.rowIndex + 1}
+                            header="#" body={(rowData, options) => options.rowIndex + 1}
                             style={{ width: '50px' }}
                         />
                         <Column field="user_name" header="Username" sortable />
                         <Column field="email" header="Email" sortable />
-                        <Column header="Linked" body={linkedBodyTemplate} sortable />
                         <Column field="status" header="Status" sortable body={statusBodyTemplate} />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
                     </DataTable>
@@ -310,19 +245,18 @@ const UserPage = () => {
                     {selectedUser && <SaveDialog
                         visible={showSaveDialog}
                         user={selectedUser}
-                        roles={roles}
-                        onChange={setSelectedUser}
-                        onSave={saveUser}
-                        onHide={hideDialog}
+                        onComplete={onSaveComplete}
+                        onHide={hideDialogs}
                     />}
 
-                    {selectedUser && !selectedUser.linkedApplicant && <ConfirmDialog
+
+                    {/*selectedUser && !selectedUser.linkedApplicant && <ConfirmDialog
                         showDialog={showLinkDialog}
                         operation="link"
                         selectedDataInfo={selectedUser.user_name}
                         onConfirmAsync={linkUser}
                         onHide={hideDialog}
-                    />}
+                    />*/}
 
                     {selectedUser && <ConfirmDialog
                         showDialog={showDeleteDialog}
@@ -330,7 +264,7 @@ const UserPage = () => {
                             selectedUser.status === UserStatus.Suspended ? 'activate' : 'remove'}
                         selectedDataInfo={selectedUser.user_name}
                         onConfirmAsync={deleteUser}
-                        onHide={hideDialog}
+                        onHide={hideDialogs}
                     />}
 
                 </div>

@@ -86,7 +86,7 @@ export class UserService {
         }
         const exist = await User.exists({ user_name: userName });
         if (!exist) {
-            const data = { user_name: userName, password: password, email: email, status: UserStatus.active, roles: [], isDeleted: true };
+            const data = { user_name: userName, password: password, email: email, status: UserStatus.active, roles: [], isHidden: true };
             await this.createUser(data);
             console.log('Default admin user created successfully.');
         }

@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { Toast } from "primereact/toast";
 import { Reviewer, ReviewerStatus, validateReviewer } from "../models/reviewer.model";
 import { OrganizationApi } from "@/app/(main)/organizations/api/organization.api";
-import { Category, Organization } from "@/app/(main)/organizations/models/organization.model";
+import { Scope, Organization } from "@/app/(main)/organizations/models/organization.model";
 import { applicantTemplate } from "@/app/(main)/applicants/models/applicant.template";
 import { ReviewerApi } from "../api/reviewer.api";
 
@@ -21,7 +21,7 @@ interface ReviewerDialogProps {
 export default function SaveReviewerDialog({ visible, reviewer, onCompelete, onHide }: ReviewerDialogProps) {
 
     const toast = useRef<Toast>(null);
-    const [scope, setScope] = useState<Category>();
+    const [scope, setScope] = useState<Scope>();
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [workspace, setWorkspace] = useState<Organization>();
     const [applicants, setApplicants] = useState<Applicant[]>([]);
@@ -135,7 +135,7 @@ export default function SaveReviewerDialog({ visible, reviewer, onCompelete, onH
                         <Dropdown
                             id="scope"
                             value={scope}
-                            options={Object.values(Category).map(g => ({ label: g, value: g }))}
+                            options={Object.values(Scope).map(g => ({ label: g, value: g }))}
                             onChange={(e) =>
                                 setScope(e.value)
                             }

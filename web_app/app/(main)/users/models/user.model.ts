@@ -6,7 +6,8 @@ import { Role } from "../../roles/models/role.model";
 export enum UserStatus {
     Pending = 'Pending',
     Active = 'Active',
-    Suspended = 'Suspended'
+    Suspended = 'Suspended',
+    Deleted = 'Deleted'
 }
 export type User = {
     _id?: string;
@@ -14,7 +15,7 @@ export type User = {
     email: string;
     password?: string;
     confirmed_password?: string;
-    roles?: Role[];
+    roles?: Role[] | string[];
     reset_code?: string;
     reset_code_expires?: Date;
     linkedApplicant?: string | Applicant;
@@ -54,3 +55,20 @@ export const validateUser = (user: User): { valid: boolean; message?: string } =
     }
     return { valid: true };
 };
+
+
+export function sanitizeUser(user: Partial<User>): Partial<User> {
+    return {
+        ...user,
+        roles: user.roles
+            ?.map((role) => {
+                if (!role) return undefined;
+                if (typeof role === "object" && "_id" in role) {
+                    return (role as any)._id.toString(); // ensure string
+                }
+                return role;
+            })
+            .filter((r): r is string => typeof r === "string"),
+    };
+}
+

@@ -35,8 +35,9 @@ export class UserController {
   static async updateUser(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { password, status, roles } = req.body;
+      const { user_name, password, status, roles } = req.body;
       const data: Partial<CreateUserDto> = {
+        user_name: user_name ? user_name : undefined,
         password: password ? password : undefined,
         status: status ? status : undefined,
         roles: roles ? roles.map((r: string) => new mongoose.Types.ObjectId(r)) : undefined,

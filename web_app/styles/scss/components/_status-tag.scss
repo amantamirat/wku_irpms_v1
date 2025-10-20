@@ -20,17 +20,19 @@
 }
 
 .status-badge {
+
     &.status-pending,
     &.status-planned {
         background: #FFF9C4;
         color: #8A6D3B;
     }
 
-    &.status-active{
+    &.status-active {
         background: #C8E6C9;
         color: #256029;
     }
 
+    &.status-deleted,
     &.status-closed,
     &.status-suspended {
         background: #FFCDD2;
