@@ -25,7 +25,6 @@ const ConfirmDialog = (props: ConfirmDialogProps) => {
                 props.onConfirm();
             }
 
-
             if (props.operation) {
                 toast.current?.show({
                     severity: 'success',
@@ -41,8 +40,7 @@ const ConfirmDialog = (props: ConfirmDialogProps) => {
                     life: 2000
                 });
             }
-
-
+            setTimeout(() => props.onHide(), 2000);
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
@@ -52,7 +50,7 @@ const ConfirmDialog = (props: ConfirmDialogProps) => {
             });
         }
         finally {
-            setTimeout(() => props.onHide(), 2000);
+
         }
     }
 

@@ -9,10 +9,11 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Organization, Scope } from '../../organizations/models/organization.model';
+import { Scope } from '../../organizations/models/organization.model';
 import { ApplicantApi } from '../api/applicant.api';
 import { Applicant, Gender } from '../models/applicant.model';
 import SaveDialog from './dialogs/SaveDialog';
+import { on } from 'events';
 
 interface ApplicantManagerProps {
     scope: Scope;
@@ -35,6 +36,7 @@ const ApplicantManager = (props: ApplicantManagerProps) => {
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
     const [selectedApplicant, setSelectedApplicant] = useState<Applicant>(emptyApplicant);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
+    const [showLinkDialog, setShowLinkDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
 
@@ -52,12 +54,7 @@ const ApplicantManager = (props: ApplicantManagerProps) => {
             const data = await ApplicantApi.getApplicants({ scope: scope });
             setApplicants(data);
         } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load applicant data',
-                detail: '' + err,
-                life: 3000
-            });
+            console.error('Error loading applicants:', err);
         }
     }, [scope]);
 
@@ -84,33 +81,26 @@ const ApplicantManager = (props: ApplicantManagerProps) => {
 
 
     const deleteApplicant = async () => {
-        try {
-            const deleted = await ApplicantApi.deleteApplicant(selectedApplicant);
-            if (deleted) {
-                setApplicants(applicants.filter((c) => c._id !== selectedApplicant._id));
-                toast.current?.show({
-                    severity: 'success',
-                    summary: 'Deleted',
-                    detail: 'Applicant deleted',
-                    life: 3000
-                });
-            }
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to delete applicant',
-                detail: '' + err,
-                life: 3000
-            });
-        } finally {
-            setShowDeleteDialog(false);
-            setSelectedApplicant(emptyApplicant);
+        const deleted = await ApplicantApi.deleteApplicant(selectedApplicant);
+        if (deleted) {
+            setApplicants(applicants.filter((c) => c._id !== selectedApplicant._id));
+            hideDialogs();
         }
+    };
+
+    const linkApplicant = async () => {
+        let linked = await ApplicantApi.linkApplicant(selectedApplicant);
+        linked = {
+            ...linked,
+            organization: selectedApplicant.organization
+        };
+        onSaveComplete(linked);
     };
 
     const hideDialogs = () => {
         setShowSaveDialog(false);
         setShowDeleteDialog(false);
+        setShowLinkDialog(false);
         setSelectedApplicant(emptyApplicant);
     }
 
@@ -138,6 +128,11 @@ const ApplicantManager = (props: ApplicantManagerProps) => {
 
     const actionBodyTemplate = (rowData: Applicant) => (
         <>
+            {!rowData.user && <Button icon="pi pi-user-plus" rounded severity="secondary" className="p-button-rounded p-button-text"
+                style={{ fontSize: '1.2rem' }} onClick={() => {
+                    setSelectedApplicant(rowData);
+                    setShowLinkDialog(true);
+                }} />}
             <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
                 style={{ fontSize: '1.2rem' }} onClick={() => {
                     setSelectedApplicant(rowData);
@@ -192,7 +187,7 @@ const ApplicantManager = (props: ApplicantManagerProps) => {
                         <Column field="birth_date" header="Birth Date" body={(rowData) => new Date(rowData.birth_date!).toLocaleDateString('en-CA')} />
                         <Column field="organization.name" header={isAcademic ? "Department" : isSupportive ? "Office" : "Organization"} sortable />
                         <Column field="email" header="Email" sortable />
-                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
+                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
                     </DataTable>
 
                     {selectedApplicant && (
@@ -209,6 +204,17 @@ const ApplicantManager = (props: ApplicantManagerProps) => {
                             showDialog={showDeleteDialog}
                             selectedDataInfo={`${selectedApplicant.first_name} ${selectedApplicant.last_name}`}
                             onConfirmAsync={deleteApplicant}
+                            onHide={hideDialogs}
+                        />
+                    )}
+
+
+                    {selectedApplicant && (
+                        <ConfirmDialog
+                            showDialog={showLinkDialog}
+                            selectedDataInfo={`${selectedApplicant.first_name} ${selectedApplicant.last_name}`}
+                            operation='Link'
+                            onConfirmAsync={linkApplicant}
                             onHide={hideDialogs}
                         />
                     )}

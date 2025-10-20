@@ -25,6 +25,7 @@ export type Applicant = {
     organization: string | Organization;
     email?: string;
     accessibility?: Accessibility[];
+    user?:string;
     createdAt?: Date;
     updatedAt?: Date;
 }

@@ -64,11 +64,12 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
                 <SaveDialog
                     visible={showProfileDialog}
                     applicant={user.linkedApplicant as Applicant}
-                    onSave={() => setShowProfileDialog(false)}
+                    onComplete={(savedApplicant: Applicant) => {
+                        user.linkedApplicant = savedApplicant;
+                        setShowProfileDialog(false)
+                    }}
                     onHide={() => setShowProfileDialog(false)}
-                    setApplicant={function (applicant: Applicant): void {
-                        throw new Error("Function not implemented.");
-                    }} />
+                />
             )}
             {user?._id && <ChangePasswordDialog
                 visible={showPasswordDialog}

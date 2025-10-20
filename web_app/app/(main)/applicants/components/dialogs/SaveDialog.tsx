@@ -11,6 +11,7 @@ import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 import { accessibilityOptions, Applicant, genderOptions, scopeToOrganizationUnit, validateApplicant } from '../../models/applicant.model';
+import { ApplicantApi } from '../../api/applicant.api';
 
 interface SaveApplicantDialogProps {
     visible: boolean;
@@ -25,7 +26,7 @@ const SaveApplicantDialog = ({ visible, applicant, onHide, onComplete }: SaveApp
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
-    
+
     useEffect(() => {
         const fetchOrganizations = async () => {
             try {
@@ -63,15 +64,23 @@ const SaveApplicantDialog = ({ visible, applicant, onHide, onComplete }: SaveApp
             if (!validation.valid) {
                 throw new Error(validation.message);
             }
-
+            let saved: Applicant;
+            if (localApplicant._id) {
+                saved = await ApplicantApi.updateApplicant(localApplicant);
+            } else {
+                saved = await ApplicantApi.createApplicant(localApplicant);
+            }
+            saved = {
+                ...saved,
+                organization: localApplicant.organization
+            };
             toast.current?.show({
                 severity: 'success',
                 summary: 'Success',
                 detail: 'Applicant saved successfully',
                 life: 2000,
             });
-
-            if (onComplete) setTimeout(() => onComplete(localApplicant), 2000);
+            if (onComplete) setTimeout(() => onComplete(saved), 2000);
         } catch (err: any) {
             toast.current?.show({
                 severity: 'error',
