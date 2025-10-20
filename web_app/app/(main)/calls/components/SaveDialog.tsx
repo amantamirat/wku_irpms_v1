@@ -1,7 +1,8 @@
 'use client';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
+import { Toast } from 'primereact/toast';
 import { CalendarApi } from '../../calendars/api/calendar.api';
 import { Calendar, CalendarStatus } from '../../calendars/models/calendar.model';
 import { EvaluationApi } from '../../evals/api/evaluation.api';
@@ -12,17 +13,19 @@ import { ThemeApi } from '../../themes/api/theme.api';
 import { Theme } from '../../themes/models/theme.model';
 import { Call, validateCall } from '../models/call.model';
 import CallForm from './CallForm';
+import { CallApi } from '../api/call.api';
 
 interface SaveDialogProps {
     visible: boolean;
     call: Call;
-    setCall: (call: Call) => void;
-    onSave: () => void;
     onHide: () => void;
+    onComplete?: (savedCall: Call) => void;
 }
 
-const SaveDialog = (props: SaveDialogProps) => {
-    const { visible, call, setCall, onSave, onHide } = props;
+const SaveDialog = ({ visible, call, onHide, onComplete }: SaveDialogProps) => {
+    const toast = useRef<Toast>(null);
+
+    const [localCall, setLocalCall] = useState<Call>({ ...call });
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
@@ -31,30 +34,43 @@ const SaveDialog = (props: SaveDialogProps) => {
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
     const [themes, setThemes] = useState<Theme[]>([]);
 
+    // Reset local copy when dialog opens
+    useEffect(() => {
+        if (visible) {
+            setLocalCall({ ...call });
+            setSubmitted(false);
+            setErrorMessage(undefined);
+        }
+    }, [visible, call]);
+
+    // Fetch calendars once (if no calendar selected)
     useEffect(() => {
         const fetchCalendars = async () => {
             const data = await CalendarApi.getCalendars({ status: CalendarStatus.active });
             setCalendars(data);
         };
-        if (!call.calendar)
-            fetchCalendars();
-    }, []);
+        if (!localCall.calendar) fetchCalendars();
+    }, [localCall.calendar]);
 
+    const directorateId = (localCall.directorate as any)?._id;
 
     const fetchGrants = useCallback(async () => {
-        const data = await GrantApi.getGrants({ directorate: (call.directorate as any)._id });
+        if (!directorateId) return;
+        const data = await GrantApi.getGrants({ directorate: directorateId });
         setGrants(data);
-    }, [(call.directorate as any)._id]);
+    }, [directorateId]);
 
     const fetchEvaluations = useCallback(async () => {
-        const data = await EvaluationApi.getEvaluations({ directorate: (call.directorate as any)._id });
+        if (!directorateId) return;
+        const data = await EvaluationApi.getEvaluations({ directorate: directorateId });
         setEvaluations(data);
-    }, [(call.directorate as any)._id]);
+    }, [directorateId]);
 
     const fetchThemes = useCallback(async () => {
-        const data = await ThemeApi.getThemes({ directorate: (call.directorate as any)._id });
+        if (!directorateId) return;
+        const data = await ThemeApi.getThemes({ directorate: directorateId });
         setThemes(data);
-    }, [(call.directorate as any)._id]);
+    }, [directorateId]);
 
     useEffect(() => {
         fetchGrants();
@@ -62,22 +78,41 @@ const SaveDialog = (props: SaveDialogProps) => {
         fetchThemes();
     }, [fetchGrants, fetchEvaluations, fetchThemes]);
 
-
+    // Save handler with API
     const save = async () => {
-        setSubmitted(true);
-        const result = validateCall(call);
-        if (!result.valid) {
-            setErrorMessage(result.message);
-            return;
+        try {
+            setSubmitted(true);
+            const validation = validateCall(localCall);
+            if (!validation.valid) throw new Error(validation.message);
+
+            let saved: Call;
+            if (localCall._id) {
+                saved = await CallApi.updateCall(localCall);
+            } else {
+                saved = await CallApi.createCall(localCall);
+            }
+
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Call saved successfully',
+                life: 2000,
+            });
+
+            if (onComplete) setTimeout(() => onComplete(saved), 2000);
+        } catch (err: any) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Failed to save call',
+                detail: err.message || '' + err,
+                life: 2000,
+            });
         }
-        setErrorMessage(undefined);
-        onSave();
     };
 
     const hide = () => {
         setSubmitted(false);
         setErrorMessage(undefined);
-        //setShowCalendars(false);
         onHide();
     };
 
@@ -88,40 +123,32 @@ const SaveDialog = (props: SaveDialogProps) => {
         </>
     );
 
-    useEffect(() => {
-        if (!visible) {
-            setSubmitted(false);
-            setErrorMessage(undefined);
-        }
-    }, [visible]);
-
-
     return (
-        <Dialog
-            visible={visible}
-            style={{ width: '500px' }}
-            header={call._id ? 'Edit Call' : 'New Call'}
-            modal
-            className="p-fluid"
-            footer={footer}
-            onHide={hide}
-            maximizable
-        >
-
-            <CallForm call={call} setCall={setCall}
-                calendars={calendars}
-                grants={grants}
-                evaluations={evaluations}
-                themes={themes}
-                submitted={submitted} />
-            {errorMessage && (
-                <small className="p-error">{errorMessage}</small>
-            )}
-
-        </Dialog>
+        <>
+            <Toast ref={toast} />
+            <Dialog
+                visible={visible}
+                style={{ width: '600px' }}
+                header={localCall._id ? 'Edit Call' : 'New Call'}
+                modal
+                className="p-fluid"
+                footer={footer}
+                onHide={hide}
+                maximizable
+            >
+                <CallForm
+                    call={localCall}
+                    setCall={setLocalCall}
+                    calendars={calendars}
+                    grants={grants}
+                    evaluations={evaluations}
+                    themes={themes}
+                    submitted={submitted}
+                />
+                {errorMessage && <small className="p-error">{errorMessage}</small>}
+            </Dialog>
+        </>
     );
-}
+};
 
 export default SaveDialog;
-
-

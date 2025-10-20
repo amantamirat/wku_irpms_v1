@@ -1,18 +1,15 @@
 'use client';
-import { Button } from 'primereact/button';
 import { Calendar as PrimeCalendar } from 'primereact/calendar';
-import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
-import { classNames } from 'primereact/utils';
-import { useEffect, useState } from 'react';
-import { Calendar, CalendarStatus } from '../../calendars/models/calendar.model';
-import { Call, CallStatus, validateCall } from '../models/call.model';
 import { InputTextarea } from 'primereact/inputtextarea';
+import { classNames } from 'primereact/utils';
+import { useState } from 'react';
+import { Calendar } from '../../calendars/models/calendar.model';
+import { Evaluation } from '../../evals/models/evaluation.model';
 import { Grant } from '../../grants/models/grant.model';
 import { Theme } from '../../themes/models/theme.model';
-import { Evaluation } from '../../evals/models/evaluation.model';
-import { CalendarApi } from '../../calendars/api/calendar.api';
+import { Call, CallStatus } from '../models/call.model';
 
 interface CallFormProps {
     call: Call;

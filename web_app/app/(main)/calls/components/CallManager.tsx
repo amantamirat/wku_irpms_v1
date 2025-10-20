@@ -9,18 +9,10 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Call, CallStatus } from '../models/call.model';
-import { CallApi } from '../api/call.api';
-import SaveDialog from './SaveDialog';
-import { Calendar } from '../../calendars/models/calendar.model';
-import { CalendarApi } from '../../calendars/api/calendar.api';
-import { GrantApi } from '../../grants/api/grant.api';
-import { Grant } from '../../grants/models/grant.model';
-import { Evaluation } from '../../evals/models/evaluation.model';
-import { Theme } from '../../themes/models/theme.model';
-import { ThemeApi } from '../../themes/api/theme.api';
-import { EvaluationApi } from '../../evals/api/evaluation.api';
 import ProjectManager from '../../projects/components/ProjectManager';
+import { CallApi } from '../api/call.api';
+import { Call, CallStatus } from '../models/call.model';
+import SaveDialog from './SaveDialog';
 
 
 interface CallManagerProps {
@@ -93,61 +85,35 @@ const CallManager = (props: CallManagerProps) => {
         );
     }
 
-    const saveCall = async () => {
-        try {
-            let _calls = [...calls];
-            if (selectedCall._id) {
-                const updated = await CallApi.updateCall(selectedCall);
-                const index = _calls.findIndex((c) => c._id === selectedCall._id);
-                _calls[index] = { ...updated, calendar: selectedCall.calendar, grant: selectedCall.grant, theme: selectedCall.theme, evaluation: selectedCall.evaluation };
-            } else {
-                const created = await CallApi.createCall(selectedCall);
-                _calls.push({ ...selectedCall, _id: created._id });
-            }
-            setCalls(_calls);
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Successful',
-                detail: `Call ${selectedCall._id ? 'updated' : 'created'}`,
-                life: 3000
-            });
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to save call',
-                detail: '' + err,
-                life: 3000
-            });
-        } finally {
-            setShowSaveDialog(false);
-            setSelectedCall(emptyCall);
+    const onSaveComplete = (savedCall: Call) => {
+        let _calls = [...calls]; // calls is your local state array of Call
+        const index = _calls.findIndex((c) => c._id === savedCall._id);
+        if (index !== -1) {
+            // Replace existing call
+            _calls[index] = { ...savedCall };
+        } else {
+            // Add new call
+            _calls.push({ ...savedCall });
+        }
+        setCalls(_calls); // update state
+        hideDialogs();    // close your SaveDialog
+    };
+
+
+
+    const deleteCall = async () => {
+        const deleted = await CallApi.deleteCall(selectedCall);
+        if (deleted) {
+            setCalls(calls.filter((c) => c._id !== selectedCall._id));
+            hideDialogs();
         }
     };
 
-    const deleteCall = async () => {
-        try {
-            const deleted = await CallApi.deleteCall(selectedCall);
-            if (deleted) {
-                setCalls(calls.filter((c) => c._id !== selectedCall._id));
-                toast.current?.show({
-                    severity: 'success',
-                    summary: 'Deleted',
-                    detail: 'Call deleted',
-                    life: 3000
-                });
-            }
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to delete call',
-                detail: '' + err,
-                life: 3000
-            });
-        } finally {
-            setShowDeleteDialog(false);
-            setSelectedCall(emptyCall);
-        }
-    };
+    const hideDialogs = () => {
+        setShowSaveDialog(false);
+        setShowDeleteDialog(false);
+        setSelectedCall(emptyCall);
+    }
 
     const startToolbarTemplate = () => (
         <div className="my-2">
@@ -223,7 +189,7 @@ const CallManager = (props: CallManagerProps) => {
                             <ProjectManager call={rowData} />
                         )}
                     >
-                        <Column expander style={{ width: '3em' }} /> 
+                        <Column expander style={{ width: '3em' }} />
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="calendar.year" header="Calendar" sortable />
                         <Column field="title" header="Title" sortable />
@@ -239,9 +205,8 @@ const CallManager = (props: CallManagerProps) => {
                         <SaveDialog
                             visible={showSaveDialog}
                             call={selectedCall}
-                            setCall={setSelectedCall}
-                            onSave={saveCall}
-                            onHide={() => setShowSaveDialog(false)}
+                            onComplete={onSaveComplete}
+                            onHide={hideDialogs}
                         />
                     )}
 
@@ -250,7 +215,7 @@ const CallManager = (props: CallManagerProps) => {
                             showDialog={showDeleteDialog}
                             selectedDataInfo={String(selectedCall.title)}
                             onConfirmAsync={deleteCall}
-                            onHide={() => setShowDeleteDialog(false)}
+                            onHide={hideDialogs}
                         />
                     )}
                 </div>
