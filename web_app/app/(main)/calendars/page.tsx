@@ -1,8 +1,7 @@
 'use client';
 
 import ConfirmDialog from '@/components/ConfirmationDialog';
-import SaveDialog from './dialogs/SaveDialog';
-
+import SaveCalendarDialog from './dialogs/SaveCalendarDialog';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -55,46 +54,31 @@ const CalendarPage = () => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
 
-    const saveCalendar = async () => {
-        try {
-            let _calendars = [...calendars];
-            if (selectedCalendar._id) {
-                const updated = await CalendarApi.updateCalendar(selectedCalendar);
-                const index = _calendars.findIndex((c) => c._id === selectedCalendar._id);
-                _calendars[index] = updated;
-            } else {
-                const created = await CalendarApi.createCalendar(selectedCalendar);
-                _calendars.push(created);
-            }
-            setCalendars(_calendars);
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Successful',
-                detail: `Calendar ${selectedCalendar._id ? 'updated' : 'created'}`,
-                life: 3000
-            });
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to save calendar',
-                detail: '' + err,
-                life: 3000
-            });
-        } finally {
-            setShowSaveDialog(false);
-            setSelectedCalendar(emptyCalendar);
+    const onSaveComplete = (savedCalendar: Calendar) => {
+        let _calendars = [...calendars]; // clone the current state array
+        const index = _calendars.findIndex((c) => c._id === savedCalendar._id);
+        if (index !== -1) {
+            _calendars[index] = { ...savedCalendar };
+        } else {
+            _calendars.push({ ...savedCalendar });
         }
+        setCalendars(_calendars); // update the React state
+        hideDialogs();             // close dialog
     };
+
 
     const deleteCalendar = async () => {
         const deleted = await CalendarApi.deleteCalendar(selectedCalendar);
         if (deleted) {
             setCalendars(calendars.filter((c) => c._id !== selectedCalendar._id));
-            setShowDeleteDialog(false);
-            setSelectedCalendar(emptyCalendar);
+            hideDialogs();
         }
     };
 
+    const hideDialogs = () => {
+        setShowSaveDialog(false);
+        setShowDeleteDialog(false);
+    }
     const startToolbarTemplate = () => (
         <div className="my-2">
             <Button label="New Calendar" icon="pi pi-plus" severity="success" className="mr-2"
@@ -172,12 +156,11 @@ const CalendarPage = () => {
                     </DataTable>
 
                     {selectedCalendar && (
-                        <SaveDialog
+                        <SaveCalendarDialog
                             visible={showSaveDialog}
                             calendar={selectedCalendar}
-                            setCalendar={setSelectedCalendar}
-                            onSave={saveCalendar}
-                            onHide={() => setShowSaveDialog(false)}
+                            onComplete={onSaveComplete}
+                            onHide={hideDialogs}
                         />
                     )}
 
@@ -186,7 +169,7 @@ const CalendarPage = () => {
                             showDialog={showDeleteDialog}
                             selectedDataInfo={String(selectedCalendar.year)}
                             onConfirmAsync={deleteCalendar}
-                            onHide={() => setShowDeleteDialog(false)}
+                            onHide={hideDialogs}
                         />
                     )}
                 </div>
