@@ -1,8 +1,6 @@
 'use client';
 
 import ConfirmDialog from '@/components/ConfirmationDialog';
-import SaveDialog from './dialogs/SaveDialog';
-import { Applicant, Gender, scopeToOrganizationUnit } from '../models/applicant.model';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -11,9 +9,10 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Scope, Organization, OrganizationalUnit } from '../../organizations/models/organization.model';
-import { OrganizationApi } from '../../organizations/api/organization.api';
+import { Organization, Scope } from '../../organizations/models/organization.model';
 import { ApplicantApi } from '../api/applicant.api';
+import { Applicant, Gender } from '../models/applicant.model';
+import SaveDialog from './dialogs/SaveDialog';
 
 interface ApplicantManagerProps {
     scope: Scope;
@@ -31,7 +30,6 @@ const ApplicantManager = (props: ApplicantManagerProps) => {
     };
 
     const [applicants, setApplicants] = useState<Applicant[]>([]);
-    const [organizations, setOrganizations] = useState<Organization[]>([]);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
@@ -63,67 +61,27 @@ const ApplicantManager = (props: ApplicantManagerProps) => {
         }
     }, [scope]);
 
-
-
-    const loadOrganizations = useCallback(async () => {
-        try {
-            if (!scope) return;
-            const type = scopeToOrganizationUnit[scope];
-            if (type) {
-                const data = await OrganizationApi.getOrganizations({ type });
-                setOrganizations(data);
-            }
-        } catch (err) {
-            console.error('Failed to load oranizations:', err);
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load oranizations data',
-                detail: '' + err,
-                life: 3000
-            });
-        }
-    }, [scope]);
-
     useEffect(() => {
         loadApplicants();
-        loadOrganizations();
-    }, [scope, loadApplicants, loadOrganizations]);
+    }, [scope, loadApplicants]);
 
     useEffect(() => {
         setFilters(initFilters());
         setGlobalFilter('');
     }, []);
 
-    const saveApplicant = async () => {
-        try {
-            let _applicants = [...applicants];
-            if (selectedApplicant._id) {
-                const updated = await ApplicantApi.updateApplicant(selectedApplicant);
-                const index = _applicants.findIndex((c) => c._id === selectedApplicant._id);
-                _applicants[index] = selectedApplicant;
-            } else {
-                const created = await ApplicantApi.createApplicant(selectedApplicant);
-                _applicants.push({ ...selectedApplicant, _id: created._id });
-            }
-            setApplicants(_applicants);
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Successful',
-                detail: `Applicant ${selectedApplicant._id ? 'updated' : 'created'}`,
-                life: 3000
-            });
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to save applicant',
-                detail: '' + err,
-                life: 3000
-            });
-        } finally {
-            setShowSaveDialog(false);
-            setSelectedApplicant(emptyApplicant);
+    const onSaveComplete = (savedApplicant: Applicant) => {
+        let _applicants = [...applicants]; // applicants is your local state array of Applicant
+        const index = _applicants.findIndex((a) => a._id === savedApplicant._id);
+        if (index !== -1) {
+            _applicants[index] = { ...savedApplicant };
+        } else {
+            _applicants.push({ ...savedApplicant });
         }
+        setApplicants(_applicants); // update state
+        hideDialogs(); // close your SaveApplicantDialog
     };
+
 
     const deleteApplicant = async () => {
         try {
@@ -149,6 +107,12 @@ const ApplicantManager = (props: ApplicantManagerProps) => {
             setSelectedApplicant(emptyApplicant);
         }
     };
+
+    const hideDialogs = () => {
+        setShowSaveDialog(false);
+        setShowDeleteDialog(false);
+        setSelectedApplicant(emptyApplicant);
+    }
 
     const startToolbarTemplate = () => (
         <div className="my-2">
@@ -235,9 +199,7 @@ const ApplicantManager = (props: ApplicantManagerProps) => {
                         <SaveDialog
                             visible={showSaveDialog}
                             applicant={selectedApplicant}
-                            organizations={organizations}
-                            setApplicant={setSelectedApplicant}
-                            onSave={saveApplicant}
+                            onComplete={onSaveComplete}
                             onHide={() => setShowSaveDialog(false)}
                         />
                     )}
@@ -247,7 +209,7 @@ const ApplicantManager = (props: ApplicantManagerProps) => {
                             showDialog={showDeleteDialog}
                             selectedDataInfo={`${selectedApplicant.first_name} ${selectedApplicant.last_name}`}
                             onConfirmAsync={deleteApplicant}
-                            onHide={() => setShowDeleteDialog(false)}
+                            onHide={hideDialogs}
                         />
                     )}
                 </div>
