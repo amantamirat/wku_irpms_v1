@@ -69,6 +69,16 @@ export class ApplicantController {
         }
     }
 
+    static async linkApplicant(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+            const linked = await ApplicantService.autoLinkUserByEmail(id);
+            successResponse(res, 201, "Applicant linked successfully", linked);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    }
+
 }
 
 

@@ -3,6 +3,7 @@ import Applicant from "./applicant.model";
 import { Gender, Accessibility, Scope } from "./applicant.enum";
 import { BaseOrganization } from "../organization/organization.model";
 import { Unit } from "../organization/organization.enum";
+import { User } from "../users/user.model";
 
 export interface GetApplicantsOptions {
     organization?: mongoose.Types.ObjectId;
@@ -52,16 +53,6 @@ export class ApplicantService {
         return await Applicant.find(filter).populate('organization').lean();
     }
 
-    /*
-    static async findApplicant(options: GetApplicantsOptions) {
-        const filter: any = {};
-        if (options.uid) filter.user = options.uid;
-        if (options.email) filter.email = options.email;
-        if (options._id) filter._id = options._id;
-        return await Applicant.findOne(filter).lean();
-    }
-    */
-
     static async updateApplicant(id: string, data: Partial<CreateApplicantDto>) {
         await this.validateApplicant(data);
         const applicant = await Applicant.findById(id);
@@ -75,4 +66,18 @@ export class ApplicantService {
         if (!applicant) throw new Error("Applicant not found");
         return await applicant.deleteOne();
     }
+
+    static async autoLinkUserByEmail(applicantId: string) {
+        const applicant = await Applicant.findById(applicantId);
+        if (!applicant) throw new Error("Applicant not found");
+        if (!applicant.email) throw new Error("Applicant has no email to link");
+        if (applicant.user) throw new Error("This user is already linked to another applicant");
+        const user = await User.findOne({ email: applicant.email });
+        if (!user) throw new Error("No user account found with this email");
+        applicant.user = user._id as mongoose.Types.ObjectId;;
+        await applicant.save();
+        return applicant;
+    }
+
+
 }

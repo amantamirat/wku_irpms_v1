@@ -9,5 +9,6 @@ router.post('/', verifyActiveAccount, ApplicantController.createApplicant);
 router.get('/', verifyActiveAccount, ApplicantController.getApplicants);
 router.put('/:id', verifyActiveAccount, ApplicantController.updateApplicant);
 router.delete('/:id', verifyActiveAccount, ApplicantController.deleteApplicant);
+router.patch('/:id', verifyActiveAccount, ApplicantController.linkApplicant);
 
 export default router;
