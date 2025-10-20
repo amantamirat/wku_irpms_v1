@@ -1,11 +1,7 @@
 import { ApiClient } from "@/api/ApiClient";
-import { User } from "../models/user.model";
-
+import { sanitizeUser, User } from "../models/user.model";
 
 const end_point = '/users/';
-
-
-
 
 export const UserApi = {
 
@@ -15,8 +11,8 @@ export const UserApi = {
     },
 
     async createUser(user: Partial<User>): Promise<User> {
-        //const sanitized = sanitizeUser(user);
-        const createdData = await ApiClient.post(end_point, user);
+        const sanitized = sanitizeUser(user);
+        const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as User;
     },
 
@@ -25,8 +21,8 @@ export const UserApi = {
             throw new Error("_id required.");
         }
         const url = `${end_point}${user._id}`;
-        //const sanitized = sanitizeUser(user);
-        const updatedUser = await ApiClient.put(url, user);
+        const sanitized = sanitizeUser(user);
+        const updatedUser = await ApiClient.put(url, sanitized);
         return updatedUser as User;
     },
 
@@ -39,15 +35,18 @@ export const UserApi = {
         return response;
     },
 
-    /*
-    async linkUser(user: Partial<User>): Promise<User> {
-        if (!user._id) {
-            throw new Error("_id required.");
-        }
-        const url = `${end_point}${user._id}`;
-        const updatedUser = await ApiClient.post(url, user);
-        return updatedUser as User;
+    async changePassword(userId: string, oldPassword: string, newPassword: string): Promise<any> {
+        const url = `${end_point}${userId}/change-password`;
+        const payload = { oldPassword, newPassword };
+        const result = await ApiClient.patch(url, payload);
+        return result;
     },
-    */
+
+    async resetPassword(userId: string, newPassword: string): Promise<any> {
+        const url = `${end_point}${userId}/reset-password`;
+        const payload = { newPassword };
+        const result = await ApiClient.patch(url, payload);
+        return result;
+    }
 
 };

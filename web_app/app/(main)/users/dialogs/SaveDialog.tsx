@@ -12,15 +12,15 @@ import { Role } from '../../roles/models/role.model';
 import { RoleApi } from '../../roles/api/role.api';
 import { UserApi } from '../api/UserService';
 
+
 interface SaveUserDialogProps {
     visible: boolean;
     user: User;
     onHide: () => void;
     onComplete?: (savedUser: User) => void;
-    changePassword?: boolean;
 }
 
-export default function SaveUserDialog({ visible, user, onHide, onComplete, changePassword }: SaveUserDialogProps) {
+const SaveUserDialog = ({ visible, user, onHide, onComplete }: SaveUserDialogProps) => {
     const toast = useRef<Toast>(null);
     const [localUser, setLocalUser] = useState<User>({ ...user });
     const [roles, setRoles] = useState<Role[]>([]);
@@ -44,14 +44,12 @@ export default function SaveUserDialog({ visible, user, onHide, onComplete, chan
     }, []);
 
     const saveUser = async () => {
-        setSubmitted(true);
-        const validation = validateUser(localUser);
-        if (!validation.valid) {
-            setErrorMessage(validation.message);
-            return;
-        }
-
         try {
+            setSubmitted(true);
+            const validation = validateUser(localUser);
+            if (!validation.valid) {
+                throw new Error(validation.message);
+            }
             let saved: User;
             if (localUser._id) {
                 saved = await UserApi.updateUser(localUser);
@@ -74,6 +72,16 @@ export default function SaveUserDialog({ visible, user, onHide, onComplete, chan
                 life: 2000,
             });
         }
+    };
+
+    useEffect(() => {
+        if (!visible) clearForm();
+    }, [visible]);
+
+    const clearForm = () => {
+        setSubmitted(false);
+        setErrorMessage(undefined);
+        setLocalUser({ ...user });
     };
 
     const footer = (
@@ -111,7 +119,7 @@ export default function SaveUserDialog({ visible, user, onHide, onComplete, chan
                     )}
                 </div>
 
-                {(!isEdit || (isEdit && changePassword)) && (
+                {!isEdit && (
                     <>
                         <div className="field">
                             <label htmlFor="password">Password</label>
@@ -176,3 +184,5 @@ export default function SaveUserDialog({ visible, user, onHide, onComplete, chan
         </>
     );
 }
+
+export default SaveUserDialog;

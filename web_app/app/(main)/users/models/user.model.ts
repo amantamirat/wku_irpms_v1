@@ -9,6 +9,13 @@ export enum UserStatus {
     Suspended = 'Suspended',
     Deleted = 'Deleted'
 }
+
+export type ChangePassword = {
+    _id?: string;
+    oldPassword?: string;
+    newPassword: string;
+    confirmPassword?: string;
+};
 export type User = {
     _id?: string;
     user_name: string;

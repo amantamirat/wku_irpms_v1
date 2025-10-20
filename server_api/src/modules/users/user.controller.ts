@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { errorResponse, successResponse } from '../../util/response';
-import { UserService, CreateUserDto } from './user.service';
+import { UserService, CreateUserDto, ChangePasswordDto } from './user.service';
 import { UserStatus } from './user.enum';
 import mongoose from 'mongoose';
 
@@ -35,10 +35,9 @@ export class UserController {
   static async updateUser(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { user_name, password, status, roles } = req.body;
+      const { user_name, status, roles } = req.body;
       const data: Partial<CreateUserDto> = {
         user_name: user_name ? user_name : undefined,
-        password: password ? password : undefined,
         status: status ? status : undefined,
         roles: roles ? roles.map((r: string) => new mongoose.Types.ObjectId(r)) : undefined,
       };
@@ -49,25 +48,36 @@ export class UserController {
     }
   }
 
-  /*
 
-  static async linkUser(req: Request, res: Response) {
-    try {
-      const { id } = req.params;
-      const linked = await UserService.linkApplicant(id);
-      successResponse(res, 201, "User linked successfully", linked);
-    } catch (err: any) {
-      errorResponse(res, 400, err.message, err);
-    }
-  }
-
-  */
 
   static async deleteUser(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const deleted = await UserService.deleteUser(id);
       successResponse(res, 201, "User deleted successfully", deleted);
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
+    }
+  }
+
+  static async changePassword(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { oldPassword, newPassword } = req.body;
+      const dto: ChangePasswordDto = { oldPassword, newPassword };
+      const result = await UserService.changePassword(id, dto);
+      successResponse(res, 200, "Password changed successfully", result);
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
+    }
+  }
+
+  static async resetPassword(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { newPassword } = req.body;
+      const result = await UserService.resetPassword(id, newPassword);
+      successResponse(res, 200, "Password reset successfully", result);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }

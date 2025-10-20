@@ -75,6 +75,25 @@ export const ApiClient = {
         return result.data;
     },
 
+    async patch(endpoint: string, payload?: any): Promise<any> {
+        const url = `${BASE_URL}${endpoint}`;
+        const token = getAuthToken();
+
+        const response = await fetch(url, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+            body: payload ? JSON.stringify(payload) : undefined,
+        });
+
+        await handleError(response);
+        const result = await response.json();
+        return result.data;
+    },
+
+
     async delete(endpoint: string): Promise<boolean> {
         const url = `${BASE_URL}${endpoint}`;
         const token = getAuthToken();

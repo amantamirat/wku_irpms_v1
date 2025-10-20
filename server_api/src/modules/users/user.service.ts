@@ -1,9 +1,8 @@
-import { User } from "./user.model";
-import { UserStatus } from "./user.enum";
 import bcrypt from "bcryptjs";
-import Applicant from "../applicants/applicant.model";
-import { ApplicantService } from "../applicants/applicant.service";
 import mongoose from "mongoose";
+import Applicant from "../applicants/applicant.model";
+import { UserStatus } from "./user.enum";
+import { User } from "./user.model";
 
 
 export interface CreateUserDto {
@@ -12,6 +11,11 @@ export interface CreateUserDto {
     email: string;
     roles: mongoose.Types.ObjectId[];
     status: UserStatus;
+}
+
+export class ChangePasswordDto {
+    oldPassword!: string;
+    newPassword!: string;
 }
 
 
@@ -38,43 +42,62 @@ export class UserService {
     static async updateUser(id: string, data: Partial<CreateUserDto>) {
         const user = await User.findById(id);
         if (!user) throw new Error("User not found");
-        if (data.password) {
-            data.password = await this.prepareHash(data.password);
-        }
         Object.assign(user, data);
         const updatedUser = await user.save();
         const { password, ...rest } = updatedUser.toObject();
         return rest;
     }
 
-
-
     static async deleteUser(id: string) {
         const user = await User.findById(id).select("-password");
         if (!user) throw new Error("User not found");
 
-        // Deny deletion of active users
         if (user.status === UserStatus.active) {
             throw new Error("Active users cannot be deleted");
         }
-        // Unlink applicant if any (works for pending and deleted)
+
         const applicant = await Applicant.findOne({ user: id });
         if (applicant) {
             applicant.user = undefined;
             await applicant.save();
         }
-        // If user is already soft-deleted, perform permanent deletion
+
         if (user.status === UserStatus.deleted) {
             await user.deleteOne();
             return { message: "User permanently deleted" };
         }
 
-        // If pending or other non-active/non-deleted statuses, mark as deleted
         user.status = UserStatus.deleted;
         await user.save();
         return { message: "User marked as deleted successfully" };
     }
 
+    static async changePassword(id: string, dto: ChangePasswordDto) {
+        const user = await User.findById(id);
+        if (!user) throw new Error("User not found");
+
+        const { oldPassword, newPassword } = dto;
+
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            throw new Error("Old password is incorrect");
+        }
+        user.password = await this.prepareHash(newPassword);
+        await user.save();
+
+        return { message: "Password changed successfully" };
+    }
+
+
+    static async resetPassword(id: string, newPassword: string) {
+        const user = await User.findById(id);
+        if (!user) throw new Error("User not found");
+
+        user.password = await this.prepareHash(newPassword);
+        await user.save();
+
+        return { message: "Password reset successfully" };
+    }
 
 
     static async initAdminUser() {
