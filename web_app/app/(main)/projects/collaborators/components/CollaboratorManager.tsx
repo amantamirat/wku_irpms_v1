@@ -47,19 +47,23 @@ export default function CollaboratorManager({ project, setProject }: Collaborato
     }, [project?._id]);
 
 
-    const saveCollaborator = async () => {
-        let _collaborators = [...collaborators];
-        if (collaborator._id) {
-            const updated = await CollaboratorApi.updateCollaborator(collaborator);
-            const index = _collaborators.findIndex((c) => c._id === updated._id);
-            _collaborators[index] = { ...collaborator, updatedAt: updated.updatedAt };
+    const onSaveComplete = (savedCollaborator: Collaborator) => {
+        let _collaborators = [...collaborators]; // local copy of state
+        const index = _collaborators.findIndex(
+            (c) => (c.applicant as Applicant)._id === (savedCollaborator.applicant as Applicant)._id
+        );
+        if (index !== -1) {
+            _collaborators[index] = { ...savedCollaborator };
         } else {
-            const created = await CollaboratorApi.createCollaborator(collaborator);
-            _collaborators.push({ ...created, project: collaborator.project, applicant: collaborator.applicant });
+            _collaborators.push({ ...savedCollaborator });
         }
-        setCollaborators(_collaborators);
-        hideDialogs();
+        setCollaborators(_collaborators); // update state
+        hideDialogs(); // close dialog
     };
+
+
+
+    
 
     const deleteCollaborator = async () => {
         const deleted = await CollaboratorApi.deleteCollaborator(collaborator);
@@ -69,8 +73,8 @@ export default function CollaboratorManager({ project, setProject }: Collaborato
         }
     };
 
-    const addCollaborator = () => {
-        const applicant = collaborator.applicant as Applicant;
+    const addCollaborator = (savedCollaborator: Collaborator) => {
+        const applicant = savedCollaborator.applicant as Applicant;
         if (!applicant || !applicant._id) {
             throw new Error("Please select a valid collaborator.");
         }
@@ -82,12 +86,11 @@ export default function CollaboratorManager({ project, setProject }: Collaborato
         if (exists) {
             throw new Error("This collaborator is already added!");
         }
-        const updatedCollaborators = [...(project.collaborators || []), collaborator];
+        const updatedCollaborators = [...(project.collaborators || []), savedCollaborator];
         // notify parent
         if (setProject) {
             setProject({ ...project, collaborators: updatedCollaborators });
         }
-        setCollaborators(updatedCollaborators);
         hideDialogs();
     };
 
@@ -179,10 +182,9 @@ export default function CollaboratorManager({ project, setProject }: Collaborato
                 {collaborator &&
                     <CollaboratorDialog
                         collaborator={collaborator}
-                        setCollaborator={setCollaborator}
                         visible={showSaveDialog}
-                        onSave={project._id ? saveCollaborator : undefined}
-                        onAdd={!project._id ? addCollaborator : undefined}
+                        onSave={!project._id ? addCollaborator : undefined}
+                        onComplete={onSaveComplete}
                         onHide={hideDialogs}
                     />}
 

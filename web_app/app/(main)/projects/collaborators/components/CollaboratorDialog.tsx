@@ -1,7 +1,9 @@
+'use client';
+
 import { ApplicantApi } from "@/app/(main)/applicants/api/applicant.api";
 import { Applicant, scopeToOrganizationUnit } from "@/app/(main)/applicants/models/applicant.model";
 import { OrganizationApi } from "@/app/(main)/organizations/api/organization.api";
-import { Category, Organization } from "@/app/(main)/organizations/models/organization.model";
+import { Scope, Organization } from "@/app/(main)/organizations/models/organization.model";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
@@ -9,80 +11,82 @@ import { useEffect, useRef, useState } from "react";
 import { applicantTemplate } from "@/app/(main)/applicants/models/applicant.template";
 import { Toast } from "primereact/toast";
 import { Collaborator, CollaboratorStatus } from "../models/collaborator.model";
-
+import { CollaboratorApi } from "../api/collaborator.api";
 
 interface CollaboratorDialogProps {
     collaborator: Collaborator;
-    setCollaborator: (collaborator: Collaborator) => void;
     visible: boolean;
-    onSave?: () => Promise<void>;
-    onAdd?: () => void;
+    onSave?: (saved: Collaborator) => void;
+    onComplete?: (saved: Collaborator) => void; // replaced onSave
     onHide: () => void;
 }
 
-export default function CollaboratorDialog({ collaborator, setCollaborator, visible, onHide, onSave, onAdd }: CollaboratorDialogProps) {
-
-    const [scope, setScope] = useState<Category>();
+export default function CollaboratorDialog({ collaborator, visible, onSave, onComplete, onHide }: CollaboratorDialogProps) {
+    const [localCollaborator, setLocalCollaborator] = useState<Collaborator>({ ...collaborator });
+    const [scope, setScope] = useState<Scope>();
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [workspace, setWorkspace] = useState<Organization>();
     const [applicants, setApplicants] = useState<Applicant[]>([]);
     const toast = useRef<Toast>(null);
 
+    // Fetch organizations based on scope
     useEffect(() => {
         let isMounted = true;
         const fetchOrganizations = async () => {
+            if (!scope) return;
             try {
-                if (!scope) return;
                 const type = scopeToOrganizationUnit[scope];
                 if (type) {
                     const data = await OrganizationApi.getOrganizations({ type });
-                    if (isMounted) {
-                        setOrganizations(data);
-                    }
+                    if (isMounted) setOrganizations(data);
                 }
             } catch (err) {
                 console.error("Failed to fetch organizations:", err);
             }
         };
         fetchOrganizations();
-        return () => {
-            isMounted = false;
-        };
+        return () => { isMounted = false; };
     }, [scope]);
 
+    // Fetch applicants based on workspace
     useEffect(() => {
         let isMounted = true;
         const fetchApplicants = async () => {
+            if (!workspace) return;
             try {
-                if (!workspace) return;
                 const data = await ApplicantApi.getApplicants({ organization: workspace._id });
-                if (isMounted) {
-                    setApplicants(data);
-                }
+                if (isMounted) setApplicants(data);
             } catch (err) {
                 console.error("Failed to fetch applicants:", err);
             }
         };
         fetchApplicants();
-        return () => {
-            isMounted = false;
-        };
+        return () => { isMounted = false; };
     }, [workspace]);
 
     const saveCollaborator = async () => {
         try {
             if (onSave) {
-                await onSave();
+                onSave(localCollaborator);
+                if (onComplete) onComplete(localCollaborator);
+                return;
             }
-            if (onAdd) {
-                onAdd();
+            let saved: Collaborator;
+            if (localCollaborator._id) {
+                saved = await CollaboratorApi.updateCollaborator(localCollaborator);
+            } else {
+                saved = await CollaboratorApi.createCollaborator(localCollaborator);
             }
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',
-                detail: 'Collaborator Saved',
+                detail: 'Collaborator saved',
                 life: 2000
             });
+            // Update local copy and notify parent
+            setLocalCollaborator(saved);
+            if (onComplete) onComplete(saved);
+
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
@@ -91,8 +95,7 @@ export default function CollaboratorDialog({ collaborator, setCollaborator, visi
                 life: 2000
             });
         }
-    }
-
+    };
 
     const footer = (
         <>
@@ -113,75 +116,62 @@ export default function CollaboratorDialog({ collaborator, setCollaborator, visi
                 footer={footer}
                 onHide={onHide}
             >
-                {!collaborator._id ? <>
-                    <div className="field">
-                        <label htmlFor="scope">Scope</label>
-                        <Dropdown
-                            id="scope"
-                            value={scope}
-                            options={Object.values(Category).map(g => ({ label: g, value: g }))}
-                            onChange={(e) =>
-                                setScope(e.value)
-                            }
-                            placeholder="Select Scope"
-                        />
-                    </div>
-
-                    <div className="field">
-                        <label htmlFor="workspace">Workspace</label>
-                        <Dropdown
-                            id="workspace"
-                            value={workspace}
-                            options={organizations}
-                            onChange={(e) =>
-                                setWorkspace(e.value)
-                            }
-                            optionLabel="name"
-                            placeholder="Select a Workspace"
-                        />
-                    </div>
-
-                    <div className="field">
-                        <label htmlFor="applicant">Collaborator</label>
-                        <Dropdown
-                            id="applicant"
-                            value={collaborator.applicant}
-                            options={applicants}
-                            onChange={(e) =>
-                                setCollaborator({ ...collaborator, applicant: e.value })
-                            }
-                            dataKey="_id"
-                            optionLabel="first_name"
-                            itemTemplate={(option) => applicantTemplate(option)}
-                            valueTemplate={(option) =>
-                                option
-                                    ? applicantTemplate(option)
-                                    : <span className="p-placeholder">Select a Collaborator</span>
-                            }
-                            placeholder="Select a Collaborator"
-                        //className={classNames({ 'p-invalid': submitted && !scope })}
-                        />
-                    </div>
-
-                </> :
+                {!localCollaborator._id ? (
                     <>
                         <div className="field">
-                            <label htmlFor="status">Status</label>
+                            <label htmlFor="scope">Scope</label>
                             <Dropdown
-                                id="status"
-                                value={collaborator.status}
-                                options={Object.values(CollaboratorStatus).map(s => ({ label: s, value: s }))}
-                                onChange={(e) =>
-                                    setCollaborator({ ...collaborator, status: e.value })
-                                }
+                                id="scope"
+                                value={scope}
+                                options={Object.values(Scope).map(g => ({ label: g, value: g }))}
+                                onChange={(e) => setScope(e.value)}
+                                placeholder="Select Scope"
                             />
                         </div>
-                    </>}
 
+                        <div className="field">
+                            <label htmlFor="workspace">Workspace</label>
+                            <Dropdown
+                                id="workspace"
+                                value={workspace}
+                                options={organizations}
+                                onChange={(e) => setWorkspace(e.value)}
+                                optionLabel="name"
+                                placeholder="Select a Workspace"
+                            />
+                        </div>
+
+                        <div className="field">
+                            <label htmlFor="applicant">Collaborator</label>
+                            <Dropdown
+                                id="applicant"
+                                value={localCollaborator.applicant}
+                                options={applicants}
+                                onChange={(e) => setLocalCollaborator({ ...localCollaborator, applicant: e.value })}
+                                dataKey="_id"
+                                optionLabel="first_name"
+                                itemTemplate={applicantTemplate}
+                                valueTemplate={(option) =>
+                                    option
+                                        ? applicantTemplate(option)
+                                        : <span className="p-placeholder">Select a Collaborator</span>
+                                }
+                                placeholder="Select a Collaborator"
+                            />
+                        </div>
+                    </>
+                ) : (
+                    <div className="field">
+                        <label htmlFor="status">Status</label>
+                        <Dropdown
+                            id="status"
+                            value={localCollaborator.status}
+                            options={Object.values(CollaboratorStatus).map(s => ({ label: s, value: s }))}
+                            onChange={(e) => setLocalCollaborator({ ...localCollaborator, status: e.value })}
+                        />
+                    </div>
+                )}
             </Dialog>
         </>
-
     );
 }
-
-
