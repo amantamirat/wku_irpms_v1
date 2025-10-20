@@ -13,7 +13,7 @@ export class ProjectController {
         call: new mongoose.Types.ObjectId(call as string),
         title: title,
         summary: summary,
-        createdBy: new mongoose.Types.ObjectId(req.user!.id),
+        createdBy: new mongoose.Types.ObjectId(req.user!._id),
       };
       const created = await ProjectService.createProject(data);
       successResponse(res, 201, "Project created successfully", created);
@@ -32,7 +32,7 @@ export class ProjectController {
       const project = JSON.parse(req.body.project);
       const data: CreateProjectDto = {
         ...project,
-        createdBy: new mongoose.Types.ObjectId(req.user!.id),
+        createdBy: new mongoose.Types.ObjectId(req.user!._id),
         documentPath: documentPath
       };
       const submitted = await ProjectService.submitProject(data);

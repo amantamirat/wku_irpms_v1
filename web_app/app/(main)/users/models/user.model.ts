@@ -10,10 +10,10 @@ export enum UserStatus {
     Deleted = 'Deleted'
 }
 
-export type ChangePassword = {
-    _id?: string;
+export type PasswordType = {
+    _id: string;
     oldPassword?: string;
-    newPassword: string;
+    newPassword?: string;
     confirmPassword?: string;
 };
 export type User = {
@@ -59,6 +59,33 @@ export const validateUser = (user: User): { valid: boolean; message?: string } =
         if (user.password !== user.confirmed_password) {
             return { valid: false, message: "Password mismatch" };
         }
+    }
+    return { valid: true };
+};
+
+
+export const validatePassword = (password: PasswordType): { valid: boolean; message?: string } => {
+
+    if (!password._id || password._id.trim() === "") {
+        return { valid: false, message: "Password id is required." };
+    }
+    if (!password.newPassword) {
+        return { valid: false, message: "Password required" };
+    }
+    if (!password.confirmPassword) {
+        return { valid: false, message: "Password confirmation required" };
+    }
+    if (password.newPassword !== password.confirmPassword) {
+        return { valid: false, message: "Password mismatch" };
+    }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
+    if (!passwordRegex.test(password.newPassword)) {
+        return {
+            valid: false,
+            message:
+                "Password must be at least 8 characters long, include uppercase, lowercase, number, and symbol."
+        };
     }
     return { valid: true };
 };

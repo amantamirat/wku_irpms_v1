@@ -1,5 +1,5 @@
 import { ApiClient } from "@/api/ApiClient";
-import { sanitizeUser, User } from "../models/user.model";
+import { PasswordType, sanitizeUser, User } from "../models/user.model";
 
 const end_point = '/users/';
 
@@ -35,17 +35,15 @@ export const UserApi = {
         return response;
     },
 
-    async changePassword(userId: string, oldPassword: string, newPassword: string): Promise<any> {
-        const url = `${end_point}${userId}/change-password`;
-        const payload = { oldPassword, newPassword };
-        const result = await ApiClient.patch(url, payload);
+    async changePassword(password: Partial<PasswordType>): Promise<any> {
+        const url = `${end_point}${password._id}/change-password`;        
+        const result = await ApiClient.patch(url, password);
         return result;
     },
 
-    async resetPassword(userId: string, newPassword: string): Promise<any> {
-        const url = `${end_point}${userId}/reset-password`;
-        const payload = { newPassword };
-        const result = await ApiClient.patch(url, payload);
+    async resetPassword(password: Partial<PasswordType>): Promise<any> {
+        const url = `${end_point}${password._id}/reset-password`;
+        const result = await ApiClient.patch(url, password);
         return result;
     }
 

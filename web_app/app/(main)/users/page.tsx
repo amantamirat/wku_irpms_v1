@@ -10,6 +10,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { UserApi } from './api/UserService';
 import SaveDialog from './dialogs/SaveDialog';
 import { User, UserStatus } from './models/user.model';
+import ChangePasswordDialog from './dialogs/ChangePassword';
 
 
 const UserPage = () => {
@@ -20,18 +21,13 @@ const UserPage = () => {
         roles: []
     };
     const [users, setUsers] = useState<User[]>([]);
-
-
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
-
     const [selectedUser, setSelectedUser] = useState<User>(emptyUser);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    //const [showLinkDialog, setShowLinkDialog] = useState(false);
+    const [showPasswordDialog, setShowPasswordDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    //const toast = useRef<Toast>(null);
-    //const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
@@ -41,9 +37,6 @@ const UserPage = () => {
         setFilters(initFilters());
         setGlobalFilter('');
     }, []);
-
-
-
 
 
     useEffect(() => {
@@ -141,11 +134,16 @@ const UserPage = () => {
         setShowSaveDialog(true);
     };
 
+    const openResetPasswordDialog = (user: User) => {
+        setSelectedUser({ ...user });
+        setShowPasswordDialog(true);
+    };
+
 
     const hideDialogs = () => {
         setShowSaveDialog(false);
         setShowDeleteDialog(false);
-        //setShowLinkDialog(false);
+        setShowPasswordDialog(false);
         setSelectedUser(emptyUser);
     };
 
@@ -154,10 +152,7 @@ const UserPage = () => {
         setShowDeleteDialog(true);
     };
 
-    const confirmLinkItem = (user: User) => {
-        setSelectedUser(user);
-        //setShowLinkDialog(true);
-    };
+
 
     const startToolbarTemplate = () => {
         return (
@@ -186,6 +181,11 @@ const UserPage = () => {
             <>
                 <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
                     style={{ fontSize: '2rem' }} onClick={() => openSaveDialog(rowData)} />
+
+                <Button
+                    icon="pi pi-refresh" rounded severity="danger" className="p-button-rounded p-button-text"
+                    style={{ fontSize: '2rem' }} onClick={() => openResetPasswordDialog(rowData)}
+                />
                 <Button icon={rowData.status === UserStatus.Active ? "pi pi-user-minus" : rowData.status === UserStatus.Suspended ? "pi pi-user-plus" :
                     "pi pi-times"}
                     rounded severity="warning" className="p-button-rounded p-button-text"
@@ -246,6 +246,14 @@ const UserPage = () => {
                         visible={showSaveDialog}
                         user={selectedUser}
                         onComplete={onSaveComplete}
+                        onHide={hideDialogs}
+                    />}
+
+                    {selectedUser._id && <ChangePasswordDialog
+                        visible={showPasswordDialog}
+                        id={selectedUser._id}
+                        reset={true}
+                        onComplete={hideDialogs}
                         onHide={hideDialogs}
                     />}
 

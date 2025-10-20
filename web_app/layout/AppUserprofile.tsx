@@ -1,5 +1,6 @@
 import SaveDialog from "@/app/(main)/applicants/components/dialogs/SaveDialog";
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
+import ChangePasswordDialog from "@/app/(main)/users/dialogs/ChangePassword";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
@@ -15,6 +16,7 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
 
     const { user, logout } = useAuth();
     const [showProfileDialog, setShowProfileDialog] = useState(false);
+    const [showPasswordDialog, setShowPasswordDialog] = useState(false);
 
     const handleLogout = () => {
         props.setVisible(false);
@@ -40,6 +42,15 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
                 </p>
                 <p>
                     <Button
+                        label="Change Password"
+                        severity="warning"
+                        icon="pi pi-key"
+                        className="w-full"
+                        onClick={() => setShowPasswordDialog(true)}
+                    />
+                </p>
+                <p>
+                    <Button
                         label="Sign Out"
                         severity="danger"
                         icon="pi pi-sign-out"
@@ -59,6 +70,12 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
                         throw new Error("Function not implemented.");
                     }} />
             )}
+            {user?._id && <ChangePasswordDialog
+                visible={showPasswordDialog}
+                id={user._id}
+                onComplete={() => setShowPasswordDialog(false)}
+                onHide={() => setShowPasswordDialog(false)}
+            />}
         </>
 
     );

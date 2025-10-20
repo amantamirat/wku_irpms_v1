@@ -7,10 +7,11 @@ import { Button } from 'primereact/button';
 import { MultiSelect } from 'primereact/multiselect';
 import { classNames } from 'primereact/utils';
 import { Toast } from 'primereact/toast';
-import { User, validateUser } from '../models/user.model';
+import { User, UserStatus, validateUser } from '../models/user.model';
 import { Role } from '../../roles/models/role.model';
 import { RoleApi } from '../../roles/api/role.api';
 import { UserApi } from '../api/UserService';
+import { Dropdown } from 'primereact/dropdown';
 
 
 interface SaveUserDialogProps {
@@ -56,6 +57,10 @@ const SaveUserDialog = ({ visible, user, onHide, onComplete }: SaveUserDialogPro
             } else {
                 saved = await UserApi.createUser(localUser);
             }
+            saved = {
+                ...saved,
+                roles: localUser.roles
+            };
             toast.current?.show({
                 severity: 'success',
                 summary: 'Success',
@@ -169,6 +174,7 @@ const SaveUserDialog = ({ visible, user, onHide, onComplete }: SaveUserDialogPro
                     <label htmlFor="roles">Roles</label>
                     <MultiSelect
                         id="roles"
+                        dataKey="_id"
                         value={localUser.roles}
                         options={roles}
                         optionLabel="role_name"
@@ -178,7 +184,20 @@ const SaveUserDialog = ({ visible, user, onHide, onComplete }: SaveUserDialogPro
                         className={classNames({ 'p-invalid': submitted && !localUser.roles?.length })}
                     />
                 </div>
-
+                {isEdit &&
+                    <div className="field">
+                        <label htmlFor="status">Status</label>
+                        <Dropdown
+                            id="status"
+                            value={localUser.status}
+                            options={Object.values(UserStatus).map(s => ({ label: s, value: s }))}
+                            onChange={(e) =>
+                                setLocalUser({ ...localUser, status: e.value })
+                            }
+                            placeholder="Select Status"
+                        />
+                    </div>
+                }
                 {errorMessage && <small className="p-error">{errorMessage}</small>}
             </Dialog>
         </>

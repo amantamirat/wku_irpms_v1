@@ -1,8 +1,7 @@
-import mongoose from "mongoose";
 import { UserStatus } from "../user.enum";
 
 export default interface JwtPayload {
-  id: string;
+  _id: string;
   email?: string;
   user_name: string;
   status: UserStatus;

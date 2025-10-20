@@ -41,7 +41,7 @@ export class AuthService {
 
         const linkedApplicant = await Applicant.findOne({ user: user._id }).populate('organization').lean();
         const payload: JwtPayload = {
-            id: user._id as string,
+            _id: user._id as string,
             email: user.email,
             user_name: user.user_name,
             roles: user.roles,
