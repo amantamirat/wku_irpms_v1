@@ -1,5 +1,6 @@
 export enum COLLECTIONS {
   APPLICANT = "applicants",
+  POSITION = "positions",
   ORGANIZATION = "organizations",
   THEME = "thms",
   EVALUATION = "evaluations",
