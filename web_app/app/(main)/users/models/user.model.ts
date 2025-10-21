@@ -41,6 +41,11 @@ export const validateUser = (user: User): { valid: boolean; message?: string } =
     if (!emailRegex.test(user.email)) {
         return { valid: false, message: "Email is not valid." };
     }
+
+    if (!user.roles || user.roles.length === 0) {
+        return { valid: false, message: "At least one role is required." };
+    }
+
     if (!user._id && !user.password) {
         return { valid: false, message: "Password is required." };
     }
