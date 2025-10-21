@@ -75,61 +75,35 @@ const RoleManager = () => {
         );
     }
 
-    const saveRole = async () => {
-        try {
-            let _roles = [...roles];
-            if (selectedRole._id) {
-                const updated = await RoleApi.updateRole(selectedRole);
-                const index = _roles.findIndex((c) => c._id === selectedRole._id);
-                _roles[index] = { ...updated, permissions: selectedRole.permissions };
-            } else {
-                const created = await RoleApi.createRole(selectedRole);
-                _roles.push({ ...selectedRole, _id: created._id });
-            }
-            setRoles(_roles);
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Successful',
-                detail: `Role ${selectedRole._id ? 'updated' : 'created'}`,
-                life: 3000
-            });
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to save role',
-                detail: '' + err,
-                life: 3000
-            });
-        } finally {
-            setShowSaveDialog(false);
-            setSelectedRole(emptyRole);
+    const onSaveComplete = (savedRole: Role) => {
+        let _roles = [...roles]; // roles is your local state array of Role
+        const index = _roles.findIndex((u) => u._id === savedRole._id);
+        if (index !== -1) {
+            // Replace existing role
+            _roles[index] = { ...savedRole };
+        } else {
+            // Add new role
+            _roles.push({ ...savedRole });
         }
+        setRoles(_roles); // update state
+        hideDialogs();    // close your SaveRoleDialog
     };
 
     const deleteRole = async () => {
-        try {
-            const deleted = await RoleApi.deleteRole(selectedRole);
-            if (deleted) {
-                setRoles(roles.filter((c) => c._id !== selectedRole._id));
-                toast.current?.show({
-                    severity: 'success',
-                    summary: 'Deleted',
-                    detail: 'Role deleted',
-                    life: 3000
-                });
-            }
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to delete role',
-                detail: '' + err,
-                life: 3000
-            });
-        } finally {
-            setShowDeleteDialog(false);
-            setSelectedRole(emptyRole);
+
+        const deleted = await RoleApi.deleteRole(selectedRole);
+        if (deleted) {
+            setRoles(roles.filter((c) => c._id !== selectedRole._id));
+
         }
+        hideDialogs();
     };
+
+    const hideDialogs = () => {
+        setShowDeleteDialog(false);
+        setShowSaveDialog(false);
+        setSelectedRole(emptyRole);
+    }
 
     const startToolbarTemplate = () => (
         <div className="my-2">
@@ -201,9 +175,8 @@ const RoleManager = () => {
                         <SaveDialog
                             visible={showSaveDialog}
                             role={selectedRole}
-                            onChange={setSelectedRole}
-                            onSave={saveRole}
-                            onHide={() => setShowSaveDialog(false)}
+                            onComplete={onSaveComplete}                            
+                            onHide={hideDialogs}
                         />
                     )}
 
