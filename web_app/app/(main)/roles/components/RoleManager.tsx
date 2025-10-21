@@ -168,6 +168,10 @@ const RoleManager = () => {
                         <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="role_name" header="Role Name" sortable />
+                        <Column header="Permissions"
+                            body={(rowData) => rowData.permissions?.length || 0}
+                            style={{ width: '150px', textAlign: 'center' }}
+                        />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
@@ -175,7 +179,7 @@ const RoleManager = () => {
                         <SaveDialog
                             visible={showSaveDialog}
                             role={selectedRole}
-                            onComplete={onSaveComplete}                            
+                            onComplete={onSaveComplete}
                             onHide={hideDialogs}
                         />
                     )}

@@ -98,37 +98,6 @@ const UserPage = () => {
     };
 
 
-    /*
-
-    const linkUser = async () => {
-        try {
-            const updatedUser = await UserApi.linkUser(selectedUser);
-            let _users = [...(users as any)];
-            const index = users.findIndex((user) => user._id === selectedUser._id);
-            _users[index] = { ...selectedUser, linkedApplicant: updatedUser.linkedApplicant };
-            setUsers(_users);
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Successful',
-                detail: 'User Linked',
-                life: 3000
-            });
-        } catch (error) {
-            console.error(error);
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to link user',
-                detail: '' + error,
-                life: 3000
-            });
-        } finally {
-            hideDialog();
-        }
-
-    };
-
-    */
-
     const openSaveDialog = (user: User) => {
         setSelectedUser({ ...user });
         setShowSaveDialog(true);
@@ -203,11 +172,6 @@ const UserPage = () => {
         );
     };
 
-    const linkedBodyTemplate = (rowData: any) => {
-        return rowData.linkedApplicant ? <span className='user-badge linked'>Linked</span> :
-            <span className='user-badge notlinked'>Not Linked</span>;
-    };
-
 
     return (
         <div className="grid">
@@ -238,6 +202,7 @@ const UserPage = () => {
                         />
                         <Column field="user_name" header="Username" sortable />
                         <Column field="email" header="Email" sortable />
+                        <Column header="Roles" body={(rowData) => rowData.roles?.length || 0} />
                         <Column field="status" header="Status" sortable body={statusBodyTemplate} />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
                     </DataTable>
