@@ -16,7 +16,7 @@ export class RoleService {
     }
 
     static async getRoles() {
-        return Role.find().lean();
+        return Role.find().populate("permissions").lean();
     }
 
     static async updateRole(id: string, data: Partial<CreateRoleDto>) {

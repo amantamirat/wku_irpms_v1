@@ -10,6 +10,7 @@ import { RoleApi } from '../api/role.api';
 import { Toast } from 'primereact/toast';
 import { Permission } from '../permission/model/permission.model';
 import { PermissionApi } from '../permission/api/permission.api';
+import { MultiSelect } from 'primereact/multiselect';
 
 interface SaveDialogProps {
     visible: boolean;
@@ -77,8 +78,6 @@ const SaveDialog = (props: SaveDialogProps) => {
         }
     };
 
-
-
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
@@ -123,6 +122,22 @@ const SaveDialog = (props: SaveDialogProps) => {
                         <small className="p-invalid">Name is required.</small>
                     )}
                 </div>
+
+                <div className="field">
+                    <label htmlFor="permissions">Permissions</label>
+                    <MultiSelect
+                        id="permissions"
+                        dataKey="_id"
+                        value={localRole.permissions}
+                        options={permissions}
+                        optionLabel="name"
+                        onChange={(e) => setLocalRole({ ...localRole, permissions: e.value })}
+                        placeholder="Select Persmissions"
+                        display="chip"
+                        className={classNames({ 'p-invalid': submitted && !localRole.permissions?.length })}
+                    />
+                </div>
+
                 {errorMessage && (
                     <small className="p-error">{errorMessage}</small>
                 )}

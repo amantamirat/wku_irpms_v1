@@ -24,6 +24,7 @@ import reviewerRoutes from './modules/project/reviewers/reviewer.routes';
 import resultRoutes from './modules/project/results/result.routes';
 import userRoutes from './modules/users/user.routes';
 import roleRoutes from './modules/users/roles/role.routes';
+import permissionRoutes from './modules/users/permissions/permission.routes';
 
 import { PermissionService } from './modules/users/permissions/permission.service';
 import { initializeThemeModels } from './modules/call/themes/init.models';
@@ -43,6 +44,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/roles", roleRoutes);
+app.use("/api/permissions", permissionRoutes);
 
 app.use("/api/applicants", applicantRoutes);
 app.use("/api/organs", organRoutes);
