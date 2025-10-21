@@ -29,11 +29,6 @@ export const validatePhase = (pt: Phase): { valid: boolean; message?: string } =
     if (!pt.activity || pt.activity.trim().length === 0) {
         return { valid: false, message: 'Activity is required.' };
     }
-    /*
-    if (!pt.order) {
-        return { valid: false, message: 'Order is required.' };
-    }
-    */
     if (!pt.duration) {
         return { valid: false, message: 'Duration is required.' };
     }

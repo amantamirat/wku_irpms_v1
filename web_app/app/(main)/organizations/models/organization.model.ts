@@ -1,3 +1,5 @@
+import { Scope } from "../../applicants/models/applicant.model";
+
 // Enum for Organization Types
 export enum OrganizationalUnit {
     College = 'College',
@@ -40,12 +42,7 @@ export enum Ownership {
     NGO = 'NGO',
 }
 
-// Enum for Category
-export enum Scope {
-    academic = 'Academic',
-    supportive = 'Supportive',
-    external = 'External',
-}
+
 
 // Address Type
 export type Address = {

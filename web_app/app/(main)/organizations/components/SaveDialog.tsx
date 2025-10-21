@@ -6,9 +6,10 @@ import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { classNames } from 'primereact/utils';
 import { Dropdown } from 'primereact/dropdown';
-import { AcademicLevel, Scope, Classification, Organization, OrganizationalUnit, Ownership, validateOrganization } from '../models/organization.model';
+import { AcademicLevel, Classification, Organization, OrganizationalUnit, Ownership, validateOrganization } from '../models/organization.model';
 import { OrganizationApi } from '../api/organization.api';
 import { Toast } from 'primereact/toast';
+import { Scope } from '../../applicants/models/applicant.model';
 
 interface SaveDialogProps {
     visible: boolean;

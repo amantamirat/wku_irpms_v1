@@ -1,5 +1,12 @@
-import { Scope, Organization, OrganizationalUnit } from "../../organizations/models/organization.model";
+import { Organization, OrganizationalUnit } from "../../organizations/models/organization.model";
 
+
+// Used for also Category
+export enum Scope {
+    academic = 'Academic',
+    supportive = 'Supportive',
+    external = 'External',
+}
 
 export enum Gender {
     Male = 'Male',

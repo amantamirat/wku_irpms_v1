@@ -8,8 +8,9 @@ import { AppMenuItem } from '@/types';
 import { PrimeIcons } from 'primereact/api';
 
 
-import { Scope, Organization, OrganizationalUnit } from '@/app/(main)/organizations/models/organization.model';
+import { Organization, OrganizationalUnit } from '@/app/(main)/organizations/models/organization.model';
 import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
+import { Scope } from '@/app/(main)/applicants/models/applicant.model';
 
 
 const AppMenu = () => {
