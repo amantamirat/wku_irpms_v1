@@ -1,7 +1,9 @@
+import { Permission } from "../permission/model/permission.model";
+
 export type Role = {
     _id?: string;
     role_name: string;
-    permissions: string[];
+    permissions: string[] | Permission[];
 };
 
 export const validateRole = (role: Role): { valid: boolean; message?: string } => {

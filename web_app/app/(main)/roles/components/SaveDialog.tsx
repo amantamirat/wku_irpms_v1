@@ -8,6 +8,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Role, validateRole } from '../models/role.model';
 import { RoleApi } from '../api/role.api';
 import { Toast } from 'primereact/toast';
+import { Permission } from '../permission/model/permission.model';
+import { PermissionApi } from '../permission/api/permission.api';
 
 interface SaveDialogProps {
     visible: boolean;
@@ -20,8 +22,21 @@ const SaveDialog = (props: SaveDialogProps) => {
     const { visible, role, onComplete, onHide } = props;
     const toast = useRef<Toast>(null);
     const [localRole, setLocalRole] = useState<Role>({ ...role });
+    const [permissions, setPermissions] = useState<Permission[]>([]);
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
+
+    useEffect(() => {
+        const fetchPermissions = async () => {
+            try {
+                const data = await PermissionApi.getPermissions();
+                setPermissions(data);
+            } catch (err) {
+                console.error("Failed to fetch permissions:", err);
+            }
+        };
+        fetchPermissions();
+    }, []);
 
     useEffect(() => {
         setLocalRole({ ...role });
