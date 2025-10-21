@@ -7,6 +7,7 @@ import authRoutes from './modules/users/auth/auth.routes';
 
 import organRoutes from './modules/organization/organization.routes';
 import applicantRoutes from './modules/applicants/applicant.routes';
+import positionRoutes from './modules/applicants/positions/position.routes';
 import themeRoutes from './modules/call/themes/theme.routes';
 import evalRoutes from './modules/call/evaluations/evaluation.routes';
 import calendarRoutes from './modules/calendar/calendar.routes';
@@ -48,6 +49,7 @@ app.use("/api/permissions", permissionRoutes);
 
 app.use("/api/applicants", applicantRoutes);
 app.use("/api/organs", organRoutes);
+app.use("/api/positions", positionRoutes);
 app.use("/api/themes", themeRoutes);
 app.use("/api/evals", evalRoutes);
 app.use("/api/calendars", calendarRoutes);
