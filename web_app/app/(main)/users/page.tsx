@@ -11,6 +11,7 @@ import { UserApi } from './api/UserService';
 import SaveDialog from './dialogs/SaveDialog';
 import { User, UserStatus } from './models/user.model';
 import ChangePasswordDialog from './dialogs/ChangePassword';
+import { InputSwitch } from 'primereact/inputswitch';
 
 
 const UserPage = () => {
@@ -20,9 +21,11 @@ const UserPage = () => {
         status: UserStatus.Pending,
         roles: []
     };
-    const [users, setUsers] = useState<User[]>([]);
-    const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
+    
+    const dt = useRef<DataTable<any>>(null);
+    const [showDeleted, setShowDeleted] = useState(true);
+    const [users, setUsers] = useState<User[]>([]);
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
     const [selectedUser, setSelectedUser] = useState<User>(emptyUser);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -122,14 +125,21 @@ const UserPage = () => {
     };
 
 
+    const endToolbarTemplate = () => {
+        return (
+            <div className="my-2">
+                <label htmlFor="show-deleted">Row Click</label>
+                <InputSwitch inputId="show-deleted" checked={showDeleted} onChange={(e) => setShowDeleted(e.value)} />
+            </div>
+        );
+    };
+
 
     const startToolbarTemplate = () => {
         return (
-            <React.Fragment>
-                <div className="my-2">
-                    <Button label="New User" icon="pi pi-plus" severity="success" className="mr-2" onClick={() => openSaveDialog(emptyUser)} />
-                </div>
-            </React.Fragment>
+            <div className="my-2">
+                <Button label="New User" icon="pi pi-plus" severity="success" className="mr-2" onClick={() => openSaveDialog(emptyUser)} />
+            </div>
         );
     };
 
@@ -153,7 +163,7 @@ const UserPage = () => {
                     icon="pi pi-refresh" rounded severity="warning" className="p-button-rounded p-button-text"
                     style={{ fontSize: '2rem' }} onClick={() => openResetPasswordDialog(rowData)}
                 />
-                <Button icon={rowData.status !== UserStatus.Deleted ? "pi pi-user-minus" : 
+                <Button icon={rowData.status !== UserStatus.Deleted ? "pi pi-user-minus" :
                     "pi pi-times"}
                     rounded severity="danger" className="p-button-rounded p-button-text"
                     style={{ fontSize: '2rem' }} onClick={() => confirmDeleteItem(rowData)} />
@@ -194,7 +204,7 @@ const UserPage = () => {
                         scrollable
                         filters={filters}
                     >
-                         <Column selectionMode="single" headerStyle={{ width: '3em' }}/>
+                        <Column selectionMode="single" headerStyle={{ width: '3em' }} />
                         <Column
                             header="#" body={(rowData, options) => options.rowIndex + 1}
                             style={{ width: '50px' }}
@@ -222,7 +232,7 @@ const UserPage = () => {
                     />}
 
                     {selectedUser && <ConfirmDialog
-                        showDialog={showDeleteDialog}                        
+                        showDialog={showDeleteDialog}
                         selectedDataInfo={selectedUser.user_name}
                         onConfirmAsync={deleteUser}
                         onHide={hideDialogs}
