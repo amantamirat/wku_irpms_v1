@@ -150,12 +150,12 @@ const UserPage = () => {
                     style={{ fontSize: '2rem' }} onClick={() => openSaveDialog(rowData)} />
 
                 <Button
-                    icon="pi pi-refresh" rounded severity="danger" className="p-button-rounded p-button-text"
+                    icon="pi pi-refresh" rounded severity="warning" className="p-button-rounded p-button-text"
                     style={{ fontSize: '2rem' }} onClick={() => openResetPasswordDialog(rowData)}
                 />
-                <Button icon={rowData.status === UserStatus.Active ? "pi pi-user-minus" : rowData.status === UserStatus.Suspended ? "pi pi-user-plus" :
+                <Button icon={rowData.status !== UserStatus.Deleted ? "pi pi-user-minus" : 
                     "pi pi-times"}
-                    rounded severity="warning" className="p-button-rounded p-button-text"
+                    rounded severity="danger" className="p-button-rounded p-button-text"
                     style={{ fontSize: '2rem' }} onClick={() => confirmDeleteItem(rowData)} />
             </>
         );
@@ -221,19 +221,8 @@ const UserPage = () => {
                         onHide={hideDialogs}
                     />}
 
-
-                    {/*selectedUser && !selectedUser.linkedApplicant && <ConfirmDialog
-                        showDialog={showLinkDialog}
-                        operation="link"
-                        selectedDataInfo={selectedUser.user_name}
-                        onConfirmAsync={linkUser}
-                        onHide={hideDialog}
-                    />*/}
-
                     {selectedUser && <ConfirmDialog
-                        showDialog={showDeleteDialog}
-                        operation={selectedUser.status === UserStatus.Active ? 'suspend' :
-                            selectedUser.status === UserStatus.Suspended ? 'activate' : 'remove'}
+                        showDialog={showDeleteDialog}                        
                         selectedDataInfo={selectedUser.user_name}
                         onConfirmAsync={deleteUser}
                         onHide={hideDialogs}

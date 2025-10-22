@@ -6,7 +6,6 @@ import { Role } from "../../roles/models/role.model";
 export enum UserStatus {
     Pending = 'Pending',
     Active = 'Active',
-    Suspended = 'Suspended',
     Deleted = 'Deleted'
 }
 

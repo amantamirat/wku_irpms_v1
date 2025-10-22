@@ -52,17 +52,12 @@ export class UserService {
         const user = await User.findById(id).select("-password");
         if (!user) throw new Error("User not found");
 
-        if (user.status === UserStatus.active) {
-            throw new Error("Active users cannot be deleted");
-        }
-
-        const applicant = await Applicant.findOne({ user: id });
-        if (applicant) {
-            applicant.user = undefined;
-            await applicant.save();
-        }
-
         if (user.status === UserStatus.deleted) {
+            const applicant = await Applicant.findOne({ user: id });
+            if (applicant) {
+                applicant.user = undefined;
+                await applicant.save();
+            }
             await user.deleteOne();
             return { message: "User permanently deleted" };
         }

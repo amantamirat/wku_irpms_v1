@@ -28,7 +28,7 @@ export class AuthService {
                 { email: data.user_name },
                 { user_name: data.user_name }
             ],
-            status: { $ne: UserStatus.suspended }
+            status: { $ne: UserStatus.deleted }
         }).populate('roles');
         if (!user) {
             throw new Error("User not found");
@@ -55,7 +55,7 @@ export class AuthService {
 
 
     static async sendVerificationCode(email: string): Promise<void> {
-        const user = await User.findOne({ email, status: { $ne: UserStatus.suspended } });
+        const user = await User.findOne({ email, status: { $ne: UserStatus.deleted } });
         if (!user) {
             throw new Error("User does not exist.");
         }
@@ -118,7 +118,7 @@ export class AuthService {
         if (!password || password.trim() === "") {
             throw new Error("Password not found!");
         }
-        const user = await User.findOne({ email, status: { $ne: UserStatus.suspended } });
+        const user = await User.findOne({ email, status: { $ne: UserStatus.deleted } });
         if (!user) {
             throw new Error("User not found");
         }
