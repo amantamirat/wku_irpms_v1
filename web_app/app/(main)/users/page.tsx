@@ -133,8 +133,6 @@ const UserPage = () => {
         );
     };
 
-
-
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
             <h5 className="m-0">Manage Users</h5>
@@ -196,6 +194,7 @@ const UserPage = () => {
                         scrollable
                         filters={filters}
                     >
+                         <Column selectionMode="single" headerStyle={{ width: '3em' }}/>
                         <Column
                             header="#" body={(rowData, options) => options.rowIndex + 1}
                             style={{ width: '50px' }}
