@@ -1,6 +1,6 @@
 'use client';
 import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
-import { Organization, Scope } from '@/app/(main)/organizations/models/organization.model';
+import { Organization } from '@/app/(main)/organizations/models/organization.model';
 import { Button } from 'primereact/button';
 import { Calendar as PrimeCalendar } from 'primereact/calendar';
 import { Dialog } from 'primereact/dialog';
@@ -10,7 +10,7 @@ import { MultiSelect } from 'primereact/multiselect';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
-import { accessibilityOptions, Applicant, genderOptions, scopeToOrganizationUnit, validateApplicant } from '../../models/applicant.model';
+import { accessibilityOptions, Applicant, genderOptions, Scope, scopeToOrganizationUnit, validateApplicant } from '../../models/applicant.model';
 import { ApplicantApi } from '../../api/applicant.api';
 
 interface SaveApplicantDialogProps {

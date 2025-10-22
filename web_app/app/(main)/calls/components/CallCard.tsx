@@ -1,15 +1,13 @@
-import { Dialog } from "primereact/dialog";
-import { Call } from "../../calls/models/call.model";
-import { FileUpload } from "primereact/fileupload";
-import { Card } from "primereact/card";
-import { Calendar } from "../../calendars/models/calendar.model";
-import { Button } from "primereact/button";
-import { useState } from "react";
-import ApplyWizard from "../../projects/components/apply/ApplyWizard";
-import { Organization } from "../../organizations/models/organization.model";
-import { Project } from "../../projects/models/project.model";
 import { useAuth } from "@/contexts/auth-context";
+import { Button } from "primereact/button";
+import { Card } from "primereact/card";
+import { useState } from "react";
+import { Calendar } from "../../calendars/models/calendar.model";
+import { Call } from "../../calls/models/call.model";
+import { Organization } from "../../organizations/models/organization.model";
 import { Collaborator, CollaboratorStatus } from "../../projects/collaborators/models/collaborator.model";
+import ApplyWizard from "../../projects/components/apply/ApplyWizard";
+import { Project } from "../../projects/models/project.model";
 import CallViewDialog from "./CallViewDialog";
 
 interface CallCardProps {
