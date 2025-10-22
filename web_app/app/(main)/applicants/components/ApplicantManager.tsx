@@ -9,11 +9,10 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Scope } from '../../organizations/models/organization.model';
 import { ApplicantApi } from '../api/applicant.api';
-import { Applicant, Gender } from '../models/applicant.model';
+import { Applicant, Gender, Scope } from '../models/applicant.model';
 import SaveDialog from './dialogs/SaveDialog';
-import { on } from 'events';
+
 
 interface ApplicantManagerProps {
     scope: Scope;

@@ -34,30 +34,26 @@ const RoleManager = () => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
 
-    const loadRoles = useCallback(async () => {
-        try {
-            const data = await RoleApi.getRoles();
-            setRoles(data);
-        } catch (err) {
-            setError(`Failed to load grant data ${err}`);
-        } finally {
-
-        }
-    }, [error]);
-
-    useEffect(() => {
-        loadRoles();
-    }, [loadRoles]);
+    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
+    };
 
     useEffect(() => {
         setFilters(initFilters());
         setGlobalFilter('');
     }, []);
 
-
-    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
-    };
+    useEffect(() => {
+        const fetchRoles = async () => {
+            try {
+                const data = await RoleApi.getRoles();
+                setRoles(data);
+            } catch (err) {
+                console.error("Failed to fetch roles:", err);
+            }
+        };
+        fetchRoles();
+    }, []);
 
     if (error) {
         return (
@@ -90,11 +86,9 @@ const RoleManager = () => {
     };
 
     const deleteRole = async () => {
-
         const deleted = await RoleApi.deleteRole(selectedRole);
         if (deleted) {
             setRoles(roles.filter((c) => c._id !== selectedRole._id));
-
         }
         hideDialogs();
     };

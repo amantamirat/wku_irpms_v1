@@ -1,5 +1,3 @@
-import { Scope } from "../../applicants/models/applicant.model";
-
 // Enum for Organization Types
 export enum OrganizationalUnit {
     College = 'College',
@@ -10,9 +8,7 @@ export enum OrganizationalUnit {
     Supportive = 'Supportive',
     Sector = 'Sector',
     External = 'External',
-    Specialization = 'Specialization',
-    Position = 'Position',
-    Rank = 'Rank',
+    Specialization = 'Specialization'
 }
 
 // Enum for Academic Levels
@@ -61,7 +57,6 @@ export type Organization = {
     classification?: Classification;
     ownership?: Ownership;
     address?: Address;
-    category?: Scope;
     parent?: string | Organization;
     createdAt?: string;
     updatedAt?: string;
@@ -77,8 +72,6 @@ export const getChildType = (current: OrganizationalUnit): OrganizationalUnit | 
             return OrganizationalUnit.Center;
         case OrganizationalUnit.Sector:
             return OrganizationalUnit.External;
-        case OrganizationalUnit.Position:
-            return OrganizationalUnit.Rank;
         default:
             return null; // No children
     }
@@ -94,8 +87,6 @@ export const getParentType = (current: OrganizationalUnit): OrganizationalUnit |
             return OrganizationalUnit.Directorate;
         case OrganizationalUnit.External:
             return OrganizationalUnit.Sector;
-        case OrganizationalUnit.Rank:
-            return OrganizationalUnit.Position;
         default:
             return null; // Root-level types have no parent
     }
@@ -132,12 +123,6 @@ export const validateOrganization = (
         case OrganizationalUnit.External:
             if (!organization.ownership) {
                 return { valid: false, message: 'Ownership is required for External.' };
-            }
-            break;
-
-        case OrganizationalUnit.Position:
-            if (!organization.category) {
-                return { valid: false, message: 'Category is required for Position.' };
             }
             break;
     }

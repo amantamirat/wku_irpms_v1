@@ -8,9 +8,7 @@ export enum Unit {
     Supportive = 'Supportive',
     Sector = 'Sector',
     External = 'External',
-    Specialization = 'Specialization',
-    Position = 'Position',
-    Rank = 'Rank',
+    Specialization = 'Specialization'
 }
 
 export enum AcademicLevel {
@@ -24,8 +22,6 @@ export enum AcademicLevel {
     PhD = 'PhD',
     PostDoc = 'PostDoc'
 }
-
-
 
 export enum Classification {
     Regular = 'Regular',

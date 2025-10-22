@@ -41,7 +41,6 @@ const OrganizationManager = (props: OrganizationMangerProps) => {
 
     const isProgram = props.type === OrganizationalUnit.Program;
     const isSpecialization = props.type === OrganizationalUnit.Specialization;
-    const isPosition = props.type === OrganizationalUnit.Position;
     const isExternal = props.type === OrganizationalUnit.External;
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -154,15 +153,7 @@ const OrganizationManager = (props: OrganizationMangerProps) => {
                 {rowData.classification}
             </span>
         );
-    };
-
-    const categoryBodyTemplate = (rowData: Organization) => {
-        return (
-            <span className={`category-badge category-${rowData.category?.toLowerCase()}`}>
-                {rowData.category}
-            </span>
-        );
-    };
+    };    
 
     const ownershipBodyTemplate = (rowData: Organization) => {
         return (
@@ -228,9 +219,6 @@ const OrganizationManager = (props: OrganizationMangerProps) => {
                         )}
                         {isProgram && (
                             <Column field="classification" header="Classification" body={classificationBodyTemplate} sortable />
-                        )}
-                        {isPosition && (
-                            <Column field="category" header="Category" body={categoryBodyTemplate} sortable />
                         )}
                         {isExternal && (
                             <Column field="ownership" header="Ownership" body={ownershipBodyTemplate} sortable />

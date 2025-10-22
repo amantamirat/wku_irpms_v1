@@ -47,7 +47,7 @@ const SavePositionDialog = (props: SavePositionDialogProps) => {
             toast.current?.show({
                 severity: 'success',
                 summary: 'Success',
-                detail: 'Position saved successfully',
+                detail: `${position.type} saved successfully`,
                 life: 2000,
             });
 
@@ -55,7 +55,7 @@ const SavePositionDialog = (props: SavePositionDialogProps) => {
         } catch (err: any) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to save position',
+                summary: `Failed to save ${position.type}`,
                 detail: err.message || String(err),
                 life: 2000,
             });
@@ -79,8 +79,8 @@ const SavePositionDialog = (props: SavePositionDialogProps) => {
         setLocalPosition({ ...position });
     };
 
-   
-    const typeOptions = Object.values(PositionType).map(t => ({ label: t, value: t }));
+
+
 
     return (
         <>
@@ -88,19 +88,21 @@ const SavePositionDialog = (props: SavePositionDialogProps) => {
             <Dialog
                 visible={visible}
                 style={{ width: '500px' }}
-                header={localPosition._id ? 'Edit Position' : 'New Position'}
+                header={localPosition._id ?
+                    `Edit ${localPosition.type}` :
+                    `New ${localPosition.type}`}
                 modal
                 className="p-fluid"
                 footer={footer}
                 onHide={onHide}
             >
-                {/* Type */}
+                {/*                
                 <div className="field">
                     <label htmlFor="type">Type</label>
                     <Dropdown
                         id="type"
                         value={localPosition.type}
-                        options={typeOptions}
+                        options={posTypeOptions}
                         onChange={(e) => setLocalPosition({ ...localPosition, type: e.value })}
                         placeholder="Select Type"
                         className={classNames({ 'p-invalid': submitted && !localPosition.type })}
@@ -109,7 +111,7 @@ const SavePositionDialog = (props: SavePositionDialogProps) => {
                         <small className="p-invalid">Type is required.</small>
                     )}
                 </div>
-
+                */}
                 {/* Name */}
                 <div className="field">
                     <label htmlFor="name">Name</label>

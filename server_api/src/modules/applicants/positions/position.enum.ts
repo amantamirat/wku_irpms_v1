@@ -1,4 +1,4 @@
 export enum PositionType {
-    position = 'position',
-    rank = 'rank'
+    position = 'Position',
+    rank = 'Rank'
 }

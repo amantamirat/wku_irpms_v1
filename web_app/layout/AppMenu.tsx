@@ -6,8 +6,6 @@ import { MenuProvider } from './context/menucontext';
 import Link from 'next/link';
 import { AppMenuItem } from '@/types';
 import { PrimeIcons } from 'primereact/api';
-
-
 import { Organization, OrganizationalUnit } from '@/app/(main)/organizations/models/organization.model';
 import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
 import { Scope } from '@/app/(main)/applicants/models/applicant.model';
@@ -96,7 +94,12 @@ const AppMenu = () => {
                             label: 'External',
                             icon: 'pi pi-fw pi-asterisk',
                             to: `/applicants?scope=${Scope.external}`
-                        }
+                        },
+                        {
+                            label: 'Positions',
+                            icon: 'pi pi-fw pi-flag',
+                            to: '/applicants/positions'
+                        },
                     ]
                 },
                 {
@@ -127,14 +130,10 @@ const AppMenu = () => {
                             label: 'Specializations',
                             icon: PrimeIcons.FILTER,
                             to: `/organizations?type=${OrganizationalUnit.Specialization}`
-                        },
-                        {
-                            label: 'Positions',
-                            icon: 'pi pi-fw pi-flag',
-                            to: `/organizations?type=${OrganizationalUnit.Position}`
-                        },
+                        }
                     ]
                 },
+
                 {
                     label: 'User Accounts',
                     icon: PrimeIcons.USERS,

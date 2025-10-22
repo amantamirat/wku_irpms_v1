@@ -1,7 +1,7 @@
 import { ApiClient } from "@/api/ApiClient";
 import { Position, sanitizePosition, PositionType } from "../models/position.model";
 
-const end_point = "/organization/positions/";
+const end_point = "/positions/";
 
 export interface GetPositionOptions {
     type?: PositionType;

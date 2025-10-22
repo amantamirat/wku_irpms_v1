@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import { Call } from "../call/call.model";
 import { AcademicLevel, Classification, Ownership, Unit } from "./organization.enum";
 import { BaseOrganization } from "./organization.model";
-import { Scope } from "../applicants/applicant.enum";
 
 
 export interface GetOrganizationsOptions {
@@ -18,7 +17,6 @@ export interface CreateOrganizationDto {
     classification?: Classification;
     ownership?: Ownership;
     //address?: Address;
-    category?: Scope;
     parent?: mongoose.Types.ObjectId;
 }
 

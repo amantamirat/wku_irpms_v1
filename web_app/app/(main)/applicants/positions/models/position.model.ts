@@ -2,8 +2,8 @@ import { Scope } from "../../models/applicant.model";
 
 
 export enum PositionType {
-    position = "position",
-    rank = "rank",
+    position = "Position",
+    rank = "Rank",
 }
 
 export type Position = {
@@ -15,6 +15,8 @@ export type Position = {
     createdAt?: Date;
     updatedAt?: Date;
 };
+
+ const posTypeOptions = Object.values(PositionType).map(t => ({ label: t, value: t }));
 
 
 export const validatePosition = (pos: Position): { valid: boolean; message?: string } => {

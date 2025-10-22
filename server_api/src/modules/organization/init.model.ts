@@ -1,4 +1,4 @@
-import { College, Directorate, Office, Position, Sector, Specialization, Center, Department, Program, Rank, External } from "./organization.model";
+import { College, Directorate, Office, Sector, Specialization, Center, Department, Program, External } from "./organization.model";
 
 export function initializeOrganizationModels() {
   return {
@@ -7,10 +7,8 @@ export function initializeOrganizationModels() {
     Office,
     Sector,
     Specialization,
-    Position, 
     Department,
     Center, 
-    Rank,
     Program,
     External
   };

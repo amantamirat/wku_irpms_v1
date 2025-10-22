@@ -1,8 +1,8 @@
 'use client';
 import React, { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Scope } from '../organizations/models/organization.model';
 import ApplicantManager from './components/ApplicantManager';
+import { Scope } from './models/applicant.model';
 
 
 

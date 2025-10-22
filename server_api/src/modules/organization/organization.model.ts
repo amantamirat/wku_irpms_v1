@@ -1,7 +1,6 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../enums/collections.enum";
 import { AcademicLevel, Classification, Ownership, Unit } from "./organization.enum";
-import { Scope } from "../applicants/applicant.enum";
 
 
 interface BaseOrganizationDocument extends Document {
@@ -57,16 +56,7 @@ const SpecializationSchema = new Schema<SpecializationDocument>({
 
 export const Specialization = BaseOrganization.discriminator<SpecializationDocument>(Unit.Specialization, SpecializationSchema);
 
-interface PositionDocument extends BaseOrganizationDocument {
-    type: Unit.Position;
-    category: Scope;
-}
 
-const PositionSchema = new Schema<PositionDocument>({
-    category: { type: String, enum: Object.values(Scope), required: true },
-});
-
-export const Position = BaseOrganization.discriminator<PositionDocument>(Unit.Position, PositionSchema);
 
 interface ChildOrganizationDocument extends BaseOrganizationDocument {
     parent: mongoose.Types.ObjectId;
@@ -114,26 +104,6 @@ const CenterSchema = new Schema<CenterDocument>({
 
 export const Center = BaseOrganization.discriminator<CenterDocument>(Unit.Center, CenterSchema);
 
-interface RankDocument extends ChildOrganizationDocument {
-    type: Unit.Rank;
-}
-
-const RankSchema = new Schema<RankDocument>({
-    parent: {
-        type: Schema.Types.ObjectId,
-        ref: Position.modelName,
-        required: true,
-        validate: {
-            validator: async function (parentId: mongoose.Types.ObjectId) {
-                const exist = await Position.exists({ _id: parentId });
-                return !!exist;
-            },
-            message: "Rank must belong to a Position",
-        },
-    }
-});
-
-export const Rank = BaseOrganization.discriminator<RankDocument>(Unit.Rank, RankSchema);
 
 interface ProgramDocument extends ChildOrganizationDocument {
     type: Unit.Program;

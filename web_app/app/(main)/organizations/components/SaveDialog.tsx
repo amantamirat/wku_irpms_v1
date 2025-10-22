@@ -9,7 +9,6 @@ import { Dropdown } from 'primereact/dropdown';
 import { AcademicLevel, Classification, Organization, OrganizationalUnit, Ownership, validateOrganization } from '../models/organization.model';
 import { OrganizationApi } from '../api/organization.api';
 import { Toast } from 'primereact/toast';
-import { Scope } from '../../applicants/models/applicant.model';
 
 interface SaveDialogProps {
     visible: boolean;
@@ -30,7 +29,6 @@ const SaveDialog = ({ visible, organization, onHide, onComplete }: SaveDialogPro
 
     const isProgram = localOrganization.type === OrganizationalUnit.Program;
     const isSpecialization = localOrganization.type === OrganizationalUnit.Specialization;
-    const isPosition = localOrganization.type === OrganizationalUnit.Position;
     const isExternal = localOrganization.type === OrganizationalUnit.External;
 
     const saveOrganization = async () => {
@@ -149,23 +147,6 @@ const SaveDialog = ({ visible, organization, onHide, onComplete }: SaveDialogPro
                             </div>
                         )}
                     </>
-                )}
-
-                {isPosition && (
-                    <div className="field">
-                        <label htmlFor="category">Category</label>
-                        <Dropdown
-                            id="category"
-                            value={localOrganization.category}
-                            options={Object.values(Scope).map(level => ({ label: level, value: level }))}
-                            onChange={(e) => setLocalOrganization({ ...localOrganization, category: e.value })}
-                            placeholder="Select Category"
-                            className={classNames({ 'p-invalid': submitted && !localOrganization.category })}
-                        />
-                        {submitted && !localOrganization.category && (
-                            <small className="p-invalid">Category is required.</small>
-                        )}
-                    </div>
                 )}
 
                 {isExternal && (

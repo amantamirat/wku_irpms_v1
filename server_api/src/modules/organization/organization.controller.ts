@@ -16,8 +16,7 @@ export class OrganizationController {
                 name: name,
                 parent: parent ? new mongoose.Types.ObjectId(parent as string) : undefined,
                 academic_level: type === Unit.Program || type === Unit.Specialization ? academic_level : undefined,
-                classification: type === Unit.Program ? classification : undefined,
-                category: type === Unit.Position ? category : undefined,
+                classification: type === Unit.Program ? classification : undefined,                
                 ownership: type === Unit.External ? ownership : undefined,
             };
             const organization = await OrganizationService.createOrganization(data);
@@ -44,13 +43,12 @@ export class OrganizationController {
     static async updateOrganization(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const { type, name, parent, academic_level, classification, category, ownership } = req.body;
+            const { type, name, parent, academic_level, classification, ownership } = req.body;
             const data: Partial<CreateOrganizationDto> = {
                 name: name,
                 parent: parent ? new mongoose.Types.ObjectId(parent as string) : undefined,
                 academic_level: academic_level ? academic_level : undefined,
                 classification: classification ? classification : undefined,
-                category: category ? category : undefined,
                 ownership: ownership ? ownership : undefined,
             };
             const updated = await OrganizationService.updateOrganization(id, data);
