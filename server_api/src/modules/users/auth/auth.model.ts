@@ -7,6 +7,7 @@ export default interface JwtPayload {
   status: UserStatus;
   linkedApplicant?: any;
   roles?: any;
+  permissions?: string[];
   iat?: number;
   exp?: number;
 }

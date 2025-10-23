@@ -29,7 +29,14 @@ export class AuthService {
                 { user_name: data.user_name }
             ],
             status: { $ne: UserStatus.deleted }
-        }).populate('roles');
+        }).populate({
+            path: 'roles',
+            populate: {
+                path: 'permissions',
+                model: 'Permission'
+            }
+        });
+
         if (!user) {
             throw new Error("User not found");
         }
@@ -39,17 +46,30 @@ export class AuthService {
             throw new Error("Invalid credentials.");
         }
 
-        const linkedApplicant = await Applicant.findOne({ user: user._id }).populate('organization').lean();
+        
+        const allPermissions = user.roles?.flatMap((role: any) =>
+            role.permissions?.map((p: any) => p.name)
+        ) || [];
+
+        // Remove duplicates just in case
+        const uniquePermissions = [...new Set(allPermissions)];
+
+        const linkedApplicant = await Applicant.findOne({ user: user._id })
+            .populate('organization')
+            .lean();
+
+        
         const payload: JwtPayload = {
             _id: user._id as string,
             email: user.email,
             user_name: user.user_name,
-            roles: user.roles,
-            linkedApplicant: linkedApplicant,
+            roles: user.roles.map((r: any) => ({ _id: r._id, name: r.name })),
+            permissions: uniquePermissions,
+            linkedApplicant,
             status: user.status
         };
+
         const token = jwt.sign(payload, process.env.KEY as string, { expiresIn: '2h' });
-        //console.log("user:", user.user_name, "logged in.");
         return { token, user: payload };
     }
 
