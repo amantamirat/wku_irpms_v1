@@ -39,35 +39,20 @@ export const verifyActiveAccount = (req: AuthenticatedRequest, res: Response, ne
 };
 
 
-export const checkPermission = (requiredPermission: string) => {
+export const checkPermission = (requiredPermission: string | string[]) => {
   return async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
         return errorResponse(res, 401, "Unauthorized. No user in request.");
       }
+      const userPermissions = req.user.permissions || [];
+      
+      const hasPermission = Array.isArray(requiredPermission)
+        ? requiredPermission.some((perm) => userPermissions.includes(perm))
+        : userPermissions.includes(requiredPermission);
 
-      /*
-      const roleIds = req.user.roles?.map((r: any) => r._id || r);
-      if (!roleIds?.length) {
-        return errorResponse(res, 403, "Access denied. User has no assigned roles.");
-      }
-        */
-
-      // Fetch roles with their permissions
-      //const roles = await Role.find({ _id: { $in: roleIds } }).populate("permissions");
-
-      /*
-      // Flatten all permission names
-      const userPermissions = roles.flatMap((r) =>
-        r.permissions.map((p: any) => p.name)
-      );
-      */
-
-      const userPermissions =  req.user.permissions || [];
-
-      // Check if the required permission exists
-      if (!userPermissions.includes(requiredPermission)) {
-        return errorResponse(res, 403, "Access denied. Permission missing.");
+      if (!hasPermission) {
+        return errorResponse(res, 403, "Forbidden. Permission missing.");
       }
 
       next();
@@ -77,4 +62,5 @@ export const checkPermission = (requiredPermission: string) => {
     }
   };
 };
+
 
