@@ -1,6 +1,5 @@
 import { ApiClient } from "@/api/ApiClient";
-import { LoginDto } from "@/app/(full-page)/auth/login/model/login.model";
-import { User } from "@/app/(main)/users/models/user.model";
+import { LoginDto, User, VerfyUserDto } from "@/app/(full-page)/auth/model/login.model";
 const end_point = '/auth/';
 const send_verification_code_end_point = '/auth/send-verification-code';
 const reset_password_end_point = '/auth/reset-password';
@@ -23,7 +22,7 @@ export const AuthApi = {
         return response;
     },
 
-    async resetPassword(credential: Partial<User>): Promise<any> {
+    async resetPassword(credential: Partial<VerfyUserDto>): Promise<any> {
         if (!credential.reset_code) {
             throw new Error("verification code required.");
         }
@@ -31,7 +30,7 @@ export const AuthApi = {
         return response;
     },
 
-    async activateUser(credential: Partial<User>): Promise<any> {
+    async activateUser(credential: Partial<VerfyUserDto>): Promise<any> {
         if (!credential.reset_code) {
             throw new Error("verification code required.");
         }

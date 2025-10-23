@@ -1,8 +1,6 @@
 'use client';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { User } from '@/app/(main)/users/models/user.model';
-import { LoginDto } from '@/app/(full-page)/auth/login/model/login.model';
+import { LoginDto, User } from '@/app/(full-page)/auth/model/login.model';
 import { AuthApi } from '@/app/(full-page)/auth/api/auth.api';
 
 

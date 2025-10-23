@@ -1,41 +1,40 @@
 'use client';
-import { useRef, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Button } from 'primereact/button';
-import { Password } from 'primereact/password';
-import { InputText } from 'primereact/inputtext';
-import { classNames } from 'primereact/utils';
-import { LayoutContext } from '../../../../layout/context/layoutcontext';
-import { useContext } from 'react';
-import { Messages } from 'primereact/messages';
 import { AuthApi } from '@/app/(full-page)/auth/api/auth.api';
 import NoAuthGuard from '@/components/NoAuthGuard';
-import { User, validateUser } from '@/app/(main)/users/models/user.model';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Button } from 'primereact/button';
+import { InputText } from 'primereact/inputtext';
+import { Password } from 'primereact/password';
+import { classNames } from 'primereact/utils';
+import { useContext, useState } from 'react';
+import { LayoutContext } from '../../../../layout/context/layoutcontext';
+import { User, UserStatus, validateVerification, VerfyUserDto } from '../model/login.model';
 
 export default function ResetPassword() {
 
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
 
-  let emptyUser: User = {
-    user_name: email,
+  let emptyVerification: VerfyUserDto = {
     email: email,
+    reset_code: ''
   };
 
   const router = useRouter();
   const [progressing, setProgressing] = useState(false);
-  const [credential, setCredential] = useState<User>(emptyUser);
+  const [credential, setCredential] = useState<VerfyUserDto>(emptyVerification);
 
 
 
   const resetPassword = async () => {
     try {
       setProgressing(true);
-      const result = validateUser(credential);
+
+      const result = validateVerification(credential);
       if (!result.valid) {
-        alert(result.message || 'Resetting failed');
-        return;
+        throw new Error(result.message);
       }
+
       const data = await AuthApi.resetPassword(credential);
       if (data.success) {
         alert('Your password has been reset successfully.');

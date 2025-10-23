@@ -17,8 +17,8 @@ export class AuthController {
 
     static async sendVerificationCode(req: Request, res: Response) {
         try {
-            const data = req.body.email;
-            await AuthService.sendVerificationCode(data);
+            const email = req.body.email;
+            await AuthService.sendVerificationCode(email);
             successResponse(res, 200, 'Verfification code sent to email.', { success: true });
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

@@ -1,11 +1,11 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { AuthApi } from '@/app/(full-page)/auth/api/auth.api';
+import RequireAuth from '@/components/RequireAuth';
+import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
 import { Button } from 'primereact/button';
 import { Messages } from 'primereact/messages';
-import { useAuth } from '@/contexts/auth-context';
-import { AuthApi } from '@/app/(full-page)/auth/api/auth.api';
-import RequireAuth from '@/components/RequireAuth';
+import { useRef, useState } from 'react';
 
 
 export default function RequestActivationPage() {

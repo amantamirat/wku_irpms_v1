@@ -1,10 +1,9 @@
-import jwt from 'jsonwebtoken';
-import { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
+import { NextFunction, Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
 import { errorResponse } from '../../../util/response';
 import { UserStatus } from '../user.enum';
 import JwtPayload from './auth.model';
-import { Role } from '../roles/role.model';
 
 dotenv.config();
 
@@ -47,18 +46,24 @@ export const checkPermission = (requiredPermission: string) => {
         return errorResponse(res, 401, "Unauthorized. No user in request.");
       }
 
+      /*
       const roleIds = req.user.roles?.map((r: any) => r._id || r);
       if (!roleIds?.length) {
         return errorResponse(res, 403, "Access denied. User has no assigned roles.");
       }
+        */
 
       // Fetch roles with their permissions
-      const roles = await Role.find({ _id: { $in: roleIds } }).populate("permissions");
+      //const roles = await Role.find({ _id: { $in: roleIds } }).populate("permissions");
 
+      /*
       // Flatten all permission names
       const userPermissions = roles.flatMap((r) =>
         r.permissions.map((p: any) => p.name)
       );
+      */
+
+      const userPermissions =  req.user.permissions || [];
 
       // Check if the required permission exists
       if (!userPermissions.includes(requiredPermission)) {

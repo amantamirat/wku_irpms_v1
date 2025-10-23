@@ -9,10 +9,9 @@ import { LayoutContext } from '../../../../layout/context/layoutcontext';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import { Messages } from "primereact/messages";
-import { AuthApi } from '@/app/(full-page)/auth/api/auth.api';
 import { useAuth } from '@/contexts/auth-context';
 import NoAuthGuard from '@/components/NoAuthGuard';
-import { LoginDto, validateLogin } from './model/login.model';
+import { LoginDto, validateLogin } from '../model/login.model';
 
 const LoginPage = () => {
 
