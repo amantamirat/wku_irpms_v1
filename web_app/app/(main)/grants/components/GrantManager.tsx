@@ -19,15 +19,11 @@ import { TabPanel, TabView } from 'primereact/tabview';
 import { BaseConstraintType } from '../constraints/models/constraint.model';
 
 
-interface GrantManagerProps {
-    directorate: any;
-}
 
-const GrantManager = (props: GrantManagerProps) => {
+const GrantManager = () => {
 
-    const { directorate } = props
     const emptyGrant: Grant = {
-        directorate: props.directorate,
+        directorate: '',
         title: ''
     };
 
@@ -44,14 +40,12 @@ const GrantManager = (props: GrantManagerProps) => {
 
     const fetchGrants = useCallback(async () => {
         try {
-            const data = await GrantApi.getGrants({ directorate: props.directorate._id });
+            const data = await GrantApi.getGrants({});
             setGrants(data);
         } catch (err) {
             setError(`Failed to load grant data ${err}`);
-        } finally {
-
         }
-    }, [directorate, error]);
+    }, []);
 
     useEffect(() => {
         fetchGrants();
@@ -85,61 +79,30 @@ const GrantManager = (props: GrantManagerProps) => {
         );
     }
 
-    const saveGrant = async () => {
-        try {
-            let _grants = [...grants];
-            if (selectedGrant._id) {
-                const updated = await GrantApi.updateGrant(selectedGrant);
-                const index = _grants.findIndex((c) => c._id === selectedGrant._id);
-                _grants[index] = { ...updated };
-            } else {
-                const created = await GrantApi.createGrant(selectedGrant);
-                _grants.push({ ...selectedGrant, _id: created._id });
-            }
-            setGrants(_grants);
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Successful',
-                detail: `Grant ${selectedGrant._id ? 'updated' : 'created'}`,
-                life: 3000
-            });
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to save grant',
-                detail: '' + err,
-                life: 3000
-            });
-        } finally {
-            setShowSaveDialog(false);
-            setSelectedGrant(emptyGrant);
+    const onSaveComplete = (savedgrant: Grant) => {
+        let _grants = [...grants]; // grants is your local state array of grant
+        const index = _grants.findIndex((a) => a._id === savedgrant._id);
+        if (index !== -1) {
+            _grants[index] = { ...savedgrant };
+        } else {
+            _grants.push({ ...savedgrant });
         }
+        setGrants(_grants);
+        hideDialogs();
     };
 
     const deleteGrant = async () => {
-        try {
-            const deleted = await GrantApi.deleteGrant(selectedGrant);
-            if (deleted) {
-                setGrants(grants.filter((c) => c._id !== selectedGrant._id));
-                toast.current?.show({
-                    severity: 'success',
-                    summary: 'Deleted',
-                    detail: 'Grant deleted',
-                    life: 3000
-                });
-            }
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to delete grant',
-                detail: '' + err,
-                life: 3000
-            });
-        } finally {
-            setShowDeleteDialog(false);
-            setSelectedGrant(emptyGrant);
+        const deleted = await GrantApi.deleteGrant(selectedGrant);
+        if (deleted) {
+            setGrants(grants.filter((c) => c._id !== selectedGrant._id));
+            hideDialogs();
         }
     };
+    const hideDialogs = () => {
+        setShowSaveDialog(false);
+        setShowDeleteDialog(false);
+        setSelectedGrant(emptyGrant);
+    }
 
     const startToolbarTemplate = () => (
         <div className="my-2">
@@ -218,6 +181,7 @@ const GrantManager = (props: GrantManagerProps) => {
 
                         <Column expander style={{ width: '3em' }} />
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
+                        <Column field="directorate.name" header="Directorate" sortable />
                         <Column field="title" header="Title" sortable />
                         <Column field="description" header="Description" sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
@@ -227,8 +191,7 @@ const GrantManager = (props: GrantManagerProps) => {
                         <SaveDialog
                             visible={showSaveDialog}
                             grant={selectedGrant}
-                            setGrant={setSelectedGrant}
-                            onSave={saveGrant}
+                            onComplete={onSaveComplete}
                             onHide={() => setShowSaveDialog(false)}
                         />
                     )}

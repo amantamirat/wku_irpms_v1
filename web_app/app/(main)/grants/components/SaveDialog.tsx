@@ -4,31 +4,86 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { classNames } from 'primereact/utils';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Grant, validateGrant } from '../models/grant.model';
+import { Organization, OrganizationalUnit } from '../../organizations/models/organization.model';
+import { OrganizationApi } from '../../organizations/api/organization.api';
+import { Dropdown } from 'primereact/dropdown';
+import { GrantApi } from '../api/grant.api';
+import { Toast } from 'primereact/toast';
 
 interface SaveDialogProps {
     visible: boolean;
     grant: Grant;
-    setGrant: (grant: Grant) => void;
-    onSave: () => void;
+    onComplete?: (savedGrant: Grant) => void;
     onHide: () => void;
 }
 
-function SaveDialog(props: SaveDialogProps) {
-    const { visible, grant, setGrant, onSave, onHide } = props;
+const SaveDialog = ({ visible, grant, onComplete, onHide }: SaveDialogProps) => {
+    const toast = useRef<Toast>(null);
+    const [localGrant, setLocalGrant] = useState<Grant>({ ...grant });
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
+    const [organizations, setOrganizations] = useState<Organization[]>([]);
 
-    const save = async () => {
-        setSubmitted(true);
-        const result = validateGrant(grant);
-        if (!result.valid) {
-            setErrorMessage(result.message);
-            return;
-        }
+    useEffect(() => {
+        const fetchOrganizations = async () => {
+            try {
+                const data = await OrganizationApi.getOrganizations({ type: OrganizationalUnit.Directorate });
+                setOrganizations(data);
+            } catch (err) {
+                console.error('Failed to fetch organizations:', err);
+            }
+        };
+        fetchOrganizations();
+    }, []);
+
+    useEffect(() => {
+        setLocalGrant({ ...grant });
+    }, [grant]);
+
+    useEffect(() => {
+        if (!visible) clearForm();
+    }, [visible]);
+
+    const clearForm = () => {
+        setSubmitted(false);
         setErrorMessage(undefined);
-        onSave();
+        setLocalGrant({ ...grant });
+    };
+
+    const saveGrant = async () => {
+        try {
+            setSubmitted(true);
+            const validation = validateGrant(localGrant);
+            if (!validation.valid) {
+                throw new Error(validation.message);
+            }
+            let saved: Grant;
+            if (localGrant._id) {
+                saved = await GrantApi.updateGrant(localGrant);
+            } else {
+                saved = await GrantApi.createGrant(localGrant);
+            }
+            saved = {
+                ...saved,
+                directorate: localGrant.directorate
+            };
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Grant saved successfully',
+                life: 2000,
+            });
+            if (onComplete) setTimeout(() => onComplete(saved), 2000);
+        } catch (err: any) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Failed to save Grant',
+                detail: err.message || 'An error occurred',
+                life: 2000,
+            });
+        }
     };
 
     const hide = () => {
@@ -40,7 +95,7 @@ function SaveDialog(props: SaveDialogProps) {
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={hide} />
-            <Button label="Save" icon="pi pi-check" text onClick={save} />
+            <Button label="Save" icon="pi pi-check" text onClick={saveGrant} />
         </>
     );
 
@@ -53,41 +108,58 @@ function SaveDialog(props: SaveDialogProps) {
 
 
     return (
-        <Dialog
-            visible={visible}
-            style={{ width: '600px', height: '400px' }}
-            header={grant._id ? 'Edit Grant' : 'Create New Grant'}
-            modal
-            className="p-fluid"
-            footer={footer}
-            onHide={hide}
-            maximizable
-        >
-            
-            <div className="field">
-                <label htmlFor="title">Title</label>
-                <InputText
-                    id="title"
-                    value={grant.title}
-                    onChange={(e) => setGrant({ ...grant, title: e.target.value })}
-                    required
-                    autoFocus
-                    className={classNames({ 'p-invalid': submitted && !grant.title })}
-                />
-            </div>
+        <>
+            <Toast ref={toast} />
+            <Dialog
+                visible={visible}
+                style={{ width: '600px', height: '400px' }}
+                header={localGrant._id ? 'Edit Grant' : 'Create New Grant'}
+                modal
+                className="p-fluid"
+                footer={footer}
+                onHide={hide}
+                //maximizable
+            >
+                <div className="field">
+                    <label htmlFor="organization">
+                        Directorate
+                    </label>
+                    <Dropdown
+                        id="organization"
+                        value={localGrant.directorate}
+                        options={organizations}
+                        optionLabel="name"
+                        onChange={(e) => setLocalGrant({ ...localGrant, directorate: e.value })}
+                        placeholder="Select Organization"
+                        className={classNames({ 'p-invalid': submitted && !localGrant.directorate })}
+                    />
+                </div>
 
-            <div className="field">
-                <label htmlFor="description">Description </label>
-                <InputTextarea
-                    value={grant.description ?? ""}
-                    onChange={(e) => setGrant({ ...grant, description: e.target.value })}
-                    rows={5}
-                    cols={30} />
-            </div>   
-            {errorMessage && (
-                <small className="p-error">{errorMessage}</small>
-            )}
-        </Dialog>
+                <div className="field">
+                    <label htmlFor="title">Title</label>
+                    <InputText
+                        id="title"
+                        value={localGrant.title}
+                        onChange={(e) => setLocalGrant({ ...localGrant, title: e.target.value })}
+                        required
+                        autoFocus
+                        className={classNames({ 'p-invalid': submitted && !localGrant.title })}
+                    />
+                </div>
+
+                <div className="field">
+                    <label htmlFor="description">Description </label>
+                    <InputTextarea
+                        value={localGrant.description ?? ""}
+                        onChange={(e) => setLocalGrant({ ...localGrant, description: e.target.value })}
+                        rows={5}
+                        cols={30} />
+                </div>
+                {errorMessage && (
+                    <small className="p-error">{errorMessage}</small>
+                )}
+            </Dialog>
+        </>
     );
 }
 

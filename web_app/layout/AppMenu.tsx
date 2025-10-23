@@ -38,11 +38,7 @@ const AppMenu = () => {
                     to: `/calls?id=${dir._id}&name=${encodeURIComponent(dir.name)}`
                 },
 
-                {
-                    label: 'Grants',
-                    icon: 'pi pi-fw pi-wrench',
-                    to: `/grants?id=${dir._id}&name=${encodeURIComponent(dir.name)}`
-                },
+
 
                 {
                     label: 'Themes',
@@ -74,6 +70,11 @@ const AppMenu = () => {
                     label: 'Projects',
                     icon: PrimeIcons.BRIEFCASE,
                     to: '/projects'
+                },
+                {
+                    label: 'Grants',
+                    icon: 'pi pi-fw pi-wrench',
+                    to: `/grants`
                 },
                 {
                     label: 'Calendars',
