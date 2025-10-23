@@ -7,6 +7,7 @@ import { User } from "../user.model";
 import JwtPayload from "./auth.model";
 import Applicant from "../../applicants/applicant.model";
 import { UserService } from "../user.service";
+import { cache } from "../../../util/cache";
 
 
 export interface LoginUserDto {
@@ -44,33 +45,27 @@ export class AuthService {
             throw new Error("Invalid credentials.");
         }
 
-
-        const allPermissions = user.roles?.flatMap((role: any) =>
+        const permissions = new Set(user.roles?.flatMap((role: any) =>
             role.permissions?.map((p: any) => p.name)
-        ) || [];
+        ) || []);
 
-        // Remove duplicates just in case
-        const uniquePermissions = [...new Set(allPermissions)];
+        cache.set(`user:${user._id}:permissions`, permissions);
 
         const linkedApplicant = await Applicant.findOne({ user: user._id })
             .populate('organization')
             .lean();
 
-
         const payload: JwtPayload = {
             _id: user._id as string,
-            //email: user.email,
             user_name: user.user_name,
-            //roles: user.roles.map((r: any) => ({ _id: r._id, name: r.name })),
-            //permissions: uniquePermissions,
-            //linkedApplicant,
             status: user.status
         };
 
         const token = jwt.sign(payload, process.env.KEY as string, { expiresIn: '2h' });
         const userResponse = {
             ...payload,
-            permissions: uniquePermissions,  
+            roles: user.roles.map((r: any) => ({ _id: r._id, name: r.name })),
+            permissions: permissions,  
             linkedApplicant:linkedApplicant
         };
         return { token, user: userResponse };

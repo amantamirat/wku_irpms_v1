@@ -5,6 +5,7 @@ import { errorResponse } from '../../../util/response';
 import { UserStatus } from '../user.enum';
 import JwtPayload from './auth.model';
 import { User } from '../user.model';
+import { cache } from '../../../util/cache';
 
 dotenv.config();
 
@@ -47,17 +48,26 @@ export const checkPermission = (requiredPermission: string | string[]) => {
         return errorResponse(res, 401, "Unauthorized. No user in request.");
       }
 
-      const user = await User.findById(req.user._id)
-        .populate({
-          path: 'roles',
-          populate: { path: 'permissions' }
-        });
+      const cacheKey = `user:${req.user._id}:permissions`;
+      let userPermissions = cache.get<string[]>(cacheKey);
 
-      if (!user) return errorResponse(res, 401, "User not found.");
+      if (!userPermissions) {
+        const user = await User.findById(req.user._id)
+          .populate({
+            path: 'roles',
+            populate: { path: 'permissions' }
+          });
 
-      const userPermissions = user.roles?.flatMap((role: any) =>
-        role.permissions?.map((p: any) => p.name)
-      ) || [];
+        if (!user) return errorResponse(res, 401, "User not found.");
+
+        userPermissions = user.roles?.flatMap((role: any) =>
+          role.permissions?.map((p: any) => p.name)
+        ) || [];
+
+        cache.set(cacheKey, userPermissions);
+      }
+
+
 
       const hasPermission = Array.isArray(requiredPermission)
         ? requiredPermission.some((perm) => userPermissions.includes(perm))
