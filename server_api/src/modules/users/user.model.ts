@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
 import { UserStatus } from './user.enum';
-import { COLLECTIONS } from '../../enums/collections.enum';
+import { COLLECTIONS } from '../../util/collections.enum';
 
 export interface IUser extends Document {
   user_name: string;

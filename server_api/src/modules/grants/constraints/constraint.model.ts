@@ -1,6 +1,6 @@
 import mongoose, { model, Schema } from "mongoose";
 import { OperationMode, ApplicantConstraintType, BaseConstraintType, ProjectConstraintType } from "./constraint.enum";
-import { COLLECTIONS } from "../../../enums/collections.enum";
+import { COLLECTIONS } from "../../../util/collections.enum";
 
 export interface IBaseConstraint extends Document {
     grant: mongoose.Types.ObjectId;

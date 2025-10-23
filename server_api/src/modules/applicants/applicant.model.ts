@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema, model } from 'mongoose';
 import { Gender, Accessibility, Scope } from './applicant.enum';
-import { COLLECTIONS } from '../../enums/collections.enum';
+import { COLLECTIONS } from '../../util/collections.enum';
 
 
 

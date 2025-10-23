@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { COLLECTIONS } from '../../../enums/collections.enum';
+import { COLLECTIONS } from '../../../util/collections.enum';
 
 interface IPermission extends Document {
     name: string;

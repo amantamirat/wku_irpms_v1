@@ -1,5 +1,5 @@
 import mongoose, { Schema, model } from "mongoose";
-import { COLLECTIONS } from "../../../enums/collections.enum";
+import { COLLECTIONS } from "../../../util/collections.enum";
 import { ThemeType, ThemeLevel } from "./theme.enum";
 import { Directorate } from "../../organization/organization.model";
 

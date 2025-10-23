@@ -1,6 +1,6 @@
 import mongoose, { model, Schema } from "mongoose";
 import { EvaluationType, FormType } from "./evaluation.enum";
-import { COLLECTIONS } from "../../../enums/collections.enum";
+import { COLLECTIONS } from "../../../util/collections.enum";
 import { Directorate } from "../../organization/organization.model";
 
 

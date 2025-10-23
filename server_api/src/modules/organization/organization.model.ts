@@ -1,5 +1,5 @@
 import mongoose, { model, Schema } from "mongoose";
-import { COLLECTIONS } from "../../enums/collections.enum";
+import { COLLECTIONS } from "../../util/collections.enum";
 import { AcademicLevel, Classification, Ownership, Unit } from "./organization.enum";
 
 

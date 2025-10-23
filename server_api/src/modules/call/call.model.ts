@@ -1,6 +1,6 @@
 import mongoose, { Schema, model, Document } from 'mongoose';
 import { CallStatus } from './call.enum';
-import { COLLECTIONS } from '../../enums/collections.enum';
+import { COLLECTIONS } from '../../util/collections.enum';
 import { Directorate } from '../organization/organization.model';
 import { Catalog } from './themes/theme.model';
 import { Evaluation } from './evaluations/evaluation.model';

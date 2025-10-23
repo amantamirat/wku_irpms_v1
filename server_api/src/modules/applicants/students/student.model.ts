@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import { COLLECTIONS } from '../../../enums/collections.enum';
+import { COLLECTIONS } from '../../../util/collections.enum';
 import { Program } from '../../organization/organization.model';
 
 export interface IStudent extends Document {
