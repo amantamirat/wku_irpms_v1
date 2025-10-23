@@ -98,12 +98,7 @@ const AppMenu = () => {
                             label: 'External',
                             icon: 'pi pi-fw pi-asterisk',
                             to: `/applicants?scope=${Scope.external}`
-                        },
-                        {
-                            label: 'Positions',
-                            icon: 'pi pi-fw pi-flag',
-                            to: '/applicants/positions'
-                        },
+                        }
                     ]
                 },
                 {
@@ -149,7 +144,13 @@ const AppMenu = () => {
                     icon: PrimeIcons.LOCK,
                     to: '/roles',
                     visible: hasPermission(['role:read', 'role:create', 'role:update', 'role:delete'])
-                }
+                },
+                {
+                    label: 'Positions',
+                    icon: 'pi pi-fw pi-flag',
+                    to: '/applicants/positions',
+                    visible: hasPermission(["position:read", "position:create", "position:update", "position:delete"])
+                },
             ]
         },
         {

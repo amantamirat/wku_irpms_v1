@@ -63,5 +63,21 @@
     "category": "Calendar Management",
     "name": "calendar:delete",
     "description": "Delete calendar entries"
-  }  
+  },
+  {
+    "category": "Position Management",
+    "name": "position:create"
+  },
+  {
+    "category": "Position Management",
+    "name": "position:read"
+  },
+  {
+    "category": "Position Management",
+    "name": "position:update"
+  },
+  {
+    "category": "Position Management",
+    "name": "position:delete"
+  }
 ]
