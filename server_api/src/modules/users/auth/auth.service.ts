@@ -63,12 +63,17 @@ export class AuthService {
             user_name: user.user_name,
             //roles: user.roles.map((r: any) => ({ _id: r._id, name: r.name })),
             permissions: uniquePermissions,
-            linkedApplicant,
+            //linkedApplicant,
             status: user.status
         };
 
         const token = jwt.sign(payload, process.env.KEY as string, { expiresIn: '2h' });
-        return { token, user: payload };
+        const userResponse = {
+            payload,
+            //permissions: uniquePermissions,  
+            linkedApplicant:linkedApplicant
+        };
+        return { token, user: userResponse };
     }
 
 
