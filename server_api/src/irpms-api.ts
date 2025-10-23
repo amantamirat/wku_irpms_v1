@@ -29,7 +29,6 @@ import permissionRoutes from './modules/users/permissions/permission.routes';
 
 import { PermissionService } from './modules/users/permissions/permission.service';
 import { initializeThemeModels } from './modules/call/themes/init.models';
-import { initializeOrganizationModels } from './modules/organization/init.model';
 import { UserService } from './modules/users/user.service';
 import path from 'path';
 
@@ -77,9 +76,8 @@ const PORT = process.env.SERVER_PORT || 5000;
     }
     await mongoose.connect(MONGO_URL);
     console.log('database connection established');
-    initializeOrganizationModels();
     initializeThemeModels();
-    await PermissionService.initPermissions();
+    await PermissionService.seedPermissions();
     await UserService.initAdminUser();
    
     app.listen(PORT, () => {

@@ -4,7 +4,7 @@ import path from 'path';
 
 export class PermissionService {
 
-    static async initPermissions() {
+    static async seedPermissions() {
         const filePath = path.join(process.cwd(), 'data', 'permissions.json');
         const rawData = await fs.readFile(filePath, 'utf-8');
         const permissions = JSON.parse(rawData);

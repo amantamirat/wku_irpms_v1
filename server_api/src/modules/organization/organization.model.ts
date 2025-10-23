@@ -58,11 +58,11 @@ export const Specialization = Organization.discriminator<SpecializationDocument>
 
 
 
-interface ChildOrganizationDocument extends OrganizationDocument {
+interface SubOrganizationDocument extends OrganizationDocument {
     parent: mongoose.Types.ObjectId;
 }
 
-interface DepartmentDocument extends ChildOrganizationDocument {
+interface DepartmentDocument extends SubOrganizationDocument {
     type: Unit.Department;
 }
 
@@ -83,7 +83,7 @@ const DepartmentSchema = new Schema<DepartmentDocument>({
 
 export const Department = Organization.discriminator<DepartmentDocument>(Unit.Department, DepartmentSchema);
 
-interface CenterDocument extends ChildOrganizationDocument {
+interface CenterDocument extends SubOrganizationDocument {
     type: Unit.Center;
 }
 
@@ -105,7 +105,7 @@ const CenterSchema = new Schema<CenterDocument>({
 export const Center = Organization.discriminator<CenterDocument>(Unit.Center, CenterSchema);
 
 
-interface ProgramDocument extends ChildOrganizationDocument {
+interface ProgramDocument extends SubOrganizationDocument {
     type: Unit.Program;
     academic_level: AcademicLevel;
     classification: Classification;
@@ -137,7 +137,7 @@ const ProgramSchema = new Schema<ProgramDocument>({
 
 export const Program = Organization.discriminator<ProgramDocument>(Unit.Program, ProgramSchema);
 
-interface ExternalDocument extends ChildOrganizationDocument {
+interface ExternalDocument extends SubOrganizationDocument {
     type: Unit.External;
     ownership: Ownership;
 }

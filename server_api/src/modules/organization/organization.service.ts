@@ -34,14 +34,6 @@ export class OrganizationService {
         return Organization.find(filter).lean();
     }
 
-    static async findOrganization(options: GetOrganizationsOptions) {
-        const filter: any = {};
-        if (options.id) filter._id = options.id;
-        if (options.type) filter.type = options.type;
-        if (options.parent) filter.parent = options.parent;
-        return Organization.findOne(filter);
-    }
-
 
     static async updateOrganization(id: string, data: Partial<CreateOrganizationDto>) {
         const organization = await Organization.findById(id);
@@ -59,14 +51,6 @@ export class OrganizationService {
         if (organization.type === Unit.Directorate) {
             const isCallExist = await Call.exists({ directorate: organization._id });
             if (isCallExist) throw new Error(`Can not delete ${organization.type} ${organization.name}, Call data exist.`);
-            /**
-             * const isEvaluationExist = await Evaluation.exists({ directorate: organization._id });
-            if (isEvaluationExist) throw new Error(`Can not delete ${organization.type} ${organization.name}, Evaluation data exist.`);
-
-             const isThemeExist = await Catalog.exists({ directorate: organization._id });
-            if (isThemeExist) throw new Error(`Can not delete ${organization.type} ${organization.name}, Theme data exist.`);
- 
-             */
 
         }
         return await organization.deleteOne();
