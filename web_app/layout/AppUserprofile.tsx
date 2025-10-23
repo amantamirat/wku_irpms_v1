@@ -19,7 +19,7 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
     const [showPasswordDialog, setShowPasswordDialog] = useState(false);
 
     const handleLogout = () => {
-        props.setVisible(false);
+        //props.setVisible(false);
         logout();
     };
 

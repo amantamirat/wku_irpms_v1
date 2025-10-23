@@ -9,12 +9,16 @@ import { PrimeIcons } from 'primereact/api';
 import { Organization, OrganizationalUnit } from '@/app/(main)/organizations/models/organization.model';
 import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
 import { Scope } from '@/app/(main)/applicants/models/applicant.model';
+import { useAuth } from '@/contexts/auth-context';
 
 
 const AppMenu = () => {
+    const { hasPermission } = useAuth();
     const { layoutConfig } = useContext(LayoutContext);
     const icons = ['pi pi-mars', 'pi pi-microchip', 'pi pi-prime', 'pi pi-sparkles', 'pi pi-venus'];
+
     const [organizations, setOrganizations] = useState<Organization[]>([]);
+
     useEffect(() => {
         OrganizationApi.getOrganizations({ type: OrganizationalUnit.Directorate })
             .then(data => setOrganizations(data))
@@ -62,7 +66,7 @@ const AppMenu = () => {
             label: 'Home',
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
         },
-        directoratesMenu,
+        //directoratesMenu,
         {
             label: 'Manage',
             items: [
@@ -137,12 +141,14 @@ const AppMenu = () => {
                 {
                     label: 'User Accounts',
                     icon: PrimeIcons.USERS,
-                    to: '/users'
+                    to: '/users',
+                    visible: hasPermission(['user:read'])
                 },
                 {
                     label: 'Roles &  Permissions',
                     icon: PrimeIcons.LOCK,
-                    to: '/roles'
+                    to: '/roles',
+                    visible: hasPermission(['role:read', 'role:create', 'role:update', 'role:delete'])
                 }
             ]
         },
@@ -165,18 +171,6 @@ const AppMenu = () => {
                     label: 'Documentation',
                     icon: 'pi pi-fw pi-question',
                     to: '/documentation'
-                },
-                {
-                    label: 'Figma',
-                    url: 'https://www.dropbox.com/scl/fi/bhfwymnk8wu0g5530ceas/sakai-2023.fig?rlkey=u0c8n6xgn44db9t4zkd1brr3l&dl=0',
-                    icon: 'pi pi-fw pi-pencil',
-                    target: '_blank'
-                },
-                {
-                    label: 'View Source',
-                    icon: 'pi pi-fw pi-search',
-                    url: 'https://github.com/primefaces/sakai-react',
-                    target: '_blank'
                 }
             ]
         }

@@ -10,6 +10,7 @@ interface AuthContextType {
     loggedIn: boolean;
     login: (user: LoginDto) => Promise<boolean>;
     logout: () => void;
+    hasPermission: (perms: string[]) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,8 +45,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         //router.push('/auth/login');
     };
 
+    const hasPermission = (perms: string[]): boolean => {
+        return perms.some((p) => user?.permissions?.includes(p));
+    };
+
     return (
-        <AuthContext.Provider value={{ user, loading, loggedIn: !!user, login, logout }}>
+        <AuthContext.Provider value={{ user, loading, loggedIn: !!user, login, logout, hasPermission }}>
             {children}
         </AuthContext.Provider>
     );
