@@ -22,7 +22,7 @@ const UserPage = () => {
         roles: []
     };
     const [globalFilter, setGlobalFilter] = useState('');
-    
+
     const dt = useRef<DataTable<any>>(null);
     const [showDeleted, setShowDeleted] = useState(true);
     const [users, setUsers] = useState<User[]>([]);
@@ -59,7 +59,6 @@ const UserPage = () => {
     const onSaveComplete = (savedUser: User) => {
         let _users = [...users]; // users is your local state array of User
         const index = _users.findIndex((u) => u._id === savedUser._id);
-
         if (index !== -1) {
             // Replace existing user
             _users[index] = { ...savedUser };
@@ -67,7 +66,6 @@ const UserPage = () => {
             // Add new user
             _users.push({ ...savedUser });
         }
-
         setUsers(_users); // update state
         hideDialogs();    // close your SaveUserDialog
     };
@@ -78,23 +76,16 @@ const UserPage = () => {
         const deleted = await UserApi.deleteUser(selectedUser);
         if (deleted) {
             let _users = [...users];
-
-            if (selectedUser.status === UserStatus.Active) {
-                // Active users cannot be deleted, do nothing
-                return;
-            }
-
-            if (selectedUser.status === UserStatus.Pending) {
-                // Mark pending user as deleted locally
+            if (selectedUser.status === UserStatus.Deleted) {
+                // Permanent deletion
+                _users = _users.filter(u => u._id !== selectedUser._id);
+            } else {
+                // Soft deletion
                 const index = _users.findIndex(u => u._id === selectedUser._id);
                 if (index !== -1) {
                     _users[index] = { ..._users[index], status: UserStatus.Deleted };
                 }
-            } else if (selectedUser.status === UserStatus.Deleted) {
-                // Permanent deletion
-                _users = _users.filter(u => u._id !== selectedUser._id);
             }
-
             setUsers(_users);
             hideDialogs();
         }
