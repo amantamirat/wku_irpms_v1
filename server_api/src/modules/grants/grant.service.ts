@@ -1,8 +1,7 @@
-import { Grant } from "./grant.model";
-import { Directorate } from "../organization/organization.model";
 import mongoose from "mongoose";
 import { Call } from "../call/call.model";
-import { CreateProjectDto } from "../project/project.service";
+import { Directorate } from "../organization/organization.model";
+import { Grant } from "./grant.model";
 
 
 export interface GetGrantsOptions {
