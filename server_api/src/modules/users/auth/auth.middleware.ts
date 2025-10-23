@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { errorResponse } from '../../../util/response';
 import { UserStatus } from '../user.enum';
 import JwtPayload from './auth.model';
+import { User } from '../user.model';
 
 dotenv.config();
 
@@ -45,8 +46,19 @@ export const checkPermission = (requiredPermission: string | string[]) => {
       if (!req.user) {
         return errorResponse(res, 401, "Unauthorized. No user in request.");
       }
-      const userPermissions = req.user.permissions || [];
-      
+
+      const user = await User.findById(req.user._id)
+        .populate({
+          path: 'roles',
+          populate: { path: 'permissions' }
+        });
+
+      if (!user) return errorResponse(res, 401, "User not found.");
+
+      const userPermissions = user.roles?.flatMap((role: any) =>
+        role.permissions?.map((p: any) => p.name)
+      ) || [];
+
       const hasPermission = Array.isArray(requiredPermission)
         ? requiredPermission.some((perm) => userPermissions.includes(perm))
         : userPermissions.includes(requiredPermission);

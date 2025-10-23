@@ -8,6 +8,7 @@ export interface IUser extends Document {
   email: string;
   status: UserStatus;
   roles: mongoose.Types.ObjectId[];
+  organizations?: mongoose.Types.ObjectId[];
   reset_code?: String;
   reset_code_expires?: Date;
   isHidden?: Boolean;
@@ -45,6 +46,10 @@ const UserSchema = new Schema<IUser>(
     roles: [{
       type: Schema.Types.ObjectId,
       ref: COLLECTIONS.ROLE
+    }],
+    organizations: [{
+      type: Schema.Types.ObjectId,
+      ref: COLLECTIONS.ORGANIZATION
     }],
     reset_code: {
       type: String
