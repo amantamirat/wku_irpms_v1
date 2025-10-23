@@ -129,86 +129,82 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
     );
 
     return (
-        <div className="grid">
-            <div className="col-12">
-                <div className="card">
-                    <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
-                    <DataTable
-                        ref={dt}
-                        value={constraints}
-                        selection={selectedConstraint}
-                        onSelectionChange={(e) => setSelectedConstraint(e.value as Constraint)}
-                        dataKey="_id"
-                        paginator
-                        rows={10}
-                        rowsPerPageOptions={[5, 10, 25]}
-                        className="datatable-responsive"
-                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} constraints"
-                        globalFilter={globalFilter}
-                        emptyMessage="No constraint data found."
-                        header={header}
-                        scrollable
-                        filters={filters}
-                        expandedRows={expandedRows}
-                        onRowToggle={(e) => setExpandedRows(e.data)}
-                        rowExpansionTemplate={(rowData) => {
-                            if (type === BaseConstraintType.APPLICANT) {
-                                return (
-                                    <CompositionManager parent={rowData as Constraint} />
-                                )
-                            }
-                        }}
+        <div className="card">
+            <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
+            <DataTable
+                ref={dt}
+                value={constraints}
+                selection={selectedConstraint}
+                onSelectionChange={(e) => setSelectedConstraint(e.value as Constraint)}
+                dataKey="_id"
+                paginator
+                rows={10}
+                rowsPerPageOptions={[5, 10, 25]}
+                className="datatable-responsive"
+                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} constraints"
+                globalFilter={globalFilter}
+                emptyMessage="No constraint data found."
+                header={header}
+                scrollable
+                filters={filters}
+                expandedRows={expandedRows}
+                onRowToggle={(e) => setExpandedRows(e.data)}
+                rowExpansionTemplate={(rowData) => {
+                    if (type === BaseConstraintType.APPLICANT) {
+                        return (
+                            <CompositionManager parent={rowData as Constraint} />
+                        )
+                    }
+                }}
 
-                    >
-                        {
-                            type === BaseConstraintType.APPLICANT &&
-                            <Column expander style={{ width: '3em' }} />
-                        }
-                        {
-                            type !== BaseConstraintType.APPLICANT &&
-                            <Column selectionMode="single" style={{ width: '3em' }} />
+            >
+                {
+                    type === BaseConstraintType.APPLICANT &&
+                    <Column expander style={{ width: '3em' }} />
+                }
+                {
+                    type !== BaseConstraintType.APPLICANT &&
+                    <Column selectionMode="single" style={{ width: '3em' }} />
 
-                        }
-                        <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                        <Column field="constraint" header="Constraint" sortable />
-                        {
-                            type === BaseConstraintType.APPLICANT &&
-                            (<Column field="mode" header="Mode" sortable />)
-                        }
+                }
+                <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
+                <Column field="constraint" header="Constraint" sortable />
+                {
+                    type === BaseConstraintType.APPLICANT &&
+                    (<Column field="mode" header="Mode" sortable />)
+                }
 
-                        {
-                            (type === BaseConstraintType.PROJECT
-                            ) &&
-                            (<Column field="min" header="Min" sortable />)
-                        }
-                        {
-                            (type === BaseConstraintType.PROJECT) &&
-                            (<Column field="max" header="Max" sortable />)
-                        }
+                {
+                    (type === BaseConstraintType.PROJECT
+                    ) &&
+                    (<Column field="min" header="Min" sortable />)
+                }
+                {
+                    (type === BaseConstraintType.PROJECT) &&
+                    (<Column field="max" header="Max" sortable />)
+                }
 
 
-                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
-                    </DataTable>
-                    {selectedConstraint && (
-                        <SaveDialog
-                            visible={showSaveDialog}
-                            constraint={selectedConstraint}
-                            setConstraint={setSelectedConstraint}
-                            onSave={saveConstraint}
-                            onHide={hideDialogs}
-                        />
-                    )}
-                    {selectedConstraint && (
-                        <ConfirmDialog
-                            showDialog={showDeleteDialog}
-                            selectedDataInfo={String(selectedConstraint.type)}
-                            onConfirmAsync={deleteConstraint}
-                            onHide={hideDialogs}
-                        />
-                    )}
-                </div>
-            </div>
+                <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
+            </DataTable>
+            {selectedConstraint && (
+                <SaveDialog
+                    visible={showSaveDialog}
+                    constraint={selectedConstraint}
+                    setConstraint={setSelectedConstraint}
+                    onSave={saveConstraint}
+                    onHide={hideDialogs}
+                />
+            )}
+            {selectedConstraint && (
+                <ConfirmDialog
+                    showDialog={showDeleteDialog}
+                    selectedDataInfo={String(selectedConstraint.type)}
+                    onConfirmAsync={deleteConstraint}
+                    onHide={hideDialogs}
+                />
+            )}
         </div>
     );
 };

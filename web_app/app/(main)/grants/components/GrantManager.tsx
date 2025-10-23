@@ -12,11 +12,9 @@ import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { GrantApi } from '../api/grant.api';
+import ConstraintContainer from '../constraints/components/ConstraintContainer';
 import { Grant } from '../models/grant.model';
 import SaveDialog from './SaveDialog';
-import ConstraintManager from '../constraints/components/ConstraintManager';
-import { TabPanel, TabView } from 'primereact/tabview';
-import { BaseConstraintType } from '../constraints/models/constraint.model';
 
 
 
@@ -166,16 +164,7 @@ const GrantManager = () => {
                         expandedRows={expandedRows}
                         onRowToggle={(e) => setExpandedRows(e.data)}
                         rowExpansionTemplate={(rowData) => {
-                            return (<>
-                                <TabView>
-                                    <TabPanel header="Project">
-                                        <ConstraintManager grant={rowData as Grant} type={BaseConstraintType.PROJECT} />
-                                    </TabPanel>
-                                    <TabPanel header="Applicant">
-                                        <ConstraintManager grant={rowData as Grant} type={BaseConstraintType.APPLICANT} />
-                                    </TabPanel>
-                                </TabView>
-                            </>)
+                            return (<ConstraintContainer grant={rowData as Grant} />)
                         }}
                     >
 
