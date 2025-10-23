@@ -45,9 +45,10 @@ export class AuthService {
             throw new Error("Invalid credentials.");
         }
 
-        const permissions = new Set(user.roles?.flatMap((role: any) =>
+        //might include duplicate permissions if multiple roles have same permissions
+        const permissions = user.roles?.flatMap((role: any) =>
             role.permissions?.map((p: any) => p.name)
-        ) || []);
+        ) || [];
 
         cache.set(`user:${user._id}:permissions`, permissions);
 
@@ -64,7 +65,7 @@ export class AuthService {
         const token = jwt.sign(payload, process.env.KEY as string, { expiresIn: '2h' });
         const userResponse = {
             ...payload,
-            roles: user.roles.map((r: any) => ({ _id: r._id, name: r.name })),
+            //roles: user.roles.map((r: any) => ({ _id: r._id, name: r.name })),
             permissions: permissions,  
             linkedApplicant:linkedApplicant
         };
