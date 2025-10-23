@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import Applicant from "./applicant.model";
 import { Gender, Accessibility, Scope } from "./applicant.enum";
-import { BaseOrganization } from "../organization/organization.model";
+import { Organization } from "../organization/organization.model";
 import { Unit } from "../organization/organization.enum";
 import { User } from "../users/user.model";
 
@@ -33,7 +33,7 @@ export class ApplicantService {
     private static async validateApplicant(applicant: Partial<CreateApplicantDto>) {
         if (applicant.scope && applicant.organization) {
             const expected = scopeToOrganizationUnit[applicant.scope];
-            const org = await BaseOrganization.findById(applicant.organization);
+            const org = await Organization.findById(applicant.organization);
             if (!org || org.type !== expected) {
                 throw new Error(`Scope ${applicant.scope} requires organization of unit ${expected}`);
             }

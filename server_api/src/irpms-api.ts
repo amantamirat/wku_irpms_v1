@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import authRoutes from './modules/users/auth/auth.routes';
 
 
-import organRoutes from './modules/organization/organization.routes';
+import organizationRoutes from './modules/organization/organization.routes';
 import applicantRoutes from './modules/applicants/applicant.routes';
 import positionRoutes from './modules/applicants/positions/position.routes';
 import themeRoutes from './modules/call/themes/theme.routes';
@@ -48,7 +48,7 @@ app.use("/api/roles", roleRoutes);
 app.use("/api/permissions", permissionRoutes);
 
 app.use("/api/applicants", applicantRoutes);
-app.use("/api/organs", organRoutes);
+app.use("/api/organizations", organizationRoutes);
 app.use("/api/positions", positionRoutes);
 app.use("/api/themes", themeRoutes);
 app.use("/api/evals", evalRoutes);

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { Call } from "../call/call.model";
 import { AcademicLevel, Classification, Ownership, Unit } from "./organization.enum";
-import { BaseOrganization } from "./organization.model";
+import { Organization } from "./organization.model";
 
 
 export interface GetOrganizationsOptions {
@@ -16,28 +16,22 @@ export interface CreateOrganizationDto {
     academic_level?: AcademicLevel;
     classification?: Classification;
     ownership?: Ownership;
-    //address?: Address;
     parent?: mongoose.Types.ObjectId;
 }
 
 export class OrganizationService {
 
 
-    static async createOrganization(data: CreateOrganizationDto) {
-        const { type, ...rest } = data;
-        if (!BaseOrganization.discriminators || !BaseOrganization.discriminators[type]) {
-            throw new Error(`Invalid organization type: ${type}`);
-        }
-        const model = BaseOrganization.discriminators[type];
-        const createdOrganization = await model.create({ type, ...rest });
-        return createdOrganization;
+    static async createOrganization(data: CreateOrganizationDto) {       
+        const created = await Organization.create(data);
+        return created;
     }
 
     static async getOrganizations(options: GetOrganizationsOptions) {
         const filter: any = {};
         if (options.type) filter.type = options.type;
         if (options.parent) filter.parent = options.parent;
-        return BaseOrganization.find(filter).lean();
+        return Organization.find(filter).lean();
     }
 
     static async findOrganization(options: GetOrganizationsOptions) {
@@ -45,21 +39,21 @@ export class OrganizationService {
         if (options.id) filter._id = options.id;
         if (options.type) filter.type = options.type;
         if (options.parent) filter.parent = options.parent;
-        return BaseOrganization.findOne(filter);
+        return Organization.findOne(filter);
     }
 
 
     static async updateOrganization(id: string, data: Partial<CreateOrganizationDto>) {
-        const organization = await BaseOrganization.findById(id);
+        const organization = await Organization.findById(id);
         if (!organization) throw new Error("Organization not found");
         Object.assign(organization, data);
         return organization.save();
     }
 
     static async deleteOrganization(id: string) {
-        const organization = await BaseOrganization.findById(id);
+        const organization = await Organization.findById(id);
         if (!organization) throw new Error("Organization not found");
-        const isParentExist = await BaseOrganization.exists({ parent: organization._id });
+        const isParentExist = await Organization.exists({ parent: organization._id });
         if (isParentExist) throw new Error(`Can not delete parent ${organization.type} ${organization.name}`);
 
         if (organization.type === Unit.Directorate) {
