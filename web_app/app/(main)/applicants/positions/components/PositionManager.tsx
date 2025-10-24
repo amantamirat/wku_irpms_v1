@@ -12,6 +12,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { PositionApi } from '../api/position.api';
 import { Position, PositionType } from '../models/position.model';
 import SavePositionDialog from './SavePositionDialog';
+import ErrorComponent from '@/components/ErrorComponent';
 
 interface PositionProps {
     posType: PositionType;
@@ -56,8 +57,7 @@ const PositionManager = ({ posType, parent }: PositionProps) => {
                 );
                 setPositions(data);
             } catch (err) {
-                console.error('Failed to fetch positions:', err);
-                setError('Failed to load positions.');
+                setError(`Failed to load positions. ${err}`);
             }
         };
         fetchPositions();
@@ -65,17 +65,7 @@ const PositionManager = ({ posType, parent }: PositionProps) => {
 
     if (error) {
         return (
-            <div className="flex align-items-center justify-content-center py-6">
-                <div className="text-center">
-                    <i className="pi pi-exclamation-triangle text-4xl text-500 mb-3" />
-                    <p className="text-500 mb-4">{error}</p>
-                    <Button
-                        label="Retry"
-                        icon="pi pi-refresh"
-                        onClick={() => window.location.reload()}
-                    />
-                </div>
-            </div>
+            <ErrorComponent errorMessage={error} />
         );
     }
 

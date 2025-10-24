@@ -12,6 +12,7 @@ import SaveDialog from './dialogs/SaveDialog';
 import { User, UserStatus } from './models/user.model';
 import ChangePasswordDialog from './dialogs/ChangePassword';
 import { InputSwitch } from 'primereact/inputswitch';
+import ErrorComponent from '@/components/ErrorComponent';
 
 
 const UserPage = () => {
@@ -26,6 +27,7 @@ const UserPage = () => {
     const dt = useRef<DataTable<any>>(null);
     const [showDeleted, setShowDeleted] = useState(true);
     const [users, setUsers] = useState<User[]>([]);
+    const [error, setError] = useState<string | null>(null);
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
     const [selectedUser, setSelectedUser] = useState<User>(emptyUser);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -48,11 +50,18 @@ const UserPage = () => {
                 const data = await UserApi.getUsers();
                 setUsers(data);
             } catch (err) {
-                console.error("Failed to fetch users:", err);
+                setError("Failed to fetch users:" + err);
             }
         };
         fetchUsers();
     }, []);
+
+
+    if (error) {
+        return (
+            <ErrorComponent errorMessage={error} />
+        );
+    }
 
 
 
