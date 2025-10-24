@@ -41,7 +41,7 @@ export const verifyActiveAccount = (req: AuthenticatedRequest, res: Response, ne
 };
 
 
-export const checkPermission = (requiredPermission: string | string[]) => {
+export const checkPermission = (requiredPermission: string[]) => {
   return async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
@@ -66,12 +66,9 @@ export const checkPermission = (requiredPermission: string | string[]) => {
 
         cache.set(cacheKey, userPermissions);
       }
-
-
-
-      const hasPermission = Array.isArray(requiredPermission)
-        ? requiredPermission.some((perm) => userPermissions.includes(perm))
-        : userPermissions.includes(requiredPermission);
+      
+      const hasPermission =  requiredPermission.some((perm) => userPermissions.includes(perm));
+        
 
       if (!hasPermission) {
         return errorResponse(res, 403, "Forbidden. Permission missing.");

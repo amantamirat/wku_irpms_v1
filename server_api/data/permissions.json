@@ -20,6 +20,10 @@
     "description": "Delete users"
   },
   {
+    "category": "User Management",
+    "name": "user:reset"
+  },
+  {
     "category": "Role Management",
     "name": "role:create",
     "description": "Create new roles"

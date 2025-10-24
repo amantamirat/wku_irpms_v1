@@ -34,7 +34,7 @@ export class AuthService {
             .populate({
                 path: 'roles',
                 populate: { path: 'permissions' }
-            });
+            }).populate('organizations');
 
         if (!user) {
             throw new Error("User not found");
@@ -50,7 +50,10 @@ export class AuthService {
             role.permissions?.map((p: any) => p.name)
         ) || [];
 
+        const organizations = user.organizations?.map((org: any) => org._id) || []
+
         cache.set(`user:${user._id}:permissions`, permissions);
+        cache.set(`user:${user._id}:organizations`, organizations);
 
         const linkedApplicant = await Applicant.findOne({ user: user._id })
             .populate('organization')
@@ -65,9 +68,10 @@ export class AuthService {
         const token = jwt.sign(payload, process.env.KEY as string, { expiresIn: '2h' });
         const userResponse = {
             ...payload,
-            //roles: user.roles.map((r: any) => ({ _id: r._id, name: r.name })),
-            permissions: permissions,  
-            linkedApplicant:linkedApplicant
+            roles: user.roles || [],
+            permissions: permissions,
+            organizations: user.organizations || [],
+            linkedApplicant: linkedApplicant
         };
         return { token, user: userResponse };
     }
