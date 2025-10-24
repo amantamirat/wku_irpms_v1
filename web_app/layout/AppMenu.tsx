@@ -107,6 +107,13 @@ const AppMenu = () => {
                 {
                     label: 'Applicants',
                     icon: PrimeIcons.GLOBE,
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.APPLICANT.CREATE,
+                            PERMISSIONS.APPLICANT.UPDATE,
+                            PERMISSIONS.APPLICANT.DELETE
+                        ]
+                    ),
                     items: [
                         {
                             label: 'Academic',

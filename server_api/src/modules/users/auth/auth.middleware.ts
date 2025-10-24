@@ -67,8 +67,7 @@ export const checkPermission = (requiredPermission: string[]) => {
         cache.set(cacheKey, userPermissions);
       }
       
-      const hasPermission =  requiredPermission.some((perm) => userPermissions.includes(perm));
-        
+      const hasPermission =  requiredPermission.some((perm) => userPermissions.includes(perm));        
 
       if (!hasPermission) {
         return errorResponse(res, 403, "Forbidden. Permission missing.");

@@ -64,6 +64,26 @@
     "description": "Delete organizations"
   },
   {
+    "category": "Applicant Management",
+    "name": "applicant:create",
+    "description": "Create new applicants"
+  },
+  {
+    "category": "Applicant Management",
+    "name": "applicant:read",
+    "description": "View applicants"
+  },
+  {
+    "category": "Applicant Management",
+    "name": "applicant:update",
+    "description": "Edit applicants"
+  },
+  {
+    "category": "Applicant Management",
+    "name": "applicant:delete",
+    "description": "Delete applicants"
+  },
+  {
     "category": "Permission Management",
     "name": "permission:read",
     "description": "View permissions"
