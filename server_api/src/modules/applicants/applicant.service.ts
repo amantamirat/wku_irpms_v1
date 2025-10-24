@@ -54,7 +54,6 @@ export class ApplicantService {
     }
 
     static async updateApplicant(id: string, data: Partial<CreateApplicantDto>) {
-        await this.validateApplicant(data);
         const applicant = await Applicant.findById(id);
         if (!applicant) throw new Error("Applicant not found");
         Object.assign(applicant, data);

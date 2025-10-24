@@ -51,7 +51,24 @@ export class ApplicantController {
     static async updateApplicant(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const data: Partial<CreateApplicantDto> = req.body;
+            const {
+                first_name,
+                last_name,
+                birth_date,
+                gender,
+                organization,
+                email,
+                accessibility
+            } = req.body;
+            const data: Partial<CreateApplicantDto> = {
+                first_name,
+                last_name,
+                birth_date: new Date(birth_date),
+                gender,
+                organization: new mongoose.Types.ObjectId(organization as string),
+                email,
+                accessibility: accessibility || []
+            };
             const updated = await ApplicantService.updateApplicant(id, data);
             successResponse(res, 201, "Applicant updated successfully", updated);
         } catch (err: any) {

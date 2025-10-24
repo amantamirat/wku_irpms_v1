@@ -115,6 +115,21 @@ const SaveApplicantDialog = ({ visible, applicant, onHide, onComplete }: SaveApp
                 onHide={onHide}
             >
                 <div className="field">
+                    <label htmlFor="organization">
+                        {isAcademic ? 'Department' : isSupportive ? 'Office' : 'Organization'}
+                    </label>
+                    <Dropdown
+                        id="organization"
+                        value={localApplicant.organization}
+                        options={organizations}
+                        optionLabel="name"
+                        onChange={(e) => setLocalApplicant({ ...localApplicant, organization: e.value })}
+                        placeholder="Select Department"
+                        className={classNames({ 'p-invalid': submitted && !localApplicant.organization })}
+                    />
+                </div>
+
+                <div className="field">
                     <label htmlFor="first_name">First Name</label>
                     <InputText
                         id="first_name"
@@ -161,21 +176,6 @@ const SaveApplicantDialog = ({ visible, applicant, onHide, onComplete }: SaveApp
                         onChange={(e) => setLocalApplicant({ ...localApplicant, gender: e.value })}
                         placeholder="Select Gender"
                         className={classNames({ 'p-invalid': submitted && !localApplicant.gender })}
-                    />
-                </div>
-
-                <div className="field">
-                    <label htmlFor="organization">
-                        {isAcademic ? 'Department' : isSupportive ? 'Office' : 'Organization'}
-                    </label>
-                    <Dropdown
-                        id="organization"
-                        value={localApplicant.organization}
-                        options={organizations}
-                        optionLabel="name"
-                        onChange={(e) => setLocalApplicant({ ...localApplicant, organization: e.value })}
-                        placeholder="Select Organization"
-                        className={classNames({ 'p-invalid': submitted && !localApplicant.organization })}
                     />
                 </div>
 
