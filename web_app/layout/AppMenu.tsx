@@ -10,6 +10,7 @@ import { Organization, OrganizationalUnit } from '@/app/(main)/organizations/mod
 import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
 import { Scope } from '@/app/(main)/applicants/models/applicant.model';
 import { useAuth } from '@/contexts/auth-context';
+import { PERMISSIONS } from '@/types/permissions';
 
 
 const AppMenu = () => {
@@ -79,7 +80,14 @@ const AppMenu = () => {
                 {
                     label: 'Calendars',
                     icon: PrimeIcons.CALENDAR,
-                    to: '/calendars'
+                    to: '/calendars',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.CALENDAR.CREATE,
+                            PERMISSIONS.CALENDAR.UPDATE,
+                            PERMISSIONS.CALENDAR.DELETE
+                        ]
+                    )
                 },
                 {
                     label: 'Applicants',
@@ -138,19 +146,35 @@ const AppMenu = () => {
                     label: 'User Accounts',
                     icon: PrimeIcons.USERS,
                     to: '/users',
-                    visible: hasPermission(['user:read'])
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.USER.CREATE,
+                            PERMISSIONS.USER.UPDATE,
+                            PERMISSIONS.USER.DELETE
+                        ]
+                    )
                 },
                 {
                     label: 'Roles &  Permissions',
                     icon: PrimeIcons.LOCK,
                     to: '/roles',
-                    visible: hasPermission(['role:read', 'role:create', 'role:update', 'role:delete'])
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.ROLE.CREATE,
+                            PERMISSIONS.ROLE.UPDATE,
+                            PERMISSIONS.ROLE.DELETE
+                        ]
+                    )
                 },
                 {
                     label: 'Positions',
                     icon: 'pi pi-fw pi-flag',
                     to: '/applicants/positions',
-                    visible: hasPermission(["position:read", "position:create", "position:update", "position:delete"])
+                    visible: hasPermission([
+                        PERMISSIONS.POSITION.CREATE,
+                        PERMISSIONS.POSITION.UPDATE,
+                        PERMISSIONS.POSITION.DELETE
+                    ])
                 },
             ]
         },
