@@ -203,6 +203,7 @@ const UserPage = () => {
                         <Column field="user_name" header="Username" sortable />
                         <Column field="email" header="Email" sortable />
                         <Column header="Roles" body={(rowData) => rowData.roles?.length || 0} />
+                        <Column header="Organizations" body={(rowData) => rowData.organizations?.length || 0} />
                         <Column field="status" header="Status" sortable body={statusBodyTemplate} />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
                     </DataTable>

@@ -36,7 +36,8 @@ export class UserService {
     }
 
     static async getUsers() {
-        const users = await User.find({ isHidden: { $ne: true } }, { password: 0 }).populate("roles").lean();
+        const users = await User.find({ isHidden: { $ne: true } }, { password: 0 }).
+        populate("roles").populate("organizations").lean();
         return users;
     }
 
