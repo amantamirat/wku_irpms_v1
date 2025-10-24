@@ -14,7 +14,7 @@ import { PERMISSIONS } from '@/types/permissions';
 
 
 const AppMenu = () => {
-    const { hasPermission } = useAuth();
+    const { hasPermission, hasOrganizationType } = useAuth();
     const { layoutConfig } = useContext(LayoutContext);
     const icons = ['pi pi-mars', 'pi pi-microchip', 'pi pi-prime', 'pi pi-sparkles', 'pi pi-venus'];
 
@@ -38,9 +38,6 @@ const AppMenu = () => {
                     icon: 'pi pi-fw pi-megaphone',
                     to: `/calls?id=${dir._id}&name=${encodeURIComponent(dir.name)}`
                 },
-
-
-
                 {
                     label: 'Themes',
                     icon: 'pi pi-fw pi-tags',
@@ -61,13 +58,10 @@ const AppMenu = () => {
         },
         directoratesMenu,
         {
-            label: 'Manage',
+            label: 'Directorate',
+            icon: PrimeIcons.SITEMAP,
+            visible: hasOrganizationType([OrganizationalUnit.Directorate]),
             items: [
-                {
-                    label: 'Projects',
-                    icon: PrimeIcons.BRIEFCASE,
-                    to: '/projects'
-                },
                 {
                     label: 'Evaluations',
                     icon: 'pi pi-fw pi-calculator',
@@ -91,6 +85,16 @@ const AppMenu = () => {
                             PERMISSIONS.GRANT.DELETE
                         ]
                     )
+                }
+            ]
+        },
+        {
+            label: 'Manage',
+            items: [
+                {
+                    label: 'Projects',
+                    icon: PrimeIcons.BRIEFCASE,
+                    to: '/projects'
                 },
                 {
                     label: 'Calendars',
@@ -118,17 +122,20 @@ const AppMenu = () => {
                         {
                             label: 'Academic',
                             icon: 'pi pi-fw pi-crown',
-                            to: `/applicants?scope=${Scope.academic}`
+                            to: `/applicants?scope=${Scope.academic}`,
+                            visible: hasOrganizationType([OrganizationalUnit.Department]),
                         },
                         {
                             label: 'Supportive',
                             icon: 'pi pi-fw pi-bullseye',
-                            to: `/applicants?scope=${Scope.supportive}`
+                            to: `/applicants?scope=${Scope.supportive}`,
+                            visible: hasOrganizationType([OrganizationalUnit.Supportive]),
                         },
                         {
                             label: 'External',
                             icon: 'pi pi-fw pi-asterisk',
-                            to: `/applicants?scope=${Scope.external}`
+                            to: `/applicants?scope=${Scope.external}`,
+                            visible: hasOrganizationType([OrganizationalUnit.External]),
                         }
                     ]
                 },

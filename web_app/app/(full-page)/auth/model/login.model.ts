@@ -23,6 +23,7 @@ export type User = {
     linkedApplicant?: any;
     //roles?: any;
     permissions?: string[];
+    organizations?: any;
     iat?: number;
     exp?: number;
 }
