@@ -21,6 +21,12 @@ export const PERMISSIONS = {
     UPDATE: "calendar:update",
     DELETE: "calendar:delete",
   },
+  GRANT: {
+    CREATE: "grant:create",
+    READ: "grant:read",
+    UPDATE: "grant:update",
+    DELETE: "grant:delete",
+  },
   POSITION: {
     CREATE: "position:create",
     READ: "position:read",

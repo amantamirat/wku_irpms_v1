@@ -12,6 +12,7 @@ import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
 import { Calendar, CalendarStatus } from './models/calendar.model';
 import { CalendarApi } from './api/calendar.api';
+import ErrorComponent from '@/components/ErrorComponent';
 
 const CalendarPage = () => {
     const emptyCalendar: Calendar = {
@@ -28,31 +29,35 @@ const CalendarPage = () => {
     const [selectedCalendar, setSelectedCalendar] = useState<Calendar>(emptyCalendar);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const toast = useRef<Toast>(null);
-
-    useEffect(() => {
-        setFilters(initFilters());
-        setGlobalFilter('');
-        loadCalendars();
-    }, []);
-
-    const loadCalendars = async () => {
-        try {
-            const data = await CalendarApi.getCalendars({});
-            setCalendars(data);
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load calendar data',
-                detail: '' + err,
-                life: 3000
-            });
-        }
-    };
+    const [error, setError] = useState<string | null>(null);
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
+
+    useEffect(() => {
+        setFilters(initFilters());
+        setGlobalFilter('');
+
+    }, []);
+
+    useEffect(() => {
+        const fetchCalendars = async () => {
+            try {
+                const data = await CalendarApi.getCalendars({});
+                setCalendars(data);
+            } catch (err) {
+                setError("Failed to fetch calendars:" + err);
+            }
+        };
+        fetchCalendars();
+    }, []);
+
+    if (error) {
+        return (
+            <ErrorComponent errorMessage={error} />
+        );
+    }
 
     const onSaveComplete = (savedCalendar: Calendar) => {
         let _calendars = [...calendars]; // clone the current state array
@@ -125,8 +130,7 @@ const CalendarPage = () => {
     return (
         <div className="grid">
             <div className="col-12">
-                <div className="card">
-                    <Toast ref={toast} />
+                <div className="card">                  
                     <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
                     <DataTable
                         ref={dt}

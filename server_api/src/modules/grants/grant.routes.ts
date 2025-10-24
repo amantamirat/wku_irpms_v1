@@ -1,13 +1,41 @@
 import { Router } from 'express';
-import { verifyActiveAccount } from '../users/auth/auth.middleware';
 import { GrantController } from './grant.controller';
-
+import { verifyActiveAccount, checkPermission } from '../users/auth/auth.middleware';
+import { PERMISSIONS } from '../../util/permissions';
 
 const router: Router = Router();
 
-router.post('/', verifyActiveAccount, GrantController.createGrant);
-router.get('/', verifyActiveAccount, GrantController.getGrants);
-router.put('/:id', verifyActiveAccount, GrantController.updateGrant);
-router.delete('/:id', verifyActiveAccount, GrantController.deleteGrant);
+router.post(
+  '/',
+  verifyActiveAccount,
+  checkPermission([PERMISSIONS.GRANT.CREATE]),
+  GrantController.createGrant
+);
+
+router.get(
+  '/',
+  verifyActiveAccount,
+  checkPermission([
+    PERMISSIONS.GRANT.READ,
+    PERMISSIONS.GRANT.CREATE,
+    PERMISSIONS.GRANT.UPDATE,
+    PERMISSIONS.GRANT.DELETE
+  ]),
+  GrantController.getGrants
+);
+
+router.put(
+  '/:id',
+  verifyActiveAccount,
+  checkPermission([PERMISSIONS.GRANT.UPDATE]),
+  GrantController.updateGrant
+);
+
+router.delete(
+  '/:id',
+  verifyActiveAccount,
+  checkPermission([PERMISSIONS.GRANT.DELETE]),
+  GrantController.deleteGrant
+);
 
 export default router;

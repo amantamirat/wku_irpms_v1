@@ -75,7 +75,14 @@ const AppMenu = () => {
                 {
                     label: 'Grants',
                     icon: 'pi pi-fw pi-wrench',
-                    to: `/grants`
+                    to: `/grants`,
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.GRANT.CREATE,
+                            PERMISSIONS.GRANT.UPDATE,
+                            PERMISSIONS.GRANT.DELETE
+                        ]
+                    )
                 },
                 {
                     label: 'Calendars',

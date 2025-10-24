@@ -69,6 +69,26 @@
     "description": "Delete calendar entries"
   },
   {
+    "category": "Grant Management",
+    "name": "grant:create",
+    "description": "Create grant entries"
+  },
+  {
+    "category": "Grant Management",
+    "name": "grant:read",
+    "description": "Read grant entries"
+  },
+  {
+    "category": "Grant Management",
+    "name": "grant:update",
+    "description": "Update grant entries"
+  },
+  {
+    "category": "Grant Management",
+    "name": "grant:delete",
+    "description": "Delete grant entries"
+  },
+  {
     "category": "Position Management",
     "name": "position:create"
   },
