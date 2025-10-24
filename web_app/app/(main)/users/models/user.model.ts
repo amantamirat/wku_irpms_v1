@@ -1,7 +1,6 @@
 import { Applicant } from "../../applicants/models/applicant.model";
+import { Organization } from "../../organizations/models/organization.model";
 import { Role } from "../../roles/models/role.model";
-
-
 
 export enum UserStatus {
     Pending = 'Pending',
@@ -22,6 +21,7 @@ export type User = {
     password?: string;
     confirmed_password?: string;
     roles?: Role[] | string[];
+    organizations?: Organization[] | string[];
     reset_code?: string;
     reset_code_expires?: Date;
     linkedApplicant?: string | Applicant;
@@ -99,14 +99,21 @@ export function sanitizeUser(user: Partial<User>): Partial<User> {
     return {
         ...user,
         roles: user.roles
-            ?.map((role) => {
-                if (!role) return undefined;
-                if (typeof role === "object" && "_id" in role) {
-                    return (role as any)._id.toString(); // ensure string
-                }
-                return role;
-            })
-            .filter((r): r is string => typeof r === "string"),
+            ?.map(role =>
+                typeof role === 'object' && role !== null
+                    ? (role as Role)._id
+                    : role
+            )
+            .filter((id): id is string => typeof id === 'string'),
+
+        organizations: user.organizations
+            ?.map(org =>
+                typeof org === 'object' && org !== null
+                    ? (org as Organization)._id
+                    : org
+            )
+            .filter((id): id is string => typeof id === 'string'),
     };
 }
+
 

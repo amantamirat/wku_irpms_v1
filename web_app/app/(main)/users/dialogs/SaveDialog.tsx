@@ -12,6 +12,8 @@ import { Role } from '../../roles/models/role.model';
 import { RoleApi } from '../../roles/api/role.api';
 import { UserApi } from '../api/UserService';
 import { Dropdown } from 'primereact/dropdown';
+import { OrganizationApi } from '../../organizations/api/organization.api';
+import { Organization } from '../../organizations/models/organization.model';
 
 
 interface SaveUserDialogProps {
@@ -25,6 +27,7 @@ const SaveUserDialog = ({ visible, user, onHide, onComplete }: SaveUserDialogPro
     const toast = useRef<Toast>(null);
     const [localUser, setLocalUser] = useState<User>({ ...user });
     const [roles, setRoles] = useState<Role[]>([]);
+    const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
@@ -42,6 +45,16 @@ const SaveUserDialog = ({ visible, user, onHide, onComplete }: SaveUserDialogPro
             }
         };
         fetchRoles();
+
+        const fetchOrganizations = async () => {
+            try {
+                const data = await OrganizationApi.getOrganizations({});
+                setOrganizations(data);
+            } catch (err) {
+                console.error('Failed to fetch organizations:', err);
+            }
+        };
+        fetchOrganizations();
     }, []);
 
     const saveUser = async () => {
@@ -59,7 +72,8 @@ const SaveUserDialog = ({ visible, user, onHide, onComplete }: SaveUserDialogPro
             }
             saved = {
                 ...saved,
-                roles: localUser.roles
+                roles: localUser.roles,
+                organizations: localUser.organizations
             };
             toast.current?.show({
                 severity: 'success',
@@ -184,6 +198,21 @@ const SaveUserDialog = ({ visible, user, onHide, onComplete }: SaveUserDialogPro
                         className={classNames({ 'p-invalid': submitted && !localUser.roles?.length })}
                     />
                 </div>
+
+                <div className="field">
+                    <label htmlFor="organizations">Organizations</label>
+                    <MultiSelect
+                        id="organizations"
+                        dataKey="_id"
+                        value={localUser.organizations}
+                        options={organizations}
+                        optionLabel="name"
+                        onChange={(e) => setLocalUser({ ...localUser, organizations: e.value })}
+                        placeholder="Select Ownerships"
+                        display="chip"
+                    />
+                </div>
+
                 {isEdit &&
                     <div className="field">
                         <label htmlFor="status">Status</label>
