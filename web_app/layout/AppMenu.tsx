@@ -47,11 +47,7 @@ const AppMenu = () => {
                     to: `/themes?id=${dir._id}&name=${encodeURIComponent(dir.name)}`
 
                 },
-                {
-                    label: 'Evaluations',
-                    icon: 'pi pi-fw pi-calculator',
-                    to: `/evals?id=${dir._id}&name=${encodeURIComponent(dir.name)}`
-                },
+
             ]
         }))
     };
@@ -73,9 +69,21 @@ const AppMenu = () => {
                     to: '/projects'
                 },
                 {
+                    label: 'Evaluations',
+                    icon: 'pi pi-fw pi-calculator',
+                    to: '/evals',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.EVALUATION.CREATE,
+                            PERMISSIONS.EVALUATION.UPDATE,
+                            PERMISSIONS.EVALUATION.DELETE
+                        ]
+                    )
+                },
+                {
                     label: 'Grants',
                     icon: 'pi pi-fw pi-wrench',
-                    to: `/grants`,
+                    to: '/grants',
                     visible: hasPermission(
                         [
                             PERMISSIONS.GRANT.CREATE,
@@ -120,6 +128,13 @@ const AppMenu = () => {
                 {
                     label: 'Organizations',
                     icon: 'pi pi-sitemap',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.ORGANIAZTION.CREATE,
+                            PERMISSIONS.ORGANIAZTION.UPDATE,
+                            PERMISSIONS.ORGANIAZTION.DELETE
+                        ]
+                    ),
                     items: [
                         {
                             label: 'Colleges',

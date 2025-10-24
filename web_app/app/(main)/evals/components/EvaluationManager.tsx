@@ -1,20 +1,18 @@
 'use client';
 import ConfirmDialog from '@/components/ConfirmationDialog';
+import ErrorComponent from '@/components/ErrorComponent';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
+import { FileUpload } from 'primereact/fileupload';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import SaveDialog from './dialogs/SaveDialog';
-import { EvalType, Evaluation, FormType } from '../models/evaluation.model';
 import { EvaluationApi } from '../api/evaluation.api';
-import { Organization } from '../../organizations/models/organization.model';
-import { FileUpload } from 'primereact/fileupload';
-
-
+import { EvalType, Evaluation, FormType } from '../models/evaluation.model';
+import SaveDialog from './dialogs/SaveDialog';
 
 const pluralMap = {
     Evaluation: 'Evaluations',
@@ -26,27 +24,28 @@ const pluralMap = {
 
 interface EvaluationManagerProps {
     type: EvalType;
-    directorate?: any;
     parent?: Evaluation;
 }
 
-const EvaluationManager = (props: EvaluationManagerProps) => {
-
-    const type = props.type;
+const EvaluationManager = ({ type, parent }: EvaluationManagerProps) => {
+    const isEvaluation = type === EvalType.evaluation;
+    const isValidation = type === EvalType.validation;
+    const isStage = type === EvalType.stage;
     const isCriterion = type === EvalType.criterion;
-    const childType = type === (EvalType.evaluation || EvalType.validation) ? EvalType.stage
-        : type === EvalType.stage ? EvalType.criterion
+    const childType = isEvaluation || isValidation ? EvalType.stage
+        : isStage ? EvalType.criterion
             : isCriterion ? EvalType.option : null;
 
 
     const emptyEval: Evaluation = {
         title: '',
-        type: props.type,
-        directorate: props.directorate,
-        parent: props.parent
+        type: type,
+        directorate: '',
+        parent: parent
     };
 
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
+    const [error, setError] = useState<string | null>(null);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
@@ -61,124 +60,82 @@ const EvaluationManager = (props: EvaluationManagerProps) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
 
-
-    const loadEvaluations = useCallback(async () => {
-        try {
-            setLoading(true);
-            if (props.directorate && (props.type === EvalType.evaluation || props.type === EvalType.validation)) {
-                const data = await EvaluationApi.getEvaluations({
-                    type: props.type,
-                    directorate: props.directorate._id || ''
-                });
-                setEvaluations(data);
-            } else if (props.parent) {
-                const data = await EvaluationApi.getEvaluations({
-                    type: props.type,
-                    parent: props.parent._id || ''
-                });
-                setEvaluations(data);
-            }
-        } catch (err) {
-            console.error('Failed to load evaluations:', err);
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load evaluations data',
-                detail: '' + err,
-                life: 3000
-            });
-        } finally {
-            setLoading(false);
-        }
-    }, [props.parent, props.directorate, toast]);
-
     useEffect(() => {
         setFilters(initFilters());
         setGlobalFilter('');
-        loadEvaluations();
-    }, [loadEvaluations]);
+    }, []);
 
-    const saveEvaluation = async () => {
+
+    const fetchEvaluations = useCallback(async () => {
         try {
             setLoading(true);
-            let _evlas = [...evaluations];
-            if (selectedEvaluation._id) {
-                const updated = await EvaluationApi.updateEvaluation(selectedEvaluation);
-                const index = _evlas.findIndex((c) => c._id === selectedEvaluation._id);
-                _evlas[index] = updated;
-            } else {
-                const created = await EvaluationApi.createEvaluation(selectedEvaluation);
-                _evlas.push({ ...selectedEvaluation, _id: created._id, order: created.order });
-            }
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Successful',
-                detail: `${type} ${selectedEvaluation._id ? 'updated' : 'created'}`,
-                life: 3000
+            const data = await EvaluationApi.getEvaluations({
+                type: type,
+                parent: parent?._id
             });
-            setEvaluations(_evlas);
+            setEvaluations(data);
         } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: `Failed to save ${type}`,
-                detail: '' + err,
-                life: 3000
-            });
+            setError(`Failed to load grant data ${err}`);
         } finally {
-            setShowSaveDialog(false);
-            setSelectedEvaluation(emptyEval);
             setLoading(false);
         }
+    }, [parent]);
+
+    useEffect(() => {
+        fetchEvaluations();
+    }, [fetchEvaluations]);
+
+
+    if (error) {
+        return (
+            <ErrorComponent errorMessage={error} />
+        );
+    }
+
+    const onSaveComplete = (savedEvaluation: Evaluation) => {
+        let _evaluations = [...evaluations]; // evaluations is your local state array
+        const index = _evaluations.findIndex((e) => e._id === savedEvaluation._id);
+        if (index !== -1) {
+            _evaluations[index] = { ...savedEvaluation };
+        } else {
+            _evaluations.push({ ...savedEvaluation });
+        }
+        setEvaluations(_evaluations); // update state
+        hideDialogs(); // hide your SaveDialog
     };
 
+
     const deleteEvaluation = async () => {
-        try {
-            setLoading(true);
-            const deleted = await EvaluationApi.deleteEvaluation(selectedEvaluation);
-            if (deleted) {
-                //setEvaluations(evaluations.filter((c) => c._id !== selectedEvaluation._id));
-                setEvaluations((prevEvals) => {
-                    let updated = prevEvals.filter((c) => c._id !== selectedEvaluation._id);
-                    // Explicitly check that stage_level is a number
-                    if (
-                        selectedEvaluation.type === 'Stage' &&
-                        selectedEvaluation.parent &&
-                        typeof selectedEvaluation.order === 'number'
-                    ) {
-                        updated = updated.map((e) => {
-                            if (
-                                e.type === 'Stage' &&
-                                e.parent === selectedEvaluation.parent &&
-                                typeof e.order === 'number' &&
-                                e.order > selectedEvaluation.order!
-                            ) {
-                                return { ...e, order: e.order - 1 };
-                            }
-                            return e;
-                        });
-                    }
-
-                    return updated;
-                });
-
-                toast.current?.show({
-                    severity: 'success',
-                    summary: 'Deleted',
-                    detail: `${type} deleted`,
-                    life: 3000
-                });
-            }
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: `Failed to delete ${type}`,
-                detail: '' + err,
-                life: 3000
+        setLoading(true);
+        const deleted = await EvaluationApi.deleteEvaluation(selectedEvaluation);
+        if (deleted) {
+            //setEvaluations(evaluations.filter((c) => c._id !== selectedEvaluation._id));
+            setEvaluations((prevEvals) => {
+                let updated = prevEvals.filter((c) => c._id !== selectedEvaluation._id);
+                // Explicitly check that stage_level is a number
+                if (
+                    selectedEvaluation.type === 'Stage' &&
+                    selectedEvaluation.parent &&
+                    typeof selectedEvaluation.order === 'number'
+                ) {
+                    updated = updated.map((e) => {
+                        if (
+                            e.type === 'Stage' &&
+                            e.parent === selectedEvaluation.parent &&
+                            typeof e.order === 'number' &&
+                            e.order > selectedEvaluation.order!
+                        ) {
+                            return { ...e, order: e.order - 1 };
+                        }
+                        return e;
+                    });
+                }
+                return updated;
             });
-        } finally {
-            setShowDeleteDialog(false);
-            setSelectedEvaluation(emptyEval);
-            setLoading(false);
         }
+        hideDialogs();
+        setLoading(false);
+
     };
 
     const reorderStage = async (evaluation: Evaluation, direction: "up" | "down") => {
@@ -222,6 +179,13 @@ const EvaluationManager = (props: EvaluationManagerProps) => {
     };
 
 
+    const hideDialogs = () => {
+        setShowSaveDialog(false);
+        setShowDeleteDialog(false);
+        setSelectedEvaluation(emptyEval);
+    }
+
+
     const endToolbarTemplate = () => {
         if (type !== EvalType.criterion) {
             return null;
@@ -238,10 +202,10 @@ const EvaluationManager = (props: EvaluationManagerProps) => {
                 let criteriaData, stageId;
                 if (Array.isArray(json)) {
                     criteriaData = json;
-                    stageId = props.parent?._id;
+                    stageId = parent?._id;
                 } else {
                     criteriaData = json.criteriaData;
-                    stageId = json.stageId || props.parent?._id;
+                    stageId = json.stageId || parent?._id;
                 }
                 if (!stageId || !Array.isArray(criteriaData)) {
                     toast.current?.show({ severity: 'error', summary: 'Import Error', detail: 'Invalid import data', life: 3000 });
@@ -250,7 +214,7 @@ const EvaluationManager = (props: EvaluationManagerProps) => {
                 // Call API
                 const result = await EvaluationApi.importCriteriaBatch(stageId, criteriaData);
                 // Reload evaluations
-                await loadEvaluations();
+                await fetchEvaluations();
                 toast.current?.show({ severity: 'success', summary: 'Import Successful', detail: `Imported ${result.length} criteria`, life: 3000 });
             } catch (err) {
                 toast.current?.show({ severity: 'error', summary: 'Import Failed', detail: '' + err, life: 3000 });
@@ -272,7 +236,7 @@ const EvaluationManager = (props: EvaluationManagerProps) => {
             <Button label={`New ${type}`} icon="pi pi-plus" severity="success" className="mr-2"
                 onClick={() => {
                     let nextEval = { ...emptyEval };
-                    if (type === EvalType.stage) {
+                    if (isStage) {
                         const stages = evaluations.filter(e => e.type === EvalType.stage);
                         const maxLevel = Math.max(0, ...stages.map(e => e.order ?? 0));
                         nextEval = { ...emptyEval, order: maxLevel + 1 };
@@ -287,7 +251,7 @@ const EvaluationManager = (props: EvaluationManagerProps) => {
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
             <h5 className="m-0">
-                Manage {props.directorate?.name} {props.parent?.title} {pluralMap[type]}
+                Manage {parent?.title} {pluralMap[type]}
             </h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
@@ -376,11 +340,14 @@ const EvaluationManager = (props: EvaluationManagerProps) => {
                                 : <Column selectionMode="single" headerStyle={{ width: '3em' }} />
                         }
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
+                        {isEvaluation &&
+                            <Column field="directorate.name" header="Directorate" sortable />
+                        }
                         <Column field="title" header="Title" sortable />
-                        {type === EvalType.stage && (
+                        {isStage && (
                             <Column field="order" header="Order" sortable />
                         )}
-                        {type === EvalType.stage && (
+                        {isStage && (
                             <Column body={orderBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
                         )}
                         {isCriterion && (
@@ -399,12 +366,8 @@ const EvaluationManager = (props: EvaluationManagerProps) => {
                         <SaveDialog
                             visible={showSaveDialog}
                             evaluation={selectedEvaluation}
-                            onChange={setSelectedEvaluation}
-                            onSave={saveEvaluation}
-                            onHide={() => {
-                                setShowSaveDialog(false);
-                                setSelectedEvaluation(emptyEval);
-                            }}
+                            onComplete={onSaveComplete}
+                            onHide={hideDialogs}
                         />
                     )}
 
@@ -413,7 +376,7 @@ const EvaluationManager = (props: EvaluationManagerProps) => {
                             showDialog={showDeleteDialog}
                             selectedDataInfo={String(selectedEvaluation.title)}
                             onConfirmAsync={deleteEvaluation}
-                            onHide={() => setShowDeleteDialog(false)}
+                            onHide={hideDialogs}
                         />
                     )}
                 </div>

@@ -15,6 +15,12 @@ export const PERMISSIONS = {
   PERMISSION: {
     READ: "permission:read",
   },
+  ORGANIAZTION: {
+    CREATE: "organization:create",
+    READ: "organization:read",
+    UPDATE: "organization:update",
+    DELETE: "organization:delete",
+  },
   CALENDAR: {
     CREATE: "calendar:create",
     READ: "calendar:read",
@@ -26,6 +32,12 @@ export const PERMISSIONS = {
     READ: "grant:read",
     UPDATE: "grant:update",
     DELETE: "grant:delete",
+  },
+  EVALUATION: {
+    CREATE: "evaluation:create",
+    READ: "evaluation:read",
+    UPDATE: "evaluation:update",
+    DELETE: "evaluation:delete",
   },
   POSITION: {
     CREATE: "position:create",

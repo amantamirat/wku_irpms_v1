@@ -44,6 +44,26 @@
     "description": "Delete roles"
   },
   {
+    "category": "Organization Management",
+    "name": "organization:create",
+    "description": "Create new organizations"
+  },
+  {
+    "category": "Organization Management",
+    "name": "organization:read",
+    "description": "View organizations"
+  },
+  {
+    "category": "Organization Management",
+    "name": "organization:update",
+    "description": "Edit organizations"
+  },
+  {
+    "category": "Organization Management",
+    "name": "organization:delete",
+    "description": "Delete organizations"
+  },
+  {
     "category": "Permission Management",
     "name": "permission:read",
     "description": "View permissions"
@@ -87,6 +107,26 @@
     "category": "Grant Management",
     "name": "grant:delete",
     "description": "Delete grant entries"
+  },
+  {
+    "category": "Evaluation Management",
+    "name": "evaluation:create",
+    "description": "Create evaluation entries"
+  },
+  {
+    "category": "Evaluation Management",
+    "name": "evaluation:read",
+    "description": "Read evaluation entries"
+  },
+  {
+    "category": "Evaluation Management",
+    "name": "evaluation:update",
+    "description": "Update evaluation entries"
+  },
+  {
+    "category": "Evaluation Management",
+    "name": "evaluation:delete",
+    "description": "Delete evaluation entries"
   },
   {
     "category": "Position Management",

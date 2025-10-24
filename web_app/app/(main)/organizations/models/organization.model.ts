@@ -33,6 +33,7 @@ export enum Classification {
 
 // Enum for Ownership
 export enum Ownership {
+    //Internal = 'Internal',
     Private = 'Private',
     Public = 'Public',
     NGO = 'NGO',

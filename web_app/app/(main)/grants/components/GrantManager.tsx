@@ -37,6 +37,17 @@ const GrantManager = () => {
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
     const toast = useRef<Toast>(null);
 
+    useEffect(() => {
+        setFilters(initFilters());
+        setGlobalFilter('');
+    }, []);
+
+
+    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
+    };
+
+
     const fetchGrants = useCallback(async () => {
         try {
             const data = await GrantApi.getGrants({});
@@ -49,17 +60,6 @@ const GrantManager = () => {
     useEffect(() => {
         fetchGrants();
     }, [fetchGrants]);
-
-    useEffect(() => {
-        setFilters(initFilters());
-        setGlobalFilter('');
-
-    }, []);
-
-
-    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
-    };
 
 
     if (error) {

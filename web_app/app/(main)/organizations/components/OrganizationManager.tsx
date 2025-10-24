@@ -11,6 +11,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import SaveDialog from './SaveDialog';
 import { getChildType, Organization, OrganizationalUnit } from '../models/organization.model';
 import { OrganizationApi } from '../api/organization.api';
+import ErrorComponent from '@/components/ErrorComponent';
 
 
 interface OrganizationMangerProps {
@@ -36,7 +37,7 @@ const OrganizationManager = (props: OrganizationMangerProps) => {
     const [selectedOrganization, setSelectedOrganization] = useState<Organization>(emptyOrganization);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const toast = useRef<Toast>(null);
+    //const toast = useRef<Toast>(null);
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
     const isProgram = props.type === OrganizationalUnit.Program;
@@ -47,7 +48,12 @@ const OrganizationManager = (props: OrganizationMangerProps) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
 
-    const loadOrganizations = useCallback(async () => {
+    useEffect(() => {
+        setFilters(initFilters());
+        setGlobalFilter('');
+    }, []);
+
+    const fetchOrganizations = useCallback(async () => {
         try {
             if (props.parent) {
                 const data = await OrganizationApi.getOrganizations({ parent: props.parent._id });
@@ -57,16 +63,20 @@ const OrganizationManager = (props: OrganizationMangerProps) => {
                 setOrganizations(data);
             }
         } catch (err) {
-            console.error('Failed to load organizations:', err);
-            setError(`Failed to load calls. Please try again later. Error:${err}`);
+            //console.error('Failed to load organizations:', err);
+            setError(`Failed to load organizations. ${err}`);
         }
     }, [props.parent?._id, type, error]);
 
     useEffect(() => {
-        setFilters(initFilters());
-        setGlobalFilter('');
-        loadOrganizations();
-    }, [type, loadOrganizations]);
+        fetchOrganizations();
+    }, [type, fetchOrganizations]);
+
+    if (error) {
+        return (
+            <ErrorComponent errorMessage={error} />
+        );
+    }
 
     const onSaveComplete = (savedOrganization: Organization) => {
         let _organizations = [...organizations];
@@ -77,7 +87,6 @@ const OrganizationManager = (props: OrganizationMangerProps) => {
         } else {
             _organizations.push({ ...savedOrganization });
         }
-
         setOrganizations(_organizations);
         hideDialogs();
     };
@@ -153,7 +162,7 @@ const OrganizationManager = (props: OrganizationMangerProps) => {
                 {rowData.classification}
             </span>
         );
-    };    
+    };
 
     const ownershipBodyTemplate = (rowData: Organization) => {
         return (
@@ -167,7 +176,6 @@ const OrganizationManager = (props: OrganizationMangerProps) => {
         <div className="grid">
             <div className="col-12">
                 <div className="card">
-                    <Toast ref={toast} />
                     <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
                     <DataTable
                         ref={dt}
@@ -241,7 +249,6 @@ const OrganizationManager = (props: OrganizationMangerProps) => {
                             onConfirmAsync={deleteOrganization}
                             onHide={hideDialogs}
                         />}
-
                 </div>
             </div>
         </div>

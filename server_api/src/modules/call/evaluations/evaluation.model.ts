@@ -54,7 +54,8 @@ const StageSchema = new Schema<IStage>({
   parent: {
     type: Schema.Types.ObjectId,
     ref: Evaluation.modelName,
-    required: true
+    required: true,
+    immutable: true,
   },
   order: {
     type: Number,
@@ -78,7 +79,8 @@ const CriterionSchema = new Schema<ICriterion>({
   parent: {
     type: Schema.Types.ObjectId,
     ref: Stage.modelName,
-    required: true
+    required: true,
+    immutable: true,
   },
   weight_value: {
     type: Number,
@@ -105,7 +107,8 @@ const OptionSchema = new Schema<IOption>({
   parent: {
     type: Schema.Types.ObjectId,
     ref: Criterion.modelName,
-    required: true
+    required: true,
+    immutable: true,
   },
   weight_value: {
     type: Number,

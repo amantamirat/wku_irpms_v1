@@ -40,7 +40,7 @@ export const OrganizationApi = {
         if (!organization._id) {
             throw new Error("_id required.");
         }
-        const url = `${end_point}/${organization._id}`;
+        const url = `${end_point}${organization._id}`;
         const updatedOrganization = await ApiClient.put(url, organization);
         return updatedOrganization as Organization;
     },

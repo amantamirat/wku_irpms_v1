@@ -3,7 +3,6 @@
 .academic-badge,
 .classification-badge,
 .category-badge,
-.ownership-badge,
 .calendar-badge,
 .call-badge,
 .collaborator-badge,
@@ -181,22 +180,6 @@
     }
 }
 
-.ownership-badge {
-    &.ownership-private {
-        background: #FFF3E0;
-        color: #EF6C00;
-    }
-
-    &.ownership-public {
-        background: #E3F2FD;
-        color: #1565C0;
-    }
-
-    &.ownership-ngo {
-        background: #E8F5E9;
-        color: #2E7D32;
-    }
-}
 
 .gender-badge {
     display: inline-block;

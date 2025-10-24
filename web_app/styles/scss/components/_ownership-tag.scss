@@ -1,0 +1,28 @@
+.ownership-badge {
+    border-radius: var(--border-radius);
+    padding: .25em .5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .3px;
+}
+
+.ownership-badge.ownership-private {
+    background: #FFF3E0;
+    color: #EF6C00;
+}
+
+.ownership-badge.ownership-public {
+    background: #E3F2FD;
+    color: #1565C0;
+}
+
+.ownership-badge.ownership-ngo {
+    background: #E8F5E9;
+    color: #2E7D32;
+}
+
+.ownership-badge.ownership-internal {
+    background: #F3E5F5;
+    color: #6A1B9A;
+}

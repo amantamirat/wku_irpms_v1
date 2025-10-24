@@ -5,35 +5,95 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { EvalType, Evaluation, FormType, validateEvaluation } from '../../models/evaluation.model';
+import { EvaluationApi } from '../../api/evaluation.api';
+import { Toast } from 'primereact/toast';
+import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
+import { Organization, OrganizationalUnit } from '@/app/(main)/organizations/models/organization.model';
+
 
 interface SaveDialogProps {
     visible: boolean;
     evaluation: Evaluation;
-    onChange: (e: Evaluation) => void;
-    onSave: () => void;
+    onComplete?: (saved: Evaluation) => void;
     onHide: () => void;
 }
 
-function SaveDialog(props: SaveDialogProps) {
-    const { visible, evaluation, onChange, onSave, onHide } = props;
+const SaveDialog = ({ visible, evaluation, onComplete, onHide }: SaveDialogProps) => {
+    const toast = useRef<Toast>(null);
+    const [localEvaluation, setLocalEvaluation] = useState<Evaluation>({ ...evaluation });
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
+    const [directorates, setDirectorates] = useState<Organization[]>([]);
 
-    const isStage = evaluation.type === EvalType.stage;
-    const isCreterion = evaluation.type === EvalType.criterion;
-    const isOption = evaluation.type === EvalType.option;
+    const isEvaluation = localEvaluation.type === EvalType.evaluation;
+    const isStage = localEvaluation.type === EvalType.stage;
+    const isCriterion = localEvaluation.type === EvalType.criterion;
+    const isOption = localEvaluation.type === EvalType.option;
 
-    const save = async () => {
-        setSubmitted(true);
-        const result = validateEvaluation(evaluation);
-        if (!result.valid) {
-            setErrorMessage(result.message);
-            return;
-        }
+    // Fetch directorates for evaluation creation
+    useEffect(() => {
+        const fetchDirectorates = async () => {
+            try {
+                const data = await OrganizationApi.getOrganizations({ type: OrganizationalUnit.Directorate });
+                setDirectorates(data);
+            } catch (err) {
+                console.error('Failed to fetch directorates', err);
+            }
+        };
+        fetchDirectorates();
+    }, []);
+
+    useEffect(() => {
+        setLocalEvaluation({ ...evaluation });
+    }, [evaluation]);
+
+    useEffect(() => {
+        if (!visible) clearForm();
+    }, [visible]);
+
+    const clearForm = () => {
+        setSubmitted(false);
         setErrorMessage(undefined);
-        onSave();
+        setLocalEvaluation({ ...evaluation });
+    };
+
+    const saveEvaluation = async () => {
+        try {
+            setSubmitted(true);
+            const validation = validateEvaluation(localEvaluation);
+            if (!validation.valid) {
+                throw new Error(validation.message);
+            }
+
+            let saved: Evaluation;
+            if (localEvaluation._id) {
+                saved = await EvaluationApi.updateEvaluation(localEvaluation);
+            } else {
+                saved = await EvaluationApi.createEvaluation(localEvaluation);
+            }
+            saved = {
+                ...saved,
+                directorate: localEvaluation.directorate,
+                parent: localEvaluation.parent
+            };
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Evaluation saved successfully',
+                life: 2000,
+            });
+
+            if (onComplete) setTimeout(() => onComplete(saved), 2000);
+        } catch (err: any) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Failed to save evaluation',
+                detail: err.message || 'An error occurred',
+                life: 2000,
+            });
+        }
     };
 
     const hide = () => {
@@ -45,82 +105,84 @@ function SaveDialog(props: SaveDialogProps) {
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={hide} />
-            <Button label="Save" icon="pi pi-check" text onClick={save} />
+            <Button label="Save" icon="pi pi-check" text onClick={saveEvaluation} />
         </>
     );
 
-    useEffect(() => {
-        if (!visible) {
-            setSubmitted(false);
-            setErrorMessage(undefined);
-        }
-    }, [visible]);
-
     return (
-        <Dialog
-            visible={visible}
-            style={{ width: '500px' }}
-            header={evaluation._id ? `Edit ${evaluation.type}` : `New ${evaluation.type}`}
-            modal
-            className="p-fluid"
-            footer={footer}
-            onHide={hide}
-        >
-            {evaluation && (
-                <>
+        <>
+            <Toast ref={toast} />
+            <Dialog
+                visible={visible}
+                style={{ width: '600px' }}
+                header={localEvaluation._id ? `Edit ${localEvaluation.type}` : `New ${localEvaluation.type}`}
+                modal
+                className="p-fluid"
+                footer={footer}
+                onHide={hide}
+            >
+                {(isEvaluation && !localEvaluation._id) && (
                     <div className="field">
-                        <label htmlFor="title">Title</label>
-                        <InputText
-                            id="title"
-                            value={evaluation.title}
-                            onChange={(e) => onChange({ ...evaluation, title: e.target.value })}
-                            required
-                            autoFocus
-                            className={classNames({ 'p-invalid': submitted && !evaluation.title })}
+                        <label htmlFor="directorate">Directorate</label>
+                        <Dropdown
+                            id="directorate"
+                            value={localEvaluation.directorate}
+                            options={directorates}
+                            optionLabel="name"
+                            onChange={(e) => setLocalEvaluation({ ...localEvaluation, directorate: e.value })}
+                            placeholder="Select Directorate"
+                            className={classNames({ 'p-invalid': submitted && !localEvaluation.directorate })}
                         />
                     </div>
+                )}
 
-                    {(isCreterion || isOption) && (<>
-                        <div className="field">
-                            <label htmlFor="weight_value">{isCreterion ? 'Weight ' : 'Value'}</label>
-                            <InputNumber
-                                id="weight_value"
-                                value={evaluation.weight_value}
-                                onChange={(e) =>
-                                    onChange({ ...evaluation, weight_value: e.value || 0 })
-                                }
-                                //max={isOption?}
-                                required
-                                className={classNames({
-                                    'p-invalid': submitted && (isCreterion) && (evaluation.weight_value == null || evaluation.weight_value <= 0),
-                                })}
-                            />
-                        </div>
+                <div className="field">
+                    <label htmlFor="title">Title</label>
+                    <InputText
+                        id="title"
+                        value={localEvaluation.title}
+                        onChange={(e) => setLocalEvaluation({ ...localEvaluation, title: e.target.value })}
+                        required
+                        autoFocus
+                        className={classNames({ 'p-invalid': submitted && !localEvaluation.title })}
+                    />
+                </div>
 
-                        {isCreterion && (
-                            <div className="field">
-                                <label htmlFor="form_type">Form Type</label>
-                                <Dropdown
-                                    id="type"
-                                    value={evaluation.form_type}
-                                    options={Object.values(FormType).map(g => ({ label: g, value: g }))}
-                                    onChange={(e) =>
-                                        onChange({ ...evaluation, form_type: e.value })
-                                    }
-                                    placeholder="Select Form"
-                                    className={classNames({ 'p-invalid': submitted && isCreterion && !evaluation.form_type })}
-                                />
-                            </div>
-                        )}
-                    </>)
-                    }
-                </>)}
+                {(isCriterion || isOption) && (
+                    <div className="field">
+                        <label htmlFor="weight_value">{isCriterion ? 'Weight' : 'Value'}</label>
+                        <InputNumber
+                            id="weight_value"
+                            value={localEvaluation.weight_value}
+                            onChange={(e) =>
+                                setLocalEvaluation({ ...localEvaluation, weight_value: e.value || 0 })
+                            }
+                            required
+                            className={classNames({
+                                'p-invalid': submitted && (isCriterion || isOption) && (localEvaluation.weight_value == null),
+                            })}
+                        />
+                    </div>
+                )}
 
-            {errorMessage && (
-                <small className="p-error">{errorMessage}</small>
-            )}
-        </Dialog>
+                {isCriterion && (
+                    <div className="field">
+                        <label htmlFor="form_type">Form Type</label>
+                        <Dropdown
+                            id="form_type"
+                            value={localEvaluation.form_type}
+                            options={Object.values(FormType).map(f => ({ label: f, value: f }))}
+                            onChange={(e) => setLocalEvaluation({ ...localEvaluation, form_type: e.value })}
+                            placeholder="Select Form Type"
+                            className={classNames({ 'p-invalid': submitted && !localEvaluation.form_type })}
+                        />
+                    </div>
+                )}
+
+                {errorMessage && <small className="p-error">{errorMessage}</small>}
+            </Dialog>
+        </>
     );
-}
+};
 
 export default SaveDialog;

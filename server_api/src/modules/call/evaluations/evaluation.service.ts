@@ -80,7 +80,7 @@ export class EvaluationService {
         if (options.type) filter.type = options.type;
         if (options.parent) filter.parent = options.parent;
         if (options.directorate) filter.directorate = options.directorate;
-        return await BaseEvaluation.find(filter).lean();
+        return await BaseEvaluation.find(filter).populate('directorate').lean();
     }
 
     static async updateEvaluation(id: string, data: Partial<CreateEvaluationDto>) {
