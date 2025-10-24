@@ -86,7 +86,7 @@ export class ApplicantController {
         }
     }
 
-    static async linkApplicant(req: Request, res: Response) {
+    static async linkUser(req: Request, res: Response) {
         try {
             const { id } = req.params;
             const linked = await ApplicantService.autoLinkUserByEmail(id);

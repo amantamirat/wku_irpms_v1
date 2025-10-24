@@ -177,7 +177,16 @@ const AppMenu = () => {
                         }
                     ]
                 },
-
+                {
+                    label: 'Positions',
+                    icon: 'pi pi-fw pi-flag',
+                    to: '/applicants/positions',
+                    visible: hasPermission([
+                        PERMISSIONS.POSITION.CREATE,
+                        PERMISSIONS.POSITION.UPDATE,
+                        PERMISSIONS.POSITION.DELETE
+                    ])
+                },
                 {
                     label: 'User Accounts',
                     icon: PrimeIcons.USERS,
@@ -201,17 +210,7 @@ const AppMenu = () => {
                             PERMISSIONS.ROLE.DELETE
                         ]
                     )
-                },
-                {
-                    label: 'Positions',
-                    icon: 'pi pi-fw pi-flag',
-                    to: '/applicants/positions',
-                    visible: hasPermission([
-                        PERMISSIONS.POSITION.CREATE,
-                        PERMISSIONS.POSITION.UPDATE,
-                        PERMISSIONS.POSITION.DELETE
-                    ])
-                },
+                }
             ]
         },
         {

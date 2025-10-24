@@ -37,7 +37,7 @@ router.delete('/:id',
 router.patch('/:id',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.APPLICANT.UPDATE]),
-    ApplicantController.linkApplicant
+    ApplicantController.linkUser
 );
 
 export default router;
