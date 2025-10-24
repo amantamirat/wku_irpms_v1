@@ -10,6 +10,7 @@ export interface CreateUserDto {
     password: string;
     email: string;
     roles: mongoose.Types.ObjectId[];
+    organizations?: mongoose.Types.ObjectId[];
     status: UserStatus;
 }
 

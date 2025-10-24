@@ -8,12 +8,13 @@ export class UserController {
 
   static async createUser(req: Request, res: Response) {
     try {
-      const { user_name, password, email, roles, status } = req.body;
+      const { user_name, password, email, roles, organizations, status } = req.body;
       const data: CreateUserDto = {
         user_name: user_name,
         password: password,
         email: email,
         roles: roles ? roles.map((r: string) => new mongoose.Types.ObjectId(r)) : [],
+        organizations: organizations ? organizations.map((o: string) => new mongoose.Types.ObjectId(o)) : [],
         status: status as UserStatus
       };
       const created = await UserService.createUser(data);
@@ -35,11 +36,12 @@ export class UserController {
   static async updateUser(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { user_name, status, roles } = req.body;
+      const { user_name, status, roles, organizations } = req.body;
       const data: Partial<CreateUserDto> = {
         user_name: user_name ? user_name : undefined,
         status: status ? status : undefined,
         roles: roles ? roles.map((r: string) => new mongoose.Types.ObjectId(r)) : undefined,
+        organizations: organizations ? organizations.map((o: string) => new mongoose.Types.ObjectId(o)) : undefined,
       };
       const updated = await UserService.updateUser(id, data);
       successResponse(res, 201, "User updated successfully", updated);
