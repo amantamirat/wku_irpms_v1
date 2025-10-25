@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema, model } from 'mongoose';
-import { Gender, Accessibility, Scope } from './applicant.enum';
+import { Gender, Accessibility } from './applicant.enum';
 import { COLLECTIONS } from '../../util/collections.enum';
 
 
@@ -9,7 +9,7 @@ export interface IApplicant extends Document {
     last_name: string;
     birth_date: Date;
     gender: Gender;
-    scope: Scope;
+    //scope: Scope;
     organization: mongoose.Types.ObjectId;
     email?: string;
     user?: mongoose.Types.ObjectId;
@@ -36,11 +36,12 @@ const ApplicantSchema = new Schema<IApplicant>({
         enum: Object.values(Gender),
         required: true
     },
+    /*
     scope: {
         type: String,
         enum: Object.values(Scope),
-        required: true
     },
+    */
     organization: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.ORGANIZATION,

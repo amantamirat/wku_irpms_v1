@@ -17,7 +17,7 @@ export class ApplicantController {
                 last_name,
                 birth_date,
                 gender,
-                scope,
+                //scope,
                 organization,
                 email,
                 accessibility
@@ -27,7 +27,7 @@ export class ApplicantController {
                 last_name,
                 birth_date: new Date(birth_date),
                 gender,
-                scope,
+                //scope,
                 organization: new mongoose.Types.ObjectId(organization as string),
                 email,
                 accessibility: accessibility || []
@@ -60,7 +60,7 @@ export class ApplicantController {
             }
 
             const filter = {
-                scope: scope ? scope : undefined,
+                //scope: scope ? scope : undefined,
                 organization: orgFilter,
             } as GetApplicantsOptions;
 
@@ -84,7 +84,7 @@ export class ApplicantController {
                 last_name,
                 birth_date,
                 gender,
-                //organization,
+                organization,
                 email,
                 accessibility
             } = req.body;
@@ -93,7 +93,7 @@ export class ApplicantController {
                 last_name,
                 birth_date: new Date(birth_date),
                 gender,
-                //organization: new mongoose.Types.ObjectId(organization as string),
+                organization: new mongoose.Types.ObjectId(organization as string),
                 email,
                 accessibility: accessibility || []
             };

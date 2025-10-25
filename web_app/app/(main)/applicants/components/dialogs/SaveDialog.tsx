@@ -10,7 +10,7 @@ import { MultiSelect } from 'primereact/multiselect';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
-import { accessibilityOptions, Applicant, genderOptions, Scope, scopeToOrganizationUnit, validateApplicant } from '../../models/applicant.model';
+import { accessibilityOptions, Applicant, applicantUnits, genderOptions, validateApplicant } from '../../models/applicant.model';
 import { ApplicantApi } from '../../api/applicant.api';
 import { useAuth } from '@/contexts/auth-context';
 
@@ -32,18 +32,18 @@ const SaveApplicantDialog = ({ visible, applicant, onHide, onComplete }: SaveApp
     useEffect(() => {
         const fetchOrganizations = () => {
             try {
-                if (!localApplicant.scope) return;
-                const type = scopeToOrganizationUnit[localApplicant.scope];
-                if (type) {
-                    const data = getOrganizationsByType(type);
-                    setUserOrganizations(data);
-                }
+                //if (!localApplicant.scope) return;
+                //const type = scopeToOrganizationUnit[localApplicant.scope];
+                //if (type) {
+                const data = getOrganizationsByType(applicantUnits);
+                setUserOrganizations(data);
+                //}
             } catch (err) {
                 console.error('Failed to fetch organizations:', err);
             }
         };
         fetchOrganizations();
-    }, [localApplicant.scope]);
+    }, []);
 
     useEffect(() => {
         setLocalApplicant({ ...applicant });
@@ -101,8 +101,8 @@ const SaveApplicantDialog = ({ visible, applicant, onHide, onComplete }: SaveApp
     );
 
     const isEdit = !!localApplicant._id;
-    const isAcademic = localApplicant.scope === Scope.academic;
-    const isSupportive = localApplicant.scope === Scope.supportive;
+    //const isAcademic = localApplicant.scope === Scope.academic;
+    //const isSupportive = localApplicant.scope === Scope.supportive;
 
     return (
         <>
@@ -116,23 +116,23 @@ const SaveApplicantDialog = ({ visible, applicant, onHide, onComplete }: SaveApp
                 footer={footer}
                 onHide={onHide}
             >
-                {!localApplicant._id &&
-                    <>
-                        <div className="field">
-                            <label htmlFor="organization">
-                                {isAcademic ? 'Department' : isSupportive ? 'Office' : 'Organization'}
-                            </label>
-                            <Dropdown
-                                id="organization"
-                                value={localApplicant.organization}
-                                options={userOrganizations}
-                                optionLabel="name"
-                                onChange={(e) => setLocalApplicant({ ...localApplicant, organization: e.value })}
-                                placeholder="Select Department"
-                                className={classNames({ 'p-invalid': submitted && !localApplicant.organization })}
-                            />
-                        </div>
-                    </>}
+
+                <>
+                    <div className="field">
+                        <label htmlFor="organization">
+                            {'Organization'}
+                        </label>
+                        <Dropdown
+                            id="organization"
+                            value={localApplicant.organization}
+                            options={userOrganizations}
+                            optionLabel="name"
+                            onChange={(e) => setLocalApplicant({ ...localApplicant, organization: e.value })}
+                            placeholder="Select Department"
+                            className={classNames({ 'p-invalid': submitted && !localApplicant.organization })}
+                        />
+                    </div>
+                </>
 
                 <div className="field">
                     <label htmlFor="first_name">First Name</label>

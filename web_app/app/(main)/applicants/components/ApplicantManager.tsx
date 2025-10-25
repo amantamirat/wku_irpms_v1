@@ -10,16 +10,17 @@ import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ApplicantApi } from '../api/applicant.api';
-import { Applicant, Gender, Scope, scopeToOrganizationUnit } from '../models/applicant.model';
+import { Applicant, applicantUnits, Gender } from '../models/applicant.model';
 import SaveDialog from './dialogs/SaveDialog';
 import { useAuth } from '@/contexts/auth-context';
+import { OrganizationalUnit } from '../../organizations/models/organization.model';
 
 
 interface ApplicantManagerProps {
-    scope: Scope;
+    //scope: Scope;
 }
 
-const ApplicantManager = ({ scope }: ApplicantManagerProps) => {
+const ApplicantManager = (/*{ scope }: ApplicantManagerProps*/) => {
 
     const emptyApplicant: Applicant = {
         first_name: '',
@@ -27,12 +28,14 @@ const ApplicantManager = ({ scope }: ApplicantManagerProps) => {
         organization: '',
         birth_date: new Date(),
         gender: Gender.Male,
-        scope: scope,
+        //scope: scope,
     };
 
+    /*
     const isAcademic = scope === Scope.academic;
     const isSupportive = scope === Scope.supportive;
     const isExternal = scope === Scope.external;
+    */
 
     const [applicants, setApplicants] = useState<Applicant[]>([]);
     const dt = useRef<DataTable<any>>(null);
@@ -40,7 +43,7 @@ const ApplicantManager = ({ scope }: ApplicantManagerProps) => {
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
 
     const { getOrganizationsByType } = useAuth();
-    const [userOrganizations, setUserOrganizations] = useState<string[]>([]);
+
 
     const [selectedApplicant, setSelectedApplicant] = useState<Applicant>(emptyApplicant);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -60,10 +63,9 @@ const ApplicantManager = ({ scope }: ApplicantManagerProps) => {
 
     const loadApplicants = useCallback(async () => {
         try {
-            const type = scopeToOrganizationUnit[scope]; // map scope to org type
-            if (!type) return;
-
-            const orgs = getOrganizationsByType(type).map((org) => org._id);
+            //const type = scopeToOrganizationUnit[scope]; // map scope to org type
+            //if (!type) return;
+            const orgs = getOrganizationsByType(applicantUnits).map((org) => org._id);
 
             if (orgs.length === 0) {
                 // No organizations available for this scope, skip fetching
@@ -72,18 +74,18 @@ const ApplicantManager = ({ scope }: ApplicantManagerProps) => {
             }
 
             const data = await ApplicantApi.getApplicants({
-                scope,
+                //scope,
                 organization: orgs, // array of IDs
             });
             setApplicants(data);
         } catch (err) {
             console.error('Error loading applicants:', err);
         }
-    }, [scope, getOrganizationsByType]);
+    }, []);
 
     useEffect(() => {
         loadApplicants();
-    }, [scope, loadApplicants]);
+    }, []);
 
 
 
@@ -138,7 +140,7 @@ const ApplicantManager = ({ scope }: ApplicantManagerProps) => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage {scope}</h5>
+            <h5 className="m-0">Manage Applicants</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
@@ -193,7 +195,7 @@ const ApplicantManager = ({ scope }: ApplicantManagerProps) => {
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} applicants"
                         globalFilter={globalFilter}
-                        emptyMessage={`No ${scope} data found.`}
+                        emptyMessage={'No applicat data found.'}
                         header={header}
                         scrollable
                         filters={filters}
@@ -205,7 +207,7 @@ const ApplicantManager = ({ scope }: ApplicantManagerProps) => {
                         <Column field="last_name" header="Last Name" sortable />
                         <Column field="gender" header="Gender" body={genderBodyTemplate} sortable />
                         <Column field="birth_date" header="Birth Date" body={(rowData) => new Date(rowData.birth_date!).toLocaleDateString('en-CA')} />
-                        <Column field="organization.name" header={isAcademic ? "Department" : isSupportive ? "Office" : "Organization"} sortable />
+                        <Column field="organization.name" header={"Organization"} sortable />
                         <Column field="email" header="Email" sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
                     </DataTable>

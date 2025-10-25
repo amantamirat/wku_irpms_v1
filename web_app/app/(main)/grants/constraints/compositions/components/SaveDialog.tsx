@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Composition, validateComposition } from '../models/composition.model';
 import { ApplicantConstraintType, Constraint, isListConstraint, isRangeConstraint } from '../../models/constraint.model';
 import { Toast } from 'primereact/toast';
-import { accessibilityOptions, genderOptions, scopeOptions } from '@/app/(main)/applicants/models/applicant.model';
+import { accessibilityOptions, applicantUnits, genderOptions, scopeOptions } from '@/app/(main)/applicants/models/applicant.model';
 
 interface SaveDialogProps {
     visible: boolean;
@@ -111,7 +111,7 @@ function SaveDialog(props: SaveDialogProps) {
                         id="item"
                         value={composition.item}
                         options={parent.constraint === ApplicantConstraintType.GENDER ? genderOptions :
-                            parent.constraint === ApplicantConstraintType.ACCESSIBILITY ? accessibilityOptions : scopeOptions}
+                            parent.constraint === ApplicantConstraintType.ACCESSIBILITY ? accessibilityOptions : applicantUnits}
                         onChange={(e) => setComposition({ ...composition, item: e.value })}
                         placeholder="Select Item"
 

@@ -1,6 +1,7 @@
 import { Organization, OrganizationalUnit } from "../../organizations/models/organization.model";
 
 
+
 // Used for also Category
 export enum Scope {
     academic = 'Academic',
@@ -28,14 +29,17 @@ export type Applicant = {
     last_name: string;
     birth_date: Date;
     gender: Gender;
-    scope: Scope;
+    //scope: Scope;
     organization: string | Organization;
     email?: string;
     accessibility?: Accessibility[];
-    user?:string;
+    user?: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
+
+export const applicantUnits = [OrganizationalUnit.Department, OrganizationalUnit.External, OrganizationalUnit.Supportive]
+
 
 export const accessibilityOptions = Object.values(Accessibility).map(a => ({
     label: a,
@@ -76,6 +80,7 @@ export const validateApplicant = (applicant: Applicant): { valid: boolean; messa
             return { valid: false, message: "Email is not valid." };
         }
     }
+    /*
     if (applicant.scope === Scope.academic && !applicant.organization) {
         return { valid: false, message: 'Department is required for academic category.' };
     }
@@ -87,9 +92,11 @@ export const validateApplicant = (applicant: Applicant): { valid: boolean; messa
     if (applicant.scope === Scope.external && !applicant.organization) {
         return { valid: false, message: 'External Organization is required for external category.' };
     }
-
+*/
     return { valid: true };
 };
+
+/*
 
 //convert the applicant scope to the approprate unit umbrella
 export const scopeToOrganizationUnit: Record<Scope, OrganizationalUnit> = {
@@ -97,4 +104,6 @@ export const scopeToOrganizationUnit: Record<Scope, OrganizationalUnit> = {
     [Scope.supportive]: OrganizationalUnit.Supportive,
     [Scope.external]: OrganizationalUnit.External,
 };
+
+*/
 

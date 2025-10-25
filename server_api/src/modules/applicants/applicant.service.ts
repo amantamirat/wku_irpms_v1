@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import Applicant from "./applicant.model";
-import { Gender, Accessibility, Scope } from "./applicant.enum";
+import { Gender, Accessibility } from "./applicant.enum";
 import { Organization } from "../organization/organization.model";
 import { Unit } from "../organization/organization.enum";
 import { User } from "../users/user.model";
@@ -8,7 +8,7 @@ import { checkOrganizationOwnership } from "../../util/ownershipChecker";
 
 export interface GetApplicantsOptions {
     organization?: mongoose.Types.ObjectId | mongoose.Types.ObjectId[];
-    scope?: Scope;
+    //scope?: Scope;
 }
 
 export interface CreateApplicantDto {
@@ -16,28 +16,41 @@ export interface CreateApplicantDto {
     last_name: string;
     birth_date: Date;
     gender: Gender;
-    scope: Scope;
+    //scope: Scope;
     organization: mongoose.Types.ObjectId;
     email?: string;
     accessibility?: Accessibility[];
     user?: mongoose.Types.ObjectId;
 }
-
+/*
 const scopeToOrganizationUnit: Record<Scope, Unit> = {
     Academic: Unit.Department,
     Supportive: Unit.Supportive,
     External: Unit.External,
 };
+*/
+
+export const applicantUnits = [Unit.Department, Unit.External, Unit.Supportive]
+
 
 export class ApplicantService {
 
     private static async validateApplicant(applicant: Partial<CreateApplicantDto>) {
+        /*
         if (applicant.scope && applicant.organization) {
             const expected = scopeToOrganizationUnit[applicant.scope];
             const org = await Organization.findById(applicant.organization);
             if (!org || org.type !== expected) {
                 throw new Error(`Scope ${applicant.scope} requires organization of unit ${expected}`);
             }
+        }
+        */
+        if (!applicant.organization) {
+            throw new Error("Organization required.");
+        }
+        const org = await Organization.findOne({ _id: applicant.organization, type: { $in: applicantUnits } });
+        if (!org) {
+            throw new Error('Organization is not found');
         }
     }
 
@@ -53,7 +66,7 @@ export class ApplicantService {
 
     static async getApplicants(options: GetApplicantsOptions) {
         const filter: any = {};
-        if (options.scope) filter.scope = options.scope;
+        //if (options.scope) filter.scope = options.scope;
         if (options.organization) {
             if (Array.isArray(options.organization)) {
                 filter.organization = { $in: options.organization };
@@ -65,6 +78,13 @@ export class ApplicantService {
     }
 
     static async updateApplicant(id: string, data: Partial<CreateApplicantDto>, userId: string) {
+        if (data.organization) {
+            const ownsOrg = await checkOrganizationOwnership(userId, data.organization);
+            if (!ownsOrg) {
+                throw new Error("You are not authorized to create an applicant under this organization.");
+            }
+        }
+        await this.validateApplicant(data);
         const applicant = await Applicant.findById(id);
         if (!applicant) throw new Error("Applicant not found");
         const ownsOrg = await checkOrganizationOwnership(userId, applicant.organization);

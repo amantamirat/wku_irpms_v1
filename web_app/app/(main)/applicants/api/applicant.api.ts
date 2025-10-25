@@ -1,5 +1,5 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Applicant, Scope } from "../models/applicant.model";
+import { Applicant } from "../models/applicant.model";
 
 const end_point = '/applicants/';
 
@@ -16,7 +16,7 @@ function sanitizeApplicant(applicant: Partial<Applicant>): Partial<Applicant> {
 
 export interface GetApplicantsOptions {
     organization?: string | string[];
-    scope?: Scope;
+    //scope?: Scope;
 }
 
 
@@ -30,7 +30,7 @@ export const ApplicantApi = {
 
     async getApplicants(options: GetApplicantsOptions): Promise<Applicant[]> {
         const query = new URLSearchParams();
-        if (options.scope) query.append("scope", options.scope);
+        //if (options.scope) query.append("scope", options.scope);
 
         if (options.organization) {
             if (Array.isArray(options.organization)) {
@@ -49,7 +49,7 @@ export const ApplicantApi = {
             throw new Error("_id required.");
         }
         const url = `${end_point}${applicant._id}`;
-        const updatedApplicant = await ApiClient.put(url, applicant);
+        const updatedApplicant = await ApiClient.put(url, sanitizeApplicant(applicant));
         return updatedApplicant as Applicant;
     },
 

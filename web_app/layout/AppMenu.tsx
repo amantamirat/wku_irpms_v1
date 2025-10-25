@@ -8,7 +8,7 @@ import { AppMenuItem } from '@/types';
 import { PrimeIcons } from 'primereact/api';
 import { Organization, OrganizationalUnit } from '@/app/(main)/organizations/models/organization.model';
 import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
-import { Scope } from '@/app/(main)/applicants/models/applicant.model';
+//import { Scope } from '@/app/(main)/applicants/models/applicant.model';
 import { useAuth } from '@/contexts/auth-context';
 import { PERMISSIONS } from '@/types/permissions';
 
@@ -118,6 +118,8 @@ const AppMenu = () => {
                             PERMISSIONS.APPLICANT.DELETE
                         ]
                     ),
+                    to: '/applicants',
+                    /*
                     items: [
                         {
                             label: 'Academic',
@@ -138,6 +140,7 @@ const AppMenu = () => {
                             visible: hasOrganizationType([OrganizationalUnit.External]),
                         }
                     ]
+                    */
                 },
                 {
                     label: 'Organizations',

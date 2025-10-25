@@ -1,12 +1,12 @@
 'use client';
-import React, { useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import ApplicantManager from './components/ApplicantManager';
-import { Scope } from './models/applicant.model';
+//import { Scope } from './models/applicant.model';
 
 
 
 const ApplicantPage = () => {
+
+    /*
     const searchParams = useSearchParams();
     const router = useRouter();
     const scopeParam = searchParams.get('scope');
@@ -26,8 +26,9 @@ const ApplicantPage = () => {
         return null;
     }
     const scope = scopeParam as Scope;
+    */
     return (
-        <ApplicantManager scope={scope} />
+        <ApplicantManager  />
     );
 };
 

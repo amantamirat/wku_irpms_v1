@@ -1,11 +1,10 @@
 
 import mongoose from "mongoose";
 import Applicant from "../../applicants/applicant.model";
-import { ApplicantConstraintType, OperationMode, ProjectConstraintType } from "./constraint.enum";
-import { ApplicantConstraint, ProjectConstraint } from "./constraint.model";
-import { Gender } from "../../applicants/applicant.enum";
 import { CreateProjectDto } from "../../project/project.service";
 import { Composition } from "./compositions/composition.model";
+import { ApplicantConstraintType, OperationMode, ProjectConstraintType } from "./constraint.enum";
+import { ApplicantConstraint, ProjectConstraint } from "./constraint.model";
 
 export class ConstraintValidator {
 
@@ -88,7 +87,7 @@ export class ConstraintValidator {
         const applicantConstraints = await ApplicantConstraint.find({ grant: grantId }).lean();
         if (!applicantConstraints || applicantConstraints.length === 0) return;
 
-        const applicantData = await Applicant.find({ _id: { $in: applicants } }).lean();
+        const applicantData = await Applicant.find({ _id: { $in: applicants } }).populate('organization').lean();
         if (applicantData.length === 0 || applicantData.length !== applicants.length) {
             throw new Error("Applicants not found in the database.");
         }
@@ -148,9 +147,32 @@ export class ConstraintValidator {
                         break;
                     }
 
-                    // ---------------- SCOPE ----------------
+                     // ---------------- SCOPE ----------------
+                    /*
                     case ApplicantConstraintType.SCOPE: {
                         const filtered = applicantData.filter(a => a.scope === item);
+                        const count = filtered.length;
+
+                        if (value === 0 && count > 0) {
+                            throw new Error(`Applicants with scope [${item}] are not allowed (found ${count}).`);
+                        }
+
+                        if (mode === OperationMode.COUNT && value > 0) {
+                            if (count < value) {
+                                throw new Error(`At least ${value} applicants with scope [${item}] are required (found ${count}).`);
+                            }
+                        } else if (mode === OperationMode.RATIO && value > 0) {
+                            const ratio = count / applicantData.length;
+                            if (ratio < value) {
+                                throw new Error(`Applicants with scope [${item}] ratio (${(ratio * 100).toFixed(1)}%) must be  ${(value * 100).toFixed(1)}%.`);
+                            }
+                        }
+                        break;
+                    }
+                    */
+
+                    case ApplicantConstraintType.SCOPE: {
+                        const filtered = applicantData.filter(a => (a.organization as any).type === item);
                         const count = filtered.length;
 
                         if (value === 0 && count > 0) {
