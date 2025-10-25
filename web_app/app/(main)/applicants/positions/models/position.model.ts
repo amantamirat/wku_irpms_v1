@@ -1,4 +1,4 @@
-import { Scope } from "../../models/applicant.model";
+//import { Scope } from "../../models/applicant.model";
 
 
 export enum PositionType {
@@ -10,7 +10,7 @@ export type Position = {
     _id?: string;
     name: string;
     type: PositionType;
-    category?: string | Scope; // for position only
+    category?: string ; // for position only
     parent?: string | Position; // for rank only
     createdAt?: Date;
     updatedAt?: Date;

@@ -1,13 +1,13 @@
 import mongoose from "mongoose";
 import { BasePosition, Position, Rank } from "./position.model";
 import { PositionType } from "./position.enum";
-import { Scope } from "../applicant.enum";
+//import { Scope } from "../applicant.enum";
 
 
 export interface CreatePositionDto {
     name: string;
     type: PositionType;
-    category?: Scope; // only for Position
+    category?: string; // only for Position
     parent?: mongoose.Types.ObjectId; // only for Rank
 }
 

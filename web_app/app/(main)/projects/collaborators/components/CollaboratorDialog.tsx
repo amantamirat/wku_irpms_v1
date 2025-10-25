@@ -1,17 +1,17 @@
 'use client';
 
 import { ApplicantApi } from "@/app/(main)/applicants/api/applicant.api";
-import { Applicant, Scope, scopeToOrganizationUnit } from "@/app/(main)/applicants/models/applicant.model";
+import { Applicant, applicantUnits } from "@/app/(main)/applicants/models/applicant.model";
+import { applicantTemplate } from "@/app/(main)/applicants/models/applicant.template";
 import { OrganizationApi } from "@/app/(main)/organizations/api/organization.api";
-import { Organization } from "@/app/(main)/organizations/models/organization.model";
+import { Organization, OrganizationalUnit } from "@/app/(main)/organizations/models/organization.model";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
-import { useEffect, useRef, useState } from "react";
-import { applicantTemplate } from "@/app/(main)/applicants/models/applicant.template";
 import { Toast } from "primereact/toast";
-import { Collaborator, CollaboratorStatus } from "../models/collaborator.model";
+import { useEffect, useRef, useState } from "react";
 import { CollaboratorApi } from "../api/collaborator.api";
+import { Collaborator, CollaboratorStatus } from "../models/collaborator.model";
 
 interface CollaboratorDialogProps {
     collaborator: Collaborator;
@@ -23,7 +23,7 @@ interface CollaboratorDialogProps {
 
 export default function CollaboratorDialog({ collaborator, visible, onSave, onComplete, onHide }: CollaboratorDialogProps) {
     const [localCollaborator, setLocalCollaborator] = useState<Collaborator>({ ...collaborator });
-    const [scope, setScope] = useState<Scope>();
+    const [scope, setScope] = useState<OrganizationalUnit>();
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [workspace, setWorkspace] = useState<Organization>();
     const [applicants, setApplicants] = useState<Applicant[]>([]);
@@ -35,9 +35,9 @@ export default function CollaboratorDialog({ collaborator, visible, onSave, onCo
         const fetchOrganizations = async () => {
             if (!scope) return;
             try {
-                const type = scopeToOrganizationUnit[scope];
-                if (type) {
-                    const data = await OrganizationApi.getOrganizations({ type });
+                //const type = scopeToOrganizationUnit[scope];
+                if (scope) {
+                    const data = await OrganizationApi.getOrganizations({ type: scope });
                     if (isMounted) setOrganizations(data);
                 }
             } catch (err) {
@@ -123,7 +123,7 @@ export default function CollaboratorDialog({ collaborator, visible, onSave, onCo
                             <Dropdown
                                 id="scope"
                                 value={scope}
-                                options={Object.values(Scope).map(g => ({ label: g, value: g }))}
+                                options={applicantUnits}
                                 onChange={(e) => setScope(e.value)}
                                 placeholder="Select Scope"
                             />

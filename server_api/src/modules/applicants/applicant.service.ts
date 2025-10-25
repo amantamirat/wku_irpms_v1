@@ -1,10 +1,9 @@
 import mongoose from "mongoose";
-import Applicant from "./applicant.model";
-import { Gender, Accessibility } from "./applicant.enum";
-import { Organization } from "../organization/organization.model";
-import { Unit } from "../organization/organization.enum";
-import { User } from "../users/user.model";
 import { checkOrganizationOwnership } from "../../util/ownershipChecker";
+import { Organization } from "../organization/organization.model";
+import { Accessibility, applicantUnits, Gender } from "./applicant.enum";
+import Applicant from "./applicant.model";
+import { User } from "../users/user.model";
 
 export interface GetApplicantsOptions {
     organization?: mongoose.Types.ObjectId | mongoose.Types.ObjectId[];
@@ -30,7 +29,7 @@ const scopeToOrganizationUnit: Record<Scope, Unit> = {
 };
 */
 
-export const applicantUnits = [Unit.Department, Unit.External, Unit.Supportive]
+
 
 
 export class ApplicantService {

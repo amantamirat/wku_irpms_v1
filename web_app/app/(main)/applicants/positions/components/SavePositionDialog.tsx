@@ -9,7 +9,8 @@ import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { Position, validatePosition, PositionType } from '../models/position.model';
 import { PositionApi } from '../api/position.api';
-import { scopeOptions } from '../../models/applicant.model';
+import { applicantUnits } from '../../models/applicant.model';
+//import { scopeOptions } from '../../models/applicant.model';
 
 
 interface SavePositionDialogProps {
@@ -134,7 +135,7 @@ const SavePositionDialog = (props: SavePositionDialogProps) => {
                         <Dropdown
                             id="category"
                             value={localPosition.category}
-                            options={scopeOptions}
+                            options={applicantUnits}
                             onChange={(e) =>
                                 setLocalPosition({ ...localPosition, category: e.value })
                             }

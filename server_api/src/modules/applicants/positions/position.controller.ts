@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { errorResponse, successResponse } from "../../../util/response";
 import { CreatePositionDto, GetPositionOptions, PositionService } from "./position.service";
 import { PositionType } from "./position.enum";
-import { Scope } from "../applicant.enum";
+//import { Scope } from "../applicant.enum";
 
 export class PositionController {
     // 🟢 CREATE
@@ -14,7 +14,7 @@ export class PositionController {
             const data: CreatePositionDto = {
                 type: type as PositionType,
                 name: name,
-                category: type === PositionType.position ? (category as Scope) : undefined,
+                category: type === PositionType.position ? category : undefined,
                 parent: type === PositionType.rank && parent
                     ? new mongoose.Types.ObjectId(parent as string)
                     : undefined,

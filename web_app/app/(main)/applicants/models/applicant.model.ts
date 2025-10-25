@@ -1,13 +1,14 @@
 import { Organization, OrganizationalUnit } from "../../organizations/models/organization.model";
 
 
-
+/*
 // Used for also Category
 export enum Scope {
     academic = 'Academic',
     supportive = 'Supportive',
     external = 'External',
 }
+*/
 
 export enum Gender {
     Male = 'Male',
@@ -51,10 +52,12 @@ export const genderOptions = Object.values(Gender).map(g => ({
     value: g
 }));
 
+/*
 export const scopeOptions = Object.values(Scope).map(s => ({
     label: s,
     value: s
 }));
+*/
 
 
 export const validateApplicant = (applicant: Applicant): { valid: boolean; message?: string } => {

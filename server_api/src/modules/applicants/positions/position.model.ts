@@ -1,7 +1,8 @@
 import mongoose, { Schema, model } from "mongoose";
 import { COLLECTIONS } from "../../../util/collections.enum";
-import { Scope } from "../applicant.enum";
+//import { Scope } from "../applicant.enum";
 import { PositionType } from "./position.enum";
+import { applicantUnits } from "../applicant.enum";
 
 interface BasePositionDocument extends Document {
     type: PositionType;
@@ -30,12 +31,12 @@ export const BasePosition = model<BasePositionDocument>(COLLECTIONS.POSITION, Ba
 
 interface PositionDocument extends BasePositionDocument {
     type: PositionType.position
-    category: Scope;
+    category: (typeof applicantUnits)[number];
 }
 
 const PositionSchema = new Schema<PositionDocument>(
     {
-        category: { type: String, enum: Object.values(Scope), required: true },
+        category: { type: String, enum: applicantUnits, required: true },
     }
 );
 
