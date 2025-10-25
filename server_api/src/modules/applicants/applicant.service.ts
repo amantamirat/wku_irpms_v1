@@ -7,7 +7,7 @@ import { User } from "../users/user.model";
 import { checkOrganizationOwnership } from "../../util/ownershipChecker";
 
 export interface GetApplicantsOptions {
-    organization?: mongoose.Types.ObjectId;
+    organization?: mongoose.Types.ObjectId | mongoose.Types.ObjectId[];
     scope?: Scope;
 }
 
@@ -54,7 +54,13 @@ export class ApplicantService {
     static async getApplicants(options: GetApplicantsOptions) {
         const filter: any = {};
         if (options.scope) filter.scope = options.scope;
-        if (options.organization) filter.organization = options.organization;
+        if (options.organization) {
+            if (Array.isArray(options.organization)) {
+                filter.organization = { $in: options.organization };
+            } else {
+                filter.organization = options.organization;
+            }
+        }
         return await Applicant.find(filter).populate('organization').lean();
     }
 
@@ -81,7 +87,7 @@ export class ApplicantService {
 
     static async autoLinkUserByEmail(applicantId: string) {
         const applicant = await Applicant.findById(applicantId);
-        if (!applicant) throw new Error("Applicant not found");        
+        if (!applicant) throw new Error("Applicant not found");
         if (!applicant.email) throw new Error("Applicant has no email to link");
         if (applicant.user) throw new Error("This user is already linked to another applicant");
         const user = await User.findOne({ email: applicant.email });

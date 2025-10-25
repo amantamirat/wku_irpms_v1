@@ -12,6 +12,7 @@ import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 import { accessibilityOptions, Applicant, genderOptions, Scope, scopeToOrganizationUnit, validateApplicant } from '../../models/applicant.model';
 import { ApplicantApi } from '../../api/applicant.api';
+import { useAuth } from '@/contexts/auth-context';
 
 interface SaveApplicantDialogProps {
     visible: boolean;
@@ -21,20 +22,21 @@ interface SaveApplicantDialogProps {
 }
 
 const SaveApplicantDialog = ({ visible, applicant, onHide, onComplete }: SaveApplicantDialogProps) => {
-    const toast = useRef<Toast>(null);
+    const { getOrganizationsByType } = useAuth();
     const [localApplicant, setLocalApplicant] = useState<Applicant>({ ...applicant });
-    const [organizations, setOrganizations] = useState<Organization[]>([]);
+    const [userOrganizations, setUserOrganizations] = useState<Organization[]>([]);
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
+    const toast = useRef<Toast>(null);
 
     useEffect(() => {
-        const fetchOrganizations = async () => {
+        const fetchOrganizations = () => {
             try {
                 if (!localApplicant.scope) return;
                 const type = scopeToOrganizationUnit[localApplicant.scope];
                 if (type) {
-                    const data = await OrganizationApi.getOrganizations({ type });
-                    setOrganizations(data);
+                    const data = getOrganizationsByType(type);
+                    setUserOrganizations(data);
                 }
             } catch (err) {
                 console.error('Failed to fetch organizations:', err);
@@ -123,7 +125,7 @@ const SaveApplicantDialog = ({ visible, applicant, onHide, onComplete }: SaveApp
                             <Dropdown
                                 id="organization"
                                 value={localApplicant.organization}
-                                options={organizations}
+                                options={userOrganizations}
                                 optionLabel="name"
                                 onChange={(e) => setLocalApplicant({ ...localApplicant, organization: e.value })}
                                 placeholder="Select Department"

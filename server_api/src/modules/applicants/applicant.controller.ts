@@ -42,16 +42,35 @@ export class ApplicantController {
     static async getApplicants(req: Request, res: Response) {
         try {
             const { scope, organization } = req.query;
+
+            let orgFilter: mongoose.Types.ObjectId[] | undefined;
+
+            if (organization) {
+                let orgs: string[] = [];
+
+                if (Array.isArray(organization)) {
+                    // repeated query params
+                    orgs = organization as string[];
+                } else {
+                    // single string, could be comma-separated
+                    orgs = (organization as string).split(',').map(o => o.trim());
+                }
+
+                orgFilter = orgs.map((id) => new mongoose.Types.ObjectId(id));
+            }
+
             const filter = {
                 scope: scope ? scope : undefined,
-                organization: organization ? new mongoose.Types.ObjectId(organization as string) : undefined
+                organization: orgFilter,
             } as GetApplicantsOptions;
+
             const applicants = await ApplicantService.getApplicants(filter);
             successResponse(res, 200, 'Applicants fetched successfully', applicants);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
+
 
     static async updateApplicant(req: AuthenticatedRequest, res: Response) {
         try {

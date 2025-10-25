@@ -10,15 +10,16 @@ import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ApplicantApi } from '../api/applicant.api';
-import { Applicant, Gender, Scope } from '../models/applicant.model';
+import { Applicant, Gender, Scope, scopeToOrganizationUnit } from '../models/applicant.model';
 import SaveDialog from './dialogs/SaveDialog';
+import { useAuth } from '@/contexts/auth-context';
 
 
 interface ApplicantManagerProps {
     scope: Scope;
 }
 
-const ApplicantManager = (props: ApplicantManagerProps) => {
+const ApplicantManager = ({ scope }: ApplicantManagerProps) => {
 
     const emptyApplicant: Applicant = {
         first_name: '',
@@ -26,13 +27,21 @@ const ApplicantManager = (props: ApplicantManagerProps) => {
         organization: '',
         birth_date: new Date(),
         gender: Gender.Male,
-        scope: props.scope,
+        scope: scope,
     };
+
+    const isAcademic = scope === Scope.academic;
+    const isSupportive = scope === Scope.supportive;
+    const isExternal = scope === Scope.external;
 
     const [applicants, setApplicants] = useState<Applicant[]>([]);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
+
+    const { getOrganizationsByType } = useAuth();
+    const [userOrganizations, setUserOrganizations] = useState<string[]>([]);
+
     const [selectedApplicant, setSelectedApplicant] = useState<Applicant>(emptyApplicant);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showLinkDialog, setShowLinkDialog] = useState(false);
@@ -43,28 +52,40 @@ const ApplicantManager = (props: ApplicantManagerProps) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
 
-    const scope = props.scope;
-    const isAcademic = scope === Scope.academic;
-    const isSupportive = scope === Scope.supportive;
-    const isExternal = scope === Scope.external;
+    useEffect(() => {
+        setFilters(initFilters());
+        setGlobalFilter('');
+    }, []);
+
 
     const loadApplicants = useCallback(async () => {
         try {
-            const data = await ApplicantApi.getApplicants({ scope: scope });
+            const type = scopeToOrganizationUnit[scope]; // map scope to org type
+            if (!type) return;
+
+            const orgs = getOrganizationsByType(type).map((org) => org._id);
+
+            if (orgs.length === 0) {
+                // No organizations available for this scope, skip fetching
+                setApplicants([]);
+                return;
+            }
+
+            const data = await ApplicantApi.getApplicants({
+                scope,
+                organization: orgs, // array of IDs
+            });
             setApplicants(data);
         } catch (err) {
             console.error('Error loading applicants:', err);
         }
-    }, [scope]);
+    }, [scope, getOrganizationsByType]);
 
     useEffect(() => {
         loadApplicants();
     }, [scope, loadApplicants]);
 
-    useEffect(() => {
-        setFilters(initFilters());
-        setGlobalFilter('');
-    }, []);
+
 
     const onSaveComplete = (savedApplicant: Applicant) => {
         let _applicants = [...applicants]; // applicants is your local state array of Applicant

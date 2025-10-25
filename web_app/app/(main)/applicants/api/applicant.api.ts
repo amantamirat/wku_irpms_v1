@@ -1,6 +1,5 @@
-import { Scope, Organization } from "@/app/(main)/organizations/models/organization.model";
 import { ApiClient } from "@/api/ApiClient";
-import { Applicant } from "../models/applicant.model";
+import { Applicant, Scope } from "../models/applicant.model";
 
 const end_point = '/applicants/';
 
@@ -10,13 +9,13 @@ function sanitizeApplicant(applicant: Partial<Applicant>): Partial<Applicant> {
         ...applicant,
         organization:
             typeof applicant.organization === 'object' && applicant.organization !== null
-                ? (applicant.organization as Organization)._id
+                ? (applicant.organization as any)._id
                 : applicant.organization,
     };
 }
 
 export interface GetApplicantsOptions {
-    organization?: string;
+    organization?: string | string[];
     scope?: Scope;
 }
 
@@ -32,10 +31,18 @@ export const ApplicantApi = {
     async getApplicants(options: GetApplicantsOptions): Promise<Applicant[]> {
         const query = new URLSearchParams();
         if (options.scope) query.append("scope", options.scope);
-        if (options.organization) query.append("organization", options.organization);
+
+        if (options.organization) {
+            if (Array.isArray(options.organization)) {
+                query.append("organization", options.organization.join(',')); // comma-separated
+            } else {
+                query.append("organization", options.organization);
+            }
+        }
+
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Applicant[];
-    },   
+    },
 
     async updateApplicant(applicant: Partial<Applicant>): Promise<Applicant> {
         if (!applicant._id) {

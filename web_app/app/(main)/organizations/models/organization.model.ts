@@ -135,4 +135,15 @@ export const validateOrganization = (
 };
 
 
+export function sanitizeOrganization(organization: Partial<Organization>): Partial<Organization> {
+    return {
+        ...organization,
+        parent:
+            typeof organization.parent === 'object' && organization.parent !== null
+                ? (organization.parent as Organization)._id
+                : organization.parent,
+    };
+}
+
+
 

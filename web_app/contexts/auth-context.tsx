@@ -13,6 +13,7 @@ interface AuthContextType {
     logout: () => void;
     hasPermission: (perms: string[]) => boolean;
     hasOrganizationType: (types: OrganizationalUnit[]) => boolean;
+    getOrganizationsByType: (type: OrganizationalUnit) => any[];
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -56,8 +57,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return user.organizations.some((org: any) => types.includes(org.type));
     };
 
+    const getOrganizationsByType = (type: OrganizationalUnit): any[] => {
+        if (!user?.organizations) return [];
+        return user.organizations.filter((org: any) => type === org.type);
+    };
+
     return (
-        <AuthContext.Provider value={{ user, loading, loggedIn: !!user, login, logout, hasPermission, hasOrganizationType }}>
+        <AuthContext.Provider value={{ user, loading, loggedIn: !!user, login, logout, hasPermission, hasOrganizationType, getOrganizationsByType }}>
             {children}
         </AuthContext.Provider>
     );
