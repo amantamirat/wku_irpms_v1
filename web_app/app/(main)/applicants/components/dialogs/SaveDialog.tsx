@@ -114,20 +114,23 @@ const SaveApplicantDialog = ({ visible, applicant, onHide, onComplete }: SaveApp
                 footer={footer}
                 onHide={onHide}
             >
-                <div className="field">
-                    <label htmlFor="organization">
-                        {isAcademic ? 'Department' : isSupportive ? 'Office' : 'Organization'}
-                    </label>
-                    <Dropdown
-                        id="organization"
-                        value={localApplicant.organization}
-                        options={organizations}
-                        optionLabel="name"
-                        onChange={(e) => setLocalApplicant({ ...localApplicant, organization: e.value })}
-                        placeholder="Select Department"
-                        className={classNames({ 'p-invalid': submitted && !localApplicant.organization })}
-                    />
-                </div>
+                {!localApplicant._id &&
+                    <>
+                        <div className="field">
+                            <label htmlFor="organization">
+                                {isAcademic ? 'Department' : isSupportive ? 'Office' : 'Organization'}
+                            </label>
+                            <Dropdown
+                                id="organization"
+                                value={localApplicant.organization}
+                                options={organizations}
+                                optionLabel="name"
+                                onChange={(e) => setLocalApplicant({ ...localApplicant, organization: e.value })}
+                                placeholder="Select Department"
+                                className={classNames({ 'p-invalid': submitted && !localApplicant.organization })}
+                            />
+                        </div>
+                    </>}
 
                 <div className="field">
                     <label htmlFor="first_name">First Name</label>

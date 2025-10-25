@@ -2,11 +2,16 @@ import { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import { errorResponse, successResponse } from '../../util/response';
 import { ApplicantService, CreateApplicantDto, GetApplicantsOptions } from './applicant.service';
+import { AuthenticatedRequest } from '../users/auth/auth.middleware';
 
 export class ApplicantController {
 
-    static async createApplicant(req: Request, res: Response) {
+    static async createApplicant(req: AuthenticatedRequest, res: Response) {
         try {
+            if (!req.user) {
+                throw new Error("User not found!");
+            }
+            const userId = req.user._id;
             const {
                 first_name,
                 last_name,
@@ -27,7 +32,7 @@ export class ApplicantController {
                 email,
                 accessibility: accessibility || []
             };
-            const created = await ApplicantService.createApplicant(data);
+            const created = await ApplicantService.createApplicant(data, userId);
             successResponse(res, 201, "Applicant created successfully", created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -48,15 +53,19 @@ export class ApplicantController {
         }
     }
 
-    static async updateApplicant(req: Request, res: Response) {
+    static async updateApplicant(req: AuthenticatedRequest, res: Response) {
         try {
+            if (!req.user) {
+                throw new Error("User not found!");
+            }
+            const userId = req.user._id;
             const { id } = req.params;
             const {
                 first_name,
                 last_name,
                 birth_date,
                 gender,
-                organization,
+                //organization,
                 email,
                 accessibility
             } = req.body;
@@ -65,21 +74,25 @@ export class ApplicantController {
                 last_name,
                 birth_date: new Date(birth_date),
                 gender,
-                organization: new mongoose.Types.ObjectId(organization as string),
+                //organization: new mongoose.Types.ObjectId(organization as string),
                 email,
                 accessibility: accessibility || []
             };
-            const updated = await ApplicantService.updateApplicant(id, data);
+            const updated = await ApplicantService.updateApplicant(id, data, userId);
             successResponse(res, 201, "Applicant updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
-    static async deleteApplicant(req: Request, res: Response) {
+    static async deleteApplicant(req: AuthenticatedRequest, res: Response) {
         try {
+            if (!req.user) {
+                throw new Error("User not found!");
+            }
+            const userId = req.user._id;
             const { id } = req.params;
-            const deleted = await ApplicantService.deleteApplicant(id);
+            const deleted = await ApplicantService.deleteApplicant(id, userId);
             successResponse(res, 201, "Applicant deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
