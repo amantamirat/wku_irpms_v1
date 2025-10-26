@@ -1,11 +1,10 @@
 import dotenv from 'dotenv';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import { CacheService } from '../../../util/cache/cache.service';
 import { errorResponse } from '../../../util/response';
 import { UserStatus } from '../user.enum';
 import JwtPayload from './auth.model';
-import { User } from '../user.model';
-import { cache } from '../../../util/cache';
 
 dotenv.config();
 
@@ -47,32 +46,11 @@ export const checkPermission = (requiredPermission: string[]) => {
       if (!req.user) {
         return errorResponse(res, 401, "Unauthorized. No user in request.");
       }
-
-      const cacheKey = `user:${req.user._id}:permissions`;
-      let userPermissions = cache.get<string[]>(cacheKey);
-
-      if (!userPermissions) {
-        const user = await User.findById(req.user._id)
-          .populate({
-            path: 'roles',
-            populate: { path: 'permissions' }
-          });
-
-        if (!user) return errorResponse(res, 401, "User not found.");
-
-        userPermissions = user.roles?.flatMap((role: any) =>
-          role.permissions?.map((p: any) => p.name)
-        ) || [];
-
-        cache.set(cacheKey, userPermissions);
-      }
-      
-      const hasPermission =  requiredPermission.some((perm) => userPermissions.includes(perm));        
-
+      const userId = req.user._id;
+      const hasPermission = CacheService.hasPermissions(userId, requiredPermission);
       if (!hasPermission) {
         return errorResponse(res, 403, "Forbidden. Permission missing.");
       }
-
       next();
     } catch (err) {
       console.error("Permission check failed:", err);

@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
-import { checkOrganizationOwnership } from "../../util/ownershipChecker";
 import { Organization } from "../organization/organization.model";
 import { Accessibility, applicantUnits, Gender } from "./applicant.enum";
 import Applicant from "./applicant.model";
 import { User } from "../users/user.model";
+import { CacheService } from "../../util/cache/cache.service";
 
 export interface GetApplicantsOptions {
     organization?: mongoose.Types.ObjectId | mongoose.Types.ObjectId[];
@@ -54,10 +54,7 @@ export class ApplicantService {
     }
 
     static async createApplicant(data: CreateApplicantDto, userId: string) {
-        const ownsOrg = await checkOrganizationOwnership(userId, data.organization);
-        if (!ownsOrg) {
-            throw new Error("You are not authorized to create an applicant under this organization.");
-        }
+        await CacheService.validateOwnership(userId, data.organization);
         await this.validateApplicant(data);
         const createdApplicant = await Applicant.create({ ...data });
         return createdApplicant;
@@ -78,18 +75,12 @@ export class ApplicantService {
 
     static async updateApplicant(id: string, data: Partial<CreateApplicantDto>, userId: string) {
         if (data.organization) {
-            const ownsOrg = await checkOrganizationOwnership(userId, data.organization);
-            if (!ownsOrg) {
-                throw new Error("You are not authorized to create an applicant under this organization.");
-            }
+            await CacheService.validateOwnership(userId, data.organization);
         }
         await this.validateApplicant(data);
         const applicant = await Applicant.findById(id);
         if (!applicant) throw new Error("Applicant not found");
-        const ownsOrg = await checkOrganizationOwnership(userId, applicant.organization);
-        if (!ownsOrg) {
-            throw new Error("You are not authorized to create an applicant under this organization.");
-        }
+        await CacheService.validateOwnership(userId, applicant.organization);
         Object.assign(applicant, data);
         return await applicant.save();
     }
@@ -97,10 +88,7 @@ export class ApplicantService {
     static async deleteApplicant(id: string, userId: string) {
         const applicant = await Applicant.findById(id);
         if (!applicant) throw new Error("Applicant not found");
-        const ownsOrg = await checkOrganizationOwnership(userId, applicant.organization);
-        if (!ownsOrg) {
-            throw new Error("You are not authorized to create an applicant under this organization.");
-        }
+        await CacheService.validateOwnership(userId, applicant.organization);
         return await applicant.deleteOne();
     }
 

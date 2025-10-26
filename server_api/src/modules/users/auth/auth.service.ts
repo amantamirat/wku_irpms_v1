@@ -7,7 +7,7 @@ import { User } from "../user.model";
 import JwtPayload from "./auth.model";
 import Applicant from "../../applicants/applicant.model";
 import { UserService } from "../user.service";
-import { cache } from "../../../util/cache";
+import { CacheService } from "../../../util/cache/cache.service";
 
 
 export interface LoginUserDto {
@@ -52,8 +52,9 @@ export class AuthService {
 
         const organizations = user.organizations?.map((org: any) => org._id) || []
 
-        cache.set(`user:${user._id}:permissions`, permissions);
-        cache.set(`user:${user._id}:organizations`, organizations);
+        CacheService.setUserOrganizations(user._id as string, organizations);
+        CacheService.setUserPermissions(user._id as string, permissions);
+
 
         const linkedApplicant = await Applicant.findOne({ user: user._id })
             .populate('organization')

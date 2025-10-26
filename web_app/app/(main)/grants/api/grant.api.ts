@@ -34,6 +34,11 @@ export const GrantApi = {
         return data as Grant[];
     },
 
+    async getUserGrants(): Promise<Grant[]> {
+        const data = await ApiClient.get(`${end_point}/user`);
+        return data as Grant[];
+    },
+
 
     async updateGrant(grant: Partial<Grant>): Promise<Grant> {
         if (!grant._id) {

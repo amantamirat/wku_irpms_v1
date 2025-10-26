@@ -50,7 +50,7 @@ const GrantManager = () => {
 
     const fetchGrants = useCallback(async () => {
         try {
-            const data = await GrantApi.getGrants({});
+            const data = await GrantApi.getUserGrants();
             setGrants(data);
         } catch (err) {
             setError(`Failed to load grant data ${err}`);

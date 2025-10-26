@@ -1,16 +1,16 @@
 'use client';
+import { useAuth } from '@/contexts/auth-context';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
+import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
+import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
-import { Grant, validateGrant } from '../models/grant.model';
 import { Organization, OrganizationalUnit } from '../../organizations/models/organization.model';
-import { OrganizationApi } from '../../organizations/api/organization.api';
-import { Dropdown } from 'primereact/dropdown';
 import { GrantApi } from '../api/grant.api';
-import { Toast } from 'primereact/toast';
+import { Grant, validateGrant } from '../models/grant.model';
 
 interface SaveDialogProps {
     visible: boolean;
@@ -20,6 +20,7 @@ interface SaveDialogProps {
 }
 
 const SaveDialog = ({ visible, grant, onComplete, onHide }: SaveDialogProps) => {
+    const { getOrganizationsByType } = useAuth();
     const toast = useRef<Toast>(null);
     const [localGrant, setLocalGrant] = useState<Grant>({ ...grant });
     const [submitted, setSubmitted] = useState(false);
@@ -29,7 +30,7 @@ const SaveDialog = ({ visible, grant, onComplete, onHide }: SaveDialogProps) => 
     useEffect(() => {
         const fetchOrganizations = async () => {
             try {
-                const data = await OrganizationApi.getOrganizations({ type: OrganizationalUnit.Directorate });
+                const data = getOrganizationsByType([OrganizationalUnit.Directorate]);
                 setOrganizations(data);
             } catch (err) {
                 console.error('Failed to fetch organizations:', err);
@@ -118,7 +119,7 @@ const SaveDialog = ({ visible, grant, onComplete, onHide }: SaveDialogProps) => 
                 className="p-fluid"
                 footer={footer}
                 onHide={hide}
-                //maximizable
+            //maximizable
             >
                 <div className="field">
                     <label htmlFor="organization">

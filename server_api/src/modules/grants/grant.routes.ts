@@ -16,12 +16,21 @@ router.get(
   '/',
   verifyActiveAccount,
   checkPermission([
-    PERMISSIONS.GRANT.READ,
+    PERMISSIONS.GRANT.READ
+  ]),
+  GrantController.getGrants
+);
+
+
+router.get(
+  '/user',
+  verifyActiveAccount,
+  checkPermission([
     PERMISSIONS.GRANT.CREATE,
     PERMISSIONS.GRANT.UPDATE,
     PERMISSIONS.GRANT.DELETE
   ]),
-  GrantController.getGrants
+  GrantController.getUserGrants
 );
 
 router.put(
