@@ -8,14 +8,15 @@ export class EvaluationController {
 
     static async createEvaluation(req: Request, res: Response) {
         try {
-            const { type, title, directorate, parent, form_type, weight_value } = req.body;
+            const { type, title, directorate, parent, form_type, weight_value, isValidation } = req.body;
             const data: CreateEvaluationDto = {
                 type: type,
                 title: title,
                 directorate: type === EvaluationType.evaluation ? new mongoose.Types.ObjectId(directorate as string) : undefined,
                 parent: type !== EvaluationType.evaluation ? new mongoose.Types.ObjectId(parent as string) : undefined,
                 form_type: type === EvaluationType.criterion ? form_type : undefined,
-                weight_value: type === EvaluationType.criterion || type === EvaluationType.option ? weight_value : undefined
+                weight_value: type === EvaluationType.criterion || type === EvaluationType.option ? weight_value : undefined,
+                isValidation: type === EvaluationType.stage && isValidation ? isValidation : undefined
             };
             const evaluation = await EvaluationService.createEvaluation(data);
             successResponse(res, 201, "Evaluation created successfully", evaluation);
@@ -69,7 +70,7 @@ export class EvaluationController {
     static async reorderStageLevel(req: Request, res: Response) {
         try {
             const { id, direction } = req.params;
-            const data = await EvaluationService.reorderStage(id, direction);
+            const data = await EvaluationService.reorderStage(id, direction as 'up' | 'down');
             successResponse(res, 201, "Stage reorder successfully", data);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

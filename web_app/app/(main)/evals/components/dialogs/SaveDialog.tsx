@@ -4,6 +4,7 @@ import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
+import { InputSwitch } from 'primereact/inputswitch';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 import { EvalType, Evaluation, FormType, validateEvaluation } from '../../models/evaluation.model';
@@ -11,7 +12,6 @@ import { EvaluationApi } from '../../api/evaluation.api';
 import { Toast } from 'primereact/toast';
 import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
 import { Organization, OrganizationalUnit } from '@/app/(main)/organizations/models/organization.model';
-
 
 interface SaveDialogProps {
     visible: boolean;
@@ -32,18 +32,21 @@ const SaveDialog = ({ visible, evaluation, onComplete, onHide }: SaveDialogProps
     const isCriterion = localEvaluation.type === EvalType.criterion;
     const isOption = localEvaluation.type === EvalType.option;
 
-    // Fetch directorates for evaluation creation
+    // ✅ Fetch directorates ONLY when the type is Evaluation
     useEffect(() => {
         const fetchDirectorates = async () => {
+            if (!isEvaluation) return;
             try {
-                const data = await OrganizationApi.getOrganizations({ type: OrganizationalUnit.Directorate });
+                const data = await OrganizationApi.getOrganizations({
+                    type: OrganizationalUnit.Directorate
+                });
                 setDirectorates(data);
             } catch (err) {
                 console.error('Failed to fetch directorates', err);
             }
         };
         fetchDirectorates();
-    }, []);
+    }, [isEvaluation]);
 
     useEffect(() => {
         setLocalEvaluation({ ...evaluation });
@@ -57,6 +60,15 @@ const SaveDialog = ({ visible, evaluation, onComplete, onHide }: SaveDialogProps
         setSubmitted(false);
         setErrorMessage(undefined);
         setLocalEvaluation({ ...evaluation });
+    };
+
+    // ✅ Handle change in isValidation
+    const onValidationToggle = (value: boolean) => {
+        setLocalEvaluation(prev => ({
+            ...prev,
+            isValidation: value,
+            title: value ? 'Validation' : (prev._id ? prev.title : '') // reset only for new item
+        }));
     };
 
     const saveEvaluation = async () => {
@@ -121,6 +133,19 @@ const SaveDialog = ({ visible, evaluation, onComplete, onHide }: SaveDialogProps
                 footer={footer}
                 onHide={hide}
             >
+                {/* ✅ Show validation switch for Evaluation type */}
+                {(isStage&&!localEvaluation._id) && (
+                    <div className="field flex align-items-center justify-content-between">
+                        <label htmlFor="isValidation" className="mr-2">Is Validation</label>
+                        <InputSwitch
+                            id="isValidation"
+                            checked={localEvaluation.isValidation ?? false}
+                            onChange={(e) => onValidationToggle(e.value ?? false)}
+                        />
+                    </div>
+                )}
+
+                {/* ✅ Directorate dropdown — only for Evaluation creation */}
                 {(isEvaluation && !localEvaluation._id) && (
                     <div className="field">
                         <label htmlFor="directorate">Directorate</label>
@@ -129,20 +154,26 @@ const SaveDialog = ({ visible, evaluation, onComplete, onHide }: SaveDialogProps
                             value={localEvaluation.directorate}
                             options={directorates}
                             optionLabel="name"
-                            onChange={(e) => setLocalEvaluation({ ...localEvaluation, directorate: e.value })}
+                            onChange={(e) =>
+                                setLocalEvaluation({ ...localEvaluation, directorate: e.value })
+                            }
                             placeholder="Select Directorate"
                             className={classNames({ 'p-invalid': submitted && !localEvaluation.directorate })}
                         />
                     </div>
                 )}
 
+                {/* ✅ Title field (disabled when validation is ON) */}
                 <div className="field">
                     <label htmlFor="title">Title</label>
                     <InputText
                         id="title"
                         value={localEvaluation.title}
-                        onChange={(e) => setLocalEvaluation({ ...localEvaluation, title: e.target.value })}
+                        onChange={(e) =>
+                            setLocalEvaluation({ ...localEvaluation, title: e.target.value })
+                        }
                         required
+                        disabled={localEvaluation.isValidation === true}
                         autoFocus
                         className={classNames({ 'p-invalid': submitted && !localEvaluation.title })}
                     />
@@ -172,7 +203,9 @@ const SaveDialog = ({ visible, evaluation, onComplete, onHide }: SaveDialogProps
                             id="form_type"
                             value={localEvaluation.form_type}
                             options={Object.values(FormType).map(f => ({ label: f, value: f }))}
-                            onChange={(e) => setLocalEvaluation({ ...localEvaluation, form_type: e.value })}
+                            onChange={(e) =>
+                                setLocalEvaluation({ ...localEvaluation, form_type: e.value })
+                            }
                             placeholder="Select Form Type"
                             className={classNames({ 'p-invalid': submitted && !localEvaluation.form_type })}
                         />

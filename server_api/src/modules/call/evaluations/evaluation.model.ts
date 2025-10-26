@@ -48,6 +48,7 @@ interface ChildEvaluationDocument extends IBaseEvaluation {
 export interface IStage extends ChildEvaluationDocument {
   type: EvaluationType.stage;
   order: number;
+  isValidation?: boolean;
 }
 
 const StageSchema = new Schema<IStage>({
@@ -63,6 +64,9 @@ const StageSchema = new Schema<IStage>({
     max: 10,
     required: true
   },
+  isValidation: {
+    type: Boolean
+  }
 });
 
 StageSchema.index({ parent: 1, order: 1 }, { unique: true });

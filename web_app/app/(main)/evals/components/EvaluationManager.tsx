@@ -75,7 +75,7 @@ const EvaluationManager = ({ type, parent }: EvaluationManagerProps) => {
             });
             setEvaluations(data);
         } catch (err) {
-            setError(`Failed to load grant data ${err}`);
+            setError(`Failed to load evluation data ${err}`);
         } finally {
             setLoading(false);
         }
@@ -277,15 +277,16 @@ const EvaluationManager = ({ type, parent }: EvaluationManagerProps) => {
 
     const orderBodyTemplate = (rowData: Evaluation) => (
         <>
-            <Button icon="pi pi-sort-numeric-up" severity="success" className="p-button-rounded p-button-text"
-                tooltip="move the stage up" style={{ fontSize: '1.2rem' }} onClick={async () => {
-                    reorderStage(rowData, "up");
-                }} />
-            <Button icon="pi pi-sort-numeric-down" severity="danger" className="p-button-rounded p-button-text"
-                tooltip="move the stage down" style={{ fontSize: '1.2rem' }} onClick={async () => {
-                    reorderStage(rowData, "down");
-                }} />
-
+            {!rowData.isValidation && <>
+                <Button icon="pi pi-sort-numeric-up" severity="success" className="p-button-rounded p-button-text"
+                    tooltip="move the stage up" style={{ fontSize: '1.2rem' }} onClick={async () => {
+                        reorderStage(rowData, "up");
+                    }} />
+                <Button icon="pi pi-sort-numeric-down" severity="danger" className="p-button-rounded p-button-text"
+                    tooltip="move the stage down" style={{ fontSize: '1.2rem' }} onClick={async () => {
+                        reorderStage(rowData, "down");
+                    }} />
+            </>}
         </>
     );
 

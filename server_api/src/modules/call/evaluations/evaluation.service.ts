@@ -1,9 +1,9 @@
-import { EvaluationType, FormType } from "./evaluation.enum";
-import { BaseEvaluation, Criterion, Evaluation, Stage, IStage, Option } from "./evaluation.model";
 import mongoose from "mongoose";
-import { Call } from "../call.model";
 import { Directorate } from "../../organization/organization.model";
 import { ProjectStage } from "../../project/stages/stage.model";
+import { Call } from "../call.model";
+import { EvaluationType, FormType } from "./evaluation.enum";
+import { BaseEvaluation, Criterion, Evaluation, Option, Stage } from "./evaluation.model";
 
 export interface GetEvalsOptions {
     type?: EvaluationType;
@@ -19,12 +19,13 @@ export interface CreateEvaluationDto {
     order?: number;
     weight_value?: number;
     form_type?: FormType;
+    isValidation?: boolean;
 }
 
 
 export class EvaluationService {
 
-    private static async validateEvaluation(evl: Partial<CreateEvaluationDto>) {
+    private static async validateEvaluationCreation(evl: Partial<CreateEvaluationDto>) {
         if (evl.type === EvaluationType.evaluation) {
             const directorate = await Directorate.findById(evl.directorate);
             if (!directorate) {
@@ -36,6 +37,14 @@ export class EvaluationService {
                 const parent = await Evaluation.findById(evl.parent);
                 if (!parent) {
                     throw new Error("Evaluation Not Found!");
+                }
+                if (evl.isValidation) {
+                    const isValidationExist = await Stage.exists({ parent: evl.parent, isValidation: true });
+                    if (isValidationExist) throw new Error('Validation already created.');
+                }
+                const stageCount = await Stage.countDocuments({ parent: evl.parent });
+                if (stageCount >= 10) {
+                    throw new Error('Cannot create more than 10 stages per evaluation.');
                 }
             }
             else if (evl.type === EvaluationType.criterion) {
@@ -59,17 +68,45 @@ export class EvaluationService {
         }
     }
 
+    private static async validateEvaluationUpdation(evl: Partial<CreateEvaluationDto>, oldEvl: any) {
+        if (oldEvl.type === EvaluationType.criterion) {
+            if (evl.weight_value) {
+                const options = await Option.find({ parent: oldEvl._id }).lean();
+                for (const option of options) {
+                    if (option.weight_value > evl.weight_value) {
+                        throw new Error(`Option value (${option.weight_value}) is greater to the new criterion weight (${evl.weight_value}).`);
+                    }
+                }
+            }
+        }
+
+        if (oldEvl.type === EvaluationType.option) {
+            const creterion = oldEvl.parent;
+            if (evl.weight_value) {
+                if (evl.weight_value > creterion.weight_value) {
+                    throw new Error(`Option value (${evl.weight_value}) must be less than or equal to the criterion weight (${creterion.weight_value}).`);
+                }
+            }
+        }
+    }
+
     static async createEvaluation(data: CreateEvaluationDto) {
         const { type, ...rest } = data;
-        await this.validateEvaluation(data);
+        await this.validateEvaluationCreation(data);
         if (type === EvaluationType.stage) {
-            const maxStage = await Stage.findOne({
-                parent: data.parent
-            })
-                .sort({ order: -1 })
-                .select('order')
-                .lean();
-            rest.order = maxStage ? (maxStage.order ?? 0) + 1 : 1;
+            if (data.isValidation) {
+                rest.order = 10;
+            }
+            else {
+                const maxStage = await Stage.findOne({
+                    parent: data.parent, isValidation: { $ne: true }
+                })
+                    .sort({ order: -1 })
+                    .select('order')
+                    .lean();
+                rest.order = maxStage ? (maxStage.order ?? 0) + 1 : 1;
+            }
+
         }
         const createdEvaluation = await BaseEvaluation.create({ type, ...rest });
         return createdEvaluation;
@@ -84,10 +121,9 @@ export class EvaluationService {
     }
 
     static async updateEvaluation(id: string, data: Partial<CreateEvaluationDto>) {
-        const evaluation = await BaseEvaluation.findById(id);
+        const evaluation = await BaseEvaluation.findById(id).populate('parent');
         if (!evaluation) throw new Error("Evaluation not found");
-        await this.validateEvaluation(data);
-        //updation of creterion if there is options that greter than the weight value of the creterion 
+        await this.validateEvaluationUpdation(data, evaluation);
         Object.assign(evaluation, data);
         return evaluation.save();
     }
@@ -105,19 +141,20 @@ export class EvaluationService {
         } else if (evaluation.type === EvaluationType.stage) {
             const referencedByProject = await ProjectStage.exists({ stage: evaluation._id });
             if (referencedByProject) throw new Error(`Can not delete ${evaluation.title}, it is referenced in projects.`);
-            const stage = evaluation as unknown as IStage;
+            const stage = evaluation as any;
             const deleted = await evaluation.deleteOne();
-            await Stage.updateMany({
-                parent: stage.parent,
-                order: { $gt: stage.order },
-            },
-                { $inc: { order: -1 } }
-            );
+            if (!stage.isValidation) {
+                await Stage.updateMany({
+                    parent: stage.parent,
+                    order: { $gt: stage.order },
+                },
+                    { $inc: { order: -1 } }
+                );
+            }
             return deleted;
         }
         return await evaluation.deleteOne();
     }
-
 
 
     static async reorderStage(id: string, direction: string) {
@@ -125,9 +162,7 @@ export class EvaluationService {
             throw new Error('Direction must be "up" or "down".');
         }
         const current = await Stage.findById(id).lean();
-        if (!current) {
-            throw new Error('Stage not found.');
-        }
+         if (!current || current.isValidation) throw new Error('Stage not found');
 
         const currentReferencedByProject = await ProjectStage.exists({ stage: current._id });
         if (currentReferencedByProject) throw new Error(`Can not reorder ${current.title}, it is used in projects.`);
@@ -138,6 +173,7 @@ export class EvaluationService {
         }
         const target = await Stage.findOne({
             parent: current.parent,
+            isValidation: { $ne: true },
             order: direction === 'up' ? order - 1 : order + 1
         });
         if (!target) {
@@ -168,6 +204,10 @@ export class EvaluationService {
         );
         return true;
     }
+
+    
+
+
 
     /**
      * Batch import criteria (with optional options) under a given stage.
@@ -202,7 +242,8 @@ export class EvaluationService {
                 for (const option of criterion.options) {
                     // Only create option if weight_value is valid
                     if (option.weight_value > criterion.weight_value) {
-                        throw new Error(`Option value (${option.weight_value}) must be less than or equal to the criterion weight (${criterion.weight_value}).`);
+                        //throw new Error(`Option value (${option.weight_value}) must be less than or equal to the criterion weight (${criterion.weight_value}).`);
+                        continue;
                     }
                     const optionDoc = await Option.create({
                         type: EvaluationType.option,

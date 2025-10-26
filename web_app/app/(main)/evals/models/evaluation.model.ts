@@ -22,6 +22,7 @@ export type Evaluation = {
   order?: number;
   weight_value?: number;
   form_type?: FormType;
+  isValidation?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 };
