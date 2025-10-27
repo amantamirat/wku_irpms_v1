@@ -49,4 +49,9 @@ router.delete(
   ThemeController.deleteTheme
 );
 
+
+router.post('/import-themes', verifyActiveAccount,
+  checkPermission([PERMISSIONS.THEME.CREATE]),
+  ThemeController.importThemesBatch);
+
 export default router;

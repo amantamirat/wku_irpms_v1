@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { ThemeType, ThemeLevel } from "./theme.enum";
-import { BaseTheme, ThematicArea } from "./theme.model";
+import { BaseTheme, Componenet, FocusArea, ThematicArea, Theme } from "./theme.model";
 import { Call } from "../call.model";
 import { ProjectTheme } from "../../project/themes/project.theme.model";
 import { Directorate } from "../../organization/organization.model";
@@ -124,4 +124,114 @@ export class ThemeService {
 
         return await theme.deleteOne();
     }
+
+
+
+    static async importThemes(
+        thematic_areaId: mongoose.Types.ObjectId,
+        data: Array<{
+            title: string;
+            priority?: number;
+            children?: Array<any>;
+        }>
+    ) {
+        // Validate thematic area
+        const thematicArea = await ThematicArea.findById(thematic_areaId);
+        if (!thematicArea) throw new Error("Thematic Area not found");
+
+        // Determine max depth based on thematic_area level
+        let maxDepth: number;
+        switch (thematicArea.level) {
+            case ThemeLevel.broad:
+                maxDepth = 1; // Only theme
+                break;
+            case ThemeLevel.componenet:
+                maxDepth = 2; // Theme → Component
+                break;
+            case ThemeLevel.narrow:
+            default:
+                maxDepth = 3; // Theme → Component → FocusArea
+                break;
+        }
+
+        const createdThemes: any[] = [];
+
+        for (const themeItem of data) {
+            const themeDoc = await Theme.create({
+                title: themeItem.title,
+                type: ThemeType.theme,
+                thematic_area: thematicArea._id,
+                parent: thematicArea._id,
+                priority: themeItem.priority
+            });
+
+            let createdComponents: any[] = [];
+
+            if (themeItem.children && themeItem.children.length > 0 && maxDepth >= 2) {
+                createdComponents = await this.createSubThemesRecursiveByLevel(
+                    themeItem.children,
+                    themeDoc._id,
+                    thematicArea._id,
+                    2,
+                    maxDepth
+                );
+            }
+
+            createdThemes.push({ theme: themeDoc, components: createdComponents });
+        }
+
+        return createdThemes;
+    }
+
+    // Recursive function with level control
+    private static async createSubThemesRecursiveByLevel(
+        items: Array<any>,
+        parentId: mongoose.Types.ObjectId,
+        thematic_areaId: mongoose.Types.ObjectId,
+        currentDepth: number,
+        maxDepth: number
+    ) {
+        const created: any[] = [];
+
+        for (const item of items) {
+            let doc;
+            if (currentDepth === 2) {
+                // Component level
+                doc = await Componenet.create({
+                    title: item.title,
+                    type: ThemeType.componenet,
+                    thematic_area: thematic_areaId,
+                    parent: parentId,
+                    priority: item.priority
+                });
+            } else if (currentDepth === 3) {
+                // FocusArea level
+                doc = await FocusArea.create({
+                    title: item.title,
+                    type: ThemeType.focusArea,
+                    thematic_area: thematic_areaId,
+                    parent: parentId,
+                    priority: item.priority
+                });
+            } else {
+                throw new Error(`Invalid depth ${currentDepth} for import`);
+            }
+
+            let nested: any[] = [];
+            if (item.children && item.children.length > 0 && currentDepth + 1 <= maxDepth) {
+                nested = await this.createSubThemesRecursiveByLevel(
+                    item.children,
+                    doc._id,
+                    thematic_areaId,
+                    currentDepth + 1,
+                    maxDepth
+                );
+            }
+
+            created.push({ doc, children: nested });
+        }
+
+        return created;
+    }
+
 }
