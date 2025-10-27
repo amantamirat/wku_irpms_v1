@@ -169,7 +169,7 @@ const ThemeManager = ({ type, parent, themeLevel }: ThemeManagerProps) => {
 
     // Level Badge
     const themeLevelBodyTemplate = (rowData: Theme) => (
-        <span className={`theme-level-badge theme-${rowData.level}`}>
+        <span className={`theme-level-badge theme-${rowData.level?.toLowerCase()}`}>
             {rowData.level}
         </span>
     );
