@@ -17,20 +17,18 @@ import { Toast } from 'primereact/toast';
 
 interface ThemeManagerProps {
     type: ThemeType;
-    //directorate?: any;
     parent?: Theme;
     themeLevel?: ThemeLevel;
 }
 
 const ThemeManager = ({ type, parent, themeLevel }: ThemeManagerProps) => {
 
-    // Identify type-level hierarchy
+
     const isThematicArea = type === ThemeType.thematic_area;
     const isBroadTheme = type === ThemeType.broadTheme;
     const isSubTheme = type === ThemeType.componenet;
     const isBroadLevel = themeLevel === ThemeLevel.broad;
     const isComponentLevel = themeLevel === ThemeLevel.componenet;
-
     const childType = isThematicArea
         ? ThemeType.broadTheme
         : isBroadTheme
@@ -38,11 +36,11 @@ const ThemeManager = ({ type, parent, themeLevel }: ThemeManagerProps) => {
             : isSubTheme
                 ? ThemeType.focusArea
                 : null;
-
     const isSelectionOnly =
         !childType ||
         (isBroadLevel && isBroadTheme) ||
         (isComponentLevel && isSubTheme);
+
 
     const emptyTheme: Theme = {
         title: '',
@@ -70,29 +68,25 @@ const ThemeManager = ({ type, parent, themeLevel }: ThemeManagerProps) => {
         setGlobalFilter('');
     }, []);
 
+
+
     const fetchThemes = useCallback(async () => {
         let data: Theme[] = [];
-        if (isThematicArea) {
-            data = await ThemeApi.getUserThemes();
-        } else if (parent) {
-            data = await ThemeApi.getThemes({ type, parent: parent._id || '' });
+        try {
+            if (type === ThemeType.thematic_area) {
+                data = await ThemeApi.getUserThemes();
+            } else if (parent) {
+                data = await ThemeApi.getThemes({ type, parent: parent._id || '' });
+            }
+            setThemes(data);
+        } catch (err) {
+            setError(`Failed to load grant data ${err}`);
         }
-        setThemes(data);
-    }, [type, parent, isThematicArea]);
+    }, [type, parent]);
 
     useEffect(() => {
-        let mounted = true;
-        const load = async () => {
-            if (!mounted) return;
-            await fetchThemes();
-        };
-        load();
-        return () => {
-            mounted = false;
-        };
+        fetchThemes()
     }, [fetchThemes]); // effect runs once
-
-
 
 
     // Error state
@@ -203,10 +197,6 @@ const ThemeManager = ({ type, parent, themeLevel }: ThemeManagerProps) => {
     };
 
 
-
-
-
-
     const startToolbarTemplate = () => (
         <div className="my-2">
             <Button
@@ -225,7 +215,7 @@ const ThemeManager = ({ type, parent, themeLevel }: ThemeManagerProps) => {
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
             <h5 className="m-0">
-                Manage {type}s
+                Manage {type}s 
             </h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
@@ -301,12 +291,16 @@ const ThemeManager = ({ type, parent, themeLevel }: ThemeManagerProps) => {
                         onRowToggle={(e) => setExpandedRows(e.data)}
                         rowExpansionTemplate={(rowData) => {
                             const rowTheme = rowData as Theme;
+                            let level = themeLevel;
+                            if (rowTheme.type === ThemeType.thematic_area) {
+                                level = rowTheme.level;
+                            }
                             if (isSelectionOnly) return null;
                             return (
                                 <ThemeManager
                                     type={childType!}
                                     parent={rowTheme}
-                                    themeLevel={themeLevel}
+                                    themeLevel={level}
                                 />
                             );
                         }}
@@ -317,11 +311,11 @@ const ThemeManager = ({ type, parent, themeLevel }: ThemeManagerProps) => {
                             <Column expander style={{ width: '3em' }} />
                         )}
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                        {isThematicArea &&
+                        {type === ThemeType.thematic_area &&
                             <Column field="directorate.name" header="Directorate" sortable />
                         }
                         <Column field="title" header={type} sortable />
-                        {isThematicArea ? (
+                        {type === ThemeType.thematic_area ? (
                             <Column field="level" header="Level" body={themeLevelBodyTemplate} sortable />
                         ) : (
                             <Column field="priority" header="Priority" sortable />
