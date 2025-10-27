@@ -1,11 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import ThemeManager from './components/ThemeManager';
 import { ThemeType } from './models/theme.model';
-import { Organization } from '../organizations/models/organization.model';
 
 const ThemePage = () => {
     const router = useRouter();
@@ -25,7 +23,7 @@ const ThemePage = () => {
     };
 
     return (
-        <ThemeManager type={ThemeType.catalog} directorate={directorate} />
+        <ThemeManager type={ThemeType.thematic_area} directorate={directorate} />
     );
 };
 

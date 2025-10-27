@@ -9,10 +9,9 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import SaveDialog from './dialogs/SaveDialog';
-import { Theme, ThemeLevel, ThemeType } from '../models/theme.model';
 import { ThemeApi } from '../api/theme.api';
-import { Organization } from '../../organizations/models/organization.model';
+import { Theme, ThemeLevel, ThemeType } from '../models/theme.model';
+import SaveDialog from './dialogs/SaveDialog';
 
 
 interface ThemeManagerProps {
@@ -29,11 +28,11 @@ const ThemeManager = (props: ThemeManagerProps) => {
     const isBroadLevel = level === ThemeLevel.broad;
     const isComponenetLevel = level === ThemeLevel.componenet;
     //const isNarrowLevel = level === ThemeLevel.narrow;
-    const isCatalog = type === ThemeType.catalog;
+    const isThematicArea = type === ThemeType.thematic_area;
     const isBroadTheme = type === ThemeType.broadTheme;
     const isSubTheme = type === ThemeType.componenet;
     //const isFocusArea = type === ThemeType.focusArea;
-    const childType = isCatalog ? ThemeType.broadTheme : isBroadTheme ? ThemeType.componenet : isSubTheme ? ThemeType.focusArea : null;
+    const childType = isThematicArea ? ThemeType.broadTheme : isBroadTheme ? ThemeType.componenet : isSubTheme ? ThemeType.focusArea : null;
     const isSelectionOnly = !childType || (isBroadLevel && isBroadTheme) || (isComponenetLevel && isSubTheme); // Non Expandable 
 
     const emptyTheme: Theme = {
@@ -63,7 +62,7 @@ const ThemeManager = (props: ThemeManagerProps) => {
     const loadThemes = useCallback(async () => {
         try {
             setLoading(true);
-            if (props.directorate && isCatalog) {
+            if (props.directorate && isThematicArea) {
                 const data = await ThemeApi.getThemes({
                     type: props.type,
                     directorate: props.directorate._id || ''
@@ -158,7 +157,7 @@ const ThemeManager = (props: ThemeManagerProps) => {
     const startToolbarTemplate = () => (
         <div className="my-2">
             <Button label={`New ${type}`} icon="pi pi-plus" severity='success'
-                className={`mr-2 theme-type-button ${type.split('-')[0].toLowerCase()}`}
+                //className={`mr-2 theme-type-button ${type.split('-')[0].toLowerCase()}`}
                 onClick={() => {
                     setSelectedTheme(emptyTheme);
                     setShowSaveDialog(true);
@@ -228,14 +227,14 @@ const ThemeManager = (props: ThemeManagerProps) => {
                         onRowToggle={(e) => setExpandedRows(e.data)}
                         rowExpansionTemplate={(rowData) => {
                             let rowTheme = rowData as Theme;
-                            if (isCatalog && rowTheme.level) {
+                            if (isThematicArea && rowTheme.level) {
                                 level = rowTheme.level
                             } else if (isSelectionOnly) {
                                 return null;
                             }
                             return (
                                 <ThemeManager
-                                    type={childType ? childType : ThemeType.catalog}
+                                    type={childType ? childType : ThemeType.thematic_area}
                                     parent={rowTheme}
                                     themeLevel={level}
                                 />
@@ -249,10 +248,10 @@ const ThemeManager = (props: ThemeManagerProps) => {
                         }
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="title" header={type + " Title"} sortable />
-                        {isCatalog && (
+                        {isThematicArea && (
                             <Column field="level" header="Level" body={themeLevelBodyTemplate} sortable />
                         )}
-                        {!isCatalog && (
+                        {!isThematicArea && (
                             <Column field="priority" header="Priority" sortable />
                         )}
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
@@ -262,7 +261,7 @@ const ThemeManager = (props: ThemeManagerProps) => {
                         <SaveDialog
                             visible={showSaveDialog}
                             theme={selectedTheme}
-                            isCatalog={isCatalog}
+                            isCatalog={isThematicArea}
                             onChange={setSelectedTheme}
                             onSave={saveTheme}
                             onHide={() => setShowSaveDialog(false)}
