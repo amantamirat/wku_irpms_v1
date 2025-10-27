@@ -66,7 +66,7 @@ export default function SaveThemeDialog({ project, projectTheme, setProjectTheme
                     ? (theme as any)._id
                     : theme;
             const data = await ThemeApi.getThemes({
-                catalog: catalogId
+                thematic_area: catalogId
             });
             setThemes(data);
             const node = buildTree(data);

@@ -23,7 +23,7 @@ function sanitizeTheme(theme: Partial<Theme>): Partial<Theme> {
 export interface GetThemesOptions {
     type?: ThemeType;
     parent?: string;
-    catalog?: string;
+    thematic_area?: string;
     directorate?: string;
 }
 
@@ -39,7 +39,7 @@ export const ThemeApi = {
         const query = new URLSearchParams();
         if (options.type) query.append("type", options.type);
         if (options.parent) query.append("parent", options.parent);
-        if (options.catalog) query.append("catalog", options.catalog);
+        if (options.thematic_area) query.append("thematic_area", options.thematic_area);
         if (options.directorate) query.append("directorate", options.directorate);
         //console.log(options);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);

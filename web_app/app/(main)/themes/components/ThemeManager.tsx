@@ -151,7 +151,7 @@ const ThemeManager = ({ type, parent, themeLevel }: ThemeManagerProps) => {
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
             <h5 className="m-0">
-                Manage {type}s {parent?.title && `in ${parent.title}`}
+                Manage {type}s
             </h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
@@ -245,7 +245,7 @@ const ThemeManager = ({ type, parent, themeLevel }: ThemeManagerProps) => {
                         {isThematicArea &&
                             <Column field="directorate.name" header="Directorate" sortable />
                         }
-                        <Column field="title" header={`${type} Title`} sortable />
+                        <Column field="title" header={type} sortable />
                         {isThematicArea ? (
                             <Column field="level" header="Level" body={themeLevelBodyTemplate} sortable />
                         ) : (

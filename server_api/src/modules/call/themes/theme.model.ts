@@ -45,13 +45,13 @@ const ThematicAreaSchema = new Schema<ThematicAreaDocument>({
 export const ThematicArea = BaseTheme.discriminator<ThematicAreaDocument>(ThemeType.thematic_area, ThematicAreaSchema);
 
 interface ChildThemeDocument extends BaseThemeDocument {
-  catalog: mongoose.Types.ObjectId;
+  thematic_area: mongoose.Types.ObjectId;
   priority?: number;
   parent: mongoose.Types.ObjectId;
 }
 
 const childThemeFields = {
-  catalog: {
+  thematic_area: {
     type: Schema.Types.ObjectId,
     ref: ThematicArea.modelName,
     required: true

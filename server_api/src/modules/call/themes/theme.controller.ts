@@ -13,7 +13,7 @@ export class ThemeController {
                 throw new Error("User not found!");
             }
             const userId = req.user._id;
-            const { type, title, directorate, level, parent, catalog, priority } = req.body;
+            const { type, title, directorate, level, parent, thematic_area, priority } = req.body;
 
             const data: CreateThemeDto = {
                 type: type,
@@ -25,8 +25,8 @@ export class ThemeController {
                 parent: type !== ThemeType.thematic_area && parent
                     ? new mongoose.Types.ObjectId(parent as string)
                     : undefined,
-                catalog: type !== ThemeType.thematic_area && catalog
-                    ? new mongoose.Types.ObjectId(catalog as string)
+                thematic_area: type !== ThemeType.thematic_area && thematic_area
+                    ? new mongoose.Types.ObjectId(thematic_area as string)
                     : undefined,
                 priority: priority ?? undefined
             };
@@ -40,11 +40,11 @@ export class ThemeController {
 
     static async getThemes(req: Request, res: Response) {
         try {
-            const { type, parent, catalog, directorate } = req.query;
+            const { type, parent, thematic_area, directorate } = req.query;
             const filter: GetThemesOptions = {
                 type: type as ThemeType | undefined,
                 parent: parent ? new Types.ObjectId(parent as string) : undefined,
-                catalog: catalog ? new Types.ObjectId(catalog as string) : undefined,
+                thematic_area: thematic_area ? new Types.ObjectId(thematic_area as string) : undefined,
                 directorate: directorate ? new Types.ObjectId(directorate as string) : undefined
             };
 
@@ -75,16 +75,15 @@ export class ThemeController {
             }
             const userId = req.user._id;
             const { id } = req.params;
-            const { title, level, parent, catalog, priority } = req.body;
+            const { title, level, parent, thematic_area, priority } = req.body;
 
             const data: Partial<CreateThemeDto> = {
                 title: title ?? undefined,
                 level: level ?? undefined,
                 parent: parent ? new mongoose.Types.ObjectId(parent as string) : undefined,
-                catalog: catalog ? new mongoose.Types.ObjectId(catalog as string) : undefined,
+                thematic_area: thematic_area ? new mongoose.Types.ObjectId(thematic_area as string) : undefined,
                 priority: priority ?? undefined
             };
-
             const updated = await ThemeService.updateTheme(id, data, userId);
             successResponse(res, 201, "Theme updated successfully", updated);
         } catch (err: any) {

@@ -10,7 +10,7 @@ import { CacheService } from "../../../util/cache/cache.service";
 export interface GetThemesOptions {
     type?: ThemeType;
     parent?: mongoose.Types.ObjectId;
-    catalog?: mongoose.Types.ObjectId;
+    thematic_area?: mongoose.Types.ObjectId;
     directorate?: mongoose.Types.ObjectId;
 }
 
@@ -21,7 +21,7 @@ export interface CreateThemeDto {
     level?: ThemeLevel;
     parent?: mongoose.Types.ObjectId;
     priority?: number;
-    catalog?: mongoose.Types.ObjectId;
+    thematic_area?: mongoose.Types.ObjectId;
 }
 
 export class ThemeService {
@@ -36,11 +36,11 @@ export class ThemeService {
         const parent = await BaseTheme.findById(theme.parent).lean() as any;
         if (!parent) throw new Error("Parent Not Found!");
 
-        const catalog = await ThematicArea.findById(
-            theme.type === ThemeType.theme ? parent._id : parent.catalog
+        const thematic_area = await ThematicArea.findById(
+            theme.type === ThemeType.theme ? parent._id : parent.thematic_area
         ).lean();
 
-        if (!catalog) throw new Error("Catalog Not Found!");
+        if (!thematic_area) throw new Error("Catalog Not Found!");
 
         if (theme.type === ThemeType.theme) {
             if (parent.type !== ThemeType.thematic_area)
@@ -48,20 +48,19 @@ export class ThemeService {
         } else if (theme.type === ThemeType.componenet) {
             if (parent.type !== ThemeType.theme)
                 throw new Error(`Invalid Componenet Parent (${parent.type}) Found!`);
-            if (catalog.level === ThemeLevel.broad)
+            if (thematic_area.level === ThemeLevel.broad)
                 throw new Error("Invalid hierarchy: Component must not trace back to Broad catalog");
         } else {
             if (parent.type !== ThemeType.componenet)
                 throw new Error(`Invalid Focus Area Parent (${parent.type}) Found!`);
             if (
-                catalog.level === ThemeLevel.broad ||
-                catalog.level === ThemeLevel.componenet
+                thematic_area.level === ThemeLevel.broad ||
+                thematic_area.level === ThemeLevel.componenet
             )
                 throw new Error("Invalid hierarchy: Focus Area must not trace back to Broad or Component catalog");
         }
-
         // assign catalog
-        (theme as any).catalog = catalog._id;
+        (theme as any).thematic_area = thematic_area._id;
     }
 
     // ✅ CREATE with ownership validation
@@ -79,7 +78,7 @@ export class ThemeService {
         const filter: any = {};
         if (options.type) filter.type = options.type;
         if (options.parent) filter.parent = options.parent;
-        if (options.catalog) filter.catalog = options.catalog;
+        if (options.thematic_area) filter.thematic_area = options.thematic_area;
         if (options.directorate) filter.directorate = options.directorate;
         return await BaseTheme.find(filter).lean();
     }
@@ -94,11 +93,9 @@ export class ThemeService {
     static async updateTheme(id: string, data: Partial<CreateThemeDto>, userId: string) {
         const theme = await BaseTheme.findById(id);
         if (!theme) throw new Error("Theme not found");
-
         if ((theme as any).directorate) {
             await CacheService.validateOwnership(userId, (theme as any).directorate);
         }
-
         Object.assign(theme, data);
         return await theme.save();
     }
