@@ -29,6 +29,10 @@ export const CallApi = {
         return data as Call[];
     },
 
+    async getUserCalls(): Promise<Call[]> {
+        const data = await ApiClient.get(`${end_point}/user`);
+        return data as Call[];
+    },
 
     async updateCall(call: Partial<Call>): Promise<Call> {
         if (!call._id) {

@@ -51,7 +51,7 @@ const CallManager = () => {
 
     const loadCalls = useCallback(async () => {
         try {
-            const data = await CallApi.getCalls({});
+            const data = await CallApi.getUserCalls();
             setCalls(data);
         } catch (err) {
             setError(`Failed to load call data ${err}`);
