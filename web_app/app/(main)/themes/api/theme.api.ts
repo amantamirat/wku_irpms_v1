@@ -71,7 +71,7 @@ export const ThemeApi = {
         return response;
     },
 
-    async importThemeBatch(thematicAreaId: string, themesData: any[]): Promise<any> {
+    async importThemesBatch(thematicAreaId: string, themesData: any[]): Promise<any> {
             const response = await ApiClient.post(`${end_point}/import-themes`, {
                 thematicAreaId,
                 themesData

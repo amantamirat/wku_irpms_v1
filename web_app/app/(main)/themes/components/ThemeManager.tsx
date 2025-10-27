@@ -12,6 +12,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ThemeApi } from '../api/theme.api';
 import { Theme, ThemeLevel, ThemeType } from '../models/theme.model';
 import SaveDialog from './dialogs/SaveDialog';
+import { FileUpload } from 'primereact/fileupload';
+import { Toast } from 'primereact/toast';
 
 interface ThemeManagerProps {
     type: ThemeType;
@@ -59,7 +61,7 @@ const ThemeManager = ({ type, parent, themeLevel }: ThemeManagerProps) => {
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     //const [loading, setLoading] = useState(false);
-    //const toast = useRef<Toast>(null);
+    const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
 
     // Initialize filters
@@ -133,6 +135,78 @@ const ThemeManager = ({ type, parent, themeLevel }: ThemeManagerProps) => {
     };
 
     // Toolbar
+
+    const endToolbarTemplate = () => {
+        if (type !== ThemeType.broadTheme) {
+            return null;
+        }
+        const handleImport = async (event: any) => {
+            try {
+                const file = event.files[0];
+                if (!file) return;
+
+                const text = await file.text();
+                const json = JSON.parse(text);
+
+                // Expecting either array or { themesData: [...] }
+                let themesData;
+                if (Array.isArray(json)) {
+                    themesData = json;
+                } else {
+                    themesData = json.themesData;
+                }
+
+                if (!Array.isArray(themesData)) {
+                    toast.current?.show({
+                        severity: 'error',
+                        summary: 'Import Error',
+                        detail: 'Invalid import data',
+                        life: 3000
+                    });
+                    return;
+                }
+                // Call API
+                if (parent?._id) {
+                    const result = await ThemeApi.importThemesBatch(parent?._id, themesData);
+                    toast.current?.show({
+                        severity: 'success',
+                        summary: 'Import Successful',
+                        detail: `Imported ${result.length} themes`,
+                        life: 3000
+                    });
+                }
+                // Reload themes
+                await fetchThemes();
+            } catch (err) {
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Import Failed',
+                    detail: '' + err,
+                    life: 3000
+                });
+            }
+        };
+
+        return (
+            <div className="my-2">
+                <FileUpload
+                    mode="basic"
+                    accept="application/json"
+                    maxFileSize={1000000}
+                    chooseLabel="Import"
+                    className="mr-2 inline-block"
+                    customUpload
+                    uploadHandler={handleImport}
+                />
+            </div>
+        );
+    };
+
+
+
+
+
+
     const startToolbarTemplate = () => (
         <div className="my-2">
             <Button
@@ -203,7 +277,8 @@ const ThemeManager = ({ type, parent, themeLevel }: ThemeManagerProps) => {
         <div className="grid">
             <div className="col-12">
                 <div className="card">
-                    <Toolbar className="mb-4" start={startToolbarTemplate} />
+                    <Toast ref={toast} />
+                    <Toolbar className="mb-4" start={startToolbarTemplate} end={endToolbarTemplate} />
                     <DataTable
                         ref={dt}
                         value={themes}
