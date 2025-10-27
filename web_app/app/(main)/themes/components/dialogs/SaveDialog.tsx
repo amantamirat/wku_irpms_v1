@@ -63,9 +63,15 @@ const SaveDialog = ({ visible, theme, onComplete, onHide }: SaveDialogProps) => 
                 throw new Error(result.message);
             }
 
-            const saved = localTheme._id
+            let saved = localTheme._id
                 ? await ThemeApi.updateTheme(localTheme)
                 : await ThemeApi.createTheme(localTheme);
+
+            saved = {
+                ...saved,
+                directorate: localTheme.directorate,
+                parent: localTheme.parent
+            };
 
             toast.current?.show({
                 severity: 'success',

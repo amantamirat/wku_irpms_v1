@@ -12,6 +12,7 @@ import { EvaluationApi } from '../../api/evaluation.api';
 import { Toast } from 'primereact/toast';
 import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
 import { Organization, OrganizationalUnit } from '@/app/(main)/organizations/models/organization.model';
+import { useAuth } from '@/contexts/auth-context';
 
 interface SaveDialogProps {
     visible: boolean;
@@ -22,6 +23,7 @@ interface SaveDialogProps {
 
 const SaveDialog = ({ visible, evaluation, onComplete, onHide }: SaveDialogProps) => {
     const toast = useRef<Toast>(null);
+    const { getOrganizationsByType } = useAuth();
     const [localEvaluation, setLocalEvaluation] = useState<Evaluation>({ ...evaluation });
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
@@ -34,12 +36,10 @@ const SaveDialog = ({ visible, evaluation, onComplete, onHide }: SaveDialogProps
 
     // ✅ Fetch directorates ONLY when the type is Evaluation
     useEffect(() => {
-        const fetchDirectorates = async () => {
+        const fetchDirectorates = () => {
             if (!isEvaluation) return;
             try {
-                const data = await OrganizationApi.getOrganizations({
-                    type: OrganizationalUnit.Directorate
-                });
+                const data = getOrganizationsByType([OrganizationalUnit.Directorate]);
                 setDirectorates(data);
             } catch (err) {
                 console.error('Failed to fetch directorates', err);
@@ -134,7 +134,7 @@ const SaveDialog = ({ visible, evaluation, onComplete, onHide }: SaveDialogProps
                 onHide={hide}
             >
                 {/* ✅ Show validation switch for Evaluation type */}
-                {(isStage&&!localEvaluation._id) && (
+                {(isStage && !localEvaluation._id) && (
                     <div className="field flex align-items-center justify-content-between">
                         <label htmlFor="isValidation" className="mr-2">Is Validation</label>
                         <InputSwitch

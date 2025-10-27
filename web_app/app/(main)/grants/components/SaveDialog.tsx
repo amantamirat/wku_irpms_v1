@@ -60,10 +60,13 @@ const SaveDialog = ({ visible, grant, onComplete, onHide }: SaveDialogProps) => 
                 throw new Error(validation.message);
             }
 
-            const saved = localGrant._id
+            let saved = localGrant._id
                 ? await GrantApi.updateGrant(localGrant)
                 : await GrantApi.createGrant(localGrant);
-
+            saved = {
+                ...saved,
+                directorate: localGrant.directorate
+            };
             toast.current?.show({
                 severity: 'success',
                 summary: 'Success',

@@ -46,7 +46,6 @@ export class CacheService {
 
     static async hasOrganizationOwnership(userId: string, organizationId: string | mongoose.Types.ObjectId): Promise<boolean> {
         const orgs = await this.getUserOrganizations(userId);
-        console.log(orgs);
         return orgs.includes(organizationId.toString());
     }
 
