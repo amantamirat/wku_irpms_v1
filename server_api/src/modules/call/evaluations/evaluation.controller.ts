@@ -3,11 +3,16 @@ import mongoose from "mongoose";
 import { EvaluationService, CreateEvaluationDto, GetEvalsOptions } from "./evaluation.service";
 import { EvaluationType } from "./evaluation.enum";
 import { errorResponse, successResponse } from "../../../util/response";
+import { AuthenticatedRequest } from "../../users/auth/auth.middleware";
 
 export class EvaluationController {
 
-    static async createEvaluation(req: Request, res: Response) {
+    static async createEvaluation(req: AuthenticatedRequest, res: Response) {
         try {
+            if (!req.user) {
+                throw new Error("User not found!");
+            }
+            const userId = req.user._id;
             const { type, title, directorate, parent, form_type, weight_value, isValidation } = req.body;
             const data: CreateEvaluationDto = {
                 type: type,
@@ -18,7 +23,7 @@ export class EvaluationController {
                 weight_value: type === EvaluationType.criterion || type === EvaluationType.option ? weight_value : undefined,
                 isValidation: type === EvaluationType.stage && isValidation ? isValidation : undefined
             };
-            const evaluation = await EvaluationService.createEvaluation(data);
+            const evaluation = await EvaluationService.createEvaluation(data, userId);
             successResponse(res, 201, "Evaluation created successfully", evaluation);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -40,8 +45,26 @@ export class EvaluationController {
         }
     }
 
-    static async updateEvaluation(req: Request, res: Response) {
+
+    static async getUserEvaluations(req: AuthenticatedRequest, res: Response) {
         try {
+            if (!req.user) {
+                throw new Error("User not found!");
+            }
+            const userId = req.user._id;
+            const evals = await EvaluationService.getUserEvaluations(userId);
+            successResponse(res, 200, 'Evaluations fetched successfully', evals);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    }
+
+    static async updateEvaluation(req: AuthenticatedRequest, res: Response) {
+        try {
+            if (!req.user) {
+                throw new Error("User not found!");
+            }
+            const userId = req.user._id;
             const { id } = req.params;
             const { title, form_type, weight_value } = req.body;
             const data: Partial<CreateEvaluationDto> = {
@@ -49,17 +72,21 @@ export class EvaluationController {
                 form_type: form_type,
                 weight_value: weight_value
             }
-            const updated = await EvaluationService.updateEvaluation(id, data);
+            const updated = await EvaluationService.updateEvaluation(id, data, userId);
             successResponse(res, 201, "Evaluation updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
-    static async deleteEvaluation(req: Request, res: Response) {
+    static async deleteEvaluation(req: AuthenticatedRequest, res: Response) {
         try {
+            if (!req.user) {
+                throw new Error("User not found!");
+            }
+            const userId = req.user._id;
             const { id } = req.params;
-            const deleted = await EvaluationService.deleteEvaluation(id);
+            const deleted = await EvaluationService.deleteEvaluation(id, userId);
             successResponse(res, 201, "Evaluation deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

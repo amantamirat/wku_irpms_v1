@@ -4,6 +4,7 @@ import { ProjectStage } from "../../project/stages/stage.model";
 import { Call } from "../call.model";
 import { EvaluationType, FormType } from "./evaluation.enum";
 import { BaseEvaluation, Criterion, Evaluation, Option, Stage } from "./evaluation.model";
+import { CacheService } from "../../../util/cache/cache.service";
 
 export interface GetEvalsOptions {
     type?: EvaluationType;
@@ -90,8 +91,12 @@ export class EvaluationService {
         }
     }
 
-    static async createEvaluation(data: CreateEvaluationDto) {
+    static async createEvaluation(data: CreateEvaluationDto, userId: string) {
         const { type, ...rest } = data;
+        if (data.directorate) {
+            await CacheService.validateOwnership(userId, data.directorate);
+        }
+
         await this.validateEvaluationCreation(data);
         if (type === EvaluationType.stage) {
             if (data.isValidation) {
@@ -120,15 +125,23 @@ export class EvaluationService {
         return await BaseEvaluation.find(filter).populate('directorate').lean();
     }
 
-    static async updateEvaluation(id: string, data: Partial<CreateEvaluationDto>) {
-        const evaluation = await BaseEvaluation.findById(id).populate('parent');
+    static async getUserEvaluations(userId: string) {
+        const evaluations = await CacheService.getUserOrganizations(userId);
+        return await BaseEvaluation.find({ directorate: { $in: evaluations } }).populate('directorate').lean();
+    }
+
+    static async updateEvaluation(id: string, data: Partial<CreateEvaluationDto>, userId: string) {
+        const evaluation = await BaseEvaluation.findById(id).populate('parent') as any;
         if (!evaluation) throw new Error("Evaluation not found");
+        if (evaluation.diectorate) {
+            await CacheService.validateOwnership(userId, evaluation.directorate);
+        }
         await this.validateEvaluationUpdation(data, evaluation);
         Object.assign(evaluation, data);
         return evaluation.save();
     }
 
-    static async deleteEvaluation(id: string) {
+    static async deleteEvaluation(id: string, userId: string) {
         const evaluation = await BaseEvaluation.findById(id);
         if (!evaluation) throw new Error("Evaluation not found");
         if (evaluation.type !== EvaluationType.option) {
@@ -136,6 +149,9 @@ export class EvaluationService {
             if (isParent) throw new Error(`Can not delete parent ${evaluation.type} ${evaluation.title}`);
         }
         if (evaluation.type === EvaluationType.evaluation) {
+            if ((evaluation as any).diectorate) {
+                await CacheService.validateOwnership(userId, (evaluation as any).directorate);
+            }
             const referencedByCall = await Call.exists({ evaluation: evaluation._id });
             if (referencedByCall) throw new Error(`Can not delete ${evaluation.title}, it is referenced in call.`);
         } else if (evaluation.type === EvaluationType.stage) {
@@ -162,7 +178,7 @@ export class EvaluationService {
             throw new Error('Direction must be "up" or "down".');
         }
         const current = await Stage.findById(id).lean();
-         if (!current || current.isValidation) throw new Error('Stage not found');
+        if (!current || current.isValidation) throw new Error('Stage not found');
 
         const currentReferencedByProject = await ProjectStage.exists({ stage: current._id });
         if (currentReferencedByProject) throw new Error(`Can not reorder ${current.title}, it is used in projects.`);
@@ -205,7 +221,7 @@ export class EvaluationService {
         return true;
     }
 
-    
+
 
 
 

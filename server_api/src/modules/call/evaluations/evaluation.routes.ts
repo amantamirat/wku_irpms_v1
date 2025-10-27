@@ -11,12 +11,22 @@ router.post('/', verifyActiveAccount,
     EvaluationController.createEvaluation);
 router.get('/', verifyActiveAccount,
     checkPermission([
-        PERMISSIONS.EVALUATION.READ,
+        PERMISSIONS.EVALUATION.READ
+    ]),
+    EvaluationController.getEvaluations);
+
+router.get(
+    '/user',
+    verifyActiveAccount,
+    checkPermission([
         PERMISSIONS.EVALUATION.CREATE,
         PERMISSIONS.EVALUATION.UPDATE,
         PERMISSIONS.EVALUATION.DELETE
     ]),
-    EvaluationController.getEvaluations);
+    EvaluationController.getUserEvaluations
+);
+
+
 router.put('/reorder/:id/:direction', verifyActiveAccount,
     checkPermission([PERMISSIONS.EVALUATION.UPDATE]),
     EvaluationController.reorderStageLevel);

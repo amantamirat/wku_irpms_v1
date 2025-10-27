@@ -29,10 +29,10 @@ interface EvaluationManagerProps {
 
 const EvaluationManager = ({ type, parent }: EvaluationManagerProps) => {
     const isEvaluation = type === EvalType.evaluation;
-    const isValidation = type === EvalType.validation;
+    //const isValidation = type === EvalType.validation;
     const isStage = type === EvalType.stage;
     const isCriterion = type === EvalType.criterion;
-    const childType = isEvaluation || isValidation ? EvalType.stage
+    const childType = isEvaluation ? EvalType.stage
         : isStage ? EvalType.criterion
             : isCriterion ? EvalType.option : null;
 
@@ -54,7 +54,7 @@ const EvaluationManager = ({ type, parent }: EvaluationManagerProps) => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const toast = useRef<Toast>(null);
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
-    const [loading, setLoading] = useState(false);
+    //const [loading, setLoading] = useState(false);
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
@@ -68,18 +68,24 @@ const EvaluationManager = ({ type, parent }: EvaluationManagerProps) => {
 
     const fetchEvaluations = useCallback(async () => {
         try {
-            setLoading(true);
-            const data = await EvaluationApi.getEvaluations({
-                type: type,
-                parent: parent?._id
-            });
-            setEvaluations(data);
+            //setLoading(true);
+            if (isEvaluation) {
+                const data = await EvaluationApi.getUserEvaluations();
+                setEvaluations(data);
+            }
+            else {
+                const data = await EvaluationApi.getEvaluations({
+                    type: type,
+                    parent: parent?._id
+                });
+                setEvaluations(data);
+            }
         } catch (err) {
             setError(`Failed to load evluation data ${err}`);
         } finally {
-            setLoading(false);
+            //setLoading(false);
         }
-    }, [parent]);
+    }, [parent, type]);
 
     useEffect(() => {
         fetchEvaluations();
@@ -106,7 +112,7 @@ const EvaluationManager = ({ type, parent }: EvaluationManagerProps) => {
 
 
     const deleteEvaluation = async () => {
-        setLoading(true);
+        //setLoading(true);
         const deleted = await EvaluationApi.deleteEvaluation(selectedEvaluation);
         if (deleted) {
             //setEvaluations(evaluations.filter((c) => c._id !== selectedEvaluation._id));
@@ -134,13 +140,13 @@ const EvaluationManager = ({ type, parent }: EvaluationManagerProps) => {
             });
         }
         hideDialogs();
-        setLoading(false);
+        //setLoading(false);
 
     };
 
     const reorderStage = async (evaluation: Evaluation, direction: "up" | "down") => {
         try {
-            setLoading(true);
+            //setLoading(true);
             if (!evaluation.order) {
                 throw new Error("Stage Level is Required");
             }
@@ -174,7 +180,7 @@ const EvaluationManager = ({ type, parent }: EvaluationManagerProps) => {
         } finally {
             //setShowDeleteDialog(false);
             setSelectedEvaluation(emptyEval);
-            setLoading(false);
+            //setLoading(false);
         }
     };
 
@@ -193,7 +199,7 @@ const EvaluationManager = ({ type, parent }: EvaluationManagerProps) => {
         // Handler for file upload and import
         const handleImport = async (event: any) => {
             try {
-                setLoading(true);
+                //setLoading(true);
                 const file = event.files[0];
                 if (!file) return;
                 const text = await file.text();
@@ -219,7 +225,7 @@ const EvaluationManager = ({ type, parent }: EvaluationManagerProps) => {
             } catch (err) {
                 toast.current?.show({ severity: 'error', summary: 'Import Failed', detail: '' + err, life: 3000 });
             } finally {
-                setLoading(false);
+                //setLoading(false);
             }
         };
         return (
@@ -322,7 +328,7 @@ const EvaluationManager = ({ type, parent }: EvaluationManagerProps) => {
                         header={header}
                         scrollable
                         filters={filters}
-                        loading={loading}
+                        //loading={loading}
                         expandedRows={expandedRows}
                         onRowToggle={(e) => setExpandedRows(e.data)}
                         rowExpansionTemplate={(rowData) => {
