@@ -3,7 +3,7 @@ import { CallStatus } from "./call.enum";
 import { Call } from "./call.model";
 import { Directorate } from "../organization/organization.model";
 import mongoose from "mongoose";
-import { Catalog } from "./themes/theme.model";
+import { ThematicArea } from "./themes/theme.model";
 import { Calendar } from "../calendar/calendar.model";
 import { Evaluation } from "./evaluations/evaluation.model";
 import { Grant } from "../grants/grant.model";
@@ -45,7 +45,7 @@ export class CallService {
         if (!grant) {
             throw new Error("Grant Not Found!");
         }
-        const catalog = await Catalog.findById(call.theme);
+        const catalog = await ThematicArea.findById(call.theme);
         if (!catalog) {
             throw new Error("Theme Catalog Not Found!");
         }

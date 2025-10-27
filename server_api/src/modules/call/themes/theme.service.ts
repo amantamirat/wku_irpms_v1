@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { ThemeType, ThemeLevel } from "./theme.enum";
-import { BaseTheme, Catalog } from "./theme.model";
+import { BaseTheme, ThematicArea } from "./theme.model";
 import { Call } from "../call.model";
 import { ProjectTheme } from "../../project/themes/project.theme.model";
 import { Directorate } from "../../organization/organization.model";
@@ -25,7 +25,7 @@ export interface CreateThemeDto {
 export class ThemeService {
 
     private static async validateTheme(theme: Partial<CreateThemeDto>) {
-        if (theme.type === ThemeType.catalog) {
+        if (theme.type === ThemeType.thematic_area) {
             const directorate = await Directorate.findById(theme.directorate);
             if (!directorate) {
                 throw new Error("Directorate Not Found!");
@@ -37,13 +37,13 @@ export class ThemeService {
             throw new Error("Parent Not Found!");
         }
 
-        const catalog = await Catalog.findById(theme.type === ThemeType.theme ? parent._id : parent.catalog).lean();
+        const catalog = await ThematicArea.findById(theme.type === ThemeType.theme ? parent._id : parent.catalog).lean();
         if (!catalog) {
             throw new Error("Catalog Not Found!");
         }
 
         if (theme.type === ThemeType.theme) {
-            if (parent.type !== ThemeType.catalog) {
+            if (parent.type !== ThemeType.thematic_area) {
                 throw new Error(`Invalid Theme Parent (${parent.type}) Found!`);
             }
         }
@@ -96,7 +96,7 @@ export class ThemeService {
         if (!theme) throw new Error("Theme not found");
         const isParentExist = await BaseTheme.exists({ parent: theme._id });
         if (isParentExist) throw new Error(`Can not delete parent ${theme.type} ${theme.title}`);
-        if (theme.type === ThemeType.catalog) {
+        if (theme.type === ThemeType.thematic_area) {
             const referencedByCall = await Call.exists({ theme: theme._id });
             if (referencedByCall) throw new Error(`Can not delete ${theme.title}, it is referenced in call.`);
         }

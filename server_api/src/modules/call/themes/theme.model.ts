@@ -21,13 +21,13 @@ const BaseThemeSchema = new Schema<BaseThemeDocument>(
 // Base model
 export const BaseTheme = model<BaseThemeDocument>(COLLECTIONS.THEME, BaseThemeSchema);
 
-export interface CatalogDocument extends BaseThemeDocument {
-  type: ThemeType.catalog;
+export interface ThematicAreaDocument extends BaseThemeDocument {
+  type: ThemeType.thematic_area;
   level: ThemeLevel;
   directorate: mongoose.Types.ObjectId;
 }
 
-const CatalogSchema = new Schema<CatalogDocument>({
+const ThematicAreaSchema = new Schema<ThematicAreaDocument>({
   directorate: {
     type: Schema.Types.ObjectId,
     ref: Directorate.modelName,
@@ -42,7 +42,7 @@ const CatalogSchema = new Schema<CatalogDocument>({
   }  
 });
 
-export const Catalog = BaseTheme.discriminator<CatalogDocument>(ThemeType.catalog, CatalogSchema);
+export const ThematicArea = BaseTheme.discriminator<ThematicAreaDocument>(ThemeType.thematic_area, ThematicAreaSchema);
 
 interface ChildThemeDocument extends BaseThemeDocument {
   catalog: mongoose.Types.ObjectId;
@@ -53,7 +53,7 @@ interface ChildThemeDocument extends BaseThemeDocument {
 const childThemeFields = {
   catalog: {
     type: Schema.Types.ObjectId,
-    ref: Catalog.modelName,
+    ref: ThematicArea.modelName,
     required: true
   },
   priority: { type: Number }
@@ -67,7 +67,7 @@ const ThemeSchema = new Schema<ThemeDocument>({
   ...childThemeFields,
   parent: {
     type: Schema.Types.ObjectId,
-    ref: Catalog.modelName,
+    ref: ThematicArea.modelName,
     required: true
   }
 });

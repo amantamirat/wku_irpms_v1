@@ -2,7 +2,7 @@ import mongoose, { Schema, model, Document } from 'mongoose';
 import { CallStatus } from './call.enum';
 import { COLLECTIONS } from '../../util/collections.enum';
 import { Directorate } from '../organization/organization.model';
-import { Catalog } from './themes/theme.model';
+import { ThematicArea } from './themes/theme.model';
 import { Evaluation } from './evaluations/evaluation.model';
 
 interface ICall extends Document {
@@ -51,7 +51,7 @@ const CallSchema = new Schema<ICall>({
     },
     theme: {
         type: Schema.Types.ObjectId,
-        ref: Catalog.modelName,
+        ref: ThematicArea.modelName,
         immutable: true,
     },
     evaluation: {

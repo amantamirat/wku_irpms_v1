@@ -1,6 +1,6 @@
 export enum EvaluationType {
     evaluation = 'Evaluation',
-    validation = 'Validation',
+    //validation = 'Validation',
     stage = 'Stage',
     criterion = 'Criterion',
     option = 'Option'

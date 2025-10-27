@@ -1,8 +1,8 @@
-import { Catalog, Theme, Componenet, FocusArea } from "./theme.model";
+import { ThematicArea, Theme, Componenet, FocusArea } from "./theme.model";
 
 export function initializeThemeModels() {
   return {
-    Catalog,
+    Catalog: ThematicArea,
     Theme,
     Componenet,
     FocusArea

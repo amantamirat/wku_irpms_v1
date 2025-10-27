@@ -2,7 +2,7 @@ import { Organization } from "../../organizations/models/organization.model";
 
 export enum EvalType {
   evaluation = 'Evaluation',
-  validation = 'Validation',
+  //validation = 'Validation',
   stage = 'Stage',
   criterion = 'Criterion',
   option = 'Option'
@@ -47,7 +47,7 @@ export const validateEvaluation = (evaluation: Evaluation): { valid: boolean; me
     return { valid: false, message: 'Title is required.' };
   }
 
-  if (type === EvalType.evaluation || type === EvalType.validation) {
+  if (type === EvalType.evaluation) {
     if (!directorate) {
       return { valid: false, message: `'${type}' requires a directorate.` };
     }

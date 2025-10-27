@@ -8,10 +8,10 @@ export enum ThemeLevel {
 }
 
 export enum ThemeType {
-    catalog = 'Catalog',
+    thematic_area = 'Thematic Area',
     broadTheme = 'Theme',
     componenet = 'Componenet',
-    focusArea = 'Focus-area'
+    focusArea = 'Focus Area'
 }
 
 export type Theme = {
@@ -36,7 +36,7 @@ export const validateTheme = (theme: Theme): { valid: boolean; message?: string 
         return { valid: false, message: 'Title is required.' };
     }
 
-    if (theme.type === ThemeType.catalog) {
+    if (theme.type === ThemeType.thematic_area) {
         if (!theme.directorate) {
             return { valid: false, message: 'Directorate is required.' };
         }

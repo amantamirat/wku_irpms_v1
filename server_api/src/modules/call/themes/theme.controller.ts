@@ -12,10 +12,10 @@ export class ThemeController {
             const data: CreateThemeDto = {
                 type: type,
                 title: title,
-                directorate: type === ThemeType.catalog ? new mongoose.Types.ObjectId(directorate as string) : undefined,
-                level: type === ThemeType.catalog ? level : undefined,
-                parent: type !== ThemeType.catalog ? new mongoose.Types.ObjectId(parent as string) : undefined,
-                catalog: type !== ThemeType.catalog ? new mongoose.Types.ObjectId(catalog as string) : undefined
+                directorate: type === ThemeType.thematic_area ? new mongoose.Types.ObjectId(directorate as string) : undefined,
+                level: type === ThemeType.thematic_area ? level : undefined,
+                parent: type !== ThemeType.thematic_area ? new mongoose.Types.ObjectId(parent as string) : undefined,
+                catalog: type !== ThemeType.thematic_area ? new mongoose.Types.ObjectId(catalog as string) : undefined
             };
             const theme = await ThemeService.createTheme(data);
             successResponse(res, 201, "Theme created successfully", theme);

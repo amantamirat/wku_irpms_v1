@@ -1,8 +1,8 @@
 export enum ThemeType {
-    catalog = 'Catalog',
+    thematic_area = 'Thematic Area',
     theme = 'Theme',
     componenet = 'Componenet',
-    focusArea = 'Focus-area'
+    focusArea = 'Focus Area'
 }
 
 export enum ThemeLevel {
