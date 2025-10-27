@@ -48,7 +48,7 @@ export const ProjectApi = {
         if (!project._id) {
             throw new Error("_id required.");
         }
-        const url = `${end_point}${project._id}`;
+        const url = `${end_point}/${project._id}`;
         const response = await ApiClient.delete(url);
         return response;
     },

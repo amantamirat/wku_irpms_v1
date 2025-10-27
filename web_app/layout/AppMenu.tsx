@@ -1,13 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { useContext, useEffect, useState } from 'react';
+import { OrganizationalUnit } from '@/app/(main)/organizations/models/organization.model';
+import { AppMenuItem } from '@/types';
+import Link from 'next/link';
+import { PrimeIcons } from 'primereact/api';
+import { useContext } from 'react';
 import AppMenuitem from './AppMenuitem';
 import { LayoutContext } from './context/layoutcontext';
 import { MenuProvider } from './context/menucontext';
-import Link from 'next/link';
-import { AppMenuItem } from '@/types';
-import { PrimeIcons } from 'primereact/api';
-import { Organization, OrganizationalUnit } from '@/app/(main)/organizations/models/organization.model';
-import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
 //import { Scope } from '@/app/(main)/applicants/models/applicant.model';
 import { useAuth } from '@/contexts/auth-context';
 import { PERMISSIONS } from '@/types/permissions';
@@ -31,7 +30,12 @@ const AppMenu = () => {
                 {
                     label: 'Calls',
                     icon: 'pi pi-fw pi-megaphone',
-                    to: '/calls'
+                    to: '/calls',
+                    visible: hasPermission([
+                        PERMISSIONS.CALL.CREATE,
+                        PERMISSIONS.CALL.UPDATE,
+                        PERMISSIONS.CALL.DELETE
+                    ])
                 },
                 {
                     label: 'Themes',
