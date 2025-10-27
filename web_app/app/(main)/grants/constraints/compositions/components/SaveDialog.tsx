@@ -1,14 +1,14 @@
 'use client';
+import { accessibilityOptions, applicantUnits, genderOptions } from '@/app/(main)/applicants/models/applicant.model';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
-import { InputNumber } from 'primereact/inputnumber';
 import { Dropdown } from 'primereact/dropdown';
+import { InputNumber } from 'primereact/inputnumber';
+import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
-import { Composition, validateComposition } from '../models/composition.model';
 import { ApplicantConstraintType, Constraint, isListConstraint, isRangeConstraint } from '../../models/constraint.model';
-import { Toast } from 'primereact/toast';
-import { accessibilityOptions, applicantUnits, genderOptions, scopeOptions } from '@/app/(main)/applicants/models/applicant.model';
+import { Composition, validateComposition } from '../models/composition.model';
 
 interface SaveDialogProps {
     visible: boolean;

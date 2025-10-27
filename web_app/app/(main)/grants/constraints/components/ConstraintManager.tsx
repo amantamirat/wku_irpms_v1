@@ -9,9 +9,9 @@ import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Grant } from '../../models/grant.model';
 import { ConstraintApi } from '../api/constraint.api';
-import { ApplicantConstraintType, BaseConstraintType, Constraint, isListConstraint, isRangeConstraint } from '../models/constraint.model';
-import SaveDialog from './SaveDialog';
 import CompositionManager from '../compositions/components/CompositionManager';
+import { BaseConstraintType, Constraint } from '../models/constraint.model';
+import SaveDialog from './SaveDialog';
 
 
 interface ConstraintManagerProps {

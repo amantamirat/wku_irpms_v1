@@ -8,7 +8,7 @@ import { InputText } from 'primereact/inputtext';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CompositionApi } from '../api/composition.api';
-import { Composition, validateComposition } from '../models/composition.model';
+import { Composition } from '../models/composition.model';
 
 import { ApplicantConstraintType, Constraint, isListConstraint, isRangeConstraint } from '../../models/constraint.model';
 import SaveDialog from './SaveDialog';

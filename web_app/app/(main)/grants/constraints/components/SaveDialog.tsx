@@ -1,13 +1,12 @@
 'use client';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
-import { useEffect, useRef, useState } from 'react';
-import { ApplicantConstraintType, BaseConstraintType, Constraint, isListConstraint, isRangeConstraint, OperationMode, ProjectConstraintType, validateConstraint } from '../models/constraint.model';
 import { Dropdown } from 'primereact/dropdown';
-import { classNames } from 'primereact/utils';
 import { InputNumber } from 'primereact/inputnumber';
 import { Toast } from 'primereact/toast';
-import { accessibilityOptions, genderOptions, scopeOptions } from '@/app/(main)/applicants/models/applicant.model';
+import { classNames } from 'primereact/utils';
+import { useEffect, useRef, useState } from 'react';
+import { ApplicantConstraintType, BaseConstraintType, Constraint, OperationMode, ProjectConstraintType, validateConstraint } from '../models/constraint.model';
 
 
 interface SaveDialogProps {
