@@ -47,7 +47,7 @@ export const checkPermission = (requiredPermission: string[]) => {
         return errorResponse(res, 401, "Unauthorized. No user in request.");
       }
       const userId = req.user._id;
-      const hasPermission = CacheService.hasPermissions(userId, requiredPermission);
+      const hasPermission = await CacheService.hasPermissions(userId, requiredPermission);
       if (!hasPermission) {
         return errorResponse(res, 403, "Forbidden. Permission missing.");
       }
