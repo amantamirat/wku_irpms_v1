@@ -8,6 +8,7 @@ export class CacheService {
         const userKey = `user:${userId}:organizations`;
         let orgs = cache.get(userKey) as string[] | undefined;
         if (!orgs) {
+            //console.log(`[Cache MISS] ${userKey}`);
             const user = await User.findById(userId).populate("organizations", "_id");
             if (!user) return [];
             orgs = user.organizations?.map((org: any) => org._id.toString()) ?? [];
@@ -46,7 +47,8 @@ export class CacheService {
 
     static async hasOrganizationOwnership(userId: string, organizationId: string | mongoose.Types.ObjectId): Promise<boolean> {
         const orgs = await this.getUserOrganizations(userId);
-        return orgs.includes(organizationId.toString());
+        //console.log("orgs", orgs);
+        return orgs.map(o => o.toString()).includes(organizationId.toString());
     }
 
     static async hasPermissions(userId: string, permissions: string[]): Promise<boolean> {

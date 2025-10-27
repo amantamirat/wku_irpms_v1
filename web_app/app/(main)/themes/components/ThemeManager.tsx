@@ -7,9 +7,8 @@ import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
-import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ThemeApi } from '../api/theme.api';
 import { Theme, ThemeLevel, ThemeType } from '../models/theme.model';
 import SaveDialog from './dialogs/SaveDialog';
@@ -59,7 +58,7 @@ const ThemeManager = ({ type, parent, themeLevel }: ThemeManagerProps) => {
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const [loading, setLoading] = useState(false);
+    //const [loading, setLoading] = useState(false);
     //const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
 
@@ -69,30 +68,31 @@ const ThemeManager = ({ type, parent, themeLevel }: ThemeManagerProps) => {
         setGlobalFilter('');
     }, []);
 
-    // Fetch themes
-    const fetchThemes = useCallback(async () => {
-        try {
-            setLoading(true);
-            let data: Theme[] = [];
-            if (isThematicArea) {
-                data = await ThemeApi.getUserThemes();
-            } else if (parent) {
-                data = await ThemeApi.getThemes({
-                    type,
-                    parent: parent._id || '',
-                });
+    useEffect(() => {
+        let mounted = true;
+        const fetchThemes = async () => {
+            try {
+                //setLoading(true);
+                let data: Theme[] = [];
+                if (isThematicArea) {
+                    data = await ThemeApi.getUserThemes();
+                } else if (parent) {
+                    data = await ThemeApi.getThemes({
+                        type,
+                        parent: parent._id || '',
+                    });
+                }
+                if (mounted) setThemes(data);
+            } catch (err) {
+                if (mounted) setError(`Failed to load ${type} data: ${err}`);
+            } finally {
+                //if (mounted) setLoading(false);
             }
-            setThemes(data);
-        } catch (err) {
-            setError(`Failed to load ${type} data: ${err}`);
-        } finally {
-            setLoading(false);
-        }
+        };
+        fetchThemes();
+        return () => { mounted = false; };
     }, [type, parent, isThematicArea]);
 
-    useEffect(() => {
-        fetchThemes();
-    }, [fetchThemes]);
 
     // Error state
     if (error) {
@@ -203,7 +203,7 @@ const ThemeManager = ({ type, parent, themeLevel }: ThemeManagerProps) => {
     return (
         <div className="grid">
             <div className="col-12">
-                <div className="card">                    
+                <div className="card">
                     <Toolbar className="mb-4" start={startToolbarTemplate} />
                     <DataTable
                         ref={dt}
@@ -222,7 +222,7 @@ const ThemeManager = ({ type, parent, themeLevel }: ThemeManagerProps) => {
                         header={header}
                         scrollable
                         filters={filters}
-                        loading={loading}
+                        //loading={loading}
                         expandedRows={expandedRows}
                         onRowToggle={(e) => setExpandedRows(e.data)}
                         rowExpansionTemplate={(rowData) => {

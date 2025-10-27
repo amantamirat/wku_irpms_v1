@@ -94,9 +94,9 @@ export class EvaluationService {
     static async createEvaluation(data: CreateEvaluationDto, userId: string) {
         const { type, ...rest } = data;
         if (data.directorate) {
+            console.log("trying to create evaluation with", data.directorate);
             await CacheService.validateOwnership(userId, data.directorate);
         }
-
         await this.validateEvaluationCreation(data);
         if (type === EvaluationType.stage) {
             if (data.isValidation) {
