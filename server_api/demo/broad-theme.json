@@ -1,0 +1,10 @@
+[
+  { "title": "Health", "priority": 1 },
+  { "title": "Education", "priority": 2 },
+  { "title": "Environment", "priority": 3 },
+  { "title": "Infrastructure", "priority": 4 },
+  { "title": "Technology", "priority": 5 },
+  { "title": "Economy", "priority": 6 },
+  { "title": "Agriculture", "priority": 7 },
+  { "title": "Governance", "priority": 8 }
+]

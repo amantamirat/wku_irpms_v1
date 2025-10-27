@@ -1,0 +1,82 @@
+[
+  {
+    "title": "Health",
+    "priority": 1,
+    "children": [
+      { "title": "Nutrition", "priority": 1 },
+      { "title": "Sanitation", "priority": 2 },
+      { "title": "Public Health", "priority": 3 },
+      { "title": "Mental Health", "priority": 4 }
+    ]
+  },
+  {
+    "title": "Education",
+    "priority": 2,
+    "children": [
+      { "title": "Primary Education", "priority": 1 },
+      { "title": "Secondary Education", "priority": 2 },
+      { "title": "Higher Education", "priority": 3 },
+      { "title": "Vocational Training", "priority": 4 }
+    ]
+  },
+  {
+    "title": "Environment",
+    "priority": 3,
+    "children": [
+      { "title": "Conservation", "priority": 1 },
+      { "title": "Pollution Control", "priority": 2 },
+      { "title": "Climate Action", "priority": 3 },
+      { "title": "Sustainable Energy", "priority": 4 }
+    ]
+  },
+  {
+    "title": "Infrastructure",
+    "priority": 4,
+    "children": [
+      { "title": "Roads", "priority": 1 },
+      { "title": "Bridges", "priority": 2 },
+      { "title": "Water Systems", "priority": 3 },
+      { "title": "Electricity", "priority": 4 }
+    ]
+  },
+  {
+    "title": "Technology",
+    "priority": 5,
+    "children": [
+      { "title": "ICT", "priority": 1 },
+      { "title": "AI & Automation", "priority": 2 },
+      { "title": "Cybersecurity", "priority": 3 },
+      { "title": "Innovation", "priority": 4 }
+    ]
+  },
+  {
+    "title": "Economy",
+    "priority": 6,
+    "children": [
+      { "title": "Trade", "priority": 1 },
+      { "title": "Finance", "priority": 2 },
+      { "title": "Employment", "priority": 3 },
+      { "title": "Investments", "priority": 4 }
+    ]
+  },
+  {
+    "title": "Agriculture",
+    "priority": 7,
+    "children": [
+      { "title": "Crop Production", "priority": 1 },
+      { "title": "Livestock", "priority": 2 },
+      { "title": "Irrigation", "priority": 3 },
+      { "title": "Agri-Research", "priority": 4 }
+    ]
+  },
+  {
+    "title": "Governance",
+    "priority": 8,
+    "children": [
+      { "title": "Policy", "priority": 1 },
+      { "title": "Public Services", "priority": 2 },
+      { "title": "Transparency", "priority": 3 },
+      { "title": "Community Engagement", "priority": 4 }
+    ]
+  }
+]
