@@ -126,8 +126,8 @@ export class EvaluationService {
     }
 
     static async getUserEvaluations(userId: string) {
-        const evaluations = await CacheService.getUserOrganizations(userId);
-        return await BaseEvaluation.find({ directorate: { $in: evaluations } }).populate('directorate').lean();
+        const orgs = await CacheService.getUserOrganizations(userId);
+        return await BaseEvaluation.find({ directorate: { $in: orgs } }).populate('directorate').lean();
     }
 
     static async updateEvaluation(id: string, data: Partial<CreateEvaluationDto>, userId: string) {
