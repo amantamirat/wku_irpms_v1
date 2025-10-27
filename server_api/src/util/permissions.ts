@@ -39,6 +39,12 @@ export const PERMISSIONS = {
     UPDATE: "grant:update",
     DELETE: "grant:delete",
   },
+  CALL: {
+    CREATE: "call:create",
+    READ: "call:read",
+    UPDATE: "call:update",
+    DELETE: "call:delete",
+  },
   EVALUATION: {
     CREATE: "evaluation:create",
     READ: "evaluation:read",

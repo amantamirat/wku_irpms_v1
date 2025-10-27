@@ -129,6 +129,26 @@
     "description": "Delete grant entries"
   },
   {
+    "category": "Call Management",
+    "name": "call:create",
+    "description": "Create call entries"
+  },
+  {
+    "category": "Call Management",
+    "name": "call:read",
+    "description": "Read call entries"
+  },
+  {
+    "category": "Call Management",
+    "name": "call:update",
+    "description": "Update call entries"
+  },
+  {
+    "category": "Call Management",
+    "name": "call:delete",
+    "description": "Delete call entries"
+  },
+  {
     "category": "Evaluation Management",
     "name": "evaluation:create",
     "description": "Create evaluation entries"

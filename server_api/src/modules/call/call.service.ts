@@ -1,15 +1,14 @@
-
+import mongoose from "mongoose";
 import { CallStatus } from "./call.enum";
 import { Call } from "./call.model";
 import { Directorate } from "../organization/organization.model";
-import mongoose from "mongoose";
 import { ThematicArea } from "./themes/theme.model";
 import { Calendar } from "../calendar/calendar.model";
 import { Evaluation } from "./evaluations/evaluation.model";
 import { Grant } from "../grants/grant.model";
 import { Project } from "../project/project.model";
 import { CalendarStatus } from "../calendar/calendar.enum";
-
+import { CacheService } from "../../util/cache/cache.service";
 
 export interface GetCallsOptions {
     calendar?: mongoose.Types.ObjectId;
@@ -29,34 +28,27 @@ export interface CreateCallDto {
     status?: CallStatus;
 }
 
-
 export class CallService {
 
     private static async validateCall(call: Partial<CreateCallDto>) {
-        const directorate = await Directorate.findById(call.directorate);
-        if (!directorate) {
-            throw new Error("Directorate Not Found!");
-        }
-        const calendar = await Calendar.findOne({ _id: call.calendar, status: CalendarStatus.active });
-        if (!calendar) {
-            throw new Error("Calendar Not Found!");
-        }
-        const grant = await Grant.findById(call.grant);
-        if (!grant) {
-            throw new Error("Grant Not Found!");
-        }
-        const thematicArea = await ThematicArea.findById(call.theme);
-        if (!thematicArea) {
-            throw new Error("Thematic Area Not Found!");
-        }
-        const evaluation = await Evaluation.findById(call.evaluation);
-        if (!evaluation) {
-            throw new Error("Evaluation Not Found!");
-        }
-        return
+        const directorate = await Directorate.findById(call.directorate).lean();
+        if (!directorate) throw new Error("Directorate Not Found!");
+
+        const calendar = await Calendar.findOne({ _id: call.calendar, status: CalendarStatus.active }).lean();
+        if (!calendar) throw new Error("Calendar Not Found!");
+
+        const grant = await Grant.findById(call.grant).lean();
+        if (!grant) throw new Error("Grant Not Found!");
+
+        const thematicArea = await ThematicArea.findById(call.theme).lean();
+        if (!thematicArea) throw new Error("Thematic Area Not Found!");
+
+        const evaluation = await Evaluation.findById(call.evaluation).lean();
+        if (!evaluation) throw new Error("Evaluation Not Found!");
     }
 
-    static async createCall(data: CreateCallDto) {
+    static async createCall(data: CreateCallDto, userId: string) {
+        await CacheService.validateOwnership(userId, data.directorate);
         await this.validateCall(data);
         const createdCall = await Call.create({ ...data, status: CallStatus.planned });
         return createdCall;
@@ -67,6 +59,24 @@ export class CallService {
         if (options.calendar) filter.calendar = options.calendar;
         if (options.directorate) filter.directorate = options.directorate;
         if (options.status) filter.status = options.status;
+
+        return await Call.find(filter).populate([
+            { path: 'calendar' },
+            { path: 'directorate' },
+            { path: 'theme' },
+            { path: 'evaluation' },
+            { path: 'grant' },
+        ]).lean();
+    }
+
+
+    static async getUserCalls(userId: string, options?: { status?: CallStatus }) {
+        // Get directorates/organizations the user belongs to
+        const organizations = await CacheService.getUserOrganizations(userId);
+
+        const filter: any = { directorate: { $in: organizations } };
+        if (options?.status) filter.status = options.status;
+
         return await Call.find(filter).populate([
             { path: 'calendar' },
             { path: 'directorate' },
@@ -81,18 +91,22 @@ export class CallService {
         return await Call.findById(id).lean();
     }
 
-    static async updateCall(id: string, data: Partial<CreateCallDto>) {
+    static async updateCall(id: string, data: Partial<CreateCallDto>, userId: string) {
         const call = await Call.findById(id);
         if (!call) throw new Error("Call not found");
+        await CacheService.validateOwnership(userId, call.directorate);
         Object.assign(call, data);
         return call.save();
     }
 
-    static async deleteCall(id: string) {
+    static async deleteCall(id: string, userId: string) {
         const call = await Call.findById(id);
         if (!call) throw new Error("Call not found");
+        await CacheService.validateOwnership(userId, call.directorate);
+
         const referencedByProject = await Project.exists({ call: call._id });
-        if (referencedByProject) throw new Error(`Can not delete ${call.title}, it is referenced in projects.`);
+        if (referencedByProject) throw new Error(`Cannot delete ${call.title}, it is referenced in projects.`);
+
         return await call.deleteOne();
     }
 }
