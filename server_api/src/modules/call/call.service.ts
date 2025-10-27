@@ -45,9 +45,9 @@ export class CallService {
         if (!grant) {
             throw new Error("Grant Not Found!");
         }
-        const catalog = await ThematicArea.findById(call.theme);
-        if (!catalog) {
-            throw new Error("Theme Catalog Not Found!");
+        const thematicArea = await ThematicArea.findById(call.theme);
+        if (!thematicArea) {
+            throw new Error("Thematic Area Not Found!");
         }
         const evaluation = await Evaluation.findById(call.evaluation);
         if (!evaluation) {

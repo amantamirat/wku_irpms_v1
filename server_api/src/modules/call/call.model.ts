@@ -46,13 +46,14 @@ const CallSchema = new Schema<ICall>({
     grant: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.GRANT,
-        immutable: true,
+        //immutable: true,
         required: true
     },
     theme: {
         type: Schema.Types.ObjectId,
         ref: ThematicArea.modelName,
-        immutable: true,
+        required: true,
+        //immutable: true,
     },
     evaluation: {
         type: Schema.Types.ObjectId,
