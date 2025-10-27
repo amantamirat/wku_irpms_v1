@@ -45,6 +45,12 @@ export const PERMISSIONS = {
     UPDATE: "evaluation:update",
     DELETE: "evaluation:delete",
   },
+  THEME: {
+    CREATE: "theme:create",
+    READ: "theme:read",
+    UPDATE: "theme:update",
+    DELETE: "theme:delete",
+  },
   POSITION: {
     CREATE: "position:create",
     READ: "position:read",

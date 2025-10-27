@@ -149,6 +149,26 @@
     "description": "Delete evaluation entries"
   },
   {
+    "category": "Theme Management",
+    "name": "theme:create",
+    "description": "Create theme entries"
+  },
+  {
+    "category": "Theme Management",
+    "name": "theme:read",
+    "description": "Read theme entries"
+  },
+  {
+    "category": "Theme Management",
+    "name": "theme:update",
+    "description": "Update theme entries"
+  },
+  {
+    "category": "Theme Management",
+    "name": "theme:delete",
+    "description": "Delete theme entries"
+  },
+  {
     "category": "Position Management",
     "name": "position:create"
   },
