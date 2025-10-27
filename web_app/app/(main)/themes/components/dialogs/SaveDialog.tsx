@@ -4,118 +4,185 @@ import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
+import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
-import { useEffect, useState } from 'react';
-import { Theme,  ThemeLevel, validateTheme } from '../../models/theme.model';
+import { useEffect, useRef, useState } from 'react';
+import { Theme, ThemeLevel, ThemeType, validateTheme } from '../../models/theme.model';
+import { ThemeApi } from '../../api/theme.api';
+import { useAuth } from '@/contexts/auth-context';
+import { Organization, OrganizationalUnit } from '@/app/(main)/organizations/models/organization.model';
+
 
 interface SaveDialogProps {
     visible: boolean;
     theme: Theme;
-    isCatalog?: boolean;
-    onChange: (theme: Theme) => void;
-    onSave: () => void;
+    onComplete?: (savedTheme: Theme) => void;
     onHide: () => void;
 }
 
-function SaveDialog(props: SaveDialogProps) {
-    const { visible, theme, onChange, onSave, onHide } = props;
+const SaveDialog = ({ visible, theme, onComplete, onHide }: SaveDialogProps) => {
+    const { getOrganizationsByType } = useAuth();
+    const toast = useRef<Toast>(null);
+    const [localTheme, setLocalTheme] = useState<Theme>({ ...theme });
     const [submitted, setSubmitted] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | undefined>();
+    const [organizations, setOrganizations] = useState<Organization[]>([]);
+    const isThematicArea = localTheme.type === ThemeType.thematic_area;
 
-    const save = async () => {
+    useEffect(() => {
+        setLocalTheme({ ...theme });
+    }, [theme]);
+
+
+    useEffect(() => {
+        const fetchDirectorates = async () => {
+            if (!isThematicArea) return;
+            try {
+                const data = getOrganizationsByType([OrganizationalUnit.Directorate]);
+                setOrganizations(data);
+            } catch (err) {
+                console.error('Failed to fetch directorates', err);
+            }
+        };
+        fetchDirectorates();
+    }, [isThematicArea]);
+
+    useEffect(() => {
+        if (!visible) clearForm();
+    }, [visible]);
+
+    const clearForm = () => {
+        setSubmitted(false);
+        setLocalTheme({ ...theme });
+    };
+
+    const saveTheme = async () => {
         setSubmitted(true);
-        const result = validateTheme(theme);
-        if (!result.valid) {
-            setErrorMessage(result.message);
-            return;
+        try {
+            const result = validateTheme(localTheme);
+            if (!result.valid) {
+                throw new Error(result.message);
+            }
+
+            const saved = localTheme._id
+                ? await ThemeApi.updateTheme(localTheme)
+                : await ThemeApi.createTheme(localTheme);
+
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Theme saved successfully',
+                life: 2000,
+            });
+
+            if (onComplete) setTimeout(() => onComplete(saved), 1000);
+        } catch (err: any) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: err.message || 'Failed to save Theme',
+                life: 2500,
+            });
         }
-        setErrorMessage(undefined);
-        onSave();
     };
 
     const hide = () => {
-        setSubmitted(false);
-        setErrorMessage(undefined);
+        clearForm();
         onHide();
     };
 
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={hide} />
-            <Button label="Save" icon="pi pi-check" text onClick={save} />
+            <Button label="Save" icon="pi pi-check" text onClick={saveTheme} />
         </>
     );
 
-    useEffect(() => {
-        if (!visible) {
-            setSubmitted(false);
-            setErrorMessage(undefined);
-        }
-    }, [visible]);
-
     return (
-        <Dialog
-            visible={visible}
-            style={{ width: '500px' }}
-            header={theme._id ? `Edit ${theme.type}` : `New ${theme.type}`}
-            modal
-            className="p-fluid"
-            footer={footer}
-            onHide={hide}
-        >
-            <div className="field">
-                <label htmlFor="title">Title</label>
-                <InputText
-                    id="title"
-                    value={theme.title}
-                    onChange={(e) => onChange({ ...theme, title: e.target.value })}
-                    required
-                    autoFocus
-                    className={classNames({ 'p-invalid': submitted && !theme.title })}
-                />
-            </div>
+        <>
+            <Toast ref={toast} />
+            <Dialog
+                visible={visible}
+                style={{ width: '500px' }}
+                header={localTheme._id ? `Edit ${localTheme.type}` : `New ${localTheme.type}`}
+                modal
+                className="p-fluid"
+                footer={footer}
+                onHide={hide}
+            >
+                {isThematicArea && <>
+                    <div className="field">
+                        <label htmlFor="directorate">Directorate</label>
+                        <Dropdown
+                            id="directorate"
+                            value={localTheme.directorate}
+                            options={organizations}
+                            optionLabel="name"
+                            onChange={(e) => setLocalTheme({ ...localTheme, directorate: e.value })}
+                            placeholder="Select Directorate"
+                            className={classNames({ 'p-invalid': submitted && !localTheme.directorate })}
+                        />
+                    </div>
+                </>}
 
-            <div className="field">
-                {
-                    props.isCatalog ? (
-                        props.theme._id ? <></> :
+                {/* Title Field */}
+                <div className="field">
+                    <label htmlFor="title">Title</label>
+                    <InputText
+                        id="title"
+                        value={localTheme.title}
+                        onChange={(e) => setLocalTheme({ ...localTheme, title: e.target.value })}
+                        required
+                        autoFocus
+                        className={classNames({ 'p-invalid': submitted && !localTheme.title })}
+                    />
+                </div>
+
+                {/* Priority or Level Field */}
+                <div className="field">
+                    {isThematicArea ? (
+                        localTheme._id ? null : (
                             <>
-                                <label htmlFor="priority">{'Level '}</label>
+                                <label htmlFor="level">Level</label>
                                 <Dropdown
                                     id="level"
-                                    value={theme.level}
-                                    options={Object.values(ThemeLevel).map(g => ({ label: g, value: g }))}
-                                    onChange={(e) =>
-                                        onChange({ ...theme, level: e.value })
-                                    }
+                                    value={localTheme.level}
+                                    options={Object.values(ThemeLevel).map((g) => ({
+                                        label: g,
+                                        value: g,
+                                    }))}
+                                    onChange={(e) => setLocalTheme({ ...localTheme, level: e.value })}
                                     placeholder="Select Level"
-                                    className={classNames({ 'p-invalid': submitted && !theme.level })}
-                                />
-                            </>
-                    )
-                        : (
-                            <>
-                                <label htmlFor="priority">{props.isCatalog ? 'Level ' : 'Priority'}</label>
-                                <InputNumber
-                                    id="priority"
-                                    value={theme.priority as number | null}
-                                    onChange={(e) =>
-                                        onChange({ ...theme, priority: e.value || 0 })
-                                    }
-                                    required
                                     className={classNames({
-                                        'p-invalid': submitted && (!props.isCatalog) && (theme.priority == null),
+                                        'p-invalid': submitted && !localTheme.level,
                                     })}
                                 />
                             </>
                         )
-                }
-            </div>
-            {errorMessage && (
-                <small className="p-error">{errorMessage}</small>
-            )}
-        </Dialog>
+                    ) : (
+                        <>
+                            <label htmlFor="priority">
+                                {isThematicArea ? 'Level' : 'Priority'}
+                            </label>
+                            <InputNumber
+                                id="priority"
+                                value={localTheme.priority as number | null}
+                                onChange={(e) =>
+                                    setLocalTheme({ ...localTheme, priority: e.value || 0 })
+                                }
+                                required
+                                className={classNames({
+                                    'p-invalid':
+                                        submitted &&
+                                        !isThematicArea &&
+                                        localTheme.priority == null,
+                                })}
+                            />
+                        </>
+                    )}
+                </div>
+            </Dialog>
+        </>
     );
-}
+};
 
 export default SaveDialog;

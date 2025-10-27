@@ -22,9 +22,9 @@ interface SaveDialogProps {
 const SaveDialog = ({ visible, grant, onComplete, onHide }: SaveDialogProps) => {
     const { getOrganizationsByType } = useAuth();
     const toast = useRef<Toast>(null);
+
     const [localGrant, setLocalGrant] = useState<Grant>({ ...grant });
     const [submitted, setSubmitted] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | undefined>();
     const [organizations, setOrganizations] = useState<Organization[]>([]);
 
     useEffect(() => {
@@ -49,47 +49,41 @@ const SaveDialog = ({ visible, grant, onComplete, onHide }: SaveDialogProps) => 
 
     const clearForm = () => {
         setSubmitted(false);
-        setErrorMessage(undefined);
         setLocalGrant({ ...grant });
     };
 
     const saveGrant = async () => {
+        setSubmitted(true);
         try {
-            setSubmitted(true);
             const validation = validateGrant(localGrant);
             if (!validation.valid) {
                 throw new Error(validation.message);
             }
-            let saved: Grant;
-            if (localGrant._id) {
-                saved = await GrantApi.updateGrant(localGrant);
-            } else {
-                saved = await GrantApi.createGrant(localGrant);
-            }
-            saved = {
-                ...saved,
-                directorate: localGrant.directorate
-            };
+
+            const saved = localGrant._id
+                ? await GrantApi.updateGrant(localGrant)
+                : await GrantApi.createGrant(localGrant);
+
             toast.current?.show({
                 severity: 'success',
                 summary: 'Success',
                 detail: 'Grant saved successfully',
                 life: 2000,
             });
-            if (onComplete) setTimeout(() => onComplete(saved), 2000);
+
+            if (onComplete) setTimeout(() => onComplete(saved), 1000);
         } catch (err: any) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to save Grant',
-                detail: err.message || 'An error occurred',
-                life: 2000,
+                summary: 'Error',
+                detail: err.message || 'Failed to save Grant',
+                life: 2500,
             });
         }
     };
 
     const hide = () => {
-        setSubmitted(false);
-        setErrorMessage(undefined);
+        clearForm();
         onHide();
     };
 
@@ -100,42 +94,33 @@ const SaveDialog = ({ visible, grant, onComplete, onHide }: SaveDialogProps) => 
         </>
     );
 
-    useEffect(() => {
-        if (!visible) {
-            setSubmitted(false);
-            setErrorMessage(undefined);
-        }
-    }, [visible]);
-
-
     return (
         <>
             <Toast ref={toast} />
             <Dialog
                 visible={visible}
-                style={{ width: '600px', height: '400px' }}
-                header={localGrant._id ? 'Edit Grant' : 'Create New Grant'}
+                style={{ width: '600px' }}
+                header={localGrant._id ? 'Edit Grant' : 'New Grant'}
                 modal
                 className="p-fluid"
                 footer={footer}
                 onHide={hide}
-            //maximizable
             >
+                {/* Directorate Selector */}
                 <div className="field">
-                    <label htmlFor="organization">
-                        Directorate
-                    </label>
+                    <label htmlFor="directorate">Directorate</label>
                     <Dropdown
-                        id="organization"
+                        id="directorate"
                         value={localGrant.directorate}
                         options={organizations}
                         optionLabel="name"
                         onChange={(e) => setLocalGrant({ ...localGrant, directorate: e.value })}
-                        placeholder="Select Organization"
+                        placeholder="Select Directorate"
                         className={classNames({ 'p-invalid': submitted && !localGrant.directorate })}
                     />
                 </div>
 
+                {/* Title Field */}
                 <div className="field">
                     <label htmlFor="title">Title</label>
                     <InputText
@@ -148,20 +133,20 @@ const SaveDialog = ({ visible, grant, onComplete, onHide }: SaveDialogProps) => 
                     />
                 </div>
 
+                {/* Description Field */}
                 <div className="field">
-                    <label htmlFor="description">Description </label>
+                    <label htmlFor="description">Description</label>
                     <InputTextarea
-                        value={localGrant.description ?? ""}
+                        id="description"
+                        value={localGrant.description ?? ''}
                         onChange={(e) => setLocalGrant({ ...localGrant, description: e.target.value })}
-                        rows={5}
-                        cols={30} />
+                        rows={4}
+                        cols={30}
+                    />
                 </div>
-                {errorMessage && (
-                    <small className="p-error">{errorMessage}</small>
-                )}
             </Dialog>
         </>
     );
-}
+};
 
 export default SaveDialog;
