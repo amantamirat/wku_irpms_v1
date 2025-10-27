@@ -21,7 +21,7 @@ export class ProjectThemeService {
     private static async validateProjectTheme(pt: CreateProjectThemeDto) {
         const project = await Project.findById(pt.project).populate<{ call: CreateCallDto }>("call").lean();
         if (!project) throw new Error("Project not found");
-        const theme = await BaseTheme.findOne({ _id: pt.theme, catalog: project.call.theme }).lean();
+        const theme = await BaseTheme.findOne({ _id: pt.theme, thematic_area: project.call.theme }).lean();
         if (!theme) throw new Error("Theme not found");
     }
 
