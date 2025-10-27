@@ -87,7 +87,7 @@ export class ThemeService {
     // ✅ GET user-owned themes (like getUserGrants)
     static async getUserThemes(userId: string) {
         const organizations = await CacheService.getUserOrganizations(userId);
-        return await BaseTheme.find({ directorate: { $in: organizations } }).lean();
+        return await BaseTheme.find({ directorate: { $in: organizations } }).populate("directorate").lean();
     }
 
     // ✅ UPDATE with ownership validation
