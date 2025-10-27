@@ -13,17 +13,13 @@ import ProjectManager from '../../projects/components/ProjectManager';
 import { CallApi } from '../api/call.api';
 import { Call, CallStatus } from '../models/call.model';
 import SaveDialog from './SaveDialog';
+import ErrorComponent from '@/components/ErrorComponent';
 
 
-interface CallManagerProps {
-    directorate: any;
-}
-
-
-const CallManager = (props: CallManagerProps) => {
+const CallManager = () => {
 
     const emptyCall: Call = {
-        directorate: props.directorate,
+        directorate: '',
         title: '',
         deadline: new Date(),
         grant: '',
@@ -43,45 +39,36 @@ const CallManager = (props: CallManagerProps) => {
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
     const toast = useRef<Toast>(null);
 
-    const loadCalls = useCallback(async () => {
-        try {
-            const data = await CallApi.getCalls({ directorate: props.directorate._id });
-            setCalls(data);
-        } catch (err) {
-            setError(`Failed to load grant data ${err}`);
-        } finally {
 
-        }
-    }, [props.directorate, error]);
-
-
-    useEffect(() => {
-        loadCalls();
-    }, [loadCalls]);
+    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
+    };
 
     useEffect(() => {
         setFilters(initFilters());
         setGlobalFilter('');
     }, []);
 
+    const loadCalls = useCallback(async () => {
+        try {
+            const data = await CallApi.getCalls({});
+            setCalls(data);
+        } catch (err) {
+            setError(`Failed to load call data ${err}`);
+        } finally {
 
-    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
-    };
+        }
+    }, []);
+
+
+    useEffect(() => {
+        loadCalls();
+    }, [loadCalls]);
+
 
     if (error) {
         return (
-            <div className="flex align-items-center justify-content-center py-6">
-                <div className="text-center">
-                    <i className="pi pi-exclamation-triangle text-4xl text-500 mb-3" />
-                    <p className="text-500 mb-4">{error}</p>
-                    <Button
-                        label="Retry"
-                        icon="pi pi-refresh"
-                        onClick={() => window.location.reload()}
-                    />
-                </div>
-            </div>
+            <ErrorComponent errorMessage={error} />
         );
     }
 
@@ -128,7 +115,7 @@ const CallManager = (props: CallManagerProps) => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage  {props.directorate.name} Calls</h5>
+            <h5 className="m-0">Manage Calls</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
@@ -192,6 +179,7 @@ const CallManager = (props: CallManagerProps) => {
                         <Column expander style={{ width: '3em' }} />
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="calendar.year" header="Calendar" sortable />
+                        <Column field="directorate.name" header="Directorate" sortable />
                         <Column field="title" header="Title" sortable />
                         <Column field="deadline" header="Deadline" body={(rowData) => new Date(rowData.deadline!).toLocaleDateString('en-CA')} />
                         <Column field="grant.title" header="Grant" sortable />

@@ -16,56 +16,32 @@ import { PERMISSIONS } from '@/types/permissions';
 const AppMenu = () => {
     const { hasPermission, hasOrganizationType } = useAuth();
     const { layoutConfig } = useContext(LayoutContext);
-    const icons = ['pi pi-mars', 'pi pi-microchip', 'pi pi-prime', 'pi pi-sparkles', 'pi pi-venus'];
-
-    const [organizations, setOrganizations] = useState<Organization[]>([]);
-
-    useEffect(() => {
-        OrganizationApi.getOrganizations({ type: OrganizationalUnit.Directorate })
-            .then(data => setOrganizations(data))
-            .catch(err => console.error('Failed to fetch organization of directorates', err));
-    }, []);
-
-    const directoratesMenu: AppMenuItem = {
-        label: 'Directorates',
-        icon: 'pi pi-sitemap',
-        items: organizations.map((dir, index) => ({
-            label: dir.name,
-            icon: icons[index % icons.length],
-            items: [
-                {
-                    label: 'Calls',
-                    icon: 'pi pi-fw pi-megaphone',
-                    to: `/calls?id=${dir._id}&name=${encodeURIComponent(dir.name)}`
-                },
-
-
-            ]
-        }))
-    };
-
-
+    //const icons = ['pi pi-mars', 'pi pi-microchip', 'pi pi-prime', 'pi pi-sparkles', 'pi pi-venus'];   
 
     const model: AppMenuItem[] = [
         {
             label: 'Home',
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
         },
-        directoratesMenu,
         {
             label: 'Directorate',
             icon: PrimeIcons.SITEMAP,
             visible: hasOrganizationType([OrganizationalUnit.Directorate]),
             items: [
                 {
-                    label: 'Grants',
-                    icon: 'pi pi-fw pi-wrench',
-                    to: '/grants',
+                    label: 'Calls',
+                    icon: 'pi pi-fw pi-megaphone',
+                    to: '/calls'
+                },
+                {
+                    label: 'Themes',
+                    icon: 'pi pi-fw pi-tags',
+                    to: '/themes',
                     visible: hasPermission(
                         [
-                            PERMISSIONS.GRANT.CREATE,
-                            PERMISSIONS.GRANT.UPDATE,
-                            PERMISSIONS.GRANT.DELETE
+                            PERMISSIONS.THEME.CREATE,
+                            PERMISSIONS.THEME.UPDATE,
+                            PERMISSIONS.THEME.DELETE
                         ]
                     )
                 },
@@ -82,17 +58,17 @@ const AppMenu = () => {
                     )
                 },
                 {
-                    label: 'Themes',
-                    icon: 'pi pi-fw pi-tags',
-                    to: '/themes',
+                    label: 'Grants',
+                    icon: 'pi pi-fw pi-wrench',
+                    to: '/grants',
                     visible: hasPermission(
                         [
-                            PERMISSIONS.THEME.CREATE,
-                            PERMISSIONS.THEME.UPDATE,
-                            PERMISSIONS.THEME.DELETE
+                            PERMISSIONS.GRANT.CREATE,
+                            PERMISSIONS.GRANT.UPDATE,
+                            PERMISSIONS.GRANT.DELETE
                         ]
                     )
-                }
+                },
             ]
         },
         {
@@ -126,28 +102,6 @@ const AppMenu = () => {
                         ]
                     ),
                     to: '/applicants',
-                    /*
-                    items: [
-                        {
-                            label: 'Academic',
-                            icon: 'pi pi-fw pi-crown',
-                            to: `/applicants?scope=${Scope.academic}`,
-                            visible: hasOrganizationType([OrganizationalUnit.Department]),
-                        },
-                        {
-                            label: 'Supportive',
-                            icon: 'pi pi-fw pi-bullseye',
-                            to: `/applicants?scope=${Scope.supportive}`,
-                            visible: hasOrganizationType([OrganizationalUnit.Supportive]),
-                        },
-                        {
-                            label: 'External',
-                            icon: 'pi pi-fw pi-asterisk',
-                            to: `/applicants?scope=${Scope.external}`,
-                            visible: hasOrganizationType([OrganizationalUnit.External]),
-                        }
-                    ]
-                    */
                 },
                 {
                     label: 'Organizations',
