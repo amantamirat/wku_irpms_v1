@@ -107,15 +107,14 @@ export class ThemeController {
 
     static async importThemesBatch(req: Request, res: Response) {
         try {
-            const { thematic_areaId, themesData } = req.body;
-            if (!thematic_areaId || !Array.isArray(themesData)) {
+            const { thematicAreaId, themesData } = req.body;
+            if (!thematicAreaId || !Array.isArray(themesData)) {
                 return errorResponse(res, 400, "thematic_areaId and themesData are required");
             }
             const result = await ThemeService.importThemes(
-                new mongoose.Types.ObjectId(thematic_areaId as string),
+                new mongoose.Types.ObjectId(thematicAreaId as string),
                 themesData
             );
-
             return successResponse(res, 201, "Themes imported successfully", result);
         } catch (err: any) {
             return errorResponse(res, 400, err.message, err);

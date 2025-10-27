@@ -70,4 +70,12 @@ export const ThemeApi = {
         const response = await ApiClient.delete(url);
         return response;
     },
+
+    async importThemeBatch(thematicAreaId: string, themesData: any[]): Promise<any> {
+            const response = await ApiClient.post(`${end_point}/import-themes`, {
+                thematicAreaId,
+                themesData
+            });
+            return response;
+        },
 };

@@ -128,7 +128,7 @@ export class ThemeService {
 
 
     static async importThemes(
-        thematic_areaId: mongoose.Types.ObjectId,
+        thematicAreaId: mongoose.Types.ObjectId,
         data: Array<{
             title: string;
             priority?: number;
@@ -136,7 +136,7 @@ export class ThemeService {
         }>
     ) {
         // Validate thematic area
-        const thematicArea = await ThematicArea.findById(thematic_areaId);
+        const thematicArea = await ThematicArea.findById(thematicAreaId);
         if (!thematicArea) throw new Error("Thematic Area not found");
 
         // Determine max depth based on thematic_area level
@@ -187,7 +187,7 @@ export class ThemeService {
     private static async createSubThemesRecursiveByLevel(
         items: Array<any>,
         parentId: mongoose.Types.ObjectId,
-        thematic_areaId: mongoose.Types.ObjectId,
+        thematiAreaId: mongoose.Types.ObjectId,
         currentDepth: number,
         maxDepth: number
     ) {
@@ -200,7 +200,7 @@ export class ThemeService {
                 doc = await Componenet.create({
                     title: item.title,
                     type: ThemeType.componenet,
-                    thematic_area: thematic_areaId,
+                    thematic_area: thematiAreaId,
                     parent: parentId,
                     priority: item.priority
                 });
@@ -209,7 +209,7 @@ export class ThemeService {
                 doc = await FocusArea.create({
                     title: item.title,
                     type: ThemeType.focusArea,
-                    thematic_area: thematic_areaId,
+                    thematic_area: thematiAreaId,
                     parent: parentId,
                     priority: item.priority
                 });
@@ -222,7 +222,7 @@ export class ThemeService {
                 nested = await this.createSubThemesRecursiveByLevel(
                     item.children,
                     doc._id,
-                    thematic_areaId,
+                    thematiAreaId,
                     currentDepth + 1,
                     maxDepth
                 );
