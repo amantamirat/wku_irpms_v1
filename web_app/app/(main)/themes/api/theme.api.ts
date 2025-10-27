@@ -46,6 +46,11 @@ export const ThemeApi = {
         return data as Theme[];
     },
 
+    async getUserThemes(): Promise<Theme[]> {
+        const data = await ApiClient.get(`${end_point}/user`);
+        return data as Theme[];
+    },
+
 
     async updateTheme(theme: Partial<Theme>): Promise<Theme> {
         if (!theme._id) {

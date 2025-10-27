@@ -38,12 +38,7 @@ const AppMenu = () => {
                     icon: 'pi pi-fw pi-megaphone',
                     to: `/calls?id=${dir._id}&name=${encodeURIComponent(dir.name)}`
                 },
-                {
-                    label: 'Themes',
-                    icon: 'pi pi-fw pi-tags',
-                    to: `/themes?id=${dir._id}&name=${encodeURIComponent(dir.name)}`
 
-                },
 
             ]
         }))
@@ -63,6 +58,18 @@ const AppMenu = () => {
             visible: hasOrganizationType([OrganizationalUnit.Directorate]),
             items: [
                 {
+                    label: 'Grants',
+                    icon: 'pi pi-fw pi-wrench',
+                    to: '/grants',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.GRANT.CREATE,
+                            PERMISSIONS.GRANT.UPDATE,
+                            PERMISSIONS.GRANT.DELETE
+                        ]
+                    )
+                },
+                {
                     label: 'Evaluations',
                     icon: 'pi pi-fw pi-calculator',
                     to: '/evals',
@@ -75,14 +82,14 @@ const AppMenu = () => {
                     )
                 },
                 {
-                    label: 'Grants',
-                    icon: 'pi pi-fw pi-wrench',
-                    to: '/grants',
+                    label: 'Themes',
+                    icon: 'pi pi-fw pi-tags',
+                    to: '/themes',
                     visible: hasPermission(
                         [
-                            PERMISSIONS.GRANT.CREATE,
-                            PERMISSIONS.GRANT.UPDATE,
-                            PERMISSIONS.GRANT.DELETE
+                            PERMISSIONS.THEME.CREATE,
+                            PERMISSIONS.THEME.UPDATE,
+                            PERMISSIONS.THEME.DELETE
                         ]
                     )
                 }

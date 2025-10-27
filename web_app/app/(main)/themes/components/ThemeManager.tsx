@@ -1,6 +1,7 @@
 'use client';
 
 import ConfirmDialog from '@/components/ConfirmationDialog';
+import ErrorComponent from '@/components/ErrorComponent';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -13,151 +14,132 @@ import { ThemeApi } from '../api/theme.api';
 import { Theme, ThemeLevel, ThemeType } from '../models/theme.model';
 import SaveDialog from './dialogs/SaveDialog';
 
-
 interface ThemeManagerProps {
     type: ThemeType;
-    directorate?: any;
+    //directorate?: any;
     parent?: Theme;
     themeLevel?: ThemeLevel;
 }
 
-const ThemeManager = (props: ThemeManagerProps) => {
+const ThemeManager = ({ type, parent, themeLevel }: ThemeManagerProps) => {
 
-    const type = props.type;
-    let level = props.themeLevel;
-    const isBroadLevel = level === ThemeLevel.broad;
-    const isComponenetLevel = level === ThemeLevel.componenet;
-    //const isNarrowLevel = level === ThemeLevel.narrow;
+    // Identify type-level hierarchy
     const isThematicArea = type === ThemeType.thematic_area;
     const isBroadTheme = type === ThemeType.broadTheme;
     const isSubTheme = type === ThemeType.componenet;
-    //const isFocusArea = type === ThemeType.focusArea;
-    const childType = isThematicArea ? ThemeType.broadTheme : isBroadTheme ? ThemeType.componenet : isSubTheme ? ThemeType.focusArea : null;
-    const isSelectionOnly = !childType || (isBroadLevel && isBroadTheme) || (isComponenetLevel && isSubTheme); // Non Expandable 
+    const isBroadLevel = themeLevel === ThemeLevel.broad;
+    const isComponentLevel = themeLevel === ThemeLevel.componenet;
+
+    const childType = isThematicArea
+        ? ThemeType.broadTheme
+        : isBroadTheme
+            ? ThemeType.componenet
+            : isSubTheme
+                ? ThemeType.focusArea
+                : null;
+
+    const isSelectionOnly =
+        !childType ||
+        (isBroadLevel && isBroadTheme) ||
+        (isComponentLevel && isSubTheme);
 
     const emptyTheme: Theme = {
         title: '',
-        type: type,
-        directorate: props.directorate,
-        parent: props.parent
+        type,
+        directorate: '',
+        parent,
     };
 
+    // Local States
     const [themes, setThemes] = useState<Theme[]>([]);
-    const dt = useRef<DataTable<any>>(null);
+    const [selectedTheme, setSelectedTheme] = useState<Theme>(emptyTheme);
+    const [error, setError] = useState<string | null>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
-    const [selectedTheme, setSelectedTheme] = useState<Theme>(emptyTheme);
+    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const toast = useRef<Toast>(null);
-    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
     const [loading, setLoading] = useState(false);
+    //const toast = useRef<Toast>(null);
+    const dt = useRef<DataTable<any>>(null);
 
+    // Initialize filters
+    useEffect(() => {
+        setFilters(initFilters());
+        setGlobalFilter('');
+    }, []);
 
+    // Fetch themes
+    const fetchThemes = useCallback(async () => {
+        try {
+            setLoading(true);
+            let data: Theme[] = [];
+            if (isThematicArea) {
+                data = await ThemeApi.getUserThemes();
+            } else if (parent) {
+                data = await ThemeApi.getThemes({
+                    type,
+                    parent: parent._id || '',
+                });
+            }
+            setThemes(data);
+        } catch (err) {
+            setError(`Failed to load ${type} data: ${err}`);
+        } finally {
+            setLoading(false);
+        }
+    }, [type, parent, isThematicArea]);
+
+    useEffect(() => {
+        fetchThemes();
+    }, [fetchThemes]);
+
+    // Error state
+    if (error) {
+        return <ErrorComponent errorMessage={error} />;
+    }
+
+    // Dialog Control
+    const hideDialogs = () => {
+        setShowSaveDialog(false);
+        setShowDeleteDialog(false);
+        setSelectedTheme(emptyTheme);
+    };
+
+    // Save complete callback
+    const onSaveComplete = (savedTheme: Theme) => {
+        let _themes = [...themes];
+        const index = _themes.findIndex((t) => t._id === savedTheme._id);
+        if (index !== -1) {
+            _themes[index] = { ...savedTheme };
+        } else {
+            _themes.push({ ...savedTheme });
+        }
+        setThemes(_themes);
+        hideDialogs();
+    };
+
+    // Delete theme
+    const deleteTheme = async () => {
+        const deleted = await ThemeApi.deleteTheme(selectedTheme);
+        if (deleted) {
+            setThemes(themes.filter((c) => c._id !== selectedTheme._id));
+            hideDialogs();
+        }
+    };
+
+    // Search
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
     };
 
-
-    const loadThemes = useCallback(async () => {
-        try {
-            setLoading(true);
-            if (props.directorate && isThematicArea) {
-                const data = await ThemeApi.getThemes({
-                    type: props.type,
-                    directorate: props.directorate._id || ''
-                });
-                setThemes(data);
-            } else if (props.parent) {
-                const data = await ThemeApi.getThemes({
-                    type: props.type,
-                    parent: props.parent._id || ''
-                });
-                setThemes(data);
-            }
-        } catch (err) {
-            console.error('Failed to load themes:', err);
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load themes data',
-                detail: '' + err,
-                life: 3000
-            });
-        } finally {
-            setLoading(false);
-        }
-    }, [props.parent, props.directorate, toast]);
-
-    useEffect(() => {
-        setFilters(initFilters());
-        setGlobalFilter('');
-        loadThemes();
-    }, [loadThemes]);
-
-    const saveTheme = async () => {
-        try {
-            setLoading(true);
-            let _themes = [...themes];
-            if (selectedTheme._id) {
-                const updated = await ThemeApi.updateTheme(selectedTheme);
-                const index = _themes.findIndex((c) => c._id === selectedTheme._id);
-                _themes[index] = updated;
-            } else {
-                const created = await ThemeApi.createTheme(selectedTheme);
-                _themes.push({ ...selectedTheme, _id: created._id });
-            }
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Successful',
-                detail: `${type} ${selectedTheme._id ? 'updated' : 'created'}`,
-                life: 3000
-            });
-            setThemes(_themes);
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: `Failed to save ${type}`,
-                detail: '' + err,
-                life: 3000
-            });
-        } finally {
-            setShowSaveDialog(false);
-            setSelectedTheme(emptyTheme);
-            setLoading(false);
-        }
-    };
-
-    const deleteTheme = async () => {
-        try {
-            setLoading(true);
-            const deleted = await ThemeApi.deleteTheme(selectedTheme);
-            if (deleted) {
-                setThemes(themes.filter((c) => c._id !== selectedTheme._id));
-                toast.current?.show({
-                    severity: 'success',
-                    summary: 'Deleted',
-                    detail: `${type} deleted`,
-                    life: 3000
-                });
-            }
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: `Failed to delete ${type}`,
-                detail: '' + err,
-                life: 3000
-            });
-        } finally {
-            setShowDeleteDialog(false);
-            setSelectedTheme(emptyTheme);
-            setLoading(false);
-        }
-    };
-
+    // Toolbar
     const startToolbarTemplate = () => (
         <div className="my-2">
-            <Button label={`New ${type}`} icon="pi pi-plus" severity='success'
-                //className={`mr-2 theme-type-button ${type.split('-')[0].toLowerCase()}`}
+            <Button
+                label={`New ${type}`}
+                icon="pi pi-plus"
+                severity="success"
                 onClick={() => {
                     setSelectedTheme(emptyTheme);
                     setShowSaveDialog(true);
@@ -166,45 +148,63 @@ const ThemeManager = (props: ThemeManagerProps) => {
         </div>
     );
 
+    // Table Header
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage {type}s of {props.directorate?.name} {props.parent?.title} </h5>
+            <h5 className="m-0">
+                Manage {type}s {parent?.title && `in ${parent.title}`}
+            </h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
-                <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
+                <InputText
+                    type="search"
+                    value={globalFilter}
+                    onChange={onGlobalFilterChange}
+                    placeholder="Search..."
+                    className="w-full md:w-1/3"
+                />
             </span>
         </div>
     );
 
-    const themeLevelBodyTemplate = (rowData: Theme) => {
-        return (
-            <span className={`theme-level-badge theme-${rowData.level}`}>
-                {rowData.level}
-            </span>
-        );
-    };
+    // Level Badge
+    const themeLevelBodyTemplate = (rowData: Theme) => (
+        <span className={`theme-level-badge theme-${rowData.level}`}>
+            {rowData.level}
+        </span>
+    );
 
+    // Actions
     const actionBodyTemplate = (rowData: Theme) => (
         <>
-            <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }} onClick={() => {
+            <Button
+                icon="pi pi-pencil"
+                rounded
+                severity="success"
+                className="p-button-rounded p-button-text"
+                onClick={() => {
                     setSelectedTheme(rowData);
                     setShowSaveDialog(true);
-                }} />
-            <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }} onClick={() => {
+                }}
+            />
+            <Button
+                icon="pi pi-trash"
+                rounded
+                severity="warning"
+                className="p-button-rounded p-button-text"
+                onClick={() => {
                     setSelectedTheme(rowData);
                     setShowDeleteDialog(true);
-                }} />
+                }}
+            />
         </>
     );
 
     return (
         <div className="grid">
             <div className="col-12">
-                <div className="card">
-                    <Toast ref={toast} />
-                    <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
+                <div className="card">                    
+                    <Toolbar className="mb-4" start={startToolbarTemplate} />
                     <DataTable
                         ref={dt}
                         value={themes}
@@ -218,7 +218,7 @@ const ThemeManager = (props: ThemeManagerProps) => {
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate={`Showing {first} to {last} of {totalRecords} ${type}s`}
                         globalFilter={globalFilter}
-                        emptyMessage={`No themes data found.`}
+                        emptyMessage={`No ${type} data found.`}
                         header={header}
                         scrollable
                         filters={filters}
@@ -226,44 +226,40 @@ const ThemeManager = (props: ThemeManagerProps) => {
                         expandedRows={expandedRows}
                         onRowToggle={(e) => setExpandedRows(e.data)}
                         rowExpansionTemplate={(rowData) => {
-                            let rowTheme = rowData as Theme;
-                            if (isThematicArea && rowTheme.level) {
-                                level = rowTheme.level
-                            } else if (isSelectionOnly) {
-                                return null;
-                            }
+                            const rowTheme = rowData as Theme;
+                            if (isSelectionOnly) return null;
                             return (
                                 <ThemeManager
-                                    type={childType ? childType : ThemeType.thematic_area}
+                                    type={childType!}
                                     parent={rowTheme}
-                                    themeLevel={level}
+                                    themeLevel={themeLevel}
                                 />
                             );
                         }}
-
                     >
-                        {
-                            isSelectionOnly ? <Column selectionMode="single" style={{ width: '3em' }} /> :
-                                <Column expander style={{ width: '3em' }} />
-                        }
-                        <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                        <Column field="title" header={type + " Title"} sortable />
-                        {isThematicArea && (
-                            <Column field="level" header="Level" body={themeLevelBodyTemplate} sortable />
+                        {isSelectionOnly ? (
+                            <Column selectionMode="single" style={{ width: '3em' }} />
+                        ) : (
+                            <Column expander style={{ width: '3em' }} />
                         )}
-                        {!isThematicArea && (
+                        <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
+                        {isThematicArea &&
+                            <Column field="directorate.name" header="Directorate" sortable />
+                        }
+                        <Column field="title" header={`${type} Title`} sortable />
+                        {isThematicArea ? (
+                            <Column field="level" header="Level" body={themeLevelBodyTemplate} sortable />
+                        ) : (
                             <Column field="priority" header="Priority" sortable />
                         )}
-                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
+                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
                     </DataTable>
 
                     {selectedTheme && (
                         <SaveDialog
                             visible={showSaveDialog}
                             theme={selectedTheme}
-                            isCatalog={isThematicArea}
-                            onChange={setSelectedTheme}
-                            onSave={saveTheme}
+                            onComplete={onSaveComplete}
                             onHide={() => setShowSaveDialog(false)}
                         />
                     )}
