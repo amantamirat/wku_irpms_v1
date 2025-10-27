@@ -1,0 +1,69 @@
+[
+  {
+    "title": "Alignment with Institutional Technology Transfer Goals",
+    "weight_value": 20,
+    "form_type": "Closed",
+    "options": [
+      { "title": "Strongly Aligned – directly supports institutional transfer strategy", "weight_value": 20 },
+      { "title": "Moderately Aligned – supports goals indirectly", "weight_value": 15 },
+      { "title": "Minimally Aligned – limited relevance", "weight_value": 10 },
+      { "title": "Not Aligned – unrelated to institutional objectives", "weight_value": 5 }
+    ]
+  },
+  {
+    "title": "Innovation and Commercial Potential",
+    "weight_value": 25,
+    "form_type": "Closed",
+    "options": [
+      { "title": "High – novel technology with strong market demand", "weight_value": 25 },
+      { "title": "Moderate – some innovation with fair market interest", "weight_value": 20 },
+      { "title": "Low – incremental improvement with limited market", "weight_value": 15 },
+      { "title": "None – lacks innovation or market potential", "weight_value": 10 }
+    ]
+  },
+  {
+    "title": "Intellectual Property (IP) Readiness and Protection",
+    "weight_value": 15,
+    "form_type": "Closed",
+    "options": [
+      { "title": "IP secured or in advanced filing stage", "weight_value": 15 },
+      { "title": "IP under preparation or review", "weight_value": 10 },
+      { "title": "IP not yet developed", "weight_value": 5 }
+    ]
+  },
+  {
+    "title": "Implementation and Collaboration Feasibility",
+    "weight_value": 15,
+    "form_type": "Closed",
+    "options": [
+      { "title": "Highly feasible – clear roadmap and strong partners", "weight_value": 15 },
+      { "title": "Moderately feasible – partial readiness or limited partners", "weight_value": 10 },
+      { "title": "Low feasibility – unclear implementation plan", "weight_value": 5 }
+    ]
+  },
+  {
+    "title": "Socioeconomic and Environmental Impact",
+    "weight_value": 15,
+    "form_type": "Closed",
+    "options": [
+      { "title": "High – significant positive economic or social outcomes", "weight_value": 15 },
+      { "title": "Moderate – some benefits with limited scope", "weight_value": 10 },
+      { "title": "Low – minimal measurable benefits", "weight_value": 5 }
+    ]
+  },
+  {
+    "title": "Scalability and Sustainability",
+    "weight_value": 10,
+    "form_type": "Closed",
+    "options": [
+      { "title": "High – can be scaled and maintained long-term", "weight_value": 10 },
+      { "title": "Moderate – scalable with additional support", "weight_value": 7 },
+      { "title": "Low – limited scalability or short-term only", "weight_value": 5 }
+    ]
+  },
+  {
+    "title": "Comments and Recommendations",
+    "weight_value": 0,
+    "form_type": "Open"
+  }
+]
