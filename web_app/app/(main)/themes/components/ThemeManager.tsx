@@ -8,7 +8,7 @@ import { Column } from 'primereact/column';
 import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { Toolbar } from 'primereact/toolbar';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ThemeApi } from '../api/theme.api';
 import { Theme, ThemeLevel, ThemeType } from '../models/theme.model';
 import SaveDialog from './dialogs/SaveDialog';
@@ -68,30 +68,29 @@ const ThemeManager = ({ type, parent, themeLevel }: ThemeManagerProps) => {
         setGlobalFilter('');
     }, []);
 
+    const fetchThemes = useCallback(async () => {
+        let data: Theme[] = [];
+        if (isThematicArea) {
+            data = await ThemeApi.getUserThemes();
+        } else if (parent) {
+            data = await ThemeApi.getThemes({ type, parent: parent._id || '' });
+        }
+        setThemes(data);
+    }, [type, parent, isThematicArea]);
+
     useEffect(() => {
         let mounted = true;
-        const fetchThemes = async () => {
-            try {
-                //setLoading(true);
-                let data: Theme[] = [];
-                if (isThematicArea) {
-                    data = await ThemeApi.getUserThemes();
-                } else if (parent) {
-                    data = await ThemeApi.getThemes({
-                        type,
-                        parent: parent._id || '',
-                    });
-                }
-                if (mounted) setThemes(data);
-            } catch (err) {
-                if (mounted) setError(`Failed to load ${type} data: ${err}`);
-            } finally {
-                //if (mounted) setLoading(false);
-            }
+        const load = async () => {
+            if (!mounted) return;
+            await fetchThemes();
         };
-        fetchThemes();
-        return () => { mounted = false; };
-    }, [type, parent, isThematicArea]);
+        load();
+        return () => {
+            mounted = false;
+        };
+    }, [fetchThemes]); // effect runs once
+
+
 
 
     // Error state

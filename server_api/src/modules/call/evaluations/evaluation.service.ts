@@ -127,7 +127,11 @@ export class EvaluationService {
 
     static async getUserEvaluations(userId: string) {
         const orgs = await CacheService.getUserOrganizations(userId);
-        return await BaseEvaluation.find({ directorate: { $in: orgs } }).populate('directorate').lean();
+        if (!orgs.length) {
+            return [];
+        }
+        const evals = await BaseEvaluation.find({ directorate: { $in: orgs } }).populate('directorate').lean();
+        return evals;
     }
 
     static async updateEvaluation(id: string, data: Partial<CreateEvaluationDto>, userId: string) {

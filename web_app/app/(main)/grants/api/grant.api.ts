@@ -39,7 +39,6 @@ export const GrantApi = {
         return data as Grant[];
     },
 
-
     async updateGrant(grant: Partial<Grant>): Promise<Grant> {
         if (!grant._id) {
             throw new Error("_id required.");

@@ -11,9 +11,10 @@ export class CacheService {
             //console.log(`[Cache MISS] ${userKey}`);
             const user = await User.findById(userId).populate("organizations", "_id");
             if (!user) return [];
-            orgs = user.organizations?.map((org: any) => org._id.toString()) ?? [];
+            orgs = user.organizations?.map((org: any) => org._id) ?? [];
             this.setUserOrganizations(userId, orgs);
         }
+        //console.log(`[Cache HIT] ${userKey}`);
         return orgs;
     }
 
