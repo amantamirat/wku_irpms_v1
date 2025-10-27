@@ -2,19 +2,19 @@
 
 import ConfirmDialog from '@/components/ConfirmationDialog';
 
+import ErrorComponent from '@/components/ErrorComponent';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
-import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Call } from '../../calls/models/call.model';
 import { GetProjectsOptions, ProjectApi } from '../api/project.api';
 import { Project } from '../models/project.model';
 import SaveProjectDialog from './dialogs/SaveProjectDialog';
 import ProjectDetail from './ProjectDetail';
-import { Call } from '../../calls/models/call.model';
 
 interface ProjectManagerProps {
     call?: Call;
@@ -26,39 +26,16 @@ const ProjectManager = (props: ProjectManagerProps) => {
         call: call || '',
         title: ''
     };
-
     const [projects, setProjects] = useState<Project[]>([]);
+    const [error, setError] = useState<string | null>(null);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
     const [selectedProject, setSelectedProject] = useState<Project>(emptyProject);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const toast = useRef<Toast>(null);
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
-
-
-
-    const fetchProjects = useCallback(async () => {
-        try {
-            const options: GetProjectsOptions = {};
-            options.call = call ? call._id : undefined;
-            const data = await ProjectApi.getProjects(options);
-            setProjects(data);
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to load project data',
-                detail: '' + err,
-                life: 3000
-            });
-        }
-    }, [call]);
-
-    useEffect(() => {
-        fetchProjects();
-    }, [fetchProjects]);
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
@@ -69,45 +46,58 @@ const ProjectManager = (props: ProjectManagerProps) => {
         setGlobalFilter('');
     }, []);
 
-    const saveProject = async () => {
+
+    const fetchProjects = useCallback(async () => {
         try {
-            let _projects = [...projects];
-            if (selectedProject._id) {
-                const updated = await ProjectApi.updateProject(selectedProject);
-                const index = _projects.findIndex((c) => c._id === updated._id);
-                _projects[index] = selectedProject;
-            } else {
-                const created = await ProjectApi.createProject(selectedProject);
-                _projects.push({ ...created, call: selectedProject.call });
-            }
-            setProjects(_projects);
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Successful',
-                detail: `Project ${selectedProject._id ? 'updated' : 'created'}`,
-                life: 3000
-            });
+            const options: GetProjectsOptions = {};
+            options.call = call ? call._id : undefined;
+            const data = await ProjectApi.getProjects(options);
+            setProjects(data);
         } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to save project',
-                detail: '' + err,
-                life: 3000
-            });
-        } finally {
-            setShowSaveDialog(false);
-            setSelectedProject(emptyProject);
+            setError(`Failed to load call data ${err}`);
         }
+    }, [call]);
+
+    useEffect(() => {
+        fetchProjects();
+    }, [fetchProjects]);
+
+    if (error) {
+        return (
+            <ErrorComponent errorMessage={error} />
+        );
+    }
+
+    const onSaveComplete = (savedProject: Project) => {
+        let _projects = [...projects]; // projects is your local state array of Project
+        const index = _projects.findIndex((p) => p._id === savedProject._id);
+
+        if (index !== -1) {
+            // Replace existing project
+            _projects[index] = { ...savedProject };
+        } else {
+            // Add new project
+            _projects.push({ ...savedProject });
+        }
+
+        setProjects(_projects); // update state
+        hideDialogs();
     };
 
     const deleteProject = async () => {
         const deleted = await ProjectApi.deleteProject(selectedProject);
         if (deleted) {
             setProjects(projects.filter((c) => c._id !== selectedProject._id));
-            setShowDeleteDialog(false);
-            setSelectedProject(emptyProject);
+            hideDialogs();
         }
     };
+
+    
+    const hideDialogs = () => {
+        setShowSaveDialog(false);
+        setShowDeleteDialog(false);
+        setSelectedProject(emptyProject);
+    }
 
     const startToolbarTemplate = () => (
         <div className="my-2">
@@ -157,7 +147,6 @@ const ProjectManager = (props: ProjectManagerProps) => {
         <div className="grid">
             <div className="col-12">
                 <div className="card">
-                    <Toast ref={toast} />
                     <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
                     <DataTable
                         ref={dt}
@@ -196,9 +185,8 @@ const ProjectManager = (props: ProjectManagerProps) => {
                         <SaveProjectDialog
                             visible={showSaveDialog}
                             project={selectedProject}
-                            setProject={setSelectedProject}
-                            onSave={saveProject}
-                            onHide={() => setShowSaveDialog(false)}
+                            onComplete={onSaveComplete}
+                            onHide={hideDialogs}
                         />
                     )}
 
@@ -207,7 +195,7 @@ const ProjectManager = (props: ProjectManagerProps) => {
                             showDialog={showDeleteDialog}
                             selectedDataInfo={String(selectedProject.title)}
                             onConfirmAsync={deleteProject}
-                            onHide={() => setShowDeleteDialog(false)}
+                            onHide={hideDialogs}
                         />
                     )}
                 </div>

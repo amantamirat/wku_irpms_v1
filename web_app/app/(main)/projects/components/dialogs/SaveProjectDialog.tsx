@@ -1,53 +1,76 @@
 'use client';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
-import { useEffect, useState } from 'react';
-import { Project, validateProject } from '../../models/project.model';
-import ProjectForm from './ProjectForm';
+import { Dropdown } from 'primereact/dropdown';
+import { InputText } from 'primereact/inputtext';
+import { InputTextarea } from 'primereact/inputtextarea';
+import { Toast } from 'primereact/toast';
+import { classNames } from 'primereact/utils';
 import { CallApi } from '@/app/(main)/calls/api/call.api';
 import { Call, CallStatus } from '@/app/(main)/calls/models/call.model';
+import { Project, validateProject } from '../../models/project.model';
+import { ProjectApi } from '../../api/project.api';
 
-
-interface SaveDialogProps {
+interface SaveProjectDialogProps {
     visible: boolean;
     project: Project;
-    setProject: (e: Project) => void;
-    onSave: () => void;
     onHide: () => void;
+    onComplete?: (savedProject: Project) => void;
 }
 
-function SaveProjectDialog(props: SaveDialogProps) {
-    const { visible, project, setProject, onSave, onHide } = props;
-    //const [submitted, setSubmitted] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | undefined>();
+const SaveProjectDialog = ({ visible, project, onHide, onComplete }: SaveProjectDialogProps) => {
+    const toast = useRef<Toast>(null);
 
-    const [calls, setCalls] = useState<Call[]|undefined>(undefined);
+    const [localProject, setLocalProject] = useState<Project>({ ...project });
+    const [submitted, setSubmitted] = useState(false);
+    //const [errorMessage, setErrorMessage] = useState<string | undefined>();
+    const [calls, setCalls] = useState<Call[] | undefined>(undefined);
 
+    // Fetch active calls if no call selected
     useEffect(() => {
         const fetchCalls = async () => {
-            const data = await CallApi.getCalls({ status: CallStatus.active });
-            setCalls(data);
+            try {
+                const data = await CallApi.getCalls({ status: CallStatus.active });
+                setCalls(data);
+            } catch (err) {
+                console.error('Failed to fetch calls:', err);
+            }
         };
-        if (!project.call) {
-            fetchCalls();
-            console.log("fetched.... call")
-        }
-    }, [project.call]);
+        if (!localProject.call) fetchCalls();
+    }, [localProject.call]);
 
     const save = async () => {
-        //setSubmitted(true);
-        const result = validateProject(project);
-        if (!result.valid) {
-            setErrorMessage(result.message);
-            return;
+        setSubmitted(true);
+        const validation = validateProject(localProject);
+        if (!validation.valid) {
+            throw new Error(validation.message);
         }
-        setErrorMessage(undefined);
-        onSave();
+
+        let saved: Project;
+        if (localProject._id) {
+            saved = await ProjectApi.updateProject(localProject);
+        } else {
+            saved = await ProjectApi.createProject(localProject);
+        }
+        saved = {
+            ...saved,
+            call: localProject.call
+        };
+
+        toast.current?.show({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Project saved successfully',
+            life: 2000,
+        });
+
+        if (onComplete) onComplete(saved);
     };
 
     const hide = () => {
-        //setSubmitted(false);
-        setErrorMessage(undefined);
+        setSubmitted(false);
+        //setErrorMessage(undefined);
         onHide();
     };
 
@@ -58,30 +81,77 @@ function SaveProjectDialog(props: SaveDialogProps) {
         </>
     );
 
+    // Reset localProject when dialog opens
     useEffect(() => {
-        if (!visible) {
-            //setSubmitted(false);
-            setErrorMessage(undefined);
+        if (visible) {
+            setLocalProject({ ...project });
+            setSubmitted(false);
+            //setErrorMessage(undefined);
         }
-    }, [visible]);
+    }, [visible, project]);
 
     return (
-        <Dialog
-            visible={visible}
-            style={{ width: '500px' }}
-            header={project._id ? 'Edit Project' : "New Project"}
-            modal
-            className="p-fluid"
-            footer={footer}
-            onHide={hide}
-        >
-            <ProjectForm project={project} setProject={setProject} calls={calls} />
-            {errorMessage && (
-                <small className="p-error">{errorMessage}</small>
-            )}
+        <>
+            <Toast ref={toast} />
+            <Dialog
+                visible={visible}
+                style={{ width: '500px' }}
+                header={localProject._id ? 'Edit Project' : 'New Project'}
+                modal
+                className="p-fluid"
+                footer={footer}
+                onHide={hide}
+            >
+                <div className="p-fluid formgrid grid">
+                    {!localProject._id && (
+                        <div className="field col-12">
+                            <label htmlFor="call">Call</label>
+                            <Dropdown
+                                id="call"
+                                dataKey="_id"
+                                options={calls}
+                                value={localProject.call}
+                                onChange={(e) => setLocalProject({ ...localProject, call: e.value })}
+                                required
+                                optionLabel="title"
+                                placeholder="Select a Call"
+                                className={classNames({ 'p-invalid': submitted && !localProject.call })}
+                            />
+                        </div>
+                    )}
 
-        </Dialog>
+                    <div className="field col-12">
+                        <label htmlFor="title">Title</label>
+                        <InputText
+                            id="title"
+                            value={localProject.title}
+                            onChange={(e) => setLocalProject({ ...localProject, title: e.target.value })}
+                            required
+                            autoFocus
+                            className={classNames({ 'p-invalid': submitted && !localProject.title })}
+                        />
+                    </div>
+
+                    <div className="field col-12">
+                        <label htmlFor="description">Description</label>
+                        <InputTextarea
+                            id="description"
+                            value={localProject.summary ?? ''}
+                            onChange={(e) => setLocalProject({ ...localProject, summary: e.target.value })}
+                            rows={5}
+                            autoResize
+                            placeholder="Enter Project summary ..."
+                            className="w-full"
+                        />
+                    </div>
+
+                    {
+                        //errorMessage && <small className="p-error">{errorMessage}</small>
+                    }
+                </div>
+            </Dialog>
+        </>
     );
-}
+};
 
 export default SaveProjectDialog;

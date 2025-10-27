@@ -60,7 +60,6 @@ const CallManager = () => {
         }
     }, []);
 
-
     useEffect(() => {
         loadCalls();
     }, [loadCalls]);
