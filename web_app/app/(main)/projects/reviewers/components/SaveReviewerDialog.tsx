@@ -1,15 +1,15 @@
 import { ApplicantApi } from "@/app/(main)/applicants/api/applicant.api";
-import { Applicant, scopeToOrganizationUnit } from "@/app/(main)/applicants/models/applicant.model";
+import { Applicant, applicantUnits } from "@/app/(main)/applicants/models/applicant.model";
+import { applicantTemplate } from "@/app/(main)/applicants/models/applicant.template";
+import { OrganizationApi } from "@/app/(main)/organizations/api/organization.api";
+import { Organization, OrganizationalUnit } from "@/app/(main)/organizations/models/organization.model";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
-import { useEffect, useRef, useState } from "react";
 import { Toast } from "primereact/toast";
-import { Reviewer, ReviewerStatus, validateReviewer } from "../models/reviewer.model";
-import { OrganizationApi } from "@/app/(main)/organizations/api/organization.api";
-import { Scope, Organization } from "@/app/(main)/organizations/models/organization.model";
-import { applicantTemplate } from "@/app/(main)/applicants/models/applicant.template";
+import { useEffect, useRef, useState } from "react";
 import { ReviewerApi } from "../api/reviewer.api";
+import { Reviewer, ReviewerStatus, validateReviewer } from "../models/reviewer.model";
 
 interface ReviewerDialogProps {
     visible: boolean;
@@ -21,7 +21,7 @@ interface ReviewerDialogProps {
 export default function SaveReviewerDialog({ visible, reviewer, onCompelete, onHide }: ReviewerDialogProps) {
 
     const toast = useRef<Toast>(null);
-    const [scope, setScope] = useState<Scope>();
+    const [scope, setScope] = useState<OrganizationalUnit>();
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [workspace, setWorkspace] = useState<Organization>();
     const [applicants, setApplicants] = useState<Applicant[]>([]);
@@ -36,9 +36,9 @@ export default function SaveReviewerDialog({ visible, reviewer, onCompelete, onH
         const fetchOrganizations = async () => {
             try {
                 if (!scope) return;
-                const type = scopeToOrganizationUnit[scope];
-                if (type) {
-                    const data = await OrganizationApi.getOrganizations({ type });
+                //const type = scopeToOrganizationUnit[scope];
+                if (scope) {
+                    const data = await OrganizationApi.getOrganizations({ type:scope });
                     if (isMounted) {
                         setOrganizations(data);
                     }
@@ -135,7 +135,7 @@ export default function SaveReviewerDialog({ visible, reviewer, onCompelete, onH
                         <Dropdown
                             id="scope"
                             value={scope}
-                            options={Object.values(Scope).map(g => ({ label: g, value: g }))}
+                            options={Object.values(applicantUnits).map(g => ({ label: g, value: g }))}
                             onChange={(e) =>
                                 setScope(e.value)
                             }

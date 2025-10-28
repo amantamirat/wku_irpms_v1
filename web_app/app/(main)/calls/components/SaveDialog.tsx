@@ -55,7 +55,6 @@ const SaveDialog = ({ visible, call, onHide, onComplete }: SaveDialogProps) => {
     }, []);
 
 
-    // Fetch calendars once (if no calendar selected)
     useEffect(() => {
         const fetchCalendars = async () => {
             try {
