@@ -6,15 +6,15 @@ const end_point = '/grants/compositions';
 function sanitizeComposition(composition: Partial<Composition>): Partial<Composition> {
     return {
         ...composition,
-        parent:
-            typeof composition.parent === 'object' && composition.parent !== null
-                ? (composition.parent as any)._id
-                : composition.parent
+        constraint:
+            typeof composition.constraint === 'object' && composition.constraint !== null
+                ? (composition.constraint as any)._id
+                : composition.constraint
     };
 }
 
 export interface GetCompositionsOptions {
-    parent?: string;
+    constraint?: string;
 }
 
 export const CompositionApi = {
@@ -26,7 +26,7 @@ export const CompositionApi = {
 
     async getCompositions(options: GetCompositionsOptions): Promise<Composition[]> {
         const query = new URLSearchParams();
-        if (options.parent) query.append("parent", options.parent);
+        if (options.constraint) query.append("constraint", options.constraint);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Composition[];
     },

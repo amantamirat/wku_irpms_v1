@@ -12,6 +12,7 @@ import { ConstraintApi } from '../api/constraint.api';
 import CompositionManager from '../compositions/components/CompositionManager';
 import { ConstraintType, Constraint } from '../models/constraint.model';
 import SaveDialog from './SaveDialog';
+import ErrorComponent from '@/components/ErrorComponent';
 
 
 interface ConstraintManagerProps {
@@ -28,6 +29,7 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
     };
 
     const [constraints, setConstraints] = useState<Constraint[]>([]);
+    const [error, setError] = useState<string | null>(null);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
@@ -36,14 +38,21 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
+    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
+    };
+    useEffect(() => {
+        setFilters(initFilters());
+        setGlobalFilter('');
+
+    }, []);
+
     const fetchConstraints = useCallback(async () => {
         try {
             const data = await ConstraintApi.getConstraints({ grant: grant._id, type: type });
             setConstraints(data);
         } catch (err) {
-            // setError(`Failed to load constraint data ${err}`);
-        } finally {
-
+            setError(`Failed to fetch constraint data ${err}`);
         }
     }, [grant, type, parent]);
 
@@ -51,31 +60,27 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
         fetchConstraints();
     }, [fetchConstraints]);
 
-    useEffect(() => {
-        setFilters(initFilters());
-        setGlobalFilter('');
-
-    }, []);
-
-
-    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
-    };
+    if (error) {
+        return (
+            <ErrorComponent errorMessage={error} />
+        );
+    }
 
 
-    const saveConstraint = async () => {
-        let _constraints = [...constraints];
-        if (selectedConstraint._id) {
-            const updated = await ConstraintApi.updateConstraint(selectedConstraint);
-            const index = _constraints.findIndex((c) => c._id === selectedConstraint._id);
-            _constraints[index] = { ...updated };
+    const onSaveComplete = (savedConstraint: Constraint) => {
+        let _constraints = [...constraints]; // constraints is your local state array of Constraint
+        const index = _constraints.findIndex((c) => c._id === savedConstraint._id);
+        if (index !== -1) {
+            // Update existing constraint
+            _constraints[index] = { ...savedConstraint };
         } else {
-            const created = await ConstraintApi.createConstraint(selectedConstraint);
-            _constraints.push({ ...selectedConstraint, _id: created._id });
+            // Add new constraint
+            _constraints.push({ ...savedConstraint });
         }
         setConstraints(_constraints);
-        //setSelectedConstraint(emptyConstraint);
+        hideDialogs();
     };
+
 
     const deleteConstraint = async () => {
         const deleted = await ConstraintApi.deleteConstraint(selectedConstraint);
@@ -153,11 +158,10 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
                 rowExpansionTemplate={(rowData) => {
                     if (type === ConstraintType.APPLICANT) {
                         return (
-                            <CompositionManager parent={rowData as Constraint} />
+                            <CompositionManager constraint={rowData as Constraint} />
                         )
                     }
                 }}
-
             >
                 {
                     type === ConstraintType.APPLICANT &&
@@ -174,7 +178,6 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
                     type === ConstraintType.APPLICANT &&
                     (<Column field="mode" header="Mode" sortable />)
                 }
-
                 {
                     (type === ConstraintType.PROJECT
                     ) &&
@@ -184,16 +187,13 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
                     (type === ConstraintType.PROJECT) &&
                     (<Column field="max" header="Max" sortable />)
                 }
-
-
                 <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
             </DataTable>
             {selectedConstraint && (
                 <SaveDialog
                     visible={showSaveDialog}
                     constraint={selectedConstraint}
-                    setConstraint={setSelectedConstraint}
-                    onSave={saveConstraint}
+                    onComplete={onSaveComplete}
                     onHide={hideDialogs}
                 />
             )}

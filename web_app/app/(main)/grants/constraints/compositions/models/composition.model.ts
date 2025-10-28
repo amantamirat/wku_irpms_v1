@@ -2,7 +2,7 @@ import { Constraint } from "../../models/constraint.model";
 
 export type Composition = {
     _id?: string;
-    parent: string | Constraint; // Reference to parent constraint
+    constraint: string | Constraint; // Reference to applicant constraint
     value: number; // Required number or ratio of applicants
     max?: number; // value for range-based constraints
     min?: number; // value for range-based constraints
@@ -12,8 +12,8 @@ export type Composition = {
 };
 
 export const validateComposition = (composition: Composition): { valid: boolean; message?: string } => {
-    if (!composition.parent) {
-        return { valid: false, message: 'Parent constraint is required.' };
+    if (!composition.constraint) {
+        return { valid: false, message: 'Applicant constraint is required.' };
     }
     if (composition.value == null || isNaN(composition.value)) {
         return { valid: false, message: 'Value is required.' };

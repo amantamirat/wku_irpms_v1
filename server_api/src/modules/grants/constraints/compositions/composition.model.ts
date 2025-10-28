@@ -4,7 +4,7 @@ import { ApplicantConstraint } from "../constraint.model";
 
 
 export interface IComposition extends Document {
-    parent: mongoose.Types.ObjectId;
+    constraint: mongoose.Types.ObjectId;
     value: number; // Required number or ratio of applicants
     max?: number; // value for range-based constraints
     min?: number; // value for range-based constraints
@@ -13,7 +13,7 @@ export interface IComposition extends Document {
 
 
 const CompositionSchema = new Schema<IComposition>({
-    parent: {
+    constraint: {
         type: Schema.Types.ObjectId,
         ref: ApplicantConstraint.modelName,
         required: true,
@@ -41,7 +41,7 @@ const CompositionSchema = new Schema<IComposition>({
 
 // Unique compound index on parent and item, but allow multiple docs with item=null
 CompositionSchema.index(
-    { parent: 1, item: 1 },
+    { constraint: 1, item: 1 },
     {
         unique: true,
         partialFilterExpression: { item: { $type: "string" } }

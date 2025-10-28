@@ -93,7 +93,7 @@ export class ConstraintValidator {
         }
 
         for (const constraint of applicantConstraints) {
-            const compositions = await Composition.find({ parent: constraint._id }).lean();
+            const compositions = await Composition.find({ constraint: constraint._id }).lean();
             if (!compositions || compositions.length === 0) continue; // No subrules to check
 
             for (const comp of compositions) {

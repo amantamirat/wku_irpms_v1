@@ -1,158 +1,208 @@
 'use client';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
-import { useEffect, useRef, useState } from 'react';
-import { ApplicantConstraintType, ConstraintType, Constraint, OperationMode, ProjectConstraintType, validateConstraint } from '../models/constraint.model';
-
+import {
+    ApplicantConstraintType,
+    Constraint,
+    ConstraintType,
+    OperationMode,
+    ProjectConstraintType,
+    validateConstraint,
+} from '../models/constraint.model';
+import { ConstraintApi } from '../api/constraint.api';
 
 interface SaveDialogProps {
     visible: boolean;
     constraint: Constraint;
-    setConstraint: (constraint: Constraint) => void;
-    onSave: () => Promise<void>;
+    onComplete?: (saved: Constraint) => void;
     onHide: () => void;
 }
 
-function SaveDialog(props: SaveDialogProps) {
-    const { visible, constraint, setConstraint, onSave, onHide } = props;
+const SaveDialog = ({ visible, constraint, onComplete, onHide }: SaveDialogProps) => {
+    const [localConstraint, setLocalConstraint] = useState<Constraint>({ ...constraint });
     const [submitted, setSubmitted] = useState(false);
     const toast = useRef<Toast>(null);
 
-    const save = async () => {
+    // Sync incoming prop changes
+    useEffect(() => {
+        setLocalConstraint({ ...constraint });
+    }, [constraint]);
+
+
+    const saveConstraint = async () => {
+        setSubmitted(true);
         try {
-            setSubmitted(true);
-            const result = validateConstraint(constraint);
-            if (!result.valid) {
-                throw new Error(result.message);
+            const validation = validateConstraint(localConstraint);
+            if (!validation.valid) {
+                throw new Error(validation.message);
             }
-            await onSave();
+            let saved = localConstraint._id
+                ? await ConstraintApi.updateConstraint(localConstraint)
+                : await ConstraintApi.createConstraint(localConstraint);
+            saved = {
+                ...saved,
+                grant: localConstraint.grant
+            };
 
             toast.current?.show({
                 severity: 'success',
-                summary: 'Successful',
-                detail: 'Constraint saved',
-                life: 2000
+                summary: 'Success',
+                detail: 'Constraint saved successfully',
+                life: 2000,
             });
-            setTimeout(() => hide(), 2000);
-        } catch (err) {
+
+            if (onComplete) setTimeout(() => onComplete(saved), 1000);
+        } catch (err: any) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to save constraint',
-                detail: '' + err,
-                life: 3000
+                summary: 'Error',
+                detail: err.message || 'Failed to save constraint',
+                life: 2500,
             });
         } finally {
             setSubmitted(false);
         }
     };
 
-    const hide = () => {
+    // Reset when dialog closed
+    useEffect(() => {
+        if (!visible) clearForm();
+    }, [visible]);
+
+    const clearForm = () => {
         setSubmitted(false);
+        setLocalConstraint({ ...constraint });
+    };
+
+    const hide = () => {
+        clearForm();
         onHide();
     };
 
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={hide} />
-            <Button label="Save" icon="pi pi-check" text onClick={save} />
+            <Button label="Save" icon="pi pi-check" text onClick={saveConstraint} />
         </>
     );
 
-    useEffect(() => {
-        if (!visible) {
-            setSubmitted(false);
-        }
-    }, [visible]);
-
-
     return (
-        <Dialog
-            visible={visible}
-            style={{ width: '500px' }}
-            header={constraint._id ? `Edit Constraint` : `Create New Constraint`}
-            modal
-            className="p-fluid"
-            footer={footer}
-            onHide={hide}
-        >
+        <>
             <Toast ref={toast} />
-            {!constraint._id && 
-                <div className="field">
-                    <label htmlFor="constraint">Constraint</label>
-                    <Dropdown
-                        id="constraint"
-                        value={constraint.constraint}
-                        options={Object.values(
-                            constraint.type === ConstraintType.PROJECT
-                                ? ProjectConstraintType
-                                : ApplicantConstraintType
-                        ).map(c => ({ label: c, value: c }))}
-                        onChange={(e) =>
-                            setConstraint({ ...constraint, constraint: e.value })
-                        }
-                        placeholder="Select Constarint"
-                        className={classNames({ 'p-invalid': submitted && !constraint.constraint })}
-                    />
-                </div>
-            }
+            <Dialog
+                visible={visible}
+                style={{ width: '600px' }}
+                header={localConstraint._id ? 'Edit Constraint' : 'New Constraint'}
+                modal
+                className="p-fluid"
+                footer={footer}
+                onHide={hide}
+            >
+                {/* Constraint Selector */}
+                {!localConstraint._id && (
+                    <div className="field">
+                        <label htmlFor="constraint">Constraint</label>
+                        <Dropdown
+                            id="constraint"
+                            value={localConstraint.constraint}
+                            options={Object.values(
+                                localConstraint.type === ConstraintType.PROJECT
+                                    ? ProjectConstraintType
+                                    : ApplicantConstraintType
+                            ).map((c) => ({ label: c, value: c }))}
+                            onChange={(e) =>
+                                setLocalConstraint({ ...localConstraint, constraint: e.value })
+                            }
+                            placeholder="Select Constraint"
+                            className={classNames({
+                                'p-invalid': submitted && !localConstraint.constraint,
+                            })}
+                        />
+                    </div>
+                )}
 
-            {(
-                constraint.type === ConstraintType.PROJECT 
-            ) && (
+                {/* Project Constraint Fields */}
+                {localConstraint.type === ConstraintType.PROJECT && (
                     <>
                         <div className="field">
-                            <label htmlFor="min">Minimum {constraint.constraint}</label>
+                            <label htmlFor="min">Minimum {localConstraint.constraint}</label>
                             <InputNumber
                                 id="min"
-                                value={constraint.min}
-                                onChange={(e) => setConstraint({ ...constraint, min: e.value || 0 })}
+                                value={localConstraint.min}
+                                onChange={(e) =>
+                                    setLocalConstraint({
+                                        ...localConstraint,
+                                        min: e.value ?? 0,
+                                    })
+                                }
                                 required
                                 className={classNames({
-                                    'p-invalid': submitted && (constraint.min == null || constraint.min <= 0),
+                                    'p-invalid':
+                                        submitted &&
+                                        (localConstraint.min == null ||
+                                            localConstraint.min <= 0),
                                 })}
                             />
                         </div>
 
                         <div className="field">
-                            <label htmlFor="max">Maximum {constraint.constraint}</label>
+                            <label htmlFor="max">Maximum {localConstraint.constraint}</label>
                             <InputNumber
                                 id="max"
-                                value={constraint.max}
-                                onChange={(e) => setConstraint({ ...constraint, max: e.value || 0 })}
+                                value={localConstraint.max}
+                                onChange={(e) =>
+                                    setLocalConstraint({
+                                        ...localConstraint,
+                                        max: e.value ?? 0,
+                                    })
+                                }
                                 required
                                 className={classNames({
-                                    'p-invalid': submitted && (constraint.max == null || constraint.max <= 0),
+                                    'p-invalid':
+                                        submitted &&
+                                        (localConstraint.max == null ||
+                                            localConstraint.max <= 0),
                                 })}
                             />
                         </div>
                     </>
                 )}
 
-           
-
-            {
-                constraint.type === ConstraintType.APPLICANT &&
-                <div className="field">
-                    <label htmlFor="mode">Mode</label>
-                    <Dropdown
-                        id="mode"
-                        value={constraint.mode}
-                        options={Object.values(OperationMode).map(op => ({ label: op, value: op }))}
-                        onChange={(e) =>
-                            setConstraint({ ...constraint, mode: e.value })
-                        }
-                        placeholder="Select Mode"
-                        className={classNames({ 'p-invalid': submitted && !constraint.mode && constraint.type === ConstraintType.APPLICANT })}
-                    />
-                </div>
-            }
-            
-        </Dialog >
+                {/* Applicant Mode Selector */}
+                {localConstraint.type === ConstraintType.APPLICANT && (
+                    <div className="field">
+                        <label htmlFor="mode">Mode</label>
+                        <Dropdown
+                            id="mode"
+                            value={localConstraint.mode}
+                            options={Object.values(OperationMode).map((op) => ({
+                                label: op,
+                                value: op,
+                            }))}
+                            onChange={(e) =>
+                                setLocalConstraint({
+                                    ...localConstraint,
+                                    mode: e.value,
+                                })
+                            }
+                            placeholder="Select Mode"
+                            className={classNames({
+                                'p-invalid':
+                                    submitted &&
+                                    !localConstraint.mode &&
+                                    localConstraint.type === ConstraintType.APPLICANT,
+                            })}
+                        />
+                    </div>
+                )}
+            </Dialog>
+        </>
     );
-}
+};
 
 export default SaveDialog;

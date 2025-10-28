@@ -9,21 +9,21 @@ import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CompositionApi } from '../api/composition.api';
 import { Composition } from '../models/composition.model';
-
 import { ApplicantConstraintType, Constraint, isListConstraint, isRangeConstraint } from '../../models/constraint.model';
 import SaveDialog from './SaveDialog';
+import ErrorComponent from '@/components/ErrorComponent';
 
 interface CompositionManagerProps {
-    parent: Constraint;
+    constraint: Constraint;
 }
 
-const CompositionManager = (props: CompositionManagerProps) => {
-    const { parent } = props;
+const CompositionManager = ({ constraint }: CompositionManagerProps) => {
+
     const emptyComposition: Composition = {
-        parent: parent,
+        constraint: constraint,
         value: 0
     };
-
+    const [error, setError] = useState<string | null>(null);
     const [compositions, setCompositions] = useState<Composition[]>([]);
     const dt = useRef<DataTable<any>>(null);
     const [globalFilter, setGlobalFilter] = useState('');
@@ -33,12 +33,20 @@ const CompositionManager = (props: CompositionManagerProps) => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
+    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
+    };
+    useEffect(() => {
+        setFilters(initFilters());
+        setGlobalFilter('');
+    }, []);
+
     const fetchCompositions = useCallback(async () => {
         try {
-            const data = await CompositionApi.getCompositions({ parent: parent._id });
+            const data = await CompositionApi.getCompositions({ constraint: constraint._id });
             setCompositions(data);
         } catch (err) {
-            // Handle error
+            setError(`Failed to fetch composition data ${err}`);
         }
     }, [parent]);
 
@@ -46,27 +54,27 @@ const CompositionManager = (props: CompositionManagerProps) => {
         fetchCompositions();
     }, [fetchCompositions]);
 
-    useEffect(() => {
-        setFilters(initFilters());
-        setGlobalFilter('');
-    }, []);
+    if (error) {
+        return (
+            <ErrorComponent errorMessage={error} />
+        );
+    }
 
-    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
-    };
+    const onSaveComplete = (savedComposition: Composition) => {
+        let _compositions = [...compositions]; // compositions is your local state array of Composition
+        const index = _compositions.findIndex((c) => c._id === savedComposition._id);
 
-    const saveComposition = async () => {
-        let _compositions = [...compositions];
-        if (selectedComposition._id) {
-            const updated = await CompositionApi.updateComposition(selectedComposition);
-            const index = _compositions.findIndex((c) => c._id === selectedComposition._id);
-            _compositions[index] = { ...updated };
+        if (index !== -1) {
+            // Update existing composition
+            _compositions[index] = { ...savedComposition };
         } else {
-            const created = await CompositionApi.createComposition(selectedComposition);
-            _compositions.push({ ...selectedComposition, _id: created._id });
+            // Add new composition
+            _compositions.push({ ...savedComposition });
         }
         setCompositions(_compositions);
+        hideDialogs(); // closes the SaveDialog
     };
+
 
     const deleteComposition = async () => {
         const deleted = await CompositionApi.deleteComposition(selectedComposition);
@@ -83,7 +91,7 @@ const CompositionManager = (props: CompositionManagerProps) => {
 
     const startToolbarTemplate = () => (
         <div className="my-2">
-            <Button label="Add Composition" icon="pi pi-plus" severity="success" className="mr-2"
+            <Button label={`Add ${constraint.constraint} Composition`} icon="pi pi-plus" severity="success" className="mr-2"
                 onClick={() => {
                     setSelectedComposition(emptyComposition);
                     setShowSaveDialog(true);
@@ -142,26 +150,26 @@ const CompositionManager = (props: CompositionManagerProps) => {
                         expandedRows={expandedRows}
                         onRowToggle={(e) => setExpandedRows(e.data)}
                     >
+                        <Column selectionMode="single" style={{ width: '3em' }} />
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                        {isRangeConstraint(parent.constraint as ApplicantConstraintType) &&
-                            <Column field="min" header="Min" sortable />
+                        {isRangeConstraint(constraint.constraint as ApplicantConstraintType) &&
+                            <Column field="min" header={`Min (${constraint.constraint})`} sortable />
                         }
-                        {isRangeConstraint(parent.constraint as ApplicantConstraintType) &&
-                            <Column field="max" header="Max" sortable />
+                        {isRangeConstraint(constraint.constraint as ApplicantConstraintType) &&
+                            <Column field="max" header={`Max (${constraint.constraint})`} sortable />
                         }
-                        {isListConstraint(parent.constraint as ApplicantConstraintType) &&
-                            <Column field="item" header="Item" sortable />
+                        {isListConstraint(constraint.constraint as ApplicantConstraintType) &&
+                            <Column field="item" header={`Item (${constraint.constraint})`} sortable />
                         }
-                        <Column field="value" header="Value" sortable />
+                        <Column field="value" header={`Value (${constraint.mode})`} sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
                     {selectedComposition && (
                         <SaveDialog
                             visible={showSaveDialog}
                             composition={selectedComposition}
-                            setComposition={setSelectedComposition}
-                            parent={parent}
-                            onSave={saveComposition}
+                            onComplete={onSaveComplete}
+                            parent={constraint}
                             onHide={hideDialogs}
                         />
                     )}

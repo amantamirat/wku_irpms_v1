@@ -4,7 +4,7 @@ import { ApplicantConstraint } from "../constraint.model";
 import { ApplicantConstraintType, isListConstraint, isRangeConstraint, OperationMode } from "../constraint.enum";
 
 export interface CreateCompositionDto {
-    parent: mongoose.Types.ObjectId;
+    constraint: mongoose.Types.ObjectId;
     value: number;
     max?: number;
     min?: number;
@@ -12,19 +12,19 @@ export interface CreateCompositionDto {
 }
 
 export interface GetCompositionOptions {
-    parent?: mongoose.Types.ObjectId;
+    constraint?: mongoose.Types.ObjectId;
 }
 
 export class CompositionService {
     static async validateComposition(data: Partial<CreateCompositionDto>) {
-        if (!data.parent) {
+        if (!data.constraint) {
             throw new Error("Applicant constraint must be specified for composition.");
         }
-        const parentConstraint = await ApplicantConstraint.findById(data.parent);
-        if (!parentConstraint) {
+        const appConstraint = await ApplicantConstraint.findById(data.constraint);
+        if (!appConstraint) {
             throw new Error("Applicant constraint not found for composition.");
         }
-        const mode = parentConstraint.mode;
+        const mode = appConstraint.mode;
         if (mode === OperationMode.RATIO) {
             if ((!data.value && data.value !== 0) || data.value < 0 || data.value > 1) {
                 throw new Error("Value must be a ratio (between 0 and 1) for ratio-based composition constraints.");
@@ -36,7 +36,7 @@ export class CompositionService {
             }
         }
 
-        const applicantType = parentConstraint.constraint;
+        const applicantType = appConstraint.constraint;
         if (isRangeConstraint(applicantType as ApplicantConstraintType)) {
             if ((!data.max || !data.min)) {
                 throw new Error(`Range must be specified for ${applicantType} constraint.`);
@@ -57,10 +57,10 @@ export class CompositionService {
 
     static async getCompositions(options: GetCompositionOptions = {}) {
         const filter: any = {};
-        if (options.parent) {
-            filter.parent = options.parent;
+        if (options.constraint) {
+            filter.constraint = options.constraint;
         }
-        return await Composition.find(filter).populate("parent").lean();
+        return await Composition.find(filter).populate("constraint").lean();
     }
 
     static async updateComposition(id: string, data: Partial<CreateCompositionDto>) {

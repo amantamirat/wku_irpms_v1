@@ -6,10 +6,10 @@ import mongoose from 'mongoose';
 export class CompositionController {
     static async createComposition(req: Request, res: Response) {
         try {
-            const { parent, value, max, min, item } = req.body;
-            if (!parent) throw new Error("Parent is required");
+            const { constraint, value, max, min, item } = req.body;
+            //if (!parent) throw new Error("Parent is required");
             const data = {
-                parent: new mongoose.Types.ObjectId(parent as string),
+                constraint: new mongoose.Types.ObjectId(constraint as string),
                 value,
                 max,
                 min,
@@ -24,9 +24,9 @@ export class CompositionController {
 
     static async getCompositions(req: Request, res: Response) {
         try {
-            const { parent } = req.query;
+            const { constraint } = req.query;
             const options = {
-                parent: parent ? new mongoose.Types.ObjectId(parent as string) : undefined
+                constraint: constraint ? new mongoose.Types.ObjectId(constraint as string) : undefined
             };
             const compositions = await CompositionService.getCompositions(options);
             successResponse(res, 200, 'Compositions fetched successfully', compositions);
