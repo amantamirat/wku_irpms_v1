@@ -17,7 +17,7 @@ router.post(
 router.get(
     '/',
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.CALL.READ]),
+    //checkPermission([PERMISSIONS.CALL.READ]),
     CallController.getCalls
 );
 

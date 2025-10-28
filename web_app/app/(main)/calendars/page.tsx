@@ -1,18 +1,17 @@
 'use client';
 
 import ConfirmDialog from '@/components/ConfirmationDialog';
-import SaveCalendarDialog from './dialogs/SaveCalendarDialog';
+import ErrorComponent from '@/components/ErrorComponent';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
-import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
-import { Calendar, CalendarStatus } from './models/calendar.model';
 import { CalendarApi } from './api/calendar.api';
-import ErrorComponent from '@/components/ErrorComponent';
+import SaveCalendarDialog from './dialogs/SaveCalendarDialog';
+import { Calendar, CalendarStatus } from './models/calendar.model';
 
 const CalendarPage = () => {
     const emptyCalendar: Calendar = {

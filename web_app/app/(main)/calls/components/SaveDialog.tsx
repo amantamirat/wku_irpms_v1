@@ -58,18 +58,26 @@ const SaveDialog = ({ visible, call, onHide, onComplete }: SaveDialogProps) => {
     // Fetch calendars once (if no calendar selected)
     useEffect(() => {
         const fetchCalendars = async () => {
-            const data = await CalendarApi.getCalendars({ status: CalendarStatus.active });
-            setCalendars(data);
+            try {
+                const data = await CalendarApi.getCalendars({ status: CalendarStatus.active });
+                setCalendars(data);
+            } catch (err) {
+                console.error('Failed to fetch calendars:', err);
+            }
         };
-        if (!localCall.calendar) fetchCalendars();
-    }, [localCall.calendar]);
+        fetchCalendars();
+    }, []);
 
 
     useEffect(() => {
         if (!(localCall.directorate as any)._id) return;
         const fetchEvaluations = async () => {
-            const data = await EvaluationApi.getEvaluations({ directorate: (localCall.directorate as any)._id });
-            setEvaluations(data);
+            try {
+                const data = await EvaluationApi.getEvaluations({ directorate: (localCall.directorate as any)._id });
+                setEvaluations(data);
+            } catch (err) {
+                console.error('Failed to fetch evaluations:', err);
+            }
         };
         fetchEvaluations();
     }, [localCall.directorate]);
@@ -77,8 +85,12 @@ const SaveDialog = ({ visible, call, onHide, onComplete }: SaveDialogProps) => {
     useEffect(() => {
         if (!(localCall.directorate as any)?._id) return;
         const fetchGrants = async () => {
-            const data = await GrantApi.getGrants({ directorate: (localCall.directorate as any)._id });
-            setGrants(data);
+            try {
+                const data = await GrantApi.getGrants({ directorate: (localCall.directorate as any)._id });
+                setGrants(data);
+            } catch (err) {
+                console.error('Failed to fetch grants:', err);
+            }
         };
         fetchGrants();
     }, [localCall.directorate]);
@@ -86,8 +98,12 @@ const SaveDialog = ({ visible, call, onHide, onComplete }: SaveDialogProps) => {
     useEffect(() => {
         if (!(localCall.directorate as any)?._id) return;
         const fetchThemes = async () => {
-            const data = await ThemeApi.getThemes({ directorate: (localCall.directorate as any)._id });
-            setThemes(data);
+            try {
+                const data = await ThemeApi.getThemes({ directorate: (localCall.directorate as any)._id });
+                setThemes(data);
+            } catch (err) {
+                console.error('Failed to fetch themes:', err);
+            }
         };
         fetchThemes();
     }, [localCall.directorate]);

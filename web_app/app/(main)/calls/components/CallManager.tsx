@@ -1,6 +1,7 @@
 'use client';
 
 import ConfirmDialog from '@/components/ConfirmationDialog';
+import ErrorComponent from '@/components/ErrorComponent';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -8,12 +9,11 @@ import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereac
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ProjectManager from '../../projects/components/ProjectManager';
 import { CallApi } from '../api/call.api';
 import { Call, CallStatus } from '../models/call.model';
 import SaveDialog from './SaveDialog';
-import ErrorComponent from '@/components/ErrorComponent';
 
 
 const CallManager = () => {
@@ -49,21 +49,17 @@ const CallManager = () => {
         setGlobalFilter('');
     }, []);
 
-    const loadCalls = useCallback(async () => {
-        try {
-            const data = await CallApi.getUserCalls();
-            setCalls(data);
-        } catch (err) {
-            setError(`Failed to load call data ${err}`);
-        } finally {
-
-        }
-    }, []);
-
     useEffect(() => {
-        loadCalls();
-    }, [loadCalls]);
-
+        const fetchCalls = async () => {
+            try {
+                const data = await CallApi.getUserCalls();
+                setCalls(data);
+            } catch (err) {
+                setError("Failed to fetch calls:" + err);
+            }
+        }
+        fetchCalls();
+    }, []);
 
     if (error) {
         return (
@@ -72,20 +68,16 @@ const CallManager = () => {
     }
 
     const onSaveComplete = (savedCall: Call) => {
-        let _calls = [...calls]; // calls is your local state array of Call
+        let _calls = [...calls];
         const index = _calls.findIndex((c) => c._id === savedCall._id);
         if (index !== -1) {
-            // Replace existing call
             _calls[index] = { ...savedCall };
         } else {
-            // Add new call
             _calls.push({ ...savedCall });
         }
-        setCalls(_calls); // update state
-        hideDialogs();    // close your SaveDialog
+        setCalls(_calls);
+        hideDialogs();
     };
-
-
 
     const deleteCall = async () => {
         const deleted = await CallApi.deleteCall(selectedCall);

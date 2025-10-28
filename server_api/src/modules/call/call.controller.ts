@@ -47,8 +47,11 @@ export class CallController {
 
     static async getUserCalls(req: AuthenticatedRequest, res: Response) {
         try {
-            if (!req.user) throw new Error("User not found!");
-            const calls = await CallService.getUserCalls(req.user._id);
+            if (!req.user) {
+                throw new Error("User not found!");
+            }
+            const userId = req.user._id;
+            const calls = await CallService.getUserCalls(userId);
             successResponse(res, 200, 'User calls fetched successfully', calls);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

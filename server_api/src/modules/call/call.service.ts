@@ -70,20 +70,19 @@ export class CallService {
     }
 
 
-    static async getUserCalls(userId: string, options?: { status?: CallStatus }) {
+    static async getUserCalls(userId: string) {
         // Get directorates/organizations the user belongs to
         const organizations = await CacheService.getUserOrganizations(userId);
-
-        const filter: any = { directorate: { $in: organizations } };
-        if (options?.status) filter.status = options.status;
-
-        return await Call.find(filter).populate([
+        //if (options?.status) filter.status = options.status;
+        const calls = await Call.find({ directorate: { $in: organizations } }).populate([
             { path: 'calendar' },
             { path: 'directorate' },
             { path: 'theme' },
             { path: 'evaluation' },
             { path: 'grant' },
         ]).lean();
+        //console.log(calls);
+        return calls;
     }
 
 

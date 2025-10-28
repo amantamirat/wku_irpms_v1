@@ -2,9 +2,8 @@ import { AuthApi } from "@/app/(full-page)/auth/api/auth.api";
 
 export const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-
 const getAuthToken = (): string | null => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
         return AuthApi.getToken();
     }
     return null;
@@ -12,9 +11,17 @@ const getAuthToken = (): string | null => {
 
 const handleError = async (response: Response) => {
     if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.log("Error Data:", errorData);
-        throw new Error(errorData.message || `Request failed with status ${response.status}`);
+        let errorMessage = `Request failed with status ${response.status}`;
+        try {
+            const errorData = await response.json();
+            if (errorData.message) {
+                errorMessage = errorData.message;
+            }
+        } catch {
+            const text = await response.text();
+            if (text) errorMessage = text;
+        }
+        throw new Error(errorMessage);
     }
     return response;
 };
@@ -23,91 +30,114 @@ export const ApiClient = {
     async get(endpoint: string): Promise<any> {
         const url = `${BASE_URL}${endpoint}`;
         const token = getAuthToken();
-        const response = await fetch(url, {
-            headers: {
-                'Content-Type': 'application/json',
-                ...(token && { 'Authorization': `Bearer ${token}` }),
-            },
-            cache: 'no-store',
-        });
 
-        await handleError(response);
-        const result = await response.json();
-        return result.data;
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token && { Authorization: `Bearer ${token}` }),
+                },
+                cache: "no-store",
+            });
+
+            await handleError(response);
+            const result = await response.json().catch(() => ({}));
+            return result.data ?? result;
+        } catch (error) {
+            console.error("[ApiClient.get] Error:", error);
+            throw error;
+        }
     },
 
     async post(endpoint: string, payload: any): Promise<any> {
         const url = `${BASE_URL}${endpoint}`;
         const token = getAuthToken();
-
         const isFormData = payload instanceof FormData;
 
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                ...(token && { 'Authorization': `Bearer ${token}` }),
-                // Do NOT set Content-Type if sending FormData
-                ...(!isFormData && { 'Content-Type': 'application/json' }),
-            },
-            body: isFormData ? payload : JSON.stringify(payload),
-        });
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    ...(token && { Authorization: `Bearer ${token}` }),
+                    ...(!isFormData && { "Content-Type": "application/json" }),
+                },
+                body: isFormData ? payload : JSON.stringify(payload),
+            });
 
-        await handleError(response);
-        const result = await response.json();
-        return result.data;
+            await handleError(response);
+            const result = await response.json().catch(() => ({}));
+            return result.data ?? result;
+        } catch (error) {
+            console.error("[ApiClient.post] Error:", error);
+            throw error;
+        }
     },
 
     async put(endpoint: string, payload?: any): Promise<any> {
         const url = `${BASE_URL}${endpoint}`;
         const token = getAuthToken();
 
-        const response = await fetch(url, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                ...(token && { 'Authorization': `Bearer ${token}` }),
-            },
-            body: payload ? JSON.stringify(payload) : undefined,
-        });
+        try {
+            const response = await fetch(url, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token && { Authorization: `Bearer ${token}` }),
+                },
+                body: payload ? JSON.stringify(payload) : undefined,
+            });
 
-        await handleError(response);
-        const result = await response.json();
-        return result.data;
+            await handleError(response);
+            const result = await response.json().catch(() => ({}));
+            return result.data ?? result;
+        } catch (error) {
+            console.error("[ApiClient.put] Error:", error);
+            throw error;
+        }
     },
 
     async patch(endpoint: string, payload?: any): Promise<any> {
         const url = `${BASE_URL}${endpoint}`;
         const token = getAuthToken();
 
-        const response = await fetch(url, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                ...(token && { 'Authorization': `Bearer ${token}` }),
-            },
-            body: payload ? JSON.stringify(payload) : undefined,
-        });
+        try {
+            const response = await fetch(url, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token && { Authorization: `Bearer ${token}` }),
+                },
+                body: payload ? JSON.stringify(payload) : undefined,
+            });
 
-        await handleError(response);
-        const result = await response.json();
-        return result.data;
+            await handleError(response);
+            const result = await response.json().catch(() => ({}));
+            return result.data ?? result;
+        } catch (error) {
+            console.error("[ApiClient.patch] Error:", error);
+            throw error;
+        }
     },
-
 
     async delete(endpoint: string): Promise<boolean> {
         const url = `${BASE_URL}${endpoint}`;
         const token = getAuthToken();
 
-        const response = await fetch(url, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                ...(token && { 'Authorization': `Bearer ${token}` }),
-            },
-        });
+        try {
+            const response = await fetch(url, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token && { Authorization: `Bearer ${token}` }),
+                },
+            });
 
-        await handleError(response);
-        const result = await response.json();
-        return result.data;
-    }
+            await handleError(response);
+            const result = await response.json().catch(() => ({}));
+            return result.data ?? true;
+        } catch (error) {
+            console.error("[ApiClient.delete] Error:", error);
+            throw error;
+        }
+    },
 };
