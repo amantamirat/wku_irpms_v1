@@ -18,11 +18,11 @@ export interface GetCompositionOptions {
 export class CompositionService {
     static async validateComposition(data: Partial<CreateCompositionDto>) {
         if (!data.parent) {
-            throw new Error("Parent applicant constraint must be specified for composition.");
+            throw new Error("Applicant constraint must be specified for composition.");
         }
         const parentConstraint = await ApplicantConstraint.findById(data.parent);
         if (!parentConstraint) {
-            throw new Error("Parent applicant constraint not found for composition.");
+            throw new Error("Applicant constraint not found for composition.");
         }
         const mode = parentConstraint.mode;
         if (mode === OperationMode.RATIO) {

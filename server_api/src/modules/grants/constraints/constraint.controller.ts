@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { ConstraintService, CreateConstraintDto, GetConstraintOptions } from './constraint.service';
 import { errorResponse, successResponse } from '../../../util/response';
 import mongoose from 'mongoose';
-import { BaseConstraintType } from './constraint.enum';
+import { ConstraintType } from './constraint.enum';
 
 
 
@@ -15,9 +15,9 @@ export class ConstraintController {
         type: type,
         grant: grant,
         constraint: constraint,
-        min: type !== BaseConstraintType.PROJECT ? min : undefined,
-        max: type !== BaseConstraintType.PROJECT ? max : undefined,
-        mode: type === BaseConstraintType.APPLICANT ? mode : undefined,
+        min: type !== ConstraintType.PROJECT ? min : undefined,
+        max: type !== ConstraintType.PROJECT ? max : undefined,
+        mode: type === ConstraintType.APPLICANT ? mode : undefined,
       };
       const created = await ConstraintService.createConstraint(data);
       successResponse(res, 201, "Constraint created successfully", created);
@@ -31,7 +31,7 @@ export class ConstraintController {
       const { grant, type } = req.query;
       const options: GetConstraintOptions = {
         grant: grant ? new mongoose.Types.ObjectId(grant as string) : undefined,
-        type: type ? type as BaseConstraintType : undefined,
+        type: type ? type as ConstraintType : undefined,
       }
       const constraints = await ConstraintService.getConstraints(options);
       successResponse(res, 200, 'Constraints fetched successfully', constraints);

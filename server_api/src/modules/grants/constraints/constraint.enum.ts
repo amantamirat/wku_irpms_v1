@@ -1,5 +1,5 @@
 
-export enum BaseConstraintType {
+export enum ConstraintType {
     PROJECT = "Project",
     APPLICANT = "Applicant",
     //COMPOSITION = "Composition"
@@ -43,6 +43,7 @@ export enum OperationMode {
 }
 
 //////////////////////////////////////////////////////////
+/*
 export enum ConstraintType {
     // Project Status Constraints
     SUBMITTED = "SUBMITTED",              // Submitted projects
@@ -56,5 +57,6 @@ export enum ConstraintType {
     EXTERNAL = "EXTERNAL",                // External applicants    
     //CO_PI_COUNT = "CO-PI-COUNT",          // Number of Co-PIs
 }
+*/
 
 

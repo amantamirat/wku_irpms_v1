@@ -1,14 +1,14 @@
 import mongoose, { model, Schema } from "mongoose";
-import { OperationMode, ApplicantConstraintType, BaseConstraintType, ProjectConstraintType } from "./constraint.enum";
+import { OperationMode, ApplicantConstraintType, ConstraintType, ProjectConstraintType } from "./constraint.enum";
 import { COLLECTIONS } from "../../../util/collections.enum";
 
-export interface IBaseConstraint extends Document {
+export interface IConstraint extends Document {
     grant: mongoose.Types.ObjectId;
-    type: BaseConstraintType;
+    type: ConstraintType;
     createdAt?: Date;
     updatedAt?: Date;
 }
-const BaseConstraintSchema = new Schema<IBaseConstraint>(
+const ConstraintSchema = new Schema<IConstraint>(
     {
         grant: {
             type: Schema.Types.ObjectId,
@@ -18,7 +18,7 @@ const BaseConstraintSchema = new Schema<IBaseConstraint>(
         },
         type: {
             type: String,
-            enum: Object.values(BaseConstraintType),
+            enum: Object.values(ConstraintType),
             required: true,
             immutable: true,
         }
@@ -28,12 +28,13 @@ const BaseConstraintSchema = new Schema<IBaseConstraint>(
     }
 );
 
-BaseConstraintSchema.index({ grant: 1, constraint: 1 }, { unique: true });
-export const BaseConstraint = model<IBaseConstraint>(COLLECTIONS.CONSTRAINT, BaseConstraintSchema);
+ConstraintSchema.index({ grant: 1, constraint: 1 }, { unique: true });
+export const Constraint = model<IConstraint>(COLLECTIONS.CONSTRAINT, ConstraintSchema);
+
 
 //Project Constraints Model
-export interface IProjectConstraint extends IBaseConstraint {
-    type: BaseConstraintType.PROJECT;
+export interface IProjectConstraint extends IConstraint {
+    type: ConstraintType.PROJECT;
     constraint: ProjectConstraintType;
     max: number;
     min: number;
@@ -59,12 +60,12 @@ const ProjectConstraintSchema = new Schema<IProjectConstraint>({
 });
 
 ProjectConstraintSchema.index({ grant: 1, type: 1, constraint: 1 }, { unique: true });
-export const ProjectConstraint = BaseConstraint.discriminator<IProjectConstraint>(BaseConstraintType.PROJECT, ProjectConstraintSchema);
+export const ProjectConstraint = Constraint.discriminator<IProjectConstraint>(ConstraintType.PROJECT, ProjectConstraintSchema);
 
 
 // Applicant Constraint Model
-export interface IApplicantConstraint extends IBaseConstraint {
-    type: BaseConstraintType.APPLICANT;
+export interface IApplicantConstraint extends IConstraint {
+    type: ConstraintType.APPLICANT;
     constraint: ApplicantConstraintType;
     mode: OperationMode; // Mode of applying the constraint (count or ratio)
 }
@@ -85,7 +86,7 @@ const ApplicantConstraintSchema = new Schema<IApplicantConstraint>({
 
 });
 
-export const ApplicantConstraint = BaseConstraint.discriminator<IApplicantConstraint>(BaseConstraintType.APPLICANT, ApplicantConstraintSchema);
+export const ApplicantConstraint = Constraint.discriminator<IApplicantConstraint>(ConstraintType.APPLICANT, ApplicantConstraintSchema);
 
 
 
