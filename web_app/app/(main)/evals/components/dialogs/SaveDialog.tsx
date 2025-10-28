@@ -134,7 +134,7 @@ const SaveDialog = ({ visible, evaluation, onComplete, onHide }: SaveDialogProps
                 onHide={hide}
             >
                 {/* ✅ Show validation switch for Evaluation type */}
-                {(isStage && !localEvaluation._id) && (
+                {(false && isStage && !localEvaluation._id) && (
                     <div className="field flex align-items-center justify-content-between">
                         <label htmlFor="isValidation" className="mr-2">Is Validation</label>
                         <InputSwitch

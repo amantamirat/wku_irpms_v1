@@ -22,7 +22,8 @@ export interface CreateCollaboratorDto {
 export class CollaboratorService {
 
     private static async validateCollaborator(collaborator: CreateCollaboratorDto) {
-        const project = await Project.findOne({ project: collaborator.project, status: { $ne: ProjectStatus.pending } }).lean();
+        const project = await Project.findById(collaborator.project).lean();
+        //const project = await Project.findOne({ project: collaborator.project, status: { $ne: ProjectStatus.pending } }).lean();        
         if (!project) throw new Error("Project not found");
         const applicant = await Applicant.findById(collaborator.applicant).lean();
         if (!applicant) throw new Error("Applicant not found");

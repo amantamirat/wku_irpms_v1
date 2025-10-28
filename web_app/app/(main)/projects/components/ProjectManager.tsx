@@ -54,7 +54,7 @@ const ProjectManager = (props: ProjectManagerProps) => {
             const data = await ProjectApi.getProjects(options);
             setProjects(data);
         } catch (err) {
-            setError(`Failed to load call data ${err}`);
+            setError(`Failed to load projects data ${err}`);
         }
     }, [call]);
 

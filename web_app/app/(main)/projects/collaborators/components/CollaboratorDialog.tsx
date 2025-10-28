@@ -77,6 +77,11 @@ export default function CollaboratorDialog({ collaborator, visible, onSave, onCo
             } else {
                 saved = await CollaboratorApi.createCollaborator(localCollaborator);
             }
+            saved = {
+                ...saved,
+                project: localCollaborator.project,
+                applicant: localCollaborator.applicant
+            };
             toast.current?.show({
                 severity: 'success',
                 summary: 'Successful',
@@ -84,7 +89,7 @@ export default function CollaboratorDialog({ collaborator, visible, onSave, onCo
                 life: 2000
             });
             // Update local copy and notify parent
-            setLocalCollaborator(saved);
+            //setLocalCollaborator(saved);
             if (onComplete) onComplete(saved);
 
         } catch (err) {
