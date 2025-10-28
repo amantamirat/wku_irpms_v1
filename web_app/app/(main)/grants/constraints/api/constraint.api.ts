@@ -1,5 +1,5 @@
 import { ApiClient } from "@/api/ApiClient";
-import { BaseConstraintType, Constraint } from "../models/constraint.model";
+import { ConstraintType, Constraint } from "../models/constraint.model";
 import { Grant } from "../../models/grant.model";
 
 
@@ -11,17 +11,13 @@ function sanitizeConstraint(constraint: Partial<Constraint>): Partial<Constraint
         grant:
             typeof constraint.grant === 'object' && constraint.grant !== null
                 ? (constraint.grant as Grant)._id
-                : constraint.grant,
-        parent:
-            typeof constraint.parent === 'object' && constraint.parent !== null
-                ? (constraint.parent as Constraint)._id
-                : constraint.parent
+                : constraint.grant
     };
 }
 
 export interface GetConstraintsOptions {
     grant?: string;
-    type?: BaseConstraintType;
+    type?: ConstraintType;
 }
 
 export const ConstraintApi = {

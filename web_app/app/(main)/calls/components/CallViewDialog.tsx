@@ -2,7 +2,7 @@ import { Dialog } from "primereact/dialog";
 import { Call } from "../models/call.model";
 import { Grant } from "../../grants/models/grant.model";
 import { useEffect, useState } from "react";
-import { Constraint, BaseConstraintType, ProjectConstraintType, ApplicantConstraintType, OperationMode } from "../../grants/constraints/models/constraint.model";
+import { Constraint, ConstraintType, ProjectConstraintType, ApplicantConstraintType, OperationMode } from "../../grants/constraints/models/constraint.model";
 import { GrantApi } from "../../grants/api/grant.api";
 import { ConstraintApi } from "../../grants/constraints/api/constraint.api";
 
@@ -29,8 +29,8 @@ export default function CallViewDialog({ visible, call, onHide }: CallViewDialog
                 setGrant(grantData || null);
                 // Fetch constraints
                 const allConstraints = await ConstraintApi.getConstraints({ grant: typeof call.grant === 'object' ? call.grant._id : call.grant });
-                setProjectConstraints(allConstraints.filter(c => c.type === BaseConstraintType.PROJECT));
-                setApplicantConstraints(allConstraints.filter(c => c.type === BaseConstraintType.APPLICANT));
+                setProjectConstraints(allConstraints.filter(c => c.type === ConstraintType.PROJECT));
+                setApplicantConstraints(allConstraints.filter(c => c.type === ConstraintType.APPLICANT));
             } catch (err) {
                 // Handle error
             } finally {

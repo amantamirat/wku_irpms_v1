@@ -1,6 +1,6 @@
 import { Grant } from "../../models/grant.model";
 
-export enum BaseConstraintType {
+export enum ConstraintType {
     PROJECT = "Project",
     APPLICANT = "Applicant"
 }
@@ -45,7 +45,7 @@ export enum OperationMode {
 export type Constraint = {
     _id?: string;
     grant?: string | Grant; //
-    type: BaseConstraintType;
+    type: ConstraintType;
     constraint?: ProjectConstraintType | ApplicantConstraintType;
     max?: number;
     min?: number;
@@ -61,12 +61,12 @@ export const validateConstraint = (constraint: Constraint): { valid: boolean; me
     if (!constraint.grant) {
         return { valid: false, message: 'Grant is required.' };
     }
-    if (constraint.type === BaseConstraintType.APPLICANT) {
+    if (constraint.type === ConstraintType.APPLICANT) {
         if (!constraint.mode) {
             return { valid: false, message: 'Operation mode is required for applicant constraints.' };
         }
     }
-    if (constraint.type === BaseConstraintType.PROJECT) {
+    if (constraint.type === ConstraintType.PROJECT) {
         if (constraint.min == null || isNaN(constraint.min)) {
             return { valid: false, message: 'Minimum value is required.' };
         }

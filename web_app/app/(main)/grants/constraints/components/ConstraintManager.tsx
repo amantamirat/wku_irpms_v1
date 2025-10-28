@@ -10,12 +10,12 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Grant } from '../../models/grant.model';
 import { ConstraintApi } from '../api/constraint.api';
 import CompositionManager from '../compositions/components/CompositionManager';
-import { BaseConstraintType, Constraint } from '../models/constraint.model';
+import { ConstraintType, Constraint } from '../models/constraint.model';
 import SaveDialog from './SaveDialog';
 
 
 interface ConstraintManagerProps {
-    type: BaseConstraintType;
+    type: ConstraintType;
     grant: Grant;
 }
 
@@ -151,7 +151,7 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
                 expandedRows={expandedRows}
                 onRowToggle={(e) => setExpandedRows(e.data)}
                 rowExpansionTemplate={(rowData) => {
-                    if (type === BaseConstraintType.APPLICANT) {
+                    if (type === ConstraintType.APPLICANT) {
                         return (
                             <CompositionManager parent={rowData as Constraint} />
                         )
@@ -160,28 +160,28 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
 
             >
                 {
-                    type === BaseConstraintType.APPLICANT &&
+                    type === ConstraintType.APPLICANT &&
                     <Column expander style={{ width: '3em' }} />
                 }
                 {
-                    type !== BaseConstraintType.APPLICANT &&
+                    type !== ConstraintType.APPLICANT &&
                     <Column selectionMode="single" style={{ width: '3em' }} />
 
                 }
                 <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                 <Column field="constraint" header="Constraint" sortable />
                 {
-                    type === BaseConstraintType.APPLICANT &&
+                    type === ConstraintType.APPLICANT &&
                     (<Column field="mode" header="Mode" sortable />)
                 }
 
                 {
-                    (type === BaseConstraintType.PROJECT
+                    (type === ConstraintType.PROJECT
                     ) &&
                     (<Column field="min" header="Min" sortable />)
                 }
                 {
-                    (type === BaseConstraintType.PROJECT) &&
+                    (type === ConstraintType.PROJECT) &&
                     (<Column field="max" header="Max" sortable />)
                 }
 

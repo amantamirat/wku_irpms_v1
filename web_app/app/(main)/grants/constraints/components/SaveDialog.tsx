@@ -6,7 +6,7 @@ import { InputNumber } from 'primereact/inputnumber';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
-import { ApplicantConstraintType, BaseConstraintType, Constraint, OperationMode, ProjectConstraintType, validateConstraint } from '../models/constraint.model';
+import { ApplicantConstraintType, ConstraintType, Constraint, OperationMode, ProjectConstraintType, validateConstraint } from '../models/constraint.model';
 
 
 interface SaveDialogProps {
@@ -87,7 +87,7 @@ function SaveDialog(props: SaveDialogProps) {
                         id="constraint"
                         value={constraint.constraint}
                         options={Object.values(
-                            constraint.type === BaseConstraintType.PROJECT
+                            constraint.type === ConstraintType.PROJECT
                                 ? ProjectConstraintType
                                 : ApplicantConstraintType
                         ).map(c => ({ label: c, value: c }))}
@@ -101,7 +101,7 @@ function SaveDialog(props: SaveDialogProps) {
             }
 
             {(
-                constraint.type === BaseConstraintType.PROJECT 
+                constraint.type === ConstraintType.PROJECT 
             ) && (
                     <>
                         <div className="field">
@@ -135,7 +135,7 @@ function SaveDialog(props: SaveDialogProps) {
            
 
             {
-                constraint.type === BaseConstraintType.APPLICANT &&
+                constraint.type === ConstraintType.APPLICANT &&
                 <div className="field">
                     <label htmlFor="mode">Mode</label>
                     <Dropdown
@@ -146,7 +146,7 @@ function SaveDialog(props: SaveDialogProps) {
                             setConstraint({ ...constraint, mode: e.value })
                         }
                         placeholder="Select Mode"
-                        className={classNames({ 'p-invalid': submitted && !constraint.mode && constraint.type === BaseConstraintType.APPLICANT })}
+                        className={classNames({ 'p-invalid': submitted && !constraint.mode && constraint.type === ConstraintType.APPLICANT })}
                     />
                 </div>
             }

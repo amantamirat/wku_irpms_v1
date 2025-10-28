@@ -1,6 +1,6 @@
 import { TabView, TabPanel } from "primereact/tabview";
 import { Grant } from "../../models/grant.model";
-import { BaseConstraintType } from "../models/constraint.model";
+import { ConstraintType } from "../models/constraint.model";
 import ConstraintManager from "./ConstraintManager";
 
 interface ConstraintContainerProps {
@@ -11,10 +11,10 @@ const ConstraintContainer = ({ grant }: ConstraintContainerProps) => {
         <div>
             <TabView>
                 <TabPanel header="Project">
-                    <ConstraintManager grant={grant} type={BaseConstraintType.PROJECT} />
+                    <ConstraintManager grant={grant} type={ConstraintType.PROJECT} />
                 </TabPanel>
                 <TabPanel header="Applicant">
-                    <ConstraintManager grant={grant} type={BaseConstraintType.APPLICANT} />
+                    <ConstraintManager grant={grant} type={ConstraintType.APPLICANT} />
                 </TabPanel>
             </TabView>
         </div>
