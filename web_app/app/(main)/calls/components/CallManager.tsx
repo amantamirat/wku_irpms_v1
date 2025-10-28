@@ -161,13 +161,16 @@ const CallManager = () => {
                         header={header}
                         scrollable
                         filters={filters}
-                        expandedRows={expandedRows}
-                        onRowToggle={(e) => setExpandedRows(e.data)}
-                        rowExpansionTemplate={(rowData: Call) => (
-                            <ProjectManager call={rowData} />
-                        )}
+                    /*
+                    expandedRows={expandedRows}
+                    onRowToggle={(e) => setExpandedRows(e.data)}
+                    rowExpansionTemplate={(rowData: Call) => (
+                        <ProjectManager call={rowData} />
+                    )} */
                     >
-                        <Column expander style={{ width: '3em' }} />
+                        {
+                            //<Column expander style={{ width: '3em' }} />
+                        }
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="calendar.year" header="Calendar" sortable />
                         <Column field="directorate.name" header="Directorate" sortable />
