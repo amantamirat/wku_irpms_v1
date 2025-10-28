@@ -63,16 +63,13 @@ const UserPage = () => {
         );
     }
 
-
-
+    
     const onSaveComplete = (savedUser: User) => {
         let _users = [...users]; // users is your local state array of User
         const index = _users.findIndex((u) => u._id === savedUser._id);
         if (index !== -1) {
-            // Replace existing user
             _users[index] = { ...savedUser };
         } else {
-            // Add new user
             _users.push({ ...savedUser });
         }
         setUsers(_users); // update state

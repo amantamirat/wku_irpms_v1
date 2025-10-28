@@ -169,6 +169,7 @@ const CallManager = () => {
                     )} */
                     >
                         {
+                            <Column selectionMode="single" style={{ width: '3em' }} />
                             //<Column expander style={{ width: '3em' }} />
                         }
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
