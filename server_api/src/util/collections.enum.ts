@@ -6,6 +6,7 @@ export enum COLLECTIONS {
   EVALUATION = "evaluations",
   CALENDAR = "calendars",
   CALL = "calls",
+  CALL_STAGE="callstages",
   GRANT = "grants",
   CONSTRAINT = "constraints",
   COMPOSITION = "compositions",
