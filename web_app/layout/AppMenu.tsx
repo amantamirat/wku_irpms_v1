@@ -73,16 +73,17 @@ const AppMenu = () => {
                         ]
                     )
                 },
-            ]
-        },
-        {
-            label: 'Manage',
-            items: [
                 {
                     label: 'Projects',
                     icon: PrimeIcons.BRIEFCASE,
                     to: '/projects'
                 },
+            ]
+        },
+        {
+            label: 'Manage',
+            items: [
+                
                 {
                     label: 'Calendars',
                     icon: PrimeIcons.CALENDAR,
