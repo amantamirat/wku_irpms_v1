@@ -11,8 +11,6 @@ import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 import { CalendarApi } from '../../calendars/api/calendar.api';
 import { Calendar, CalendarStatus } from '../../calendars/models/calendar.model';
-import { EvaluationApi } from '../../evals/api/evaluation.api';
-import { Evaluation } from '../../evals/models/evaluation.model';
 import { GrantApi } from '../../grants/api/grant.api';
 import { Grant } from '../../grants/models/grant.model';
 import { Organization, OrganizationalUnit } from '../../organizations/models/organization.model';
@@ -39,7 +37,7 @@ const SaveDialog = ({ visible, call, onHide, onComplete }: SaveDialogProps) => {
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
     const [grants, setGrants] = useState<Grant[]>([]);
-    const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
+   // const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
     const [themes, setThemes] = useState<Theme[]>([]);
 
     useEffect(() => {
@@ -68,18 +66,7 @@ const SaveDialog = ({ visible, call, onHide, onComplete }: SaveDialogProps) => {
     }, []);
 
 
-    useEffect(() => {
-        if (!(localCall.directorate as any)._id) return;
-        const fetchEvaluations = async () => {
-            try {
-                const data = await EvaluationApi.getEvaluations({ directorate: (localCall.directorate as any)._id });
-                setEvaluations(data);
-            } catch (err) {
-                console.error('Failed to fetch evaluations:', err);
-            }
-        };
-        fetchEvaluations();
-    }, [localCall.directorate]);
+    
 
     useEffect(() => {
         if (!(localCall.directorate as any)?._id) return;
@@ -127,7 +114,7 @@ const SaveDialog = ({ visible, call, onHide, onComplete }: SaveDialogProps) => {
                 calendar: localCall.calendar,
                 directorate: localCall.directorate,
                 theme: localCall.theme,
-                evaluation: localCall.evaluation,
+                //evaluation: localCall.evaluation,
                 grant: localCall.grant
             };
 
@@ -269,19 +256,7 @@ const SaveDialog = ({ visible, call, onHide, onComplete }: SaveDialogProps) => {
                                 />
                             </div>
 
-                            <div className="field">
-                                <label htmlFor="evaluation">Evaluation</label>
-                                <Dropdown
-                                    id="evaluation"
-                                    value={localCall.evaluation}
-                                    options={evaluations}
-                                    onChange={(e) => setLocalCall({ ...localCall, evaluation: e.value })}
-                                    optionLabel="title"
-                                    placeholder="Select Evaluation"
-                                    required
-                                    className={classNames({ 'p-invalid': submitted && !localCall.evaluation })}
-                                />
-                            </div>
+                            
 
                             <div className="field">
                                 <label htmlFor="theme">Thematic Area</label>

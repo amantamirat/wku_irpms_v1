@@ -10,7 +10,6 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
-import ProjectManager from '../../projects/components/ProjectManager';
 import { CallApi } from '../api/call.api';
 import { Call, CallStatus } from '../models/call.model';
 import SaveDialog from './SaveDialog';
@@ -24,7 +23,7 @@ const CallManager = () => {
         deadline: new Date(),
         grant: '',
         theme: '',
-        evaluation: '',
+        //evaluation: '',
         status: CallStatus.planned,
     };
 
@@ -178,7 +177,6 @@ const CallManager = () => {
                         <Column field="title" header="Title" sortable />
                         <Column field="deadline" header="Deadline" body={(rowData) => new Date(rowData.deadline!).toLocaleDateString('en-CA')} />
                         <Column field="grant.title" header="Grant" sortable />
-                        <Column field="evaluation.title" header="Evaluation" sortable />
                         <Column field="theme.title" header="Theme" sortable />
                         <Column header="Status" body={statusBodyTemplate} sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
