@@ -33,10 +33,13 @@ export const CriterionApi = {
         return data as Criterion[];
     },
 
-    async getUserCriteria(): Promise<Criterion[]> {
-        const data = await ApiClient.get(`${end_point}/user`);
-        return data as Criterion[];
-    },
+     async importCriteriaBatch(evaluationId: string, criteriaData: any[]): Promise<any> {
+                const response = await ApiClient.post(`${end_point}/import-batch`, {
+                    evaluationId: evaluationId,
+                    criteriaData: criteriaData
+                });
+                return response;
+            },
 
     async updateCriterion(criterion: Partial<Criterion>): Promise<Criterion> {
         if (!criterion._id) {

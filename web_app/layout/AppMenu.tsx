@@ -28,6 +28,11 @@ const AppMenu = () => {
             visible: hasOrganizationType([OrganizationalUnit.Directorate]),
             items: [
                 {
+                    label: 'Projects',
+                    icon: PrimeIcons.BRIEFCASE,
+                    to: '/projects'
+                },
+                {
                     label: 'Calls',
                     icon: 'pi pi-fw pi-megaphone',
                     to: '/calls',
@@ -73,11 +78,7 @@ const AppMenu = () => {
                         ]
                     )
                 },
-                {
-                    label: 'Projects',
-                    icon: PrimeIcons.BRIEFCASE,
-                    to: '/projects'
-                },
+
             ]
         },
         {

@@ -33,11 +33,6 @@ export const OptionApi = {
         return data as Option[];
     },
 
-    async getUserOptions(): Promise<Option[]> {
-        const data = await ApiClient.get(`${end_point}/user`);
-        return data as Option[];
-    },
-
     async updateOption(option: Partial<Option>): Promise<Option> {
         if (!option._id) {
             throw new Error("_id required.");
