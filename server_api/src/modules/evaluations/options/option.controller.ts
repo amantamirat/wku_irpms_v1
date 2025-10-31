@@ -10,10 +10,10 @@ export class OptionController {
         try {
             if (!req.user) throw new Error("User not found");
 
-            const { criterionId, title, value } = req.body;
+            const { criterion, title, value } = req.body;
 
             const dto: CreateOptionDTO = {
-                criterionId: new mongoose.Types.ObjectId(criterionId as string),
+                criterion: new mongoose.Types.ObjectId(criterion as string),
                 title,
                 value
             };
@@ -30,7 +30,7 @@ export class OptionController {
             const { id } = req.query;
 
             const dto: GetOptionsDTO = {
-                criterionId: new mongoose.Types.ObjectId(id as string)
+                criterion: new mongoose.Types.ObjectId(id as string)
             };
 
             const options = await OptionService.getOptions(dto);

@@ -18,7 +18,7 @@ export interface UpdateCriterionDTO {
 }
 
 export interface GetCriteriaDTO {
-    evaluationId: mongoose.Types.ObjectId;
+    evaluation: mongoose.Types.ObjectId;
 }
 
 export interface DeleteCriterionDTO {
@@ -38,6 +38,6 @@ export interface ImportCriterionDTO {
 }
 
 export interface ImportCriteriaBatchDTO {
-    evaluationId: mongoose.Types.ObjectId;
+    evaluation: mongoose.Types.ObjectId;
     criteriaData: ImportCriterionDTO[];
 }

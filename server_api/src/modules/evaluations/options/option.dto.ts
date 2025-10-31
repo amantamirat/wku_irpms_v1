@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 export interface CreateOptionDTO {
-    criterionId: mongoose.Types.ObjectId;
+    criterion: mongoose.Types.ObjectId;
     title: string;
     value: number;
 }
@@ -19,5 +19,5 @@ export interface DeleteOptionDTO {
 }
 
 export interface GetOptionsDTO {
-    criterionId: mongoose.Types.ObjectId;
+    criterion: mongoose.Types.ObjectId;
 }

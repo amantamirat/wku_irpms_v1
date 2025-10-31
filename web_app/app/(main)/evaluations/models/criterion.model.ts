@@ -16,8 +16,7 @@ export type Criterion = {
 };
 
 export const validateCriterion = (
-    criterion: Criterion
-): { valid: boolean; message?: string } => {
+    criterion: Criterion): { valid: boolean; message?: string } => {
     if (!criterion.title || criterion.title.trim().length === 0) {
         return { valid: false, message: "Title is required." };
     }

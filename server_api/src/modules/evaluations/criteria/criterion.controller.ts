@@ -10,13 +10,13 @@ export class CriterionController {
         try {
             if (!req.user) throw new Error("User not found");
 
-            const { evaluationId, title, form_type, value } = req.body;
+            const { evaluation, title, form_type, weight } = req.body;
 
             const dto: CreateCriterionDTO = {
-                evaluation: new mongoose.Types.ObjectId(evaluationId as string),
+                evaluation: new mongoose.Types.ObjectId(evaluation as string),
                 title,
                 form_type,
-                weight: value,
+                weight: weight,
                 //userId: req.user._id
             };
 
@@ -29,10 +29,10 @@ export class CriterionController {
 
     static async getCriteria(req: Request, res: Response) {
         try {
-            const { evaluationId } = req.query;
+            const { evaluation } = req.query;
 
             const dto: GetCriteriaDTO = {
-                evaluationId: new mongoose.Types.ObjectId(evaluationId as string)
+                evaluation: new mongoose.Types.ObjectId(evaluation as string)
             };
 
             const criteria = await CriterionService.getCriteria(
@@ -87,7 +87,7 @@ export class CriterionController {
             }
 
             const dto: ImportCriteriaBatchDTO = {
-                evaluationId: new mongoose.Types.ObjectId(evaluationId as string),
+                evaluation: new mongoose.Types.ObjectId(evaluationId as string),
                 criteriaData
             };
 

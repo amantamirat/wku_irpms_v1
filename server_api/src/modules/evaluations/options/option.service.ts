@@ -1,3 +1,4 @@
+import { FormType } from "../criteria/criterion.enum";
 import { Criterion } from "../criteria/criterion.model";
 import {
     CreateOptionDTO,
@@ -12,14 +13,15 @@ export class OptionService {
      * Create a new option under a criterion.
      */
     static async createOption(dto: CreateOptionDTO) {
-        const { criterionId, title, value } = dto;
+        const { criterion, title, value } = dto;
 
-        const criterion = await Criterion.findById(criterionId);
-        if (!criterion) throw new Error("Criterion not found.");
+        const criterionDoc = await Criterion.findById(criterion);
+        if (!criterionDoc) throw new Error("Criterion not found.");
+        if (criterionDoc.form_type!==FormType.closed) throw new Error("Criterion must be closed.");
 
-        if (value > criterion.weight) {
+        if (value > criterionDoc.weight) {
             throw new Error(
-                `Option weight (${value}) exceeds its criterion limit (${criterion.weight}).`
+                `Option weight (${value}) exceeds its criterion limit (${criterionDoc.weight}).`
             );
         }
 
@@ -30,8 +32,8 @@ export class OptionService {
      * Get all options under a given criterion.
      */
     static async getOptions(dto: GetOptionsDTO) {
-        const { criterionId } = dto;
-        return await Option.find({ criterion: criterionId })
+        const { criterion } = dto;
+        return await Option.find({ criterion: criterion })
             .sort({ value: -1 })
             .lean();
     }

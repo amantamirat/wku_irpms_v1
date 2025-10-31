@@ -1,15 +1,14 @@
-import mongoose from "mongoose";
-import { FormType } from "./criterion.enum";
 import { Evaluation } from "../evaluation.model";
-import { Criterion } from "./criterion.model";
 import { Option } from "../options/option.model";
 import {
     CreateCriterionDTO,
-    UpdateCriterionDTO,
     DeleteCriterionDTO,
-    ImportCriteriaBatchDTO,
     GetCriteriaDTO,
+    ImportCriteriaBatchDTO,
+    UpdateCriterionDTO,
 } from "./criterion.dto";
+import { FormType } from "./criterion.enum";
+import { Criterion } from "./criterion.model";
 
 export class CriterionService {
     /**
@@ -26,8 +25,8 @@ export class CriterionService {
      * Get all criteria for an evaluation.
      */
     static async getCriteria(dto: GetCriteriaDTO) {
-        const { evaluationId } = dto;
-        return await Criterion.find({ evaluation: evaluationId })
+        const { evaluation } = dto;
+        return await Criterion.find({ evaluation: evaluation })
             .sort({ createdAt: -1 })
             .lean();
     }
@@ -74,11 +73,11 @@ export class CriterionService {
      * Batch import criteria (with optional options) under a given evaluation.
      */
     static async importCriteriaBatch(dto: ImportCriteriaBatchDTO) {
-        const { evaluationId, criteriaData } = dto;
+        const { evaluation, criteriaData } = dto;
 
         // 1️⃣ Validate evaluation exists
-        const evaluation = await Evaluation.findById(evaluationId);
-        if (!evaluation) throw new Error("Evaluation not found.");
+        const _evaluation = await Evaluation.findById(evaluation);
+        if (!_evaluation) throw new Error("Evaluation not found.");
 
         const createdResults = [];
 
@@ -86,7 +85,7 @@ export class CriterionService {
         for (const criterion of criteriaData) {
             // Create criterion
             const criterionDoc = await Criterion.create({
-                evaluation: evaluationId,
+                evaluation: evaluation,
                 title: criterion.title,
                 weight: criterion.weight,
                 form_type: criterion.form_type,

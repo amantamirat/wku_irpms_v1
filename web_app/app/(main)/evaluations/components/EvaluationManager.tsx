@@ -13,6 +13,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EvaluationApi } from '../api/evaluation.api';
 import { Evaluation } from '../models/evaluation.model';
 import SaveEvaluation from './SaveEvaluation';
+import CriterionManager from './CriterionManager';
 
 const EvaluationManager = () => {
     const emptyEvaluation: Evaluation = {
@@ -171,6 +172,11 @@ const EvaluationManager = () => {
                         filters={filters}
                         expandedRows={expandedRows}
                         onRowToggle={(e) => setExpandedRows(e.data)}
+                        rowExpansionTemplate={(rowData) => {
+                            return (
+                                <CriterionManager evaluation={rowData as Evaluation} />
+                            )
+                        }}
                     >
                         <Column expander style={{ width: '3em' }} />
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
