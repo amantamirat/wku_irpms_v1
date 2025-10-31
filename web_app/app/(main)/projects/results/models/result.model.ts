@@ -1,13 +1,15 @@
-import { Evaluation } from "@/app/(main)/evals/models/evaluation.model";
+//import { Evaluation } from "@/app/(main)/evals/models/evaluation.model";
 import { Reviewer } from "../../reviewers/models/reviewer.model";
+import { Criterion } from "@/app/(main)/evaluations/models/criterion.model";
+import { Option } from "@/app/(main)/evaluations/models/option.model";
 
 
 export type Result = {
     _id?: string;
     evaluator: string | Reviewer;
-    criterion: string | Evaluation;
+    criterion: string | Criterion;
     score?: number;
-    selected_option?: string | Evaluation;
+    selected_option?: string | Option;
     createdAt?: Date;
     updatedAt?: Date;
 };
@@ -35,7 +37,7 @@ export const sanitizeResult = (result: Partial<Result>): Result => {
         ...result,
         criterion:
             typeof result.criterion === "object" && result.criterion !== null
-                ? (result.criterion as Evaluation)._id
+                ? (result.criterion as any)._id
                 : result.criterion,
         evaluator:
             typeof result.evaluator === "object" && result.evaluator !== null

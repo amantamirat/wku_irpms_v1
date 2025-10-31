@@ -7,9 +7,11 @@ import { useEffect, useState } from "react";
 import { Reviewer } from "../../reviewers/models/reviewer.model";
 import { ResultApi } from "../api/result.api";
 import { Result } from "../models/result.model";
-import { EvalType, Evaluation, evaluationTemplate, FormType } from "@/app/(main)/evals/models/evaluation.model";
-import { EvaluationApi } from "@/app/(main)/evals/api/evaluation.api";
+//import { EvalType, Evaluation, evaluationTemplate, FormType } from "@/app/(main)/evals/models/evaluation.model";
+//import { EvaluationApi } from "@/app/(main)/evals/api/evaluation.api";
 import EditResultDialog from "./EditResultDialog";
+import { Criterion, FormType } from "@/app/(main)/evaluations/models/criterion.model";
+import { Option } from "@/app/(main)/evaluations/models/option.model";
 
 interface ResultManagerProps {
     evaluator?: Reviewer;
@@ -24,6 +26,7 @@ const ResultManager = ({ evaluator }: ResultManagerProps) => {
 
 
     useEffect(() => {
+        /*
         const fetchData = async () => {
             try {
                 const fetchedCriteria =
@@ -50,16 +53,19 @@ const ResultManager = ({ evaluator }: ResultManagerProps) => {
         };
 
         fetchData();
+        */
     }, [evaluator]);
 
 
     const onSaveComplete = (savedResult: Result) => {
+       /*
         const updatedResults = results.map((r) =>
             (r.criterion as Evaluation)._id === (savedResult.criterion as Evaluation)._id
                 ? savedResult
                 : r
         );
         setResults(updatedResults);
+        */
         hideDialogs();
     };
 
@@ -67,11 +73,13 @@ const ResultManager = ({ evaluator }: ResultManagerProps) => {
         if (!selectedResult?._id) return;
         const deleted = await ResultApi.deleteResult(selectedResult);
         if (deleted) {
+            /*
             setResults(results.map(r =>
                 (r.criterion as Evaluation)._id === (selectedResult.criterion as Evaluation)._id
                     ? { ...r, _id: undefined, score: 0 } // reset instead of removing
                     : r
             ));
+            */
             hideDialogs();
         }
     };
@@ -84,12 +92,12 @@ const ResultManager = ({ evaluator }: ResultManagerProps) => {
 
     const calculateTotalScore = () => {
         return results.reduce((sum, r) => {
-            const criterion = r.criterion as Evaluation;
+            const criterion = r.criterion as Criterion;
             if (!criterion) return sum;
 
             if (criterion.form_type === FormType.closed && r.selected_option) {
-                const optionEval = r.selected_option as Evaluation;
-                return sum + (optionEval.weight_value || 0);
+                const optionEval = r.selected_option as Option;
+                return sum + (optionEval.value || 0);
             } else if (criterion.form_type !== FormType.closed && r.score) {
                 return sum + r.score;
             }
@@ -100,11 +108,11 @@ const ResultManager = ({ evaluator }: ResultManagerProps) => {
 
 
     const scoreTemplate = (rowData: Result) => {
-        const criterion = rowData.criterion as Evaluation;
+        const criterion = rowData.criterion as Criterion;
         if (!criterion) return "";
         if (criterion.form_type === FormType.closed) {
             return rowData.selected_option
-                ? evaluationTemplate(rowData.selected_option as Evaluation)
+                ? (rowData.selected_option as Option).value
                 : "-";
         }
         return rowData.score ?? "-";
@@ -170,6 +178,7 @@ const ResultManager = ({ evaluator }: ResultManagerProps) => {
                 <EditResultDialog
                     visible={showAddDialog}
                     result={selectedResult}
+                    criterion={selectedResult.criterion as Criterion}
                     onCompelete={onSaveComplete}
                     onHide={hideDialogs}
                 />

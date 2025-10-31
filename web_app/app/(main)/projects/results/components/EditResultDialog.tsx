@@ -1,4 +1,4 @@
-import { Evaluation, evaluationTemplate, FormType } from "@/app/(main)/evals/models/evaluation.model";
+//import { Evaluation, evaluationTemplate, FormType } from "@/app/(main)/evals/models/evaluation.model";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputNumber } from "primereact/inputnumber";
@@ -6,25 +6,30 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { ResultApi } from "../api/result.api";
 import { Result, validateResult } from "../models/result.model";
-import { EvaluationApi } from "@/app/(main)/evals/api/evaluation.api";
+//import { EvaluationApi } from "@/app/(main)/evals/api/evaluation.api";
 import { Dropdown } from "primereact/dropdown";
+import { Option } from "@/app/(main)/evaluations/models/option.model";
+import { Criterion, FormType } from "@/app/(main)/evaluations/models/criterion.model";
 
 interface EditResultDialogProps {
     visible: boolean;
     result: Result;
     onCompelete?: (savedResult: Result) => void;
+    criterion:Criterion;
     onHide: () => void;
 }
 
-const EditResultDialog = ({ visible, result, onCompelete, onHide }: EditResultDialogProps) => {
+const EditResultDialog = ({ visible, result, onCompelete, onHide, criterion }: EditResultDialogProps) => {
 
     const toast = useRef<Toast>(null);
-    const [options, setOptions] = useState<Evaluation[]>([]);
+    const [options, setOptions] = useState<Option[]>([]);
     const [localResult, setLocalResult] = useState(result || {});
 
     useEffect(() => {
         setLocalResult(result || {});
     }, [result]);
+
+    /*
 
     useEffect(() => {
         if (result.criterion && (result.criterion as Evaluation).form_type === FormType.closed) {
@@ -39,7 +44,7 @@ const EditResultDialog = ({ visible, result, onCompelete, onHide }: EditResultDi
             fetchOptions();
         }
     }, [result]);
-
+*/
 
     const saveResult = async () => {
         try {
@@ -99,9 +104,9 @@ const EditResultDialog = ({ visible, result, onCompelete, onHide }: EditResultDi
                 footer={footer}
                 onHide={onHide}
             >
-                <h3 className="mb-3 text-center">{(result.criterion as Evaluation).title}</h3>
+                <h3 className="mb-3 text-center">{criterion.title}</h3>
                 {
-                    (result.criterion && (result.criterion as Evaluation).form_type === FormType.closed) &&
+                    (result.criterion && criterion.form_type === FormType.closed) &&
                     <div className="field">
                         <label htmlFor="option">Option</label>
                         <Dropdown
@@ -113,13 +118,13 @@ const EditResultDialog = ({ visible, result, onCompelete, onHide }: EditResultDi
                                 setLocalResult({ ...localResult, selected_option: e.value })
                             }
                             optionLabel="title"
-                            itemTemplate={evaluationTemplate}
+                            //itemTemplate={evaluationTemplate}
                             placeholder="Select Option"
                         />
                     </div>
                 }
                 {
-                    (result.criterion && (result.criterion as Evaluation).form_type === FormType.open) &&
+                    (result.criterion && criterion.form_type === FormType.open) &&
                     <div className="field">
                         <label htmlFor="score">Score</label>
                         <InputNumber
