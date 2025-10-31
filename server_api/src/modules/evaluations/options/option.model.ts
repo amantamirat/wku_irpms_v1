@@ -34,6 +34,6 @@ const OptionSchema = new Schema<IOption>(
     { timestamps: true }
 );
 
-OptionSchema.index({ criterion: 1, weight_value: 1 }, { unique: true });
+OptionSchema.index({ criterion: 1, value: 1 }, { unique: true });
 
 export const Option = model<IOption>(COLLECTIONS.OPTION, OptionSchema);

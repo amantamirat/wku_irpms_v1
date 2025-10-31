@@ -27,10 +27,10 @@ export class OptionController {
 
     static async getOptions(req: Request, res: Response) {
         try {
-            const { id } = req.query;
+            const { criterion } = req.query;
 
             const dto: GetOptionsDTO = {
-                criterion: new mongoose.Types.ObjectId(id as string)
+                criterion: new mongoose.Types.ObjectId(criterion as string)
             };
 
             const options = await OptionService.getOptions(dto);

@@ -6,9 +6,8 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
-import { Option, validateOption } from '../models/option.model';
-import { Criterion } from '../models/criterion.model';
 import { OptionApi } from '../api/option.api';
+import { Option, validateOption } from '../models/option.model';
 
 interface SaveOptionProps {
     visible: boolean;

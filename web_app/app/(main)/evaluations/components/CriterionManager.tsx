@@ -5,7 +5,7 @@ import ErrorComponent from '@/components/ErrorComponent';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
-import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
+import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
@@ -14,6 +14,7 @@ import { Evaluation } from '../../evaluations/models/evaluation.model';
 import { CriterionApi } from '../api/criterion.api';
 import { Criterion, FormType } from '../models/criterion.model';
 import SaveCriterion from './SaveCriterion';
+import OptionManager from './OptionManager';
 
 interface CriterionManagerProps {
     evaluation: Evaluation;
@@ -35,6 +36,7 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
     const [selectedCriterion, setSelectedCriterion] = useState<Criterion>(emptyCriterion);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
     const toast = useRef<Toast>(null);
 
     // Initialize filters
@@ -173,7 +175,19 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
                 header={header}
                 scrollable
                 filters={filters}
+                expandedRows={expandedRows}
+                onRowToggle={(e) => setExpandedRows(e.data)}
+                rowExpansionTemplate={(rowData) => {
+                    const _criterion = rowData as Criterion;
+                    if (_criterion.form_type !== FormType.closed) {
+                        return null;
+                    }
+                    return (
+                        <OptionManager criterion={_criterion} />
+                    )
+                }}
             >
+                <Column expander style={{ width: '3em' }} />
                 <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                 <Column field="title" header="Title" sortable />
                 <Column field="weight" header="Weight" sortable />

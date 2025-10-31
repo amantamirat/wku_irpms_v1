@@ -12,6 +12,7 @@ import themeRoutes from './modules/call/themes/theme.routes';
 //import evalRoutes from './modules/call/evaluations/evaluation.routes';
 import evaluationRoutes from './modules/evaluations/evaluation.routes';
 import criterionRoutes from './modules/evaluations/criteria/criterion.routes';
+import optionRoutes from './modules/evaluations/options/option.routes';
 import calendarRoutes from './modules/calendar/calendar.routes';
 import callRoutes from './modules/call/call.routes';
 import grantRoutes from './modules/grants/grant.routes';
@@ -54,6 +55,8 @@ app.use("/api/themes", themeRoutes);
 //app.use("/api/evals", evalRoutes);
 app.use("/api/evaluations", evaluationRoutes);
 app.use("/api/criteria", criterionRoutes);
+app.use("/api/options", optionRoutes);
+
 app.use("/api/calendars", calendarRoutes);
 app.use("/api/calls", callRoutes);
 app.use("/api/grants", grantRoutes);

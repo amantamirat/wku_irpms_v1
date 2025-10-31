@@ -174,6 +174,7 @@ const OptionManager = ({ criterion }: OptionManagerProps) => {
                 scrollable
                 filters={filters}
             >
+                <Column selectionMode="single" headerStyle={{ width: '3em' }}/>
                 <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                 <Column field="title" header="Title" sortable />
                 <Column field="value" header="Value" sortable />
