@@ -3,7 +3,6 @@ import { CallStatus } from './call.enum';
 import { COLLECTIONS } from '../../util/collections.enum';
 import { Directorate } from '../organization/organization.model';
 import { ThematicArea } from './themes/theme.model';
-import { Evaluation } from './evaluations/evaluation.model';
 
 interface ICall extends Document {
     directorate: mongoose.Types.ObjectId;
@@ -13,7 +12,6 @@ interface ICall extends Document {
     description?: string;
     grant: mongoose.Types.ObjectId;
     theme?: mongoose.Types.ObjectId;
-    evaluation: mongoose.Types.ObjectId;
     status: CallStatus;
     createdAt?: Date;
     updatedAt?: Date;
@@ -54,12 +52,6 @@ const CallSchema = new Schema<ICall>({
         ref: ThematicArea.modelName,
         required: true,
         //immutable: true,
-    },
-    evaluation: {
-        type: Schema.Types.ObjectId,
-        ref: Evaluation.modelName,
-        immutable: true,
-        required: true
     },
     status: {
         type: String,

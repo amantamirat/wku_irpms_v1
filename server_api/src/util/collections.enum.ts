@@ -4,7 +4,6 @@ export enum COLLECTIONS {
   ORGANIZATION = "organizations",
   THEME = "thms",
   EVALUATION = "evaluations",
-  EVAL = "evals",
   CRITERION = "criteria",
   OPTION = "options",
   CALENDAR = "calendars",

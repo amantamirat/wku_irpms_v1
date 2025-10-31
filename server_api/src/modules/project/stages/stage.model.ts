@@ -1,11 +1,10 @@
 import mongoose, { model, Schema } from "mongoose";
 import { ProjectStageStatus } from "./stage.enum";
 import { COLLECTIONS } from "../../../util/collections.enum";
-import { Stage } from "../../call/evaluations/evaluation.model";
 
 interface IProjectStage extends Document {
     project: mongoose.Types.ObjectId;
-    stage: mongoose.Types.ObjectId;
+    //stage: mongoose.Types.ObjectId;
     status: ProjectStageStatus;
     documentPath: string;
     createdAt?: Date;
@@ -19,12 +18,13 @@ const ProjectStageSchema = new Schema<IProjectStage>({
         immutable: true,
         required: true
     },
+    /*
     stage: {
         type: Schema.Types.ObjectId,
         ref: Stage.modelName,
         immutable: true,
         required: true
-    },
+    },*/
     documentPath: {
         type: String, 
         required: true
@@ -37,5 +37,5 @@ const ProjectStageSchema = new Schema<IProjectStage>({
     },
 }, { timestamps: true });
 
-ProjectStageSchema.index({ project: 1, stage: 1 }, { unique: true });
+//ProjectStageSchema.index({ project: 1, stage: 1 }, { unique: true });
 export const ProjectStage = model<IProjectStage>(COLLECTIONS.PROJECT_STAGE, ProjectStageSchema);

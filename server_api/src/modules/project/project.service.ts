@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import Applicant from "../applicants/applicant.model";
 import { CallStatus } from "../call/call.enum";
 import { Call } from "../call/call.model";
-import { Stage } from "../call/evaluations/evaluation.model";
 import { BaseTheme } from "../call/themes/theme.model";
 import { ConstraintValidator } from "../grants/constraints/constraint.validator";
 import { CollaboratorStatus } from "./collaborators/collaborator.enum";
@@ -63,8 +62,8 @@ export class ProjectService {
         await  ConstraintValidator.validateProjectConstraints(call.grant, dto);
         await  ConstraintValidator.validateApplicantConstraints(call.grant, dto);        
         //Find the first stage
-        const stage = await Stage.findOne({ parent: call.evaluation, order: 1 }).lean();
-        if (!stage) throw new Error("Stage not found");
+        //const stage = await Stage.findOne({ parent: call.evaluation, order: 1 }).lean();
+        //if (!stage) throw new Error("Stage not found");
 
         //Check collaborator applicants
         let hasLeadPI = false;
@@ -111,7 +110,7 @@ export class ProjectService {
         }));
         const projectStage: CreateProjectStageDto = {
             project: submittedProject._id,
-            stage: stage._id,
+            //stage: stage._id,
             documentPath: dto.documentPath,
             status: ProjectStageStatus.submitted
         }

@@ -20,7 +20,7 @@ export class ProjectStageController {
             const { project, stage } = req.body;
             const data: CreateProjectStageDto = {
                 project: new mongoose.Types.ObjectId(project as string),
-                stage: new mongoose.Types.ObjectId(stage as string),
+                //stage: new mongoose.Types.ObjectId(stage as string),
                 documentPath: documentPath,
             };
             const created = await ProjectStageService.createProjectStage(data);
@@ -42,7 +42,7 @@ export class ProjectStageController {
             const { project, stage, status } = req.query;
             const filter: GetProjectStageOptions = {
                 project: project ? new mongoose.Types.ObjectId(project as string) : undefined,
-                stage: stage ? new mongoose.Types.ObjectId(stage as string) : undefined,
+                //stage: stage ? new mongoose.Types.ObjectId(stage as string) : undefined,
                 status: status as any ?? undefined,
             };
             const stages = await ProjectStageService.getProjectStages(filter);

@@ -1,5 +1,4 @@
 import { Calendar } from "../../calendars/models/calendar.model";
-import { Evaluation } from "../../evals/models/evaluation.model";
 import { Grant } from "../../grants/models/grant.model";
 import { Organization } from "../../organizations/models/organization.model";
 import { Theme } from "../../themes/models/theme.model";
@@ -19,7 +18,7 @@ export type Call = {
     poster?: string | null;
     grant: string | Grant;
     theme?: string | Theme;
-    evaluation: string | Evaluation;
+    //evaluation: string | Evaluation;
     status: CallStatus;
     createdAt?: Date;
     updatedAt?: Date;
@@ -46,10 +45,7 @@ export const validateCall = (call: Call): { valid: boolean; message?: string } =
         return { valid: false, message: 'Grant is required.' };
     }
 
-    if (!call.evaluation) {
-        return { valid: false, message: 'Grant is required.' };
-    }
-
+    
     const deadlineDate = new Date(call.deadline);
     if (!call.deadline || isNaN(deadlineDate.getTime())) {
         return { valid: false, message: 'Deadline must be a valid date.' };
@@ -86,9 +82,6 @@ export const sanitizeCall = (call: Partial<Call>): Partial<Call> => {
             typeof call.theme === "object" && call.theme !== null
                 ? (call.theme as Theme)._id
                 : call.theme,
-        evaluation:
-            typeof call.evaluation === "object" && call.evaluation !== null
-                ? (call.evaluation as Evaluation)._id
-                : call.evaluation,
+       
     };
 }

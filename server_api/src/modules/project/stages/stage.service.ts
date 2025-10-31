@@ -2,18 +2,17 @@ import mongoose from "mongoose";
 import { ProjectStageStatus } from "./stage.enum";
 import { ProjectStage } from "./stage.model";
 import { Project } from "../project.model";
-import { Stage } from "../../call/evaluations/evaluation.model";
 
 export interface GetProjectStageOptions {
     _id?: string;
     project?: mongoose.Types.ObjectId;
-    stage?: mongoose.Types.ObjectId;
+    //stage?: mongoose.Types.ObjectId;
     status?: ProjectStageStatus;
 }
 
 export interface CreateProjectStageDto {
     project: mongoose.Types.ObjectId;
-    stage: mongoose.Types.ObjectId;
+    //stage: mongoose.Types.ObjectId;
     documentPath: string;
     status?: ProjectStageStatus;
 }
@@ -29,6 +28,7 @@ export class ProjectStageService {
         if (!project) {
             throw new Error("Project Not Found!");
         }
+        /*
         const stage = await Stage.findById(ps.stage).lean();
         //validate against call
         if (!stage) {
@@ -47,6 +47,8 @@ export class ProjectStageService {
                 throw new Error("Previous Project Stage is Not Accepted!");
             }
         }
+        */
+        
     }
 
     static async createProjectStage(data: CreateProjectStageDto) {
@@ -58,8 +60,8 @@ export class ProjectStageService {
     static async getProjectStages(options: GetProjectStageOptions) {
         const filter: any = {};
         if (options.project) filter.project = options.project;
-        if (options.stage) filter.stage = options.stage;
-        if (options.status) filter.status = options.status;
+        //if (options.stage) filter.stage = options.stage;
+        //if (options.status) filter.status = options.status;
 
         const projectStages = await ProjectStage.find(filter)
             .populate("project")

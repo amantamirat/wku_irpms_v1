@@ -1,4 +1,4 @@
-import { Evaluation } from "../../../evals/models/evaluation.model";
+
 import { Project } from "../../models/project.model";
 
 export enum StageStatus {
@@ -10,7 +10,7 @@ export enum StageStatus {
 export type ProjectStage = {
     _id?: string;
     project: string | Project;
-    stage: string | Evaluation;
+    stage: string ; //| Evaluation;
     documentPath?: string;
     file?: File;
     status: StageStatus;
@@ -38,7 +38,7 @@ export const sanitizeProjectStage = (ps: Partial<ProjectStage>): Partial<Project
                 : ps.project,
         stage:
             typeof ps.stage === "object" && ps.stage !== null
-                ? (ps.stage as Evaluation)._id
+                ? (ps.stage as any)._id
                 : ps.stage,
     };
 }

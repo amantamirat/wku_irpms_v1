@@ -4,7 +4,6 @@ import { Call } from "./call.model";
 import { Directorate } from "../organization/organization.model";
 import { ThematicArea } from "./themes/theme.model";
 import { Calendar } from "../calendar/calendar.model";
-import { Evaluation } from "./evaluations/evaluation.model";
 import { Grant } from "../grants/grant.model";
 import { Project } from "../project/project.model";
 import { CalendarStatus } from "../calendar/calendar.enum";
@@ -42,9 +41,6 @@ export class CallService {
 
         const thematicArea = await ThematicArea.findById(call.theme).lean();
         if (!thematicArea) throw new Error("Thematic Area Not Found!");
-
-        const evaluation = await Evaluation.findById(call.evaluation).lean();
-        if (!evaluation) throw new Error("Evaluation Not Found!");
     }
 
     static async createCall(data: CreateCallDto, userId: string) {

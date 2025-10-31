@@ -1,8 +1,10 @@
 import mongoose from "mongoose";
 import { Result } from "./result.model";
-import { Criterion, Option } from "../../call/evaluations/evaluation.model";
 import { Reviewer } from "../reviewers/reviewer.model";
-import { FormType } from "../../call/evaluations/evaluation.enum";
+import { Criterion } from "../../evaluations/criteria/criterion.model";
+import { Option } from "../../evaluations/options/option.model";
+import { FormType } from "../../evaluations/criteria/criterion.enum";
+
 
 export interface CreateResultDto {
     evaluator: mongoose.Types.ObjectId;
@@ -30,7 +32,7 @@ export class ResultService {
             if (result.score === undefined || result.score === null) {
                 throw new Error("Score is required");
             }
-            const maxScore = criterion.weight_value;
+            const maxScore = criterion.weight;
             if (result.score < 0 || result.score > maxScore) {
                 throw new Error(`Score must be between 0 and ${maxScore}`);
             }

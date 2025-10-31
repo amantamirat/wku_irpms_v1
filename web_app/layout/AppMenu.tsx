@@ -50,18 +50,6 @@ const AppMenu = () => {
                     )
                 },
                 {
-                    label: 'Evals',
-                    icon: 'pi pi-fw pi-calculator',
-                    to: '/evals',
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.EVALUATION.CREATE,
-                            PERMISSIONS.EVALUATION.UPDATE,
-                            PERMISSIONS.EVALUATION.DELETE
-                        ]
-                    )
-                },
-                {
                     label: 'Evaluations',
                     icon: 'pi pi-fw pi-calculator',
                     to: '/evaluations',

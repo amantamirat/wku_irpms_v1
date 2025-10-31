@@ -1,6 +1,4 @@
 import { Call } from "@/app/(main)/calls/models/call.model";
-import { EvaluationApi } from "@/app/(main)/evals/api/evaluation.api";
-import { EvalType, Evaluation } from "@/app/(main)/evals/models/evaluation.model";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
@@ -23,8 +21,9 @@ export default function SaveProjectStageDialog({ project, projectStage, setProje
 
     const toast = useRef<Toast>(null);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
-    const [evaluaionStages, setEvaluationStages] = useState<Evaluation[]>([]);
+    const [evaluaionStages, setEvaluationStages] = useState<any[]>([]);
 
+    /*
     useEffect(() => {
         const fetchStages = async () => {
             const evaluation = (project.call as Call).evaluation;
@@ -40,7 +39,7 @@ export default function SaveProjectStageDialog({ project, projectStage, setProje
         };
         fetchStages();
     }, [project?.call]);
-
+*/
 
     const saveProjectStage = async () => {
         try {
