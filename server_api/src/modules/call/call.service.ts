@@ -60,7 +60,6 @@ export class CallService {
             { path: 'calendar' },
             { path: 'directorate' },
             { path: 'theme' },
-            { path: 'evaluation' },
             { path: 'grant' },
         ]).lean();
     }
@@ -74,8 +73,7 @@ export class CallService {
             { path: 'calendar' },
             { path: 'directorate' },
             { path: 'theme' },
-            { path: 'evaluation' },
-            { path: 'grant' },
+            { path: 'grant' }
         ]).lean();
         //console.log(calls);
         return calls;
