@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { CallStatus } from "./call.enum";
 import { Call } from "./call.model";
 import { Directorate } from "../organization/organization.model";
-import { ThematicArea } from "./themes/theme.model";
+import { ThematicArea } from "../themes/theme.model";
 import { Calendar } from "../calendar/calendar.model";
 import { Grant } from "../grants/grant.model";
 import { Project } from "../project/project.model";

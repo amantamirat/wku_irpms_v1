@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import { ThemeType, ThemeLevel } from "./theme.enum";
 import { BaseTheme, Componenet, FocusArea, ThematicArea, Theme } from "./theme.model";
-import { Call } from "../call.model";
-import { ProjectTheme } from "../../project/themes/project.theme.model";
-import { Directorate } from "../../organization/organization.model";
-import { CacheService } from "../../../util/cache/cache.service";
+import { Call } from "../call/call.model";
+import { ProjectTheme } from "../project/themes/project.theme.model";
+import { Directorate } from "../organization/organization.model";
+import { CacheService } from "../../util/cache/cache.service";
 
 
 export interface GetThemesOptions {

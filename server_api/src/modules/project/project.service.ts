@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import Applicant from "../applicants/applicant.model";
 import { CallStatus } from "../call/call.enum";
 import { Call } from "../call/call.model";
-import { BaseTheme } from "../call/themes/theme.model";
+import { BaseTheme } from "../themes/theme.model";
 import { ConstraintValidator } from "../grants/constraints/constraint.validator";
 import { CollaboratorStatus } from "./collaborators/collaborator.enum";
 import { Collaborator } from "./collaborators/collaborator.model";

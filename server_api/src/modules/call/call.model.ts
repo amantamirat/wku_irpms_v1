@@ -2,7 +2,7 @@ import mongoose, { Schema, model, Document } from 'mongoose';
 import { CallStatus } from './call.enum';
 import { COLLECTIONS } from '../../util/collections.enum';
 import { Directorate } from '../organization/organization.model';
-import { ThematicArea } from './themes/theme.model';
+import { ThematicArea } from '../themes/theme.model';
 
 interface ICall extends Document {
     directorate: mongoose.Types.ObjectId;

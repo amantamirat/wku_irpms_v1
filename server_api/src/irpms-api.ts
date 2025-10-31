@@ -8,7 +8,7 @@ import authRoutes from './modules/users/auth/auth.routes';
 import organizationRoutes from './modules/organization/organization.routes';
 import applicantRoutes from './modules/applicants/applicant.routes';
 import positionRoutes from './modules/applicants/positions/position.routes';
-import themeRoutes from './modules/call/themes/theme.routes';
+import themeRoutes from './modules/themes/theme.routes';
 //import evalRoutes from './modules/call/evaluations/evaluation.routes';
 import evaluationRoutes from './modules/evaluations/evaluation.routes';
 import criterionRoutes from './modules/evaluations/criteria/criterion.routes';

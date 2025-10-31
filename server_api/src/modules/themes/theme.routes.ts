@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ThemeController } from './theme.controller';
-import { verifyActiveAccount, checkPermission } from '../../users/auth/auth.middleware';
-import { PERMISSIONS } from '../../../util/permissions';
+import { verifyActiveAccount, checkPermission } from '../users/auth/auth.middleware';
+import { PERMISSIONS } from '../../util/permissions';
 
 const router: Router = Router();
 
