@@ -50,9 +50,21 @@ const AppMenu = () => {
                     )
                 },
                 {
-                    label: 'Evaluations',
+                    label: 'Evals',
                     icon: 'pi pi-fw pi-calculator',
                     to: '/evals',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.EVALUATION.CREATE,
+                            PERMISSIONS.EVALUATION.UPDATE,
+                            PERMISSIONS.EVALUATION.DELETE
+                        ]
+                    )
+                },
+                {
+                    label: 'Evaluations',
+                    icon: 'pi pi-fw pi-calculator',
+                    to: '/evaluations',
                     visible: hasPermission(
                         [
                             PERMISSIONS.EVALUATION.CREATE,
@@ -83,7 +95,7 @@ const AppMenu = () => {
         {
             label: 'Manage',
             items: [
-                
+
                 {
                     label: 'Calendars',
                     icon: PrimeIcons.CALENDAR,

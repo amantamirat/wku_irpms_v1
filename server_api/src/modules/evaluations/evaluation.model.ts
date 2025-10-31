@@ -27,7 +27,7 @@ const EvaluationSchema = new Schema<IEvaluation>(
 );
 
 export const Evaluation = model<IEvaluation>(
-    COLLECTIONS.EVALUATION,
+    COLLECTIONS.EVAL,
     EvaluationSchema
 );
 

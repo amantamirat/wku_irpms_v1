@@ -10,10 +10,10 @@ export class EvaluationController {
         try {
             if (!req.user) throw new Error("User not found");
 
-            const { title, directorateId } = req.body;
+            const { title, directorate } = req.body;
 
             const dto: CreateEvaluationDTO = {
-                directorateId: new mongoose.Types.ObjectId(directorateId as string),
+                directorate: new mongoose.Types.ObjectId(directorate as string),
                 title: title,
                 userId: req.user._id
             }
@@ -27,10 +27,10 @@ export class EvaluationController {
 
     static async getEvaluations(req: Request, res: Response) {
         try {
-            const { directorateId } = req.query;
+            const { directorate } = req.query;
 
             const evaluations = await EvaluationService.getEvaluations(
-                directorateId ? new mongoose.Types.ObjectId(directorateId as string) : undefined
+                directorate ? new mongoose.Types.ObjectId(directorate as string) : undefined
             );
 
             successResponse(res, 200, "Evaluations fetched successfully", evaluations);

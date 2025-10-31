@@ -6,27 +6,28 @@ import { Evaluation } from "./evaluation.model";
 import { CreateEvaluationDTO, UpdateEvaluationDTO } from "./evaluation.dto";
 
 export class EvaluationService {
+    
     static async createEvaluation(dto: CreateEvaluationDTO) {
-        const { directorateId, title, userId } = dto;
+        const {  directorate, title, userId } = dto;
 
         // Validate ownership
-        await CacheService.validateOwnership(userId, directorateId);
+        await CacheService.validateOwnership(userId, directorate);
 
         // Validate directorate
-        const directorate = await Directorate.findById(directorateId);
-        if (!directorate) throw new Error("Directorate not found.");
+        const dir = await Directorate.findById(directorate);
+        if (!dir) throw new Error("Directorate not found.");
 
         const evalDoc = await Evaluation.create({
-            directorate: directorateId,
+            directorate: directorate,
             title,
         });
 
         return evalDoc;
     }
 
-    static async getEvaluations(directorateId?: mongoose.Types.ObjectId) {
+    static async getEvaluations(directorate?: mongoose.Types.ObjectId) {
         const filter: any = {};
-        if (directorateId) filter.directorate = directorateId;
+        if (directorate) filter.directorate = directorate;
 
         return await Evaluation.find(filter)
             .populate("directorate")

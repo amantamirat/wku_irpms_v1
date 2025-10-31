@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 export interface CreateEvaluationDTO {
-    directorateId: mongoose.Types.ObjectId;
+    directorate: mongoose.Types.ObjectId;
     title: string;
     userId: string;
 }
