@@ -7,8 +7,7 @@
 .call-badge,
 .collaborator-badge,
 .project-badge,
-.theme-badge,
-.form-badge {
+.theme-badge{
     border-radius: var(--border-radius);
     padding: .25em .5rem;
     text-transform: uppercase;
@@ -200,17 +199,7 @@
 }
 
 
-.form-badge {
-    &.type-open {
-        background: #C8E6C9;
-        color: #256029;
-    }
 
-    &.type-closed {
-        background: #FCE4EC;
-        color: #880E4F;
-    }
-}
 
 
 

@@ -1,0 +1,18 @@
+.form-badge {
+    border-radius: var(--border-radius);
+    padding: .25em .5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .3px;
+}
+
+.form-badge.form-type-open {
+    background: #C8E6C9;
+    color: #256029;
+}
+
+.form-badge.form-type-closed {
+    background: #FCE4EC;
+    color: #880E4F;
+}

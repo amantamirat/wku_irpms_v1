@@ -126,6 +126,14 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
         </div>
     );
 
+
+    // Form Type Badge
+    const formBodyTemplate = (rowData: Criterion) => (
+        <span className={`form-badge form-type-${rowData.form_type?.toLowerCase()}`}>
+            {rowData.form_type}
+        </span>
+    );
+
     const actionBodyTemplate = (rowData: Criterion) => (
         <>
             <Button
@@ -191,7 +199,7 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
                 <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                 <Column field="title" header="Title" sortable />
                 <Column field="weight" header="Weight" sortable />
-                <Column field="form_type" header="Form Type" sortable />
+                <Column field="form_type" header="Form Type" body={formBodyTemplate} sortable />
                 <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
             </DataTable>
 
