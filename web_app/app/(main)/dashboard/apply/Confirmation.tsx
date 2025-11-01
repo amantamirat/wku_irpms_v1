@@ -1,7 +1,7 @@
 import { Card } from "primereact/card";
 import { Divider } from "primereact/divider";
 import { Tag } from "primereact/tag";
-import { Project } from "../../models/project.model";
+import { Project } from "../../projects/models/project.model";
 
 interface ConfirmationProps {
     project: Project;

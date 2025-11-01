@@ -19,14 +19,14 @@ import { Theme } from '../../themes/models/theme.model';
 import { CallApi } from '../api/call.api';
 import { Call, CallStatus, validateCall } from '../models/call.model';
 
-interface SaveDialogProps {
+interface SaveCallProps {
     visible: boolean;
     call: Call;
     onHide: () => void;
     onComplete?: (savedCall: Call) => void;
 }
 
-const SaveDialog = ({ visible, call, onHide, onComplete }: SaveDialogProps) => {
+const SaveCall = ({ visible, call, onHide, onComplete }: SaveCallProps) => {
     const { getOrganizationsByType } = useAuth();
     const toast = useRef<Toast>(null);
     const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -297,4 +297,4 @@ const SaveDialog = ({ visible, call, onHide, onComplete }: SaveDialogProps) => {
 
 };
 
-export default SaveDialog;
+export default SaveCall;

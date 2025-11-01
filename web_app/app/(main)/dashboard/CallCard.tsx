@@ -2,12 +2,12 @@ import { useAuth } from "@/contexts/auth-context";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { useState } from "react";
-import { Calendar } from "../../calendars/models/calendar.model";
-import { Call } from "../../calls/models/call.model";
-import { Organization } from "../../organizations/models/organization.model";
-import { Collaborator, CollaboratorStatus } from "../../projects/collaborators/models/collaborator.model";
-import ApplyWizard from "../../projects/components/apply/ApplyWizard";
-import { Project } from "../../projects/models/project.model";
+import { Calendar } from "../calendars/models/calendar.model";
+import { Call } from "../calls/models/call.model";
+import { Organization } from "../organizations/models/organization.model";
+import { Collaborator, CollaboratorStatus } from "../projects/collaborators/models/collaborator.model";
+import ApplyWizard from "./apply/ApplyWizard";
+import { Project } from "../projects/models/project.model";
 import CallViewDialog from "./CallViewDialog";
 
 interface CallCardProps {
@@ -55,7 +55,7 @@ export default function CallCard(props: CallCardProps) {
                         setProject(emptyProject);
                         setShowApplyDialog(true);
                     }}
-                    disabled={new Date(call.deadline) < new Date()}
+                    //disabled={new Date(call.deadline) < new Date()}
                 />
             </div>
         </div>
@@ -77,7 +77,8 @@ export default function CallCard(props: CallCardProps) {
                         <span>
                             <strong>
                                 <span style={{ color: "red" }}>Deadline:</span>{" "}
-                                {new Date(call.deadline).toLocaleDateString()}
+                                {//new Date(call.deadline).toLocaleDateString()
+                                }
                             </strong>
                         </span>
                     </div>

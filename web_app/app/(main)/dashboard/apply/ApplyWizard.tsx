@@ -2,17 +2,17 @@ import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Steps } from "primereact/steps";
 import { useRef, useState } from "react";
-import { Call } from "../../../calls/models/call.model";
-import { Grant } from "../../../grants/models/grant.model";
-import CollaboratorManager from "../../collaborators/components/CollaboratorManager";
-import ProjectForm from "../dialogs/ProjectForm";
-import { Project, validateApplyProject } from "../../models/project.model";
-import ProjectThemeManager from "../../themes/components/ThemeManager";
-import { PhaseType } from "../../phases/models/phase.model";
-import PhaseManager from "../../phases/components/PhaseManager";
-import UploadForm from "../UploadForm";
+import { Call } from "../../calls/models/call.model";
+import { Grant } from "../../grants/models/grant.model";
+import CollaboratorManager from "../../projects/collaborators/components/CollaboratorManager";
+import ProjectForm from "../../projects/components/dialogs/ProjectForm";
+import { Project, validateApplyProject } from "../../projects/models/project.model";
+import ProjectThemeManager from "../../projects/themes/components/ThemeManager";
+import { PhaseType } from "../../projects/phases/models/phase.model";
+import PhaseManager from "../../projects/phases/components/PhaseManager";
+import UploadForm from "../../projects/components/UploadForm";
 import Confirmation from "./Confirmation";
-import { ProjectApi } from "../../api/project.api";
+import { ProjectApi } from "../../projects/api/project.api";
 import { Toast } from "primereact/toast";
 
 

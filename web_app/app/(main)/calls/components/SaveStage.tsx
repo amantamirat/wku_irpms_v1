@@ -152,6 +152,7 @@ const SaveStage = ({ visible, stage, call, onComplete, onHide }: SaveStageProps)
                     <label htmlFor="evaluation">Evaluation</label>
                     <Dropdown
                         id="evaluation"
+                        dataKey="_id"
                         value={localStage.evaluation}
                         options={evaluations}
                         optionLabel="title"

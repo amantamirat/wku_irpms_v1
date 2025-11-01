@@ -12,7 +12,7 @@ import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
 import { CallApi } from '../api/call.api';
 import { Call, CallStatus } from '../models/call.model';
-import SaveDialog from './SaveDialog';
+import SaveCall from './SaveCall';
 import StageManager from './StageManager';
 import Badge from '@/templates/Badge';
 
@@ -187,7 +187,7 @@ const CallManager = () => {
                     </DataTable>
 
                     {selectedCall && (
-                        <SaveDialog
+                        <SaveCall
                             visible={showSaveDialog}
                             call={selectedCall}
                             onComplete={onSaveComplete}

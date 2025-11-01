@@ -1,10 +1,10 @@
 import { Dialog } from "primereact/dialog";
-import { Call } from "../models/call.model";
-import { Grant } from "../../grants/models/grant.model";
+import { Call } from "../calls/models/call.model";
+import { Grant } from "../grants/models/grant.model";
 import { useEffect, useState } from "react";
-import { Constraint, ConstraintType, ProjectConstraintType, ApplicantConstraintType, OperationMode } from "../../grants/constraints/models/constraint.model";
-import { GrantApi } from "../../grants/api/grant.api";
-import { ConstraintApi } from "../../grants/constraints/api/constraint.api";
+import { Constraint, ConstraintType, ProjectConstraintType, ApplicantConstraintType, OperationMode } from "../grants/constraints/models/constraint.model";
+import { GrantApi } from "../grants/api/grant.api";
+import { ConstraintApi } from "../grants/constraints/api/constraint.api";
 
 interface CallViewDialogProps {
     visible: boolean;

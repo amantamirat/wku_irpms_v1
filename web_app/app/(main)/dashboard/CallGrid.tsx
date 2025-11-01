@@ -2,10 +2,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
-import { Call, CallStatus } from '../models/call.model';
-import { CallApi } from '../api/call.api';
+import { Call, CallStatus } from '../calls/models/call.model';
+import { CallApi } from '../calls/api/call.api';
 import { Skeleton } from 'primereact/skeleton';
 import CallCard from './CallCard';
+import ErrorComponent from '@/components/ErrorComponent';
 
 
 export default function CallGrid() {
@@ -18,7 +19,7 @@ export default function CallGrid() {
         const fetchCalls = async () => {
             try {
                 setLoading(true);
-                const data = await CallApi.getCalls({status:CallStatus.active});
+                const data = await CallApi.getCalls({ status: CallStatus.active });
                 setCalls(data);
             } catch (err) {
                 console.error('Failed to fetch calls of directorates', err);
@@ -51,17 +52,7 @@ export default function CallGrid() {
 
     if (error) {
         return (
-            <div className="flex align-items-center justify-content-center py-6">
-                <div className="text-center">
-                    <i className="pi pi-exclamation-triangle text-4xl text-500 mb-3" />
-                    <p className="text-500 mb-4">{error}</p>
-                    <Button
-                        label="Retry"
-                        icon="pi pi-refresh"
-                        onClick={() => window.location.reload()}
-                    />
-                </div>
-            </div>
+            <ErrorComponent errorMessage={error} />
         );
     }
 
