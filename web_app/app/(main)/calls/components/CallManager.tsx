@@ -14,6 +14,7 @@ import { CallApi } from '../api/call.api';
 import { Call, CallStatus } from '../models/call.model';
 import SaveDialog from './SaveDialog';
 import StageManager from './StageManager';
+import Badge from '@/templates/Badge';
 
 
 const CallManager = () => {
@@ -128,12 +129,13 @@ const CallManager = () => {
                 }} />
         </>
     );
+    
 
     const statusBodyTemplate = (rowData: Call) => {
         return (
             <>
                 <span className="p-column-title">Status</span>
-                <span className={`call-badge status-${rowData.status}`}>{rowData.status}</span>
+                <Badge type="status" value={rowData.status ?? 'Unknown'} />
             </>
         );
     };

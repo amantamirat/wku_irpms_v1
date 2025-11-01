@@ -13,6 +13,7 @@ import { User, UserStatus } from './models/user.model';
 import ChangePasswordDialog from './dialogs/ChangePassword';
 import { InputSwitch } from 'primereact/inputswitch';
 import ErrorComponent from '@/components/ErrorComponent';
+import Badge from '@/templates/Badge';
 
 
 const UserPage = () => {
@@ -63,7 +64,7 @@ const UserPage = () => {
         );
     }
 
-    
+
     const onSaveComplete = (savedUser: User) => {
         let _users = [...users]; // users is your local state array of User
         const index = _users.findIndex((u) => u._id === savedUser._id);
@@ -172,7 +173,7 @@ const UserPage = () => {
         return (
             <>
                 <span className="p-column-title">Status</span>
-                <span className={`status-badge status-${rowData.status?.toLowerCase()}`}>{rowData.status}</span>
+                <Badge type="status" value={rowData.status ?? 'Unknown'} />
             </>
         );
     };

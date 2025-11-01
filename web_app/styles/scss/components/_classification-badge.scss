@@ -1,0 +1,26 @@
+.classification-badge {
+    border-radius: var(--border-radius);
+    padding: .25em .5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .3px;
+}
+
+/* Regular Program */
+.classification-badge.classification-regular {
+    background: #E8F5E9; /* light green */
+    color: #2E7D32; /* dark green */
+}
+
+/* Evening Program */
+.classification-badge.classification-evening {
+    background: #E3F2FD; /* light blue */
+    color: #1565C0; /* dark blue */
+}
+
+/* Weekend Program */
+.classification-badge.classification-weekend {
+    background: #FFF3E0; /* light orange */
+    color: #EF6C00; /* dark orange */
+}

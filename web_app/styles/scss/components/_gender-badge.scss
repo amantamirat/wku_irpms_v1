@@ -1,0 +1,21 @@
+.gender-badge {
+    border-radius: 9999px; /* pill shape */
+    padding: .25em .5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .3px;
+    display: inline-block;
+}
+
+/* Male */
+.gender-badge.gender-male {
+    background: #E3F2FD; /* light blue */
+    color: #1565C0; /* deep blue */
+}
+
+/* Female */
+.gender-badge.gender-female {
+    background: #FCE4EC; /* soft pink */
+    color: #AD1457; /* elegant rose */
+}

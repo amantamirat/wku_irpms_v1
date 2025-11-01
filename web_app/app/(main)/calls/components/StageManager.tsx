@@ -14,6 +14,7 @@ import { StageApi } from '../api/stage.api';
 import { Call } from '../models/call.model';
 import { Stage, StageStatus, StageType } from '../models/stage.model';
 import SaveStage from './SaveStage';
+import Badge from '@/templates/Badge';
 
 interface StageManagerProps {
     call: Call;
@@ -134,6 +135,15 @@ const StageManager = ({ call }: StageManagerProps) => {
         </>
     );
 
+    const statusBodyTemplate = (rowData: Stage) => {
+        return (
+            <>
+                <span className="p-column-title">Status</span>
+                <Badge type="status" value={rowData.status ?? 'Unknown'} />
+            </>
+        );
+    };
+
     return (
         <div className="card">
             <Toast ref={toast} />
@@ -164,7 +174,7 @@ const StageManager = ({ call }: StageManagerProps) => {
                 <Column field="type" header="Type" sortable />
                 <Column field="evaluation.title" header="Evaluation" sortable />
                 <Column field="deadline" header="Deadline" body={(rowData) => rowData.deadline ? new Date(rowData.deadline).toLocaleDateString() : ''} />
-                <Column field="status" header="Status" sortable />
+                <Column field="status" body={statusBodyTemplate} sortable />
                 <Column body={actionBodyTemplate} style={{ minWidth: '10rem' }} />
             </DataTable>
 

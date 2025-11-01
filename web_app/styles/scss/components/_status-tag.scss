@@ -1,13 +1,4 @@
-.status-badge,
-.user-badge,
-.academic-badge,
-.classification-badge,
-.category-badge,
-.calendar-badge,
-.call-badge,
-.collaborator-badge,
-.project-badge,
-.theme-badge{
+.status-badge {
     border-radius: var(--border-radius);
     padding: .25em .5rem;
     text-transform: uppercase;
@@ -15,241 +6,30 @@
     font-size: 12px;
     letter-spacing: .3px;
 }
-
 .status-badge {
-
     &.status-pending,
     &.status-planned {
         background: #FFF9C4;
         color: #8A6D3B;
     }
 
+    &.status-linked,
     &.status-active {
         background: #C8E6C9;
         color: #256029;
     }
 
+    &.status-notlinked,
     &.status-deleted,
-    &.status-closed,
-    &.status-suspended {
+    &.status-suspended,
+    &.status-locked {
         background: #FFCDD2;
         color: #d80517;
     }
-}
-
-.collaborator-badge {
-    &.status-pending {
-        background: #FFCDD2;
-        color: #d80517;
-    }
-
-    &.status-active {
-        background: #C8E6C9;
-        color: #256029;
-    }
-}
-
-
-.project-badge {
-
-    &.status-pending {
-        background: #6ba19a;
-        color: #d80517;
-    }
-
     &.status-closed {
         background: #F3E5F5;
         color: #4A148C;
     }
 }
-
-.call-badge {
-    &.status-active {
-        background: #C8E6C9;
-        color: #256029;
-    }
-
-    &.status-planned {
-        background: #6ba19a;
-        color: #d80517;
-    }
-
-    &.status-closed {
-        background: #F3E5F5;
-        color: #4A148C;
-    }
-}
-
-.user-badge {
-    &.status-active {
-        background: #C8E6C9;
-        color: #256029;
-    }
-
-    &.status-pending {
-        background: #FFCDD2;
-        color: #C63737;
-    }
-
-    &.status-suspended {
-        background: #FEEDAF;
-        color: #5c1a1f;
-    }
-
-    &.linked {
-        background: #03ce5e;
-        color: #1e02c0;
-    }
-
-    &.notlinked {
-        background: hsl(353, 80%, 6%);
-        color: #ecc7c7;
-    }
-}
-
-.academic-badge {
-    &.level-certificate {
-        background: #E0F7FA;
-        color: #006064;
-    }
-
-    &.level-diploma {
-        background: #FFF3E0;
-        color: #E65100;
-    }
-
-    &.level-ba,
-    &.level-bsc,
-    &.level-bt {
-        background: #e0dff7;
-        color: #d8402c;
-    }
-
-    &.level-ma,
-    &.level-msc,
-    &.level-mphil,
-    &.level-mt {
-        background: #F3E5F5;
-        color: #4A148C;
-    }
-
-    &.level-phd {
-        background: #E3F2FD;
-        color: #0D47A1;
-    }
-
-    &.level-postdoc {
-        background: #FCE4EC;
-        color: #880E4F;
-    }
-}
-
-.classification-badge {
-    &.classification-regular {
-        background: #E8F5E9;
-        color: #2E7D32;
-    }
-
-    &.classification-evening {
-        background: #E3F2FD;
-        color: #1565C0;
-    }
-
-    &.classification-weekend {
-        background: #FFF3E0;
-        color: #EF6C00;
-    }
-}
-
-.category-badge {
-    &.category-academic {
-        background: #E8F0FE;
-        color: #1A73E8;
-    }
-
-    &.category-supportive {
-        background: #FFF8E1;
-        color: #F9A825;
-    }
-
-    &.category-external {
-        background: #FCE4EC;
-        color: #C2185B;
-    }
-}
-
-
-.gender-badge {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 9999px; // pill shape
-    font-weight: 500;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-
-    &.gender-male {
-        background: #E3F2FD; // light blue
-        color: #1565C0; // deep blue
-    }
-
-    &.gender-female {
-        background: #FCE4EC; // soft pink
-        color: #AD1457; // elegant rose
-    }
-}
-
-
-
-
-
-
-
 
 ///////////////
-
-
-.calendar-badge {
-    &.status-active {
-        background: #C8E6C9;
-        color: #256029;
-    }
-
-    &.status-closed {
-        background: #FFCDD2;
-        color: #C63737;
-    }
-}
-
-.call-badge {
-    &.status-planned {
-        background: #BBDEFB; // light blue
-        color: #0D47A1; // dark blue
-    }
-
-    &.status-active {
-        background: #C8E6C9; // light green
-        color: #256029; // dark green
-    }
-
-    &.status-closed {
-        background: #FFCDD2; // light red
-        color: #C63737; // dark red
-    }
-
-    &.status-locked {
-        background: #E0E0E0; // light grey
-        color: #424242; // dark grey
-    }
-}
-
-.theme-badge {
-    &.status-active {
-        background: #C8E6C9; // light green
-        color: #256029; // dark green
-    }
-
-    &.status-locked {
-        background: #E0E0E0; // light grey
-        color: #424242; // dark grey
-    }
-}

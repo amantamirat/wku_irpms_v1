@@ -1,0 +1,49 @@
+.academic-badge {
+    border-radius: var(--border-radius);
+    padding: .25em .5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .3px;
+}
+
+/* Certificate */
+.academic-badge.level-certificate {
+    background: #E0F7FA; /* light cyan */
+    color: #006064; /* dark teal */
+}
+
+/* Diploma */
+.academic-badge.level-diploma {
+    background: #FFF3E0; /* light orange */
+    color: #E65100; /* dark orange */
+}
+
+/* Bachelor (BA, BSc, BT) */
+.academic-badge.level-ba,
+.academic-badge.level-bsc,
+.academic-badge.level-bt {
+    background: #E0DFF7; /* light lavender */
+    color: #D8402C; /* deep red */
+}
+
+/* Master (MA, MSc, MPhil, MT) */
+.academic-badge.level-ma,
+.academic-badge.level-msc,
+.academic-badge.level-mphil,
+.academic-badge.level-mt {
+    background: #F3E5F5; /* light purple */
+    color: #4A148C; /* dark violet */
+}
+
+/* PhD */
+.academic-badge.level-phd {
+    background: #E3F2FD; /* light blue */
+    color: #0D47A1; /* dark blue */
+}
+
+/* Postdoctoral */
+.academic-badge.level-postdoc {
+    background: #FCE4EC; /* light pink */
+    color: #880E4F; /* dark magenta */
+}
