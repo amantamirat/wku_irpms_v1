@@ -1,8 +1,11 @@
 export enum StageType {
-    screening = 'screening',
+    //screening = "screening",//The filter of compliance (not need scoring).
+    evaluation = "evaluation",
     validation = 'validation'
 }
+
 export enum StageStatus {
     planned = 'planned',
-    active = 'active'
+    active = 'active',
+    completed = "completed"
 }
