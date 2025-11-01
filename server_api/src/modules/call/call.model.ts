@@ -8,7 +8,7 @@ interface ICall extends Document {
     directorate: mongoose.Types.ObjectId;
     calendar: mongoose.Types.ObjectId;
     title: string;
-    deadline: Date;
+    //deadline: Date;
     description?: string;
     grant: mongoose.Types.ObjectId;
     theme?: mongoose.Types.ObjectId;
@@ -34,10 +34,12 @@ const CallSchema = new Schema<ICall>({
         type: String,
         required: true
     },
+    /*
     deadline: {
         type: Date,
         required: true
     },
+    */
     description: {
         type: String,
     },

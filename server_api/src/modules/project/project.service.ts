@@ -39,10 +39,12 @@ export class ProjectService {
     private static async validateProject(project: CreateProjectDto) {
         const call = await Call.findOne({ _id: project.call, status: CallStatus.active }).lean();
         if (!call) throw new Error("Call not found");
+        /*
         const now = new Date();
         if (call.deadline < now) {
             throw new Error("The deadline for this call has already passed");
         }
+        */
         return call;
     }
 
@@ -59,8 +61,8 @@ export class ProjectService {
             throw new Error("Document path not found");
         }
         const call = await this.validateProject(dto);
-        await  ConstraintValidator.validateProjectConstraints(call.grant, dto);
-        await  ConstraintValidator.validateApplicantConstraints(call.grant, dto);        
+        await ConstraintValidator.validateProjectConstraints(call.grant, dto);
+        await ConstraintValidator.validateApplicantConstraints(call.grant, dto);
         //Find the first stage
         //const stage = await Stage.findOne({ parent: call.evaluation, order: 1 }).lean();
         //if (!stage) throw new Error("Stage not found");
@@ -123,7 +125,7 @@ export class ProjectService {
 
     static async getProjects(options: GetProjectsOptions) {
         const filter: any = {};
-        if (options.call) filter.call = options.call;        
+        if (options.call) filter.call = options.call;
         return await Project.find(filter).populate('call').lean();
     }
 

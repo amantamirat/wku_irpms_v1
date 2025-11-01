@@ -21,7 +21,7 @@ const CallManager = () => {
     const emptyCall: Call = {
         directorate: '',
         title: '',
-        deadline: new Date(),
+        //deadline: new Date(),
         grant: '',
         theme: '',
         //evaluation: '',
@@ -175,7 +175,9 @@ const CallManager = () => {
                         <Column field="calendar.year" header="Calendar" sortable />
                         <Column field="directorate.name" header="Directorate" sortable />
                         <Column field="title" header="Title" sortable />
-                        <Column field="deadline" header="Deadline" body={(rowData) => new Date(rowData.deadline!).toLocaleDateString('en-CA')} />
+                        {
+                            //<Column field="deadline" header="Deadline" body={(rowData) => new Date(rowData.deadline!).toLocaleDateString('en-CA')} />
+                        }
                         <Column field="grant.title" header="Grant" sortable />
                         <Column field="theme.title" header="Theme" sortable />
                         <Column header="Status" body={statusBodyTemplate} sortable />

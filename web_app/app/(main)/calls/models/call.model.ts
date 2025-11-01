@@ -13,7 +13,7 @@ export type Call = {
     directorate: string | Organization;
     calendar?: string | Calendar;
     title: string;
-    deadline: Date;
+    // deadline: Date;
     description?: string | null;
     poster?: string | null;
     grant: string | Grant;
@@ -45,7 +45,7 @@ export const validateCall = (call: Call): { valid: boolean; message?: string } =
         return { valid: false, message: 'Grant is required.' };
     }
 
-    
+    /*
     const deadlineDate = new Date(call.deadline);
     if (!call.deadline || isNaN(deadlineDate.getTime())) {
         return { valid: false, message: 'Deadline must be a valid date.' };
@@ -55,6 +55,8 @@ export const validateCall = (call: Call): { valid: boolean; message?: string } =
     if (deadlineDate < today) {
         return { valid: false, message: 'Deadline must be today or later.' };
     }
+
+    */
 
     if (!call.status) {
         return { valid: false, message: 'Status is required.' };
@@ -82,6 +84,6 @@ export const sanitizeCall = (call: Partial<Call>): Partial<Call> => {
             typeof call.theme === "object" && call.theme !== null
                 ? (call.theme as Theme)._id
                 : call.theme,
-       
+
     };
 }
