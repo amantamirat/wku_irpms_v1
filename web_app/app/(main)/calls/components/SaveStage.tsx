@@ -11,15 +11,17 @@ import { StageApi } from '../api/stage.api';
 import { Stage, StageStatus, StageType, validateStage } from '../models/stage.model';
 import { Evaluation } from '../../evaluations/models/evaluation.model';
 import { EvaluationApi } from '../../evaluations/api/evaluation.api';
+import { Call } from '../models/call.model';
 
 interface SaveStageProps {
     visible: boolean;
     stage: Stage;
+    call?: Call;
     onComplete?: (savedStage: Stage) => void;
     onHide: () => void;
 }
 
-const SaveStage = ({ visible, stage, onComplete, onHide }: SaveStageProps) => {
+const SaveStage = ({ visible, stage, call, onComplete, onHide }: SaveStageProps) => {
     const toast = useRef<Toast>(null);
     const [localStage, setLocalStage] = useState<Stage>({ ...stage });
     const [submitted, setSubmitted] = useState(false);
@@ -28,14 +30,26 @@ const SaveStage = ({ visible, stage, onComplete, onHide }: SaveStageProps) => {
     useEffect(() => {
         const fetchEvaluations = async () => {
             try {
-                const data = await EvaluationApi.getEvaluations({});
-                setEvaluations(data);
+                if (call?.directorate) {
+                    let directorateId: string;
+
+                    if (typeof call.directorate === 'string') {
+                        directorateId = call.directorate;
+                    } else if (typeof call.directorate === 'object' && call.directorate !== null) {
+                        directorateId = (call.directorate as { _id: string })._id;
+                    } else {
+                        return; // invalid directorate, do nothing
+                    }
+                    const data = await EvaluationApi.getEvaluations({ directorate: directorateId });
+                    setEvaluations(data);
+                }
             } catch (err) {
                 console.error('Failed to fetch evaluations:', err);
             }
         };
         fetchEvaluations();
-    }, []);
+    }, [call]);
+
 
     useEffect(() => {
         setLocalStage({ ...stage });

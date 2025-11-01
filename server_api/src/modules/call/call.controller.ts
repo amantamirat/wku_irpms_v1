@@ -17,7 +17,7 @@ export class CallController {
                 calendar: new mongoose.Types.ObjectId(calendar as string),
                 directorate: new mongoose.Types.ObjectId(directorate as string),
                 title,
-                deadline,
+                //deadline,
                 description: description ?? undefined,
                 grant: new mongoose.Types.ObjectId(grant as string),
                 theme: new mongoose.Types.ObjectId(theme as string),
@@ -67,7 +67,7 @@ export class CallController {
 
             const data: Partial<CreateCallDto> = {
                 title,
-                deadline,
+                //deadline,
                 description: description ?? undefined,
                 status: status as CallStatus
             };

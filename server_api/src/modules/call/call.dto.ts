@@ -12,7 +12,7 @@ export interface CreateCallDto {
     directorate: mongoose.Types.ObjectId;
     calendar: mongoose.Types.ObjectId;
     title: string;
-    deadline: Date | string;
+    //deadline: Date | string;
     description?: string;
     grant: mongoose.Types.ObjectId;
     theme: mongoose.Types.ObjectId;

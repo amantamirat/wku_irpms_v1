@@ -37,7 +37,7 @@ const SaveDialog = ({ visible, call, onHide, onComplete }: SaveDialogProps) => {
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
     const [grants, setGrants] = useState<Grant[]>([]);
-   // const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
+    // const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
     const [themes, setThemes] = useState<Theme[]>([]);
 
     useEffect(() => {
@@ -66,7 +66,7 @@ const SaveDialog = ({ visible, call, onHide, onComplete }: SaveDialogProps) => {
     }, []);
 
 
-    
+
 
     useEffect(() => {
         if (!(localCall.directorate as any)?._id) return;
@@ -224,7 +224,8 @@ const SaveDialog = ({ visible, call, onHide, onComplete }: SaveDialogProps) => {
                         />
                     </div>
 
-                    <div className="field">
+                    {/**
+ * <div className="field">
                         <label htmlFor="deadline">Deadline</label>
                         <PrimeCalendar
                             id="deadline"
@@ -238,6 +239,8 @@ const SaveDialog = ({ visible, call, onHide, onComplete }: SaveDialogProps) => {
                             hourFormat="12"
                         />
                     </div>
+ */}
+
 
                     {!localCall._id && (
                         <>
@@ -256,7 +259,7 @@ const SaveDialog = ({ visible, call, onHide, onComplete }: SaveDialogProps) => {
                                 />
                             </div>
 
-                            
+
 
                             <div className="field">
                                 <label htmlFor="theme">Thematic Area</label>

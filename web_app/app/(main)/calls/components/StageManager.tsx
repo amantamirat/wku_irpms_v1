@@ -44,7 +44,7 @@ const StageManager = ({ call }: StageManagerProps) => {
         setGlobalFilter('');
     }, []);
 
-   
+
     // Fetch stages for this call
     const fetchStages = useCallback(async () => {
         try {
@@ -172,6 +172,7 @@ const StageManager = ({ call }: StageManagerProps) => {
                 <SaveStage
                     visible={showSaveDialog}
                     stage={selectedStage}
+                    call={call}
                     onComplete={onSaveComplete}
                     onHide={() => setShowSaveDialog(false)}
                 />
