@@ -4,8 +4,6 @@ import { Call, CallStatus, sanitizeCall } from "../models/call.model";
 
 const end_point = '/calls';
 
-
-
 export interface GetCallsOptions {
     calendar?: string;
     directorate?: string;

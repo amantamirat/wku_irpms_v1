@@ -29,7 +29,7 @@ const StageSchema = new Schema<IStage>({
     type: {
         type: String,
         enum: Object.values(StageType),
-        default: StageType.screening,
+        default: StageType.evaluation,
         required: true
     },
     evaluation: {

@@ -13,6 +13,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { CallApi } from '../api/call.api';
 import { Call, CallStatus } from '../models/call.model';
 import SaveDialog from './SaveDialog';
+import StageManager from './StageManager';
 
 
 const CallManager = () => {
@@ -160,16 +161,15 @@ const CallManager = () => {
                         header={header}
                         scrollable
                         filters={filters}
-                    /*
-                    expandedRows={expandedRows}
-                    onRowToggle={(e) => setExpandedRows(e.data)}
-                    rowExpansionTemplate={(rowData: Call) => (
-                        <ProjectManager call={rowData} />
-                    )} */
+                        expandedRows={expandedRows}
+                        onRowToggle={(e) => setExpandedRows(e.data)}
+                        rowExpansionTemplate={(rowData: Call) => (
+                            <StageManager call={rowData} />
+                        )}
                     >
                         {
-                            <Column selectionMode="single" style={{ width: '3em' }} />
-                            //<Column expander style={{ width: '3em' }} />
+                            // <Column selectionMode="single" style={{ width: '3em' }} />
+                            <Column expander style={{ width: '3em' }} />
                         }
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="calendar.year" header="Calendar" sortable />

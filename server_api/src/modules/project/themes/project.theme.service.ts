@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import { CreateCallDto } from "../../call/call.service";
 import { BaseTheme } from "../../themes/theme.model";
 import { Project } from "../project.model";
 import { ProjectTheme } from "./project.theme.model";
+import { CreateCallDto } from "../../call/call.dto";
 
 
 export interface GetProjectThemeOptions {
