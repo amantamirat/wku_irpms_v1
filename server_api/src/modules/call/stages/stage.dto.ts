@@ -19,7 +19,6 @@ export interface UpdateStageDTO {
     }>;
 }
 
-
 export interface GetStagesDTO {
     call: mongoose.Types.ObjectId;
 }
