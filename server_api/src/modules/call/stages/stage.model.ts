@@ -1,22 +1,36 @@
 import mongoose, { Schema, model } from "mongoose";
 import { COLLECTIONS } from "../../../util/collections.enum";
-import { EvaluationStatus } from "./call.evaluation.enum";
+import { StageStatus, StageType } from "./stage.enum";
 import { Evaluation } from "../../evaluations/evaluation.model";
 
 
-interface ICallEvaluation extends Document {
+interface IStage extends Document {
     call: mongoose.Types.ObjectId;
+    name: string;
+    type: StageType;
     evaluation: mongoose.Types.ObjectId; // Refers to Evaluation
-    deadline?: Date; //Submission Deadline
-    status?: EvaluationStatus;
+    deadline: Date; //Submission Deadline
+    status: StageStatus;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
 
-const CallEvaluationSchema = new Schema<ICallEvaluation>({
+const StageSchema = new Schema<IStage>({
     call: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.CALL,
         required: true,
         immutable: true,
+    },
+    name: {
+        type: String,
+        required: true
+    },
+    type: {
+        type: String,
+        enum: Object.values(StageType),
+        default: StageType.screening,
+        required: true
     },
     evaluation: {
         type: Schema.Types.ObjectId,
@@ -29,12 +43,12 @@ const CallEvaluationSchema = new Schema<ICallEvaluation>({
     },
     status: {
         type: String,
-        enum: Object.values(EvaluationStatus),
-        default: EvaluationStatus.planned,
+        enum: Object.values(StageStatus),
+        default: StageStatus.planned,
         required: true
     }
 }, { timestamps: true });
 
-CallEvaluationSchema.index({ call: 1, evaluation: 1 }, { unique: true });
+StageSchema.index({ call: 1, evaluation: 1 }, { unique: true });
 
-export const CallEvaluation = model<ICallEvaluation>(COLLECTIONS.CALL_EVALUATION, CallEvaluationSchema);
+export const Stage = model<IStage>(COLLECTIONS.STAGE, StageSchema);
