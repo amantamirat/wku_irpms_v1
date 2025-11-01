@@ -2,8 +2,9 @@ import { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import { errorResponse, successResponse } from '../../util/response';
 import { AuthenticatedRequest } from '../users/auth/auth.middleware';
-import { CallService, CreateCallDto, GetCallsOptions } from './call.service';
+import { CallService } from './call.service';
 import { CallStatus } from './call.enum';
+import { CreateCallDto, GetCallsOptions } from './call.dto';
 
 export class CallController {
 

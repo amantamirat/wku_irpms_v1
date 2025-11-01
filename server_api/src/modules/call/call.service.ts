@@ -8,24 +8,9 @@ import { Grant } from "../grants/grant.model";
 import { Project } from "../project/project.model";
 import { CalendarStatus } from "../calendar/calendar.enum";
 import { CacheService } from "../../util/cache/cache.service";
+import { CreateCallDto, GetCallsOptions } from "./call.dto";
 
-export interface GetCallsOptions {
-    calendar?: mongoose.Types.ObjectId;
-    directorate?: mongoose.Types.ObjectId;
-    status?: CallStatus;
-}
 
-export interface CreateCallDto {
-    directorate: mongoose.Types.ObjectId;
-    calendar: mongoose.Types.ObjectId;
-    title: string;
-    deadline: Date | string;
-    description?: string;
-    grant: mongoose.Types.ObjectId;
-    theme: mongoose.Types.ObjectId;
-    evaluation: mongoose.Types.ObjectId;
-    status?: CallStatus;
-}
 
 export class CallService {
 
