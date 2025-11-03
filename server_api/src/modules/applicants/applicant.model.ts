@@ -9,11 +9,11 @@ export interface IApplicant extends Document {
     last_name: string;
     birth_date: Date;
     gender: Gender;
-    //scope: Scope;
     organization: mongoose.Types.ObjectId;
     email?: string;
     user?: mongoose.Types.ObjectId;
     accessibility?: Accessibility[];
+    //ORCID
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -36,12 +36,6 @@ const ApplicantSchema = new Schema<IApplicant>({
         enum: Object.values(Gender),
         required: true
     },
-    /*
-    scope: {
-        type: String,
-        enum: Object.values(Scope),
-    },
-    */
     organization: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.ORGANIZATION,
