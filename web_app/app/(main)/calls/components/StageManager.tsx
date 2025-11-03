@@ -72,17 +72,10 @@ const StageManager = ({ call }: StageManagerProps) => {
 
     // Delete stage
     const deleteStage = async () => {
-        try {
-            const deleted = await StageApi.deleteStage(selectedStage);
-            if (deleted) setStages(stages.filter((s) => s._id !== selectedStage._id));
+        const deleted = await StageApi.deleteStage(selectedStage);
+        if (deleted) {
+            setStages(stages.filter((s) => s._id !== selectedStage._id));
             hideDialogs();
-        } catch (err: any) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Delete Failed',
-                detail: err.message,
-                life: 2500,
-            });
         }
     };
 
@@ -135,13 +128,18 @@ const StageManager = ({ call }: StageManagerProps) => {
         </>
     );
 
+    const stageTypeBodyTemplate = (rowData: Stage) => {
+        return (
+            <Badge type="stage" value={rowData.type ?? 'Unknown'} />
+        );
+    };
+
+
+
     const statusBodyTemplate = (rowData: Stage) => {
         return (
-            <>
-                <span className="p-column-title">Status</span>
-                <Badge type="status" value={rowData.status ?? 'Unknown'} />
-            </>
-        );
+            <Badge type="status" value={rowData.status ?? 'Unknown'} />
+        )
     };
 
     return (
@@ -169,12 +167,12 @@ const StageManager = ({ call }: StageManagerProps) => {
                 expandedRows={expandedRows}
                 onRowToggle={(e) => setExpandedRows(e.data)}
             >
-                <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
+                <Column field="order" header="Order" sortable />
                 <Column field="name" header="Stage Name" sortable />
-                <Column field="type" header="Type" sortable />
                 <Column field="evaluation.title" header="Evaluation" sortable />
                 <Column field="deadline" header="Deadline" body={(rowData) => rowData.deadline ? new Date(rowData.deadline).toLocaleDateString() : ''} />
-                <Column field="status" body={statusBodyTemplate} sortable />
+                <Column field="type" header="Type" body={stageTypeBodyTemplate} sortable />
+                <Column field="status" header="Status" body={statusBodyTemplate} sortable />
                 <Column body={actionBodyTemplate} style={{ minWidth: '10rem' }} />
             </DataTable>
 

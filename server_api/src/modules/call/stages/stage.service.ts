@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Evaluation } from "../../evaluations/evaluation.model";
 import { CreateStageDTO, GetStagesDTO, UpdateStageDTO } from "./stage.dto";
 import { StageStatus } from "./stage.enum";
@@ -15,6 +16,13 @@ export class StageService {
         const evalDoc = await Evaluation.findById(evaluation);
         if (!evalDoc) throw new Error("Evaluation not found.");
 
+        // Find the latest stage order for this call
+        const lastStage = await Stage.findOne({ call })
+            .sort({ order: -1 })
+            .select("order");
+
+        const nextOrder = lastStage ? lastStage.order + 1 : 1;
+
         // Create stage
         const stage = await Stage.create({
             call,
@@ -22,6 +30,7 @@ export class StageService {
             type,
             evaluation,
             deadline,
+            order: nextOrder,
             status: StageStatus.planned,
         });
 
@@ -37,7 +46,7 @@ export class StageService {
 
         return await Stage.find(filter)
             .populate("evaluation")
-            .sort({ createdAt: -1 })
+            .sort({ order: 1 })
             .lean();
     }
 
@@ -50,6 +59,7 @@ export class StageService {
         const stage = await Stage.findById(id);
         if (!stage) throw new Error("Stage not found");
 
+        //only one active stage should be there
         Object.assign(stage, data);
         return stage.save();
     }
@@ -65,6 +75,16 @@ export class StageService {
         if (stage.status !== StageStatus.planned)
             throw new Error("Only planned stages can be deleted.");
 
-        return await stage.deleteOne();
+        const deleted = await stage.deleteOne();
+        await StageService.resequenceStages(stage.call);
+        return deleted;
+    }
+
+    static async resequenceStages(callId: string | mongoose.Types.ObjectId) {
+        const stages = await Stage.find({ call: callId }).sort({ order: 1 });
+        for (let i = 0; i < stages.length; i++) {
+            stages[i].order = i + 1;
+            await stages[i].save();
+        }
     }
 }

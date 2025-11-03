@@ -8,6 +8,7 @@ interface IStage extends Document {
     call: mongoose.Types.ObjectId;
     name: string;
     type: StageType;
+    order: number;
     evaluation: mongoose.Types.ObjectId; // Refers to Evaluation
     deadline: Date; //Submission Deadline
     status: StageStatus;
@@ -32,6 +33,11 @@ const StageSchema = new Schema<IStage>({
         default: StageType.evaluation,
         required: true
     },
+    order: {
+        type: Number,
+        required: true,
+        //immutable: true,
+    },
     evaluation: {
         type: Schema.Types.ObjectId,
         ref: Evaluation.modelName,
@@ -49,6 +55,7 @@ const StageSchema = new Schema<IStage>({
     }
 }, { timestamps: true });
 
-StageSchema.index({ call: 1, evaluation: 1 }, { unique: true });
+//StageSchema.index({ call: 1, evaluation: 1 }, { unique: true });
+StageSchema.index({ call: 1, order: 1 }, { unique: true });
 
 export const Stage = model<IStage>(COLLECTIONS.STAGE, StageSchema);

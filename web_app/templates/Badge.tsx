@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface BadgeProps {
-  type: 'status' | 'academic' | 'classification' | 'gender';
+  type: 'status' | 'academic' | 'classification' | 'gender' | 'stage';
   value: string;
 }
 
