@@ -14,81 +14,85 @@ interface CallCardProps {
     call: Call;
 }
 
-export default function CallCard(props: CallCardProps) {
-
-    const { call } = props;
-
+export default function CallCard({ call }: CallCardProps) {
     const { user } = useAuth();
-
     const emptyProject: Project = {
         title: "",
-        call: call,
+        call,
         collaborators: user?.linkedApplicant
             ? [
                 {
                     applicant: user.linkedApplicant,
-                    status:CollaboratorStatus.active,
+                    status: CollaboratorStatus.active,
                     isLeadPI: true,
                 } as Collaborator,
             ]
             : [],
     };
+
     const [project, setProject] = useState<Project>(emptyProject);
     const [showApplyDialog, setShowApplyDialog] = useState(false);
     const [showViewDialog, setShowViewDialog] = useState(false);
 
-    const header = <img alt="Call" src={call.poster || "/images/callcard.png"} />;
-
-    const footer = (
-        <div className="flex justify-content-between align-items-center">
-            <div className="flex gap-2">
-                <Button label="View" icon="pi pi-eye" severity="info"
-                    rounded raised outlined
-                    onClick={() => {
-                        setShowViewDialog(true);
-                    }}
-                />
-                <Button
-                    label="Apply" icon="pi pi-check-circle" severity="success"
-                    rounded raised outlined
-                    onClick={() => {
-                        setProject(emptyProject);
-                        setShowApplyDialog(true);
-                    }}
-                    //disabled={new Date(call.deadline) < new Date()}
-                />
-            </div>
+    const header = (
+        <div className="relative overflow-hidden border-round-top-lg">
+            <img
+                alt="Call Poster"
+                src={call.poster || "/images/callcard.png"}
+                className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
+            />
         </div>
     );
 
-    const truncateText = (text: string, maxLength: number) => {
-        if (text.length <= maxLength) return text;
-        return text.substring(0, maxLength) + '...';
-    };
+    const footer = (
+        <div className="flex justify-content-between align-items-center mt-3">
+            <Button
+                label="View"
+                icon="pi pi-eye"
+                severity="info"
+                rounded
+                outlined
+                onClick={() => setShowViewDialog(true)}
+            />
+            <Button
+                label="Apply"
+                icon="pi pi-check-circle"
+                severity="success"
+                rounded
+                outlined
+                onClick={() => {
+                    setProject(emptyProject);
+                    setShowApplyDialog(true);
+                }}
+            />
+        </div>
+    );
+
+    const truncate = (text: string, max: number) =>
+        text.length <= max ? text : text.substring(0, max) + '…';
 
     return (
         <>
             <Card
-                title={call.title}
+                title={<span className="font-semibold text-lg">{truncate(call.title, 45)}</span>}
                 subTitle={
-                    <div className="flex flex-column gap-1">
+                    <div className="flex flex-column gap-1 text-sm text-600">
                         <span>{(call.directorate as Organization).name}</span>
                         <span>{(call.calendar as Calendar).year}</span>
                         <span>
-                            <strong>
-                                <span style={{ color: "red" }}>Deadline:</span>{" "}
-                                {//new Date(call.deadline).toLocaleDateString()
-                                }
-                            </strong>
+                            <strong className="text-red-500">
+                                Deadline: 
+                            </strong>{" "}
+                            {/* {new Date(call.deadline).toLocaleDateString()} */}
                         </span>
                     </div>
                 }
                 header={header}
                 footer={footer}
-                className="mb-3 h-full hover:shadow-lg transition-shadow duration-300"
+                className="h-full shadow-1 hover:shadow-4 transition-shadow duration-300 border-round-lg overflow-hidden"
             >
-                <p className="m-0">
-                    {truncateText(call.description || "", 100)}
+                <p className="text-sm text-700 line-height-3">
+                    {truncate(call.description || "", 110)}
                 </p>
             </Card>
 
@@ -97,7 +101,8 @@ export default function CallCard(props: CallCardProps) {
                     visible={showApplyDialog}
                     call={call}
                     onCancel={() => setShowApplyDialog(false)}
-                    project={project} setProject={setProject}
+                    project={project}
+                    setProject={setProject}
                 />
             )}
 
@@ -109,5 +114,5 @@ export default function CallCard(props: CallCardProps) {
                 />
             )}
         </>
-    )
+    );
 }

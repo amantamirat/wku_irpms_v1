@@ -60,9 +60,6 @@ export default function CollaboratorManager({ project, setProject }: Collaborato
         setCollaborators(_collaborators); // update state
         hideDialogs(); // close dialog
     };
-
-
-
     
 
     const deleteCollaborator = async () => {
