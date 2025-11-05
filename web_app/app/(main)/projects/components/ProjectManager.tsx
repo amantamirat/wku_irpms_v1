@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Call } from '../../calls/models/call.model';
 import { GetProjectsOptions, ProjectApi } from '../api/project.api';
 import { Project } from '../models/project.model';
-import SaveProjectDialog from './dialogs/SaveProjectDialog';
+import SaveProjectDialog from './SaveProjectDialog';
 import ProjectDetail from './ProjectDetail';
 import Badge from '@/templates/Badge';
 

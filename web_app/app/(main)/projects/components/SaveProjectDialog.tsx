@@ -9,8 +9,8 @@ import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { CallApi } from '@/app/(main)/calls/api/call.api';
 import { Call, CallStatus } from '@/app/(main)/calls/models/call.model';
-import { Project, validateProject } from '../../models/project.model';
-import { ProjectApi } from '../../api/project.api';
+import { Project, validateProject } from '../models/project.model';
+import { ProjectApi } from '../api/project.api';
 
 interface SaveProjectDialogProps {
     visible: boolean;

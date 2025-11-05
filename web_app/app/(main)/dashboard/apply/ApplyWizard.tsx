@@ -1,7 +1,7 @@
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Steps } from "primereact/steps";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Call } from "../../calls/models/call.model";
 import { Grant } from "../../grants/models/grant.model";
 import CollaboratorManager from "../../projects/collaborators/components/CollaboratorManager";
@@ -14,21 +14,37 @@ import UploadForm from "../../projects/components/UploadForm";
 import Confirmation from "./Confirmation";
 import { ProjectApi } from "../../projects/api/project.api";
 import { Toast } from "primereact/toast";
+import { useAuth } from "@/contexts/auth-context";
+import { Collaborator, CollaboratorStatus } from "../../projects/collaborators/models/collaborator.model";
 
 
 interface ApplyWizardProps {
     visible: boolean;
     call: Call;
-    project: Project;
-    setProject: (project: Project) => void;
     onCancel: () => void;
 }
 
-const ApplyWizard = ({ visible, call, project, setProject, onCancel }: ApplyWizardProps) => {
-
-
+const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
+    const { user } = useAuth();
     const toast = useRef<Toast>(null);
-    const [loading, setLoading] = useState(false); 
+    const [loading, setLoading] = useState(false);
+
+    const initializeProject = (): Project => ({
+        title: "",
+        call,
+        collaborators: user?.linkedApplicant
+            ? [
+                {
+                    applicant: user.linkedApplicant,
+                    status: CollaboratorStatus.active,
+                    isLeadPI: true,
+                } as Collaborator,
+            ]
+            : [],
+    });
+
+    const [project, setProject] = useState<Project>(initializeProject());
+
     const submit = async () => {
         try {
             setLoading(true);
@@ -52,7 +68,7 @@ const ApplyWizard = ({ visible, call, project, setProject, onCancel }: ApplyWiza
                 life: 3000
             });
         }
-        finally{
+        finally {
             setLoading(false);
         }
     };
@@ -98,6 +114,12 @@ const ApplyWizard = ({ visible, call, project, setProject, onCancel }: ApplyWiza
     const updateFile = (file: File) => {
         setProject({ ...project, ["file"]: file });
     }
+
+    useEffect(() => {
+        if (visible) {
+            setProject(initializeProject());
+        }
+    }, [visible, call, user]);
 
     return (
         <>

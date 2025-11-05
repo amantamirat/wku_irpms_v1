@@ -6,7 +6,7 @@ import { CallApi } from '../calls/api/call.api';
 import CallCard from './CallCard';
 import ErrorComponent from '@/components/ErrorComponent';
 
-export default function CallGrid() {
+const CallGrid = () => {
     const [calls, setCalls] = useState<Call[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -65,3 +65,5 @@ export default function CallGrid() {
         </div>
     );
 }
+
+export default CallGrid;

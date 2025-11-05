@@ -1,36 +1,18 @@
-import { useAuth } from "@/contexts/auth-context";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { useState } from "react";
 import { Calendar } from "../calendars/models/calendar.model";
 import { Call } from "../calls/models/call.model";
 import { Organization } from "../organizations/models/organization.model";
-import { Collaborator, CollaboratorStatus } from "../projects/collaborators/models/collaborator.model";
 import ApplyWizard from "./apply/ApplyWizard";
-import { Project } from "../projects/models/project.model";
 import CallViewDialog from "./CallViewDialog";
 
 interface CallCardProps {
     call: Call;
 }
 
-export default function CallCard({ call }: CallCardProps) {
-    const { user } = useAuth();
-    const emptyProject: Project = {
-        title: "",
-        call,
-        collaborators: user?.linkedApplicant
-            ? [
-                {
-                    applicant: user.linkedApplicant,
-                    status: CollaboratorStatus.active,
-                    isLeadPI: true,
-                } as Collaborator,
-            ]
-            : [],
-    };
+const CallCard = ({ call }: CallCardProps) => {
 
-    const [project, setProject] = useState<Project>(emptyProject);
     const [showApplyDialog, setShowApplyDialog] = useState(false);
     const [showViewDialog, setShowViewDialog] = useState(false);
 
@@ -61,7 +43,7 @@ export default function CallCard({ call }: CallCardProps) {
                 rounded
                 outlined
                 onClick={() => {
-                    setProject(emptyProject);
+                    //setProject(emptyProject);
                     setShowApplyDialog(true);
                 }}
             />
@@ -81,7 +63,7 @@ export default function CallCard({ call }: CallCardProps) {
                         <span>{(call.calendar as Calendar).year}</span>
                         <span>
                             <strong className="text-red-500">
-                                Deadline: 
+                                Deadline:
                             </strong>{" "}
                             {/* {new Date(call.deadline).toLocaleDateString()} */}
                         </span>
@@ -101,8 +83,6 @@ export default function CallCard({ call }: CallCardProps) {
                     visible={showApplyDialog}
                     call={call}
                     onCancel={() => setShowApplyDialog(false)}
-                    project={project}
-                    setProject={setProject}
                 />
             )}
 
@@ -116,3 +96,5 @@ export default function CallCard({ call }: CallCardProps) {
         </>
     );
 }
+
+export default CallCard;
