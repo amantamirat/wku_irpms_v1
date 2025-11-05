@@ -5,7 +5,7 @@ import { InputText } from "primereact/inputtext";
 import { InputNumber } from "primereact/inputnumber";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Phase, validatePhase } from "../models/phase.model";
 import { PhaseApi } from "../api/phase.api";
 
@@ -67,6 +67,15 @@ export default function SavePhaseDialog({ phase, visible, onSave, onComplete, on
         </>
     );
 
+
+    useEffect(() => {
+        if (visible) {
+            setLocalPhase({ ...phase });
+            //setSubmitted(false);
+            //setErrorMessage(undefined);
+        }
+    }, [visible, phase]);
+
     return (
         <>
             <Toast ref={toast} />
@@ -105,9 +114,9 @@ export default function SavePhaseDialog({ phase, visible, onSave, onComplete, on
                         id="budget"
                         value={localPhase.budget}
                         onValueChange={(e) => updateField("budget", e.value ?? 0)}
-                        mode="currency"
-                        currency="ETB"
-                        locale="en-ET"
+                        //mode="currency"
+                        //currency="ETB"
+                        //locale="en-ET"
                     />
                 </div>
 

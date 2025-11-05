@@ -28,7 +28,7 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
     };
 
     const [phases, setPhases] = useState<Phase[]>([]);
-    const [phase, setPhase] = useState<Phase>(emptyPhase);
+    const [saved, setPhase] = useState<Phase>(emptyPhase);
     const [showDialog, setShowDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -58,19 +58,27 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
     };
 
     const addPhase = (saved: Phase) => {
+        const exists = phases?.some(
+            (p) =>
+                p.order === saved.order
+        );
+        if (exists) {
+            throw new Error("The order is already added!");
+        }
         const updatedPhases = [...(project.phases || []), saved];
         if (setProject) setProject({ ...project, phases: updatedPhases });
+        
         hideDialogs();
     };
 
     const deletePhase = async () => {
         if (project._id) {
-            const deleted = await PhaseApi.deletePhase(phase);
+            const deleted = await PhaseApi.deletePhase(saved);
             if (deleted) {
-                setPhases(phases.filter((p) => p._id !== phase._id));
+                setPhases(phases.filter((p) => p._id !== saved._id));
             }
         } else {
-            const updated = project.phases?.filter((p) => p.activity !== phase.activity) || [];
+            const updated = project.phases?.filter((p) => p.activity !== saved.activity) || [];
             if (setProject) setProject({ ...project, phases: updated });
         }
         hideDialogs();
@@ -90,7 +98,10 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
                 className="mr-2"
                 tooltip={`Add ${phaseType}`}
                 onClick={() => {
-                    setPhase(emptyPhase);
+                    let newPhase = { ...emptyPhase };
+                    const maxLevel = Math.max(0, ...phases.map(e => e.order ?? 0));
+                    newPhase.order = maxLevel + 1;
+                    setPhase(newPhase);
                     setShowDialog(true);
                 }}
             />
@@ -120,7 +131,7 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
                 <Toolbar className="mb-4" start={startToolbarTemplate} />
                 <DataTable
                     value={phases}
-                    selection={phase}
+                    selection={saved}
                     onSelectionChange={(e) => setPhase(e.value as Phase)}
                     dataKey={phases.some(p => p._id) ? "_id" : "order"}
                     paginator
@@ -140,9 +151,9 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
                     <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
                 </DataTable>
 
-                {phase && (
+                {saved && (
                     <SavePhaseDialog
-                        phase={phase}
+                        phase={saved}
                         visible={showDialog}
                         onSave={!project._id ? addPhase : undefined}
                         onComplete={onSaveComplete}
@@ -150,10 +161,10 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
                     />
                 )}
 
-                {phase && (
+                {saved && (
                     <ConfirmDialog
                         showDialog={showDeleteDialog}
-                        selectedDataInfo={phase.activity}
+                        selectedDataInfo={saved.activity}
                         onConfirmAsync={project._id ? deletePhase : undefined}
                         onConfirm={!project._id ? deletePhase : undefined}
                         onHide={hideDialogs}
