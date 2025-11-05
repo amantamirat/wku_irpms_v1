@@ -1,7 +1,6 @@
 'use client';
 
 import ConfirmDialog from '@/components/ConfirmationDialog';
-
 import ErrorComponent from '@/components/ErrorComponent';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
@@ -15,6 +14,7 @@ import { GetProjectsOptions, ProjectApi } from '../api/project.api';
 import { Project } from '../models/project.model';
 import SaveProjectDialog from './dialogs/SaveProjectDialog';
 import ProjectDetail from './ProjectDetail';
+import Badge from '@/templates/Badge';
 
 interface ProjectManagerProps {
     call?: Call;
@@ -92,7 +92,7 @@ const ProjectManager = (props: ProjectManagerProps) => {
         }
     };
 
-    
+
     const hideDialogs = () => {
         setShowSaveDialog(false);
         setShowDeleteDialog(false);
@@ -138,7 +138,7 @@ const ProjectManager = (props: ProjectManagerProps) => {
 
     const statusBodyTemplate = (rowData: Project) => {
         return (
-            <span className={`project-badge status-${rowData.status}`}>{rowData.status}</span>
+            <Badge type="status" value={rowData.status ?? 'Unknown'} />
         );
     };
 
@@ -173,9 +173,7 @@ const ProjectManager = (props: ProjectManagerProps) => {
                     >
                         <Column expander headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                        {!call &&
-                            <Column field="call.title" header="Call" />
-                        }
+                        
                         <Column field="title" header="Title" sortable />
                         <Column header="Status" body={statusBodyTemplate} sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
