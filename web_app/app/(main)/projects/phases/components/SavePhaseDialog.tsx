@@ -1,59 +1,64 @@
+'use client';
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
+import { InputText } from "primereact/inputtext";
 import { InputNumber } from "primereact/inputnumber";
 import { InputTextarea } from "primereact/inputtextarea";
-import { Phase, validatePhase } from "../models/phase.model";
-import { InputText } from "primereact/inputtext";
-import { useRef } from "react";
 import { Toast } from "primereact/toast";
-
+import { useRef, useState } from "react";
+import { Phase, validatePhase } from "../models/phase.model";
+import { PhaseApi } from "../api/phase.api";
 
 interface SavePhaseDialogProps {
     phase: Phase;
-    setPhase: (phase: Phase) => void;
     visible: boolean;
-    onSave?: () => Promise<void>;
-    onAdd?: () => void;
+    onSave?: (saved: Phase) => void;
+    onComplete?: (saved: Phase) => void;
     onHide: () => void;
 }
 
-export default function SavePhaseDialog({ phase, setPhase, visible, onSave, onAdd, onHide }: SavePhaseDialogProps) {
-
+export default function SavePhaseDialog({ phase, visible, onSave, onComplete, onHide }: SavePhaseDialogProps) {
+    const [localPhase, setLocalPhase] = useState<Phase>({ ...phase });
     const toast = useRef<Toast>(null);
-    //const [errorMessage, setErrorMessage] = useState<string | undefined>();
+
     const updateField = (field: keyof Phase, value: any) => {
-        setPhase({ ...phase, [field]: value });
+        setLocalPhase({ ...localPhase, [field]: value });
     };
 
     const savePhase = async () => {
         try {
-            const result = validatePhase(phase);
-            if (!result.valid) {
-                throw new Error(result.message);
-            }
-            //setErrorMessage(undefined);
-            if (onAdd) {
-                onAdd();
-            }
+            const validation = validatePhase(localPhase);
+            if (!validation.valid) throw new Error(validation.message);
+
+            let saved: Phase;
             if (onSave) {
-                await onSave();
+                saved = { ...localPhase };
+                onSave(localPhase);
+            } else {
+                if (localPhase._id) {
+                    saved = await PhaseApi.updatePhase(localPhase);
+                } else {
+                    saved = await PhaseApi.createPhase(localPhase);
+                }
+                saved = { ...saved, project: localPhase.project, type: localPhase.type };
+                toast.current?.show({
+                    severity: "success",
+                    summary: "Successful",
+                    detail: "Phase saved successfully",
+                    life: 2000,
+                });
             }
 
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Successful',
-                detail: `Phase ${onSave ? 'Saved' : 'Added'}.`,
-                life: 2000
-            });
+            if (onComplete) onComplete(saved);
         } catch (err) {
             toast.current?.show({
-                severity: 'error',
-                summary: `Failed to ${onSave ? 'Save' : 'Add'} project theme`,
-                detail: '' + err,
-                life: 2000
+                severity: "error",
+                summary: "Failed to save phase",
+                detail: String(err),
+                life: 2000,
             });
         }
-    }
+    };
 
     const footer = (
         <>
@@ -78,10 +83,9 @@ export default function SavePhaseDialog({ phase, setPhase, visible, onSave, onAd
                     <label htmlFor="activity">Activity</label>
                     <InputText
                         id="activity"
-                        value={phase.activity}
+                        value={localPhase.activity}
                         onChange={(e) => updateField("activity", e.target.value)}
-                        required
-                        autoFocus
+                        placeholder="Enter activity name"
                     />
                 </div>
 
@@ -89,10 +93,9 @@ export default function SavePhaseDialog({ phase, setPhase, visible, onSave, onAd
                     <label htmlFor="duration">Duration (days)</label>
                     <InputNumber
                         id="duration"
-                        value={phase.duration}
+                        value={localPhase.duration}
                         onValueChange={(e) => updateField("duration", e.value ?? 0)}
                         min={1}
-                        placeholder="Enter duration in days"
                     />
                 </div>
 
@@ -100,12 +103,11 @@ export default function SavePhaseDialog({ phase, setPhase, visible, onSave, onAd
                     <label htmlFor="budget">Budget (ETB)</label>
                     <InputNumber
                         id="budget"
-                        value={phase.budget}
+                        value={localPhase.budget}
                         onValueChange={(e) => updateField("budget", e.value ?? 0)}
                         mode="currency"
                         currency="ETB"
                         locale="en-ET"
-                        placeholder="Enter budget"
                     />
                 </div>
 
@@ -114,10 +116,9 @@ export default function SavePhaseDialog({ phase, setPhase, visible, onSave, onAd
                     <InputTextarea
                         id="description"
                         rows={3}
-                        value={phase.description}
+                        value={localPhase.description}
                         onChange={(e) => updateField("description", e.target.value)}
                         autoResize
-                        placeholder="Enter description (optional)"
                     />
                 </div>
             </Dialog>

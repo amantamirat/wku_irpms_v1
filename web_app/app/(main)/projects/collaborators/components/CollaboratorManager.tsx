@@ -15,7 +15,7 @@ interface CollaboratorProps {
     setProject?: (project: Project) => void;
 }
 
-export default function CollaboratorManager({ project, setProject }: CollaboratorProps) {
+const CollaboratorManager = ({ project, setProject }: CollaboratorProps) => {
 
     const emptyCollaborator: Collaborator = {
         project: project,
@@ -60,7 +60,7 @@ export default function CollaboratorManager({ project, setProject }: Collaborato
         setCollaborators(_collaborators); // update state
         hideDialogs(); // close dialog
     };
-    
+
 
     const deleteCollaborator = async () => {
         const deleted = await CollaboratorApi.deleteCollaborator(collaborator);
@@ -199,3 +199,4 @@ export default function CollaboratorManager({ project, setProject }: Collaborato
         </>
     );
 }
+export default CollaboratorManager;

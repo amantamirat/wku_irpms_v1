@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Call } from "../../calls/models/call.model";
 import { Grant } from "../../grants/models/grant.model";
 import CollaboratorManager from "../../projects/collaborators/components/CollaboratorManager";
-import ProjectForm from "../../projects/components/dialogs/ProjectForm";
+import ProjectForm from "./ProjectForm";
 import { Project, validateApplyProject } from "../../projects/models/project.model";
 import ProjectThemeManager from "../../projects/themes/components/ThemeManager";
 import { PhaseType } from "../../projects/phases/models/phase.model";

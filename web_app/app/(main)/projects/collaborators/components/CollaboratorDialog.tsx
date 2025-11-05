@@ -17,7 +17,7 @@ interface CollaboratorDialogProps {
     collaborator: Collaborator;
     visible: boolean;
     onSave?: (saved: Collaborator) => void;
-    onComplete?: (saved: Collaborator) => void; // replaced onSave
+    onComplete?: (saved: Collaborator) => void;
     onHide: () => void;
 }
 
@@ -66,30 +66,29 @@ export default function CollaboratorDialog({ collaborator, visible, onSave, onCo
 
     const saveCollaborator = async () => {
         try {
-            if (onSave) {
-                onSave(localCollaborator);
-                if (onComplete) onComplete(localCollaborator);
-                return;
-            }
             let saved: Collaborator;
-            if (localCollaborator._id) {
-                saved = await CollaboratorApi.updateCollaborator(localCollaborator);
+            if (onSave) {
+                saved = { ...localCollaborator };
+                onSave(localCollaborator);
             } else {
-                saved = await CollaboratorApi.createCollaborator(localCollaborator);
+
+                if (localCollaborator._id) {
+                    saved = await CollaboratorApi.updateCollaborator(localCollaborator);
+                } else {
+                    saved = await CollaboratorApi.createCollaborator(localCollaborator);
+                }
+                saved = {
+                    ...saved,
+                    project: localCollaborator.project,
+                    applicant: localCollaborator.applicant
+                };
+                toast.current?.show({
+                    severity: 'success',
+                    summary: 'Successful',
+                    detail: 'Collaborator saved',
+                    life: 2000
+                });
             }
-            saved = {
-                ...saved,
-                project: localCollaborator.project,
-                applicant: localCollaborator.applicant
-            };
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Successful',
-                detail: 'Collaborator saved',
-                life: 2000
-            });
-            // Update local copy and notify parent
-            //setLocalCollaborator(saved);
             if (onComplete) onComplete(saved);
 
         } catch (err) {
