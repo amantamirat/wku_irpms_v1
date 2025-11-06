@@ -6,9 +6,9 @@ import { useRef } from "react";
 interface ConfirmDialogProps {
     showDialog: boolean;
     operation?: string;
-    selectedDataInfo?: string;
+    title?: string;
     message?: string;
-    onConfirm?: () => void;
+    onConfirm?: (data?: any) => void;
     onConfirmAsync?: () => Promise<void>;
     onHide: () => void;
 }
@@ -29,14 +29,14 @@ const ConfirmDialog = (props: ConfirmDialogProps) => {
                 toast.current?.show({
                     severity: 'success',
                     summary: `${props.operation} performed`,
-                    detail: `${props.operation} performed on ${props.selectedDataInfo}`,
+                    detail: `${props.operation} performed on ${props.title}`,
                     life: 2000
                 });
             } else {
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Deleted',
-                    detail: `${props.selectedDataInfo} deleted`,
+                    detail: `${props.title} deleted`,
                     life: 2000
                 });
             }
@@ -44,7 +44,7 @@ const ConfirmDialog = (props: ConfirmDialogProps) => {
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
-                summary: `Failed to ${props.operation ?? 'delete'} ${props.selectedDataInfo}`,
+                summary: `Failed to ${props.operation ?? 'delete'} ${props.title}`,
                 detail: '' + err,
                 life: 2000
             });
@@ -72,9 +72,9 @@ const ConfirmDialog = (props: ConfirmDialogProps) => {
             >
                 <div className="flex align-items-center justify-content-center">
                     <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                    {props.selectedDataInfo && (
+                    {props.title && (
                         <span>
-                            Are you sure you want to {props.operation ?? 'delete'} <b>{props.selectedDataInfo}</b>?
+                            Are you sure you want to {props.operation ?? 'delete'} <b>{props.title}</b>?
                         </span>
                     )}
                     {props.message && (

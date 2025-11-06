@@ -192,7 +192,7 @@ const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) =
                 {collaborator && collaborator.applicant && (
                     <ConfirmDialog
                         showDialog={showDeleteDialog}
-                        selectedDataInfo={String((collaborator.applicant as any).first_name)}
+                        title={String((collaborator.applicant as any).first_name)}
                         onConfirmAsync={project._id ? deleteCollaborator : undefined}
                         //onConfirm={!project._id ? onRemove : undefined}
                         onHide={hideDialogs}

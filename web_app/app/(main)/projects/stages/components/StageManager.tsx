@@ -191,7 +191,7 @@ export default function ProjectStageManager({ project }: ProjectInfoStepProps) {
                 {projectStage && (
                     <ConfirmDialog
                         showDialog={showDeleteDialog}
-                        selectedDataInfo={`projectStage ${projectStage._id}`}
+                        title={`projectStage ${projectStage._id}`}
                         onConfirmAsync={removeProjectStage}
                         onHide={hideDialogs}
                     />

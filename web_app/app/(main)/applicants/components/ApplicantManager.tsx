@@ -224,7 +224,7 @@ const ApplicantManager = (/*{ scope }: ApplicantManagerProps*/) => {
                     {selectedApplicant && (
                         <ConfirmDialog
                             showDialog={showDeleteDialog}
-                            selectedDataInfo={`${selectedApplicant.first_name} ${selectedApplicant.last_name}`}
+                            title={`${selectedApplicant.first_name} ${selectedApplicant.last_name}`}
                             onConfirmAsync={deleteApplicant}
                             onHide={hideDialogs}
                         />
@@ -234,7 +234,7 @@ const ApplicantManager = (/*{ scope }: ApplicantManagerProps*/) => {
                     {selectedApplicant && (
                         <ConfirmDialog
                             showDialog={showLinkDialog}
-                            selectedDataInfo={`${selectedApplicant.first_name} ${selectedApplicant.last_name}`}
+                            title={`${selectedApplicant.first_name} ${selectedApplicant.last_name}`}
                             operation='Link'
                             onConfirmAsync={linkApplicant}
                             onHide={hideDialogs}

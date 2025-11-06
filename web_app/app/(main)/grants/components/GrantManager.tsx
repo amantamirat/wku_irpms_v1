@@ -179,7 +179,7 @@ const GrantManager = () => {
                     {selectedGrant && (
                         <ConfirmDialog
                             showDialog={showDeleteDialog}
-                            selectedDataInfo={String(selectedGrant.title)}
+                            title={String(selectedGrant.title)}
                             onConfirmAsync={deleteGrant}
                             onHide={() => setShowDeleteDialog(false)}
                         />

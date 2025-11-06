@@ -191,7 +191,7 @@ const ProjectManager = (props: ProjectManagerProps) => {
                     {selectedProject && (
                         <ConfirmDialog
                             showDialog={showDeleteDialog}
-                            selectedDataInfo={String(selectedProject.title)}
+                            title={String(selectedProject.title)}
                             onConfirmAsync={deleteProject}
                             onHide={hideDialogs}
                         />

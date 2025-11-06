@@ -164,7 +164,7 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
                 {saved && (
                     <ConfirmDialog
                         showDialog={showDeleteDialog}
-                        selectedDataInfo={saved.activity}
+                        title={saved.activity}
                         onConfirmAsync={project._id ? deletePhase : undefined}
                         onConfirm={!project._id ? deletePhase : undefined}
                         onHide={hideDialogs}

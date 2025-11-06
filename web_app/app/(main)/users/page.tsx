@@ -232,7 +232,7 @@ const UserPage = () => {
 
                     {selectedUser && <ConfirmDialog
                         showDialog={showDeleteDialog}
-                        selectedDataInfo={selectedUser.user_name}
+                        title={selectedUser.user_name}
                         onConfirmAsync={deleteUser}
                         onHide={hideDialogs}
                     />}

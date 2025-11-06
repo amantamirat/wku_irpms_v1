@@ -164,7 +164,7 @@ export default function ReviewerManager({ applicant, projectStage }: ReviewerMan
                     {reviewer && (
                         <ConfirmDialog
                             showDialog={showDeleteDialog}
-                            selectedDataInfo={String((reviewer.applicant as any)?.first_name)}
+                            title={String((reviewer.applicant as any)?.first_name)}
                             onConfirmAsync={deleteReviewer}
                             onHide={() => setShowDeleteDialog(false)}
                         />

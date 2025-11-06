@@ -200,7 +200,7 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
             {selectedConstraint && (
                 <ConfirmDialog
                     showDialog={showDeleteDialog}
-                    selectedDataInfo={String(selectedConstraint.type)}
+                    title={String(selectedConstraint.type)}
                     onConfirmAsync={deleteConstraint}
                     onHide={hideDialogs}
                 />

@@ -189,7 +189,7 @@ const StageManager = ({ call }: StageManagerProps) => {
             {selectedStage && showDeleteDialog && (
                 <ConfirmDialog
                     showDialog={showDeleteDialog}
-                    selectedDataInfo={selectedStage.name || ''}
+                    title={selectedStage.name || ''}
                     onConfirmAsync={deleteStage}
                     onHide={() => setShowDeleteDialog(false)}
                 />

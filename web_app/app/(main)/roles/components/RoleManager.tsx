@@ -181,7 +181,7 @@ const RoleManager = () => {
                     {selectedRole && (
                         <ConfirmDialog
                             showDialog={showDeleteDialog}
-                            selectedDataInfo={String(selectedRole.role_name)}
+                            title={String(selectedRole.role_name)}
                             onConfirmAsync={deleteRole}
                             onHide={() => setShowDeleteDialog(false)}
                         />

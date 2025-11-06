@@ -193,7 +193,7 @@ const OptionManager = ({ criterion }: OptionManagerProps) => {
             {selectedOption && (
                 <ConfirmDialog
                     showDialog={showDeleteDialog}
-                    selectedDataInfo={String(selectedOption.title)}
+                    title={String(selectedOption.title)}
                     onConfirmAsync={deleteOption}
                     onHide={() => setShowDeleteDialog(false)}
                 />

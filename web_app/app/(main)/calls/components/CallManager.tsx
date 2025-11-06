@@ -198,7 +198,7 @@ const CallManager = () => {
                     {selectedCall && (
                         <ConfirmDialog
                             showDialog={showDeleteDialog}
-                            selectedDataInfo={String(selectedCall.title)}
+                            title={String(selectedCall.title)}
                             onConfirmAsync={deleteCall}
                             onHide={hideDialogs}
                         />

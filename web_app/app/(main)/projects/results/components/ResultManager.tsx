@@ -188,7 +188,7 @@ const ResultManager = ({ evaluator }: ResultManagerProps) => {
                 selectedResult &&
                 <ConfirmDialog
                     showDialog={showDeleteDialog}
-                    selectedDataInfo={`result (score ${selectedResult.score})`}
+                    title={`result (score ${selectedResult.score})`}
                     onConfirmAsync={deleteResult}
                     onHide={hideDialogs}
                 />
