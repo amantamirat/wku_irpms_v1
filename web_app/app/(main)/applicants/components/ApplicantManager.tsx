@@ -14,6 +14,7 @@ import { Applicant, applicantUnits, Gender } from '../models/applicant.model';
 import SaveDialog from './dialogs/SaveDialog';
 import { useAuth } from '@/contexts/auth-context';
 import { OrganizationalUnit } from '../../organizations/models/organization.model';
+import ErrorComponent from '@/components/ErrorComponent';
 
 
 interface ApplicantManagerProps {
@@ -49,6 +50,7 @@ const ApplicantManager = (/*{ scope }: ApplicantManagerProps*/) => {
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showLinkDialog, setShowLinkDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const toast = useRef<Toast>(null);
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,32 +63,36 @@ const ApplicantManager = (/*{ scope }: ApplicantManagerProps*/) => {
     }, []);
 
 
-    const loadApplicants = useCallback(async () => {
-        try {
-            //const type = scopeToOrganizationUnit[scope]; // map scope to org type
-            //if (!type) return;
-            const orgs = getOrganizationsByType(applicantUnits).map((org) => org._id);
-
-            if (orgs.length === 0) {
-                // No organizations available for this scope, skip fetching
-                setApplicants([]);
-                return;
-            }
-
-            const data = await ApplicantApi.getApplicants({
-                //scope,
-                organization: orgs, // array of IDs
-            });
-            setApplicants(data);
-        } catch (err) {
-            console.error('Error loading applicants:', err);
-        }
-    }, []);
-
     useEffect(() => {
-        loadApplicants();
-    }, []);
+        const fetchApplicants = async () => {
+            try {
+                const orgs = getOrganizationsByType(applicantUnits).map((org) => org._id);
 
+                if (orgs.length === 0) {
+                   // setApplicants([]);
+                    //return;
+                }
+                const data = await ApplicantApi.getApplicants({
+                    organization: orgs,
+                });
+
+                setApplicants(data);
+            } catch (err) {
+                setError("Failed to load applicants:" + err);
+                //console.error("Failed to load applicants:", err);
+            }
+        };
+
+        fetchApplicants();
+    }, [applicantUnits]);
+
+
+
+    if (error) {
+        return (
+            <ErrorComponent errorMessage={error} />
+        );
+    }
 
 
     const onSaveComplete = (savedApplicant: Applicant) => {
