@@ -12,10 +12,11 @@ import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
 
 interface CollaboratorProps {
     project: Project;
-    setProject?: (project: Project) => void;
+    onSave?: (collaborator: Collaborator) => void;
+    onRemove?: (collaborator: Collaborator) => void;
 }
 
-const CollaboratorManager = ({ project, setProject }: CollaboratorProps) => {
+const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) => {
 
     const emptyCollaborator: Collaborator = {
         project: project,
@@ -37,7 +38,6 @@ const CollaboratorManager = ({ project, setProject }: CollaboratorProps) => {
                 console.error("Failed to fetch collaborators:", err);
             }
         };
-
         if (project?._id) {
             fetchCollaborators();
         }
@@ -69,6 +69,8 @@ const CollaboratorManager = ({ project, setProject }: CollaboratorProps) => {
             hideDialogs();
         }
     };
+
+    /*
 
     const addCollaborator = (savedCollaborator: Collaborator) => {
         const applicant = savedCollaborator.applicant as Applicant;
@@ -102,6 +104,8 @@ const CollaboratorManager = ({ project, setProject }: CollaboratorProps) => {
         setCollaborators(updatedCollaborators);
         hideDialogs();
     };
+
+    */
 
 
     const hideDialogs = () => {
@@ -180,7 +184,7 @@ const CollaboratorManager = ({ project, setProject }: CollaboratorProps) => {
                     <CollaboratorDialog
                         collaborator={collaborator}
                         visible={showSaveDialog}
-                        onSave={!project._id ? addCollaborator : undefined}
+                        onSave={onSave}
                         onComplete={onSaveComplete}
                         onHide={hideDialogs}
                     />}
@@ -190,7 +194,7 @@ const CollaboratorManager = ({ project, setProject }: CollaboratorProps) => {
                         showDialog={showDeleteDialog}
                         selectedDataInfo={String((collaborator.applicant as any).first_name)}
                         onConfirmAsync={project._id ? deleteCollaborator : undefined}
-                        onConfirm={!project._id ? removeCollaborator : undefined}
+                        //onConfirm={!project._id ? onRemove : undefined}
                         onHide={hideDialogs}
                     />
                 )}

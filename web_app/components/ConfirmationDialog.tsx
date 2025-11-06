@@ -18,13 +18,13 @@ const ConfirmDialog = (props: ConfirmDialogProps) => {
 
     const onOK = async () => {
         try {
-            if (props.onConfirmAsync) {
-                await props.onConfirmAsync();
-            }
+
             if (props.onConfirm) {
                 props.onConfirm();
             }
-
+            else if (props.onConfirmAsync) {
+                await props.onConfirmAsync();
+            }
             if (props.operation) {
                 toast.current?.show({
                     severity: 'success',

@@ -16,6 +16,7 @@ import { ProjectApi } from "../../projects/api/project.api";
 import { Toast } from "primereact/toast";
 import { useAuth } from "@/contexts/auth-context";
 import { Collaborator, CollaboratorStatus } from "../../projects/collaborators/models/collaborator.model";
+import { Applicant } from "../../applicants/models/applicant.model";
 
 
 interface ApplyWizardProps {
@@ -26,9 +27,6 @@ interface ApplyWizardProps {
 
 const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
     const { user } = useAuth();
-    const toast = useRef<Toast>(null);
-    const [loading, setLoading] = useState(false);
-
     const initializeProject = (): Project => ({
         title: "",
         call,
@@ -42,8 +40,43 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
             ]
             : [],
     });
-
+    const toast = useRef<Toast>(null);
+    const [loading, setLoading] = useState(false);
     const [project, setProject] = useState<Project>(initializeProject());
+
+    useEffect(() => {
+        if (visible) {
+            setProject(initializeProject());
+        }
+    }, [visible, call, user]);
+
+    const updateFile = (file: File) => {
+        setProject({ ...project, ["file"]: file });
+    }
+
+    const addCollaborator = (savedCollaborator: Collaborator) => {
+        const applicant = savedCollaborator.applicant as Applicant;
+        if (!applicant || !applicant._id) {
+            throw new Error("Please select a valid collaborator.");
+        }
+        const exists =
+            project.collaborators?.some(
+                (c) => (c.applicant as Applicant)._id === applicant._id
+            ) ?? false;
+
+        if (exists) {
+            throw new Error("This collaborator is already added!");
+        }
+        const updatedCollaborators = [...(project.collaborators || []), savedCollaborator];
+        setProject({ ...project, collaborators: updatedCollaborators });
+    };
+
+    const removeCollaborator = (collaborator:Collaborator) => {
+        const updatedCollaborators = project.collaborators?.filter(
+            (c) => (c.applicant as Applicant)._id !== (collaborator.applicant as Applicant)._id
+        ) || [];
+        setProject({ ...project, collaborators: updatedCollaborators });        
+    };
 
     const submit = async () => {
         try {
@@ -111,15 +144,9 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
         </div>
     );
 
-    const updateFile = (file: File) => {
-        setProject({ ...project, ["file"]: file });
-    }
 
-    useEffect(() => {
-        if (visible) {
-            setProject(initializeProject());
-        }
-    }, [visible, call, user]);
+
+
 
     return (
         <>
@@ -136,7 +163,7 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
                 <Steps model={items} activeIndex={activeStep} readOnly className="mb-4" />
                 {activeStep === 0 && <UploadForm file={project.file} onUpload={updateFile} />}
                 {activeStep === 1 && <ProjectForm project={project} setProject={setProject} />}
-                {activeStep === 2 && <CollaboratorManager project={project} setProject={setProject} />}
+                {activeStep === 2 && <CollaboratorManager project={project} onSave={addCollaborator} />}
                 {activeStep === 3 && <ProjectThemeManager project={project} setProject={setProject} />}
                 {activeStep === 4 && <PhaseManager project={project} setProject={setProject} phaseType={PhaseType.phase} />}
                 {activeStep === items.length - 1 && <Confirmation project={project} call={project.call as Call} />}
