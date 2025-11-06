@@ -12,7 +12,7 @@ export class CallController {
         try {
             if (!req.user) throw new Error("User not found!");
 
-            const { calendar, directorate, title, deadline, description, grant, theme, evaluation } = req.body;
+            const { calendar, directorate, title, description, grant, theme, evaluation } = req.body;
             const data: CreateCallDto = {
                 calendar: new mongoose.Types.ObjectId(calendar as string),
                 directorate: new mongoose.Types.ObjectId(directorate as string),
@@ -67,7 +67,6 @@ export class CallController {
 
             const data: Partial<CreateCallDto> = {
                 title,
-                //deadline,
                 description: description ?? undefined,
                 status: status as CallStatus
             };

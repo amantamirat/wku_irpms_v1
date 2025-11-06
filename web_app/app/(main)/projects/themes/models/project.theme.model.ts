@@ -1,4 +1,4 @@
-import { Theme } from "@/app/(main)/themes/models/theme.model";
+import { Theme } from "@/app/(main)/thematic_areas/models/theme.model";
 import { Project } from "../../models/project.model";
 
 export type ProjectTheme = {

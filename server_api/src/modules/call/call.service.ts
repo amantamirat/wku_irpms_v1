@@ -36,6 +36,11 @@ export class CallService {
     }
 
     static async getCalls(options: GetCallsOptions) {
+        /*
+        if (options.userId) {
+            return await this.getUserCalls(options.userId);
+        }
+        */
         const filter: any = {};
         if (options.calendar) filter.calendar = options.calendar;
         if (options.directorate) filter.directorate = options.directorate;

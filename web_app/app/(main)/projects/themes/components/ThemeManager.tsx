@@ -8,7 +8,7 @@ import { Project } from "../../models/project.model";
 import { ProjectThemeApi } from "../api/project.theme.api";
 import { ProjectTheme } from "../models/project.theme.model";
 import SaveThemeDialog from "./SaveThemeDialog";
-import { Theme } from "@/app/(main)/themes/models/theme.model";
+import { Theme } from "@/app/(main)/thematic_areas/models/theme.model";
 
 interface ProjectInfoStepProps {
     project: Project;

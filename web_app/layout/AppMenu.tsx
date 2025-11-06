@@ -38,18 +38,6 @@ const AppMenu = () => {
                     ])
                 },
                 {
-                    label: 'Themes',
-                    icon: 'pi pi-fw pi-tags',
-                    to: '/themes',
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.THEME.CREATE,
-                            PERMISSIONS.THEME.UPDATE,
-                            PERMISSIONS.THEME.DELETE
-                        ]
-                    )
-                },
-                {
                     label: 'Evaluations',
                     icon: 'pi pi-fw pi-calculator',
                     to: '/evaluations',
@@ -73,6 +61,18 @@ const AppMenu = () => {
                         ]
                     )
                 },
+                {
+                    label: 'Thematic Areas',
+                    icon: 'pi pi-fw pi-tags',
+                    to: '/thematic_areas',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.THEME.CREATE,
+                            PERMISSIONS.THEME.UPDATE,
+                            PERMISSIONS.THEME.DELETE
+                        ]
+                    )
+                }
 
             ]
         },
@@ -184,13 +184,18 @@ const AppMenu = () => {
         },
         {
             label: 'Pages',
-            icon: 'pi pi-fw pi-briefcase',
-            to: '/pages',
+
             items: [
                 {
                     label: 'Landing',
                     icon: 'pi pi-fw pi-globe',
                     to: '/landing'
+                },
+                {
+                    label: 'University Website',
+                    icon: 'pi pi-fw pi-globe',
+                    to: 'https://www.wku.edu.et',
+                    target: '_blank'
                 }
             ]
         },

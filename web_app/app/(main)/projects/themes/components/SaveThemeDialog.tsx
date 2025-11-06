@@ -5,9 +5,9 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { ProjectTheme, validateProjectTheme } from "../models/project.theme.model";
 import { Project } from "../../models/project.model";
-import { Theme, ThemeType } from "@/app/(main)/themes/models/theme.model";
+import { Theme, ThemeType } from "@/app/(main)/thematic_areas/models/theme.model";
 import { Call } from "@/app/(main)/calls/models/call.model";
-import { ThemeApi } from "@/app/(main)/themes/api/theme.api";
+import { ThemeApi } from "@/app/(main)/thematic_areas/api/theme.api";
 
 type Node = {
     key?: string;

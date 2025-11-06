@@ -14,8 +14,8 @@ import { Calendar, CalendarStatus } from '../../calendars/models/calendar.model'
 import { GrantApi } from '../../grants/api/grant.api';
 import { Grant } from '../../grants/models/grant.model';
 import { Organization, OrganizationalUnit } from '../../organizations/models/organization.model';
-import { ThemeApi } from '../../themes/api/theme.api';
-import { Theme } from '../../themes/models/theme.model';
+import { ThemeApi } from '../../thematic_areas/api/theme.api';
+import { Theme } from '../../thematic_areas/models/theme.model';
 import { CallApi } from '../api/call.api';
 import { Call, CallStatus, validateCall } from '../models/call.model';
 
