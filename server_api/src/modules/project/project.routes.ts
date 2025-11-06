@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ProjectController } from './project.controller';
 import { verifyActiveAccount } from '../users/auth/auth.middleware';
-import { upload } from '../../config/multer';
+import { upload } from '../../util/multer';
 
 const router: Router = Router();
 

@@ -2,7 +2,7 @@ import mongoose, { Schema, model } from "mongoose";
 import { COLLECTIONS } from "../../../util/collections.enum";
 //import { Scope } from "../applicant.enum";
 import { PositionType } from "./position.enum";
-import { applicantUnits } from "../applicant.enum";
+import { applicantUnits } from "../../applicants/applicant.enum";
 
 interface BasePositionDocument extends Document {
     type: PositionType;
