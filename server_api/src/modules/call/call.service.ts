@@ -1,14 +1,12 @@
-import mongoose from "mongoose";
-import { CallStatus } from "./call.enum";
-import { Call } from "./call.model";
-import { Directorate } from "../organization/organization.model";
-import { ThematicArea } from "../themes/theme.model";
+import { CacheService } from "../../util/cache/cache.service";
+import { CalendarStatus } from "../calendar/calendar.enum";
 import { Calendar } from "../calendar/calendar.model";
 import { Grant } from "../grants/grant.model";
-import { Project } from "../project/project.model";
-import { CalendarStatus } from "../calendar/calendar.enum";
-import { CacheService } from "../../util/cache/cache.service";
+import { Directorate } from "../organization/organization.model";
+import { ThematicArea } from "../themes/theme.model";
 import { CreateCallDto, DeleteCallDTO, GetCallsOptions, UpdateCallDto } from "./call.dto";
+import { CallStatus } from "./call.enum";
+import { Call } from "./call.model";
 
 
 
@@ -91,10 +89,8 @@ export class CallService {
         const call = await Call.findById(id);
         if (!call) throw new Error("Call not found");
         await CacheService.validateOwnership(userId, call.directorate);
-
         //const referencedByProject = await Project.exists({ call: call._id });
         //if (referencedByProject) throw new Error(`Cannot delete ${call.title}, it is referenced in projects.`);
-
         return await call.deleteOne();
     }
 }

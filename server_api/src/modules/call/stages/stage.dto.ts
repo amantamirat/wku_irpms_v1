@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
 
+export interface GetStagesDTO {
+    call?: mongoose.Types.ObjectId;
+}
+
 export interface CreateStageDTO {
     call: mongoose.Types.ObjectId;
     name: string;
@@ -19,6 +23,4 @@ export interface UpdateStageDTO {
     }>;
 }
 
-export interface GetStagesDTO {
-    call?: mongoose.Types.ObjectId;
-}
+

@@ -23,13 +23,13 @@ export interface CreateCallDto {
 
 export interface UpdateCallDto {
     id: string | mongoose.Types.ObjectId;
-    data: {
-        title?: string;
-        description?: string;
+    data: Partial<{
+        title: string;
+        description: string;
         //grant: mongoose.Types.ObjectId;
         //theme: mongoose.Types.ObjectId;
-        status?: CallStatus;
-    };
+        status: CallStatus;
+    }>;
     userId: string;
 }
 

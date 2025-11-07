@@ -172,20 +172,6 @@ const SaveCall = ({ visible, call, onHide, onComplete }: SaveCallProps) => {
                 maximizable
             >
                 <div className="p-fluid">
-                    {!localCall._id &&
-                        <div className="field">
-                            <label htmlFor="directorate">Directorate</label>
-                            <Dropdown
-                                id="directorate"
-                                value={localCall.directorate}
-                                options={organizations}
-                                optionLabel="name"
-                                onChange={(e) => setLocalCall({ ...localCall, directorate: e.value })}
-                                placeholder="Select Directorate"
-                                className={classNames({ 'p-invalid': submitted && !localCall.directorate })}
-                            />
-                        </div>
-                    }
                     {!(localCall._id) && (
                         <div className="field">
                             <label htmlFor="calendar">Research Calendar</label>
@@ -201,6 +187,21 @@ const SaveCall = ({ visible, call, onHide, onComplete }: SaveCallProps) => {
                             />
                         </div>
                     )}
+
+                    {!localCall._id &&
+                        <div className="field">
+                            <label htmlFor="directorate">Directorate</label>
+                            <Dropdown
+                                id="directorate"
+                                value={localCall.directorate}
+                                options={organizations}
+                                optionLabel="name"
+                                onChange={(e) => setLocalCall({ ...localCall, directorate: e.value })}
+                                placeholder="Select Directorate"
+                                className={classNames({ 'p-invalid': submitted && !localCall.directorate })}
+                            />
+                        </div>
+                    }
 
                     <div className="field">
                         <label htmlFor="title">Title</label>
