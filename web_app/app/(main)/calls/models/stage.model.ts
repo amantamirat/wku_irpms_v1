@@ -4,7 +4,7 @@ import { Call } from "../../calls/models/call.model";
 export enum StageStatus {
     planned = "planned",
     active = "active",
-    completed = "completed",
+    closed = "closed",
 }
 
 export enum StageType {

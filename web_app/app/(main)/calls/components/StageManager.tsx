@@ -134,8 +134,6 @@ const StageManager = ({ call }: StageManagerProps) => {
         );
     };
 
-
-
     const statusBodyTemplate = (rowData: Stage) => {
         return (
             <Badge type="status" value={rowData.status ?? 'Unknown'} />
@@ -167,6 +165,7 @@ const StageManager = ({ call }: StageManagerProps) => {
                 expandedRows={expandedRows}
                 onRowToggle={(e) => setExpandedRows(e.data)}
             >
+                <Column selectionMode="single" headerStyle={{ width: '3em' }} />
                 <Column field="order" header="Order" sortable />
                 <Column field="name" header="Stage Name" sortable />
                 <Column field="evaluation.title" header="Evaluation" sortable />

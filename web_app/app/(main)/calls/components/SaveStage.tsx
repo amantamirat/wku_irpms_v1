@@ -121,6 +121,20 @@ const SaveStage = ({ visible, stage, call, onComplete, onHide }: SaveStageProps)
                 footer={footer}
                 onHide={hide}
             >
+                {/* Stage Type */}
+                {!localStage._id &&
+                    <div className="field">
+                        <label htmlFor="type">Stage Type</label>
+                        <Dropdown
+                            id="type"
+                            value={localStage.type}
+                            options={Object.values(StageType)}
+                            onChange={(e) => setLocalStage({ ...localStage, type: e.value })}
+                            placeholder="Select Stage Type"
+                            className={classNames({ 'p-invalid': submitted && !localStage.type })}
+                        />
+                    </div>
+                }
                 {/* Stage Name */}
                 <div className="field">
                     <label htmlFor="name">Stage Name</label>
@@ -131,19 +145,6 @@ const SaveStage = ({ visible, stage, call, onComplete, onHide }: SaveStageProps)
                         required
                         autoFocus
                         className={classNames({ 'p-invalid': submitted && !localStage.name })}
-                    />
-                </div>
-
-                {/* Stage Type */}
-                <div className="field">
-                    <label htmlFor="type">Stage Type</label>
-                    <Dropdown
-                        id="type"
-                        value={localStage.type}
-                        options={Object.values(StageType)}
-                        onChange={(e) => setLocalStage({ ...localStage, type: e.value })}
-                        placeholder="Select Stage Type"
-                        className={classNames({ 'p-invalid': submitted && !localStage.type })}
                     />
                 </div>
 
@@ -176,17 +177,20 @@ const SaveStage = ({ visible, stage, call, onComplete, onHide }: SaveStageProps)
                 </div>
 
                 {/* Status */}
-                <div className="field">
-                    <label htmlFor="status">Status</label>
-                    <Dropdown
-                        id="status"
-                        value={localStage.status}
-                        options={Object.values(StageStatus)}
-                        onChange={(e) => setLocalStage({ ...localStage, status: e.value })}
-                        placeholder="Select Status"
-                        className={classNames({ 'p-invalid': submitted && !localStage.status })}
-                    />
-                </div>
+                {localStage._id &&
+                    <div className="field">
+                        <label htmlFor="status">Status</label>
+                        <Dropdown
+                            id="status"
+                            value={localStage.status}
+                            options={Object.values(StageStatus)}
+                            onChange={(e) => setLocalStage({ ...localStage, status: e.value })}
+                            placeholder="Select Status"
+                            className={classNames({ 'p-invalid': submitted && !localStage.status })}
+                        />
+                    </div>
+                }
+
             </Dialog>
         </>
     );

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { Evaluation } from "../../evaluations/evaluation.model";
 import { CreateStageDTO, GetStagesDTO, UpdateStageDTO } from "./stage.dto";
-import { StageStatus } from "./stage.enum";
+import { StageStatus, StageType } from "./stage.enum";
 import { Stage } from "./stage.model";
 
 export class StageService {
@@ -22,6 +22,10 @@ export class StageService {
             .select("order");
 
         const nextOrder = lastStage ? lastStage.order + 1 : 1;
+
+        if (nextOrder === 1 && type === StageType.validation) {
+            throw new Error("The first stage cannot be validation.");
+        }
 
         // Create stage
         const stage = await Stage.create({
@@ -59,6 +63,28 @@ export class StageService {
         const stage = await Stage.findById(id);
         if (!stage) throw new Error("Stage not found");
 
+        /*
+        const activeStage = await Stage.findOne({
+            call: stage.call,
+            status: StageStatus.active,
+            _id: { $ne: stage._id } // exclude current stage
+        });
+        if (activeStage) {
+            throw new Error("Only one active stage is allowed per call.");
+        }
+
+        // rule 2: Check previous stages are validated before activating this one
+        const previousStage = await Stage.findOne({
+            call: stage.call,
+            order: { $lt: stage.order },
+            status: { $ne: StageStatus.closed }
+        });
+        if (previousStage) {
+            throw new Error("Cannot activate this stage before all previous stages are closed.");
+        }
+
+        */
+
         //only one active stage should be there
         Object.assign(stage, data);
         return stage.save();
@@ -71,15 +97,27 @@ export class StageService {
         const stage = await Stage.findById(id);
         if (!stage) throw new Error("Stage not found");
 
-        // Optional restriction: only delete planned stages
-        if (stage.status !== StageStatus.planned)
+        // Rule 1: Only planned (pending) stages can be deleted
+        if (stage.status !== StageStatus.planned) {
             throw new Error("Only planned stages can be deleted.");
+        }
 
+        // Rule 2: Only the last stage can be deleted
+        const lastStage = await Stage.findOne({ call: stage.call })
+            .sort({ order: -1 })
+            .select("order");
+
+        if (!lastStage || lastStage._id.toString() !== stage._id.toString()) {
+            throw new Error("Only the last stage can be deleted.");
+        }
+
+        // Proceed with deletion
         const deleted = await stage.deleteOne();
-        await StageService.resequenceStages(stage.call);
         return deleted;
     }
 
+
+    /*
     static async resequenceStages(callId: string | mongoose.Types.ObjectId) {
         const stages = await Stage.find({ call: callId }).sort({ order: 1 });
         for (let i = 0; i < stages.length; i++) {
@@ -87,4 +125,5 @@ export class StageService {
             await stages[i].save();
         }
     }
+    */
 }

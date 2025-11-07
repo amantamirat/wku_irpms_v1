@@ -3,18 +3,19 @@ import mongoose from "mongoose";
 import { StageService } from "./stage.service";
 import { CreateStageDTO, GetStagesDTO, UpdateStageDTO } from "./stage.dto";
 import { successResponse, errorResponse } from "../../../util/response";
+import { StageStatus } from "./stage.enum";
 
 export class StageController {
     static async createStage(req: Request, res: Response) {
         try {
             const { call, name, type, evaluation, deadline } = req.body;
-
             const dto: CreateStageDTO = {
                 call: new mongoose.Types.ObjectId(call as string),
                 name,
                 type,
                 evaluation: new mongoose.Types.ObjectId(evaluation as string),
                 deadline,
+                //status: StageStatus.planned
             };
 
             const stage = await StageService.createStage(dto);
@@ -48,7 +49,7 @@ export class StageController {
                 id,
                 data: {
                     name,
-                    type,
+                    //type,
                     evaluation: evaluation ? new mongoose.Types.ObjectId(evaluation as string) : undefined,
                     deadline,
                     status,

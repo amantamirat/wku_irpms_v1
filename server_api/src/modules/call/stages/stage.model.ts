@@ -31,7 +31,8 @@ const StageSchema = new Schema<IStage>({
         type: String,
         enum: Object.values(StageType),
         default: StageType.evaluation,
-        required: true
+        required: true,
+        immutable: true,
     },
     order: {
         type: Number,
