@@ -53,7 +53,7 @@ const CallManager = () => {
     useEffect(() => {
         const fetchCalls = async () => {
             try {
-                const data = await CallApi.getUserCalls();
+                const data = await CallApi.getCalls({ user: true });
                 setCalls(data);
             } catch (err) {
                 setError("Failed to fetch calls:" + err);
@@ -129,7 +129,7 @@ const CallManager = () => {
                 }} />
         </>
     );
-    
+
 
     const statusBodyTemplate = (rowData: Call) => {
         return (

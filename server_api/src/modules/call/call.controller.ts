@@ -4,37 +4,38 @@ import { errorResponse, successResponse } from '../../util/response';
 import { AuthenticatedRequest } from '../users/auth/auth.middleware';
 import { CallService } from './call.service';
 import { CallStatus } from './call.enum';
-import { CreateCallDto, GetCallsOptions } from './call.dto';
+import { CreateCallDto, GetCallsOptions, UpdateCallDto } from './call.dto';
 
 export class CallController {
 
     static async createCall(req: AuthenticatedRequest, res: Response) {
         try {
             if (!req.user) throw new Error("User not found!");
-
-            const { calendar, directorate, title, description, grant, theme, evaluation } = req.body;
+            const { calendar, directorate, title, description, grant, theme } = req.body;
             const data: CreateCallDto = {
                 calendar: new mongoose.Types.ObjectId(calendar as string),
                 directorate: new mongoose.Types.ObjectId(directorate as string),
                 title,
-                //deadline,
                 description: description ?? undefined,
                 grant: new mongoose.Types.ObjectId(grant as string),
                 theme: new mongoose.Types.ObjectId(theme as string),
-                evaluation: new mongoose.Types.ObjectId(evaluation as string)
+                userId: req.user._id
             };
-
-            const created = await CallService.createCall(data, req.user._id);
+            const created = await CallService.createCall(data);
             successResponse(res, 201, "Call created successfully", created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
-    static async getCalls(req: Request, res: Response) {
+    static async getCalls(req: AuthenticatedRequest, res: Response) {
         try {
-            const { calendar, directorate, status } = req.query;
+            const { calendar, directorate, status, user } = req.query;
+            if (user) {
+                if (!req.user) throw new Error("User not found!");
+            }
             const filter: GetCallsOptions = {
+                userId: user && req.user ? req.user._id : undefined,
                 calendar: calendar ? new mongoose.Types.ObjectId(calendar as string) : undefined,
                 directorate: directorate ? new mongoose.Types.ObjectId(directorate as string) : undefined,
                 status: status as CallStatus ?? undefined
@@ -45,6 +46,8 @@ export class CallController {
             errorResponse(res, 400, err.message, err);
         }
     }
+
+    /*
 
     static async getUserCalls(req: AuthenticatedRequest, res: Response) {
         try {
@@ -59,30 +62,38 @@ export class CallController {
         }
     }
 
+    */
+
     static async updateCall(req: AuthenticatedRequest, res: Response) {
         try {
-            if (!req.user) throw new Error("User not found!");
-            const { id } = req.params;
-            const { title, deadline, description, status } = req.body;
+            if (!req.user) throw new Error("User not found");
 
-            const data: Partial<CreateCallDto> = {
-                title,
-                description: description ?? undefined,
-                status: status as CallStatus
+            const { id } = req.params;
+            const { title, description, status } = req.body;
+
+            const dto: UpdateCallDto = {
+                id: id,
+                data: {
+                    title: title,
+                    description: description ?? undefined,
+                    status: status as CallStatus
+                },
+                userId: req.user._id
             };
 
-            const updated = await CallService.updateCall(id, data, req.user._id);
-            successResponse(res, 201, "Call updated successfully", updated);
+            const updated = await CallService.updateCall(dto);
+            successResponse(res, 200, "Call updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
+
     static async deleteCall(req: AuthenticatedRequest, res: Response) {
         try {
             if (!req.user) throw new Error("User not found!");
             const { id } = req.params;
-            const deleted = await CallService.deleteCall(id, req.user._id);
+            const deleted = await CallService.deleteCall({ id, userId: req.user._id });
             successResponse(res, 201, "Call deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

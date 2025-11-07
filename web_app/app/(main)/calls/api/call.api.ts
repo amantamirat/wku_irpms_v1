@@ -5,6 +5,7 @@ import { Call, CallStatus, sanitizeCall } from "../models/call.model";
 const end_point = '/calls';
 
 export interface GetCallsOptions {
+    user?: boolean;
     calendar?: string;
     directorate?: string;
     status?: CallStatus;
@@ -20,6 +21,7 @@ export const CallApi = {
 
     async getCalls(options: GetCallsOptions): Promise<Call[]> {
         const query = new URLSearchParams();
+        if (options.user) query.append("user", "true");
         if (options.calendar) query.append("calendar", options.calendar);
         if (options.directorate) query.append("directorate", options.directorate);
         if (options.status) query.append("status", options.status);
@@ -27,10 +29,12 @@ export const CallApi = {
         return data as Call[];
     },
 
+    /*
     async getUserCalls(): Promise<Call[]> {
         const data = await ApiClient.get(`${end_point}/user`);
         return data as Call[];
     },
+    */
 
     async updateCall(call: Partial<Call>): Promise<Call> {
         if (!call._id) {

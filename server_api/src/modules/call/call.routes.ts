@@ -17,11 +17,12 @@ router.post(
 router.get(
     '/',
     verifyActiveAccount,
-    //checkPermission([PERMISSIONS.CALL.READ]),
+    checkPermission([PERMISSIONS.CALL.READ]),
     CallController.getCalls
 );
 
 // Get Calls for the logged-in user
+/*
 router.get(
     '/user',
     verifyActiveAccount,
@@ -32,6 +33,7 @@ router.get(
     ]),
     CallController.getUserCalls
 );
+*/
 
 // Update Call
 router.put(
