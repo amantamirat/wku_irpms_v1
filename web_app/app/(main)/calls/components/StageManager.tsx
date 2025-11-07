@@ -103,6 +103,18 @@ const StageManager = ({ call }: StageManagerProps) => {
         </div>
     );
 
+
+    const header = (
+        <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+            <h5 className="m-0">Manage Stages</h5>
+            <span className="block mt-2 md:mt-0 p-input-icon-left">
+                <i className="pi pi-search" />
+                <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
+            </span>
+        </div>
+    );
+
+
     const actionBodyTemplate = (rowData: Stage) => (
         <>
             <Button
@@ -144,6 +156,7 @@ const StageManager = ({ call }: StageManagerProps) => {
         <div className="card">
             <Toast ref={toast} />
             <Toolbar className="mb-4" start={startToolbarTemplate} />
+            {/*
             <span className="block mt-2 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText
@@ -154,8 +167,11 @@ const StageManager = ({ call }: StageManagerProps) => {
                     className="w-full md:w-1/3"
                 />
             </span>
+            */}
+
             <DataTable
                 value={stages}
+                header={header}
                 dataKey="_id"
                 paginator
                 rows={10}

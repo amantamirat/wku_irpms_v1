@@ -3,6 +3,8 @@ import { StageStatus, StageType } from "./stage.enum";
 
 export interface GetStagesDTO {
     call?: mongoose.Types.ObjectId;
+    order?: number;
+    status?: StageStatus;
 }
 
 export interface CreateStageDTO {

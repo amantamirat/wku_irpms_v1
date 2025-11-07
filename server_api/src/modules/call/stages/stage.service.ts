@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { Evaluation } from "../../evaluations/evaluation.model";
 import { CreateStageDTO, GetStagesDTO, UpdateStageDTO } from "./stage.dto";
 import { StageStatus, StageType } from "./stage.enum";
@@ -16,6 +15,18 @@ export class StageService {
         const evalDoc = await Evaluation.findById(evaluation);
         if (!evalDoc) throw new Error("Evaluation not found.");
 
+
+          // If adding an evaluation, no validation should exist before it
+        if (type === StageType.evaluation) {
+            const validationBefore = await Stage.findOne({
+                call,
+                type: StageType.validation,
+            });
+            if (validationBefore) {
+                throw new Error("Cannot add an evaluation stage after a validation stage already exists.");
+            }
+        }
+
         // Find the latest stage order for this call
         const lastStage = await Stage.findOne({ call })
             .sort({ order: -1 })
@@ -25,7 +36,7 @@ export class StageService {
 
         if (nextOrder === 1 && type === StageType.validation) {
             throw new Error("The first stage cannot be validation.");
-        }
+        }      
 
         // Create stage
         const stage = await Stage.create({
@@ -47,6 +58,8 @@ export class StageService {
     static async getStages(dto: GetStagesDTO) {
         const filter: any = {};
         if (dto.call) filter.call = dto.call;
+        if (dto.order) filter.order = dto.order;
+        if (dto.status) filter.status = dto.status;
 
         return await Stage.find(filter)
             .populate("evaluation")

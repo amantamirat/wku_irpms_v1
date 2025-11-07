@@ -27,10 +27,12 @@ export class StageController {
 
     static async getStages(req: Request, res: Response) {
         try {
-            const { call } = req.query;
+            const { call, order, status } = req.query;
 
             const dto: GetStagesDTO = {
                 call: new mongoose.Types.ObjectId(call as string),
+                order: order ? Number(order) : undefined,
+                status: status as StageStatus
             };
 
             const stages = await StageService.getStages(dto);
