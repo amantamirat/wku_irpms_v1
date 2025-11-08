@@ -40,7 +40,7 @@ export class StageService {
 
         // Create stage
         const stage = await Stage.create({
-            cycle: cycle,
+            cycle,
             name,
             type,
             evaluation,
@@ -57,7 +57,7 @@ export class StageService {
      */
     static async getStages(dto: GetStagesDTO) {
         const filter: any = {};
-        if (dto.cycle) filter.call = dto.cycle;
+        if (dto.cycle) filter.cycle = dto.cycle;
         if (dto.order) filter.order = dto.order;
         if (dto.status) filter.status = dto.status;
 

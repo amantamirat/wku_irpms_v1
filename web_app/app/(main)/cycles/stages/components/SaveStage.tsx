@@ -33,11 +33,13 @@ const SaveStage = ({ visible, stage, cycle, onComplete, onHide }: SaveStageProps
             try {
                 if (cycle?.organization) {
                     let directorateId: string;
-
-                    if (typeof cycle.organization === 'string') {
-                        directorateId = cycle.organization;
-                    } else if (typeof cycle.organization === 'object' && cycle.organization !== null) {
-                        directorateId = (cycle.organization as { _id: string })._id;
+                    if (typeof cycle.organization === 'object' && cycle.organization !== null) {
+                        if (cycle.type === 'Program') {
+                            directorateId = (cycle.organization as any).parent;
+                        }
+                        else {
+                            directorateId = (cycle.organization as any)._id;
+                        }
                     } else {
                         return; // invalid directorate, do nothing
                     }

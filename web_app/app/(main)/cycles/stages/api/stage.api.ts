@@ -1,7 +1,7 @@
 import { ApiClient } from "@/api/ApiClient";
 import { Stage, sanitizeStage } from "../models/stage.model";
 
-const end_point = "/call/stages";
+const end_point = "/cycle/stages";
 
 export interface GetStagesDTO {
     cycle?: string;
