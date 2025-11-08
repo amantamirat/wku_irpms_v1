@@ -32,15 +32,8 @@ const AppMenu = () => {
             ]
         },
         {
-            label: 'Cycle',
-            visible: hasPermission([
-                PERMISSIONS.CYCLE.CALL.CREATE,
-                PERMISSIONS.CYCLE.CALL.UPDATE,
-                PERMISSIONS.CYCLE.CALL.DELETE,
-                PERMISSIONS.CYCLE.PROGRAM.CREATE,
-                PERMISSIONS.CYCLE.PROGRAM.UPDATE,
-                PERMISSIONS.CYCLE.PROGRAM.DELETE
-            ]),
+            label: 'Directorate',
+            visible: hasOrganizationType([OrganizationalUnit.Directorate, OrganizationalUnit.Center]),
             items: [
                 {
                     label: 'Calls',
@@ -63,12 +56,6 @@ const AppMenu = () => {
                         PERMISSIONS.CYCLE.PROGRAM.DELETE
                     ])
                 },
-            ]
-        },
-        {
-            label: 'Directorate',
-            visible: hasOrganizationType([OrganizationalUnit.Directorate]),
-            items: [
                 /** {
                     label: 'Calls',
                     icon: 'pi pi-fw pi-megaphone',
