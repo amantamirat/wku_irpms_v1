@@ -119,7 +119,7 @@ export const ApiClient = {
         }
     },
 
-    async delete(endpoint: string): Promise<boolean> {
+    async delete(endpoint: string, payload?: any): Promise<boolean> {
         const url = `${BASE_URL}${endpoint}`;
         const token = getAuthToken();
 
@@ -130,6 +130,7 @@ export const ApiClient = {
                     "Content-Type": "application/json",
                     ...(token && { Authorization: `Bearer ${token}` }),
                 },
+                body: payload ? JSON.stringify(payload) : undefined,
             });
 
             await handleError(response);

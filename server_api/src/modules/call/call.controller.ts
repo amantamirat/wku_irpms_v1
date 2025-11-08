@@ -1,10 +1,10 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import mongoose from 'mongoose';
 import { errorResponse, successResponse } from '../../util/response';
 import { AuthenticatedRequest } from '../users/auth/auth.middleware';
-import { CallService } from './call.service';
-import { CallStatus } from './call.enum';
 import { CreateCallDto, GetCallsOptions, UpdateCallDto } from './call.dto';
+import { CallStatus } from './call.enum';
+import { CallService } from './call.service';
 
 export class CallController {
 

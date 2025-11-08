@@ -1,0 +1,843 @@
+[
+    {
+        "title": "Agriculture and Natural Resource",
+        "priority": 1,
+        "children": [
+            {
+                "title": "Livestock and Fishery Production",
+                "priority": 1,
+                "children": [
+                    {
+                        "title": "Genetics and breed improvement",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Feed and feeding improvement",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Animal health and welfare",
+                        "priority": 3
+                    },
+                    {
+                        "title": "Input supply and service delivery",
+                        "priority": 4
+                    },
+                    {
+                        "title": "Livestock production and environment",
+                        "priority": 5
+                    },
+                    {
+                        "title": "Beekeeping",
+                        "priority": 6
+                    }
+                ]
+            },
+            {
+                "title": "Cereal, Horticulture & Oil Crop Improvements",
+                "priority": 2,
+                "children": [
+                    {
+                        "title": "Seed System",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Agronomy and physiology of crops",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Existing major production constraints (disease & pest)",
+                        "priority": 3
+                    },
+                    {
+                        "title": "Postharvest handling",
+                        "priority": 4
+                    },
+                    {
+                        "title": "Crops breeding and improvement",
+                        "priority": 5
+                    },
+                    {
+                        "title": "Tropical and subtropical fruit",
+                        "priority": 6
+                    },
+                    {
+                        "title": "Coffee production",
+                        "priority": 7
+                    },
+                    {
+                        "title": "Enset production",
+                        "priority": 8
+                    }
+                ]
+            },
+            {
+                "title": "Biodiversity and Wildlife Conservation",
+                "priority": 3,
+                "children": [
+                    {
+                        "title": "Biodiversity conservation",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Wildlife conservation and management",
+                        "priority": 2
+                    }
+                ]
+            },
+            {
+                "title": "Molecular Biology and Biotechnology",
+                "priority": 4,
+                "children": [
+                    {
+                        "title": "Environmental resistance and genetically crops variety improvement",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Vaccine and drug development",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Cross breeding and tissue culture",
+                        "priority": 3
+                    }
+                ]
+            },
+            {
+                "title": "Natural Resource Management",
+                "priority": 5,
+                "children": [
+                    {
+                        "title": "Watershed management",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Soil resource management and agro-forestry",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Forest conservation and management",
+                        "priority": 3
+                    },
+                    {
+                        "title": "Environmental management and climate change",
+                        "priority": 4
+                    },
+                    {
+                        "title": "Irrigation water resources development and management",
+                        "priority": 5
+                    },
+                    {
+                        "title": "Natural resource and social conflict",
+                        "priority": 6
+                    }
+                ]
+            },
+            {
+                "title": "Natural Resources Economics Concern",
+                "priority": 6,
+                "children": [
+                    {
+                        "title": "Natural resource & environmental valuation",
+                        "priority": 1
+                    }
+                ]
+            },
+            {
+                "title": "Agricultural Extension System and Service Delivery",
+                "priority": 7,
+                "children": [
+                    {
+                        "title": "Technological impact, economic efficacy, value chain",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Food security",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Agriculture innovation and adoption",
+                        "priority": 3
+                    }
+                ]
+            },
+            {
+                "title": "Agri-business Marketing, and Value chain",
+                "priority": 8,
+                "children": [
+                    {
+                        "title": "Value creation and gender dynamics",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Value Chain for Strategic Agricultural Commodities",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Production challenge, cooperative, Farming system",
+                        "priority": 3
+                    }
+                ]
+            },
+            {
+                "title": "Agricultural Mechanization",
+                "priority": 9,
+                "children": [
+                    {
+                        "title": "Design and prototyping of farm implements",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Design and prototyping of livestock production and processing technology",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Development of mechanized irrigation system",
+                        "priority": 3
+                    },
+                    {
+                        "title": "Development of packaging and storage technology",
+                        "priority": 4
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Manufacturing and Engineering",
+        "priority": 2,
+        "children": [
+            {
+                "title": "Construction Materials and Technology",
+                "priority": 1,
+                "children": [
+                    {
+                        "title": "Construction project management",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Materials science & advancement of materials",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Low-cost construction materials and methods",
+                        "priority": 3
+                    },
+                    {
+                        "title": "Irrigation technology",
+                        "priority": 4
+                    },
+                    {
+                        "title": "Hydraulic structures",
+                        "priority": 5
+                    },
+                    {
+                        "title": "Transport system & safety",
+                        "priority": 6
+                    }
+                ]
+            },
+            {
+                "title": "Regional and Urban Planning and Design",
+                "priority": 2,
+                "children": [
+                    {
+                        "title": "Land escape and ecological architecture",
+                        "priority": 1
+                    }
+                ]
+            },
+            {
+                "title": "Textile and Fashion Technology",
+                "priority": 3,
+                "children": [
+                    {
+                        "title": "Industrial process and quality control",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Development and optimization of machineries",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Novel technologies and process improvement in textile sectors",
+                        "priority": 3
+                    },
+                    {
+                        "title": "Apparel enterprise development and technology transfer",
+                        "priority": 4
+                    },
+                    {
+                        "title": "Analysis and improvement of sewing workstation for garment industry and related",
+                        "priority": 5
+                    }
+                ]
+            },
+            {
+                "title": "Emerging Technology & Innovative Product Development",
+                "priority": 4,
+                "children": []
+            }
+        ]
+    },
+    {
+        "title": "Culture and Tourism",
+        "priority": 3,
+        "children": [
+            {
+                "title": "Culture & Tourism Development",
+                "priority": 1,
+                "children": [
+                    {
+                        "title": "Tourism attraction",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Hotel and service industry for tourism",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Theatre and community development",
+                        "priority": 3
+                    },
+                    {
+                        "title": "Language, culture and folklore",
+                        "priority": 4
+                    },
+                    {
+                        "title": "Identity and tradition",
+                        "priority": 5
+                    },
+                    {
+                        "title": "History and heritage management",
+                        "priority": 6
+                    },
+                    {
+                        "title": "Film",
+                        "priority": 7
+                    },
+                    {
+                        "title": "Cultural sports",
+                        "priority": 8
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Mining and Energy",
+        "priority": 4,
+        "children": [
+            {
+                "title": "Earth Resources Exploration",
+                "priority": 1,
+                "children": [
+                    {
+                        "title": "Ground water exploration",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Geo-hazard assessment",
+                        "priority": 2
+                    }
+                ]
+            },
+            {
+                "title": "Energy & Energy Management Systems",
+                "priority": 2,
+                "children": [
+                    {
+                        "title": "Renewable energy",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Geotechnical and environmental engineering",
+                        "priority": 2
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Digital Technology",
+        "priority": 5,
+        "children": [
+            {
+                "title": "Information and Communication Technology",
+                "priority": 1,
+                "children": [
+                    {
+                        "title": "Artificial Intelligence and Robotics",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Networking and Security",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Software and Reverse Engineering",
+                        "priority": 3
+                    },
+                    {
+                        "title": "Digital Inclusion",
+                        "priority": 4
+                    },
+                    {
+                        "title": "Data Science, Big Data and High-Performance computing",
+                        "priority": 5
+                    },
+                    {
+                        "title": "Internet of Things and Embedded System",
+                        "priority": 6
+                    },
+                    {
+                        "title": "Telecommunications and IT Infrastructures",
+                        "priority": 7
+                    },
+                    {
+                        "title": "Algorithm Designing, Simulation & Modeling and Computer Architecture",
+                        "priority": 8
+                    },
+                    {
+                        "title": "Human Computer Interaction",
+                        "priority": 9
+                    },
+                    {
+                        "title": "Distributed/Cloud/Green/Mobile/Edge/Pervasive Computing",
+                        "priority": 10
+                    },
+                    {
+                        "title": "Augmented and Virtual Reality",
+                        "priority": 11
+                    },
+                    {
+                        "title": "Quantum Computing",
+                        "priority": 12
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Education",
+        "priority": 6,
+        "children": [
+            {
+                "title": "Education and Leadership",
+                "priority": 1,
+                "children": [
+                    {
+                        "title": "Quality education",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Education policy and leadership",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Change and innovation in education",
+                        "priority": 3
+                    },
+                    {
+                        "title": "School supervision and managements of change",
+                        "priority": 4
+                    },
+                    {
+                        "title": "Curriculum relevance and teacher education",
+                        "priority": 5
+                    },
+                    {
+                        "title": "Teaching- learning, assessment and evaluation",
+                        "priority": 6
+                    },
+                    {
+                        "title": "ECCE (Early Child Care and Education) and child development",
+                        "priority": 7
+                    }
+                ]
+            },
+            {
+                "title": "Psychology and Well Being",
+                "priority": 2,
+                "children": [
+                    {
+                        "title": "Behavioral problems in children and adolescence",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Psychosocial issues",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Social influence on individual behavior",
+                        "priority": 3
+                    },
+                    {
+                        "title": "Guidance & counseling",
+                        "priority": 4
+                    },
+                    {
+                        "title": "Career development and choices",
+                        "priority": 5
+                    },
+                    {
+                        "title": "Disability, vulnerability and inclusiveness",
+                        "priority": 6
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Health and Wellbeing",
+        "priority": 7,
+        "children": [
+            {
+                "title": "Health Promotion and Disease Prevention",
+                "priority": 1,
+                "children": [
+                    {
+                        "title": "Health care seeking behavior of the community",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Behavioral and social determinants of health",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Health service and safety, outbreak control and management",
+                        "priority": 3
+                    },
+                    {
+                        "title": "Nutrition",
+                        "priority": 4
+                    },
+                    {
+                        "title": "Orphan, disability and socially disadvantaged groups",
+                        "priority": 5
+                    }
+                ]
+            },
+            {
+                "title": "Reproductive, Sexual, Maternal, Newborn, Child health",
+                "priority": 2,
+                "children": [
+                    {
+                        "title": "Reproductive and sexual health",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Maternal, new-born and child health",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Young people's reproductive health and substance use/abuse",
+                        "priority": 3
+                    },
+                    {
+                        "title": "Gender based violence and Women empowerment and Harmful traditional practices",
+                        "priority": 4
+                    }
+                ]
+            },
+            {
+                "title": "Sport for Health",
+                "priority": 3,
+                "children": [
+                    {
+                        "title": "Mass sport and sport for fitness",
+                        "priority": 1
+                    }
+                ]
+            },
+            {
+                "title": "Environmental, Occupational Health and Safety",
+                "priority": 4,
+                "children": [
+                    {
+                        "title": "Housing/health problems in residential and institutional environment",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Food & water handling, safety and hygiene",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Waste management, sanitation and personal hygiene",
+                        "priority": 3
+                    },
+                    {
+                        "title": "Occupational health and hazards",
+                        "priority": 4
+                    }
+                ]
+            },
+            {
+                "title": "Communicable & Non-Communicable Disease and Control",
+                "priority": 5,
+                "children": [
+                    {
+                        "title": "Emerging and re-emerging infectious diseases and communicable disease control",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Chronic and non-communicable disease",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Mental health & wellbeing",
+                        "priority": 3
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Governance, Human Security & Macroeconomy Concern",
+        "priority": 8,
+        "children": [
+            {
+                "title": "Macroeconomy, Leadership and Governance",
+                "priority": 1,
+                "children": [
+                    {
+                        "title": "Leadership strategy & challenge",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Market and government regulation",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Business ethics and corporate governance",
+                        "priority": 3
+                    },
+                    {
+                        "title": "Investment climate and industrial policy",
+                        "priority": 4
+                    },
+                    {
+                        "title": "Structural transformation",
+                        "priority": 5
+                    },
+                    {
+                        "title": "Regional economic integration and international finance",
+                        "priority": 6
+                    },
+                    {
+                        "title": "Morality, ethics & corruption",
+                        "priority": 7
+                    },
+                    {
+                        "title": "Conflict, peace and security",
+                        "priority": 8
+                    },
+                    {
+                        "title": "Federalism and local governance",
+                        "priority": 9
+                    },
+                    {
+                        "title": "Politics and international relation",
+                        "priority": 10
+                    },
+                    {
+                        "title": "Hydro politics",
+                        "priority": 11
+                    },
+                    {
+                        "title": "Democratization",
+                        "priority": 12
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Development & Business",
+        "priority": 9,
+        "children": [
+            {
+                "title": "Urbanization, Modernization and Migration",
+                "priority": 1,
+                "children": [
+                    {
+                        "title": "Urban planning and land governance",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Rural-urban linkages",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Rural and urban infrastructures and utilities",
+                        "priority": 3
+                    },
+                    {
+                        "title": "Unemployment and human capital",
+                        "priority": 4
+                    },
+                    {
+                        "title": "Poverty reduction & livelihood/income diversification",
+                        "priority": 5
+                    },
+                    {
+                        "title": "Entrepreneurship",
+                        "priority": 6
+                    },
+                    {
+                        "title": "Deviance and crime",
+                        "priority": 7
+                    },
+                    {
+                        "title": "Development projects and social dimension",
+                        "priority": 8
+                    }
+                ]
+            },
+            {
+                "title": "Business, Economics and Finance",
+                "priority": 2,
+                "children": [
+                    {
+                        "title": "Financial management and auditing",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Taxation concern",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Financial market and institutions",
+                        "priority": 3
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Justices and Rule of Law",
+        "priority": 10,
+        "children": [
+            {
+                "title": "Human Rights, Public and International law",
+                "priority": 1,
+                "children": [
+                    {
+                        "title": "International and trans-boundary water law",
+                        "priority": 1
+                    },
+                    {
+                        "title": "International humanitarian law",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Constitution and constitutionalism",
+                        "priority": 3
+                    },
+                    {
+                        "title": "Media law and access to public information",
+                        "priority": 4
+                    },
+                    {
+                        "title": "Rule of law and administrative law",
+                        "priority": 5
+                    },
+                    {
+                        "title": "Election laws",
+                        "priority": 6
+                    }
+                ]
+            },
+            {
+                "title": "Protection of Right and Access to Justice",
+                "priority": 2,
+                "children": [
+                    {
+                        "title": "Protection of rights of children, women and other vulnerable groups",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Property, economic, labor & employment right",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Criminal justices & fair trail right",
+                        "priority": 3
+                    },
+                    {
+                        "title": "Development & right",
+                        "priority": 4
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Indigenous Knowledge Development",
+        "priority": 11,
+        "children": [
+            {
+                "title": "Agriculture and Natural Resource",
+                "priority": 1,
+                "children": [
+                    {
+                        "title": "Livestock production and indigenous knowledge",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Indigenous agricultural knowledge and practices",
+                        "priority": 2
+                    }
+                ]
+            },
+            {
+                "title": "Manufacturing and Engineering",
+                "priority": 2,
+                "children": [
+                    {
+                        "title": "Indigenous clothing and globalization of fashion products",
+                        "priority": 1
+                    }
+                ]
+            },
+            {
+                "title": "Culture and Tourism",
+                "priority": 3,
+                "children": [
+                    {
+                        "title": "Indigenous performance",
+                        "priority": 1
+                    }
+                ]
+            },
+            {
+                "title": "Health and Wellbeing",
+                "priority": 4,
+                "children": [
+                    {
+                        "title": "Traditional and herbal medicine",
+                        "priority": 1
+                    },
+                    {
+                        "title": "Traditional health care practices",
+                        "priority": 2
+                    },
+                    {
+                        "title": "Traditional foods and nutritional approaches",
+                        "priority": 3
+                    }
+                ]
+            },
+            {
+                "title": "Justices and Rule of Law",
+                "priority": 5,
+                "children": [
+                    {
+                        "title": "Indigenous restorative justice and cultural rights",
+                        "priority": 1
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -8,6 +8,7 @@ export enum COLLECTIONS {
   OPTION = "options",
   CALENDAR = "calendars",
   CALL = "calls",
+  CYCLE="cycles",
   STAGE = "stages",
   GRANT = "grants",
   CONSTRAINT = "constraints",

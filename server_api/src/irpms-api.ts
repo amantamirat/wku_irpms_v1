@@ -15,6 +15,7 @@ import criterionRoutes from './modules/evaluations/criteria/criterion.routes';
 import optionRoutes from './modules/evaluations/options/option.routes';
 import calendarRoutes from './modules/calendar/calendar.routes';
 import callRoutes from './modules/call/call.routes';
+import cycleRoutes from './modules/cycles/cycle.routes';
 import callStageRoutes from './modules/call/stages/stage.routes';
 import grantRoutes from './modules/grants/grant.routes';
 import constraintRoutes from './modules/grants/constraints/constraint.routes';
@@ -60,6 +61,7 @@ app.use("/api/options", optionRoutes);
 
 app.use("/api/calendars", calendarRoutes);
 app.use("/api/calls", callRoutes);
+app.use("/api/cycles", cycleRoutes);
 app.use("/api/call/stages", callStageRoutes);
 app.use("/api/grants", grantRoutes);
 app.use("/api/grants/constraints", constraintRoutes);

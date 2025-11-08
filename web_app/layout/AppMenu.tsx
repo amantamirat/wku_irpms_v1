@@ -7,7 +7,6 @@ import { useContext } from 'react';
 import AppMenuitem from './AppMenuitem';
 import { LayoutContext } from './context/layoutcontext';
 import { MenuProvider } from './context/menucontext';
-//import { Scope } from '@/app/(main)/applicants/models/applicant.model';
 import { useAuth } from '@/contexts/auth-context';
 import { PERMISSIONS } from '@/types/permissions';
 
@@ -23,11 +22,54 @@ const AppMenu = () => {
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
         },
         {
-            label: 'Directorate',
-            icon: PrimeIcons.SITEMAP,
-            visible: hasOrganizationType([OrganizationalUnit.Directorate]),
+            label: 'Project',
             items: [
                 {
+                    label: 'Projects',
+                    icon: PrimeIcons.BRIEFCASE,
+                    to: '/projects'
+                },
+            ]
+        },
+        {
+            label: 'Cycle',
+            visible: hasPermission([
+                PERMISSIONS.CYCLE.CALL.CREATE,
+                PERMISSIONS.CYCLE.CALL.UPDATE,
+                PERMISSIONS.CYCLE.CALL.DELETE,
+                PERMISSIONS.CYCLE.PROGRAM.CREATE,
+                PERMISSIONS.CYCLE.PROGRAM.UPDATE,
+                PERMISSIONS.CYCLE.PROGRAM.DELETE
+            ]),
+            items: [
+                {
+                    label: 'Calls',
+                    icon: 'pi pi-fw pi-megaphone',
+                    to: '/cycles/calls',
+                    visible: hasPermission([
+                        PERMISSIONS.CYCLE.CALL.CREATE,
+                        PERMISSIONS.CYCLE.CALL.UPDATE,
+                        PERMISSIONS.CYCLE.CALL.DELETE,
+
+                    ])
+                },
+                {
+                    label: 'Programs',
+                    icon: 'pi pi-circle-fill',
+                    to: '/cycles/programs',
+                    visible: hasPermission([
+                        PERMISSIONS.CYCLE.PROGRAM.CREATE,
+                        PERMISSIONS.CYCLE.PROGRAM.UPDATE,
+                        PERMISSIONS.CYCLE.PROGRAM.DELETE
+                    ])
+                },
+            ]
+        },
+        {
+            label: 'Directorate',
+            visible: hasOrganizationType([OrganizationalUnit.Directorate]),
+            items: [
+                /** {
                     label: 'Calls',
                     icon: 'pi pi-fw pi-megaphone',
                     to: '/calls',
@@ -36,10 +78,11 @@ const AppMenu = () => {
                         PERMISSIONS.CALL.UPDATE,
                         PERMISSIONS.CALL.DELETE
                     ])
-                },
+                },*/
+
                 {
                     label: 'Evaluations',
-                    icon: 'pi pi-fw pi-calculator',
+                    icon: 'pi pi-chart-bar',
                     to: '/evaluations',
                     visible: hasPermission(
                         [
@@ -51,7 +94,7 @@ const AppMenu = () => {
                 },
                 {
                     label: 'Grants',
-                    icon: 'pi pi-fw pi-wrench',
+                    icon: 'pi pi-cog',
                     to: '/grants',
                     visible: hasPermission(
                         [
@@ -80,11 +123,6 @@ const AppMenu = () => {
             label: 'Manage',
             items: [
                 {
-                    label: 'Projects',
-                    icon: PrimeIcons.BRIEFCASE,
-                    to: '/projects'
-                },
-                {
                     label: 'Calendars',
                     icon: PrimeIcons.CALENDAR,
                     to: '/calendars',
@@ -98,7 +136,7 @@ const AppMenu = () => {
                 },
                 {
                     label: 'Applicants',
-                    icon: PrimeIcons.GLOBE,
+                    icon: 'pi pi-address-book',
                     visible: hasPermission(
                         [
                             PERMISSIONS.APPLICANT.CREATE,
@@ -110,7 +148,6 @@ const AppMenu = () => {
                 },
                 {
                     label: 'Organizations',
-                    icon: 'pi pi-sitemap',
                     visible: hasPermission(
                         [
                             PERMISSIONS.ORGANIAZTION.CREATE,
@@ -131,12 +168,12 @@ const AppMenu = () => {
                         },
                         {
                             label: 'Offices',
-                            icon: 'pi pi-fw pi-shop',
+                            icon: 'pi pi-fw pi-building-columns',
                             to: `/organizations?type=${OrganizationalUnit.Supportive}`
                         },
                         {
                             label: 'Sectors',
-                            icon: 'pi pi-fw pi-building-columns',
+                            icon: 'pi pi-sitemap',
                             to: `/organizations?type=${OrganizationalUnit.Sector}`
                         },
                         {
@@ -184,11 +221,10 @@ const AppMenu = () => {
         },
         {
             label: 'Pages',
-
             items: [
                 {
                     label: 'Landing',
-                    icon: 'pi pi-fw pi-globe',
+                    icon: 'pi pi-shield',
                     to: '/landing'
                 },
                 {

@@ -45,6 +45,20 @@ export const PERMISSIONS = {
     UPDATE: "call:update",
     DELETE: "call:delete",
   },
+  CYCLE: {
+    CALL: {
+      CREATE: "cycle:call:create",
+      READ: "cycle:call:read",
+      UPDATE: "cycle:call:update",
+      DELETE: "cycle:call:delete",
+    },
+    PROGRAM: {
+      CREATE: "cycle:program:create",
+      READ: "cycle:program:read",
+      UPDATE: "cycle:program:update",
+      DELETE: "cycle:program:delete",
+    },
+  },
   EVALUATION: {
     CREATE: "evaluation:create",
     READ: "evaluation:read",
