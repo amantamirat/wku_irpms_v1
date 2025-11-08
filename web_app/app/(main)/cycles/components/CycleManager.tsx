@@ -15,6 +15,7 @@ import { Cycle, CycleStatus, CycleType } from '../models/cycle.model';
 import SaveCycle from './SaveCycle';
 //import StageManager from './StageManager';
 import Badge from '@/templates/Badge';
+import StageManager from '../stages/components/StageManager';
 
 interface CycleManagerProps {
     type: CycleType; // "CALL" or "PROGRAM"
@@ -61,7 +62,7 @@ const CycleManager: React.FC<CycleManagerProps> = ({ type }) => {
     useEffect(() => {
         const fetchCycles = async () => {
             try {
-                const data = await CycleApi.getCycles({ user: true, type:type });
+                const data = await CycleApi.getCycles({ user: true, type: type });
                 setCycles(data);
             } catch (err) {
                 setError("Failed to fetch " + type.toLowerCase() + " cycles: " + err);
@@ -194,7 +195,9 @@ const CycleManager: React.FC<CycleManagerProps> = ({ type }) => {
                         filters={filters}
                         expandedRows={expandedRows}
                         onRowToggle={(e) => setExpandedRows(e.data)}
-
+                        rowExpansionTemplate={(rowData: Cycle) => (
+                            <StageManager cycle={rowData} />
+                        )}
                     >
                         <Column expander style={{ width: '3em' }} />
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />

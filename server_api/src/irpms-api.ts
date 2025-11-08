@@ -4,7 +4,6 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './modules/users/auth/auth.routes';
 
-
 import organizationRoutes from './modules/organization/organization.routes';
 import applicantRoutes from './modules/applicants/applicant.routes';
 import positionRoutes from './modules/applicants/positions/position.routes';
@@ -15,8 +14,9 @@ import criterionRoutes from './modules/evaluations/criteria/criterion.routes';
 import optionRoutes from './modules/evaluations/options/option.routes';
 import calendarRoutes from './modules/calendar/calendar.routes';
 import callRoutes from './modules/call/call.routes';
-import cycleRoutes from './modules/cycles/cycle.routes';
 import callStageRoutes from './modules/call/stages/stage.routes';
+import cycleRoutes from './modules/cycles/cycle.routes';
+import cycleStageRoutes from './modules/cycles/stages/stage.routes';
 import grantRoutes from './modules/grants/grant.routes';
 import constraintRoutes from './modules/grants/constraints/constraint.routes';
 import compositionRoutes from './modules/grants/constraints/compositions/composition.routes';
@@ -35,8 +35,6 @@ import permissionRoutes from './modules/users/permissions/permission.routes';
 import { PermissionService } from './modules/users/permissions/permission.service';
 import { UserService } from './modules/users/user.service';
 import path from 'path';
-
-
 
 
 dotenv.config();
@@ -61,8 +59,9 @@ app.use("/api/options", optionRoutes);
 
 app.use("/api/calendars", calendarRoutes);
 app.use("/api/calls", callRoutes);
-app.use("/api/cycles", cycleRoutes);
 app.use("/api/call/stages", callStageRoutes);
+app.use("/api/cycles", cycleRoutes);
+app.use("/api/cycle/stages", cycleStageRoutes);
 app.use("/api/grants", grantRoutes);
 app.use("/api/grants/constraints", constraintRoutes);
 app.use("/api/grants/compositions", compositionRoutes);
