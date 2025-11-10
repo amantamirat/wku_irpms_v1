@@ -1,12 +1,17 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { errorResponse, successResponse } from "../../../util/response";
-import { CreatePhaseDto, GetPhaseOptions, PhaseService } from "./phase.service";
+import { AuthenticatedRequest } from "../../users/auth/auth.middleware";
+import { CreatePhaseDto, DeletePhaseDto, GetPhasesOptions, UpdatePhaseDto } from "./phase.dto";
 import { PhaseType } from "./phase.enum";
+import { PhaseService } from "./phase.service";
 
 export class PhaseController {
-    static async createPhase(req: Request, res: Response) {
+    
+    
+    static async createPhase(req: AuthenticatedRequest, res: Response) {
         try {
+            if (!req.user) throw new Error('User not found!');
             const { type, activity, duration, budget, description, project, parent } = req.body;
             const data: CreatePhaseDto = {
                 type: type as PhaseType,
@@ -16,7 +21,7 @@ export class PhaseController {
                 description: description ? description : undefined,
                 project: type === PhaseType.phase ? new mongoose.Types.ObjectId(project as string) : undefined,
                 parent: type === PhaseType.breakdown ? new mongoose.Types.ObjectId(parent as string) : undefined,
-
+                userId: req.user._id,
             };
             const created = await PhaseService.createPhase(data);
             successResponse(res, 201, "Phase created successfully", created);
@@ -28,9 +33,9 @@ export class PhaseController {
     static async getPhases(req: Request, res: Response) {
         try {
             const { project, parent } = req.query;
-            const filter: GetPhaseOptions = {
-                project: project ? String(project) : undefined,
-                parent: parent ? String(parent) : undefined
+            const filter: GetPhasesOptions = {
+                project: project ? new mongoose.Types.ObjectId(String(project)) : undefined,
+                parent: parent ? new mongoose.Types.ObjectId(String(parent)) : undefined
             };
             const phases = await PhaseService.getPhases(filter);
             successResponse(res, 200, "Phases fetched successfully", phases);
@@ -39,28 +44,36 @@ export class PhaseController {
         }
     }
 
-    static async updatePhase(req: Request, res: Response) {
+    static async updatePhase(req: AuthenticatedRequest, res: Response) {
         try {
+            if (!req.user) throw new Error('User not found!');
             const { id } = req.params;
             const { activity, duration, budget, description, parent } = req.body;
-            const data: Partial<CreatePhaseDto> = {
-                activity: activity ?? undefined,
-                duration: duration ?? undefined,
-                budget: budget ?? undefined,
-                description: description ?? undefined,
-                parent: parent ? new mongoose.Types.ObjectId(parent as string) : undefined,
+
+            const dto: UpdatePhaseDto = {
+                id,
+                data: {
+                    activity: activity ?? undefined,
+                    duration: duration ?? undefined,
+                    budget: budget ?? undefined,
+                    description: description ?? undefined,
+                    //parent: parent ? new mongoose.Types.ObjectId(parent as string) : undefined,
+                },
+                userId: req.user._id,
             };
-            const updated = await PhaseService.updatePhase(id, data);
+            const updated = await PhaseService.updatePhase(dto);
             successResponse(res, 200, "Phase updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
-    static async deletePhase(req: Request, res: Response) {
+    static async deletePhase(req: AuthenticatedRequest, res: Response) {
         try {
+            if (!req.user) throw new Error('User not found!');
             const { id } = req.params;
-            const deleted = await PhaseService.deletePhase(id);
+            const dto: DeletePhaseDto = { id, userId: req.user._id };            
+            const deleted = await PhaseService.deletePhase(dto);
             successResponse(res, 200, "Phase deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

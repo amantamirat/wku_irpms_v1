@@ -145,7 +145,7 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
                     <Column selectionMode="single" headerStyle={{ width: '3em' }} />
                     <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                     <Column field="activity" header="Activity" sortable />
-                    <Column field="duration" header="Duration (days)" sortable />
+                    <Column field="duration" header="Duration (Days)" sortable />
                     <Column field="budget" header="Budget (ETB)" sortable />
                     <Column field="description" header="Description" sortable />
                     <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />

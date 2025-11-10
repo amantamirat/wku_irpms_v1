@@ -31,11 +31,11 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
                     <TabPanel header="Collaborators">
                         <CollaboratorManager project={project} />
                     </TabPanel>
-                    <TabPanel header="Themes">
-                        <ProjectThemeManager project={project} />
-                    </TabPanel>
                     <TabPanel header="Phases">
                         <PhaseManager project={project} phaseType={PhaseType.phase} />
+                    </TabPanel>
+                    <TabPanel header="Themes">
+                        <ProjectThemeManager project={project} />
                     </TabPanel>
                     <TabPanel header="Documents">
                         <ProjectStageManager project={project} />

@@ -8,6 +8,7 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { Phase, validatePhase } from "../models/phase.model";
 import { PhaseApi } from "../api/phase.api";
+import exp from "constants";
 
 interface SavePhaseDialogProps {
     phase: Phase;
@@ -17,7 +18,8 @@ interface SavePhaseDialogProps {
     onHide: () => void;
 }
 
-export default function SavePhaseDialog({ phase, visible, onSave, onComplete, onHide }: SavePhaseDialogProps) {
+const SavePhaseDialog=({ phase, visible, onSave, onComplete, onHide }: SavePhaseDialogProps) =>{
+    
     const [localPhase, setLocalPhase] = useState<Phase>({ ...phase });
     const toast = useRef<Toast>(null);
 
@@ -99,12 +101,12 @@ export default function SavePhaseDialog({ phase, visible, onSave, onComplete, on
                 </div>
 
                 <div className="field">
-                    <label htmlFor="duration">Duration (days)</label>
+                    <label htmlFor="duration">Duration (Days)</label>
                     <InputNumber
                         id="duration"
                         value={localPhase.duration}
                         onValueChange={(e) => updateField("duration", e.value ?? 0)}
-                        min={1}
+                        //min={1}
                     />
                 </div>
 
@@ -134,3 +136,5 @@ export default function SavePhaseDialog({ phase, visible, onSave, onComplete, on
         </>
     );
 }
+
+export default SavePhaseDialog;

@@ -7,8 +7,6 @@ import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
-import { CallApi } from '@/app/(main)/calls/api/call.api';
-import { Call, CallStatus } from '@/app/(main)/calls/models/call.model';
 import { Project, validateProject } from '../models/project.model';
 import { ProjectApi } from '../api/project.api';
 import { CycleApi } from '../../cycles/services/cycle.api';
@@ -22,6 +20,7 @@ interface SaveProjectDialogProps {
 }
 
 const SaveProjectDialog = ({ visible, project, onHide, onComplete }: SaveProjectDialogProps) => {
+    
     const toast = useRef<Toast>(null);
 
     const [localProject, setLocalProject] = useState<Project>({ ...project });

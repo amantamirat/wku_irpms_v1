@@ -1,65 +1,40 @@
-import mongoose from "mongoose";
-import { BasePhase, Breakdown, Phase } from "./phase.model"; // only BasePhase import
+import { Project } from "../project.model";
+import { CreatePhaseDto, DeletePhaseDto, GetPhasesOptions, UpdatePhaseDto } from "./phase.dto";
 import { PhaseType } from "./phase.enum";
+import { BasePhase, Phase } from "./phase.model"; // only BasePhase import
 
-// DTOs
-export interface CreatePhaseDto {
-    activity: string;
-    duration: number;
-    budget: number;
-    description?: string;
-    project?: mongoose.Types.ObjectId;
-    parent?: mongoose.Types.ObjectId;
-    type: PhaseType;
-}
 
-export interface GetPhaseOptions {
-    _id?: string;
-    project?: string;
-    parent?: string;
-}
 
 export class PhaseService {
 
-    static async createPhase(data: CreatePhaseDto) {
-        return await BasePhase.create(data);
+    static async createPhase(dto: CreatePhaseDto) {
+        if (dto.type === PhaseType.phase) {
+            const project = await Project.findById(dto.project).lean();
+            if (!project) throw new Error("Project not found");
+        } else if (dto.type === PhaseType.breakdown) {
+            const phase = await Phase.findById(dto.parent).lean();
+            if (!phase) throw new Error("Phase not found");
+        }
+        return await BasePhase.create(dto);
     }
 
-    static async getPhases(options: GetPhaseOptions) {
+    static async getPhases(options: GetPhasesOptions) {
         const filter: any = {};
         if (options.project) filter.project = options.project;
-        if (options.parent) filter.parent = options.parent;
-        if (options.project) {
-            return await Phase.find(filter).lean();
-        }
-        if (options.parent) {
-            return await Breakdown.find(filter).lean();
-        }
+        else if (options.parent) filter.parent = options.parent;
         return await BasePhase.find(filter).lean();
     }
 
-    static async findPhase(options: GetPhaseOptions) {
-        const filter: any = {};
-        if (options._id) filter._id = options._id;
-        if (options.project) filter.project = options.project;
-        if (options.parent) filter.parent = options.parent;
-        if (options.project) {
-            return await Phase.findOne(filter).lean();
-        }
-        if (options.parent) {
-            return await Breakdown.findOne(filter).lean();
-        }
-        return await BasePhase.findOne(filter).lean();
-    }
-
-    static async updatePhase(id: string, data: Partial<CreatePhaseDto>) {
+    static async updatePhase(dto: UpdatePhaseDto) {
+        const { id, data, userId } = dto;
         const doc = await BasePhase.findById(id);
         if (!doc) throw new Error("Phase not found");
         Object.assign(doc, data);
         return await doc.save();
     }
 
-    static async deletePhase(id: string) {
+    static async deletePhase(dto: DeletePhaseDto) {
+        const { id, userId } = dto;
         const doc = await BasePhase.findById(id);
         if (!doc) throw new Error("Phase not found");
         return await doc.deleteOne();
