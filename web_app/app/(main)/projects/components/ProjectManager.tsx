@@ -157,10 +157,10 @@ const ProjectManager = () => {
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} projects"
                         globalFilter={globalFilter}
+                        filters={filters}
                         emptyMessage="No project data found."
                         header={header}
                         scrollable
-                        filters={filters}
                         expandedRows={expandedRows}
                         onRowToggle={(e) => setExpandedRows(e.data)}
                         rowExpansionTemplate={(rowData) => {

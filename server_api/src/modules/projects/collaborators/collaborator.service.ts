@@ -30,7 +30,7 @@ export class CollaboratorService {
             filter.applicant = options.applicant;
         }
         const collaborators = await Collaborator.find(filter).populate([
-            { path: 'applicant' },
+            { path: 'applicant', populate: { path: 'organization' } },
             { path: 'project' }
         ]).lean();
         return collaborators;
