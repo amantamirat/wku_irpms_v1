@@ -32,4 +32,12 @@ const CycleSchema = new Schema<ICycle>(
     { timestamps: true }
 );
 
+CycleSchema.virtual('firstStage', {
+    ref: COLLECTIONS.CYCLE_STAGE,
+    localField: '_id',
+    foreignField: 'call',
+    justOne: true,
+    match: { order: 1 } // 👈 fetch stage with order 1 for this cycle
+});
+
 export const Cycle = model<ICycle>(COLLECTIONS.CYCLE, CycleSchema);

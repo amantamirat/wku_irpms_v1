@@ -3,7 +3,7 @@ import { COLLECTIONS } from "../../util/collections.enum";
 import { ProjectStatus } from "./project.enum";
 
 interface IProject extends Document {
-    call: mongoose.Types.ObjectId;
+    cycle: mongoose.Types.ObjectId;
     title: string;
     summary?: string;
     createdBy: mongoose.Types.ObjectId;
@@ -13,9 +13,9 @@ interface IProject extends Document {
 }
 
 const ProjectSchema = new Schema<IProject>({
-    call: {
+    cycle: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.CALL,
+        ref: COLLECTIONS.CYCLE,
         required: true,
         immutable:true
     },

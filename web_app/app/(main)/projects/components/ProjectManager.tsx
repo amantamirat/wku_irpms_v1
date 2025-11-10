@@ -2,28 +2,27 @@
 
 import ConfirmDialog from '@/components/ConfirmationDialog';
 import ErrorComponent from '@/components/ErrorComponent';
+import Badge from '@/templates/Badge';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { Toolbar } from 'primereact/toolbar';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Call } from '../../calls/models/call.model';
-import { GetProjectsOptions, ProjectApi } from '../api/project.api';
+import React, { useEffect, useRef, useState } from 'react';
+import { Cycle } from '../../cycles/models/cycle.model';
+import { ProjectApi } from '../api/project.api';
 import { Project } from '../models/project.model';
-import SaveProjectDialog from './SaveProjectDialog';
 import ProjectDetail from './ProjectDetail';
-import Badge from '@/templates/Badge';
+import SaveProjectDialog from './SaveProjectDialog';
 
 interface ProjectManagerProps {
-    call?: Call;
+    cycle?: Cycle;
 }
 
-const ProjectManager = (props: ProjectManagerProps) => {
-    const { call } = props
+const ProjectManager = () => {
     const emptyProject: Project = {
-        call: call || '',
+        cycle: '',
         title: ''
     };
     const [projects, setProjects] = useState<Project[]>([]);
@@ -47,20 +46,17 @@ const ProjectManager = (props: ProjectManagerProps) => {
     }, []);
 
 
-    const fetchProjects = useCallback(async () => {
-        try {
-            const options: GetProjectsOptions = {};
-            options.call = call ? call._id : undefined;
-            const data = await ProjectApi.getProjects(options);
-            setProjects(data);
-        } catch (err) {
-            setError(`Failed to load projects data ${err}`);
-        }
-    }, [call]);
-
     useEffect(() => {
+        const fetchProjects = async () => {
+            try {
+                const data = await ProjectApi.getProjects({});
+                setProjects(data);
+            } catch (err) {
+                setError(`Failed to load projects data ${err}`);
+            }
+        };
         fetchProjects();
-    }, [fetchProjects]);
+    }, []);
 
     if (error) {
         return (
@@ -173,7 +169,7 @@ const ProjectManager = (props: ProjectManagerProps) => {
                     >
                         <Column expander headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                        
+
                         <Column field="title" header="Title" sortable />
                         <Column header="Status" body={statusBodyTemplate} sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>

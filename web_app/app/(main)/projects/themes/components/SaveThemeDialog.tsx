@@ -60,7 +60,7 @@ export default function SaveThemeDialog({ project, projectTheme, setProjectTheme
 
     useEffect(() => {
         const fetchThemes = async () => {
-            const theme = (project.call as Call).theme;
+            const theme = (project.cycle as Call).theme;
             const catalogId =
                 typeof theme === "object" && theme !== null
                     ? (theme as any)._id
@@ -73,7 +73,7 @@ export default function SaveThemeDialog({ project, projectTheme, setProjectTheme
             setNodes(node as any);
         };
         fetchThemes();
-    }, [project?.call]);
+    }, [project?.cycle]);
 
     const addProjectTheme = async () => {
         try {

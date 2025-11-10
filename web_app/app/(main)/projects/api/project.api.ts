@@ -4,14 +4,14 @@ const end_point = '/projects';
 
 
 export interface GetProjectsOptions {
-    call?: string;
+    cycle?: string;
 }
 
 export const ProjectApi = {
 
     async getProjects(options: GetProjectsOptions): Promise<Project[]> {
         const query = new URLSearchParams();
-        if (options.call) query.append("call", options.call);
+        if (options.cycle) query.append("cycle", options.cycle);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Project[];
     },

@@ -7,9 +7,7 @@ import { ThematicArea } from "../themes/theme.model";
 import { CycleStatus } from "./cycle.d";
 
 import {
-    //CreateCallCycleDto,
     CreateCycleDto,
-    //CreateProgramCenterDto,
     DeleteCycleDto,
     GetCyclesOptions,
     UpdateCycleDto
@@ -19,16 +17,19 @@ import { Cycle } from "./cycle.model";
 export class CycleService {
 
     private static async validateCycle(dto: CreateCycleDto) {
-
         let directorateId: string;
         if (dto.type === "Call") {
+
             const directorate = await Directorate.findById(dto.organization).lean();
             if (!directorate) throw new Error("Directorate Not Found!");
             directorateId = directorate._id.toString();
+
         } else if (dto.type === "Program") {
+
             const center = await Center.findById(dto.organization).lean();
             if (!center) throw new Error("Center Not Found!");
             directorateId = center.parent.toString();
+
         } else {
             throw new Error("Invalid cycle type");
         }
@@ -88,7 +89,8 @@ export class CycleService {
             { path: 'calendar' },
             { path: 'grant' },
             { path: 'theme' },
-            { path: 'organization' }
+            { path: 'organization' },
+            { path: 'firstStage' }
         ]).lean();
     }
 
@@ -99,9 +101,7 @@ export class CycleService {
         const { id, userId } = dto;
         const cycle = await Cycle.findById(id);
         if (!cycle) throw new Error("Cycle not found");
-
         await CacheService.validateOwnership(userId, cycle.organization);
-
         return await cycle.deleteOne();
     }
 }

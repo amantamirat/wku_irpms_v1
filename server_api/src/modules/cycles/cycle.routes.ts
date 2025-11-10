@@ -17,7 +17,7 @@ router.post(
 router.get(
     '/',
     verifyActiveAccount,
-    checkCyclePermission('READ'),
+    //checkCyclePermission('READ'),
     CycleController.getCycles
 );
 

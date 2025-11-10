@@ -6,7 +6,7 @@ import { upload } from '../../util/multer';
 const router: Router = Router();
 
 router.post('/', verifyActiveAccount, ProjectController.createProject);
-router.post("/submit", verifyActiveAccount, upload.single("document"), ProjectController.submitProject);
+//router.post("/submit", verifyActiveAccount, upload.single("document"), ProjectController.submitProject);
 router.get('/', verifyActiveAccount, ProjectController.getProjects);
 router.put('/:id', verifyActiveAccount, ProjectController.updateProject);
 router.delete('/:id', verifyActiveAccount, ProjectController.deleteProject);

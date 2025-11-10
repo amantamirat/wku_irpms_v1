@@ -1,4 +1,4 @@
-import { Call } from "../../calls/models/call.model";
+import { Cycle } from "../../cycles/models/cycle.model";
 import { User } from "../../users/models/user.model";
 import { Collaborator, sanitizeCollaborator } from "../collaborators/models/collaborator.model";
 import { Phase, sanitizePhase } from "../phases/models/phase.model";
@@ -11,7 +11,7 @@ export enum ProjectStatus {
 
 export type Project = {
     _id?: string;
-    call?: string | Call;
+    cycle?: string | Cycle;
     title: string;
     summary?: string;    
     status?: ProjectStatus;
@@ -26,7 +26,7 @@ export type Project = {
 
 
 export const validateProject = (project: Project): { valid: boolean; message?: string } => {
-    if (!project.call) {
+    if (!project.cycle) {
         return { valid: false, message: 'Call is required.' };
     }
     if (!project.title || project.title.trim().length === 0) {
@@ -54,10 +54,10 @@ export const validateApplyProject = (project: Project): { valid: boolean; messag
 export const sanitizeProject=(project: Partial<Project>): Partial<Project> => {
     return {
         ...project,
-        call:
-            typeof project.call === 'object' && project.call !== null
-                ? (project.call as Call)._id
-                : project.call,
+        cycle:
+            typeof project.cycle === 'object' && project.cycle !== null
+                ? (project.cycle as Cycle)._id
+                : project.cycle,
         collaborators: project.collaborators?.map(c => sanitizeCollaborator(c)),
         themes: project.themes?.map(t => sanitizeProjectTheme(t)),
         phases: project.phases?.map(p => sanitizePhase(p)),

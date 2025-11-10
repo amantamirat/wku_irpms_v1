@@ -11,6 +11,8 @@ import { CallApi } from '@/app/(main)/calls/api/call.api';
 import { Call, CallStatus } from '@/app/(main)/calls/models/call.model';
 import { Project, validateProject } from '../models/project.model';
 import { ProjectApi } from '../api/project.api';
+import { CycleApi } from '../../cycles/services/cycle.api';
+import { Cycle } from '../../cycles/models/cycle.model';
 
 interface SaveProjectDialogProps {
     visible: boolean;
@@ -24,21 +26,20 @@ const SaveProjectDialog = ({ visible, project, onHide, onComplete }: SaveProject
 
     const [localProject, setLocalProject] = useState<Project>({ ...project });
     const [submitted, setSubmitted] = useState(false);
-    //const [errorMessage, setErrorMessage] = useState<string | undefined>();
-    const [calls, setCalls] = useState<Call[] | undefined>(undefined);
+    const [cycles, setCycles] = useState<Cycle[]>([]);
 
     // Fetch active calls if no call selected
     useEffect(() => {
-        const fetchCalls = async () => {
+        const fetchCycles = async () => {
             try {
-                const data = await CallApi.getCalls({ status: CallStatus.active });
-                setCalls(data);
+                const data = await CycleApi.getCycles({});
+                setCycles(data);
             } catch (err) {
                 console.error('Failed to fetch calls:', err);
             }
         };
-        if (!localProject.call) fetchCalls();
-    }, [localProject.call]);
+        fetchCycles();
+    }, []);
 
     const save = async () => {
         setSubmitted(true);
@@ -55,7 +56,7 @@ const SaveProjectDialog = ({ visible, project, onHide, onComplete }: SaveProject
         }
         saved = {
             ...saved,
-            call: localProject.call
+            cycle: localProject.cycle
         };
 
         toast.current?.show({
@@ -70,7 +71,6 @@ const SaveProjectDialog = ({ visible, project, onHide, onComplete }: SaveProject
 
     const hide = () => {
         setSubmitted(false);
-        //setErrorMessage(undefined);
         onHide();
     };
 
@@ -86,7 +86,6 @@ const SaveProjectDialog = ({ visible, project, onHide, onComplete }: SaveProject
         if (visible) {
             setLocalProject({ ...project });
             setSubmitted(false);
-            //setErrorMessage(undefined);
         }
     }, [visible, project]);
 
@@ -105,17 +104,17 @@ const SaveProjectDialog = ({ visible, project, onHide, onComplete }: SaveProject
                 <div className="p-fluid formgrid grid">
                     {!localProject._id && (
                         <div className="field col-12">
-                            <label htmlFor="call">Call</label>
+                            <label htmlFor="cycle">Cycle</label>
                             <Dropdown
-                                id="call"
+                                id="cycle"
                                 dataKey="_id"
-                                options={calls}
-                                value={localProject.call}
-                                onChange={(e) => setLocalProject({ ...localProject, call: e.value })}
+                                options={cycles}
+                                value={localProject.cycle}
+                                onChange={(e) => setLocalProject({ ...localProject, cycle: e.value })}
                                 required
                                 optionLabel="title"
-                                placeholder="Select a Call"
-                                className={classNames({ 'p-invalid': submitted && !localProject.call })}
+                                placeholder="Select a Cycle"
+                                className={classNames({ 'p-invalid': submitted && !localProject.cycle })}
                             />
                         </div>
                     )}
@@ -143,11 +142,7 @@ const SaveProjectDialog = ({ visible, project, onHide, onComplete }: SaveProject
                             placeholder="Enter Project summary ..."
                             className="w-full"
                         />
-                    </div>
-
-                    {
-                        //errorMessage && <small className="p-error">{errorMessage}</small>
-                    }
+                    </div>                   
                 </div>
             </Dialog>
         </>

@@ -1,21 +1,33 @@
-import { Request, Response } from 'express';
-import { errorResponse, successResponse } from '../../util/response';
-import { ProjectService, CreateProjectDto, GetProjectsOptions } from './project.service';
-import { AuthenticatedRequest } from '../users/auth/auth.middleware';
-import mongoose from 'mongoose';
+import { Response } from "express";
+import mongoose from "mongoose";
+import { errorResponse, successResponse } from "../../util/response";
+import { AuthenticatedRequest } from "../users/auth/auth.middleware";
+import { ProjectService } from "./project.service";
+import {
+  CreateProjectDto,
+  UpdateProjectDto,
+  GetProjectsOptions,
+  DeleteProjectDto,
+} from "./project.dto";
 
 export class ProjectController {
 
+ 
   static async createProject(req: AuthenticatedRequest, res: Response) {
     try {
-      const { call, title, summary } = req.body;
-      const data: CreateProjectDto = {
-        call: new mongoose.Types.ObjectId(call as string),
-        title: title,
-        summary: summary,
-        createdBy: new mongoose.Types.ObjectId(req.user!._id),
+      if (!req.user) throw new Error("User not found!");
+
+      const { cycle, title, summary, status } = req.body;
+
+      const dto: CreateProjectDto = {
+        cycle: new mongoose.Types.ObjectId(cycle as string),
+        title,
+        summary: summary ?? undefined,
+        status,
+        userId: req.user._id,
       };
-      const created = await ProjectService.createProject(data);
+
+      const created = await ProjectService.createProject(dto);
       successResponse(res, 201, "Project created successfully", created);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
@@ -23,58 +35,94 @@ export class ProjectController {
   }
 
 
+  // -----------------------
+  // Submit (file upload)
+  // -----------------------
+  // NOTE: service currently uses the same create flow. documentPath is not
+  // persisted in the project schema today; this endpoint forwards the
+  // project payload and ignores the file path unless the model/schema is
+  // extended to store it.
   static async submitProject(req: AuthenticatedRequest, res: Response) {
     try {
-      if (!req.file) {
-        return errorResponse(res, 400, "Document required");
-      }
+      if (!req.user) throw new Error("User not found!");
+      if (!req.file) return errorResponse(res, 400, "Document required");
+
       const documentPath = `uploads/${req.file.filename}`;
       const project = JSON.parse(req.body.project);
-      const data: CreateProjectDto = {
-        ...project,
-        createdBy: new mongoose.Types.ObjectId(req.user!._id),
-        documentPath: documentPath
+
+      const dto: CreateProjectDto = {
+        cycle: new mongoose.Types.ObjectId(project.cycle as string),
+        title: project.title,
+        summary: project.summary ?? undefined,
+        status: project.status,
+        userId: req.user._id,
       };
-      const submitted = await ProjectService.submitProject(data);
+
+      const submitted = await ProjectService.createProject(dto);
       successResponse(res, 201, "Project submitted successfully", submitted);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
   }
 
-  static async getProjects(req: Request, res: Response) {
+
+  // -----------------------
+  // Fetch / Query
+  // -----------------------
+  static async getProjects(req: AuthenticatedRequest, res: Response) {
     try {
-      const { call } = req.query;
+      const { cycle, status, user } = req.query;
+
       const filter: GetProjectsOptions = {
-        call: call ? new mongoose.Types.ObjectId(call as string) : undefined,
+        userId: user && req.user ? req.user._id : undefined,
+        cycle: cycle ? new mongoose.Types.ObjectId(cycle as string) : undefined,
+        status: status as any,
       };
+
       const projects = await ProjectService.getProjects(filter);
-      successResponse(res, 200, 'Projects fetched successfully', projects);
+      successResponse(res, 200, "Projects fetched successfully", projects);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
   }
 
-  static async updateProject(req: Request, res: Response) {
+
+  // -----------------------
+  // Update
+  // -----------------------
+  static async updateProject(req: AuthenticatedRequest, res: Response) {
     try {
+      if (!req.user) throw new Error("User not found!");
+
       const { id } = req.params;
-      const { title, summary } = req.body;
-      const data: Partial<CreateProjectDto> = {
-        title: title,
-        summary: summary
+      const { title, summary, status } = req.body;
+
+      const dto: UpdateProjectDto = {
+        id,
+        data: { title, summary, status },
+        userId: req.user._id,
       };
-      const updated = await ProjectService.updateProject(id, data);
-      successResponse(res, 201, "Project updated successfully", updated);
+
+      const updated = await ProjectService.updateProject(dto);
+      successResponse(res, 200, "Project updated successfully", updated);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
   }
 
-  static async deleteProject(req: Request, res: Response) {
+
+  // -----------------------
+  // Delete
+  // -----------------------
+  static async deleteProject(req: AuthenticatedRequest, res: Response) {
     try {
+      if (!req.user) throw new Error("User not found!");
+
       const { id } = req.params;
-      const deleted = await ProjectService.deleteProject(id);
-      successResponse(res, 201, "Project deleted successfully", deleted);
+      const dto: DeleteProjectDto = { id, userId: req.user._id };
+
+      const deleted = await ProjectService.deleteProject(dto);
+      successResponse(res, 200, "Project deleted successfully", deleted);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
