@@ -17,7 +17,7 @@ export class CollaboratorService {
         if (!project) throw new Error("Project not found");
         const applicant = await Applicant.findById(dto.applicant).lean();
         if (!applicant) throw new Error("Applicant not found");
-        const createdCollaborator = await Collaborator.create({ dto });
+        const createdCollaborator = await Collaborator.create({ ...dto });
         return createdCollaborator;
     }
 

@@ -11,7 +11,7 @@ import { Collaborator, CollaboratorStatus } from "../models/collaborator.model";
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
 
 interface CollaboratorProps {
-    project: Project;
+    project?: Project;
     onSave?: (collaborator: Collaborator) => void;
     onRemove?: (collaborator: Collaborator) => void;
 }
@@ -19,7 +19,7 @@ interface CollaboratorProps {
 const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) => {
 
     const emptyCollaborator: Collaborator = {
-        project: project,
+        project: project ?? "",
         applicant: "",
         status: CollaboratorStatus.pending
     };
@@ -32,18 +32,19 @@ const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) =
     useEffect(() => {
         const fetchCollaborators = async () => {
             try {
-                const data = await CollaboratorApi.getCollaborators({ project: project._id });
+                const data = await CollaboratorApi.getCollaborators({ project: project?._id });
+                console.log("Fetched collaborators:", data);
                 setCollaborators(data);
             } catch (err) {
                 console.error("Failed to fetch collaborators:", err);
             }
         };
-        if (project?._id) {
-            fetchCollaborators();
-        }
-        else {
-            setCollaborators(project.collaborators ?? []);
-        }
+        // if (project?._id) {
+        fetchCollaborators();
+        // }
+        // else {
+        //  setCollaborators(project.collaborators ?? []);
+        // }
     }, [project?._id]);
 
 
@@ -70,44 +71,6 @@ const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) =
         }
     };
 
-    /*
-
-    const addCollaborator = (savedCollaborator: Collaborator) => {
-        const applicant = savedCollaborator.applicant as Applicant;
-        if (!applicant || !applicant._id) {
-            throw new Error("Please select a valid collaborator.");
-        }
-        const exists =
-            project.collaborators?.some(
-                (c) => (c.applicant as Applicant)._id === applicant._id
-            ) ?? false;
-
-        if (exists) {
-            throw new Error("This collaborator is already added!");
-        }
-        const updatedCollaborators = [...(project.collaborators || []), savedCollaborator];
-        // notify parent
-        if (setProject) {
-            setProject({ ...project, collaborators: updatedCollaborators });
-        }
-        hideDialogs();
-    };
-
-    const removeCollaborator = () => {
-        const updatedCollaborators = project.collaborators?.filter(
-            (c) => (c.applicant as Applicant)._id !== (collaborator.applicant as Applicant)._id
-        ) || [];
-
-        if (setProject) {
-            setProject({ ...project, collaborators: updatedCollaborators });
-        }
-        setCollaborators(updatedCollaborators);
-        hideDialogs();
-    };
-
-    */
-
-
     const hideDialogs = () => {
         setCollaborator(emptyCollaborator);
         setShowSaveDialog(false);
@@ -121,10 +84,10 @@ const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) =
                     setCollaborator(emptyCollaborator);
                     setShowSaveDialog(true);
                 }}
+                visible={!!project}
             />
         </div>
     );
-
 
     const statusBodyTemplate = (rowData: Project) => {
         return (
@@ -155,7 +118,7 @@ const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) =
                     value={collaborators}
                     selection={collaborator}
                     onSelectionChange={(e) => setCollaborator(e.value as Collaborator)}
-                    dataKey="applicant._id"
+                    dataKey={project?._id ? "_id" : "applicant._id"}
                     paginator
                     rows={10}
                     rowsPerPageOptions={[5, 10, 25]}
@@ -167,20 +130,23 @@ const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) =
                 >
                     <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                     <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
+                    {!project &&
+                        <Column field="project.title" header="Project" sortable />
+                    }
                     <Column
                         field="applicant.first_name"
                         header="Collaborator"
                         body={(rowData) => `${rowData.applicant.first_name} ${rowData.applicant.last_name}`}
                         sortable
-                        headerStyle={{ minWidth: '15rem' }}
                     />
+
                     <Column field="applicant.gender" header="Gender" sortable headerStyle={{ minWidth: '8rem' }} />
                     <Column header="Status" body={statusBodyTemplate} sortable />
                     <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
 
                 </DataTable>
 
-                {collaborator &&
+                {project && collaborator &&
                     <CollaboratorDialog
                         collaborator={collaborator}
                         visible={showSaveDialog}
@@ -189,12 +155,11 @@ const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) =
                         onHide={hideDialogs}
                     />}
 
-                {collaborator && collaborator.applicant && (
+                {project && collaborator && collaborator.applicant && (
                     <ConfirmDialog
                         showDialog={showDeleteDialog}
                         title={String((collaborator.applicant as any).first_name)}
                         onConfirmAsync={project._id ? deleteCollaborator : undefined}
-                        //onConfirm={!project._id ? onRemove : undefined}
                         onHide={hideDialogs}
                     />
                 )}

@@ -29,6 +29,11 @@ const AppMenu = () => {
                     icon: PrimeIcons.BRIEFCASE,
                     to: '/projects'
                 },
+                {
+                    label: 'Collaborators',
+                    icon: 'pi pi-fw pi-users',
+                    to: '/projects/collaborators',
+                },
             ]
         },
         {
