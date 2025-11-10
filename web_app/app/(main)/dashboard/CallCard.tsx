@@ -20,7 +20,7 @@ const CallCard = ({ call }: CallCardProps) => {
         <div className="relative overflow-hidden border-round-top-lg">
             <img
                 alt="Call Poster"
-                src={call.poster || "/images/callcard.png"}
+                src={"/images/callcard.png"}
                 className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
             />
         </div>
@@ -59,7 +59,7 @@ const CallCard = ({ call }: CallCardProps) => {
                 title={<span className="font-semibold text-lg">{truncate(call.title, 45)}</span>}
                 subTitle={
                     <div className="flex flex-column gap-1 text-sm text-600">
-                        <span>{(call.directorate as Organization).name}</span>
+                        <span>{(call.organization as Organization).name}</span>
                         <span>{(call.calendar as Calendar).year}</span>
                         <span>
                             <strong className="text-red-500">
