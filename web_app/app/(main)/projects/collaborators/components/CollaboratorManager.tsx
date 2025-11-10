@@ -12,6 +12,7 @@ import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
 import { InputText } from "primereact/inputtext";
 import { handleGlobalFilterChange, initFilters } from "@/utils/filterUtils";
 import Badge from "@/templates/Badge";
+import ErrorComponent from "@/components/ErrorComponent";
 
 interface CollaboratorProps {
     project?: Project;
@@ -23,11 +24,11 @@ const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) =
 
     const emptyCollaborator: Collaborator = {
         project: project ?? "",
-        applicant: "",
         status: CollaboratorStatus.pending
     };
 
     const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+    const [error, setError] = useState<string | null>(null);
     const [collaborator, setCollaborator] = useState<Collaborator>(emptyCollaborator);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -48,10 +49,9 @@ const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) =
         const fetchCollaborators = async () => {
             try {
                 const data = await CollaboratorApi.getCollaborators({ project: project?._id });
-                console.log("Fetched collaborators:", data);
                 setCollaborators(data);
             } catch (err) {
-                console.error("Failed to fetch collaborators:", err);
+                setError("Failed to fetch collaborators:" + err);
             }
         };
         // if (project?._id) {
@@ -61,6 +61,10 @@ const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) =
         //  setCollaborators(project.collaborators ?? []);
         // }
     }, [project?._id]);
+
+    if (error) {
+        return <ErrorComponent errorMessage={error} />;
+    }
 
 
     const onSaveComplete = (savedCollaborator: Collaborator) => {
@@ -121,20 +125,41 @@ const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) =
         </div>
     );
 
-    const actionBodyTemplate = (rowData: Collaborator) => (
-        <>
-            <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setCollaborator(rowData);
-                    setShowSaveDialog(true);
-                }} />
-            <Button icon="pi pi-times" rounded severity="warning" className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setCollaborator(rowData);
-                    setShowDeleteDialog(true);
-                }} />
-        </>
-    );
+    const actionBodyTemplate = (rowData: Collaborator) => {
+        // 👇 declare it here
+        const isPending = rowData.status === CollaboratorStatus.pending;
+        // (or use CollaboratorStatus.pending if you have an enum)
+        return (
+            <>
+                {/* ✅ Toggle status button */}
+                <Button
+                    icon={isPending ? "pi pi-check-circle" : "pi pi-pause"}
+                    rounded
+                    severity={isPending ? "success" : "danger"}
+                    className="p-button-rounded p-button-text mr-2"
+                    style={{ fontSize: "1rem", width: '2.5rem', height: '2.5rem' }}
+                    onClick={() => {
+                        const updatedStatus = isPending ? "ACTIVE" : "PENDING";
+                        console.log(`Changing ${rowData._id} to ${updatedStatus}`);
+                    }}
+                />
+
+                {/* ❌ Delete button */}
+                <Button
+                    icon="pi pi-times"
+                    rounded
+                    severity="warning"
+                    className="p-button-rounded p-button-text"
+                    style={{ fontSize: "1.2rem" }}
+                    onClick={() => {
+                        setCollaborator(rowData);
+                        setShowDeleteDialog(true);
+                    }}
+                />
+            </>
+        );
+    };
+
 
     return (
         <>
@@ -147,7 +172,7 @@ const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) =
                     selection={collaborator}
                     header={header}
                     onSelectionChange={(e) => setCollaborator(e.value as Collaborator)}
-                    dataKey={project?._id ? "_id" : "applicant._id"}
+                    dataKey={"_id"}
                     paginator
                     rows={10}
                     rowsPerPageOptions={[5, 10, 25]}
@@ -161,6 +186,9 @@ const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) =
                 >
                     <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
                     <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
+
+                    <Column field="applicant.organization.name" header="Workspace" sortable />
+
                     <Column
                         field="applicant.first_name"
                         header="Collaborator"
@@ -190,7 +218,7 @@ const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) =
                     <ConfirmDialog
                         showDialog={showDeleteDialog}
                         title={String((collaborator.applicant as any).first_name)}
-                        onConfirmAsync={project._id ? deleteCollaborator : undefined}
+                        onConfirmAsync={collaborator._id ? deleteCollaborator : undefined}
                         onHide={hideDialogs}
                     />
                 )}

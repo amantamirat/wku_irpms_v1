@@ -9,7 +9,7 @@ export enum CollaboratorStatus {
 export type Collaborator = {
     _id?: string;
     project: string | Project;
-    applicant: string | Applicant;
+    applicant?: string | Applicant;
     isLeadPI?: boolean;
     status?: CollaboratorStatus;
     createdAt?: Date;

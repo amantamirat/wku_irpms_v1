@@ -31,7 +31,7 @@ const AppMenu = () => {
                 },
                 {
                     label: 'Collaborators',
-                    icon: 'pi pi-fw pi-users',
+                    icon: 'pi pi-fw pi-asterisk',
                     to: '/projects/collaborators',
                 },
             ]

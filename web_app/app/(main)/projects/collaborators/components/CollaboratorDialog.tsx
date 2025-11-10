@@ -12,6 +12,7 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { CollaboratorApi } from "../api/collaborator.api";
 import { Collaborator, CollaboratorStatus } from "../models/collaborator.model";
+import exp from "constants";
 
 interface CollaboratorDialogProps {
     collaborator: Collaborator;
@@ -21,13 +22,17 @@ interface CollaboratorDialogProps {
     onHide: () => void;
 }
 
-export default function CollaboratorDialog({ collaborator, visible, onSave, onComplete, onHide }: CollaboratorDialogProps) {
+const CollaboratorDialog = ({ collaborator, visible, onSave, onComplete, onHide }: CollaboratorDialogProps) => {
     const [localCollaborator, setLocalCollaborator] = useState<Collaborator>({ ...collaborator });
     const [scope, setScope] = useState<OrganizationalUnit>();
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [workspace, setWorkspace] = useState<Organization>();
     const [applicants, setApplicants] = useState<Applicant[]>([]);
     const toast = useRef<Toast>(null);
+
+    useEffect(() => {
+        setLocalCollaborator({ ...collaborator });
+    }, [collaborator]);
 
     // Fetch organizations based on scope
     useEffect(() => {
@@ -71,9 +76,9 @@ export default function CollaboratorDialog({ collaborator, visible, onSave, onCo
                 saved = { ...localCollaborator };
                 onSave(localCollaborator);
             } else {
-
                 if (localCollaborator._id) {
-                    saved = await CollaboratorApi.updateCollaborator(localCollaborator);
+                    saved = { ...localCollaborator }
+                    // saved = await CollaboratorApi.updateCollaborator(localCollaborator);
                 } else {
                     saved = await CollaboratorApi.createCollaborator(localCollaborator);
                 }
@@ -120,8 +125,8 @@ export default function CollaboratorDialog({ collaborator, visible, onSave, onCo
                 footer={footer}
                 onHide={onHide}
             >
-                {!localCollaborator._id ? (
-                    <>
+                {(!localCollaborator._id && !localCollaborator.applicant)
+                    && <>
                         <div className="field">
                             <label htmlFor="scope">Scope</label>
                             <Dropdown
@@ -163,8 +168,9 @@ export default function CollaboratorDialog({ collaborator, visible, onSave, onCo
                                 placeholder="Select a Collaborator"
                             />
                         </div>
-                    </>
-                ) : (
+                    </>}
+                {
+                    localCollaborator._id &&
                     <div className="field">
                         <label htmlFor="status">Status</label>
                         <Dropdown
@@ -174,8 +180,9 @@ export default function CollaboratorDialog({ collaborator, visible, onSave, onCo
                             onChange={(e) => setLocalCollaborator({ ...localCollaborator, status: e.value })}
                         />
                     </div>
-                )}
-            </Dialog>
+                }
+            </Dialog >
         </>
     );
 }
+export default CollaboratorDialog;
