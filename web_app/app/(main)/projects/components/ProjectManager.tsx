@@ -169,7 +169,7 @@ const ProjectManager = () => {
                     >
                         <Column expander headerStyle={{ width: '3em' }}></Column>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-
+                        <Column field="cycle.title" header="Cycle" sortable />
                         <Column field="title" header="Title" sortable />
                         <Column header="Status" body={statusBodyTemplate} sortable />
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>

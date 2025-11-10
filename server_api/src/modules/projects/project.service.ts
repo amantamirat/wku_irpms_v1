@@ -1,17 +1,16 @@
 import mongoose from "mongoose";
 import { CacheService } from "../../util/cache/cache.service";
 import { Cycle } from "../cycles/cycle.model";
+import { Collaborator } from "./collaborators/collaborator.model";
 import {
     CreateProjectDto,
-    UpdateProjectDto,
+    DeleteProjectDto,
     GetProjectsOptions,
-    DeleteProjectDto
+    UpdateProjectDto
 } from "./project.dto";
 import { Project } from "./project.model";
-import { ProjectStatus } from "./project.enum";
-import { Collaborator } from "./collaborators/collaborator.model";
 
-export class ProjectService {  
+export class ProjectService {
 
 
     static async createProject(dto: CreateProjectDto) {
@@ -25,21 +24,25 @@ export class ProjectService {
         });
         return project;
     }
-    
+
     static async updateProject(dto: UpdateProjectDto) {
         const { id, data, userId } = dto;
         const project = await Project.findById(id);
         if (!project) throw new Error("Project not found");
 
-        const cycle = await Cycle.findById(project.cycle).lean();
-        if (!cycle) throw new Error("Cycle not found");
-        await CacheService.validateOwnership(userId, cycle.organization);
+        const createdBy = project.createdBy.toString();
+        if (createdBy !== userId) {
+            throw new Error("Unauthorized: You do not have permission to update this project.");
+        }
+        //const cycle = await Cycle.findById(project.cycle).lean();
+        //if (!cycle) throw new Error("Cycle not found");
+        //await CacheService.validateOwnership(userId, cycle.organization);
 
         Object.assign(project, data);
         return project.save();
     }
 
-   
+
     static async getProjects(options: GetProjectsOptions) {
         const filter: any = {};
         if (options.userId) {
@@ -60,11 +63,15 @@ export class ProjectService {
         const { id, userId } = dto;
         const project = await Project.findById(id);
         if (!project) throw new Error("Project not found");
-
-        const cycle = await Cycle.findById(project.cycle).lean();
-        if (!cycle) throw new Error("Cycle not found");
-        await CacheService.validateOwnership(userId, cycle.organization);
-
+        const createdBy = project.createdBy.toString();
+        if (createdBy !== userId) {
+            throw new Error("Unauthorized: You do not have permission to delete this project.");
+        }
+        /*
+                const cycle = await Cycle.findById(project.cycle).lean();
+                if (!cycle) throw new Error("Cycle not found");
+                await CacheService.validateOwnership(userId, cycle.organization);
+        */
         const collaborator = await Collaborator.exists({ project: project._id });
         if (collaborator) throw new Error(`Cannot delete: ${project.title} collaborator exist.`);
 

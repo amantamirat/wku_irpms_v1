@@ -1,7 +1,8 @@
 import { Router } from 'express';
-import { verifyActiveAccount } from '../users/auth/auth.middleware';
+import { checkPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
 import { CycleController } from './cycle.controller';
 import { checkCyclePermission } from './cycle.middleware';
+import { PERMISSIONS } from '../../util/permissions';
 
 const router = Router();
 
@@ -17,7 +18,9 @@ router.post(
 router.get(
     '/',
     verifyActiveAccount,
-    //checkCyclePermission('READ'),
+    checkPermission([PERMISSIONS.CYCLE.CALL.READ,
+    PERMISSIONS.CYCLE.PROGRAM.READ
+    ]),
     CycleController.getCycles
 );
 

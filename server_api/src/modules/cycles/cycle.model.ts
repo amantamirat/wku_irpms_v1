@@ -33,7 +33,7 @@ const CycleSchema = new Schema<ICycle>(
 );
 
 CycleSchema.virtual('firstStage', {
-    ref: COLLECTIONS.CYCLE_STAGE,
+    ref: COLLECTIONS.STAGE,
     localField: '_id',
     foreignField: 'call',
     justOne: true,

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Card } from 'primereact/card';
 import { Skeleton } from 'primereact/skeleton';
-import { Call, CallStatus } from '../calls/models/call.model';
-import { CallApi } from '../calls/api/call.api';
 import CallCard from './CallCard';
 import ErrorComponent from '@/components/ErrorComponent';
+import { Cycle, CycleStatus } from '../cycles/models/cycle.model';
+import { CycleApi } from '../cycles/services/cycle.api';
 
 const CallGrid = () => {
-    const [calls, setCalls] = useState<Call[]>([]);
+    const [cycles, setCycles] = useState<Cycle[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -15,8 +15,8 @@ const CallGrid = () => {
         const fetchCalls = async () => {
             try {
                 setLoading(true);
-                const data = await CallApi.getCalls({ status: CallStatus.active });
-                setCalls(data);
+                const data = await CycleApi.getCycles({ type: "Call", status: CycleStatus.active });
+                setCycles(data);
             } catch {
                 setError('Failed to load calls. Please try again later.');
             } finally {
@@ -45,7 +45,7 @@ const CallGrid = () => {
 
     if (error) return <ErrorComponent errorMessage={error} />;
 
-    if (calls.length === 0)
+    if (cycles.length === 0)
         return (
             <div className="flex justify-content-center align-items-center py-6">
                 <div className="text-center">
@@ -57,7 +57,7 @@ const CallGrid = () => {
 
     return (
         <div className="grid gap-4">
-            {calls.map((call) => (
+            {cycles.map((call) => (
                 <div key={call._id} className="col-12 sm:col-6 lg:col-4 xl:col-3">
                     <CallCard call={call} />
                 </div>

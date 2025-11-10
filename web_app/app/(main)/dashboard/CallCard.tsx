@@ -2,13 +2,13 @@ import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { useState } from "react";
 import { Calendar } from "../calendars/models/calendar.model";
-import { Call } from "../calls/models/call.model";
 import { Organization } from "../organizations/models/organization.model";
 import ApplyWizard from "./apply/ApplyWizard";
 import CallViewDialog from "./CallViewDialog";
+import { Cycle } from "../cycles/models/cycle.model";
 
 interface CallCardProps {
-    call: Call;
+    call: Cycle;
 }
 
 const CallCard = ({ call }: CallCardProps) => {

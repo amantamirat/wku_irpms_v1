@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { Call } from "../call/call.model";
 import { Directorate } from "../organization/organization.model";
 import { Grant } from "./grant.model";
 import { CacheService } from "../../util/cache/cache.service";
@@ -57,8 +56,6 @@ export class GrantService {
         const grant = await Grant.findById(id);
         if (!grant) throw new Error("Grant not found");
         await CacheService.validateOwnership(userId, grant.directorate);
-        const referencedByCall = await Call.exists({ grant: grant._id });
-        if (referencedByCall) throw new Error(`Can not delete ${grant.title}, it is referenced in call.`);
         return await grant.deleteOne();
     }
 }

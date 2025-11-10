@@ -1,4 +1,4 @@
-import { Call } from "../call/call.model";
+import { Cycle } from "../cycles/cycle.model";
 import { CalendarStatus } from "./calendar.enum";
 import { Calendar } from "./calendar.model";
 
@@ -36,8 +36,8 @@ export class CalendarService {
     static async deleteCalendar(id: string) {
         const calendar = await Calendar.findById(id);
         if (!calendar) throw new Error("Calendar not found");
-        const referencedByCall = await Call.exists({ calendar: calendar._id });
-        if (referencedByCall) throw new Error(`Can not delete ${calendar.year}, it is referenced in call.`);
+        const referencedByCycle = await Cycle.exists({ calendar: calendar._id });
+        if (referencedByCycle) throw new Error(`Can not delete ${calendar.year}, cycle exist.`);
         return await calendar.deleteOne();
     }
 }

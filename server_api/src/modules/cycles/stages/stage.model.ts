@@ -59,4 +59,4 @@ const StageSchema = new Schema<IStage>({
 
 StageSchema.index({ cycle: 1, order: 1 }, { unique: true });
 
-export const Stage = model<IStage>(COLLECTIONS.CYCLE_STAGE, StageSchema);
+export const Stage = model<IStage>(COLLECTIONS.STAGE, StageSchema);

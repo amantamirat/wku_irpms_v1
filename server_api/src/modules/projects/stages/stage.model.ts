@@ -1,7 +1,7 @@
 import mongoose, { model, Schema } from "mongoose";
 import { ProjectStageStatus } from "./stage.enum";
 import { COLLECTIONS } from "../../../util/collections.enum";
-import { Stage } from "../../call/stages/stage.model";
+import { Stage } from "../../cycles/stages/stage.model";
 
 interface IProjectStage extends Document {
     project: mongoose.Types.ObjectId;

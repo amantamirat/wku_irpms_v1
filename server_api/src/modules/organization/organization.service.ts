@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { Call } from "../call/call.model";
 import { AcademicLevel, Classification, Ownership, Unit } from "./organization.enum";
 import { Organization } from "./organization.model";
 
@@ -49,8 +48,8 @@ export class OrganizationService {
         if (isParentExist) throw new Error(`Can not delete parent ${organization.type} ${organization.name}`);
 
         if (organization.type === Unit.Directorate) {
-            const isCallExist = await Call.exists({ directorate: organization._id });
-            if (isCallExist) throw new Error(`Can not delete ${organization.type} ${organization.name}, Call data exist.`);
+            //const isCallExist = await Call.exists({ directorate: organization._id });
+            //if (isCallExist) throw new Error(`Can not delete ${organization.type} ${organization.name}, Call data exist.`);
 
         }
         return await organization.deleteOne();

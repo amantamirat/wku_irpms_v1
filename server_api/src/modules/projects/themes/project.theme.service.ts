@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import { BaseTheme } from "../../themes/theme.model";
 import { Project } from "../project.model";
 import { ProjectTheme } from "./project.theme.model";
-import { CreateCallDto } from "../../call/call.dto";
 
 
 export interface GetProjectThemeOptions {
@@ -19,7 +18,7 @@ export interface CreateProjectThemeDto {
 export class ProjectThemeService {
 
     private static async validateProjectTheme(pt: CreateProjectThemeDto) {
-        const project = await Project.findById(pt.project).populate<{ call: CreateCallDto }>("call").lean();
+        const project = await Project.findById(pt.project).populate("call").lean() as any;
         if (!project) throw new Error("Project not found");
         const theme = await BaseTheme.findOne({ _id: pt.theme, thematic_area: project.call.theme }).lean();
         if (!theme) throw new Error("Theme not found");

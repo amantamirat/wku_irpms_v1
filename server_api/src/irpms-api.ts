@@ -8,13 +8,11 @@ import organizationRoutes from './modules/organization/organization.routes';
 import applicantRoutes from './modules/applicants/applicant.routes';
 import positionRoutes from './modules/applicants/positions/position.routes';
 import themeRoutes from './modules/themes/theme.routes';
-//import evalRoutes from './modules/call/evaluations/evaluation.routes';
+
 import evaluationRoutes from './modules/evaluations/evaluation.routes';
 import criterionRoutes from './modules/evaluations/criteria/criterion.routes';
 import optionRoutes from './modules/evaluations/options/option.routes';
 import calendarRoutes from './modules/calendar/calendar.routes';
-import callRoutes from './modules/call/call.routes';
-import callStageRoutes from './modules/call/stages/stage.routes';
 import cycleRoutes from './modules/cycles/cycle.routes';
 import cycleStageRoutes from './modules/cycles/stages/stage.routes';
 import grantRoutes from './modules/grants/grant.routes';
@@ -58,8 +56,6 @@ app.use("/api/criteria", criterionRoutes);
 app.use("/api/options", optionRoutes);
 
 app.use("/api/calendars", calendarRoutes);
-app.use("/api/calls", callRoutes);
-app.use("/api/call/stages", callStageRoutes);
 app.use("/api/cycles", cycleRoutes);
 app.use("/api/cycle/stages", cycleStageRoutes);
 app.use("/api/grants", grantRoutes);
