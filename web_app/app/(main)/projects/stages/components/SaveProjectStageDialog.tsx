@@ -1,12 +1,11 @@
-import { Call } from "@/app/(main)/calls/models/call.model";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import UploadForm from "../../components/UploadForm";
 import { Project } from "../../models/project.model";
 import { ProjectStage, StageStatus, validateProjectStage } from "../models/stage.model";
-import UploadForm from "../../components/UploadForm";
 
 interface SaveProjectStageDialogProps {
     project: Project;
