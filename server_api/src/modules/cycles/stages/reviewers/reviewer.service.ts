@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import { ReviewerStatus } from "./reviewer.enum";
 import { Reviewer } from "./reviewer.model";
-import { ProjectStage } from "../stages/stage.model";
-import { ProjectStageStatus } from "../stages/stage.enum";
-import Applicant from "../../applicants/applicant.model";
-import { Collaborator } from "../collaborators/collaborator.model";
+import { ProjectStage } from "../stage_projects/stage.project.model";
+import { ProjectStageStatus } from "../stage_projects/stage.project.enum";
+import Applicant from "../../../applicants/applicant.model";
+import { Collaborator } from "../../../projects/collaborators/collaborator.model";
 
 export interface GetReviewerOptions {
     projectStage?: mongoose.Types.ObjectId;

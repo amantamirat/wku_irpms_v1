@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
-import { errorResponse, successResponse } from "../../../util/response";
+import { errorResponse, successResponse } from "../../../../../util/response";
 import { CreateResultDto, GetResultOptions, ResultService } from "./result.service";
 
 export class ResultController {

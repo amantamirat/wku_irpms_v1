@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 import { Result } from "./result.model";
-import { Reviewer } from "../reviewers/reviewer.model";
-import { Criterion } from "../../evaluations/criteria/criterion.model";
-import { Option } from "../../evaluations/options/option.model";
-import { FormType } from "../../evaluations/criteria/criterion.enum";
+import { Reviewer } from "../reviewer.model";
+import { Criterion } from "../../../../evaluations/criteria/criterion.model";
+import { Option } from "../../../../evaluations/options/option.model";
+import { FormType } from "../../../../evaluations/criteria/criterion.enum";
 
 
 export interface CreateResultDto {

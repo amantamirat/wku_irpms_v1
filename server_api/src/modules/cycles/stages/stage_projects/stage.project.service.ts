@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import { ProjectStageStatus } from "./stage.enum";
-import { ProjectStage } from "./stage.model";
-import { Project } from "../project.model";
+import { ProjectStageStatus } from "./stage.project.enum";
+import { ProjectStage } from "./stage.project.model";
+import { Project } from "../../../projects/project.model";
 
 export interface GetProjectStageOptions {
     _id?: string;

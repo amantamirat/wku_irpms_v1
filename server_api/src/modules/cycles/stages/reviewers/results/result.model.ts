@@ -1,7 +1,7 @@
 import mongoose, { model, Schema } from "mongoose";
-import { COLLECTIONS } from "../../../util/collections.enum";
-import { Criterion } from "../../evaluations/criteria/criterion.model";
-import { Option } from "../../evaluations/options/option.model";
+import { COLLECTIONS } from "../../../../../util/collections.enum";
+import { Criterion } from "../../../../evaluations/criteria/criterion.model";
+import { Option } from "../../../../evaluations/options/option.model";
 
 interface IResult extends Document {
     evaluator: mongoose.Types.ObjectId;

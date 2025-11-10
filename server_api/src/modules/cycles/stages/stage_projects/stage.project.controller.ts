@@ -4,9 +4,9 @@ import {
     CreateProjectStageDto,
     GetProjectStageOptions,
     UpdateProjectStageDto
-} from "./stage.service";
+} from "./stage.project.service";
 import fs from "fs";
-import { errorResponse, successResponse } from "../../../util/response";
+import { errorResponse, successResponse } from "../../../../util/response";
 import mongoose from "mongoose";
 
 export class ProjectStageController {

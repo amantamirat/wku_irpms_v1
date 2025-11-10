@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { ReviewerService, CreateReviewerDto, GetReviewerOptions } from './reviewer.service';
 import mongoose from 'mongoose';
-import { errorResponse, successResponse } from '../../../util/response';
+import { errorResponse, successResponse } from '../../../../util/response';
 import { ReviewerStatus } from './reviewer.enum';
 
 export class ReviewerController {

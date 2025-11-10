@@ -1,11 +1,12 @@
 import mongoose, { model, Schema } from "mongoose";
-import { ProjectStageStatus } from "./stage.enum";
-import { COLLECTIONS } from "../../../util/collections.enum";
-import { Stage } from "../../cycles/stages/stage.model";
+import { ProjectStageStatus } from "./stage.project.enum";
+import { COLLECTIONS } from "../../../../util/collections.enum";
+import { Stage } from "../stage.model";
 
 interface IProjectStage extends Document {
-    project: mongoose.Types.ObjectId;
     stage: mongoose.Types.ObjectId;
+    project: mongoose.Types.ObjectId;
+
     status: ProjectStageStatus;
     documentPath: string;
     createdAt?: Date;
@@ -13,20 +14,20 @@ interface IProjectStage extends Document {
 }
 
 const ProjectStageSchema = new Schema<IProjectStage>({
-    project: {
-        type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.PROJECT,
-        immutable: true,
-        required: true
-    },    
     stage: {
         type: Schema.Types.ObjectId,
         ref: Stage.modelName,
         immutable: true,
         required: true
     },
+    project: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.PROJECT,
+        immutable: true,
+        required: true
+    },
     documentPath: {
-        type: String, 
+        type: String,
         required: true
     },
     status: {
