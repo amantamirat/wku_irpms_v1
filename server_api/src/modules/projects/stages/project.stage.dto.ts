@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { ProjectStageStatus } from "./stage.project.enum";
+import { ProjectStageStatus } from "./project.stage.enum";
 
 export interface GetProjectStagesDTO {
     project?: mongoose.Types.ObjectId;

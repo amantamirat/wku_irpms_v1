@@ -10,9 +10,9 @@ import { Phase } from "./phase/phase.model";
 import { ProjectStatus } from "./project.enum";
 import { Project } from "./project.model";
 import { CreateProjectDto } from "./project.service";
-import { ProjectStageStatus } from "../cycles/stages/stage_projects/stage.project.enum";
-import { ProjectStage } from "../cycles/stages/stage_projects/stage.project.model";
-import { CreateProjectStageDto } from "../cycles/stages/stage_projects/stage.project.service";
+import { ProjectStageStatus } from "./stages/project.stage.enum";
+import { ProjectStage } from "./stages/project.stage.model";
+import { CreateProjectStageDto } from "./stages/project.stage.service";
 import { ProjectTheme } from "./themes/project.theme.model";
 
 export class ProService {

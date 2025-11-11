@@ -9,10 +9,10 @@ import { Project } from "../../models/project.model";
 import { ProjectStage, StageStatus, validateProjectStage } from "../models/stage.model";
 import { StageApi } from "@/app/(main)/cycles/stages/api/stage.api";
 import { Stage } from "@/app/(main)/cycles/stages/models/stage.model";
-import { ProjectStageApi } from "../api/stage.api";
+import { ProjectStageApi } from "../api/project.stage.api";
 
 interface SaveProjectStageDialogProps {
-    project: Project;
+    project?: Project;
     visible: boolean;
     projectStage: ProjectStage;
     onComplete?: (saved: ProjectStage) => void;
@@ -45,11 +45,10 @@ const SaveProjectStageDialog = ({
             if (localProjectStage._id) {
                 saved = await ProjectStageApi.updateProjectStage(localProjectStage);
             } else {
-                saved = await ProjectStageApi.createProjectStage({
-                    ...localProjectStage,
-                    project: project._id,
-                });
+                saved = await ProjectStageApi.createProjectStage(localProjectStage);
             }
+
+            saved = { ...saved, project: localProjectStage.project, stage: localProjectStage.stage };
 
             toast.current?.show({
                 severity: "success",
@@ -75,7 +74,7 @@ const SaveProjectStageDialog = ({
             const fetchStages = async () => {
                 try {
                     const data = await StageApi.getStages({
-                        cycle: (project.cycle as any)?._id,
+                        cycle: (project?.cycle as any)?._id,
                     });
                     setStages(data);
                 } catch (err) {

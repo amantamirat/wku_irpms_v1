@@ -1,8 +1,8 @@
-import { Project } from "../../../projects/project.model";
-import { Stage } from "../stage.model";
-import { CreateProjectStageDTO, GetProjectStagesDTO, UpdateProjectStageDTO } from "./stage.project.dto";
-import { ProjectStageStatus } from "./stage.project.enum";
-import { ProjectStage } from "./stage.project.model";
+import { Project } from "../project.model";
+import { Stage } from "../../cycles/stages/stage.model";
+import { CreateProjectStageDTO, GetProjectStagesDTO, UpdateProjectStageDTO } from "./project.stage.dto";
+import { ProjectStageStatus } from "./project.stage.enum";
+import { ProjectStage } from "./project.stage.model";
 
 
 export class ProjectStageService {
@@ -38,8 +38,6 @@ export class ProjectStageService {
                 throw new Error("Previous Project Stage is Not Accepted!");
             }
         }
-
-
     }
 
     static async createProjectStage(data: CreateProjectStageDTO) {

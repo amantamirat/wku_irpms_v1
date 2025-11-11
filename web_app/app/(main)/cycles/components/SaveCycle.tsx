@@ -17,7 +17,7 @@ import { Theme } from '../../thematic_areas/models/theme.model';
 import { Organization, OrganizationalUnit } from '../../organizations/models/organization.model';
 import { Cycle, CycleStatus, validateCycle } from '../models/cycle.model';
 import { CycleType } from '../models/cycle.model';
-import { CycleApi } from '../services/cycle.api';
+import { CycleApi } from '../api/cycle.api';
 
 interface SaveCycleProps {
     type: CycleType;

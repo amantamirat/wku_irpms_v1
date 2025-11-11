@@ -10,7 +10,7 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useEffect, useRef, useState } from 'react';
-import { CycleApi } from '../services/cycle.api';
+import { CycleApi } from '../api/cycle.api';
 import { Cycle, CycleStatus, CycleType } from '../models/cycle.model';
 import SaveCycle from './SaveCycle';
 //import StageManager from './StageManager';

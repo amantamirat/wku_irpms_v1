@@ -9,12 +9,12 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-//import { Evaluation } from '../../evaluations/models/evaluation.model';
 import { StageApi } from '../api/stage.api';
 import { Stage, StageStatus, StageType } from '../models/stage.model';
 import SaveStage from './SaveStage';
 import Badge from '@/templates/Badge';
 import { Cycle } from '../../models/cycle.model';
+import ProjectStageManager from '@/app/(main)/projects/stages/components/ProjectStageManager';
 
 
 interface StageManagerProps {
@@ -181,10 +181,16 @@ const StageManager = ({ cycle }: StageManagerProps) => {
                 scrollable
                 expandedRows={expandedRows}
                 onRowToggle={(e) => setExpandedRows(e.data)}
+                rowExpansionTemplate={(rowData: Stage) => (
+                    <ProjectStageManager stage={rowData} />
+                )}
             >
-                <Column selectionMode="single" headerStyle={{ width: '3em' }} />
+                {
+                    //<Column selectionMode="single" headerStyle={{ width: '3em' }} />
+                }
+                <Column expander style={{ width: '3em' }} />
                 <Column field="order" header="Order" sortable />
-                <Column field="name" header="Stage Name" sortable />
+                <Column field="name" header="Name" sortable />
                 <Column field="evaluation.title" header="Evaluation" sortable />
                 <Column field="deadline" header="Deadline" body={(rowData) => rowData.deadline ? new Date(rowData.deadline).toLocaleDateString() : ''} />
                 <Column field="type" header="Type" body={stageTypeBodyTemplate} sortable />

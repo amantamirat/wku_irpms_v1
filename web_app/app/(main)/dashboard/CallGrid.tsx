@@ -4,7 +4,7 @@ import { Skeleton } from 'primereact/skeleton';
 import CallCard from './CallCard';
 import ErrorComponent from '@/components/ErrorComponent';
 import { Cycle, CycleStatus } from '../cycles/models/cycle.model';
-import { CycleApi } from '../cycles/services/cycle.api';
+import { CycleApi } from '../cycles/api/cycle.api';
 
 const CallGrid = () => {
     const [cycles, setCycles] = useState<Cycle[]>([]);

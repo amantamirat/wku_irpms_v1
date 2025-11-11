@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import fs from "fs";
 import mongoose from "mongoose";
-import { errorResponse, successResponse } from "../../../../util/response";
-import { ProjectStageService } from "./stage.project.service";
-import { CreateProjectStageDTO, GetProjectStagesDTO, UpdateProjectStageDTO } from "./stage.project.dto";
-import { ProjectStage } from "./stage.project.model";
+import { errorResponse, successResponse } from "../../../util/response";
+import { ProjectStageService } from "./project.stage.service";
+import { CreateProjectStageDTO, GetProjectStagesDTO, UpdateProjectStageDTO } from "./project.stage.dto";
+import { ProjectStage } from "./project.stage.model";
 
 export class ProjectStageController {
 

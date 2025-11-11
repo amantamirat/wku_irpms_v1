@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 import { ReviewerStatus } from "./reviewer.enum";
 import { Reviewer } from "./reviewer.model";
-import { ProjectStage } from "../stage_projects/stage.project.model";
-import { ProjectStageStatus } from "../stage_projects/stage.project.enum";
+import { ProjectStage } from "../../../projects/stages/project.stage.model";
+import { ProjectStageStatus } from "../../../projects/stages/project.stage.enum";
 import Applicant from "../../../applicants/applicant.model";
 import { Collaborator } from "../../../projects/collaborators/collaborator.model";
 

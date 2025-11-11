@@ -13,6 +13,7 @@
         color: #8A6D3B;
     }
 
+    &.status-submitted,
     &.status-linked,
     &.status-active {
         background: #C8E6C9;
@@ -26,6 +27,7 @@
         background: #FFCDD2;
         color: #d80517;
     }
+    &.status-accepted,
     &.status-closed {
         background: #F3E5F5;
         color: #4A148C;

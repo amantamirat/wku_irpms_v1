@@ -1,6 +1,6 @@
 import express from "express";
-import { ProjectStageController } from "./stage.project.controller";
-import { upload } from "../../../../util/multer";
+import { ProjectStageController } from "./project.stage.controller";
+import { upload } from "../../../util/multer";
 
 
 const router = express.Router();

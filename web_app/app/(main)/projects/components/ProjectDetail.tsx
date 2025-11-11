@@ -5,7 +5,7 @@ import CollaboratorManager from "../collaborators/components/CollaboratorManager
 import ProjectThemeManager from "../themes/components/ThemeManager";
 import PhaseManager from "../phases/components/PhaseManager";
 import { PhaseType } from "../phases/models/phase.model";
-import ProjectStageManager from "../stages/components/StageManager";
+import ProjectStageManager from "../stages/components/ProjectStageManager";
 
 
 interface ProjectDetailProps {

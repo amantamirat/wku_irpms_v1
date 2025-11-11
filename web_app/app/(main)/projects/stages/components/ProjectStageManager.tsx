@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
-import { DataTable } from "primereact/datatable";
+import { DataTable, DataTableFilterMeta } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
 import ConfirmDialog from "@/components/ConfirmationDialog";
 import SaveProjectStageDialog from "./SaveProjectStageDialog";
@@ -11,31 +11,48 @@ import { Project } from "../../models/project.model";
 import { ProjectStage, StageStatus } from "../models/stage.model";
 import { BASE_URL } from "@/api/ApiClient";
 import ReviewerManager from "../../reviewers/components/ReviewerManager";
-import { ProjectStageApi } from "../api/stage.api";
+import { ProjectStageApi } from "../api/project.stage.api";
+import { Stage } from "@/app/(main)/cycles/stages/models/stage.model";
+import Badge from "@/templates/Badge";
+import { InputText } from "primereact/inputtext";
+import { handleGlobalFilterChange, initFilters } from "@/utils/filterUtils";
 
 interface ProjectStageManagerProps {
-    project: Project;
+    project?: Project;
+    stage?: Stage;
     setProject?: (project: Project) => void;
 }
 
-export default function ProjectStageManager({ project, setProject }: ProjectStageManagerProps) {
+const ProjectStageManager = ({ project, stage, setProject }: ProjectStageManagerProps) => {
     const emptyProjectStage: ProjectStage = {
-        project: project,
+        project: project ? project : "",
         stage: "",
         status: StageStatus.pending,
     };
 
     const [stages, setStages] = useState<ProjectStage[]>([]);
-    const [saved, setStage] = useState<ProjectStage>(emptyProjectStage);
+    const [projectStage, setProjectStage] = useState<ProjectStage>(emptyProjectStage);
     const [showDialog, setShowDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+    const [globalFilter, setGlobalFilter] = useState('');
+    const [filters, setFilters] = useState<DataTableFilterMeta>({});
+
+    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
+    };
+
+    useEffect(() => {
+        setFilters(initFilters());
+        setGlobalFilter('');
+    }, []);
 
     // ✅ Fetch stages from backend if project exists
     useEffect(() => {
         const fetchProjectStages = async () => {
             try {
-                if (project._id) {
-                    const data = await ProjectStageApi.getProjectStages({ project: project._id });
+                if (project?._id || stage?._id) {
+                    const data = await ProjectStageApi.getProjectStages({ project: project?._id, stage: stage?._id });
                     setStages(data);
                 }
             } catch (err) {
@@ -43,7 +60,7 @@ export default function ProjectStageManager({ project, setProject }: ProjectStag
             }
         };
         fetchProjectStages();
-    }, [project?._id]);
+    }, [project?._id, stage?._id]);
 
     // ✅ Called after saving (either create or update)
     const onSaveComplete = (savedStage: ProjectStage) => {
@@ -70,10 +87,10 @@ export default function ProjectStageManager({ project, setProject }: ProjectStag
 
     // ✅ Delete handler
     const deleteProjectStage = async () => {
-        if (project._id) {
-            const deleted = await ProjectStageApi.deleteProjectStage(saved);
+        if (project?._id) {
+            const deleted = await ProjectStageApi.deleteProjectStage(projectStage);
             if (deleted) {
-                setStages(stages.filter((s) => s._id !== saved._id));
+                setStages(stages.filter((s) => s._id !== projectStage._id));
             }
         } else {
             /*
@@ -86,7 +103,7 @@ export default function ProjectStageManager({ project, setProject }: ProjectStag
 
     // ✅ Hide dialogs and reset state
     const hideDialogs = () => {
-        setStage(emptyProjectStage);
+        setProjectStage(emptyProjectStage);
         setShowDialog(false);
         setShowDeleteDialog(false);
     };
@@ -100,10 +117,20 @@ export default function ProjectStageManager({ project, setProject }: ProjectStag
                 className="mr-2"
                 tooltip="Add Project Stage"
                 onClick={() => {
-                    setStage(emptyProjectStage);
+                    setProjectStage(emptyProjectStage);
                     setShowDialog(true);
                 }}
             />
+        </div>
+    );
+
+    const header = (
+        <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+            <h5 className="m-0"> {project ? "Stages" : stage ? "Projects" : "Project Stages"}</h5>
+            <span className="block mt-2 md:mt-0 p-input-icon-left">
+                <i className="pi pi-search" />
+                <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
+            </span>
         </div>
     );
 
@@ -117,7 +144,7 @@ export default function ProjectStageManager({ project, setProject }: ProjectStag
                 className="p-button-rounded p-button-text"
                 style={{ fontSize: "1.2rem" }}
                 onClick={() => {
-                    setStage(rowData);
+                    setProjectStage(rowData);
                     setShowDialog(true);
                 }}
             />
@@ -128,7 +155,7 @@ export default function ProjectStageManager({ project, setProject }: ProjectStag
                 className="p-button-rounded p-button-text"
                 style={{ fontSize: "1.2rem" }}
                 onClick={() => {
-                    setStage(rowData);
+                    setProjectStage(rowData);
                     setShowDeleteDialog(true);
                 }}
             />
@@ -149,53 +176,67 @@ export default function ProjectStageManager({ project, setProject }: ProjectStag
         );
     };
 
+    const statusBodyTemplate = (rowData: ProjectStage) => {
+        return (
+            <Badge type="status" value={rowData.status ?? 'Unknown'} />
+        );
+    };
+
     return (
         <div className="card">
-            <Toolbar className="mb-4" start={startToolbarTemplate} />
+            {project &&
+                <Toolbar className="mb-4" start={startToolbarTemplate} />
+            }
             <DataTable
                 value={stages}
-                selection={saved}
-                onSelectionChange={(e) => setStage(e.value as ProjectStage)}
+                header={header}
+                selection={projectStage}
+                onSelectionChange={(e) => setProjectStage(e.value as ProjectStage)}
                 dataKey={stages.some((s) => s._id) ? "_id" : "stage"}
                 paginator
                 rows={10}
                 rowsPerPageOptions={[5, 10, 25]}
                 className="datatable-responsive"
                 emptyMessage="No project stages found."
+                globalFilter={globalFilter}
+                filters={filters}
                 scrollable
-                tableStyle={{ minWidth: "50rem" }}
-                rowExpansionTemplate={(rowData: ProjectStage) => (
-                    <ReviewerManager projectStage={rowData} />
-                )}
+            //tableStyle={{ minWidth: "50rem" }}
             >
-                <Column expander style={{ width: "3em" }} />
+                {
+                    //<Column expander style={{ width: "3em" }} />
+                }
+                <Column selectionMode="single" headerStyle={{ width: '3em' }} />
                 <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: "50px" }} />
-                <Column field="stage.name" header="Stage" sortable />
+                {!stage && <Column field="stage.name" header="Stage" sortable />}
+                {!project && <Column field="project.title" header="Project" sortable />}
                 <Column header="Document" body={documentBodyTemplate} />
-                <Column field="status" header="Status" sortable />
+                <Column header="Status" body={statusBodyTemplate} sortable />
                 <Column body={actionBodyTemplate} headerStyle={{ minWidth: "10rem" }} />
             </DataTable>
 
-            {saved && (
+            {(projectStage && project) &&
                 <SaveProjectStageDialog
                     project={project}
-                    projectStage={saved}
+                    projectStage={projectStage}
                     visible={showDialog}
                     //onSave={!project._id ? addProjectStage : undefined}
                     onComplete={onSaveComplete}
                     onHide={hideDialogs}
                 />
-            )}
+            }
 
-            {saved && (
+            {(projectStage && project) && (
                 <ConfirmDialog
                     showDialog={showDeleteDialog}
-                    title={saved.stage ? saved.stage.toString() : "Project Stage"}
-                    onConfirmAsync={project._id ? deleteProjectStage : undefined}
-                    onConfirm={!project._id ? deleteProjectStage : undefined}
+                    title={projectStage.stage ? projectStage.stage.toString() : "Project Stage"}
+                    onConfirmAsync={project?._id ? deleteProjectStage : undefined}
+                    onConfirm={!project?._id ? deleteProjectStage : undefined}
                     onHide={hideDialogs}
                 />
             )}
         </div>
     );
 }
+
+export default ProjectStageManager;

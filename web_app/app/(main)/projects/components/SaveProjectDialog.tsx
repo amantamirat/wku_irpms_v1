@@ -9,7 +9,7 @@ import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { Project, validateProject } from '../models/project.model';
 import { ProjectApi } from '../api/project.api';
-import { CycleApi } from '../../cycles/services/cycle.api';
+import { CycleApi } from '../../cycles/api/cycle.api';
 import { Cycle } from '../../cycles/models/cycle.model';
 
 interface SaveProjectDialogProps {
@@ -22,7 +22,6 @@ interface SaveProjectDialogProps {
 const SaveProjectDialog = ({ visible, project, onHide, onComplete }: SaveProjectDialogProps) => {
     
     const toast = useRef<Toast>(null);
-
     const [localProject, setLocalProject] = useState<Project>({ ...project });
     const [submitted, setSubmitted] = useState(false);
     const [cycles, setCycles] = useState<Cycle[]>([]);
