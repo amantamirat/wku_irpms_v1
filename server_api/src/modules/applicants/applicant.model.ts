@@ -54,7 +54,8 @@ const ApplicantSchema = new Schema<IApplicant>({
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.USER,
         unique: true,
-        sparse: true
+        sparse: true,
+        immutable: true
     },
     accessibility: {
         type: [String],

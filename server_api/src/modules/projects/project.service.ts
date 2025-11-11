@@ -9,6 +9,7 @@ import {
     UpdateProjectDto
 } from "./project.dto";
 import { Project } from "./project.model";
+import Applicant from "../applicants/applicant.model";
 
 export class ProjectService {
 
@@ -16,10 +17,12 @@ export class ProjectService {
     static async createProject(dto: CreateProjectDto) {
         const cycle = await Cycle.findById(dto.cycle).lean();
         if (!cycle) throw new Error("Cycle not found");
-        // ensure user belongs to cycle's organization
+        const leadPI = await Applicant.findOne({ user: dto.userId }).lean();
+        if (!leadPI) throw new Error("Lead PI Applicant Not found");
         await CacheService.validateOwnership(dto.userId, cycle.organization);
         const project = await Project.create({
             ...dto,
+            leadPI: leadPI._id,
             createdBy: new mongoose.Types.ObjectId(dto.userId)
         });
         return project;

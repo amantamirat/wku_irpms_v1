@@ -6,6 +6,7 @@ interface IProject extends Document {
     cycle: mongoose.Types.ObjectId;
     title: string;
     summary?: string;
+    leadPI: mongoose.Types.ObjectId;
     createdBy: mongoose.Types.ObjectId;
     status: ProjectStatus;
     createdAt?: Date;
@@ -17,7 +18,7 @@ const ProjectSchema = new Schema<IProject>({
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.CYCLE,
         required: true,
-        immutable:true
+        immutable: true
     },
     title: {
         type: String,
@@ -30,6 +31,11 @@ const ProjectSchema = new Schema<IProject>({
         type: String,
         enum: Object.values(ProjectStatus),
         default: ProjectStatus.pending,
+        required: true
+    },
+    leadPI: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.APPLICANT,
         required: true
     },
     createdBy: {

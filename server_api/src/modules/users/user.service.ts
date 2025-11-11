@@ -56,10 +56,9 @@ export class UserService {
 
         if (user.status === UserStatus.deleted) {
             const applicant = await Applicant.findOne({ user: id });
-            if (applicant) {
-                applicant.user = undefined;
-                await applicant.save();
-            }
+            if(applicant){
+                throw new Error("Cannot delete user linked to an applicant");
+            }           
             await user.deleteOne();
             return { message: "User permanently deleted" };
         }

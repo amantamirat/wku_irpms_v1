@@ -4,6 +4,7 @@ import { Accessibility, applicantUnits, Gender } from "./applicant.enum";
 import Applicant from "./applicant.model";
 import { User } from "../users/user.model";
 import { CacheService } from "../../util/cache/cache.service";
+import { Project } from "../projects/project.model";
 
 export interface GetApplicantsOptions {
     organization?: mongoose.Types.ObjectId | mongoose.Types.ObjectId[];
@@ -89,6 +90,10 @@ export class ApplicantService {
         const applicant = await Applicant.findById(id);
         if (!applicant) throw new Error("Applicant not found");
         await CacheService.validateOwnership(userId, applicant.organization);
+        const project = await Project.findOne({ leadPI: applicant._id });
+        if (project) {
+            throw new Error("Cannot delete applicant who is a lead PI of a project");
+        }
         return await applicant.deleteOne();
     }
 
