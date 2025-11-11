@@ -10,12 +10,12 @@ export class OptionController {
         try {
             if (!req.user) throw new Error("User not found");
 
-            const { criterion, title, value } = req.body;
+            const { criterion, title, score } = req.body;
 
             const dto: CreateOptionDTO = {
                 criterion: new mongoose.Types.ObjectId(criterion as string),
                 title,
-                value
+                score: score
             };
 
             const option = await OptionService.createOption(dto);
@@ -45,11 +45,11 @@ export class OptionController {
             if (!req.user) throw new Error("User not found");
 
             const { id } = req.params;
-            const { title, value } = req.body;
+            const { title, score } = req.body;
 
             const dto: UpdateOptionDTO = {
                 id,
-                updates: { title, value }
+                updates: { title, score }
             };
 
             const updated = await OptionService.updateOption(dto);

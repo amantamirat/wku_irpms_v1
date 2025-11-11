@@ -13,15 +13,15 @@ export class OptionService {
      * Create a new option under a criterion.
      */
     static async createOption(dto: CreateOptionDTO) {
-        const { criterion, title, value } = dto;
+        const { criterion, title, score } = dto;
 
         const criterionDoc = await Criterion.findById(criterion);
         if (!criterionDoc) throw new Error("Criterion not found.");
         if (criterionDoc.form_type!==FormType.closed) throw new Error("Criterion must be closed.");
 
-        if (value > criterionDoc.weight) {
+        if (score > criterionDoc.weight) {
             throw new Error(
-                `Option weight (${value}) exceeds its criterion limit (${criterionDoc.weight}).`
+                `Option weight (${score}) exceeds its criterion limit (${criterionDoc.weight}).`
             );
         }
 
@@ -47,11 +47,11 @@ export class OptionService {
         const option = await Option.findById(id).populate("criterion");
         if (!option) throw new Error("Option not found.");
 
-        if (updates.value !== undefined) {
+        if (updates.score !== undefined) {
             const criterion: any = option.criterion;
-            if (updates.value > criterion.weight) {
+            if (updates.score > criterion.weight) {
                 throw new Error(
-                    `Option weight (${updates.value}) exceeds its criterion limit (${criterion.weight}).`
+                    `Option weight (${updates.score}) exceeds its criterion limit (${criterion.weight}).`
                 );
             }
         }

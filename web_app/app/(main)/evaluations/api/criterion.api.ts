@@ -16,6 +16,7 @@ function sanitizeCriterion(criterion: Partial<Criterion>): Partial<Criterion> {
 
 export interface GetCriteriaOptions {
     evaluation?: string;
+    stage?: string;
 }
 
 export const CriterionApi = {
@@ -29,17 +30,18 @@ export const CriterionApi = {
     async getCriteria(options: GetCriteriaOptions = {}): Promise<Criterion[]> {
         const query = new URLSearchParams();
         if (options.evaluation) query.append("evaluation", options.evaluation);
+        if (options.stage) query.append("stage", options.stage);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Criterion[];
     },
 
-     async importCriteriaBatch(evaluationId: string, criteriaData: any[]): Promise<any> {
-                const response = await ApiClient.post(`${end_point}/import-batch`, {
-                    evaluationId: evaluationId,
-                    criteriaData: criteriaData
-                });
-                return response;
-            },
+    async importCriteriaBatch(evaluationId: string, criteriaData: any[]): Promise<any> {
+        const response = await ApiClient.post(`${end_point}/import-batch`, {
+            evaluationId: evaluationId,
+            criteriaData: criteriaData
+        });
+        return response;
+    },
 
     async updateCriterion(criterion: Partial<Criterion>): Promise<Criterion> {
         if (!criterion._id) {

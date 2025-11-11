@@ -1,7 +1,5 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../../../../util/collections.enum";
-import { Criterion } from "../../../../evaluations/criteria/criterion.model";
-import { Option } from "../../../../evaluations/options/option.model";
 
 interface IResult extends Document {
     evaluator: mongoose.Types.ObjectId;
@@ -21,7 +19,7 @@ const ResultSchema = new Schema<IResult>({
     },
     criterion: {
         type: Schema.Types.ObjectId,
-        ref: Criterion.modelName,
+        ref: COLLECTIONS.CRITERION,
         required: true,
         immutable: true
     },
@@ -31,9 +29,9 @@ const ResultSchema = new Schema<IResult>({
     },
     selected_option: {
         type: Schema.Types.ObjectId,
-        ref: Option.modelName
+        ref: COLLECTIONS.OPTION
     },
-    
+
 }, { timestamps: true });
 ResultSchema.index({ evaluator: 1, criterion: 1 }, { unique: true });
 export const Result = model<IResult>(COLLECTIONS.RESULT, ResultSchema);

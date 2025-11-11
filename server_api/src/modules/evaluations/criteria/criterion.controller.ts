@@ -29,10 +29,11 @@ export class CriterionController {
 
     static async getCriteria(req: Request, res: Response) {
         try {
-            const { evaluation } = req.query;
+            const { evaluation, stage } = req.query;
 
             const dto: GetCriteriaDTO = {
-                evaluation: new mongoose.Types.ObjectId(evaluation as string)
+                evaluation: evaluation ? new mongoose.Types.ObjectId(evaluation as string) : undefined,
+                stage: stage ? new mongoose.Types.ObjectId(stage as string) : undefined
             };
 
             const criteria = await CriterionService.getCriteria(

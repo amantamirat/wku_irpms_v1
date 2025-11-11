@@ -1,6 +1,5 @@
 import mongoose, { Schema, model } from "mongoose";
 import { COLLECTIONS } from "../../../util/collections.enum";
-import { Criterion } from "../criteria/criterion.model";
 
 // =========================
 // 3️⃣ Option
@@ -10,7 +9,7 @@ import { Criterion } from "../criteria/criterion.model";
 export interface IOption extends Document {
     criterion: mongoose.Types.ObjectId;
     title: string;
-    value: number;
+    score: number;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -19,12 +18,12 @@ const OptionSchema = new Schema<IOption>(
     {
         criterion: {
             type: Schema.Types.ObjectId,
-            ref: Criterion.modelName,
+            ref: COLLECTIONS.CRITERION,
             required: true,
             immutable: true,
         },
         title: { type: String, required: true },
-        value: {
+        score: {
             type: Number,
             min: 0,
             max: 100,
@@ -34,6 +33,6 @@ const OptionSchema = new Schema<IOption>(
     { timestamps: true }
 );
 
-OptionSchema.index({ criterion: 1, value: 1 }, { unique: true });
+OptionSchema.index({ criterion: 1, score: 1 }, { unique: true });
 
 export const Option = model<IOption>(COLLECTIONS.OPTION, OptionSchema);

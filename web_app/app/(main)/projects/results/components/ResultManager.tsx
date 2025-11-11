@@ -7,18 +7,18 @@ import { useEffect, useState } from "react";
 import { Reviewer } from "../../reviewers/models/reviewer.model";
 import { ResultApi } from "../api/result.api";
 import { Result } from "../models/result.model";
-//import { EvalType, Evaluation, evaluationTemplate, FormType } from "@/app/(main)/evals/models/evaluation.model";
-//import { EvaluationApi } from "@/app/(main)/evals/api/evaluation.api";
-import EditResultDialog from "./EditResultDialog";
+import SaveResultDialog from "./SaveResultDialog";
 import { Criterion, FormType } from "@/app/(main)/evaluations/models/criterion.model";
 import { Option } from "@/app/(main)/evaluations/models/option.model";
+import { CriterionApi } from "@/app/(main)/evaluations/api/criterion.api";
+import { ProjectStage } from "../../stages/models/stage.model";
 
 interface ResultManagerProps {
-    evaluator?: Reviewer;
+    reviewer?: Reviewer;
 }
 
-const ResultManager = ({ evaluator }: ResultManagerProps) => {
-    //const [criteria, setCriteria] = useState<Evaluation[]>([]);
+const ResultManager = ({ reviewer }: ResultManagerProps) => {
+    //const [criteria, setCriteria] = useState<Criterion[]>([]);
     const [results, setResults] = useState<Result[]>([]);
     const [selectedResult, setSelectedResult] = useState<Result | null>(null);
     const [showAddDialog, setShowAddDialog] = useState(false);
@@ -26,23 +26,23 @@ const ResultManager = ({ evaluator }: ResultManagerProps) => {
 
 
     useEffect(() => {
-        /*
+
         const fetchData = async () => {
             try {
                 const fetchedCriteria =
-                    await EvaluationApi.getEvaluations({ type: EvalType.criterion });
+                    await CriterionApi.getCriteria({ stage: (reviewer?.projectStage as ProjectStage).stage });
                 const fetchedResults =
-                    await ResultApi.getResults({ evaluator: evaluator && evaluator._id ? evaluator._id : undefined });
+                    await ResultApi.getResults({ evaluator: reviewer?._id || "" });
 
-                const mergedResults: Result[] = fetchedCriteria.map((criterion: Evaluation) => {
+                const mergedResults: Result[] = fetchedCriteria.map((criterion: Criterion) => {
                     const existing = fetchedResults.find(
-                        (r: Result) => (r.criterion as Evaluation)?._id === criterion._id
+                        (r: Result) => (r.criterion as Criterion)?._id === criterion._id
                     );
                     return (
                         existing || {
                             criterion,
                             score: 0,
-                            evaluator: evaluator || "",
+                            evaluator: reviewer || "",
                         }
                     );
                 });
@@ -53,33 +53,30 @@ const ResultManager = ({ evaluator }: ResultManagerProps) => {
         };
 
         fetchData();
-        */
-    }, [evaluator]);
+
+    }, [reviewer]);
 
 
     const onSaveComplete = (savedResult: Result) => {
-       /*
         const updatedResults = results.map((r) =>
-            (r.criterion as Evaluation)._id === (savedResult.criterion as Evaluation)._id
+            (r.criterion as Criterion)._id === (savedResult.criterion as Criterion)._id
                 ? savedResult
                 : r
         );
         setResults(updatedResults);
-        */
         hideDialogs();
     };
 
     const deleteResult = async () => {
+
         if (!selectedResult?._id) return;
         const deleted = await ResultApi.deleteResult(selectedResult);
         if (deleted) {
-            /*
             setResults(results.map(r =>
-                (r.criterion as Evaluation)._id === (selectedResult.criterion as Evaluation)._id
-                    ? { ...r, _id: undefined, score: 0 } // reset instead of removing
+                (r.criterion as Criterion)._id === (selectedResult.criterion as Criterion)._id
+                    ? { ...r, _id: undefined, score: 0, selected_option: undefined } // reset instead of removing
                     : r
             ));
-            */
             hideDialogs();
         }
     };
@@ -97,7 +94,7 @@ const ResultManager = ({ evaluator }: ResultManagerProps) => {
 
             if (criterion.form_type === FormType.closed && r.selected_option) {
                 const optionEval = r.selected_option as Option;
-                return sum + (optionEval.value || 0);
+                return sum + (optionEval.score || 0);
             } else if (criterion.form_type !== FormType.closed && r.score) {
                 return sum + r.score;
             }
@@ -112,7 +109,7 @@ const ResultManager = ({ evaluator }: ResultManagerProps) => {
         if (!criterion) return "";
         if (criterion.form_type === FormType.closed) {
             return rowData.selected_option
-                ? (rowData.selected_option as Option).value
+                ? (rowData.selected_option as Option).title
                 : "-";
         }
         return rowData.score ?? "-";
@@ -175,7 +172,7 @@ const ResultManager = ({ evaluator }: ResultManagerProps) => {
 
             {
                 selectedResult &&
-                <EditResultDialog
+                <SaveResultDialog
                     visible={showAddDialog}
                     result={selectedResult}
                     criterion={selectedResult.criterion as Criterion}

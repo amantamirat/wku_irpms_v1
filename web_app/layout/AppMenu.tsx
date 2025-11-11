@@ -30,6 +30,12 @@ const AppMenu = () => {
                     to: '/projects'
                 },
                 {
+                    label: 'Reviewers',
+                    icon: 'pi pi-fw pi-eye',
+                    to: '/projects/reviewers',
+                    //visible: hasPermission([PERMISSIONS.PROJECT.REVIEW])
+                },
+                {
                     label: 'Collaborators',
                     icon: 'pi pi-fw pi-asterisk',
                     to: '/projects/collaborators',

@@ -4,10 +4,10 @@
     "weight": 20,
     "form_type": "Closed",
     "options": [
-      { "title": "Strongly Aligned – directly supports institutional transfer strategy", "value": 20 },
-      { "title": "Moderately Aligned – supports goals indirectly", "value": 15 },
-      { "title": "Minimally Aligned – limited relevance", "value": 10 },
-      { "title": "Not Aligned – unrelated to institutional objectives", "value": 5 }
+      { "title": "Strongly Aligned – directly supports institutional transfer strategy", "score": 20 },
+      { "title": "Moderately Aligned – supports goals indirectly", "score": 15 },
+      { "title": "Minimally Aligned – limited relevance", "score": 10 },
+      { "title": "Not Aligned – unrelated to institutional objectives", "score": 5 }
     ]
   },
   {
@@ -15,10 +15,10 @@
     "weight": 25,
     "form_type": "Closed",
     "options": [
-      { "title": "High – novel technology with strong market demand", "value": 25 },
-      { "title": "Moderate – some innovation with fair market interest", "value": 20 },
-      { "title": "Low – incremental improvement with limited market", "value": 15 },
-      { "title": "None – lacks innovation or market potential", "value": 10 }
+      { "title": "High – novel technology with strong market demand", "score": 25 },
+      { "title": "Moderate – some innovation with fair market interest", "score": 20 },
+      { "title": "Low – incremental improvement with limited market", "score": 15 },
+      { "title": "None – lacks innovation or market potential", "score": 10 }
     ]
   },
   {
@@ -26,9 +26,9 @@
     "weight": 15,
     "form_type": "Closed",
     "options": [
-      { "title": "IP secured or in advanced filing stage", "value": 15 },
-      { "title": "IP under preparation or review", "value": 10 },
-      { "title": "IP not yet developed", "value": 5 }
+      { "title": "IP secured or in advanced filing stage", "score": 15 },
+      { "title": "IP under preparation or review", "score": 10 },
+      { "title": "IP not yet developed", "score": 5 }
     ]
   },
   {
@@ -36,9 +36,9 @@
     "weight": 15,
     "form_type": "Closed",
     "options": [
-      { "title": "Highly feasible – clear roadmap and strong partners", "value": 15 },
-      { "title": "Moderately feasible – partial readiness or limited partners", "value": 10 },
-      { "title": "Low feasibility – unclear implementation plan", "value": 5 }
+      { "title": "Highly feasible – clear roadmap and strong partners", "score": 15 },
+      { "title": "Moderately feasible – partial readiness or limited partners", "score": 10 },
+      { "title": "Low feasibility – unclear implementation plan", "score": 5 }
     ]
   },
   {
@@ -46,9 +46,9 @@
     "weight": 15,
     "form_type": "Closed",
     "options": [
-      { "title": "High – significant positive economic or social outcomes", "value": 15 },
-      { "title": "Moderate – some benefits with limited scope", "value": 10 },
-      { "title": "Low – minimal measurable benefits", "value": 5 }
+      { "title": "High – significant positive economic or social outcomes", "score": 15 },
+      { "title": "Moderate – some benefits with limited scope", "score": 10 },
+      { "title": "Low – minimal measurable benefits", "score": 5 }
     ]
   },
   {
@@ -56,9 +56,9 @@
     "weight": 10,
     "form_type": "Closed",
     "options": [
-      { "title": "High – can be scaled and maintained long-term", "value": 10 },
-      { "title": "Moderate – scalable with additional support", "value": 7 },
-      { "title": "Low – limited scalability or short-term only", "value": 5 }
+      { "title": "High – can be scaled and maintained long-term", "score": 10 },
+      { "title": "Moderate – scalable with additional support", "score": 7 },
+      { "title": "Low – limited scalability or short-term only", "score": 5 }
     ]
   },
   {

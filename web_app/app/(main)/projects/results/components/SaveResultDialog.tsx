@@ -6,20 +6,20 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { ResultApi } from "../api/result.api";
 import { Result, validateResult } from "../models/result.model";
-//import { EvaluationApi } from "@/app/(main)/evals/api/evaluation.api";
 import { Dropdown } from "primereact/dropdown";
 import { Option } from "@/app/(main)/evaluations/models/option.model";
 import { Criterion, FormType } from "@/app/(main)/evaluations/models/criterion.model";
+import { OptionApi } from "@/app/(main)/evaluations/api/option.api";
 
-interface EditResultDialogProps {
+interface SaveResultDialogProps {
     visible: boolean;
     result: Result;
     onCompelete?: (savedResult: Result) => void;
-    criterion:Criterion;
+    criterion: Criterion;
     onHide: () => void;
 }
 
-const EditResultDialog = ({ visible, result, onCompelete, onHide, criterion }: EditResultDialogProps) => {
+const SaveResultDialog = ({ visible, result, onCompelete, onHide, criterion }: SaveResultDialogProps) => {
 
     const toast = useRef<Toast>(null);
     const [options, setOptions] = useState<Option[]>([]);
@@ -29,13 +29,12 @@ const EditResultDialog = ({ visible, result, onCompelete, onHide, criterion }: E
         setLocalResult(result || {});
     }, [result]);
 
-    /*
-
     useEffect(() => {
-        if (result.criterion && (result.criterion as Evaluation).form_type === FormType.closed) {
+        if ((result.criterion as Criterion).form_type === FormType.closed) {
             const fetchOptions = async () => {
                 try {
-                    const data = await EvaluationApi.getEvaluations({ parent: (result.criterion as Evaluation)._id });
+                    const data = await OptionApi.getOptions({ criterion: criterion._id });
+                    //console.log(data);
                     setOptions(data);
                 } catch (err) {
                     console.error("Failed to fetch options:", err);
@@ -43,8 +42,8 @@ const EditResultDialog = ({ visible, result, onCompelete, onHide, criterion }: E
             };
             fetchOptions();
         }
-    }, [result]);
-*/
+    }, [criterion.form_type]);
+
 
     const saveResult = async () => {
         try {
@@ -118,7 +117,7 @@ const EditResultDialog = ({ visible, result, onCompelete, onHide, criterion }: E
                                 setLocalResult({ ...localResult, selected_option: e.value })
                             }
                             optionLabel="title"
-                            //itemTemplate={evaluationTemplate}
+                            optionValue="_id" 
                             placeholder="Select Option"
                         />
                     </div>
@@ -142,4 +141,4 @@ const EditResultDialog = ({ visible, result, onCompelete, onHide, criterion }: E
     );
 }
 
-export default EditResultDialog;
+export default SaveResultDialog;

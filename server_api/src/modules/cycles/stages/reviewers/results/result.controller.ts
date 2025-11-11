@@ -7,6 +7,7 @@ export class ResultController {
     static async createResult(req: Request, res: Response) {
         try {
             const { evaluator, criterion, score, selected_option } = req.body;
+            //console.log("selected_option", selected_option);
             const data: CreateResultDto = {
                 evaluator: new mongoose.Types.ObjectId(evaluator as string),
                 criterion: new mongoose.Types.ObjectId(criterion as string),

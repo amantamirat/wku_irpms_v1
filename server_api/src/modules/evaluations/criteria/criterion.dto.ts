@@ -18,7 +18,8 @@ export interface UpdateCriterionDTO {
 }
 
 export interface GetCriteriaDTO {
-    evaluation: mongoose.Types.ObjectId;
+    evaluation?: mongoose.Types.ObjectId;
+    stage?: mongoose.Types.ObjectId;
 }
 
 export interface DeleteCriterionDTO {
@@ -27,7 +28,7 @@ export interface DeleteCriterionDTO {
 
 export interface ImportCriterionOptionDTO {
     title: string;
-    value: number;
+    score: number;
 }
 
 export interface ImportCriterionDTO {

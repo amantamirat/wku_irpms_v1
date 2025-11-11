@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
-import { DataTable, DataTableFilterMeta } from "primereact/datatable";
+import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
 import ConfirmDialog from "@/components/ConfirmationDialog";
 import SaveProjectStageDialog from "./SaveProjectStageDialog";
@@ -34,7 +34,7 @@ const ProjectStageManager = ({ project, stage, setProject }: ProjectStageManager
     const [projectStage, setProjectStage] = useState<ProjectStage>(emptyProjectStage);
     const [showDialog, setShowDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-
+    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
 
@@ -51,10 +51,10 @@ const ProjectStageManager = ({ project, stage, setProject }: ProjectStageManager
     useEffect(() => {
         const fetchProjectStages = async () => {
             try {
-                if (project?._id || stage?._id) {
-                    const data = await ProjectStageApi.getProjectStages({ project: project?._id, stage: stage?._id });
-                    setStages(data);
-                }
+                //if (project?._id || stage?._id) {
+                const data = await ProjectStageApi.getProjectStages({ project: project?._id, stage: stage?._id });
+                setStages(data);
+                // }
             } catch (err) {
                 console.error("Failed to fetch project stages:", err);
             }
@@ -201,12 +201,18 @@ const ProjectStageManager = ({ project, stage, setProject }: ProjectStageManager
                 globalFilter={globalFilter}
                 filters={filters}
                 scrollable
-            //tableStyle={{ minWidth: "50rem" }}
+                expandedRows={expandedRows}
+                onRowToggle={(e) => setExpandedRows(e.data)}
+                rowExpansionTemplate={(rowData) => {
+                    return <ReviewerManager projectStage={rowData as ProjectStage} />;
+                }}
             >
-                {
-                    //<Column expander style={{ width: "3em" }} />
+                {!project &&
+                    <Column expander style={{ width: "3em" }} />
                 }
-                <Column selectionMode="single" headerStyle={{ width: '3em' }} />
+                {project &&
+                    <Column selectionMode="single" headerStyle={{ width: '3em' }} />
+                }
                 <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: "50px" }} />
                 {!stage && <Column field="stage.name" header="Stage" sortable />}
                 {!project && <Column field="project.title" header="Project" sortable />}

@@ -101,13 +101,23 @@ export class ApplicantService {
         const applicant = await Applicant.findById(applicantId);
         if (!applicant) throw new Error("Applicant not found");
         if (!applicant.email) throw new Error("Applicant has no email to link");
-        if (applicant.user) throw new Error("This user is already linked to another applicant");
+        if (applicant.user) throw new Error("Applicant already linked to a user");
+
         const user = await User.findOne({ email: applicant.email });
         if (!user) throw new Error("No user account found with this email");
-        applicant.user = user._id as mongoose.Types.ObjectId;;
-        await applicant.save();
-        return applicant;
+
+        const linked = await Applicant.findOneAndUpdate(
+            { _id: applicantId, user: { $exists: false } },
+            { $set: { user: user._id } },
+            { new: true }
+        );
+
+        if (!linked) throw new Error("Applicant already linked or could not be updated");
+
+        return linked;
     }
+
+
 
 
 }

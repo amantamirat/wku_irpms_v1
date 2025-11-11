@@ -5,7 +5,7 @@ export type Option = {
     _id?: string;
     criterion: string | Criterion;
     title: string;
-    value: number;
+    score: number;
     createdAt?: Date;
     updatedAt?: Date;
 };
@@ -16,7 +16,7 @@ export const validateOption = (
     if (!option.title || option.title.trim().length === 0) {
         return { valid: false, message: "Title is required." };
     }
-    if (option.value === undefined || option.value < 0) {
+    if (option.score === undefined || option.score < 0) {
         return { valid: false, message: "Value must be a positive number." };
     }
     if (!option.criterion) {

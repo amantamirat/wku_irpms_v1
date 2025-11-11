@@ -1,3 +1,4 @@
+import { Stage } from "../../cycles/stages/stage.model";
 import { Evaluation } from "../evaluation.model";
 import { Option } from "../options/option.model";
 import {
@@ -25,11 +26,28 @@ export class CriterionService {
      * Get all criteria for an evaluation.
      */
     static async getCriteria(dto: GetCriteriaDTO) {
-        const { evaluation } = dto;
-        return await Criterion.find({ evaluation: evaluation })
+        const { evaluation, stage } = dto;
+
+        // Determine the correct evaluation ID to use
+        let stageEvaluation = evaluation;
+
+        if (!stageEvaluation && stage) {
+            const stageDoc = await Stage.findById(stage).select("evaluation");
+            if (!stageDoc) {
+                throw new Error("Stage not found.");
+            }
+            stageEvaluation = stageDoc.evaluation;
+        }
+
+        if (!stageEvaluation) {
+            throw new Error("Evaluation ID is required.");
+        }
+
+        return await Criterion.find({ evaluation: stageEvaluation })
             .sort({ createdAt: -1 })
             .lean();
     }
+
 
     /**
      * Update an existing criterion.
@@ -44,9 +62,9 @@ export class CriterionService {
         if (data.weight !== undefined) {
             const options = await Option.find({ criterion: id }).lean();
             for (const opt of options) {
-                if (opt.value > data.weight) {
+                if (opt.score > data.weight) {
                     throw new Error(
-                        `Option value (${opt.value}) exceeds new criterion weight (${data.weight}).`
+                        `Option value (${opt.score}) exceeds new criterion weight (${data.weight}).`
                     );
                 }
             }
@@ -96,12 +114,12 @@ export class CriterionService {
             // If closed form, process options
             if (criterion.form_type === FormType.closed && Array.isArray(criterion.options)) {
                 for (const opt of criterion.options) {
-                    if (opt.value > criterion.weight) continue; // skip invalid option
+                    if (opt.score > criterion.weight) continue; // skip invalid option
 
                     const optionDoc = await Option.create({
                         criterion: criterionDoc._id,
                         title: opt.title,
-                        value: opt.value,
+                        score: opt.score,
                     });
 
                     createdOptions.push(optionDoc);

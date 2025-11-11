@@ -113,7 +113,7 @@ export default function ReviewerManager({ applicant, projectStage }: ReviewerMan
                         ? `${rowData.applicant.first_name ?? ""} ${rowData.applicant.last_name ?? ""}`
                         : ""}
                 </h6>
-                <ResultManager evaluator={rowData} />
+                <ResultManager reviewer={rowData} />
             </div>
         );
     };

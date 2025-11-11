@@ -23,7 +23,7 @@ interface OptionManagerProps {
 const OptionManager = ({ criterion }: OptionManagerProps) => {
     const emptyOption: Option = {
         title: '',
-        value: 0,
+        score: 0,
         criterion: criterion,
     };
 
@@ -177,7 +177,7 @@ const OptionManager = ({ criterion }: OptionManagerProps) => {
                 <Column selectionMode="single" headerStyle={{ width: '3em' }}/>
                 <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                 <Column field="title" header="Title" sortable />
-                <Column field="value" header="Value" sortable />
+                <Column field="score" header="Score" sortable />
                 <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
             </DataTable>
 

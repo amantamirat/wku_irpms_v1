@@ -4,10 +4,10 @@
     "weight": 20,
     "form_type": "Closed",
     "options": [
-      { "title": "Highly Relevant", "value": 20 },
-      { "title": "Moderately Relevant", "value": 15 },
-      { "title": "Somewhat Relevant", "value": 10 },
-      { "title": "Not Relevant", "value": 5 }
+      { "title": "Highly Relevant", "score": 20 },
+      { "title": "Moderately Relevant", "score": 15 },
+      { "title": "Somewhat Relevant", "score": 10 },
+      { "title": "Not Relevant", "score": 5 }
     ]
   },
   {
@@ -15,10 +15,10 @@
     "weight": 25,
     "form_type": "Closed",
     "options": [
-      { "title": "Excellent – strong originality and sound methodology", "value": 25 },
-      { "title": "Good – some innovation, adequate methodology", "value": 20 },
-      { "title": "Fair – limited innovation, weak methodology", "value": 15 },
-      { "title": "Poor – lacks originality or clear research design", "value": 10 }
+      { "title": "Excellent – strong originality and sound methodology", "score": 25 },
+      { "title": "Good – some innovation, adequate methodology", "score": 20 },
+      { "title": "Fair – limited innovation, weak methodology", "score": 15 },
+      { "title": "Poor – lacks originality or clear research design", "score": 10 }
     ]
   },
   {
@@ -26,9 +26,9 @@
     "weight": 15,
     "form_type": "Closed",
     "options": [
-      { "title": "Highly Experienced – demonstrated track record", "value": 15 },
-      { "title": "Moderately Experienced", "value": 10 },
-      { "title": "Limited Experience", "value": 5 }
+      { "title": "Highly Experienced – demonstrated track record", "score": 15 },
+      { "title": "Moderately Experienced", "score": 10 },
+      { "title": "Limited Experience", "score": 5 }
     ]
   },
   {
@@ -36,9 +36,9 @@
     "weight": 15,
     "form_type": "Closed",
     "options": [
-      { "title": "Well-justified and realistic", "value": 15 },
-      { "title": "Partially justified", "value": 10 },
-      { "title": "Weak or unclear justification", "value": 5 }
+      { "title": "Well-justified and realistic", "score": 15 },
+      { "title": "Partially justified", "score": 10 },
+      { "title": "Weak or unclear justification", "score": 5 }
     ]
   },
   {
@@ -46,9 +46,9 @@
     "weight": 15,
     "form_type": "Closed",
     "options": [
-      { "title": "High – strong long-term benefit", "value": 15 },
-      { "title": "Moderate – some lasting benefits", "value": 10 },
-      { "title": "Low – limited or unclear benefit", "value": 5 }
+      { "title": "High – strong long-term benefit", "score": 15 },
+      { "title": "Moderate – some lasting benefits", "score": 10 },
+      { "title": "Low – limited or unclear benefit", "score": 5 }
     ]
   },
   {

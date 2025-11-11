@@ -55,7 +55,7 @@ const ApplicantSchema = new Schema<IApplicant>({
         ref: COLLECTIONS.USER,
         unique: true,
         sparse: true,
-        immutable: true
+        //immutable: true
     },
     accessibility: {
         type: [String],

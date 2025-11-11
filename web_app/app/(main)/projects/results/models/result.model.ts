@@ -1,4 +1,3 @@
-//import { Evaluation } from "@/app/(main)/evals/models/evaluation.model";
 import { Reviewer } from "../../reviewers/models/reviewer.model";
 import { Criterion } from "@/app/(main)/evaluations/models/criterion.model";
 import { Option } from "@/app/(main)/evaluations/models/option.model";

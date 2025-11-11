@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
-import { Result } from "./result.model";
-import { Reviewer } from "../reviewer.model";
+import { FormType } from "../../../../evaluations/criteria/criterion.enum";
 import { Criterion } from "../../../../evaluations/criteria/criterion.model";
 import { Option } from "../../../../evaluations/options/option.model";
-import { FormType } from "../../../../evaluations/criteria/criterion.enum";
+import { Stage } from "../../stage.model";
+import { Reviewer } from "../reviewer.model";
+import { Result } from "./result.model";
 
 
 export interface CreateResultDto {
@@ -26,7 +27,11 @@ export class ResultService {
         if (!reviewer) throw new Error("Reviewer not found");
         const stage = (reviewer.projectStage as any).stage;
         if (!stage) throw new Error("Project stage not found");
-        const criterion = await Criterion.findOne({ _id: result.criterion, parent: stage }).lean();
+        const stageDoc = await Stage.findById(stage).select("evaluation");
+        if (!stageDoc) {
+            throw new Error("Stage not found.");
+        }
+        const criterion = await Criterion.findOne({ _id: result.criterion, evaluation: stageDoc.evaluation }).lean();
         if (!criterion) throw new Error("Criterion not found");
         if (criterion.form_type === FormType.open) {
             if (result.score === undefined || result.score === null) {
@@ -41,10 +46,16 @@ export class ResultService {
             if (!result.selected_option) {
                 throw new Error("Selected option is required for closed form type");
             }
-            const option = await Option.findById(result.selected_option).lean();
-            if (!option) {
-                throw new Error("Selected option is not found.");
+            //console.log("Validating selected option:", result.selected_option);
+            const optionExists = await Option.exists({ _id: result.selected_option });
+            if (!optionExists) {
+                throw new Error("Selected option not found.");
             }
+            /**  const option = await Option.findOne({ _id: result.selected_option, criterion: criterion._id }).lean();
+                    if (!option) {
+                        throw new Error("Selected option is not found.");
+                    }*/
+
         }
     }
 

@@ -20,7 +20,7 @@ interface SaveProjectDialogProps {
 }
 
 const SaveProjectDialog = ({ visible, project, onHide, onComplete }: SaveProjectDialogProps) => {
-    
+
     const toast = useRef<Toast>(null);
     const [localProject, setLocalProject] = useState<Project>({ ...project });
     const [submitted, setSubmitted] = useState(false);
@@ -40,31 +40,40 @@ const SaveProjectDialog = ({ visible, project, onHide, onComplete }: SaveProject
     }, []);
 
     const save = async () => {
-        setSubmitted(true);
-        const validation = validateProject(localProject);
-        if (!validation.valid) {
-            throw new Error(validation.message);
+        try {
+            setSubmitted(true);
+            const validation = validateProject(localProject);
+            if (!validation.valid) {
+                throw new Error(validation.message);
+            }
+
+            let saved: Project;
+            if (localProject._id) {
+                saved = await ProjectApi.updateProject(localProject);
+            } else {
+                saved = await ProjectApi.createProject(localProject);
+            }
+            saved = {
+                ...saved,
+                cycle: localProject.cycle
+            };
+
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Project saved successfully',
+                life: 2000,
+            });
+
+            if (onComplete) onComplete(saved);
+        } catch (err: any) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: err.message || 'Failed to save project',
+                life: 2000,
+            });
         }
-
-        let saved: Project;
-        if (localProject._id) {
-            saved = await ProjectApi.updateProject(localProject);
-        } else {
-            saved = await ProjectApi.createProject(localProject);
-        }
-        saved = {
-            ...saved,
-            cycle: localProject.cycle
-        };
-
-        toast.current?.show({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Project saved successfully',
-            life: 2000,
-        });
-
-        if (onComplete) onComplete(saved);
     };
 
     const hide = () => {
@@ -140,7 +149,7 @@ const SaveProjectDialog = ({ visible, project, onHide, onComplete }: SaveProject
                             placeholder="Enter Project summary ..."
                             className="w-full"
                         />
-                    </div>                   
+                    </div>
                 </div>
             </Dialog>
         </>

@@ -36,9 +36,10 @@ const StageManager = ({ cycle }: StageManagerProps) => {
     const [selectedStage, setSelectedStage] = useState<Stage>(emptyStage);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
-    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
+    
 
     // Init filters
     useEffect(() => {
