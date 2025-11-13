@@ -28,14 +28,7 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                console.log("reviewer", {
-                    _id: reviewer?._id,
-                    projectStage: reviewer?.projectStage,
-                    applicant: reviewer?.applicant,
-                });
-
                 if (!reviewer?._id || !reviewer?.projectStage) return;
-
                 const projectStage = reviewer.projectStage as ProjectStage;
                 const stageId =
                     typeof projectStage.stage === "string"
@@ -54,6 +47,7 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
                             criterion,
                             score: 0,
                             evaluator: reviewer,
+                            selected_option: ""
                         }
                     );
                 });
@@ -69,18 +63,25 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
 
 
 
-    const onSaveComplete = (savedResult: Result) => {
-        const updatedResults = results.map((r) =>
-            (r.criterion as Criterion)._id === (savedResult.criterion as Criterion)._id
-                ? savedResult
-                : r
+    const onSaveComplete = (saved: Result) => {
+        let _results = [...results];
+        const index = _results.findIndex(
+            (r) => (r.criterion as Criterion)._id === (saved.criterion as Criterion)._id
         );
-        setResults(updatedResults);
+
+        if (index !== -1) {
+            _results[index] = { ...saved };
+        } else {
+            _results.push({ ...saved });
+        }
+        setResults(_results);
         hideDialogs();
     };
 
-    const deleteResult = async () => {
 
+
+
+    const deleteResult = async () => {
         if (!selectedResult?._id) return;
         const deleted = await ResultApi.deleteResult(selectedResult);
         if (deleted) {
@@ -99,6 +100,13 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
         setShowDeleteDialog(false);
     };
 
+    const calculateTotalWeight = () => {
+        return results.reduce((sum, r) => {
+            const criterion = r.criterion as Criterion;
+            return sum + (criterion?.weight || 0);
+        }, 0);
+    };
+
     const calculateTotalScore = () => {
         return results.reduce((sum, r) => {
             const criterion = r.criterion as Criterion;
@@ -113,8 +121,6 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
             return sum;
         }, 0);
     };
-
-
 
     const scoreTemplate = (rowData: Result) => {
         const criterion = rowData.criterion as Criterion;
@@ -177,8 +183,9 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
                 tableStyle={{ minWidth: "50rem" }}
             >
                 <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: "50px" }} />
-                <Column field="criterion.title" header="Criterion" sortable />
-                <Column body={scoreTemplate} header="Score" sortable footer={<strong>Total: {calculateTotalScore()}</strong>} />
+                <Column field="criterion.title" header="Criterion" sortable footer={<strong>Weight: {calculateTotalWeight()}</strong>} />
+                <Column field="criterion.weight" header="Weight" sortable />
+                <Column body={scoreTemplate} header="Score" sortable footer={<strong>Score: {calculateTotalScore()}</strong>} />
                 <Column body={actionBodyTemplate} headerStyle={{ minWidth: "10rem" }} />
             </DataTable>
 
@@ -187,7 +194,6 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
                 <SaveResultDialog
                     visible={showAddDialog}
                     result={selectedResult}
-                    criterion={selectedResult.criterion as Criterion}
                     onCompelete={onSaveComplete}
                     onHide={hideDialogs}
                 />
@@ -197,7 +203,7 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
                 selectedResult &&
                 <ConfirmDialog
                     showDialog={showDeleteDialog}
-                    title={`result (score ${selectedResult.score})`}
+                    title={`result of ${(selectedResult.criterion as Criterion).title}`}
                     onConfirmAsync={deleteResult}
                     onHide={hideDialogs}
                 />

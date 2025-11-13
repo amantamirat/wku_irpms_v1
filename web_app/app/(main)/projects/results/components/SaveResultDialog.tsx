@@ -12,18 +12,19 @@ import { Criterion, FormType } from "@/app/(main)/evaluations/models/criterion.m
 import { OptionApi } from "@/app/(main)/evaluations/api/option.api";
 
 interface SaveResultDialogProps {
-    visible: boolean;
     result: Result;
+    visible: boolean;
     onCompelete?: (savedResult: Result) => void;
-    criterion: Criterion;
+    //criterion: Criterion;
     onHide: () => void;
 }
 
-const SaveResultDialog = ({ visible, result, onCompelete, onHide, criterion }: SaveResultDialogProps) => {
+const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDialogProps) => {
 
     const toast = useRef<Toast>(null);
     const [options, setOptions] = useState<Option[]>([]);
     const [localResult, setLocalResult] = useState(result || {});
+    const criterion = result.criterion as Criterion;
 
     useEffect(() => {
         setLocalResult(result || {});
@@ -107,20 +108,21 @@ const SaveResultDialog = ({ visible, result, onCompelete, onHide, criterion }: S
                 {
                     (result.criterion && criterion.form_type === FormType.closed) &&
                     <div className="field">
-                        <label htmlFor="option">Option</label>
+                        <label htmlFor="selected_option">Score</label>
                         <Dropdown
-                            id="option"
+                            id="selected_option"
                             dataKey="_id"
                             value={localResult.selected_option}
                             options={options}
-                            onChange={(e) =>
-                                setLocalResult({ ...localResult, selected_option: e.value })
-                            }
+                            onChange={(e) => {
+                                setLocalResult({ ...localResult, selected_option: e.value });
+                            }}
                             optionLabel="title"
-                            optionValue="_id" 
+                            //optionValue="_id"
                             placeholder="Select Option"
                         />
                     </div>
+
                 }
                 {
                     (result.criterion && criterion.form_type === FormType.open) &&

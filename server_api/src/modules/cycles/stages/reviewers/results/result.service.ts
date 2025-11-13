@@ -26,10 +26,9 @@ export class ResultService {
         const reviewer = await Reviewer.findById(result.evaluator).populate("projectStage").lean();
         if (!reviewer) throw new Error("Reviewer not found");
         const stage = (reviewer.projectStage as any).stage;
-        if (!stage) throw new Error("Project stage not found");
         const stageDoc = await Stage.findById(stage).select("evaluation");
         if (!stageDoc) {
-            throw new Error("Stage not found.");
+            throw new Error("Cycle stage not found.");
         }
         const criterion = await Criterion.findOne({ _id: result.criterion, evaluation: stageDoc.evaluation }).lean();
         if (!criterion) throw new Error("Criterion not found");
@@ -46,16 +45,10 @@ export class ResultService {
             if (!result.selected_option) {
                 throw new Error("Selected option is required for closed form type");
             }
-            //console.log("Validating selected option:", result.selected_option);
-            const optionExists = await Option.exists({ _id: result.selected_option });
-            if (!optionExists) {
+            const option = await Option.exists({ _id: result.selected_option, criterion: criterion._id });
+            if (!option) {
                 throw new Error("Selected option not found.");
             }
-            /**  const option = await Option.findOne({ _id: result.selected_option, criterion: criterion._id }).lean();
-                    if (!option) {
-                        throw new Error("Selected option is not found.");
-                    }*/
-
         }
     }
 
