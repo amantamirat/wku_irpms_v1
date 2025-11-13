@@ -4,7 +4,7 @@ import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable, DataTableExpandedRows } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import ResultManager from "../../results/components/ResultManager";
 import { ProjectStage } from "../../stages/models/stage.model";
 import { GetReviewersOptions, ReviewerApi } from "../api/reviewer.api";
@@ -16,7 +16,7 @@ interface ReviewerManagerProps {
     projectStage?: ProjectStage;
 }
 
-export default function ReviewerManager({ applicant, projectStage }: ReviewerManagerProps) {
+const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
     const emptyReviewer: Reviewer = {
         applicant: applicant ?? undefined,
         projectStage: projectStage ?? undefined,
@@ -29,26 +29,28 @@ export default function ReviewerManager({ applicant, projectStage }: ReviewerMan
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
-    const fetchReviewers = useCallback(async () => {
-        try {
-            const options: GetReviewersOptions = {};
-            options.applicant = applicant ? applicant._id : undefined;
-            options.projectStage = projectStage ? projectStage._id : undefined;
-            const data = await ReviewerApi.getReviewers(options);
-            setReviewers(data);
-        } catch (err) {
-            console.error("Failed to fetch reviewers:", err);
-        }
+    useEffect(() => {
+        const fetchReviewers = async () => {
+            try {
+                const options: GetReviewersOptions = {};
+                options.applicant = applicant ? applicant._id : undefined;
+                options.projectStage = projectStage ? projectStage._id : undefined;
+
+                const data = await ReviewerApi.getReviewers(options);
+                setReviewers(data);
+            } catch (err) {
+                console.error("Failed to fetch reviewers:", err);
+            }
+        };
+        fetchReviewers();
     }, [applicant, projectStage]);
 
-    useEffect(() => {
-        fetchReviewers();
-    }, [fetchReviewers]);
+
 
 
     const onSaveCompelete = (savedReviewer: Reviewer) => {
         let _reviewers = [...reviewers];
-        const index = _reviewers.findIndex((c) => c._id === savedReviewer._id);
+        const index = _reviewers.findIndex((r) => r._id === savedReviewer._id);
         if (index !== -1) {
             _reviewers[index] = { ...savedReviewer };
         } else {
@@ -174,3 +176,5 @@ export default function ReviewerManager({ applicant, projectStage }: ReviewerMan
         </div>
     );
 }
+
+export default ReviewerManager;

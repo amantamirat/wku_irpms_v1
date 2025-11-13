@@ -26,13 +26,24 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
 
 
     useEffect(() => {
-
         const fetchData = async () => {
             try {
-                const fetchedCriteria =
-                    await CriterionApi.getCriteria({ stage: (reviewer?.projectStage as ProjectStage).stage });
-                const fetchedResults =
-                    await ResultApi.getResults({ evaluator: reviewer?._id || "" });
+                console.log("reviewer", {
+                    _id: reviewer?._id,
+                    projectStage: reviewer?.projectStage,
+                    applicant: reviewer?.applicant,
+                });
+
+                if (!reviewer?._id || !reviewer?.projectStage) return;
+
+                const projectStage = reviewer.projectStage as ProjectStage;
+                const stageId =
+                    typeof projectStage.stage === "string"
+                        ? projectStage.stage
+                        : (projectStage.stage as any)?._id;
+
+                const fetchedCriteria = await CriterionApi.getCriteria({ stage: stageId });
+                const fetchedResults = await ResultApi.getResults({ evaluator: reviewer._id });
 
                 const mergedResults: Result[] = fetchedCriteria.map((criterion: Criterion) => {
                     const existing = fetchedResults.find(
@@ -42,10 +53,11 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
                         existing || {
                             criterion,
                             score: 0,
-                            evaluator: reviewer || "",
+                            evaluator: reviewer,
                         }
                     );
                 });
+
                 setResults(mergedResults);
             } catch (err) {
                 console.error("Error fetching criteria or results:", err);
@@ -53,8 +65,8 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
         };
 
         fetchData();
-
     }, [reviewer]);
+
 
 
     const onSaveComplete = (savedResult: Result) => {
