@@ -2,7 +2,7 @@ import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../../../../util/collections.enum";
 
 interface IResult extends Document {
-    evaluator: mongoose.Types.ObjectId;
+    reviewer: mongoose.Types.ObjectId;
     criterion: mongoose.Types.ObjectId;
     score?: number;
     selected_option?: mongoose.Types.ObjectId;
@@ -11,7 +11,7 @@ interface IResult extends Document {
 }
 
 const ResultSchema = new Schema<IResult>({
-    evaluator: {
+    reviewer: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.REVIEWER,
         required: true,
@@ -33,5 +33,5 @@ const ResultSchema = new Schema<IResult>({
     },
 
 }, { timestamps: true });
-ResultSchema.index({ evaluator: 1, criterion: 1 }, { unique: true });
+ResultSchema.index({ reviewer: 1, criterion: 1 }, { unique: true });
 export const Result = model<IResult>(COLLECTIONS.RESULT, ResultSchema);

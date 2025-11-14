@@ -4,15 +4,15 @@ import { Result, sanitizeResult } from "../models/result.model";
 const end_point = '/project/results/';
 
 export interface GetResultOptions {
-    criterion?: string;
-    evaluator?: string;
+    //criterion?: string;
+    reviewer?: string;
 }
 
 export const ResultApi = {
     async getResults(options: GetResultOptions): Promise<Result[]> {
         const query = new URLSearchParams();
-        if (options.criterion) query.append("criterion", options.criterion);
-        if (options.evaluator) query.append("evaluator", options.evaluator);
+        //if (options.criterion) query.append("criterion", options.criterion);
+        if (options.reviewer) query.append("reviewer", options.reviewer);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Result[];
     },

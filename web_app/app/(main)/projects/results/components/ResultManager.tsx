@@ -36,7 +36,7 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
                         : (projectStage.stage as any)?._id;
 
                 const fetchedCriteria = await CriterionApi.getCriteria({ stage: stageId });
-                const fetchedResults = await ResultApi.getResults({ evaluator: reviewer._id });
+                const fetchedResults = await ResultApi.getResults({ reviewer: reviewer._id });
 
                 const mergedResults: Result[] = fetchedCriteria.map((criterion: Criterion) => {
                     const existing = fetchedResults.find(
@@ -46,7 +46,7 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
                         existing || {
                             criterion,
                             score: 0,
-                            evaluator: reviewer,
+                            reviewer: reviewer,
                             selected_option: ""
                         }
                     );

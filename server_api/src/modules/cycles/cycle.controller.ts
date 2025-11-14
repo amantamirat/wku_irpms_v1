@@ -30,10 +30,10 @@ export class CycleController {
                 description: description ?? undefined,
                 grant: new mongoose.Types.ObjectId(grant as string),
                 theme: theme ? new mongoose.Types.ObjectId(theme as string) : undefined,
-                userId: req.user._id,
                 status,
                 type: cycleType,
                 organization: new mongoose.Types.ObjectId(organization as string),
+                userId: req.user._id,
             };
             const created = await CycleService.createCycle(dto);
             successResponse(res, 201, "Cycle created successfully", created);

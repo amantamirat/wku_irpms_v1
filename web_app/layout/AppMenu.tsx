@@ -222,12 +222,12 @@ const AppMenu = () => {
             items: [
                 {
                     label: 'Landing',
-                    icon: 'pi pi-shield',
+                    icon: 'pi pi-fw pi-globe',
                     to: '/landing'
                 },
                 {
                     label: 'University Website',
-                    icon: 'pi pi-fw pi-globe',
+                    icon: 'pi pi-external-link',
                     to: 'https://www.wku.edu.et',
                     target: '_blank'
                 }

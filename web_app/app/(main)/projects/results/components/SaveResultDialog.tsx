@@ -60,7 +60,7 @@ const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDi
             }
             saved = {
                 ...saved,
-                evaluator: localResult.evaluator,
+                reviewer: localResult.reviewer,
                 criterion: localResult.criterion,
                 selected_option: localResult.selected_option
             };

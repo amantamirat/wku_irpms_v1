@@ -5,7 +5,7 @@ import { Option } from "@/app/(main)/evaluations/models/option.model";
 
 export type Result = {
     _id?: string;
-    evaluator: string | Reviewer;
+    reviewer: string | Reviewer;
     criterion: string | Criterion;
     score?: number;
     selected_option?: string | Option;
@@ -19,8 +19,8 @@ export const resultTemplate = (result: Result) => {
 };
 
 export const validateResult = (result: Result): { valid: boolean; message?: string } => {
-    if (!result.evaluator) {
-        return { valid: false, message: "Evaluator is required." };
+    if (!result.reviewer) {
+        return { valid: false, message: "Reviewer is required." };
     }
     if (!result.criterion) {
         return { valid: false, message: "Criterion is required." };
@@ -38,10 +38,10 @@ export const sanitizeResult = (result: Partial<Result>): Result => {
             typeof result.criterion === "object" && result.criterion !== null
                 ? (result.criterion as any)._id
                 : result.criterion,
-        evaluator:
-            typeof result.evaluator === "object" && result.evaluator !== null
-                ? (result.evaluator as any)._id
-                : result.evaluator,
+        reviewer:
+            typeof result.reviewer === "object" && result.reviewer !== null
+                ? (result.reviewer as any)._id
+                : result.reviewer,
         selected_option:
             typeof result.selected_option === "object" && result.selected_option !== null
                 ? (result.selected_option as any)._id
