@@ -23,7 +23,7 @@ import collaboratorRoutes from './modules/projects/collaborators/collaborator.ro
 import assignmentRoutes from './modules/projects/collaborators/assignment/assignment.routes';
 import projectThemeRoutes from './modules/projects/themes/project.theme.routes';
 import phaseRoutes from './modules/projects/phase/phase.routes';
-import stageRoutes2 from './modules/projects/stages/project.stage.routes';
+import stageRoutes2 from './modules/cycles/stages/projects/project.stage.routes';
 import reviewerRoutes from './modules/cycles/stages/reviewers/reviewer.routes';
 import resultRoutes from './modules/cycles/stages/reviewers/results/result.routes';
 import userRoutes from './modules/users/user.routes';

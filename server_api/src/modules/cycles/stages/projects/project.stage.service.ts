@@ -1,5 +1,5 @@
-import { Project } from "../project.model";
-import { Stage } from "../../cycles/stages/stage.model";
+import { Project } from "../../../projects/project.model";
+import { Stage } from "../stage.model";
 import { CreateProjectStageDTO, GetProjectStagesDTO, UpdateProjectStageDTO } from "./project.stage.dto";
 import { ProjectStageStatus } from "./project.stage.enum";
 import { ProjectStage } from "./project.stage.model";

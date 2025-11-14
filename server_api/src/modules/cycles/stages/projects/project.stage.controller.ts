@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import fs from "fs";
 import mongoose from "mongoose";
-import { errorResponse, successResponse } from "../../../util/response";
+import { errorResponse, successResponse } from "../../../../util/response";
 import { ProjectStageService } from "./project.stage.service";
 import { CreateProjectStageDTO, GetProjectStagesDTO, UpdateProjectStageDTO } from "./project.stage.dto";
 import { ProjectStage } from "./project.stage.model";
