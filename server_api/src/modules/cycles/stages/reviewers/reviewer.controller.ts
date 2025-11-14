@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
-import { ReviewerService, CreateReviewerDto, GetReviewerOptions } from './reviewer.service';
+import { ReviewerService } from './reviewer.service';
 import mongoose from 'mongoose';
 import { errorResponse, successResponse } from '../../../../util/response';
 import { ReviewerStatus } from './reviewer.enum';
+import { CreateReviewerDto, GetReviewerOptions, UpdateReviewerDto } from './reviewer.dto';
+import { DeleteDto } from '../../../../util/delete.dto';
 
 export class ReviewerController {
 
@@ -27,7 +29,7 @@ export class ReviewerController {
             const filter: GetReviewerOptions = {
                 applicant: applicant ? new mongoose.Types.ObjectId(applicant as string) : undefined,
                 projectStage: projectStage ? new mongoose.Types.ObjectId(projectStage as string) : undefined
-            };            
+            };
             const reviewers = await ReviewerService.getReviewers(filter);
             successResponse(res, 200, 'Reviewers fetched successfully', reviewers);
         } catch (err: any) {
@@ -39,10 +41,13 @@ export class ReviewerController {
         try {
             const { id } = req.params;
             const { status } = req.body;
-            const data: Partial<CreateReviewerDto> = {
-                status: status as ReviewerStatus
+            const dto: UpdateReviewerDto = {
+                id: id,
+                data: {
+                    status: status as ReviewerStatus
+                }
             };
-            const updated = await ReviewerService.updateReviewer(id, data);
+            const updated = await ReviewerService.updateReviewer(dto);
             successResponse(res, 201, "Reviewer updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -52,7 +57,8 @@ export class ReviewerController {
     static async deleteReviewer(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const deleted = await ReviewerService.deleteReviewer(id);
+            const dto: DeleteDto = { id };
+            const deleted = await ReviewerService.deleteReviewer(dto);
             successResponse(res, 201, "Reviewer deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

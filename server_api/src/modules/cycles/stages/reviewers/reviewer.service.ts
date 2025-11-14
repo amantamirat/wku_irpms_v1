@@ -5,17 +5,10 @@ import { ProjectStage } from "../../../projects/stages/project.stage.model";
 import { ProjectStageStatus } from "../../../projects/stages/project.stage.enum";
 import Applicant from "../../../applicants/applicant.model";
 import { Collaborator } from "../../../projects/collaborators/collaborator.model";
+import { CreateReviewerDto, GetReviewerOptions, UpdateReviewerDto } from "./reviewer.dto";
+import { DeleteDto } from "../../../../util/delete.dto";
 
-export interface GetReviewerOptions {
-    projectStage?: mongoose.Types.ObjectId;
-    applicant?: mongoose.Types.ObjectId;
-}
 
-export interface CreateReviewerDto {
-    projectStage: mongoose.Types.ObjectId;
-    applicant: mongoose.Types.ObjectId;
-    status?: ReviewerStatus;
-}
 
 export class ReviewerService {
 
@@ -32,7 +25,7 @@ export class ReviewerService {
 
     static async createReviewer(data: CreateReviewerDto) {
         await this.validateReviewer(data);
-        const createdReviewer = await Reviewer.create({ ...data, status: data.status ?? ReviewerStatus.pending });       
+        const createdReviewer = await Reviewer.create({ ...data, status: ReviewerStatus.pending });
         return createdReviewer;
     }
 
@@ -44,14 +37,16 @@ export class ReviewerService {
         return reviewers;
     }
 
-    static async updateReviewer(id: string, data: Partial<CreateReviewerDto>) {
+    static async updateReviewer(dto: UpdateReviewerDto) {
+        const { id, data } = dto;
         const reviewer = await Reviewer.findById(id);
         if (!reviewer) throw new Error("Reviewer not found");
         Object.assign(reviewer, data);
         return reviewer.save();
     }
 
-    static async deleteReviewer(id: string) {
+    static async deleteReviewer(dto: DeleteDto) {
+        const { id } = dto;
         const reviewer = await Reviewer.findById(id);
         if (!reviewer) throw new Error("Reviewer not found");
         if (reviewer.status !== ReviewerStatus.pending) {

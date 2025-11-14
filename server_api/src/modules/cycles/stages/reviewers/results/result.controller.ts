@@ -32,7 +32,6 @@ export class ResultController {
             const { reviewer } = req.query;
             const filter: GetResultsDTO = {
                 reviewer: reviewer ? new mongoose.Types.ObjectId(String(reviewer)) : undefined,
-                //criterion: criterion ? new mongoose.Types.ObjectId(String(criterion)) : undefined
             };
             const results = await ResultService.getResults(filter);
             successResponse(res, 200, "Results fetched successfully", results);
