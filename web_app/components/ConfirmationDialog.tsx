@@ -15,6 +15,7 @@ interface ConfirmDialogProps {
 
 const ConfirmDialog = (props: ConfirmDialogProps) => {
     const toast = useRef<Toast>(null);
+    const op = props.operation || "Delete";
 
     const onOK = async () => {
         try {
@@ -25,26 +26,18 @@ const ConfirmDialog = (props: ConfirmDialogProps) => {
             else if (props.onConfirmAsync) {
                 await props.onConfirmAsync();
             }
-            if (props.operation) {
-                toast.current?.show({
-                    severity: 'success',
-                    summary: `${props.operation} performed`,
-                    detail: `${props.operation} performed on ${props.title}`,
-                    life: 2000
-                });
-            } else {
-                toast.current?.show({
-                    severity: 'success',
-                    summary: 'Deleted',
-                    detail: `${props.title} deleted`,
-                    life: 2000
-                });
-            }
+            
+            toast.current?.show({
+                severity: "success",
+                summary: `${op} performed`,
+                detail: `${props.title} ${op.toLowerCase()}`,
+                life: 2000
+            });
             setTimeout(() => props.onHide(), 2000);
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
-                summary: `Failed to ${props.operation ?? 'delete'} ${props.title}`,
+                summary: `Failed to ${op} ${props.title}`,
                 detail: '' + err,
                 life: 2000
             });

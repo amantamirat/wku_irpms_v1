@@ -38,7 +38,7 @@ export default function SaveReviewerDialog({ visible, reviewer, onCompelete, onH
                 if (!scope) return;
                 //const type = scopeToOrganizationUnit[scope];
                 if (scope) {
-                    const data = await OrganizationApi.getOrganizations({ type:scope });
+                    const data = await OrganizationApi.getOrganizations({ type: scope });
                     if (isMounted) {
                         setOrganizations(data);
                     }
@@ -80,7 +80,8 @@ export default function SaveReviewerDialog({ visible, reviewer, onCompelete, onH
             }
             let saved: Reviewer;
             if (localReviewer._id) {
-                saved = await ReviewerApi.updateReviewer(localReviewer);
+                // saved = await ReviewerApi.updateReviewer(localReviewer);
+                throw new Error("Updating reviewer is not allowed.");
             } else {
                 saved = await ReviewerApi.createReviewer(localReviewer);
             }

@@ -118,7 +118,7 @@ const ApplicantManager = (/*{ scope }: ApplicantManagerProps*/) => {
 
     const linkApplicant = async () => {
         let linked = await ApplicantApi.linkApplicant(selectedApplicant);
-        console.log('Linked applicant:', linked);
+        //console.log('Linked applicant:', linked);
         linked = {
             ...linked,
             organization: selectedApplicant.organization

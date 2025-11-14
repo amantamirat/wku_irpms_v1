@@ -65,6 +65,12 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
         hideDialogs();
     };
 
+    const onDeleteCompelete = (deleted: Reviewer) => {
+        let _reviewers = reviewers.filter((r) => r._id !== deleted._id);
+        setReviewers(_reviewers);
+        hideDialogs();
+    }
+
 
     const deleteReviewer = async () => {
         const deleted = await ReviewerApi.deleteReviewer(reviewer);
@@ -169,7 +175,7 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
                             showDialog={showDeleteDialog}
                             title={String((reviewer.applicant as any)?.first_name)}
                             onConfirmAsync={deleteReviewer}
-                            onHide={() => setShowDeleteDialog(false)}
+                            onHide={hideDialogs}
                         />
                     )}
                 </div>
