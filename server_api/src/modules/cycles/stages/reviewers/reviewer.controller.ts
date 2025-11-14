@@ -5,6 +5,7 @@ import { errorResponse, successResponse } from '../../../../util/response';
 import { ReviewerStatus } from './reviewer.enum';
 import { CreateReviewerDto, GetReviewerOptions, UpdateReviewerDto } from './reviewer.dto';
 import { DeleteDto } from '../../../../util/delete.dto';
+import { AuthenticatedRequest } from '../../../users/auth/auth.middleware';
 
 export class ReviewerController {
 
@@ -37,15 +38,17 @@ export class ReviewerController {
         }
     }
 
-    static async updateReviewer(req: Request, res: Response) {
+    static async updateReviewer(req: AuthenticatedRequest, res: Response) {
         try {
+            if (!req.user) throw new Error("User not found!");
             const { id } = req.params;
             const { status } = req.body;
             const dto: UpdateReviewerDto = {
                 id: id,
                 data: {
                     status: status as ReviewerStatus
-                }
+                },
+                userId: req.user._id,
             };
             const updated = await ReviewerService.updateReviewer(dto);
             successResponse(res, 201, "Reviewer updated successfully", updated);

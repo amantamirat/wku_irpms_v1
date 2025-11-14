@@ -9,7 +9,6 @@ export interface GetReviewerOptions {
 export interface CreateReviewerDto {
     projectStage: mongoose.Types.ObjectId;
     applicant: mongoose.Types.ObjectId;
-    //status?: ReviewerStatus;
 }
 
 export interface UpdateReviewerDto {
@@ -17,5 +16,5 @@ export interface UpdateReviewerDto {
     data: Partial<{
         status: ReviewerStatus;
     }>;
-    userId?: string;
+    userId: string;
 }

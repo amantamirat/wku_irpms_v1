@@ -17,7 +17,7 @@ export class ResultService {
         const applicantDoc = await Applicant.findOne({ user: userId }).lean();
         if (!applicantDoc) throw new Error("Applicant not found");
         if (String(reviewerDoc.applicant) !== String(applicantDoc._id)) {
-            throw new Error("You are not allowed to provide result for this.")
+            throw new Error("You are not allowed to provide result for this project.")
         }
     }
 

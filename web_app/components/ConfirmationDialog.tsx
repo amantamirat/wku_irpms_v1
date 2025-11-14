@@ -30,7 +30,7 @@ const ConfirmDialog = (props: ConfirmDialogProps) => {
             toast.current?.show({
                 severity: "success",
                 summary: `${op} performed`,
-                detail: `${props.title} ${op.toLowerCase()}`,
+                detail: `${props.title} ${op.toLowerCase()}ed`,
                 life: 2000
             });
             setTimeout(() => props.onHide(), 2000);

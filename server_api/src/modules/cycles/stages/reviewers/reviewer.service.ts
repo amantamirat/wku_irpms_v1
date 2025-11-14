@@ -38,12 +38,34 @@ export class ReviewerService {
     }
 
     static async updateReviewer(dto: UpdateReviewerDto) {
-        const { id, data } = dto;
-        const reviewer = await Reviewer.findById(id);
-        if (!reviewer) throw new Error("Reviewer not found");
-        Object.assign(reviewer, data);
-        return reviewer.save();
-    }
+        const { id, data, userId } = dto;
+        
+        const reviewerDoc = await Reviewer.findById(id);
+        if (!reviewerDoc) throw new Error("Reviewer not found");
+        
+        const applicantDoc = await Applicant.findOne({ user: userId }).lean();
+        if (!applicantDoc) throw new Error("Applicant not found");
+        if (String(reviewerDoc.applicant) !== String(applicantDoc._id)) {
+            throw new Error("You are not allowed to update this reviewer status.")
+        }
+        
+        const current = reviewerDoc.status;
+        const next = data.status;
+        const transitions: Record<ReviewerStatus, ReviewerStatus[]> = {
+            [ReviewerStatus.pending]: [ReviewerStatus.active],
+            [ReviewerStatus.active]: [ReviewerStatus.pending, ReviewerStatus.submitted],
+            [ReviewerStatus.submitted]: [ReviewerStatus.active],
+            [ReviewerStatus.approved]: [ReviewerStatus.submitted]
+        };
+        
+        const allowedNext = transitions[current];
+        if (!allowedNext.includes(next!)) {
+            throw new Error(`Invalid state transition: ${current} → ${next}`);
+        }
+
+        Object.assign(reviewerDoc, data);
+        return reviewerDoc.save();
+    }    
 
     static async deleteReviewer(dto: DeleteDto) {
         const { id } = dto;
