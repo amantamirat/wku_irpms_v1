@@ -1,14 +1,15 @@
-import mongoose from "mongoose";
+import { CacheService } from "../../../../util/cache/cache.service";
+import { DeleteDto } from "../../../../util/delete.dto";
+import { PERMISSIONS } from "../../../../util/permissions";
+import Applicant from "../../../applicants/applicant.model";
+import { Criterion } from "../../../evaluations/criteria/criterion.model";
+import { Collaborator } from "../../../projects/collaborators/collaborator.model";
+import { ProjectStageStatus } from "../../../projects/stages/project.stage.enum";
+import { ProjectStage } from "../../../projects/stages/project.stage.model";
+import { Result } from "./results/result.model";
+import { CreateReviewerDto, GetReviewerOptions, UpdateReviewerDto } from "./reviewer.dto";
 import { ReviewerStatus } from "./reviewer.enum";
 import { Reviewer } from "./reviewer.model";
-import { ProjectStage } from "../../../projects/stages/project.stage.model";
-import { ProjectStageStatus } from "../../../projects/stages/project.stage.enum";
-import Applicant from "../../../applicants/applicant.model";
-import { Collaborator } from "../../../projects/collaborators/collaborator.model";
-import { CreateReviewerDto, GetReviewerOptions, UpdateReviewerDto } from "./reviewer.dto";
-import { DeleteDto } from "../../../../util/delete.dto";
-import { CacheService } from "../../../../util/cache/cache.service";
-import { PERMISSIONS } from "../../../../util/permissions";
 
 
 
@@ -52,7 +53,7 @@ export class ReviewerService {
             current === ReviewerStatus.approved || next === ReviewerStatus.approved;
 
         if (isApprovalTransition) {
-            const hasPermission = await CacheService.hasPermissions(userId, [PERMISSIONS.REVIEWER.UPDATE]);
+            const hasPermission = await CacheService.hasPermissions(userId, [PERMISSIONS.REVIEWER.APPROVE]);
             if (!hasPermission) {
                 throw new Error("You do not have permission to approve reviewer status.");
             }
@@ -75,6 +76,29 @@ export class ReviewerService {
         const allowedNext = transitions[current];
         if (!allowedNext.includes(next!)) {
             throw new Error(`Invalid state transition: ${current} → ${next}`);
+        }
+
+        if (next === ReviewerStatus.submitted) {
+
+            const projectStageDoc = await ProjectStage.findById(
+                reviewerDoc.projectStage,
+                { stage: 1 }
+            )
+                .populate("stage", "evaluation")
+                .lean();
+
+            if (!projectStageDoc) throw new Error("Project Stage not found");
+
+            const evaluationId = (projectStageDoc.stage as any).evaluation;
+
+            const [resultsCount, criteriaCount] = await Promise.all([
+                Result.countDocuments({ reviewer: reviewerDoc._id }),
+                Criterion.countDocuments({ evaluation: evaluationId })
+            ]);
+
+            if (resultsCount !== criteriaCount) {
+                throw new Error("Please complete all evaluation criteria before submitting.");
+            }
         }
 
         Object.assign(reviewerDoc, data);

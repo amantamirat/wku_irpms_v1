@@ -12,6 +12,8 @@ import SaveReviewerDialog from "./SaveReviewerDialog";
 import ErrorComponent from "@/components/ErrorComponent";
 import Badge from "@/templates/Badge";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import { useAuth } from "@/contexts/auth-context";
+import { PERMISSIONS } from "@/types/permissions";
 
 interface ReviewerManagerProps {
     applicant?: Applicant;
@@ -19,11 +21,21 @@ interface ReviewerManagerProps {
 }
 
 const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
+
     const emptyReviewer: Reviewer = {
         applicant: applicant ?? undefined,
         projectStage: projectStage ?? undefined,
         status: ReviewerStatus.pending
     };
+
+    const { getLinkedApplicant } = useAuth();
+    const linkedApplicant = getLinkedApplicant();
+    const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
+    const { hasPermission } = useAuth();
+    const canApprove = hasPermission([PERMISSIONS.REVIEWER.APPROVE]);
+    const canDelete = hasPermission([PERMISSIONS.REVIEWER.DELETE]);
+    const canCreate = hasPermission([PERMISSIONS.REVIEWER.CREATE]);
+
     const confirm = useConfirmDialog();
     const [reviewers, setReviewers] = useState<Reviewer[]>([]);
     const [error, setError] = useState<string | null>(null);
@@ -78,7 +90,6 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
                 prev.map(r => r._id === updated._id ? { ...row, status: updated.status } : r)
             );
         } catch (err: any) {
-            //setError(err.message || "Failed to update reviewer status");
             throw err;
         }
     };
@@ -89,16 +100,21 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
         setShowSaveDialog(false);
     }
 
-    const startToolbarTemplate = () => (
-        <div className="my-2">
-            <Button label="New Reviewer" icon="pi pi-plus" severity="success" className="mr-2"
-                onClick={() => {
-                    setReviewer(emptyReviewer);
-                    setShowSaveDialog(true);
-                }}
-            />
-        </div>
-    );
+    const startToolbarTemplate = () => {
+        if (!canCreate) {
+            return null;
+        }
+        return (
+            <div className="my-2">
+                <Button label="New Reviewer" icon="pi pi-plus" severity="success" className="mr-2"
+                    onClick={() => {
+                        setReviewer(emptyReviewer);
+                        setShowSaveDialog(true);
+                    }}
+                />
+            </div>
+        );
+    }
 
     const statusBodyTemplate = (rowData: Reviewer) => {
         return (
@@ -107,83 +123,93 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
     };
 
     const stateTransitionTemplate = (rowData: Reviewer) => {
-        const s = rowData.status;
+        const state = rowData.status;
+        const isOwner = (rowData?.applicant as any)._id === loggedApplicantId;
         return (
             <div className="flex gap-2">
-                {/* pending → active */}
-                {s === ReviewerStatus.pending && (
-                    <Button
-                        label="Activate"
-                        icon="pi pi-check"
-                        severity="success"
-                        size="small"
-                        //onClick={() => updateStatus(rowData, ReviewerStatus.active)}
-                        onClick={() => {
-                            confirm.ask({
-                                operation: 'activate',
-                                onConfirmAsync: () => updateStatus(rowData, ReviewerStatus.active)
-                            });
-                        }}
-                    />
-                )}
-
-                {/* active → pending or submitted */}
-                {s === ReviewerStatus.active && (
-                    <>
+                {isOwner && (<>
+                    {/* pending → active */}
+                    {state === ReviewerStatus.pending && (
                         <Button
-                            label="Pend"
-                            icon="pi pi-arrow-left"
-                            severity="warning"
+                            label="Activate"
+                            icon="pi pi-check"
+                            severity="success"
                             size="small"
                             onClick={() => {
                                 confirm.ask({
-                                    operation: 'pend',
-                                    onConfirmAsync: () => updateStatus(rowData, ReviewerStatus.pending)
+                                    operation: 'activate',
+                                    onConfirmAsync: () => updateStatus(rowData, ReviewerStatus.active)
                                 });
                             }}
                         />
-                    </>
-                )}
-                {/* submitted → approved */}
-                {s === ReviewerStatus.submitted && (
-                    <Button
-                        label="Approve"
-                        icon="pi pi-check-circle"
-                        severity="info"
-                        size="small"
-                        onClick={() => confirm.ask({
-                            operation: 'Approve',
-                            onConfirmAsync: () => updateStatus(rowData, ReviewerStatus.approved)
-                        })}
-                    />)}
-                {/* approved → submitted */}
-                {s === ReviewerStatus.approved && (
-                    <Button
-                        label="Revert to Submitted"
-                        icon="pi pi-undo"
-                        severity="warning"
-                        size="small"
-                        onClick={() => confirm.ask({
-                            operation: 'revert to submitted',
-                            onConfirmAsync: () => updateStatus(rowData, ReviewerStatus.submitted)
-                        })}
-                    />
-                )}
+                    )}
+
+                    {/* active → pending*/}
+                    {state === ReviewerStatus.active && (
+                        <>
+                            <Button
+                                label="Pend"
+                                icon="pi pi-arrow-left"
+                                severity="warning"
+                                size="small"
+                                onClick={() => {
+                                    confirm.ask({
+                                        operation: 'pend',
+                                        onConfirmAsync: () => updateStatus(rowData, ReviewerStatus.pending)
+                                    });
+                                }}
+                            />
+                        </>
+                    )}
+                </>)}
+                {canApprove && (<>
+                    {/* submitted → approved */}
+                    {state === ReviewerStatus.submitted && (
+                        <Button
+                            label="Approve"
+                            icon="pi pi-check-circle"
+                            severity="info"
+                            size="small"
+                            onClick={() => confirm.ask({
+                                operation: 'Approve',
+                                onConfirmAsync: () => updateStatus(rowData, ReviewerStatus.approved)
+                            })}
+                        />)}
+                    {/* approved → submitted */}
+                    {state === ReviewerStatus.approved && (
+                        <Button
+                            label="Revert to Submitted"
+                            icon="pi pi-undo"
+                            severity="warning"
+                            size="small"
+                            onClick={() => confirm.ask({
+                                operation: 'revert to submitted',
+                                onConfirmAsync: () => updateStatus(rowData, ReviewerStatus.submitted)
+                            })}
+                        />
+                    )}
+                </>)}
             </div>
         );
     }
 
     const actionBodyTemplate = (rowData: Reviewer) => {
-        const s = rowData.status;
+        if (!canDelete) {
+            return null;
+        }
         return (
-            <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }}
-                onClick={() => {
-                    confirm.ask({
-                        item: String((rowData.applicant as any)?.first_name),
-                        onConfirmAsync: () => deleteReviewer(rowData)
-                    });
-                }} />
+            <>
+                <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
+                    style={{ fontSize: '1.2rem' }}
+                    onClick={() => {
+                        confirm.ask({
+                            item: String((rowData.applicant as any)?.first_name),
+                            onConfirmAsync: () => deleteReviewer(rowData)
+                        });
+                    }} />
+            </>
+
+
         );
     };
 
@@ -200,7 +226,7 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
         <div className="grid">
             <div className="col-12">
                 <div className="card">
-                    <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
+                    {canCreate && <Toolbar className="mb-4" start={startToolbarTemplate} />}
                     <DataTable
                         value={reviewers}
                         selection={reviewer}

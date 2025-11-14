@@ -11,7 +11,7 @@ export class ResultController {
     static async createResult(req: AuthenticatedRequest, res: Response) {
         try {
             if (!req.user) throw new Error("User not found!");
-            const { reviewer, criterion, score, selected_option } = req.body;
+            const { reviewer, criterion, score, selected_option, comment } = req.body;
 
             const data: CreateResultDTO = {
                 reviewer: new mongoose.Types.ObjectId(reviewer as string),
@@ -19,6 +19,7 @@ export class ResultController {
                 score: score,
                 selected_option: selected_option ? new mongoose.Types.ObjectId(selected_option as string) : undefined,
                 userId: req.user._id,
+                comment: comment
             };
             const created = await ResultService.createResult(data);
             successResponse(res, 201, "Result created successfully", created);
@@ -44,12 +45,13 @@ export class ResultController {
         try {
             if (!req.user) throw new Error("User not found!");
             const { id } = req.params;
-            const { score, selected_option } = req.body;
+            const { score, selected_option, comment } = req.body;
             const dto: UpdateResultDTO = {
                 id: id,
                 data: {
                     score: score ?? undefined,
                     selected_option: selected_option ? new mongoose.Types.ObjectId(selected_option as string) : undefined,
+                    comment: comment ?? undefined
                 },
                 userId: req.user._id,
             };

@@ -23,6 +23,7 @@ export class ResultService {
         if (String(reviewerDoc.applicant) !== String(applicantDoc._id)) {
             throw new Error("You are not allowed to provide result for this project.")
         }
+        return { reviewerDoc, applicantDoc };
     }
 
     private static async validateResult(data: { criterion: mongoose.Types.ObjectId, score?: number, selected_option?: mongoose.Types.ObjectId }) {
@@ -44,6 +45,7 @@ export class ResultService {
                 throw new Error("Selected option not found.");
             }
         }
+        return {criterionDoc};
     }
 
     static async createResult(dto: CreateResultDTO) {

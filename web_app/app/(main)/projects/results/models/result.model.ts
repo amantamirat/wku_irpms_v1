@@ -9,6 +9,7 @@ export type Result = {
     criterion: string | Criterion;
     score?: number;
     selected_option?: string | Option;
+    comment?: string;
     createdAt?: Date;
     updatedAt?: Date;
 };

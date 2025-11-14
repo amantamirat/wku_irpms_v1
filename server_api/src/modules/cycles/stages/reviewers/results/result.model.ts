@@ -6,6 +6,7 @@ interface IResult extends Document {
     criterion: mongoose.Types.ObjectId;
     score?: number;
     selected_option?: mongoose.Types.ObjectId;
+    comment?: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -30,6 +31,10 @@ const ResultSchema = new Schema<IResult>({
     selected_option: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.OPTION
+    },
+    comment: {
+        type: String,
+        maxlength: 2000 // optional but recommended
     },
 
 }, { timestamps: true });

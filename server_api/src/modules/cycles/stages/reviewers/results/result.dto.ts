@@ -9,6 +9,7 @@ export interface CreateResultDTO {
     criterion: mongoose.Types.ObjectId;
     score?: number;
     selected_option?: mongoose.Types.ObjectId;
+    comment?: string;
     userId: string;
 }
 
@@ -17,6 +18,7 @@ export interface UpdateResultDTO {
     data: Partial<{
         score: number;
         selected_option: mongoose.Types.ObjectId;
+        comment: string;
     }>;
     userId: string;
 }

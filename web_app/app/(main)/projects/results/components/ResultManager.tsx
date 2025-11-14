@@ -21,12 +21,13 @@ interface ResultManagerProps {
 
 const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) => {
 
-    const confirm = useConfirmDialog();
+    
     const { getLinkedApplicant } = useAuth();
     const applicant = getLinkedApplicant();
     const loggedApplicantId = applicant?._id ?? applicant;
     const isOwner = (reviewer?.applicant as any)._id === loggedApplicantId;
     const isActiveReviewer = isOwner && reviewer?.status === ReviewerStatus.active;
+    const confirm = useConfirmDialog();
 
     const [results, setResults] = useState<Result[]>([]);
     const [selectedResult, setSelectedResult] = useState<Result | null>(null);
@@ -127,8 +128,9 @@ const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) =
         const criterion = rowData.criterion as Criterion;
         if (!criterion) return "";
         if (criterion.form_type === FormType.closed) {
-            return rowData.selected_option
-                ? (rowData.selected_option as Option).title
+            const opt = rowData.selected_option as Option;
+            return opt
+                ? opt.title + " (" + opt.score + ")"
                 : "-";
         }
         return rowData.score ?? "-";
@@ -213,13 +215,14 @@ const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) =
                 className="datatable-responsive"
                 emptyMessage={"No criteria or results found."}
                 scrollable
-                tableStyle={{ minWidth: "50rem" }}
+                //tableStyle={{ minWidth: "50rem" }}
             >
                 <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: "50px" }} />
                 <Column field="criterion.title" header="Criterion" sortable footer={<strong>Weight: {calculateTotalWeight()}</strong>} />
                 <Column field="criterion.weight" header="Weight" sortable />
                 <Column body={scoreTemplate} header="Score" sortable footer={<strong>Score: {calculateTotalScore()}</strong>} />
-                <Column body={actionBodyTemplate} headerStyle={{ minWidth: "10rem" }} style={{ display: isActiveReviewer ? undefined : "none" }} />
+                <Column field="comment" header="Comment" sortable />
+                <Column body={actionBodyTemplate} style={{ display: isActiveReviewer ? undefined : "none" }} />
             </DataTable>
             {
                 (isActiveReviewer && selectedResult) &&

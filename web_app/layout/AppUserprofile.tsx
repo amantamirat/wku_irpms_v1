@@ -28,12 +28,21 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
             <Sidebar visible={props.visible} position="right" onHide={() => props.setVisible(false)}>
                 <h2>Welcome, {user?.user_name || 'User'}</h2>
                 <p>
-                    You are currently logged in. Use the button below to sign out.
+                    You are currently logged in. Use the buttons below to view your evaluations, edit your profile, change your password, or sign out.
                 </p>
                 <Divider />
                 <p>
                     <Button
-                        label="Profile"
+                        label="My Evaluations"
+                        severity="help"
+                        icon="pi pi-list"
+                        className="w-full"
+
+                    />
+                </p>
+                <p>
+                    <Button
+                        label="My Profile"
                         severity="info"
                         icon="pi pi-user"
                         className="w-full"

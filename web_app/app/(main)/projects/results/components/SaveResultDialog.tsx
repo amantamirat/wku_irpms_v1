@@ -10,6 +10,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Option } from "@/app/(main)/evaluations/models/option.model";
 import { Criterion, FormType } from "@/app/(main)/evaluations/models/criterion.model";
 import { OptionApi } from "@/app/(main)/evaluations/api/option.api";
+import { InputTextarea } from "primereact/inputtextarea";
 
 interface SaveResultDialogProps {
     result: Result;
@@ -22,7 +23,8 @@ const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDi
 
     const toast = useRef<Toast>(null);
     const [options, setOptions] = useState<Option[]>([]);
-    const [localResult, setLocalResult] = useState(result || {});
+    //const [localResult, setLocalResult] = useState(result || {});
+    const [localResult, setLocalResult] = useState<Result>(result);
     const criterion = result.criterion as Criterion;
 
     useEffect(() => {
@@ -102,7 +104,9 @@ const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDi
                 footer={footer}
                 onHide={onHide}
             >
-                <h3 className="mb-3 text-center">{criterion.title}</h3>
+                <h3 className="mb-3 text-center text-xl font-semibold break-words">
+                    {criterion.title}
+                </h3>
                 {
                     (result.criterion && criterion.form_type === FormType.closed) &&
                     <div className="field">
@@ -130,10 +134,23 @@ const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDi
                             value={localResult.score}
                             onValueChange={(e) => setLocalResult({ ...localResult, score: e.value ?? 0 })}
                             min={0}
+                            max={criterion.weight}
                             placeholder="Enter score"
                         />
                     </div>
                 }
+                {/* Comment Field */}
+                <div className="field">
+                    <label htmlFor="comment">Comment</label>
+                    <InputTextarea
+                        id="comment"
+                        value={localResult.comment ?? ''}
+                        onChange={(e) => setLocalResult({ ...localResult, comment: e.target.value })}
+                        rows={4}
+                        cols={30}
+                        maxLength={2000}
+                    />
+                </div>
 
             </Dialog>
         </>
