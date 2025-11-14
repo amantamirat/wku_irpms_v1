@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 
 export interface GetResultsDTO {
     reviewer?: mongoose.Types.ObjectId;
-    //criterion?: mongoose.Types.ObjectId;
 }
 
 export interface CreateResultDTO {

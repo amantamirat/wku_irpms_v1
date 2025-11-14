@@ -11,6 +11,7 @@ import { GetReviewersOptions, ReviewerApi } from "../api/reviewer.api";
 import { Reviewer, ReviewerStatus } from "../models/reviewer.model";
 import SaveReviewerDialog from "./SaveReviewerDialog";
 import ErrorComponent from "@/components/ErrorComponent";
+import Badge from "@/templates/Badge";
 
 interface ReviewerManagerProps {
     applicant?: Applicant;
@@ -90,9 +91,11 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
         </div>
     );
 
-    const statusBodyTemplate = (rowData: Reviewer) => (
-        <span className={`reviewer-badge status-${rowData.status}`}>{rowData.status}</span>
-    );
+    const statusBodyTemplate = (rowData: Reviewer) => {
+        return (
+            <Badge type="status" value={rowData.status ?? 'Unknown'} />
+        );
+    };
 
     const actionBodyTemplate = (rowData: Reviewer) => (
         <>
@@ -112,7 +115,7 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
     // Row expansion template for results
     const resultExpansionTemplate = (rowData: Reviewer) => {
         return (
-            <div className="p-3">              
+            <div className="p-3">
                 <ResultManager reviewer={rowData} />
             </div>
         );

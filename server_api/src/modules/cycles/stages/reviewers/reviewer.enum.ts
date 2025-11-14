@@ -1,4 +1,5 @@
 export enum ReviewerStatus {
     pending = 'pending',
-    active = 'active'
+    active = 'active',
+    submitted = 'submitted',
 }
