@@ -134,8 +134,7 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
     };
 
     const actionBodyTemplate = (rowData: Result) => {
-        if (!canEdit) return null; // Hide actions for unauthorized users
-
+        if (!canEdit) return null;
         return (
             <>
                 <Button
@@ -172,7 +171,7 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
 
     return (
         <div className="card">
-            <Toolbar className="mb-4" end={endToolbarTemplate} />
+            {canEdit && <Toolbar className="mb-4" end={endToolbarTemplate} />}
             <DataTable
                 value={results}
                 selection={selectedResult}
@@ -193,7 +192,7 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
                 <Column body={actionBodyTemplate} headerStyle={{ minWidth: "10rem" }} style={{ display: canEdit ? undefined : "none" }} />
             </DataTable>
             {
-                selectedResult &&
+                (canEdit && selectedResult) &&
                 <SaveResultDialog
                     visible={showAddDialog}
                     result={selectedResult}
@@ -202,7 +201,7 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
                 />
             }
             {
-                selectedResult &&
+                (canEdit && selectedResult) &&
                 <ConfirmDialog
                     showDialog={showDeleteDialog}
                     title={`result of ${(selectedResult.criterion as Criterion).title}`}

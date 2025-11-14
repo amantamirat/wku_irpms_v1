@@ -1,8 +1,6 @@
 'use client';
 
 import ConfirmDialog from '@/components/ConfirmationDialog';
-
-
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';

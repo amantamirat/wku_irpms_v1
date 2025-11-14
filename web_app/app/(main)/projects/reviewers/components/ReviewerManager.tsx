@@ -10,6 +10,7 @@ import { ProjectStage } from "../../stages/models/stage.model";
 import { GetReviewersOptions, ReviewerApi } from "../api/reviewer.api";
 import { Reviewer, ReviewerStatus } from "../models/reviewer.model";
 import SaveReviewerDialog from "./SaveReviewerDialog";
+import ErrorComponent from "@/components/ErrorComponent";
 
 interface ReviewerManagerProps {
     applicant?: Applicant;
@@ -24,6 +25,7 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
     };
 
     const [reviewers, setReviewers] = useState<Reviewer[]>([]);
+    const [error, setError] = useState<string | null>(null);
     const [reviewer, setReviewer] = useState<Reviewer>(emptyReviewer);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -35,18 +37,20 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
                 const options: GetReviewersOptions = {};
                 options.applicant = applicant ? applicant._id : undefined;
                 options.projectStage = projectStage ? projectStage._id : undefined;
-
                 const data = await ReviewerApi.getReviewers(options);
                 setReviewers(data);
-            } catch (err) {
-                console.error("Failed to fetch reviewers:", err);
+            } catch (err: Error | any) {
+                setError("Failed to fetch reviewers." + (err.message || ""));
             }
         };
         fetchReviewers();
     }, [applicant, projectStage]);
 
-
-
+    if (error) {
+        return (
+            <ErrorComponent errorMessage={error} />
+        );
+    }
 
     const onSaveCompelete = (savedReviewer: Reviewer) => {
         let _reviewers = [...reviewers];
@@ -108,13 +112,7 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
     // Row expansion template for results
     const resultExpansionTemplate = (rowData: Reviewer) => {
         return (
-            <div className="p-3">
-                <h6>
-                    Results for Reviewer:
-                    {typeof rowData.applicant === "object" && rowData.applicant !== null
-                        ? `${rowData.applicant.first_name ?? ""} ${rowData.applicant.last_name ?? ""}`
-                        : ""}
-                </h6>
+            <div className="p-3">              
                 <ResultManager reviewer={rowData} />
             </div>
         );
