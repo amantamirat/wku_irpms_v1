@@ -198,7 +198,7 @@ const EvaluationManager = () => {
                     {selectedEvaluation && (
                         <ConfirmDialog
                             showDialog={showDeleteDialog}
-                            title={String(selectedEvaluation.title)}
+                            item={String(selectedEvaluation.title)}
                             onConfirmAsync={deleteEvaluation}
                             onHide={() => setShowDeleteDialog(false)}
                         />

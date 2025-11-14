@@ -204,7 +204,7 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
                 (canEdit && selectedResult) &&
                 <ConfirmDialog
                     showDialog={showDeleteDialog}
-                    title={`result of ${(selectedResult.criterion as Criterion).title}`}
+                    item={`result of ${(selectedResult.criterion as Criterion).title}`}
                     onConfirmAsync={deleteResult}
                     onHide={hideDialogs}
                 />

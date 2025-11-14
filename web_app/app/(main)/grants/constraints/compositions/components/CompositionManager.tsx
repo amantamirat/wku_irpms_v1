@@ -176,7 +176,7 @@ const CompositionManager = ({ constraint }: CompositionManagerProps) => {
                     {selectedComposition && (
                         <ConfirmDialog
                             showDialog={showDeleteDialog}
-                            title={String(selectedComposition.value)}
+                            item={String(selectedComposition.value)}
                             onConfirmAsync={deleteComposition}
                             onHide={hideDialogs}
                         />

@@ -275,7 +275,7 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
             {selectedCriterion && (
                 <ConfirmDialog
                     showDialog={showDeleteDialog}
-                    title={String(selectedCriterion.title)}
+                    item={String(selectedCriterion.title)}
                     onConfirmAsync={deleteCriterion}
                     onHide={() => setShowDeleteDialog(false)}
                 />

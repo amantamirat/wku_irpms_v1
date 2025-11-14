@@ -187,7 +187,7 @@ const ProjectManager = () => {
                     {selectedProject && (
                         <ConfirmDialog
                             showDialog={showDeleteDialog}
-                            title={String(selectedProject.title)}
+                            item={String(selectedProject.title)}
                             onConfirmAsync={deleteProject}
                             onHide={hideDialogs}
                         />

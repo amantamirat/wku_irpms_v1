@@ -335,7 +335,7 @@ const ThemeManager = ({ type, parent, themeLevel }: ThemeManagerProps) => {
                     {selectedTheme && (
                         <ConfirmDialog
                             showDialog={showDeleteDialog}
-                            title={String(selectedTheme.title)}
+                            item={String(selectedTheme.title)}
                             onConfirmAsync={deleteTheme}
                             onHide={() => setShowDeleteDialog(false)}
                         />

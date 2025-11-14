@@ -223,7 +223,7 @@ const CycleManager: React.FC<CycleManagerProps> = ({ type }) => {
                     {selectedCycle && (
                         <ConfirmDialog
                             showDialog={showDeleteDialog}
-                            title={String(selectedCycle.title)}
+                            item={String(selectedCycle.title)}
                             onConfirmAsync={deleteCycle}
                             onHide={hideDialogs}
                         />

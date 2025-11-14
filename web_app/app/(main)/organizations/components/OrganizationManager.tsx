@@ -245,7 +245,7 @@ const OrganizationManager = (props: OrganizationMangerProps) => {
                     {selectedOrganization &&
                         <ConfirmDialog
                             showDialog={showDeleteDialog}
-                            title={selectedOrganization.name}
+                            item={selectedOrganization.name}
                             onConfirmAsync={deleteOrganization}
                             onHide={hideDialogs}
                         />}

@@ -235,7 +235,7 @@ const ProjectStageManager = ({ project, stage, setProject }: ProjectStageManager
             {(projectStage && project) && (
                 <ConfirmDialog
                     showDialog={showDeleteDialog}
-                    title={projectStage.stage ? projectStage.stage.toString() : "Project Stage"}
+                    item={projectStage.stage ? projectStage.stage.toString() : "Project Stage"}
                     onConfirmAsync={project?._id ? deleteProjectStage : undefined}
                     onConfirm={!project?._id ? deleteProjectStage : undefined}
                     onHide={hideDialogs}

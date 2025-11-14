@@ -212,7 +212,7 @@ const StageManager = ({ cycle }: StageManagerProps) => {
             {selectedStage && showDeleteDialog && (
                 <ConfirmDialog
                     showDialog={showDeleteDialog}
-                    title={selectedStage.name || ''}
+                    item={selectedStage.name || ''}
                     onConfirmAsync={deleteStage}
                     onHide={() => setShowDeleteDialog(false)}
                 />

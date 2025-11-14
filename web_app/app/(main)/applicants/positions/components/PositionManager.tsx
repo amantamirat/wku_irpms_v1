@@ -234,7 +234,7 @@ const PositionManager = ({ posType, parent }: PositionProps) => {
                     {selectedPosition && (
                         <ConfirmDialog
                             showDialog={showDeleteDialog}
-                            title={String(selectedPosition.name)}
+                            item={String(selectedPosition.name)}
                             onConfirmAsync={deletePosition}
                             onHide={() => setShowDeleteDialog(false)}
                         />

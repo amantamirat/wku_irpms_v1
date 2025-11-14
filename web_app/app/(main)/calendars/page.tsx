@@ -170,7 +170,7 @@ const CalendarPage = () => {
                     {selectedCalendar && (
                         <ConfirmDialog
                             showDialog={showDeleteDialog}
-                            title={String(selectedCalendar.year)}
+                            item={String(selectedCalendar.year)}
                             onConfirmAsync={deleteCalendar}
                             onHide={hideDialogs}
                         />

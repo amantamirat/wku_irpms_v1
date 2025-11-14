@@ -173,7 +173,7 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
                     {reviewer && (
                         <ConfirmDialog
                             showDialog={showDeleteDialog}
-                            title={String((reviewer.applicant as any)?.first_name)}
+                            item={String((reviewer.applicant as any)?.first_name)}
                             onConfirmAsync={deleteReviewer}
                             onHide={hideDialogs}
                         />

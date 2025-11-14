@@ -159,7 +159,7 @@ export default function ProjectThemeManager({ project, setProject }: ProjectInfo
             {projectTheme && (
                 <ConfirmDialog
                     showDialog={showDeleteDialog}
-                    title={String((projectTheme.theme as any).title)}
+                    item={String((projectTheme.theme as any).title)}
                     onConfirmAsync={project._id ? deleteProjectTheme : undefined}
                     onConfirm={!project._id ? removeProjectTheme : undefined}
                     onHide={hideDialogs}

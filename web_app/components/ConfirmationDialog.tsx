@@ -6,8 +6,7 @@ import { useRef } from "react";
 interface ConfirmDialogProps {
     showDialog: boolean;
     operation?: string;
-    title?: string;
-    message?: string;
+    item?: string;
     onConfirm?: (data?: any) => void;
     onConfirmAsync?: () => Promise<void>;
     onHide: () => void;
@@ -16,6 +15,17 @@ interface ConfirmDialogProps {
 const ConfirmDialog = (props: ConfirmDialogProps) => {
     const toast = useRef<Toast>(null);
     const op = props.operation || "Delete";
+    const item = props.item ?? "";
+
+
+    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
+        toast.current?.show({
+            severity,
+            summary,
+            detail,
+            life: 2000,
+        });
+    };
 
     const onOK = async () => {
         try {
@@ -26,24 +36,10 @@ const ConfirmDialog = (props: ConfirmDialogProps) => {
             else if (props.onConfirmAsync) {
                 await props.onConfirmAsync();
             }
-            
-            toast.current?.show({
-                severity: "success",
-                summary: `${op} performed`,
-                detail: `${props.title} ${op.toLowerCase()}ed`,
-                life: 2000
-            });
+            showToast("success", `${op} Successful`, `${item} ${op.toLowerCase()}ed successfully`);
             setTimeout(() => props.onHide(), 2000);
-        } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: `Failed to ${op} ${props.title}`,
-                detail: '' + err,
-                life: 2000
-            });
-        }
-        finally {
-
+        } catch (err: any) {
+            showToast("error", `Failed to ${op.toLowerCase()} ${item}`, err?.message ?? String(err));
         }
     }
 
@@ -65,16 +61,17 @@ const ConfirmDialog = (props: ConfirmDialogProps) => {
             >
                 <div className="flex align-items-center justify-content-center">
                     <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                    {props.title && (
-                        <span>
-                            Are you sure you want to {props.operation ?? 'delete'} <b>{props.title}</b>?
-                        </span>
-                    )}
-                    {props.message && (
+                    <span>
+                        Are you sure you want to {op} <b>{item}</b>?
+                    </span>
+
+                    {/*
+                    props.message && (
                         <span>
                             {props.message}?
                         </span>
-                    )}
+                    )
+                    */}
                 </div>
             </Dialog>
         </>
