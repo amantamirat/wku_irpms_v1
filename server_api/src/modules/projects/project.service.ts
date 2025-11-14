@@ -19,7 +19,9 @@ export class ProjectService {
         if (!cycle) throw new Error("Cycle not found");
         const leadPI = await Applicant.findOne({ user: dto.userId }).lean();
         if (!leadPI) throw new Error("Lead PI Applicant Not found");
-        await CacheService.validateOwnership(dto.userId, cycle.organization);
+        if (cycle.type === "Program") {
+            await CacheService.validateOwnership(dto.userId, cycle.organization);
+        }
         const project = await Project.create({
             ...dto,
             leadPI: leadPI._id,
