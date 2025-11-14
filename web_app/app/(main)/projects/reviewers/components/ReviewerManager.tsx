@@ -194,24 +194,31 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
     }
 
     const actionBodyTemplate = (rowData: Reviewer) => {
-        if (!canDelete) {
-            return null;
-        }
+        if (!canDelete) return null;
+
+        const state = rowData.status;
+
         return (
             <>
-                <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
-                    style={{ fontSize: '1.2rem' }}
-                    onClick={() => {
-                        confirm.ask({
-                            item: String((rowData.applicant as any)?.first_name),
-                            onConfirmAsync: () => deleteReviewer(rowData)
-                        });
-                    }} />
+                {state === ReviewerStatus.pending && (
+                    <Button
+                        icon="pi pi-trash"
+                        rounded
+                        severity="warning"
+                        className="p-button-rounded p-button-text"
+                        style={{ fontSize: '1.2rem' }}
+                        onClick={() => {
+                            confirm.ask({
+                                item: String((rowData.applicant as any)?.first_name),
+                                onConfirmAsync: () => deleteReviewer(rowData)
+                            });
+                        }}
+                    />
+                )}
             </>
-
-
         );
     };
+
 
 
     const resultExpansionTemplate = (rowData: Reviewer) => {
