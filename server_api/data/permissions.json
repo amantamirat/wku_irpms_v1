@@ -1,5 +1,10 @@
 [
   {
+    "category": "Permission Management",
+    "name": "permission:read",
+    "description": "View permissions"
+  },
+  {
     "category": "User Management",
     "name": "user:create",
     "description": "Create new users"
@@ -44,6 +49,26 @@
     "description": "Delete roles"
   },
   {
+    "category": "Calendar Management",
+    "name": "calendar:create",
+    "description": "Create calendar entries"
+  },
+  {
+    "category": "Calendar Management",
+    "name": "calendar:read",
+    "description": "Read calendar entries"
+  },
+  {
+    "category": "Calendar Management",
+    "name": "calendar:update",
+    "description": "Update calendar entries"
+  },
+  {
+    "category": "Calendar Management",
+    "name": "calendar:delete",
+    "description": "Delete calendar entries"
+  },
+  {
     "category": "Organization Management",
     "name": "organization:create",
     "description": "Create new organizations"
@@ -82,31 +107,6 @@
     "category": "Applicant Management",
     "name": "applicant:delete",
     "description": "Delete applicants"
-  },
-  {
-    "category": "Permission Management",
-    "name": "permission:read",
-    "description": "View permissions"
-  },
-  {
-    "category": "Calendar Management",
-    "name": "calendar:create",
-    "description": "Create calendar entries"
-  },
-  {
-    "category": "Calendar Management",
-    "name": "calendar:read",
-    "description": "Read calendar entries"
-  },
-  {
-    "category": "Calendar Management",
-    "name": "calendar:update",
-    "description": "Update calendar entries"
-  },
-  {
-    "category": "Calendar Management",
-    "name": "calendar:delete",
-    "description": "Delete calendar entries"
   },
   {
     "category": "Grant Management",
@@ -207,6 +207,31 @@
     "category": "Evaluation Management",
     "name": "evaluation:delete",
     "description": "Delete evaluation entries"
+  },
+  {
+    "category": "Reviewer Management",
+    "name": "reviewer:create",
+    "description": "Create new reviewers"
+  },
+  {
+    "category": "Reviewer Management",
+    "name": "reviewer:read",
+    "description": "View reviewers"
+  },
+  {
+    "category": "Reviewer Management",
+    "name": "reviewer:update",
+    "description": "Edit reviewer details"
+  },
+  {
+    "category": "Reviewer Management",
+    "name": "reviewer:approve",
+    "description": "Approve reviewer status, requires 'reviewer:update' permission"
+  },
+  {
+    "category": "Reviewer Management",
+    "name": "reviewer:delete",
+    "description": "Delete reviewers"
   },
   {
     "category": "Theme Management",

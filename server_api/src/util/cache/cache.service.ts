@@ -48,7 +48,6 @@ export class CacheService {
 
     static async hasOrganizationOwnership(userId: string, organizationId: string | mongoose.Types.ObjectId): Promise<boolean> {
         const orgs = await this.getUserOrganizations(userId);
-        //console.log("orgs", orgs);
         return orgs.map(o => o.toString()).includes(organizationId.toString());
     }
 
@@ -60,7 +59,7 @@ export class CacheService {
     static async validateOwnership(userId: string, organizationId: string | mongoose.Types.ObjectId) {
         const ownsOrg = await this.hasOrganizationOwnership(userId, organizationId);
         if (!ownsOrg) {
-            throw new Error("You are not authorized to manipulate data under this organization.");
+            throw new Error("User does not have ownership of the organization.");
         }
     }
 }

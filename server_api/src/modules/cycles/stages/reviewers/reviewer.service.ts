@@ -7,6 +7,8 @@ import Applicant from "../../../applicants/applicant.model";
 import { Collaborator } from "../../../projects/collaborators/collaborator.model";
 import { CreateReviewerDto, GetReviewerOptions, UpdateReviewerDto } from "./reviewer.dto";
 import { DeleteDto } from "../../../../util/delete.dto";
+import { CacheService } from "../../../../util/cache/cache.service";
+import { PERMISSIONS } from "../../../../util/permissions";
 
 
 
@@ -39,25 +41,37 @@ export class ReviewerService {
 
     static async updateReviewer(dto: UpdateReviewerDto) {
         const { id, data, userId } = dto;
-        
+
         const reviewerDoc = await Reviewer.findById(id);
         if (!reviewerDoc) throw new Error("Reviewer not found");
-        
-        const applicantDoc = await Applicant.findOne({ user: userId }).lean();
-        if (!applicantDoc) throw new Error("Applicant not found");
-        if (String(reviewerDoc.applicant) !== String(applicantDoc._id)) {
-            throw new Error("You are not allowed to update this reviewer status.")
-        }
-        
+
         const current = reviewerDoc.status;
         const next = data.status;
+
+        const isApprovalTransition =
+            current === ReviewerStatus.approved || next === ReviewerStatus.approved;
+
+        if (isApprovalTransition) {
+            const hasPermission = await CacheService.hasPermissions(userId, [PERMISSIONS.REVIEWER.UPDATE]);
+            if (!hasPermission) {
+                throw new Error("You do not have permission to approve reviewer status.");
+            }
+
+        } else {
+            const applicantDoc = await Applicant.findOne({ user: userId }).lean();
+            if (!applicantDoc) throw new Error("Applicant not found");
+            if (String(reviewerDoc.applicant) !== String(applicantDoc._id)) {
+                throw new Error(`You are not allowed to ${current} this reviewer status.`);
+            }
+        }
+
         const transitions: Record<ReviewerStatus, ReviewerStatus[]> = {
             [ReviewerStatus.pending]: [ReviewerStatus.active],
             [ReviewerStatus.active]: [ReviewerStatus.pending, ReviewerStatus.submitted],
-            [ReviewerStatus.submitted]: [ReviewerStatus.active],
+            [ReviewerStatus.submitted]: [ReviewerStatus.active, ReviewerStatus.approved],
             [ReviewerStatus.approved]: [ReviewerStatus.submitted]
         };
-        
+
         const allowedNext = transitions[current];
         if (!allowedNext.includes(next!)) {
             throw new Error(`Invalid state transition: ${current} → ${next}`);
@@ -65,7 +79,7 @@ export class ReviewerService {
 
         Object.assign(reviewerDoc, data);
         return reviewerDoc.save();
-    }    
+    }
 
     static async deleteReviewer(dto: DeleteDto) {
         const { id } = dto;

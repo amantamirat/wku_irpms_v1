@@ -1,5 +1,4 @@
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
-import ConfirmDialog from "@/components/ConfirmationDialog";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable, DataTableExpandedRows } from "primereact/datatable";
@@ -12,6 +11,7 @@ import { Reviewer, ReviewerStatus } from "../models/reviewer.model";
 import SaveReviewerDialog from "./SaveReviewerDialog";
 import ErrorComponent from "@/components/ErrorComponent";
 import Badge from "@/templates/Badge";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 
 interface ReviewerManagerProps {
     applicant?: Applicant;
@@ -24,12 +24,11 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
         projectStage: projectStage ?? undefined,
         status: ReviewerStatus.pending
     };
-
+    const confirm = useConfirmDialog();
     const [reviewers, setReviewers] = useState<Reviewer[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [reviewer, setReviewer] = useState<Reviewer>(emptyReviewer);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
     useEffect(() => {
@@ -62,27 +61,31 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
             _reviewers.push({ ...savedReviewer });
         }
         setReviewers(_reviewers);
-        hideDialogs();
+        hideSaveDialog();
     };
 
-    const onDeleteCompelete = (deleted: Reviewer) => {
-        let _reviewers = reviewers.filter((r) => r._id !== deleted._id);
-        setReviewers(_reviewers);
-        hideDialogs();
-    }
-
-
-    const deleteReviewer = async () => {
-        const deleted = await ReviewerApi.deleteReviewer(reviewer);
+    const deleteReviewer = async (row: Reviewer) => {
+        const deleted = await ReviewerApi.deleteReviewer(row);
         if (deleted) {
-            setReviewers(reviewers.filter((c) => c._id !== reviewer._id));
-            hideDialogs();
+            setReviewers(reviewers.filter((c) => c._id !== row._id));
         }
     };
 
-    const hideDialogs = () => {
+    const updateStatus = async (row: Reviewer, next: ReviewerStatus) => {
+        try {
+            const updated = await ReviewerApi.updateReviewer({ _id: row._id, status: next });
+            setReviewers(prev =>
+                prev.map(r => r._id === updated._id ? { ...row, status: updated.status } : r)
+            );
+        } catch (err: any) {
+            //setError(err.message || "Failed to update reviewer status");
+            throw err;
+        }
+    };
+
+
+    const hideSaveDialog = () => {
         setReviewer(emptyReviewer);
-        setShowDeleteDialog(false);
         setShowSaveDialog(false);
     }
 
@@ -103,26 +106,92 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
         );
     };
 
-    const actionBodyTemplate = (rowData: Reviewer) => (
-        <>
-            <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setReviewer(rowData);
-                    setShowSaveDialog(true);
-                }} />
-            <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setReviewer(rowData);
-                    setShowDeleteDialog(true);
-                }} />
-        </>
-    );
+    const stateTransitionTemplate = (rowData: Reviewer) => {
+        const s = rowData.status;
+        return (
+            <div className="flex gap-2">
+                {/* pending → active */}
+                {s === ReviewerStatus.pending && (
+                    <Button
+                        label="Activate"
+                        icon="pi pi-check"
+                        severity="success"
+                        size="small"
+                        //onClick={() => updateStatus(rowData, ReviewerStatus.active)}
+                        onClick={() => {
+                            confirm.ask({
+                                operation: 'activate',
+                                onConfirmAsync: () => updateStatus(rowData, ReviewerStatus.active)
+                            });
+                        }}
+                    />
+                )}
 
-    // Row expansion template for results
+                {/* active → pending or submitted */}
+                {s === ReviewerStatus.active && (
+                    <>
+                        <Button
+                            label="Pend"
+                            icon="pi pi-arrow-left"
+                            severity="warning"
+                            size="small"
+                            onClick={() => {
+                                confirm.ask({
+                                    operation: 'pend',
+                                    onConfirmAsync: () => updateStatus(rowData, ReviewerStatus.pending)
+                                });
+                            }}
+                        />
+                    </>
+                )}
+                {/* submitted → approved */}
+                {s === ReviewerStatus.submitted && (
+                    <Button
+                        label="Approve"
+                        icon="pi pi-check-circle"
+                        severity="info"
+                        size="small"
+                        onClick={() => confirm.ask({
+                            operation: 'Approve',
+                            onConfirmAsync: () => updateStatus(rowData, ReviewerStatus.approved)
+                        })}
+                    />)}
+                {/* approved → submitted */}
+                {s === ReviewerStatus.approved && (
+                    <Button
+                        label="Revert to Submitted"
+                        icon="pi pi-undo"
+                        severity="warning"
+                        size="small"
+                        onClick={() => confirm.ask({
+                            operation: 'revert to submitted',
+                            onConfirmAsync: () => updateStatus(rowData, ReviewerStatus.submitted)
+                        })}
+                    />
+                )}
+            </div>
+        );
+    }
+
+    const actionBodyTemplate = (rowData: Reviewer) => {
+        const s = rowData.status;
+        return (
+            <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
+                style={{ fontSize: '1.2rem' }}
+                onClick={() => {
+                    confirm.ask({
+                        item: String((rowData.applicant as any)?.first_name),
+                        onConfirmAsync: () => deleteReviewer(rowData)
+                    });
+                }} />
+        );
+    };
+
+
     const resultExpansionTemplate = (rowData: Reviewer) => {
         return (
             <div className="p-3">
-                <ResultManager reviewer={rowData} />
+                <ResultManager reviewer={rowData} updateReviewerStatus={updateStatus} />
             </div>
         );
     };
@@ -159,7 +228,8 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
                             headerStyle={{ minWidth: '15rem' }}
                         />
                         <Column field="status" header="Status" body={statusBodyTemplate} sortable />
-                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
+                        <Column body={stateTransitionTemplate} />
+                        <Column body={actionBodyTemplate} />
                     </DataTable>
 
                     {reviewer && projectStage &&
@@ -167,17 +237,8 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
                             visible={showSaveDialog}
                             reviewer={reviewer}
                             onCompelete={onSaveCompelete}
-                            onHide={hideDialogs}
+                            onHide={hideSaveDialog}
                         />}
-
-                    {reviewer && (
-                        <ConfirmDialog
-                            showDialog={showDeleteDialog}
-                            item={String((reviewer.applicant as any)?.first_name)}
-                            onConfirmAsync={deleteReviewer}
-                            onHide={hideDialogs}
-                        />
-                    )}
                 </div>
             </div>
         </div>

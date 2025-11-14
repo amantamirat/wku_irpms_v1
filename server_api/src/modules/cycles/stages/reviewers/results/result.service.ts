@@ -7,13 +7,17 @@ import { DeleteDto } from "../../../../../util/delete.dto";
 import { Result } from "./result.model";
 import Applicant from "../../../../applicants/applicant.model";
 import mongoose from "mongoose";
+import { ReviewerStatus } from "../reviewer.enum";
 
 export class ResultService {
 
-    private static async validateOwnership(data: { reviewer: mongoose.Types.ObjectId, userId: string }) {
+    private static async validateReviwer(data: { reviewer: mongoose.Types.ObjectId, userId: string }) {
         const { reviewer, userId } = data;
         const reviewerDoc = await Reviewer.findById(reviewer).lean();
         if (!reviewerDoc) throw new Error("Reviewer not found");
+        if (reviewerDoc.status !== ReviewerStatus.active) {
+            throw new Error("Reviewer is not active");
+        }
         const applicantDoc = await Applicant.findOne({ user: userId }).lean();
         if (!applicantDoc) throw new Error("Applicant not found");
         if (String(reviewerDoc.applicant) !== String(applicantDoc._id)) {
@@ -44,7 +48,7 @@ export class ResultService {
 
     static async createResult(dto: CreateResultDTO) {
         const { reviewer, criterion, selected_option, score, userId } = dto;
-        await this.validateOwnership({ reviewer, userId });
+        await this.validateReviwer({ reviewer, userId });
         await this.validateResult({ criterion, score, selected_option });
         return await Result.create(dto);
     }
@@ -60,7 +64,7 @@ export class ResultService {
         const { score, selected_option } = data;
         const resultDoc = await Result.findById(id);
         if (!resultDoc) throw new Error("Result not found");
-        await this.validateOwnership({ reviewer: resultDoc.reviewer, userId });
+        await this.validateReviwer({ reviewer: resultDoc.reviewer, userId });
         await this.validateResult({ criterion: resultDoc.criterion, score, selected_option });
         Object.assign(resultDoc, data);
         return resultDoc.save();
@@ -73,7 +77,7 @@ export class ResultService {
         }
         const resultDoc = await Result.findById(id);
         if (!resultDoc) throw new Error("Result not found");
-        await this.validateOwnership({ reviewer: resultDoc.reviewer, userId });
+        await this.validateReviwer({ reviewer: resultDoc.reviewer, userId });
         return await resultDoc.deleteOne();
     }
 }

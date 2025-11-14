@@ -5,8 +5,8 @@ import { useRef } from "react";
 
 interface ConfirmDialogProps {
     showDialog: boolean;
-    operation?: string;
-    item?: string;
+    operation?: string;                // e.g. "activate", "approve", "submit"
+    item?: string;                     // optional
     onConfirm?: (data?: any) => void;
     onConfirmAsync?: () => Promise<void>;
     onHide: () => void;
@@ -14,41 +14,47 @@ interface ConfirmDialogProps {
 
 const ConfirmDialog = (props: ConfirmDialogProps) => {
     const toast = useRef<Toast>(null);
-    const op = props.operation || "Delete";
+
+    const op = props.operation || "delete";
     const item = props.item ?? "";
 
+    // 👉 generate clean messages
+    const actionText = item ? `${op} ${item}` : op;
 
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            life: 2000,
-        });
-    };
+    const successDetail = item
+        ? `${item} ${op}d successfully`
+        : `${op}d successfully`;
 
     const onOK = async () => {
         try {
+            if (props.onConfirm) props.onConfirm();
+            else if (props.onConfirmAsync) await props.onConfirmAsync();
 
-            if (props.onConfirm) {
-                props.onConfirm();
-            }
-            else if (props.onConfirmAsync) {
-                await props.onConfirmAsync();
-            }
-            showToast("success", `${op} Successful`, `${item} ${op.toLowerCase()}ed successfully`);
+            toast.current?.show({
+                severity: "success",
+                summary: `${op.charAt(0).toUpperCase() + op.slice(1)} Successful`,
+                detail: successDetail,
+                life: 2000
+            });
+
             setTimeout(() => props.onHide(), 2000);
         } catch (err: any) {
-            showToast("error", `Failed to ${op.toLowerCase()} ${item}`, err?.message ?? String(err));
+            toast.current?.show({
+                severity: "error",
+                summary: `Failed to ${op}`,
+                detail: err?.message ?? String(err),
+                life: 2000
+            });
         }
-    }
+    };
 
     return (
         <>
             <Toast ref={toast} />
+
             <Dialog
                 visible={props.showDialog}
-                style={{ width: '450px' }}
+                style={{ width: "450px" }}
                 header="Confirm"
                 modal
                 footer={
@@ -60,22 +66,15 @@ const ConfirmDialog = (props: ConfirmDialogProps) => {
                 onHide={props.onHide}
             >
                 <div className="flex align-items-center justify-content-center">
-                    <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                    <span>
-                        Are you sure you want to {op} <b>{item}</b>?
-                    </span>
+                    <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: "2rem" }} />
 
-                    {/*
-                    props.message && (
-                        <span>
-                            {props.message}?
-                        </span>
-                    )
-                    */}
+                    <span>
+                        Are you sure you want to&nbsp;
+                        <b>{actionText}</b>?
+                    </span>
                 </div>
             </Dialog>
         </>
-
     );
 };
 

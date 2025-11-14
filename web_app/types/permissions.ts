@@ -77,4 +77,11 @@ export const PERMISSIONS = {
     UPDATE: "position:update",
     DELETE: "position:delete",
   },
+  REVIEWER: {
+    CREATE: "reviewer:create",
+    READ: "reviewer:read",
+    UPDATE: "reviewer:update",
+    APPROVE: "reviewer:approve",
+    DELETE: "reviewer:delete",
+  },
 } as const;

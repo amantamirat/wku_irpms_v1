@@ -9,7 +9,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { ReviewerApi } from "../api/reviewer.api";
-import { Reviewer, ReviewerStatus, validateReviewer } from "../models/reviewer.model";
+import { Reviewer, validateReviewer } from "../models/reviewer.model";
 
 interface ReviewerDialogProps {
     visible: boolean;
@@ -130,7 +130,7 @@ export default function SaveReviewerDialog({ visible, reviewer, onCompelete, onH
                 footer={footer}
                 onHide={onHide}
             >
-                {!reviewer._id ? <>
+                {!reviewer._id && <>
                     <div className="field">
                         <label htmlFor="scope">Scope</label>
                         <Dropdown
@@ -177,20 +177,7 @@ export default function SaveReviewerDialog({ visible, reviewer, onCompelete, onH
                             placeholder="Select an Applicant"
                         />
                     </div>
-                </> :
-                    <>
-                        <div className="field">
-                            <label htmlFor="status">Status</label>
-                            <Dropdown
-                                id="status"
-                                value={localReviewer.status}
-                                options={Object.values(ReviewerStatus).map(s => ({ label: s, value: s }))}
-                                onChange={(e) =>
-                                    setLocalReviewer({ ...localReviewer, status: e.value })
-                                }
-                            />
-                        </div>
-                    </>}
+                </>}
             </Dialog>
         </>
     );

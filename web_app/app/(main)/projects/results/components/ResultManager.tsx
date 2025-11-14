@@ -1,10 +1,9 @@
-import ConfirmDialog from "@/components/ConfirmationDialog";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
 import { useEffect, useState } from "react";
-import { Reviewer } from "../../reviewers/models/reviewer.model";
+import { Reviewer, ReviewerStatus } from "../../reviewers/models/reviewer.model";
 import { ResultApi } from "../api/result.api";
 import { Result } from "../models/result.model";
 import SaveResultDialog from "./SaveResultDialog";
@@ -13,22 +12,25 @@ import { Option } from "@/app/(main)/evaluations/models/option.model";
 import { CriterionApi } from "@/app/(main)/evaluations/api/criterion.api";
 import { ProjectStage } from "../../stages/models/stage.model";
 import { useAuth } from "@/contexts/auth-context";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 
 interface ResultManagerProps {
     reviewer?: Reviewer;
+    updateReviewerStatus?: (reviewer: Reviewer, nextStatus: ReviewerStatus) => Promise<void>;
 }
 
-const ResultManager = ({ reviewer }: ResultManagerProps) => {
+const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) => {
 
+    const confirm = useConfirmDialog();
     const { getLinkedApplicant } = useAuth();
     const applicant = getLinkedApplicant();
     const loggedApplicantId = applicant?._id ?? applicant;
-    const canEdit = (reviewer?.applicant as any)._id === loggedApplicantId;
+    const isOwner = (reviewer?.applicant as any)._id === loggedApplicantId;
+    const isActiveReviewer = isOwner && reviewer?.status === ReviewerStatus.active;
 
     const [results, setResults] = useState<Result[]>([]);
     const [selectedResult, setSelectedResult] = useState<Result | null>(null);
-    const [showAddDialog, setShowAddDialog] = useState(false);
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [showSaveDialog, setShowSaveDialog] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -78,26 +80,25 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
             _results.push({ ...saved });
         }
         setResults(_results);
-        hideDialogs();
+        hideSaveDialog();
     };
 
-    const deleteResult = async () => {
-        if (!selectedResult?._id) return;
-        const deleted = await ResultApi.deleteResult(selectedResult);
+    const deleteResult = async (row: Result) => {
+        const deleted = await ResultApi.deleteResult(row);
         if (deleted) {
             setResults(results.map(r =>
-                (r.criterion as Criterion)._id === (selectedResult.criterion as Criterion)._id
+                (r.criterion as Criterion)._id === (row.criterion as Criterion)._id
                     ? { ...r, _id: undefined, score: 0, selected_option: undefined } // reset instead of removing
                     : r
             ));
-            hideDialogs();
+            // hideDialogs();
         }
     };
 
-    const hideDialogs = () => {
+    const hideSaveDialog = () => {
         setSelectedResult(null);
-        setShowAddDialog(false);
-        setShowDeleteDialog(false);
+        setShowSaveDialog(false);
+        //setShowDeleteDialog(false);
     };
 
     const calculateTotalWeight = () => {
@@ -134,7 +135,7 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
     };
 
     const actionBodyTemplate = (rowData: Result) => {
-        if (!canEdit) return null;
+        if (!isActiveReviewer) return null;
         return (
             <>
                 <Button
@@ -144,7 +145,7 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
                     className="p-button-rounded p-button-text"
                     onClick={() => {
                         setSelectedResult(rowData);
-                        setShowAddDialog(true);
+                        setShowSaveDialog(true);
                     }}
                 />
                 {rowData._id && (
@@ -154,8 +155,10 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
                         severity="warning"
                         className="p-button-rounded p-button-text"
                         onClick={() => {
-                            setSelectedResult(rowData);
-                            setShowDeleteDialog(true);
+                            confirm.ask({
+                                item: `result of ${(rowData.criterion as Criterion).title}`,
+                                onConfirmAsync: () => deleteResult(rowData)
+                            });
                         }}
                     />
                 )}
@@ -163,15 +166,42 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
         );
     };
 
-    const endToolbarTemplate = () => (
-        <div className="my-2">
-            <Button label="Submit" icon="pi pi-check" outlined severity="success" />
-        </div>
-    );
+    const endToolbarTemplate = () => {
+        const s = reviewer?.status;
+        return (
+            <div className="my-2">
+                {/* active → submitted */}
+                {s === ReviewerStatus.active && (
+                    <Button label="Submit" icon="pi pi-check" outlined severity="success"
+                        onClick={() => {
+                            if (!reviewer || !updateReviewerStatus) return;
+                            confirm.ask({
+                                operation: 'submit',
+                                onConfirmAsync: () => updateReviewerStatus(reviewer, ReviewerStatus.submitted)
+                            });
+                        }}
+                    />
+                )}
+                {/* submitted → active */}
+                {s === ReviewerStatus.submitted && (
+                    <Button label="Recall Submission" icon="pi pi-arrow-left" outlined severity="warning"
+                        onClick={() => {
+                            if (!reviewer || !updateReviewerStatus) return;
+                            confirm.ask({
+                                operation: 'Recall Submission',
+                                onConfirmAsync: () => updateReviewerStatus(reviewer, ReviewerStatus.active)
+                            });
+                        }}
+                    />
+                )}
+
+            </div>
+        )
+    };
 
     return (
         <div className="card">
-            {canEdit && <Toolbar className="mb-4" end={endToolbarTemplate} />}
+            {isOwner && <Toolbar className="mb-4" end={endToolbarTemplate} />}
             <DataTable
                 value={results}
                 selection={selectedResult}
@@ -189,26 +219,18 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
                 <Column field="criterion.title" header="Criterion" sortable footer={<strong>Weight: {calculateTotalWeight()}</strong>} />
                 <Column field="criterion.weight" header="Weight" sortable />
                 <Column body={scoreTemplate} header="Score" sortable footer={<strong>Score: {calculateTotalScore()}</strong>} />
-                <Column body={actionBodyTemplate} headerStyle={{ minWidth: "10rem" }} style={{ display: canEdit ? undefined : "none" }} />
+                <Column body={actionBodyTemplate} headerStyle={{ minWidth: "10rem" }} style={{ display: isActiveReviewer ? undefined : "none" }} />
             </DataTable>
             {
-                (canEdit && selectedResult) &&
+                (isActiveReviewer && selectedResult) &&
                 <SaveResultDialog
-                    visible={showAddDialog}
+                    visible={showSaveDialog}
                     result={selectedResult}
                     onCompelete={onSaveComplete}
-                    onHide={hideDialogs}
+                    onHide={hideSaveDialog}
                 />
             }
-            {
-                (canEdit && selectedResult) &&
-                <ConfirmDialog
-                    showDialog={showDeleteDialog}
-                    item={`result of ${(selectedResult.criterion as Criterion).title}`}
-                    onConfirmAsync={deleteResult}
-                    onHide={hideDialogs}
-                />
-            }
+
         </div>
     );
 };

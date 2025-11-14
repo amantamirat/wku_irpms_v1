@@ -4,7 +4,9 @@ import { ProjectStage } from "../../stages/models/stage.model";
 
 export enum ReviewerStatus {
     pending = 'pending',
-    active = 'active'
+    active = 'active',
+    submitted = 'submitted',
+    approved = 'approved'
 }
 
 export type Reviewer = {

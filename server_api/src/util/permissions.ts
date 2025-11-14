@@ -15,6 +15,12 @@ export const PERMISSIONS = {
   PERMISSION: {
     READ: "permission:read",
   },
+  CALENDAR: {
+    CREATE: "calendar:create",
+    READ: "calendar:read",
+    UPDATE: "calendar:update",
+    DELETE: "calendar:delete",
+  },
   ORGANIAZTION: {
     CREATE: "organization:create",
     READ: "organization:read",
@@ -27,12 +33,7 @@ export const PERMISSIONS = {
     UPDATE: "applicant:update",
     DELETE: "applicant:delete",
   },
-  CALENDAR: {
-    CREATE: "calendar:create",
-    READ: "calendar:read",
-    UPDATE: "calendar:update",
-    DELETE: "calendar:delete",
-  },
+
   GRANT: {
     CREATE: "grant:create",
     READ: "grant:read",
@@ -64,6 +65,13 @@ export const PERMISSIONS = {
     READ: "evaluation:read",
     UPDATE: "evaluation:update",
     DELETE: "evaluation:delete",
+  },
+  REVIEWER: {
+    CREATE: "reviewer:create",
+    READ: "reviewer:read",
+    UPDATE: "reviewer:update",
+    APPROVE: "reviewer:approve",
+    DELETE: "reviewer:delete",
   },
   THEME: {
     CREATE: "theme:create",
