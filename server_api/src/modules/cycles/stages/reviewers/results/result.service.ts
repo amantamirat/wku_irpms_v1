@@ -1,47 +1,52 @@
 import { FormType } from "../../../../evaluations/criteria/criterion.enum";
 import { Criterion } from "../../../../evaluations/criteria/criterion.model";
 import { Option } from "../../../../evaluations/options/option.model";
-import { Stage } from "../../stage.model";
 import { Reviewer } from "../reviewer.model";
 import { CreateResultDTO, GetResultsDTO, UpdateResultDTO } from "./result.dto";
 import { DeleteDto } from "../../../../../util/delete.dto";
 import { Result } from "./result.model";
+import Applicant from "../../../../applicants/applicant.model";
+import mongoose from "mongoose";
 
 export class ResultService {
 
-    private static async validateResult(result: CreateResultDTO) {
-        const reviewer = await Reviewer.findById(result.reviewer).populate("projectStage").lean();
-        if (!reviewer) throw new Error("Reviewer not found");
-        const stage = (reviewer.projectStage as any).stage;
-        const stageDoc = await Stage.findById(stage).select("evaluation");
-        if (!stageDoc) {
-            throw new Error("Cycle stage not found.");
+    private static async validateOwnership(data: { reviewer: mongoose.Types.ObjectId, userId: string }) {
+        const { reviewer, userId } = data;
+        const reviewerDoc = await Reviewer.findById(reviewer).lean();
+        if (!reviewerDoc) throw new Error("Reviewer not found");
+        const applicantDoc = await Applicant.findOne({ user: userId }).lean();
+        if (!applicantDoc) throw new Error("Applicant not found");
+        if (String(reviewerDoc.applicant) !== String(applicantDoc._id)) {
+            throw new Error("You are not allowed to provide result for this.")
         }
-        const criterion = await Criterion.findOne({ _id: result.criterion, evaluation: stageDoc.evaluation }).lean();
-        if (!criterion) throw new Error("Criterion not found");
-        if (criterion.form_type === FormType.open) {
-            if (result.score === undefined || result.score === null) {
+    }
+
+    private static async validateResult(data: { criterion: mongoose.Types.ObjectId, score?: number, selected_option?: mongoose.Types.ObjectId }) {
+        const criterionDoc = await Criterion.findOne({ _id: data.criterion }).lean();
+        if (!criterionDoc) throw new Error("Criterion not found");
+
+        if (criterionDoc.form_type === FormType.open) {
+            if (data.score === undefined || data.score === null) {
                 throw new Error("Score is required");
             }
-            const maxScore = criterion.weight;
-            if (result.score < 0 || result.score > maxScore) {
+            const maxScore = criterionDoc.weight;
+            if (data.score < 0 || data.score > maxScore) {
                 throw new Error(`Score must be between 0 and ${maxScore}`);
             }
         }
-        if (criterion.form_type === FormType.closed) {
-            if (!result.selected_option) {
-                throw new Error("Selected option is required for closed form type");
-            }
-            const option = await Option.exists({ _id: result.selected_option, criterion: criterion._id });
-            if (!option) {
+        if (criterionDoc.form_type === FormType.closed) {
+            const option = await Option.findById(data.selected_option).lean();
+            if (!option || String(option.criterion) !== String(criterionDoc._id)) {
                 throw new Error("Selected option not found.");
             }
         }
     }
 
-    static async createResult(data: CreateResultDTO) {
-        await this.validateResult(data);
-        return await Result.create(data);
+    static async createResult(dto: CreateResultDTO) {
+        const { reviewer, criterion, selected_option, score, userId } = dto;
+        await this.validateOwnership({ reviewer, userId });
+        await this.validateResult({ criterion, score, selected_option });
+        return await Result.create(dto);
     }
 
     static async getResults(options: GetResultsDTO) {
@@ -51,17 +56,24 @@ export class ResultService {
     }
 
     static async updateResult(dto: UpdateResultDTO) {
-        const { id, data } = dto;
-        const result = await Result.findById(id);
-        if (!result) throw new Error("Result not found");
-        Object.assign(result, data);
-        return result.save();
+        const { id, data, userId } = dto;
+        const { score, selected_option } = data;
+        const resultDoc = await Result.findById(id);
+        if (!resultDoc) throw new Error("Result not found");
+        await this.validateOwnership({ reviewer: resultDoc.reviewer, userId });
+        await this.validateResult({ criterion: resultDoc.criterion, score, selected_option });
+        Object.assign(resultDoc, data);
+        return resultDoc.save();
     }
 
     static async deleteResult(dto: DeleteDto) {
-        const { id } = dto;
-        const doc = await Result.findById(id);
-        if (!doc) throw new Error("Result not found");
-        return await doc.deleteOne();
+        const { id, userId } = dto;
+        if (!userId) {
+            throw new Error("User ID is required for deletion");
+        }
+        const resultDoc = await Result.findById(id);
+        if (!resultDoc) throw new Error("Result not found");
+        await this.validateOwnership({ reviewer: resultDoc.reviewer, userId });
+        return await resultDoc.deleteOne();
     }
 }

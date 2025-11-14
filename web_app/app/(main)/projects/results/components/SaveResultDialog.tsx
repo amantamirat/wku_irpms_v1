@@ -15,7 +15,6 @@ interface SaveResultDialogProps {
     result: Result;
     visible: boolean;
     onCompelete?: (savedResult: Result) => void;
-    //criterion: Criterion;
     onHide: () => void;
 }
 
@@ -35,7 +34,6 @@ const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDi
             const fetchOptions = async () => {
                 try {
                     const data = await OptionApi.getOptions({ criterion: criterion._id });
-                    //console.log(data);
                     setOptions(data);
                 } catch (err) {
                     console.error("Failed to fetch options:", err);
@@ -118,7 +116,6 @@ const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDi
                                 setLocalResult({ ...localResult, selected_option: e.value });
                             }}
                             optionLabel="title"
-                            //optionValue="_id"
                             placeholder="Select Option"
                         />
                     </div>

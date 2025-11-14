@@ -12,18 +12,23 @@ import { Criterion, FormType } from "@/app/(main)/evaluations/models/criterion.m
 import { Option } from "@/app/(main)/evaluations/models/option.model";
 import { CriterionApi } from "@/app/(main)/evaluations/api/criterion.api";
 import { ProjectStage } from "../../stages/models/stage.model";
+import { useAuth } from "@/contexts/auth-context";
 
 interface ResultManagerProps {
     reviewer?: Reviewer;
 }
 
 const ResultManager = ({ reviewer }: ResultManagerProps) => {
-    //const [criteria, setCriteria] = useState<Criterion[]>([]);
+
+    const { getLinkedApplicant } = useAuth();
+    const applicant = getLinkedApplicant();
+    const loggedApplicantId = applicant?._id ?? applicant;
+    const canEdit = (reviewer?.applicant as any)._id === loggedApplicantId;
+
     const [results, setResults] = useState<Result[]>([]);
     const [selectedResult, setSelectedResult] = useState<Result | null>(null);
     const [showAddDialog, setShowAddDialog] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-
 
     useEffect(() => {
         const fetchData = async () => {
@@ -57,7 +62,6 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
                 console.error("Error fetching criteria or results:", err);
             }
         };
-
         fetchData();
     }, [reviewer]);
 
@@ -68,7 +72,6 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
         const index = _results.findIndex(
             (r) => (r.criterion as Criterion)._id === (saved.criterion as Criterion)._id
         );
-
         if (index !== -1) {
             _results[index] = { ...saved };
         } else {
@@ -77,9 +80,6 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
         setResults(_results);
         hideDialogs();
     };
-
-
-
 
     const deleteResult = async () => {
         if (!selectedResult?._id) return;
@@ -133,32 +133,36 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
         return rowData.score ?? "-";
     };
 
-    const actionBodyTemplate = (rowData: Result) => (
-        <>
-            <Button
-                icon="pi pi-pencil"
-                rounded
-                severity="success"
-                className="p-button-rounded p-button-text"
-                onClick={() => {
-                    setSelectedResult(rowData);
-                    setShowAddDialog(true);
-                }}
-            />
-            {rowData._id && (
+    const actionBodyTemplate = (rowData: Result) => {
+        if (!canEdit) return null; // Hide actions for unauthorized users
+
+        return (
+            <>
                 <Button
-                    icon="pi pi-times"
+                    icon="pi pi-pencil"
                     rounded
-                    severity="warning"
+                    severity="success"
                     className="p-button-rounded p-button-text"
                     onClick={() => {
                         setSelectedResult(rowData);
-                        setShowDeleteDialog(true);
+                        setShowAddDialog(true);
                     }}
                 />
-            )}
-        </>
-    );
+                {rowData._id && (
+                    <Button
+                        icon="pi pi-times"
+                        rounded
+                        severity="warning"
+                        className="p-button-rounded p-button-text"
+                        onClick={() => {
+                            setSelectedResult(rowData);
+                            setShowDeleteDialog(true);
+                        }}
+                    />
+                )}
+            </>
+        );
+    };
 
     const endToolbarTemplate = () => (
         <div className="my-2">
@@ -186,9 +190,8 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
                 <Column field="criterion.title" header="Criterion" sortable footer={<strong>Weight: {calculateTotalWeight()}</strong>} />
                 <Column field="criterion.weight" header="Weight" sortable />
                 <Column body={scoreTemplate} header="Score" sortable footer={<strong>Score: {calculateTotalScore()}</strong>} />
-                <Column body={actionBodyTemplate} headerStyle={{ minWidth: "10rem" }} />
+                <Column body={actionBodyTemplate} headerStyle={{ minWidth: "10rem" }} style={{ display: canEdit ? undefined : "none" }} />
             </DataTable>
-
             {
                 selectedResult &&
                 <SaveResultDialog
@@ -198,7 +201,6 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
                     onHide={hideDialogs}
                 />
             }
-
             {
                 selectedResult &&
                 <ConfirmDialog
