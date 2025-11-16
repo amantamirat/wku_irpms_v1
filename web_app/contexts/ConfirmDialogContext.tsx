@@ -59,8 +59,8 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
                 life: 2000
             });
 
+            
             options.onComplete?.();
-
 
         } catch (err: any) {
             toast.current?.show({
@@ -71,8 +71,9 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
             });
 
         } finally {
+            await new Promise(resolve => setTimeout(resolve, 2000));
             setLoading(false);
-            setTimeout(close, 2000);
+            close();
         }
     };
 
@@ -96,6 +97,7 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
                             text
                             onClick={onOK}
                             loading={loading} // spinner while async operation runs
+                            disabled={loading}
                         />
                     </>
                 }

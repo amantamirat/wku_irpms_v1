@@ -22,8 +22,8 @@ interface SaveResultDialogProps {
 const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDialogProps) => {
 
     const toast = useRef<Toast>(null);
+    const [submitting, setSubmitting] = useState(false);
     const [options, setOptions] = useState<Option[]>([]);
-    //const [localResult, setLocalResult] = useState(result || {});
     const [localResult, setLocalResult] = useState<Result>(result);
     const criterion = result.criterion as Criterion;
 
@@ -48,6 +48,7 @@ const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDi
 
     const saveResult = async () => {
         try {
+            setSubmitting(true);
             const validation = validateResult(localResult);
             if (!validation.valid) {
                 throw new Error(validation.message);
@@ -71,7 +72,8 @@ const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDi
                 life: 2000
             });
             if (onCompelete) {
-                setTimeout(() => onCompelete(saved), 2000);
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                onCompelete(saved);
             }
         } catch (err) {
             toast.current?.show({
@@ -81,14 +83,14 @@ const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDi
                 life: 2000
             });
         } finally {
-            // Any cleanup if necessary
+            setSubmitting(false);
         }
     };
 
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
-            <Button label="Save" icon="pi pi-check" text onClick={saveResult} />
+            <Button label="Save" loading={submitting} disabled={submitting} icon="pi pi-check" text onClick={saveResult} />
         </>
     );
 
