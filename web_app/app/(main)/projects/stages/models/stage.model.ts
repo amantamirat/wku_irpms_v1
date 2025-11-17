@@ -2,7 +2,6 @@
 import { Project } from "../../models/project.model";
 
 export enum StageStatus {
-    pending = 'pending',
     submitted = 'submitted',
     accepted = 'accepted'
 }

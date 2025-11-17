@@ -27,7 +27,7 @@ const ProjectStageManager = ({ project, stage, setProject }: ProjectStageManager
     const emptyProjectStage: ProjectStage = {
         project: project ? project : "",
         stage: "",
-        status: StageStatus.pending,
+        status: StageStatus.submitted,
     };
 
     const [stages, setStages] = useState<ProjectStage[]>([]);

@@ -13,7 +13,6 @@ export class ProjectStageService {
         if (!project) {
             throw new Error("Project Not Found!");
         }
-
         const stage = await Stage.findById(dto.stage).lean();
         if (!stage) {
             throw new Error("Stage Not Found!");
@@ -71,8 +70,8 @@ export class ProjectStageService {
         if (!projectStage) throw new Error("Project stage not found");
         if (data && data.status && data.status !== projectStage.status) {
             const allowedTransitions: Record<ProjectStageStatus, ProjectStageStatus[]> = {
-                [ProjectStageStatus.pending]: [ProjectStageStatus.submitted],
-                [ProjectStageStatus.submitted]: [ProjectStageStatus.pending, ProjectStageStatus.accepted],
+                [ProjectStageStatus.submitted]: [ProjectStageStatus.accepted],
+                [ProjectStageStatus.on_review]: [ProjectStageStatus.accepted],
                 [ProjectStageStatus.accepted]: [ProjectStageStatus.submitted],
             };
 
@@ -90,9 +89,7 @@ export class ProjectStageService {
     static async deleteProjectStage(id: string) {
         const projectStage = await ProjectStage.findById(id);
         if (!projectStage) throw new Error("Project stage not found");
-        if (projectStage.status !== ProjectStageStatus.pending) {
-            throw new Error(`Can not delete ${projectStage.status} project stage`);
-        }
+        
         const deletedDoc = projectStage.toObject();
         await projectStage.deleteOne();
         return { documentPath: deletedDoc.documentPath };

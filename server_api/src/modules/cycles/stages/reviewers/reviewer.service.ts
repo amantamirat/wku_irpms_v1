@@ -115,9 +115,12 @@ export class ReviewerService {
         }
 
         Object.assign(reviewerDoc, data);
-        return reviewerDoc.save();
+        const savedReviewer =  reviewerDoc.save();
+
+        return savedReviewer;
     }
 
+   
     static async deleteReviewer(dto: DeleteDto) {
         const { id } = dto;
         const reviewer = await Reviewer.findById(id);
