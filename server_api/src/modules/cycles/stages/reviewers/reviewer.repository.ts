@@ -2,11 +2,13 @@
 import mongoose from "mongoose";
 import { Reviewer, IReviewer } from "./reviewer.model";
 import { CreateReviewerDTO, UpdateReviewerDTO } from "./reviewer.dto";
+import { ReviewerStatus } from "./reviewer.enum";
 
 export interface IReviewerRepository {
     findById(id: string): Promise<IReviewer | null>;
     findByProjectStage(projectStageId: string): Promise<Partial<IReviewer>[]>;
     findByApplicant(applicantId: string): Promise<Partial<IReviewer>[]>;
+    existsActiveByProjectStage(projectStageId: string): Promise<boolean>;
     create(dto: CreateReviewerDTO): Promise<IReviewer>;
     update(id: string, data: UpdateReviewerDTO["data"]): Promise<IReviewer>;
     delete(id: string): Promise<void>;
@@ -60,6 +62,14 @@ export class ReviewerRepository implements IReviewerRepository {
         if (!updatedReviewer) throw new Error("Reviewer not found");
 
         return updatedReviewer;
+    }
+
+    async existsActiveByProjectStage(projectStageId: string): Promise<boolean> {
+        const doc = await Reviewer.exists({
+            projectStage: new mongoose.Types.ObjectId(projectStageId),
+            status: ReviewerStatus.active
+        });
+        return !!doc;
     }
 
 

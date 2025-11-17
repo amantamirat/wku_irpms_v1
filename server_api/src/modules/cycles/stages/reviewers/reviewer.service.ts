@@ -8,28 +8,38 @@ import { Collaborator } from "../../../projects/collaborators/collaborator.model
 import { Criterion } from "../../../evaluations/criteria/criterion.model";
 import { Stage } from "../stage.model";
 import { ProjectStageStatus } from "../projects/project-stage.enum";
-import { ProjectStage } from "../projects/project-stage.model";
 import { IResultRepository, ResultRepository } from "./results/result.repository";
+import { IProjectStageRepository, ProjectStageRepository } from "../projects/project-stage.repository";
+import { ProjectStageSynchronizer } from "../projects/project-stage.synchronizer";
 
 export class ReviewerService {
+
     private repository: IReviewerRepository;
     private resultRepo: IResultRepository;
+    private projectStageRepo: IProjectStageRepository;
+    private projectStageSynchronizer: ProjectStageSynchronizer;
 
-    constructor(repository?: IReviewerRepository, resultRepo?: IResultRepository) {
+    constructor(repository?: IReviewerRepository, resultRepo?: IResultRepository,
+        projectStageRepo?: IProjectStageRepository, projectStageSynchronizer?: ProjectStageSynchronizer
+    ) {
         this.repository = repository || new ReviewerRepository();
         this.resultRepo = resultRepo || new ResultRepository();
+        this.projectStageRepo = projectStageRepo || new ProjectStageRepository();
+        this.projectStageSynchronizer = projectStageSynchronizer ||
+            new ProjectStageSynchronizer(this.projectStageRepo, this.repository);
     }
 
     async createReviewer(dto: CreateReviewerDTO) {
         const { projectStageId, applicantId } = dto;
 
-        const projectStageDoc = await ProjectStage.findById(projectStageId);
+        const projectStageDoc = await this.projectStageRepo.findById(projectStageId);
         if (!projectStageDoc) throw new Error("Project Stage not found");
 
         if ([ProjectStageStatus.accepted, ProjectStageStatus.rejected].includes(projectStageDoc.status)) {
             throw new Error(`This project stage is already ${projectStageDoc.status} and cannot be modified.`);
         }
 
+        ///////////////////////////will be modified//////////////////////////////////////////
         const applicantDoc = await Applicant.findById(applicantId).lean();
         if (!applicantDoc) throw new Error("Applicant not found");
 
@@ -37,6 +47,7 @@ export class ReviewerService {
         if (collaborators.find(c => String(c.applicant) === applicantId)) {
             throw new Error("Reviewer applicant is already a collaborator on the project");
         }
+        /////////////////////////////////////////////////////////////
 
         const createdReviewer = await this.repository.create({
             projectStageId,
@@ -44,11 +55,7 @@ export class ReviewerService {
             userId: dto.userId
         });
 
-        if (projectStageDoc.status === ProjectStageStatus.submitted) {
-            projectStageDoc.status = ProjectStageStatus.on_review;
-            await projectStageDoc.save();
-        }
-
+        await this.projectStageSynchronizer.onReviewerCreated(projectStageId, projectStageDoc);
         return createdReviewer;
     }
 
@@ -76,9 +83,7 @@ export class ReviewerService {
 
         // Permission check for approval
         const isApprovalTransition = current === ReviewerStatus.approved || next === ReviewerStatus.approved;
-        if (isApprovalTransition) {
-            // TODO: check user permissions via cache or auth service
-        } else {
+        if (!isApprovalTransition) {
             const applicantDoc = await Applicant.findOne({ user: userId }).lean();
             if (!applicantDoc) throw new Error("Applicant not found");
             if (String(reviewerDoc.applicant) !== String(applicantDoc._id)) {
@@ -88,7 +93,7 @@ export class ReviewerService {
 
         // Validation if status is submitted
         if (next === ReviewerStatus.submitted) {
-            const projectStageDoc = await ProjectStage.findById(reviewerDoc.projectStage);
+            const projectStageDoc = await this.projectStageRepo.findById(reviewerDoc.projectStage.toString());
             if (!projectStageDoc) throw new Error("Project Stage not found");
 
             const stageDoc = await Stage.findById(projectStageDoc.stage).lean();
@@ -118,6 +123,8 @@ export class ReviewerService {
             throw new Error("Cannot delete non-pending reviewer");
         }
 
-        return this.repository.delete(dto.id);
+        const deleted = await this.repository.delete(dto.id);
+        await this.projectStageSynchronizer.onReviewerDeleted(reviewerDoc.projectStage.toString());
+        return deleted
     }
 }

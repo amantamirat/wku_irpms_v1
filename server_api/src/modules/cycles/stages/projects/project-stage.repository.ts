@@ -8,10 +8,10 @@ import {
 } from "./project-stage.dto";
 
 export interface IProjectStageRepository {
-    findById(id: string): Promise<Partial<IProjectStage> | null>; // <-- allow POJO
+    findById(id: string): Promise<IProjectStage | null>; // <-- allow POJO
     find(filters: GetProjectStagesDTO): Promise<Partial<IProjectStage>[]>;
     create(dto: CreateProjectStageDTO): Promise<IProjectStage>;
-    update(id: string, data: UpdateProjectStageDTO["data"]): Promise<IProjectStage>;
+    updateState(id: string, status: UpdateProjectStageDTO["data"]): Promise<IProjectStage>;
     delete(id: string): Promise<IProjectStage | null>;
 }
 
@@ -61,7 +61,7 @@ export class ProjectStageRepository implements IProjectStageRepository {
         return ProjectStage.create(data);
     }
 
-    async update(id: string, dtoData: UpdateProjectStageDTO["data"]): Promise<IProjectStage> {
+    async updateState(id: string, dtoData: UpdateProjectStageDTO["data"]): Promise<IProjectStage> {
         const updateData: Partial<IProjectStage> = {};
         /*
         if (dtoData.documentPath !== undefined) {

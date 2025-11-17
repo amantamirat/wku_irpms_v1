@@ -1,22 +1,24 @@
 //result.service.ts
 import { IResultRepository, ResultRepository } from "./result.repository";
 import { CreateResultDTO, DeleteResultDTO, GetResultsDTO, UpdateResultDTO } from "./result.dto";
-import { Reviewer } from "../reviewer.model";
 import { ReviewerStatus } from "../reviewer.enum";
 import { Option } from "../../../../evaluations/options/option.model";
 import Applicant from "../../../../applicants/applicant.model";
 import { FormType } from "../../../../evaluations/criteria/criterion.enum";
 import { Criterion } from "../../../../evaluations/criteria/criterion.model";
+import { IReviewerRepository, ReviewerRepository } from "../reviewer.repository";
 
 export class ResultService {
     private repository: IResultRepository;
+    private reviewerRepo: IReviewerRepository;
 
-    constructor(repository?: IResultRepository) {
+    constructor(repository?: IResultRepository, reviewerRepo?: IReviewerRepository) {
         this.repository = repository || new ResultRepository();
+        this.reviewerRepo = reviewerRepo || new ReviewerRepository();;
     }
 
     private async validateReviewerPermission(reviewerId: string, userId: string) {
-        const reviewerDoc = await Reviewer.findById(reviewerId).lean();
+        const reviewerDoc = await this.reviewerRepo.findById(reviewerId);
         if (!reviewerDoc) throw new Error("Reviewer not found");
         if (reviewerDoc.status !== ReviewerStatus.active) throw new Error("Reviewer is not active");
 
@@ -52,8 +54,6 @@ export class ResultService {
     async createResult(dto: CreateResultDTO) {
         await this.validateReviewerPermission(dto.reviewerId, dto.userId);
         await this.validateResult(dto.criterionId, dto.score, dto.selectedOptionId);
-
-        // Pass DTO directly to repository
         return this.repository.create(dto);
     }
 

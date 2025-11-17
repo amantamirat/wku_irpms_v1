@@ -64,13 +64,15 @@ export class ProjectStageService {
     async updateProjectStage(dto: UpdateProjectStageDTO) {
         const { id, data } = dto;
         const newStatus = data.status;
-        if (newStatus) {
-            const projectStage = await this.repository.findById(id);
-            if (!projectStage || !projectStage.status) throw new Error("Project stage not found");
-            const currentStatus = projectStage.status;
-            ProjectStageStateMachine.validateTransition(currentStatus, newStatus);
+        if (!newStatus) {
+            throw new Error("Status Not Fouund!");
         }
-        return this.repository.update(dto.id, dto.data);
+
+        const projectStage = await this.repository.findById(id);
+        if (!projectStage || !projectStage.status) throw new Error("Project stage not found");
+        const currentStatus = projectStage.status;
+        ProjectStageStateMachine.validateTransition(currentStatus, newStatus);
+        return this.repository.updateState(dto.id, dto.data);
     }
 
     async deleteProjectStage(dto: DeleteProjectStageDTO) {

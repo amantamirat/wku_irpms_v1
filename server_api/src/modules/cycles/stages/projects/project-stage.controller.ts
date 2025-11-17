@@ -75,7 +75,10 @@ export class ProjectStageController {
             const { id } = req.params;
             if (!id) throw new Error("id is required");
 
-            const { status } = req.body;            
+            const { status } = req.body;    
+            if(!status){
+                throw new Error("Status Required");
+            }        
 
             const dto: UpdateProjectStageDTO = {
                 id,

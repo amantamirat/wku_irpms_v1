@@ -16,12 +16,12 @@ export interface IResultRepository {
 export class ResultRepository implements IResultRepository {
 
     async findById(id: string) {
-        return Result.findById(new mongoose.Types.ObjectId(id)).exec();
+        return Result.findById(new mongoose.Types.ObjectId(id)).lean<IResult>().exec();
     }
 
     async findByReviewer(reviewerId: string) {
         return Result.find({ reviewer: new mongoose.Types.ObjectId(reviewerId) })
-            .populate("criterion selectedOption")
+            .populate("criterion selectedOption").lean<IResult[]>()
             .exec();
     }
 
