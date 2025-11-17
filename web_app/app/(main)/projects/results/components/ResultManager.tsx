@@ -13,6 +13,8 @@ import { CriterionApi } from "@/app/(main)/evaluations/api/criterion.api";
 import { ProjectStage } from "../../stages/models/stage.model";
 import { useAuth } from "@/contexts/auth-context";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import ErrorComponent from "@/components/ErrorComponent";
+import { Skeleton } from "primereact/skeleton";
 
 interface ResultManagerProps {
     reviewer?: Reviewer;
@@ -21,7 +23,7 @@ interface ResultManagerProps {
 
 const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) => {
 
-    
+
     const { getLinkedApplicant } = useAuth();
     const applicant = getLinkedApplicant();
     const loggedApplicantId = applicant?._id ?? applicant;
@@ -30,12 +32,15 @@ const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) =
     const confirm = useConfirmDialog();
 
     const [results, setResults] = useState<Result[]>([]);
+    const [error, setError] = useState<string | null>(null);
     const [selectedResult, setSelectedResult] = useState<Result | null>(null);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
+                setLoading(true);
                 if (!reviewer?._id || !reviewer?.projectStage) return;
                 const projectStage = reviewer.projectStage as ProjectStage;
                 const stageId =
@@ -61,14 +66,35 @@ const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) =
                 });
 
                 setResults(mergedResults);
-            } catch (err) {
-                console.error("Error fetching criteria or results:", err);
+            } catch (err: Error | any) {
+                setError("Failed to fetch reviewers." + (err.message || ""));
             }
+            finally { setLoading(false); }
         };
         fetchData();
     }, [reviewer]);
 
+    if (loading) {
+        return (
+            <div className="p-4">
+                {[...Array(10)].map((_, i) => (
+                    <div key={i} className="flex items-center mb-3">
+                        <Skeleton width="50px" height="2rem" className="mr-2" />
+                        <Skeleton width="200px" height="2rem" className="mr-2" />
+                        <Skeleton width="80px" height="2rem" className="mr-2" />
+                        <Skeleton width="100px" height="2rem" className="mr-2" />
+                        <Skeleton width="120px" height="2rem" />
+                    </div>
+                ))}
+            </div>
+        );
+    }
 
+    if (error) {
+        return (
+            <ErrorComponent errorMessage={error} />
+        );
+    }
 
     const onSaveComplete = (saved: Result) => {
         let _results = [...results];
@@ -215,7 +241,7 @@ const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) =
                 className="datatable-responsive"
                 emptyMessage={"No criteria or results found."}
                 scrollable
-                //tableStyle={{ minWidth: "50rem" }}
+            //tableStyle={{ minWidth: "50rem" }}
             >
                 <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: "50px" }} />
                 <Column field="criterion.title" header="Criterion" sortable footer={<strong>Weight: {calculateTotalWeight()}</strong>} />
