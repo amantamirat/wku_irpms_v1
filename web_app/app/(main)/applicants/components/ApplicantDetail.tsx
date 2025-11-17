@@ -1,7 +1,6 @@
 import { TabPanel, TabView } from "primereact/tabview";
-import { Applicant } from "../models/applicant.model";
-import exp from "constants";
 import ReviewerManager from "../../projects/reviewers/components/ReviewerManager";
+import { Applicant } from "../models/applicant.model";
 
 
 

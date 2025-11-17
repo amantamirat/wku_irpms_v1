@@ -1,7 +1,9 @@
+import ApplicantDetailDialog from "@/app/(main)/applicants/components/dialogs/ApplicantDetailDialog";
 import SaveDialog from "@/app/(main)/applicants/components/dialogs/SaveDialog";
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
 import ChangePasswordDialog from "@/app/(main)/users/dialogs/ChangePassword";
 import { useAuth } from "@/contexts/auth-context";
+import App from "next/app";
 import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
 import { Sidebar } from "primereact/sidebar";
@@ -15,6 +17,7 @@ interface UserProfileSidebarProps {
 function AppUserProfileSidebar(props: UserProfileSidebarProps) {
 
     const { user, logout } = useAuth();
+    const [showApplicantDetailDialog, setShowApplicantDetailDialog] = useState(false);
     const [showProfileDialog, setShowProfileDialog] = useState(false);
     const [showPasswordDialog, setShowPasswordDialog] = useState(false);
 
@@ -33,11 +36,11 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
                 <Divider />
                 <p>
                     <Button
-                        label="My Evaluations"
+                        label="My Workspace"
                         severity="help"
                         icon="pi pi-list"
                         className="w-full"
-
+                        onClick={() => setShowApplicantDetailDialog(true)}
                     />
                 </p>
                 <p>
@@ -69,6 +72,14 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
                 </p>
 
             </Sidebar>
+
+            {user?.linkedApplicant && (
+                <ApplicantDetailDialog
+                    visible={showApplicantDetailDialog}
+                    applicant={user.linkedApplicant as Applicant}
+                    onHide={() => setShowApplicantDetailDialog(false)}
+                />
+            )}
             {user?.linkedApplicant && (
                 <SaveDialog
                     visible={showProfileDialog}
