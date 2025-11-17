@@ -4,7 +4,7 @@ import ConfirmDialog from '@/components/ConfirmationDialog';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
-import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
+import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
@@ -15,6 +15,7 @@ import SaveDialog from './dialogs/SaveDialog';
 import { useAuth } from '@/contexts/auth-context';
 import { OrganizationalUnit } from '../../organizations/models/organization.model';
 import ErrorComponent from '@/components/ErrorComponent';
+import ApplicantDetail from './ApplicantDetail';
 
 
 interface ApplicantManagerProps {
@@ -52,6 +53,7 @@ const ApplicantManager = (/*{ scope }: ApplicantManagerProps*/) => {
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const toast = useRef<Toast>(null);
+    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
@@ -69,7 +71,7 @@ const ApplicantManager = (/*{ scope }: ApplicantManagerProps*/) => {
                 const orgs = getOrganizationsByType(applicantUnits).map((org) => org._id);
 
                 if (orgs.length === 0) {
-                   // setApplicants([]);
+                    // setApplicants([]);
                     //return;
                 }
                 const data = await ApplicantApi.getApplicants({
@@ -202,13 +204,17 @@ const ApplicantManager = (/*{ scope }: ApplicantManagerProps*/) => {
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} applicants"
                         globalFilter={globalFilter}
+                        filters={filters}
                         emptyMessage={'No applicat data found.'}
                         header={header}
                         scrollable
-                        filters={filters}
-                        tableStyle={{ minWidth: '50rem' }}
+                        expandedRows={expandedRows}
+                        onRowToggle={(e) => setExpandedRows(e.data)}
+                        rowExpansionTemplate={(rowData) => {
+                            return <ApplicantDetail applicant={rowData as Applicant} />;
+                        }}
                     >
-                        <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
+                        <Column expander headerStyle={{ width: '3em' }} />
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="first_name" header="First Name" sortable />
                         <Column field="last_name" header="Last Name" sortable />

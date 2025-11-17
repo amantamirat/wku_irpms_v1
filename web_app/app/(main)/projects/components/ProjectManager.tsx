@@ -167,7 +167,7 @@ const ProjectManager = () => {
                             return <ProjectDetail project={rowData as Project} />;
                         }}
                     >
-                        <Column expander headerStyle={{ width: '3em' }}></Column>
+                        <Column expander headerStyle={{ width: '3em' }}/>
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         <Column field="cycle.title" header="Cycle" sortable />
                         <Column field="title" header="Title" sortable />

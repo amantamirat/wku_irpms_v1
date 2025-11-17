@@ -28,7 +28,7 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
             <Sidebar visible={props.visible} position="right" onHide={() => props.setVisible(false)}>
                 <h2>Welcome, {user?.user_name || 'User'}</h2>
                 <p>
-                    You are currently logged in. Use the buttons below to view your evaluations, edit your profile, change your password, or sign out.
+                    You are signed in. Use the buttons below to access your account features.
                 </p>
                 <Divider />
                 <p>

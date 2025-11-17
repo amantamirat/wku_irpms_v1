@@ -50,7 +50,12 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
                 options.applicant = applicant ? applicant._id : undefined;
                 options.projectStage = projectStage ? projectStage._id : undefined;
                 const data = await ReviewerApi.getReviewers(options);
-                setReviewers(data);
+                const processed = data.map((r: Reviewer) => ({
+                    ...r,
+                    applicant: applicant ?? r.applicant,
+                    projectStage: projectStage ?? r.projectStage,
+                }));
+                setReviewers(processed);
             } catch (err: Error | any) {
                 setError("Failed to fetch reviewers." + (err.message || ""));
             }
@@ -233,7 +238,7 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
         <div className="grid">
             <div className="col-12">
                 <div className="card">
-                    {canCreate && <Toolbar className="mb-4" start={startToolbarTemplate} />}
+                    {(canCreate && projectStage) && <Toolbar className="mb-4" start={startToolbarTemplate} />}
                     <DataTable
                         value={reviewers}
                         selection={reviewer}
@@ -253,13 +258,23 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
                     >
                         <Column expander style={{ width: '3em' }} />
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                        <Column
-                            field="applicant.first_name"
-                            header="Reviewer"
-                            body={(rowData) => `${rowData.applicant?.first_name ?? ''} ${rowData.applicant?.last_name ?? ''}`}
-                            sortable
-                            headerStyle={{ minWidth: '15rem' }}
-                        />
+                        {applicant &&
+                            <Column
+                                field="projectStage.project.title"
+                                header="Project"
+                                sortable
+                                headerStyle={{ minWidth: '15rem' }}
+                            />
+                        }
+                        {projectStage &&
+                            <Column
+                                field="applicant.first_name"
+                                header="Reviewer"
+                                body={(rowData) => `${rowData.applicant?.first_name ?? ''} ${rowData.applicant?.last_name ?? ''}`}
+                                sortable
+                                headerStyle={{ minWidth: '15rem' }}
+                            />
+                        }
                         <Column field="status" header="Status" body={statusBodyTemplate} sortable />
                         <Column body={stateTransitionTemplate} />
                         <Column body={actionBodyTemplate} />

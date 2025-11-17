@@ -34,10 +34,23 @@ export class ReviewerService {
 
     static async getReviewers(options: GetReviewerOptions) {
         const filter: any = {};
-        if (options.projectStage) filter.projectStage = options.projectStage;
         if (options.applicant) filter.applicant = options.applicant;
-        const reviewers = await Reviewer.find(filter).populate("applicant").populate("projectStage").lean();
-        return reviewers;
+        if (options.projectStage) filter.projectStage = options.projectStage;
+        let query = Reviewer.find(filter);
+        if (options.applicant && !options.projectStage) {
+            query = query.populate({
+                path: "projectStage",
+                populate: {
+                    path: "project",
+                },
+            });
+        }
+        if (options.projectStage && !options.applicant) {
+            query = query.populate("applicant");
+        }        
+        // const reviewers = await Reviewer.find(filter).populate("applicant").populate("projectStage").lean();
+        //  return reviewers;
+        return query.lean();
     }
 
     static async updateReviewer(dto: UpdateReviewerDto) {
