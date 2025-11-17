@@ -63,7 +63,7 @@ const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDi
                 ...saved,
                 reviewer: localResult.reviewer,
                 criterion: localResult.criterion,
-                selected_option: localResult.selected_option
+                selectedOption: localResult.selectedOption
             };
             toast.current?.show({
                 severity: 'success',
@@ -112,14 +112,14 @@ const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDi
                 {
                     (result.criterion && criterion.form_type === FormType.closed) &&
                     <div className="field">
-                        <label htmlFor="selected_option">Score</label>
+                        <label htmlFor="selectedOption">Score</label>
                         <Dropdown
-                            id="selected_option"
+                            id="selectedOption"
                             dataKey="_id"
-                            value={localResult.selected_option}
+                            value={localResult.selectedOption}
                             options={options}
                             onChange={(e) => {
-                                setLocalResult({ ...localResult, selected_option: e.value });
+                                setLocalResult({ ...localResult, selectedOption: e.value });
                             }}
                             optionLabel="title"
                             placeholder="Select Option"

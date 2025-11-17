@@ -8,7 +8,7 @@ export interface CreateResultDTO {
     reviewer: mongoose.Types.ObjectId;
     criterion: mongoose.Types.ObjectId;
     score?: number;
-    selected_option?: mongoose.Types.ObjectId;
+    selectedOption?: mongoose.Types.ObjectId;
     comment?: string;
     userId: string;
 }
@@ -17,7 +17,7 @@ export interface UpdateResultDTO {
     id: string;
     data: Partial<{
         score: number;
-        selected_option: mongoose.Types.ObjectId;
+        selectedOption: mongoose.Types.ObjectId;
         comment: string;
     }>;
     userId: string;

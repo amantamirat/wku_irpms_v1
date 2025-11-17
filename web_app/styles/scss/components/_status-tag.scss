@@ -6,7 +6,9 @@
     font-size: 12px;
     letter-spacing: .3px;
 }
+
 .status-badge {
+
     &.status-pending,
     &.status-planned {
         background: #FFF9C4;
@@ -27,11 +29,17 @@
         background: #FFCDD2;
         color: #d80517;
     }
+
     &.status-accepted,
     &.status-approved,
     &.status-closed {
         background: #F3E5F5;
         color: #4A148C;
+    }
+
+    &.status-on_review {
+        background: #BBDEFB;
+        color: #0D47A1;
     }
 }
 

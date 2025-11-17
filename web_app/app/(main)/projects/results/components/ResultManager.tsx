@@ -140,8 +140,8 @@ const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) =
             const criterion = r.criterion as Criterion;
             if (!criterion) return sum;
 
-            if (criterion.form_type === FormType.closed && r.selected_option) {
-                const optionEval = r.selected_option as Option;
+            if (criterion.form_type === FormType.closed && r.selectedOption) {
+                const optionEval = r.selectedOption as Option;
                 return sum + (optionEval.score || 0);
             } else if (criterion.form_type !== FormType.closed && r.score) {
                 return sum + r.score;
@@ -154,7 +154,7 @@ const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) =
         const criterion = rowData.criterion as Criterion;
         if (!criterion) return "";
         if (criterion.form_type === FormType.closed) {
-            const opt = rowData.selected_option as Option;
+            const opt = rowData.selectedOption as Option;
             return opt
                 ? opt.title + " (" + opt.score + ")"
                 : "-";

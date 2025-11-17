@@ -11,7 +11,7 @@ import { ReviewerStatus } from "../reviewer.enum";
 
 export class ResultService {
 
-    private static async validateReviwer(data: { reviewer: mongoose.Types.ObjectId, userId: string }) {
+    private static async validateReviwerPermission(data: { reviewer: mongoose.Types.ObjectId, userId: string }) {
         const { reviewer, userId } = data;
         const reviewerDoc = await Reviewer.findById(reviewer).lean();
         if (!reviewerDoc) throw new Error("Reviewer not found");
@@ -26,7 +26,7 @@ export class ResultService {
         return { reviewerDoc, applicantDoc };
     }
 
-    private static async validateResult(data: { criterion: mongoose.Types.ObjectId, score?: number, selected_option?: mongoose.Types.ObjectId }) {
+    private static async validateResult(data: { criterion: mongoose.Types.ObjectId, score?: number, selectedOption?: mongoose.Types.ObjectId }) {
         const criterionDoc = await Criterion.findOne({ _id: data.criterion }).lean();
         if (!criterionDoc) throw new Error("Criterion not found");
 
@@ -40,7 +40,7 @@ export class ResultService {
             }
         }
         if (criterionDoc.form_type === FormType.closed) {
-            const option = await Option.findById(data.selected_option).lean();
+            const option = await Option.findById(data.selectedOption).lean();
             if (!option || String(option.criterion) !== String(criterionDoc._id)) {
                 throw new Error("Selected option not found.");
             }
@@ -49,25 +49,25 @@ export class ResultService {
     }
 
     static async createResult(dto: CreateResultDTO) {
-        const { reviewer, criterion, selected_option, score, userId } = dto;
-        await this.validateReviwer({ reviewer, userId });
-        await this.validateResult({ criterion, score, selected_option });
+        const { reviewer, criterion, selectedOption, score, userId } = dto;
+        await this.validateReviwerPermission({ reviewer, userId });
+        await this.validateResult({ criterion, score, selectedOption});
         return await Result.create(dto);
     }
 
     static async getResults(options: GetResultsDTO) {
         const filter: any = {};
         if (options.reviewer) filter.reviewer = options.reviewer;
-        return await Result.find(filter).populate("reviewer").populate("criterion").populate("selected_option").lean();
+        return await Result.find(filter).populate("reviewer").populate("criterion").populate("selectedOption").lean();
     }
 
     static async updateResult(dto: UpdateResultDTO) {
         const { id, data, userId } = dto;
-        const { score, selected_option } = data;
+        const { score, selectedOption: selectedOption } = data;
         const resultDoc = await Result.findById(id);
         if (!resultDoc) throw new Error("Result not found");
-        await this.validateReviwer({ reviewer: resultDoc.reviewer, userId });
-        await this.validateResult({ criterion: resultDoc.criterion, score, selected_option });
+        await this.validateReviwerPermission({ reviewer: resultDoc.reviewer, userId });
+        await this.validateResult({ criterion: resultDoc.criterion, score, selectedOption });
         Object.assign(resultDoc, data);
         return resultDoc.save();
     }
@@ -79,7 +79,7 @@ export class ResultService {
         }
         const resultDoc = await Result.findById(id);
         if (!resultDoc) throw new Error("Result not found");
-        await this.validateReviwer({ reviewer: resultDoc.reviewer, userId });
+        await this.validateReviwerPermission({ reviewer: resultDoc.reviewer, userId });
         return await resultDoc.deleteOne();
     }
 }

@@ -5,7 +5,7 @@ interface IResult extends Document {
     reviewer: mongoose.Types.ObjectId;
     criterion: mongoose.Types.ObjectId;
     score?: number;
-    selected_option?: mongoose.Types.ObjectId;
+    selectedOption?: mongoose.Types.ObjectId;
     comment?: string;
     createdAt?: Date;
     updatedAt?: Date;
@@ -28,7 +28,7 @@ const ResultSchema = new Schema<IResult>({
         type: Number,
         min: 0
     },
-    selected_option: {
+    selectedOption: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.OPTION
     },

@@ -8,7 +8,7 @@ export type Result = {
     reviewer: string | Reviewer;
     criterion: string | Criterion;
     score?: number;
-    selected_option?: string | Option;
+    selectedOption?: string | Option;
     comment?: string;
     createdAt?: Date;
     updatedAt?: Date;
@@ -43,9 +43,9 @@ export const sanitizeResult = (result: Partial<Result>): Result => {
             typeof result.reviewer === "object" && result.reviewer !== null
                 ? (result.reviewer as any)._id
                 : result.reviewer,
-        selected_option:
-            typeof result.selected_option === "object" && result.selected_option !== null
-                ? (result.selected_option as any)._id
-                : result.selected_option,
+        selectedOption:
+            typeof result.selectedOption === "object" && result.selectedOption !== null
+                ? (result.selectedOption as any)._id
+                : result.selectedOption,
     } as Result;
 };

@@ -23,7 +23,7 @@ export class ProjectStageService {
         if (stage.deadline < new Date()) {
             throw new Error("Stage Deadline has Passed!");
         }
-        
+
         if (stage.order > 1) {
             const prevStage = await Stage.findOne({ order: stage.order - 1, cycle: stage.cycle }).lean();
             if (!prevStage) {
@@ -70,9 +70,11 @@ export class ProjectStageService {
         if (!projectStage) throw new Error("Project stage not found");
         if (data && data.status && data.status !== projectStage.status) {
             const allowedTransitions: Record<ProjectStageStatus, ProjectStageStatus[]> = {
-                [ProjectStageStatus.submitted]: [ProjectStageStatus.accepted],
-                [ProjectStageStatus.on_review]: [ProjectStageStatus.accepted],
-                [ProjectStageStatus.accepted]: [ProjectStageStatus.submitted],
+                [ProjectStageStatus.submitted]: [ProjectStageStatus.on_review],
+                [ProjectStageStatus.on_review]: [ProjectStageStatus.reviewed],
+                [ProjectStageStatus.reviewed]: [ProjectStageStatus.accepted, ProjectStageStatus.rejected],
+                [ProjectStageStatus.accepted]: [ProjectStageStatus.reviewed],
+                [ProjectStageStatus.rejected]: [ProjectStageStatus.reviewed]
             };
 
             const currentStatus = projectStage.status;
@@ -89,7 +91,9 @@ export class ProjectStageService {
     static async deleteProjectStage(id: string) {
         const projectStage = await ProjectStage.findById(id);
         if (!projectStage) throw new Error("Project stage not found");
-        
+        if (projectStage.status !== ProjectStageStatus.submitted) {
+            throw new Error("Only project stages with 'submitted' status can be deleted.");
+        }
         const deletedDoc = projectStage.toObject();
         await projectStage.deleteOne();
         return { documentPath: deletedDoc.documentPath };
