@@ -8,9 +8,9 @@ export interface IReviewerRepository {
     findById(id: string): Promise<IReviewer | null>;
     findByProjectStage(projectStageId: string): Promise<Partial<IReviewer>[]>;
     findByApplicant(applicantId: string): Promise<Partial<IReviewer>[]>;
-    existsActiveByProjectStage(projectStageId: string): Promise<boolean>;
+    //existsActiveByProjectStage(projectStageId: string): Promise<boolean>;
     create(dto: CreateReviewerDTO): Promise<IReviewer>;
-    update(id: string, data: UpdateReviewerDTO["data"]): Promise<IReviewer>;
+    updateStatus(id: string, data: UpdateReviewerDTO["data"]): Promise<IReviewer>;
     delete(id: string): Promise<void>;
 }
 
@@ -46,7 +46,7 @@ export class ReviewerRepository implements IReviewerRepository {
         return Reviewer.create(data);
     }
 
-    async update(id: string, dtoData: UpdateReviewerDTO["data"]): Promise<IReviewer> {
+    async updateStatus(id: string, dtoData: UpdateReviewerDTO["data"]): Promise<IReviewer> {
         const updateData: Partial<IReviewer> = {};
 
         if (dtoData.status !== undefined) {
@@ -64,13 +64,17 @@ export class ReviewerRepository implements IReviewerRepository {
         return updatedReviewer;
     }
 
-    async existsActiveByProjectStage(projectStageId: string): Promise<boolean> {
+    /**
+     * async existsActiveByProjectStage(projectStageId: string): Promise<boolean> {
         const doc = await Reviewer.exists({
             projectStage: new mongoose.Types.ObjectId(projectStageId),
             status: ReviewerStatus.active
         });
         return !!doc;
     }
+     */
+
+    
 
 
 

@@ -55,7 +55,7 @@ export class ReviewerService {
             userId: dto.userId
         });
 
-        await this.projectStageSynchronizer.onReviewerCreated(projectStageId, projectStageDoc);
+        await this.projectStageSynchronizer.syncProjectStageStatus(projectStageId, projectStageDoc);
         return createdReviewer;
     }
 
@@ -81,9 +81,10 @@ export class ReviewerService {
         // --- Use State Machine ---
         ReviewerStateMachine.validateTransition(current, next);
 
-        // Permission check for approval
-        const isApprovalTransition = current === ReviewerStatus.approved || next === ReviewerStatus.approved;
-        if (!isApprovalTransition) {
+        const isReviewerTransistion =
+            current === ReviewerStatus.active || next === ReviewerStatus.active ||
+            next === ReviewerStatus.submitted;
+        if (isReviewerTransistion) {
             const applicantDoc = await Applicant.findOne({ user: userId }).lean();
             if (!applicantDoc) throw new Error("Applicant not found");
             if (String(reviewerDoc.applicant) !== String(applicantDoc._id)) {
@@ -112,7 +113,10 @@ export class ReviewerService {
         }
 
         reviewerDoc.status = next;
-        return this.repository.update(id, { status: next });
+        const updated = await this.repository.updateStatus(id, { status: next });
+        await this.projectStageSynchronizer.syncProjectStageStatus(reviewerDoc.projectStage.toString());
+
+        return updated;
     }
 
     async deleteReviewer(dto: DeleteReviewerDTO) {
@@ -124,7 +128,7 @@ export class ReviewerService {
         }
 
         const deleted = await this.repository.delete(dto.id);
-        await this.projectStageSynchronizer.onReviewerDeleted(reviewerDoc.projectStage.toString());
+        await this.projectStageSynchronizer.syncProjectStageStatus(reviewerDoc.projectStage.toString());
         return deleted
     }
 }
