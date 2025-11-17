@@ -11,6 +11,7 @@ import { ProjectStageStatus } from "../project-stage.enum";
 import { IResultRepository, ResultRepository } from "./results/result.repository";
 import { IProjectStageRepository, ProjectStageRepository } from "../project-stage.repository";
 import { ProjectStageSynchronizer } from "../project-stage.synchronizer";
+import { FormType } from "../../../../evaluations/criteria/criterion.enum";
 
 export class ReviewerService {
 
@@ -110,6 +111,21 @@ export class ReviewerService {
             if (resultsCount !== criteriaCount) {
                 throw new Error("Please complete all evaluation criteria before submitting.");
             }
+
+            const results = await this.resultRepo.findByReviewer(id);
+            let totalScore = 0;
+            for (const r of results) {
+                if (r.criterion.form_type === FormType.closed) {
+                    // Closed criterion → use selectedOption score
+                    if (!r.selectedOption) throw new Error(`Selected option missing for criterion ${r.criterion._id}`);
+                    totalScore += r.selectedOption.score;
+                } else {
+                    // Open criterion → use result.score directly
+                    totalScore += r.score || 0;
+                }
+            }
+            console.log(totalScore);
+
         }
 
         reviewerDoc.status = next;

@@ -5,7 +5,7 @@ import { CreateResultDTO, UpdateResultDTO } from "./result.dto";
 
 export interface IResultRepository {
     findById(id: string): Promise<IResult | null>;
-    findByReviewer(reviewerId: string): Promise<Partial<IResult>[]>;
+    findByReviewer(reviewerId: string): Promise<Partial<any>[]>;
     countByReviewer(reviewerId: string): Promise<number>;
     create(data: CreateResultDTO): Promise<IResult>;
     update(id: string, data: UpdateResultDTO["data"]): Promise<IResult>;
