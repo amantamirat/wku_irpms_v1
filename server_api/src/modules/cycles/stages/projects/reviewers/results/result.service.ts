@@ -2,10 +2,10 @@
 import { IResultRepository, ResultRepository } from "./result.repository";
 import { CreateResultDTO, DeleteResultDTO, GetResultsDTO, UpdateResultDTO } from "./result.dto";
 import { ReviewerStatus } from "../reviewer.enum";
-import { Option } from "../../../../evaluations/options/option.model";
-import Applicant from "../../../../applicants/applicant.model";
-import { FormType } from "../../../../evaluations/criteria/criterion.enum";
-import { Criterion } from "../../../../evaluations/criteria/criterion.model";
+import { Option } from "../../../../../evaluations/options/option.model";
+import Applicant from "../../../../../applicants/applicant.model";
+import { FormType } from "../../../../../evaluations/criteria/criterion.enum";
+import { Criterion } from "../../../../../evaluations/criteria/criterion.model";
 import { IReviewerRepository, ReviewerRepository } from "../reviewer.repository";
 
 export class ResultService {

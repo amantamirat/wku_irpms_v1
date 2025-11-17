@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { ResultController } from './result.controller';
-import { verifyActiveAccount } from '../../../../users/auth/auth.middleware';
+import { verifyActiveAccount } from '../../../../../users/auth/auth.middleware';
 
 const router: Router = Router();
 

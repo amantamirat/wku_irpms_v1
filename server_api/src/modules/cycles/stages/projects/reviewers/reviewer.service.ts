@@ -3,14 +3,14 @@ import { IReviewerRepository, ReviewerRepository } from "./reviewer.repository";
 import { CreateReviewerDTO, DeleteReviewerDTO, GetReviewersDTO, UpdateReviewerDTO } from "./reviewer.dto";
 import { ReviewerStatus } from "./reviewer.enum";
 import { ReviewerStateMachine } from "./reviewer.state-machine";
-import Applicant from "../../../applicants/applicant.model";
-import { Collaborator } from "../../../projects/collaborators/collaborator.model";
-import { Criterion } from "../../../evaluations/criteria/criterion.model";
-import { Stage } from "../stage.model";
-import { ProjectStageStatus } from "../projects/project-stage.enum";
+import Applicant from "../../../../applicants/applicant.model";
+import { Collaborator } from "../../../../projects/collaborators/collaborator.model";
+import { Criterion } from "../../../../evaluations/criteria/criterion.model";
+import { Stage } from "../../stage.model";
+import { ProjectStageStatus } from "../project-stage.enum";
 import { IResultRepository, ResultRepository } from "./results/result.repository";
-import { IProjectStageRepository, ProjectStageRepository } from "../projects/project-stage.repository";
-import { ProjectStageSynchronizer } from "../projects/project-stage.synchronizer";
+import { IProjectStageRepository, ProjectStageRepository } from "../project-stage.repository";
+import { ProjectStageSynchronizer } from "../project-stage.synchronizer";
 
 export class ReviewerService {
 

@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { errorResponse, successResponse } from "../../../../../util/response";
+import { errorResponse, successResponse } from "../../../../../../util/response";
 import { ResultService } from "./result.service";
 import { CreateResultDTO, GetResultsDTO, UpdateResultDTO, DeleteResultDTO } from "./result.dto";
-import { AuthenticatedRequest } from "../../../../users/auth/auth.middleware";
+import { AuthenticatedRequest } from "../../../../../users/auth/auth.middleware";
 
 const resultService = new ResultService();
 

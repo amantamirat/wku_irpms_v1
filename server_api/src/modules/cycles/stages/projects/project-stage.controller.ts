@@ -48,11 +48,11 @@ export class ProjectStageController {
     // ---------------------------------------------------
     static async getProjectStages(req: Request, res: Response) {
         try {
-            const { projectId, stageId, status, skip, limit } = req.query;
+            const { project, stage, status, skip, limit } = req.query;
 
             const filter: GetProjectStagesDTO = {
-                projectId: projectId ? String(projectId) : undefined,
-                stageId: stageId ? String(stageId) : undefined,
+                projectId: project ? String(project) : undefined,
+                stageId: stage? String(stage) : undefined,
                 status: status ? String(status) as any : undefined,
                 skip: skip ? Number(skip) : undefined,
                 limit: limit ? Number(limit) : undefined

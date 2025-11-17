@@ -45,8 +45,8 @@ export class ProjectStageRepository implements IProjectStageRepository {
         return ProjectStage.find(query)
             .populate("project")
             .populate("stage")
-            .skip(filters.skip ?? 0)
-            .limit(filters.limit ?? 0)
+            //.skip(filters.skip ?? 0)
+            //.limit(filters.limit ?? 0)
             .lean<IProjectStage[]>()
             .exec();
     }

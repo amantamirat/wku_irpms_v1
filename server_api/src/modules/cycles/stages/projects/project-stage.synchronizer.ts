@@ -3,7 +3,7 @@ import { IProjectStageRepository } from "./project-stage.repository";
 import { ProjectStageStatus } from "./project-stage.enum";
 import { ProjectStageStateMachine } from "./project-stage.state-machine";
 import { IProjectStage } from "./project-stage.model";
-import { IReviewerRepository } from "../reviewers/reviewer.repository";
+import { IReviewerRepository } from "./reviewers/reviewer.repository";
 
 export class ProjectStageSynchronizer {
   private projectStageRepo: IProjectStageRepository;
