@@ -1,7 +1,9 @@
+//result.model.ts
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../../../../util/collections.enum";
 
-interface IResult extends Document {
+//mongo model
+export interface IResult extends Document {
     reviewer: mongoose.Types.ObjectId;
     criterion: mongoose.Types.ObjectId;
     score?: number;

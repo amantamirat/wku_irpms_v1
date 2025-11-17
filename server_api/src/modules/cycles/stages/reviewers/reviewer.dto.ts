@@ -1,20 +1,26 @@
-import mongoose from "mongoose";
 import { ReviewerStatus } from "./reviewer.enum";
 
-export interface GetReviewerOptions {
-    projectStage?: mongoose.Types.ObjectId;
-    applicant?: mongoose.Types.ObjectId;
+// reviewer.dto.ts
+export interface GetReviewersDTO {
+    projectStageId?: string;
+    applicantId?: string;
 }
 
-export interface CreateReviewerDto {
-    projectStage: mongoose.Types.ObjectId;
-    applicant: mongoose.Types.ObjectId;
+export interface CreateReviewerDTO {
+    projectStageId: string;
+    applicantId: string;
+    userId: string;
 }
 
-export interface UpdateReviewerDto {
+export interface UpdateReviewerDTO {
     id: string;
     data: Partial<{
-        status: ReviewerStatus;
+        status: ReviewerStatus; // ReviewerStatus as string
     }>;
+    userId: string;
+}
+
+export interface DeleteReviewerDTO {
+    id: string;
     userId: string;
 }

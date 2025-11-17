@@ -1,14 +1,14 @@
-import mongoose from "mongoose";
+//result.dto.ts
 
 export interface GetResultsDTO {
-    reviewer?: mongoose.Types.ObjectId;
+    reviewerId: string;
 }
 
 export interface CreateResultDTO {
-    reviewer: mongoose.Types.ObjectId;
-    criterion: mongoose.Types.ObjectId;
+    reviewerId: string;
+    criterionId: string;
     score?: number;
-    selectedOption?: mongoose.Types.ObjectId;
+    selectedOptionId?: string;
     comment?: string;
     userId: string;
 }
@@ -17,8 +17,13 @@ export interface UpdateResultDTO {
     id: string;
     data: Partial<{
         score: number;
-        selectedOption: mongoose.Types.ObjectId;
+        selectedOptionId: string;
         comment: string;
     }>;
+    userId: string;
+}
+
+export interface DeleteResultDTO {
+    id: string;
     userId: string;
 }

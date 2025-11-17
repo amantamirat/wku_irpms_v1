@@ -1,85 +1,84 @@
+//result.service.ts
+import { IResultRepository, ResultRepository } from "./result.repository";
+import { CreateResultDTO, DeleteResultDTO, GetResultsDTO, UpdateResultDTO } from "./result.dto";
+import { Reviewer } from "../reviewer.model";
+import { ReviewerStatus } from "../reviewer.enum";
+import { Option } from "../../../../evaluations/options/option.model";
+import Applicant from "../../../../applicants/applicant.model";
 import { FormType } from "../../../../evaluations/criteria/criterion.enum";
 import { Criterion } from "../../../../evaluations/criteria/criterion.model";
-import { Option } from "../../../../evaluations/options/option.model";
-import { Reviewer } from "../reviewer.model";
-import { CreateResultDTO, GetResultsDTO, UpdateResultDTO } from "./result.dto";
-import { DeleteDto } from "../../../../../util/delete.dto";
-import { Result } from "./result.model";
-import Applicant from "../../../../applicants/applicant.model";
-import mongoose from "mongoose";
-import { ReviewerStatus } from "../reviewer.enum";
 
 export class ResultService {
+    private repository: IResultRepository;
 
-    private static async validateReviwerPermission(data: { reviewer: mongoose.Types.ObjectId, userId: string }) {
-        const { reviewer, userId } = data;
-        const reviewerDoc = await Reviewer.findById(reviewer).lean();
+    constructor(repository?: IResultRepository) {
+        this.repository = repository || new ResultRepository();
+    }
+
+    private async validateReviewerPermission(reviewerId: string, userId: string) {
+        const reviewerDoc = await Reviewer.findById(reviewerId).lean();
         if (!reviewerDoc) throw new Error("Reviewer not found");
-        if (reviewerDoc.status !== ReviewerStatus.active) {
-            throw new Error("Reviewer is not active");
-        }
+        if (reviewerDoc.status !== ReviewerStatus.active) throw new Error("Reviewer is not active");
+
         const applicantDoc = await Applicant.findOne({ user: userId }).lean();
         if (!applicantDoc) throw new Error("Applicant not found");
         if (String(reviewerDoc.applicant) !== String(applicantDoc._id)) {
-            throw new Error("You are not allowed to provide result for this project.")
+            throw new Error("You are not allowed to provide result for this project.");
         }
+
         return { reviewerDoc, applicantDoc };
     }
 
-    private static async validateResult(data: { criterion: mongoose.Types.ObjectId, score?: number, selectedOption?: mongoose.Types.ObjectId }) {
-        const criterionDoc = await Criterion.findOne({ _id: data.criterion }).lean();
+    private async validateResult(criterionId: string, score?: number, selectedOptionId?: string) {
+        const criterionDoc = await Criterion.findById(criterionId).lean();
         if (!criterionDoc) throw new Error("Criterion not found");
 
         if (criterionDoc.form_type === FormType.open) {
-            if (data.score === undefined || data.score === null) {
-                throw new Error("Score is required");
-            }
+            if (score === undefined || score === null) throw new Error("Score is required");
             const maxScore = criterionDoc.weight;
-            if (data.score < 0 || data.score > maxScore) {
-                throw new Error(`Score must be between 0 and ${maxScore}`);
-            }
+            if (score < 0 || score > maxScore) throw new Error(`Score must be between 0 and ${maxScore}`);
         }
+
         if (criterionDoc.form_type === FormType.closed) {
-            const option = await Option.findById(data.selectedOption).lean();
+            const option = await Option.findById(selectedOptionId).lean();
             if (!option || String(option.criterion) !== String(criterionDoc._id)) {
                 throw new Error("Selected option not found.");
             }
         }
-        return {criterionDoc};
+
+        return { criterionDoc };
     }
 
-    static async createResult(dto: CreateResultDTO) {
-        const { reviewer, criterion, selectedOption, score, userId } = dto;
-        await this.validateReviwerPermission({ reviewer, userId });
-        await this.validateResult({ criterion, score, selectedOption});
-        return await Result.create(dto);
+    async createResult(dto: CreateResultDTO) {
+        await this.validateReviewerPermission(dto.reviewerId, dto.userId);
+        await this.validateResult(dto.criterionId, dto.score, dto.selectedOptionId);
+
+        // Pass DTO directly to repository
+        return this.repository.create(dto);
     }
 
-    static async getResults(options: GetResultsDTO) {
-        const filter: any = {};
-        if (options.reviewer) filter.reviewer = options.reviewer;
-        return await Result.find(filter).populate("reviewer").populate("criterion").populate("selectedOption").lean();
+    async getResults(options: GetResultsDTO) {
+        return this.repository.findByReviewer(options.reviewerId);
     }
 
-    static async updateResult(dto: UpdateResultDTO) {
-        const { id, data, userId } = dto;
-        const { score, selectedOption: selectedOption } = data;
-        const resultDoc = await Result.findById(id);
+    async updateResult(dto: UpdateResultDTO) {
+        const resultDoc = await this.repository.findById(dto.id);
         if (!resultDoc) throw new Error("Result not found");
-        await this.validateReviwerPermission({ reviewer: resultDoc.reviewer, userId });
-        await this.validateResult({ criterion: resultDoc.criterion, score, selectedOption });
-        Object.assign(resultDoc, data);
-        return resultDoc.save();
+
+        await this.validateReviewerPermission(String(resultDoc.reviewer), dto.userId);
+        await this.validateResult(String(resultDoc.criterion), dto.data.score, dto.data.selectedOptionId);
+
+        // Pass update DTO data directly
+        return this.repository.update(dto.id, dto.data);
     }
 
-    static async deleteResult(dto: DeleteDto) {
-        const { id, userId } = dto;
-        if (!userId) {
-            throw new Error("User ID is required for deletion");
-        }
-        const resultDoc = await Result.findById(id);
+    async deleteResult(dto: DeleteResultDTO) {
+        if (!dto.userId) throw new Error("User ID is required for deletion");
+
+        const resultDoc = await this.repository.findById(dto.id);
         if (!resultDoc) throw new Error("Result not found");
-        await this.validateReviwerPermission({ reviewer: resultDoc.reviewer, userId });
-        return await resultDoc.deleteOne();
+
+        await this.validateReviewerPermission(String(resultDoc.reviewer), dto.userId);
+        return this.repository.delete(dto.id);
     }
 }

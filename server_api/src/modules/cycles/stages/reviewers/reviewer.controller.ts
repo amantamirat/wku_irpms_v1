@@ -1,22 +1,28 @@
-import { Request, Response } from 'express';
-import { ReviewerService } from './reviewer.service';
-import mongoose from 'mongoose';
-import { errorResponse, successResponse } from '../../../../util/response';
-import { ReviewerStatus } from './reviewer.enum';
-import { CreateReviewerDto, GetReviewerOptions, UpdateReviewerDto } from './reviewer.dto';
-import { DeleteDto } from '../../../../util/delete.dto';
-import { AuthenticatedRequest } from '../../../users/auth/auth.middleware';
+// reviewer.controller.ts
+import { Request, Response } from "express";
+import { errorResponse, successResponse } from "../../../../util/response";
+import { ReviewerService } from "./reviewer.service";
+import { CreateReviewerDTO, GetReviewersDTO, UpdateReviewerDTO, DeleteReviewerDTO } from "./reviewer.dto";
+import { AuthenticatedRequest } from "../../../users/auth/auth.middleware";
+
+const reviewerService = new ReviewerService();
 
 export class ReviewerController {
 
-    static async createReviewer(req: Request, res: Response) {
+    static async createReviewer(req: AuthenticatedRequest, res: Response) {
         try {
+            if (!req.user) throw new Error("User not found!");
+
+            // Accept without Id suffix from client
             const { projectStage, applicant } = req.body;
-            const data: CreateReviewerDto = {
-                applicant: new mongoose.Types.ObjectId(applicant as string),
-                projectStage: new mongoose.Types.ObjectId(projectStage as string)
+
+            const data: CreateReviewerDTO = {
+                projectStageId: projectStage, // map to DTO
+                applicantId: applicant,
+                userId: req.user._id
             };
-            const created = await ReviewerService.createReviewer(data);
+
+            const created = await reviewerService.createReviewer(data);
             successResponse(res, 201, "Reviewer created successfully", created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -25,14 +31,15 @@ export class ReviewerController {
 
     static async getReviewers(req: Request, res: Response) {
         try {
-
             const { projectStage, applicant } = req.query;
-            const filter: GetReviewerOptions = {
-                applicant: applicant ? new mongoose.Types.ObjectId(applicant as string) : undefined,
-                projectStage: projectStage ? new mongoose.Types.ObjectId(projectStage as string) : undefined
+            
+            const filter: GetReviewersDTO = {
+                projectStageId: projectStage ? String(projectStage) : undefined, // map to DTO
+                applicantId: applicant ? String(applicant) : undefined
             };
-            const reviewers = await ReviewerService.getReviewers(filter);
-            successResponse(res, 200, 'Reviewers fetched successfully', reviewers);
+
+            const reviewers = await reviewerService.getReviewers(filter);
+            successResponse(res, 200, "Reviewers fetched successfully", reviewers);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
@@ -41,33 +48,39 @@ export class ReviewerController {
     static async updateReviewer(req: AuthenticatedRequest, res: Response) {
         try {
             if (!req.user) throw new Error("User not found!");
+
             const { id } = req.params;
             const { status } = req.body;
-            const dto: UpdateReviewerDto = {
-                id: id,
+
+            const dto: UpdateReviewerDTO = {
+                id,
                 data: {
-                    status: status as ReviewerStatus
+                    status
                 },
-                userId: req.user._id,
+                userId: req.user._id
             };
-            const updated = await ReviewerService.updateReviewer(dto);
-            successResponse(res, 201, "Reviewer updated successfully", updated);
+
+            const updated = await reviewerService.updateReviewer(dto);
+            successResponse(res, 200, "Reviewer updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
-    static async deleteReviewer(req: Request, res: Response) {
+    static async deleteReviewer(req: AuthenticatedRequest, res: Response) {
         try {
+            if (!req.user) throw new Error("User not found!");
+
             const { id } = req.params;
-            const dto: DeleteDto = { id };
-            const deleted = await ReviewerService.deleteReviewer(dto);
-            successResponse(res, 201, "Reviewer deleted successfully", deleted);
+            const dto: DeleteReviewerDTO = {
+                id,
+                userId: req.user._id
+            };
+
+            const deleted = await reviewerService.deleteReviewer(dto);
+            successResponse(res, 200, "Reviewer deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
-
 }
-
-

@@ -1,9 +1,9 @@
+//project-stage.ts
 import mongoose, { model, Schema } from "mongoose";
-import { ProjectStageStatus } from "./project.stage.enum";
+import { ProjectStageStatus } from "./project-stage.enum";
 import { COLLECTIONS } from "../../../../util/collections.enum";
-import { Stage } from "../stage.model";
 
-interface IProjectStage extends Document {
+export interface IProjectStage extends Document {
     stage: mongoose.Types.ObjectId;
     project: mongoose.Types.ObjectId;
     status: ProjectStageStatus;
@@ -15,7 +15,7 @@ interface IProjectStage extends Document {
 const ProjectStageSchema = new Schema<IProjectStage>({
     stage: {
         type: Schema.Types.ObjectId,
-        ref: Stage.modelName,
+        ref: COLLECTIONS.STAGE,
         immutable: true,
         required: true
     },

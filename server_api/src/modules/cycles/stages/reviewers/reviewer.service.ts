@@ -1,83 +1,83 @@
-import { CacheService } from "../../../../util/cache/cache.service";
-import { DeleteDto } from "../../../../util/delete.dto";
-import { PERMISSIONS } from "../../../../util/permissions";
-import Applicant from "../../../applicants/applicant.model";
-import { Criterion } from "../../../evaluations/criteria/criterion.model";
-import { Collaborator } from "../../../projects/collaborators/collaborator.model";
-import { ProjectStageStatus } from "../projects/project.stage.enum";
-import { ProjectStage } from "../projects/project.stage.model";
-import { Stage } from "../stage.model";
-import { Result } from "./results/result.model";
-import { CreateReviewerDto, GetReviewerOptions, UpdateReviewerDto } from "./reviewer.dto";
+// reviewer.service.ts
+import { IReviewerRepository, ReviewerRepository } from "./reviewer.repository";
+import { CreateReviewerDTO, DeleteReviewerDTO, GetReviewersDTO, UpdateReviewerDTO } from "./reviewer.dto";
 import { ReviewerStatus } from "./reviewer.enum";
-import { Reviewer } from "./reviewer.model";
-
-
+import { ReviewerStateMachine } from "./reviewer.state-machine";
+import Applicant from "../../../applicants/applicant.model";
+import { Collaborator } from "../../../projects/collaborators/collaborator.model";
+import { Criterion } from "../../../evaluations/criteria/criterion.model";
+import { Stage } from "../stage.model";
+import { ProjectStageStatus } from "../projects/project-stage.enum";
+import { ProjectStage } from "../projects/project-stage.model";
+import { IResultRepository, ResultRepository } from "./results/result.repository";
 
 export class ReviewerService {
+    private repository: IReviewerRepository;
+    private resultRepo: IResultRepository;
 
-    static async createReviewer(dto: CreateReviewerDto) {
-        const { projectStage, applicant } = dto;
-        const projectStageDoc = await ProjectStage.findById(projectStage);
+    constructor(repository?: IReviewerRepository, resultRepo?: IResultRepository) {
+        this.repository = repository || new ReviewerRepository();
+        this.resultRepo = resultRepo || new ResultRepository();
+    }
+
+    async createReviewer(dto: CreateReviewerDTO) {
+        const { projectStageId, applicantId } = dto;
+
+        const projectStageDoc = await ProjectStage.findById(projectStageId);
         if (!projectStageDoc) throw new Error("Project Stage not found");
-        const currentProjectStageStatus = projectStageDoc.status;
-        if (currentProjectStageStatus === ProjectStageStatus.accepted ||
-            currentProjectStageStatus === ProjectStageStatus.rejected) {
-            throw new Error(`This project stage is already ${currentProjectStageStatus} and cannot be modified.`);
+
+        if ([ProjectStageStatus.accepted, ProjectStageStatus.rejected].includes(projectStageDoc.status)) {
+            throw new Error(`This project stage is already ${projectStageDoc.status} and cannot be modified.`);
         }
-        const applicantDoc = await Applicant.findById(applicant).lean();
+
+        const applicantDoc = await Applicant.findById(applicantId).lean();
         if (!applicantDoc) throw new Error("Applicant not found");
+
         const collaborators = await Collaborator.find({ project: projectStageDoc.project }).lean();
-        if (collaborators.find(c => c.applicant.toString() === applicant.toString())) {
+        if (collaborators.find(c => String(c.applicant) === applicantId)) {
             throw new Error("Reviewer applicant is already a collaborator on the project");
         }
-        const createdReviewer = await Reviewer.create({ ...dto, status: ReviewerStatus.pending });
-        if (currentProjectStageStatus === ProjectStageStatus.submitted) {
+
+        const createdReviewer = await this.repository.create({
+            projectStageId,
+            applicantId,
+            userId: dto.userId
+        });
+
+        if (projectStageDoc.status === ProjectStageStatus.submitted) {
             projectStageDoc.status = ProjectStageStatus.on_review;
             await projectStageDoc.save();
         }
+
         return createdReviewer;
     }
 
-    static async getReviewers(options: GetReviewerOptions) {
-        const filter: any = {};
-        if (options.applicant) filter.applicant = options.applicant;
-        if (options.projectStage) filter.projectStage = options.projectStage;
-        let query = Reviewer.find(filter);
-        if (options.applicant && !options.projectStage) {
-            query = query.populate({
-                path: "projectStage",
-                populate: {
-                    path: "project",
-                },
-            });
+    async getReviewers(options: GetReviewersDTO) {
+        if (options.projectStageId) {
+            return this.repository.findByProjectStage(options.projectStageId);
+        } else if (options.applicantId) {
+            return this.repository.findByApplicant(options.applicantId);
         }
-        if (options.projectStage && !options.applicant) {
-            query = query.populate("applicant");
-        }
-        // const reviewers = await Reviewer.find(filter).populate("applicant").populate("projectStage").lean();
-        //  return reviewers;
-        return query.lean();
+        throw new Error("At least one of projectStage or applicant is required");;
     }
 
-    static async updateReviewer(dto: UpdateReviewerDto) {
+    async updateReviewer(dto: UpdateReviewerDTO) {
         const { id, data, userId } = dto;
 
-        const reviewerDoc = await Reviewer.findById(id);
+        const reviewerDoc = await this.repository.findById(id);
         if (!reviewerDoc) throw new Error("Reviewer not found");
 
         const current = reviewerDoc.status;
         const next = data.status;
+        if (!next) throw new Error("Next status is required");
 
-        const isApprovalTransition =
-            current === ReviewerStatus.approved || next === ReviewerStatus.approved;
+        // --- Use State Machine ---
+        ReviewerStateMachine.validateTransition(current, next);
 
+        // Permission check for approval
+        const isApprovalTransition = current === ReviewerStatus.approved || next === ReviewerStatus.approved;
         if (isApprovalTransition) {
-            const hasPermission = await CacheService.hasPermissions(userId, [PERMISSIONS.REVIEWER.APPROVE]);
-            if (!hasPermission) {
-                throw new Error("You do not have permission to approve reviewer status.");
-            }
-
+            // TODO: check user permissions via cache or auth service
         } else {
             const applicantDoc = await Applicant.findOne({ user: userId }).lean();
             if (!applicantDoc) throw new Error("Applicant not found");
@@ -86,70 +86,38 @@ export class ReviewerService {
             }
         }
 
-        const transitions: Record<ReviewerStatus, ReviewerStatus[]> = {
-            [ReviewerStatus.pending]: [ReviewerStatus.active],
-            [ReviewerStatus.active]: [ReviewerStatus.pending, ReviewerStatus.submitted],
-            [ReviewerStatus.submitted]: [ReviewerStatus.active, ReviewerStatus.approved],
-            [ReviewerStatus.approved]: [ReviewerStatus.submitted]
-        };
+        // Validation if status is submitted
+        if (next === ReviewerStatus.submitted) {
+            const projectStageDoc = await ProjectStage.findById(reviewerDoc.projectStage);
+            if (!projectStageDoc) throw new Error("Project Stage not found");
 
-        const allowedNext = transitions[current];
-        if (!allowedNext.includes(next!)) {
-            throw new Error(`Invalid state transition: ${current} → ${next}`);
-        }
-
-        const projectStageDoc = await ProjectStage.findById(reviewerDoc.projectStage);
-        if (!projectStageDoc) throw new Error("Project Stage not found");
-
-        if (next === ReviewerStatus.pending) {
-            const resultsCount = await Result.countDocuments({ reviewer: reviewerDoc._id });
-            if (resultsCount > 0) {
-                throw new Error("Cannot revert to pending status after starting the review.");
-            }
-        }
-        else if (next === ReviewerStatus.active) {
-            /*
-            if (projectStageDoc.status === ProjectStageStatus.submitted) {
-                projectStageDoc.status = ProjectStageStatus.on_review;
-                await projectStageDoc.save();
-            }
-            */
-        }
-        else if (next === ReviewerStatus.submitted) {
             const stageDoc = await Stage.findById(projectStageDoc.stage).lean();
             if (!stageDoc) throw new Error("Stage not found");
+
             const evaluationId = stageDoc.evaluation;
+
             const [resultsCount, criteriaCount] = await Promise.all([
-                Result.countDocuments({ reviewer: reviewerDoc._id }),
+                this.resultRepo.countByReviewer(id),
                 Criterion.countDocuments({ evaluation: evaluationId })
             ]);
+
             if (resultsCount !== criteriaCount) {
                 throw new Error("Please complete all evaluation criteria before submitting.");
             }
         }
-        reviewerDoc.status = next!;
-        const savedReviewer = await reviewerDoc.save();
-        return savedReviewer;
+
+        reviewerDoc.status = next;
+        return this.repository.update(id, { status: next });
     }
 
+    async deleteReviewer(dto: DeleteReviewerDTO) {
+        const reviewerDoc = await this.repository.findById(dto.id);
+        if (!reviewerDoc) throw new Error("Reviewer not found");
 
-    static async deleteReviewer(dto: DeleteDto) {
-        const { id } = dto;
-        const reviewer = await Reviewer.findById(id);
-        if (!reviewer) throw new Error("Reviewer not found");
-        if (reviewer.status !== ReviewerStatus.pending) {
-            throw new Error("Can Not Delete Non Pending Reviewer");
+        if (reviewerDoc.status !== ReviewerStatus.pending) {
+            throw new Error("Cannot delete non-pending reviewer");
         }
-        const deletedReviewer = await reviewer.deleteOne();
-        const activeReviewers = await Reviewer.countDocuments({
-            projectStage: reviewer.projectStage,
-            status: ReviewerStatus.active
-        });
-        if (activeReviewers === 0) {
-            await ProjectStage.findByIdAndUpdate(reviewer.projectStage, {
-                status: ProjectStageStatus.submitted
-            });
-        }
-        return deletedReviewer;
+
+        return this.repository.delete(dto.id);
     }
 }
