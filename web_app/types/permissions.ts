@@ -84,4 +84,10 @@ export const PERMISSIONS = {
     APPROVE: "reviewer:approve",
     DELETE: "reviewer:delete",
   },
+  RESULT: {
+    CREATE: "result:create",
+    READ: "result:read",
+    UPDATE: "result:update",
+    DELETE: "result:delete",
+  }
 } as const;
