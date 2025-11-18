@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { OptionService } from "./option.service";
 import { CreateOptionDTO, GetOptionsDTO, UpdateOptionDTO, DeleteOptionDTO } from "./option.dto";
-import { successResponse, errorResponse } from "../../../util/response";
-import { AuthenticatedRequest } from "../../users/auth/auth.middleware";
+import { successResponse, errorResponse } from "../../../../util/response";
+import { AuthenticatedRequest } from "../../../users/auth/auth.middleware";
 
 export class OptionController {
     static async createOption(req: AuthenticatedRequest, res: Response) {

@@ -15,7 +15,8 @@ export interface CreateReviewerDTO {
 export interface UpdateReviewerDTO {
     id: string;
     data: Partial<{
-        status: ReviewerStatus; // ReviewerStatus as string
+        status: ReviewerStatus;
+        totalScore: number;
     }>;
     userId: string;
 }

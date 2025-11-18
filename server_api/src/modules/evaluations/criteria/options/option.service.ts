@@ -1,5 +1,5 @@
-import { FormType } from "../criteria/criterion.enum";
-import { Criterion } from "../criteria/criterion.model";
+import { FormType } from "../criterion.enum";
+import { Criterion } from "../criterion.model";
 import {
     CreateOptionDTO,
     DeleteOptionDTO,

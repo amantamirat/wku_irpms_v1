@@ -11,7 +11,7 @@ import themeRoutes from './modules/themes/theme.routes';
 
 import evaluationRoutes from './modules/evaluations/evaluation.routes';
 import criterionRoutes from './modules/evaluations/criteria/criterion.routes';
-import optionRoutes from './modules/evaluations/options/option.routes';
+import optionRoutes from './modules/evaluations/criteria/options/option.routes';
 import calendarRoutes from './modules/calendar/calendar.routes';
 import cycleRoutes from './modules/cycles/cycle.routes';
 import cycleStageRoutes from './modules/cycles/stages/stage.routes';

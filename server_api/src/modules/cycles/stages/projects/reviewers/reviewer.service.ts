@@ -83,8 +83,7 @@ export class ReviewerService {
         ReviewerStateMachine.validateTransition(current, next);
 
         const isReviewerTransistion =
-            current === ReviewerStatus.active || next === ReviewerStatus.active ||
-            next === ReviewerStatus.submitted;
+            current === ReviewerStatus.active || next === ReviewerStatus.active;
         if (isReviewerTransistion) {
             const applicantDoc = await Applicant.findOne({ user: userId }).lean();
             if (!applicantDoc) throw new Error("Applicant not found");
@@ -94,6 +93,7 @@ export class ReviewerService {
         }
 
         // Validation if status is submitted
+        let totalScore;
         if (next === ReviewerStatus.submitted) {
             const projectStageDoc = await this.projectStageRepo.findById(reviewerDoc.projectStage.toString());
             if (!projectStageDoc) throw new Error("Project Stage not found");
@@ -113,7 +113,7 @@ export class ReviewerService {
             }
 
             const results = await this.resultRepo.findByReviewer(id);
-            let totalScore = 0;
+            totalScore = 0;
             for (const r of results) {
                 if (r.criterion.form_type === FormType.closed) {
                     // Closed criterion → use selectedOption score
@@ -124,12 +124,9 @@ export class ReviewerService {
                     totalScore += r.score || 0;
                 }
             }
-            console.log(totalScore);
-
         }
-
         reviewerDoc.status = next;
-        const updated = await this.repository.updateStatus(id, { status: next });
+        const updated = await this.repository.update(id, { status: next, totalScore });
         await this.projectStageSynchronizer.syncProjectStageStatus(reviewerDoc.projectStage.toString());
 
         return updated;

@@ -2,7 +2,7 @@
 import { IResultRepository, ResultRepository } from "./result.repository";
 import { CreateResultDTO, DeleteResultDTO, GetResultsDTO, UpdateResultDTO } from "./result.dto";
 import { ReviewerStatus } from "../reviewer.enum";
-import { Option } from "../../../../../evaluations/options/option.model";
+import { Option } from "../../../../../evaluations/criteria/options/option.model";
 import Applicant from "../../../../../applicants/applicant.model";
 import { FormType } from "../../../../../evaluations/criteria/criterion.enum";
 import { Criterion } from "../../../../../evaluations/criteria/criterion.model";
@@ -51,7 +51,7 @@ export class ResultService {
         return { criterionDoc };
     }
 
-    async createResult(dto: CreateResultDTO) {
+    async createResult(dto: CreateResultDTO) {   
         await this.validateReviewerPermission(dto.reviewerId, dto.userId);
         await this.validateResult(dto.criterionId, dto.score, dto.selectedOptionId);
         return this.repository.create(dto);

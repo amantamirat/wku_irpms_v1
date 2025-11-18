@@ -1,5 +1,5 @@
 import mongoose, { Schema, model } from "mongoose";
-import { COLLECTIONS } from "../../../util/collections.enum";
+import { COLLECTIONS } from "../../../../util/collections.enum";
 
 // =========================
 // 3️⃣ Option

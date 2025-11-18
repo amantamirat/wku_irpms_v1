@@ -1,6 +1,6 @@
 import { Stage } from "../../cycles/stages/stage.model";
 import { Evaluation } from "../evaluation.model";
-import { Option } from "../options/option.model";
+import { Option } from "./options/option.model";
 import {
     CreateCriterionDTO,
     DeleteCriterionDTO,

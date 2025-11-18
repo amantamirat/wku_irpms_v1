@@ -10,7 +10,7 @@ export interface IReviewerRepository {
     findByApplicant(applicantId: string): Promise<Partial<IReviewer>[]>;
     //existsActiveByProjectStage(projectStageId: string): Promise<boolean>;
     create(dto: CreateReviewerDTO): Promise<IReviewer>;
-    updateStatus(id: string, data: UpdateReviewerDTO["data"]): Promise<IReviewer>;
+    update(id: string, data: UpdateReviewerDTO["data"]): Promise<IReviewer>;
     delete(id: string): Promise<void>;
 }
 
@@ -46,8 +46,12 @@ export class ReviewerRepository implements IReviewerRepository {
         return Reviewer.create(data);
     }
 
-    async updateStatus(id: string, dtoData: UpdateReviewerDTO["data"]): Promise<IReviewer> {
+    async update(id: string, dtoData: UpdateReviewerDTO["data"]): Promise<IReviewer> {
         const updateData: Partial<IReviewer> = {};
+
+        if (dtoData.totalScore !== undefined) {
+            updateData.totalScore = dtoData.totalScore;
+        }
 
         if (dtoData.status !== undefined) {
             updateData.status = dtoData.status;
@@ -74,7 +78,7 @@ export class ReviewerRepository implements IReviewerRepository {
     }
      */
 
-    
+
 
 
 
