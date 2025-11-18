@@ -1,59 +1,64 @@
 //result.service.ts
 import { IResultRepository, ResultRepository } from "./result.repository";
 import { CreateResultDTO, DeleteResultDTO, GetResultsDTO, UpdateResultDTO } from "./result.dto";
-import { ReviewerStatus } from "../reviewer.enum";
 import { Option } from "../../../../../evaluations/criteria/options/option.model";
-import Applicant from "../../../../../applicants/applicant.model";
 import { FormType } from "../../../../../evaluations/criteria/criterion.enum";
 import { Criterion } from "../../../../../evaluations/criteria/criterion.model";
 import { IReviewerRepository, ReviewerRepository } from "../reviewer.repository";
+import { ReviewerPermission } from "../reviewer.permission";
+import { ReviewerStatus } from "../reviewer.enum";
+
 
 export class ResultService {
     private repository: IResultRepository;
     private reviewerRepo: IReviewerRepository;
+    private reviewerPerm: ReviewerPermission;
 
-    constructor(repository?: IResultRepository, reviewerRepo?: IReviewerRepository) {
+    constructor(repository?: IResultRepository, reviewerRepo?: IReviewerRepository,
+        reviewerPermission?: ReviewerPermission
+    ) {
         this.repository = repository || new ResultRepository();
-        this.reviewerRepo = reviewerRepo || new ReviewerRepository();;
+        this.reviewerRepo = reviewerRepo || new ReviewerRepository();
+        this.reviewerPerm = reviewerPermission || new ReviewerPermission(this.reviewerRepo);
     }
 
-    private async validateReviewerPermission(reviewerId: string, userId: string) {
-        const reviewerDoc = await this.reviewerRepo.findById(reviewerId);
-        if (!reviewerDoc) throw new Error("Reviewer not found");
-        if (reviewerDoc.status !== ReviewerStatus.active) throw new Error("Reviewer is not active");
-
-        const applicantDoc = await Applicant.findOne({ user: userId }).lean();
-        if (!applicantDoc) throw new Error("Applicant not found");
-        if (String(reviewerDoc.applicant) !== String(applicantDoc._id)) {
-            throw new Error("You are not allowed to provide result for this project.");
-        }
-
-        return { reviewerDoc, applicantDoc };
-    }
-
-    private async validateResult(criterionId: string, score?: number, selectedOptionId?: string) {
+    private async validateResult(criterionId: string, dto: Partial<UpdateResultDTO["data"]>) {
+        const { score, selectedOptionId } = dto;
         const criterionDoc = await Criterion.findById(criterionId).lean();
         if (!criterionDoc) throw new Error("Criterion not found");
 
         if (criterionDoc.form_type === FormType.open) {
-            if (score === undefined || score === null) throw new Error("Score is required");
-            const maxScore = criterionDoc.weight;
-            if (score < 0 || score > maxScore) throw new Error(`Score must be between 0 and ${maxScore}`);
-        }
-
-        if (criterionDoc.form_type === FormType.closed) {
-            const option = await Option.findById(selectedOptionId).lean();
-            if (!option || String(option.criterion) !== String(criterionDoc._id)) {
-                throw new Error("Selected option not found.");
+            // For open form type, score should be directly provided
+            if (score === undefined || score === null) {
+                throw new Error("Score is required");
             }
+            const maxScore = criterionDoc.weight;
+            if (score < 0 || score > maxScore) {
+                throw new Error(`Score must be between 0 and ${maxScore}`);
+            }
+
+        }
+        else if (criterionDoc.form_type === FormType.closed) {
+            // For closed form type, get score from selected option
+            if (!selectedOptionId) {
+                throw new Error("Selected option ID is required for closed form type");
+            }
+            const selectedOption = await Option.findById(selectedOptionId).lean();
+            if (!selectedOption || String(selectedOption.criterion) !== String(criterionDoc._id)) {
+                throw new Error("Selected option not found or does not belong to this criterion");
+            }
+            dto.score = selectedOption.score;
         }
 
-        return { criterionDoc };
+        return { dto };
     }
 
-    async createResult(dto: CreateResultDTO) {   
-        await this.validateReviewerPermission(dto.reviewerId, dto.userId);
-        await this.validateResult(dto.criterionId, dto.score, dto.selectedOptionId);
+    async createResult(dto: CreateResultDTO) {
+        const { reviewerId, userId } = dto;
+        const { reviewerDoc } = await this.reviewerPerm.validateReviewerPermission(reviewerId, userId);
+        if (reviewerDoc.status !== ReviewerStatus.active)
+            throw new Error("Reviewer is not active");
+        await this.validateResult(dto.criterionId, dto);
         return this.repository.create(dto);
     }
 
@@ -64,21 +69,20 @@ export class ResultService {
     async updateResult(dto: UpdateResultDTO) {
         const resultDoc = await this.repository.findById(dto.id);
         if (!resultDoc) throw new Error("Result not found");
-
-        await this.validateReviewerPermission(String(resultDoc.reviewer), dto.userId);
-        await this.validateResult(String(resultDoc.criterion), dto.data.score, dto.data.selectedOptionId);
-
-        // Pass update DTO data directly
+        const { reviewerDoc } = await this.reviewerPerm.validateReviewerPermission(String(resultDoc.reviewer), dto.userId);
+        if (reviewerDoc.status !== ReviewerStatus.active)
+            throw new Error("Reviewer is not active");
+        await this.validateResult(String(resultDoc.criterion), dto.data);
         return this.repository.update(dto.id, dto.data);
     }
 
     async deleteResult(dto: DeleteResultDTO) {
         if (!dto.userId) throw new Error("User ID is required for deletion");
-
         const resultDoc = await this.repository.findById(dto.id);
         if (!resultDoc) throw new Error("Result not found");
-
-        await this.validateReviewerPermission(String(resultDoc.reviewer), dto.userId);
+        const { reviewerDoc } = await this.reviewerPerm.validateReviewerPermission(String(resultDoc.reviewer), dto.userId);
+        if (reviewerDoc.status !== ReviewerStatus.active)
+            throw new Error("Reviewer is not active");
         return this.repository.delete(dto.id);
     }
 }
