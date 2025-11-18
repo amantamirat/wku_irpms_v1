@@ -268,5 +268,21 @@
   {
     "category": "Position Management",
     "name": "position:delete"
+  },
+  {
+    "category": "Result Management",
+    "name": "result:create"
+  },
+  {
+    "category": "Result Management",
+    "name": "result:read"
+  },
+  {
+    "category": "Result Management",
+    "name": "result:update"
+  },
+  {
+    "category": "Result Management",
+    "name": "result:delete"
   }
 ]

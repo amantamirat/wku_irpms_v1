@@ -85,6 +85,12 @@ export const PERMISSIONS = {
     UPDATE: "position:update",
     DELETE: "position:delete",
   },
+  RESULT: {
+    CREATE: "result:create",
+    READ: "result:read",
+    UPDATE: "result:update",
+    DELETE: "result:delete",
+  }
 } as const;
 
 

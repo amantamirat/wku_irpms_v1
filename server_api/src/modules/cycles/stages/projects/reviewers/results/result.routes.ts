@@ -1,12 +1,21 @@
 import { Router } from 'express';
 import { ResultController } from './result.controller';
-import { verifyActiveAccount } from '../../../../../users/auth/auth.middleware';
+import { checkPermission, verifyActiveAccount } from '../../../../../users/auth/auth.middleware';
+import { PERMISSIONS } from '../../../../../../util/permissions';
 
 const router: Router = Router();
 
-router.post('/', verifyActiveAccount, ResultController.createResult);
-router.get('/', verifyActiveAccount, ResultController.getResults);
-router.put('/:id', verifyActiveAccount, ResultController.updateResult);
-router.delete('/:id', verifyActiveAccount, ResultController.deleteResult);
+router.post('/', verifyActiveAccount,
+    checkPermission([PERMISSIONS.RESULT.CREATE]),
+    ResultController.createResult);
+router.get('/', verifyActiveAccount,
+    checkPermission([PERMISSIONS.RESULT.READ]),
+    ResultController.getResults);
+router.put('/:id', verifyActiveAccount,
+    checkPermission([PERMISSIONS.RESULT.UPDATE]),
+    ResultController.updateResult);
+router.delete('/:id', verifyActiveAccount,
+    checkPermission([PERMISSIONS.RESULT.DELETE]),
+    ResultController.deleteResult);
 
 export default router;
