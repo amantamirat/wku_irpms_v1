@@ -84,22 +84,22 @@ export class ReviewerService {
         const nextState = data.status;
         if (nextState) {
             const current = reviewerDoc.status;
-
             // --- Use State Machine ---
             ReviewerStateMachine.validateTransition(current, nextState);
 
-            const isReviewerTransistion =
+            const isActivationChange =
                 current === ReviewerStatus.active || nextState === ReviewerStatus.active;
-            if (isReviewerTransistion) {
+
+            if (isActivationChange) {
                 await this.permission.validateReviewerPermission(id, userId, reviewerDoc);
             }
-            const isApprovalTransistion =
+            const isApprovalChange =
                 current === ReviewerStatus.approved || nextState === ReviewerStatus.approved;
-            if (isApprovalTransistion) {
+
+            if (isApprovalChange) {
                 await CacheService.validatePermission(userId, [PERMISSIONS.REVIEWER.APPROVE]);
             }
             // Validation of if status is submitted
-            let totalScore;
             if (current === ReviewerStatus.active && nextState === ReviewerStatus.submitted) {
                 projectStageDoc = await this.projectStageRepo.findById(reviewerDoc.projectStage.toString());
                 if (!projectStageDoc) throw new Error("Project Stage not found");
@@ -109,16 +109,13 @@ export class ReviewerService {
 
                 const criteriaCount = await Criterion.countDocuments({ evaluation: stageDoc.evaluation })
                 const results = await this.resultRepo.findByReviewer(id);
-                const resultsCount = results.length;
 
-                if (resultsCount !== criteriaCount) {
+                if (results.length !== criteriaCount) {
                     throw new Error("Please complete all evaluation criteria before submitting.");
                 }
-                totalScore = 0;
-                for (const r of results) {
-                    totalScore += r.score || 0;
-                }
-                dto.data.totalScore = totalScore;
+
+                const totalScore = results.reduce((sum, r) => sum + (r.score ?? 0), 0);
+                dto.data.totalScore = totalScore * (reviewerDoc.weight ?? 1);
             }
             if (current === ReviewerStatus.submitted && nextState === ReviewerStatus.active) {
                 dto.data.totalScore = 0;
