@@ -1,20 +1,19 @@
 // reviewer.service.ts
-import { IReviewerRepository, ReviewerRepository } from "./reviewer.repository";
-import { CreateReviewerDTO, DeleteReviewerDTO, GetReviewersDTO, UpdateReviewerDTO } from "./reviewer.dto";
-import { ReviewerStatus } from "./reviewer.enum";
-import { ReviewerStateMachine } from "./reviewer.state-machine";
-import Applicant from "../../../../applicants/applicant.model";
-import { Collaborator } from "../../../../projects/collaborators/collaborator.model";
-import { Criterion } from "../../../../evaluations/criteria/criterion.model";
-import { Stage } from "../../stage.model";
-import { ProjectStageStatus } from "../project-stage.enum";
-import { IResultRepository, ResultRepository } from "./results/result.repository";
-import { IProjectStageRepository, ProjectStageRepository } from "../project-stage.repository";
-import { ProjectStageSynchronizer } from "../project-stage.synchronizer";
-import { FormType } from "../../../../evaluations/criteria/criterion.enum";
-import { ReviewerPermission } from "./reviewer.permission";
 import { CacheService } from "../../../../../util/cache/cache.service";
 import { PERMISSIONS } from "../../../../../util/permissions";
+import Applicant from "../../../../applicants/applicant.model";
+import { Criterion } from "../../../../evaluations/criteria/criterion.model";
+import { Collaborator } from "../../../../projects/collaborators/collaborator.model";
+import { Stage } from "../../stage.model";
+import { ProjectStageStatus } from "../project-stage.enum";
+import { IProjectStageRepository, ProjectStageRepository } from "../project-stage.repository";
+import { ProjectStageSynchronizer } from "../project-stage.synchronizer";
+import { IResultRepository, ResultRepository } from "./results/result.repository";
+import { CreateReviewerDTO, DeleteReviewerDTO, GetReviewersDTO, UpdateReviewerDTO } from "./reviewer.dto";
+import { ReviewerStatus } from "./reviewer.enum";
+import { ReviewerPermission } from "./reviewer.permission";
+import { IReviewerRepository, ReviewerRepository } from "./reviewer.repository";
+import { ReviewerStateMachine } from "./reviewer.state-machine";
 
 export class ReviewerService {
 
@@ -123,7 +122,7 @@ export class ReviewerService {
             }
         }
         const updated = await this.repository.update(id, dto.data);
-                
+
         await this.projectStageSynchronizer.syncProjectStageStatus(reviewerDoc.projectStage.toString(), projectStageDoc);
         return updated;
 
