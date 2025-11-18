@@ -12,6 +12,7 @@ import { IResultRepository, ResultRepository } from "./results/result.repository
 import { IProjectStageRepository, ProjectStageRepository } from "../project-stage.repository";
 import { ProjectStageSynchronizer } from "../project-stage.synchronizer";
 import { FormType } from "../../../../evaluations/criteria/criterion.enum";
+import { ReviewerPermission } from "./reviewer.permission";
 
 export class ReviewerService {
 
@@ -19,6 +20,7 @@ export class ReviewerService {
     private resultRepo: IResultRepository;
     private projectStageRepo: IProjectStageRepository;
     private projectStageSynchronizer: ProjectStageSynchronizer;
+    private permission: ReviewerPermission;
 
     constructor(repository?: IReviewerRepository, resultRepo?: IResultRepository,
         projectStageRepo?: IProjectStageRepository, projectStageSynchronizer?: ProjectStageSynchronizer
@@ -28,6 +30,7 @@ export class ReviewerService {
         this.projectStageRepo = projectStageRepo || new ProjectStageRepository();
         this.projectStageSynchronizer = projectStageSynchronizer ||
             new ProjectStageSynchronizer(this.projectStageRepo, this.repository);
+        this.permission = new ReviewerPermission(this.repository);
     }
 
     async createReviewer(dto: CreateReviewerDTO) {
@@ -61,12 +64,15 @@ export class ReviewerService {
     }
 
     async getReviewers(options: GetReviewersDTO) {
+        if (!options.projectStageId && !options.applicantId) {
+            throw new Error("Project-Stage or Applicant is required");
+        }
         if (options.projectStageId) {
             return this.repository.findByProjectStage(options.projectStageId);
-        } else if (options.applicantId) {
+        }
+        if (options.applicantId) {
             return this.repository.findByApplicant(options.applicantId);
         }
-        throw new Error("At least one of projectStage or applicant is required");;
     }
 
     async updateReviewer(dto: UpdateReviewerDTO) {
@@ -85,11 +91,15 @@ export class ReviewerService {
         const isReviewerTransistion =
             current === ReviewerStatus.active || next === ReviewerStatus.active;
         if (isReviewerTransistion) {
-            const applicantDoc = await Applicant.findOne({ user: userId }).lean();
+            await this.permission.validateReviewerPermission(id, userId, reviewerDoc);
+            /**
+             *  const applicantDoc = await Applicant.findOne({ user: userId }).lean();
             if (!applicantDoc) throw new Error("Applicant not found");
             if (String(reviewerDoc.applicant) !== String(applicantDoc._id)) {
                 throw new Error(`You are not allowed to ${current} this reviewer status.`);
             }
+             */
+
         }
 
         // Validation if status is submitted

@@ -4,8 +4,8 @@ import { ReviewerStatus } from "./reviewer.enum";
 export class ReviewerStateMachine {
     private static readonly transitions: Record<ReviewerStatus, ReviewerStatus[]> = {
         [ReviewerStatus.pending]: [ReviewerStatus.active],
-        [ReviewerStatus.active]: [ReviewerStatus.pending, ReviewerStatus.submitted],
-        [ReviewerStatus.submitted]: [ReviewerStatus.active, ReviewerStatus.approved],
+        [ReviewerStatus.active]: [ReviewerStatus.submitted, ReviewerStatus.pending],
+        [ReviewerStatus.submitted]: [ReviewerStatus.approved, ReviewerStatus.active],
         [ReviewerStatus.approved]: [ReviewerStatus.submitted]
     };
 
