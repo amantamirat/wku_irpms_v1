@@ -92,7 +92,7 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
         try {
             const updated = await ReviewerApi.updateReviewer({ _id: row._id, status: next });
             setReviewers(prev =>
-                prev.map(r => r._id === updated._id ? { ...row, status: updated.status } : r)
+                prev.map(r => r._id === updated._id ? { ...updated, applicant: row.applicant, projectStage: row.projectStage } : r)
             );
         } catch (err: any) {
             throw err;

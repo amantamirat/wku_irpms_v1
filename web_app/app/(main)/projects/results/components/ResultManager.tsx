@@ -115,7 +115,7 @@ const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) =
         if (deleted) {
             setResults(results.map(r =>
                 (r.criterion as Criterion)._id === (row.criterion as Criterion)._id
-                    ? { ...r, _id: undefined, score: 0, selected_option: undefined } // reset instead of removing
+                    ? { ...r, _id: undefined, score: 0, selectedOption: undefined } // reset instead of removing
                     : r
             ));
             // hideDialogs();
@@ -137,18 +137,10 @@ const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) =
 
     const calculateTotalScore = () => {
         return results.reduce((sum, r) => {
-            const criterion = r.criterion as Criterion;
-            if (!criterion) return sum;
-
-            if (criterion.form_type === FormType.closed && r.selectedOption) {
-                const optionEval = r.selectedOption as Option;
-                return sum + (optionEval.score || 0);
-            } else if (criterion.form_type !== FormType.closed && r.score) {
-                return sum + r.score;
-            }
-            return sum;
+            return sum + (r.score ?? 0);
         }, 0);
     };
+
 
     const scoreTemplate = (rowData: Result) => {
         const criterion = rowData.criterion as Criterion;

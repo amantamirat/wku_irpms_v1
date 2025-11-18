@@ -80,7 +80,7 @@ export class ProService {
             project: submittedProject._id,
             //stage: stage._id,
             documentPath: dto.documentPath,
-            status: ProjectStageStatus.submitted
+            status: ProjectStageStatus.pending
         }
         await Collaborator.insertMany(collaborators);
         await ProjectTheme.insertMany(themes);

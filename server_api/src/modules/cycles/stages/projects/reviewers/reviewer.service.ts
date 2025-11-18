@@ -84,7 +84,7 @@ export class ReviewerService {
         const nextState = data.status;
         if (nextState) {
             const current = reviewerDoc.status;
-            
+
             // --- Use State Machine ---
             ReviewerStateMachine.validateTransition(current, nextState);
 
@@ -120,9 +120,11 @@ export class ReviewerService {
                 }
                 dto.data.totalScore = totalScore;
             }
+            if (current === ReviewerStatus.submitted && nextState === ReviewerStatus.active) {
+                dto.data.totalScore = 0;
+            }
         }
         const updated = await this.repository.update(id, dto.data);
-
         await this.projectStageSynchronizer.syncProjectStageStatus(reviewerDoc.projectStage.toString(), projectStageDoc);
         return updated;
 

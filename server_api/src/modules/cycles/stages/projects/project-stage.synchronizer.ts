@@ -20,32 +20,32 @@ export class ProjectStageSynchronizer {
     const stage = projectStage ?? await this.projectStageRepo.findById(projectStageId);
     if (!stage || !stage.status) return;
 
-    // Fetch all reviewers for the project stage
+    // Fetch all reviewers
     const reviewers = await this.reviewerRepo.findByProjectStage(projectStageId);
 
     let newStatus: ProjectStageStatus;
 
+    // 1. No reviewers → pending
     if (reviewers.length === 0) {
-      // No reviewers linked
-      newStatus = ProjectStageStatus.submitted;
-    } else if (reviewers.every(r => r.status === ReviewerStatus.approved)) {
-      // All reviewers approved
-      newStatus = ProjectStageStatus.reviewed;
+      newStatus = ProjectStageStatus.pending;
+
     } else {
-      // At least one reviewer not approved
-      newStatus = ProjectStageStatus.on_review;
+      // Check for at least one active reviewer
+      const hasActive = reviewers.some(r => r.status === ReviewerStatus.active);
+
+      if (hasActive) {
+        // 2. At least one active reviewer → on_review
+        newStatus = ProjectStageStatus.on_review;
+      } else {
+        // 3. Otherwise → submitted
+        newStatus = ProjectStageStatus.submitted;
+      }
     }
 
-    // Only update if transition is allowed
+    // Update only if allowed by the state machine
     if (ProjectStageStateMachine.canTransition(stage.status, newStatus)) {
       await this.projectStageRepo.updateState(projectStageId, { status: newStatus });
     }
   }
-
-
-
-
-
-
 
 }

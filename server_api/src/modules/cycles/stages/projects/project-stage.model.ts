@@ -32,7 +32,7 @@ const ProjectStageSchema = new Schema<IProjectStage>({
     status: {
         type: String,
         enum: Object.values(ProjectStageStatus),
-        default: ProjectStageStatus.submitted,
+        default: ProjectStageStatus.pending,
         required: true
     },
 }, { timestamps: true });

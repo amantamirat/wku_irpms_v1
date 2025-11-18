@@ -80,8 +80,8 @@ export class ProjectStageService {
         const projectStage = await this.repository.findById(id);
         if (!projectStage) throw new Error("Project stage not found");
 
-        if (projectStage.status !== ProjectStageStatus.submitted) {
-            throw new Error("Only project stages with 'submitted' status can be deleted.");
+        if (projectStage.status !== ProjectStageStatus.pending) {
+            throw new Error("Only project stages with 'pending' status can be deleted.");
         }
         return this.repository.delete(id);
     }

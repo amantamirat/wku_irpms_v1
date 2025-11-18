@@ -2,15 +2,15 @@ import { ProjectStageStatus } from "./project-stage.enum";
 
 export class ProjectStageStateMachine {
     private static readonly transitions: Record<ProjectStageStatus, ProjectStageStatus[]> = {
-        [ProjectStageStatus.submitted]: [ProjectStageStatus.on_review],
-        [ProjectStageStatus.on_review]: [ProjectStageStatus.reviewed, ProjectStageStatus.submitted],
-        [ProjectStageStatus.reviewed]: [
+        [ProjectStageStatus.pending]: [ProjectStageStatus.submitted],
+        [ProjectStageStatus.submitted]: [ProjectStageStatus.on_review, ProjectStageStatus.pending],
+        [ProjectStageStatus.on_review]: [
             ProjectStageStatus.accepted,
             ProjectStageStatus.rejected,
-            ProjectStageStatus.on_review
+            ProjectStageStatus.submitted
         ],
-        [ProjectStageStatus.accepted]: [ProjectStageStatus.reviewed],
-        [ProjectStageStatus.rejected]: [ProjectStageStatus.reviewed]
+        [ProjectStageStatus.accepted]: [ProjectStageStatus.on_review],
+        [ProjectStageStatus.rejected]: [ProjectStageStatus.on_review]
     };
 
     static canTransition(from: ProjectStageStatus, to: ProjectStageStatus): boolean {
