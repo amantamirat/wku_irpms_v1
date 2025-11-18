@@ -32,7 +32,7 @@ export class ReviewerRepository implements IReviewerRepository {
             .populate({
                 path: "projectStage",
                 populate: {
-                    path: "project",
+                    path: "stage project",
                 },
             })
             .exec();

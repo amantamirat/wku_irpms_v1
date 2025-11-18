@@ -94,7 +94,7 @@ export class ReviewerService {
 
         // Validation if status is submitted
         let totalScore;
-        if (next === ReviewerStatus.submitted) {
+        if (current === ReviewerStatus.active && next === ReviewerStatus.submitted) {
             const projectStageDoc = await this.projectStageRepo.findById(reviewerDoc.projectStage.toString());
             if (!projectStageDoc) throw new Error("Project Stage not found");
 

@@ -260,6 +260,13 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
                         <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
                         {applicant &&
                             <Column
+                                field="projectStage.stage.name"
+                                header="Stage"
+                                sortable
+                            />
+                        }
+                        {applicant &&
+                            <Column
                                 field="projectStage.project.title"
                                 header="Project"
                                 sortable
@@ -275,6 +282,7 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
                                 headerStyle={{ minWidth: '15rem' }}
                             />
                         }
+                        <Column field="totalScore" header="Score" sortable />
                         <Column field="status" header="Status" body={statusBodyTemplate} sortable />
                         <Column body={stateTransitionTemplate} />
                         <Column body={actionBodyTemplate} />
