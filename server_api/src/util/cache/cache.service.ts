@@ -62,4 +62,11 @@ export class CacheService {
             throw new Error("User does not have ownership of the organization.");
         }
     }
+
+    static async validatePermission(userId: string, permissions: string[]) {
+        const hasPermission = await this.hasPermissions(userId, permissions);
+        if (!hasPermission) {
+            throw new Error("Permission denied");
+        }
+    }
 }

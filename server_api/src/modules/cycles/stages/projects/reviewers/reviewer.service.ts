@@ -13,6 +13,8 @@ import { IProjectStageRepository, ProjectStageRepository } from "../project-stag
 import { ProjectStageSynchronizer } from "../project-stage.synchronizer";
 import { FormType } from "../../../../evaluations/criteria/criterion.enum";
 import { ReviewerPermission } from "./reviewer.permission";
+import { CacheService } from "../../../../../util/cache/cache.service";
+import { PERMISSIONS } from "../../../../../util/permissions";
 
 export class ReviewerService {
 
@@ -77,69 +79,54 @@ export class ReviewerService {
 
     async updateReviewer(dto: UpdateReviewerDTO) {
         const { id, data, userId } = dto;
-
         const reviewerDoc = await this.repository.findById(id);
         if (!reviewerDoc) throw new Error("Reviewer not found");
+        let projectStageDoc;
+        const nextState = data.status;
+        if (nextState) {
+            const current = reviewerDoc.status;
+            
+            // --- Use State Machine ---
+            ReviewerStateMachine.validateTransition(current, nextState);
 
-        const current = reviewerDoc.status;
-        const next = data.status;
-        if (!next) throw new Error("Next status is required");
-
-        // --- Use State Machine ---
-        ReviewerStateMachine.validateTransition(current, next);
-
-        const isReviewerTransistion =
-            current === ReviewerStatus.active || next === ReviewerStatus.active;
-        if (isReviewerTransistion) {
-            await this.permission.validateReviewerPermission(id, userId, reviewerDoc);
-            /**
-             *  const applicantDoc = await Applicant.findOne({ user: userId }).lean();
-            if (!applicantDoc) throw new Error("Applicant not found");
-            if (String(reviewerDoc.applicant) !== String(applicantDoc._id)) {
-                throw new Error(`You are not allowed to ${current} this reviewer status.`);
+            const isReviewerTransistion =
+                current === ReviewerStatus.active || nextState === ReviewerStatus.active;
+            if (isReviewerTransistion) {
+                await this.permission.validateReviewerPermission(id, userId, reviewerDoc);
             }
-             */
-
-        }
-
-        // Validation if status is submitted
-        let totalScore;
-        if (current === ReviewerStatus.active && next === ReviewerStatus.submitted) {
-            const projectStageDoc = await this.projectStageRepo.findById(reviewerDoc.projectStage.toString());
-            if (!projectStageDoc) throw new Error("Project Stage not found");
-
-            const stageDoc = await Stage.findById(projectStageDoc.stage).lean();
-            if (!stageDoc) throw new Error("Stage not found");
-
-            const evaluationId = stageDoc.evaluation;
-
-            const [resultsCount, criteriaCount] = await Promise.all([
-                this.resultRepo.countByReviewer(id),
-                Criterion.countDocuments({ evaluation: evaluationId })
-            ]);
-
-            if (resultsCount !== criteriaCount) {
-                throw new Error("Please complete all evaluation criteria before submitting.");
+            const isApprovalTransistion =
+                current === ReviewerStatus.approved || nextState === ReviewerStatus.approved;
+            if (isApprovalTransistion) {
+                await CacheService.validatePermission(userId, [PERMISSIONS.REVIEWER.APPROVE]);
             }
+            // Validation of if status is submitted
+            let totalScore;
+            if (current === ReviewerStatus.active && nextState === ReviewerStatus.submitted) {
+                projectStageDoc = await this.projectStageRepo.findById(reviewerDoc.projectStage.toString());
+                if (!projectStageDoc) throw new Error("Project Stage not found");
 
-            const results = await this.resultRepo.findByReviewer(id);
-            totalScore = 0;
-            for (const r of results) {
-                if (r.criterion.form_type === FormType.closed) {
-                    // Closed criterion → use selectedOption score
-                    if (!r.selectedOption) throw new Error(`Selected option missing for criterion ${r.criterion._id}`);
-                    totalScore += r.selectedOption.score;
-                } else {
-                    // Open criterion → use result.score directly
+                const stageDoc = await Stage.findById(projectStageDoc.stage).lean();
+                if (!stageDoc) throw new Error("Stage not found");
+
+                const criteriaCount = await Criterion.countDocuments({ evaluation: stageDoc.evaluation })
+                const results = await this.resultRepo.findByReviewer(id);
+                const resultsCount = results.length;
+
+                if (resultsCount !== criteriaCount) {
+                    throw new Error("Please complete all evaluation criteria before submitting.");
+                }
+                totalScore = 0;
+                for (const r of results) {
                     totalScore += r.score || 0;
                 }
+                dto.data.totalScore = totalScore;
             }
         }
-        reviewerDoc.status = next;
-        const updated = await this.repository.update(id, { status: next, totalScore });
-        await this.projectStageSynchronizer.syncProjectStageStatus(reviewerDoc.projectStage.toString());
-
+        const updated = await this.repository.update(id, dto.data);
+                
+        await this.projectStageSynchronizer.syncProjectStageStatus(reviewerDoc.projectStage.toString(), projectStageDoc);
         return updated;
+
     }
 
     async deleteReviewer(dto: DeleteReviewerDTO) {
