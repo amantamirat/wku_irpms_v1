@@ -114,11 +114,11 @@ export class ReviewerService {
                     throw new Error("Please complete all evaluation criteria before submitting.");
                 }
 
-                const totalScore = results.reduce((sum, r) => sum + (r.score ?? 0), 0);
-                dto.data.totalScore = totalScore * (reviewerDoc.weight ?? 1);
+                const reviewerScore = results.reduce((sum, r) => sum + (r.score ?? 0), 0);
+                dto.data.score = reviewerScore; // * (reviewerDoc.weight ?? 1);
             }
             if (current === ReviewerStatus.submitted && nextState === ReviewerStatus.active) {
-                dto.data.totalScore = 0;
+                dto.data.score = 0;
             }
         }
         const updated = await this.repository.update(id, dto.data);

@@ -7,7 +7,7 @@ export interface IReviewer extends Document {
     projectStage: mongoose.Types.ObjectId;
     applicant: mongoose.Types.ObjectId;
     status: ReviewerStatus;
-    totalScore?: number;
+    score?: number;
     weight?: number;
     createdAt?: Date;
     updatedAt?: Date;
@@ -26,7 +26,7 @@ const ReviewerSchema = new Schema<IReviewer>({
         immutable: true,
         required: true
     },
-    totalScore: {
+    score: {
         type: Number,
         min: 0
     },

@@ -49,8 +49,8 @@ export class ReviewerRepository implements IReviewerRepository {
         if (dtoData.status !== undefined) {
             updateData.status = dtoData.status;
         }
-        if (dtoData.totalScore !== undefined) {
-            updateData.totalScore = dtoData.totalScore;
+        if (dtoData.score !== undefined) {
+            updateData.score = dtoData.score;
         }
         if (dtoData.weight !== undefined) {
             updateData.weight = dtoData.weight;

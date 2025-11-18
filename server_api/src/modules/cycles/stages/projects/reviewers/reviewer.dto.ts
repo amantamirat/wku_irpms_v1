@@ -17,8 +17,8 @@ export interface UpdateReviewerDTO {
     id: string;
     data: Partial<{
         status: ReviewerStatus;
-        totalScore: number;
-        weight?: number;
+        score: number;
+        weight: number;
     }>;
     userId: string;
 }
