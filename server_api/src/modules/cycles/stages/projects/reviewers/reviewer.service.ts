@@ -135,7 +135,7 @@ export class ReviewerService {
         if (reviewerDoc.status !== ReviewerStatus.pending) {
             throw new Error("Cannot delete non-pending reviewer");
         }
-
+        //delete the result too
         const deleted = await this.repository.delete(dto.id);
         await this.projectStageSynchronizer.syncProjectStageStatus(reviewerDoc.projectStage.toString());
         return deleted
