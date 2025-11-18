@@ -14,10 +14,6 @@ export type Result = {
     updatedAt?: Date;
 };
 
-export const resultTemplate = (result: Result) => {
-    if (!result) return null;
-    throw new Error("resultTemplate not implemented yet.");
-};
 
 export const validateResult = (result: Result): { valid: boolean; message?: string } => {
     if (!result.reviewer) {

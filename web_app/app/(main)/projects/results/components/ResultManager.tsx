@@ -10,7 +10,7 @@ import SaveResultDialog from "./SaveResultDialog";
 import { Criterion, FormType } from "@/app/(main)/evaluations/models/criterion.model";
 import { Option } from "@/app/(main)/evaluations/models/option.model";
 import { CriterionApi } from "@/app/(main)/evaluations/api/criterion.api";
-import { ProjectStage } from "../../stages/models/stage.model";
+import { ProjectStage, sanitizeProjectStage } from "../../stages/models/stage.model";
 import { useAuth } from "@/contexts/auth-context";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import ErrorComponent from "@/components/ErrorComponent";
@@ -43,12 +43,10 @@ const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) =
                 setLoading(true);
                 if (!reviewer?._id || !reviewer?.projectStage) return;
                 const projectStage = reviewer.projectStage as ProjectStage;
-                const stageId =
-                    typeof projectStage.stage === "string"
-                        ? projectStage.stage
-                        : (projectStage.stage as any)?._id;
-
-                const fetchedCriteria = await CriterionApi.getCriteria({ stage: stageId });
+                const sanitizedPS = sanitizeProjectStage(projectStage);
+                //call here getCriteria by reviewer or evaluation
+                //const fetchedCriteria = await CriterionApi.getCriteria({ reviewer: reviewer._id });
+                const fetchedCriteria = await CriterionApi.getCriteria({ stage: sanitizedPS.stage });
                 const fetchedResults = await ResultApi.getResults({ reviewer: reviewer._id });
 
                 const mergedResults: Result[] = fetchedCriteria.map((criterion: Criterion) => {

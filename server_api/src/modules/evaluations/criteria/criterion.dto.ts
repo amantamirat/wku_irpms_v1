@@ -20,6 +20,7 @@ export interface UpdateCriterionDTO {
 export interface GetCriteriaDTO {
     evaluation?: mongoose.Types.ObjectId;
     stage?: mongoose.Types.ObjectId;
+    reviewer?:string;
 }
 
 export interface DeleteCriterionDTO {

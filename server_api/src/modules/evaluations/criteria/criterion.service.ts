@@ -10,6 +10,9 @@ import {
 } from "./criterion.dto";
 import { FormType } from "./criterion.enum";
 import { Criterion } from "./criterion.model";
+import { Reviewer } from "../../cycles/stages/projects/reviewers/reviewer.model";
+import mongoose from "mongoose";
+import { COLLECTIONS } from "../../../util/collections.enum";
 
 export class CriterionService {
     /**
@@ -26,7 +29,10 @@ export class CriterionService {
      * Get all criteria for an evaluation.
      */
     static async getCriteria(dto: GetCriteriaDTO) {
-        const { evaluation, stage } = dto;
+        const { evaluation, stage, reviewer } = dto;
+        if(reviewer){
+            return await this.getCriteriaByReviewer(reviewer);
+        }
 
         // Determine the correct evaluation ID to use
         let stageEvaluation = evaluation;
@@ -46,6 +52,59 @@ export class CriterionService {
         return await Criterion.find({ evaluation: stageEvaluation })
             .sort({ createdAt: -1 })
             .lean();
+    }
+
+    /**
+     * Get all criteria for a given reviewer (via reviewer → projectStage → stage → evaluation).
+     */
+    static async getCriteriaByReviewer(reviewerId: string) {
+        const criteria = await Reviewer.aggregate([
+            // 1️⃣ Match the reviewer
+            { $match: { _id: new mongoose.Types.ObjectId(reviewerId) } },
+
+            // 2️⃣ Lookup projectStage
+            {
+                $lookup: {
+                    from: "projectstages",      // MongoDB collection name for ProjectStage
+                    localField: "projectStage",
+                    foreignField: "_id",
+                    as: "projectStage"
+                }
+            },
+            { $unwind: "$projectStage" },
+
+            // 3️⃣ Lookup stage
+            {
+                $lookup: {
+                    from: "stages",            // MongoDB collection name for Stage
+                    localField: "projectStage.stage",
+                    foreignField: "_id",
+                    as: "stage"
+                }
+            },
+            { $unwind: "$stage" },
+
+            // 4️⃣ Lookup criteria (linked to evaluation)
+            {
+                $lookup: {
+                    from: COLLECTIONS.CRITERION,          // MongoDB collection name for Criterion
+                    localField: "stage.evaluation",
+                    foreignField: "evaluation",
+                    as: "criteria"
+                }
+            },
+
+            // 5️⃣ Unwind criteria array so each criterion is a separate document
+            { $unwind: "$criteria" },
+
+            // 6️⃣ Replace root so we only return the criteria
+            { $replaceRoot: { newRoot: "$criteria" } },
+
+            // 7️⃣ Sort by creation date (descending)
+            { $sort: { createdAt: -1 } }
+        ]);
+
+        return criteria;
     }
 
 

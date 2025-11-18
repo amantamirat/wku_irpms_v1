@@ -17,6 +17,7 @@ function sanitizeCriterion(criterion: Partial<Criterion>): Partial<Criterion> {
 export interface GetCriteriaOptions {
     evaluation?: string;
     stage?: string;
+    reviewer?: string;
 }
 
 export const CriterionApi = {
@@ -31,6 +32,7 @@ export const CriterionApi = {
         const query = new URLSearchParams();
         if (options.evaluation) query.append("evaluation", options.evaluation);
         if (options.stage) query.append("stage", options.stage);
+        if (options.reviewer) query.append("reviewer", options.reviewer);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Criterion[];
     },
