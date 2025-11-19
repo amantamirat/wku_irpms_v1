@@ -31,10 +31,10 @@ const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) =
     const isActiveReviewer = isOwner && reviewer?.status === ReviewerStatus.active;
     const confirm = useConfirmDialog();
 
-    const [results, setResults] = useState<Result[]>([]);
-    const [error, setError] = useState<string | null>(null);
+    const [results, setResults] = useState<Result[]>([]);    
     const [selectedResult, setSelectedResult] = useState<Result | null>(null);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -46,7 +46,7 @@ const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) =
                 const sanitizedPS = sanitizeProjectStage(projectStage);
                 //call here getCriteria by reviewer or evaluation
                 //const fetchedCriteria = await CriterionApi.getCriteria({ reviewer: reviewer._id });
-                const fetchedCriteria = await CriterionApi.getCriteria({ stage: sanitizedPS.stage });
+                const fetchedCriteria = await CriterionApi.getCriteria({ stage: sanitizedPS.stage as string });
                 const fetchedResults = await ResultApi.getResults({ reviewer: reviewer._id });
 
                 const mergedResults: Result[] = fetchedCriteria.map((criterion: Criterion) => {

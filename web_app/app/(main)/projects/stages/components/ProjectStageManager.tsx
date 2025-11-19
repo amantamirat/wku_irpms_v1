@@ -5,7 +5,6 @@ import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
-import ConfirmDialog from "@/components/ConfirmationDialog";
 import SaveProjectStageDialog from "./SaveProjectStageDialog";
 import { Project } from "../../models/project.model";
 import { ProjectStage, ProjectStageStatus } from "../models/stage.model";
@@ -16,26 +15,38 @@ import { Stage } from "@/app/(main)/cycles/stages/models/stage.model";
 import Badge from "@/templates/Badge";
 import { InputText } from "primereact/inputtext";
 import { handleGlobalFilterChange, initFilters } from "@/utils/filterUtils";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import { useAuth } from "@/contexts/auth-context";
+import ErrorComponent from "@/components/ErrorComponent";
+import { Skeleton } from "primereact/skeleton";
 
 interface ProjectStageManagerProps {
     project?: Project;
     stage?: Stage;
-    setProject?: (project: Project) => void;
+    //setProject?: (project: Project) => void;
+    showControllers?: boolean;
 }
 
-const ProjectStageManager = ({ project, stage, setProject }: ProjectStageManagerProps) => {
+const ProjectStageManager = ({ project, stage, showControllers }: ProjectStageManagerProps) => {
     const emptyProjectStage: ProjectStage = {
         project: project ? project : "",
         stage: ""
     };
 
+    const { getLinkedApplicant } = useAuth();
+    const linkedApplicant = getLinkedApplicant();
+    const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
+    const confirm = useConfirmDialog();
+
     const [stages, setStages] = useState<ProjectStage[]>([]);
     const [projectStage, setProjectStage] = useState<ProjectStage>(emptyProjectStage);
     const [showDialog, setShowDialog] = useState(false);
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
+
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
@@ -50,16 +61,44 @@ const ProjectStageManager = ({ project, stage, setProject }: ProjectStageManager
     useEffect(() => {
         const fetchProjectStages = async () => {
             try {
+                setLoading(true);
                 //if (project?._id || stage?._id) {
                 const data = await ProjectStageApi.getProjectStages({ project: project?._id, stage: stage?._id });
                 setStages(data);
                 // }
-            } catch (err) {
+            } catch (err: any) {
                 console.error("Failed to fetch project stages:", err);
+                setError("Failed to fetch project stages:" + err.message);
+            }
+            finally {
+                setLoading(false);
             }
         };
         fetchProjectStages();
     }, [project?._id, stage?._id]);
+
+
+    if (loading) {
+        return (
+            <div className="p-4">
+                {[...Array(10)].map((_, i) => (
+                    <div key={i} className="flex items-center mb-3">
+                        <Skeleton width="50px" height="2rem" className="mr-2" />
+                        <Skeleton width="200px" height="2rem" className="mr-2" />
+                        <Skeleton width="80px" height="2rem" className="mr-2" />
+                        <Skeleton width="100px" height="2rem" className="mr-2" />
+                        <Skeleton width="120px" height="2rem" />
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <ErrorComponent errorMessage={error} />
+        );
+    }
 
     // ✅ Called after saving (either create or update)
     const onSaveComplete = (savedStage: ProjectStage) => {
@@ -68,7 +107,7 @@ const ProjectStageManager = ({ project, stage, setProject }: ProjectStageManager
             ? stages.map((s, i) => (i === existingIndex ? savedStage : s))
             : [...stages, savedStage];
         setStages(updated);
-        hideDialogs();
+        hideSaveDialog();
     };
 
     /*
@@ -97,31 +136,33 @@ const ProjectStageManager = ({ project, stage, setProject }: ProjectStageManager
             if (setProject) setProject({ ...project, stages: updated });
             */
         }
-        hideDialogs();
+        //hideSaveDialog();
     };
 
     // ✅ Hide dialogs and reset state
-    const hideDialogs = () => {
+    const hideSaveDialog = () => {
         setProjectStage(emptyProjectStage);
         setShowDialog(false);
-        setShowDeleteDialog(false);
     };
 
     // ✅ Toolbar for adding a new stage
-    const startToolbarTemplate = () => (
-        <div className="my-2">
-            <Button
-                icon="pi pi-plus"
-                severity="success"
-                className="mr-2"
-                tooltip="Add Project Stage"
-                onClick={() => {
-                    setProjectStage(emptyProjectStage);
-                    setShowDialog(true);
-                }}
-            />
-        </div>
-    );
+    const startToolbarTemplate = () => {
+        if (!showControllers) return null;
+        return (
+            <div className="my-2">
+                <Button
+                    icon="pi pi-plus"
+                    severity="success"
+                    className="mr-2"
+                    tooltip="Add Project Stage"
+                    onClick={() => {
+                        setProjectStage(emptyProjectStage);
+                        setShowDialog(true);
+                    }}
+                />
+            </div>
+        )
+    };
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
@@ -134,32 +175,40 @@ const ProjectStageManager = ({ project, stage, setProject }: ProjectStageManager
     );
 
     // ✅ Action buttons for each row
-    const actionBodyTemplate = (rowData: ProjectStage) => (
-        <>
-            <Button
-                icon="pi pi-pencil"
-                rounded
-                severity="success"
-                className="p-button-rounded p-button-text"
-                style={{ fontSize: "1.2rem" }}
-                onClick={() => {
-                    setProjectStage(rowData);
-                    setShowDialog(true);
-                }}
-            />
-            <Button
-                icon="pi pi-times"
-                rounded
-                severity="warning"
-                className="p-button-rounded p-button-text"
-                style={{ fontSize: "1.2rem" }}
-                onClick={() => {
-                    setProjectStage(rowData);
-                    setShowDeleteDialog(true);
-                }}
-            />
-        </>
-    );
+    const actionBodyTemplate = (rowData: ProjectStage) => {
+        if (!showControllers) return null;
+        return (
+            <>
+                <Button
+                    icon="pi pi-pencil"
+                    rounded
+                    severity="success"
+                    className="p-button-rounded p-button-text"
+                    style={{ fontSize: "1.2rem" }}
+                    onClick={() => {
+                        setProjectStage(rowData);
+                        setShowDialog(true);
+                    }}
+                />
+                <Button
+                    icon="pi pi-times"
+                    rounded
+                    severity="warning"
+                    className="p-button-rounded p-button-text"
+                    style={{ fontSize: "1.2rem" }}
+                    onClick={() => {
+                        confirm.ask({
+                            item: String((projectStage.stage as Stage).name),
+                            onConfirmAsync: deleteProjectStage
+                            //onConfirm = {!project?._id ? deleteProjectStage : undefined}
+                        });
+                    }}
+                />
+            </>
+        );
+    }
+
+
 
     // ✅ Column for viewing uploaded document
     const documentBodyTemplate = (rowData: ProjectStage) => {
@@ -203,7 +252,7 @@ const ProjectStageManager = ({ project, stage, setProject }: ProjectStageManager
                 expandedRows={expandedRows}
                 onRowToggle={(e) => setExpandedRows(e.data)}
                 rowExpansionTemplate={(rowData) => {
-                    return <ReviewerManager projectStage={rowData as ProjectStage} />;
+                    return <ReviewerManager projectStage={rowData as ProjectStage} showControllers={true} />;
                 }}
             >
                 {!project &&
@@ -226,7 +275,9 @@ const ProjectStageManager = ({ project, stage, setProject }: ProjectStageManager
                     }}
                     sortable />
                 <Column header="Status" body={statusBodyTemplate} sortable />
-                <Column body={actionBodyTemplate} headerStyle={{ minWidth: "10rem" }} />
+                {showControllers &&
+                    <Column body={actionBodyTemplate} headerStyle={{ minWidth: "10rem" }} />
+                }
             </DataTable>
 
             {(projectStage && project) &&
@@ -236,19 +287,9 @@ const ProjectStageManager = ({ project, stage, setProject }: ProjectStageManager
                     visible={showDialog}
                     //onSave={!project._id ? addProjectStage : undefined}
                     onComplete={onSaveComplete}
-                    onHide={hideDialogs}
+                    onHide={hideSaveDialog}
                 />
             }
-
-            {(projectStage && project) && (
-                <ConfirmDialog
-                    showDialog={showDeleteDialog}
-                    item={projectStage.stage ? projectStage.stage.toString() : "Project Stage"}
-                    onConfirmAsync={project?._id ? deleteProjectStage : undefined}
-                    onConfirm={!project?._id ? deleteProjectStage : undefined}
-                    onHide={hideDialogs}
-                />
-            )}
         </div>
     );
 }

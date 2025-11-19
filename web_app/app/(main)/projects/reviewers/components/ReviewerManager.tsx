@@ -18,9 +18,10 @@ import { PERMISSIONS } from "@/types/permissions";
 interface ReviewerManagerProps {
     applicant?: Applicant;
     projectStage?: ProjectStage;
+    showControllers?: boolean;
 }
 
-const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
+const ReviewerManager = ({ applicant, projectStage, showControllers }: ReviewerManagerProps) => {
 
     const emptyReviewer: Reviewer = {
         applicant: applicant ?? undefined,
@@ -107,9 +108,8 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
     }
 
     const startToolbarTemplate = () => {
-        if (!canCreate) {
-            return null;
-        }
+        if (!showControllers) return null;
+
         return (
             <div className="my-2">
                 <Button label="New Reviewer" icon="pi pi-plus" severity="success" className="mr-2"
@@ -236,11 +236,11 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
     }
 
     const actionBodyTemplate = (rowData: Reviewer) => {
-        //if (!canDelete) return null;
-        //const state = rowData.status;
+        if (!showControllers) return null;
+        const state = rowData.status;
         return (
             <>
-                {canEdit &&
+                {(canEdit && state !== ReviewerStatus.approved) &&
                     <Button icon="pi pi-pencil"
                         rounded
                         severity="success"
@@ -250,7 +250,7 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
                             setShowSaveDialog(true);
                         }} />
                 }
-                {canDelete &&
+                {(canDelete && state !== ReviewerStatus.approved) &&
                     <Button
                         icon="pi pi-trash"
                         rounded
@@ -331,8 +331,8 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
                         <Column field="score" header="Score"
                             body={(rowData) => {
                                 if (rowData.status === ReviewerStatus.submitted ||
-                                    rowData.status === ReviewerStatus.approved) {                                    
-                                     return rowData.score ?? '-';
+                                    rowData.status === ReviewerStatus.approved) {
+                                    return rowData.score ?? '-';
                                 } else {
                                     return '-';
                                 }
