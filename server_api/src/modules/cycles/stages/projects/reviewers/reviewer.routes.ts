@@ -14,6 +14,9 @@ router.get('/', verifyActiveAccount,
 router.put('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.REVIEWER.UPDATE]),
     ReviewerController.updateReviewer);
+router.put('/:id/status', verifyActiveAccount,
+    checkPermission([PERMISSIONS.REVIEWER.CHANGE_STATUS, PERMISSIONS.REVIEWER.APPROVE]),
+    ReviewerController.changeReviewerStatus);
 router.delete('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.REVIEWER.DELETE]),
     ReviewerController.deleteReviewer);

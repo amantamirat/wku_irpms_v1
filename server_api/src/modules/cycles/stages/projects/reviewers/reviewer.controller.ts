@@ -44,6 +44,23 @@ export class ReviewerController {
         }
     }
 
+    // Change reviewer status (activate, submit, approve)
+    static async changeReviewerStatus(req: AuthenticatedRequest, res: Response) {
+        try {
+            if (!req.user) throw new Error("User not found!");
+
+            const { id } = req.params;
+            const { status } = req.body;
+
+            const dto: UpdateReviewerDTO = { id, data: { status }, userId: req.user._id };
+            const updated = await reviewerService.changeReviewerStatus(dto);
+
+            successResponse(res, 200, `Reviewer status changed to ${status}`, updated);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    }
+
     static async updateReviewer(req: AuthenticatedRequest, res: Response) {
         try {
             if (!req.user) throw new Error("User not found!");
@@ -57,7 +74,7 @@ export class ReviewerController {
                 userId: req.user._id
             };
 
-            const updated = await reviewerService.updateReviewer(dto);
+            const updated = await reviewerService.updateReviewerData(dto);
             successResponse(res, 200, "Reviewer updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

@@ -70,7 +70,8 @@ export const PERMISSIONS = {
     CREATE: "reviewer:create",
     READ: "reviewer:read",
     UPDATE: "reviewer:update",
-    APPROVE: "reviewer:approve",
+    CHANGE_STATUS: "reviewer:change_status", // New permission for status transitions
+    APPROVE: "reviewer:approve",      // Keep as special approval permission
     DELETE: "reviewer:delete",
   },
   THEME: {

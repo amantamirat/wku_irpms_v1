@@ -9,7 +9,7 @@ export interface GetReviewersOptions {
 }
 
 export const ReviewerApi = {
-    
+
     async getReviewers(options: GetReviewersOptions): Promise<Reviewer[]> {
         const query = new URLSearchParams();
         if (options.applicant) query.append("applicant", options.applicant);
@@ -24,15 +24,22 @@ export const ReviewerApi = {
         return createdData as Reviewer;
     },
 
-    async updateReviewer(reviewer: Partial<Reviewer>): Promise<Reviewer> {
+    async updateReviewer(reviewer: Partial<Reviewer>, changeStatus = false): Promise<Reviewer> {
         if (!reviewer._id) {
             throw new Error("_id required.");
         }
+
         const sanitized = sanitizeReviewer(reviewer);
-        const url = `${end_point}${reviewer._id}`;
+
+        // URL points to /reviewers/:id or /reviewers/:id/status
+        const url = changeStatus
+            ? `${end_point}${reviewer._id}/status`
+            : `${end_point}${reviewer._id}`;
+
         const updatedReviewer = await ApiClient.put(url, sanitized);
         return updatedReviewer as Reviewer;
     },
+
 
     async deleteReviewer(reviewer: Partial<Reviewer>): Promise<boolean> {
         if (!reviewer._id) {

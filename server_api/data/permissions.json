@@ -221,12 +221,17 @@
   {
     "category": "Reviewer Management",
     "name": "reviewer:update",
-    "description": "Edit reviewer details"
+    "description": "Edit reviewer details like weight"
+  },
+  {
+    "category": "Reviewer Management",
+    "name": "reviewer:change_status",
+    "description": "Edit reviewer status like activate, pend"
   },
   {
     "category": "Reviewer Management",
     "name": "reviewer:approve",
-    "description": "Approve reviewer status, requires 'reviewer:update' permission"
+    "description": "Approve reviewer status permission"
   },
   {
     "category": "Reviewer Management",

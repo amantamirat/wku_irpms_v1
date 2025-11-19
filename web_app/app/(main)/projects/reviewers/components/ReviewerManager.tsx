@@ -92,7 +92,7 @@ const ReviewerManager = ({ applicant, projectStage, showControllers }: ReviewerM
 
     const updateStatus = async (row: Reviewer, next: ReviewerStatus) => {
         try {
-            const updated = await ReviewerApi.updateReviewer({ _id: row._id, status: next });
+            const updated = await ReviewerApi.updateReviewer({ _id: row._id, status: next }, true);
             setReviewers(prev =>
                 prev.map(r => r._id === updated._id ? { ...updated, applicant: row.applicant, projectStage: row.projectStage } : r)
             );
