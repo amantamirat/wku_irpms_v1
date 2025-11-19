@@ -25,7 +25,7 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
     const emptyReviewer: Reviewer = {
         applicant: applicant ?? undefined,
         projectStage: projectStage ?? undefined,
-        status: ReviewerStatus.pending
+        weight: 1
     };
 
     const { getLinkedApplicant } = useAuth();
@@ -34,6 +34,7 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
     const { hasPermission } = useAuth();
     const canApprove = hasPermission([PERMISSIONS.REVIEWER.APPROVE]);
     const canDelete = hasPermission([PERMISSIONS.REVIEWER.DELETE]);
+    const canEdit = hasPermission([PERMISSIONS.REVIEWER.UPDATE]);
     const canCreate = hasPermission([PERMISSIONS.REVIEWER.CREATE]);
 
     const confirm = useConfirmDialog();
@@ -130,6 +131,7 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
     const stateTransitionTemplate = (rowData: Reviewer) => {
         const state = rowData.status;
         const isOwner = (rowData?.applicant as any)._id === loggedApplicantId;
+        // const isActiveReviewer = isOwner && reviewer?.status === ReviewerStatus.active;
         return (
             <div className="flex gap-2">
                 {isOwner && (<>
@@ -166,6 +168,41 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
                             />
                         </>
                     )}
+                    {
+                        /*
+                         
+                    {state === ReviewerStatus.active && (
+                        <Button
+                            label="Submit"
+                            icon="pi pi-check"
+                            size="small"
+                            severity="success"
+                            onClick={() => {
+                                confirm.ask({
+                                    operation: 'submit',
+                                    onConfirmAsync: () => updateStatus(reviewer, ReviewerStatus.submitted)
+                                });
+                            }}
+                        />
+                    )}
+                    
+                    {state === ReviewerStatus.submitted && (
+                        <Button
+                            label="Recall Submission"
+                            icon="pi pi-arrow-left"
+                            size="small"
+                            severity="warning"
+                            onClick={() => {
+                                confirm.ask({
+                                    operation: 'Recall Submission',
+                                    onConfirmAsync: () => updateStatus(reviewer, ReviewerStatus.active)
+                                });
+                            }}
+                        />
+                    )}
+                         */
+                    }
+
                 </>)}
                 {canApprove && (<>
                     {/* submitted → approved */}
@@ -183,7 +220,7 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
                     {/* approved → submitted */}
                     {state === ReviewerStatus.approved && (
                         <Button
-                            label="Revert to Submitted"
+                            label="Revert"
                             icon="pi pi-undo"
                             severity="warning"
                             size="small"
@@ -205,7 +242,17 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
 
         return (
             <>
-                {state === ReviewerStatus.pending && (
+                {canEdit &&
+                    <Button icon="pi pi-pencil"
+                        rounded
+                        severity="success"
+                        className="p-button-rounded p-button-text"
+                        style={{ fontSize: '1.2rem' }} onClick={() => {
+                            setReviewer(rowData);
+                            setShowSaveDialog(true);
+                        }} />
+                }
+                {canDelete &&
                     <Button
                         icon="pi pi-trash"
                         rounded
@@ -219,7 +266,8 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
                             });
                         }}
                     />
-                )}
+                }
+
             </>
         );
     };

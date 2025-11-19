@@ -13,12 +13,12 @@ export class ReviewerController {
         try {
             if (!req.user) throw new Error("User not found!");
 
-            // Accept without Id suffix from client
-            const { projectStage, applicant } = req.body;
+            const { projectStage, applicant, weight } = req.body;
 
             const data: CreateReviewerDTO = {
-                projectStageId: projectStage, // map to DTO
+                projectStageId: projectStage,
                 applicantId: applicant,
+                weight: weight,
                 userId: req.user._id
             };
 
@@ -32,12 +32,11 @@ export class ReviewerController {
     static async getReviewers(req: Request, res: Response) {
         try {
             const { projectStage, applicant } = req.query;
-            
+            // map to DTO
             const filter: GetReviewersDTO = {
-                projectStageId: projectStage ? String(projectStage) : undefined, // map to DTO
+                projectStageId: projectStage ? String(projectStage) : undefined,
                 applicantId: applicant ? String(applicant) : undefined
             };
-
             const reviewers = await reviewerService.getReviewers(filter);
             successResponse(res, 200, "Reviewers fetched successfully", reviewers);
         } catch (err: any) {
@@ -50,13 +49,11 @@ export class ReviewerController {
             if (!req.user) throw new Error("User not found!");
 
             const { id } = req.params;
-            const { status } = req.body;
+            const { status, weight, } = req.body;
 
             const dto: UpdateReviewerDTO = {
                 id,
-                data: {
-                    status
-                },
+                data: { status, weight },
                 userId: req.user._id
             };
 

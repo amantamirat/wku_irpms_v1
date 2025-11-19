@@ -10,6 +10,7 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { ReviewerApi } from "../api/reviewer.api";
 import { Reviewer, validateReviewer } from "../models/reviewer.model";
+import { InputNumber } from "primereact/inputnumber";
 
 interface ReviewerDialogProps {
     visible: boolean;
@@ -80,8 +81,8 @@ export default function SaveReviewerDialog({ visible, reviewer, onCompelete, onH
             }
             let saved: Reviewer;
             if (localReviewer._id) {
-                // saved = await ReviewerApi.updateReviewer(localReviewer);
-                throw new Error("Updating reviewer is not allowed.");
+                saved = await ReviewerApi.updateReviewer({ weight: localReviewer.weight });
+                //throw new Error("Updating reviewer is not allowed.");
             } else {
                 saved = await ReviewerApi.createReviewer(localReviewer);
             }
@@ -178,6 +179,17 @@ export default function SaveReviewerDialog({ visible, reviewer, onCompelete, onH
                         />
                     </div>
                 </>}
+                <div className="field">
+                    <label htmlFor="weight">Weight</label>
+                    <InputNumber
+                        id="weight"
+                        value={localReviewer.weight}
+                        onValueChange={(e) => setLocalReviewer({ ...localReviewer, weight: e.value ?? 1 })}
+                        min={0}
+                        placeholder="Enter weight"
+                    />
+                </div>
+
             </Dialog>
         </>
     );

@@ -1,23 +1,23 @@
+import { CriterionApi } from "@/app/(main)/evaluations/api/criterion.api";
+import { Criterion, FormType } from "@/app/(main)/evaluations/models/criterion.model";
+import { Option } from "@/app/(main)/evaluations/models/option.model";
+import ErrorComponent from "@/components/ErrorComponent";
+import { useAuth } from "@/contexts/auth-context";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
-import { Toolbar } from "primereact/toolbar";
+import { Skeleton } from "primereact/skeleton";
 import { useEffect, useState } from "react";
 import { Reviewer, ReviewerStatus } from "../../reviewers/models/reviewer.model";
+import { ProjectStage, sanitizeProjectStage } from "../../stages/models/stage.model";
 import { ResultApi } from "../api/result.api";
 import { Result } from "../models/result.model";
 import SaveResultDialog from "./SaveResultDialog";
-import { Criterion, FormType } from "@/app/(main)/evaluations/models/criterion.model";
-import { Option } from "@/app/(main)/evaluations/models/option.model";
-import { CriterionApi } from "@/app/(main)/evaluations/api/criterion.api";
-import { ProjectStage, sanitizeProjectStage } from "../../stages/models/stage.model";
-import { useAuth } from "@/contexts/auth-context";
-import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-import ErrorComponent from "@/components/ErrorComponent";
-import { Skeleton } from "primereact/skeleton";
+import { Toolbar } from "primereact/toolbar";
 
 interface ResultManagerProps {
-    reviewer?: Reviewer;
+    reviewer: Reviewer;
     updateReviewerStatus?: (reviewer: Reviewer, nextStatus: ReviewerStatus) => Promise<void>;
 }
 
@@ -185,11 +185,11 @@ const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) =
     };
 
     const endToolbarTemplate = () => {
-        const s = reviewer?.status;
+        const state = reviewer?.status;
         return (
             <div className="my-2">
                 {/* active → submitted */}
-                {s === ReviewerStatus.active && (
+                {state === ReviewerStatus.active && (
                     <Button label="Submit" icon="pi pi-check" outlined severity="success"
                         onClick={() => {
                             if (!reviewer || !updateReviewerStatus) return;
@@ -201,7 +201,7 @@ const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) =
                     />
                 )}
                 {/* submitted → active */}
-                {s === ReviewerStatus.submitted && (
+                {state === ReviewerStatus.submitted && (
                     <Button label="Recall Submission" icon="pi pi-arrow-left" outlined severity="warning"
                         onClick={() => {
                             if (!reviewer || !updateReviewerStatus) return;
@@ -219,7 +219,9 @@ const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) =
 
     return (
         <div className="card">
-            {isOwner && <Toolbar className="mb-4" end={endToolbarTemplate} />}
+            {
+                isOwner && <Toolbar className="mb-4" end={endToolbarTemplate} />
+            }
             <DataTable
                 value={results}
                 selection={selectedResult}
@@ -249,7 +251,6 @@ const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) =
                     onHide={hideSaveDialog}
                 />
             }
-
         </div>
     );
 };

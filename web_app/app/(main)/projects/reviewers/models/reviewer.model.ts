@@ -13,6 +13,7 @@ export type Reviewer = {
     _id?: string;
     projectStage?: string | ProjectStage;
     applicant?: string | Applicant;
+    weight?: number;
     status?: ReviewerStatus;
     createdAt?: Date;
     updatedAt?: Date;
