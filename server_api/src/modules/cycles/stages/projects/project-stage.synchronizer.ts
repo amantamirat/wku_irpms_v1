@@ -19,32 +19,50 @@ export class ProjectStageSynchronizer {
     // Fetch project stage if not provided
     const stage = projectStage ?? await this.projectStageRepo.findById(projectStageId);
     if (!stage || !stage.status) return;
-
+    const currentStatus = stage.status;
     // Fetch all reviewers
     const reviewers = await this.reviewerRepo.findByProjectStage(projectStageId);
-
     let newStatus: ProjectStageStatus;
-
+    let totalScore: number | undefined = undefined;
     // 1. No reviewers → pending
     if (reviewers.length === 0) {
       newStatus = ProjectStageStatus.pending;
-
-    } else {
+    }
+    else {
       // Check for at least one active reviewer
-      const hasActive = reviewers.some(r => r.status === ReviewerStatus.active);
-
-      if (hasActive) {
-        // 2. At least one active reviewer → on_review
+      const hasActiveOrSubmitted = reviewers.some(
+        r => r.status === ReviewerStatus.active || r.status === ReviewerStatus.submitted);
+      if (hasActiveOrSubmitted) {
+        if (currentStatus === ProjectStageStatus.reviewed) {
+          totalScore = 0;
+        }
         newStatus = ProjectStageStatus.on_review;
-      } else {
-        // 3. Otherwise → submitted
-        newStatus = ProjectStageStatus.submitted;
+      }
+      else {
+        const allApproved = reviewers.every(r => r.status === ReviewerStatus.approved);
+        if (allApproved) {
+          newStatus = ProjectStageStatus.reviewed;
+          const totalWeight = reviewers.reduce((sum, r) => sum + (r.weight ?? 1), 0);
+          totalScore = reviewers.reduce((sum, r) => sum + (r.score ?? 0) * (r.weight ?? 1), 0) / totalWeight;
+          //totalScore = reviewers.reduce((sum, r) => sum + (r.weight ?? 1) * (r.score ?? 0), 0) / reviewers.length;
+        }
+        else {
+          // Otherwise → submitted i.e. every pending → submitted
+          newStatus = ProjectStageStatus.submitted;
+        }
       }
     }
 
+    // Prepare update payload safely
+    const updateData: Partial<IProjectStage> = { status: newStatus };
+
+    // Only attach score when it exists
+    if (totalScore !== undefined) {
+      updateData.totalScore = totalScore;
+    }
     // Update only if allowed by the state machine
-    if (ProjectStageStateMachine.canTransition(stage.status, newStatus)) {
-      await this.projectStageRepo.updateState(projectStageId, { status: newStatus });
+    if (ProjectStageStateMachine.canTransition(currentStatus, newStatus)) {
+      await this.projectStageRepo.update(projectStageId, updateData);
     }
   }
 

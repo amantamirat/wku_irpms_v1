@@ -20,6 +20,7 @@ export interface UpdateProjectStageDTO {
     data: Partial<{
         //documentPath: string;
         status: ProjectStageStatus;
+        totalScore: number;
     }>;
 }
 

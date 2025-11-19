@@ -8,7 +8,7 @@ export interface IProjectStage extends Document {
     project: mongoose.Types.ObjectId;
     status: ProjectStageStatus;
     documentPath: string;
-    reviewersScore?: number;
+    totalScore?: number;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -30,7 +30,7 @@ const ProjectStageSchema = new Schema<IProjectStage>({
         type: String,
         required: true
     },
-    reviewersScore: {
+    totalScore: {
         type: Number,
         min: 0
     },

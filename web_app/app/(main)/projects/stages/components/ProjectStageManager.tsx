@@ -8,7 +8,7 @@ import { Toolbar } from "primereact/toolbar";
 import ConfirmDialog from "@/components/ConfirmationDialog";
 import SaveProjectStageDialog from "./SaveProjectStageDialog";
 import { Project } from "../../models/project.model";
-import { ProjectStage, StageStatus } from "../models/stage.model";
+import { ProjectStage, ProjectStageStatus } from "../models/stage.model";
 import { BASE_URL } from "@/api/ApiClient";
 import ReviewerManager from "../../reviewers/components/ReviewerManager";
 import { ProjectStageApi } from "../api/project.stage.api";
@@ -26,8 +26,7 @@ interface ProjectStageManagerProps {
 const ProjectStageManager = ({ project, stage, setProject }: ProjectStageManagerProps) => {
     const emptyProjectStage: ProjectStage = {
         project: project ? project : "",
-        stage: "",
-        status: StageStatus.submitted,
+        stage: ""
     };
 
     const [stages, setStages] = useState<ProjectStage[]>([]);
@@ -217,6 +216,15 @@ const ProjectStageManager = ({ project, stage, setProject }: ProjectStageManager
                 {!stage && <Column field="stage.name" header="Stage" sortable />}
                 {!project && <Column field="project.title" header="Project" sortable />}
                 <Column header="Document" body={documentBodyTemplate} />
+                <Column field="totalScore" header="Score"
+                    body={(rowData) => {
+                        if ([ProjectStageStatus.reviewed, ProjectStageStatus.accepted, ProjectStageStatus.rejected].includes(rowData.status)) {
+                            return rowData.totalScore ?? '-';
+                        } else {
+                            return '-';
+                        }
+                    }}
+                    sortable />
                 <Column header="Status" body={statusBodyTemplate} sortable />
                 <Column body={actionBodyTemplate} headerStyle={{ minWidth: "10rem" }} />
             </DataTable>

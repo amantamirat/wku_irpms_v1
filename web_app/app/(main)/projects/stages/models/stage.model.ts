@@ -1,18 +1,26 @@
 
+import { Stage } from "@/app/(main)/cycles/stages/models/stage.model";
 import { Project } from "../../models/project.model";
 
-export enum StageStatus {
+
+
+export enum ProjectStageStatus {
+    pending = 'pending',
     submitted = 'submitted',
-    accepted = 'accepted'
+    on_review = 'on_review',
+    reviewed = 'reviewed',
+    accepted = 'accepted',
+    rejected = 'rejected'
 }
 
 export type ProjectStage = {
     _id?: string;
     project: string | Project;
-    stage: string ; //| Evaluation;
+    stage?: string | Stage;
     documentPath?: string;
     file?: File;
-    status: StageStatus;
+    totalScore?: number;
+    status?: ProjectStageStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }

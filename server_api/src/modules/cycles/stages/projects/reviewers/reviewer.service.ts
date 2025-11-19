@@ -35,13 +35,19 @@ export class ReviewerService {
     }
 
     async createReviewer(dto: CreateReviewerDTO) {
-        const { projectStageId, applicantId } = dto;
+        const { projectStageId, applicantId, weight } = dto;
+
+        if (weight) {
+            if (weight === 0 || weight < 0) {
+                throw new Error("Invalid weight value");
+            }
+        }
 
         const projectStageDoc = await this.projectStageRepo.findById(projectStageId);
         if (!projectStageDoc) throw new Error("Project Stage not found");
 
-        if ([ProjectStageStatus.accepted, ProjectStageStatus.rejected].includes(projectStageDoc.status)) {
-            throw new Error(`This project stage is already ${projectStageDoc.status} and cannot be modified.`);
+        if ([ProjectStageStatus.reviewed, ProjectStageStatus.accepted, ProjectStageStatus.rejected].includes(projectStageDoc.status)) {
+            throw new Error(`This project stage is already ${projectStageDoc.status} and cannot create reviewers.`);
         }
 
         ///////////////////////////will be modified//////////////////////////////////////////
@@ -54,11 +60,7 @@ export class ReviewerService {
         }
         /////////////////////////////////////////////////////////////
 
-        const createdReviewer = await this.repository.create({
-            projectStageId,
-            applicantId,
-            userId: dto.userId
-        });
+        const createdReviewer = await this.repository.create(dto);
 
         await this.projectStageSynchronizer.syncProjectStageStatus(projectStageId, projectStageDoc);
         return createdReviewer;
@@ -80,10 +82,29 @@ export class ReviewerService {
         const { id, data, userId } = dto;
         const reviewerDoc = await this.repository.findById(id);
         if (!reviewerDoc) throw new Error("Reviewer not found");
-        let projectStageDoc;
+
+        const projectStageDoc = await this.projectStageRepo.findById(reviewerDoc.projectStage.toString());
+        if (!projectStageDoc) throw new Error("Project Stage not found");
+
+        if ([ProjectStageStatus.accepted, ProjectStageStatus.rejected].includes(projectStageDoc.status)) {
+            throw new Error(`The project stage is already ${projectStageDoc.status} and cannot be modified.`);
+        }
+
         const nextState = data.status;
+        const current = reviewerDoc.status;
+        const weight = data.weight;
+        if (weight) {
+            if (current === ReviewerStatus.approved) {
+                throw new Error("Could not update weight for approved reviewer!");
+            }
+            if (weight === 0 || weight < 0) {
+                throw new Error("Invalid weight value");
+            }
+        }
+
+
         if (nextState) {
-            const current = reviewerDoc.status;
+
             // --- Use State Machine ---
             ReviewerStateMachine.validateTransition(current, nextState);
 
@@ -101,8 +122,7 @@ export class ReviewerService {
             }
             // Validation of if status is submitted
             if (current === ReviewerStatus.active && nextState === ReviewerStatus.submitted) {
-                projectStageDoc = await this.projectStageRepo.findById(reviewerDoc.projectStage.toString());
-                if (!projectStageDoc) throw new Error("Project Stage not found");
+
 
                 const stageDoc = await Stage.findById(projectStageDoc.stage).lean();
                 if (!stageDoc) throw new Error("Stage not found");
@@ -122,9 +142,10 @@ export class ReviewerService {
             }
         }
         const updated = await this.repository.update(id, dto.data);
-        await this.projectStageSynchronizer.syncProjectStageStatus(reviewerDoc.projectStage.toString(), projectStageDoc);
+        if (nextState) {
+            await this.projectStageSynchronizer.syncProjectStageStatus(reviewerDoc.projectStage.toString(), projectStageDoc);
+        }
         return updated;
-
     }
 
     async deleteReviewer(dto: DeleteReviewerDTO) {
@@ -136,7 +157,7 @@ export class ReviewerService {
         }
         //delete the result too
         const deleted = await this.repository.delete(dto.id);
-        //dont forget to delete many results here
+        // don't forget to delete many results here (call repository that handles results if needed)        
         await this.projectStageSynchronizer.syncProjectStageStatus(reviewerDoc.projectStage.toString());
         return deleted
     }

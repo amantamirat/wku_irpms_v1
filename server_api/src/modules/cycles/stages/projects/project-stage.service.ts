@@ -45,7 +45,7 @@ export class ProjectStageService {
 
             if (!prevProjectStage) throw new Error("Previous project stage not found");
 
-            if (prevProjectStage.status !== ProjectStageStatus.accepted) {
+            if (prevProjectStage.status !== ProjectStageStatus.reviewed) {
                 throw new Error("Previous project stage is not accepted");
             }
         }
@@ -72,7 +72,7 @@ export class ProjectStageService {
         if (!projectStage || !projectStage.status) throw new Error("Project stage not found");
         const currentStatus = projectStage.status;
         ProjectStageStateMachine.validateTransition(currentStatus, newStatus);
-        return this.repository.updateState(dto.id, dto.data);
+        return this.repository.update(dto.id, dto.data);
     }
 
     async deleteProjectStage(dto: DeleteProjectStageDTO) {

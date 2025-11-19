@@ -236,10 +236,8 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
     }
 
     const actionBodyTemplate = (rowData: Reviewer) => {
-        if (!canDelete) return null;
-
-        const state = rowData.status;
-
+        //if (!canDelete) return null;
+        //const state = rowData.status;
         return (
             <>
                 {canEdit &&
@@ -330,7 +328,16 @@ const ReviewerManager = ({ applicant, projectStage }: ReviewerManagerProps) => {
                                 headerStyle={{ minWidth: '15rem' }}
                             />
                         }
-                        <Column field="score" header="Score" sortable />
+                        <Column field="score" header="Score"
+                            body={(rowData) => {
+                                if (rowData.status === ReviewerStatus.submitted ||
+                                    rowData.status === ReviewerStatus.approved) {                                    
+                                     return rowData.score ?? '-';
+                                } else {
+                                    return '-';
+                                }
+                            }}
+                            sortable />
                         <Column field="status" header="Status" body={statusBodyTemplate} sortable />
                         <Column body={stateTransitionTemplate} />
                         <Column body={actionBodyTemplate} />

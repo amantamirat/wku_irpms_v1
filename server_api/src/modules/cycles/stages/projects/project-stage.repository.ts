@@ -11,7 +11,7 @@ export interface IProjectStageRepository {
     findById(id: string): Promise<IProjectStage | null>; // <-- allow POJO
     find(filters: GetProjectStagesDTO): Promise<Partial<IProjectStage>[]>;
     create(dto: CreateProjectStageDTO): Promise<IProjectStage>;
-    updateState(id: string, status: UpdateProjectStageDTO["data"]): Promise<IProjectStage>;
+    update(id: string, status: UpdateProjectStageDTO["data"]): Promise<IProjectStage>;
     delete(id: string): Promise<IProjectStage | null>;
 }
 
@@ -61,12 +61,12 @@ export class ProjectStageRepository implements IProjectStageRepository {
         return ProjectStage.create(data);
     }
 
-    async updateState(id: string, dtoData: UpdateProjectStageDTO["data"]): Promise<IProjectStage> {
+    async update(id: string, dtoData: UpdateProjectStageDTO["data"]): Promise<IProjectStage> {
         const updateData: Partial<IProjectStage> = {};
-        /*
-        if (dtoData.documentPath !== undefined) {
-            updateData.documentPath = dtoData.documentPath;
-        }*/
+
+        if (dtoData.totalScore !== undefined) {
+            updateData.totalScore = dtoData.totalScore;
+        }
 
         if (dtoData.status !== undefined) {
             updateData.status = dtoData.status;
@@ -78,7 +78,6 @@ export class ProjectStageRepository implements IProjectStageRepository {
         ).exec();
 
         if (!updated) throw new Error("ProjectStage not found");
-
         return updated;
     }
 

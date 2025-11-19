@@ -81,7 +81,7 @@ export default function SaveReviewerDialog({ visible, reviewer, onCompelete, onH
             }
             let saved: Reviewer;
             if (localReviewer._id) {
-                saved = await ReviewerApi.updateReviewer({ weight: localReviewer.weight });
+                saved = await ReviewerApi.updateReviewer({ _id: localReviewer._id, weight: localReviewer.weight });
                 //throw new Error("Updating reviewer is not allowed.");
             } else {
                 saved = await ReviewerApi.createReviewer(localReviewer);
