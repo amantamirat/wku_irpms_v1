@@ -20,7 +20,7 @@ export type ProjectStage = {
     documentPath?: string;
     file?: File;
     totalScore?: number;
-    status?: ProjectStageStatus;
+    status: ProjectStageStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -48,4 +48,10 @@ export const sanitizeProjectStage = (ps: Partial<ProjectStage>): Partial<Project
                 ? (ps.stage as any)._id
                 : ps.stage,
     };
+}
+
+export interface GetProjectStageOptions {
+    project?: string | Project;
+    stage?: string | Stage;
+    //status?: string;
 }

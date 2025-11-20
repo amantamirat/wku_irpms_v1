@@ -1,20 +1,21 @@
-import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
-import { Button } from "primereact/button";
-import { Column } from "primereact/column";
-import { DataTable, DataTableExpandedRows } from "primereact/datatable";
-import { Toolbar } from "primereact/toolbar";
+'use client';
+
 import { useEffect, useState } from "react";
-import ResultManager from "../../results/components/ResultManager";
-import { ProjectStage, ProjectStageStatus } from "../../stages/models/stage.model";
-import { GetReviewersOptions, ReviewerApi } from "../api/reviewer.api";
-import { Reviewer, ReviewerStatus } from "../models/reviewer.model";
-import SaveReviewerDialog from "./SaveReviewerDialog";
+import { CrudManager } from "@/components/CrudManager";
 import ErrorCard from "@/components/ErrorCard";
-import MyBadge from "@/templates/MyBadge";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useAuth } from "@/contexts/auth-context";
+import ListSkeleton from "@/components/ListSkeleton";
+import SaveReviewerDialog from "./SaveReviewerDialog";
+import MyBadge from "@/templates/MyBadge";
+import ResultManager from "../../results/components/ResultManager";
+import { Reviewer, ReviewerStatus, GetReviewersOptions } from "../models/reviewer.model";
+import { ReviewerApi } from "../api/reviewer.api";
+import { ProjectStage, ProjectStageStatus } from "../../stages/models/stage.model";
+import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
+import { useCrudList } from "@/hooks/useCrudList";
 import { PERMISSIONS } from "@/types/permissions";
-import { removeItem, updateItems } from "@/utils/onSaveComplete";
+import { Button } from "primereact/button";
 
 interface ReviewerManagerProps {
     projectStage?: ProjectStage;
@@ -23,96 +24,95 @@ interface ReviewerManagerProps {
     showControllers?: boolean;
 }
 
-const ReviewerManager = ({ projectStage, applicant, showControllers }: ReviewerManagerProps) => {
+const ReviewerManager = ({ projectStage, applicant, showControllers, updateProjectStage }: ReviewerManagerProps) => {
+    const confirm = useConfirmDialog();
+    const { getLinkedApplicant, hasPermission } = useAuth();
+    const linkedApplicant = getLinkedApplicant();
+    const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
 
     const emptyReviewer: Reviewer = {
         projectStage: projectStage ?? undefined,
         applicant: applicant ?? undefined,
-        weight: 1
+        weight: 1,
+        status: ReviewerStatus.pending
     };
 
-    const { getLinkedApplicant } = useAuth();
-    const linkedApplicant = getLinkedApplicant();
-    const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
-    const { hasPermission } = useAuth();
     const stageStatus = projectStage?.status;
     const creationStatus = [ProjectStageStatus.pending, ProjectStageStatus.submitted, ProjectStageStatus.on_review];
+    const canCreate = hasPermission([PERMISSIONS.REVIEWER.CREATE]) && stageStatus && creationStatus.includes(stageStatus);
+    const canEdit = hasPermission([PERMISSIONS.REVIEWER.UPDATE]) && stageStatus && creationStatus.includes(stageStatus);
+    const canDelete = hasPermission([PERMISSIONS.REVIEWER.DELETE]) && stageStatus && creationStatus.includes(stageStatus);
 
     const canApprove = hasPermission([PERMISSIONS.REVIEWER.APPROVE]);
-    const canDelete = hasPermission([PERMISSIONS.REVIEWER.DELETE]);
-    const canEdit = hasPermission([PERMISSIONS.REVIEWER.UPDATE]);
-    const canCreate =
-        hasPermission([PERMISSIONS.REVIEWER.CREATE]) &&
-        stageStatus &&
-        creationStatus.includes(stageStatus);
 
-    const confirm = useConfirmDialog();
-    const [reviewers, setReviewers] = useState<Reviewer[]>([]);
-    const [error, setError] = useState<string | null>(null);
+
+    // ✅ CRUD Hook
+    const {
+        items: reviewers,
+        updateItem,
+        removeItem,
+        setAll,
+        loading,
+        setLoading,
+        error,
+        setError
+    } = useCrudList<Reviewer>();
+
     const [reviewer, setReviewer] = useState<Reviewer>(emptyReviewer);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
+    const [expandedRows, setExpandedRows] = useState<any[]>([]);
 
+    // ✅ Fetch reviewers
     useEffect(() => {
         const fetchReviewers = async () => {
             try {
-                const options: GetReviewersOptions = {};
-                options.applicant = applicant ? applicant._id : undefined;
-                options.projectStage = projectStage ? projectStage._id : undefined;
+                setLoading(true);
+                const options: GetReviewersOptions = {
+                    applicant: applicant,
+                    projectStage: projectStage
+                };
                 const data = await ReviewerApi.getReviewers(options);
-                const processed = data.map((r: Reviewer) => ({
-                    ...r,
-                    applicant: applicant ?? r.applicant,
-                    projectStage: projectStage ?? r.projectStage,
-                }));
-                setReviewers(processed);
-            } catch (err: Error | any) {
-                setError("Failed to fetch reviewers." + (err.message || ""));
+                setAll(data.map(r => ({ ...r, applicant: applicant ?? r.applicant, projectStage: projectStage ?? r.projectStage })));
+            } catch (err: any) {
+                setError("Failed to fetch reviewers. " + (err.message ?? ""));
+            } finally {
+                setLoading(false);
             }
         };
         fetchReviewers();
     }, [applicant, projectStage]);
 
-    if (error) {
-        return (
-            <ErrorCard errorMessage={error} />
-        );
-    }
+    if (loading) return <ListSkeleton rows={10} />;
+    if (error) return <ErrorCard errorMessage={error} />;
 
-
-    const onSaveCompelete = (savedReviewer: Reviewer) => {
-        setReviewers(updateItems(reviewers, savedReviewer));
+    // ✅ Save / update
+    const onSaveComplete = (saved: Reviewer) => {
+        updateItem(saved);
         hideSaveDialog();
     };
 
-
     const deleteReviewer = async (row: Reviewer) => {
         const deleted = await ReviewerApi.deleteReviewer(row);
-        if (deleted) {
-            setReviewers(removeItem(reviewers, row._id));
-        }
+        if (deleted) removeItem(row);
     };
 
     const updateStatus = async (row: Reviewer, next: ReviewerStatus) => {
-        try {
-            const { updated, projectStage } = await ReviewerApi.updateReviewer({ _id: row._id, status: next }, true);
-            const savedReviewer = { ...updated, applicant: row.applicant, projectStage: row.projectStage };
-            onSaveCompelete(savedReviewer);
-        } catch (err: any) {
-            throw err;
-        }
-    };
+        const { updated, syncedProjectStage } = await ReviewerApi.updateReviewer({ _id: row._id, status: next }, true);
+        updateItem({ ...updated, applicant: row.applicant, projectStage: row.projectStage });       
 
+        if (updateProjectStage && projectStage) {
+            updateProjectStage({
+                ...syncedProjectStage,
+                project: projectStage.project, stage: projectStage.stage
+            });
+        }
+
+
+    };
 
     const hideSaveDialog = () => {
         setReviewer(emptyReviewer);
         setShowSaveDialog(false);
-    }
-
-    const statusBodyTemplate = (rowData: Reviewer) => {
-        return (
-            <MyBadge type="status" value={rowData.status ?? 'Unknown'} />
-        );
     };
 
     const stateTransitionTemplate = (rowData: Reviewer) => {
@@ -155,41 +155,6 @@ const ReviewerManager = ({ projectStage, applicant, showControllers }: ReviewerM
                             />
                         </>
                     )}
-                    {
-                        /*
-                         
-                    {state === ReviewerStatus.active && (
-                        <Button
-                            label="Submit"
-                            icon="pi pi-check"
-                            size="small"
-                            severity="success"
-                            onClick={() => {
-                                confirm.ask({
-                                    operation: 'submit',
-                                    onConfirmAsync: () => updateStatus(reviewer, ReviewerStatus.submitted)
-                                });
-                            }}
-                        />
-                    )}
-                    
-                    {state === ReviewerStatus.submitted && (
-                        <Button
-                            label="Recall Submission"
-                            icon="pi pi-arrow-left"
-                            size="small"
-                            severity="warning"
-                            onClick={() => {
-                                confirm.ask({
-                                    operation: 'Recall Submission',
-                                    onConfirmAsync: () => updateStatus(reviewer, ReviewerStatus.active)
-                                });
-                            }}
-                        />
-                    )}
-                         */
-                    }
-
                 </>)}
                 {canApprove && (<>
                     {/* submitted → approved */}
@@ -222,139 +187,51 @@ const ReviewerManager = ({ projectStage, applicant, showControllers }: ReviewerM
         );
     }
 
-    const startToolbarTemplate = () => {
-        if (!showControllers) return null;
-        return (
-            <div className="my-2">
-                <Button label="New Reviewer" icon="pi pi-plus" severity="success" className="mr-2"
-                    onClick={() => {
-                        setReviewer(emptyReviewer);
-                        setShowSaveDialog(true);
-                    }}
-                />
-            </div>
-        );
-    }
 
-    const actionBodyTemplate = (rowData: Reviewer) => {
-        if (!showControllers) return null;
-        const state = rowData.status;
-        return (
-            <>
-                {(canEdit && state !== ReviewerStatus.approved) &&
-                    <Button icon="pi pi-pencil"
-                        rounded
-                        severity="success"
-                        className="p-button-rounded p-button-text"
-                        style={{ fontSize: '1.2rem' }} onClick={() => {
-                            setReviewer(rowData);
-                            setShowSaveDialog(true);
-                        }} />
-                }
-                {(canDelete && state !== ReviewerStatus.approved) &&
-                    <Button
-                        icon="pi pi-trash"
-                        rounded
-                        severity="warning"
-                        className="p-button-rounded p-button-text"
-                        style={{ fontSize: '1.2rem' }}
-                        onClick={() => {
-                            confirm.ask({
-                                item: String((rowData.applicant as any)?.first_name),
-                                onConfirmAsync: () => deleteReviewer(rowData)
-                            });
-                        }}
-                    />
-                }
-
-            </>
-        );
-    };
-
-
-
-    const resultExpansionTemplate = (rowData: Reviewer) => {
-        return (
-            <div className="p-3">
-                <ResultManager reviewer={rowData} updateReviewerStatus={updateStatus} />
-            </div>
-        );
-    };
+    const columns = [
+        { header: "Reviewer", field: "applicant.first_name" },
+        { header: "Project", field: "projectStage.project.title", sortable: true },
+        {
+            header: "Score",
+            field: "score",
+            body: (row: Reviewer) => [ReviewerStatus.submitted, ReviewerStatus.approved].includes(row.status) ? row.score ?? "-" : "-"
+        },
+        {
+            header: "Status", field: "status", body: (p: Reviewer) =>
+                <MyBadge type="status" value={p.status ?? 'Unknown'} />
+        },
+        { body: stateTransitionTemplate }
+    ];
 
     return (
-        <div className="grid">
-            <div className="col-12">
-                <div className="card">
-                    {(canCreate && projectStage) && <Toolbar className="mb-4" start={startToolbarTemplate} />}
-                    <DataTable
-                        value={reviewers}
-                        selection={reviewer}
-                        onSelectionChange={(e) => setReviewer(e.value as Reviewer)}
-                        dataKey="_id"
-                        paginator
-                        rows={10}
-                        rowsPerPageOptions={[5, 10, 25]}
-                        className="datatable-responsive"
-                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        emptyMessage="No reviewers found."
-                        scrollable
-                        tableStyle={{ minWidth: '50rem' }}
-                        expandedRows={expandedRows}
-                        onRowToggle={(e) => setExpandedRows(e.data)}
-                        rowExpansionTemplate={resultExpansionTemplate}
-                    >
-                        <Column expander style={{ width: '3em' }} />
-                        <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                        {applicant &&
-                            <Column
-                                field="projectStage.stage.name"
-                                header="Stage"
-                                sortable
-                            />
-                        }
-                        {applicant &&
-                            <Column
-                                field="projectStage.project.title"
-                                header="Project"
-                                sortable
-                                headerStyle={{ minWidth: '15rem' }}
-                            />
-                        }
-                        {projectStage &&
-                            <Column
-                                field="applicant.first_name"
-                                header="Reviewer"
-                                body={(rowData) => `${rowData.applicant?.first_name ?? ''} ${rowData.applicant?.last_name ?? ''}`}
-                                sortable
-                                headerStyle={{ minWidth: '15rem' }}
-                            />
-                        }
-                        <Column field="score" header="Score"
-                            body={(rowData) => {
-                                if (rowData.status === ReviewerStatus.submitted ||
-                                    rowData.status === ReviewerStatus.approved) {
-                                    return rowData.score ?? '-';
-                                } else {
-                                    return '-';
-                                }
-                            }}
-                            sortable />
-                        <Column field="status" header="Status" body={statusBodyTemplate} sortable />
-                        <Column body={stateTransitionTemplate} />
-                        <Column body={actionBodyTemplate} />
-                    </DataTable>
+        <>
+            <CrudManager
+                headerTitle="Reviewers"
+                items={reviewers}
+                dataKey="_id"
+                columns={columns}
+                canCreate={canCreate}
+                canEdit={canEdit}
+                canDelete={canDelete}
+                onCreate={() => { setReviewer(emptyReviewer); setShowSaveDialog(true); }}
+                onEdit={(row) => { setReviewer(row); setShowSaveDialog(true); }}
+                onDelete={(row: any) => confirm.ask({ item: row.applicant?.first_name ?? "", onConfirmAsync: () => deleteReviewer(row) })}
+                expandedRows={expandedRows}
+                onRowToggle={(e) => setExpandedRows(e.data)}
+                rowExpansionTemplate={(row) => <ResultManager reviewer={row} updateReviewerStatus={updateStatus} />}
 
-                    {reviewer && projectStage &&
-                        <SaveReviewerDialog
-                            visible={showSaveDialog}
-                            reviewer={reviewer}
-                            onCompelete={onSaveCompelete}
-                            onHide={hideSaveDialog}
-                        />}
-                </div>
-            </div>
-        </div>
+            />
+
+            {reviewer && (
+                <SaveReviewerDialog
+                    visible={showSaveDialog}
+                    reviewer={reviewer}
+                    onCompelete={onSaveComplete}
+                    onHide={hideSaveDialog}
+                />
+            )}
+        </>
     );
-}
+};
 
 export default ReviewerManager;

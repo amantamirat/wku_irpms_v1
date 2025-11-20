@@ -23,7 +23,7 @@ const ProjectManager = ({ cycle }: ProjectManagerProps) => {
     const confirm = useConfirmDialog();
 
     const emptyProject: Project = {
-        cycle: cycle?._id ?? "",
+        cycle: cycle,
         title: ""
     };
 
@@ -96,7 +96,8 @@ const ProjectManager = ({ cycle }: ProjectManagerProps) => {
     return (
         <>
             <CrudManager
-                title="Projects"
+                itemName="Project"
+                headerTitle="Projects"
                 items={projects}
                 dataKey="_id"
                 columns={columns}
@@ -111,6 +112,7 @@ const ProjectManager = ({ cycle }: ProjectManagerProps) => {
                 rowExpansionTemplate={(row) => {
                     return <ProjectDetail project={row} />;
                 }}
+                enableSearch
             />
 
             {project && (

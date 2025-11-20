@@ -133,9 +133,9 @@ export class ReviewerService {
         }
 
         const updated = await this.repository.update(id, { status: nextState, score: dto.data.score });
-        const projectStage = await this.projectStageSynchronizer.syncProjectStageStatus(reviewerDoc.projectStage.toString(), projectStageDoc);
+        const syncedProjectStage = await this.projectStageSynchronizer.syncProjectStageStatus(reviewerDoc.projectStage.toString(), projectStageDoc);
 
-        return {updated, projectStage};
+        return {updated, syncedProjectStage};
     }    
 
     // --- Update reviewer data (weight, etc.) ---

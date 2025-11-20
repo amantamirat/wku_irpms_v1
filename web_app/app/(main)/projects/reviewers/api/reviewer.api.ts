@@ -1,19 +1,16 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Reviewer, sanitizeReviewer } from "../models/reviewer.model";
+import { GetReviewersOptions, Reviewer, sanitizeReviewer } from "../models/reviewer.model";
 
 const end_point = '/project/reviewers/';
 
-export interface GetReviewersOptions {
-    applicant?: string;
-    projectStage?: string;
-}
 
 export const ReviewerApi = {
 
     async getReviewers(options: GetReviewersOptions): Promise<Reviewer[]> {
         const query = new URLSearchParams();
-        if (options.applicant) query.append("applicant", options.applicant);
-        if (options.projectStage) query.append("projectStage", options.projectStage);
+        const sanitized = sanitizeReviewer(options);
+        if (sanitized.applicant) query.append("applicant", sanitized.applicant as string);
+        if (sanitized.projectStage) query.append("projectStage", sanitized.projectStage as string);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Reviewer[];
     },
@@ -26,8 +23,7 @@ export const ReviewerApi = {
 
     async updateReviewer(reviewer: Partial<Reviewer>, changeStatus = false): Promise<any> {
         if (!reviewer._id) {
-            throw new Error("_id required.");
-        }
+            throw new Error("_id required.");        }
 
         const sanitized = sanitizeReviewer(reviewer);
 

@@ -106,7 +106,7 @@ const ExperienceManager = ({ applicant }: ExperienceManagerProps) => {
     return (
         <>
             <CrudManager
-                title="Experience"
+                headerTitle="Experience"
                 items={experiences}
                 dataKey="_id"
                 columns={columns}

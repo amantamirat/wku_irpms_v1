@@ -90,7 +90,8 @@ export class ProjectService {
         if (!project) throw new Error("Project not found");
 
         // Only creator can delete
-        if (String(project.createdBy) !== dto.userId) {
+        if (project.createdBy.toString() !== dto.userId) {
+            console.log(project.createdBy.toString(), dto.userId);
             throw new Error("Unauthorized: You cannot delete this project.");
         }
 

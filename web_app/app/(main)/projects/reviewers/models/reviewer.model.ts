@@ -14,7 +14,8 @@ export type Reviewer = {
     projectStage?: string | ProjectStage;
     applicant?: string | Applicant;
     weight?: number;
-    status?: ReviewerStatus;
+    score?: number;
+    status: ReviewerStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -42,3 +43,8 @@ export const sanitizeReviewer = (reviewer: Partial<Reviewer>): Reviewer => {
                 : reviewer.applicant,
     } as Reviewer;
 };
+
+export interface GetReviewersOptions {
+    applicant?: string | Applicant;
+    projectStage?: string | ProjectStage;
+}

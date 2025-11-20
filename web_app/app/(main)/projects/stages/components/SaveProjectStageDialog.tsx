@@ -6,7 +6,7 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import UploadForm from "../../components/UploadForm";
 import { Project } from "../../models/project.model";
-import { ProjectStage, StageStatus, validateProjectStage } from "../models/stage.model";
+import { ProjectStage, validateProjectStage } from "../models/stage.model";
 import { StageApi } from "@/app/(main)/cycles/stages/api/stage.api";
 import { Stage } from "@/app/(main)/cycles/stages/models/stage.model";
 import { ProjectStageApi } from "../api/project.stage.api";
@@ -58,6 +58,7 @@ const SaveProjectStageDialog = ({
             });
 
             if (onComplete) onComplete(saved);
+            //onHide()
         } catch (err) {
             toast.current?.show({
                 severity: "error",
@@ -109,7 +110,7 @@ const SaveProjectStageDialog = ({
                 footer={footer}
                 onHide={onHide}
             >
-                {!localProjectStage._id ? (
+                {!localProjectStage._id &&
                     <>
                         <div className="field">
                             <label htmlFor="stage">Stage</label>
@@ -127,21 +128,7 @@ const SaveProjectStageDialog = ({
                             onUpload={(file) => updateField("file", file)}
                         />
                     </>
-                ) : (
-                    <div className="field">
-                        <label htmlFor="status">Status</label>
-                        <Dropdown
-                            id="status"
-                            value={localProjectStage.status}
-                            options={Object.values(StageStatus).map((s) => ({
-                                label: s,
-                                value: s,
-                            }))}
-                            onChange={(e) => updateField("status", e.value)}
-                            placeholder="Select Status"
-                        />
-                    </div>
-                )}
+                }
             </Dialog>
         </>
     );

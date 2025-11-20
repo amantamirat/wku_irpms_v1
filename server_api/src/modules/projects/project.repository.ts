@@ -20,9 +20,6 @@ export class ProjectRepository implements IProjectRepository {
 
     async findById(id: string) {
         return Project.findById(new mongoose.Types.ObjectId(id))
-            .populate("cycle")
-            .populate("leadPI")
-            .populate("createdBy")
             .lean<IProject>()
             .exec();
     }

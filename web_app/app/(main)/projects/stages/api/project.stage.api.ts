@@ -1,23 +1,22 @@
 import { ApiClient } from "@/api/ApiClient";
-import { ProjectStage, sanitizeProjectStage } from "../models/stage.model";
+import { GetProjectStageOptions, ProjectStage, sanitizeProjectStage } from "../models/stage.model";
+import { Project } from "../../models/project.model";
+import { Stage } from "@/app/(main)/cycles/stages/models/stage.model";
 const end_point = '/project/stages/';
 
 
 
 
-export interface GetProjectStageOptions {
-    project?: string;
-    stage?: string;
-    status?: string;
-}
+
 
 export const ProjectStageApi = {
 
     async getProjectStages(options: GetProjectStageOptions): Promise<ProjectStage[]> {
         const query = new URLSearchParams();
-        if (options.project) query.append("project", options.project);
-        if (options.stage) query.append("stage", options.stage);
-        if (options.status) query.append("status", options.status);
+        const sanitized = sanitizeProjectStage(options);
+        if (sanitized.project) query.append("project", sanitized.project as string);
+        if (sanitized.stage) query.append("stage", sanitized.stage as string);
+        //if (options.status) query.append("status", options.status);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as ProjectStage[];
     },
