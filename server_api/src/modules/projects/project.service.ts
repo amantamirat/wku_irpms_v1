@@ -1,87 +1,103 @@
-import mongoose from "mongoose";
+// project.service.ts
+import { IProjectRepository, ProjectRepository } from "./project.repository";
+import {
+    CreateProjectDTO,
+    DeleteProjectDTO,
+    GetProjectsDTO,
+    UpdateProjectDTO
+} from "./project.dto";
+
 import { CacheService } from "../../util/cache/cache.service";
 import { Cycle } from "../cycles/cycle.model";
-import { Collaborator } from "./collaborators/collaborator.model";
-import {
-    CreateProjectDto,
-    DeleteProjectDto,
-    GetProjectsOptions,
-    UpdateProjectDto
-} from "./project.dto";
-import { Project } from "./project.model";
 import Applicant from "../applicants/applicant.model";
+import { Collaborator } from "./collaborators/collaborator.model";
 
 export class ProjectService {
+    private repository: IProjectRepository;
 
-
-    static async createProject(dto: CreateProjectDto) {
-        const cycle = await Cycle.findById(dto.cycle).lean();
+    constructor(repository?: IProjectRepository) {
+        this.repository = repository || new ProjectRepository();
+    }
+    // ---------------------------------------------------
+    // CREATE
+    // ---------------------------------------------------
+    async createProject(dto: CreateProjectDTO) {
+        // Validate Cycle
+        const cycle = await Cycle.findById(dto.cycleId).lean();
         if (!cycle) throw new Error("Cycle not found");
+        // Validate Lead PI
         const leadPI = await Applicant.findOne({ user: dto.userId }).lean();
-        if (!leadPI) throw new Error("Lead PI Applicant Not found");
+        if (!leadPI) throw new Error("Lead PI Applicant not found");
+
+        // Ownership validation for PROGRAM cycles
         if (cycle.type === "Program") {
             await CacheService.validateOwnership(dto.userId, cycle.organization);
         }
-        const project = await Project.create({
+        // Create via repository
+        return this.repository.create({
             ...dto,
-            leadPI: leadPI._id,
-            createdBy: new mongoose.Types.ObjectId(dto.userId)
+            //leadPIId: String(leadPI._id)
         });
-        return project;
     }
 
-    static async updateProject(dto: UpdateProjectDto) {
-        const { id, data, userId } = dto;
-        const project = await Project.findById(id);
-        if (!project) throw new Error("Project not found");
+    // ---------------------------------------------------
+    // UPDATE
+    // ---------------------------------------------------
+    async updateProject(dto: UpdateProjectDTO) {
+        const existing = await this.repository.findById(dto.id);
+        if (!existing) throw new Error("Project not found");
 
-        const createdBy = project.createdBy.toString();
-        if (createdBy !== userId) {
-            throw new Error("Unauthorized: You do not have permission to update this project.");
+        // Only creator can update
+        if (String(existing.createdBy) !== dto.userId) {
+            throw new Error("Unauthorized: You cannot update this project.");
         }
-        //const cycle = await Cycle.findById(project.cycle).lean();
-        //if (!cycle) throw new Error("Cycle not found");
-        //await CacheService.validateOwnership(userId, cycle.organization);
 
-        Object.assign(project, data);
-        return project.save();
+        return this.repository.update(dto.id, dto.data);
     }
 
-
-    static async getProjects(options: GetProjectsOptions) {
+    // ---------------------------------------------------
+    // GET
+    // ---------------------------------------------------
+    async getProjects(options: GetProjectsDTO) {
         const filter: any = {};
+
         if (options.userId) {
             const organizations = await CacheService.getUserOrganizations(options.userId);
-            const cycles = await Cycle.find({ organization: { $in: organizations } }).select('_id').lean();
-            filter.cycle = { $in: cycles.map(c => c._id) };
+
+            const cycles = await Cycle.find({
+                organization: { $in: organizations }
+            })
+                .select("_id")
+                .lean();
+
+            filter.cycleId = cycles.map(c => String(c._id));
         }
-        if (options.cycle) filter.cycle = options.cycle;
+
+        if (options.cycleId) filter.cycleId = options.cycleId;
         if (options.status) filter.status = options.status;
 
-        return await Project.find(filter).populate([{ path: 'cycle' }]).lean();
+        return this.repository.find(filter);
     }
 
-    // -----------------------
-    // Delete
-    // -----------------------
-    static async deleteProject(dto: DeleteProjectDto) {
-        const { id, userId } = dto;
-        const project = await Project.findById(id);
+    // ---------------------------------------------------
+    // DELETE
+    // ---------------------------------------------------
+    async deleteProject(dto: DeleteProjectDTO) {
+        const { id } = dto;
+        const project = await this.repository.findById(id);
         if (!project) throw new Error("Project not found");
-        const createdBy = project.createdBy.toString();
-        if (createdBy !== userId) {
-            throw new Error("Unauthorized: You do not have permission to delete this project.");
-        }
-        /*
-                const cycle = await Cycle.findById(project.cycle).lean();
-                if (!cycle) throw new Error("Cycle not found");
-                await CacheService.validateOwnership(userId, cycle.organization);
-        */
-        const collaborator = await Collaborator.exists({ project: project._id });
-        if (collaborator) throw new Error(`Cannot delete: ${project.title} collaborator exist.`);
 
-        return await project.deleteOne();
+        // Only creator can delete
+        if (String(project.createdBy) !== dto.userId) {
+            throw new Error("Unauthorized: You cannot delete this project.");
+        }
+
+        // Check collaborators
+        const collaborator = await Collaborator.exists({ project: id });
+        if (collaborator) {
+            throw new Error(`Cannot delete: collaborator exists.`);
+        }
+
+        return this.repository.delete(dto.id);
     }
 }
-
-

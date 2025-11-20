@@ -3,31 +3,27 @@ import mongoose from "mongoose";
 import { errorResponse, successResponse } from "../../util/response";
 import { AuthenticatedRequest } from "../users/auth/auth.middleware";
 import { ProjectService } from "./project.service";
-import {
-  CreateProjectDto,
-  UpdateProjectDto,
-  GetProjectsOptions,
-  DeleteProjectDto,
-} from "./project.dto";
+import { CreateProjectDTO, DeleteProjectDTO, UpdateProjectDTO } from "./project.dto";
+
+
+const projectService = new ProjectService();
 
 export class ProjectController {
 
- 
+
   static async createProject(req: AuthenticatedRequest, res: Response) {
     try {
       if (!req.user) throw new Error("User not found!");
+      const { cycle, title, summary } = req.body;
 
-      const { cycle, title, summary, status } = req.body;
-
-      const dto: CreateProjectDto = {
-        cycle: new mongoose.Types.ObjectId(cycle as string),
+      const dto: CreateProjectDTO = {
+        cycleId: cycle,
         title,
-        summary: summary ?? undefined,
-        status,
+        summary: summary,
         userId: req.user._id,
       };
 
-      const created = await ProjectService.createProject(dto);
+      const created = await projectService.createProject(dto);
       successResponse(res, 201, "Project created successfully", created);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
@@ -42,6 +38,7 @@ export class ProjectController {
   // persisted in the project schema today; this endpoint forwards the
   // project payload and ignores the file path unless the model/schema is
   // extended to store it.
+  /*
   static async submitProject(req: AuthenticatedRequest, res: Response) {
     try {
       if (!req.user) throw new Error("User not found!");
@@ -50,22 +47,21 @@ export class ProjectController {
       const documentPath = `uploads/${req.file.filename}`;
       const project = JSON.parse(req.body.project);
 
-      const dto: CreateProjectDto = {
-        cycle: new mongoose.Types.ObjectId(project.cycle as string),
+      const dto: CreateProjectDTO = {
+        cycleId: new mongoose.Types.ObjectId(project.cycle as string),
         title: project.title,
         summary: project.summary ?? undefined,
         status: project.status,
         userId: req.user._id,
       };
 
-      const submitted = await ProjectService.createProject(dto);
-      successResponse(res, 201, "Project submitted successfully", submitted);
+      //const submitted = await ProjectService.createProject(dto);
+      successResponse(res, 201, "Project submitted successfully", dto);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
   }
-
-
+    */
   // -----------------------
   // Fetch / Query
   // -----------------------
@@ -73,13 +69,17 @@ export class ProjectController {
     try {
       const { cycle, status, user } = req.query;
 
+      /*
+
       const filter: GetProjectsOptions = {
         userId: user && req.user ? req.user._id : undefined,
         cycle: cycle ? new mongoose.Types.ObjectId(cycle as string) : undefined,
         status: status as any,
       };
 
-      const projects = await ProjectService.getProjects(filter);
+      */
+
+      const projects = await projectService.getProjects({});
       successResponse(res, 200, "Projects fetched successfully", projects);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
@@ -97,13 +97,13 @@ export class ProjectController {
       const { id } = req.params;
       const { title, summary, status } = req.body;
 
-      const dto: UpdateProjectDto = {
+      const dto: UpdateProjectDTO = {
         id,
         data: { title, summary, status },
         userId: req.user._id,
       };
 
-      const updated = await ProjectService.updateProject(dto);
+      const updated = await projectService.updateProject(dto);
       successResponse(res, 200, "Project updated successfully", updated);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
@@ -119,9 +119,9 @@ export class ProjectController {
       if (!req.user) throw new Error("User not found!");
 
       const { id } = req.params;
-      const dto: DeleteProjectDto = { id, userId: req.user._id };
+      const dto: DeleteProjectDTO = { id, userId: req.user._id };
 
-      const deleted = await ProjectService.deleteProject(dto);
+      const deleted = await projectService.deleteProject(dto);
       successResponse(res, 200, "Project deleted successfully", deleted);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);

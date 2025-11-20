@@ -1,35 +1,39 @@
-import mongoose from "mongoose";
 import { ProjectStatus } from "./project.enum";
 
-// Base fields for creating any project
-export interface CreateProjectDto {
-    cycle: mongoose.Types.ObjectId;
+// GET / Query Projects
+export interface GetProjectsDTO {
+    userId?: string;
+    cycleId?: string;
+    status?: ProjectStatus;
+    skip?: number;
+    limit?: number;
+}
+
+// CREATE Project
+export interface CreateProjectDTO {
+    cycleId: string;
     title: string;
     summary?: string;
     status?: ProjectStatus;
-    userId: string; // actor performing the create
+    userId: string;    // who is creating
+    //leadPIId?: string;  // the lead PI (if it's different from user)
 }
 
-// Base fields for updating any project
-export interface UpdateProjectDto {
-    id: string | mongoose.Types.ObjectId;
+// UPDATE Project
+export interface UpdateProjectDTO {
+    id: string;
     data: Partial<{
         title: string;
         summary: string;
         status: ProjectStatus;
+        leadPIId: string;
     }>;
+    userId: string;  // who is making the update
+}
+
+// DELETE Project
+export interface DeleteProjectDTO {
+    id: string;
     userId: string;
 }
 
-// Options for querying projects
-export interface GetProjectsOptions {
-    userId?: string;
-    cycle?: mongoose.Types.ObjectId;
-    status?: ProjectStatus;
-}
-
-// Delete DTO
-export interface DeleteProjectDto {
-    id: string | mongoose.Types.ObjectId;
-    userId: string;
-}
