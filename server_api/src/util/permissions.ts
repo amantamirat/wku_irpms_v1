@@ -1,3 +1,5 @@
+import { Experience } from "../modules/applicants/experiences/experience.model";
+
 export const PERMISSIONS = {
   USER: {
     CREATE: "user:create",
@@ -33,7 +35,12 @@ export const PERMISSIONS = {
     UPDATE: "applicant:update",
     DELETE: "applicant:delete",
   },
-
+  EXPERIENCE: {
+    CREATE: "experience:create",
+    READ: "experience:read",
+    UPDATE: "experience:update",
+    DELETE: "experience:delete",
+  },
   GRANT: {
     CREATE: "grant:create",
     READ: "grant:read",

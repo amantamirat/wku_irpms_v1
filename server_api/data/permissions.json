@@ -109,6 +109,26 @@
     "description": "Delete applicants"
   },
   {
+    "category": "Experience Management",
+    "name": "experience:create",
+    "description": "Create experience records"
+  },
+  {
+    "category": "Experience Management",
+    "name": "experience:read",
+    "description": "View experience records"
+  },
+  {
+    "category": "Experience Management",
+    "name": "experience:update",
+    "description": "Update experience records"
+  },
+  {
+    "category": "Experience Management",
+    "name": "experience:delete",
+    "description": "Delete experience records"
+  },
+  {
     "category": "Grant Management",
     "name": "grant:create",
     "description": "Create grant entries"

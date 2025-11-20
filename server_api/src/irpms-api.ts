@@ -7,6 +7,7 @@ import authRoutes from './modules/users/auth/auth.routes';
 import organizationRoutes from './modules/organization/organization.routes';
 import applicantRoutes from './modules/applicants/applicant.routes';
 import positionRoutes from './modules/applicants/positions/position.routes';
+import experienceRoutes from './modules/applicants/experiences/experience.routes';
 import themeRoutes from './modules/themes/theme.routes';
 
 import evaluationRoutes from './modules/evaluations/evaluation.routes';
@@ -49,6 +50,7 @@ app.use("/api/permissions", permissionRoutes);
 app.use("/api/applicants", applicantRoutes);
 app.use("/api/organizations", organizationRoutes);
 app.use("/api/positions", positionRoutes);
+app.use("/api/expriences", experienceRoutes);
 app.use("/api/themes", themeRoutes);
 //app.use("/api/evals", evalRoutes);
 app.use("/api/evaluations", evaluationRoutes);
