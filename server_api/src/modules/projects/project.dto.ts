@@ -15,8 +15,8 @@ export interface CreateProjectDTO {
     title: string;
     summary?: string;
     status?: ProjectStatus;
+    leadPIId?: string;  // the lead PI (if it's different from user)
     userId: string;    // who is creating
-    //leadPIId?: string;  // the lead PI (if it's different from user)
 }
 
 // UPDATE Project

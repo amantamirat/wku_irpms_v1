@@ -45,7 +45,7 @@ export class ProjectRepository implements IProjectRepository {
         return Project.find(query)
             .populate("cycle")
             .populate("leadPI")
-            .populate("createdBy")
+            //.populate("createdBy")
             //.skip(filters.skip ?? 0)
             //.limit(filters.limit ?? 0)
             .lean<IProject[]>()
@@ -58,8 +58,8 @@ export class ProjectRepository implements IProjectRepository {
             title: dto.title,
             summary: dto.summary,
             status: dto.status,
-            createdBy: new mongoose.Types.ObjectId(dto.userId),
-            leadPI: new mongoose.Types.ObjectId(dto.userId) // if needed you can change this
+            leadPI: new mongoose.Types.ObjectId(dto.leadPIId), // if needed you can change this
+            createdBy: new mongoose.Types.ObjectId(dto.userId)           
         };
 
         return Project.create(data);

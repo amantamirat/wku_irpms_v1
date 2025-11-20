@@ -15,7 +15,7 @@ export class ProjectStageSynchronizer {
     this.reviewerRepo = reviewerRepo;
   }
 
-  async syncProjectStageStatus(projectStageId: string, projectStage?: Partial<IProjectStage>): Promise<void> {
+  async syncProjectStageStatus(projectStageId: string, projectStage?: Partial<IProjectStage>) {
     // Fetch project stage if not provided
     const stage = projectStage ?? await this.projectStageRepo.findById(projectStageId);
     if (!stage || !stage.status) return;
@@ -53,6 +53,7 @@ export class ProjectStageSynchronizer {
       }
     }
 
+
     // Prepare update payload safely
     const updateData: Partial<IProjectStage> = { status: newStatus };
 
@@ -60,10 +61,12 @@ export class ProjectStageSynchronizer {
     if (totalScore !== undefined) {
       updateData.totalScore = totalScore;
     }
+    let updatedProjectStage;
     // Update only if allowed by the state machine
     if (ProjectStageStateMachine.canTransition(currentStatus, newStatus)) {
-      await this.projectStageRepo.update(projectStageId, updateData);
+      updatedProjectStage = await this.projectStageRepo.update(projectStageId, updateData);
     }
+    return updatedProjectStage;
   }
 
 }

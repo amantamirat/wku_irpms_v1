@@ -133,83 +133,10 @@ export class ReviewerService {
         }
 
         const updated = await this.repository.update(id, { status: nextState, score: dto.data.score });
-        await this.projectStageSynchronizer.syncProjectStageStatus(reviewerDoc.projectStage.toString(), projectStageDoc);
+        const projectStage = await this.projectStageSynchronizer.syncProjectStageStatus(reviewerDoc.projectStage.toString(), projectStageDoc);
 
-        return updated;
-    }
-
-
-    /*
-    async updateReviewer(dto: UpdateReviewerDTO) {
-        const { id, data, userId } = dto;
-        const reviewerDoc = await this.repository.findById(id);
-        if (!reviewerDoc) throw new Error("Reviewer not found");
-
-        const projectStageDoc = await this.projectStageRepo.findById(reviewerDoc.projectStage.toString());
-        if (!projectStageDoc) throw new Error("Project Stage not found");
-
-        if ([ProjectStageStatus.accepted, ProjectStageStatus.rejected].includes(projectStageDoc.status)) {
-            throw new Error(`The project stage is already ${projectStageDoc.status} and cannot be modified.`);
-        }
-
-        const nextState = data.status;
-        const current = reviewerDoc.status;
-        const weight = data.weight;
-        if (weight) {
-            if (current === ReviewerStatus.approved) {
-                throw new Error("Could not update weight for approved reviewer!");
-            }
-            if (weight === 0 || weight < 0) {
-                throw new Error("Invalid weight value");
-            }
-        }
-
-
-        if (nextState) {
-
-            // --- Use State Machine ---
-            ReviewerStateMachine.validateTransition(current, nextState);
-
-            const isActivationChange =
-                current === ReviewerStatus.active || nextState === ReviewerStatus.active;
-
-            if (isActivationChange) {
-                await this.permission.validateReviewerPermission(id, userId, reviewerDoc);
-            }
-            const isApprovalChange =
-                current === ReviewerStatus.approved || nextState === ReviewerStatus.approved;
-
-            if (isApprovalChange) {
-                await CacheService.validatePermission(userId, [PERMISSIONS.REVIEWER.APPROVE]);
-            }
-            // Validation of if status is submitted
-            if (current === ReviewerStatus.active && nextState === ReviewerStatus.submitted) {
-
-
-                const stageDoc = await Stage.findById(projectStageDoc.stage).lean();
-                if (!stageDoc) throw new Error("Stage not found");
-
-                const criteriaCount = await Criterion.countDocuments({ evaluation: stageDoc.evaluation })
-                const results = await this.resultRepo.findByReviewer(id);
-
-                if (results.length !== criteriaCount) {
-                    throw new Error("Please complete all evaluation criteria before submitting.");
-                }
-
-                const reviewerScore = results.reduce((sum, r) => sum + (r.score ?? 0), 0);
-                dto.data.score = reviewerScore; // * (reviewerDoc.weight ?? 1);
-            }
-            if (current === ReviewerStatus.submitted && nextState === ReviewerStatus.active) {
-                dto.data.score = 0;
-            }
-        }
-        const updated = await this.repository.update(id, dto.data);
-        if (nextState) {
-            await this.projectStageSynchronizer.syncProjectStageStatus(reviewerDoc.projectStage.toString(), projectStageDoc);
-        }
-        return updated;
-    }
-    */
+        return {updated, projectStage};
+    }    
 
     // --- Update reviewer data (weight, etc.) ---
     async updateReviewerData(dto: UpdateReviewerDTO) {
