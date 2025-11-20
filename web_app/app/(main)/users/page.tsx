@@ -12,7 +12,7 @@ import SaveDialog from './dialogs/SaveDialog';
 import { User, UserStatus } from './models/user.model';
 import ChangePasswordDialog from './dialogs/ChangePassword';
 import { InputSwitch } from 'primereact/inputswitch';
-import ErrorComponent from '@/components/ErrorComponent';
+import ErrorCard from '@/components/ErrorCard';
 import Badge from '@/templates/Badge';
 
 
@@ -60,7 +60,7 @@ const UserPage = () => {
 
     if (error) {
         return (
-            <ErrorComponent errorMessage={error} />
+            <ErrorCard errorMessage={error} />
         );
     }
 

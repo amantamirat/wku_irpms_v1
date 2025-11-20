@@ -17,7 +17,7 @@ import { InputText } from "primereact/inputtext";
 import { handleGlobalFilterChange, initFilters } from "@/utils/filterUtils";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useAuth } from "@/contexts/auth-context";
-import ErrorComponent from "@/components/ErrorComponent";
+import ErrorCard from "@/components/ErrorCard";
 import { Skeleton } from "primereact/skeleton";
 
 interface ProjectStageManagerProps {
@@ -96,7 +96,7 @@ const ProjectStageManager = ({ project, stage, showControllers }: ProjectStageMa
 
     if (error) {
         return (
-            <ErrorComponent errorMessage={error} />
+            <ErrorCard errorMessage={error} />
         );
     }
 

@@ -12,7 +12,7 @@ import { ConstraintApi } from '../api/constraint.api';
 import CompositionManager from '../compositions/components/CompositionManager';
 import { ConstraintType, Constraint } from '../models/constraint.model';
 import SaveDialog from './SaveDialog';
-import ErrorComponent from '@/components/ErrorComponent';
+import ErrorCard from '@/components/ErrorCard';
 
 
 interface ConstraintManagerProps {
@@ -62,7 +62,7 @@ const ConstraintManager = (props: ConstraintManagerProps) => {
 
     if (error) {
         return (
-            <ErrorComponent errorMessage={error} />
+            <ErrorCard errorMessage={error} />
         );
     }
 

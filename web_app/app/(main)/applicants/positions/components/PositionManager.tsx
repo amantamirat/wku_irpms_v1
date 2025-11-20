@@ -12,7 +12,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { PositionApi } from '../api/position.api';
 import { Position, PositionType } from '../models/position.model';
 import SavePositionDialog from './SavePositionDialog';
-import ErrorComponent from '@/components/ErrorComponent';
+import ErrorCard from '@/components/ErrorCard';
 
 interface PositionProps {
     posType: PositionType;
@@ -65,7 +65,7 @@ const PositionManager = ({ posType, parent }: PositionProps) => {
 
     if (error) {
         return (
-            <ErrorComponent errorMessage={error} />
+            <ErrorCard errorMessage={error} />
         );
     }
 

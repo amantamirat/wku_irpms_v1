@@ -12,7 +12,7 @@ import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
 import { InputText } from "primereact/inputtext";
 import { handleGlobalFilterChange, initFilters } from "@/utils/filterUtils";
 import Badge from "@/templates/Badge";
-import ErrorComponent from "@/components/ErrorComponent";
+import ErrorCard from "@/components/ErrorCard";
 
 interface CollaboratorProps {
     project?: Project;
@@ -63,7 +63,7 @@ const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) =
     }, [project?._id]);
 
     if (error) {
-        return <ErrorComponent errorMessage={error} />;
+        return <ErrorCard errorMessage={error} />;
     }
 
 

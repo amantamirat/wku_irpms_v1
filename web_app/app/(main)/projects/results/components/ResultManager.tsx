@@ -1,7 +1,7 @@
 import { CriterionApi } from "@/app/(main)/evaluations/api/criterion.api";
 import { Criterion, FormType } from "@/app/(main)/evaluations/models/criterion.model";
 import { Option } from "@/app/(main)/evaluations/models/option.model";
-import ErrorComponent from "@/components/ErrorComponent";
+import ErrorCard from "@/components/ErrorCard";
 import { useAuth } from "@/contexts/auth-context";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { Button } from "primereact/button";
@@ -90,7 +90,7 @@ const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) =
 
     if (error) {
         return (
-            <ErrorComponent errorMessage={error} />
+            <ErrorCard errorMessage={error} />
         );
     }
 

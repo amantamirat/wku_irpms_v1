@@ -11,7 +11,7 @@ import { CompositionApi } from '../api/composition.api';
 import { Composition } from '../models/composition.model';
 import { ApplicantConstraintType, Constraint, isListConstraint, isRangeConstraint } from '../../models/constraint.model';
 import SaveDialog from './SaveDialog';
-import ErrorComponent from '@/components/ErrorComponent';
+import ErrorCard from '@/components/ErrorCard';
 
 interface CompositionManagerProps {
     constraint: Constraint;
@@ -56,7 +56,7 @@ const CompositionManager = ({ constraint }: CompositionManagerProps) => {
 
     if (error) {
         return (
-            <ErrorComponent errorMessage={error} />
+            <ErrorCard errorMessage={error} />
         );
     }
 

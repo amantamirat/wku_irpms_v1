@@ -1,7 +1,7 @@
 'use client';
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
 import { CrudManager } from "@/components/CrudManager";
-import ErrorComponent from "@/components/ErrorComponent";
+import ErrorCard from "@/components/ErrorCard";
 import { useAuth } from "@/contexts/auth-context";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { PERMISSIONS } from "@/types/permissions";
@@ -19,7 +19,8 @@ const ExperienceManager = ({ applicant }: ExperienceManagerProps) => {
 
     const { getLinkedApplicant, hasPermission } = useAuth();
     const linkedApplicant = getLinkedApplicant();
-    const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
+    //const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
+    
     const confirm = useConfirmDialog();
 
     const emptyExperience: Experience = {
@@ -72,7 +73,7 @@ const ExperienceManager = ({ applicant }: ExperienceManagerProps) => {
     }, [applicant]);
 
     if (loading) return <ListSkeleton rows={10} />;
-    if (error) return <ErrorComponent errorMessage={error} />;
+    if (error) return <ErrorCard errorMessage={error} />;
 
     // ✅ Save / update
     const onSaveComplete = (savedExperience: Experience) => {

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card } from 'primereact/card';
 import { Skeleton } from 'primereact/skeleton';
 import CallCard from './CallCard';
-import ErrorComponent from '@/components/ErrorComponent';
+import ErrorCard from '@/components/ErrorCard';
 import { Cycle, CycleStatus } from '../cycles/models/cycle.model';
 import { CycleApi } from '../cycles/api/cycle.api';
 
@@ -43,7 +43,7 @@ const CallGrid = () => {
         );
     }
 
-    if (error) return <ErrorComponent errorMessage={error} />;
+    if (error) return <ErrorCard errorMessage={error} />;
 
     if (cycles.length === 0)
         return (

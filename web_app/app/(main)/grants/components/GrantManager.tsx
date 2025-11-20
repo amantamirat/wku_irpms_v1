@@ -13,7 +13,7 @@ import { GrantApi } from '../api/grant.api';
 import ConstraintContainer from '../constraints/components/ConstraintContainer';
 import { Grant } from '../models/grant.model';
 import SaveDialog from './SaveDialog';
-import ErrorComponent from '@/components/ErrorComponent';
+import ErrorCard from '@/components/ErrorCard';
 
 
 
@@ -62,7 +62,7 @@ const GrantManager = () => {
 
     if (error) {
         return (
-            <ErrorComponent errorMessage={error} />
+            <ErrorCard errorMessage={error} />
         );
     }
 

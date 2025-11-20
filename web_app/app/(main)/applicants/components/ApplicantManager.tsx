@@ -14,7 +14,7 @@ import { Applicant, applicantUnits, Gender } from '../models/applicant.model';
 import SaveDialog from './dialogs/SaveDialog';
 import { useAuth } from '@/contexts/auth-context';
 import { OrganizationalUnit } from '../../organizations/models/organization.model';
-import ErrorComponent from '@/components/ErrorComponent';
+import ErrorCard from '@/components/ErrorCard';
 import ApplicantDetail from './ApplicantDetail';
 
 
@@ -92,7 +92,7 @@ const ApplicantManager = (/*{ scope }: ApplicantManagerProps*/) => {
 
     if (error) {
         return (
-            <ErrorComponent errorMessage={error} />
+            <ErrorCard errorMessage={error} />
         );
     }
 

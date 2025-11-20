@@ -1,7 +1,7 @@
 'use client';
 
 import ConfirmDialog from '@/components/ConfirmationDialog';
-import ErrorComponent from '@/components/ErrorComponent';
+import ErrorCard from '@/components/ErrorCard';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
@@ -57,7 +57,7 @@ const EvaluationManager = () => {
     }, [fetchEvaluations]);
 
     if (error) {
-        return <ErrorComponent errorMessage={error} />;
+        return <ErrorCard errorMessage={error} />;
     }
 
     // Handle save (create or update)

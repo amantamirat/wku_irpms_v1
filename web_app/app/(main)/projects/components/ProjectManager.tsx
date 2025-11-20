@@ -1,7 +1,7 @@
 'use client';
 
 import ConfirmDialog from '@/components/ConfirmationDialog';
-import ErrorComponent from '@/components/ErrorComponent';
+import ErrorCard from '@/components/ErrorCard';
 import Badge from '@/templates/Badge';
 import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
 import { Button } from 'primereact/button';
@@ -60,7 +60,7 @@ const ProjectManager = () => {
 
     if (error) {
         return (
-            <ErrorComponent errorMessage={error} />
+            <ErrorCard errorMessage={error} />
         );
     }
 

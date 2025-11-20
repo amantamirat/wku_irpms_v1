@@ -9,7 +9,7 @@ import { ProjectStage, ProjectStageStatus } from "../../stages/models/stage.mode
 import { GetReviewersOptions, ReviewerApi } from "../api/reviewer.api";
 import { Reviewer, ReviewerStatus } from "../models/reviewer.model";
 import SaveReviewerDialog from "./SaveReviewerDialog";
-import ErrorComponent from "@/components/ErrorComponent";
+import ErrorCard from "@/components/ErrorCard";
 import Badge from "@/templates/Badge";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useAuth } from "@/contexts/auth-context";
@@ -75,7 +75,7 @@ const ReviewerManager = ({ projectStage, applicant, showControllers }: ReviewerM
 
     if (error) {
         return (
-            <ErrorComponent errorMessage={error} />
+            <ErrorCard errorMessage={error} />
         );
     }
 

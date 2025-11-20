@@ -11,7 +11,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import SaveDialog from './SaveDialog';
 import { getChildType, Organization, OrganizationalUnit } from '../models/organization.model';
 import { OrganizationApi } from '../api/organization.api';
-import ErrorComponent from '@/components/ErrorComponent';
+import ErrorCard from '@/components/ErrorCard';
 
 
 interface OrganizationMangerProps {
@@ -74,7 +74,7 @@ const OrganizationManager = (props: OrganizationMangerProps) => {
 
     if (error) {
         return (
-            <ErrorComponent errorMessage={error} />
+            <ErrorCard errorMessage={error} />
         );
     }
 
