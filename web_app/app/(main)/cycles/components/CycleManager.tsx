@@ -14,7 +14,7 @@ import { CycleApi } from '../api/cycle.api';
 import { Cycle, CycleStatus, CycleType } from '../models/cycle.model';
 import SaveCycle from './SaveCycle';
 //import StageManager from './StageManager';
-import Badge from '@/templates/Badge';
+import MyBadge from '@/templates/MyBadge';
 import StageManager from '../stages/components/StageManager';
 
 interface CycleManagerProps {
@@ -165,7 +165,7 @@ const CycleManager: React.FC<CycleManagerProps> = ({ type }) => {
     const statusBodyTemplate = (rowData: Cycle) => (
         <>
             <span className="p-column-title">Status</span>
-            <Badge type="status" value={rowData.status ?? 'Unknown'} />
+            <MyBadge type="status" value={rowData.status ?? 'Unknown'} />
         </>
     );
 

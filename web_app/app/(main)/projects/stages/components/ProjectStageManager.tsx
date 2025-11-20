@@ -12,7 +12,7 @@ import { BASE_URL } from "@/api/ApiClient";
 import ReviewerManager from "../../reviewers/components/ReviewerManager";
 import { ProjectStageApi } from "../api/project.stage.api";
 import { Stage } from "@/app/(main)/cycles/stages/models/stage.model";
-import Badge from "@/templates/Badge";
+import MyBadge from "@/templates/MyBadge";
 import { InputText } from "primereact/inputtext";
 import { handleGlobalFilterChange, initFilters } from "@/utils/filterUtils";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
@@ -226,7 +226,7 @@ const ProjectStageManager = ({ project, stage, showControllers }: ProjectStageMa
 
     const statusBodyTemplate = (rowData: ProjectStage) => {
         return (
-            <Badge type="status" value={rowData.status ?? 'Unknown'} />
+            <MyBadge type="status" value={rowData.status ?? 'Unknown'} />
         );
     };
 

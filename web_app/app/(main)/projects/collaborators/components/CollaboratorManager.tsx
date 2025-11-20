@@ -11,7 +11,7 @@ import { Collaborator, CollaboratorStatus } from "../models/collaborator.model";
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
 import { InputText } from "primereact/inputtext";
 import { handleGlobalFilterChange, initFilters } from "@/utils/filterUtils";
-import Badge from "@/templates/Badge";
+import MyBadge from "@/templates/MyBadge";
 import ErrorCard from "@/components/ErrorCard";
 
 interface CollaboratorProps {
@@ -110,7 +110,7 @@ const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) =
 
     const statusBodyTemplate = (rowData: Collaborator) => {
         return (
-            <Badge type="status" value={rowData.status ?? 'Unknown'} />
+            <MyBadge type="status" value={rowData.status ?? 'Unknown'} />
         );
     };
 

@@ -5,9 +5,9 @@ interface BadgeProps {
   value: string;
 }
 
-const Badge: React.FC<BadgeProps> = ({ type, value }) => {
+const MyBadge: React.FC<BadgeProps> = ({ type, value }) => {
   const className = `${type}-badge ${type}-${value.toLowerCase()}`;
   return <span className={className}>{value}</span>;
 };
 
-export default Badge;
+export default MyBadge;

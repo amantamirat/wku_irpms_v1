@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { StageApi } from '../api/stage.api';
 import { Stage, StageStatus, StageType } from '../models/stage.model';
 import SaveStage from './SaveStage';
-import Badge from '@/templates/Badge';
+import MyBadge from '@/templates/MyBadge';
 import { Cycle } from '../../models/cycle.model';
 import ProjectStageManager from '@/app/(main)/projects/stages/components/ProjectStageManager';
 
@@ -144,13 +144,13 @@ const StageManager = ({ cycle }: StageManagerProps) => {
 
     const stageTypeBodyTemplate = (rowData: Stage) => {
         return (
-            <Badge type="stage" value={rowData.type ?? 'Unknown'} />
+            <MyBadge type="stage" value={rowData.type ?? 'Unknown'} />
         );
     };
 
     const statusBodyTemplate = (rowData: Stage) => {
         return (
-            <Badge type="status" value={rowData.status ?? 'Unknown'} />
+            <MyBadge type="status" value={rowData.status ?? 'Unknown'} />
         )
     };
 

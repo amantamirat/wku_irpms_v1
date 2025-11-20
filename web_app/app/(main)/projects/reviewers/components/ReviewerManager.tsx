@@ -10,7 +10,7 @@ import { GetReviewersOptions, ReviewerApi } from "../api/reviewer.api";
 import { Reviewer, ReviewerStatus } from "../models/reviewer.model";
 import SaveReviewerDialog from "./SaveReviewerDialog";
 import ErrorCard from "@/components/ErrorCard";
-import Badge from "@/templates/Badge";
+import MyBadge from "@/templates/MyBadge";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useAuth } from "@/contexts/auth-context";
 import { PERMISSIONS } from "@/types/permissions";
@@ -111,7 +111,7 @@ const ReviewerManager = ({ projectStage, applicant, showControllers }: ReviewerM
 
     const statusBodyTemplate = (rowData: Reviewer) => {
         return (
-            <Badge type="status" value={rowData.status ?? 'Unknown'} />
+            <MyBadge type="status" value={rowData.status ?? 'Unknown'} />
         );
     };
 

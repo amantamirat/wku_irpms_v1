@@ -1,20 +1,21 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Project, sanitizeProject } from "../models/project.model";
+import { GetProjectsOptions, Project, sanitizeGetProjectsOptions, sanitizeProject } from "../models/project.model";
 const end_point = '/projects';
 
 
-export interface GetProjectsOptions {
-    cycle?: string;
-}
+
 
 export const ProjectApi = {
 
     async getProjects(options: GetProjectsOptions): Promise<Project[]> {
+        // Sanitize the options first
+        const sanitizedOptions = sanitizeGetProjectsOptions(options);
         const query = new URLSearchParams();
-        if (options.cycle) query.append("cycle", options.cycle);
+        if (sanitizedOptions.cycle) query.append("cycle", sanitizedOptions.cycle as string);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Project[];
     },
+
 
     async createProject(project: Partial<Project>): Promise<Project> {
         const sanitized = sanitizeProject(project);

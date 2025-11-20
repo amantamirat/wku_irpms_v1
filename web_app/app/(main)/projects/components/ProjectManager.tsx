@@ -1,200 +1,127 @@
 'use client';
-
-import ConfirmDialog from '@/components/ConfirmationDialog';
-import ErrorCard from '@/components/ErrorCard';
-import Badge from '@/templates/Badge';
-import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
-import { Button } from 'primereact/button';
-import { Column } from 'primereact/column';
-import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
-import { InputText } from 'primereact/inputtext';
-import { Toolbar } from 'primereact/toolbar';
-import React, { useEffect, useRef, useState } from 'react';
-import { Cycle } from '../../cycles/models/cycle.model';
-import { ProjectApi } from '../api/project.api';
-import { Project } from '../models/project.model';
-import ProjectDetail from './ProjectDetail';
-import SaveProjectDialog from './SaveProjectDialog';
+import { Cycle } from "@/app/(main)/cycles/models/cycle.model";
+import { CrudManager } from "@/components/CrudManager";
+import ErrorCard from "@/components/ErrorCard";
+import { useAuth } from "@/contexts/auth-context";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import { PERMISSIONS } from "@/types/permissions";
+import { useEffect, useState } from "react";
+import { ProjectApi } from "../api/project.api";
+import { Project, GetProjectsOptions } from "../models/project.model";
+import { useCrudList } from "@/hooks/useCrudList";
+import ListSkeleton from "@/components/ListSkeleton";
+import SaveProjectDialog from "./SaveProjectDialog";
+import MyBadge from "@/templates/MyBadge";
+import ProjectDetail from "./ProjectDetail";
 
 interface ProjectManagerProps {
     cycle?: Cycle;
 }
 
-const ProjectManager = () => {
+const ProjectManager = ({ cycle }: ProjectManagerProps) => {
+    const { hasPermission } = useAuth();
+    const confirm = useConfirmDialog();
+
     const emptyProject: Project = {
-        cycle: '',
-        title: ''
+        cycle: cycle?._id ?? "",
+        title: ""
     };
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [error, setError] = useState<string | null>(null);
-    const dt = useRef<DataTable<any>>(null);
-    const [globalFilter, setGlobalFilter] = useState('');
-    const [filters, setFilters] = useState<DataTableFilterMeta>({});
-    const [selectedProject, setSelectedProject] = useState<Project>(emptyProject);
+
+    // ✅ Permissions
+    const canCreate = true; // hasPermission([PERMISSIONS.PROJECT.CREATE]);
+    const canEdit = true;//hasPermission([PERMISSIONS.PROJECT.UPDATE]);
+    const canDelete = true; //hasPermission([PERMISSIONS.PROJECT.DELETE]);
+
+    // ✅ State + CRUD Hook
+    const {
+        items: projects,
+        updateItem,
+        removeItem,
+        setAll,
+        loading,
+        setLoading,
+        error,
+        setError
+    } = useCrudList<Project>();
+
+    const [project, setProject] = useState<Project>(emptyProject);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
+    const [expandedRows, setExpandedRows] = useState<any[]>([]);
 
-
-    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
-    };
-
-    useEffect(() => {
-        setFilters(initFilters());
-        setGlobalFilter('');
-    }, []);
-
-
+    // ✅ Fetch projects
     useEffect(() => {
         const fetchProjects = async () => {
             try {
-                const data = await ProjectApi.getProjects({});
-                setProjects(data);
-            } catch (err) {
-                setError(`Failed to load projects data ${err}`);
+                setLoading(true);
+                const options: GetProjectsOptions = { cycle };
+                const data = await ProjectApi.getProjects(options);
+                setAll(data);
+            } catch (err: any) {
+                setError("Failed to fetch projects. " + (err.message ?? ""));
+            } finally {
+                setLoading(false);
             }
         };
         fetchProjects();
-    }, []);
+    }, [cycle]);
 
-    if (error) {
-        return (
-            <ErrorCard errorMessage={error} />
-        );
-    }
+    if (loading) return <ListSkeleton rows={10} />;
+    if (error) return <ErrorCard errorMessage={error} />;
 
+    // ✅ Save / update
     const onSaveComplete = (savedProject: Project) => {
-        let _projects = [...projects]; // projects is your local state array of Project
-        const index = _projects.findIndex((p) => p._id === savedProject._id);
-
-        if (index !== -1) {
-            // Replace existing project
-            _projects[index] = { ...savedProject };
-        } else {
-            // Add new project
-            _projects.push({ ...savedProject });
-        }
-
-        setProjects(_projects); // update state
-        hideDialogs();
+        updateItem(savedProject);
+        hideSaveDialog();
     };
 
-    const deleteProject = async () => {
-        const deleted = await ProjectApi.deleteProject(selectedProject);
-        if (deleted) {
-            setProjects(projects.filter((c) => c._id !== selectedProject._id));
-            hideDialogs();
-        }
+    const deleteProject = async (row: Project) => {
+        const deleted = await ProjectApi.deleteProject(row);
+        if (deleted) removeItem(row);
     };
 
-
-    const hideDialogs = () => {
+    const hideSaveDialog = () => {
+        setProject(emptyProject);
         setShowSaveDialog(false);
-        setShowDeleteDialog(false);
-        setSelectedProject(emptyProject);
-    }
-
-    const startToolbarTemplate = () => (
-        <div className="my-2">
-            <Button label="New Project" icon="pi pi-plus" severity="success" className="mr-2"
-                onClick={() => {
-                    setSelectedProject(emptyProject);
-                    setShowSaveDialog(true);
-                }}
-            />
-        </div>
-    );
-
-    const header = (
-        <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage Projects</h5>
-            <span className="block mt-2 md:mt-0 p-input-icon-left">
-                <i className="pi pi-search" />
-                <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
-            </span>
-        </div>
-    );
-
-    const actionBodyTemplate = (rowData: Project) => (
-        <>
-            <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setSelectedProject(rowData);
-                    setShowSaveDialog(true);
-                }} />
-            <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setSelectedProject(rowData);
-                    setShowDeleteDialog(true);
-                }} />
-        </>
-    );
-
-
-    const statusBodyTemplate = (rowData: Project) => {
-        return (
-            <Badge type="status" value={rowData.status ?? 'Unknown'} />
-        );
     };
 
+    const columns = [
+        { header: "Cycle", field: "cycle.title" },
+        { header: "Title", field: "title" },
+        {
+            header: "Status", field: "status", body: (p: Project) =>
+                <MyBadge type="status" value={p.status ?? 'Unknown'} />
+        }
+    ];
 
     return (
-        <div className="grid">
-            <div className="col-12">
-                <div className="card">
-                    <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
-                    <DataTable
-                        ref={dt}
-                        value={projects}
-                        selection={selectedProject}
-                        onSelectionChange={(e) => setSelectedProject(e.value as Project)}
-                        dataKey="_id"
-                        paginator
-                        rows={10}
-                        rowsPerPageOptions={[5, 10, 25]}
-                        className="datatable-responsive"
-                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} projects"
-                        globalFilter={globalFilter}
-                        filters={filters}
-                        emptyMessage="No project data found."
-                        header={header}
-                        scrollable
-                        expandedRows={expandedRows}
-                        onRowToggle={(e) => setExpandedRows(e.data)}
-                        rowExpansionTemplate={(rowData) => {
-                            return <ProjectDetail project={rowData as Project} />;
-                        }}
-                    >
-                        <Column expander headerStyle={{ width: '3em' }}/>
-                        <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                        <Column field="cycle.title" header="Cycle" sortable />
-                        <Column field="title" header="Title" sortable />
-                        <Column header="Status" body={statusBodyTemplate} sortable />
-                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
-                    </DataTable>
+        <>
+            <CrudManager
+                title="Projects"
+                items={projects}
+                dataKey="_id"
+                columns={columns}
+                canCreate={canCreate}
+                canEdit={canEdit}
+                canDelete={canDelete}
+                onCreate={() => { setProject(emptyProject); setShowSaveDialog(true); }}
+                onEdit={(row) => { setProject(row); setShowSaveDialog(true); }}
+                onDelete={(row) => confirm.ask({ item: row.title, onConfirmAsync: () => deleteProject(row) })}
+                expandedRows={expandedRows}
+                onRowToggle={(e) => setExpandedRows(e.data)}
+                rowExpansionTemplate={(row) => {
+                    return <ProjectDetail project={row} />;
+                }}
+            />
 
-                    {selectedProject && (
-                        <SaveProjectDialog
-                            visible={showSaveDialog}
-                            project={selectedProject}
-                            onComplete={onSaveComplete}
-                            onHide={hideDialogs}
-                        />
-                    )}
-
-                    {selectedProject && (
-                        <ConfirmDialog
-                            showDialog={showDeleteDialog}
-                            item={String(selectedProject.title)}
-                            onConfirmAsync={deleteProject}
-                            onHide={hideDialogs}
-                        />
-                    )}
-                </div>
-            </div>
-        </div>
+            {project && (
+                <SaveProjectDialog
+                    visible={showSaveDialog}
+                    project={project}
+                    onComplete={onSaveComplete}
+                    onHide={hideSaveDialog}
+                />
+            )}
+        </>
     );
 };
 

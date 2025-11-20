@@ -13,7 +13,7 @@ export type Project = {
     _id?: string;
     cycle?: string | Cycle;
     title: string;
-    summary?: string;    
+    summary?: string;
     status?: ProjectStatus;
     createdBy?: string | User;
     createdAt?: Date;
@@ -24,6 +24,9 @@ export type Project = {
     file?: File;
 }
 
+export interface GetProjectsOptions {
+    cycle?: string | Cycle;
+}
 
 export const validateProject = (project: Project): { valid: boolean; message?: string } => {
     if (!project.cycle) {
@@ -37,8 +40,8 @@ export const validateProject = (project: Project): { valid: boolean; message?: s
 
 export const validateApplyProject = (project: Project): { valid: boolean; message?: string } => {
     const result = validateProject(project);
-    if(!result.valid) return result
-    if(!project.collaborators || project.collaborators.length==0){
+    if (!result.valid) return result
+    if (!project.collaborators || project.collaborators.length == 0) {
         return { valid: false, message: 'At least one collaborator is required.' };
     }
     if (!project.phases || project.phases.length === 0) {
@@ -51,7 +54,7 @@ export const validateApplyProject = (project: Project): { valid: boolean; messag
 };
 
 
-export const sanitizeProject=(project: Partial<Project>): Partial<Project> => {
+export const sanitizeProject = (project: Partial<Project>): Partial<Project> => {
     return {
         ...project,
         cycle:
@@ -63,3 +66,15 @@ export const sanitizeProject=(project: Partial<Project>): Partial<Project> => {
         phases: project.phases?.map(p => sanitizePhase(p)),
     };
 }
+
+export const sanitizeGetProjectsOptions = (options: Partial<GetProjectsOptions>): Partial<GetProjectsOptions> => {
+    return {
+        ...options,
+        cycle:
+            typeof options.cycle === 'object' && options.cycle !== null
+                ? (options.cycle as Cycle)._id
+                : options.cycle,
+    };
+};
+
+

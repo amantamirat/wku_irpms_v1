@@ -13,7 +13,7 @@ import { User, UserStatus } from './models/user.model';
 import ChangePasswordDialog from './dialogs/ChangePassword';
 import { InputSwitch } from 'primereact/inputswitch';
 import ErrorCard from '@/components/ErrorCard';
-import Badge from '@/templates/Badge';
+import MyBadge from '@/templates/MyBadge';
 
 
 const UserPage = () => {
@@ -173,7 +173,7 @@ const UserPage = () => {
         return (
             <>
                 <span className="p-column-title">Status</span>
-                <Badge type="status" value={rowData.status ?? 'Unknown'} />
+                <MyBadge type="status" value={rowData.status ?? 'Unknown'} />
             </>
         );
     };
