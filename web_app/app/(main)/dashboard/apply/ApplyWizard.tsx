@@ -2,7 +2,6 @@ import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Steps } from "primereact/steps";
 import { useEffect, useRef, useState } from "react";
-import { Call } from "../../calls/models/call.model";
 import { Grant } from "../../grants/models/grant.model";
 import CollaboratorManager from "../../projects/collaborators/components/CollaboratorManager";
 import ProjectForm from "./ProjectForm";

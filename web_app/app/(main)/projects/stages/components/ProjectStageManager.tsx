@@ -14,12 +14,14 @@ import { ProjectStageApi } from "../api/project.stage.api";
 import { Project } from "../../models/project.model";
 import { useCrudList } from "@/hooks/useCrudList";
 import { BASE_URL } from "@/api/ApiClient";
+import { Stage } from "@/app/(main)/cycles/stages/models/stage.model";
 
 interface ProjectStageManagerProps {
     project?: Project;
+    stage?:Stage;
 }
 
-const ProjectStageManager = ({ project }: ProjectStageManagerProps) => {
+const ProjectStageManager = ({ project, stage }: ProjectStageManagerProps) => {
     const confirm = useConfirmDialog();
     const { getLinkedApplicant } = useAuth();
     const linkedApplicant = getLinkedApplicant();

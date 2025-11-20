@@ -17,7 +17,7 @@ export enum UserStatus {
 
 export type User = {
     _id: string;
-    //email?: string;
+    email?: string;
     user_name: string;
     status: UserStatus;
     linkedApplicant?: any;

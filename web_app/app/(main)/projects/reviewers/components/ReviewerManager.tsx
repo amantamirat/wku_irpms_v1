@@ -98,7 +98,7 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
 
     const updateStatus = async (row: Reviewer, next: ReviewerStatus) => {
         const { updated, syncedProjectStage } = await ReviewerApi.updateReviewer({ _id: row._id, status: next }, true);
-        updateItem({ ...updated, applicant: row.applicant, projectStage: row.projectStage });       
+        updateItem({ ...updated, applicant: row.applicant, projectStage: row.projectStage });
 
         if (updateProjectStage && projectStage) {
             updateProjectStage({
@@ -188,9 +188,10 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
     }
 
 
-    const columns = [
-        { header: "Reviewer", field: "applicant.first_name" },
+    const columns = [       
+        { header: "Stage", field: "projectStage.stage.name", sortable: true },
         { header: "Project", field: "projectStage.project.title", sortable: true },
+         { header: "Reviewer", field: "applicant.first_name" },
         {
             header: "Score",
             field: "score",

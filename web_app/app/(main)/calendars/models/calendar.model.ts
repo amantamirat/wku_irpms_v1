@@ -1,5 +1,3 @@
-import { Call } from "../../calls/models/call.model";
-
 export enum CalendarStatus {
     active = 'active',
     closed = 'closed'

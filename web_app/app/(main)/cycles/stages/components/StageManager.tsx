@@ -183,7 +183,7 @@ const StageManager = ({ cycle }: StageManagerProps) => {
                 expandedRows={expandedRows}
                 onRowToggle={(e) => setExpandedRows(e.data)}
                 rowExpansionTemplate={(rowData: Stage) => (
-                    <ProjectStageManager stage={rowData} />
+                    <ProjectStageManager  />
                 )}
             >
                 {
