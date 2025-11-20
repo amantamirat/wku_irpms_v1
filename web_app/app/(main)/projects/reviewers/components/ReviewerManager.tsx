@@ -5,7 +5,7 @@ import { DataTable, DataTableExpandedRows } from "primereact/datatable";
 import { Toolbar } from "primereact/toolbar";
 import { useEffect, useState } from "react";
 import ResultManager from "../../results/components/ResultManager";
-import { ProjectStage } from "../../stages/models/stage.model";
+import { ProjectStage, ProjectStageStatus } from "../../stages/models/stage.model";
 import { GetReviewersOptions, ReviewerApi } from "../api/reviewer.api";
 import { Reviewer, ReviewerStatus } from "../models/reviewer.model";
 import SaveReviewerDialog from "./SaveReviewerDialog";
@@ -14,18 +14,20 @@ import Badge from "@/templates/Badge";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useAuth } from "@/contexts/auth-context";
 import { PERMISSIONS } from "@/types/permissions";
+import { removeItem, updateItems } from "@/utils/onSaveComplete";
 
 interface ReviewerManagerProps {
-    applicant?: Applicant;
     projectStage?: ProjectStage;
+    updateProjectStage?: (projectStage: ProjectStage) => void;
+    applicant?: Applicant;
     showControllers?: boolean;
 }
 
-const ReviewerManager = ({ applicant, projectStage, showControllers }: ReviewerManagerProps) => {
+const ReviewerManager = ({ projectStage, applicant, showControllers }: ReviewerManagerProps) => {
 
     const emptyReviewer: Reviewer = {
-        applicant: applicant ?? undefined,
         projectStage: projectStage ?? undefined,
+        applicant: applicant ?? undefined,
         weight: 1
     };
 
@@ -33,10 +35,16 @@ const ReviewerManager = ({ applicant, projectStage, showControllers }: ReviewerM
     const linkedApplicant = getLinkedApplicant();
     const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
     const { hasPermission } = useAuth();
+    const stageStatus = projectStage?.status;
+    const creationStatus = [ProjectStageStatus.pending, ProjectStageStatus.submitted, ProjectStageStatus.on_review];
+
     const canApprove = hasPermission([PERMISSIONS.REVIEWER.APPROVE]);
     const canDelete = hasPermission([PERMISSIONS.REVIEWER.DELETE]);
     const canEdit = hasPermission([PERMISSIONS.REVIEWER.UPDATE]);
-    const canCreate = hasPermission([PERMISSIONS.REVIEWER.CREATE]);
+    const canCreate =
+        hasPermission([PERMISSIONS.REVIEWER.CREATE]) &&
+        stageStatus &&
+        creationStatus.includes(stageStatus);
 
     const confirm = useConfirmDialog();
     const [reviewers, setReviewers] = useState<Reviewer[]>([]);
@@ -71,31 +79,25 @@ const ReviewerManager = ({ applicant, projectStage, showControllers }: ReviewerM
         );
     }
 
+
     const onSaveCompelete = (savedReviewer: Reviewer) => {
-        let _reviewers = [...reviewers];
-        const index = _reviewers.findIndex((r) => r._id === savedReviewer._id);
-        if (index !== -1) {
-            _reviewers[index] = { ...savedReviewer };
-        } else {
-            _reviewers.push({ ...savedReviewer });
-        }
-        setReviewers(_reviewers);
+        setReviewers(updateItems(reviewers, savedReviewer));
         hideSaveDialog();
     };
+
 
     const deleteReviewer = async (row: Reviewer) => {
         const deleted = await ReviewerApi.deleteReviewer(row);
         if (deleted) {
-            setReviewers(reviewers.filter((c) => c._id !== row._id));
+            setReviewers(removeItem(reviewers, row._id));
         }
     };
 
     const updateStatus = async (row: Reviewer, next: ReviewerStatus) => {
         try {
-            const updated = await ReviewerApi.updateReviewer({ _id: row._id, status: next }, true);
-            setReviewers(prev =>
-                prev.map(r => r._id === updated._id ? { ...updated, applicant: row.applicant, projectStage: row.projectStage } : r)
-            );
+            const { updated, projectStage } = await ReviewerApi.updateReviewer({ _id: row._id, status: next }, true);
+            const savedReviewer = { ...updated, applicant: row.applicant, projectStage: row.projectStage };
+            onSaveCompelete(savedReviewer);
         } catch (err: any) {
             throw err;
         }
@@ -105,21 +107,6 @@ const ReviewerManager = ({ applicant, projectStage, showControllers }: ReviewerM
     const hideSaveDialog = () => {
         setReviewer(emptyReviewer);
         setShowSaveDialog(false);
-    }
-
-    const startToolbarTemplate = () => {
-        if (!showControllers) return null;
-
-        return (
-            <div className="my-2">
-                <Button label="New Reviewer" icon="pi pi-plus" severity="success" className="mr-2"
-                    onClick={() => {
-                        setReviewer(emptyReviewer);
-                        setShowSaveDialog(true);
-                    }}
-                />
-            </div>
-        );
     }
 
     const statusBodyTemplate = (rowData: Reviewer) => {
@@ -231,6 +218,20 @@ const ReviewerManager = ({ applicant, projectStage, showControllers }: ReviewerM
                         />
                     )}
                 </>)}
+            </div>
+        );
+    }
+
+    const startToolbarTemplate = () => {
+        if (!showControllers) return null;
+        return (
+            <div className="my-2">
+                <Button label="New Reviewer" icon="pi pi-plus" severity="success" className="mr-2"
+                    onClick={() => {
+                        setReviewer(emptyReviewer);
+                        setShowSaveDialog(true);
+                    }}
+                />
             </div>
         );
     }

@@ -50,7 +50,7 @@ app.use("/api/permissions", permissionRoutes);
 app.use("/api/applicants", applicantRoutes);
 app.use("/api/organizations", organizationRoutes);
 app.use("/api/positions", positionRoutes);
-app.use("/api/expriences", experienceRoutes);
+app.use("/api/experiences", experienceRoutes);
 app.use("/api/themes", themeRoutes);
 //app.use("/api/evals", evalRoutes);
 app.use("/api/evaluations", evaluationRoutes);

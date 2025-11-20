@@ -24,7 +24,7 @@ export const ReviewerApi = {
         return createdData as Reviewer;
     },
 
-    async updateReviewer(reviewer: Partial<Reviewer>, changeStatus = false): Promise<Reviewer> {
+    async updateReviewer(reviewer: Partial<Reviewer>, changeStatus = false): Promise<any> {
         if (!reviewer._id) {
             throw new Error("_id required.");
         }
