@@ -33,12 +33,12 @@ const AppMenu = () => {
                     label: 'Reviewers',
                     icon: 'pi pi-fw pi-eye',
                     to: '/projects/reviewers',
-                    //visible: hasPermission([PERMISSIONS.PROJECT.REVIEW])
-                },
-                {
-                    label: 'Collaborators',
-                    icon: 'pi pi-fw pi-asterisk',
-                    to: '/projects/collaborators',
+                    visible: hasPermission([
+                        PERMISSIONS.REVIEWER.CREATE,
+                        PERMISSIONS.REVIEWER.UPDATE,
+                        PERMISSIONS.REVIEWER.DELETE,
+                        PERMISSIONS.REVIEWER.APPROVE
+                    ])
                 },
             ]
         },
