@@ -47,6 +47,12 @@ export const PERMISSIONS = {
     UPDATE: "grant:update",
     DELETE: "grant:delete",
   },
+  CONSTRAINT: {
+    CREATE: "constraint:create",
+    READ: "constraint:read",
+    UPDATE: "constraint:update",
+    DELETE: "constraint:delete",
+  },
   CALL: {
     CREATE: "call:create",
     READ: "call:read",

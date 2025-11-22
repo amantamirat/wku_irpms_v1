@@ -1,60 +1,53 @@
-import mongoose from "mongoose";
-import { Grant } from "../grant.model";
-import { ApplicantConstraintType, ConstraintType, OperationMode, ProjectConstraintType } from "./constraint.enum";
-import { Constraint } from "./constraint.model";
+import { ConstraintRepository, IConstraintRepository } from "./constraint.repository";
+import { CreateProjectConstraintDTO, UpdateProjectConstraintDTO } from "./project/project-constraint.dto";
+import { CreateApplicantConstraintDTO } from "./applicant/applicant-constaint.dto";
+import { ConstraintType } from "./constraint-type.enum";
+import { GetConstraintOptions } from "./constraint.dto";
 
-
-export interface CreateConstraintDto {
-    type: ConstraintType;
-    grant: mongoose.Types.ObjectId;
-    constraint: ProjectConstraintType | ApplicantConstraintType;
-    min?: number;
-    max?: number;
-    mode?: OperationMode;
-}
-
-
-export interface GetConstraintOptions {
-    grant?: mongoose.Types.ObjectId;
-    type?: ConstraintType;
-}
 
 export class ConstraintService {
 
-    static async validateConstraint(data: Partial<CreateConstraintDto>) {
-        if (data.type === ConstraintType.APPLICANT) {
-            if (!data.mode) {
-                throw new Error("Operation mode must be specified for applicant constraints.");
-            }
-        }        
+    private repository: IConstraintRepository;
+
+    constructor(repository?: IConstraintRepository) {
+        this.repository = repository || new ConstraintRepository();
+    }
+    //----------------------------------------
+    // GET
+    //----------------------------------------
+    async getConstraints(options: GetConstraintOptions) {
+        return await this.repository.find(options);
+    }
+    //----------------------------------------
+    // PROJECT CONSTRAINTS
+    //----------------------------------------
+    async createProjectConstraint(dto: CreateProjectConstraintDTO) {
+        return await this.repository.createProjectConstraint(dto);
     }
 
-    static async createConstraint(data: CreateConstraintDto) {
-        const grant = await Grant.findById(data.grant).lean();
-        if (!grant) throw new Error("Grant type not found");
-        await this.validateConstraint(data);        
-        const createdConstraint = await Constraint.create({ ...data });
-        return createdConstraint;
+    //----------------------------------------
+    // APPLICANT CONSTRAINTS
+    //----------------------------------------
+    async createApplicantConstraint(dto: CreateApplicantConstraintDTO) {
+        return await this.repository.createApplicantConstraint(dto);
     }
 
-    static async getConstraints(options: GetConstraintOptions = {}) {
-        const filter: any = {};
-        if (options.grant) filter.grant = options.grant;
-        if (options.type) filter.type = options.type;
-        return await Constraint.find(filter).lean();
+    async updateProjectConstraint(dto: UpdateProjectConstraintDTO) {
+        const existing = await this.repository.findById(dto.id);
+        if (!existing) throw new Error("Constraint not found");
+
+        if (existing.type !== ConstraintType.PROJECT) {
+            throw new Error("Not a project constraint");
+        }
+        return await this.repository.updateProjectConstraint(dto);
     }
 
-    static async updateConstraint(id: string, data: Partial<CreateConstraintDto>) {
-        const constraint = await Constraint.findById(id);
-        if (!constraint) throw new Error("Constraint not found");
-        Object.assign(constraint, data);
-        return await constraint.save();
-    }
-
-    /** Delete a constraint safely (ensure no child constraints exist) */
-    static async deleteConstraint(id: string) {
-        const constraint = await Constraint.findById(id);
-        if (!constraint) throw new Error("Constraint not found");
-        return await constraint.deleteOne();
+    //----------------------------------------
+    // DELETE
+    //----------------------------------------
+    async deleteConstraint(id: string) {
+        const existing = await this.repository.findById(id);
+        if (!existing) throw new Error("Constraint not found");
+        return await this.repository.delete(id);
     }
 }

@@ -3,7 +3,7 @@ import { Organization } from "../../organizations/models/organization.model";
 export type Grant = {
     _id?: string;
     directorate: string | Organization;
-    title: string;
+    title?: string;
     description?: string;
     createdAt?: Date;
     updatedAt?: Date;
@@ -19,3 +19,17 @@ export const validateGrant = (grant: Grant): { valid: boolean; message?: string 
     }
     return { valid: true };
 };
+
+export function sanitizeGrant(grant: Partial<Grant>): Partial<Grant> {
+    return {
+        ...grant,
+        directorate:
+            typeof grant.directorate === 'object' && grant.directorate !== null
+                ? (grant.directorate as Organization)._id
+                : grant.directorate
+    };
+}
+
+export interface GetGrantsOptions {
+    directorate?: string | Organization;
+}

@@ -7,7 +7,6 @@ import { InputNumber } from 'primereact/inputnumber';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import {
-    ApplicantConstraintType,
     Constraint,
     ConstraintType,
     OperationMode,
@@ -15,6 +14,7 @@ import {
     validateConstraint,
 } from '../models/constraint.model';
 import { ConstraintApi } from '../api/constraint.api';
+import { ApplicantConstraintType } from '../models/applicant-constaint-type';
 
 interface SaveDialogProps {
     visible: boolean;

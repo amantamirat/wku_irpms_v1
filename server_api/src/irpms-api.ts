@@ -18,7 +18,7 @@ import cycleRoutes from './modules/cycles/cycle.routes';
 import cycleStageRoutes from './modules/cycles/stages/stage.routes';
 import grantRoutes from './modules/grants/grant.routes';
 import constraintRoutes from './modules/grants/constraints/constraint.routes';
-import compositionRoutes from './modules/grants/constraints/compositions/composition.routes';
+import compositionRoutes from './modules/grants/constraints/applicant/compositions/composition.routes';
 import projectRoutes from './modules/projects/project.routes';
 import collaboratorRoutes from './modules/projects/collaborators/collaborator.routes';
 import assignmentRoutes from './modules/projects/collaborators/assignment/assignment.routes';

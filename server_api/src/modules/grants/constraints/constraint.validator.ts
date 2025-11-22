@@ -2,8 +2,8 @@
 import mongoose from "mongoose";
 import Applicant from "../../applicants/applicant.model";
 import { CreateProjectDto } from "../../projects/project.service";
-import { Composition } from "./compositions/composition.model";
-import { ApplicantConstraintType, OperationMode, ProjectConstraintType } from "./constraint.enum";
+import { Composition } from "./applicant/compositions/composition.model";
+import { ApplicantConstraintType, OperationMode, ProjectConstraintType } from "./constraint-type.enum";
 import { ApplicantConstraint, ProjectConstraint } from "./constraint.model";
 
 export class ConstraintValidator {

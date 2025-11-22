@@ -2,18 +2,19 @@
 
 import { IProjectStageRepository, ProjectStageRepository } from "./project-stage.repository";
 import { CreateProjectStageDTO, DeleteProjectStageDTO, GetProjectStagesDTO, UpdateProjectStageDTO } from "./project-stage.dto";
-
-import { Project } from "../../../projects/project.model";
 import { Stage } from "../stage.model";
 import { ProjectStage } from "./project-stage.model";
 import { ProjectStageStatus } from "./project-stage.enum";
 import { ProjectStageStateMachine } from "./project-stage.state-machine";
+import { IProjectRepository, ProjectRepository } from "../../../projects/project.repository";
 
 export class ProjectStageService {
     private repository: IProjectStageRepository;
+    private projectRepository: IProjectRepository;
 
-    constructor(repository?: IProjectStageRepository) {
+    constructor(repository?: IProjectStageRepository, projectRepository?: IProjectRepository) {
         this.repository = repository || new ProjectStageRepository();
+        this.projectRepository = projectRepository || new ProjectRepository();
     }
 
     // ------------------------------------
@@ -21,8 +22,8 @@ export class ProjectStageService {
     // ------------------------------------
 
     private async validateCreate(dto: CreateProjectStageDTO) {
-        const project = await Project.findById(dto.projectId).lean();
-        if (!project) throw new Error("Project not found");
+        const projectDoc = await this.projectRepository.findById(dto.projectId);
+        if (!projectDoc) throw new Error("Project not found");
 
         const stage = await Stage.findById(dto.stageId).lean();
         if (!stage) throw new Error("Stage not found");

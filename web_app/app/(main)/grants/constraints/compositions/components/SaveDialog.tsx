@@ -6,15 +6,11 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
-import {
-    ApplicantConstraintType,
-    Constraint,
-    isListConstraint,
-    isRangeConstraint,
-} from '../../models/constraint.model';
 import { Composition, validateComposition } from '../models/composition.model';
 import { accessibilityOptions, applicantUnits, genderOptions } from '@/app/(main)/applicants/models/applicant.model';
 import { CompositionApi } from '../api/composition.api';
+import { ApplicantConstraintType, isRangeConstraint, isListConstraint, getListOptions } from '../../models/applicant-constaint-type';
+import { Constraint } from '../../models/constraint.model';
 
 interface SaveDialogProps {
     visible: boolean;
@@ -25,6 +21,7 @@ interface SaveDialogProps {
 }
 
 const SaveDialog = ({ visible, composition, onComplete, onHide, parent }: SaveDialogProps) => {
+    const [itemOptions, setItemOptions] = useState<any[] | null>();
     const [localComposition, setLocalComposition] = useState<Composition>({ ...composition });
     const [submitted, setSubmitted] = useState(false);
     const toast = useRef<Toast>(null);
@@ -34,6 +31,10 @@ const SaveDialog = ({ visible, composition, onComplete, onHide, parent }: SaveDi
         setLocalComposition({ ...composition });
     }, [composition]);
 
+    useEffect(() => {
+        const options = getListOptions(parent.constraint as ApplicantConstraintType);
+        setItemOptions(options);
+    }, [parent]);
 
 
     const saveComposition = async () => {
@@ -92,12 +93,7 @@ const SaveDialog = ({ visible, composition, onComplete, onHide, parent }: SaveDi
         </>
     );
 
-    // Determine item options for list constraints
-    const itemOptions = (() => {
-        if (parent.constraint === ApplicantConstraintType.GENDER) return genderOptions;
-        if (parent.constraint === ApplicantConstraintType.ACCESSIBILITY) return accessibilityOptions;
-        return applicantUnits;
-    })();
+
 
     return (
         <>
@@ -144,7 +140,10 @@ const SaveDialog = ({ visible, composition, onComplete, onHide, parent }: SaveDi
                         <Dropdown
                             id="item"
                             value={localComposition.item}
-                            options={itemOptions}
+                            options={itemOptions?.map(o => ({
+                                label: o,
+                                value: o
+                            }))}
                             onChange={(e) => setLocalComposition({ ...localComposition, item: e.value })}
                             placeholder="Select Item"
                             className={classNames({ 'p-invalid': submitted && !localComposition.item })}

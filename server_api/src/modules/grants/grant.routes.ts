@@ -21,7 +21,7 @@ router.get(
   GrantController.getGrants
 );
 
-
+/*
 router.get(
   '/user',
   verifyActiveAccount,
@@ -32,6 +32,7 @@ router.get(
   ]),
   GrantController.getUserGrants
 );
+*/
 
 router.put(
   '/:id',

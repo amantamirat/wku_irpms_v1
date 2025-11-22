@@ -1,24 +1,10 @@
 import { ApiClient } from "@/api/ApiClient";
-import { ConstraintType, Constraint } from "../models/constraint.model";
-import { Grant } from "../../models/grant.model";
+import { Constraint, GetConstraintsOptions, sanitizeConstraint } from "../models/constraint.model";
 
 
 const end_point = '/grants/constraints';
 
-function sanitizeConstraint(constraint: Partial<Constraint>): Partial<Constraint> {
-    return {
-        ...constraint,
-        grant:
-            typeof constraint.grant === 'object' && constraint.grant !== null
-                ? (constraint.grant as Grant)._id
-                : constraint.grant
-    };
-}
 
-export interface GetConstraintsOptions {
-    grant?: string;
-    type?: ConstraintType;
-}
 
 export const ConstraintApi = {
 
@@ -30,7 +16,8 @@ export const ConstraintApi = {
 
     async getConstraints(options: GetConstraintsOptions): Promise<Constraint[]> {
         const query = new URLSearchParams();
-        if (options.grant) query.append("grant", options.grant);
+        const sanitized = sanitizeConstraint(options);
+        if (options.grant) query.append("grant", sanitized.grant as string);
         if (options.type) query.append("type", options.type);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Constraint[];

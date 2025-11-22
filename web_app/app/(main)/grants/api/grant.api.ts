@@ -1,23 +1,11 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Organization } from "../../organizations/models/organization.model";
-import { Grant } from "../models/grant.model";
+
+import { GetGrantsOptions, Grant, sanitizeGrant } from "../models/grant.model";
 
 
 const end_point = '/grants';
 
-function sanitizeGrant(grant: Partial<Grant>): Partial<Grant> {
-    return {
-        ...grant,
-        directorate:
-            typeof grant.directorate === 'object' && grant.directorate !== null
-                ? (grant.directorate as Organization)._id
-                : grant.directorate
-    };
-}
 
-export interface GetGrantsOptions {
-    directorate?: string;
-}
 
 export const GrantApi = {
 
@@ -29,7 +17,8 @@ export const GrantApi = {
 
     async getGrants(options: GetGrantsOptions): Promise<Grant[]> {
         const query = new URLSearchParams();
-        if (options.directorate) query.append("directorate", options.directorate);
+        const sanitized = sanitizeGrant(options);
+        if (sanitized.directorate) query.append("directorate", sanitized.directorate as string);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Grant[];
     },

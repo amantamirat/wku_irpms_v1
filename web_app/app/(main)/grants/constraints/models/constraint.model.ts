@@ -1,4 +1,5 @@
 import { Grant } from "../../models/grant.model";
+import { ApplicantConstraintType } from "./applicant-constaint-type";
 
 export enum ConstraintType {
     PROJECT = "Project",
@@ -19,23 +20,6 @@ export enum ProjectConstraintType {
     //FOCUS_AREA = "FOCUS-AREA",
 }
 
-export enum ApplicantConstraintType {
-    GENDER = "GENDER",                    // Gender constraint   (female, male) 
-    ACCESSIBILITY = "ACCESSIBILITY",      // Disability constraint  (visual, hearing, mobility, cognitive)
-    SCOPE = "SCOPE",                      // Scope constraint (academic, supportive, external)  
-    AGE = "AGE",                          // Age constraint (min age, max age)
-    EXPERIENCE = "EXPERIENCE",            // Experience-based constraint  
-}
-
-const rangeApplicantConstraints = [ApplicantConstraintType.AGE, ApplicantConstraintType.EXPERIENCE];
-const listApplicantConstraints = [ApplicantConstraintType.GENDER, ApplicantConstraintType.ACCESSIBILITY, ApplicantConstraintType.SCOPE];
-
-export function isRangeConstraint(type: ApplicantConstraintType) {
-    return rangeApplicantConstraints.includes(type);
-}
-export function isListConstraint(type: ApplicantConstraintType) {
-    return listApplicantConstraints.includes(type);
-}
 
 export enum OperationMode {
     COUNT = "COUNT",
@@ -56,7 +40,7 @@ export type Constraint = {
 
 export const validateConstraint = (constraint: Constraint): { valid: boolean; message?: string } => {
     if (!constraint.type) {
-        return { valid: false, message: 'Grant is required.' };
+        return { valid: false, message: 'Type is required.' };
     }
     if (!constraint.grant) {
         return { valid: false, message: 'Grant is required.' };
@@ -75,4 +59,20 @@ export const validateConstraint = (constraint: Constraint): { valid: boolean; me
         }
     }
     return { valid: true };
+}
+
+
+export function sanitizeConstraint(constraint: Partial<Constraint>): Partial<Constraint> {
+    return {
+        ...constraint,
+        grant:
+            typeof constraint.grant === 'object' && constraint.grant !== null
+                ? (constraint.grant as Grant)._id
+                : constraint.grant
+    };
+}
+
+export interface GetConstraintsOptions {
+    grant?: string|Grant;
+    type?: ConstraintType;
 }

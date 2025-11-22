@@ -1,21 +1,21 @@
 import { Request, Response } from "express";
+import { errorResponse, successResponse } from '../../../../../util/response';
+import { GetCompositionDTO, UpdateCompositionDTO } from "./composition.dto";
 import { CompositionService } from "./composition.service";
-import { errorResponse, successResponse } from '../../../../util/response';
-import mongoose from 'mongoose';
 
+const service = new CompositionService();
 export class CompositionController {
     static async createComposition(req: Request, res: Response) {
         try {
             const { constraint, value, max, min, item } = req.body;
-            //if (!parent) throw new Error("Parent is required");
             const data = {
-                constraint: new mongoose.Types.ObjectId(constraint as string),
+                constraint: constraint as string,
                 value,
                 max,
                 min,
                 item
             };
-            const created = await CompositionService.createComposition(data);
+            const created = await service.createComposition(data);
             successResponse(res, 201, "Composition created successfully", created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -25,10 +25,13 @@ export class CompositionController {
     static async getCompositions(req: Request, res: Response) {
         try {
             const { constraint } = req.query;
-            const options = {
-                constraint: constraint ? new mongoose.Types.ObjectId(constraint as string) : undefined
+            if (!constraint) {
+                throw new Error("constraint required");
+            }
+            const options: GetCompositionDTO = {
+                constraint: constraint as string
             };
-            const compositions = await CompositionService.getCompositions(options);
+            const compositions = await service.getCompositions(options);
             successResponse(res, 200, 'Compositions fetched successfully', compositions);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -39,13 +42,16 @@ export class CompositionController {
         try {
             const { id } = req.params;
             const { value, max, min, item } = req.body;
-            const data = {
-                value: value ?? undefined,
-                max: max ?? undefined,
-                min: min ?? undefined,
-                item: item ?? undefined,
+            const dto: UpdateCompositionDTO = {
+                id: id,
+                data: {
+                    value: value ?? undefined,
+                    max: max ?? undefined,
+                    min: min ?? undefined,
+                    item: item ?? undefined,
+                }
             };
-            const updated = await CompositionService.updateComposition(id, data);
+            const updated = await service.updateComposition(dto);
             successResponse(res, 201, "Composition updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -55,7 +61,7 @@ export class CompositionController {
     static async deleteComposition(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const deleted = await CompositionService.deleteComposition(id);
+            const deleted = await service.deleteComposition(id);
             successResponse(res, 201, "Composition deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

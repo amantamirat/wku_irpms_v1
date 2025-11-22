@@ -1,61 +1,54 @@
-import mongoose from "mongoose";
 import { Directorate } from "../organization/organization.model";
 import { Grant } from "./grant.model";
 import { CacheService } from "../../util/cache/cache.service";
-
-
-export interface GetGrantsOptions {
-    directorate?: mongoose.Types.ObjectId;
-}
-
-export interface CreateGrantDto {
-    directorate: mongoose.Types.ObjectId;
-    title: string;
-    description?: string;
-}
+import { CreateGrantDTO, DeleteGrantDTO, GetGrantsDTO, UpdateGrantDTO } from "./grant.dto";
+import { GrantRepository, IGrantRepository } from "./grant.repository";
 
 
 export class GrantService {
 
-    private static async validateGrant(grant: Partial<CreateGrantDto>) {
-        const directorate = await Directorate.findById(grant.directorate).lean();
-        if (!directorate) {
-            throw new Error("Directorate Not Found!");
-        }
+    private repository: IGrantRepository;
+
+    constructor(repository?: IGrantRepository) {
+        this.repository = repository || new GrantRepository();
     }
 
-    static async createGrant(data: CreateGrantDto, userId: string) {
-        await CacheService.validateOwnership(userId, data.directorate);
-        await this.validateGrant(data);
-        const createdGrant = await Grant.create({ ...data });
+    async createGrant(dto: CreateGrantDTO) {
+        await CacheService.validateOwnership(dto.userId, dto.directorateId);
+        const directorateDoc = await Directorate.findById(dto.directorateId).lean();
+        if (!directorateDoc) {
+            throw new Error("Directorate Not Found!");
+        }
+        const createdGrant = await this.repository.create(dto);
         return createdGrant;
     }
 
-    static async getGrants(options: GetGrantsOptions) {
-        const filter: any = {};
-        if (options.directorate) filter.directorate = options.directorate;
-        return await Grant.find(filter).populate('directorate').lean();
+    async getGrants(options: GetGrantsDTO) {
+        return await this.repository.find(options);
     }
 
+    /*
 
     static async getUserGrants(userId: string) {
         const organizations = await CacheService.getUserOrganizations(userId);
         return await Grant.find({ directorate: { $in: organizations } }).populate('directorate').lean();
     }
+        */
 
 
-    static async updateGrant(id: string, data: Partial<CreateGrantDto>, userId: string) {
-        const grant = await Grant.findById(id);
-        if (!grant) throw new Error("Grant not found");
-        await CacheService.validateOwnership(userId, grant.directorate);
-        Object.assign(grant, data);
-        return grant.save();
+    async updateGrant(dto: UpdateGrantDTO) {
+        const { id, data, userId } = dto;
+        const grantDoc = await this.repository.findById(id);
+        if (!grantDoc) throw new Error("Grant not found");
+        await CacheService.validateOwnership(userId, grantDoc.directorate);
+        return this.repository.update(id, data);
     }
 
-    static async deleteGrant(id: string, userId: string) {
-        const grant = await Grant.findById(id);
-        if (!grant) throw new Error("Grant not found");
-        await CacheService.validateOwnership(userId, grant.directorate);
-        return await grant.deleteOne();
+    async deleteGrant(dto: DeleteGrantDTO) {
+        const { id, userId } = dto;
+        const grantDoc = await this.repository.findById(id);
+        if (!grantDoc) throw new Error("Grant not found");
+        await CacheService.validateOwnership(userId, grantDoc.directorate);
+        return await this.repository.delete(id);
     }
 }

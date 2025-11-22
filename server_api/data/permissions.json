@@ -149,6 +149,26 @@
     "description": "Delete grant entries"
   },
   {
+    "category": "Constraint Management",
+    "name": "constraint:create",
+    "description": "Create constraint entries"
+  },
+  {
+    "category": "Constraint Management",
+    "name": "constraint:read",
+    "description": "Read constraint entries"
+  },
+  {
+    "category": "Constraint Management",
+    "name": "constraint:update",
+    "description": "Update constraint entries"
+  },
+  {
+    "category": "Constraint Management",
+    "name": "constraint:delete",
+    "description": "Delete constraint entries"
+  },
+  {
     "category": "Call Management",
     "name": "call:create",
     "description": "Create call entries"

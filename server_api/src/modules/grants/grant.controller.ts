@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
-import mongoose, { Types } from 'mongoose';
 import { errorResponse, successResponse } from '../../util/response';
 import { AuthenticatedRequest } from '../users/auth/auth.middleware';
-import { CreateGrantDto, GetGrantsOptions, GrantService } from './grant.service';
+import { CreateGrantDTO, GetGrantsDTO, UpdateGrantDTO } from './grant.dto';
+import { GrantService } from './grant.service';
 
+const grantService = new GrantService();
 export class GrantController {
 
     static async createGrant(req: AuthenticatedRequest, res: Response) {
@@ -13,12 +14,13 @@ export class GrantController {
             }
             const userId = req.user._id;
             const { directorate, title, description } = req.body;
-            const data: CreateGrantDto = {
-                directorate: new mongoose.Types.ObjectId(directorate as string),
+            const dto: CreateGrantDTO = {
+                directorateId: directorate as string,
                 title: title,
-                description: description ?? undefined
+                description: description ?? undefined,
+                userId: userId
             };
-            const grant = await GrantService.createGrant(data, userId);
+            const grant = await grantService.createGrant(dto);
             successResponse(res, 201, "Grant created successfully", grant);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -29,15 +31,16 @@ export class GrantController {
         try {
             const { directorate } = req.query;
             const filter = {
-                directorate: directorate ? new Types.ObjectId(directorate as string) : undefined
-            } as GetGrantsOptions;
-            const grants = await GrantService.getGrants(filter);
+                directorateId: directorate
+            } as GetGrantsDTO;
+            const grants = await grantService.getGrants(filter);
             successResponse(res, 200, 'Grants fetched successfully', grants);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
+    /*
     static async getUserGrants(req: AuthenticatedRequest, res: Response) {
         try {
             if (!req.user) {
@@ -50,6 +53,7 @@ export class GrantController {
             errorResponse(res, 400, err.message, err);
         }
     }
+        */
 
     static async updateGrant(req: AuthenticatedRequest, res: Response) {
         try {
@@ -59,11 +63,12 @@ export class GrantController {
             const userId = req.user._id;
             const { id } = req.params;
             const { title, description } = req.body;
-            const data: Partial<CreateGrantDto> = {
-                title: title,
-                description: description ?? undefined
+            const dto: UpdateGrantDTO = {
+                id,
+                data: { title, description },
+                userId: userId,
             };
-            const updated = await GrantService.updateGrant(id, data, userId);
+            const updated = await grantService.updateGrant(dto);
             successResponse(res, 201, "Grant updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -77,7 +82,7 @@ export class GrantController {
             }
             const userId = req.user._id;
             const { id } = req.params;
-            const deleted = await GrantService.deleteGrant(id, userId);
+            const deleted = await grantService.deleteGrant({ id: id, userId: userId });
             successResponse(res, 201, "Grant deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

@@ -7,16 +7,16 @@ import { PERMISSIONS } from '../../../util/permissions';
 const router: Router = Router();
 
 router.post('/', verifyActiveAccount,
-    checkPermission([PERMISSIONS.GRANT.CREATE]),
+    checkPermission([PERMISSIONS.CONSTRAINT.CREATE]),
     ConstraintController.createConstraint);
 router.get('/', verifyActiveAccount, checkPermission([
-    PERMISSIONS.GRANT.READ
+    PERMISSIONS.CONSTRAINT.READ
 ]), ConstraintController.getConstraints);
 router.put('/:id', verifyActiveAccount,
-    checkPermission([PERMISSIONS.GRANT.UPDATE]),
-    ConstraintController.updateConstraint);
+    checkPermission([PERMISSIONS.CONSTRAINT.UPDATE]),
+    ConstraintController.updateProjectConstraint);
 router.delete('/:id', verifyActiveAccount, 
-    checkPermission([PERMISSIONS.GRANT.DELETE]), 
+    checkPermission([PERMISSIONS.CONSTRAINT.DELETE]), 
     ConstraintController.deleteConstraint);
 
 export default router;
