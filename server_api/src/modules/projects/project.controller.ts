@@ -95,11 +95,11 @@ export class ProjectController {
       if (!req.user) throw new Error("User not found!");
 
       const { id } = req.params;
-      const { title, summary, status } = req.body;
+      const { title, summary } = req.body;
 
       const dto: UpdateProjectDTO = {
         id,
-        data: { title, summary, status },
+        data: { title, summary },
         userId: req.user._id,
       };
 

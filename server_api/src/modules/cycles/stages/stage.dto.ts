@@ -2,16 +2,16 @@ import mongoose from "mongoose";
 import { StageStatus, StageType } from "./stage.enum";
 
 export interface GetStagesDTO {
-    cycle?: mongoose.Types.ObjectId;
+    cycle?: string;
     order?: number;
     status?: StageStatus;
 }
 
 export interface CreateStageDTO {
-    cycle: mongoose.Types.ObjectId;
+    cycle: string;
     name: string;
     type: StageType;
-    evaluation: mongoose.Types.ObjectId;
+    evaluation: string;
     deadline?: Date;
     //status: StageStatus.planned;
 }
@@ -20,7 +20,7 @@ export interface UpdateStageDTO {
     id: string;
     data: Partial<{
         name: string;
-        evaluation: mongoose.Types.ObjectId;
+        evaluation: string;
         deadline: Date;
         status: StageStatus;
     }>;

@@ -7,14 +7,18 @@ import { ProjectStage } from "./project-stage.model";
 import { ProjectStageStatus } from "./project-stage.enum";
 import { ProjectStageStateMachine } from "./project-stage.state-machine";
 import { IProjectRepository, ProjectRepository } from "../../../projects/project.repository";
+import { ProjectSynchronizer } from "../../../projects/project.synchronizer";
+import { IProject } from "../../../projects/project.model";
 
 export class ProjectStageService {
     private repository: IProjectStageRepository;
     private projectRepository: IProjectRepository;
+    private projectSynchronizer: ProjectSynchronizer;
 
     constructor(repository?: IProjectStageRepository, projectRepository?: IProjectRepository) {
         this.repository = repository || new ProjectStageRepository();
         this.projectRepository = projectRepository || new ProjectRepository();
+        this.projectSynchronizer = new ProjectSynchronizer(this.projectRepository, this.repository);
     }
 
     // ------------------------------------
@@ -22,14 +26,18 @@ export class ProjectStageService {
     // ------------------------------------
 
     private async validateCreate(dto: CreateProjectStageDTO) {
+
+    }
+
+    async createProjectStage(dto: CreateProjectStageDTO) {
+        const { projectId, stageId, documentPath } = dto;
+        ////validate/////
         const projectDoc = await this.projectRepository.findById(dto.projectId);
         if (!projectDoc) throw new Error("Project not found");
-
         const stage = await Stage.findById(dto.stageId).lean();
         if (!stage) throw new Error("Stage not found");
         if (stage.status !== "active") throw new Error("Stage is not active");
         if (stage.deadline < new Date()) throw new Error("Stage deadline has passed");
-
         // Check previous stage
         if (stage.order > 1) {
             const prevStage = await Stage.findOne({
@@ -50,16 +58,14 @@ export class ProjectStageService {
                 throw new Error("Previous project stage is not accepted");
             }
         }
-    }
-
-
-    async createProjectStage(dto: CreateProjectStageDTO) {
-        await this.validateCreate(dto);
-        return this.repository.create(dto);
+        //////validation end///////////
+        const created = await this.repository.create(dto);             
+        const syncedProject = await this.projectSynchronizer.syncProjectStatus(projectId, projectDoc);       
+        return { created, syncedProject }
     }
 
     async getProjectStages(options: GetProjectStagesDTO = {}) {
-        return this.repository.find(options);
+        return await this.repository.find(options);
     }
 
     async updateProjectStage(dto: UpdateProjectStageDTO) {
@@ -68,22 +74,24 @@ export class ProjectStageService {
         if (!newStatus) {
             throw new Error("Status Not Fouund!");
         }
-
         const projectStage = await this.repository.findById(id);
         if (!projectStage || !projectStage.status) throw new Error("Project stage not found");
         const currentStatus = projectStage.status;
         ProjectStageStateMachine.validateTransition(currentStatus, newStatus);
-        return this.repository.update(dto.id, dto.data);
+        return await this.repository.update(dto.id, dto.data);
     }
 
     async deleteProjectStage(dto: DeleteProjectStageDTO) {
         const { id, userId } = dto;
         const projectStage = await this.repository.findById(id);
         if (!projectStage) throw new Error("Project stage not found");
+        //const projectDoc = projectStage.project as IProject;
 
         if (projectStage.status !== ProjectStageStatus.pending) {
             throw new Error("Only project stages with 'pending' status can be deleted.");
         }
-        return this.repository.delete(id);
+        const deleted = await this.repository.delete(id);
+        const syncedProject = await this.projectSynchronizer.syncProjectStatus(projectStage.project.toString());
+        return { deleted, syncedProject };
     }
 }

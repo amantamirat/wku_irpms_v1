@@ -10,9 +10,10 @@ import ProjectStageManager from "../stages/components/ProjectStageManager";
 
 interface ProjectDetailProps {
     project: Project;
+    updateProjectStatus?: (project: Project) => void;
 }
 
-export default function ProjectDetail({ project }: ProjectDetailProps) {
+export default function ProjectDetail({ project, updateProjectStatus }: ProjectDetailProps) {
     return (
         <div className="project-detail">
             <div className="header">
@@ -38,7 +39,7 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
                         <ProjectThemeManager project={project} />
                     </TabPanel>
                     <TabPanel header="Documents">
-                        <ProjectStageManager project={project} />
+                        <ProjectStageManager project={project} updateProjectStatus={updateProjectStatus} />
                     </TabPanel>
                 </TabView>
             </>

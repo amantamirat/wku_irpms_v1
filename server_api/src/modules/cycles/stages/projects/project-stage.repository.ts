@@ -1,5 +1,5 @@
 // project-stage.repository.ts
-import mongoose from "mongoose";
+import mongoose, { HydratedDocument } from "mongoose";
 import { ProjectStage, IProjectStage } from "./project-stage.model";
 import {
     CreateProjectStageDTO,
@@ -21,8 +21,8 @@ export class ProjectStageRepository implements IProjectStageRepository {
 
     async findById(id: string) {
         return ProjectStage.findById(new mongoose.Types.ObjectId(id))
-            .populate("project")
-            .populate("stage")
+            //.populate("project")
+            //.populate("stage")
             .lean<IProjectStage>()
             .exec();
     }
@@ -51,7 +51,7 @@ export class ProjectStageRepository implements IProjectStageRepository {
             .exec();
     }
 
-    async create(dto: CreateProjectStageDTO) {
+    async create(dto: CreateProjectStageDTO): Promise<HydratedDocument<IProjectStage>> {
         const data: Partial<IProjectStage> = {
             project: new mongoose.Types.ObjectId(dto.projectId),
             stage: new mongoose.Types.ObjectId(dto.stageId),

@@ -21,7 +21,7 @@ export const ProjectStageApi = {
         return data as ProjectStage[];
     },
 
-    async createProjectStage(projectStage: Partial<ProjectStage>): Promise<ProjectStage> {
+    async createProjectStage(projectStage: Partial<ProjectStage>): Promise<any> {
         const sanitized = sanitizeProjectStage(projectStage);
         const formData = new FormData();
         formData.append("project", sanitized.project as string);
@@ -29,7 +29,7 @@ export const ProjectStageApi = {
         if (projectStage.file)
             formData.append("document", projectStage.file);
         const createdData = await ApiClient.post(end_point, formData);
-        return createdData as ProjectStage;
+        return createdData;
     },
 
     async updateProjectStage(projectStage: Partial<ProjectStage>): Promise<ProjectStage> {
@@ -41,7 +41,7 @@ export const ProjectStageApi = {
         return updatedProjectStage as ProjectStage;
     },
 
-    async deleteProjectStage(projectStage: Partial<ProjectStage>): Promise<boolean> {
+    async deleteProjectStage(projectStage: Partial<ProjectStage>): Promise<any> {
         if (!projectStage._id) {
             throw new Error("_id required.");
         }

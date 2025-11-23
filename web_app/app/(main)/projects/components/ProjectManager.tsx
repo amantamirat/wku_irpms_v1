@@ -110,7 +110,7 @@ const ProjectManager = ({ cycle }: ProjectManagerProps) => {
                 expandedRows={expandedRows}
                 onRowToggle={(e) => setExpandedRows(e.data)}
                 rowExpansionTemplate={(row) => {
-                    return <ProjectDetail project={row} />;
+                    return <ProjectDetail project={row} updateProjectStatus={updateItem} />;
                 }}
                 enableSearch
             />

@@ -52,15 +52,14 @@ export class ProjectStageController {
 
             const filter: GetProjectStagesDTO = {
                 projectId: project ? String(project) : undefined,
-                stageId: stage? String(stage) : undefined,
+                stageId: stage ? String(stage) : undefined,
                 status: status ? String(status) as any : undefined,
                 skip: skip ? Number(skip) : undefined,
                 limit: limit ? Number(limit) : undefined
             };
 
-            const data = await projectStageService.getProjectStages(filter);
-
-            successResponse(res, 200, "Project stages fetched successfully", data);
+            const createdDoc = await projectStageService.getProjectStages(filter);
+            successResponse(res, 200, "Project stages fetched successfully", createdDoc);
 
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -75,10 +74,10 @@ export class ProjectStageController {
             const { id } = req.params;
             if (!id) throw new Error("id is required");
 
-            const { status } = req.body;    
-            if(!status){
+            const { status } = req.body;
+            if (!status) {
                 throw new Error("Status Required");
-            }        
+            }
 
             const dto: UpdateProjectStageDTO = {
                 id,
@@ -109,13 +108,12 @@ export class ProjectStageController {
                 userId: req.user._id
             };
 
-            const deleted = await projectStageService.deleteProjectStage(dto);
-
+            const deletedDoc = await projectStageService.deleteProjectStage(dto);
+            const { deleted } = deletedDoc;
             if (deleted?.documentPath) {
                 fs.unlink(deleted.documentPath, () => { });
             }
-
-            successResponse(res, 200, "Project stage deleted successfully", { deleted: true });
+            successResponse(res, 200, "Project stage deleted successfully", deletedDoc);
 
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

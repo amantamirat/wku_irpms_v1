@@ -18,10 +18,11 @@ import { Stage } from "@/app/(main)/cycles/stages/models/stage.model";
 
 interface ProjectStageManagerProps {
     project?: Project;
-    stage?:Stage;
+    updateProjectStatus?: (project: Project) => void;
+    stage?: Stage;
 }
 
-const ProjectStageManager = ({ project, stage }: ProjectStageManagerProps) => {
+const ProjectStageManager = ({ project, updateProjectStatus, stage }: ProjectStageManagerProps) => {
     const confirm = useConfirmDialog();
     const { getLinkedApplicant } = useAuth();
     const linkedApplicant = getLinkedApplicant();
@@ -73,14 +74,27 @@ const ProjectStageManager = ({ project, stage }: ProjectStageManagerProps) => {
     if (error) return <ErrorCard errorMessage={error} />;
 
     // ✅ Save / update
-    const onSaveComplete = (savedStage: ProjectStage) => {
+    const onSaveComplete = (savedStage: ProjectStage, syncedProject?: Project) => {
         updateItem(savedStage);
+        if (updateProjectStatus) {
+            if (project && syncedProject) {
+                updateProjectStatus({ ...project, status: syncedProject.status })
+            }
+        }
         hideSaveDialog();
     };
 
     const deleteStage = async (row: ProjectStage) => {
         const deleted = await ProjectStageApi.deleteProjectStage(row);
-        if (deleted) removeItem(row);
+        if (deleted) {
+            removeItem(row);
+            if (updateProjectStatus) {
+                const { projectStage, syncedProject } = deleted;
+                if (project && syncedProject) {
+                    updateProjectStatus({ ...project, status: syncedProject.status })
+                }
+            }
+        };
     };
 
     const hideSaveDialog = () => {

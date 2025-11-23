@@ -2,9 +2,15 @@ import { Evaluation } from "../../evaluations/evaluation.model";
 import { CreateStageDTO, GetStagesDTO, UpdateStageDTO } from "./stage.dto";
 import { StageStatus, StageType } from "./stage.enum";
 import { Stage } from "./stage.model";
+import { IStageRepository, StageRepository } from "./stage.repository";
 
 export class StageService {
 
+    private repository: IStageRepository;
+
+    constructor(repository?: IStageRepository) {
+        this.repository = repository || new StageRepository();
+    }
     /**
      * Create a new stage
      */
@@ -16,7 +22,7 @@ export class StageService {
         if (!evalDoc) throw new Error("Evaluation not found.");
 
 
-          // If adding an evaluation, no validation should exist before it
+        // If adding an evaluation, no validation should exist before it
         if (type === StageType.evaluation) {
             const validationBefore = await Stage.findOne({
                 cycle: cycle,
@@ -36,7 +42,7 @@ export class StageService {
 
         if (nextOrder === 1 && type === StageType.validation) {
             throw new Error("The first stage cannot be validation.");
-        }      
+        }
 
         // Create stage
         const stage = await Stage.create({

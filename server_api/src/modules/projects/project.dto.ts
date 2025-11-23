@@ -41,7 +41,7 @@ export interface SubmitProjectDTO {
     cycle: string;
     title: string;
     summary?: string;
-    leadPI:string;
+    leadPI: string;
     collaborators?: string[];
     phases?: string[];
     themes?: string[];

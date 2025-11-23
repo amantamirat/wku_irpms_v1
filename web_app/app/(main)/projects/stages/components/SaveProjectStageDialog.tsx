@@ -15,7 +15,7 @@ interface SaveProjectStageDialogProps {
     project?: Project;
     visible: boolean;
     projectStage: ProjectStage;
-    onComplete?: (saved: ProjectStage) => void;
+    onComplete?: (saved: ProjectStage, syncedProject?: Project) => void;
     onHide: () => void;
 }
 
@@ -41,11 +41,13 @@ const SaveProjectStageDialog = ({
             if (!validation.valid) throw new Error(validation.message);
 
             let saved: ProjectStage;
-
+            let syncedProject: Project | undefined = undefined;
             if (localProjectStage._id) {
                 saved = await ProjectStageApi.updateProjectStage(localProjectStage);
             } else {
-                saved = await ProjectStageApi.createProjectStage(localProjectStage);
+                const { created, syncedProject: sp } = await ProjectStageApi.createProjectStage(localProjectStage);
+                saved = created;
+                syncedProject = sp;
             }
 
             saved = { ...saved, project: localProjectStage.project, stage: localProjectStage.stage };
@@ -57,7 +59,7 @@ const SaveProjectStageDialog = ({
                 life: 2000,
             });
 
-            if (onComplete) onComplete(saved);
+            if (onComplete) onComplete(saved, syncedProject);
             //onHide()
         } catch (err) {
             toast.current?.show({

@@ -10,10 +10,10 @@ export class StageController {
         try {
             const { cycle, name, type, evaluation, deadline } = req.body;
             const dto: CreateStageDTO = {
-                cycle: new mongoose.Types.ObjectId(cycle as string),
+                cycle: cycle as string,
                 name,
                 type,
-                evaluation: new mongoose.Types.ObjectId(evaluation as string),
+                evaluation: evaluation as string,
                 deadline,
                 //status: StageStatus.planned
             };
@@ -30,7 +30,7 @@ export class StageController {
             const { cycle, order, status } = req.query;
 
             const dto: GetStagesDTO = {
-                cycle: new mongoose.Types.ObjectId(cycle as string),
+                cycle: cycle as string,
                 order: order ? Number(order) : undefined,
                 status: status as StageStatus
             };
@@ -52,7 +52,7 @@ export class StageController {
                 data: {
                     name,
                     //type,
-                    evaluation: evaluation ? new mongoose.Types.ObjectId(evaluation as string) : undefined,
+                    evaluation: evaluation ? evaluation as string : undefined,
                     deadline,
                     status,
                 },

@@ -4,7 +4,7 @@ import { StageStatus, StageType } from "./stage.enum";
 import { Evaluation } from "../../evaluations/evaluation.model";
 
 
-interface IStage extends Document {
+export interface IStage extends Document {
     cycle: mongoose.Types.ObjectId;
     name: string;
     type: StageType;

@@ -71,12 +71,10 @@ export class ProjectService {
     async updateProject(dto: UpdateProjectDTO) {
         const existing = await this.repository.findById(dto.id);
         if (!existing) throw new Error("Project not found");
-
         // Only creator can update
         if (String(existing.createdBy) !== dto.userId) {
             throw new Error("Unauthorized: You cannot update this project.");
         }
-
         return this.repository.update(dto.id, dto.data);
     }
 

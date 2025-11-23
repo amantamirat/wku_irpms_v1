@@ -135,7 +135,7 @@ export const ApiClient = {
 
             await handleError(response);
             const result = await response.json().catch(() => ({}));
-            return result.data ?? true;
+            return result.data ?? result;
         } catch (error) {
             console.error("[ApiClient.delete] Error:", error);
             throw error;
