@@ -37,13 +37,20 @@ export interface DeleteProjectDTO {
     userId: string;
 }
 
+export interface Phase {
+    activity: string;
+    duration: number;
+    budget: number;
+    description?: string;
+}
+
 export interface SubmitProjectDTO {
     cycle: string;
     title: string;
     summary?: string;
     leadPI: string;
     collaborators?: string[];
-    phases?: string[];
+    phases?: Phase[];
     themes?: string[];
     documentPath?: string;
 }
