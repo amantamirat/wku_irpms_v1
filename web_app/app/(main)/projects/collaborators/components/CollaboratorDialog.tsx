@@ -124,7 +124,7 @@ const CollaboratorDialog = ({ collaborator, visible, onSave, onComplete, onHide 
                 footer={footer}
                 onHide={onHide}
             >
-                {(!localCollaborator._id && !localCollaborator.applicant)
+                {(!localCollaborator._id)
                     && <>
                         <div className="field">
                             <label htmlFor="scope">Scope</label>
@@ -168,18 +168,6 @@ const CollaboratorDialog = ({ collaborator, visible, onSave, onComplete, onHide 
                             />
                         </div>
                     </>}
-                {
-                    localCollaborator._id &&
-                    <div className="field">
-                        <label htmlFor="status">Status</label>
-                        <Dropdown
-                            id="status"
-                            value={localCollaborator.status}
-                            options={Object.values(CollaboratorStatus).map(s => ({ label: s, value: s }))}
-                            onChange={(e) => setLocalCollaborator({ ...localCollaborator, status: e.value })}
-                        />
-                    </div>
-                }
             </Dialog >
         </>
     );

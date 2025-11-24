@@ -13,18 +13,26 @@ import CollaboratorDialog from "./CollaboratorDialog";
 import { Collaborator, CollaboratorStatus } from "../models/collaborator.model";
 import { Project } from "../../models/project.model";
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
+import { useAuth } from "@/contexts/auth-context";
+import { Button } from "primereact/button";
+import { ReviewerApi } from "../../reviewers/api/reviewer.api";
 
 interface CollaboratorProps {
     project?: Project;
+    applicant?: Applicant;
     onSave?: (collaborator: Collaborator) => void;
     onRemove?: (collaborator: Collaborator) => void;
 }
 
-const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) => {
+const CollaboratorManager = ({ project, applicant, onSave, onRemove }: CollaboratorProps) => {
     const confirm = useConfirmDialog();
+    const { getLinkedApplicant, hasPermission } = useAuth();
+    const linkedApplicant = getLinkedApplicant();
+    const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
 
     const emptyCollaborator: Collaborator = {
         project: project ?? "",
+        applicant: applicant ?? "",
         status: CollaboratorStatus.pending
     };
 
@@ -48,7 +56,7 @@ const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) =
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const data = await CollaboratorApi.getCollaborators({ project: project });
+                const data = await CollaboratorApi.getCollaborators({ project: project, applicant: applicant });
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to fetch collaborators. " + (err.message ?? ""));
@@ -58,7 +66,7 @@ const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) =
         };
 
         fetchData();
-    }, [project?._id]);
+    }, [project, applicant]);
 
     if (loading) return <ListSkeleton rows={10} />;
     if (error) return <ErrorCard errorMessage={error} />;
@@ -79,6 +87,46 @@ const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) =
             if (onRemove) onRemove(row);
         }
     };
+
+    const updateStatus = async (row: Collaborator, next: CollaboratorStatus) => {
+        const updated = await CollaboratorApi.updateCollaborator({ _id: row._id, status: next }, true);
+        updateItem({ ...updated, applicant: row.applicant, project: row.project });
+    };
+
+    const stateTransitionTemplate = (rowData: Collaborator) => {
+        const state = rowData.status;
+        const isOwner = (rowData?.applicant as any)._id === loggedApplicantId;
+        return (<div className="flex gap-2">
+            {(isOwner && state === CollaboratorStatus.pending) &&
+                <Button
+                    label="Activate"
+                    icon="pi pi-check"
+                    severity="success"
+                    size="small"
+                    onClick={() => {
+                        confirm.ask({
+                            operation: 'activate',
+                            onConfirmAsync: () => updateStatus(rowData, CollaboratorStatus.active)
+                        });
+                    }}
+                />}
+
+            {(isOwner && state === CollaboratorStatus.active) &&
+                <Button
+                    label="Pend"
+                    icon="pi pi-arrow-left"
+                    severity="warning"
+                    size="small"
+                    onClick={() => {
+                        confirm.ask({
+                            operation: 'pend',
+                            onConfirmAsync: () => updateStatus(rowData, CollaboratorStatus.pending)
+                        });
+                    }}
+                />
+            }
+        </div>);
+    }
 
     const columns = [
         /**
@@ -107,7 +155,8 @@ const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) =
         {
             header: "Status",
             body: (row: Collaborator) => <MyBadge type="status" value={row.status ?? "Unknown"} />
-        }
+        },
+        { body: stateTransitionTemplate }
     ].filter(Boolean);
 
     return (
@@ -119,7 +168,7 @@ const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) =
                 columns={columns}
                 canCreate={!!project}
                 canDelete={!!project}
-                enableSearch
+                //enableSearch
                 onCreate={() => {
                     setSelectedCollaborator(emptyCollaborator);
                     setShowSaveDialog(true);

@@ -9,7 +9,8 @@ export const CollaboratorApi = {
     async getCollaborators(options: GetCollaboratorsOptions): Promise<Collaborator[]> {
         const query = new URLSearchParams();
         const sanitized = sanitizeCollaborator(options);
-        if (options.project) query.append("project", sanitized.project as string);
+        if (sanitized.project) query.append("project", sanitized.project as string);
+        if (sanitized.applicant) query.append("applicant", sanitized.applicant as string);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Collaborator[];
     },
@@ -19,11 +20,13 @@ export const CollaboratorApi = {
         return createdData as Collaborator;
     },
 
-    async updateCollaborator(collaborator: Partial<Collaborator>): Promise<Collaborator> {
+    async updateCollaborator(collaborator: Partial<Collaborator>, changeStatus = false): Promise<Collaborator> {
         if (!collaborator._id) {
             throw new Error("_id required.");
         }
-        const url = `${end_point}${collaborator._id}`;
+        const url = changeStatus
+            ? `${end_point}${collaborator._id}/status`
+            : `${end_point}${collaborator._id}`;
         const updatedCollaborator = await ApiClient.put(url, sanitizeCollaborator(collaborator));
         return updatedCollaborator as Collaborator;
     },
