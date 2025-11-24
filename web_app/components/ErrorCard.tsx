@@ -23,7 +23,7 @@ const ErrorCard = ({ errorMessage }: ErrorProps) => {
                     </div>
                     <h1 className="text-900 font-bold text-5xl mb-2">Error Occurred</h1>
                     <div className="text-600 mb-5">{errorMessage}</div>
-                    <img src="/images/asset-error.svg" alt="Error" className="mb-5" width="80%" />
+                    <img src="/images/asset-error.svg" alt="Error" className="mb-5" width="60%" />
                 </div>
             </Card>
         </div>
