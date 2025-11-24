@@ -1,14 +1,12 @@
 // project-stage.service.ts
 
-import { IProjectStageRepository, ProjectStageRepository } from "./project-stage.repository";
-import { CreateProjectStageDTO, DeleteProjectStageDTO, GetProjectStagesDTO, UpdateProjectStageDTO } from "./project-stage.dto";
-import { ProjectStage } from "./project-stage.model";
-import { ProjectStageStatus } from "./project-stage.enum";
-import { ProjectStageStateMachine } from "./project-stage.state-machine";
 import { IProjectRepository, ProjectRepository } from "../../../projects/project.repository";
 import { ProjectSynchronizer } from "../../../projects/project.synchronizer";
-import { IProject } from "../../../projects/project.model";
 import { IStageRepository, StageRepository } from "../stage.repository";
+import { CreateProjectStageDTO, DeleteProjectStageDTO, GetProjectStagesDTO, UpdateProjectStageDTO } from "./project-stage.dto";
+import { ProjectStageStatus } from "./project-stage.enum";
+import { IProjectStageRepository, ProjectStageRepository } from "./project-stage.repository";
+import { ProjectStageStateMachine } from "./project-stage.state-machine";
 
 export class ProjectStageService {
     private repository: IProjectStageRepository;
@@ -44,25 +42,26 @@ export class ProjectStageService {
         if (stage.deadline < new Date()) throw new Error("Stage deadline has passed");
         // Check previous stage
         if (stage.order > 1) {
-            /*
-            const prevStage = await Stage.findOne({
+
+            const prevStage = await this.stageRepository.findByOrderAndCycle({
                 order: stage.order - 1,
-                cycle: stage.cycle
-            }).lean();
+                cycle: stage.cycle.toString()
+            });
+
 
             if (!prevStage) throw new Error("Previous stage not found");
-
-            const prevProjectStage = await ProjectStage.findOne({
-                project: dto.projectId,
-                stage: prevStage._id
-            }).lean();
-
-            if (!prevProjectStage) throw new Error("Previous project stage not found");
-
-            if (prevProjectStage.status !== ProjectStageStatus.reviewed) {
-               // throw new Error("Previous project stage is not accepted");
-            }
-               */
+            /*
+                       const prevProjectStage = await ProjectStage.findOne({
+                           project: dto.projectId,
+                           stage: prevStage._id
+                       }).lean();
+           
+                       if (!prevProjectStage) throw new Error("Previous project stage not found");
+           
+                       if (prevProjectStage.status !== ProjectStageStatus.reviewed) {
+                          // throw new Error("Previous project stage is not accepted");
+                       }
+                          */
         }
         //////validation end///////////
         const created = await this.repository.create(dto);

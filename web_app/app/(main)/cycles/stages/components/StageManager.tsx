@@ -134,7 +134,7 @@ const StageManager = ({ cycle }: StageManagerProps) => {
                 rowExpansionTemplate={(row: Stage) => (
                     <ProjectStageManager stage={row} />
                 )}
-                enableSearch
+                //enableSearch
             />
 
             {/* Create / Edit Stage */}
