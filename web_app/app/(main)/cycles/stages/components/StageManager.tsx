@@ -1,223 +1,146 @@
 'use client';
 
-import ConfirmDialog from '@/components/ConfirmationDialog';
-import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
-import { Button } from 'primereact/button';
-import { Column } from 'primereact/column';
-import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
-import { InputText } from 'primereact/inputtext';
-import { Toast } from 'primereact/toast';
-import { Toolbar } from 'primereact/toolbar';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { StageApi } from '../api/stage.api';
-import { Stage, StageStatus, StageType } from '../models/stage.model';
-import SaveStage from './SaveStage';
-import MyBadge from '@/templates/MyBadge';
-import { Cycle } from '../../models/cycle.model';
-import ProjectStageManager from '@/app/(main)/projects/stages/components/ProjectStageManager';
-
+import { useEffect, useState } from "react";
+import { CrudManager } from "@/components/CrudManager";
+import ErrorCard from "@/components/ErrorCard";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import ListSkeleton from "@/components/ListSkeleton";
+import SaveStage from "./SaveStage";
+import MyBadge from "@/templates/MyBadge";
+import { useCrudList } from "@/hooks/useCrudList";
+import { Stage, StageStatus, StageType } from "../models/stage.model";
+import { StageApi } from "../api/stage.api";
+import { Cycle } from "../../models/cycle.model";
+import ProjectStageManager from "@/app/(main)/projects/stages/components/ProjectStageManager";
 
 interface StageManagerProps {
     cycle: Cycle;
 }
 
 const StageManager = ({ cycle }: StageManagerProps) => {
-    const toast = useRef<Toast>(null);
+    const confirm = useConfirmDialog();
 
     const emptyStage: Stage = {
         cycle: cycle,
-        name: '',
+        name: "",
         type: StageType.evaluation,
-        evaluation: '',
-        status: StageStatus.planned,
+        evaluation: "",
+        status: StageStatus.planned
     };
 
-    const [stages, setStages] = useState<Stage[]>([]);
+    // CRUD Hook
+    const {
+        items: stages,
+        updateItem,
+        removeItem,
+        setAll,
+        loading,
+        setLoading,
+        error,
+        setError
+    } = useCrudList<Stage>();
+
     const [selectedStage, setSelectedStage] = useState<Stage>(emptyStage);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
-    const [globalFilter, setGlobalFilter] = useState('');
-    const [filters, setFilters] = useState<DataTableFilterMeta>({});
-    
+    const [expandedRows, setExpandedRows] = useState<any[]>([]);
 
-    // Init filters
+    // Fetch stages for this cycle
     useEffect(() => {
-        setFilters(initFilters());
-        setGlobalFilter('');
-    }, []);
+        const fetchStages = async () => {
+            try {
+                setLoading(true);
+                const data = await StageApi.getStages({ cycle: cycle._id });
+                setAll(data);
+            } catch (err: any) {
+                setError("Failed to fetch stages. " + (err.message ?? ""));
+            } finally {
+                setLoading(false);
+            }
+        };
 
+        if (cycle?._id) fetchStages();
+    }, [cycle?._id]);
 
-    // Fetch stages for this call
-    const fetchStages = useCallback(async () => {
-        try {
-            const data = await StageApi.getStages({ cycle: cycle._id });
-            setStages(data);
-        } catch (err) {
-            console.error('Failed to fetch stages:', err);
-        }
-    }, [cycle]);
+    if (loading) return <ListSkeleton rows={10} />;
+    if (error) return <ErrorCard errorMessage={error} />;
 
-    useEffect(() => {
-        if (cycle._id) fetchStages();
-    }, [cycle, fetchStages]);
-
-    // Handle save (create/update)
+    // Save (create/update)
     const onSaveComplete = (savedStage: Stage) => {
-        const index = stages.findIndex((s) => s._id === savedStage._id);
-        let _stages = [...stages];
-        if (index !== -1) _stages[index] = savedStage;
-        else _stages.push(savedStage);
-        setStages(_stages);
-        hideDialogs();
+        updateItem(savedStage);
+        hideSaveDialog();
     };
 
-    // Delete stage
-    const deleteStage = async () => {
-        const deleted = await StageApi.deleteStage(selectedStage);
+    // Delete
+    const deleteStage = async (row: Stage) => {
+        const deleted = await StageApi.deleteStage(row);
         if (deleted) {
-            setStages(stages.filter((s) => s._id !== selectedStage._id));
-            hideDialogs();
+            removeItem(row);
         }
     };
 
-    const hideDialogs = () => {
+    const hideSaveDialog = () => {
         setSelectedStage(emptyStage);
         setShowSaveDialog(false);
-        setShowDeleteDialog(false);
     };
 
-    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
-    };
+    // Table columns
+    const columns = [
+        { header: "Order", field: "order", sortable: true },
+        { header: "Name", field: "name", sortable: true },
+        { header: "Evaluation", field: "evaluation.title", sortable: true },
+        {
+            header: "Deadline",
+            body: (row: Stage) =>
+                row.deadline ? new Date(row.deadline).toLocaleDateString() : ""
+        },
+        {
+            header: "Type",
+            body: (row: Stage) => <MyBadge type="stage" value={row.type ?? "Unknown"} />,
+            sortable: true
+        },
+        {
+            header: "Status",
+            body: (row: Stage) => <MyBadge type="status" value={row.status ?? "Unknown"} />,
+            sortable: true
+        }
+    ];
 
-    const startToolbarTemplate = () => (
-        <div className="my-2">
-            <Button
-                label="New Stage"
-                icon="pi pi-plus"
-                severity="success"
-                onClick={() => {
+    return (
+        <>
+            <CrudManager
+                headerTitle="Manage Stages"
+                items={stages}
+                dataKey="_id"
+                columns={columns}
+                canCreate
+                canDelete
+                onCreate={() => {
                     setSelectedStage(emptyStage);
                     setShowSaveDialog(true);
                 }}
-            />
-        </div>
-    );
-
-
-    const header = (
-        <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage Stages</h5>
-            <span className="block mt-2 md:mt-0 p-input-icon-left">
-                <i className="pi pi-search" />
-                <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
-            </span>
-        </div>
-    );
-
-
-    const actionBodyTemplate = (rowData: Stage) => (
-        <>
-            <Button
-                icon="pi pi-pencil"
-                rounded
-                severity="success"
-                className="p-button-rounded p-button-text"
-                onClick={() => {
-                    setSelectedStage(rowData);
-                    setShowSaveDialog(true);
-                }}
-            />
-            <Button
-                icon="pi pi-trash"
-                rounded
-                severity="warning"
-                className="p-button-rounded p-button-text"
-                onClick={() => {
-                    setSelectedStage(rowData);
-                    setShowDeleteDialog(true);
-                }}
-            />
-        </>
-    );
-
-    const stageTypeBodyTemplate = (rowData: Stage) => {
-        return (
-            <MyBadge type="stage" value={rowData.type ?? 'Unknown'} />
-        );
-    };
-
-    const statusBodyTemplate = (rowData: Stage) => {
-        return (
-            <MyBadge type="status" value={rowData.status ?? 'Unknown'} />
-        )
-    };
-
-    return (
-        <div className="card">
-            <Toast ref={toast} />
-            <Toolbar className="mb-4" start={startToolbarTemplate} />
-            {/*
-            <span className="block mt-2 p-input-icon-left">
-                <i className="pi pi-search" />
-                <InputText
-                    type="search"
-                    value={globalFilter}
-                    onChange={onGlobalFilterChange}
-                    placeholder="Search..."
-                    className="w-full md:w-1/3"
-                />
-            </span>
-            */}
-
-            <DataTable
-                value={stages}
-                header={header}
-                dataKey="_id"
-                paginator
-                rows={10}
-                emptyMessage="No stages found"
-                globalFilter={globalFilter}
-                scrollable
+                onDelete={(row: Stage) =>
+                    confirm.ask({
+                        item: row.name ?? "",
+                        onConfirmAsync: () => deleteStage(row)
+                    })
+                }
                 expandedRows={expandedRows}
                 onRowToggle={(e) => setExpandedRows(e.data)}
-                rowExpansionTemplate={(rowData: Stage) => (
-                    <ProjectStageManager  />
+                rowExpansionTemplate={(row: Stage) => (
+                    <ProjectStageManager stage={row} />
                 )}
-            >
-                {
-                    //<Column selectionMode="single" headerStyle={{ width: '3em' }} />
-                }
-                <Column expander style={{ width: '3em' }} />
-                <Column field="order" header="Order" sortable />
-                <Column field="name" header="Name" sortable />
-                <Column field="evaluation.title" header="Evaluation" sortable />
-                <Column field="deadline" header="Deadline" body={(rowData) => rowData.deadline ? new Date(rowData.deadline).toLocaleDateString() : ''} />
-                <Column field="type" header="Type" body={stageTypeBodyTemplate} sortable />
-                <Column field="status" header="Status" body={statusBodyTemplate} sortable />
-                <Column body={actionBodyTemplate} style={{ minWidth: '10rem' }} />
-            </DataTable>
+                enableSearch
+            />
 
-            {selectedStage && showSaveDialog && (
-                <SaveStage
-                    visible={showSaveDialog}
-                    stage={selectedStage}
-                    cycle={cycle}
-                    onComplete={onSaveComplete}
-                    onHide={() => setShowSaveDialog(false)}
-                />
-            )}
-
-            {selectedStage && showDeleteDialog && (
-                <ConfirmDialog
-                    showDialog={showDeleteDialog}
-                    item={selectedStage.name || ''}
-                    onConfirmAsync={deleteStage}
-                    onHide={() => setShowDeleteDialog(false)}
-                />
-            )}
-        </div>
+            {/* Create / Edit Stage */}
+            <SaveStage
+                visible={showSaveDialog}
+                stage={selectedStage}
+                cycle={cycle}
+                onComplete={onSaveComplete}
+                onHide={hideSaveDialog}
+            />
+        </>
     );
 };
 
