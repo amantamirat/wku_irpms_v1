@@ -66,11 +66,11 @@ export class ReviewerController {
             if (!req.user) throw new Error("User not found!");
 
             const { id } = req.params;
-            const { status, weight, } = req.body;
+            const { weight, } = req.body;
 
             const dto: UpdateReviewerDTO = {
                 id,
-                data: { status, weight },
+                data: { weight },
                 userId: req.user._id
             };
 

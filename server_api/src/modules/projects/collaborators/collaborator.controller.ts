@@ -1,15 +1,13 @@
 import { Response } from 'express';
-import mongoose from 'mongoose';
+import { DeleteDto } from '../../../util/delete.dto';
 import { errorResponse, successResponse } from '../../../util/response';
 import { AuthenticatedRequest } from '../../users/auth/auth.middleware';
-import { CollaboratorService } from './collaborator.service';
-import { CollaboratorStatus } from './collaborator.enum';
 import {
     CreateCollaboratorDto,
     GetCollaboratorsOptions,
     UpdateCollaboratorDto,
 } from './collaborator.dto';
-import { DeleteDto } from '../../../util/delete.dto';
+import { CollaboratorService } from './collaborator.service';
 
 const service = new CollaboratorService();
 
@@ -51,6 +49,23 @@ export class CollaboratorController {
         }
     }
 
+
+    static async changeCollaboratorStatus(req: AuthenticatedRequest, res: Response) {
+        try {
+            if (!req.user) throw new Error("User not found!");
+
+            const { id } = req.params;
+            const { status } = req.body;
+
+            const dto: UpdateCollaboratorDto = { id, data: { status }, userId: req.user._id };
+            const updated = await service.changeCollaboratorStatus(dto);
+
+            successResponse(res, 200, `Collaborator status changed to ${status}`, updated);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    }
+
     static async updateCollaborator(req: AuthenticatedRequest, res: Response) {
         try {
             if (!req.user) throw new Error('User not found!');
@@ -62,7 +77,7 @@ export class CollaboratorController {
                 id,
                 data: {
                     isLeadPI: isLeadPI ? true : undefined,
-                    status: status as CollaboratorStatus,
+                   // status: status as CollaboratorStatus,
                 },
                 userId: req.user._id,
             };

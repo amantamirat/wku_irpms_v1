@@ -8,6 +8,9 @@ const router: Router = Router();
 router.post('/', verifyActiveAccount, CollaboratorController.createCollaborator);
 router.get('/', verifyActiveAccount, CollaboratorController.getCollaborators);
 router.put('/:id', verifyActiveAccount, CollaboratorController.updateCollaborator);
+router.put('/:id/status', verifyActiveAccount,
+    //checkPermission([PERMISSIONS.REVIEWER.CHANGE_STATUS, PERMISSIONS.REVIEWER.APPROVE]),
+    CollaboratorController.changeCollaboratorStatus);
 router.delete('/:id', verifyActiveAccount, CollaboratorController.deleteCollaborator);
 
 export default router;

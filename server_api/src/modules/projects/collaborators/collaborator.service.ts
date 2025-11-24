@@ -6,15 +6,20 @@ import {
     GetCollaboratorsOptions,
     UpdateCollaboratorDto,
 } from "./collaborator.dto";
+import { CollaboratorStatus } from "./collaborator.enum";
+import { CollaboratorPermission } from "./collaborator.permission";
 import { CollaboratorRepository, ICollaboratorRepository } from "./collaborator.repository";
+import { CollaboratorStateMachine } from "./collaborator.state-machine";
 
 export class CollaboratorService {
     private repository: ICollaboratorRepository;
     private projectRepository: IProjectRepository;
+    private permission: CollaboratorPermission;
 
     constructor(repository: ICollaboratorRepository = new CollaboratorRepository(), projectRepository?: IProjectRepository) {
         this.repository = repository;
         this.projectRepository = projectRepository || new ProjectRepository();
+        this.permission = new CollaboratorPermission(this.repository);
     }
 
     async createCollaborator(dto: CreateCollaboratorDto) {
@@ -40,6 +45,28 @@ export class CollaboratorService {
     async updateCollaborator(dto: UpdateCollaboratorDto) {
         const updatedCollaborator = await this.repository.update(dto.id, dto.data);
         return updatedCollaborator;
+    }
+
+    async changeCollaboratorStatus(dto: UpdateCollaboratorDto) {
+        const { id, data, userId } = dto;
+        const collaboratorDoc = await this.repository.findById(id);
+        if (!collaboratorDoc) throw new Error("Collaborator not found");
+        const projectDoc = await this.projectRepository.findById(String(collaboratorDoc.project));
+        if (!projectDoc) throw new Error("Project not found");
+        const nextState = data.status;
+        if (!nextState) throw new Error("Status is required");
+        const current = collaboratorDoc.status;
+        //if project state is deny here 
+
+        // --- State Machine Validation ---
+        CollaboratorStateMachine.validateTransition(current, nextState);
+        // Permissions
+        const isActivationChange = current === CollaboratorStatus.active || nextState === CollaboratorStatus.active;
+        if (isActivationChange) {
+            await this.permission.validateCollaboratorPermission(id, userId, collaboratorDoc);
+        }
+        const updated = await this.repository.update(dto.id, dto.data);
+        return updated;
     }
 
     async deleteCollaborator(dto: DeleteDto) {
