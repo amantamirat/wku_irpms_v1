@@ -2,7 +2,6 @@
 import { IProjectRepository, ProjectRepository } from "./project.repository";
 import {
     CreateProjectDTO,
-    DeleteProjectDTO,
     GetProjectsDTO,
     UpdateProjectDTO
 } from "./project.dto";
@@ -11,6 +10,7 @@ import { CacheService } from "../../util/cache/cache.service";
 import { Cycle } from "../cycles/cycle.model";
 import Applicant from "../applicants/applicant.model";
 import { Collaborator } from "./collaborators/collaborator.model";
+import { DeleteDto } from "../../util/delete.dto";
 
 export class ProjectService {
     private repository: IProjectRepository;
@@ -82,7 +82,7 @@ export class ProjectService {
     // ---------------------------------------------------
     // DELETE
     // ---------------------------------------------------
-    async deleteProject(dto: DeleteProjectDTO) {
+    async deleteProject(dto: DeleteDto) {
         const { id } = dto;
         const project = await this.repository.findById(id);
         if (!project) throw new Error("Project not found");

@@ -31,11 +31,7 @@ export interface UpdateProjectDTO {
     userId: string;  // who is making the update
 }
 
-// DELETE Project
-export interface DeleteProjectDTO {
-    id: string;
-    userId: string;
-}
+
 
 export interface Phase {
     activity: string;

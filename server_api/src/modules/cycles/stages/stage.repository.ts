@@ -4,6 +4,7 @@ import { IStage, Stage } from "./stage.model";
 
 export interface IStageRepository {
     findById(id: string): Promise<IStage | null>;
+    findLastStageByCycle(options: GetStagesDTO): Promise<IStage | null>;
     find(filters: GetStagesDTO): Promise<Partial<IStage>[]>;
     create(dto: CreateStageDTO): Promise<IStage>;
     update(id: string, data: UpdateStageDTO["data"]): Promise<IStage>;
@@ -15,10 +16,19 @@ export class StageRepository implements IStageRepository {
 
     async findById(id: string) {
         return Stage.findById(new mongoose.Types.ObjectId(id))
-            .populate("cycle")
-            .populate("evaluation")
+            //.populate("cycle")
+            //.populate("evaluation")
             .lean<IStage>()
             .exec();
+    }
+
+    async findLastStageByCycle(options: GetStagesDTO): Promise<IStage | null> {
+        const query: any = {};
+        if (options.cycle) {
+            query.cycle = new mongoose.Types.ObjectId(options.cycle);
+        }
+        return Stage.findOne(query)
+            .sort({ order: -1 }).lean<IStage>();
     }
 
     async find(filters: GetStagesDTO) {

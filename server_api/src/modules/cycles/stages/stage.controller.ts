@@ -4,7 +4,7 @@ import { StageService } from "./stage.service";
 import { CreateStageDTO, GetStagesDTO, UpdateStageDTO } from "./stage.dto";
 import { successResponse, errorResponse } from "../../../util/response";
 import { StageStatus } from "./stage.enum";
-
+const service = new StageService();
 export class StageController {
     static async createStage(req: Request, res: Response) {
         try {
@@ -18,7 +18,7 @@ export class StageController {
                 //status: StageStatus.planned
             };
 
-            const stage = await StageService.createStage(dto);
+            const stage = await service.createStage(dto);
             successResponse(res, 201, "Stage created successfully", stage);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -35,7 +35,7 @@ export class StageController {
                 status: status as StageStatus
             };
 
-            const stages = await StageService.getStages(dto);
+            const stages = await service.getStages(dto);
             successResponse(res, 200, "Stages fetched successfully", stages);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -58,7 +58,7 @@ export class StageController {
                 },
             };
 
-            const updated = await StageService.updateStage(dto);
+            const updated = await service.updateStage(dto);
             successResponse(res, 200, "Stage updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -68,7 +68,7 @@ export class StageController {
     static async deleteStage(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const deleted = await StageService.deleteStage(id);
+            const deleted = await service.deleteStage(id);
             successResponse(res, 200, "Stage deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

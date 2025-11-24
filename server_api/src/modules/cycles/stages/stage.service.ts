@@ -1,7 +1,6 @@
 import { Evaluation } from "../../evaluations/evaluation.model";
 import { CreateStageDTO, GetStagesDTO, UpdateStageDTO } from "./stage.dto";
 import { StageStatus, StageType } from "./stage.enum";
-import { Stage } from "./stage.model";
 import { IStageRepository, StageRepository } from "./stage.repository";
 
 export class StageService {
@@ -14,7 +13,7 @@ export class StageService {
     /**
      * Create a new stage
      */
-    static async createStage(dto: CreateStageDTO) {
+    async createStage(dto: CreateStageDTO) {
         const { cycle, name, type, evaluation, deadline } = dto;
 
         // Validate evaluation existence
@@ -24,19 +23,14 @@ export class StageService {
 
         // If adding an evaluation, no validation should exist before it
         if (type === StageType.evaluation) {
-            const validationBefore = await Stage.findOne({
-                cycle: cycle,
-                type: StageType.validation,
-            });
-            if (validationBefore) {
+            const validationStages = await this.repository.find({ cycle, type: StageType.validation });
+            if (validationStages.length > 0) {
                 throw new Error("Cannot add an evaluation stage after a validation stage already exists.");
             }
         }
 
         // Find the latest stage order for this call
-        const lastStage = await Stage.findOne({ cycle: cycle })
-            .sort({ order: -1 })
-            .select("order");
+        const lastStage = await this.repository.findLastStageByCycle({ cycle: cycle });
 
         const nextOrder = lastStage ? lastStage.order + 1 : 1;
 
@@ -45,15 +39,7 @@ export class StageService {
         }
 
         // Create stage
-        const stage = await Stage.create({
-            cycle,
-            name,
-            type,
-            evaluation,
-            deadline,
-            order: nextOrder,
-            status: StageStatus.planned,
-        });
+        const stage = await this.repository.create({ ...dto, status: StageStatus.planned });
 
         return stage;
     }
@@ -61,25 +47,17 @@ export class StageService {
     /**
      * Get all stages or by call
      */
-    static async getStages(dto: GetStagesDTO) {
-        const filter: any = {};
-        if (dto.cycle) filter.cycle = dto.cycle;
-        if (dto.order) filter.order = dto.order;
-        if (dto.status) filter.status = dto.status;
-
-        return await Stage.find(filter)
-            .populate("evaluation")
-            .sort({ order: 1 })
-            .lean();
+    async getStages(dto: GetStagesDTO) {
+        return await this.repository.find(dto);
     }
 
     /**
      * Update a stage
      */
-    static async updateStage(dto: UpdateStageDTO) {
+    async updateStage(dto: UpdateStageDTO) {
         const { id, data } = dto;
 
-        const stage = await Stage.findById(id);
+        const stage = await this.repository.findById(id);
         if (!stage) throw new Error("Stage not found");
 
         /*
@@ -105,15 +83,15 @@ export class StageService {
         */
 
         //only one active stage should be there
-        Object.assign(stage, data);
-        return stage.save();
+        //Object.assign(stage, data);
+        return await this.repository.update(id, data);
     }
 
     /**
      * Delete a stage
      */
-    static async deleteStage(id: string) {
-        const stage = await Stage.findById(id);
+    async deleteStage(id: string) {
+        const stage = await this.repository.findById(id);
         if (!stage) throw new Error("Stage not found");
 
         // Rule 1: Only planned (pending) stages can be deleted
@@ -122,16 +100,14 @@ export class StageService {
         }
 
         // Rule 2: Only the last stage can be deleted
-        const lastStage = await Stage.findOne({ cycle: stage.cycle })
-            .sort({ order: -1 })
-            .select("order");
+        const lastStage = await this.repository.findLastStageByCycle({ cycle: stage.cycle.toString() });
 
-        if (!lastStage || lastStage._id.toString() !== stage._id.toString()) {
+        if (!lastStage || lastStage._id.toString() !== id) {
             throw new Error("Only the last stage can be deleted.");
         }
 
         // Proceed with deletion
-        const deleted = await stage.deleteOne();
+        const deleted = await this.repository.delete(id); //stage.deleteOne();
         return deleted;
     }
 

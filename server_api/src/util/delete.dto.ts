@@ -1,6 +1,4 @@
-import mongoose from "mongoose";
-
 export interface DeleteDto {
-    id: string | mongoose.Types.ObjectId;
+    id: string;
     userId?: string;
 }

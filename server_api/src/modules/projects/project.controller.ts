@@ -3,7 +3,8 @@ import mongoose from "mongoose";
 import { errorResponse, successResponse } from "../../util/response";
 import { AuthenticatedRequest } from "../users/auth/auth.middleware";
 import { ProjectService } from "./project.service";
-import { CreateProjectDTO, DeleteProjectDTO, UpdateProjectDTO } from "./project.dto";
+import { CreateProjectDTO, UpdateProjectDTO } from "./project.dto";
+import { DeleteDto } from "../../util/delete.dto";
 
 
 const projectService = new ProjectService();
@@ -119,7 +120,7 @@ export class ProjectController {
       if (!req.user) throw new Error("User not found!");
 
       const { id } = req.params;
-      const dto: DeleteProjectDTO = { id, userId: req.user._id };
+      const dto: DeleteDto = { id, userId: req.user._id };
 
       const deleted = await projectService.deleteProject(dto);
       successResponse(res, 200, "Project deleted successfully", deleted);

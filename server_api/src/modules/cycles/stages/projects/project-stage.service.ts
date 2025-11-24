@@ -2,22 +2,26 @@
 
 import { IProjectStageRepository, ProjectStageRepository } from "./project-stage.repository";
 import { CreateProjectStageDTO, DeleteProjectStageDTO, GetProjectStagesDTO, UpdateProjectStageDTO } from "./project-stage.dto";
-import { Stage } from "../stage.model";
 import { ProjectStage } from "./project-stage.model";
 import { ProjectStageStatus } from "./project-stage.enum";
 import { ProjectStageStateMachine } from "./project-stage.state-machine";
 import { IProjectRepository, ProjectRepository } from "../../../projects/project.repository";
 import { ProjectSynchronizer } from "../../../projects/project.synchronizer";
 import { IProject } from "../../../projects/project.model";
+import { IStageRepository, StageRepository } from "../stage.repository";
 
 export class ProjectStageService {
     private repository: IProjectStageRepository;
     private projectRepository: IProjectRepository;
+    private stageRepository: IStageRepository;
     private projectSynchronizer: ProjectSynchronizer;
 
-    constructor(repository?: IProjectStageRepository, projectRepository?: IProjectRepository) {
+    constructor(repository?: IProjectStageRepository, projectRepository?: IProjectRepository,
+        stageRepository?: IStageRepository
+    ) {
         this.repository = repository || new ProjectStageRepository();
         this.projectRepository = projectRepository || new ProjectRepository();
+        this.stageRepository = stageRepository || new StageRepository();
         this.projectSynchronizer = new ProjectSynchronizer(this.projectRepository, this.repository);
     }
 
@@ -34,12 +38,13 @@ export class ProjectStageService {
         ////validate/////
         const projectDoc = await this.projectRepository.findById(dto.projectId);
         if (!projectDoc) throw new Error("Project not found");
-        const stage = await Stage.findById(dto.stageId).lean();
+        const stage = await this.stageRepository.findById(dto.stageId);
         if (!stage) throw new Error("Stage not found");
         if (stage.status !== "active") throw new Error("Stage is not active");
         if (stage.deadline < new Date()) throw new Error("Stage deadline has passed");
         // Check previous stage
         if (stage.order > 1) {
+            /*
             const prevStage = await Stage.findOne({
                 order: stage.order - 1,
                 cycle: stage.cycle
@@ -55,12 +60,13 @@ export class ProjectStageService {
             if (!prevProjectStage) throw new Error("Previous project stage not found");
 
             if (prevProjectStage.status !== ProjectStageStatus.reviewed) {
-                throw new Error("Previous project stage is not accepted");
+               // throw new Error("Previous project stage is not accepted");
             }
+               */
         }
         //////validation end///////////
-        const created = await this.repository.create(dto);             
-        const syncedProject = await this.projectSynchronizer.syncProjectStatus(projectId, projectDoc);       
+        const created = await this.repository.create(dto);
+        const syncedProject = await this.projectSynchronizer.syncProjectStatus(projectId, projectDoc);
         return { created, syncedProject }
     }
 

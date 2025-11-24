@@ -1,8 +1,8 @@
-import mongoose from "mongoose";
 import { StageStatus, StageType } from "./stage.enum";
 
 export interface GetStagesDTO {
     cycle?: string;
+    type?: StageType;
     order?: number;
     status?: StageStatus;
 }
@@ -13,7 +13,7 @@ export interface CreateStageDTO {
     type: StageType;
     evaluation: string;
     deadline?: Date;
-    //status: StageStatus.planned;
+    status?: StageStatus.planned;
 }
 
 export interface UpdateStageDTO {

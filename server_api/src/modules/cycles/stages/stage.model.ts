@@ -5,6 +5,7 @@ import { Evaluation } from "../../evaluations/evaluation.model";
 
 
 export interface IStage extends Document {
+    _id: string;
     cycle: mongoose.Types.ObjectId;
     name: string;
     type: StageType;
