@@ -1,18 +1,18 @@
-import { Button } from "primereact/button";
-import { Column } from "primereact/column";
-import { DataTable, DataTableFilterMeta } from "primereact/datatable";
-import { Toolbar } from "primereact/toolbar";
+"use client";
+
 import { useEffect, useState } from "react";
-import ConfirmDialog from "@/components/ConfirmationDialog";
-import { Project } from "../../models/project.model";
+import { CrudManager } from "@/components/CrudManager";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import { useCrudList } from "@/hooks/useCrudList";
+import ErrorCard from "@/components/ErrorCard";
+import ListSkeleton from "@/components/ListSkeleton";
+import MyBadge from "@/templates/MyBadge";
+
 import { CollaboratorApi } from "../api/collaborator.api";
 import CollaboratorDialog from "./CollaboratorDialog";
 import { Collaborator, CollaboratorStatus } from "../models/collaborator.model";
+import { Project } from "../../models/project.model";
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
-import { InputText } from "primereact/inputtext";
-import { handleGlobalFilterChange, initFilters } from "@/utils/filterUtils";
-import MyBadge from "@/templates/MyBadge";
-import ErrorCard from "@/components/ErrorCard";
 
 interface CollaboratorProps {
     project?: Project;
@@ -21,210 +21,127 @@ interface CollaboratorProps {
 }
 
 const CollaboratorManager = ({ project, onSave, onRemove }: CollaboratorProps) => {
+    const confirm = useConfirmDialog();
 
     const emptyCollaborator: Collaborator = {
         project: project ?? "",
         status: CollaboratorStatus.pending
     };
 
-    const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
-    const [error, setError] = useState<string | null>(null);
-    const [collaborator, setCollaborator] = useState<Collaborator>(emptyCollaborator);
+    // CRUD state handler
+    const {
+        items: collaborators,
+        setAll,
+        updateItem,
+        removeItem,
+        loading,
+        setLoading,
+        error,
+        setError,
+    } = useCrudList<Collaborator>();
+
+    const [selectedCollaborator, setSelectedCollaborator] = useState<Collaborator>(emptyCollaborator);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-    const [globalFilter, setGlobalFilter] = useState('');
-    const [filters, setFilters] = useState<DataTableFilterMeta>({});
-
-    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
-    };
-
+    // Fetch collaborators for project
     useEffect(() => {
-        setFilters(initFilters());
-        setGlobalFilter('');
-    }, []);
-
-    useEffect(() => {
-        const fetchCollaborators = async () => {
+        const fetchData = async () => {
             try {
-                const data = await CollaboratorApi.getCollaborators({ project: project?._id });
-                setCollaborators(data);
-            } catch (err) {
-                setError("Failed to fetch collaborators:" + err);
+                setLoading(true);
+                const data = await CollaboratorApi.getCollaborators({ project: project });
+                setAll(data);
+            } catch (err: any) {
+                setError("Failed to fetch collaborators. " + (err.message ?? ""));
+            } finally {
+                setLoading(false);
             }
         };
-        // if (project?._id) {
-        fetchCollaborators();
-        // }
-        // else {
-        //  setCollaborators(project.collaborators ?? []);
-        // }
+
+        fetchData();
     }, [project?._id]);
 
-    if (error) {
-        return <ErrorCard errorMessage={error} />;
-    }
+    if (loading) return <ListSkeleton rows={10} />;
+    if (error) return <ErrorCard errorMessage={error} />;
 
-
-    const onSaveComplete = (savedCollaborator: Collaborator) => {
-        let _collaborators = [...collaborators]; // local copy of state
-        const index = _collaborators.findIndex(
-            (c) => (c.applicant as Applicant)._id === (savedCollaborator.applicant as Applicant)._id
-        );
-        if (index !== -1) {
-            _collaborators[index] = { ...savedCollaborator };
-        } else {
-            _collaborators.push({ ...savedCollaborator });
-        }
-        setCollaborators(_collaborators); // update state
-        hideDialogs(); // close dialog
-    };
-
-
-    const deleteCollaborator = async () => {
-        const deleted = await CollaboratorApi.deleteCollaborator(collaborator);
-        if (deleted) {
-            setCollaborators(collaborators.filter((c) => c._id !== collaborator._id));
-            hideDialogs();
-        }
-    };
-
-    const hideDialogs = () => {
-        setCollaborator(emptyCollaborator);
+    // Save or update collaborator
+    const onSaveComplete = (saved: Collaborator) => {
+        updateItem(saved);
+        if (onSave) onSave(saved);
+        setSelectedCollaborator(emptyCollaborator);
         setShowSaveDialog(false);
-        setShowDeleteDialog(false);
-    }
-
-    const startToolbarTemplate = () => (
-        <div className="my-2">
-            <Button icon="pi pi-plus" severity="success" className="mr-2" tooltip="Add Collaborator"
-                onClick={() => {
-                    setCollaborator(emptyCollaborator);
-                    setShowSaveDialog(true);
-                }}
-                visible={!!project}
-            />
-        </div>
-    );
-
-    const statusBodyTemplate = (rowData: Collaborator) => {
-        return (
-            <MyBadge type="status" value={rowData.status ?? 'Unknown'} />
-        );
     };
 
-
-    const header = (
-        <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Collaborators</h5>
-            <span className="block mt-2 md:mt-0 p-input-icon-left">
-                <i className="pi pi-search" />
-                <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
-            </span>
-        </div>
-    );
-
-    const actionBodyTemplate = (rowData: Collaborator) => {
-        // 👇 declare it here
-        const isPending = rowData.status === CollaboratorStatus.pending;
-        // (or use CollaboratorStatus.pending if you have an enum)
-        return (
-            <>
-                {/* ✅ Toggle status button */}
-                <Button
-                    icon={isPending ? "pi pi-check-circle" : "pi pi-pause"}
-                    rounded
-                    severity={isPending ? "success" : "danger"}
-                    className="p-button-rounded p-button-text mr-2"
-                    style={{ fontSize: "1rem", width: '2.5rem', height: '2.5rem' }}
-                    onClick={() => {
-                        const updatedStatus = isPending ? "ACTIVE" : "PENDING";
-                        console.log(`Changing ${rowData._id} to ${updatedStatus}`);
-                    }}
-                />
-
-                {/* ❌ Delete button */}
-                <Button
-                    icon="pi pi-times"
-                    rounded
-                    severity="warning"
-                    className="p-button-rounded p-button-text"
-                    style={{ fontSize: "1.2rem" }}
-                    onClick={() => {
-                        setCollaborator(rowData);
-                        setShowDeleteDialog(true);
-                    }}
-                />
-            </>
-        );
+    // Delete collaborator
+    const deleteCollaborator = async (row: Collaborator) => {
+        const deleted = await CollaboratorApi.deleteCollaborator(row);
+        if (deleted) {
+            removeItem(row);
+            if (onRemove) onRemove(row);
+        }
     };
 
+    const columns = [
+        /**
+         *  {
+            header: "#", body: (_: any, { rowIndex }: any) => rowIndex + 1,
+        },
+         */
+
+        { header: "Workspace", field: "applicant.organization.name", sortable: true },
+        {
+            header: "Collaborator",
+            body: (row: Collaborator) =>
+                `${(row.applicant as Applicant).first_name} ${(row.applicant as Applicant).last_name}`
+        },
+        {
+            header: "Gender",
+            field: "applicant.gender",
+            sortable: true,
+            headerStyle: { minWidth: "8rem" }
+        },
+        !project && {
+            header: "Project",
+            field: "project.title",
+            sortable: true
+        },
+        {
+            header: "Status",
+            body: (row: Collaborator) => <MyBadge type="status" value={row.status ?? "Unknown"} />
+        }
+    ].filter(Boolean);
 
     return (
         <>
-            <div className="card">
-                {project &&
-                    <Toolbar className="mb-4" start={startToolbarTemplate} />
+            <CrudManager
+                headerTitle="Collaborators"
+                items={collaborators}
+                dataKey="_id"
+                columns={columns}
+                canCreate={!!project}
+                canDelete={!!project}
+                enableSearch
+                onCreate={() => {
+                    setSelectedCollaborator(emptyCollaborator);
+                    setShowSaveDialog(true);
+                }}
+                onDelete={(row: Collaborator) =>
+                    confirm.ask({
+                        item: `${(row.applicant as Applicant).first_name}`,
+                        onConfirmAsync: () => deleteCollaborator(row),
+                    })
                 }
-                <DataTable
-                    value={collaborators}
-                    selection={collaborator}
-                    header={header}
-                    onSelectionChange={(e) => setCollaborator(e.value as Collaborator)}
-                    dataKey={"_id"}
-                    paginator
-                    rows={10}
-                    rowsPerPageOptions={[5, 10, 25]}
-                    className="datatable-responsive"
-                    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                    emptyMessage={'No collaborators found.'}
-                    scrollable
-                    //tableStyle={{ minWidth: '50rem' }}
-                    globalFilter={globalFilter}
-                    filters={filters}
-                >
-                    <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
-                    <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
+            />
 
-                    <Column field="applicant.organization.name" header="Workspace" sortable />
-
-                    <Column
-                        field="applicant.first_name"
-                        header="Collaborator"
-                        body={(rowData) => `${rowData.applicant.first_name} ${rowData.applicant.last_name}`}
-                        sortable
-                    />
-                    <Column field="applicant.gender" header="Gender" sortable headerStyle={{ minWidth: '8rem' }} />
-                    {!project &&
-                        <Column field="project.title" header="Project" sortable />
-                    }
-                    <Column header="Status" body={statusBodyTemplate} sortable />
-                    {project &&
-                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
-                    }
-                </DataTable>
-
-                {project && collaborator &&
-                    <CollaboratorDialog
-                        collaborator={collaborator}
-                        visible={showSaveDialog}
-                        onSave={onSave}
-                        onComplete={onSaveComplete}
-                        onHide={hideDialogs}
-                    />}
-
-                {project && collaborator && collaborator.applicant && (
-                    <ConfirmDialog
-                        showDialog={showDeleteDialog}
-                        item={String((collaborator.applicant as any).first_name)}
-                        onConfirmAsync={collaborator._id ? deleteCollaborator : undefined}
-                        onHide={hideDialogs}
-                    />
-                )}
-
-            </div>
+            {project && (
+                <CollaboratorDialog
+                    collaborator={selectedCollaborator}
+                    visible={showSaveDialog}
+                    onComplete={onSaveComplete}
+                    onHide={() => setShowSaveDialog(false)}
+                />
+            )}
         </>
     );
-}
+};
+
 export default CollaboratorManager;

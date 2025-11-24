@@ -30,6 +30,9 @@ export class CollaboratorService {
     }
 
     async getCollaborators(options: GetCollaboratorsOptions) {
+        if (!options.project && !options.applicant) {
+            throw new Error("At least one filter option (project or applicant) must be provided");
+        }
         const collaborators = await this.repository.find(options);
         return collaborators;
     }
@@ -39,7 +42,7 @@ export class CollaboratorService {
         return updatedCollaborator;
     }
 
-     async deleteCollaborator(dto: DeleteDto) {       
+    async deleteCollaborator(dto: DeleteDto) {
         const { id, userId } = dto;
 
         // Verify user can delete this collaborator

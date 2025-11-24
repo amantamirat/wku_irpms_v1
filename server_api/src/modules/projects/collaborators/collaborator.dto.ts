@@ -22,9 +22,9 @@ export interface UpdateCollaboratorDto {
 
 // Options for querying collaborators
 export interface GetCollaboratorsOptions {
-    userId?: string;
+    //userId?: string;
     project?: string;
     applicant?: string;
-    status?:string;
+    //status?:string;
 }
 

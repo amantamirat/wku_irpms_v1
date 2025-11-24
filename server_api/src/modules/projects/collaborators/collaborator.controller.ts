@@ -41,7 +41,7 @@ export class CollaboratorController {
             const filter: GetCollaboratorsOptions = {
                 project: project ? project as string : undefined,
                 applicant: applicant ? applicant as string : undefined,
-                userId: user && req.user ? req.user._id : undefined,
+                //userId: user && req.user ? req.user._id : undefined,
             };
 
             const collaborators = await service.getCollaborators(filter);

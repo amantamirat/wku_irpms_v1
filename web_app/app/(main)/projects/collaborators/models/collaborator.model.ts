@@ -30,3 +30,9 @@ export const sanitizeCollaborator = (collaborator: Partial<Collaborator>): Colla
                 : collaborator.applicant,
     } as Collaborator;
 }
+
+
+export interface GetCollaboratorsOptions {
+    project?: string | Project;
+    applicant?: string | Applicant;
+}

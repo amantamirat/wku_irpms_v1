@@ -1,16 +1,15 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Collaborator, sanitizeCollaborator } from "../models/collaborator.model";
+import { Collaborator, GetCollaboratorsOptions, sanitizeCollaborator } from "../models/collaborator.model";
 const end_point = '/project/collaborators/';
 
-export interface GetCollaboratorsOptions {
-    project?: string;
-}
+
 
 export const CollaboratorApi = {
 
     async getCollaborators(options: GetCollaboratorsOptions): Promise<Collaborator[]> {
         const query = new URLSearchParams();
-        if (options.project) query.append("project", options.project);
+        const sanitized = sanitizeCollaborator(options);
+        if (options.project) query.append("project", sanitized.project as string);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Collaborator[];
     },
