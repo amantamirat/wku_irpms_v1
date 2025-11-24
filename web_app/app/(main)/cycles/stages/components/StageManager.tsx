@@ -28,6 +28,10 @@ const StageManager = ({ cycle }: StageManagerProps) => {
         status: StageStatus.planned
     };
 
+    const canCreate = true;// hasPermission([PERMISSIONS.STAGE.CREATE]);
+    const canEdit = true; //hasPermission([PERMISSIONS.STAGE.UPDATE]);
+    const canDelete = true;//hasPermission([PERMISSIONS.STAGE.DELETE])
+
     // CRUD Hook
     const {
         items: stages,
@@ -112,8 +116,9 @@ const StageManager = ({ cycle }: StageManagerProps) => {
                 items={stages}
                 dataKey="_id"
                 columns={columns}
-                canCreate
-                canDelete
+                canCreate={canCreate}
+                canEdit={canEdit}
+                canDelete={canDelete}
                 onCreate={() => {
                     setSelectedStage(emptyStage);
                     setShowSaveDialog(true);
