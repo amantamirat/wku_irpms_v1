@@ -8,8 +8,10 @@ import {
     CreateCollaboratorDto,
     GetCollaboratorsOptions,
     UpdateCollaboratorDto,
-    DeleteCollaboratorDto,
 } from './collaborator.dto';
+import { DeleteDto } from '../../../util/delete.dto';
+
+const service = new CollaboratorService();
 
 export class CollaboratorController {
 
@@ -19,13 +21,13 @@ export class CollaboratorController {
 
             const { project, applicant, isLeadPI } = req.body;
             const dto: CreateCollaboratorDto = {
-                applicant: new mongoose.Types.ObjectId(applicant as string),
-                project: new mongoose.Types.ObjectId(project as string),
+                applicant: applicant as string,
+                project: project as string,
                 isLeadPI: isLeadPI ? true : undefined,
                 userId: req.user._id,
             };
 
-            const created = await CollaboratorService.createCollaborator(dto);
+            const created = await service.createCollaborator(dto);
             successResponse(res, 201, 'Collaborator created successfully', created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -37,12 +39,12 @@ export class CollaboratorController {
             const { project, applicant, user } = req.query;
 
             const filter: GetCollaboratorsOptions = {
-                project: project ? new mongoose.Types.ObjectId(project as string) : undefined,
-                applicant: applicant ? new mongoose.Types.ObjectId(applicant as string) : undefined,
+                project: project ? project as string : undefined,
+                applicant: applicant ? applicant as string : undefined,
                 userId: user && req.user ? req.user._id : undefined,
             };
 
-            const collaborators = await CollaboratorService.getCollaborators(filter);
+            const collaborators = await service.getCollaborators(filter);
             successResponse(res, 200, 'Collaborators fetched successfully', collaborators);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -65,7 +67,7 @@ export class CollaboratorController {
                 userId: req.user._id,
             };
 
-            const updated = await CollaboratorService.updateCollaborator(dto);
+            const updated = await service.updateCollaborator(dto);
             successResponse(res, 200, 'Collaborator updated successfully', updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -77,9 +79,9 @@ export class CollaboratorController {
             if (!req.user) throw new Error('User not found!');
 
             const { id } = req.params;
-            const dto: DeleteCollaboratorDto = { id, userId: req.user._id };
+            const dto: DeleteDto = { id, userId: req.user._id };
 
-            const deleted = await CollaboratorService.deleteCollaborator(dto);
+            const deleted = await service.deleteCollaborator(dto);
             successResponse(res, 200, 'Collaborator deleted successfully', deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

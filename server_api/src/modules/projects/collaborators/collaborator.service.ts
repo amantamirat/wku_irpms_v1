@@ -1,60 +1,56 @@
-import Applicant from "../../applicants/applicant.model";
-import { Project } from "../project.model";
+// collaborator.service.ts
+import { DeleteDto } from "../../../util/delete.dto";
+import { IProjectRepository, ProjectRepository } from "../project.repository";
 import {
     CreateCollaboratorDto,
-    DeleteCollaboratorDto,
     GetCollaboratorsOptions,
     UpdateCollaboratorDto,
 } from "./collaborator.dto";
-import { CollaboratorStatus } from "./collaborator.enum";
-import { Collaborator } from "./collaborator.model";
-
+import { CollaboratorRepository, ICollaboratorRepository } from "./collaborator.repository";
 
 export class CollaboratorService {
+    private repository: ICollaboratorRepository;
+    private projectRepository: IProjectRepository;
 
-    static async createCollaborator(dto: CreateCollaboratorDto) {
-        const project = await Project.findById(dto.project).lean();
-        if (!project) throw new Error("Project not found");
-        const applicant = await Applicant.findById(dto.applicant).lean();
-        if (!applicant) throw new Error("Applicant not found");
-        const createdCollaborator = await Collaborator.create({ ...dto });
+    constructor(repository: ICollaboratorRepository = new CollaboratorRepository(), projectRepository?: IProjectRepository) {
+        this.repository = repository;
+        this.projectRepository = projectRepository || new ProjectRepository();
+    }
+
+    async createCollaborator(dto: CreateCollaboratorDto) {
+        const { applicant, project, userId, isLeadPI, status } = dto;
+
+        const projectDoc = this.projectRepository.findById(project);
+
+        if (!projectDoc) throw new Error("Project not found");
+        //if (!applicantExists) throw new Error("Applicant not found");
+
+        const createdCollaborator = await this.repository.create(dto);
         return createdCollaborator;
     }
 
-    static async getCollaborators(options: GetCollaboratorsOptions) {
-        const filter: any = {};
-        if (options.project) {
-            filter.project = options.project;
-        }
-        if (options.applicant) {
-            filter.applicant = options.applicant;
-        }
-        const collaborators = await Collaborator.find(filter).populate([
-            { path: 'applicant', populate: { path: 'organization' } },
-            { path: 'project' }
-        ]).lean();
+    async getCollaborators(options: GetCollaboratorsOptions) {
+        const collaborators = await this.repository.find(options);
         return collaborators;
     }
 
-    static async updateCollaborator(dto: UpdateCollaboratorDto) {
-        const { id, data, userId } = dto;
-        const collaborator = await Collaborator.findById(id);
-        if (!collaborator) throw new Error("Collaborator not found");
-        Object.assign(collaborator, data);
-        return collaborator.save();
+    async updateCollaborator(dto: UpdateCollaboratorDto) {
+        const updatedCollaborator = await this.repository.update(dto.id, dto.data);
+        return updatedCollaborator;
     }
 
-    static async deleteCollaborator(dto: DeleteCollaboratorDto) {
+     async deleteCollaborator(dto: DeleteDto) {       
         const { id, userId } = dto;
-        const collaborator = await Collaborator.findById(id);
-        if (!collaborator) throw new Error("Collaborator not found");
-        const project = await Project.findById(collaborator.project).lean();
-        if (!project) throw new Error("Project not found");
-        const createdBy = project.createdBy ? project.createdBy.toString() : undefined;
-        if (!createdBy || createdBy !== userId) throw new Error("User not authorized to delete collaborator");
-        if (collaborator.status === CollaboratorStatus.active) {
-            throw new Error("Can Not Delete Active Collaborator");
-        }
-        return await collaborator.deleteOne();
+
+        // Verify user can delete this collaborator
+        //const canDelete = await repository.verifyUserCanDelete(id, userId);
+        //  if (!canDelete) {
+        //throw new Error("User not authorized to delete collaborator or collaborator is active");
+        // }
+
+        const deletedCollaborator = await this.repository.delete(id);
+        if (!deletedCollaborator) throw new Error("Collaborator not found");
+
+        return deletedCollaborator;
     }
 }

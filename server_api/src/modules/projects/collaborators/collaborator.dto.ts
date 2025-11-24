@@ -3,8 +3,8 @@ import { CollaboratorStatus } from "./collaborator.enum";
 
 // Base fields for creating a collaborator
 export interface CreateCollaboratorDto {
-    project: mongoose.Types.ObjectId;
-    applicant: mongoose.Types.ObjectId;
+    project: string;
+    applicant: string;
     isLeadPI?: boolean;
     status?: CollaboratorStatus;
     userId: string; // actor performing the operation
@@ -12,7 +12,7 @@ export interface CreateCollaboratorDto {
 
 // Base fields for updating a collaborator
 export interface UpdateCollaboratorDto {
-    id: string | mongoose.Types.ObjectId;
+    id: string;
     data: Partial<{
         isLeadPI: boolean;
         status: CollaboratorStatus;
@@ -23,13 +23,8 @@ export interface UpdateCollaboratorDto {
 // Options for querying collaborators
 export interface GetCollaboratorsOptions {
     userId?: string;
-    project?: mongoose.Types.ObjectId;
-    applicant?: mongoose.Types.ObjectId;
-    status?: CollaboratorStatus;
+    project?: string;
+    applicant?: string;
+    status?:string;
 }
 
-// Delete DTO
-export interface DeleteCollaboratorDto {
-    id: string | mongoose.Types.ObjectId;
-    userId: string;
-}

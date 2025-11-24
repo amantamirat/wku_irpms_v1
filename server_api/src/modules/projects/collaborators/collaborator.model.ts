@@ -3,7 +3,7 @@ import { COLLECTIONS } from "../../../util/collections.enum";
 import { CollaboratorStatus } from "./collaborator.enum";
 
 
-interface ICollaborator extends Document {
+export interface ICollaborator extends Document {
     project: mongoose.Types.ObjectId;
     applicant: mongoose.Types.ObjectId;
     isLeadPI?: boolean;
