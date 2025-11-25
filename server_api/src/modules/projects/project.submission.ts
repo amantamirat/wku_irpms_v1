@@ -6,7 +6,7 @@ import { BaseTheme } from "../themes/theme.model";
 import { CollaboratorStatus } from "./collaborators/collaborator.enum";
 import { Collaborator } from "./collaborators/collaborator.model";
 import { PhaseType } from "./phase/phase.enum";
-import { Phase } from "./phase/phase.model";
+import { IPhase } from "./phase/phase.model";
 import { ProjectStatus } from "./project.enum";
 import { Project } from "./project.model";
 import { CreateProjectDto } from "./project.service";
@@ -84,7 +84,7 @@ export class ProService {
         }
         await Collaborator.insertMany(collaborators);
         await ProjectTheme.insertMany(themes);
-        await Phase.insertMany(phases);
+        await IPhase.insertMany(phases);
         await ProjectStage.create(projectStage);
         return submittedProject;
     }
