@@ -1,21 +1,25 @@
-import mongoose from "mongoose";
+
 import { PhaseType } from "./phase.enum";
 
-// ---------- CREATE DTO ----------
-export interface CreatePhaseDto {
-    // type: PhaseType; // "phase" | "breakdown"
-    type: PhaseType.phase;
+export interface PhaseDto {
     activity: string;
     duration: number;
     budget: number;
     description?: string;
+}
 
+// ---------- CREATE DTO ----------
+export interface CreatePhaseDto extends PhaseDto {
+    // type: PhaseType; // "phase" | "breakdown"
+    type: PhaseType.phase;
+    //activity: string;
+    //duration: number;
+    //budget: number;
+    //description?: string;
     // For Phase type
     project: string;
-
     // For Breakdown type
-    parent?: string;
-
+    // parent?: string;
     userId: string; // actor performing the operation
 }
 
@@ -39,8 +43,4 @@ export interface GetPhasesOptions {
     //userId?: string;
 }
 
-// ---------- DELETE DTO ----------
-export interface DeletePhaseDto {
-    id: string | mongoose.Types.ObjectId;
-    userId: string;
-}
+

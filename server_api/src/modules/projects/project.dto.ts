@@ -1,3 +1,4 @@
+import { PhaseDto } from "./phase/phase.dto";
 import { ProjectStatus } from "./project.enum";
 
 // GET / Query Projects
@@ -31,22 +32,13 @@ export interface UpdateProjectDTO {
     userId: string;  // who is making the update
 }
 
-
-
-export interface Phase {
-    activity: string;
-    duration: number;
-    budget: number;
-    description?: string;
-}
-
 export interface SubmitProjectDTO {
     cycle: string;
     title: string;
     summary?: string;
     leadPI: string;
     collaborators?: string[];
-    phases?: Phase[];
+    phases?: PhaseDto[];
     themes?: string[];
     documentPath?: string;
 }
