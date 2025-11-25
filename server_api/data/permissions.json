@@ -274,6 +274,26 @@
     "description": "Delete collaborators"
   },
   {
+    "category": "Phase Management",
+    "name": "phase:create",
+    "description": "Create phase entries"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:read",
+    "description": "Read phase entries"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:update",
+    "description": "Update phase entries"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:delete",
+    "description": "Delete phase entries"
+  },
+  {
     "category": "Reviewer Management",
     "name": "reviewer:create",
     "description": "Create new reviewers"

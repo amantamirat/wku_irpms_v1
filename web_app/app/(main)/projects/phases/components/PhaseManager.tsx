@@ -1,15 +1,20 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { Button } from "primereact/button";
-import { Column } from "primereact/column";
-import { DataTable } from "primereact/datatable";
-import { Toolbar } from "primereact/toolbar";
-import ConfirmDialog from "@/components/ConfirmationDialog";
+import { CrudManager } from "@/components/CrudManager";
+import ErrorCard from "@/components/ErrorCard";
+import ListSkeleton from "@/components/ListSkeleton";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import { useAuth } from "@/contexts/auth-context";
+
 import SavePhaseDialog from "./SavePhaseDialog";
+
 import { Project } from "../../models/project.model";
 import { Phase, PhaseType } from "../models/phase.model";
 import { PhaseApi } from "../api/phase.api";
+
+import { useCrudList } from "@/hooks/useCrudList";
+import { PERMISSIONS } from "@/types/permissions";
 
 interface PhaseManagerProps {
     project: Project;
@@ -18,6 +23,12 @@ interface PhaseManagerProps {
 }
 
 export default function PhaseManager({ project, phaseType, setProject }: PhaseManagerProps) {
+    const confirm = useConfirmDialog();
+    const { hasPermission } = useAuth();
+
+    // -------------------------------
+    // Empty Phase
+    // -------------------------------
     const emptyPhase: Phase = {
         project: project,
         type: phaseType,
@@ -27,150 +38,146 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
         description: "",
     };
 
-    const [phases, setPhases] = useState<Phase[]>([]);
-    const [saved, setPhase] = useState<Phase>(emptyPhase);
-    const [showDialog, setShowDialog] = useState(false);
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    // -------------------------------
+    // Permissions
+    // -------------------------------
 
+    const canCreate = true;//        hasPermission([PERMISSIONS.PHASE.CREATE]) &&    
+    const canEdit = true; //hasPermission([PERMISSIONS.PHASE.UPDATE]) &&
+    const canDelete = true; //hasPermission([PERMISSIONS.PHASE.DELETE]) &&
+
+    // -------------------------------
+    // CRUD Hook
+    // -------------------------------
+    const {
+        items: phases,
+        setAll,
+        updateItem,
+        removeItem,
+        loading,
+        setLoading,
+        error,
+        setError,
+    } = useCrudList<Phase>();
+
+    const [phase, setPhase] = useState<Phase>(emptyPhase);
+    const [showDialog, setShowDialog] = useState(false);
+
+    // -------------------------------
+    // Fetch phases
+    // -------------------------------
     useEffect(() => {
         const fetchPhases = async () => {
             try {
+                setLoading(true);
+
+                // If project exists on DB, fetch from API
                 if (project._id) {
                     const data = await PhaseApi.getPhases({ project: project._id });
-                    setPhases(data);
+                    setAll(data);
                 } else {
-                    setPhases(project.phases ?? []);
+                    // Use local phases
+                    setAll(project.phases ?? []);
                 }
-            } catch (err) {
-                console.error("Failed to fetch phases:", err);
+            } catch (err: any) {
+                setError("Failed to fetch phases. " + (err.message ?? ""));
+            } finally {
+                setLoading(false);
             }
         };
+
         fetchPhases();
     }, [project?._id]);
 
+    if (loading) return <ListSkeleton rows={10} />;
+    if (error) return <ErrorCard errorMessage={error} />;
+
+    // -------------------------------
+    // Save / Create
+    // -------------------------------
     const onSaveComplete = (saved: Phase) => {
-        const existingIndex = phases.findIndex((p) => p._id === saved._id);
-        const updated = existingIndex !== -1
-            ? phases.map((p, i) => (i === existingIndex ? saved : p))
-            : [...phases, saved];
-        setPhases(updated);
-        hideDialogs();
+        updateItem(saved);
+        hideDialog();
     };
 
-    const addPhase = (saved: Phase) => {
-        const exists = phases?.some(
-            (p) =>
-                p.order === saved.order
-        );
-        if (exists) {
-            throw new Error("The order is already added!");
-        }
-        const updatedPhases = [...(project.phases || []), saved];
-        if (setProject) setProject({ ...project, phases: updatedPhases });
-        
-        hideDialogs();
+    const addLocalPhase = (saved: Phase) => {
+        const exists = phases.some(p => p.order === saved.order);
+        if (exists) throw new Error("The order is already added!");
+
+        const updated = [...(project.phases ?? []), saved];
+        setProject?.({ ...project, phases: updated });
+
+        hideDialog();
     };
 
-    const deletePhase = async () => {
+    // -------------------------------
+    // Delete
+    // -------------------------------
+    const deletePhase = async (row: Phase) => {
         if (project._id) {
-            const deleted = await PhaseApi.deletePhase(saved);
-            if (deleted) {
-                setPhases(phases.filter((p) => p._id !== saved._id));
-            }
+            const deleted = await PhaseApi.deletePhase(row);
+            if (deleted) removeItem(row);
         } else {
-            const updated = project.phases?.filter((p) => p.activity !== saved.activity) || [];
-            if (setProject) setProject({ ...project, phases: updated });
+            const updated = project.phases?.filter(p => p.activity !== row.activity) ?? [];
+            setProject?.({ ...project, phases: updated });
+            removeItem(row);
         }
-        hideDialogs();
     };
 
-    const hideDialogs = () => {
+    // -------------------------------
+    // Helpers
+    // -------------------------------
+    const hideDialog = () => {
         setPhase(emptyPhase);
         setShowDialog(false);
-        setShowDeleteDialog(false);
     };
 
-    const startToolbarTemplate = () => (
-        <div className="my-2">
-            <Button
-                icon="pi pi-plus"
-                severity="success"
-                className="mr-2"
-                tooltip={`Add ${phaseType}`}
-                onClick={() => {
-                    let newPhase = { ...emptyPhase };
-                    const maxLevel = Math.max(0, ...phases.map(e => e.order ?? 0));
-                    newPhase.order = maxLevel + 1;
-                    setPhase(newPhase);
-                    setShowDialog(true);
-                }}
-            />
-        </div>
-    );
+    const handleCreate = () => {
+        const maxLevel = Math.max(0, ...phases.map(p => p.order ?? 0));
+        const newPhase = { ...emptyPhase, order: maxLevel + 1 };
+        setPhase(newPhase);
+        setShowDialog(true);
+    };
 
-    const actionBodyTemplate = (rowData: Phase) => (
-        <>
-            <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }}
-                onClick={() => {
-                    setPhase(rowData);
-                    setShowDialog(true);
-                }} />
-            <Button icon="pi pi-times" rounded severity="warning" className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }}
-                onClick={() => {
-                    setPhase(rowData);
-                    setShowDeleteDialog(true);
-                }} />
-        </>
-    );
+    const handleEdit = (row: Phase) => {
+        setPhase(row);
+        setShowDialog(true);
+    };
+
+    const columns = [
+        { field: "activity", header: "Activity", sortable: true },
+        { field: "duration", header: "Duration (Days)", sortable: true },
+        { field: "budget", header: "Budget (ETB)", sortable: true },
+        { field: "description", header: "Description" },
+    ];
 
     return (
         <>
-            <div className="card">
-                <Toolbar className="mb-4" start={startToolbarTemplate} />
-                <DataTable
-                    value={phases}
-                    selection={saved}
-                    onSelectionChange={(e) => setPhase(e.value as Phase)}
-                    dataKey={phases.some(p => p._id) ? "_id" : "order"}
-                    paginator
-                    rows={10}
-                    rowsPerPageOptions={[5, 10, 25]}
-                    className="datatable-responsive"
-                    emptyMessage="No phases found."
-                    scrollable
-                    tableStyle={{ minWidth: '50rem' }}
-                >
-                    <Column selectionMode="single" headerStyle={{ width: '3em' }} />
-                    <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                    <Column field="activity" header="Activity" sortable />
-                    <Column field="duration" header="Duration (Days)" sortable />
-                    <Column field="budget" header="Budget (ETB)" sortable />
-                    <Column field="description" header="Description" sortable />
-                    <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
-                </DataTable>
+            <CrudManager
+                headerTitle={`${phaseType} Phases`}
+                items={phases}
+                dataKey={phases.some(p => p._id) ? "_id" : "order"}
+                columns={columns}
+                canCreate={canCreate}
+                canEdit={canEdit}
+                canDelete={canDelete}
+                onCreate={handleCreate}
+                onEdit={handleEdit}
+                onDelete={(row) =>
+                    confirm.ask({
+                        item: row.activity,
+                        onConfirmAsync: () => deletePhase(row),
+                    })
+                }
+            />
 
-                {saved && (
-                    <SavePhaseDialog
-                        phase={saved}
-                        visible={showDialog}
-                        onSave={!project._id ? addPhase : undefined}
-                        onComplete={onSaveComplete}
-                        onHide={hideDialogs}
-                    />
-                )}
-
-                {saved && (
-                    <ConfirmDialog
-                        showDialog={showDeleteDialog}
-                        item={saved.activity}
-                        onConfirmAsync={project._id ? deletePhase : undefined}
-                        onConfirm={!project._id ? deletePhase : undefined}
-                        onHide={hideDialogs}
-                    />
-                )}
-            </div>
+            <SavePhaseDialog
+                visible={showDialog}
+                phase={phase}
+                onSave={!project._id ? addLocalPhase : undefined}
+                onComplete={onSaveComplete}
+                onHide={hideDialog}
+            />
         </>
     );
 }

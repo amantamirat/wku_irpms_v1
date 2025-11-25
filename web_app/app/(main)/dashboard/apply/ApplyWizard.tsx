@@ -33,7 +33,7 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
             ? [
                 {
                     applicant: user.linkedApplicant,
-                    status: CollaboratorStatus.active,
+                    status: CollaboratorStatus.verify,
                     isLeadPI: true,
                 } as Collaborator,
             ]

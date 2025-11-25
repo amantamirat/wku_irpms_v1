@@ -3,8 +3,8 @@ import { CollaboratorStatus } from "./collaborator.enum";
 // collaborator.state-machine.ts
 export class CollaboratorStateMachine {
     private static readonly transitions: Record<CollaboratorStatus, CollaboratorStatus[]> = {
-        [CollaboratorStatus.pending]: [CollaboratorStatus.active],
-        [CollaboratorStatus.active]: [CollaboratorStatus.pending]
+        [CollaboratorStatus.pending]: [CollaboratorStatus.verify],
+        [CollaboratorStatus.verify]: [CollaboratorStatus.pending]
     };
 
     static canTransition(from: CollaboratorStatus, to: CollaboratorStatus): boolean {

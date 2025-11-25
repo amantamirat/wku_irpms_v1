@@ -1,21 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { CrudManager } from "@/components/CrudManager";
-import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-import { useCrudList } from "@/hooks/useCrudList";
 import ErrorCard from "@/components/ErrorCard";
 import ListSkeleton from "@/components/ListSkeleton";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import { useCrudList } from "@/hooks/useCrudList";
 import MyBadge from "@/templates/MyBadge";
+import { useEffect, useState } from "react";
 
-import { CollaboratorApi } from "../api/collaborator.api";
-import CollaboratorDialog from "./CollaboratorDialog";
-import { Collaborator, CollaboratorStatus } from "../models/collaborator.model";
-import { Project } from "../../models/project.model";
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "primereact/button";
-import { ReviewerApi } from "../../reviewers/api/reviewer.api";
+import { Project } from "../../models/project.model";
+import { CollaboratorApi } from "../api/collaborator.api";
+import { Collaborator, CollaboratorStatus } from "../models/collaborator.model";
+import CollaboratorDialog from "./CollaboratorDialog";
 
 interface CollaboratorProps {
     project?: Project;
@@ -99,19 +98,19 @@ const CollaboratorManager = ({ project, applicant, onSave, onRemove }: Collabora
         return (<div className="flex gap-2">
             {(isOwner && state === CollaboratorStatus.pending) &&
                 <Button
-                    label="Activate"
+                    label="Verify"
                     icon="pi pi-check"
                     severity="success"
                     size="small"
                     onClick={() => {
                         confirm.ask({
-                            operation: 'activate',
-                            onConfirmAsync: () => updateStatus(rowData, CollaboratorStatus.active)
+                            operation: 'verify',
+                            onConfirmAsync: () => updateStatus(rowData, CollaboratorStatus.verify)
                         });
                     }}
                 />}
 
-            {(isOwner && state === CollaboratorStatus.active) &&
+            {(isOwner && state === CollaboratorStatus.verify) &&
                 <Button
                     label="Pend"
                     icon="pi pi-arrow-left"

@@ -35,7 +35,7 @@ export default function ProjectDetail({ project, updateProjectStatus }: ProjectD
                     <TabPanel header="Phases">
                         <PhaseManager project={project} phaseType={PhaseType.phase} />
                     </TabPanel>
-                    <TabPanel header="Themes">
+                    <TabPanel header="Themes" disabled>
                         <ProjectThemeManager project={project} />
                     </TabPanel>
                     <TabPanel header="Documents">

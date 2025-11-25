@@ -61,7 +61,7 @@ export class CollaboratorService {
         // --- State Machine Validation ---
         CollaboratorStateMachine.validateTransition(current, nextState);
         // Permissions
-        const isActivationChange = current === CollaboratorStatus.active || nextState === CollaboratorStatus.active;
+        const isActivationChange = current === CollaboratorStatus.verify || nextState === CollaboratorStatus.verify;
         if (isActivationChange) {
             await this.permission.validateCollaboratorPermission(id, userId, collaboratorDoc);
         }

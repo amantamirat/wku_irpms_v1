@@ -1,13 +1,22 @@
 import { Router } from 'express';
 import { PhaseController } from './phase.controller';
-import { verifyActiveAccount } from '../../users/auth/auth.middleware';
+import { checkPermission, verifyActiveAccount } from '../../users/auth/auth.middleware';
+import { PERMISSIONS } from '../../../util/permissions';
 
 
 const router: Router = Router();
 
-router.post('/', verifyActiveAccount, PhaseController.createPhase);
-router.get('/', verifyActiveAccount, PhaseController.getPhases);
-router.put('/:id', verifyActiveAccount, PhaseController.updatePhase);
-router.delete('/:id', verifyActiveAccount, PhaseController.deletePhase);
+router.post('/', verifyActiveAccount,
+    checkPermission([PERMISSIONS.PHASE.CREATE]),
+    PhaseController.createPhase);
+router.get('/', verifyActiveAccount,
+    checkPermission([PERMISSIONS.PHASE.READ]),
+    PhaseController.getPhases);
+router.put('/:id', verifyActiveAccount,
+    checkPermission([PERMISSIONS.PHASE.UPDATE]),
+    PhaseController.updatePhase);
+router.delete('/:id', verifyActiveAccount,
+    checkPermission([PERMISSIONS.PHASE.DELETE]),
+    PhaseController.deletePhase);
 
 export default router;
