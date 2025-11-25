@@ -249,6 +249,31 @@
     "description": "Delete evaluation entries"
   },
   {
+    "category": "Collaborator Management",
+    "name": "collaborator:create",
+    "description": "Create new collaborators"
+  },
+  {
+    "category": "Collaborator Management",
+    "name": "collaborator:read",
+    "description": "View collaborators"
+  },
+  {
+    "category": "Collaborator Management",
+    "name": "collaborator:update",
+    "description": "Edit collaborator details like weight"
+  },
+  {
+    "category": "Collaborator Management",
+    "name": "collaborator:change_status",
+    "description": "Edit collaborator status like activate, pend"
+  },
+  {
+    "category": "Collaborator Management",
+    "name": "collaborator:delete",
+    "description": "Delete collaborators"
+  },
+  {
     "category": "Reviewer Management",
     "name": "reviewer:create",
     "description": "Create new reviewers"

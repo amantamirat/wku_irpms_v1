@@ -79,6 +79,13 @@ export const PERMISSIONS = {
     UPDATE: "evaluation:update",
     DELETE: "evaluation:delete",
   },
+  COLLABORATOR: {
+    CREATE: "collaborator:create",
+    READ: "collaborator:read",
+    UPDATE: "collaborator:update",
+    CHANGE_STATUS: "collaborator:change_status", // New permission for status transitions
+    DELETE: "collaborator:delete",
+  },
   REVIEWER: {
     CREATE: "reviewer:create",
     READ: "reviewer:read",

@@ -1,16 +1,25 @@
 import { Router } from 'express';
 import { CollaboratorController } from './collaborator.controller';
-import { verifyActiveAccount } from '../../users/auth/auth.middleware';
+import { checkPermission, verifyActiveAccount } from '../../users/auth/auth.middleware';
+import { PERMISSIONS } from '../../../util/permissions';
 
 
 const router: Router = Router();
 
-router.post('/', verifyActiveAccount, CollaboratorController.createCollaborator);
-router.get('/', verifyActiveAccount, CollaboratorController.getCollaborators);
-router.put('/:id', verifyActiveAccount, CollaboratorController.updateCollaborator);
+router.post('/', verifyActiveAccount,
+    checkPermission([PERMISSIONS.COLLABORATOR.CREATE]),
+    CollaboratorController.createCollaborator);
+router.get('/', verifyActiveAccount, 
+    checkPermission([PERMISSIONS.COLLABORATOR.READ]),
+    CollaboratorController.getCollaborators);
+router.put('/:id', verifyActiveAccount, 
+    checkPermission([PERMISSIONS.COLLABORATOR.UPDATE]),
+    CollaboratorController.updateCollaborator);
 router.put('/:id/status', verifyActiveAccount,
-    //checkPermission([PERMISSIONS.REVIEWER.CHANGE_STATUS, PERMISSIONS.REVIEWER.APPROVE]),
+   checkPermission([PERMISSIONS.COLLABORATOR.CHANGE_STATUS]),
     CollaboratorController.changeCollaboratorStatus);
-router.delete('/:id', verifyActiveAccount, CollaboratorController.deleteCollaborator);
+router.delete('/:id', verifyActiveAccount, 
+    checkPermission([PERMISSIONS.COLLABORATOR.DELETE]),
+    CollaboratorController.deleteCollaborator);
 
 export default router;
