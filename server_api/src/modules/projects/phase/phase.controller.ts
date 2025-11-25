@@ -6,22 +6,28 @@ import { CreatePhaseDto, DeletePhaseDto, GetPhasesOptions, UpdatePhaseDto } from
 import { PhaseType } from "./phase.enum";
 import { PhaseService } from "./phase.service";
 
+const service = new PhaseService();
+
 export class PhaseController {
-    
-    
+
+
     static async createPhase(req: AuthenticatedRequest, res: Response) {
         try {
             if (!req.user) throw new Error('User not found!');
             const { type, activity, duration, budget, description, project, parent } = req.body;
             const data: CreatePhaseDto = {
-                type: type as PhaseType,
+                //type: type as PhaseType,
+                type: PhaseType.phase,
                 activity: activity,
                 duration: duration,
                 budget: budget,
                 description: description ? description : undefined,
-                project: type === PhaseType.phase ? new mongoose.Types.ObjectId(project as string) : undefined,
-                parent: type === PhaseType.breakdown ? new mongoose.Types.ObjectId(parent as string) : undefined,
+                project: project as string
+                //parent: type === PhaseType.breakdown ? new mongoose.Types.ObjectId(parent as string) : undefined,
+                ,
+                //parent: type === PhaseType.breakdown ? new mongoose.Types.ObjectId(parent as string) : undefined,
                 userId: req.user._id,
+
             };
             const created = await PhaseService.createPhase(data);
             successResponse(res, 201, "Phase created successfully", created);
@@ -72,7 +78,7 @@ export class PhaseController {
         try {
             if (!req.user) throw new Error('User not found!');
             const { id } = req.params;
-            const dto: DeletePhaseDto = { id, userId: req.user._id };            
+            const dto: DeletePhaseDto = { id, userId: req.user._id };
             const deleted = await PhaseService.deletePhase(dto);
             successResponse(res, 200, "Phase deleted successfully", deleted);
         } catch (err: any) {

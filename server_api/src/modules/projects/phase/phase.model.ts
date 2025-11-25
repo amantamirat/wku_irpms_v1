@@ -43,12 +43,12 @@ const BasePhaseSchema = new Schema<BasePhaseDocument>(
 
 export const BasePhase = model<BasePhaseDocument>(COLLECTIONS.PHASE, BasePhaseSchema);
 
-interface PhaseDocument extends BasePhaseDocument {
+export interface IPhase extends BasePhaseDocument {
     type: PhaseType.phase;
     project: mongoose.Types.ObjectId;
 }
 
-const PhaseSchema = new Schema<PhaseDocument>({
+const PhaseSchema = new Schema<IPhase>({
     project: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.PROJECT,
@@ -56,7 +56,7 @@ const PhaseSchema = new Schema<PhaseDocument>({
     }
 });
 
-export const Phase = BasePhase.discriminator<PhaseDocument>(PhaseType.phase, PhaseSchema);
+export const Phase = BasePhase.discriminator<IPhase>(PhaseType.phase, PhaseSchema);
 
 interface BreakdownDocument extends BasePhaseDocument {
     type: PhaseType.breakdown;
