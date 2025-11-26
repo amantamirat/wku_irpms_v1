@@ -43,21 +43,21 @@ export class RoleService {
 
         // find role if exists
         let adminRole = await Role.findOne({ role_name: roleName });
-
-        // permissions to add
-        const permissionNames = [
-            "permission:read",
-            "user:create", "user:read", "user:update", "user:delete", "user:reset",
-            "role:create", "role:read", "role:update", "role:delete"
-        ];
-
-        const permissions = await Permission.find({ name: { $in: permissionNames } });
-
-        if (!permissions.length) {
-            throw new Error("Permissions not found. Did you seed permissions?");
-        }
-
         if (!adminRole) {
+            // permissions to add
+            const permissionNames = [
+                "permission:read",
+                "user:create", "user:read", "user:update", "user:delete", "user:reset",
+                "role:create", "role:read", "role:update", "role:delete"
+            ];
+
+            const permissions = await Permission.find({ name: { $in: permissionNames } });
+
+            if (!permissions.length) {
+                throw new Error("Permissions not found. Did you seed permissions?");
+            }
+
+
             // create admin role
             adminRole = await Role.create({
                 role_name: roleName,
@@ -65,7 +65,7 @@ export class RoleService {
             });
 
             console.log("Admin role created with permissions.");
-        } 
+        }
         return adminRole;
     }
 }
