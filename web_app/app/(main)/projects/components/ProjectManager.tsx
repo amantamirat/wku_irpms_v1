@@ -28,9 +28,9 @@ const ProjectManager = ({ cycle }: ProjectManagerProps) => {
     };
 
     // ✅ Permissions
-    const canCreate = true; // hasPermission([PERMISSIONS.PROJECT.CREATE]);
-    const canEdit = true;//hasPermission([PERMISSIONS.PROJECT.UPDATE]);
-    const canDelete = true; //hasPermission([PERMISSIONS.PROJECT.DELETE]);
+    const canCreate = hasPermission([PERMISSIONS.PROJECT.CREATE]);
+    const canEdit = hasPermission([PERMISSIONS.PROJECT.UPDATE]);
+    const canDelete = hasPermission([PERMISSIONS.PROJECT.DELETE]);
 
     // ✅ State + CRUD Hook
     const {

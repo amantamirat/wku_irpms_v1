@@ -249,6 +249,26 @@
     "description": "Delete evaluation entries"
   },
   {
+    "category": "Project Management",
+    "name": "project:create",
+    "description": "Create project entries"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:read",
+    "description": "Read project entries"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:update",
+    "description": "Update project entries"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:delete",
+    "description": "Delete project entries"
+  },
+  {
     "category": "Collaborator Management",
     "name": "collaborator:create",
     "description": "Create new collaborators"

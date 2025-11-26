@@ -1,14 +1,22 @@
 import { Router } from 'express';
 import { ProjectController } from './project.controller';
-import { verifyActiveAccount } from '../users/auth/auth.middleware';
-import { upload } from '../../util/multer';
+import { checkPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
+import { PERMISSIONS } from '../../util/permissions';
 
 const router: Router = Router();
 
-router.post('/', verifyActiveAccount, ProjectController.createProject);
+router.post('/', verifyActiveAccount,
+    checkPermission([PERMISSIONS.PROJECT.CREATE]),
+    ProjectController.createProject);
 //router.post("/submit", verifyActiveAccount, upload.single("document"), ProjectController.submitProject);
-router.get('/', verifyActiveAccount, ProjectController.getProjects);
-router.put('/:id', verifyActiveAccount, ProjectController.updateProject);
-router.delete('/:id', verifyActiveAccount, ProjectController.deleteProject);
+router.get('/', verifyActiveAccount,
+    checkPermission([PERMISSIONS.PROJECT.READ]),
+    ProjectController.getProjects);
+router.put('/:id', verifyActiveAccount,
+    checkPermission([PERMISSIONS.PROJECT.UPDATE]),
+    ProjectController.updateProject);
+router.delete('/:id', verifyActiveAccount,
+    checkPermission([PERMISSIONS.PROJECT.DELETE]),
+    ProjectController.deleteProject);
 
 export default router;

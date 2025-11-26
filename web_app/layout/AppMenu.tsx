@@ -27,7 +27,13 @@ const AppMenu = () => {
                 {
                     label: 'Projects',
                     icon: PrimeIcons.BRIEFCASE,
-                    to: '/projects'
+                    to: '/projects',
+                    visible: hasPermission([
+                        PERMISSIONS.PROJECT.CREATE,
+                        PERMISSIONS.PROJECT.UPDATE,
+                        PERMISSIONS.PROJECT.DELETE,
+                        PERMISSIONS.PROJECT.READ
+                    ])
                 },
                 {
                     label: 'Reviewers',

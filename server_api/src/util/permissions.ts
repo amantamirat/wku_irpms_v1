@@ -79,6 +79,12 @@ export const PERMISSIONS = {
     UPDATE: "evaluation:update",
     DELETE: "evaluation:delete",
   },
+  PROJECT: {
+    CREATE: "project:create",
+    READ: "project:read",
+    UPDATE: "project:update",
+    DELETE: "project:delete",
+  },
   COLLABORATOR: {
     CREATE: "collaborator:create",
     READ: "collaborator:read",
