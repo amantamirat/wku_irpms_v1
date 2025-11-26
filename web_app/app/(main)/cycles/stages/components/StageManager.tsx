@@ -123,6 +123,11 @@ const StageManager = ({ cycle }: StageManagerProps) => {
                     setSelectedStage(emptyStage);
                     setShowSaveDialog(true);
                 }}
+                onEdit={(row: Stage) => {
+                    setSelectedStage(row);
+                    setShowSaveDialog(true);
+                }
+                }
                 onDelete={(row: Stage) =>
                     confirm.ask({
                         item: row.name ?? "",
@@ -134,7 +139,7 @@ const StageManager = ({ cycle }: StageManagerProps) => {
                 rowExpansionTemplate={(row: Stage) => (
                     <ProjectStageManager stage={row} />
                 )}
-                //enableSearch
+            //enableSearch
             />
 
             {/* Create / Edit Stage */}

@@ -38,6 +38,7 @@ export class ProjectStageController {
             successResponse(res, 201, "Project stage created successfully", created);
 
         } catch (err: any) {
+            
             if (req.file) fs.unlink(`uploads/${req.file.filename}`, () => { });
             errorResponse(res, 400, err.message, err);
         }

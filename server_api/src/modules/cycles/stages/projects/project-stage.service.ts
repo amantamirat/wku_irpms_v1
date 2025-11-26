@@ -1,5 +1,6 @@
 // project-stage.service.ts
 
+import { ConstraintValidator } from "../../../grants/constraints/constraint.validator";
 import { IProjectRepository, ProjectRepository } from "../../../projects/project.repository";
 import { ProjectSynchronizer } from "../../../projects/project.synchronizer";
 import { IStageRepository, StageRepository } from "../stage.repository";
@@ -13,6 +14,7 @@ export class ProjectStageService {
     private projectRepository: IProjectRepository;
     private stageRepository: IStageRepository;
     private projectSynchronizer: ProjectSynchronizer;
+    private validator: ConstraintValidator;
 
     constructor(repository?: IProjectStageRepository, projectRepository?: IProjectRepository,
         stageRepository?: IStageRepository
@@ -21,6 +23,7 @@ export class ProjectStageService {
         this.projectRepository = projectRepository || new ProjectRepository();
         this.stageRepository = stageRepository || new StageRepository();
         this.projectSynchronizer = new ProjectSynchronizer(this.projectRepository, this.repository);
+        this.validator = new ConstraintValidator(this.projectRepository);
     }
 
     // ------------------------------------
@@ -64,9 +67,18 @@ export class ProjectStageService {
                           */
         }
         //////validation end///////////
-        const created = await this.repository.create(dto);
-        const syncedProject = await this.projectSynchronizer.syncProjectStatus(projectId, projectDoc);
-        return { created, syncedProject }
+        
+        try {
+            ///grant validator////
+            await this.validator.validateProject(projectId, projectDoc);
+            ///grant validator////
+            const created = await this.repository.create(dto);
+            const syncedProject = await this.projectSynchronizer.syncProjectStatus(projectId, projectDoc);
+            return { created, syncedProject }
+        } catch (e: any) {
+            throw e;
+        }
+
     }
 
     async getProjectStages(options: GetProjectStagesDTO = {}) {
@@ -91,7 +103,6 @@ export class ProjectStageService {
         const projectStage = await this.repository.findById(id);
         if (!projectStage) throw new Error("Project stage not found");
         //const projectDoc = projectStage.project as IProject;
-
         if (projectStage.status !== ProjectStageStatus.pending) {
             throw new Error("Only project stages with 'pending' status can be deleted.");
         }

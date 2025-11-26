@@ -1,7 +1,7 @@
 import Applicant from "../applicants/applicant.model";
 import { CallStatus } from "../call/call.enum";
 import { Call } from "../call/call.model";
-import { ConstraintValidator } from "../grants/constraints/constraint.validator";
+import { ConstraintValidatorOld } from "../grants/constraints/constraint.validator.old";
 import { BaseTheme } from "../themes/theme.model";
 import { CollaboratorStatus } from "./collaborators/collaborator.enum";
 import { Collaborator } from "./collaborators/collaborator.model";
@@ -27,8 +27,8 @@ export class ProService {
             throw new Error("Document path not found");
         }
         const call = await this.validateProject(dto);
-        await ConstraintValidator.validateProjectConstraints(call.grant, dto);
-        await ConstraintValidator.validateApplicantConstraints(call.grant, dto);
+        await ConstraintValidatorOld.validateProjectConstraints(call.grant, dto);
+        await ConstraintValidatorOld.validateApplicantConstraints(call.grant, dto);
         //Find the first stage
         //const stage = await Stage.findOne({ parent: call.evaluation, order: 1 }).lean();
         //if (!stage) throw new Error("Stage not found");
