@@ -11,7 +11,8 @@ export interface IUser extends Document {
   organizations?: mongoose.Types.ObjectId[];
   reset_code?: String;
   reset_code_expires?: Date;
-  isHidden?: Boolean;
+  isDeleted?: Boolean;
+  createdBy?: mongoose.Types.ObjectId;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -56,10 +57,15 @@ const UserSchema = new Schema<IUser>(
     },
     reset_code_expires: {
       type: Date
-    },
-    isHidden: {
+    },    
+    isDeleted: {
       type: Boolean
-    }
+    },    
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: COLLECTIONS.USER,
+      immutable: true
+    },
   },
   { timestamps: true }
 );
