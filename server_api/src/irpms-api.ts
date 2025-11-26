@@ -34,6 +34,7 @@ import permissionRoutes from './modules/users/permissions/permission.routes';
 import { PermissionService } from './modules/users/permissions/permission.service';
 import { UserService } from './modules/users/user.service';
 import path from 'path';
+import { RoleService } from './modules/users/roles/role.service';
 
 
 dotenv.config();
@@ -84,8 +85,9 @@ const PORT = process.env.SERVER_PORT || 5000;
     await mongoose.connect(MONGO_URL);
     console.log('database connection established');
     await PermissionService.seedPermissions();
+    await RoleService.initAdminRole();
     await UserService.initAdminUser();
-   
+
     app.listen(PORT, () => {
       console.log(`Server API is running at http://127.0.0.1:${PORT}`);
     });

@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import Applicant from "../applicants/applicant.model";
 import { UserStatus } from "./user.enum";
 import { User } from "./user.model";
+import { Role } from "./roles/role.model";
 
 
 export interface CreateUserDto {
@@ -37,7 +38,7 @@ export class UserService {
 
     static async getUsers() {
         const users = await User.find({ isHidden: { $ne: true } }, { password: 0 }).
-        populate("roles").populate("organizations").lean();
+            populate("roles").populate("organizations").lean();
         return users;
     }
 
@@ -56,9 +57,9 @@ export class UserService {
 
         if (user.status === UserStatus.deleted) {
             const applicant = await Applicant.findOne({ user: id });
-            if(applicant){
+            if (applicant) {
                 throw new Error("Cannot delete user linked to an applicant");
-            }           
+            }
             await user.deleteOne();
             return { message: "User permanently deleted" };
         }
@@ -103,9 +104,14 @@ export class UserService {
         if (!userName || !email || !password) {
             throw new Error('Default Admin credentials are not found in environment variables.');
         }
+
         const exist = await User.exists({ user_name: userName });
         if (!exist) {
-            const data = { user_name: userName, password: password, email: email, status: UserStatus.active, roles: [], isHidden: true };
+            const adminRole = await Role.findOne({ role_name: "admin" });
+            if (!adminRole) {
+                throw new Error("Admin role not initialized.");
+            }
+            const data = { user_name: userName, password: password, email: email, status: UserStatus.active, roles: [adminRole._id as mongoose.Types.ObjectId], isHidden: true };
             await this.createUser(data);
             console.log('Default admin user created successfully.');
         }
