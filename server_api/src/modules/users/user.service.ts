@@ -5,7 +5,7 @@ import { UserStatus } from "./user.enum";
 import { User } from "./user.model";
 import { Role } from "./roles/role.model";
 import { IUserRepository, UserRepository } from "./user.repository";
-import { CreateUserDTO, UpdateUserDTO } from "./user.dto";
+import { ChangePasswordDTO, CreateUserDTO, UpdateUserDTO } from "./user.dto";
 import { DeleteDto } from "../../util/delete.dto";
 
 
@@ -17,6 +17,7 @@ export interface CreateUserDto {
     organizations?: mongoose.Types.ObjectId[];
     status: UserStatus;
 }
+
 
 export class ChangePasswordDto {
     oldPassword!: string;
@@ -56,77 +57,99 @@ export class UserService {
         const users = await this.repository.findAll({ deleted: showDeleted });
         return users.map(({ password, ...rest }) => rest);
     }
+
     async update(dto: UpdateUserDTO) {
         const { id, data, userId } = dto;
 
-        if (!userId) throw new Error("Unauthorized user update attempt.");
-
         const updated = await this.repository.update(id, data);
-
         if (!updated) throw new Error("User not found.");
-
         const { password, ...rest } = updated;
+        return rest;
+    }
+
+    async reset(id: string, newPassword: string) {
+        const hashed = await UserService.prepareHash(newPassword);
+        const resetted = await this.repository.update(id, { password: hashed });
+        if (!resetted) throw new Error("User not found");
+        return resetted;
+    }
+
+    async changePassword(dto: ChangePasswordDTO) {
+        const { id, data, userId } = dto;
+        const { oldPassword, newPassword } = data;
+
+        const user = await this.repository.findById(id);
+        if (!user) throw new Error("User not found");
+
+
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) throw new Error("Old password is incorrect");
+
+        const hashed = await UserService.prepareHash(newPassword);
+        const changed = await this.repository.update(id, { password: hashed });
+
+        const { password, ...rest } = changed;
         return rest;
     }
 
 
     async delete(dto: DeleteDto) {
         const { id, userId } = dto;
-
         const deleted = await this.repository.update(id, { isDeleted: true });
-
         if (!deleted) throw new Error("User not found");
-
         return deleted;
     }
 
 
-
-    static async deleteUser(id: string) {
-        const user = await User.findById(id).select("-password");
-        if (!user) throw new Error("User not found");
-
-        if (user.status === UserStatus.deleted) {
-            const applicant = await Applicant.findOne({ user: id });
-            if (applicant) {
-                throw new Error("Cannot delete user linked to an applicant");
+    /*
+        static async deleteUser(id: string) {
+            const user = await User.findById(id).select("-password");
+            if (!user) throw new Error("User not found");
+    
+            if (user.status === UserStatus.deleted) {
+                const applicant = await Applicant.findOne({ user: id });
+                if (applicant) {
+                    throw new Error("Cannot delete user linked to an applicant");
+                }
+                await user.deleteOne();
+                return { message: "User permanently deleted" };
             }
-            await user.deleteOne();
-            return { message: "User permanently deleted" };
+    
+            user.status = UserStatus.deleted;
+            await user.save();
+            return { message: "User marked as deleted successfully" };
         }
+    */
 
-        user.status = UserStatus.deleted;
-        await user.save();
-        return { message: "User marked as deleted successfully" };
+    /*
+static async changePassword(id: string, dto: ChangePasswordDto) {
+    const user = await User.findById(id);
+    if (!user) throw new Error("User not found");
+
+    const { oldPassword, newPassword } = dto;
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+        throw new Error("Old password is incorrect");
     }
+    user.password = await this.prepareHash(newPassword);
+    await user.save();
 
-    static async changePassword(id: string, dto: ChangePasswordDto) {
-        const user = await User.findById(id);
-        if (!user) throw new Error("User not found");
+    return { message: "Password changed successfully" };
+}
+*/
 
-        const { oldPassword, newPassword } = dto;
-
-        const isMatch = await bcrypt.compare(oldPassword, user.password);
-        if (!isMatch) {
-            throw new Error("Old password is incorrect");
+    /*
+        static async resetPassword(id: string, newPassword: string) {
+            const user = await User.findById(id);
+            if (!user) throw new Error("User not found");
+    
+            user.password = await this.prepareHash(newPassword);
+            await user.save();
+    
+            return { message: "Password reset successfully" };
         }
-        user.password = await this.prepareHash(newPassword);
-        await user.save();
-
-        return { message: "Password changed successfully" };
-    }
-
-
-    static async resetPassword(id: string, newPassword: string) {
-        const user = await User.findById(id);
-        if (!user) throw new Error("User not found");
-
-        user.password = await this.prepareHash(newPassword);
-        await user.save();
-
-        return { message: "Password reset successfully" };
-    }
-
+    */
 
     static async initAdminUser() {
         const repository = new UserRepository();

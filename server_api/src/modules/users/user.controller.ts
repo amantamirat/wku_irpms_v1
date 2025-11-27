@@ -1,11 +1,9 @@
 import { Request, Response } from 'express';
-import { errorResponse, successResponse } from '../../util/response';
-import { UserService, CreateUserDto, ChangePasswordDto } from './user.service';
-import { UserStatus } from './user.enum';
-import mongoose from 'mongoose';
-import { CreateUserDTO, UpdateUserDTO } from './user.dto';
-import { AuthenticatedRequest } from './auth/auth.middleware';
 import { DeleteDto } from '../../util/delete.dto';
+import { errorResponse, successResponse } from '../../util/response';
+import { AuthenticatedRequest } from './auth/auth.middleware';
+import { ChangePasswordDTO, CreateUserDTO, UpdateUserDTO } from './user.dto';
+import { UserService } from './user.service';
 
 const service = new UserService();
 
@@ -79,13 +77,19 @@ export class UserController {
     }
   }
 
-  static async changePassword(req: Request, res: Response) {
+  static async changePassword(req: AuthenticatedRequest, res: Response) {
     try {
+      if (!req.user) throw new Error("User not authorized!");
       const { id } = req.params;
       const { oldPassword, newPassword } = req.body;
-      const dto: ChangePasswordDto = { oldPassword, newPassword };
-      const result = await UserService.changePassword(id, dto);
-      successResponse(res, 200, "Password changed successfully", result);
+      const dto: ChangePasswordDTO =
+      {
+        id,
+        data: { oldPassword, newPassword },
+        userId: req.user._id,
+      };
+      const changed = await service.changePassword(dto);
+      successResponse(res, 200, "Password changed successfully", changed);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
@@ -95,7 +99,7 @@ export class UserController {
     try {
       const { id } = req.params;
       const { newPassword } = req.body;
-      const result = await UserService.resetPassword(id, newPassword);
+      const result = await service.reset(id, newPassword);
       successResponse(res, 200, "Password reset successfully", result);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);

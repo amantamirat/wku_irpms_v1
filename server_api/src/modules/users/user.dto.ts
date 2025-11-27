@@ -15,11 +15,21 @@ export interface UpdateUserDTO {
     data: Partial<{
         roles: string[];
         organizations?: string[];
-        isDeleted?:boolean;
+        isDeleted?: boolean;
+        password?: string;
     }>;
     userId: string;
 }
 
 export interface GetUsersDTO {
     deleted?: boolean;
+}
+
+export interface ChangePasswordDTO {
+    id: string;
+    data: {
+        oldPassword: string;
+        newPassword: string;
+    };
+    userId: string;
 }

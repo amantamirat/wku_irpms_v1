@@ -77,6 +77,10 @@ export class UserRepository implements IUserRepository {
             toUpdate.isDeleted = dtoData.isDeleted;
         }
 
+        if (dtoData.password) {
+            toUpdate.password = dtoData.password;
+        }
+
         const updated = await User.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: toUpdate },
