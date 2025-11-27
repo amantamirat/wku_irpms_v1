@@ -5,7 +5,8 @@ import { UserStatus } from "./user.enum";
 import { User } from "./user.model";
 import { Role } from "./roles/role.model";
 import { IUserRepository, UserRepository } from "./user.repository";
-import { CreateUserDTO } from "./user.dto";
+import { CreateUserDTO, UpdateUserDTO } from "./user.dto";
+import { DeleteDto } from "../../util/delete.dto";
 
 
 export interface CreateUserDto {
@@ -51,33 +52,35 @@ export class UserService {
         return rest;
     }
 
-    async getUsers(showDeleted?: boolean) {
+    async getUsers(showDeleted: boolean = false) {
         const users = await this.repository.findAll({ deleted: showDeleted });
         return users.map(({ password, ...rest }) => rest);
     }
+    async update(dto: UpdateUserDTO) {
+        const { id, data, userId } = dto;
 
+        if (!userId) throw new Error("Unauthorized user update attempt.");
 
-    static async createUser(data: CreateUserDto) {
-        const hashed = await this.prepareHash(data.password);
-        const createdUser = await User.create({ ...data, password: hashed });
-        const { password, ...rest } = createdUser.toObject();
+        const updated = await this.repository.update(id, data);
+
+        if (!updated) throw new Error("User not found.");
+
+        const { password, ...rest } = updated;
         return rest;
     }
 
-    static async getUsers() {
-        const users = await User.find({ isDeleted: { $ne: true } }, { password: 0 }).
-            populate("roles").populate("organizations").lean();
-        return users;
+
+    async delete(dto: DeleteDto) {
+        const { id, userId } = dto;
+
+        const deleted = await this.repository.update(id, { isDeleted: true });
+
+        if (!deleted) throw new Error("User not found");
+
+        return deleted;
     }
 
-    static async updateUser(id: string, data: Partial<CreateUserDto>) {
-        const user = await User.findById(id);
-        if (!user) throw new Error("User not found");
-        Object.assign(user, data);
-        const updatedUser = await user.save();
-        const { password, ...rest } = updatedUser.toObject();
-        return rest;
-    }
+
 
     static async deleteUser(id: string) {
         const user = await User.findById(id).select("-password");

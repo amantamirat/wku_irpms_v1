@@ -39,11 +39,18 @@ export class UserRepository implements IUserRepository {
 
         const filter: any = {};
         // Only set the filter if deleted is defined
-        if (typeof deleted === "boolean") {
-            filter.isDeleted = deleted;
+        if (deleted === true) {
+            // Get only deleted users
+            filter.isDeleted = true;
+        } else {
+            // Get NON-deleted users (including those without the field)
+            filter.$or = [
+                { isDeleted: false },
+                { isDeleted: { $exists: false } }
+            ];
         }
 
-        return User.find(filter)
+        return User.find(filter).populate("roles").populate("organizations")
             .lean<IUser[]>()
             .exec();
     }
@@ -64,6 +71,10 @@ export class UserRepository implements IUserRepository {
 
         if (dtoData.organizations) {
             toUpdate.organizations = dtoData.organizations.map(o => new mongoose.Types.ObjectId(o));
+        }
+
+        if (dtoData.isDeleted) {
+            toUpdate.isDeleted = dtoData.isDeleted;
         }
 
         const updated = await User.findByIdAndUpdate(

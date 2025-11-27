@@ -15,6 +15,7 @@ export interface UpdateUserDTO {
     data: Partial<{
         roles: string[];
         organizations?: string[];
+        isDeleted?:boolean;
     }>;
     userId: string;
 }
