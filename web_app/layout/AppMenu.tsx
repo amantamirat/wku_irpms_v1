@@ -207,6 +207,19 @@ const AppMenu = () => {
                         ]
                     )
                 },
+
+                {
+                    label: 'Users',
+                    icon: PrimeIcons.USERS,
+                    to: '/users/pages/',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.USER.CREATE,
+                            PERMISSIONS.USER.UPDATE,
+                            PERMISSIONS.USER.DELETE
+                        ]
+                    )
+                },
                 {
                     label: 'Roles &  Permissions',
                     icon: PrimeIcons.LOCK,

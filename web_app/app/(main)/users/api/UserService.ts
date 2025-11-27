@@ -5,8 +5,8 @@ const end_point = '/users/';
 
 export const UserApi = {
 
-    async getUsers(): Promise<User[]> {
-        const data = await ApiClient.get(end_point);
+    async getUsers(showDeleted: boolean = false): Promise<User[]> {
+        const data = await ApiClient.get(`${end_point}?showDeleted=${String(showDeleted)}`);
         return data as User[];
     },
 
@@ -16,11 +16,14 @@ export const UserApi = {
         return createdData as User;
     },
 
-    async updateUser(user: Partial<User>): Promise<User> {
+    async updateUser(user: Partial<User>, changeStatus = false): Promise<User> {
         if (!user._id) {
             throw new Error("_id required.");
         }
-        const url = `${end_point}${user._id}`;
+        const url = changeStatus
+            ? `${end_point}${user._id}/status`
+            : `${end_point}${user._id}`;
+        //const url = `${end_point}${user._id}`;
         const sanitized = sanitizeUser(user);
         const updatedUser = await ApiClient.put(url, sanitized);
         return updatedUser as User;
@@ -36,7 +39,7 @@ export const UserApi = {
     },
 
     async changePassword(password: Partial<PasswordType>): Promise<any> {
-        const url = `${end_point}${password._id}/change-password`;        
+        const url = `${end_point}${password._id}/change-password`;
         const result = await ApiClient.patch(url, password);
         return result;
     },

@@ -15,12 +15,12 @@ export default function RequireAuth({ children }: { children: React.ReactNode })
         if (loading) return;
         if (!user) {
             router.push('/auth/login');
-        } else if (user.status !== UserStatus.Active && !isRequestActivationPage) {
+        } else if (user.status !== UserStatus.active && !isRequestActivationPage) {
             router.push('/auth/request-activation');
         }
     }, [loading, user, router, isRequestActivationPage]);
 
-    if (loading || !user || (user.status !== UserStatus.Active && !isRequestActivationPage)) {
+    if (loading || !user || (user.status !== UserStatus.active && !isRequestActivationPage)) {
         return <div>Loading...</div>;
     }
 

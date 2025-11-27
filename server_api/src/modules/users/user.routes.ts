@@ -7,13 +7,16 @@ const router: Router = Router();
 
 router.post('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.USER.CREATE]), 
-    UserController.createUser);
+    UserController.create);
 router.get('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.USER.READ, PERMISSIONS.USER.CREATE, PERMISSIONS.USER.UPDATE, PERMISSIONS.USER.DELETE, PERMISSIONS.USER.RESET])
     , UserController.getUsers);
 router.put('/:id', verifyActiveAccount, 
     checkPermission([PERMISSIONS.USER.UPDATE]), 
-    UserController.updateUser);
+    UserController.update);
+router.put('/:id/status', verifyActiveAccount,
+   //checkPermission([PERMISSIONS.COLLABORATOR.CHANGE_STATUS]),
+    UserController.changeStatus);
 router.delete('/:id', verifyActiveAccount, 
     checkPermission([PERMISSIONS.USER.DELETE]), 
     UserController.deleteUser);

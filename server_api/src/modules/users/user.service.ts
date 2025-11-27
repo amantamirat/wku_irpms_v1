@@ -1,29 +1,10 @@
 import bcrypt from "bcryptjs";
-import mongoose from "mongoose";
-import Applicant from "../applicants/applicant.model";
-import { UserStatus } from "./user.enum";
-import { User } from "./user.model";
-import { Role } from "./roles/role.model";
-import { IUserRepository, UserRepository } from "./user.repository";
-import { ChangePasswordDTO, CreateUserDTO, UpdateUserDTO } from "./user.dto";
 import { DeleteDto } from "../../util/delete.dto";
-
-
-export interface CreateUserDto {
-    user_name: string;
-    password: string;
-    email: string;
-    roles: mongoose.Types.ObjectId[];
-    organizations?: mongoose.Types.ObjectId[];
-    status: UserStatus;
-}
-
-
-export class ChangePasswordDto {
-    oldPassword!: string;
-    newPassword!: string;
-}
-
+import { Role } from "./roles/role.model";
+import { ChangePasswordDTO, CreateUserDTO, UpdateUserDTO } from "./user.dto";
+import { UserStatus } from "./user.enum";
+import { IUserRepository, UserRepository } from "./user.repository";
+import { UserStateMachine } from "./user.state-machine";
 
 
 export class UserService {
@@ -53,19 +34,44 @@ export class UserService {
         return rest;
     }
 
-    async getUsers(showDeleted: boolean = false) {
-        const users = await this.repository.findAll({ deleted: showDeleted });
+    async getUsers(deleted: boolean = false) {
+        const users = await this.repository.findAll(deleted);
         return users.map(({ password, ...rest }) => rest);
     }
 
     async update(dto: UpdateUserDTO) {
         const { id, data, userId } = dto;
-
         const updated = await this.repository.update(id, data);
         if (!updated) throw new Error("User not found.");
         const { password, ...rest } = updated;
         return rest;
     }
+
+
+    async changeStatus(dto: UpdateUserDTO) {
+        const { id, data, userId } = dto;
+        const userDoc = await this.repository.findById(id);
+        if (!userDoc) throw new Error("User not found");
+
+        const nextState = data.status;
+        if (!nextState) throw new Error("Status is required");
+        const current = userDoc.status;
+
+        // --- State Machine Validation ---
+        UserStateMachine.validateTransition(current, nextState);
+
+        const updated = await this.repository.update(dto.id, dto.data);
+        return updated;
+    }
+
+    async delete(dto: DeleteDto) {
+        //soft deletion
+        const { id, userId } = dto;
+        const deleted = await this.changeStatus({ id, data: { status: UserStatus.deleted }, userId });
+        if (!deleted) throw new Error("User not found");
+        return deleted;
+    }
+    ////
 
     async reset(id: string, newPassword: string) {
         const hashed = await UserService.prepareHash(newPassword);
@@ -93,12 +99,9 @@ export class UserService {
     }
 
 
-    async delete(dto: DeleteDto) {
-        const { id, userId } = dto;
-        const deleted = await this.repository.update(id, { isDeleted: true });
-        if (!deleted) throw new Error("User not found");
-        return deleted;
-    }
+
+
+
 
 
     /*

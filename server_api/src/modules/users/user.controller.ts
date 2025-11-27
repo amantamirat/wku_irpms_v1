@@ -9,7 +9,7 @@ const service = new UserService();
 
 export class UserController {
 
-  static async createUser(req: AuthenticatedRequest, res: Response) {
+  static async create(req: AuthenticatedRequest, res: Response) {
     try {
       if (!req.user) throw new Error("User not authorized!");
 
@@ -36,14 +36,19 @@ export class UserController {
 
   static async getUsers(req: Request, res: Response) {
     try {
-      const users = await service.getUsers();
+      const { showDeleted } = req.query;
+      const isDeleted =
+        typeof showDeleted === "string"
+          ? showDeleted.toLowerCase() === "true"
+          : false;
+      const users = await service.getUsers(isDeleted);
       successResponse(res, 200, 'Users fetched successfully', users);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
   }
 
-  static async updateUser(req: AuthenticatedRequest, res: Response) {
+  static async update(req: AuthenticatedRequest, res: Response) {
     try {
       if (!req.user) throw new Error("User not authorized!");
       const { id } = req.params;
@@ -57,6 +62,25 @@ export class UserController {
       const updated = await service.update(dto);
 
       successResponse(res, 201, "User updated successfully", updated);
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
+    }
+  }
+
+  static async changeStatus(req: AuthenticatedRequest, res: Response) {
+    try {
+      if (!req.user) throw new Error("User not authorized!");
+      const { id } = req.params;
+      const { status } = req.body;
+
+      const dto: UpdateUserDTO = {
+        id,
+        data: { status },
+        userId: req.user._id,
+      };
+      const updated = await service.changeStatus(dto);
+
+      successResponse(res, 201, "User status updated successfully", updated);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
@@ -76,6 +100,8 @@ export class UserController {
       errorResponse(res, 400, err.message, err);
     }
   }
+
+  /////
 
   static async changePassword(req: AuthenticatedRequest, res: Response) {
     try {

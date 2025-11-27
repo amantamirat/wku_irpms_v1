@@ -4,6 +4,8 @@ import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from "primereac
 import { Toolbar } from "primereact/toolbar";
 import { InputText } from "primereact/inputtext";
 import React, { useState } from "react";
+import ListSkeleton from "./ListSkeleton";
+import ErrorCard from "./ErrorCard";
 
 interface CrudManagerProps<T> {
     itemName?: string;
@@ -11,16 +13,18 @@ interface CrudManagerProps<T> {
     items: T[];
     dataKey: string;
     columns: any[];
+    loading?: boolean;
+    error?: string | null;
     canCreate?: boolean;
     canEdit?: boolean;
     canDelete?: boolean;
     onCreate?: () => void;
     onEdit?: (row: T) => void;
     onDelete?: (row: T) => void;
+    toolbarEnd?: React.ReactNode;
     expandedRows?: any[] | DataTableExpandedRows;
     onRowToggle?: (exp: any) => void;
     rowExpansionTemplate?: (row: T) => React.ReactNode;
-
     /** Optional search filter */
     enableSearch?: boolean;
 }
@@ -31,12 +35,15 @@ export function CrudManager<T extends { _id?: string }>({
     items,
     dataKey,
     columns,
+    loading,
+    error,
     canCreate,
     canEdit,
     canDelete,
     onCreate,
     onEdit,
     onDelete,
+    toolbarEnd,
     expandedRows,
     onRowToggle,
     rowExpansionTemplate,
@@ -53,18 +60,21 @@ export function CrudManager<T extends { _id?: string }>({
     };
 
     const renderToolbar = () => {
-        if (!canCreate || !onCreate) return null;
+        if ((!canCreate || !onCreate) && !toolbarEnd) return null;
         return (
             <Toolbar
                 className="mb-3"
                 start={
-                    <Button
-                        label={`New ${itemName??''}`}
-                        icon="pi pi-plus"
-                        severity="success"
-                        onClick={onCreate}
-                    />
+                    canCreate && onCreate ? (
+                        <Button
+                            label={`New ${itemName ?? ''}`}
+                            icon="pi pi-plus"
+                            severity="success"
+                            onClick={onCreate}
+                        />
+                    ) : null
                 }
+                end={toolbarEnd ?? null}
             />
         );
     };
@@ -108,6 +118,9 @@ export function CrudManager<T extends { _id?: string }>({
         </div>
     );
 
+    if (loading) return <ListSkeleton rows={10} />;
+    if (error) return <ErrorCard errorMessage={error} />;
+
     return (
         <div className="card">
             {renderToolbar()}
@@ -138,7 +151,7 @@ export function CrudManager<T extends { _id?: string }>({
                     <Column key={idx} {...col} />
                 ))}
 
-                {(canEdit || canDelete) && <Column body={actionBody}/>}
+                {(canEdit || canDelete) && <Column body={actionBody} />}
             </DataTable>
         </div>
     );

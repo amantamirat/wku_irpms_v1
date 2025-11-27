@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
 import { User, IUser } from "./user.model";
-import { CreateUserDTO, GetUsersDTO, UpdateUserDTO } from "./user.dto";
+import { CreateUserDTO,  UpdateUserDTO } from "./user.dto";
+import { UserStatus } from "./user.enum";
 
 export interface IUserRepository {
     findById(id: string): Promise<IUser | null>;
-    findAll(options: GetUsersDTO): Promise<Partial<IUser>[]>;
+    findAll(deleted?: boolean): Promise<Partial<IUser>[]>;
     exists(userName: string): Promise<boolean>;
     create(data: CreateUserDTO): Promise<IUser>;
     update(id: string, data: UpdateUserDTO["data"]): Promise<IUser>;
@@ -34,22 +35,13 @@ export class UserRepository implements IUserRepository {
         return User.create(data);
     }
 
-    async findAll(query: GetUsersDTO) {
-        const { deleted } = query;
-
+    async findAll(deleted?: boolean) {
         const filter: any = {};
-        // Only set the filter if deleted is defined
         if (deleted === true) {
-            // Get only deleted users
-            filter.isDeleted = true;
+            filter.status = UserStatus.deleted;
         } else {
-            // Get NON-deleted users (including those without the field)
-            filter.$or = [
-                { isDeleted: false },
-                { isDeleted: { $exists: false } }
-            ];
+            filter.status = { $ne: UserStatus.deleted };
         }
-
         return User.find(filter).populate("roles").populate("organizations")
             .lean<IUser[]>()
             .exec();
@@ -73,8 +65,8 @@ export class UserRepository implements IUserRepository {
             toUpdate.organizations = dtoData.organizations.map(o => new mongoose.Types.ObjectId(o));
         }
 
-        if (dtoData.isDeleted) {
-            toUpdate.isDeleted = dtoData.isDeleted;
+        if (dtoData.status) {
+            toUpdate.status = dtoData.status;
         }
 
         if (dtoData.password) {

@@ -11,14 +11,14 @@ export default function NoAuthGuard({ children }: { children: React.ReactNode })
     useEffect(() => {
         if (loading) return;
 
-        if (user?.status === UserStatus.Active) {
+        if (user?.status === UserStatus.active) {
             router.push('/');
-        } else if (user?.status === UserStatus.Pending) {
+        } else if (user?.status === UserStatus.pending) {
             router.push('/auth/request-activation');
         }
     }, [loading, user, router]);
 
-    if (loading || user?.status === UserStatus.Active || user?.status === UserStatus.Pending) {
+    if (loading || user?.status === UserStatus.active || user?.status === UserStatus.pending) {
         return <div>Loading...</div>;
     }
 

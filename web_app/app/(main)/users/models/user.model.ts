@@ -3,9 +3,9 @@ import { Organization } from "../../organizations/models/organization.model";
 import { Role } from "../../roles/models/role.model";
 
 export enum UserStatus {
-    Pending = 'Pending',
-    Active = 'Active',
-    Deleted = 'Deleted'
+    pending = 'Pending',
+    active = 'Active',
+    deleted = 'Deleted'
 }
 
 export type PasswordType = {
@@ -114,6 +114,10 @@ export function sanitizeUser(user: Partial<User>): Partial<User> {
             )
             .filter((id): id is string => typeof id === 'string'),
     };
+}
+
+export interface GetUsersOptions {
+    status?: UserStatus;
 }
 
 

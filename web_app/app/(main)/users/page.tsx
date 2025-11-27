@@ -20,7 +20,7 @@ const UserPage = () => {
     let emptyUser: User = {
         user_name: '',
         email: '',
-        status: UserStatus.Pending,
+        status: UserStatus.pending,
         roles: []
     };
     const [globalFilter, setGlobalFilter] = useState('');
@@ -83,14 +83,14 @@ const UserPage = () => {
         const deleted = await UserApi.deleteUser(selectedUser);
         if (deleted) {
             let _users = [...users];
-            if (selectedUser.status === UserStatus.Deleted) {
+            if (selectedUser.status === UserStatus.deleted) {
                 // Permanent deletion
                 _users = _users.filter(u => u._id !== selectedUser._id);
             } else {
                 // Soft deletion
                 const index = _users.findIndex(u => u._id === selectedUser._id);
                 if (index !== -1) {
-                    _users[index] = { ..._users[index], status: UserStatus.Deleted };
+                    _users[index] = { ..._users[index], status: UserStatus.deleted };
                 }
             }
             setUsers(_users);
@@ -161,7 +161,7 @@ const UserPage = () => {
                     icon="pi pi-refresh" rounded severity="warning" className="p-button-rounded p-button-text"
                     style={{ fontSize: '2rem' }} onClick={() => openResetPasswordDialog(rowData)}
                 />
-                <Button icon={rowData.status !== UserStatus.Deleted ? "pi pi-user-minus" :
+                <Button icon={rowData.status !== UserStatus.deleted ? "pi pi-user-minus" :
                     "pi pi-times"}
                     rounded severity="danger" className="p-button-rounded p-button-text"
                     style={{ fontSize: '2rem' }} onClick={() => confirmDeleteItem(rowData)} />
