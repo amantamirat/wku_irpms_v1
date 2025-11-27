@@ -34,13 +34,27 @@ export class UserService {
         return rest;
     }
 
-    async getUsers(deleted: boolean = false) {
+    async getUsers() {
         const users = await this.repository.findAll();
         return users.map(({ password, ...rest }) => rest);
     }
 
     async update(dto: UpdateUserDTO) {
         const { id, data, userId } = dto;
+        const loggedInUser = await this.repository.findById(userId ?? '');
+        if (String(loggedInUser?.createdBy) === id) {
+            throw new Error(" heirarchial security:You can not modify this user!");
+        }
+
+        const userDoc = await this.repository.findById(id);
+        if (!userDoc) throw new Error("User not found");
+
+
+
+       // if (String(userDoc.createdBy) !== userId) {
+           // throw new Error("You can not update this user!");
+      //  }
+
         const updated = await this.repository.update(id, data);
         if (!updated) throw new Error("User not found.");
         const { password, ...rest } = updated;
@@ -65,18 +79,49 @@ export class UserService {
     }
 
     async delete(dto: DeleteDto) {
-        //soft deletion
+
         const { id, userId } = dto;
+
+        const loggedInUser = await this.repository.findById(userId);
+        if (String(loggedInUser?.createdBy) === id) {
+            throw new Error(" heirarchial security:You can not modify this user!");
+        }
+
+        const userDoc = await this.repository.findById(id);
+        if (!userDoc) throw new Error("User not found");
+
+        // if (String(userDoc.createdBy) !== userId) {
+        //  throw new Error("You can not delete this user!");
+        // }
+
+        // if (String(userDoc.createdBy) === id) {
+        //throw new Error("You can not delete [CR] of this user!");
+        //  }
+        if (userDoc.status === UserStatus.deleted) {
+            //hard deletion
+            if (String(userDoc.createdBy) !== userId) {
+                throw new Error("You can not delete this user!");
+            }
+            return await this.repository.delete(id);
+        }
+        //soft deletion
         const deleted = await this.changeStatus({ id, data: { status: UserStatus.deleted }, userId });
         if (!deleted) throw new Error("User not found");
         return deleted;
     }
     ////
 
-    async reset(id: string, newPassword: string) {
-        const hashed = await UserService.prepareHash(newPassword);
+    async reset(dto: UpdateUserDTO) {
+        const { id, data, userId } = dto;
+        const loggedInUser = await this.repository.findById(userId ?? '');
+        if (String(loggedInUser?.createdBy) === id) {
+            throw new Error(" heirarchial security:You can not modify this user!");
+        }
+        const userDoc = await this.repository.findById(id);
+        if (!userDoc) throw new Error("User not found");
+        if (!data.password) throw new Error("Password not found");
+        const hashed = await UserService.prepareHash(data.password);
         const resetted = await this.repository.update(id, { password: hashed });
-        if (!resetted) throw new Error("User not found");
         return resetted;
     }
 

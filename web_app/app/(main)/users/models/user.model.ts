@@ -116,8 +116,5 @@ export function sanitizeUser(user: Partial<User>): Partial<User> {
     };
 }
 
-export interface GetUsersOptions {
-    status?: UserStatus;
-}
 
 

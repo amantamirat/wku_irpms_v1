@@ -4,6 +4,7 @@ import { errorResponse, successResponse } from '../../util/response';
 import { AuthenticatedRequest } from './auth/auth.middleware';
 import { ChangePasswordDTO, CreateUserDTO, UpdateUserDTO } from './user.dto';
 import { UserService } from './user.service';
+import { UserStatus } from './user.enum';
 
 const service = new UserService();
 
@@ -36,11 +37,6 @@ export class UserController {
 
   static async getUsers(req: Request, res: Response) {
     try {
-      const { showDeleted } = req.query;
-      const isDeleted =
-        typeof showDeleted === "string"
-          ? showDeleted.toLowerCase() === "true"
-          : false;
       const users = await service.getUsers();
       successResponse(res, 200, 'Users fetched successfully', users);
     } catch (err: any) {
@@ -78,9 +74,29 @@ export class UserController {
         data: { status },
         userId: req.user._id,
       };
+      if (status === UserStatus.deleted) {
+        throw new Error("deletetion should be avoided");
+      }
       const updated = await service.changeStatus(dto);
 
       successResponse(res, 201, "User status updated successfully", updated);
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
+    }
+  }
+
+  static async resetPassword(req: AuthenticatedRequest, res: Response) {
+    try {
+      if (!req.user) throw new Error("User not authorized!");
+      const { id } = req.params;
+      const { newPassword } = req.body;
+      const dto: UpdateUserDTO = {
+        id,
+        data: { password: newPassword },
+        userId: req.user._id,
+      };
+      const result = await service.reset(dto);
+      successResponse(res, 200, "Password reset successfully", result);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
@@ -121,16 +137,7 @@ export class UserController {
     }
   }
 
-  static async resetPassword(req: Request, res: Response) {
-    try {
-      const { id } = req.params;
-      const { newPassword } = req.body;
-      const result = await service.reset(id, newPassword);
-      successResponse(res, 200, "Password reset successfully", result);
-    } catch (err: any) {
-      errorResponse(res, 400, err.message, err);
-    }
-  }
+
 
 }
 
