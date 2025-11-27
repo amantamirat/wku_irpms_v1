@@ -35,7 +35,7 @@ export class UserService {
     }
 
     async getUsers(deleted: boolean = false) {
-        const users = await this.repository.findAll(deleted);
+        const users = await this.repository.findAll();
         return users.map(({ password, ...rest }) => rest);
     }
 

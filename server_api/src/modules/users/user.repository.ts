@@ -38,9 +38,9 @@ export class UserRepository implements IUserRepository {
     async findAll(deleted?: boolean) {
         const filter: any = {};
         if (deleted === true) {
-            filter.status = UserStatus.deleted;
+           // filter.status = UserStatus.deleted;
         } else {
-            filter.status = { $ne: UserStatus.deleted };
+          //  filter.status = { $ne: UserStatus.deleted };
         }
         return User.find(filter).populate("roles").populate("organizations")
             .lean<IUser[]>()

@@ -21,6 +21,7 @@ interface CrudManagerProps<T> {
     onCreate?: () => void;
     onEdit?: (row: T) => void;
     onDelete?: (row: T) => void;
+    extraActions?: (row: T) => React.ReactNode; 
     toolbarEnd?: React.ReactNode;
     expandedRows?: any[] | DataTableExpandedRows;
     onRowToggle?: (exp: any) => void;
@@ -43,6 +44,7 @@ export function CrudManager<T extends { _id?: string }>({
     onCreate,
     onEdit,
     onDelete,
+    extraActions,
     toolbarEnd,
     expandedRows,
     onRowToggle,
@@ -97,6 +99,8 @@ export function CrudManager<T extends { _id?: string }>({
 
     const actionBody = (row: T) => (
         <div className="flex gap-2">
+            {/* ➕ Inject extra actions from parent */}
+            {extraActions && extraActions(row)}
             {canEdit && (
                 <Button
                     icon="pi pi-pencil"

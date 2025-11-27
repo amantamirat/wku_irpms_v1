@@ -29,11 +29,13 @@ const UserManager = () => {
 
     const confirm = useConfirmDialog();
 
+    const [allUsers, setAllUsers] = useState<User[]>([]);
     const [showDeleted, setShowDeleted] = useState(false);
 
     const canCreate = !showDeleted && hasPermission([PERMISSIONS.USER.CREATE]);
     const canEdit = !showDeleted && hasPermission([PERMISSIONS.USER.UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.USER.DELETE]);
+    const canReset = !showDeleted && hasPermission([PERMISSIONS.USER.RESET]);
 
     // CRUD hook
     const {
@@ -52,24 +54,31 @@ const UserManager = () => {
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showPasswordDialog, setShowPasswordDialog] = useState(false);
 
-    // Fetch users
     useEffect(() => {
         const fetchUsers = async () => {
             try {
                 setLoading(true);
-                const data = await UserApi.getUsers(showDeleted);
-                setAll(data);
+                const data = await UserApi.getUsers(); // fetch ALL without filter
+                setAllUsers(data);
             } catch (err: any) {
                 setError("Failed to fetch users. " + (err?.message ?? ""));
             } finally {
                 setLoading(false);
             }
         };
-        fetchUsers();
-    }, [showDeleted]);
 
-    //if (loading) return <ListSkeleton rows={10} />;
-    //if (error) return <ErrorCard errorMessage={error} />;
+        fetchUsers();
+    }, []);
+
+
+    useEffect(() => {
+        if (showDeleted) {
+            setAll(allUsers.filter(u => u.status === UserStatus.deleted));
+        } else {
+            setAll(allUsers.filter(u => u.status !== UserStatus.deleted));
+        }
+    }, [showDeleted, allUsers]);
+
 
     // Save callback
     const onSaveComplete = (saved: User) => {
@@ -141,7 +150,7 @@ const UserManager = () => {
             body: (u: User) => <MyBadge type="status" value={u.status ?? "Unknown"} />
         },
         { body: stateTransitionTemplate }
-    ];
+    ].filter(Boolean);
 
     return (
         <>
@@ -156,20 +165,31 @@ const UserManager = () => {
                 canCreate={canCreate}
                 canEdit={canEdit}
                 canDelete={canDelete}
-                onCreate={() => { setUser(emptyUser); setShowSaveDialog(true); }}
-                onEdit={(row) => { setUser(row); setShowSaveDialog(true); }}
-
+                onCreate={() => { setUser(emptyUser); setShowSaveDialog(true && canCreate); }}
+                onEdit={(row) => { setUser(row); setShowSaveDialog(true && canEdit); }}
                 onDelete={(row) =>
                     confirm.ask({
                         item: row.user_name,
                         onConfirmAsync: () => deleteUser(row)
                     })
                 }
+                extraActions={
+                    (row) =>
+                        canReset && <Button
+                            icon="pi pi-refresh" rounded severity="warning" className="p-button-rounded p-button-text"
+                            style={{ fontSize: '2rem' }}
+                            onClick={() => {
+                                setUser(row);
+                                setShowPasswordDialog(true);
+                            }}
+                        />
+                }
+
                 toolbarEnd={
                     <ToggleButton checked={showDeleted}
                         onChange={(e) => setShowDeleted(e.value)}
-                        offLabel="Show Deleted"
-                        onLabel="Show Active"
+                        offLabel="Trash"
+                        onLabel="Users"
                         offIcon="pi pi-trash"
                         onIcon="pi pi-users"
                     />

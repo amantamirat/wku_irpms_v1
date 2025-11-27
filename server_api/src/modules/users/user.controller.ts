@@ -41,7 +41,7 @@ export class UserController {
         typeof showDeleted === "string"
           ? showDeleted.toLowerCase() === "true"
           : false;
-      const users = await service.getUsers(isDeleted);
+      const users = await service.getUsers();
       successResponse(res, 200, 'Users fetched successfully', users);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
