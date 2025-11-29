@@ -213,20 +213,7 @@ const SaveUserDialog = ({ visible, user, onHide, onComplete }: SaveUserDialogPro
                     />
                 </div>
 
-                {isEdit &&
-                    <div className="field">
-                        <label htmlFor="status">Status</label>
-                        <Dropdown
-                            id="status"
-                            value={localUser.status}
-                            options={Object.values(UserStatus).map(s => ({ label: s, value: s }))}
-                            onChange={(e) =>
-                                setLocalUser({ ...localUser, status: e.value })
-                            }
-                            placeholder="Select Status"
-                        />
-                    </div>
-                }
+                
                 {errorMessage && <small className="p-error">{errorMessage}</small>}
             </Dialog>
         </>
