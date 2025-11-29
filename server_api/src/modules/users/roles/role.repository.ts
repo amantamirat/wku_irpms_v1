@@ -6,12 +6,18 @@ import { CreateRoleDto, UpdateRoleDto } from "./role.dto";
 export interface IRoleRepository {
     findById(id: string): Promise<IRole | null>;
     findAll(): Promise<Partial<IRole>[]>;
+    findByName(roleName: string): Promise<IRole | null>;
     create(data: CreateRoleDto): Promise<IRole>;
     update(id: string, data: UpdateRoleDto["data"]): Promise<IRole>;
     delete(id: string): Promise<IRole | null>;
 }
 
 export class RoleRepository implements IRoleRepository {
+    
+    async findByName(roleName: string): Promise<IRole | null> {
+        //throw new Error("Method not implemented.");
+        return Role.findOne({ role_name: roleName });
+    }
 
 
     async findById(id: string) {

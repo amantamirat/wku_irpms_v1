@@ -5,7 +5,7 @@ import { CreateUserDTO, UpdateUserDTO } from "./user.dto";
 export interface IUserRepository {
     findById(id: string): Promise<IUser | null>;
     findAll(): Promise<Partial<IUser>[]>;
-    findOne(userName: string): Promise<IUser | null>;
+    findByName(userName: string): Promise<IUser | null>;
     create(data: CreateUserDTO): Promise<IUser>;
     update(id: string, data: UpdateUserDTO["data"]): Promise<IUser>;
     delete(id: string): Promise<void>;
@@ -41,7 +41,7 @@ export class UserRepository implements IUserRepository {
             .exec();
     }
 
-    async findOne(userName: string): Promise<IUser | null> {
+    async findByName(userName: string): Promise<IUser | null> {
         //throw new Error("Method not implemented.");
         return User.findOne({ user_name: userName });
     }

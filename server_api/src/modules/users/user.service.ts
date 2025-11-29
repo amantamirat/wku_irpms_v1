@@ -41,19 +41,9 @@ export class UserService {
 
     async update(dto: UpdateUserDTO) {
         const { id, data, userId } = dto;
-        const loggedInUser = await this.repository.findById(userId ?? '');
-        if (String(loggedInUser?.createdBy) === id) {
-            throw new Error(" heirarchial security:You can not modify this user!");
-        }
 
         const userDoc = await this.repository.findById(id);
         if (!userDoc) throw new Error("User not found");
-
-
-
-       // if (String(userDoc.createdBy) !== userId) {
-           // throw new Error("You can not update this user!");
-      //  }
 
         const updated = await this.repository.update(id, data);
         if (!updated) throw new Error("User not found.");
@@ -79,24 +69,11 @@ export class UserService {
     }
 
     async delete(dto: DeleteDto) {
-
         const { id, userId } = dto;
-
-        const loggedInUser = await this.repository.findById(userId);
-        if (String(loggedInUser?.createdBy) === id) {
-            throw new Error(" heirarchial security:You can not modify this user!");
-        }
 
         const userDoc = await this.repository.findById(id);
         if (!userDoc) throw new Error("User not found");
 
-        // if (String(userDoc.createdBy) !== userId) {
-        //  throw new Error("You can not delete this user!");
-        // }
-
-        // if (String(userDoc.createdBy) === id) {
-        //throw new Error("You can not delete [CR] of this user!");
-        //  }
         if (userDoc.status === UserStatus.deleted) {
             //hard deletion
             if (String(userDoc.createdBy) !== userId) {
@@ -113,10 +90,12 @@ export class UserService {
 
     async reset(dto: UpdateUserDTO) {
         const { id, data, userId } = dto;
+        /*
         const loggedInUser = await this.repository.findById(userId ?? '');
         if (String(loggedInUser?.createdBy) === id) {
-            throw new Error(" heirarchial security:You can not modify this user!");
+            throw new Error(" heirarchial security:You can not resset this user!");
         }
+        */
         const userDoc = await this.repository.findById(id);
         if (!userDoc) throw new Error("User not found");
         if (!data.password) throw new Error("Password not found");
@@ -207,7 +186,7 @@ static async changePassword(id: string, dto: ChangePasswordDto) {
         if (!userName || !email || !password) {
             throw new Error('Default Admin credentials are not found in environment variables.');
         }
-        const exist = await repository.findOne(userName);
+        const exist = await repository.findByName(userName);
         if (!exist) {
             const adminRole = await Role.findOne({ role_name: "admin" });
             if (!adminRole) {

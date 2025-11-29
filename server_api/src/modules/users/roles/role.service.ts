@@ -1,9 +1,7 @@
-import { Role } from "./role.model";
-import { User } from "../user.model";
-import { Permission } from "../permissions/permission.model";
+import { DeleteDto } from "../../../util/delete.dto";
+import { PermissionRepository } from "../permissions/permission.repository";
 import { CreateRoleDto, UpdateRoleDto } from "./role.dto";
 import { IRoleRepository, RoleRepository } from "./role.repository";
-import { DeleteDto } from "../../../util/delete.dto";
 
 
 
@@ -42,15 +40,13 @@ export class RoleService {
         return await role.deleteOne();
     }
 
-
-   
-
-
     static async initAdminRole() {
+        const roleRepository = new RoleRepository();
+        const permReposiroty = new PermissionRepository();
         const roleName = "admin";
 
         // find role if exists
-        let adminRole = await Role.findOne({ role_name: roleName });
+        let adminRole = await roleRepository.findByName(roleName);
         if (!adminRole) {
             // permissions to add
             const permissionNames = [
@@ -59,15 +55,15 @@ export class RoleService {
                 "role:create", "role:read", "role:update", "role:delete"
             ];
 
-            const permissions = await Permission.find({ name: { $in: permissionNames } });
+            const permissions = await permReposiroty.findByNames(permissionNames);
 
             if (!permissions.length) {
                 throw new Error("Permissions not found. Did you seed permissions?");
             }
             // create admin role
-            adminRole = await Role.create({
-                role_name: roleName,
-                permissions: permissions.map(p => p._id)
+            adminRole = await roleRepository.create({
+                roleName: roleName,
+                permissions: permissions.map(p => String(p._id))
             });
 
             console.log("Admin role created with permissions.");

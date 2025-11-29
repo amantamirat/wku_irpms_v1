@@ -21,7 +21,7 @@ export class PermissionService {
         const permissions = JSON.parse(rawData);
         let seeded = false;
         for (const perm of permissions) {
-            const exists = await repository.findOne(perm.name);
+            const exists = await repository.findByName(perm.name);
             if (!exists) {
                 await repository.create(perm);
                 //new Permission(perm).save();
