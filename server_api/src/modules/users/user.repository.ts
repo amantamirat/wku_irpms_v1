@@ -1,12 +1,11 @@
 import mongoose from "mongoose";
 import { User, IUser } from "./user.model";
-import { CreateUserDTO,  UpdateUserDTO } from "./user.dto";
-import { UserStatus } from "./user.enum";
+import { CreateUserDTO, UpdateUserDTO } from "./user.dto";
 
 export interface IUserRepository {
     findById(id: string): Promise<IUser | null>;
-    findAll(deleted?: boolean): Promise<Partial<IUser>[]>;
-    exists(userName: string): Promise<boolean>;
+    findAll(): Promise<Partial<IUser>[]>;
+    findOne(userName: string): Promise<IUser | null>;
     create(data: CreateUserDTO): Promise<IUser>;
     update(id: string, data: UpdateUserDTO["data"]): Promise<IUser>;
     delete(id: string): Promise<void>;
@@ -35,22 +34,16 @@ export class UserRepository implements IUserRepository {
         return User.create(data);
     }
 
-    async findAll(deleted?: boolean) {
+    async findAll() {
         const filter: any = {};
-        if (deleted === true) {
-           // filter.status = UserStatus.deleted;
-        } else {
-          //  filter.status = { $ne: UserStatus.deleted };
-        }
         return User.find(filter).populate("roles").populate("organizations")
             .lean<IUser[]>()
             .exec();
     }
 
-    async exists(userName: string): Promise<boolean> {
+    async findOne(userName: string): Promise<IUser | null> {
         //throw new Error("Method not implemented.");
-        const exists = await User.exists({ user_name: userName });
-        return exists !== null; // true if exists, false otherwise
+        return User.findOne({ user_name: userName });
     }
 
 

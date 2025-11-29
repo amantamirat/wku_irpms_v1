@@ -1,41 +1,49 @@
-import { Types } from "mongoose";
 import { Role } from "./role.model";
 import { User } from "../user.model";
 import { Permission } from "../permissions/permission.model";
+import { CreateRoleDto, UpdateRoleDto } from "./role.dto";
+import { IRoleRepository, RoleRepository } from "./role.repository";
+import { DeleteDto } from "../../../util/delete.dto";
 
-export interface CreateRoleDto {
-    role_name: string;
-    permissions: Types.ObjectId[];
-}
 
 
 export class RoleService {
 
-    static async createRole(data: CreateRoleDto) {
-        const createdRole = await Role.create({ ...data });
+    private repository: IRoleRepository;
+
+    constructor(repository?: IRoleRepository) {
+        this.repository = repository || new RoleRepository();
+    }
+
+    async create(dto: CreateRoleDto) {
+        const createdRole = await this.repository.create(dto);
         return createdRole;
     }
 
-    static async getRoles() {
-        return Role.find().populate("permissions").lean();
+    async getAll() {
+        return await this.repository.findAll();
     }
 
-    static async updateRole(id: string, data: Partial<CreateRoleDto>) {
-        const role = await Role.findById(id);
+    async update(dto: UpdateRoleDto) {
+        const { id, data } = dto;
+        const role = this.repository.update(id, data);
         if (!role) throw new Error("Role not found");
-        Object.assign(role, data);
-        return role.save();
+        return role;
     }
 
-    static async deleteRole(id: string) {
-        const role = await Role.findById(id);
+    async delete(dto: DeleteDto) {
+        const { id, userId } = dto;
+        const role = await this.repository.delete(id);
         if (!role) throw new Error("Role not found");
-        const isAssigned = await User.exists({ roles: id });
-        if (isAssigned) {
-            throw new Error("Cannot delete role: it is assigned to one or more users");
-        }
+        //const isAssigned = await User.exists({ roles: id });
+        //if (isAssigned) {
+        //throw new Error("Cannot delete role: it is assigned to one or more users");
+        // }
         return await role.deleteOne();
     }
+
+
+   
 
 
     static async initAdminRole() {
@@ -56,8 +64,6 @@ export class RoleService {
             if (!permissions.length) {
                 throw new Error("Permissions not found. Did you seed permissions?");
             }
-
-
             // create admin role
             adminRole = await Role.create({
                 role_name: roleName,

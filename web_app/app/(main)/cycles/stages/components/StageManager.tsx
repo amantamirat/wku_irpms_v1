@@ -65,8 +65,6 @@ const StageManager = ({ cycle }: StageManagerProps) => {
         if (cycle?._id) fetchStages();
     }, [cycle?._id]);
 
-    if (loading) return <ListSkeleton rows={10} />;
-    if (error) return <ErrorCard errorMessage={error} />;
 
     // Save (create/update)
     const onSaveComplete = (savedStage: Stage) => {
@@ -134,6 +132,8 @@ const StageManager = ({ cycle }: StageManagerProps) => {
                         onConfirmAsync: () => deleteStage(row)
                     })
                 }
+                loading={loading}
+                error={error}
                 expandedRows={expandedRows}
                 onRowToggle={(e) => setExpandedRows(e.data)}
                 rowExpansionTemplate={(row: Stage) => (

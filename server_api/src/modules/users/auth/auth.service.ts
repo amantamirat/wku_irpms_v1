@@ -8,6 +8,8 @@ import JwtPayload from "./auth.model";
 import Applicant from "../../applicants/applicant.model";
 import { UserService } from "../user.service";
 import { CacheService } from "../../../util/cache/cache.service";
+import { IUserRepository, UserRepository } from "../user.repository";
+import { LoginDto } from "./auth.dto";
 
 
 export interface LoginUserDto {
@@ -22,6 +24,25 @@ export interface VerfyUserDto {
 }
 
 export class AuthService {
+
+    private repository: IUserRepository;
+
+    constructor(repository?: IUserRepository) {
+        this.repository = repository || new UserRepository();
+    }
+
+    async login(dto: LoginDto) {
+        const { userName, password } = dto;
+        const user = await this.repository.findOne(userName);
+        if (!user) {
+            throw new Error("User not found");
+        }
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            throw new Error("Invalid credentials.");
+        }
+    }
+
 
     static async loginUser(data: LoginUserDto) {
         const user = await User.findOne({
