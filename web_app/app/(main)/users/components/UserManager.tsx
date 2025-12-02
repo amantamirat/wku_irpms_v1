@@ -15,7 +15,6 @@ import SaveDialog from "../dialogs/SaveDialog";
 import { User, UserStatus } from "../models/user.model";
 
 
-
 const UserManager = () => {
 
     const emptyUser: User = {
@@ -81,15 +80,32 @@ const UserManager = () => {
 
 
     // Save callback
-    const onSaveComplete = (saved: User) => {
-        updateItem(saved);
-        hideDialogs();
+    const onSaveComplete = (saved: User, hide: boolean = true) => {
+        setAllUsers(prev => {
+            const index = prev.findIndex(i => i._id === saved._id);
+            // If user exists → update it
+            if (index !== -1) {
+                return prev.map(u =>
+                    u._id === saved._id ? saved : u
+                );
+            }
+            // If not exists → add it
+            return [...prev, saved];
+        });
+
+        if (hide)
+            hideDialogs();
     };
 
     // Permanent or soft delete
     const deleteUser = async (row: User) => {
         const deleted = await UserApi.deleteUser(row);
-        if (deleted) removeItem(row);
+        if (deleted && row.status === UserStatus.deleted) {
+            setAllUsers(allUsers.filter(u => u._id !== row._id));
+            return
+        }
+        onSaveComplete({ ...deleted, roles: row.roles, organizations: row.organizations }, false);
+        // if (deleted) setAll(allUsers.filter(u => u.status === UserStatus.deleted));
     };
 
     const hideDialogs = () => {
@@ -100,7 +116,8 @@ const UserManager = () => {
 
     const updateStatus = async (row: User, next: UserStatus) => {
         const updated = await UserApi.updateUser({ _id: row._id, status: next }, true);
-        updateItem({ ...updated, roles: row.roles, organizations: row.organizations });
+        onSaveComplete({ ...updated, roles: row.roles, organizations: row.organizations }, false);
+        //updateItem({ ...updated, roles: row.roles, organizations: row.organizations });
     };
 
     const stateTransitionTemplate = (rowData: User) => {
@@ -165,8 +182,14 @@ const UserManager = () => {
                 canCreate={canCreate}
                 canEdit={canEdit}
                 canDelete={canDelete}
-                onCreate={() => { setUser(emptyUser); setShowSaveDialog(true && canCreate); }}
-                onEdit={(row) => { setUser(row); setShowSaveDialog(true && canEdit); }}
+                onCreate={() => {
+                    setUser({ ...emptyUser });
+                    setShowSaveDialog(true && canCreate);
+                }}
+                onEdit={(row) => {
+                    setUser({ ...row });
+                    setShowSaveDialog(true && canEdit);
+                }}
                 onDelete={(row) =>
                     confirm.ask({
                         item: row.user_name,
@@ -199,7 +222,7 @@ const UserManager = () => {
 
             {/* Save User Dialog */}
             {
-                user && <SaveDialog
+                (user && showSaveDialog) && <SaveDialog
                     visible={showSaveDialog}
                     user={user}
                     onComplete={onSaveComplete}

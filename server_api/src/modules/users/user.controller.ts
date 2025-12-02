@@ -13,9 +13,7 @@ export class UserController {
   static async create(req: AuthenticatedRequest, res: Response) {
     try {
       if (!req.user) throw new Error("User not authorized!");
-
       const { user_name, password, email, roles, organizations } = req.body;
-
       const dto: CreateUserDTO = {
         user_name,
         password,
@@ -26,7 +24,6 @@ export class UserController {
       };
 
       const created = await service.create(dto);
-
       successResponse(res, 201, "User created successfully", created);
 
     } catch (err: any) {
@@ -75,10 +72,9 @@ export class UserController {
         userId: req.user._id,
       };
       if (status === UserStatus.deleted) {
-        throw new Error("deletetion should be avoided");
+        throw new Error("deletetion through this function is not supported");
       }
       const updated = await service.changeStatus(dto);
-
       successResponse(res, 201, "User status updated successfully", updated);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
@@ -118,7 +114,6 @@ export class UserController {
   }
 
   /////
-
   static async changePassword(req: AuthenticatedRequest, res: Response) {
     try {
       if (!req.user) throw new Error("User not authorized!");
@@ -136,8 +131,6 @@ export class UserController {
       errorResponse(res, 400, err.message, err);
     }
   }
-
-
 
 }
 

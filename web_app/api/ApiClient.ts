@@ -53,7 +53,6 @@ export const ApiClient = {
         const url = `${BASE_URL}${endpoint}`;
         const token = getAuthToken();
         const isFormData = payload instanceof FormData;
-
         try {
             const response = await fetch(url, {
                 method: "POST",
@@ -63,7 +62,6 @@ export const ApiClient = {
                 },
                 body: isFormData ? payload : JSON.stringify(payload),
             });
-
             await handleError(response);
             const result = await response.json().catch(() => ({}));
             return result.data ?? result;
@@ -119,10 +117,9 @@ export const ApiClient = {
         }
     },
 
-    async delete(endpoint: string, payload?: any): Promise<boolean> {
+    async delete(endpoint: string, payload?: any): Promise<any> {
         const url = `${BASE_URL}${endpoint}`;
         const token = getAuthToken();
-
         try {
             const response = await fetch(url, {
                 method: "DELETE",
@@ -132,7 +129,6 @@ export const ApiClient = {
                 },
                 body: payload ? JSON.stringify(payload) : undefined,
             });
-
             await handleError(response);
             const result = await response.json().catch(() => ({}));
             return result.data ?? result;

@@ -30,8 +30,8 @@ export class UserRepository implements IUserRepository {
             status: dto.status,
             createdBy: new mongoose.Types.ObjectId(dto.createdBy)
         };
-
-        return User.create(data);
+        const created = await User.create(data);
+        return created.toObject();
     }
 
     async findAll() {

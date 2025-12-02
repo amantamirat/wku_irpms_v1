@@ -12,8 +12,8 @@ export const UserApi = {
 
     async createUser(user: Partial<User>): Promise<User> {
         const sanitized = sanitizeUser(user);
-        const createdData = await ApiClient.post(end_point, sanitized);
-        return createdData as User;
+        const created = await ApiClient.post(end_point, sanitized);
+        return created as User;
     },
 
     async updateUser(user: Partial<User>, changeStatus = false): Promise<User> {
@@ -29,7 +29,7 @@ export const UserApi = {
         return updatedUser as User;
     },
 
-    async deleteUser(user: User): Promise<boolean> {
+    async deleteUser(user: User): Promise<User> {
         if (!user._id) {
             throw new Error("_id required.");
         }
