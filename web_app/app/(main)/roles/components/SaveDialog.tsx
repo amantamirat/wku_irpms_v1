@@ -11,6 +11,8 @@ import { Toast } from 'primereact/toast';
 import { Permission } from '../permission/model/permission.model';
 import { PermissionApi } from '../permission/api/permission.api';
 import { MultiSelect } from 'primereact/multiselect';
+import { useAuth } from '@/contexts/auth-context';
+import { PERMISSIONS } from '@/types/permissions';
 
 interface SaveDialogProps {
     visible: boolean;
@@ -27,7 +29,11 @@ const SaveDialog = (props: SaveDialogProps) => {
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
+    const { hasPermission } = useAuth();
+    const readPermission = hasPermission([PERMISSIONS.PERMISSION.READ]);
+
     useEffect(() => {
+        if (!readPermission) return;
         const fetchPermissions = async () => {
             try {
                 const data = await PermissionApi.getPermissions();
@@ -123,7 +129,7 @@ const SaveDialog = (props: SaveDialogProps) => {
                     )}
                 </div>
 
-                <div className="field">
+                {readPermission && <div className="field">
                     <label htmlFor="permissions">Permissions</label>
                     <MultiSelect
                         id="permissions"
@@ -136,7 +142,7 @@ const SaveDialog = (props: SaveDialogProps) => {
                         display="chip"
                         className={classNames({ 'p-invalid': submitted && !localRole.permissions?.length })}
                     />
-                </div>
+                </div>}
 
                 {errorMessage && (
                     <small className="p-error">{errorMessage}</small>

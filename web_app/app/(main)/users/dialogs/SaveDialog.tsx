@@ -14,6 +14,8 @@ import { UserApi } from '../api/UserService';
 import { Dropdown } from 'primereact/dropdown';
 import { OrganizationApi } from '../../organizations/api/organization.api';
 import { Organization } from '../../organizations/models/organization.model';
+import { useAuth } from '@/contexts/auth-context';
+import { PERMISSIONS } from '@/types/permissions';
 
 
 interface SaveUserDialogProps {
@@ -31,6 +33,9 @@ const SaveUserDialog = ({ visible, user, onHide, onComplete }: SaveUserDialogPro
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
+    const { hasPermission } = useAuth();
+    const readOrganization = hasPermission([PERMISSIONS.ORGANIAZTION.READ]);
+
     useEffect(() => {
         setLocalUser({ ...user });
     }, [user]);
@@ -46,6 +51,7 @@ const SaveUserDialog = ({ visible, user, onHide, onComplete }: SaveUserDialogPro
         };
         fetchRoles();
 
+        if (!readOrganization) return;
         const fetchOrganizations = async () => {
             try {
                 const data = await OrganizationApi.getOrganizations({});
@@ -193,13 +199,13 @@ const SaveUserDialog = ({ visible, user, onHide, onComplete }: SaveUserDialogPro
                         options={roles}
                         optionLabel="role_name"
                         onChange={(e) => setLocalUser({ ...localUser, roles: e.value })}
-                        placeholder="Select Roles"
+                        placeholder="select roles"
                         display="chip"
                         className={classNames({ 'p-invalid': submitted && !localUser.roles?.length })}
                     />
                 </div>
 
-                <div className="field">
+                {readOrganization && <div className="field">
                     <label htmlFor="organizations">Organizations</label>
                     <MultiSelect
                         id="organizations"
@@ -208,12 +214,12 @@ const SaveUserDialog = ({ visible, user, onHide, onComplete }: SaveUserDialogPro
                         options={organizations}
                         optionLabel="name"
                         onChange={(e) => setLocalUser({ ...localUser, organizations: e.value })}
-                        placeholder="Select Ownerships"
+                        placeholder="select ownerships"
                         display="chip"
                     />
-                </div>
+                </div>}
 
-                
+
                 {errorMessage && <small className="p-error">{errorMessage}</small>}
             </Dialog>
         </>

@@ -31,7 +31,7 @@ const RoleManager = () => {
         setError
     } = useCrudList<Role>();
 
-    const [allRoles, setAllRoles] = useState<Role[]>([]);
+
     const [role, setRole] = useState<Role>(emptyRole);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
 
@@ -41,7 +41,6 @@ const RoleManager = () => {
             try {
                 setLoading(true);
                 const data = await RoleApi.getRoles();
-                setAllRoles(data);
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to fetch roles. " + (err?.message ?? ""));
@@ -112,7 +111,7 @@ const RoleManager = () => {
             />
 
             {/* Save Role Dialog */}
-            {role && (
+            {(role) && (
                 <SaveDialog
                     visible={showSaveDialog}
                     role={role}

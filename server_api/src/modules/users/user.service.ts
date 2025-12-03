@@ -90,12 +90,6 @@ export class UserService {
 
     async reset(dto: UpdateUserDTO) {
         const { id, data, userId } = dto;
-        /*
-        const loggedInUser = await this.repository.findById(userId ?? '');
-        if (String(loggedInUser?.createdBy) === id) {
-            throw new Error(" heirarchial security:You can not resset this user!");
-        }
-        */
         const userDoc = await this.repository.findById(id);
         if (!userDoc) throw new Error("User not found");
         if (!data.password) throw new Error("Password not found");
@@ -181,7 +175,7 @@ static async changePassword(id: string, dto: ChangePasswordDto) {
     static async initAdminUser() {
         const repository = new UserRepository();
         const userName = process.env.ADMIN_USER_NAME;
-        const email = process.env.ADMIN_EMAIL;
+        const email = process.env.SYS_EMAIL;
         const password = process.env.ADMIN_PASSWORD;
         if (!userName || !email || !password) {
             throw new Error('Default Admin credentials are not found in environment variables.');

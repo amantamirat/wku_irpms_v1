@@ -195,18 +195,28 @@ const AppMenu = () => {
                         PERMISSIONS.POSITION.DELETE
                     ])
                 },
+
+            ]
+        },
+        {
+            label: 'Account',
+            visible: hasPermission(
+                [
+                    PERMISSIONS.USER.CREATE,
+                    PERMISSIONS.ROLE.CREATE,
+                ]
+            ),
+            items: [
                 {
-                    label: 'User Accounts',
+                    label: 'Users',
                     icon: PrimeIcons.USERS,
                     to: '/users',
                     visible: hasPermission(
                         [
                             PERMISSIONS.USER.CREATE,
-                            PERMISSIONS.USER.UPDATE,
-                            PERMISSIONS.USER.DELETE
                         ]
                     )
-                },                
+                },
                 {
                     label: 'Roles &  Permissions',
                     icon: PrimeIcons.LOCK,
@@ -214,8 +224,6 @@ const AppMenu = () => {
                     visible: hasPermission(
                         [
                             PERMISSIONS.ROLE.CREATE,
-                            PERMISSIONS.ROLE.UPDATE,
-                            PERMISSIONS.ROLE.DELETE
                         ]
                     )
                 }
