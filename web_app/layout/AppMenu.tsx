@@ -137,18 +137,6 @@ const AppMenu = () => {
                     )
                 },
                 {
-                    label: 'Applicants',
-                    icon: 'pi pi-address-book',
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.APPLICANT.CREATE,
-                            PERMISSIONS.APPLICANT.UPDATE,
-                            PERMISSIONS.APPLICANT.DELETE
-                        ]
-                    ),
-                    to: '/applicants',
-                },
-                {
                     label: 'Organizations',
                     visible: hasPermission(
                         [
@@ -202,13 +190,24 @@ const AppMenu = () => {
             label: 'Account',
             visible: hasPermission(
                 [
+                    PERMISSIONS.APPLICANT.CREATE,
                     PERMISSIONS.USER.CREATE,
-                    PERMISSIONS.ROLE.CREATE,
+                    PERMISSIONS.ROLE.CREATE
                 ]
             ),
             items: [
                 {
-                    label: 'Users',
+                    label: 'Applicants',
+                    icon: 'pi pi-address-book',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.APPLICANT.CREATE,
+                        ]
+                    ),
+                    to: '/applicants',
+                },
+                {
+                    label: 'Credentials',
                     icon: PrimeIcons.USERS,
                     to: '/users',
                     visible: hasPermission(

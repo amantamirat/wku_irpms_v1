@@ -28,7 +28,7 @@ export class RoleRepository implements IRoleRepository {
 
     async create(dto: CreateRoleDto) {
         const data: Partial<IRole> = {
-            role_name: dto.roleName,
+            role_name: dto.role_name,
             permissions: dto.permissions?.map(id => new mongoose.Types.ObjectId(id)) ?? [],
         };
         return Role.create(data);
@@ -36,7 +36,7 @@ export class RoleRepository implements IRoleRepository {
 
     async findAll() {
         const filter: any = {};
-        return Role.find(filter).populate("permissions")
+        return await Role.find(filter).populate("permissions")
             .lean<IRole[]>()
             .exec();
     }
@@ -45,8 +45,8 @@ export class RoleRepository implements IRoleRepository {
     async update(id: string, dtoData: UpdateRoleDto["data"]) {
         const toUpdate: any = {};
 
-        if (dtoData.roleName) {
-            toUpdate.role_name = dtoData.roleName;
+        if (dtoData.role_name) {
+            toUpdate.role_name = dtoData.role_name;
         }
 
         if (dtoData.permissions) {

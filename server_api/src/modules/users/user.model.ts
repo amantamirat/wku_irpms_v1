@@ -2,6 +2,7 @@ import mongoose, { Document, Schema, Model } from 'mongoose';
 import { UserStatus } from './user.enum';
 import { COLLECTIONS } from '../../util/collections.enum';
 
+//assumption it is auth just username and passowd
 export interface IUser extends Document {
   user_name: string;
   password: string;
@@ -11,6 +12,7 @@ export interface IUser extends Document {
   organizations?: mongoose.Types.ObjectId[];
   reset_code?: String;
   reset_code_expires?: Date;
+  lastLogin?:Date,
   createdBy?: mongoose.Types.ObjectId;
   createdAt?: Date;
   updatedAt?: Date;

@@ -180,7 +180,7 @@ static async changePassword(id: string, dto: ChangePasswordDto) {
         if (!userName || !email || !password) {
             throw new Error('Default Admin credentials are not found in environment variables.');
         }
-        const exist = await repository.findByName(userName);
+        const exist = await repository.findByNameOrEmail(userName);
         if (!exist) {
             const adminRole = await Role.findOne({ role_name: "admin" });
             if (!adminRole) {

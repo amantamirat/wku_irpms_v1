@@ -33,7 +33,7 @@ export class AuthService {
 
     async login(dto: LoginDto) {
         const { userName, password } = dto;
-        const user = await this.repository.findByName(userName);
+        const user = await this.repository.findByNameOrEmail(userName);
         if (!user) {
             throw new Error("User not found");
         }

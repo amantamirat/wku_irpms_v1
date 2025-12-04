@@ -9,7 +9,7 @@ router.post('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.USER.CREATE]), 
     UserController.create);
 router.get('/', verifyActiveAccount,
-    checkPermission([PERMISSIONS.USER.READ, PERMISSIONS.USER.CREATE, PERMISSIONS.USER.UPDATE, PERMISSIONS.USER.DELETE, PERMISSIONS.USER.RESET])
+    checkPermission([PERMISSIONS.USER.READ])
     , UserController.getUsers);
 router.put('/:id', verifyActiveAccount, 
     checkPermission([PERMISSIONS.USER.UPDATE]), 

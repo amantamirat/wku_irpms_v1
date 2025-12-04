@@ -3,22 +3,27 @@ import { Gender, Accessibility } from './applicant.enum';
 import { COLLECTIONS } from '../../util/collections.enum';
 
 
-
 export interface IApplicant extends Document {
+    organization: mongoose.Types.ObjectId;
     first_name: string;
     last_name: string;
     birth_date: Date;
     gender: Gender;
-    organization: mongoose.Types.ObjectId;
     email?: string;
-    user?: mongoose.Types.ObjectId;
+    fin?: string;
+    orcid?: string;
     accessibility?: Accessibility[];
-    //ORCID
+    user?: mongoose.Types.ObjectId;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
 const ApplicantSchema = new Schema<IApplicant>({
+    organization: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.ORGANIZATION,
+        required: true
+    },
     first_name: {
         type: String,
         required: true
@@ -36,11 +41,6 @@ const ApplicantSchema = new Schema<IApplicant>({
         enum: Object.values(Gender),
         required: true
     },
-    organization: {
-        type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.ORGANIZATION,
-        required: true
-    },
     email: {
         type: String,
         unique: true,
@@ -50,17 +50,29 @@ const ApplicantSchema = new Schema<IApplicant>({
         ],
         sparse: true
     },
+    fin: {
+        type: String,
+        unique: true,
+        match: [/^\d{12}$/, "Invalid FIN number"],
+        sparse: true
+    },
+    orcid: {
+        type: String,
+        unique: true,
+        sparse: true,
+        match: [/^\d{4}-\d{4}-\d{4}-\d{4}$/, "Invalid ORCID format"]
+    },
+    accessibility: {
+        type: [String],
+        enum: Object.values(Accessibility),
+        default: []
+    },
     user: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.USER,
         unique: true,
         sparse: true,
         //immutable: true
-    },
-    accessibility: {
-        type: [String],
-        enum: Object.values(Accessibility),
-        default: []
     }
 }, { timestamps: true });
 

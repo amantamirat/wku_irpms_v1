@@ -1,12 +1,12 @@
 export interface CreateRoleDto {
-    roleName: string;
+    role_name: string;
     permissions: string[];
 }
 
 export interface UpdateRoleDto {
     id: string;
     data: Partial<{
-        roleName: string;
+        role_name: string;
         permissions: string[];
     }>;
     userId?: string;

@@ -1,5 +1,5 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Role } from "../models/role.model";
+import { Role, sanitizeRole } from "../models/role.model";
 
 
 const end_point = '/roles/';
@@ -13,7 +13,8 @@ export const RoleApi = {
     },
 
     async createRole(role: Partial<Role>): Promise<Role> {
-        const createdData = await ApiClient.post(end_point, role);
+        const sanitized = sanitizeRole(role);
+        const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as Role;
     },
 
@@ -22,7 +23,8 @@ export const RoleApi = {
             throw new Error("_id required.");
         }
         const url = `${end_point}${role._id}`;
-        const updatedRole = await ApiClient.put(url, role);
+        const sanitized = sanitizeRole(role);
+        const updatedRole = await ApiClient.put(url, sanitized);
         return updatedRole as Role;
     },
 
