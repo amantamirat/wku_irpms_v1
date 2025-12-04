@@ -8,6 +8,8 @@ import { useEffect, useState } from "react";
 import { RoleApi } from "../api/role.api";
 import { Role } from "../models/role.model";
 import SaveDialog from "./SaveDialog";
+import { useAuth } from "@/contexts/auth-context";
+import { PERMISSIONS } from "@/types/permissions";
 
 
 const RoleManager = () => {
@@ -17,7 +19,12 @@ const RoleManager = () => {
         permissions: []
     };
 
+    const { hasPermission } = useAuth();
     const confirm = useConfirmDialog();
+
+    const canCreate = hasPermission([PERMISSIONS.ROLE.CREATE]);
+    const canEdit = hasPermission([PERMISSIONS.ROLE.UPDATE]);
+    const canDelete = hasPermission([PERMISSIONS.ROLE.DELETE]);
 
     // CRUD hook
     const {
@@ -85,18 +92,16 @@ const RoleManager = () => {
                 columns={columns}
                 loading={loading}
                 error={error}
-
-                canCreate={true}
-                canEdit={true}
-                canDelete={true}
-
+                canCreate={canCreate}
+                canEdit={canEdit}
+                canDelete={canDelete}
                 onCreate={() => {
-                    setRole(emptyRole);
+                    setRole({ ...emptyRole });
                     setShowSaveDialog(true);
                 }}
 
                 onEdit={(row) => {
-                    setRole(row);
+                    setRole({ ...row });
                     setShowSaveDialog(true);
                 }}
 
