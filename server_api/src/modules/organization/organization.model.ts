@@ -2,15 +2,14 @@ import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../util/collections.enum";
 import { AcademicLevel, Classification, Ownership, Unit } from "./organization.enum";
 
-
-interface OrganizationDocument extends Document {
+interface IBaseOrganization extends Document {
     type: Unit;
     name: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
-const OrganizationSchema = new Schema<OrganizationDocument>(
+const OrganizationSchema = new Schema<IBaseOrganization>(
     {
         type: { type: String, enum: Object.values(Unit), required: true },
         name: { type: String, required: true }
@@ -18,47 +17,46 @@ const OrganizationSchema = new Schema<OrganizationDocument>(
     { timestamps: true, discriminatorKey: "type" } // discriminatorKey
 );
 
-export const Organization = model<OrganizationDocument>(COLLECTIONS.ORGANIZATION, OrganizationSchema);
+export const Organization = model<IBaseOrganization>(COLLECTIONS.ORGANIZATION, OrganizationSchema);
 
-interface CollegeDocument extends OrganizationDocument {
+interface ICollege extends IBaseOrganization {
     type: Unit.College;
 }
-export const College = Organization.discriminator<CollegeDocument>(Unit.College, new Schema({}));
+export const College = Organization.discriminator<ICollege>(Unit.College, new Schema({}));
 
-interface DirectorateDocument extends OrganizationDocument {
+interface IDirectorate extends IBaseOrganization {
     type: Unit.Directorate;
 }
 
-export const Directorate = Organization.discriminator<DirectorateDocument>(Unit.Directorate, new Schema({}));
+export const Directorate = Organization.discriminator<IDirectorate>(Unit.Directorate, new Schema({}));
 
-interface OfficeDocument extends OrganizationDocument {
+/*
+interface OfficeDocument extends IOrganization {
     type: Unit.Supportive;
 }
-
 export const Office = Organization.discriminator<OfficeDocument>(Unit.Supportive, new Schema({}));
+*/
 
-
-interface SectorDocument extends OrganizationDocument {
+interface ISector extends IBaseOrganization {
     type: Unit.Sector;
 }
 
-export const Sector = Organization.discriminator<SectorDocument>(Unit.Sector, new Schema({}));
+export const Sector = Organization.discriminator<ISector>(Unit.Sector, new Schema({}));
 
-
-export interface SpecializationDocument extends OrganizationDocument {
+export interface ISpecialization extends IBaseOrganization {
     type: Unit.Specialization;
     academic_level: AcademicLevel;
 }
 
-const SpecializationSchema = new Schema<SpecializationDocument>({
+const SpecializationSchema = new Schema<ISpecialization>({
     academic_level: { type: String, enum: Object.values(AcademicLevel), required: true },
 });
 
-export const Specialization = Organization.discriminator<SpecializationDocument>(Unit.Specialization, SpecializationSchema);
+export const Specialization = Organization.discriminator<ISpecialization>(Unit.Specialization, SpecializationSchema);
 
 
 
-interface SubOrganizationDocument extends OrganizationDocument {
+interface SubOrganizationDocument extends IBaseOrganization {
     parent: mongoose.Types.ObjectId;
 }
 
