@@ -5,30 +5,51 @@ import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { classNames } from 'primereact/utils';
 import { Dropdown } from 'primereact/dropdown';
-import { AcademicLevel, Classification, Organization, OrganizationalUnit, Ownership, validateOrganization } from '../models/organization.model';
+import { AcademicLevel, Classification, Organization, OrgnUnit, Ownership, validateOrganization } from '../models/organization.model';
 import { OrganizationApi } from '../api/organization.api';
 import { Toast } from 'primereact/toast';
 
 interface SaveDialogProps {
     visible: boolean;
     organization: Organization;
+    fetchParents?: boolean;
+    parentType?: OrgnUnit;
     onHide: () => void;
     onComplete: (savedOrganization: Organization) => void;
 }
 
-const SaveDialog = ({ visible, organization, onHide, onComplete }: SaveDialogProps) => {
+const SaveDialog = ({ visible, organization, fetchParents, parentType, onHide, onComplete }: SaveDialogProps) => {
     const toast = useRef<Toast>(null);
     const [localOrganization, setLocalOrganization] = useState<Organization>({ ...organization });
     const [submitted, setSubmitted] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | undefined>();
+    const [parents, setParents] = useState<Organization[]>([]);
 
     useEffect(() => {
         setLocalOrganization({ ...organization });
     }, [organization]);
 
-    const isProgram = localOrganization.type === OrganizationalUnit.Program;
-    const isSpecialization = localOrganization.type === OrganizationalUnit.Specialization;
-    const isExternal = localOrganization.type === OrganizationalUnit.External;
+    const isProgram = localOrganization.type === OrgnUnit.Program;
+    const isSpecialization = localOrganization.type === OrgnUnit.Specialization;
+    const isExternal = localOrganization.type === OrgnUnit.External;
+
+    useEffect(() => {
+        if (!fetchParents || !parentType) return;
+        const fetchParentTypes = async () => {
+            try {
+                const data = await OrganizationApi.getOrganizations({ type: parentType });
+                setParents(data);
+            } catch (err) {
+                console.error("Failed to fetch parents:", err);
+                toast.current?.show({
+                    severity: 'error',
+                    summary: `Failed to fetch parents: ${parentType}`,
+                    detail: '' + err,
+                    life: 2000,
+                });
+            }
+        };
+        fetchParentTypes();
+    }, []);
 
     const saveOrganization = async () => {
         try {
@@ -67,14 +88,12 @@ const SaveDialog = ({ visible, organization, onHide, onComplete }: SaveDialogPro
 
     const hide = () => {
         setSubmitted(false);
-        setErrorMessage(undefined);
         onHide();
     };
 
     useEffect(() => {
         if (!visible) {
             setSubmitted(false);
-            setErrorMessage(undefined);
         }
     }, [visible]);
 
@@ -164,8 +183,6 @@ const SaveDialog = ({ visible, organization, onHide, onComplete }: SaveDialogPro
                         )}
                     </div>
                 )}
-
-                {errorMessage && <small className="p-error">{errorMessage}</small>}
             </Dialog>
         </>
     );

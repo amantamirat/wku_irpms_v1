@@ -2,7 +2,7 @@ import { ApplicantApi } from "@/app/(main)/applicants/api/applicant.api";
 import { Applicant, applicantUnits } from "@/app/(main)/applicants/models/applicant.model";
 import { applicantTemplate } from "@/app/(main)/applicants/models/applicant.template";
 import { OrganizationApi } from "@/app/(main)/organizations/api/organization.api";
-import { Organization, OrganizationalUnit } from "@/app/(main)/organizations/models/organization.model";
+import { Organization, OrgnUnit } from "@/app/(main)/organizations/models/organization.model";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
@@ -22,7 +22,7 @@ interface ReviewerDialogProps {
 export default function SaveReviewerDialog({ visible, reviewer, onCompelete, onHide }: ReviewerDialogProps) {
 
     const toast = useRef<Toast>(null);
-    const [scope, setScope] = useState<OrganizationalUnit>();
+    const [scope, setScope] = useState<OrgnUnit>();
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [workspace, setWorkspace] = useState<Organization>();
     const [applicants, setApplicants] = useState<Applicant[]>([]);

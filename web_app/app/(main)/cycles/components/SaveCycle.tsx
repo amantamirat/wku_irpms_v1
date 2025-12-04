@@ -14,7 +14,7 @@ import { GrantApi } from '../../grants/api/grant.api';
 import { Grant } from '../../grants/models/grant.model';
 import { ThemeApi } from '../../thematic_areas/api/theme.api';
 import { Theme } from '../../thematic_areas/models/theme.model';
-import { Organization, OrganizationalUnit } from '../../organizations/models/organization.model';
+import { Organization, OrgnUnit } from '../../organizations/models/organization.model';
 import { Cycle, CycleStatus, validateCycle } from '../models/cycle.model';
 import { CycleType } from '../models/cycle.model';
 import { CycleApi } from '../api/cycle.api';
@@ -54,7 +54,7 @@ const SaveCycle = ({ type, visible, cycle, onHide, onComplete }: SaveCycleProps)
 
     // Load organizations
     useEffect(() => {
-        const orgType = type === 'Program' ? [OrganizationalUnit.Center] : [OrganizationalUnit.Directorate];
+        const orgType = type === 'Program' ? [OrgnUnit.Center] : [OrgnUnit.Directorate];
         const data = getOrganizationsByType(orgType);
         setOrganizations(data);
     }, [type, getOrganizationsByType]);

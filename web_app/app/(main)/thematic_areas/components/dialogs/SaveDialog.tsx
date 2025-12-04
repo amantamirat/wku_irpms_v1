@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Theme, ThemeLevel, ThemeType, validateTheme } from '../../models/theme.model';
 import { ThemeApi } from '../../api/theme.api';
 import { useAuth } from '@/contexts/auth-context';
-import { Organization, OrganizationalUnit } from '@/app/(main)/organizations/models/organization.model';
+import { Organization, OrgnUnit } from '@/app/(main)/organizations/models/organization.model';
 
 
 interface SaveDialogProps {
@@ -37,7 +37,7 @@ const SaveDialog = ({ visible, theme, onComplete, onHide }: SaveDialogProps) => 
         const fetchDirectorates = async () => {
             if (!isThematicArea) return;
             try {
-                const data = getOrganizationsByType([OrganizationalUnit.Directorate]);
+                const data = getOrganizationsByType([OrgnUnit.Directorate]);
                 setOrganizations(data);
             } catch (err) {
                 console.error('Failed to fetch directorates', err);

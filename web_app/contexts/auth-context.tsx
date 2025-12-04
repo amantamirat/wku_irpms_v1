@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { LoginDto, User } from '@/app/(full-page)/auth/model/login.model';
 import { AuthApi } from '@/app/(full-page)/auth/api/auth.api';
-import { OrganizationalUnit } from '@/app/(main)/organizations/models/organization.model';
+import { OrgnUnit } from '@/app/(main)/organizations/models/organization.model';
 
 
 interface AuthContextType {
@@ -12,8 +12,8 @@ interface AuthContextType {
     login: (user: LoginDto) => Promise<boolean>;
     logout: () => void;
     hasPermission: (perms: string[]) => boolean;
-    hasOrganizationType: (types: OrganizationalUnit[]) => boolean;
-    getOrganizationsByType: (types: OrganizationalUnit[]) => any[];
+    hasOrganizationType: (types: OrgnUnit[]) => boolean;
+    getOrganizationsByType: (types: OrgnUnit[]) => any[];
     getLinkedApplicant: () => any | null;
 }
 
@@ -53,12 +53,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return perms.some((p) => user?.permissions?.includes(p));
     };
 
-    const hasOrganizationType = (types: OrganizationalUnit[]): boolean => {
+    const hasOrganizationType = (types: OrgnUnit[]): boolean => {
         if (!user?.organizations) return false;
         return user.organizations.some((org: any) => types.includes(org.type));
     };
 
-    const getOrganizationsByType = (types: OrganizationalUnit[]): any[] => {
+    const getOrganizationsByType = (types: OrgnUnit[]): any[] => {
         if (!user?.organizations) return [];
         return user.organizations.filter((org: any) => types.includes(org.type));
     };

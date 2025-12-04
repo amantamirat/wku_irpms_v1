@@ -1,4 +1,4 @@
-import { Organization, OrganizationalUnit } from "../../organizations/models/organization.model";
+import { Organization, OrgnUnit } from "../../organizations/models/organization.model";
 
 
 /*
@@ -39,7 +39,7 @@ export type Applicant = {
     updatedAt?: Date;
 }
 
-export const applicantUnits = [OrganizationalUnit.Department, OrganizationalUnit.External, OrganizationalUnit.Supportive]
+export const applicantUnits = [OrgnUnit.Department, OrgnUnit.External, OrgnUnit.Supportive]
 
 
 export const accessibilityOptions = Object.values(Accessibility).map(a => ({

@@ -1,5 +1,5 @@
 // Enum for Organization Types
-export enum OrganizationalUnit {
+export enum OrgnUnit {
     College = 'College',
     Department = 'Department',
     Program = 'Program',
@@ -53,7 +53,7 @@ export type Address = {
 export type Organization = {
     _id?: string;
     name: string;
-    type: OrganizationalUnit;
+    type: OrgnUnit;
     academic_level?: AcademicLevel;
     classification?: Classification;
     ownership?: Ownership;
@@ -63,33 +63,33 @@ export type Organization = {
     updatedAt?: string;
 };
 
-export const getChildType = (current: OrganizationalUnit): OrganizationalUnit | null => {
+export const getChildType = (current: OrgnUnit): OrgnUnit | undefined => {
     switch (current) {
-        case OrganizationalUnit.College:
-            return OrganizationalUnit.Department;
-        case OrganizationalUnit.Department:
-            return OrganizationalUnit.Program;
-        case OrganizationalUnit.Directorate:
-            return OrganizationalUnit.Center;
-        case OrganizationalUnit.Sector:
-            return OrganizationalUnit.External;
+        case OrgnUnit.College:
+            return OrgnUnit.Department;
+        case OrgnUnit.Department:
+            return OrgnUnit.Program;
+        case OrgnUnit.Directorate:
+            return OrgnUnit.Center;
+        case OrgnUnit.Sector:
+            return OrgnUnit.External;
         default:
-            return null; // No children
+            return undefined; // No children
     }
 };
 
-export const getParentType = (current: OrganizationalUnit): OrganizationalUnit | null => {
+export const getParentType = (current: OrgnUnit): OrgnUnit | undefined => {
     switch (current) {
-        case OrganizationalUnit.Department:
-            return OrganizationalUnit.College;
-        case OrganizationalUnit.Program:
-            return OrganizationalUnit.Department;
-        case OrganizationalUnit.Center:
-            return OrganizationalUnit.Directorate;
-        case OrganizationalUnit.External:
-            return OrganizationalUnit.Sector;
+        case OrgnUnit.Department:
+            return OrgnUnit.College;
+        case OrgnUnit.Program:
+            return OrgnUnit.Department;
+        case OrgnUnit.Center:
+            return OrgnUnit.Directorate;
+        case OrgnUnit.External:
+            return OrgnUnit.Sector;
         default:
-            return null; // Root-level types have no parent
+            return undefined; // Root-level types have no parent
     }
 };
 
@@ -106,7 +106,7 @@ export const validateOrganization = (
     }
 
     switch (organization.type) {
-        case OrganizationalUnit.Program:
+        case OrgnUnit.Program:
             if (!organization.academic_level) {
                 return { valid: false, message: 'Academic level is required for Program.' };
             }
@@ -115,13 +115,13 @@ export const validateOrganization = (
             }
             break;
 
-        case OrganizationalUnit.Specialization:
+        case OrgnUnit.Specialization:
             if (!organization.academic_level) {
                 return { valid: false, message: 'Academic level is required for Specialization.' };
             }
             break;
 
-        case OrganizationalUnit.External:
+        case OrgnUnit.External:
             if (!organization.ownership) {
                 return { valid: false, message: 'Ownership is required for External.' };
             }

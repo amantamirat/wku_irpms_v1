@@ -13,7 +13,7 @@ import { ApplicantApi } from '../api/applicant.api';
 import { Applicant, applicantUnits, Gender } from '../models/applicant.model';
 import SaveDialog from './dialogs/SaveDialog';
 import { useAuth } from '@/contexts/auth-context';
-import { OrganizationalUnit } from '../../organizations/models/organization.model';
+import { OrgnUnit } from '../../organizations/models/organization.model';
 import ErrorCard from '@/components/ErrorCard';
 import ApplicantDetail from './ApplicantDetail';
 

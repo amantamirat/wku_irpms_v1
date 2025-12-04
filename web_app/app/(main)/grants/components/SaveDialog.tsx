@@ -8,7 +8,7 @@ import { InputTextarea } from 'primereact/inputtextarea';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
-import { Organization, OrganizationalUnit } from '../../organizations/models/organization.model';
+import { Organization, OrgnUnit } from '../../organizations/models/organization.model';
 import { GrantApi } from '../api/grant.api';
 import { Grant, validateGrant } from '../models/grant.model';
 
@@ -30,7 +30,7 @@ const SaveDialog = ({ visible, grant, onComplete, onHide }: SaveDialogProps) => 
     useEffect(() => {
         const fetchOrganizations = async () => {
             try {
-                const data = getOrganizationsByType([OrganizationalUnit.Directorate]);
+                const data = getOrganizationsByType([OrgnUnit.Directorate]);
                 setOrganizations(data);
             } catch (err) {
                 console.error('Failed to fetch organizations:', err);

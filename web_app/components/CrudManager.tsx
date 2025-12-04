@@ -21,10 +21,10 @@ interface CrudManagerProps<T> {
     onCreate?: () => void;
     onEdit?: (row: T) => void;
     onDelete?: (row: T) => void;
-    extraActions?: (row: T) => React.ReactNode; 
+    extraActions?: (row: T) => React.ReactNode;
     toolbarEnd?: React.ReactNode;
-    expandedRows?: any[] | DataTableExpandedRows;
-    onRowToggle?: (exp: any) => void;
+    //expandedRows?: any[] | DataTableExpandedRows;
+    //onRowToggle?: (exp: any) => void;
     rowExpansionTemplate?: (row: T) => React.ReactNode;
     /** Optional search filter */
     enableSearch?: boolean;
@@ -46,14 +46,16 @@ export function CrudManager<T extends { _id?: string }>({
     onDelete,
     extraActions,
     toolbarEnd,
-    expandedRows,
-    onRowToggle,
+    // expandedRows,
+    // onRowToggle,
     rowExpansionTemplate,
     enableSearch = false
 }: CrudManagerProps<T>) {
 
     const [globalFilter, setGlobalFilter] = useState('');
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
+    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>({});
+
 
     const handleGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -136,8 +138,8 @@ export function CrudManager<T extends { _id?: string }>({
                 rowsPerPageOptions={[5, 10, 25]}
                 scrollable
                 emptyMessage="No data found."
-                expandedRows={expandedRows}
-                onRowToggle={onRowToggle}
+                expandedRows={rowExpansionTemplate ? expandedRows : undefined}
+                onRowToggle={(e) => setExpandedRows(e.data)}
                 rowExpansionTemplate={rowExpansionTemplate}
                 filters={filters}
                 globalFilter={globalFilter}

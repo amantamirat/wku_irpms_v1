@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { OrganizationalUnit } from '@/app/(main)/organizations/models/organization.model';
+import { OrgnUnit } from '@/app/(main)/organizations/models/organization.model';
 import { AppMenuItem } from '@/types';
 import Link from 'next/link';
 import { PrimeIcons } from 'primereact/api';
@@ -50,7 +50,7 @@ const AppMenu = () => {
         },
         {
             label: 'Directorate',
-            visible: hasOrganizationType([OrganizationalUnit.Directorate, OrganizationalUnit.Center]),
+            visible: hasOrganizationType([OrgnUnit.Directorate, OrgnUnit.Center]),
             items: [
                 {
                     label: 'Cycles',
@@ -149,27 +149,36 @@ const AppMenu = () => {
                         {
                             label: 'Colleges',
                             icon: 'pi pi-fw pi-warehouse',
-                            to: `/organizations?type=${OrganizationalUnit.College}`
+                            to: `/organizations?type=${OrgnUnit.College}`
+                        },
+                        {
+                            label: 'Departments',
+                            icon: 'pi pi-fw pi-warehouse',
+                            to: `/organizations?type=${OrgnUnit.Department}`
                         },
                         {
                             label: 'Directorates',
                             icon: 'pi pi-fw pi-objects-column',
-                            to: `/organizations?type=${OrganizationalUnit.Directorate}`
+                            to: `/organizations?type=${OrgnUnit.Directorate}`
                         },
+                        /*
                         {
                             label: 'Offices',
                             icon: 'pi pi-fw pi-building-columns',
                             to: `/organizations?type=${OrganizationalUnit.Supportive}`
                         },
+
                         {
                             label: 'Sectors',
                             icon: 'pi pi-sitemap',
                             to: `/organizations?type=${OrganizationalUnit.Sector}`
                         },
+                        */
+                        
                         {
                             label: 'Specializations',
                             icon: PrimeIcons.FILTER,
-                            to: `/organizations?type=${OrganizationalUnit.Specialization}`
+                            to: `/organizations?type=${OrgnUnit.Specialization}`
                         }
                     ]
                 },

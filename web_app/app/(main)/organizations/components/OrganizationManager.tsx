@@ -1,256 +1,196 @@
 'use client';
-import ConfirmDialog from '@/components/ConfirmationDialog';
-import ErrorCard from '@/components/ErrorCard';
-import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
-import { Button } from 'primereact/button';
-import { Column } from 'primereact/column';
-import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
-import { InputText } from 'primereact/inputtext';
-import { Toolbar } from 'primereact/toolbar';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { OrganizationApi } from '../api/organization.api';
-import { getChildType, Organization, OrganizationalUnit } from '../models/organization.model';
-import SaveDialog from './SaveDialog';
+import { CrudManager } from "@/components/CrudManager";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import { useCrudList } from "@/hooks/useCrudList";
+import { useAuth } from "@/contexts/auth-context";
 
+import React, { useEffect, useState, useCallback } from "react";
 
-interface OrganizationMangerProps {
-    type: OrganizationalUnit;
+import { OrganizationApi } from "../api/organization.api";
+import {
+    Organization,
+    OrgnUnit,
+    getChildType,
+    getParentType
+} from "../models/organization.model";
+
+import SaveDialog from "./SaveDialog";
+import { PERMISSIONS } from "@/types/permissions";
+
+interface OrganizationManagerProps {
+    type: OrgnUnit;
     parent?: Organization;
 }
 
-const OrganizationManager = (props: OrganizationMangerProps) => {
+const OrganizationManager = ({ type, parent }: OrganizationManagerProps) => {
 
-    const type = props.type;
+    const emptyOrganization: Organization = {
+        name: "",
+        type,
+        parent: parent
+    };
+
     const childType = getChildType(type);
+    const parentType = getParentType(type);
 
-    let emptyOrganization: Organization = {
-        name: '',
-        type: type,
-        parent: props.parent
-    };
-    const [organizations, setOrganizations] = useState<Organization[]>([]);
-    const [error, setError] = useState<string | null>(null);
-    const dt = useRef<DataTable<any>>(null);
-    const [globalFilter, setGlobalFilter] = useState('');
-    const [filters, setFilters] = useState<DataTableFilterMeta>({});
-    const [selectedOrganization, setSelectedOrganization] = useState<Organization>(emptyOrganization);
+    const {
+        items: organizations,
+        setAll,
+        updateItem,
+        removeItem,
+        loading,
+        setLoading,
+        error,
+        setError
+    } = useCrudList<Organization>();
+
+    const { hasPermission } = useAuth();
+    const confirm = useConfirmDialog();
+
+    const canCreate = true; //hasPermission([PERMISSIONS.ORG.CREATE]);
+    const canEdit = true;//hasPermission([PERMISSIONS.ORG.UPDATE]);
+    const canDelete = true;//hasPermission([PERMISSIONS.ORG.DELETE]);
+
+    const [selectedItem, setSelectedItem] = useState<Organization>(emptyOrganization);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    //const toast = useRef<Toast>(null);
-    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
-    const isProgram = props.type === OrganizationalUnit.Program;
-    const isSpecialization = props.type === OrganizationalUnit.Specialization;
-    const isExternal = props.type === OrganizationalUnit.External;
-
-    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
-    };
-
-    useEffect(() => {
-        setFilters(initFilters());
-        setGlobalFilter('');
-    }, []);
-
+    /** Fetch organizations */
     const fetchOrganizations = useCallback(async () => {
         try {
-            if (props.parent) {
-                const data = await OrganizationApi.getOrganizations({ parent: props.parent._id });
-                setOrganizations(data);
-            } else {
-                const data = await OrganizationApi.getOrganizations({ type: props.type });
-                setOrganizations(data);
-            }
-        } catch (err) {
-            //console.error('Failed to load organizations:', err);
-            setError(`Failed to load organizations. ${err}`);
+            setLoading(true);
+
+            const data = parent
+                ? await OrganizationApi.getOrganizations({ parent: parent._id })
+                : await OrganizationApi.getOrganizations({ type });
+
+            setAll(data);
+        } catch (err: any) {
+            setError("Failed to load organizations. " + (err?.message || ""));
+        } finally {
+            setLoading(false);
         }
-    }, [props.parent?._id, type, error]);
+    }, [parent?._id, type]);
 
     useEffect(() => {
         fetchOrganizations();
-    }, [type, fetchOrganizations]);
+    }, [fetchOrganizations]);
 
-    if (error) {
-        return (
-            <ErrorCard errorMessage={error} />
-        );
-    }
-
-    const onSaveComplete = (savedOrganization: Organization) => {
-        let _organizations = [...organizations];
-        const index = _organizations.findIndex((o) => o._id === savedOrganization._id);
-
-        if (index !== -1) {
-            _organizations[index] = { ...savedOrganization };
-        } else {
-            _organizations.push({ ...savedOrganization });
-        }
-        setOrganizations(_organizations);
+    /** Save callback */
+    const onSaveComplete = (saved: Organization) => {
+        updateItem(saved);
         hideDialogs();
     };
 
-
-    const deleteOrganization = async () => {
-        const deleted = await OrganizationApi.deleteOrganization(selectedOrganization);
-        if (deleted) {
-            let _organizations = (organizations as any)?.filter((val: any) => val._id !== selectedOrganization._id);
-            setOrganizations(_organizations);
-        }
+    /** Delete */
+    const deleteOrganization = async (row: Organization) => {
+        const ok = await OrganizationApi.deleteOrganization(row);
+        if (ok) removeItem(row);
     };
 
-    const openSaveDialog = (organization: Organization) => {
-        setSelectedOrganization({ ...organization });
-        setShowSaveDialog(true);
-    };
-
-
-    const confirmDeleteItem = (organization: Organization) => {
-        setSelectedOrganization(organization);
-        setShowDeleteDialog(true);
-    };
-
+    /** Hide all dialogs */
     const hideDialogs = () => {
+        setSelectedItem(emptyOrganization);
         setShowSaveDialog(false);
-        setShowDeleteDialog(false);
-        setSelectedOrganization(emptyOrganization);
     };
 
-    const startToolbarTemplate = () => {
-        return (
-            <React.Fragment>
-                <div className="my-2">
-                    <Button label={`New ${type}`} icon="pi pi-plus" severity="success" className="mr-2" onClick={() => openSaveDialog(emptyOrganization)} />
-                </div>
-            </React.Fragment>
-        );
-    };
+    /** Column definitions */
+    const columns = [
+        ...((!parent && parentType) ? [
+            { header: parentType, field: "parent.name", sortable: true }
+        ] : []),
+        { header: "Name", field: "name", sortable: true },
 
-    const header = (
-        <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage {props.parent?.name} {type}s</h5>
-            <span className="block mt-2 md:mt-0 p-input-icon-left">
-                <i className="pi pi-search" />
-                <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
-            </span>
-        </div>
-    );
+        ...(type === OrgnUnit.Program || type === OrgnUnit.Specialization
+            ? [{
+                header: "Ac. Level",
+                field: "academic_level",
+                sortable: true,
+                body: (r: Organization) => (
+                    <span className={`academic-badge level-${r.academic_level?.toLowerCase()}`}>
+                        {r.academic_level}
+                    </span>
+                )
+            }]
+            : []
+        ),
 
-    const actionBodyTemplate = (rowData: Organization) => {
-        return (
-            <>
-                <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
-                    style={{ fontSize: '2rem' }} onClick={() => openSaveDialog(rowData)} />
-                <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
-                    style={{ fontSize: '2rem' }} onClick={() => confirmDeleteItem(rowData)} />
-            </>
-        );
-    };
+        ...(type === OrgnUnit.Program
+            ? [{
+                header: "Classification",
+                field: "classification",
+                sortable: true,
+                body: (r: Organization) => (
+                    <span className={`classification-badge classification-${r.classification?.toLowerCase()}`}>
+                        {r.classification}
+                    </span>
+                )
+            }]
+            : []
+        ),
 
-    const academicLevelBodyTemplate = (rowData: Organization) => {
-        return (
-            <span className={`academic-badge level-${rowData.academic_level?.toLowerCase()}`}>
-                {rowData.academic_level}
-            </span>
-        );
-    };
-
-    const classificationBodyTemplate = (rowData: Organization) => {
-        return (
-            <span className={`classification-badge classification-${rowData.classification?.toLowerCase()}`}>
-                {rowData.classification}
-            </span>
-        );
-    };
-
-    const ownershipBodyTemplate = (rowData: Organization) => {
-        return (
-            <span className={`ownership-badge ownership-${rowData.ownership?.toLowerCase()}`}>
-                {rowData.ownership}
-            </span>
-        );
-    };
+        ...(type === OrgnUnit.External
+            ? [{
+                header: "Ownership",
+                field: "ownership",
+                sortable: true,
+                body: (r: Organization) => (
+                    <span className={`ownership-badge ownership-${r.ownership?.toLowerCase()}`}>
+                        {r.ownership}
+                    </span>
+                )
+            }]
+            : []
+        ),
+    ];
 
     return (
-        <div className="grid">
-            <div className="col-12">
-                <div className="card">
-                    <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
-                    <DataTable
-                        ref={dt}
-                        value={organizations}
-                        selection={selectedOrganization}
-                        onSelectionChange={(e) => setSelectedOrganization(e.value as Organization)}
-                        dataKey="_id"
-                        paginator
-                        rows={10}
-                        rowsPerPageOptions={[5, 10, 25]}
-                        className="datatable-responsive"
-                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate={`Showing {first} to {last} of {totalRecords} ${type}s`}
-                        globalFilter={globalFilter}
-                        emptyMessage={`No ${type} organization data found.`}
-                        header={header}
-                        scrollable
-                        filters={filters}
-                        onRowDoubleClick={(e) => {
-                            const selected = e.data;
-                            if (selected) {
-                                setSelectedOrganization(selected as Organization);
-                            }
-                        }}
-                        {...(childType && {
-                            expandedRows: expandedRows,
-                            onRowToggle: (e) => setExpandedRows(e.data),
-                            rowExpansionTemplate: (data) => (
-                                <OrganizationManager
-                                    type={childType}
-                                    parent={data as Organization}
-                                />
-                            )
-                        })}
-                    >
-                        {
-                            childType
-                                ? <Column expander style={{ width: '3em' }} />
-                                : <Column selectionMode="single" headerStyle={{ width: '3em' }} />
-                        }
-                        <Column
-                            header="#"
-                            body={(rowData, options) => options.rowIndex + 1}
-                            style={{ width: '50px' }}
-                        />
-                        <Column field="name" header="Name" sortable headerStyle={{ minWidth: '15rem' }} />
-                        {(isSpecialization || isProgram) && (
-                            <Column field="academic_level" header="Ac. Level" body={academicLevelBodyTemplate} sortable />
-                        )}
-                        {isProgram && (
-                            <Column field="classification" header="Classification" body={classificationBodyTemplate} sortable />
-                        )}
-                        {isExternal && (
-                            <Column field="ownership" header="Ownership" body={ownershipBodyTemplate} sortable />
-                        )}
-                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
-                    </DataTable>
+        <>
+            <CrudManager
+                headerTitle={`Manage ${parent?.name ?? ""} ${type}s`}
+                itemName={type}
+                items={organizations}
+                dataKey="_id"
+                columns={columns}
+                loading={loading}
+                error={error}
+                enableSearch
+                canCreate={canCreate}
+                canEdit={canEdit}
+                canDelete={canDelete}
 
-                    {selectedOrganization &&
-                        <SaveDialog
-                            visible={showSaveDialog}
-                            organization={selectedOrganization}
-                            onComplete={onSaveComplete}
-                            onHide={hideDialogs}
-                        />}
+                onCreate={() => {
+                    setSelectedItem({ ...emptyOrganization });
+                    setShowSaveDialog(true);
+                }}
 
-                    {selectedOrganization &&
-                        <ConfirmDialog
-                            showDialog={showDeleteDialog}
-                            item={selectedOrganization.name}
-                            onConfirmAsync={deleteOrganization}
-                            onHide={hideDialogs}
-                        />}
-                </div>
-            </div>
-        </div>
+                onEdit={(row) => {
+                    setSelectedItem({ ...row });
+                    setShowSaveDialog(true);
+                }}
+
+                onDelete={(row) =>
+                    confirm.ask({
+                        item: row.name,
+                        onConfirmAsync: () => deleteOrganization(row)
+                    })
+                }
+                rowExpansionTemplate={!childType ? undefined : (row) => {
+                    return (
+                        <OrganizationManager
+                            type={childType!}
+                            parent={row}
+                        />);
+                }}
+            />
+
+            <SaveDialog
+                visible={showSaveDialog}
+                organization={selectedItem}
+                parentType={parentType}
+                onComplete={onSaveComplete}
+                onHide={hideDialogs}
+            />
+        </>
     );
 };
 

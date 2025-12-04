@@ -7,7 +7,7 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
-import { Organization, OrganizationalUnit } from '../../organizations/models/organization.model';
+import { Organization, OrgnUnit } from '../../organizations/models/organization.model';
 import { EvaluationApi } from '../api/evaluation.api';
 import { Evaluation, validateEvaluation } from '../models/evaluation.model';
 
@@ -29,7 +29,7 @@ const SaveEvaluation = ({ visible, evaluation, onComplete, onHide }: SaveEvaluat
     useEffect(() => {
         const fetchOrganizations = async () => {
             try {
-                const data = getOrganizationsByType([OrganizationalUnit.Directorate]);
+                const data = getOrganizationsByType([OrgnUnit.Directorate]);
                 setOrganizations(data);
             } catch (err) {
                 console.error('Failed to fetch organizations:', err);
