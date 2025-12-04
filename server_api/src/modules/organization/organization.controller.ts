@@ -1,68 +1,105 @@
+// organization.controller.ts
 import { Request, Response } from "express";
-import mongoose from "mongoose";
-import { OrganizationService, CreateOrganizationDto, GetOrganizationsOptions } from "./organization.service";
 import { errorResponse, successResponse } from "../../util/response";
+
+import {
+    CreateOrganizationDTO,
+    GetOrganizationsDTO,
+    UpdateOrganizationDTO
+} from "./organization.dto";
+
+import { OrganizationService } from "./organization.service";
+import { OrganizationRepository } from "./organization.repository";
 import { Unit } from "./organization.enum";
+import { AuthenticatedRequest } from "../users/auth/auth.middleware";
 
-
+const service = new OrganizationService(new OrganizationRepository());
 
 export class OrganizationController {
 
-    static async createOrganization(req: Request, res: Response) {
+    // ----------------------------------------------------
+    // CREATE
+    // ----------------------------------------------------
+    static async create(req: AuthenticatedRequest, res: Response) {
         try {
-            const { type, name, parent, academic_level, classification, category, ownership } = req.body;
-            const data: CreateOrganizationDto = {
-                type: type,
-                name: name,
-                parent: parent ? new mongoose.Types.ObjectId(parent as string) : undefined,
-                academic_level: type === Unit.Program || type === Unit.Specialization ? academic_level : undefined,
-                classification: type === Unit.Program ? classification : undefined,                
-                ownership: type === Unit.External ? ownership : undefined,
+            if (!req.user) throw new Error("User not authorized!");
+
+            const dto: CreateOrganizationDTO = {
+                type: req.body.type,
+                name: req.body.name,
+                parent: req.body.parent,
+                academic_level: req.body.academic_level,
+                classification: req.body.classification,
+                ownership: req.body.ownership,
             };
-            const organization = await OrganizationService.createOrganization(data);
-            successResponse(res, 201, "Organization created successfully", organization);
+
+            const created = await service.create(dto);
+
+            successResponse(res, 201, "Organization created successfully", created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
-    static async getOrganizations(req: Request, res: Response) {
+    // ----------------------------------------------------
+    // GET ALL (filter: type, parent)
+    // ----------------------------------------------------
+    static async getAll(req: Request, res: Response) {
         try {
-            const { type, parent } = req.query;
-            const filter = {
-                type: type as Unit | undefined,
-                parent: parent ? new mongoose.Types.ObjectId(parent as string) : undefined
-            } as GetOrganizationsOptions;
-            const organizations = await OrganizationService.getOrganizations(filter);
-            successResponse(res, 200, 'Organizations fetched successfully', organizations);
-        } catch (err: any) {
-            errorResponse(res, 400, err.message, err);
-        }
-    }
-
-    static async updateOrganization(req: Request, res: Response) {
-        try {
-            const { id } = req.params;
-            const { type, name, parent, academic_level, classification, ownership } = req.body;
-            const data: Partial<CreateOrganizationDto> = {
-                name: name,
-                parent: parent ? new mongoose.Types.ObjectId(parent as string) : undefined,
-                academic_level: academic_level ? academic_level : undefined,
-                classification: classification ? classification : undefined,
-                ownership: ownership ? ownership : undefined,
+            const filters: GetOrganizationsDTO = {
+                type: req.query.type as Unit,
+                parent: req.query.parent as string
             };
-            const updated = await OrganizationService.updateOrganization(id, data);
-            successResponse(res, 201, "Organization updated successfully", updated);
+
+            const organizations = await service.getAll(filters);
+
+            successResponse(res, 200, "Organizations fetched successfully", organizations);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
-    static async deleteOrganization(req: Request, res: Response) {
+    // ----------------------------------------------------
+    // UPDATE
+    // ----------------------------------------------------
+    static async update(req: AuthenticatedRequest, res: Response) {
         try {
+            if (!req.user) throw new Error("User not authorized!");
+
             const { id } = req.params;
-            const deleted = await OrganizationService.deleteOrganization(id);
-            successResponse(res, 201, "Organization deleted successfully", deleted);
+
+            const dto: UpdateOrganizationDTO = {
+                id,
+                data: {
+                    name: req.body.name,
+                    parentId: req.body.parentId,
+                    academic_level: req.body.academic_level,
+                    classification: req.body.classification,
+                    ownership: req.body.ownership,
+                },
+                userId:req.user._id,
+            };
+
+            const updated = await service.update(id, dto);
+
+            successResponse(res, 200, "Organization updated successfully", updated);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    }
+
+    // ----------------------------------------------------
+    // DELETE
+    // ----------------------------------------------------
+    static async delete(req: AuthenticatedRequest, res: Response) {
+        try {
+            if (!req.user) throw new Error("User not authorized!");
+
+            const { id } = req.params;
+
+            await service.delete(id);
+
+            successResponse(res, 200, "Organization deleted successfully", null);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }

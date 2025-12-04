@@ -1,57 +1,57 @@
-import mongoose from "mongoose";
-import { AcademicLevel, Classification, Ownership, Unit } from "./organization.enum";
-import { Organization } from "./organization.model";
-
-
-export interface GetOrganizationsOptions {
-    id?: mongoose.Types.ObjectId;
-    type?: Unit;
-    parent?: mongoose.Types.ObjectId;
-}
-
-export interface CreateOrganizationDto {
-    type: Unit;
-    name: string;
-    academic_level?: AcademicLevel;
-    classification?: Classification;
-    ownership?: Ownership;
-    parent?: mongoose.Types.ObjectId;
-}
+// organization.service.ts
+import { IOrganizationRepository } from "./organization.repository";
+import {
+    CreateOrganizationDTO,
+    GetOrganizationsDTO,
+    UpdateOrganizationDTO
+} from "./organization.dto";
 
 export class OrganizationService {
 
+    private readonly repo: IOrganizationRepository;
 
-    static async createOrganization(data: CreateOrganizationDto) {       
-        const created = await Organization.create(data);
-        return created;
+    constructor(repository: IOrganizationRepository) {
+        this.repo = repository;
     }
 
-    static async getOrganizations(options: GetOrganizationsOptions) {
-        const filter: any = {};
-        if (options.type) filter.type = options.type;
-        if (options.parent) filter.parent = options.parent;
-        return Organization.find(filter).lean();
+    // ----------------------------------------------------
+    // FIND LIST (filter by type, parent)
+    // ----------------------------------------------------
+    async getAll(filters: GetOrganizationsDTO) {
+        return this.repo.find(filters);
     }
 
-
-    static async updateOrganization(id: string, data: Partial<CreateOrganizationDto>) {
-        const organization = await Organization.findById(id);
-        if (!organization) throw new Error("Organization not found");
-        Object.assign(organization, data);
-        return organization.save();
-    }
-
-    static async deleteOrganization(id: string) {
-        const organization = await Organization.findById(id);
-        if (!organization) throw new Error("Organization not found");
-        const isParentExist = await Organization.exists({ parent: organization._id });
-        if (isParentExist) throw new Error(`Can not delete parent ${organization.type} ${organization.name}`);
-
-        if (organization.type === Unit.Directorate) {
-            //const isCallExist = await Call.exists({ directorate: organization._id });
-            //if (isCallExist) throw new Error(`Can not delete ${organization.type} ${organization.name}, Call data exist.`);
-
+    // ----------------------------------------------------
+    // CREATE ORGANIZATION
+    // ----------------------------------------------------
+    async create(data: CreateOrganizationDTO) {
+        // Validate required fields
+        if (!data.name || !data.type) {
+            throw new Error("Organization name and type are required");
         }
-        return await organization.deleteOne();
+
+        return this.repo.create(data);
+    }
+
+    // ----------------------------------------------------
+    // UPDATE ORGANIZATION
+    // ----------------------------------------------------
+    async update(id: string, dto: UpdateOrganizationDTO) {
+        if (!dto.data || Object.keys(dto.data).length === 0) {
+            throw new Error("No update data provided");
+        }
+        return this.repo.update(id, dto.data);
+    }
+
+    // ----------------------------------------------------
+    // DELETE ORGANIZATION
+    // ----------------------------------------------------
+    async delete(id: string) {
+        const existing = await this.repo.findById(id);
+        if (!existing) {
+            throw new Error("Organization not found");
+        }
+        await this.repo.delete(id);
+        return { message: "Organization deleted successfully" };
     }
 }
