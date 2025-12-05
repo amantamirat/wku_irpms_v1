@@ -12,17 +12,17 @@ import { Toast } from 'primereact/toast';
 interface SaveDialogProps {
     visible: boolean;
     organization: Organization;
-    fetchParents?: boolean;
+    hasParent?: boolean;
     parentType?: OrgnUnit;
     onHide: () => void;
     onComplete: (savedOrganization: Organization) => void;
 }
 
-const SaveDialog = ({ visible, organization, fetchParents, parentType, onHide, onComplete }: SaveDialogProps) => {
+const SaveDialog = ({ visible, organization, hasParent, parentType, onHide, onComplete }: SaveDialogProps) => {
     const toast = useRef<Toast>(null);
     const [localOrganization, setLocalOrganization] = useState<Organization>({ ...organization });
     const [submitted, setSubmitted] = useState(false);
-    const [parents, setParents] = useState<Organization[]>([]);
+    const [parents, setParents] = useState<Organization[] | undefined>(undefined);
 
     useEffect(() => {
         setLocalOrganization({ ...organization });
@@ -33,7 +33,7 @@ const SaveDialog = ({ visible, organization, fetchParents, parentType, onHide, o
     const isExternal = localOrganization.type === OrgnUnit.External;
 
     useEffect(() => {
-        if (!fetchParents || !parentType) return;
+        if (hasParent || !parentType) return;
         const fetchParentTypes = async () => {
             try {
                 const data = await OrganizationApi.getOrganizations({ type: parentType });
@@ -49,7 +49,7 @@ const SaveDialog = ({ visible, organization, fetchParents, parentType, onHide, o
             }
         };
         fetchParentTypes();
-    }, []);
+    }, [hasParent, parentType]);
 
     const saveOrganization = async () => {
         try {
@@ -66,6 +66,10 @@ const SaveDialog = ({ visible, organization, fetchParents, parentType, onHide, o
                 // create new
                 saved = await OrganizationApi.createOrganization(localOrganization);
             }
+            saved = {
+                ...saved,
+                parent: localOrganization.parent
+            };
             toast.current?.show({
                 severity: 'success',
                 summary: 'Success',
@@ -116,6 +120,24 @@ const SaveDialog = ({ visible, organization, fetchParents, parentType, onHide, o
                 footer={footer}
                 onHide={hide}
             >
+                {(parentType && !hasParent) &&
+                    <div className="field">
+                        <label htmlFor="parent">
+                            {parentType}
+                        </label>
+                        <Dropdown
+                            id="parent"
+                            dataKey="_id"
+                            value={localOrganization.parent}
+                            options={parents}
+                            optionLabel="name"
+                            onChange={(e) => setLocalOrganization({ ...localOrganization, parent: e.value })}
+                            placeholder={`Select ${parentType}`}
+                            className={classNames({ 'p-invalid': submitted && !localOrganization.parent })}
+                        />
+                    </div>
+                }
+
                 <div className="field">
                     <label htmlFor="name">{localOrganization.type} Name</label>
                     <InputText

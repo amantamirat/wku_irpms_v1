@@ -15,7 +15,7 @@ import {
 } from "../models/organization.model";
 
 import SaveDialog from "./SaveDialog";
-import { PERMISSIONS } from "@/types/permissions";
+//import { PERMISSIONS } from "@/types/permissions";
 
 interface OrganizationManagerProps {
     type: OrgnUnit;
@@ -32,6 +32,7 @@ const OrganizationManager = ({ type, parent }: OrganizationManagerProps) => {
 
     const childType = getChildType(type);
     const parentType = getParentType(type);
+    const hasParent = !!parent;
 
     const {
         items: organizations,
@@ -58,18 +59,14 @@ const OrganizationManager = ({ type, parent }: OrganizationManagerProps) => {
     const fetchOrganizations = useCallback(async () => {
         try {
             setLoading(true);
-
-            const data = parent
-                ? await OrganizationApi.getOrganizations({ parent: parent._id })
-                : await OrganizationApi.getOrganizations({ type });
-
+            const data = await OrganizationApi.getOrganizations({ parent: parent, type })
             setAll(data);
         } catch (err: any) {
             setError("Failed to load organizations. " + (err?.message || ""));
         } finally {
             setLoading(false);
         }
-    }, [parent?._id, type]);
+    }, [parent, type]);
 
     useEffect(() => {
         fetchOrganizations();
@@ -95,7 +92,7 @@ const OrganizationManager = ({ type, parent }: OrganizationManagerProps) => {
 
     /** Column definitions */
     const columns = [
-        ...((!parent && parentType) ? [
+        ...((!hasParent && parentType) ? [
             { header: parentType, field: "parent.name", sortable: true }
         ] : []),
         { header: "Name", field: "name", sortable: true },
@@ -186,6 +183,7 @@ const OrganizationManager = ({ type, parent }: OrganizationManagerProps) => {
             <SaveDialog
                 visible={showSaveDialog}
                 organization={selectedItem}
+                hasParent={hasParent}
                 parentType={parentType}
                 onComplete={onSaveComplete}
                 onHide={hideDialogs}

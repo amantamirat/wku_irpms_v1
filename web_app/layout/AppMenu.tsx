@@ -153,13 +153,23 @@ const AppMenu = () => {
                         },
                         {
                             label: 'Departments',
-                            icon: 'pi pi-fw pi-warehouse',
+                            icon: 'pi pi-fw pi-star',
                             to: `/organizations?type=${OrgnUnit.Department}`
+                        },
+                        {
+                            label: 'Programs',
+                            icon: 'pi pi-fw pi-star-half',
+                            to: `/organizations?type=${OrgnUnit.Program}`
                         },
                         {
                             label: 'Directorates',
                             icon: 'pi pi-fw pi-objects-column',
                             to: `/organizations?type=${OrgnUnit.Directorate}`
+                        },
+                        {
+                            label: 'Centers',
+                            icon: 'pi pi-fw pi-circle',
+                            to: `/organizations?type=${OrgnUnit.Center}`
                         },
                         /*
                         {
@@ -174,7 +184,7 @@ const AppMenu = () => {
                             to: `/organizations?type=${OrganizationalUnit.Sector}`
                         },
                         */
-                        
+
                         {
                             label: 'Specializations',
                             icon: PrimeIcons.FILTER,

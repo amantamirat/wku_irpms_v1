@@ -36,7 +36,7 @@ const SaveApplicantDialog = ({ visible, applicant, onHide, onComplete }: SaveApp
                 //const type = scopeToOrganizationUnit[localApplicant.scope];
                 //if (type) {
                 const data = getOrganizationsByType(applicantUnits);
-                console.log(data);
+                //console.log(data);
                 setUserOrganizations(data);
                 //}
             } catch (err) {

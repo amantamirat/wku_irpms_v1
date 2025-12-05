@@ -4,11 +4,9 @@ import { Organization, OrgnUnit, sanitizeOrganization } from "../models/organiza
 
 const end_point = '/organizations/';
 
-
-
 export interface GetOrganizationsOptions {
     type?: OrgnUnit;
-    parent?: string;
+    parent?: Organization;
 }
 
 export const OrganizationApi = {
@@ -18,15 +16,16 @@ export const OrganizationApi = {
         const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as Organization;
     },
-    
+
     async getOrganizations(options: GetOrganizationsOptions): Promise<Organization[]> {
         const query = new URLSearchParams();
+        const sanitized = sanitizeOrganization(options);
         if (options.type) query.append("type", options.type);
-        if (options.parent) query.append("parent", options.parent);
+        if (sanitized.parent) query.append("parent", sanitized.parent as string);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Organization[];
     },
-    
+
 
     async updateOrganization(organization: Partial<Organization>): Promise<Organization> {
         if (!organization._id) {
