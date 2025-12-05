@@ -29,7 +29,7 @@ const SaveDialog = ({ visible, organization, hasParent, parentType, onHide, onCo
     }, [organization]);
 
     const isProgram = localOrganization.type === OrgnUnit.Program;
-    const isSpecialization = localOrganization.type === OrgnUnit.Specialization;
+    // const isSpecialization = localOrganization.type === OrgnUnit.Specialization;
     const isExternal = localOrganization.type === OrgnUnit.External;
 
     useEffect(() => {
@@ -153,41 +153,42 @@ const SaveDialog = ({ visible, organization, hasParent, parentType, onHide, onCo
                     )}
                 </div>
 
-                {(isSpecialization || isProgram) && (
-                    <>
-                        <div className="field">
-                            <label htmlFor="academic_level">Academic Level</label>
-                            <Dropdown
-                                id="academic_level"
-                                value={localOrganization.academic_level}
-                                options={Object.values(AcademicLevel).map(level => ({ label: level, value: level }))}
-                                onChange={(e) => setLocalOrganization({ ...localOrganization, academic_level: e.value })}
-                                placeholder="Select Ac. Level"
-                                className={classNames({ 'p-invalid': submitted && !localOrganization.academic_level })}
-                            />
-                            {submitted && !localOrganization.academic_level && (
-                                <small className="p-invalid">Ac. Level is required.</small>
-                            )}
-                        </div>
-
-                        {isProgram && (
+                {( //isSpecialization || 
+                    isProgram) && (
+                        <>
                             <div className="field">
-                                <label htmlFor="classification">Classification</label>
+                                <label htmlFor="academic_level">Academic Level</label>
                                 <Dropdown
-                                    id="classification"
-                                    value={localOrganization.classification}
-                                    options={Object.values(Classification).map(level => ({ label: level, value: level }))}
-                                    onChange={(e) => setLocalOrganization({ ...localOrganization, classification: e.value })}
-                                    placeholder="Select Classification"
-                                    className={classNames({ 'p-invalid': submitted && !localOrganization.classification })}
+                                    id="academic_level"
+                                    value={localOrganization.academic_level}
+                                    options={Object.values(AcademicLevel).map(level => ({ label: level, value: level }))}
+                                    onChange={(e) => setLocalOrganization({ ...localOrganization, academic_level: e.value })}
+                                    placeholder="Select Ac. Level"
+                                    className={classNames({ 'p-invalid': submitted && !localOrganization.academic_level })}
                                 />
-                                {submitted && !localOrganization.classification && (
-                                    <small className="p-invalid">Classification is required.</small>
+                                {submitted && !localOrganization.academic_level && (
+                                    <small className="p-invalid">Ac. Level is required.</small>
                                 )}
                             </div>
-                        )}
-                    </>
-                )}
+
+                            {isProgram && (
+                                <div className="field">
+                                    <label htmlFor="classification">Classification</label>
+                                    <Dropdown
+                                        id="classification"
+                                        value={localOrganization.classification}
+                                        options={Object.values(Classification).map(level => ({ label: level, value: level }))}
+                                        onChange={(e) => setLocalOrganization({ ...localOrganization, classification: e.value })}
+                                        placeholder="Select Classification"
+                                        className={classNames({ 'p-invalid': submitted && !localOrganization.classification })}
+                                    />
+                                    {submitted && !localOrganization.classification && (
+                                        <small className="p-invalid">Classification is required.</small>
+                                    )}
+                                </div>
+                            )}
+                        </>
+                    )}
 
                 {isExternal && (
                     <div className="field">

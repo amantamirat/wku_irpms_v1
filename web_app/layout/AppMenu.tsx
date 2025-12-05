@@ -183,13 +183,19 @@ const AppMenu = () => {
                             icon: 'pi pi-sitemap',
                             to: `/organizations?type=${OrganizationalUnit.Sector}`
                         },
-                        */
 
                         {
                             label: 'Specializations',
                             icon: PrimeIcons.FILTER,
                             to: `/organizations?type=${OrgnUnit.Specialization}`
                         }
+                        */
+{
+                            label: 'External',
+                            icon: "pi pi-fw pi-mars",
+                            to: `/organizations?type=${OrgnUnit.External}`
+                        }
+                        
                     ]
                 },
                 {

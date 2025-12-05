@@ -1,33 +1,42 @@
 import { Router } from 'express';
-import { PERMISSIONS } from '../../util/permissions';
-import { verifyActiveAccount, checkPermission } from '../users/auth/auth.middleware';
+import { checkPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
 import { OrganizationController } from './organization.controller';
+import { checkUnitPermission } from './organization.middleware';
+import { PERMISSIONS } from '../../util/permissions';
 
 const router: Router = Router();
 
 router.post('/',
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.ORGANIAZTION.CREATE]),
+    checkUnitPermission('CREATE'),
+    // checkPermission([PERMISSIONS.ORGANIAZTION.CREATE]),
     OrganizationController.create
 );
 
 router.get('/',
     verifyActiveAccount,
-    checkPermission([
-        PERMISSIONS.ORGANIAZTION.READ
+    //checkUnitPermission('READ'),
+    checkPermission([PERMISSIONS.ORGANIAZTION.COLLEGE.READ,
+    PERMISSIONS.ORGANIAZTION.DEPARTMENT.READ,
+    PERMISSIONS.ORGANIAZTION.PROGRAM.READ,
+    PERMISSIONS.ORGANIAZTION.DIRECTORATE.READ,
+    PERMISSIONS.ORGANIAZTION.CENTER.READ,
+    PERMISSIONS.ORGANIAZTION.EXTERNAL.READ
     ]),
     OrganizationController.getAll
 );
 
 router.put('/:id',
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.ORGANIAZTION.UPDATE]),
+    checkUnitPermission('UPDATE'),
+    // checkPermission([PERMISSIONS.ORGANIAZTION.UPDATE]),
     OrganizationController.update
 );
 
 router.delete('/:id',
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.ORGANIAZTION.DELETE]),
+    checkUnitPermission('DELETE'),
+    //checkPermission([PERMISSIONS.ORGANIAZTION.DELETE]),
     OrganizationController.delete
 );
 

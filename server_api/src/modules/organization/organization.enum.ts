@@ -5,10 +5,10 @@ export enum Unit {
     Program = 'Program',
     Directorate = 'Directorate',
     Center = 'Center',
-    Supportive = 'Supportive',
-    Sector = 'Sector',
+    //Supportive = 'Supportive',
+    //Sector = 'Sector',
     External = 'External',
-    Specialization = 'Specialization'
+    //Specialization = 'Specialization'
 }
 
 export enum AcademicLevel {

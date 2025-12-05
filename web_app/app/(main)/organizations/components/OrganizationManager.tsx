@@ -97,7 +97,7 @@ const OrganizationManager = ({ type, parent }: OrganizationManagerProps) => {
         ] : []),
         { header: "Name", field: "name", sortable: true },
 
-        ...(type === OrgnUnit.Program || type === OrgnUnit.Specialization
+        ...(type === OrgnUnit.Program //|| type === OrgnUnit.Specialization
             ? [{
                 header: "Ac. Level",
                 field: "academic_level",

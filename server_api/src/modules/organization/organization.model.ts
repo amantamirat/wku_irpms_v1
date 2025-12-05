@@ -30,16 +30,16 @@ interface IDirectorate extends IBaseOrganization {
 
 export const Directorate = Organization.discriminator<IDirectorate>(Unit.Directorate, new Schema({}));
 
-interface ExternalDocument extends IBaseOrganization {
+interface IExternal extends IBaseOrganization {
     type: Unit.External;
     ownership: Ownership;
 }
 
-const ExternalSchema = new Schema<ExternalDocument>({
+const ExternalSchema = new Schema<IExternal>({
     ownership: { type: String, enum: Object.values(Ownership), required: true }
 });
 
-export const External = Organization.discriminator<ExternalDocument>(Unit.External, ExternalSchema);
+export const External = Organization.discriminator<IExternal>(Unit.External, ExternalSchema);
 
 
 

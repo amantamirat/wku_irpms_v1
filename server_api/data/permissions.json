@@ -49,45 +49,125 @@
     "description": "Delete roles"
   },
   {
-    "category": "Calendar Management",
-    "name": "calendar:create",
-    "description": "Create calendar entries"
-  },
-  {
-    "category": "Calendar Management",
-    "name": "calendar:read",
-    "description": "Read calendar entries"
-  },
-  {
-    "category": "Calendar Management",
-    "name": "calendar:update",
-    "description": "Update calendar entries"
-  },
-  {
-    "category": "Calendar Management",
-    "name": "calendar:delete",
-    "description": "Delete calendar entries"
+    "category": "Organization Management",
+    "name": "college:create",
+    "description": "Create new colleges"
   },
   {
     "category": "Organization Management",
-    "name": "organization:create",
-    "description": "Create new organizations"
+    "name": "college:read",
+    "description": "View colleges"
   },
   {
     "category": "Organization Management",
-    "name": "organization:read",
-    "description": "View organizations"
+    "name": "college:update",
+    "description": "Edit colleges"
   },
   {
     "category": "Organization Management",
-    "name": "organization:update",
-    "description": "Edit organizations"
+    "name": "college:delete",
+    "description": "Delete colleges"
   },
   {
     "category": "Organization Management",
-    "name": "organization:delete",
-    "description": "Delete organizations"
+    "name": "department:create",
+    "description": "Create new departments"
   },
+  {
+    "category": "Organization Management",
+    "name": "department:read",
+    "description": "View departments"
+  },
+  {
+    "category": "Organization Management",
+    "name": "department:update",
+    "description": "Edit departments"
+  },
+  {
+    "category": "Organization Management",
+    "name": "department:delete",
+    "description": "Delete departments"
+  },
+  {
+    "category": "Organization Management",
+    "name": "program:create",
+    "description": "Create new programs"
+  },
+  {
+    "category": "Organization Management",
+    "name": "program:read",
+    "description": "View programs"
+  },
+  {
+    "category": "Organization Management",
+    "name": "program:update",
+    "description": "Edit programs"
+  },
+  {
+    "category": "Organization Management",
+    "name": "program:delete",
+    "description": "Delete programs"
+  },
+  {
+    "category": "Organization Management",
+    "name": "directorate:create",
+    "description": "Create new directorates"
+  },
+  {
+    "category": "Organization Management",
+    "name": "directorate:read",
+    "description": "View directorates"
+  },
+  {
+    "category": "Organization Management",
+    "name": "directorate:update",
+    "description": "Edit directorates"
+  },
+  {
+    "category": "Organization Management",
+    "name": "directorate:delete",
+    "description": "Delete directorates"
+  },
+  {
+    "category": "Organization Management",
+    "name": "center:create",
+    "description": "Create new centers"
+  },
+  {
+    "category": "Organization Management",
+    "name": "center:read",
+    "description": "View centers"
+  },
+  {
+    "category": "Organization Management",
+    "name": "center:update",
+    "description": "Edit centers"
+  },
+  {
+    "category": "Organization Management",
+    "name": "center:delete",
+    "description": "Delete centers"
+  },
+  {
+    "category": "Organization Management",
+    "name": "external:create",
+    "description": "Create new external units"
+  },
+  {
+    "category": "Organization Management",
+    "name": "external:read",
+    "description": "View external units"
+  },
+  {
+    "category": "Organization Management",
+    "name": "external:update",
+    "description": "Edit external units"
+  },
+  {
+    "category": "Organization Management",
+    "name": "external:delete",
+    "description": "Delete external units"
+  },  
   {
     "category": "Applicant Management",
     "name": "applicant:create",
@@ -107,6 +187,26 @@
     "category": "Applicant Management",
     "name": "applicant:delete",
     "description": "Delete applicants"
+  },
+  {
+    "category": "Calendar Management",
+    "name": "calendar:create",
+    "description": "Create calendar entries"
+  },
+  {
+    "category": "Calendar Management",
+    "name": "calendar:read",
+    "description": "Read calendar entries"
+  },
+  {
+    "category": "Calendar Management",
+    "name": "calendar:update",
+    "description": "Update calendar entries"
+  },
+  {
+    "category": "Calendar Management",
+    "name": "calendar:delete",
+    "description": "Delete calendar entries"
   },
   {
     "category": "Experience Management",

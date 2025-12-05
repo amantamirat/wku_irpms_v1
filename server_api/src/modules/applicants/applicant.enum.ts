@@ -14,7 +14,8 @@ export enum Scope {
 }
 */
 
-export const applicantUnits = [Unit.Department, Unit.External, Unit.Supportive]
+export const applicantUnits = [Unit.Department, Unit.External, //Unit.Supportive
+]
 
 export enum Accessibility {
   Visual = 'Visual',
