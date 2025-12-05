@@ -39,7 +39,9 @@ export type Applicant = {
     updatedAt?: Date;
 }
 
-export const applicantUnits = [OrgnUnit.Department, OrgnUnit.External, OrgnUnit.Supportive]
+
+export const applicantUnits = [OrgnUnit.Department, OrgnUnit.External //, OrgnUnit.Supportive
+]
 
 
 export const accessibilityOptions = Object.values(Accessibility).map(a => ({

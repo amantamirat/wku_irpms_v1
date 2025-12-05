@@ -136,68 +136,7 @@ const AppMenu = () => {
                         ]
                     )
                 },
-                {
-                    label: 'Organizations',
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.ORGANIAZTION.CREATE,
-                            PERMISSIONS.ORGANIAZTION.UPDATE,
-                            PERMISSIONS.ORGANIAZTION.DELETE
-                        ]
-                    ),
-                    items: [
-                        {
-                            label: 'Colleges',
-                            icon: 'pi pi-fw pi-warehouse',
-                            to: `/organizations?type=${OrgnUnit.College}`
-                        },
-                        {
-                            label: 'Departments',
-                            icon: 'pi pi-fw pi-star',
-                            to: `/organizations?type=${OrgnUnit.Department}`
-                        },
-                        {
-                            label: 'Programs',
-                            icon: 'pi pi-fw pi-star-half',
-                            to: `/organizations?type=${OrgnUnit.Program}`
-                        },
-                        {
-                            label: 'Directorates',
-                            icon: 'pi pi-fw pi-objects-column',
-                            to: `/organizations?type=${OrgnUnit.Directorate}`
-                        },
-                        {
-                            label: 'Centers',
-                            icon: 'pi pi-fw pi-circle',
-                            to: `/organizations?type=${OrgnUnit.Center}`
-                        },
-                        /*
-                        {
-                            label: 'Offices',
-                            icon: 'pi pi-fw pi-building-columns',
-                            to: `/organizations?type=${OrganizationalUnit.Supportive}`
-                        },
 
-                        {
-                            label: 'Sectors',
-                            icon: 'pi pi-sitemap',
-                            to: `/organizations?type=${OrganizationalUnit.Sector}`
-                        },
-
-                        {
-                            label: 'Specializations',
-                            icon: PrimeIcons.FILTER,
-                            to: `/organizations?type=${OrgnUnit.Specialization}`
-                        }
-                        */
-{
-                            label: 'External',
-                            icon: "pi pi-fw pi-mars",
-                            to: `/organizations?type=${OrgnUnit.External}`
-                        }
-                        
-                    ]
-                },
                 {
                     label: 'Positions',
                     icon: 'pi pi-fw pi-flag',
@@ -208,6 +147,83 @@ const AppMenu = () => {
                         PERMISSIONS.POSITION.DELETE
                     ])
                 },
+
+            ]
+        },
+
+        {
+            label: 'Organizations',
+            visible: hasPermission(
+                [
+                    PERMISSIONS.ORGANIAZTION.COLLEGE.CREATE,
+                    PERMISSIONS.ORGANIAZTION.DEPARTMENT.CREATE,
+                    PERMISSIONS.ORGANIAZTION.PROGRAM.CREATE,
+                    PERMISSIONS.ORGANIAZTION.DIRECTORATE.CREATE,
+                    PERMISSIONS.ORGANIAZTION.CENTER.CREATE,
+                    PERMISSIONS.ORGANIAZTION.EXTERNAL.CREATE,
+                ]
+            ),
+            items: [
+                {
+                    label: 'Colleges',
+                    icon: 'pi pi-fw pi-warehouse',
+                    to: `/organizations?type=${OrgnUnit.College}`,
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.ORGANIAZTION.COLLEGE.CREATE,
+                        ]
+                    ),
+                },
+                {
+                    label: 'Departments',
+                    icon: 'pi pi-fw pi-star',
+                    to: `/organizations?type=${OrgnUnit.Department}`,
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.ORGANIAZTION.DEPARTMENT.CREATE,
+                        ]
+                    ),
+                },
+                {
+                    label: 'Programs',
+                    icon: 'pi pi-fw pi-star-half',
+                    to: `/organizations?type=${OrgnUnit.Program}`,
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.ORGANIAZTION.PROGRAM.CREATE,
+                        ]
+                    ),
+                },
+                {
+                    label: 'Directorates',
+                    icon: 'pi pi-fw pi-objects-column',
+                    to: `/organizations?type=${OrgnUnit.Directorate}`,
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.ORGANIAZTION.DIRECTORATE.CREATE,
+                        ]
+                    ),
+                },
+                {
+                    label: 'Centers',
+                    icon: 'pi pi-fw pi-circle',
+                    to: `/organizations?type=${OrgnUnit.Center}`,
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.ORGANIAZTION.CENTER.CREATE,
+                        ]
+                    ),
+                },
+                {
+                    label: 'External',
+                    icon: "pi pi-fw pi-mars",
+                    to: `/organizations?type=${OrgnUnit.External}`,
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.ORGANIAZTION.EXTERNAL.CREATE,
+                        ]
+                    ),
+                }
 
             ]
         },

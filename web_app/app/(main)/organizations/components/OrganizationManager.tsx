@@ -15,7 +15,17 @@ import {
 } from "../models/organization.model";
 
 import SaveDialog from "./SaveDialog";
-//import { PERMISSIONS } from "@/types/permissions";
+import { PERMISSIONS } from "@/types/permissions";
+
+
+const ORG_PERMISSION_KEY: Record<OrgnUnit, keyof typeof PERMISSIONS.ORGANIAZTION> = {
+    College: "COLLEGE",
+    Department: "DEPARTMENT",
+    Program: "PROGRAM",
+    Directorate: "DIRECTORATE",
+    Center: "CENTER",
+    External: "EXTERNAL",
+};
 
 interface OrganizationManagerProps {
     type: OrgnUnit;
@@ -48,9 +58,12 @@ const OrganizationManager = ({ type, parent }: OrganizationManagerProps) => {
     const { hasPermission } = useAuth();
     const confirm = useConfirmDialog();
 
-    const canCreate = true; //hasPermission([PERMISSIONS.ORG.CREATE]);
-    const canEdit = true;//hasPermission([PERMISSIONS.ORG.UPDATE]);
-    const canDelete = true;//hasPermission([PERMISSIONS.ORG.DELETE]);
+    const permissionKey = ORG_PERMISSION_KEY[type];
+    const canCreate = hasPermission([PERMISSIONS.ORGANIAZTION[permissionKey].CREATE]);
+    const canEdit = hasPermission([PERMISSIONS.ORGANIAZTION[permissionKey].UPDATE]);
+    const canDelete = hasPermission([PERMISSIONS.ORGANIAZTION[permissionKey].DELETE]);
+
+
 
     const [selectedItem, setSelectedItem] = useState<Organization>(emptyOrganization);
     const [showSaveDialog, setShowSaveDialog] = useState(false);

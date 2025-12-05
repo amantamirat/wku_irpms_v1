@@ -16,10 +16,47 @@ export const PERMISSIONS = {
     READ: "permission:read",
   },
   ORGANIAZTION: {
-    CREATE: "organization:create",
-    READ: "organization:read",
-    UPDATE: "organization:update",
-    DELETE: "organization:delete",
+    COLLEGE: {
+      CREATE: "college:create",
+      READ: "college:read",
+      UPDATE: "college:update",
+      DELETE: "college:delete",
+    },
+
+    DEPARTMENT: {
+      CREATE: "department:create",
+      READ: "department:read",
+      UPDATE: "department:update",
+      DELETE: "department:delete",
+    },
+
+    PROGRAM: {
+      CREATE: "program:create",
+      READ: "program:read",
+      UPDATE: "program:update",
+      DELETE: "program:delete",
+    },
+
+    DIRECTORATE: {
+      CREATE: "directorate:create",
+      READ: "directorate:read",
+      UPDATE: "directorate:update",
+      DELETE: "directorate:delete",
+    },
+
+    CENTER: {
+      CREATE: "center:create",
+      READ: "center:read",
+      UPDATE: "center:update",
+      DELETE: "center:delete",
+    },
+
+    EXTERNAL: {
+      CREATE: "external:create",
+      READ: "external:read",
+      UPDATE: "external:update",
+      DELETE: "external:delete",
+    },
   },
   APPLICANT: {
     CREATE: "applicant:create",
