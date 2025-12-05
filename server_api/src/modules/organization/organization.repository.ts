@@ -5,8 +5,8 @@ import {
     Organization,
     College,
     Directorate,
-    Sector,
-    Specialization,
+    //Sector,
+    //Specialization,
     Department,
     Center,
     Program,
@@ -103,8 +103,8 @@ export class OrganizationRepository implements IOrganizationRepository {
 
         if (dtoData.name) updated.name = dtoData.name;
 
-        if (dtoData.parentId) {
-            updated.parent = new mongoose.Types.ObjectId(dtoData.parentId);
+        if (dtoData.parent) {
+            updated.parent = new mongoose.Types.ObjectId(dtoData.parent);
         }
 
         if (dtoData.academic_level) {
@@ -142,9 +142,9 @@ export class OrganizationRepository implements IOrganizationRepository {
             case Unit.Program: return Program;
             case Unit.Directorate: return Directorate;
             case Unit.Center: return Center;
-            case "Sector": return Sector;
-            case "External": return External;
-            case Unit.Specialization: return Specialization;
+            //case "Sector": return Sector;
+            case Unit.External: return External;
+            //case Unit.Specialization: return Specialization;
             default:
                 throw new Error(`Unknown organization type: ${type}`);
         }

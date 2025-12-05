@@ -28,6 +28,7 @@ export interface CreateDirectorateDTO extends BaseOrganizationDTO {
     type: Unit.Directorate;
 }
 
+/*
 export interface CreateSectorDTO extends BaseOrganizationDTO {
     type: Unit.Sector;
 }
@@ -36,7 +37,7 @@ export interface CreateSpecializationDTO extends BaseOrganizationDTO {
     type: Unit.Specialization;
     academic_level: AcademicLevel;
 }
-
+*/
 export interface CreateDepartmentDTO extends BaseOrganizationDTO, WithParentDTO {
     type: Unit.Department;
 }
@@ -51,7 +52,8 @@ export interface CreateProgramDTO extends BaseOrganizationDTO, WithParentDTO {
     classification: Classification;
 }
 
-export interface CreateExternalDTO extends BaseOrganizationDTO, WithParentDTO {
+export interface CreateExternalDTO extends BaseOrganizationDTO //, WithParentDTO 
+{
     type: Unit.External;
     ownership: Ownership;
 }
@@ -62,8 +64,8 @@ export interface CreateExternalDTO extends BaseOrganizationDTO, WithParentDTO {
 export type CreateOrganizationDTO =
     | CreateCollegeDTO
     | CreateDirectorateDTO
-    | CreateSectorDTO
-    | CreateSpecializationDTO
+    //| CreateSectorDTO
+    //| CreateSpecializationDTO
     | CreateDepartmentDTO
     | CreateCenterDTO
     | CreateProgramDTO
@@ -74,7 +76,7 @@ export interface UpdateOrganizationDTO {
     id: string;
     data: Partial<{
         name: string;
-        parentId: string;
+        parent: string;
         academic_level: AcademicLevel;
         classification: Classification;
         ownership: Ownership;

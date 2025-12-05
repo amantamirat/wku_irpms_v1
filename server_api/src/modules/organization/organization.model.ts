@@ -30,6 +30,19 @@ interface IDirectorate extends IBaseOrganization {
 
 export const Directorate = Organization.discriminator<IDirectorate>(Unit.Directorate, new Schema({}));
 
+interface ExternalDocument extends IBaseOrganization {
+    type: Unit.External;
+    ownership: Ownership;
+}
+
+const ExternalSchema = new Schema<ExternalDocument>({
+    ownership: { type: String, enum: Object.values(Ownership), required: true }
+});
+
+export const External = Organization.discriminator<ExternalDocument>(Unit.External, ExternalSchema);
+
+
+
 /*
 interface OfficeDocument extends IOrganization {
     type: Unit.Supportive;
@@ -37,12 +50,14 @@ interface OfficeDocument extends IOrganization {
 export const Office = Organization.discriminator<OfficeDocument>(Unit.Supportive, new Schema({}));
 */
 
+/*
 interface ISector extends IBaseOrganization {
     type: Unit.Sector;
 }
 
 export const Sector = Organization.discriminator<ISector>(Unit.Sector, new Schema({}));
-
+*/
+/*
 export interface ISpecialization extends IBaseOrganization {
     type: Unit.Specialization;
     academic_level: AcademicLevel;
@@ -53,7 +68,7 @@ const SpecializationSchema = new Schema<ISpecialization>({
 });
 
 export const Specialization = Organization.discriminator<ISpecialization>(Unit.Specialization, SpecializationSchema);
-
+*/
 
 
 interface SubOrganizationDocument extends IBaseOrganization {
@@ -127,34 +142,13 @@ const ProgramSchema = new Schema<ProgramDocument>({
         enum: Object.values(AcademicLevel),
         required: true
     },
-    classification: { 
-        type: String, 
-        enum: Object.values(Classification), 
-        required: true },
+    classification: {
+        type: String,
+        enum: Object.values(Classification),
+        required: true
+    },
 });
 
 export const Program = Organization.discriminator<ProgramDocument>(Unit.Program, ProgramSchema);
 
-interface ExternalDocument extends SubOrganizationDocument {
-    type: Unit.External;
-    ownership: Ownership;
-}
-
-const ExternalSchema = new Schema<ExternalDocument>({
-    parent: {
-        type: Schema.Types.ObjectId,
-        ref: Sector.modelName,
-        required: true,
-        validate: {
-            validator: async function (parentId: mongoose.Types.ObjectId) {
-                const exist = await Sector.exists({ _id: parentId });
-                return !!exist;
-            },
-            message: "External Organization must belong to a Sector",
-        },
-    },
-    ownership: { type: String, enum: Object.values(Ownership), required: true }
-});
-
-export const External = Organization.discriminator<ExternalDocument>(Unit.External, ExternalSchema);
 

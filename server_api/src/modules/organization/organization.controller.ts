@@ -72,7 +72,7 @@ export class OrganizationController {
                 id,
                 data: {
                     name: req.body.name,
-                    parentId: req.body.parentId,
+                    parent: req.body.parent,
                     academic_level: req.body.academic_level,
                     classification: req.body.classification,
                     ownership: req.body.ownership,
