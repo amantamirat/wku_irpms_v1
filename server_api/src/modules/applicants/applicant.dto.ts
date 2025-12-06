@@ -25,20 +25,19 @@ export interface UpdateApplicantDTO {
         fin: string;
         orcid: string;
         accessibility: Accessibility[];
+        roles: string[];
+        ownerships: string[];
     }>;
     userId?: string;
 }
 
-export interface UpdateRolesDTO {
-    id: string;
-    data: Partial<{
-        roles: string[];
-        organizations: string[];
-    }>;
-    userId?: string;
-}
 
 export interface GetApplicantsDTO {
     workspace?: string;
+}
+
+export interface FindApplicantDTO {
+    id: string;
+    email: string;
 }
 

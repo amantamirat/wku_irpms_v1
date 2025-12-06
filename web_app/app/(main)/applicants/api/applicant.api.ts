@@ -44,6 +44,7 @@ export const ApplicantApi = {
         return updatedApplicant as Applicant;
     },
 
+    /*
     async updateRoles(applicant: Partial<Applicant>): Promise<Applicant> {
         if (!applicant._id) {
             throw new Error("_id required.");
@@ -53,6 +54,7 @@ export const ApplicantApi = {
         const updatedApplicant = await ApiClient.patch(url, sanitized);
         return updatedApplicant as Applicant;
     },
+    */
 
     async deleteApplicant(applicant: Partial<Applicant>): Promise<boolean> {
         if (!applicant._id) {

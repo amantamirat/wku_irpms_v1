@@ -1,13 +1,13 @@
 import Applicant, { IApplicant } from "./applicant.model";
-import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO, UpdateRolesDTO } from "./applicant.dto";
+import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO, FindApplicantDTO } from "./applicant.dto";
 import mongoose from "mongoose";
 
 export interface IApplicantRepository {
-    findById(id: string): Promise<IApplicant | null>;
+    find(option: Partial<FindApplicantDTO>): Promise<IApplicant | null>;
     findAll(filter?: GetApplicantsDTO): Promise<IApplicant[]>;
     create(data: CreateApplicantDTO): Promise<IApplicant>;
     update(id: string, data: UpdateApplicantDTO["data"]): Promise<IApplicant>;
-    updateRoles(id: string, data: UpdateRolesDTO["data"]): Promise<IApplicant>;
+    //updateRoles(id: string, data: UpdateRolesDTO["data"]): Promise<IApplicant>;
     delete(id: string): Promise<IApplicant | null>;
 }
 
@@ -16,8 +16,16 @@ export class ApplicantRepository implements IApplicantRepository {
     // -------------------------
     // FIND BY ID
     // -------------------------
-    async findById(id: string): Promise<IApplicant | null> {
-        return Applicant.findById(new mongoose.Types.ObjectId(id)).
+    async find(option: Partial<FindApplicantDTO>): Promise<IApplicant | null> {
+        const query: any = {};
+
+        if (option.id) {
+            query._id = new mongoose.Types.ObjectId(option.id);
+        }
+        if (option.email) {
+            query.email = option.email;
+        }
+        return Applicant.findOne(query).
             populate("workspace").
             populate({
                 path: "roles",
@@ -82,6 +90,12 @@ export class ApplicantRepository implements IApplicantRepository {
         if (dtoData.fin) toUpdate.fin = dtoData.fin;
         if (dtoData.orcid) toUpdate.orcid = dtoData.orcid;
         if (dtoData.accessibility) toUpdate.accessibility = dtoData.accessibility;
+        if (dtoData.roles) {
+            toUpdate.roles = dtoData.roles?.map(id => new mongoose.Types.ObjectId(id))
+        }
+        if (dtoData.ownerships) {
+            toUpdate.organizations = dtoData.ownerships?.map(id => new mongoose.Types.ObjectId(id))
+        }
 
         const updated = await Applicant.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
@@ -93,27 +107,6 @@ export class ApplicantRepository implements IApplicantRepository {
             throw new Error("Applicant not found.");
         }
 
-        return updated;
-    }
-
-
-    async updateRoles(id: string, data: UpdateRolesDTO["data"]): Promise<IApplicant> {
-        const toUpdate: any = {};
-        if (data.roles) {
-            toUpdate.roles = data.roles?.map(id => new mongoose.Types.ObjectId(id))
-        }
-        if (data.organizations) {
-            toUpdate.organizations = data.organizations?.map(id => new mongoose.Types.ObjectId(id))
-        }
-        const updated = await Applicant.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(id),
-            { $set: toUpdate },
-            { new: true }
-        ).lean<IApplicant>();
-
-        if (!updated) {
-            throw new Error("Applicant not found.");
-        }
         return updated;
     }
 

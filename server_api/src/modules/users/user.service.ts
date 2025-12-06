@@ -5,14 +5,17 @@ import { ChangePasswordDTO, CreateUserDTO, UpdateUserDTO } from "./user.dto";
 import { UserStatus } from "./user.enum";
 import { IUserRepository, UserRepository } from "./user.repository";
 import { UserStateMachine } from "./user.state-machine";
+import { ApplicantRepository, IApplicantRepository } from "../applicants/applicant.repository";
 
 
 export class UserService {
 
     private repository: IUserRepository;
+    private appRepository: IApplicantRepository;
 
-    constructor(repository?: IUserRepository) {
+    constructor(repository?: IUserRepository, appRepository?: IApplicantRepository) {
         this.repository = repository || new UserRepository();
+        this.appRepository = appRepository || new ApplicantRepository();
     }
 
     static async prepareHash(password: string): Promise<string> {
@@ -21,16 +24,20 @@ export class UserService {
     };
 
     async create(data: CreateUserDTO) {
+        const applicantDoc = await this.appRepository.find({ email: data.email });
+        if (!applicantDoc) {
+            throw Error("Applicant Not Found!");
+        }
         const hashed = await UserService.prepareHash(data.password);
-        // Build the proper DTO for the repository
         const dto = {
             ...data,
+            applicant: String(applicantDoc._id),
             password: hashed,
             status: UserStatus.pending
         };
         const createdUser = await this.repository.create(dto);
         const { password, ...rest } = createdUser;
-        return rest;
+        return { ...rest, applicant: applicantDoc };
     }
 
     async getUsers() {
@@ -40,10 +47,12 @@ export class UserService {
 
     async update(dto: UpdateUserDTO) {
         const { id, data, userId } = dto;
-
         const userDoc = await this.repository.findById(id);
         if (!userDoc) throw new Error("User not found");
-
+        if (data.password) {
+            const hashed = await UserService.prepareHash(data.password);
+            data.password = hashed;
+        }
         const updated = await this.repository.update(id, data);
         if (!updated) throw new Error("User not found.");
         const { password, ...rest } = updated;
@@ -64,20 +73,16 @@ export class UserService {
         UserStateMachine.validateTransition(current, nextState);
 
         const updated = await this.repository.update(dto.id, dto.data);
-        return updated;
+        const { password, ...rest } = updated;
+        return rest;
     }
 
     async delete(dto: DeleteDto) {
         const { id, userId } = dto;
-
         const userDoc = await this.repository.findById(id);
         if (!userDoc) throw new Error("User not found");
 
         if (userDoc.status === UserStatus.deleted) {
-            //hard deletion
-            // if (String(userDoc.createdBy) !== userId) {
-            //    throw new Error("You can not delete this user!");
-            //  }
             return await this.repository.delete(id);
         }
         //soft deletion
@@ -85,8 +90,9 @@ export class UserService {
         if (!deleted) throw new Error("User not found");
         return deleted;
     }
-    ////
 
+
+    /*
     async reset(dto: UpdateUserDTO) {
         const { id, data, userId } = dto;
         const userDoc = await this.repository.findById(id);
@@ -96,6 +102,7 @@ export class UserService {
         const resetted = await this.repository.update(id, { password: hashed });
         return resetted;
     }
+        */
 
     async changePassword(dto: ChangePasswordDTO) {
         const { id, data, userId } = dto;
@@ -173,20 +180,19 @@ static async changePassword(id: string, dto: ChangePasswordDto) {
 
     static async initAdminUser() {
         const repository = new UserRepository();
-        const userName = process.env.ADMIN_USER_NAME;
-        const email = process.env.SYS_EMAIL;
-        const password = process.env.ADMIN_PASSWORD;
-        if (!userName || !email || !password) {
+        const email = process.env.EMAIL;
+        const password = process.env.PASSWORD;
+        if (!email || !password) {
             throw new Error('Default Admin credentials are not found in environment variables.');
         }
-        const exist = await repository.findByNameOrEmail(userName);
+        const exist = await repository.findByEmail(email);
         if (!exist) {
             const adminRole = await Role.findOne({ role_name: "admin" });
             if (!adminRole) {
                 throw new Error("Admin role not initialized.");
             }
             const hashed = await this.prepareHash(password);
-            const data = { user_name: userName, password: hashed, email: email, status: UserStatus.active, roles: [adminRole._id as string] };
+            const data = { email: email, password: hashed, status: UserStatus.active, roles: [adminRole._id as string] };
             await repository.create(data);
             console.log('Default admin user created successfully.');
         }

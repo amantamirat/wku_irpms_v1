@@ -11,12 +11,11 @@ import { UserApi } from '../api/UserService';
 interface ChangePasswordDialogProps {
     visible: boolean;
     id: string;
-    reset?: boolean; // if true, admin reset mode
     onHide: () => void;
     onComplete?: () => void;
 }
 
-const ChangePasswordDialog = ({ visible, id, reset = false, onHide, onComplete }: ChangePasswordDialogProps) => {
+const ChangePasswordDialog = ({ visible, id, onHide, onComplete }: ChangePasswordDialogProps) => {
 
     let emptyPassword: PasswordType = {
         _id: id,
@@ -25,13 +24,13 @@ const ChangePasswordDialog = ({ visible, id, reset = false, onHide, onComplete }
     const toast = useRef<Toast>(null);
     const [form, setForm] = useState<PasswordType>(emptyPassword);
     const [submitted, setSubmitted] = useState(false);
-   
+
 
     const handleSave = async () => {
         try {
             setSubmitted(true);
             // Validation
-            if (!reset && !form.oldPassword) {
+            if (!form.oldPassword) {
                 throw new Error('Old password is required.');
             }
             const validation = validatePassword(form);
@@ -39,16 +38,14 @@ const ChangePasswordDialog = ({ visible, id, reset = false, onHide, onComplete }
                 throw new Error(validation.message);
             }
             // Call API
-            if (reset) {
-                await UserApi.resetPassword(form);
-            } else {
-                await UserApi.changePassword(form);
-            }
+
+            await UserApi.changePassword(form);
+
 
             toast.current?.show({
                 severity: 'success',
                 summary: 'Success',
-                detail: reset ? 'Password reset successfully' : 'Password changed successfully',
+                detail: 'Password changed successfully',
                 life: 2000,
             });
 
@@ -85,27 +82,27 @@ const ChangePasswordDialog = ({ visible, id, reset = false, onHide, onComplete }
             <Dialog
                 visible={visible}
                 style={{ width: '450px' }}
-                header={reset ? 'Reset Password' : 'Change Password'}
+                header={'Change Password'}
                 modal
                 className="p-fluid"
                 footer={footer}
                 onHide={onHide}
             >
-                {!reset && (
-                    <div className="field">
-                        <label htmlFor="oldPassword">Old Password</label>
-                        <Password
-                            id="oldPassword"
-                            value={form.oldPassword || ''}
-                            onChange={(e) => setForm({ ...form, oldPassword: e.target.value })}
-                            toggleMask
-                            className={classNames({ 'p-invalid': submitted && !form.oldPassword })}
-                        />
-                        {submitted && !form.oldPassword && (
-                            <small className="p-invalid">Old password is required.</small>
-                        )}
-                    </div>
-                )}
+
+                <div className="field">
+                    <label htmlFor="oldPassword">Old Password</label>
+                    <Password
+                        id="oldPassword"
+                        value={form.oldPassword || ''}
+                        onChange={(e) => setForm({ ...form, oldPassword: e.target.value })}
+                        toggleMask
+                        className={classNames({ 'p-invalid': submitted && !form.oldPassword })}
+                    />
+                    {submitted && !form.oldPassword && (
+                        <small className="p-invalid">Old password is required.</small>
+                    )}
+                </div>
+
 
                 <div className="field">
                     <label htmlFor="newPassword">New Password</label>

@@ -10,7 +10,6 @@ import { Button } from "primereact/button";
 import { ToggleButton } from "primereact/togglebutton";
 import { useEffect, useState } from "react";
 import { UserApi } from "../api/UserService";
-import ChangePasswordDialog from "../dialogs/ChangePassword";
 import SaveDialog from "../dialogs/SaveDialog";
 import { User, UserStatus } from "../models/user.model";
 
@@ -18,10 +17,10 @@ import { User, UserStatus } from "../models/user.model";
 const UserManager = () => {
 
     const emptyUser: User = {
-        user_name: "",
+        //user_name: "",
         email: "",
         status: UserStatus.pending,
-        roles: []
+        //roles: []
     };
 
     const { hasPermission } = useAuth();
@@ -34,7 +33,7 @@ const UserManager = () => {
     const canCreate = !showDeleted && hasPermission([PERMISSIONS.USER.CREATE]);
     const canEdit = !showDeleted && hasPermission([PERMISSIONS.USER.UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.USER.DELETE]);
-    const canReset = !showDeleted && hasPermission([PERMISSIONS.USER.RESET]);
+    // const canReset = !showDeleted && hasPermission([PERMISSIONS.USER.RESET]);
 
     // CRUD hook
     const {
@@ -51,7 +50,7 @@ const UserManager = () => {
 
     const [user, setUser] = useState<User>(emptyUser);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+    //const [showPasswordDialog, setShowPasswordDialog] = useState(false);
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -104,19 +103,24 @@ const UserManager = () => {
             setAllUsers(allUsers.filter(u => u._id !== row._id));
             return
         }
-        onSaveComplete({ ...deleted, roles: row.roles, organizations: row.organizations }, false);
-        // if (deleted) setAll(allUsers.filter(u => u.status === UserStatus.deleted));
+        onSaveComplete({
+            ...deleted,
+            applicant: row.applicant,
+        }, false);
     };
 
     const hideDialogs = () => {
         setUser(emptyUser);
         setShowSaveDialog(false);
-        setShowPasswordDialog(false);
+        // setShowPasswordDialog(false);
     };
 
     const updateStatus = async (row: User, next: UserStatus) => {
         const updated = await UserApi.updateUser({ _id: row._id, status: next }, true);
-        onSaveComplete({ ...updated, roles: row.roles, organizations: row.organizations }, false);
+        onSaveComplete({
+            ...updated,
+             applicant: row.applicant,
+        }, false);
         //updateItem({ ...updated, roles: row.roles, organizations: row.organizations });
     };
 
@@ -157,10 +161,21 @@ const UserManager = () => {
 
     // Columns
     const columns = [
-        { header: "Username", field: "user_name" },
+        {
+            //header: "Username", field: "user_name" 
+        },
         { header: "Email", field: "email" },
-        { header: "Roles", body: (u: User) => u.roles?.length ?? 0 },
-        { header: "Organizations", body: (u: User) => u.organizations?.length ?? 0 },
+
+        {
+            header: "Applicant", field: "applicant.firstName"
+        },
+        {
+            //header: "Roles", body: (u: User) => u.roles?.length ?? 0 
+
+        },
+        {
+            // header: "Organizations", body: (u: User) => u.organizations?.length ?? 0 
+        },
         {
             header: "Status",
             field: "status",
@@ -192,11 +207,13 @@ const UserManager = () => {
                 }}
                 onDelete={(row) =>
                     confirm.ask({
-                        item: row.user_name,
+                        item: row.email,
                         onConfirmAsync: () => deleteUser(row)
                     })
                 }
-                extraActions={
+                /**
+                 * 
+                 * extraActions={
                     (row) =>
                         canReset && <Button
                             icon="pi pi-refresh" rounded severity="warning" className="p-button-rounded p-button-text"
@@ -207,6 +224,8 @@ const UserManager = () => {
                             }}
                         />
                 }
+                 */
+
 
                 toolbarEnd={
                     <ToggleButton checked={showDeleted}
@@ -230,16 +249,19 @@ const UserManager = () => {
                 />
             }
 
-            {/* Reset Password Dialog */}
-            {user._id && (
+            {/* Reset Password Dialog 
+             {user._id && (
                 <ChangePasswordDialog
                     visible={showPasswordDialog}
                     id={user._id}
-                    reset={true}
+                    //reset={true}
                     onComplete={hideDialogs}
                     onHide={hideDialogs}
                 />
             )}
+            
+            */}
+
         </>
     );
 };

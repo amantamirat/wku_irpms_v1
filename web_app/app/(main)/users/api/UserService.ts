@@ -44,10 +44,11 @@ export const UserApi = {
         return result;
     },
 
+    /*
     async resetPassword(password: Partial<PasswordType>): Promise<any> {
         const url = `${end_point}${password._id}/reset-password`;
         const result = await ApiClient.patch(url, password);
         return result;
     }
-
+*/
 };

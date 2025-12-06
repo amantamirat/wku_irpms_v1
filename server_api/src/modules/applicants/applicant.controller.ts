@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import { errorResponse, successResponse } from '../../util/response';
 import { AuthenticatedRequest } from '../users/auth/auth.middleware';
-import { ApplicantService } from './app.service';
-import { CreateApplicantDTO, GetApplicantsDTO, UpdateApplicantDTO, UpdateRolesDTO } from './applicant.dto';
+import { ApplicantService } from './app.licant.service';
+import { CreateApplicantDTO, GetApplicantsDTO, UpdateApplicantDTO } from './applicant.dto';
 
 const service = new ApplicantService();
 export class ApplicantController {
@@ -85,9 +85,11 @@ export class ApplicantController {
                 firstName,
                 lastName,
                 birthDate,
-                gender,                
+                gender,
                 email,
-                accessibility
+                accessibility,
+                roles,
+                ownerships,
             } = req.body;
 
             const dto: UpdateApplicantDTO = {
@@ -99,7 +101,9 @@ export class ApplicantController {
                     birthDate,
                     gender,
                     email,
-                    accessibility
+                    accessibility,
+                    roles,
+                    ownerships
                 },
                 userId: userId
             };
@@ -111,32 +115,6 @@ export class ApplicantController {
     }
 
 
-    static async updateRoles(req: AuthenticatedRequest, res: Response) {
-        try {
-            if (!req.user) {
-                throw new Error("User not found!");
-            }
-            const userId = req.user._id;
-            const { id } = req.params;
-            const {
-                roles,
-                organizations,
-            } = req.body;
-
-            const dto: UpdateRolesDTO = {
-                id,
-                data: {
-                    roles,
-                    organizations,
-                },
-                userId: userId
-            };
-            const updated = await service.updateRoles(dto);
-            successResponse(res, 201, "Applicant updated successfully", updated);
-        } catch (err: any) {
-            errorResponse(res, 400, err.message, err);
-        }
-    }
 
     static async deleteApplicant(req: AuthenticatedRequest, res: Response) {
         try {

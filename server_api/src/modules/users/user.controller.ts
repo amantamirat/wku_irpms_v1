@@ -13,16 +13,12 @@ export class UserController {
   static async create(req: AuthenticatedRequest, res: Response) {
     try {
       if (!req.user) throw new Error("User not authorized!");
-      const { user_name, password, email, roles, organizations } = req.body;
+      const { email, password } = req.body;
       const dto: CreateUserDTO = {
-        user_name,
-        password,
         email,
-        //roles,
-        //organizations,
-        createdBy: req.user._id
+        password,
+        //createdBy: req.user._id
       };
-
       const created = await service.create(dto);
       successResponse(res, 201, "User created successfully", created);
 
@@ -45,17 +41,15 @@ export class UserController {
     try {
       if (!req.user) throw new Error("User not authorized!");
       const { id } = req.params;
-      const { roles, organizations } = req.body;
-
+      const { password } = req.body;
       const dto: UpdateUserDTO = {
         id,
-        data: { 
-         // roles, organizations 
+        data: {
+          password
         },
         userId: req.user._id,
       };
       const updated = await service.update(dto);
-
       successResponse(res, 201, "User updated successfully", updated);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
@@ -83,6 +77,7 @@ export class UserController {
     }
   }
 
+  /*
   static async resetPassword(req: AuthenticatedRequest, res: Response) {
     try {
       if (!req.user) throw new Error("User not authorized!");
@@ -99,7 +94,7 @@ export class UserController {
       errorResponse(res, 400, err.message, err);
     }
   }
-
+*/
   static async deleteUser(req: AuthenticatedRequest, res: Response) {
     try {
       if (!req.user) throw new Error("User not authorized!");

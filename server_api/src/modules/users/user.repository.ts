@@ -5,7 +5,7 @@ import { CreateUserDTO, UpdateUserDTO } from "./user.dto";
 export interface IUserRepository {
     findById(id: string): Promise<IUser | null>;
     findAll(): Promise<Partial<IUser>[]>;
-    findByNameOrEmail(eName: string): Promise<IUser | null>;
+    findByEmail(eName: string): Promise<IUser | null>;
     create(data: CreateUserDTO): Promise<IUser>;
     update(id: string, data: UpdateUserDTO["data"]): Promise<IUser>;
     delete(id: string): Promise<void>;
@@ -23,13 +23,13 @@ export class UserRepository implements IUserRepository {
     async create(dto: CreateUserDTO) {
         const data: Partial<IUser> = {
             applicant: new mongoose.Types.ObjectId(dto.applicant),
-            user_name: dto.user_name,
+            //user_name: dto.user_name,
             password: dto.password,
             email: dto.email,
             //roles: dto.roles?.map(id => new mongoose.Types.ObjectId(id)) ?? [],
-           // organizations: dto.organizations?.map(id => new mongoose.Types.ObjectId(id)) ?? [],
+            // organizations: dto.organizations?.map(id => new mongoose.Types.ObjectId(id)) ?? [],
             status: dto.status,
-            createdBy: new mongoose.Types.ObjectId(dto.createdBy)
+            //createdBy: new mongoose.Types.ObjectId(dto.createdBy)
         };
         const created = await User.create(data);
         return created.toObject();
@@ -38,19 +38,15 @@ export class UserRepository implements IUserRepository {
     async findAll() {
         const filter: any = {};
         return User.find(filter).populate("applicant")
-        .populate("roles").populate("organizations")
+            .populate("roles").populate("organizations")
             .lean<IUser[]>()
             .exec();
     }
 
-    async findByNameOrEmail(eName: string): Promise<IUser | null> {
-        //throw new Error("Method not implemented.");
-        return await User.findOne({
-            $or: [
-                { email: eName },
-                { user_name: eName }
-            ]
-        }).lean();
+    async findByEmail(email: string): Promise<IUser | null> {
+        return await User.findOne(
+            { email: email }
+        ).lean();
     }
 
 
@@ -66,7 +62,7 @@ export class UserRepository implements IUserRepository {
         if (dtoData.organizations) {
             toUpdate.organizations = dtoData.organizations.map(o => new mongoose.Types.ObjectId(o));
         }
-         */       
+         */
 
         if (dtoData.status) {
             toUpdate.status = dtoData.status;
@@ -85,7 +81,6 @@ export class UserRepository implements IUserRepository {
         if (!updated) {
             throw new Error("User not found.");
         }
-
         return updated;
     }
 

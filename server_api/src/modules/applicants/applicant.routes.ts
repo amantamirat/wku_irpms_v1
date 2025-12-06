@@ -31,10 +31,11 @@ router.delete('/:id',
     ApplicantController.deleteApplicant
 );
 
+/*
 router.patch('/:id',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.APPLICANT.UPDATE_ROLES]),
     ApplicantController.updateRoles
 );
-
+*/
 export default router;

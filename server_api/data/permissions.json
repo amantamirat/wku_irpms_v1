@@ -17,17 +17,13 @@
   {
     "category": "User Management",
     "name": "user:update",
-    "description": "Edit user details"
+    "description": "Edit user details, or reset passwords"
   },
   {
     "category": "User Management",
     "name": "user:delete",
     "description": "Delete users"
-  },
-  {
-    "category": "User Management",
-    "name": "user:reset"
-  },
+  }, 
   {
     "category": "Role Management",
     "name": "role:create",

@@ -16,13 +16,13 @@ export type PasswordType = {
 };
 export type User = {
     _id?: string;
-    applicant:string|Applicant;
-    user_name: string;
+    applicant?: string | Applicant;
+    //user_name?: string;
     email: string;
     password?: string;
-    confirmed_password?: string;
-    roles?: Role[] | string[];
-    organizations?: Organization[] | string[];
+    confirmedPassword?: string;
+    //roles?: Role[] | string[];
+    //organizations?: Organization[] | string[];
     reset_code?: string;
     reset_code_expires?: Date;
     linkedApplicant?: string | Applicant;
@@ -31,9 +31,9 @@ export type User = {
 
 
 export const validateUser = (user: User): { valid: boolean; message?: string } => {
-    if (!user.user_name || user.user_name.trim() === "") {
-        return { valid: false, message: "Username is required." };
-    }
+   // if (!user.user_name || user.user_name.trim() === "") {
+     //   return { valid: false, message: "Username is required." };
+   // }
     if (!user.email || user.email.trim() === "") {
         return { valid: false, message: "Email is required." };
     }
@@ -60,10 +60,10 @@ export const validateUser = (user: User): { valid: boolean; message?: string } =
                     "Password must be at least 8 characters long, include uppercase, lowercase, number, and symbol."
             };
         }
-        if (!user.confirmed_password) {
+        if (!user.confirmedPassword) {
             return { valid: false, message: "Password confirmation required" };
         }
-        if (user.password !== user.confirmed_password) {
+        if (user.password !== user.confirmedPassword) {
             return { valid: false, message: "Password mismatch" };
         }
     }
@@ -101,6 +101,7 @@ export const validatePassword = (password: PasswordType): { valid: boolean; mess
 export function sanitizeUser(user: Partial<User>): Partial<User> {
     return {
         ...user,
+        /*
         roles: user.roles
             ?.map(role =>
                 typeof role === 'object' && role !== null
@@ -116,6 +117,7 @@ export function sanitizeUser(user: Partial<User>): Partial<User> {
                     : org
             )
             .filter((id): id is string => typeof id === 'string'),
+            */
     };
 }
 

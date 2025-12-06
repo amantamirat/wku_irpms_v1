@@ -20,9 +20,11 @@ router.put('/:id/status', verifyActiveAccount,
 router.delete('/:id', verifyActiveAccount, 
     checkPermission([PERMISSIONS.USER.DELETE]), 
     UserController.deleteUser);
+/*
 router.patch("/:id/reset-password", verifyActiveAccount, 
     checkPermission([PERMISSIONS.USER.RESET]),
     UserController.resetPassword);
+    */
 router.patch("/:id/change-password", verifyActiveAccount, 
     UserController.changePassword);
     

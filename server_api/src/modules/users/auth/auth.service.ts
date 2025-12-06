@@ -36,7 +36,7 @@ export class AuthService {
 
     async login(dto: LoginDto) {
         const { userName, password } = dto;
-        const userDoc = await this.repository.findByNameOrEmail(userName);
+        const userDoc = await this.repository.findByEmail(userName);
         if (!userDoc || userDoc.status !== UserStatus.active) {
             throw new Error("User not found");
         }
@@ -44,7 +44,7 @@ export class AuthService {
         if (!isMatch) {
             throw new Error("Invalid credentials.");
         }
-        const applicantDoc = await this.appRepository.findById(String(userDoc.applicant));
+        const applicantDoc = await this.appRepository.find({ id: String(userDoc.applicant) });
         if (!applicantDoc) {
             throw new Error("Applicant not found.");
         }

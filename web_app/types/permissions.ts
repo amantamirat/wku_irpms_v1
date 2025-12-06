@@ -4,7 +4,7 @@ export const PERMISSIONS = {
     READ: "user:read",
     UPDATE: "user:update",
     DELETE: "user:delete",
-    RESET: "user:reset",
+    //RESET: "user:reset",
   },
   ROLE: {
     CREATE: "role:create",

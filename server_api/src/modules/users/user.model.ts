@@ -28,8 +28,8 @@ const UserSchema = new Schema<IUser>(
     },
     user_name: {
       type: String,
-      required: true,
-      unique: true,
+      //required: true,
+      //unique: true,
     },
     password: {
       type: String,

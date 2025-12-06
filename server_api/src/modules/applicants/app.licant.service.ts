@@ -1,6 +1,6 @@
 import { Unit } from "../organization/organization.enum";
 import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
-import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO, UpdateRolesDTO } from "./applicant.dto";
+import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO } from "./applicant.dto";
 import { IApplicantRepository, ApplicantRepository } from "./applicant.repository";
 
 export class ApplicantService {
@@ -34,7 +34,7 @@ export class ApplicantService {
     // GET ALL (with optional filter)
     // -------------------------
     async getAll(filter?: GetApplicantsDTO) {
-        return this.repository.findAll(filter);
+        return await this.repository.findAll(filter);
     }  
     // -------------------------
     // UPDATE
@@ -44,11 +44,13 @@ export class ApplicantService {
         if (data.workspace) {
             await this.validateWorkspace(data.workspace);
         }
+        //check permission for roles and ownerships !!!!!!danger
         const updated = await this.repository.update(id, data);
         if (!updated) throw new Error("Applicant not found");
         return updated;
     }
 
+    /*
     // -------------------------
     async updateRoles(dto: UpdateRolesDTO) {
         const { id, data } = dto;
@@ -56,6 +58,7 @@ export class ApplicantService {
         if (!updated) throw new Error("Applicant not found");
         return updated;
     }
+        */
 
     // -------------------------
     // DELETE

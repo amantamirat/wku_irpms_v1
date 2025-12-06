@@ -163,7 +163,8 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
                     <ApplicantDetail applicant={row} />
                 )}
 
-                extraActions={
+                /** 
+                 * extraActions={
                     (row) =>
                         canUpdateRoles &&
                         <Button icon="pi pi-shield" rounded
@@ -177,6 +178,8 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
                             }}
                         />
                 }
+                 * 
+                */
                 enableSearch
             />
 
@@ -185,7 +188,6 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
                 <SaveDialog
                     visible={showSaveDialog}
                     applicant={selectedApplicant}
-                    updateRoles={canUpdateRoles && showRolesDialog}
                     hasWorkspace={hasWorkspace}
                     onComplete={onSaveComplete}
                     onHide={hideDialogs}
