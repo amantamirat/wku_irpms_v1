@@ -32,7 +32,8 @@ export const OrganizationApi = {
             throw new Error("_id required.");
         }
         const url = `${end_point}${organization._id}`;
-        const updatedOrganization = await ApiClient.put(url, organization);
+        const sanitized = sanitizeOrganization(organization);
+        const updatedOrganization = await ApiClient.put(url, sanitized);
         return updatedOrganization as Organization;
     },
 

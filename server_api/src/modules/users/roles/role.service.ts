@@ -24,7 +24,7 @@ export class RoleService {
 
     async update(dto: UpdateRoleDto) {
         const { id, data } = dto;
-        const role = this.repository.update(id, data);
+        const role = await this.repository.update(id, data);
         if (!role) throw new Error("Role not found");
         return role;
     }

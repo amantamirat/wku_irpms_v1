@@ -15,9 +15,6 @@ router.get('/',
     verifyActiveAccount,
     checkPermission([
         PERMISSIONS.APPLICANT.READ,
-        PERMISSIONS.APPLICANT.CREATE,
-        PERMISSIONS.APPLICANT.UPDATE,
-        PERMISSIONS.APPLICANT.DELETE
     ]),
     ApplicantController.getApplicants
 );
@@ -34,10 +31,11 @@ router.delete('/:id',
     ApplicantController.deleteApplicant
 );
 
+/*
 router.patch('/:id',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.APPLICANT.UPDATE]),
     ApplicantController.linkUser
 );
-
+*/
 export default router;

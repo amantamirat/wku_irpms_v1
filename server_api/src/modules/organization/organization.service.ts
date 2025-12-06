@@ -30,6 +30,8 @@ export class OrganizationService {
             throw new Error("Organization name and type are required");
         }
 
+        
+
         return this.repo.create(data);
     }
 

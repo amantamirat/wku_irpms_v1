@@ -1,9 +1,12 @@
 import { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import { errorResponse, successResponse } from '../../util/response';
-import { ApplicantService, CreateApplicantDto, GetApplicantsOptions } from './applicant.service';
+import { GetApplicantsOptions } from './applicant.service';
 import { AuthenticatedRequest } from '../users/auth/auth.middleware';
+import { ApplicantService } from './app.service';
+import { CreateApplicantDTO, UpdateApplicantDTO } from './applicant.dto';
 
+const service = new ApplicantService();
 export class ApplicantController {
 
     static async createApplicant(req: AuthenticatedRequest, res: Response) {
@@ -17,22 +20,20 @@ export class ApplicantController {
                 last_name,
                 birth_date,
                 gender,
-                //scope,
                 organization,
-                email,
+                //email,
                 accessibility
             } = req.body;
-            const data: CreateApplicantDto = {
+            const data: CreateApplicantDTO = {
                 first_name,
                 last_name,
                 birth_date: new Date(birth_date),
                 gender,
-                //scope,
-                organization: new mongoose.Types.ObjectId(organization as string),
-                email,
+                organization,
+                //email,
                 accessibility: accessibility || []
             };
-            const created = await ApplicantService.createApplicant(data, userId);
+            const created = await service.create(data);
             successResponse(res, 201, "Applicant created successfully", created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -64,7 +65,7 @@ export class ApplicantController {
                 organization: orgFilter,
             } as GetApplicantsOptions;
 
-            const applicants = await ApplicantService.getApplicants(filter);
+            const applicants = await service.getAll({});
             successResponse(res, 200, 'Applicants fetched successfully', applicants);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -85,19 +86,24 @@ export class ApplicantController {
                 birth_date,
                 gender,
                 organization,
-                email,
+                //email,
                 accessibility
             } = req.body;
-            const data: Partial<CreateApplicantDto> = {
-                first_name,
-                last_name,
-                birth_date: new Date(birth_date),
-                gender,
-                organization: new mongoose.Types.ObjectId(organization as string),
-                email,
-                accessibility: accessibility || []
+
+            const dto: UpdateApplicantDTO = {
+                id,
+                data: {
+                    first_name,
+                    last_name,
+                    birth_date,
+                    gender,
+                    organization,
+                    //email,
+                    accessibility
+                },
+                userId: userId
             };
-            const updated = await ApplicantService.updateApplicant(id, data, userId);
+            const updated = await service.update(dto);
             successResponse(res, 201, "Applicant updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -109,15 +115,16 @@ export class ApplicantController {
             if (!req.user) {
                 throw new Error("User not found!");
             }
-            const userId = req.user._id;
+            //const userId = req.user._id;
             const { id } = req.params;
-            const deleted = await ApplicantService.deleteApplicant(id, userId);
+            const deleted = await service.delete(id);
             successResponse(res, 201, "Applicant deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
+    /*
     static async linkUser(req: Request, res: Response) {
         try {
             const { id } = req.params;
@@ -127,6 +134,7 @@ export class ApplicantController {
             errorResponse(res, 400, err.message, err);
         }
     }
+    */
 
 }
 
