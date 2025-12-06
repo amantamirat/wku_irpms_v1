@@ -16,7 +16,7 @@ export class RoleRepository implements IRoleRepository {
     
     async findByName(roleName: string): Promise<IRole | null> {
         //throw new Error("Method not implemented.");
-        return Role.findOne({ role_name: roleName });
+        return Role.findOne({ name: roleName });
     }
 
 
@@ -28,7 +28,7 @@ export class RoleRepository implements IRoleRepository {
 
     async create(dto: CreateRoleDto) {
         const data: Partial<IRole> = {
-            role_name: dto.role_name,
+            name: dto.name,
             permissions: dto.permissions?.map(id => new mongoose.Types.ObjectId(id)) ?? [],
         };
         return Role.create(data);
@@ -45,8 +45,8 @@ export class RoleRepository implements IRoleRepository {
     async update(id: string, dtoData: UpdateRoleDto["data"]) {
         const toUpdate: any = {};
 
-        if (dtoData.role_name) {
-            toUpdate.role_name = dtoData.role_name;
+        if (dtoData.name) {
+            toUpdate.name = dtoData.name;
         }
 
         if (dtoData.permissions) {

@@ -160,30 +160,34 @@ const SaveApplicantDialog = ({ visible, applicant, hasWorkspace, onHide, onCompl
                         </div>
                     }
                     <div className="field">
-                        <label htmlFor="firstName">First Name</label>
+                        <label htmlFor="name">Full Name</label>
                         <InputText
-                            id="firstName"
-                            value={localApplicant.firstName}
-                            onChange={(e) => setLocalApplicant({ ...localApplicant, firstName: e.target.value })}
-                            className={classNames({ 'p-invalid': submitted && !localApplicant.firstName })}
+                            id="name"
+                            value={localApplicant.name}
+                            onChange={(e) => setLocalApplicant({ ...localApplicant, name: e.target.value })}
+                            className={classNames({ 'p-invalid': submitted && !localApplicant.name })}
                         />
-                        {submitted && !localApplicant.firstName && (
-                            <small className="p-invalid">First Name is required.</small>
+                        {submitted && !localApplicant.name && (
+                            <small className="p-invalid">Name is required.</small>
                         )}
                     </div>
 
-                    <div className="field">
-                        <label htmlFor="lastName">Last Name</label>
-                        <InputText
-                            id="lastName"
-                            value={localApplicant.lastName}
-                            onChange={(e) => setLocalApplicant({ ...localApplicant, lastName: e.target.value })}
-                            className={classNames({ 'p-invalid': submitted && !localApplicant.lastName })}
-                        />
-                        {submitted && !localApplicant.lastName && (
-                            <small className="p-invalid">Last Name is required.</small>
-                        )}
-                    </div>
+                    {
+                        /**
+                         *  <div className="field">
+                                            <label htmlFor="lastName">Last Name</label>
+                                            <InputText
+                                                id="lastName"
+                                                value={localApplicant.lastName}
+                                                onChange={(e) => setLocalApplicant({ ...localApplicant, lastName: e.target.value })}
+                                                className={classNames({ 'p-invalid': submitted && !localApplicant.lastName })}
+                                            />
+                                            {submitted && !localApplicant.lastName && (
+                                                <small className="p-invalid">Last Name is required.</small>
+                                            )}
+                                        </div>
+                         */
+                    }
 
                     <div className="field">
                         <label htmlFor="birthDate">Birth Date</label>

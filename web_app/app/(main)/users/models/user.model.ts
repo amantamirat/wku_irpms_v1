@@ -1,6 +1,4 @@
 import { Applicant } from "../../applicants/models/applicant.model";
-import { Organization } from "../../organizations/models/organization.model";
-import { Role } from "../../roles/models/role.model";
 
 export enum UserStatus {
     pending = 'Pending',
@@ -17,23 +15,22 @@ export type PasswordType = {
 export type User = {
     _id?: string;
     applicant?: string | Applicant;
-    //user_name?: string;
     email: string;
-    password?: string;
+    password: string;
+    currentPassword?: string;
     confirmedPassword?: string;
-    //roles?: Role[] | string[];
-    //organizations?: Organization[] | string[];
     reset_code?: string;
     reset_code_expires?: Date;
-    linkedApplicant?: string | Applicant;
     status?: UserStatus;
+    //credential informations
+    permissions?: string[];
+    organizations?: any;
+    iat?: number;
+    exp?: number;
 };
 
 
 export const validateUser = (user: User): { valid: boolean; message?: string } => {
-   // if (!user.user_name || user.user_name.trim() === "") {
-     //   return { valid: false, message: "Username is required." };
-   // }
     if (!user.email || user.email.trim() === "") {
         return { valid: false, message: "Email is required." };
     }
@@ -42,31 +39,25 @@ export const validateUser = (user: User): { valid: boolean; message?: string } =
         return { valid: false, message: "Email is not valid." };
     }
 
-    /*
-    if (!user.roles || user.roles.length === 0) {
-        return { valid: false, message: "At least one role is required." };
-    }
-        */
-
-    if (!user._id && !user.password) {
+    if (!user.password || user.password.trim() === "") {
         return { valid: false, message: "Password is required." };
     }
-    if (user.password) {
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
-        if (!passwordRegex.test(user.password)) {
-            return {
-                valid: false,
-                message:
-                    "Password must be at least 8 characters long, include uppercase, lowercase, number, and symbol."
-            };
-        }
-        if (!user.confirmedPassword) {
-            return { valid: false, message: "Password confirmation required" };
-        }
-        if (user.password !== user.confirmedPassword) {
-            return { valid: false, message: "Password mismatch" };
-        }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
+    if (!passwordRegex.test(user.password)) {
+        return {
+            valid: false,
+            message:
+                "Password must be at least 8 characters long, include uppercase, lowercase, number, and symbol."
+        };
     }
+    if (!user.confirmedPassword) {
+        return { valid: false, message: "Password confirmation required" };
+    }
+    if (user.password !== user.confirmedPassword) {
+        return { valid: false, message: "Password mismatch" };
+    }
+
     return { valid: true };
 };
 

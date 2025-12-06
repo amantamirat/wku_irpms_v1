@@ -24,7 +24,8 @@ const UserSchema = new Schema<IUser>(
     applicant: {
       type: Schema.Types.ObjectId,
       ref: COLLECTIONS.APPLICANT,
-      immutable: true
+      immutable: true,
+      unique: true
     },
     user_name: {
       type: String,
@@ -64,6 +65,9 @@ const UserSchema = new Schema<IUser>(
       type: String
     },
     reset_code_expires: {
+      type: Date
+    },
+    lastLogin: {
       type: Date
     },
     createdBy: {

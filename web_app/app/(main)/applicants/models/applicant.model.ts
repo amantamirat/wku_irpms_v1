@@ -28,8 +28,8 @@ export enum Accessibility {
 export type Applicant = {
     _id?: string;
     workspace: string | Organization;
-    firstName: string;
-    lastName: string;
+    name: string;
+    //lastName: string;
     birthDate: Date;
     gender: Gender;
     email?: string;
@@ -59,19 +59,20 @@ export const genderOptions = Object.values(Gender).map(g => ({
 
 
 export const validateApplicant = (applicant: Applicant): { valid: boolean; message?: string } => {
-    
+
     if (!applicant.workspace) {
         return { valid: false, message: 'workspace is required.' };
     }
-    
-    if (!applicant.firstName) {
-        return { valid: false, message: 'First name is required.' };
+
+    if (!applicant.name) {
+        return { valid: false, message: 'Name is required.' };
     }
 
+    /*
     if (!applicant.lastName) {
         return { valid: false, message: 'Last name is required.' };
     }
-
+        */
     if (!applicant.birthDate || isNaN(new Date(applicant.birthDate).getTime())) {
         return { valid: false, message: 'Valid birth date is required.' };
     }
@@ -80,7 +81,7 @@ export const validateApplicant = (applicant: Applicant): { valid: boolean; messa
         return { valid: false, message: 'Gender is required.' };
     }
 
-     if (!applicant.email) {
+    if (!applicant.email) {
         return { valid: false, message: 'Email is required.' };
     }
 

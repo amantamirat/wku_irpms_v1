@@ -17,10 +17,9 @@ import { User, UserStatus } from "../models/user.model";
 const UserManager = () => {
 
     const emptyUser: User = {
-        //user_name: "",
         email: "",
+        password: "",
         status: UserStatus.pending,
-        //roles: []
     };
 
     const { hasPermission } = useAuth();
@@ -119,7 +118,7 @@ const UserManager = () => {
         const updated = await UserApi.updateUser({ _id: row._id, status: next }, true);
         onSaveComplete({
             ...updated,
-             applicant: row.applicant,
+            applicant: row.applicant,
         }, false);
         //updateItem({ ...updated, roles: row.roles, organizations: row.organizations });
     };
@@ -167,7 +166,7 @@ const UserManager = () => {
         { header: "Email", field: "email" },
 
         {
-            header: "Applicant", field: "applicant.firstName"
+            header: "Name", field: "applicant.name"
         },
         {
             //header: "Roles", body: (u: User) => u.roles?.length ?? 0 
@@ -244,6 +243,7 @@ const UserManager = () => {
                 (user && showSaveDialog) && <SaveDialog
                     visible={showSaveDialog}
                     user={user}
+                    enableCurrentPassword={false}
                     onComplete={onSaveComplete}
                     onHide={hideDialogs}
                 />

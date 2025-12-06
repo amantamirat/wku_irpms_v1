@@ -62,7 +62,7 @@ export class RoleService {
             }
             // create admin role
             adminRole = await roleRepository.create({
-                role_name: roleName,
+                name: roleName,
                 permissions: permissions.map(p => String(p._id))
             });
 

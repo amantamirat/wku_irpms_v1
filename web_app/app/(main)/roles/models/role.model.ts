@@ -2,12 +2,12 @@ import { Permission } from "../permission/model/permission.model";
 
 export type Role = {
     _id?: string;
-    role_name: string;
+    name: string;
     permissions: string[] | Permission[];
 };
 
 export const validateRole = (role: Role): { valid: boolean; message?: string } => {
-    if (!role.role_name || role.role_name.trim() === '') {
+    if (!role.name || role.name.trim() === '') {
         return { valid: false, message: ' Role Name is required.' };
     }
      if (!role.permissions || role.permissions.length === 0) {
@@ -20,7 +20,6 @@ export const validateRole = (role: Role): { valid: boolean; message?: string } =
 export function sanitizeRole(role: Partial<Role>): Partial<Role> {
     return {
         ...role,
-
         permissions: role.permissions
             ?.map(p =>
                 typeof p === "object" && p !== null

@@ -14,12 +14,7 @@ router.post('/',
 
 router.get('/',
     verifyActiveAccount,
-    checkPermission([
-        PERMISSIONS.ROLE.READ,
-        PERMISSIONS.ROLE.CREATE,
-        PERMISSIONS.ROLE.UPDATE,
-        PERMISSIONS.ROLE.DELETE
-    ]),
+    checkPermission([PERMISSIONS.ROLE.READ]),
     RoleController.getRoles
 );
 

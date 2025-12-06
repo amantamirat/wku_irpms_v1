@@ -1,11 +1,13 @@
+import jwt from 'jsonwebtoken';
 import bcrypt from "bcryptjs";
 import { DeleteDto } from "../../util/delete.dto";
 import { Role } from "./roles/role.model";
-import { ChangePasswordDTO, CreateUserDTO, UpdateUserDTO } from "./user.dto";
+import JwtPayload, { ChangePasswordDTO, CreateUserDTO, LoginDto, UpdateUserDTO } from "./user.dto";
 import { UserStatus } from "./user.enum";
 import { IUserRepository, UserRepository } from "./user.repository";
 import { UserStateMachine } from "./user.state-machine";
 import { ApplicantRepository, IApplicantRepository } from "../applicants/applicant.repository";
+import { CacheService } from "../../util/cache/cache.service";
 
 
 export class UserService {
@@ -75,6 +77,53 @@ export class UserService {
         const updated = await this.repository.update(dto.id, dto.data);
         const { password, ...rest } = updated;
         return rest;
+    }
+
+
+    async login(dto: LoginDto) {
+        const { email, password } = dto;
+        const userDoc = await this.repository.findByEmail(email);
+        if (!userDoc || userDoc.status !== UserStatus.active) {
+            throw new Error("User not found");
+        }
+        const isMatch = await bcrypt.compare(password, userDoc.password);
+        if (!isMatch) {
+            throw new Error("Invalid credentials.");
+        }
+        const userId = String(userDoc._id);
+        const applicantId = String(userDoc.applicant);
+
+        const applicantDoc = await this.appRepository.find({ id: applicantId });
+        if (!applicantDoc) {
+            throw new Error("Applicant not found.");
+        }
+        const permissions = applicantDoc.roles?.flatMap((role: any) =>
+            role.permissions?.map((p: any) => p.name)
+        ) || [];
+
+        const ownerships = applicantDoc.ownerships?.map((org: any) => org._id) || []
+
+        CacheService.setUserOrganizations(applicantId, ownerships);
+        CacheService.setUserPermissions(applicantId, permissions);
+
+        const payload: JwtPayload = {
+            _id: userId,
+            applicantId,
+            email,
+            status: userDoc.status
+        };
+
+        const token = jwt.sign(payload, process.env.KEY as string, { expiresIn: '2h' });
+        const response = {
+            ...payload,
+            permissions: permissions,
+            organizations: applicantDoc.ownerships || [],
+            applicant: applicantDoc
+        };
+
+        await this.repository.update(userId, { lastLogin: new Date() });
+
+        return { token, user: response };
     }
 
     async delete(dto: DeleteDto) {

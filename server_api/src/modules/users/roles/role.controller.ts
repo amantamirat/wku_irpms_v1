@@ -31,12 +31,12 @@ export class RoleController {
       if (!req.user) throw new Error("User not authorized!");
       const { id } = req.params;
       const {
-        role_name,
+        name,
         permissions
       } = req.body;
       const dto: UpdateRoleDto = {
         id,
-        data: { role_name, permissions },
+        data: { name, permissions },
         userId: req.user._id,
       };
       const updated = await service.update(dto);

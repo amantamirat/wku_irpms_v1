@@ -72,6 +72,10 @@ export class UserRepository implements IUserRepository {
             toUpdate.password = dtoData.password;
         }
 
+        if (dtoData.lastLogin) {
+            toUpdate.lastLogin = dtoData.lastLogin;
+        }
+
         const updated = await User.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: toUpdate },

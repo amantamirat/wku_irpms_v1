@@ -62,8 +62,8 @@ export class ApplicantRepository implements IApplicantRepository {
     async create(dto: CreateApplicantDTO): Promise<IApplicant> {
         const data: Partial<IApplicant> = {
             workspace: dto.workspace ? new mongoose.Types.ObjectId(dto.workspace) : undefined,
-            firstName: dto.firstName,
-            lastName: dto.lastName,
+            name: dto.name,
+            //lastName: dto.lastName,
             birthDate: dto.birthDate,
             gender: dto.gender,
             email: dto.email,
@@ -82,8 +82,8 @@ export class ApplicantRepository implements IApplicantRepository {
         const toUpdate: any = {};
 
         if (dtoData.workspace) toUpdate.organization = new mongoose.Types.ObjectId(dtoData.workspace);
-        if (dtoData.firstName) toUpdate.first_name = dtoData.firstName;
-        if (dtoData.lastName) toUpdate.last_name = dtoData.lastName;
+        if (dtoData.name) toUpdate.name = dtoData.name;
+        //if (dtoData.lastName) toUpdate.last_name = dtoData.lastName;
         if (dtoData.birthDate) toUpdate.birth_date = dtoData.birthDate;
         if (dtoData.gender) toUpdate.gender = dtoData.gender;
         if (dtoData.email) toUpdate.email = dtoData.email;

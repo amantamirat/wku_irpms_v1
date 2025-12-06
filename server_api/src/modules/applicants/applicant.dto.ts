@@ -2,8 +2,7 @@ import { Accessibility, Gender } from "./applicant.enum";
 
 export interface CreateApplicantDTO {
     workspace: string;
-    firstName: string;
-    lastName: string;
+    name: string;
     birthDate: Date;
     gender: Gender;
     email: string;
@@ -17,8 +16,7 @@ export interface UpdateApplicantDTO {
     id: string;
     data: Partial<{
         workspace: string;
-        firstName: string;
-        lastName: string;
+        name: string;
         birthDate: Date;
         gender: Gender;
         email: string;

@@ -118,13 +118,13 @@ const SaveDialog = (props: SaveDialogProps) => {
                     <label htmlFor="name">Role Name</label>
                     <InputText
                         id="name"
-                        value={localRole.role_name}
-                        onChange={(e) => setLocalRole({ ...localRole, role_name: e.target.value })}
+                        value={localRole.name}
+                        onChange={(e) => setLocalRole({ ...localRole, name: e.target.value })}
                         required
                         autoFocus
-                        className={classNames({ 'p-invalid': submitted && !localRole.role_name })}
+                        className={classNames({ 'p-invalid': submitted && !localRole.name })}
                     />
-                    {submitted && !localRole.role_name && (
+                    {submitted && !localRole.name && (
                         <small className="p-invalid">Name is required.</small>
                     )}
                 </div>

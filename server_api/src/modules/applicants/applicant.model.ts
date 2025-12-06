@@ -4,8 +4,7 @@ import { COLLECTIONS } from '../../util/collections.enum';
 
 export interface IApplicant extends Document {
     workspace?: mongoose.Types.ObjectId;
-    firstName: string;
-    lastName: string;
+    name: string;
     birthDate: Date;
     gender: Gender;
     email: string;
@@ -24,11 +23,7 @@ const ApplicantSchema = new Schema<IApplicant>({
         ref: COLLECTIONS.ORGANIZATION,
         //required: true
     },
-    firstName: {
-        type: String,
-        required: true
-    },
-    lastName: {
+    name: {
         type: String,
         required: true
     },

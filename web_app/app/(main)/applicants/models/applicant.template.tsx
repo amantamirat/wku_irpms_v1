@@ -4,7 +4,7 @@ export const applicantTemplate = (app: Applicant) => {
     if (!app) return null;
     return (
         <span>
-            {app.gender === Gender.Male ? 'Mr.' : 'Miss'} {app.firstName} {app.lastName}
+            {app.gender === Gender.Male ? 'Mr.' : 'Miss'} {app.name}
         </span>
     );
 };

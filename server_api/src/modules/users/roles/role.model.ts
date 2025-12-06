@@ -3,14 +3,14 @@ import { COLLECTIONS } from '../../../util/collections.enum';
 
 
 export interface IRole extends Document {
-  role_name: string;
+  name: string;
   permissions: mongoose.Types.ObjectId[];
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 const RoleSchema: Schema = new Schema<IRole>({
-  role_name: { type: String, required: true, unique: true, },
+  name: { type: String, required: true, unique: true, },
   permissions: [{ type: Schema.Types.ObjectId, ref: COLLECTIONS.PERMISSION }]
 },
   {

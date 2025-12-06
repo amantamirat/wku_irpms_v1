@@ -21,8 +21,8 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
 
     const emptyApplicant: Applicant = {
         workspace: workspace ?? "",
-        firstName: "",
-        lastName: "",
+        name: "",
+        //lastName: "",
         birthDate: new Date(),
         gender: Gender.Male,
         email: "",
@@ -109,8 +109,10 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
             { header: "Workspace", field: "workspace.name", sortable: true },
         ] : []),
 
-        { header: "First Name", field: "firstName", sortable: true },
-        { header: "Last Name", field: "lastName", sortable: true },
+        { header: "Name", field: "name", sortable: true },
+        { 
+           // header: "Last Name", field: "lastName", sortable: true 
+        },
         {
             header: "Gender",
             body: (row: Applicant) => (
@@ -154,7 +156,7 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
                 /** DELETE */
                 onDelete={(row) =>
                     confirm.ask({
-                        item: `${row.firstName} ${row.lastName}`,
+                        item: `${row.name}`,
                         onConfirmAsync: () => deleteApplicant(row)
                     })
                 }

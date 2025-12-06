@@ -15,7 +15,7 @@ import { PERMISSIONS } from "@/types/permissions";
 const RoleManager = () => {
 
     const emptyRole: Role = {
-        role_name: "",
+        name: "",
         permissions: []
     };
 
@@ -78,7 +78,7 @@ const RoleManager = () => {
 
     /** Columns */
     const columns = [
-        { header: "Role Name", field: "role_name" },
+        { header: "Name", field: "name" },
         { header: "Permissions", body: (r: Role) => r.permissions?.length ?? 0 }
     ];
 
@@ -107,7 +107,7 @@ const RoleManager = () => {
 
                 onDelete={(row) =>
                     confirm.ask({
-                        item: row.role_name,
+                        item: row.name,
                         onConfirmAsync: () => deleteRole(row)
                     })
                 }

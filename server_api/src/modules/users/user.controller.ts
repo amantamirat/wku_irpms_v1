@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { DeleteDto } from '../../util/delete.dto';
 import { errorResponse, successResponse } from '../../util/response';
 import { AuthenticatedRequest } from './auth/auth.middleware';
-import { ChangePasswordDTO, CreateUserDTO, UpdateUserDTO } from './user.dto';
+import { ChangePasswordDTO, CreateUserDTO, LoginDto, UpdateUserDTO } from './user.dto';
 import { UserService } from './user.service';
 import { UserStatus } from './user.enum';
 
@@ -95,6 +95,18 @@ export class UserController {
     }
   }
 */
+
+  static async logInUser(req: Request, res: Response) {
+    try {
+      const data: LoginDto = req.body;
+      const loggedInUser = await service.login(data);
+      successResponse(res, 201, "User logged in successfully", loggedInUser);
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
+    }
+  }
+
+
   static async deleteUser(req: AuthenticatedRequest, res: Response) {
     try {
       if (!req.user) throw new Error("User not authorized!");

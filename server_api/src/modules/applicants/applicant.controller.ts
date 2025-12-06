@@ -16,7 +16,7 @@ export class ApplicantController {
             const userId = req.user._id;
             const {
                 workspace,
-                firstName,
+                name,
                 lastName,
                 birthDate,
                 gender,
@@ -26,8 +26,8 @@ export class ApplicantController {
             } = req.body;
             const data: CreateApplicantDTO = {
                 workspace,
-                firstName,
-                lastName,
+                name,
+                //lastName,
                 birthDate: new Date(birthDate),
                 gender,
                 email,
@@ -43,24 +43,6 @@ export class ApplicantController {
     static async getApplicants(req: Request, res: Response) {
         try {
             const { workspace } = req.query;
-            /*
-            let orgFilter: mongoose.Types.ObjectId[] | undefined;
-
-            if (organization) {
-                let orgs: string[] = [];
-
-                if (Array.isArray(organization)) {
-                    // repeated query params
-                    orgs = organization as string[];
-                } else {
-                    // single string, could be comma-separated
-                    orgs = (organization as string).split(',').map(o => o.trim());
-                }
-
-                orgFilter = orgs.map((id) => new mongoose.Types.ObjectId(id));
-            }
-                */
-
             const filter = {
                 workspace: workspace,
             } as GetApplicantsDTO;
@@ -82,8 +64,8 @@ export class ApplicantController {
             const { id } = req.params;
             const {
                 workspace,
-                firstName,
-                lastName,
+                name,
+                //lastName,
                 birthDate,
                 gender,
                 email,
@@ -96,8 +78,8 @@ export class ApplicantController {
                 id,
                 data: {
                     workspace,
-                    firstName,
-                    lastName,
+                    name,
+                    //lastName,
                     birthDate,
                     gender,
                     email,

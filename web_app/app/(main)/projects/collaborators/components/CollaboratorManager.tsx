@@ -137,8 +137,7 @@ const CollaboratorManager = ({ project, applicant, onSave, onRemove }: Collabora
         { header: "Workspace", field: "applicant.organization.name", sortable: true },
         {
             header: "Collaborator",
-            body: (row: Collaborator) =>
-                `${(row.applicant as Applicant).firstName} ${(row.applicant as Applicant).lastName}`
+             field: "applicant.name",
         },
         {
             header: "Gender",
@@ -174,7 +173,7 @@ const CollaboratorManager = ({ project, applicant, onSave, onRemove }: Collabora
                 }}
                 onDelete={(row: Collaborator) =>
                     confirm.ask({
-                        item: `${(row.applicant as Applicant).firstName}`,
+                        item: `${(row.applicant as Applicant).name}`,
                         onConfirmAsync: () => deleteCollaborator(row),
                     })
                 }
