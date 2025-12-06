@@ -1,261 +1,180 @@
-'use client';
+"use client";
 
-import ConfirmDialog from '@/components/ConfirmationDialog';
-import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
-import { Button } from 'primereact/button';
-import { Column } from 'primereact/column';
-import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
-import { InputText } from 'primereact/inputtext';
-import { Toast } from 'primereact/toast';
-import { Toolbar } from 'primereact/toolbar';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ApplicantApi } from '../api/applicant.api';
-import { Applicant, applicantUnits, Gender } from '../models/applicant.model';
-import SaveDialog from './dialogs/SaveDialog';
-import { useAuth } from '@/contexts/auth-context';
-import { OrgnUnit } from '../../organizations/models/organization.model';
-import ErrorCard from '@/components/ErrorCard';
-import ApplicantDetail from './ApplicantDetail';
+import { CrudManager } from "@/components/CrudManager";
+import { useCrudList } from "@/hooks/useCrudList";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import { useAuth } from "@/contexts/auth-context";
+
+import { useEffect, useState } from "react";
+import { ApplicantApi } from "../api/applicant.api";
+import { Applicant, Gender, applicantUnits } from "../models/applicant.model";
+
+import SaveDialog from "./dialogs/SaveDialog";
+import ApplicantDetail from "./ApplicantDetail";
+import ErrorCard from "@/components/ErrorCard";
 
 
-interface ApplicantManagerProps {
-    //scope: Scope;
-}
-
-const ApplicantManager = (/*{ scope }: ApplicantManagerProps*/) => {
+const ApplicantManager = () => {
 
     const emptyApplicant: Applicant = {
-        first_name: '',
-        last_name: '',
-        organization: '',
+        first_name: "",
+        last_name: "",
         birth_date: new Date(),
         gender: Gender.Male,
-        //scope: scope,
+        user: undefined,
+        organization: "",
     };
 
-    /*
-    const isAcademic = scope === Scope.academic;
-    const isSupportive = scope === Scope.supportive;
-    const isExternal = scope === Scope.external;
-    */
+    const confirm = useConfirmDialog();
+    const { getOrganizationsByType, hasPermission } = useAuth();
 
-    const [applicants, setApplicants] = useState<Applicant[]>([]);
-    const dt = useRef<DataTable<any>>(null);
-    const [globalFilter, setGlobalFilter] = useState('');
-    const [filters, setFilters] = useState<DataTableFilterMeta>({});
+    const canCreate = hasPermission(["applicant:create"]);
+    const canEdit = hasPermission(["applicant:update"]);
+    const canDelete = hasPermission(["applicant:delete"]);
 
-    const { getOrganizationsByType } = useAuth();
-
+    /** CRUD HOOK */
+    const {
+        items: applicants,
+        setAll,
+        updateItem,
+        removeItem,
+        loading,
+        setLoading,
+        error,
+        setError
+    } = useCrudList<Applicant>();
 
     const [selectedApplicant, setSelectedApplicant] = useState<Applicant>(emptyApplicant);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [showLinkDialog, setShowLinkDialog] = useState(false);
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const toast = useRef<Toast>(null);
-    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
 
-    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
-    };
-
+    /** FETCH Applicants */
     useEffect(() => {
-        setFilters(initFilters());
-        setGlobalFilter('');
-    }, []);
-
-
-    useEffect(() => {
-        const fetchApplicants = async () => {
+        const fetchData = async () => {
             try {
-                const orgs = getOrganizationsByType(applicantUnits).map((org) => org._id);
+                setLoading(true);
 
-                if (orgs.length === 0) {
-                    // setApplicants([]);
-                    //return;
-                }
+                const orgs = getOrganizationsByType(applicantUnits).map((o) => o._id);
+
                 const data = await ApplicantApi.getApplicants({
-                    organization: orgs,
+                    organization: orgs.length ? orgs : undefined
                 });
 
-                setApplicants(data);
-            } catch (err) {
-                setError("Failed to load applicants:" + err);
-                //console.error("Failed to load applicants:", err);
+                setAll(data);
+            } catch (err: any) {
+                setError("Failed to load applicants: " + err?.message);
+            } finally {
+                setLoading(false);
             }
         };
 
-        fetchApplicants();
-    }, [applicantUnits]);
+        fetchData();
+    }, []);
 
-
-
-    if (error) {
-        return (
-            <ErrorCard errorMessage={error} />
-        );
-    }
-
-
-    const onSaveComplete = (savedApplicant: Applicant) => {
-        let _applicants = [...applicants]; // applicants is your local state array of Applicant
-        const index = _applicants.findIndex((a) => a._id === savedApplicant._id);
-        if (index !== -1) {
-            _applicants[index] = { ...savedApplicant };
-        } else {
-            _applicants.push({ ...savedApplicant });
-        }
-        setApplicants(_applicants); // update state
-        hideDialogs(); // close your SaveApplicantDialog
+    /** SAVE callback */
+    const onSaveComplete = (saved: Applicant) => {
+        updateItem(saved);
+        hideDialogs();
     };
 
-
-    const deleteApplicant = async () => {
-        const deleted = await ApplicantApi.deleteApplicant(selectedApplicant);
-        if (deleted) {
-            setApplicants(applicants.filter((c) => c._id !== selectedApplicant._id));
-            hideDialogs();
-        }
+    /** DELETE */
+    const deleteApplicant = async (row: Applicant) => {
+        const ok = await ApplicantApi.deleteApplicant(row);
+        if (ok) removeItem(row);
     };
 
-    const linkApplicant = async () => {
-        let linked = await ApplicantApi.linkApplicant(selectedApplicant);
-        //console.log('Linked applicant:', linked);
+    /** LINK USER */
+    const linkApplicant = async (row: Applicant) => {
+        let linked = await ApplicantApi.linkApplicant(row);
+
         linked = {
             ...linked,
-            organization: selectedApplicant.organization
+            organization: row.organization
         };
-        onSaveComplete(linked);
+
+        updateItem(linked);
     };
 
     const hideDialogs = () => {
         setShowSaveDialog(false);
-        setShowDeleteDialog(false);
-        setShowLinkDialog(false);
         setSelectedApplicant(emptyApplicant);
-    }
-
-    const startToolbarTemplate = () => (
-        <div className="my-2">
-            <Button label="New Applicant" icon="pi pi-plus" severity="success" className="mr-2"
-                onClick={() => {
-                    setSelectedApplicant(emptyApplicant);
-                    setShowSaveDialog(true);
-                }}
-            />
-        </div>
-    );
-
-
-    const header = (
-        <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage Applicants</h5>
-            <span className="block mt-2 md:mt-0 p-input-icon-left">
-                <i className="pi pi-search" />
-                <InputText type="search" value={globalFilter} onChange={onGlobalFilterChange} placeholder="Search..." className="w-full md:w-1/3" />
-            </span>
-        </div>
-    );
-
-    const actionBodyTemplate = (rowData: Applicant) => (
-        <>
-            {!rowData.user && <Button icon="pi pi-user-plus" rounded severity="secondary" className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setSelectedApplicant(rowData);
-                    setShowLinkDialog(true);
-                }} />}
-            <Button icon="pi pi-pencil" rounded severity="success" className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setSelectedApplicant(rowData);
-                    setShowSaveDialog(true);
-                }} />
-            <Button icon="pi pi-trash" rounded severity="warning" className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setSelectedApplicant(rowData);
-                    setShowDeleteDialog(true);
-                }} />
-        </>
-    );
-
-    const genderBodyTemplate = (rowData: Applicant) => {
-        return (
-            <span className={`gender-badge gender-${rowData.gender.toLowerCase()}`}>
-                {rowData.gender}
-            </span>
-        );
     };
 
+    /** TABLE COLUMNS */
+    const columns = [
+        { header: "First Name", field: "first_name" },
+        { header: "Last Name", field: "last_name" },
+        {
+            header: "Gender",
+            body: (row: Applicant) => (
+                <span className={`gender-badge gender-${row.gender.toLowerCase()}`}>
+                    {row.gender}
+                </span>
+            )
+        },
+        {
+            header: "Birth Date",
+            body: (row: Applicant) =>
+                new Date(row.birth_date!).toLocaleDateString("en-CA")
+        },
+        { header: "Organization", field: "organization.name" },
+        //{ header: "Email", field: "email" }
+    ];
+
     return (
-        <div className="grid">
-            <div className="col-12">
-                <div className="card">
-                    <Toast ref={toast} />
-                    <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
-                    <DataTable
-                        ref={dt}
-                        value={applicants}
-                        selection={selectedApplicant}
-                        onSelectionChange={(e) => setSelectedApplicant(e.value as Applicant)}
-                        dataKey="_id"
-                        paginator
-                        rows={10}
-                        rowsPerPageOptions={[5, 10, 25]}
-                        className="datatable-responsive"
-                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} applicants"
-                        globalFilter={globalFilter}
-                        filters={filters}
-                        emptyMessage={'No applicat data found.'}
-                        header={header}
-                        scrollable
-                        expandedRows={expandedRows}
-                        onRowToggle={(e) => setExpandedRows(e.data)}
-                        rowExpansionTemplate={(rowData) => {
-                            return <ApplicantDetail applicant={rowData as Applicant} />;
-                        }}
-                    >
-                        <Column expander headerStyle={{ width: '3em' }} />
-                        <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                        <Column field="first_name" header="First Name" sortable />
-                        <Column field="last_name" header="Last Name" sortable />
-                        <Column field="gender" header="Gender" body={genderBodyTemplate} sortable />
-                        <Column field="birth_date" header="Birth Date" body={(rowData) => new Date(rowData.birth_date!).toLocaleDateString('en-CA')} />
-                        <Column field="organization.name" header={"Organization"} sortable />
-                        <Column field="email" header="Email" sortable />
-                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
-                    </DataTable>
+        <>
+            {/* ERROR MESSAGE */}
+            {error && <ErrorCard errorMessage={error} />}
 
-                    {selectedApplicant && (
-                        <SaveDialog
-                            visible={showSaveDialog}
-                            applicant={selectedApplicant}
-                            onComplete={onSaveComplete}
-                            onHide={() => setShowSaveDialog(false)}
-                        />
-                    )}
+            <CrudManager
+                headerTitle="Manage Applicants"
+                itemName="Applicant"
+                items={applicants}
+                dataKey="_id"
+                columns={columns}
+                loading={loading}
+                error={error}
 
-                    {selectedApplicant && (
-                        <ConfirmDialog
-                            showDialog={showDeleteDialog}
-                            item={`${selectedApplicant.first_name} ${selectedApplicant.last_name}`}
-                            onConfirmAsync={deleteApplicant}
-                            onHide={hideDialogs}
-                        />
-                    )}
+                canCreate={canCreate}
+                canEdit={canEdit}
+                canDelete={canDelete}
 
+                /** CREATE */
+                onCreate={() => {
+                    setSelectedApplicant({ ...emptyApplicant });
+                    setShowSaveDialog(true);
+                }}
 
-                    {selectedApplicant && (
-                        <ConfirmDialog
-                            showDialog={showLinkDialog}
-                            item={`${selectedApplicant.first_name} ${selectedApplicant.last_name}`}
-                            operation='Link'
-                            onConfirmAsync={linkApplicant}
-                            onHide={hideDialogs}
-                        />
-                    )}
-                </div>
-            </div>
-        </div>
+                /** EDIT */
+                onEdit={(row) => {
+                    setSelectedApplicant({ ...row });
+                    setShowSaveDialog(true);
+                }}
+
+                /** DELETE */
+                onDelete={(row) =>
+                    confirm.ask({
+                        item: `${row.first_name} ${row.last_name}`,
+                        onConfirmAsync: () => deleteApplicant(row)
+                    })
+                }               
+                /** EXPANSION ROW */
+                rowExpansionTemplate={(row) => (
+                    <ApplicantDetail applicant={row} />
+                )}
+
+                enableSearch
+            />
+
+            {/* SAVE DIALOG */}
+            {(selectedApplicant && (
+                <SaveDialog
+                    visible={showSaveDialog}
+                    applicant={selectedApplicant}
+                    onComplete={onSaveComplete}
+                    onHide={hideDialogs}
+                />
+            ))}
+        </>
     );
 };
 

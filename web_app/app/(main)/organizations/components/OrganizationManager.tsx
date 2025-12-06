@@ -3,7 +3,6 @@ import { CrudManager } from "@/components/CrudManager";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useCrudList } from "@/hooks/useCrudList";
 import { useAuth } from "@/contexts/auth-context";
-
 import React, { useEffect, useState, useCallback } from "react";
 
 import { OrganizationApi } from "../api/organization.api";

@@ -1,6 +1,6 @@
 'use client';
 import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
-import { Organization } from '@/app/(main)/organizations/models/organization.model';
+import { Organization, OrgnUnit } from '@/app/(main)/organizations/models/organization.model';
 import { Button } from 'primereact/button';
 import { Calendar as PrimeCalendar } from 'primereact/calendar';
 import { Dialog } from 'primereact/dialog';
@@ -30,12 +30,13 @@ const SaveApplicantDialog = ({ visible, applicant, onHide, onComplete }: SaveApp
     const toast = useRef<Toast>(null);
 
     useEffect(() => {
-        const fetchOrganizations = () => {
+        const fetchOrganizations = async () => {
             try {
                 //if (!localApplicant.scope) return;
                 //const type = scopeToOrganizationUnit[localApplicant.scope];
                 //if (type) {
-                const data = getOrganizationsByType(applicantUnits);
+                //const data = getOrganizationsByType(applicantUnits);
+                const data = await OrganizationApi.getOrganizations({ type: OrgnUnit.Department });
                 //console.log(data);
                 setUserOrganizations(data);
                 //}
@@ -125,6 +126,7 @@ const SaveApplicantDialog = ({ visible, applicant, onHide, onComplete }: SaveApp
                         </label>
                         <Dropdown
                             id="organization"
+                            dataKey="_id"
                             value={localApplicant.organization}
                             options={userOrganizations}
                             optionLabel="name"
@@ -185,15 +187,20 @@ const SaveApplicantDialog = ({ visible, applicant, onHide, onComplete }: SaveApp
                     />
                 </div>
 
-                <div className="field">
-                    <label htmlFor="email">Email</label>
-                    <InputText
-                        id="email"
-                        type="email"
-                        value={localApplicant.email ?? ''}
-                        onChange={(e) => setLocalApplicant({ ...localApplicant, email: e.target.value })}
-                    />
-                </div>
+                {
+                    /**
+                     *  <div className="field">
+                                    <label htmlFor="email">Email</label>
+                                    <InputText
+                                        id="email"
+                                        type="email"
+                                        value={localApplicant.email ?? ''}
+                                        onChange={(e) => setLocalApplicant({ ...localApplicant, email: e.target.value })}
+                                    />
+                                </div>
+                     */
+                }
+
 
                 <div className="field">
                     <label htmlFor="accessibility">Accessibility</label>

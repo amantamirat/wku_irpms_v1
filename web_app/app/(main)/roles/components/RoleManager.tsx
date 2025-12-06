@@ -72,7 +72,7 @@ const RoleManager = () => {
 
     /** Hide dialogs */
     const hideDialogs = () => {
-        setRole(emptyRole);
+       // setRole({});
         setShowSaveDialog(false);
     };
 

@@ -18,7 +18,8 @@ export class ApplicantService {
         if (!organDoc) {
             throw new Error('Organization is not found');
         }
-        if (organDoc.type !== Unit.Department || organDoc.type !== Unit.External) {
+        
+        if (organDoc.type !== Unit.Department && organDoc.type !== Unit.External) {
             throw new Error("Invalid Organization Type.");
         }
     }
