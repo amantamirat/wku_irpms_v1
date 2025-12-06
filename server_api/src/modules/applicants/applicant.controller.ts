@@ -4,7 +4,7 @@ import { errorResponse, successResponse } from '../../util/response';
 import { GetApplicantsOptions } from './applicant.service';
 import { AuthenticatedRequest } from '../users/auth/auth.middleware';
 import { ApplicantService } from './app.service';
-import { CreateApplicantDTO, UpdateApplicantDTO } from './applicant.dto';
+import { CreateApplicantDTO, UpdateApplicantDTO, UpdateRolesDTO } from './applicant.dto';
 
 const service = new ApplicantService();
 export class ApplicantController {
@@ -104,6 +104,34 @@ export class ApplicantController {
                 userId: userId
             };
             const updated = await service.update(dto);
+            successResponse(res, 201, "Applicant updated successfully", updated);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    }
+
+
+    static async updateRoles(req: AuthenticatedRequest, res: Response) {
+        try {
+            if (!req.user) {
+                throw new Error("User not found!");
+            }
+            const userId = req.user._id;
+            const { id } = req.params;
+            const {
+                roles,
+                organizations,
+            } = req.body;
+
+            const dto: UpdateRolesDTO = {
+                id,
+                data: {
+                    roles,
+                    organizations,
+                },
+                userId: userId
+            };
+            const updated = await service.updateRoles(dto);
             successResponse(res, 201, "Applicant updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

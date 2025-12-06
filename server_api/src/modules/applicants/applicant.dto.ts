@@ -23,7 +23,16 @@ export interface UpdateApplicantDTO {
         orcid: string;
         accessibility: Accessibility[];
     }>;
-    userId?: string; 
+    userId?: string;
+}
+
+export interface UpdateRolesDTO {
+    id: string;
+    data: Partial<{
+        roles: string[];
+        organizations: string[];
+    }>;
+    userId?: string;
 }
 
 export interface GetApplicantsDTO {

@@ -63,6 +63,7 @@ export const PERMISSIONS = {
     READ: "applicant:read",
     UPDATE: "applicant:update",
     DELETE: "applicant:delete",
+    UPDATE_ROLES: "applicant:update_roles"
   },
   EXPERIENCE: {
     CREATE: "experience:create",

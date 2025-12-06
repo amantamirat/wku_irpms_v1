@@ -101,6 +101,7 @@ const ApplicantManager = () => {
 
     /** TABLE COLUMNS */
     const columns = [
+        { header: "Workspace", field: "organization.name" },
         { header: "First Name", field: "first_name" },
         { header: "Last Name", field: "last_name" },
         {
@@ -116,7 +117,7 @@ const ApplicantManager = () => {
             body: (row: Applicant) =>
                 new Date(row.birth_date!).toLocaleDateString("en-CA")
         },
-        { header: "Organization", field: "organization.name" },
+        
         //{ header: "Email", field: "email" }
     ];
 

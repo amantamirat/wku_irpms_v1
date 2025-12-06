@@ -63,6 +63,14 @@ export const PERMISSIONS = {
     },
   },
 
+  APPLICANT: {
+    CREATE: "applicant:create",
+    READ: "applicant:read",
+    UPDATE: "applicant:update",
+    DELETE: "applicant:delete",
+    UPDATE_ROLES:"applicant:update_roles"
+  },
+
 
   CALENDAR: {
     CREATE: "calendar:create",
@@ -75,12 +83,7 @@ export const PERMISSIONS = {
 
 
 
-  APPLICANT: {
-    CREATE: "applicant:create",
-    READ: "applicant:read",
-    UPDATE: "applicant:update",
-    DELETE: "applicant:delete",
-  },
+  
   EXPERIENCE: {
     CREATE: "experience:create",
     READ: "experience:read",

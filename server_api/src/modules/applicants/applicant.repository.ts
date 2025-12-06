@@ -1,5 +1,5 @@
 import Applicant, { IApplicant } from "./applicant.model";
-import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO } from "./applicant.dto";
+import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO, UpdateRolesDTO } from "./applicant.dto";
 import mongoose from "mongoose";
 
 export interface IApplicantRepository {
@@ -7,10 +7,9 @@ export interface IApplicantRepository {
     findAll(filter?: GetApplicantsDTO): Promise<IApplicant[]>;
     create(data: CreateApplicantDTO): Promise<IApplicant>;
     update(id: string, data: UpdateApplicantDTO["data"]): Promise<IApplicant>;
+    updateRoles(id: string, data: UpdateRolesDTO["data"]): Promise<IApplicant>;
     delete(id: string): Promise<IApplicant | null>;
 }
-
-
 
 
 export class ApplicantRepository implements IApplicantRepository {
@@ -88,6 +87,27 @@ export class ApplicantRepository implements IApplicantRepository {
             throw new Error("Applicant not found.");
         }
 
+        return updated;
+    }
+
+
+    async updateRoles(id: string, data: UpdateRolesDTO["data"]): Promise<IApplicant> {
+        const toUpdate: any = {};
+        if (data.roles) {
+            toUpdate.roles = data.roles?.map(id => new mongoose.Types.ObjectId(id))
+        }
+        if (data.organizations) {
+            toUpdate.organizations = data.organizations?.map(id => new mongoose.Types.ObjectId(id))
+        }
+        const updated = await Applicant.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            { $set: toUpdate },
+            { new: true }
+        ).lean<IApplicant>();
+
+        if (!updated) {
+            throw new Error("Applicant not found.");
+        }
         return updated;
     }
 

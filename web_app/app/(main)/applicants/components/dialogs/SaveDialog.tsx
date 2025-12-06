@@ -36,9 +36,10 @@ const SaveApplicantDialog = ({ visible, applicant, onHide, onComplete }: SaveApp
                 //const type = scopeToOrganizationUnit[localApplicant.scope];
                 //if (type) {
                 //const data = getOrganizationsByType(applicantUnits);
-                const data = await OrganizationApi.getOrganizations({ type: OrgnUnit.Department });
+                const depData = await OrganizationApi.getOrganizations({ type: OrgnUnit.Department });
+                const extData = await OrganizationApi.getOrganizations({ type: OrgnUnit.External });
                 //console.log(data);
-                setUserOrganizations(data);
+                setUserOrganizations([...depData, ...extData]);
                 //}
             } catch (err) {
                 console.error('Failed to fetch organizations:', err);
@@ -122,7 +123,7 @@ const SaveApplicantDialog = ({ visible, applicant, onHide, onComplete }: SaveApp
                 <>
                     <div className="field">
                         <label htmlFor="organization">
-                            {'Organization'}
+                            Workspace
                         </label>
                         <Dropdown
                             id="organization"
@@ -131,7 +132,7 @@ const SaveApplicantDialog = ({ visible, applicant, onHide, onComplete }: SaveApp
                             options={userOrganizations}
                             optionLabel="name"
                             onChange={(e) => setLocalApplicant({ ...localApplicant, organization: e.value })}
-                            placeholder="Select Department"
+                            placeholder="Select Workspace"
                             className={classNames({ 'p-invalid': submitted && !localApplicant.organization })}
                         />
                     </div>

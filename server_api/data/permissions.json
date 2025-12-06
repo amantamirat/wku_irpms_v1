@@ -183,6 +183,12 @@
     "name": "applicant:update",
     "description": "Edit applicants"
   },
+
+  {
+    "category": "Applicant Management",
+    "name": "applicant:update_roles",
+    "description": "Update applicants roles and ownerships"
+  },
   {
     "category": "Applicant Management",
     "name": "applicant:delete",

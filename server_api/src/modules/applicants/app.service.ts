@@ -1,6 +1,6 @@
 import { Unit } from "../organization/organization.enum";
 import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
-import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO } from "./applicant.dto";
+import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO, UpdateRolesDTO } from "./applicant.dto";
 import { IApplicantRepository, ApplicantRepository } from "./applicant.repository";
 
 export class ApplicantService {
@@ -17,8 +17,7 @@ export class ApplicantService {
         const organDoc = await this.orgnRepo.findById(organization);
         if (!organDoc) {
             throw new Error('Organization is not found');
-        }
-        
+        }        
         if (organDoc.type !== Unit.Department && organDoc.type !== Unit.External) {
             throw new Error("Invalid Organization Type.");
         }
@@ -36,18 +35,7 @@ export class ApplicantService {
     // -------------------------
     async getAll(filter?: GetApplicantsDTO) {
         return this.repository.findAll(filter);
-    }
-
-    // -------------------------
-    // GET ONE BY ID
-    // -------------------------
-    /*
-    async getById(id: string) {
-        const applicant = await this.repository.findById(id);
-        if (!applicant) throw new Error("Applicant not found");
-        return applicant;
-    }
-    */
+    }    
 
     // -------------------------
     // UPDATE
@@ -58,6 +46,14 @@ export class ApplicantService {
             await this.validateOrganization(data.organization);
         }
         const updated = await this.repository.update(id, data);
+        if (!updated) throw new Error("Applicant not found");
+        return updated;
+    }
+
+    // -------------------------
+    async updateRoles(dto: UpdateRolesDTO) {
+        const { id, data } = dto;
+        const updated = await this.repository.updateRoles(id, data);
         if (!updated) throw new Error("Applicant not found");
         return updated;
     }

@@ -14,9 +14,9 @@ export class CollaboratorPermission {
         const applicantDoc = await Applicant.findById(collaboratorDoc.applicant).lean();
         if (!applicantDoc) throw new Error("Invalid applicant");
 
-        if (userId !== String(applicantDoc.user)) {
-            throw new Error("Collaborator Permission denied");
-        }
+        //if (userId !== String(applicantDoc.user)) {
+        //    throw new Error("Collaborator Permission denied");
+       // }
         return { collaboratorDoc, applicantDoc };
     }
 
