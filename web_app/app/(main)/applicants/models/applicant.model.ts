@@ -1,4 +1,5 @@
 import { Organization, OrgnUnit } from "../../organizations/models/organization.model";
+import { Role } from "../../roles/models/role.model";
 
 
 /*
@@ -26,15 +27,17 @@ export enum Accessibility {
 
 export type Applicant = {
     _id?: string;
+    organization: string | Organization;
     first_name: string;
     last_name: string;
     birth_date: Date;
     gender: Gender;
     //scope: Scope;
-    organization: string | Organization;
     email?: string;
-    accessibility?: Accessibility[];
     user?: string;
+    accessibility?: Accessibility[];
+    roles?: Role[] | string[];
+    organizations?: Organization[] | string[];
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -85,30 +88,32 @@ export const validateApplicant = (applicant: Applicant): { valid: boolean; messa
             return { valid: false, message: "Email is not valid." };
         }
     }
-    /*
-    if (applicant.scope === Scope.academic && !applicant.organization) {
-        return { valid: false, message: 'Department is required for academic category.' };
-    }
 
-    if (applicant.scope === Scope.supportive && !applicant.organization) {
-        return { valid: false, message: 'Office is required for supportive category.' };
-    }
-
-    if (applicant.scope === Scope.external && !applicant.organization) {
-        return { valid: false, message: 'External Organization is required for external category.' };
-    }
-*/
     return { valid: true };
 };
 
-/*
+export function sanitizeApplicant(applicant: Partial<Applicant>): Partial<Applicant> {
+    return {
+        ...applicant,
+        organization:
+            typeof applicant.organization === 'object' && applicant.organization !== null
+                ? (applicant.organization as any)._id
+                : applicant.organization,
+        roles: applicant.roles
+            ?.map(role =>
+                typeof role === 'object' && role !== null
+                    ? (role as Role)._id
+                    : role
+            )
+            .filter((id): id is string => typeof id === 'string'),
 
-//convert the applicant scope to the approprate unit umbrella
-export const scopeToOrganizationUnit: Record<Scope, OrganizationalUnit> = {
-    [Scope.academic]: OrganizationalUnit.Department,
-    [Scope.supportive]: OrganizationalUnit.Supportive,
-    [Scope.external]: OrganizationalUnit.External,
-};
-
-*/
+        organizations: applicant.organizations
+            ?.map(org =>
+                typeof org === 'object' && org !== null
+                    ? (org as Organization)._id
+                    : org
+            )
+            .filter((id): id is string => typeof id === 'string'),
+    };
+}
 

@@ -1,18 +1,10 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Applicant } from "../models/applicant.model";
+import { Applicant, sanitizeApplicant } from "../models/applicant.model";
 
 const end_point = '/applicants/';
 
 
-function sanitizeApplicant(applicant: Partial<Applicant>): Partial<Applicant> {
-    return {
-        ...applicant,
-        organization:
-            typeof applicant.organization === 'object' && applicant.organization !== null
-                ? (applicant.organization as any)._id
-                : applicant.organization,
-    };
-}
+
 
 export interface GetApplicantsOptions {
     organization?: string | string[];
@@ -48,15 +40,26 @@ export const ApplicantApi = {
         if (!applicant._id) {
             throw new Error("_id required.");
         }
+        const sanitized = sanitizeApplicant(applicant);
         const url = `${end_point}${applicant._id}`;
-        const updatedApplicant = await ApiClient.put(url, sanitizeApplicant(applicant));
+        const updatedApplicant = await ApiClient.put(url, sanitized);
+        return updatedApplicant as Applicant;
+    },
+
+    async updateRoles(applicant: Partial<Applicant>): Promise<Applicant> {
+        if (!applicant._id) {
+            throw new Error("_id required.");
+        }
+        const sanitized = sanitizeApplicant(applicant);
+        const url = `${end_point}${applicant._id}`;
+        const updatedApplicant = await ApiClient.patch(url, sanitized);
         return updatedApplicant as Applicant;
     },
 
     async deleteApplicant(applicant: Partial<Applicant>): Promise<boolean> {
         if (!applicant._id) {
             throw new Error("_id required.");
-        }
+        }        
         const url = `${end_point}${applicant._id}`;
         const response = await ApiClient.delete(url);
         return response;

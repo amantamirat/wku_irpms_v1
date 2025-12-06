@@ -12,6 +12,8 @@ import { Applicant, Gender, applicantUnits } from "../models/applicant.model";
 import SaveDialog from "./dialogs/SaveDialog";
 import ApplicantDetail from "./ApplicantDetail";
 import ErrorCard from "@/components/ErrorCard";
+import { PERMISSIONS } from "@/types/permissions";
+import { Button } from "primereact/button";
 
 
 const ApplicantManager = () => {
@@ -28,9 +30,10 @@ const ApplicantManager = () => {
     const confirm = useConfirmDialog();
     const { getOrganizationsByType, hasPermission } = useAuth();
 
-    const canCreate = hasPermission(["applicant:create"]);
-    const canEdit = hasPermission(["applicant:update"]);
-    const canDelete = hasPermission(["applicant:delete"]);
+    const canCreate = hasPermission([PERMISSIONS.APPLICANT.CREATE]);
+    const canEdit = hasPermission([PERMISSIONS.APPLICANT.UPDATE]);
+    const canUpdateRoles = hasPermission([PERMISSIONS.APPLICANT.UPDATE_ROLES]);
+    const canDelete = hasPermission([PERMISSIONS.APPLICANT.DELETE]);
 
     /** CRUD HOOK */
     const {
@@ -46,6 +49,7 @@ const ApplicantManager = () => {
 
     const [selectedApplicant, setSelectedApplicant] = useState<Applicant>(emptyApplicant);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
+    const [showRolesDialog, setShowRolesDialog] = useState(false);
 
     /** FETCH Applicants */
     useEffect(() => {
@@ -95,8 +99,9 @@ const ApplicantManager = () => {
     };
 
     const hideDialogs = () => {
+        setSelectedApplicant({ ...emptyApplicant });
         setShowSaveDialog(false);
-        setSelectedApplicant(emptyApplicant);
+        setShowRolesDialog(false);
     };
 
     /** TABLE COLUMNS */
@@ -117,7 +122,7 @@ const ApplicantManager = () => {
             body: (row: Applicant) =>
                 new Date(row.birth_date!).toLocaleDateString("en-CA")
         },
-        
+
         //{ header: "Email", field: "email" }
     ];
 
@@ -157,11 +162,26 @@ const ApplicantManager = () => {
                         item: `${row.first_name} ${row.last_name}`,
                         onConfirmAsync: () => deleteApplicant(row)
                     })
-                }               
+                }
                 /** EXPANSION ROW */
                 rowExpansionTemplate={(row) => (
                     <ApplicantDetail applicant={row} />
                 )}
+
+                extraActions={
+                    (row) =>
+                        canUpdateRoles &&
+                        <Button icon="pi pi-shield" rounded
+                            severity="secondary"
+                            className="p-button-rounded p-button-text"
+                            style={{ fontSize: '2rem' }}
+                            onClick={() => {
+                                setSelectedApplicant({ ...row });
+                                setShowRolesDialog(true);
+                                setShowSaveDialog(true);
+                            }}
+                        />
+                }
 
                 enableSearch
             />
@@ -171,6 +191,7 @@ const ApplicantManager = () => {
                 <SaveDialog
                     visible={showSaveDialog}
                     applicant={selectedApplicant}
+                    updateRoles={canUpdateRoles && showRolesDialog}
                     onComplete={onSaveComplete}
                     onHide={hideDialogs}
                 />

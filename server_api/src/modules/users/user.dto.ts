@@ -1,6 +1,7 @@
 import { UserStatus } from "./user.enum";
 
 export interface CreateUserDTO {
+    applicant?: string;
     user_name: string;
     password: string;
     email: string;

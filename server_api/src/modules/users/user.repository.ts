@@ -22,6 +22,7 @@ export class UserRepository implements IUserRepository {
 
     async create(dto: CreateUserDTO) {
         const data: Partial<IUser> = {
+            applicant: new mongoose.Types.ObjectId(dto.applicant),
             user_name: dto.user_name,
             password: dto.password,
             email: dto.email,

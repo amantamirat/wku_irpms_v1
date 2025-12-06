@@ -32,7 +32,10 @@ export class ApplicantRepository implements IApplicantRepository {
             query.organization = new mongoose.Types.ObjectId(filter.organization);
         }
 
-        return Applicant.find(query).populate("organization")
+        return Applicant.find(query).
+            populate("organization").
+            populate("roles").
+            populate("organizations")
             .lean<IApplicant[]>()
             .exec();
     }
