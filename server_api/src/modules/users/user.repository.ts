@@ -37,7 +37,8 @@ export class UserRepository implements IUserRepository {
 
     async findAll() {
         const filter: any = {};
-        return User.find(filter).populate("roles").populate("organizations")
+        return User.find(filter).populate("applicant")
+        .populate("roles").populate("organizations")
             .lean<IUser[]>()
             .exec();
     }
@@ -49,7 +50,7 @@ export class UserRepository implements IUserRepository {
                 { email: eName },
                 { user_name: eName }
             ]
-        });
+        }).populate("applicant").lean();
     }
 
 

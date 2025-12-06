@@ -29,7 +29,6 @@ export class UserService {
             status: UserStatus.pending
         };
         const createdUser = await this.repository.create(dto);
-        // Remove password before returning
         const { password, ...rest } = createdUser;
         return rest;
     }
