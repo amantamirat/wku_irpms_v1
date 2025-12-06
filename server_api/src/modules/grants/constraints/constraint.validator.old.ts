@@ -175,7 +175,7 @@ export class ConstraintValidatorOld {
                     */
 
                     case ApplicantConstraintType.SCOPE: {
-                        const filtered = applicantData.filter(a => (a.organization as any).type === item);
+                        const filtered = applicantData.filter(a => (a.workspace as any).type === item);
                         const count = filtered.length;
 
                         if (value === 0 && count > 0) {
@@ -202,8 +202,8 @@ export class ConstraintValidatorOld {
                         const maxAge = max ?? Number.MAX_SAFE_INTEGER;
 
                         const filtered = applicantData.filter(app => {
-                            const age = now.getFullYear() - app.birth_date.getFullYear() -
-                                (now < new Date(now.getFullYear(), app.birth_date.getMonth(), app.birth_date.getDate()) ? 1 : 0);
+                            const age = now.getFullYear() - app.birthDate.getFullYear() -
+                                (now < new Date(now.getFullYear(), app.birthDate.getMonth(), app.birthDate.getDate()) ? 1 : 0);
                             return age >= minAge && age <= maxAge;
                         });
 

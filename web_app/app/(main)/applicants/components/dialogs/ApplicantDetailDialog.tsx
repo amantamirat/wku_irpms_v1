@@ -16,7 +16,7 @@ const ApplicantDetailDialog = ({ applicant, visible, onHide }: ApplicantDetailPr
             //maximizable
             maximized    
         >
-            <h3>Applicant Detail: {applicant.first_name} {applicant.last_name}</h3>
+            <h3>Applicant Detail: {applicant.firstName} {applicant.lastName}</h3>
             <ApplicantDetail applicant={applicant} />
         </Dialog>
     );

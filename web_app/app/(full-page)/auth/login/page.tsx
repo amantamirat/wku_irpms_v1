@@ -22,9 +22,9 @@ const LoginPage = () => {
     };
 
     const [loginDto, setLoginDto] = useState<LoginDto>(emptyLogin);
-    const [checked, setChecked] = useState(false);   
-     const msgs = useRef<Messages>(null); 
-    const router = useRouter();   
+    const [checked, setChecked] = useState(false);
+    const msgs = useRef<Messages>(null);
+    const router = useRouter();
     const { login } = useAuth();
 
     const handleLogin = async () => {
@@ -39,8 +39,8 @@ const LoginPage = () => {
                 });
                 return;
             }
-            const loggedIn  =  await login(loginDto);
-            if (loggedIn) {               
+            const loggedIn = await login(loginDto);
+            if (loggedIn) {
                 msgs.current?.clear();
                 msgs.current?.show({ severity: 'success', summary: 'Success', detail: 'Login successful!' });
                 setTimeout(() => router.push('/'), 500);

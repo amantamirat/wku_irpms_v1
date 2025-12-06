@@ -5,17 +5,7 @@ export enum Gender {
   Female = 'Female'
 }
 
-/*
-//also used by position
-export enum Scope {
-  academic = 'Academic',
-  supportive = 'Supportive',
-  external = 'External',
-}
-*/
-
-export const applicantUnits = [Unit.Department, Unit.External, //Unit.Supportive
-]
+export const applicantUnits = [Unit.Department, Unit.External]
 
 export enum Accessibility {
   Visual = 'Visual',

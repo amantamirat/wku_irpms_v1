@@ -1,15 +1,12 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Applicant, sanitizeApplicant } from "../models/applicant.model";
+import { Applicant, GetApplicantsOptions, sanitizeApplicant } from "../models/applicant.model";
+import { sanitizeOrganization } from "../../organizations/models/organization.model";
 
 const end_point = '/applicants/';
 
 
 
 
-export interface GetApplicantsOptions {
-    organization?: string | string[];
-    //scope?: Scope;
-}
 
 
 export const ApplicantApi = {
@@ -22,16 +19,17 @@ export const ApplicantApi = {
 
     async getApplicants(options: GetApplicantsOptions): Promise<Applicant[]> {
         const query = new URLSearchParams();
-        //if (options.scope) query.append("scope", options.scope);
-
-        if (options.organization) {
-            if (Array.isArray(options.organization)) {
-                query.append("organization", options.organization.join(',')); // comma-separated
-            } else {
-                query.append("organization", options.organization);
-            }
+        const sanitized = sanitizeApplicant(options);
+        if (sanitized.workspace) {
+            query.append("workspace", sanitized.workspace as string);
+            /*
+             if (Array.isArray(options.workspace)) {
+                 query.append("organization", options.workspace.join(',')); // comma-separated
+             } else {
+                 
+             }
+            */
         }
-
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Applicant[];
     },
@@ -59,7 +57,7 @@ export const ApplicantApi = {
     async deleteApplicant(applicant: Partial<Applicant>): Promise<boolean> {
         if (!applicant._id) {
             throw new Error("_id required.");
-        }        
+        }
         const url = `${end_point}${applicant._id}`;
         const response = await ApiClient.delete(url);
         return response;

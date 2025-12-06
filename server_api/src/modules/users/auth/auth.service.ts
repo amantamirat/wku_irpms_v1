@@ -10,6 +10,7 @@ import { UserService } from "../user.service";
 import { CacheService } from "../../../util/cache/cache.service";
 import { IUserRepository, UserRepository } from "../user.repository";
 import { LoginDto } from "./auth.dto";
+import { ApplicantRepository, IApplicantRepository } from "../../applicants/applicant.repository";
 
 
 export interface LoginUserDto {
@@ -26,21 +27,37 @@ export interface VerfyUserDto {
 export class AuthService {
 
     private repository: IUserRepository;
+    private appRepository: IApplicantRepository;
 
-    constructor(repository?: IUserRepository) {
+    constructor(repository?: IUserRepository, appRepository?: IApplicantRepository) {
         this.repository = repository || new UserRepository();
+        this.appRepository = appRepository || new ApplicantRepository();
     }
 
     async login(dto: LoginDto) {
         const { userName, password } = dto;
-        const user = await this.repository.findByNameOrEmail(userName);
-        if (!user) {
+        const userDoc = await this.repository.findByNameOrEmail(userName);
+        if (!userDoc || userDoc.status !== UserStatus.active) {
             throw new Error("User not found");
         }
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password, userDoc.password);
         if (!isMatch) {
             throw new Error("Invalid credentials.");
         }
+        const applicantDoc = await this.appRepository.findById(String(userDoc.applicant));
+        if (!applicantDoc) {
+            throw new Error("Applicant not found.");
+        }
+        const permissions = applicantDoc.roles?.flatMap((role: any) =>
+            role.permissions?.map((p: any) => p.name)
+        ) || [];
+
+        const organizations = applicantDoc.ownerships?.map((org: any) => org._id) || []
+
+        CacheService.setUserOrganizations(applicantDoc._id as string, organizations);
+        CacheService.setUserPermissions(applicantDoc._id as string, permissions);
+        CacheService.setUserPermissions(userDoc._id as string, permissions);
+
     }
 
 

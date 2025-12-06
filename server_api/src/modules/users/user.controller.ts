@@ -18,8 +18,8 @@ export class UserController {
         user_name,
         password,
         email,
-        roles,
-        organizations,
+        //roles,
+        //organizations,
         createdBy: req.user._id
       };
 
@@ -49,7 +49,9 @@ export class UserController {
 
       const dto: UpdateUserDTO = {
         id,
-        data: { roles, organizations },
+        data: { 
+         // roles, organizations 
+        },
         userId: req.user._id,
       };
       const updated = await service.update(dto);

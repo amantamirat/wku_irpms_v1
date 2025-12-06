@@ -15,6 +15,8 @@ import {
 
 import SaveDialog from "./SaveDialog";
 import { PERMISSIONS } from "@/types/permissions";
+import { TabView, TabPanel } from "primereact/tabview";
+import ApplicantManager from "../../applicants/components/ApplicantManager";
 
 
 const ORG_PERMISSION_KEY: Record<OrgnUnit, keyof typeof PERMISSIONS.ORGANIAZTION> = {
@@ -107,6 +109,7 @@ const OrganizationManager = ({ type, parent }: OrganizationManagerProps) => {
         ...((!hasParent && parentType) ? [
             { header: parentType, field: "parent.name", sortable: true }
         ] : []),
+
         { header: "Name", field: "name", sortable: true },
 
         ...(type === OrgnUnit.Program //|| type === OrgnUnit.Specialization
@@ -183,12 +186,32 @@ const OrganizationManager = ({ type, parent }: OrganizationManagerProps) => {
                         onConfirmAsync: () => deleteOrganization(row)
                     })
                 }
-                rowExpansionTemplate={!childType ? undefined : (row) => {
+                rowExpansionTemplate={(!childType && type !== OrgnUnit.External) ? undefined : (row) => {
+                    if (type === OrgnUnit.Department) {
+                        return (
+                            <>
+                                <TabView>
+                                    <TabPanel header="Programs">
+                                        <OrganizationManager
+                                            type={childType!}
+                                            parent={row}
+                                        />
+                                    </TabPanel>
+                                    <TabPanel header="Staff">
+                                        <ApplicantManager workspace={row} />
+                                    </TabPanel>
+                                </TabView>
+                            </>);
+                    }
+                    else if (type === OrgnUnit.External) {
+                        return (<ApplicantManager workspace={row} />);
+                    }
                     return (
                         <OrganizationManager
                             type={childType!}
                             parent={row}
-                        />);
+                        />
+                    );
                 }}
             />
 

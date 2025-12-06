@@ -17,9 +17,17 @@ export class ApplicantRepository implements IApplicantRepository {
     // FIND BY ID
     // -------------------------
     async findById(id: string): Promise<IApplicant | null> {
-        return Applicant.findById(new mongoose.Types.ObjectId(id))
-            .lean<IApplicant>()
-            .exec();
+        return Applicant.findById(new mongoose.Types.ObjectId(id)).
+            populate("workspace").
+            populate({
+                path: "roles",
+                populate: {
+                    path: "permissions"
+                }
+            }).
+            populate("ownerships").
+            lean<IApplicant>().
+            exec();
     }
 
     // -------------------------
@@ -28,14 +36,14 @@ export class ApplicantRepository implements IApplicantRepository {
     async findAll(filter: GetApplicantsDTO = {}): Promise<IApplicant[]> {
         const query: any = {};
 
-        if (filter.organization) {
-            query.organization = new mongoose.Types.ObjectId(filter.organization);
+        if (filter.workspace) {
+            query.workspace = new mongoose.Types.ObjectId(filter.workspace);
         }
 
         return Applicant.find(query).
-            populate("organization").
+            populate("workspace").
             populate("roles").
-            populate("organizations")
+            populate("ownerships")
             .lean<IApplicant[]>()
             .exec();
     }
@@ -45,11 +53,12 @@ export class ApplicantRepository implements IApplicantRepository {
     // -------------------------
     async create(dto: CreateApplicantDTO): Promise<IApplicant> {
         const data: Partial<IApplicant> = {
-            organization: dto.organization ? new mongoose.Types.ObjectId(dto.organization) : undefined,
-            first_name: dto.first_name,
-            last_name: dto.last_name,
-            birth_date: dto.birth_date,
+            workspace: dto.workspace ? new mongoose.Types.ObjectId(dto.workspace) : undefined,
+            firstName: dto.firstName,
+            lastName: dto.lastName,
+            birthDate: dto.birthDate,
             gender: dto.gender,
+            email: dto.email,
             fin: dto.fin,
             orcid: dto.orcid,
             accessibility: dto.accessibility ?? []
@@ -64,21 +73,15 @@ export class ApplicantRepository implements IApplicantRepository {
     async update(id: string, dtoData: UpdateApplicantDTO["data"]): Promise<IApplicant> {
         const toUpdate: any = {};
 
-        if (dtoData.organization) {
-            toUpdate.organization = new mongoose.Types.ObjectId(dtoData.organization);
-        }
-
-        if (dtoData.first_name) toUpdate.first_name = dtoData.first_name;
-        if (dtoData.last_name) toUpdate.last_name = dtoData.last_name;
-        if (dtoData.birth_date) toUpdate.birth_date = dtoData.birth_date;
+        if (dtoData.workspace) toUpdate.organization = new mongoose.Types.ObjectId(dtoData.workspace);
+        if (dtoData.firstName) toUpdate.first_name = dtoData.firstName;
+        if (dtoData.lastName) toUpdate.last_name = dtoData.lastName;
+        if (dtoData.birthDate) toUpdate.birth_date = dtoData.birthDate;
         if (dtoData.gender) toUpdate.gender = dtoData.gender;
-
+        if (dtoData.email) toUpdate.email = dtoData.email;
         if (dtoData.fin) toUpdate.fin = dtoData.fin;
         if (dtoData.orcid) toUpdate.orcid = dtoData.orcid;
-
-        if (dtoData.accessibility) {
-            toUpdate.accessibility = dtoData.accessibility;
-        }
+        if (dtoData.accessibility) toUpdate.accessibility = dtoData.accessibility;
 
         const updated = await Applicant.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),

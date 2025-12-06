@@ -9,8 +9,8 @@ export interface IUser extends Document {
   password: string;
   email: string;
   status: UserStatus;
-  roles: mongoose.Types.ObjectId[];
-  organizations?: mongoose.Types.ObjectId[];
+  roles: mongoose.Types.ObjectId[]; //remove
+  organizations?: mongoose.Types.ObjectId[]; //remove
   reset_code?: String;
   reset_code_expires?: Date;
   lastLogin?: Date,
@@ -51,6 +51,7 @@ const UserSchema = new Schema<IUser>(
       default: UserStatus.pending,
       required: true,
     },
+
     roles: [{
       type: Schema.Types.ObjectId,
       ref: COLLECTIONS.ROLE

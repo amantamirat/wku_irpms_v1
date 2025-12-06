@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import { errorResponse, successResponse } from '../../util/response';
-import { GetApplicantsOptions } from './applicant.service';
 import { AuthenticatedRequest } from '../users/auth/auth.middleware';
 import { ApplicantService } from './app.service';
-import { CreateApplicantDTO, UpdateApplicantDTO, UpdateRolesDTO } from './applicant.dto';
+import { CreateApplicantDTO, GetApplicantsDTO, UpdateApplicantDTO, UpdateRolesDTO } from './applicant.dto';
 
 const service = new ApplicantService();
 export class ApplicantController {
@@ -16,21 +15,22 @@ export class ApplicantController {
             }
             const userId = req.user._id;
             const {
-                first_name,
-                last_name,
-                birth_date,
+                workspace,
+                firstName,
+                lastName,
+                birthDate,
                 gender,
                 organization,
-                //email,
+                email,
                 accessibility
             } = req.body;
             const data: CreateApplicantDTO = {
-                first_name,
-                last_name,
-                birth_date: new Date(birth_date),
+                workspace,
+                firstName,
+                lastName,
+                birthDate: new Date(birthDate),
                 gender,
-                organization,
-                //email,
+                email,
                 accessibility: accessibility || []
             };
             const created = await service.create(data);
@@ -42,8 +42,8 @@ export class ApplicantController {
 
     static async getApplicants(req: Request, res: Response) {
         try {
-            const { scope, organization } = req.query;
-
+            const { workspace } = req.query;
+            /*
             let orgFilter: mongoose.Types.ObjectId[] | undefined;
 
             if (organization) {
@@ -59,13 +59,13 @@ export class ApplicantController {
 
                 orgFilter = orgs.map((id) => new mongoose.Types.ObjectId(id));
             }
+                */
 
             const filter = {
-                //scope: scope ? scope : undefined,
-                organization: orgFilter,
-            } as GetApplicantsOptions;
+                workspace: workspace,
+            } as GetApplicantsDTO;
 
-            const applicants = await service.getAll({});
+            const applicants = await service.getAll(filter);
             successResponse(res, 200, 'Applicants fetched successfully', applicants);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -81,24 +81,24 @@ export class ApplicantController {
             const userId = req.user._id;
             const { id } = req.params;
             const {
-                first_name,
-                last_name,
-                birth_date,
-                gender,
-                organization,
-                //email,
+                workspace,
+                firstName,
+                lastName,
+                birthDate,
+                gender,                
+                email,
                 accessibility
             } = req.body;
 
             const dto: UpdateApplicantDTO = {
                 id,
                 data: {
-                    first_name,
-                    last_name,
-                    birth_date,
+                    workspace,
+                    firstName,
+                    lastName,
+                    birthDate,
                     gender,
-                    organization,
-                    //email,
+                    email,
                     accessibility
                 },
                 userId: userId

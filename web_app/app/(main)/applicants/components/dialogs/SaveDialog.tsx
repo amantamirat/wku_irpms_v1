@@ -20,29 +20,26 @@ interface SaveApplicantDialogProps {
     visible: boolean;
     applicant: Applicant;
     updateRoles: boolean;
+    hasWorkspace: boolean;
     onHide: () => void;
     onComplete?: (savedApplicant: Applicant) => void;
 }
 
-const SaveApplicantDialog = ({ visible, applicant, updateRoles, onHide, onComplete }: SaveApplicantDialogProps) => {
+const SaveApplicantDialog = ({ visible, applicant, updateRoles, hasWorkspace, onHide, onComplete }: SaveApplicantDialogProps) => {
     const { getOrganizationsByType } = useAuth();
     const [localApplicant, setLocalApplicant] = useState<Applicant>({ ...applicant });
     const [roles, setRoles] = useState<Role[]>([]);
     const [userOrganizations, setUserOrganizations] = useState<Organization[]>([]);
     const [submitted, setSubmitted] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | undefined>();
+    //const [errorMessage, setErrorMessage] = useState<string | undefined>();
     const toast = useRef<Toast>(null);
 
     useEffect(() => {
+        if (hasWorkspace) return
         const fetchOrganizations = async () => {
             try {
-                //if (!localApplicant.scope) return;
-                //const type = scopeToOrganizationUnit[localApplicant.scope];
-                //if (type) {
-                //const data = getOrganizationsByType(applicantUnits);
                 const depData = await OrganizationApi.getOrganizations({ type: OrgnUnit.Department });
                 const extData = await OrganizationApi.getOrganizations({ type: OrgnUnit.External });
-                //console.log(data);
                 setUserOrganizations([...depData, ...extData]);
                 //}
             } catch (err) {
@@ -50,15 +47,17 @@ const SaveApplicantDialog = ({ visible, applicant, updateRoles, onHide, onComple
             }
         };
         fetchOrganizations();
-    }, []);
+    }, [hasWorkspace]);
 
 
     useEffect(() => {
+        if (!updateRoles) {
+            return;
+        }
         const fetchRoles = async () => {
             try {
                 const rolesData = await RoleApi.getRoles();
                 setRoles(rolesData);
-                //}
             } catch (err) {
                 console.error('Failed to fetch roles:', err);
             }
@@ -76,7 +75,7 @@ const SaveApplicantDialog = ({ visible, applicant, updateRoles, onHide, onComple
 
     const clearForm = () => {
         setSubmitted(false);
-        setErrorMessage(undefined);
+        //setErrorMessage(undefined);
         setLocalApplicant({ ...applicant });
     };
 
@@ -99,7 +98,7 @@ const SaveApplicantDialog = ({ visible, applicant, updateRoles, onHide, onComple
             }
             saved = {
                 ...saved,
-                organization: localApplicant.organization
+                workspace: localApplicant.workspace
             };
             toast.current?.show({
                 severity: 'success',
@@ -126,8 +125,6 @@ const SaveApplicantDialog = ({ visible, applicant, updateRoles, onHide, onComple
     );
 
     const isEdit = !!localApplicant._id;
-    //const isAcademic = localApplicant.scope === Scope.academic;
-    //const isSupportive = localApplicant.scope === Scope.supportive;
 
     return (
         <>
@@ -157,14 +154,14 @@ const SaveApplicantDialog = ({ visible, applicant, updateRoles, onHide, onComple
                     </div>
 
                     <div className="field">
-                        <label htmlFor="organizations">Organizations</label>
+                        <label htmlFor="ownerships">Ownerships</label>
                         <MultiSelect
-                            id="organizations"
+                            id="ownerships"
                             dataKey="_id"
-                            value={localApplicant.organizations}
+                            value={localApplicant.ownerships}
                             options={userOrganizations}
                             optionLabel="name"
-                            onChange={(e) => setLocalApplicant({ ...localApplicant, organizations: e.value })}
+                            onChange={(e) => setLocalApplicant({ ...localApplicant, ownerships: e.value })}
                             placeholder="select ownerships"
                             display="chip"
                         />
@@ -173,58 +170,59 @@ const SaveApplicantDialog = ({ visible, applicant, updateRoles, onHide, onComple
                 }
                 {!updateRoles &&
                     <>
+                        {!hasWorkspace
+                            &&
+                            <div className="field">
+                                <label htmlFor="workspace">
+                                    Workspace
+                                </label>
+                                <Dropdown
+                                    id="workspace"
+                                    dataKey="_id"
+                                    value={localApplicant.workspace}
+                                    options={userOrganizations}
+                                    optionLabel="name"
+                                    onChange={(e) => setLocalApplicant({ ...localApplicant, workspace: e.value })}
+                                    placeholder="Select Workspace"
+                                    className={classNames({ 'p-invalid': submitted && !localApplicant.workspace })}
+                                />
+                            </div>
+                        }
                         <div className="field">
-                            <label htmlFor="organization">
-                                Workspace
-                            </label>
-                            <Dropdown
-                                id="organization"
-                                dataKey="_id"
-                                value={localApplicant.organization}
-                                options={userOrganizations}
-                                optionLabel="name"
-                                onChange={(e) => setLocalApplicant({ ...localApplicant, organization: e.value })}
-                                placeholder="Select Workspace"
-                                className={classNames({ 'p-invalid': submitted && !localApplicant.organization })}
-                            />
-                        </div>
-
-
-                        <div className="field">
-                            <label htmlFor="first_name">First Name</label>
+                            <label htmlFor="firstName">First Name</label>
                             <InputText
-                                id="first_name"
-                                value={localApplicant.first_name}
-                                onChange={(e) => setLocalApplicant({ ...localApplicant, first_name: e.target.value })}
-                                className={classNames({ 'p-invalid': submitted && !localApplicant.first_name })}
+                                id="firstName"
+                                value={localApplicant.firstName}
+                                onChange={(e) => setLocalApplicant({ ...localApplicant, firstName: e.target.value })}
+                                className={classNames({ 'p-invalid': submitted && !localApplicant.firstName })}
                             />
-                            {submitted && !localApplicant.first_name && (
+                            {submitted && !localApplicant.firstName && (
                                 <small className="p-invalid">First Name is required.</small>
                             )}
                         </div>
 
                         <div className="field">
-                            <label htmlFor="last_name">Last Name</label>
+                            <label htmlFor="lastName">Last Name</label>
                             <InputText
-                                id="last_name"
-                                value={localApplicant.last_name}
-                                onChange={(e) => setLocalApplicant({ ...localApplicant, last_name: e.target.value })}
-                                className={classNames({ 'p-invalid': submitted && !localApplicant.last_name })}
+                                id="lastName"
+                                value={localApplicant.lastName}
+                                onChange={(e) => setLocalApplicant({ ...localApplicant, lastName: e.target.value })}
+                                className={classNames({ 'p-invalid': submitted && !localApplicant.lastName })}
                             />
-                            {submitted && !localApplicant.last_name && (
+                            {submitted && !localApplicant.lastName && (
                                 <small className="p-invalid">Last Name is required.</small>
                             )}
                         </div>
 
                         <div className="field">
-                            <label htmlFor="birth_date">Birth Date</label>
+                            <label htmlFor="birthDate">Birth Date</label>
                             <PrimeCalendar
-                                id="birth_date"
-                                value={localApplicant.birth_date ? new Date(localApplicant.birth_date) : undefined}
-                                onChange={(e) => setLocalApplicant({ ...localApplicant, birth_date: e.value! })}
+                                id="birthDate"
+                                value={localApplicant.birthDate ? new Date(localApplicant.birthDate) : undefined}
+                                onChange={(e) => setLocalApplicant({ ...localApplicant, birthDate: e.value! })}
                                 dateFormat="yy-mm-dd"
                                 showIcon
-                                className={classNames({ 'p-invalid': submitted && !localApplicant.birth_date })}
+                                className={classNames({ 'p-invalid': submitted && !localApplicant.birthDate })}
                             />
                         </div>
 
@@ -241,6 +239,20 @@ const SaveApplicantDialog = ({ visible, applicant, updateRoles, onHide, onComple
                         </div>
 
                         <div className="field">
+                            <label htmlFor="email">Email</label>
+                            <InputText
+                                id="email"
+                                type="email"
+                                value={localApplicant.email}
+                                onChange={(e) => setLocalApplicant({ ...localApplicant, email: e.target.value })}
+                                className={classNames({ 'p-invalid': submitted && !localApplicant.email })}
+                            />
+                            {submitted && !localApplicant.email && (
+                                <small className="p-invalid">Email is required.</small>
+                            )}
+                        </div>
+
+                        <div className="field">
                             <label htmlFor="accessibility">Accessibility</label>
                             <MultiSelect
                                 id="accessibility"
@@ -253,7 +265,9 @@ const SaveApplicantDialog = ({ visible, applicant, updateRoles, onHide, onComple
                         </div>
                     </>
                 }
-                {errorMessage && <small className="p-error">{errorMessage}</small>}
+                {
+                    //{errorMessage && <small className="p-error">{errorMessage}</small>}
+                }
             </Dialog>
         </>
     );

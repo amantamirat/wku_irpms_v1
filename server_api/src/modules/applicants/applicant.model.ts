@@ -2,39 +2,49 @@ import mongoose, { Document, Schema, model } from 'mongoose';
 import { Gender, Accessibility } from './applicant.enum';
 import { COLLECTIONS } from '../../util/collections.enum';
 
-//user model
 export interface IApplicant extends Document {
-    organization?: mongoose.Types.ObjectId;//rename to workspace
-    first_name: string;
-    last_name: string;
-    birth_date: Date;
+    workspace?: mongoose.Types.ObjectId;
+    firstName: string;
+    lastName: string;
+    birthDate: Date;
     gender: Gender;
+    email: string;
     fin?: string;
     orcid?: string;
     accessibility?: Accessibility[];
     roles?: mongoose.Types.ObjectId[];
-    organizations?: mongoose.Types.ObjectId[];
+    ownerships?: mongoose.Types.ObjectId[];
     createdAt?: Date;
     updatedAt?: Date;
 }
 
 const ApplicantSchema = new Schema<IApplicant>({
-    organization: {
+    workspace: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.ORGANIZATION,
         //required: true
     },
-    first_name: {
+    firstName: {
         type: String,
         required: true
     },
-    last_name: {
+    lastName: {
         type: String,
         required: true
     },
-    birth_date: {
+    birthDate: {
         type: Date,
         required: true
+    },
+    email: {
+        type: String,
+        unique: true,
+        required: true,
+        //immutable: true,
+        match: [
+            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+            'Please provide a valid email',
+        ]
     },
     gender: {
         type: String,
@@ -62,7 +72,7 @@ const ApplicantSchema = new Schema<IApplicant>({
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.ROLE
     }],
-    organizations: [{
+    ownerships: [{
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.ORGANIZATION
     }],

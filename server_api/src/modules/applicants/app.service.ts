@@ -13,20 +13,20 @@ export class ApplicantService {
         this.orgnRepo = orgnRepo || new OrganizationRepository();
     }
 
-    async validateOrganization(organization: string) {
-        const organDoc = await this.orgnRepo.findById(organization);
+    async validateWorkspace(workspace: string) {
+        const organDoc = await this.orgnRepo.findById(workspace);
         if (!organDoc) {
-            throw new Error('Organization is not found');
+            throw new Error('Workspace is not found');
         }        
         if (organDoc.type !== Unit.Department && organDoc.type !== Unit.External) {
-            throw new Error("Invalid Organization Type.");
+            throw new Error("Invalid Workspace.");
         }
     }
     // -------------------------
     // CREATE
     // -------------------------
     async create(dto: CreateApplicantDTO) {
-        await this.validateOrganization(dto.organization);
+        await this.validateWorkspace(dto.workspace);
         const created = await this.repository.create(dto);
         return created;
     }
@@ -35,15 +35,14 @@ export class ApplicantService {
     // -------------------------
     async getAll(filter?: GetApplicantsDTO) {
         return this.repository.findAll(filter);
-    }    
-
+    }  
     // -------------------------
     // UPDATE
     // -------------------------
     async update(dto: UpdateApplicantDTO) {
         const { id, data } = dto;
-        if (data.organization) {
-            await this.validateOrganization(data.organization);
+        if (data.workspace) {
+            await this.validateWorkspace(data.workspace);
         }
         const updated = await this.repository.update(id, data);
         if (!updated) throw new Error("Applicant not found");

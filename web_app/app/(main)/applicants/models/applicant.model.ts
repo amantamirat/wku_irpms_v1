@@ -27,25 +27,25 @@ export enum Accessibility {
 
 export type Applicant = {
     _id?: string;
-    organization: string | Organization;
-    first_name: string;
-    last_name: string;
-    birth_date: Date;
+    workspace: string | Organization;
+    firstName: string;
+    lastName: string;
+    birthDate: Date;
     gender: Gender;
-    //scope: Scope;
     email?: string;
-    user?: string;
+    //user?: string;
     accessibility?: Accessibility[];
     roles?: Role[] | string[];
-    organizations?: Organization[] | string[];
+    ownerships?: Organization[] | string[];
     createdAt?: Date;
     updatedAt?: Date;
 }
 
+export interface GetApplicantsOptions {
+    workspace?: string | Organization;
+}
 
-export const applicantUnits = [OrgnUnit.Department, OrgnUnit.External //, OrgnUnit.Supportive
-]
-
+export const applicantUnits = [OrgnUnit.Department, OrgnUnit.External]
 
 export const accessibilityOptions = Object.values(Accessibility).map(a => ({
     label: a,
@@ -57,29 +57,31 @@ export const genderOptions = Object.values(Gender).map(g => ({
     value: g
 }));
 
-/*
-export const scopeOptions = Object.values(Scope).map(s => ({
-    label: s,
-    value: s
-}));
-*/
-
 
 export const validateApplicant = (applicant: Applicant): { valid: boolean; message?: string } => {
-    if (!applicant.first_name) {
+    
+    if (!applicant.workspace) {
+        return { valid: false, message: 'workspace is required.' };
+    }
+    
+    if (!applicant.firstName) {
         return { valid: false, message: 'First name is required.' };
     }
 
-    if (!applicant.last_name) {
+    if (!applicant.lastName) {
         return { valid: false, message: 'Last name is required.' };
     }
 
-    if (!applicant.birth_date || isNaN(new Date(applicant.birth_date).getTime())) {
+    if (!applicant.birthDate || isNaN(new Date(applicant.birthDate).getTime())) {
         return { valid: false, message: 'Valid birth date is required.' };
     }
 
     if (!applicant.gender) {
         return { valid: false, message: 'Gender is required.' };
+    }
+
+     if (!applicant.email) {
+        return { valid: false, message: 'Email is required.' };
     }
 
     if (applicant.email) {
@@ -88,17 +90,16 @@ export const validateApplicant = (applicant: Applicant): { valid: boolean; messa
             return { valid: false, message: "Email is not valid." };
         }
     }
-
     return { valid: true };
 };
 
 export function sanitizeApplicant(applicant: Partial<Applicant>): Partial<Applicant> {
     return {
         ...applicant,
-        organization:
-            typeof applicant.organization === 'object' && applicant.organization !== null
-                ? (applicant.organization as any)._id
-                : applicant.organization,
+        workspace:
+            typeof applicant.workspace === 'object' && applicant.workspace !== null
+                ? (applicant.workspace as any)._id
+                : applicant.workspace,
         roles: applicant.roles
             ?.map(role =>
                 typeof role === 'object' && role !== null
@@ -107,7 +108,7 @@ export function sanitizeApplicant(applicant: Partial<Applicant>): Partial<Applic
             )
             .filter((id): id is string => typeof id === 'string'),
 
-        organizations: applicant.organizations
+        ownerships: applicant.ownerships
             ?.map(org =>
                 typeof org === 'object' && org !== null
                     ? (org as Organization)._id

@@ -44,6 +44,7 @@ const SaveUserDialog = ({ visible, user, onHide, onComplete }: SaveUserDialogPro
     }, [user]);
 
     useEffect(() => {
+        /*
         const fetchApplicants = async () => {
             try {
                 const data = await ApplicantApi.getApplicants({});
@@ -53,31 +54,8 @@ const SaveUserDialog = ({ visible, user, onHide, onComplete }: SaveUserDialogPro
             }
         };
         fetchApplicants();
-
-        /*
-        const fetchRoles = async () => {
-            try {
-                const data = await RoleApi.getRoles();
-                setRoles(data);
-            } catch (err) {
-                console.error("Failed to fetch roles:", err);
-            }
-        };
-        fetchRoles();
-        */
-        /**
-         * if (!readOrganization) return;
-        const fetchOrganizations = async () => {
-            try {
-                const data = await OrganizationApi.getOrganizations({});
-                setOrganizations(data);
-            } catch (err) {
-                console.error('Failed to fetch organizations:', err);
-            }
-        };
-        fetchOrganizations();
-         * 
-         */
+*/
+        
     }, []);
 
     const saveUser = async () => {

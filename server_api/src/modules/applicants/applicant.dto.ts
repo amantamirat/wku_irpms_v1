@@ -1,24 +1,27 @@
 import { Accessibility, Gender } from "./applicant.enum";
 
 export interface CreateApplicantDTO {
-    organization: string;
-    first_name: string;
-    last_name: string;
-    birth_date: Date;
+    workspace: string;
+    firstName: string;
+    lastName: string;
+    birthDate: Date;
     gender: Gender;
+    email: string;
     fin?: string;
     orcid?: string;
     accessibility?: Accessibility[];
+    userId?: string;
 }
 
 export interface UpdateApplicantDTO {
     id: string;
     data: Partial<{
-        organization: string;
-        first_name: string;
-        last_name: string;
-        birth_date: Date;
+        workspace: string;
+        firstName: string;
+        lastName: string;
+        birthDate: Date;
         gender: Gender;
+        email: string;
         fin: string;
         orcid: string;
         accessibility: Accessibility[];
@@ -36,6 +39,6 @@ export interface UpdateRolesDTO {
 }
 
 export interface GetApplicantsDTO {
-    organization?: string;
+    workspace?: string;
 }
 

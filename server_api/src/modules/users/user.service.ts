@@ -75,9 +75,9 @@ export class UserService {
 
         if (userDoc.status === UserStatus.deleted) {
             //hard deletion
-            if (String(userDoc.createdBy) !== userId) {
-                throw new Error("You can not delete this user!");
-            }
+            // if (String(userDoc.createdBy) !== userId) {
+            //    throw new Error("You can not delete this user!");
+            //  }
             return await this.repository.delete(id);
         }
         //soft deletion

@@ -81,7 +81,7 @@ export class ApplicantService {
         await this.validateApplicant(data);
         const applicant = await Applicant.findById(id);
         if (!applicant) throw new Error("Applicant not found");
-        await CacheService.validateOwnership(userId, applicant.organization);
+        await CacheService.validateOwnership(userId, applicant.workspace);
         Object.assign(applicant, data);
         return await applicant.save();
     }
@@ -89,7 +89,7 @@ export class ApplicantService {
     static async deleteApplicant(id: string, userId: string) {
         const applicant = await Applicant.findById(id);
         if (!applicant) throw new Error("Applicant not found");
-        await CacheService.validateOwnership(userId, applicant.organization);
+        await CacheService.validateOwnership(userId, applicant.workspace);
         const project = await Project.findOne({ leadPI: applicant._id });
         if (project) {
             throw new Error("Cannot delete applicant who is a lead PI of a project");

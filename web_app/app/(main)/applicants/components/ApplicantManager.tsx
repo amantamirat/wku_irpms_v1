@@ -4,28 +4,30 @@ import { CrudManager } from "@/components/CrudManager";
 import { useCrudList } from "@/hooks/useCrudList";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useAuth } from "@/contexts/auth-context";
-
 import { useEffect, useState } from "react";
 import { ApplicantApi } from "../api/applicant.api";
-import { Applicant, Gender, applicantUnits } from "../models/applicant.model";
-
+import { Applicant, Gender } from "../models/applicant.model";
 import SaveDialog from "./dialogs/SaveDialog";
 import ApplicantDetail from "./ApplicantDetail";
-import ErrorCard from "@/components/ErrorCard";
 import { PERMISSIONS } from "@/types/permissions";
 import { Button } from "primereact/button";
+import { Organization } from "../../organizations/models/organization.model";
 
+interface ApplicantManagerProps {
+    workspace?: Organization;
+}
 
-const ApplicantManager = () => {
+const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
 
     const emptyApplicant: Applicant = {
-        first_name: "",
-        last_name: "",
-        birth_date: new Date(),
+        workspace: workspace ?? "",
+        firstName: "",
+        lastName: "",
+        birthDate: new Date(),
         gender: Gender.Male,
-        user: undefined,
-        organization: "",
+        email: "",
     };
+
 
     const confirm = useConfirmDialog();
     const { getOrganizationsByType, hasPermission } = useAuth();
@@ -35,6 +37,7 @@ const ApplicantManager = () => {
     const canUpdateRoles = hasPermission([PERMISSIONS.APPLICANT.UPDATE_ROLES]);
     const canDelete = hasPermission([PERMISSIONS.APPLICANT.DELETE]);
 
+    const hasWorkspace = !!workspace;
     /** CRUD HOOK */
     const {
         items: applicants,
@@ -56,13 +59,7 @@ const ApplicantManager = () => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-
-                const orgs = getOrganizationsByType(applicantUnits).map((o) => o._id);
-
-                const data = await ApplicantApi.getApplicants({
-                    organization: orgs.length ? orgs : undefined
-                });
-
+                const data = await ApplicantApi.getApplicants({ workspace });
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to load applicants: " + err?.message);
@@ -72,7 +69,7 @@ const ApplicantManager = () => {
         };
 
         fetchData();
-    }, []);
+    }, [workspace]);
 
     /** SAVE callback */
     const onSaveComplete = (saved: Applicant) => {
@@ -87,6 +84,7 @@ const ApplicantManager = () => {
     };
 
     /** LINK USER */
+    /*
     const linkApplicant = async (row: Applicant) => {
         let linked = await ApplicantApi.linkApplicant(row);
 
@@ -97,6 +95,7 @@ const ApplicantManager = () => {
 
         updateItem(linked);
     };
+    */
 
     const hideDialogs = () => {
         setSelectedApplicant({ ...emptyApplicant });
@@ -106,31 +105,31 @@ const ApplicantManager = () => {
 
     /** TABLE COLUMNS */
     const columns = [
-        { header: "Workspace", field: "organization.name" },
-        { header: "First Name", field: "first_name" },
-        { header: "Last Name", field: "last_name" },
+        ...(!hasWorkspace ? [
+            { header: "Workspace", field: "workspace.name", sortable: true },
+        ] : []),
+
+        { header: "First Name", field: "firstName", sortable: true },
+        { header: "Last Name", field: "lastName", sortable: true },
         {
             header: "Gender",
             body: (row: Applicant) => (
                 <span className={`gender-badge gender-${row.gender.toLowerCase()}`}>
                     {row.gender}
                 </span>
-            )
+            ),
+            sortable: true
         },
         {
             header: "Birth Date",
             body: (row: Applicant) =>
-                new Date(row.birth_date!).toLocaleDateString("en-CA")
+                new Date(row.birthDate!).toLocaleDateString("en-CA")
         },
-
-        //{ header: "Email", field: "email" }
+        { header: "Email", field: "email" }
     ];
 
     return (
         <>
-            {/* ERROR MESSAGE */}
-            {error && <ErrorCard errorMessage={error} />}
-
             <CrudManager
                 headerTitle="Manage Applicants"
                 itemName="Applicant"
@@ -139,27 +138,23 @@ const ApplicantManager = () => {
                 columns={columns}
                 loading={loading}
                 error={error}
-
                 canCreate={canCreate}
                 canEdit={canEdit}
                 canDelete={canDelete}
-
                 /** CREATE */
                 onCreate={() => {
                     setSelectedApplicant({ ...emptyApplicant });
                     setShowSaveDialog(true);
                 }}
-
                 /** EDIT */
                 onEdit={(row) => {
                     setSelectedApplicant({ ...row });
                     setShowSaveDialog(true);
                 }}
-
                 /** DELETE */
                 onDelete={(row) =>
                     confirm.ask({
-                        item: `${row.first_name} ${row.last_name}`,
+                        item: `${row.firstName} ${row.lastName}`,
                         onConfirmAsync: () => deleteApplicant(row)
                     })
                 }
@@ -182,7 +177,6 @@ const ApplicantManager = () => {
                             }}
                         />
                 }
-
                 enableSearch
             />
 
@@ -192,6 +186,7 @@ const ApplicantManager = () => {
                     visible={showSaveDialog}
                     applicant={selectedApplicant}
                     updateRoles={canUpdateRoles && showRolesDialog}
+                    hasWorkspace={hasWorkspace}
                     onComplete={onSaveComplete}
                     onHide={hideDialogs}
                 />
