@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import mongoose from 'mongoose';
 import { errorResponse, successResponse } from '../../util/response';
 import { AuthenticatedRequest } from '../users/user.middleware';
 import { ApplicantService } from './app.licant.service';
@@ -47,7 +46,6 @@ export class ApplicantController {
             const filter = {
                 workspace: workspace,
             } as GetApplicantsDTO;
-
             const applicants = await service.getAll(filter);
             successResponse(res, 200, 'Applicants fetched successfully', applicants);
         } catch (err: any) {

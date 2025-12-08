@@ -96,8 +96,8 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
                     onHide={() => setShowProfileDialog(false)}
                 />
             )}*/}
-            
-            {(user?._id&&user.applicant) && <SaveDialog
+
+            {(user?._id && user.applicant) && <SaveDialog
                 visible={showPasswordDialog}
                 user={user}
                 enableCurrentPassword={true}

@@ -1,16 +1,6 @@
 import { Organization, OrgnUnit } from "../../organizations/models/organization.model";
 import { Role } from "../../roles/models/role.model";
 
-
-/*
-// Used for also Category
-export enum Scope {
-    academic = 'Academic',
-    supportive = 'Supportive',
-    external = 'External',
-}
-*/
-
 export enum Gender {
     Male = 'Male',
     Female = 'Female'

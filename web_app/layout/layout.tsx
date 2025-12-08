@@ -1,18 +1,17 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useEventListener, useMountEffect, useUnmountEffect } from 'primereact/hooks';
-import React, { useContext, useEffect, useRef } from 'react';
+import { AppTopbarRef, ChildContainerProps, LayoutState } from '@/types';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { PrimeReactContext } from 'primereact/api';
+import { useEventListener, useUnmountEffect } from 'primereact/hooks';
 import { classNames } from 'primereact/utils';
+import React, { useContext, useEffect, useRef } from 'react';
+import AppConfig from './AppConfig';
 import AppFooter from './AppFooter';
 import AppSidebar from './AppSidebar';
 import AppTopbar from './AppTopbar';
-import AppConfig from './AppConfig';
 import { LayoutContext } from './context/layoutcontext';
-import { PrimeReactContext } from 'primereact/api';
-import { ChildContainerProps, LayoutState, AppTopbarRef } from '@/types';
-import { usePathname, useSearchParams } from 'next/navigation';
 
 const Layout = ({ children }: ChildContainerProps) => {
     const { layoutConfig, layoutState, setLayoutState } = useContext(LayoutContext);
@@ -97,7 +96,6 @@ const Layout = ({ children }: ChildContainerProps) => {
         if (layoutState.overlayMenuActive || layoutState.staticMenuMobileActive) {
             bindMenuOutsideClickListener();
         }
-
         layoutState.staticMenuMobileActive && blockBodyScroll();
     }, [layoutState.overlayMenuActive, layoutState.staticMenuMobileActive]);
 

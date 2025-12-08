@@ -63,7 +63,6 @@ export class ApplicantRepository implements IApplicantRepository {
         const data: Partial<IApplicant> = {
             workspace: dto.workspace ? new mongoose.Types.ObjectId(dto.workspace) : undefined,
             name: dto.name,
-            //lastName: dto.lastName,
             birthDate: dto.birthDate,
             gender: dto.gender,
             email: dto.email,
@@ -94,7 +93,7 @@ export class ApplicantRepository implements IApplicantRepository {
             toUpdate.roles = dtoData.roles?.map(id => new mongoose.Types.ObjectId(id))
         }
         if (dtoData.ownerships) {
-            toUpdate.organizations = dtoData.ownerships?.map(id => new mongoose.Types.ObjectId(id))
+            toUpdate.ownerships = dtoData.ownerships?.map(id => new mongoose.Types.ObjectId(id))
         }
 
         const updated = await Applicant.findByIdAndUpdate(

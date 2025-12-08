@@ -23,6 +23,10 @@ const AppMenu = () => {
         },
         {
             label: 'Project',
+            visible: hasPermission([
+                PERMISSIONS.PROJECT.CREATE,
+                PERMISSIONS.REVIEWER.CREATE,
+            ]),
             items: [
                 {
                     label: 'Projects',
@@ -50,75 +54,70 @@ const AppMenu = () => {
         },
         {
             label: 'Directorate',
-            visible: hasOrganizationType([OrgnUnit.Directorate, OrgnUnit.Center]),
+            visible: hasPermission([
+                PERMISSIONS.CYCLE.CALL.CREATE,
+                PERMISSIONS.CYCLE.PROGRAM.CREATE,
+                PERMISSIONS.EVALUATION.CREATE,
+                PERMISSIONS.GRANT.CREATE,
+                PERMISSIONS.THEME.CREATE,
+            ]),
             items: [
                 {
-                    label: 'Cycles',
-                    items: [
-                        {
-                            label: 'Calls',
-                            icon: 'pi pi-fw pi-megaphone',
-                            to: '/cycles/calls',
-                            visible: hasPermission([
-                                PERMISSIONS.CYCLE.CALL.CREATE,
-                                PERMISSIONS.CYCLE.CALL.UPDATE,
-                                PERMISSIONS.CYCLE.CALL.DELETE,
-
-                            ])
-                        },
-                        {
-                            label: 'Programs',
-                            icon: 'pi pi-circle-fill',
-                            to: '/cycles/programs',
-                            visible: hasPermission([
-                                PERMISSIONS.CYCLE.PROGRAM.CREATE,
-                                PERMISSIONS.CYCLE.PROGRAM.UPDATE,
-                                PERMISSIONS.CYCLE.PROGRAM.DELETE
-                            ])
-                        },
-                    ]
+                    label: 'Calls',
+                    icon: 'pi pi-fw pi-megaphone',
+                    to: '/cycles/calls',
+                    visible: hasPermission([
+                        PERMISSIONS.CYCLE.CALL.CREATE,
+                        PERMISSIONS.CYCLE.CALL.UPDATE,
+                        PERMISSIONS.CYCLE.CALL.DELETE,
+                    ])
                 },
                 {
-                    label: 'Catalogues',
-                    items: [
-                        {
-                            label: 'Evaluations',
-                            icon: 'pi pi-chart-bar',
-                            to: '/evaluations',
-                            visible: hasPermission(
-                                [
-                                    PERMISSIONS.EVALUATION.CREATE,
-                                    PERMISSIONS.EVALUATION.UPDATE,
-                                    PERMISSIONS.EVALUATION.DELETE
-                                ]
-                            )
-                        },
-                        {
-                            label: 'Grants',
-                            icon: 'pi pi-cog',
-                            to: '/grants',
-                            visible: hasPermission(
-                                [
-                                    PERMISSIONS.GRANT.CREATE,
-                                    PERMISSIONS.GRANT.UPDATE,
-                                    PERMISSIONS.GRANT.DELETE
-                                ]
-                            )
-                        },
-                        {
-                            label: 'Thematic Areas',
-                            icon: 'pi pi-fw pi-tags',
-                            to: '/thematic_areas',
-                            visible: hasPermission(
-                                [
-                                    PERMISSIONS.THEME.CREATE,
-                                    PERMISSIONS.THEME.UPDATE,
-                                    PERMISSIONS.THEME.DELETE
-                                ]
-                            )
-                        }
-                    ],
+                    label: 'Programs',
+                    icon: 'pi pi-circle-fill',
+                    to: '/cycles/programs',
+                    visible: hasPermission([
+                        PERMISSIONS.CYCLE.PROGRAM.CREATE,
+                        PERMISSIONS.CYCLE.PROGRAM.UPDATE,
+                        PERMISSIONS.CYCLE.PROGRAM.DELETE
+                    ])
                 },
+                {
+                    label: 'Evaluations',
+                    icon: 'pi pi-chart-bar',
+                    to: '/evaluations',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.EVALUATION.CREATE,
+                            PERMISSIONS.EVALUATION.UPDATE,
+                            PERMISSIONS.EVALUATION.DELETE
+                        ]
+                    )
+                },
+                {
+                    label: 'Grants',
+                    icon: 'pi pi-cog',
+                    to: '/grants',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.GRANT.CREATE,
+                            PERMISSIONS.GRANT.UPDATE,
+                            PERMISSIONS.GRANT.DELETE
+                        ]
+                    )
+                },
+                {
+                    label: 'Thematic Areas',
+                    icon: 'pi pi-fw pi-tags',
+                    to: '/thematic_areas',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.THEME.CREATE,
+                            PERMISSIONS.THEME.UPDATE,
+                            PERMISSIONS.THEME.DELETE
+                        ]
+                    )
+                }
             ]
         },
         {

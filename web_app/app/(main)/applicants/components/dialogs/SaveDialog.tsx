@@ -34,6 +34,7 @@ const SaveApplicantDialog = ({ visible, applicant, hasWorkspace, onHide, onCompl
     const [localApplicant, setLocalApplicant] = useState<Applicant>({ ...applicant });
     const [roles, setRoles] = useState<Role[]>([]);
     const [userOrganizations, setUserOrganizations] = useState<Organization[]>([]);
+    const [ownerships, setOwnerships] = useState<Organization[]>([]);
     const [submitted, setSubmitted] = useState(false);
     const toast = useRef<Toast>(null);
 
@@ -43,7 +44,9 @@ const SaveApplicantDialog = ({ visible, applicant, hasWorkspace, onHide, onCompl
             try {
                 const depData = await OrganizationApi.getOrganizations({ type: OrgnUnit.Department });
                 const extData = await OrganizationApi.getOrganizations({ type: OrgnUnit.External });
+                const dirData = await OrganizationApi.getOrganizations({ type: OrgnUnit.Directorate });
                 setUserOrganizations([...depData, ...extData]);
+                setOwnerships([...dirData, ...depData, ...extData]);
                 //}
             } catch (err) {
                 console.error('Failed to fetch organizations:', err);
@@ -289,7 +292,7 @@ const SaveApplicantDialog = ({ visible, applicant, hasWorkspace, onHide, onCompl
                                 id="ownerships"
                                 dataKey="_id"
                                 value={localApplicant.ownerships}
-                                options={userOrganizations}
+                                options={ownerships}
                                 optionLabel="name"
                                 onChange={(e) => setLocalApplicant({ ...localApplicant, ownerships: e.value })}
                                 placeholder="select ownerships"

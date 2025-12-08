@@ -50,7 +50,7 @@ export class UserService {
 
         const ownerships = applicantDoc.ownerships?.map((org: any) => org._id) || []
         CacheService.setUserPermissions(userId, permissions);
-        //CacheService.setUserOrganizations(userId, ownerships);
+        CacheService.setUserOrganizations(userId, ownerships);
         const payload: JwtPayload = {
             _id: userId,
             applicantId,
