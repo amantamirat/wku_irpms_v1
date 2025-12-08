@@ -1,7 +1,9 @@
 import { ApiClient } from "@/api/ApiClient";
-import { PasswordType, sanitizeUser, User } from "../models/user.model";
+import { sanitizeUser, User } from "../models/user.model";
 
 const end_point = '/users/';
+const tokenStorage = 'authToken';
+const userStorage = 'authUser';
 
 export const UserApi = {
 
@@ -14,6 +16,37 @@ export const UserApi = {
         const sanitized = sanitizeUser(user);
         const created = await ApiClient.post(end_point, sanitized);
         return created as User;
+    },
+
+    async loginUser(credentials: User): Promise<any> {
+        const loggedInData = await ApiClient.post(`${end_point}login`, credentials);
+        console.log(`${end_point}login`);
+        const { token, user } = loggedInData;
+        localStorage.setItem(tokenStorage, token);
+        localStorage.setItem(userStorage, JSON.stringify(user));
+        return user;
+    },
+
+    getLoggedInUser(): User | null {
+        const userInfo = localStorage.getItem(userStorage);
+        if (userInfo) {
+            return JSON.parse(userInfo);
+        }
+        return null;
+    },
+
+    logout() {
+        localStorage.removeItem(tokenStorage);
+        localStorage.removeItem(userStorage);
+        //router.push('/auth/login');
+    },
+
+    getToken(): string | null {
+        const tokenInfo = localStorage.getItem(tokenStorage);
+        if (tokenInfo) {
+            return tokenInfo
+        }
+        return null;
     },
 
     async updateUser(user: Partial<User>, changeStatus = false): Promise<User> {
@@ -38,17 +71,10 @@ export const UserApi = {
         return response;
     },
 
-    async changePassword(password: Partial<PasswordType>): Promise<any> {
+    async changePassword(password: Partial<User>): Promise<any> {
         const url = `${end_point}${password._id}/change-password`;
         const result = await ApiClient.patch(url, password);
         return result;
     },
 
-    /*
-    async resetPassword(password: Partial<PasswordType>): Promise<any> {
-        const url = `${end_point}${password._id}/reset-password`;
-        const result = await ApiClient.patch(url, password);
-        return result;
-    }
-*/
 };

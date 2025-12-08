@@ -35,13 +35,18 @@ const SaveUserDialog = ({ visible, user, enableCurrentPassword, onHide, onComple
     const saveUser = async () => {
         try {
             setSubmitted(true);
-            const validation = validateUser(localUser);
+            const validation = validateUser(localUser, enableCurrentPassword);
             if (!validation.valid) {
                 throw new Error(validation.message);
             }
             let saved: User;
             if (localUser._id) {
-                saved = await UserApi.updateUser(localUser);
+                if (enableCurrentPassword) {
+                    saved = await UserApi.changePassword(localUser);
+                }
+                else {
+                    saved = await UserApi.updateUser(localUser);
+                }
                 saved = {
                     ...saved,
                     applicant: localUser.applicant,

@@ -21,8 +21,8 @@ export interface UpdateUserDTO {
 export interface ChangePasswordDTO {
     id: string;
     data: {
-        oldPassword: string;
-        newPassword: string;
+        currentPassword: string;
+        password: string;
     };
     userId: string;
 }

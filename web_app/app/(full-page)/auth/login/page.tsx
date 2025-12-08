@@ -11,17 +11,18 @@ import { classNames } from 'primereact/utils';
 import { Messages } from "primereact/messages";
 import { useAuth } from '@/contexts/auth-context';
 import NoAuthGuard from '@/components/NoAuthGuard';
-import { LoginDto, validateLogin } from '../model/login.model';
+import { User, validateUser } from '@/app/(main)/users/models/user.model';
+//import { LoginDto, validateLogin } from '../model/login.model';
 
 const LoginPage = () => {
 
 
-    let emptyLogin: LoginDto = {
-        user_name: '',
+    let emptyLogin: User = {
+        email: '',
         password: '',
     };
 
-    const [loginDto, setLoginDto] = useState<LoginDto>(emptyLogin);
+    const [loginDto, setLoginDto] = useState<User>(emptyLogin);
     const [checked, setChecked] = useState(false);
     const msgs = useRef<Messages>(null);
     const router = useRouter();
@@ -29,15 +30,9 @@ const LoginPage = () => {
 
     const handleLogin = async () => {
         try {
-            const result = validateLogin(loginDto);
+            const result = validateUser(loginDto, false, false);
             if (!result.valid) {
-                msgs.current?.clear();
-                msgs.current?.show({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: result.message || 'Login failed.'
-                });
-                return;
+                throw new Error(result.message || 'Login failed.');
             }
             const loggedIn = await login(loginDto);
             if (loggedIn) {
@@ -46,7 +41,7 @@ const LoginPage = () => {
                 setTimeout(() => router.push('/'), 500);
             }
         } catch (err: any) {
-            console.error(err);
+            //console.error(err);
             msgs.current?.clear();
             msgs.current?.show({
                 severity: 'error',
@@ -79,11 +74,11 @@ const LoginPage = () => {
 
                             <div>
                                 <label htmlFor="email" className="block text-900 text-xl font-medium mb-2">
-                                    Username or Email
+                                    Email
                                 </label>
                                 <InputText id="email" type="text"
-                                    value={loginDto.user_name}
-                                    onChange={(e) => setLoginDto({ ...loginDto, user_name: e.target.value })}
+                                    value={loginDto.email}
+                                    onChange={(e) => setLoginDto({ ...loginDto, email: e.target.value })}
                                     placeholder="Email address"
                                     className="w-full md:w-30rem mb-5"
                                     style={{ padding: '1rem' }} />

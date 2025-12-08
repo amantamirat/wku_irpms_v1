@@ -96,7 +96,7 @@ export class UserController {
   }
 */
 
-  static async logInUser(req: Request, res: Response) {
+  static async login(req: Request, res: Response) {
     try {
       const data: LoginDto = req.body;
       const loggedInUser = await service.login(data);
@@ -127,15 +127,15 @@ export class UserController {
     try {
       if (!req.user) throw new Error("User not authorized!");
       const { id } = req.params;
-      const { oldPassword, newPassword } = req.body;
+      const { currentPassword, password } = req.body;
       const dto: ChangePasswordDTO =
       {
         id,
-        data: { oldPassword, newPassword },
+        data: { currentPassword, password: password },
         userId: req.user._id,
       };
-      const changed = await service.changePassword(dto);
-      successResponse(res, 200, "Password changed successfully", changed);
+      const updated = await service.changePassword(dto);
+      successResponse(res, 200, "Password changed successfully", updated);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }

@@ -1,15 +1,15 @@
 'use client';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { LoginDto, User } from '@/app/(full-page)/auth/model/login.model';
-import { AuthApi } from '@/app/(full-page)/auth/api/auth.api';
 import { OrgnUnit } from '@/app/(main)/organizations/models/organization.model';
+import { UserApi } from '@/app/(main)/users/api/UserService';
+import { User } from '@/app/(main)/users/models/user.model';
 
 
 interface AuthContextType {
     user: User | null;
     loading: boolean;
     loggedIn: boolean;
-    login: (user: LoginDto) => Promise<boolean>;
+    login: (user: User) => Promise<boolean>;
     logout: () => void;
     hasPermission: (perms: string[]) => boolean;
     hasOrganizationType: (types: OrgnUnit[]) => boolean;
@@ -25,7 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const userInfo = AuthApi.getLoggedInUser();
+        const userInfo = UserApi.getLoggedInUser();
         if (userInfo) {
             try {
                 setUser(userInfo);
@@ -37,14 +37,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
 
-    const login = async (user: LoginDto) => {
-        const loggedInuser = await AuthApi.loginUser(user);
-        setUser(loggedInuser);
-        return true;
+    const login = async (user: User) => {
+        try {
+            //const loggedInUser = await AuthApi.loginUser(dto);
+            const loggedInUser = await UserApi.loginUser(user);
+            setUser(loggedInUser);
+            return true;
+        } catch {
+            return false;
+        }
     };
 
     const logout = () => {
-        AuthApi.logout();
+        UserApi.logout();
         setUser(null);
         //router.push('/auth/login');
     };
@@ -64,8 +69,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const getLinkedApplicant = (): any | null => {
-        if (!user || !user.linkedApplicant) return null;
-        return user.linkedApplicant;
+        if (!user || !user.applicant) return null;
+        return user.applicant;
     }
 
     return (

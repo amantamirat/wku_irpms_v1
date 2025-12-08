@@ -6,12 +6,6 @@ export enum UserStatus {
     deleted = 'Deleted'
 }
 
-export type PasswordType = {
-    _id: string;
-    oldPassword?: string;
-    newPassword?: string;
-    confirmPassword?: string;
-};
 export type User = {
     _id?: string;
     applicant?: string | Applicant;
@@ -30,7 +24,7 @@ export type User = {
 };
 
 
-export const validateUser = (user: User): { valid: boolean; message?: string } => {
+export const validateUser = (user: User, currentPassword: boolean = false, regexPasswprd: boolean = true): { valid: boolean; message?: string } => {
     if (!user.email || user.email.trim() === "") {
         return { valid: false, message: "Email is required." };
     }
@@ -38,55 +32,35 @@ export const validateUser = (user: User): { valid: boolean; message?: string } =
     if (!emailRegex.test(user.email)) {
         return { valid: false, message: "Email is not valid." };
     }
+    if (currentPassword) {
+        if (!user.currentPassword || user.currentPassword.trim() === "") {
+            return { valid: false, message: "Current Password is required." };
+        }
+    }
 
     if (!user.password || user.password.trim() === "") {
         return { valid: false, message: "Password is required." };
     }
 
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
-    if (!passwordRegex.test(user.password)) {
-        return {
-            valid: false,
-            message:
-                "Password must be at least 8 characters long, include uppercase, lowercase, number, and symbol."
-        };
-    }
-    if (!user.confirmedPassword) {
-        return { valid: false, message: "Password confirmation required" };
-    }
-    if (user.password !== user.confirmedPassword) {
-        return { valid: false, message: "Password mismatch" };
-    }
-
-    return { valid: true };
-};
-
-
-export const validatePassword = (password: PasswordType): { valid: boolean; message?: string } => {
-
-    if (!password._id || password._id.trim() === "") {
-        return { valid: false, message: "Password id is required." };
-    }
-    if (!password.newPassword) {
-        return { valid: false, message: "Password required" };
-    }
-    if (!password.confirmPassword) {
-        return { valid: false, message: "Password confirmation required" };
-    }
-    if (password.newPassword !== password.confirmPassword) {
-        return { valid: false, message: "Password mismatch" };
-    }
-
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
-    if (!passwordRegex.test(password.newPassword)) {
-        return {
-            valid: false,
-            message:
-                "Password must be at least 8 characters long, include uppercase, lowercase, number, and symbol."
-        };
+    if (regexPasswprd) {
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
+        if (!passwordRegex.test(user.password)) {
+            return {
+                valid: false,
+                message:
+                    "Password must be at least 8 characters long, include uppercase, lowercase, number, and symbol."
+            };
+        }
+        if (!user.confirmedPassword) {
+            return { valid: false, message: "Password confirmation required" };
+        }
+        if (user.password !== user.confirmedPassword) {
+            return { valid: false, message: "Password mismatch" };
+        }
     }
     return { valid: true };
 };
+
 
 
 export function sanitizeUser(user: Partial<User>): Partial<User> {

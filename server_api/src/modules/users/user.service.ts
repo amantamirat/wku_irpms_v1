@@ -2,12 +2,13 @@ import jwt from 'jsonwebtoken';
 import bcrypt from "bcryptjs";
 import { DeleteDto } from "../../util/delete.dto";
 import { Role } from "./roles/role.model";
-import JwtPayload, { ChangePasswordDTO, CreateUserDTO, LoginDto, UpdateUserDTO } from "./user.dto";
+import { ChangePasswordDTO, CreateUserDTO, LoginDto, UpdateUserDTO } from "./user.dto";
 import { UserStatus } from "./user.enum";
 import { IUserRepository, UserRepository } from "./user.repository";
 import { UserStateMachine } from "./user.state-machine";
 import { ApplicantRepository, IApplicantRepository } from "../applicants/applicant.repository";
 import { CacheService } from "../../util/cache/cache.service";
+import JwtPayload from './auth/auth.model';
 
 
 export class UserService {
@@ -79,7 +80,6 @@ export class UserService {
         return rest;
     }
 
-
     async login(dto: LoginDto) {
         const { email, password } = dto;
         const userDoc = await this.repository.findByEmail(email);
@@ -108,8 +108,9 @@ export class UserService {
 
         const payload: JwtPayload = {
             _id: userId,
-            applicantId,
-            email,
+            //applicantId,
+            user_name: "user",
+            //email,
             status: userDoc.status
         };
 
@@ -155,14 +156,13 @@ export class UserService {
 
     async changePassword(dto: ChangePasswordDTO) {
         const { id, data, userId } = dto;
-        const { oldPassword, newPassword } = data;
+        const { currentPassword, password: newPassword } = data;
 
         const user = await this.repository.findById(id);
         if (!user) throw new Error("User not found");
-
-
-        const isMatch = await bcrypt.compare(oldPassword, user.password);
-        if (!isMatch) throw new Error("Old password is incorrect");
+        //check here the current user(auth)
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) throw new Error("Current password is incorrect");
 
         const hashed = await UserService.prepareHash(newPassword);
         const changed = await this.repository.update(id, { password: hashed });

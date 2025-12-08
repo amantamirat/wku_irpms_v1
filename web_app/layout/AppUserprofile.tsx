@@ -1,9 +1,8 @@
 import ApplicantDetailDialog from "@/app/(main)/applicants/components/dialogs/ApplicantDetailDialog";
-import SaveDialog from "@/app/(main)/applicants/components/dialogs/SaveDialog";
+
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
-import ChangePasswordDialog from "@/app/(main)/users/dialogs/ChangePassword";
+import SaveDialog from "@/app/(main)/users/dialogs/SaveDialog";
 import { useAuth } from "@/contexts/auth-context";
-import App from "next/app";
 import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
 import { Sidebar } from "primereact/sidebar";
@@ -80,7 +79,9 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
                     onHide={() => setShowApplicantDetailDialog(false)}
                 />
             )}
-            {user?.linkedApplicant && (
+            {
+                /** 
+                 *  {user?.linkedApplicant && (
                 <SaveDialog
                     visible={showProfileDialog}
                     applicant={user.linkedApplicant as Applicant}
@@ -91,12 +92,18 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
                     onHide={() => setShowProfileDialog(false)}
                 />
             )}
-            {user?._id && <ChangePasswordDialog
+
+             {user?._id && <SaveDialog
                 visible={showPasswordDialog}
-                id={user._id}
+                //id={user._id}
+                user={user}
                 onComplete={() => setShowPasswordDialog(false)}
                 onHide={() => setShowPasswordDialog(false)}
             />}
+                */
+            }
+           
+           
         </>
 
     );
