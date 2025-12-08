@@ -123,7 +123,7 @@ export class AuthService {
         }
         const now = new Date();
         const bufferTime = 90 * 60 * 1000; //1 hr and 30 mins
-        if (user.reset_code && user.reset_code_expires && user.reset_code_expires.getTime() - now.getTime() > bufferTime) {
+        if (user.resetCode && user.resetCodeExpires && user.resetCodeExpires.getTime() - now.getTime() > bufferTime) {
             return;
         }
 
@@ -169,8 +169,8 @@ export class AuthService {
             });
         });
 
-        user.reset_code = code;
-        user.reset_code_expires = expiry;
+        user.resetCode = code;
+        user.resetCodeExpires = expiry;
         await user.save();
     }
 
@@ -184,16 +184,16 @@ export class AuthService {
         if (!user) {
             throw new Error("User not found");
         }
-        if (!user.reset_code_expires || user.reset_code_expires < new Date()) {
+        if (!user.resetCodeExpires || user.resetCodeExpires < new Date()) {
             throw new Error("Verification code has expired. Please request a new one.");
         }
-        if (!user.reset_code || user.reset_code !== reset_code) {
+        if (!user.resetCode || user.resetCode !== reset_code) {
             throw new Error("Invalid verification code.");
         }
         const hashedPassword = await UserService.prepareHash(password);
         user.password = hashedPassword;
-        user.reset_code = undefined;
-        user.reset_code_expires = undefined;
+        user.resetCode = undefined;
+        user.resetCodeExpires = undefined;
         await user.save();
     }
 
@@ -204,15 +204,15 @@ export class AuthService {
         if (!user) {
             throw new Error("User not found");
         }
-        if (!user.reset_code_expires || user.reset_code_expires < new Date()) {
+        if (!user.resetCodeExpires || user.resetCodeExpires < new Date()) {
             throw new Error("Verification code has expired. Please request a new one.");
         }
-        if (!user.reset_code || user.reset_code !== reset_code) {
+        if (!user.resetCode || user.resetCode !== reset_code) {
             throw new Error("Invalid verification code.");
         }
         user.status = UserStatus.active;
-        user.reset_code = undefined;
-        user.reset_code_expires = undefined;
+        user.resetCode = undefined;
+        user.resetCodeExpires = undefined;
         await user.save();
     }
 

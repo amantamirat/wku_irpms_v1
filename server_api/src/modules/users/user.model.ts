@@ -11,8 +11,8 @@ export interface IUser extends Document {
   status: UserStatus;
   roles: mongoose.Types.ObjectId[]; //remove
   organizations?: mongoose.Types.ObjectId[]; //remove
-  reset_code?: String;
-  reset_code_expires?: Date;
+  resetCode?: String;
+  resetCodeExpires?: Date;
   lastLogin?: Date,
   createdBy?: mongoose.Types.ObjectId;
   createdAt?: Date;
@@ -61,10 +61,10 @@ const UserSchema = new Schema<IUser>(
       type: Schema.Types.ObjectId,
       ref: COLLECTIONS.ORGANIZATION
     }],
-    reset_code: {
+    resetCode: {
       type: String
     },
-    reset_code_expires: {
+    resetCodeExpires: {
       type: Date
     },
     lastLogin: {

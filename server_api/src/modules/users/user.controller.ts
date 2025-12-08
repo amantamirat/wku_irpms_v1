@@ -2,13 +2,23 @@ import { Request, Response } from 'express';
 import { DeleteDto } from '../../util/delete.dto';
 import { errorResponse, successResponse } from '../../util/response';
 import { AuthenticatedRequest } from './user.middleware';
-import { ChangePasswordDTO, CreateUserDTO, LoginDto, UpdateUserDTO } from './user.dto';
+import { ChangePasswordDTO, CreateUserDTO, LoginDto, UpdateUserDTO, VerfyUserDto } from './user.dto';
 import { UserService } from './user.service';
 import { UserStatus } from './user.enum';
 
 const service = new UserService();
 
 export class UserController {
+
+  static async login(req: Request, res: Response) {
+    try {
+      const data: LoginDto = req.body;
+      const loggedInUser = await service.login(data);
+      successResponse(res, 201, "User logged in successfully", loggedInUser);
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
+    }
+  }
 
   static async create(req: AuthenticatedRequest, res: Response) {
     try {
@@ -21,12 +31,10 @@ export class UserController {
       };
       const created = await service.create(dto);
       successResponse(res, 201, "User created successfully", created);
-
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
   }
-
 
   static async getUsers(req: Request, res: Response) {
     try {
@@ -77,36 +85,6 @@ export class UserController {
     }
   }
 
-  /*
-  static async resetPassword(req: AuthenticatedRequest, res: Response) {
-    try {
-      if (!req.user) throw new Error("User not authorized!");
-      const { id } = req.params;
-      const { newPassword } = req.body;
-      const dto: UpdateUserDTO = {
-        id,
-        data: { password: newPassword },
-        userId: req.user._id,
-      };
-      const result = await service.reset(dto);
-      successResponse(res, 200, "Password reset successfully", result);
-    } catch (err: any) {
-      errorResponse(res, 400, err.message, err);
-    }
-  }
-*/
-
-  static async login(req: Request, res: Response) {
-    try {
-      const data: LoginDto = req.body;
-      const loggedInUser = await service.login(data);
-      successResponse(res, 201, "User logged in successfully", loggedInUser);
-    } catch (err: any) {
-      errorResponse(res, 400, err.message, err);
-    }
-  }
-
-
   static async deleteUser(req: AuthenticatedRequest, res: Response) {
     try {
       if (!req.user) throw new Error("User not authorized!");
@@ -122,7 +100,7 @@ export class UserController {
     }
   }
 
-  /////
+
   static async changePassword(req: AuthenticatedRequest, res: Response) {
     try {
       if (!req.user) throw new Error("User not authorized!");
@@ -140,6 +118,41 @@ export class UserController {
       errorResponse(res, 400, err.message, err);
     }
   }
+
+
+  static async sendVerificationCode(req: Request, res: Response) {
+    try {
+      const email = req.body.email;
+      await service.sendCode(email);
+      successResponse(res, 200, 'Verfification code sent to email.', { success: true });
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
+    }
+  }
+
+  static async resetUser(req: Request, res: Response) {
+    try {
+      const data: VerfyUserDto = req.body;
+      await service.resetPassword(data);
+      successResponse(res, 201, "Password resetted successfully", { success: true });
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
+    }
+  }
+
+  static async activateUser(req: Request, res: Response) {
+    try {
+      const data: VerfyUserDto = req.body;
+      await service.activateUser(data);
+      successResponse(res, 201, "User activated successfully", { success: true });
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
+    }
+  }
+
+
+
+
 
 }
 

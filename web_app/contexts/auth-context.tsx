@@ -43,8 +43,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const loggedInUser = await UserApi.loginUser(user);
             setUser(loggedInUser);
             return true;
-        } catch {
-            return false;
+        } catch(err) {
+            throw err;
+            //return false;
         }
     };
 

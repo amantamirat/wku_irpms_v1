@@ -1,9 +1,11 @@
 import { UserStatus } from "./user.enum";
 
+
+
 export interface CreateUserDTO {
     applicant?: string;
-    password: string;
     email: string;
+    password: string;
     status?: UserStatus;
     //createdBy?: string;
 }
@@ -11,8 +13,10 @@ export interface CreateUserDTO {
 export interface UpdateUserDTO {
     id: string;
     data: Partial<{
-        lastLogin: Date,
         password: string;
+        lastLogin: Date;
+        resetCode: string;
+        resetCodeExpires: Date;
         status: UserStatus;
     }>;
     userId?: string;
@@ -30,6 +34,12 @@ export interface ChangePasswordDTO {
 export interface LoginDto {
     email: string;
     password: string;
+}
+
+export interface VerfyUserDto {
+    email: string;
+    password?: string;
+    resetCode: string;
 }
 
 
