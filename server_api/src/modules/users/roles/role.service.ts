@@ -44,7 +44,6 @@ export class RoleService {
         const roleRepository = new RoleRepository();
         const permReposiroty = new PermissionRepository();
         const roleName = "admin";
-
         // find role if exists
         let adminRole = await roleRepository.findByName(roleName);
         if (!adminRole) {

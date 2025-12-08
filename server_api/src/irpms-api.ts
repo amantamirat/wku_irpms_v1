@@ -86,7 +86,7 @@ const PORT = process.env.SERVER_PORT || 5000;
     console.log('database connection established');
     await PermissionService.seedPermissions();
     await RoleService.initAdminRole();
-    await UserService.initAdminUser();
+   // await UserService.initAdminUser();
 
     app.listen(PORT, () => {
       console.log(`Server API is running at http://127.0.0.1:${PORT}`);

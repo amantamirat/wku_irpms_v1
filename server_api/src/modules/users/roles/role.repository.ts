@@ -13,10 +13,11 @@ export interface IRoleRepository {
 }
 
 export class RoleRepository implements IRoleRepository {
-    
+
     async findByName(roleName: string): Promise<IRole | null> {
         //throw new Error("Method not implemented.");
-        return Role.findOne({ name: roleName });
+        return Role.findOne({ name: roleName }).populate("permissions")
+            .lean<IRole>();
     }
 
 

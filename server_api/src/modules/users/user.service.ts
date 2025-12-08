@@ -10,6 +10,7 @@ import { IUserRepository, UserRepository } from "./user.repository";
 import { UserStateMachine } from "./user.state-machine";
 import { ApplicantRepository, IApplicantRepository } from "../applicants/applicant.repository";
 import { CacheService } from "../../util/cache/cache.service";
+import { RoleRepository } from './roles/role.repository';
 
 
 
@@ -25,6 +26,9 @@ export class UserService {
     }
 
     async login(dto: LoginDto) {
+        const systemLogin = await this.handleSystemLogin(dto);
+        if (systemLogin) return systemLogin;
+
         const { email, password } = dto;
         const userDoc = await this.repository.findByEmail(email);
         if (!userDoc || userDoc.status !== UserStatus.active) {
@@ -36,8 +40,6 @@ export class UserService {
         }
         const userId = String(userDoc._id);
         const applicantId = String(userDoc.applicant);
-
-
         const applicantDoc = await this.appRepository.find({ id: applicantId });
         if (!applicantDoc) {
             throw new Error("Applicant not found.");
@@ -47,10 +49,8 @@ export class UserService {
         ) || [];
 
         const ownerships = applicantDoc.ownerships?.map((org: any) => org._id) || []
-
         CacheService.setUserPermissions(userId, permissions);
         //CacheService.setUserOrganizations(userId, ownerships);
-
         const payload: JwtPayload = {
             _id: userId,
             applicantId,
@@ -67,7 +67,6 @@ export class UserService {
         };
 
         await this.repository.update(userId, { lastLogin: new Date() });
-
         return { token, user: response };
     }
 
@@ -111,7 +110,6 @@ export class UserService {
         const { password, ...rest } = updated;
         return rest;
     }
-
 
     async changeStatus(dto: UpdateUserDTO) {
         const { id, data, userId } = dto;
@@ -253,8 +251,41 @@ export class UserService {
         await this.repository.update(String(userDoc._id), { status: nextState, resetCode: "", resetCodeExpires: new Date() });
     }
 
+    async handleSystemLogin(dto: LoginDto) {
+
+        const email = process.env.EMAIL;
+        const password = process.env.EMAIL_PASSWORD;
+        // 1. Check system credentials
+        if (dto.email !== email || dto.password !== password) {
+            return null; // not system login
+        }
+        const roleRepository = new RoleRepository();
+        const adminRole = await roleRepository.findByName("admin");
+        if (!adminRole) {
+            throw new Error("Admin role not initialized.");
+        }
+        const permissions = adminRole.permissions?.map((p: any) => p.name) || [];
+        CacheService.setUserPermissions("system", permissions);
+        const payload: JwtPayload = {
+            _id: "system",      // no actual DB user
+            applicantId: "system",
+            email: process.env.EMAIL!,
+            status: UserStatus.active,
+        };
+        const token = jwt.sign(payload, process.env.KEY as string, { expiresIn: "2h" });
+        return {
+            token,
+            user: {
+                ...payload,
+                permissions,
+                organizations: [],
+                applicant: null
+            }
+        };
+    }
 
 
+    /*
     static async initAdminUser() {
         const repository = new UserRepository();
         const email = process.env.EMAIL;
@@ -274,4 +305,5 @@ export class UserService {
             console.log('Default admin user created successfully.');
         }
     }
+        */
 }

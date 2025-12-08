@@ -1,10 +1,11 @@
-import { AuthApi } from "@/app/(full-page)/auth/api/auth.api";
+import { UserApi } from "@/app/(main)/users/api/UserService";
+
 
 export const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const getAuthToken = (): string | null => {
     if (typeof window !== "undefined") {
-        return AuthApi.getToken();
+        return UserApi.getToken();
     }
     return null;
 };
@@ -30,7 +31,6 @@ export const ApiClient = {
     async get(endpoint: string): Promise<any> {
         const url = `${BASE_URL}${endpoint}`;
         const token = getAuthToken();
-
         try {
             const response = await fetch(url, {
                 headers: {
