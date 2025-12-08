@@ -1,5 +1,4 @@
 'use client';
-import { AuthApi } from '@/app/(full-page)/auth/api/auth.api';
 import { useRouter } from 'next/navigation';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
@@ -8,6 +7,7 @@ import { classNames } from 'primereact/utils';
 import { useContext, useRef, useState } from 'react';
 import { LayoutContext } from '../../../../layout/context/layoutcontext';
 import { useAuth } from '@/contexts/auth-context';
+import { UserApi } from '@/app/(main)/users/api/UserService';
 
 export default function ActivateAccountPage() {
   const [activating, setActivating] = useState(false);
@@ -29,7 +29,7 @@ export default function ActivateAccountPage() {
         msgs.current?.show({ severity: 'warn', summary: 'Validation', detail: 'Code is required.' });
         return;
       }
-      const data = await AuthApi.activateUser({ ...user, reset_code: activationCode });
+      const data = await UserApi.activateUser({ ...user, resetCode: activationCode });
       if (data.success) {
         msgs.current?.clear();
         msgs.current?.show({ severity: 'success', summary: 'Success!', detail: 'Your account has been activated successfully.' });

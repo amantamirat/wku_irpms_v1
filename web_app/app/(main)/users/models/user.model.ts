@@ -13,10 +13,10 @@ export type User = {
     password: string;
     currentPassword?: string;
     confirmedPassword?: string;
-    reset_code?: string;
-    reset_code_expires?: Date;
+    resetCode?: string;
+    resetCodeExpires?: Date;
     status?: UserStatus;
-    //credential informations
+    //other informations
     permissions?: string[];
     organizations?: any;
     iat?: number;

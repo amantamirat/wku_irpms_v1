@@ -1,5 +1,4 @@
 'use client';
-import { AuthApi } from '@/app/(full-page)/auth/api/auth.api';
 import NoAuthGuard from '@/components/NoAuthGuard';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from 'primereact/button';
@@ -8,34 +7,35 @@ import { Password } from 'primereact/password';
 import { classNames } from 'primereact/utils';
 import { useContext, useState } from 'react';
 import { LayoutContext } from '../../../../layout/context/layoutcontext';
-import { User, UserStatus, validateVerification, VerfyUserDto } from '../model/login.model';
+import { User, validateUser } from '@/app/(main)/users/models/user.model';
+import { UserApi } from '@/app/(main)/users/api/UserService';
 
 export default function ResetPassword() {
 
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
 
-  let emptyVerification: VerfyUserDto = {
+  let emptyVerification: User = {
     email: email,
-    reset_code: ''
+    password: "",
+    resetCode: ''
   };
 
   const router = useRouter();
   const [progressing, setProgressing] = useState(false);
-  const [credential, setCredential] = useState<VerfyUserDto>(emptyVerification);
+  const [credential, setCredential] = useState<User>(emptyVerification);
 
 
 
   const resetPassword = async () => {
     try {
       setProgressing(true);
-
-      const result = validateVerification(credential);
+      const result = validateUser(credential, false, true);
       if (!result.valid) {
         throw new Error(result.message);
       }
 
-      const data = await AuthApi.resetPassword(credential);
+      const data = await UserApi.resetPassword(credential);
       if (data.success) {
         alert('Your password has been reset successfully.');
         setTimeout(() => router.push('/auth/login'), 3000);
@@ -77,8 +77,8 @@ export default function ResetPassword() {
                 </label>
                 <InputText
                   id="verificationCode"
-                  value={credential.reset_code}
-                  onChange={(e) => setCredential({ ...credential, reset_code: e.target.value })}
+                  value={credential.resetCode}
+                  onChange={(e) => setCredential({ ...credential, resetCode: e.target.value })}
                   placeholder="Enter the 9-digit code you received"
                   className="w-full p-3 md:w-30rem"
                 />
@@ -105,8 +105,8 @@ export default function ResetPassword() {
                 </label>
                 <Password
                   id="confirmPassword"
-                  value={credential.confirmed_password}
-                  onChange={(e) => setCredential({ ...credential, confirmed_password: e.target.value })}
+                  value={credential.confirmedPassword}
+                  onChange={(e) => setCredential({ ...credential, confirmedPassword: e.target.value })}
                   placeholder="Confirm new password"
                   toggleMask
                   className="w-full"

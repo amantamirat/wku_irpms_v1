@@ -2,25 +2,16 @@ import { ApiClient } from "@/api/ApiClient";
 import { sanitizeUser, User } from "../models/user.model";
 
 const end_point = '/users/';
+const send_verification_code_end_point = '/users/send-verification-code';
+const reset_password_end_point = '/users/reset-password';
+const activate_user_end_point = '/users/activate-user';
 const tokenStorage = 'authToken';
 const userStorage = 'authUser';
 
 export const UserApi = {
 
-    async getUsers(showDeleted: boolean = false): Promise<User[]> {
-        const data = await ApiClient.get(`${end_point}?showDeleted=${String(showDeleted)}`);
-        return data as User[];
-    },
-
-    async createUser(user: Partial<User>): Promise<User> {
-        const sanitized = sanitizeUser(user);
-        const created = await ApiClient.post(end_point, sanitized);
-        return created as User;
-    },
-
     async loginUser(credentials: User): Promise<any> {
         const loggedInData = await ApiClient.post(`${end_point}login`, credentials);
-        console.log(`${end_point}login`);
         const { token, user } = loggedInData;
         localStorage.setItem(tokenStorage, token);
         localStorage.setItem(userStorage, JSON.stringify(user));
@@ -35,18 +26,29 @@ export const UserApi = {
         return null;
     },
 
-    logout() {
-        localStorage.removeItem(tokenStorage);
-        localStorage.removeItem(userStorage);
-        //router.push('/auth/login');
-    },
-
     getToken(): string | null {
         const tokenInfo = localStorage.getItem(tokenStorage);
         if (tokenInfo) {
             return tokenInfo
         }
         return null;
+    },
+
+    logout() {
+        localStorage.removeItem(tokenStorage);
+        localStorage.removeItem(userStorage);
+        //router.push('/auth/login');
+    },
+
+    async createUser(user: Partial<User>): Promise<User> {
+        const sanitized = sanitizeUser(user);
+        const created = await ApiClient.post(end_point, sanitized);
+        return created as User;
+    },
+
+    async getUsers(showDeleted: boolean = false): Promise<User[]> {
+        const data = await ApiClient.get(end_point);
+        return data as User[];
     },
 
     async updateUser(user: Partial<User>, changeStatus = false): Promise<User> {
@@ -75,6 +77,27 @@ export const UserApi = {
         const url = `${end_point}${password._id}/change-password`;
         const result = await ApiClient.patch(url, password);
         return result;
+    },
+
+    async sendVerificationCode(email: string): Promise<any> {
+        const response = await ApiClient.post(send_verification_code_end_point, { email: email });
+        return response;
+    },
+
+    async resetPassword(credential: Partial<User>): Promise<any> {
+        if (!credential.resetCode) {
+            throw new Error("verification code required.");
+        }
+        const response = await ApiClient.post(reset_password_end_point, credential);
+        return response;
+    },
+
+    async activateUser(credential: Partial<User>): Promise<any> {
+        if (!credential.resetCode) {
+            throw new Error("verification code required.");
+        }
+        const response = await ApiClient.post(activate_user_end_point, credential);
+        return response;
     },
 
 };

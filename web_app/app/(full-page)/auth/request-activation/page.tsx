@@ -1,5 +1,5 @@
 'use client';
-import { AuthApi } from '@/app/(full-page)/auth/api/auth.api';
+import { UserApi } from '@/app/(main)/users/api/UserService';
 import RequireAuth from '@/components/RequireAuth';
 import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
@@ -22,7 +22,7 @@ export default function RequestActivationPage() {
       if (!user || !user.email) {
         throw new Error('Activation failed.');
       }
-      const res = await AuthApi.sendVerificationCode(user?.email ?? "");
+      const res = await UserApi.sendVerificationCode(user?.email ?? "");
       if (res.success) {
         msgs.current?.clear();
         msgs.current?.show({ severity: 'success', summary: 'Almost There!', detail: 'Verfication code has been sent to your email.' });
@@ -56,7 +56,6 @@ export default function RequestActivationPage() {
                 </p>
               </div>
               <div className="mb-4 text-center">
-                <div className="text-xl"><strong>Username:</strong> {user?.user_name}</div>
                 <div className="text-xl mt-2"><strong>Email:</strong> {user?.email}</div>
               </div>
               <Messages ref={msgs} />
