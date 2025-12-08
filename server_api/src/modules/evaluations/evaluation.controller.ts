@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { EvaluationService } from "./evaluation.service";
 import { errorResponse, successResponse } from "../../util/response";
-import { AuthenticatedRequest } from "../users/auth/auth.middleware";
+import { AuthenticatedRequest } from "../users/user.middleware";
 import { CreateEvaluationDTO, UpdateEvaluationDTO } from "./evaluation.dto";
 
 export class EvaluationController {

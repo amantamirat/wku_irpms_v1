@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { ProjectController } from './project.controller';
-import { checkPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
+import { checkPermission, verifyActiveAccount } from '../users/user.middleware';
 import { PERMISSIONS } from '../../util/permissions';
 
 const router: Router = Router();

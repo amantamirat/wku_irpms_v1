@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ExperienceController } from './experience.controller';
 import { PERMISSIONS } from '../../../util/permissions';
-import { verifyActiveAccount, checkPermission } from '../../users/auth/auth.middleware';
+import { verifyActiveAccount, checkPermission } from '../../users/user.middleware';
 
 
 const router: Router = Router();

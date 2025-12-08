@@ -2,13 +2,12 @@ import jwt from 'jsonwebtoken';
 import bcrypt from "bcryptjs";
 import { DeleteDto } from "../../util/delete.dto";
 import { Role } from "./roles/role.model";
-import { ChangePasswordDTO, CreateUserDTO, LoginDto, UpdateUserDTO } from "./user.dto";
+import JwtPayload, { ChangePasswordDTO, CreateUserDTO, LoginDto, UpdateUserDTO } from "./user.dto";
 import { UserStatus } from "./user.enum";
 import { IUserRepository, UserRepository } from "./user.repository";
 import { UserStateMachine } from "./user.state-machine";
 import { ApplicantRepository, IApplicantRepository } from "../applicants/applicant.repository";
 import { CacheService } from "../../util/cache/cache.service";
-import JwtPayload from './auth/auth.model';
 
 
 export class UserService {
@@ -93,6 +92,7 @@ export class UserService {
         const userId = String(userDoc._id);
         const applicantId = String(userDoc.applicant);
 
+
         const applicantDoc = await this.appRepository.find({ id: applicantId });
         if (!applicantDoc) {
             throw new Error("Applicant not found.");
@@ -103,14 +103,14 @@ export class UserService {
 
         const ownerships = applicantDoc.ownerships?.map((org: any) => org._id) || []
 
-        CacheService.setUserOrganizations(applicantId, ownerships);
-        CacheService.setUserPermissions(applicantId, permissions);
+        CacheService.setUserPermissions(userId, permissions);
+        //CacheService.setUserOrganizations(userId, ownerships);
+
 
         const payload: JwtPayload = {
             _id: userId,
-            //applicantId,
-            user_name: "user",
-            //email,
+            applicantId,
+            email,
             status: userDoc.status
         };
 

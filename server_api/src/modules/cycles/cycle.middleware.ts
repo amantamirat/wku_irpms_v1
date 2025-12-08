@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { checkPermission } from '../users/auth/auth.middleware';
+import { checkPermission } from '../users/user.middleware';
 import { PermissionAction, PERMISSIONS } from '../../util/permissions';
 import { errorResponse } from '../../util/response';
 import { CycleType } from './cycle.d';

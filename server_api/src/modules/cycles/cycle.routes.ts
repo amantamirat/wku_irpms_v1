@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { checkPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
+import { checkPermission, verifyActiveAccount } from '../users/user.middleware';
 import { CycleController } from './cycle.controller';
 import { checkCyclePermission } from './cycle.middleware';
 import { PERMISSIONS } from '../../util/permissions';

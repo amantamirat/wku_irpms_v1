@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { DeleteDto } from '../../../util/delete.dto';
 import { errorResponse, successResponse } from '../../../util/response';
-import { AuthenticatedRequest } from '../../users/auth/auth.middleware';
+import { AuthenticatedRequest } from '../../users/user.middleware';
 import {
     CreateCollaboratorDto,
     GetCollaboratorsOptions,

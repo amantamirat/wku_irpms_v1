@@ -8,7 +8,7 @@ import {
     GetProjectStagesDTO,
     UpdateProjectStageDTO
 } from "./project-stage.dto";
-import { AuthenticatedRequest } from "../../../users/auth/auth.middleware";
+import { AuthenticatedRequest } from "../../../users/user.middleware";
 import { ProjectStageService } from "./project-stage.service";
 
 const projectStageService = new ProjectStageService();

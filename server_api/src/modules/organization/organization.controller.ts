@@ -11,7 +11,7 @@ import {
 import { OrganizationService } from "./organization.service";
 import { OrganizationRepository } from "./organization.repository";
 import { Unit } from "./organization.enum";
-import { AuthenticatedRequest } from "../users/auth/auth.middleware";
+import { AuthenticatedRequest } from "../users/user.middleware";
 
 const service = new OrganizationService(new OrganizationRepository());
 

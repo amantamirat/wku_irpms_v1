@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { PermissionAction, PERMISSIONS } from "../../util/permissions";
 import { errorResponse } from "../../util/response";
-import { checkPermission } from "../users/auth/auth.middleware";
+import { checkPermission } from "../users/user.middleware";
 import { Unit } from "./organization.enum";
 
 const UNIT_PERMISSION_KEY: Record<Unit, keyof typeof PERMISSIONS.ORGANIAZTION> = {

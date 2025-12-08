@@ -1,10 +1,10 @@
 import dotenv from 'dotenv';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { CacheService } from '../../../util/cache/cache.service';
-import { errorResponse } from '../../../util/response';
-import { UserStatus } from '../user.enum';
-import JwtPayload from './auth.model';
+import { CacheService } from '../../util/cache/cache.service';
+import { errorResponse } from '../../util/response';
+import { UserStatus } from './user.enum';
+import JwtPayload from './user.dto';
 
 dotenv.config();
 

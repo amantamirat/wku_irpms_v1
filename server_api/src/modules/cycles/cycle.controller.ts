@@ -1,7 +1,7 @@
 import { Response } from "express";
 import mongoose from "mongoose";
 import { errorResponse, successResponse } from "../../util/response";
-import { AuthenticatedRequest } from "../users/auth/auth.middleware";
+import { AuthenticatedRequest } from "../users/user.middleware";
 import { CycleStatus, CycleType } from './cycle.d';
 import {
     CreateCycleDto,

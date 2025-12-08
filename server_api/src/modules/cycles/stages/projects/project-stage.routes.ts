@@ -1,7 +1,7 @@
 import express from "express";
 import { ProjectStageController } from "./project-stage.controller";
 import { upload } from "../../../../util/multer";
-import { verifyActiveAccount } from "../../../users/auth/auth.middleware";
+import { verifyActiveAccount } from "../../../users/user.middleware";
 
 
 const router = express.Router();

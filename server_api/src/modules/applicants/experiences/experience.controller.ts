@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { AuthenticatedRequest } from "../../users/auth/auth.middleware";
+import { AuthenticatedRequest } from "../../users/user.middleware";
 import { successResponse, errorResponse } from "../../../util/response";
 import { ExperienceService } from "./experience.service";
 import {

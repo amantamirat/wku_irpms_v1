@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import mongoose, { Types } from 'mongoose';
 import { errorResponse, successResponse } from '../../util/response';
-import { AuthenticatedRequest } from '../users/auth/auth.middleware';
+import { AuthenticatedRequest } from '../users/user.middleware';
 import { CreateThemeDto, GetThemesOptions, ThemeService } from './theme.service';
 import { ThemeType } from './theme.enum';
 

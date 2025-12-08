@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { CriterionService } from "./criterion.service";
 import { CreateCriterionDTO, GetCriteriaDTO, ImportCriteriaBatchDTO, UpdateCriterionDTO } from "./criterion.dto";
 import { successResponse, errorResponse } from "../../../util/response";
-import { AuthenticatedRequest } from "../../users/auth/auth.middleware";
+import { AuthenticatedRequest } from "../../users/user.middleware";
 
 export class CriterionController {
     static async createCriterion(req: AuthenticatedRequest, res: Response) {
