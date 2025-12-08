@@ -2,7 +2,7 @@ import express, { Application } from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import authRoutes from './modules/users/auth/auth.routes';
+//import authRoutes from './modules/users/auth/auth.routes';
 
 import organizationRoutes from './modules/organization/organization.routes';
 import applicantRoutes from './modules/applicants/applicant.routes';
@@ -43,7 +43,7 @@ const app: Application = express();
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/auth", authRoutes);
+//app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/permissions", permissionRoutes);

@@ -123,6 +123,12 @@ const AppMenu = () => {
         },
         {
             label: 'Manage',
+            visible: hasPermission(
+                [
+                    PERMISSIONS.CALENDAR.CREATE,
+                    PERMISSIONS.POSITION.CREATE
+                ]
+            ),
             items: [
                 {
                     label: 'Calendars',
@@ -136,7 +142,6 @@ const AppMenu = () => {
                         ]
                     )
                 },
-
                 {
                     label: 'Positions',
                     icon: 'pi pi-fw pi-flag',

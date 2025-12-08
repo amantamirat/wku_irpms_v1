@@ -17,19 +17,20 @@ export class ApplicantController {
             const {
                 workspace,
                 name,
-                lastName,
                 birthDate,
                 gender,
-                organization,
+                fin,
+                orcid,
                 email,
                 accessibility
             } = req.body;
             const data: CreateApplicantDTO = {
                 workspace,
                 name,
-                //lastName,
                 birthDate: new Date(birthDate),
                 gender,
+                fin,
+                orcid,
                 email,
                 accessibility: accessibility || []
             };
@@ -65,9 +66,10 @@ export class ApplicantController {
             const {
                 workspace,
                 name,
-                //lastName,
                 birthDate,
                 gender,
+                fin,
+                orcid,
                 email,
                 accessibility,
                 roles,
@@ -79,9 +81,10 @@ export class ApplicantController {
                 data: {
                     workspace,
                     name,
-                    //lastName,
                     birthDate,
                     gender,
+                    fin,
+                    orcid,
                     email,
                     accessibility,
                     roles,

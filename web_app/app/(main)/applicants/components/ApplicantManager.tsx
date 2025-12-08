@@ -110,9 +110,7 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
         ] : []),
 
         { header: "Name", field: "name", sortable: true },
-        { 
-           // header: "Last Name", field: "lastName", sortable: true 
-        },
+
         {
             header: "Gender",
             body: (row: Applicant) => (
@@ -126,6 +124,12 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
             header: "Birth Date",
             body: (row: Applicant) =>
                 new Date(row.birthDate!).toLocaleDateString("en-CA")
+        },
+        {
+            header: "FIN", field: "fin", sortable: true
+        },
+        {
+            header: "ORCID", field: "orcid", sortable: true
         },
         { header: "Email", field: "email" }
     ];

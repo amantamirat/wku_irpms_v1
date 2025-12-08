@@ -29,11 +29,11 @@ export type Applicant = {
     _id?: string;
     workspace: string | Organization;
     name: string;
-    //lastName: string;
     birthDate: Date;
     gender: Gender;
     email?: string;
-    //user?: string;
+    fin?: string;
+    orcid?: string;
     accessibility?: Accessibility[];
     roles?: Role[] | string[];
     ownerships?: Organization[] | string[];
@@ -68,11 +68,6 @@ export const validateApplicant = (applicant: Applicant): { valid: boolean; messa
         return { valid: false, message: 'Name is required.' };
     }
 
-    /*
-    if (!applicant.lastName) {
-        return { valid: false, message: 'Last name is required.' };
-    }
-        */
     if (!applicant.birthDate || isNaN(new Date(applicant.birthDate).getTime())) {
         return { valid: false, message: 'Valid birth date is required.' };
     }
@@ -89,6 +84,18 @@ export const validateApplicant = (applicant: Applicant): { valid: boolean; messa
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(applicant.email)) {
             return { valid: false, message: "Email is not valid." };
+        }
+    }
+    if (applicant.fin) {
+        const finRegex = /^\d{12}$/;
+        if (!finRegex.test(applicant.fin)) {
+            return { valid: false, message: "FIN must be a 12-digit number." };
+        }
+    }
+    if (applicant.orcid) {
+        const orcidRegex = /^\d{4}-\d{4}-\d{4}-\d{4}$/;
+        if (!orcidRegex.test(applicant.orcid)) {
+            return { valid: false, message: "ORCID must follow the format xxxx-xxxx-xxxx-xxxx." };
         }
     }
     return { valid: true };

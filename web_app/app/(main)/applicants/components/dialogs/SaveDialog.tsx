@@ -172,23 +172,6 @@ const SaveApplicantDialog = ({ visible, applicant, hasWorkspace, onHide, onCompl
                         )}
                     </div>
 
-                    {
-                        /**
-                         *  <div className="field">
-                                            <label htmlFor="lastName">Last Name</label>
-                                            <InputText
-                                                id="lastName"
-                                                value={localApplicant.lastName}
-                                                onChange={(e) => setLocalApplicant({ ...localApplicant, lastName: e.target.value })}
-                                                className={classNames({ 'p-invalid': submitted && !localApplicant.lastName })}
-                                            />
-                                            {submitted && !localApplicant.lastName && (
-                                                <small className="p-invalid">Last Name is required.</small>
-                                            )}
-                                        </div>
-                         */
-                    }
-
                     <div className="field">
                         <label htmlFor="birthDate">Birth Date</label>
                         <PrimeCalendar
@@ -211,6 +194,52 @@ const SaveApplicantDialog = ({ visible, applicant, hasWorkspace, onHide, onCompl
                             placeholder="Select Gender"
                             className={classNames({ 'p-invalid': submitted && !localApplicant.gender })}
                         />
+                    </div>
+
+                    <div className="field">
+                        <label htmlFor="fin">FIN (12-digit)</label>
+                        <InputText
+                            id="fin"
+                            value={localApplicant.fin || ""}
+                            onChange={(e) =>
+                                setLocalApplicant({ ...localApplicant, fin: e.target.value })
+                            }
+                            className={classNames({
+                                'p-invalid':
+                                    submitted &&
+                                    localApplicant.fin &&
+                                    !/^\d{12}$/.test(localApplicant.fin),
+                            })}
+                            maxLength={12}
+                        />
+                        {submitted && localApplicant.fin && !/^\d{12}$/.test(localApplicant.fin) && (
+                            <small className="p-invalid">FIN must be exactly 12 digits.</small>
+                        )}
+                    </div>
+
+                    <div className="field">
+                        <label htmlFor="orcid">ORCID (xxxx-xxxx-xxxx-xxxx)</label>
+                        <InputText
+                            id="orcid"
+                            value={localApplicant.orcid || ""}
+                            onChange={(e) =>
+                                setLocalApplicant({ ...localApplicant, orcid: e.target.value })
+                            }
+                            className={classNames({
+                                'p-invalid':
+                                    submitted &&
+                                    localApplicant.orcid &&
+                                    !/^\d{4}-\d{4}-\d{4}-\d{4}$/.test(localApplicant.orcid),
+                            })}
+                            placeholder="0000-0000-0000-0000"
+                        />
+                        {submitted &&
+                            localApplicant.orcid &&
+                            !/^\d{4}-\d{4}-\d{4}-\d{4}$/.test(localApplicant.orcid) && (
+                                <small className="p-invalid">
+                                    ORCID must follow the format xxxx-xxxx-xxxx-xxxx.
+                                </small>
+                            )}
                     </div>
 
                     <div className="field">
@@ -247,7 +276,7 @@ const SaveApplicantDialog = ({ visible, applicant, hasWorkspace, onHide, onCompl
                                 dataKey="_id"
                                 value={localApplicant.roles}
                                 options={roles}
-                                optionLabel="role_name"
+                                optionLabel="name"
                                 onChange={(e) => setLocalApplicant({ ...localApplicant, roles: e.value })}
                                 placeholder="select roles"
                                 display="chip"

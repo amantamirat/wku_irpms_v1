@@ -1,5 +1,4 @@
 import ApplicantDetailDialog from "@/app/(main)/applicants/components/dialogs/ApplicantDetailDialog";
-
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
 import SaveDialog from "@/app/(main)/users/dialogs/SaveDialog";
 import { useAuth } from "@/contexts/auth-context";
@@ -28,21 +27,23 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
     return (
         <>
             <Sidebar visible={props.visible} position="right" onHide={() => props.setVisible(false)}>
-                <h2>Welcome, {user?.user_name || 'User'}</h2>
+                <h2>Welcome, {((user?.applicant) as Applicant).name || 'User'}</h2>
                 <p>
                     You are signed in. Use the buttons below to access your account features.
                 </p>
                 <Divider />
                 <p>
                     <Button
-                        label="My Workspace"
+                        label="My Profile"
                         severity="help"
                         icon="pi pi-list"
                         className="w-full"
                         onClick={() => setShowApplicantDetailDialog(true)}
                     />
                 </p>
-                <p>
+                {
+                    /**
+                     * <p>
                     <Button
                         label="My Profile"
                         severity="info"
@@ -51,6 +52,9 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
                         onClick={() => setShowProfileDialog(true)}
                     />
                 </p>
+                    */
+                }
+
                 <p>
                     <Button
                         label="Change Password"
@@ -72,10 +76,10 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
 
             </Sidebar>
 
-            {user?.linkedApplicant && (
+            {user?.applicant && (
                 <ApplicantDetailDialog
                     visible={showApplicantDetailDialog}
-                    applicant={user.linkedApplicant as Applicant}
+                    applicant={user.applicant as Applicant}
                     onHide={() => setShowApplicantDetailDialog(false)}
                 />
             )}
@@ -91,19 +95,19 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
                     }}
                     onHide={() => setShowProfileDialog(false)}
                 />
-            )}
-
-             {user?._id && <SaveDialog
+            )}*/}
+            
+            {(user?._id&&user.applicant) && <SaveDialog
                 visible={showPasswordDialog}
-                //id={user._id}
                 user={user}
+                enableCurrentPassword={true}
                 onComplete={() => setShowPasswordDialog(false)}
                 onHide={() => setShowPasswordDialog(false)}
             />}
-                */
-            }
-           
-           
+
+
+
+
         </>
 
     );
