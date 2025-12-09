@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, createContext } from 'react';
+import React, { useState, createContext, useEffect } from 'react';
 import { LayoutState, ChildContainerProps, LayoutConfig, LayoutContextProps } from '@/types';
 export const LayoutContext = createContext({} as LayoutContextProps);
 
@@ -22,6 +22,35 @@ export const LayoutProvider = ({ children }: ChildContainerProps) => {
         menuHoverActive: false
     });
 
+    // 👇 OS Theme detection and application
+    useEffect(() => {
+        const link = document.getElementById("theme-css") as HTMLLinkElement;
+
+        const applyTheme = () => {
+            const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+            const newTheme = isDark ? 'lara-dark-indigo' : 'lara-light-indigo';
+            const newColorScheme = isDark ? 'dark' : 'light';
+
+            // Update Sakai layoutConfig state
+            setLayoutConfig((prev) => ({ ...prev, theme: newTheme, colorScheme: newColorScheme }));
+
+            // Update the <link> CSS file
+            if (link) link.href = `/themes/${newTheme}/theme.css`;
+        };
+
+        // Apply theme initially
+        applyTheme();
+
+        // Listen for OS theme changes
+        const watcher = window.matchMedia("(prefers-color-scheme: dark)");
+        watcher.addEventListener("change", applyTheme);
+
+        return () => watcher.removeEventListener("change", applyTheme);
+    }, []);
+    // the os theme detector ends here 
+    
+    
     const onMenuToggle = () => {
         if (isOverlay()) {
             setLayoutState((prevLayoutState) => ({ ...prevLayoutState, overlayMenuActive: !prevLayoutState.overlayMenuActive }));
