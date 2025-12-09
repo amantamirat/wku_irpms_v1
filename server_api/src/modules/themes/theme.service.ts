@@ -79,7 +79,7 @@ export class ThemeService {
         if (options.parent) filter.parent = options.parent;
         if (options.thematic_area) filter.thematic_area = options.thematic_area;
         if (options.directorate) filter.directorate = options.directorate;
-        return await BaseTheme.find(filter).lean();
+        return await BaseTheme.find(filter).populate("directorate").lean();
     }
 
     // ✅ GET user-owned themes 
