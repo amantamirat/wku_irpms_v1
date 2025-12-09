@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { OptionService } from "./option.service";
 import { CreateOptionDTO, GetOptionsDTO, UpdateOptionDTO, DeleteOptionDTO } from "./option.dto";
-import { successResponse, errorResponse } from "../../../../util/response";
+import { successResponse, errorResponse } from "../../../../common/helpers/response";
 import { AuthenticatedRequest } from "../../../users/user.middleware";
 
 export class OptionController {

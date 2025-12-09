@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import { errorResponse, successResponse } from '../../../util/response';
+import { errorResponse, successResponse } from '../../../common/helpers/response';
 import { CreateProjectThemeDto, GetProjectThemeOptions, ProjectThemeService } from './project.theme.service';
 import mongoose from 'mongoose';
 

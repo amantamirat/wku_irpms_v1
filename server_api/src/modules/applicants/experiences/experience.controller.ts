@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { AuthenticatedRequest } from "../../users/user.middleware";
-import { successResponse, errorResponse } from "../../../util/response";
+import { successResponse, errorResponse } from "../../../common/helpers/response";
 import { ExperienceService } from "./experience.service";
 import {
     CreateExperienceDTO,

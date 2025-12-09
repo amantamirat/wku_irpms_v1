@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { errorResponse, successResponse } from '../../util/response';
+import { errorResponse, successResponse } from '../../common/helpers/response';
 import { CalendarService } from './calendar.service';
 import { CreateCalendarDTO, UpdateCalendarDTO } from './calendar.dto';
 

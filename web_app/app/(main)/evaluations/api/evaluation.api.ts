@@ -33,10 +33,12 @@ export const EvaluationApi = {
         return data as Evaluation[];
     },
 
+    /*
     async getUserEvaluations(): Promise<Evaluation[]> {
         const data = await ApiClient.get(`${end_point}/user`);
         return data as Evaluation[];
     },
+    */
 
     async updateEvaluation(evaluation: Partial<Evaluation>): Promise<Evaluation> {
         if (!evaluation._id) {

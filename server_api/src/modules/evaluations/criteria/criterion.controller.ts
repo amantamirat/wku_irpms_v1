@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { CriterionService } from "./criterion.service";
 import { CreateCriterionDTO, GetCriteriaDTO, ImportCriteriaBatchDTO, UpdateCriterionDTO } from "./criterion.dto";
-import { successResponse, errorResponse } from "../../../util/response";
+import { successResponse, errorResponse } from "../../../common/helpers/response";
 import { AuthenticatedRequest } from "../../users/user.middleware";
 
 export class CriterionController {

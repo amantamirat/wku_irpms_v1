@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import mongoose, { Types } from 'mongoose';
-import { errorResponse, successResponse } from '../../util/response';
+import { errorResponse, successResponse } from '../../common/helpers/response';
 import { AuthenticatedRequest } from '../users/user.middleware';
 import { CreateThemeDto, GetThemesOptions, ThemeService } from './theme.service';
 import { ThemeType } from './theme.enum';

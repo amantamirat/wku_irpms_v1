@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { StageService } from "./stage.service";
 import { CreateStageDTO, GetStagesDTO, UpdateStageDTO } from "./stage.dto";
-import { successResponse, errorResponse } from "../../../util/response";
+import { successResponse, errorResponse } from "../../../common/helpers/response";
 import { StageStatus } from "./stage.enum";
 const service = new StageService();
 export class StageController {

@@ -1,6 +1,6 @@
 // reviewer.controller.ts
 import { Request, Response } from "express";
-import { errorResponse, successResponse } from "../../../../../util/response";
+import { errorResponse, successResponse } from "../../../../../common/helpers/response";
 import { ReviewerService } from "./reviewer.service";
 import { CreateReviewerDTO, GetReviewersDTO, UpdateReviewerDTO, DeleteReviewerDTO } from "./reviewer.dto";
 import { AuthenticatedRequest } from "../../../../users/user.middleware";

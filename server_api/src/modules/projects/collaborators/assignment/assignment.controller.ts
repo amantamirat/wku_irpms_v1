@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { AssignmentService, CreateAssignmentDto, GetAssignmentOptions, UpdateAssignmentDto } from './assignment.service';
-import { errorResponse, successResponse } from '../../../../util/response';
+import { errorResponse, successResponse } from '../../../../common/helpers/response';
 
 
 export class AssignmentController {

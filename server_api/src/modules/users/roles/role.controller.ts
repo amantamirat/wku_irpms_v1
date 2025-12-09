@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { RoleService } from './role.service';
-import { errorResponse, successResponse } from '../../../util/response';
+import { errorResponse, successResponse } from '../../../common/helpers/response';
 import { CreateRoleDto, UpdateRoleDto } from './role.dto';
 import { AuthenticatedRequest } from '../user.middleware';
 

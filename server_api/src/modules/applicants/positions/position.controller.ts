@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
-import { errorResponse, successResponse } from "../../../util/response";
+import { errorResponse, successResponse } from "../../../common/helpers/response";
 import { CreatePositionDto, GetPositionOptions, PositionService } from "./position.service";
 import { PositionType } from "./position.enum";
 //import { Scope } from "../applicant.enum";

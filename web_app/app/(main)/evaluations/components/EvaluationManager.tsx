@@ -45,7 +45,7 @@ const EvaluationManager = () => {
     // Fetch evaluations
     const fetchEvaluations = useCallback(async () => {
         try {
-            const data = await EvaluationApi.getUserEvaluations();
+            const data = await EvaluationApi.getEvaluations();
             setEvaluations(data);
         } catch (err) {
             setError(`Failed to load evaluation data: ${err}`);

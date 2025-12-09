@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { checkPermission } from '../users/user.middleware';
 import { PermissionAction, PERMISSIONS } from '../../util/permissions';
-import { errorResponse } from '../../util/response';
+import { errorResponse } from '../../common/helpers/response';
 import { CycleType } from './cycle.d';
 
 

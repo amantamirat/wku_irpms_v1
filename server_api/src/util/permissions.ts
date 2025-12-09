@@ -1,4 +1,4 @@
-import { Experience } from "../modules/applicants/experiences/experience.model";
+
 
 export const PERMISSIONS = {
   USER: {

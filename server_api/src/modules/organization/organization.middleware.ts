@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { PermissionAction, PERMISSIONS } from "../../util/permissions";
-import { errorResponse } from "../../util/response";
+import { errorResponse } from "../../common/helpers/response";
 import { checkPermission } from "../users/user.middleware";
 import { Unit } from "./organization.enum";
 

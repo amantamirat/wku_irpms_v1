@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { ConstraintService } from "./constraint.service";
-import { errorResponse, successResponse } from "../../../util/response";
+import { errorResponse, successResponse } from "../../../common/helpers/response";
 import { ConstraintType } from "./constraint-type.enum";
 import { CreateProjectConstraintDTO, UpdateProjectConstraintDTO } from "./project/project-constraint.dto";
 import { CreateApplicantConstraintDTO } from "./applicant/applicant-constaint.dto";

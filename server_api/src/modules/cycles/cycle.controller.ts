@@ -1,6 +1,6 @@
 import { Response } from "express";
 import mongoose from "mongoose";
-import { errorResponse, successResponse } from "../../util/response";
+import { errorResponse, successResponse } from "../../common/helpers/response";
 import { AuthenticatedRequest } from "../users/user.middleware";
 import { CycleStatus, CycleType } from './cycle.d';
 import {

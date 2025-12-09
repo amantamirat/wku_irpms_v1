@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { DeleteDto } from '../../util/delete.dto';
-import { errorResponse, successResponse } from '../../util/response';
+import { errorResponse, successResponse } from '../../common/helpers/response';
 import { AuthenticatedRequest } from './user.middleware';
 import { ChangePasswordDTO, CreateUserDTO, LoginDto, UpdateUserDTO, VerfyUserDto } from './user.dto';
 import { UserService } from './user.service';

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import fs from "fs";
-import { errorResponse, successResponse } from "../../../../util/response";
+import { errorResponse, successResponse } from "../../../../common/helpers/response";
 
 import {
     CreateProjectStageDTO,

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { errorResponse, successResponse } from "../../../../../../util/response";
+import { errorResponse, successResponse } from "../../../../../../common/helpers/response";
 import { ResultService } from "./result.service";
 import { CreateResultDTO, GetResultsDTO, UpdateResultDTO, DeleteResultDTO } from "./result.dto";
 import { AuthenticatedRequest } from "../../../../../users/user.middleware";

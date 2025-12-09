@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { PermissionService } from './permission.service';
-import { errorResponse, successResponse } from '../../../util/response';
+import { errorResponse, successResponse } from '../../../common/helpers/response';
 
 const service = new PermissionService();
 export class PermissionController {
