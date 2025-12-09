@@ -118,8 +118,8 @@ const OrganizationManager = ({ type, parent }: OrganizationManagerProps) => {
                 field: "academicLevel",
                 sortable: true,
                 body: (r: Organization) => (
-                    <span className={`academic-badge level-${r.academic_level?.toLowerCase()}`}>
-                        {r.academic_level}
+                    <span className={`academic-badge level-${r.academicLevel?.toLowerCase()}`}>
+                        {r.academicLevel}
                     </span>
                 )
             }]

@@ -23,7 +23,7 @@
     "category": "User Management",
     "name": "user:delete",
     "description": "Delete users"
-  }, 
+  },
   {
     "category": "Role Management",
     "name": "role:create",
@@ -43,6 +43,26 @@
     "category": "Role Management",
     "name": "role:delete",
     "description": "Delete roles"
+  },
+  {
+    "category": "Specialization Management",
+    "name": "specialization:create",
+    "description": "Create specialization entries"
+  },
+  {
+    "category": "Specialization Management",
+    "name": "specialization:read",
+    "description": "Read specialization entries"
+  },
+  {
+    "category": "Specialization Management",
+    "name": "specialization:update",
+    "description": "Update specialization entries"
+  },
+  {
+    "category": "Specialization Management",
+    "name": "specialization:delete",
+    "description": "Delete specialization entries"
   },
   {
     "category": "Organization Management",
@@ -163,7 +183,7 @@
     "category": "Organization Management",
     "name": "external:delete",
     "description": "Delete external units"
-  },  
+  },
   {
     "category": "Applicant Management",
     "name": "applicant:create",
@@ -179,7 +199,6 @@
     "name": "applicant:update",
     "description": "Edit applicants"
   },
-
   {
     "category": "Applicant Management",
     "name": "applicant:update_roles",

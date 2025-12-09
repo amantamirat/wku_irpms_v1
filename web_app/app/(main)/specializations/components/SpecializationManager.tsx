@@ -6,18 +6,15 @@ import { useCrudList } from "@/hooks/useCrudList";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { PERMISSIONS } from "@/types/permissions";
-import { Calendar, CalendarStatus } from "../models/calendar.model";
-import { CalendarApi } from "../api/calendar.api";
-import SaveCalendarDialog from "../dialogs/SaveCalendarDialog";
-import MyBadge from "@/templates/MyBadge";
+import { SpecializationApi } from "../api/specialization.api";
+import { Specialization } from "../models/specialization.model";
+import SaveSpecializationDialog from "../dialogs/SaveCalendarDialog";
 
-const CalendarManager = () => {
 
-    const emptyCalendar: Calendar = {
-        year: new Date().getFullYear(),
-        status: CalendarStatus.active,
-        startDate: new Date(),
-        endDate: new Date(),
+const SpecializationManager = () => {
+
+    const emptySpecialization: Specialization = {
+        name: "",
     };
 
     const { hasPermission } = useAuth();
@@ -29,7 +26,7 @@ const CalendarManager = () => {
 
     // CRUD hook
     const {
-        items: calendars,
+        items: specializations,
         setAll,
         updateItem,
         removeItem,
@@ -37,36 +34,36 @@ const CalendarManager = () => {
         setLoading,
         error,
         setError
-    } = useCrudList<Calendar>();
+    } = useCrudList<Specialization>();
 
-    const [calendar, setCalendar] = useState<Calendar>(emptyCalendar);
+    const [specialization, setSpecialization] = useState<Specialization>(emptySpecialization);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
 
-    /** Fetch calendars */
+    /** Fetch specializations */
     useEffect(() => {
-        const fetchCalendars = async () => {
+        const fetchSpecializations = async () => {
             try {
                 setLoading(true);
-                const data = await CalendarApi.getCalendars();
+                const data = await SpecializationApi.getSpecializations();
                 setAll(data);
             } catch (err: any) {
-                setError("Failed to fetch calendars. " + (err?.message ?? ""));
+                setError("Failed to fetch specializations. " + (err?.message ?? ""));
             } finally {
                 setLoading(false);
             }
         };
-        fetchCalendars();
+        fetchSpecializations();
     }, []);
 
     /** Save callback */
-    const onSaveComplete = (saved: Calendar) => {
+    const onSaveComplete = (saved: Specialization) => {
         updateItem(saved);
         hideDialogs();
     };
 
     /** Delete */
-    const deleteCalendar = async (row: Calendar) => {
-        const ok = await CalendarApi.deleteCalendar(row);
+    const deleteSpecialization = async (row: Specialization) => {
+        const ok = await SpecializationApi.deleteSpecialization(row);
         if (ok) removeItem(row);
     };
 
@@ -77,22 +74,25 @@ const CalendarManager = () => {
 
     /** Columns shown in CRUD table */
     const columns = [
-        { header: "Year", field: "year" },
-        { header: "Start Date", body: (r: Calendar) => new Date(r.startDate!).toLocaleDateString("en-CA") },
-        { header: "End Date", body: (r: Calendar) => new Date(r.endDate!).toLocaleDateString("en-CA") },
-      {
-            header: "Status",
-            field: "status",
-            body: (u: Calendar) => <MyBadge type="status" value={u.status ?? "Unknown"} />
-        },
+        { header: "Name", field: "name" },
+        {
+            header: "Ac. Level",
+            field: "academicLevel",
+            sortable: true,
+            body: (r: Specialization) => (
+                <span className={`academic-badge level-${r.academicLevel?.toLowerCase()}`}>
+                    {r.academicLevel}
+                </span>
+            )
+        }
     ];
 
     return (
         <>
             <CrudManager
-                headerTitle="Manage Calendars"
-                itemName="Calendar"
-                items={calendars}
+                headerTitle="Manage Specializations"
+                itemName="Specialization"
+                items={specializations}
                 dataKey="_id"
                 columns={columns}
                 loading={loading}
@@ -103,19 +103,19 @@ const CalendarManager = () => {
                 canDelete={canDelete}
 
                 onCreate={() => {
-                    setCalendar({ ...emptyCalendar });
+                    setSpecialization({ ...emptySpecialization });
                     setShowSaveDialog(true);
                 }}
 
                 onEdit={(row) => {
-                    setCalendar({ ...row });
+                    setSpecialization({ ...row });
                     setShowSaveDialog(true);
                 }}
 
                 onDelete={(row) =>
                     confirm.ask({
-                        item: String(row.year),
-                        onConfirmAsync: () => deleteCalendar(row)
+                        item: String(row.name),
+                        onConfirmAsync: () => deleteSpecialization(row)
                     })
                 }
 
@@ -123,10 +123,10 @@ const CalendarManager = () => {
             />
 
             {/* Save Dialog */}
-            {calendar && (
-                <SaveCalendarDialog
+            {specialization && (
+                <SaveSpecializationDialog
                     visible={showSaveDialog}
-                    calendar={calendar}
+                    specialization={specialization}
                     onComplete={onSaveComplete}
                     onHide={hideDialogs}
                 />
@@ -135,4 +135,4 @@ const CalendarManager = () => {
     );
 };
 
-export default CalendarManager;
+export default SpecializationManager;

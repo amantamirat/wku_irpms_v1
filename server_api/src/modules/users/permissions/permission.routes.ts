@@ -1,7 +1,16 @@
 import { Router } from 'express';
+import { PERMISSIONS } from '../../../util/permissions';
 import { checkPermission, verifyActiveAccount } from '../user.middleware';
 import { PermissionController } from './permission.controller';
-import { PERMISSIONS } from '../../../util/permissions';
+
 const router: Router = Router();
-router.get('/', verifyActiveAccount, checkPermission([PERMISSIONS.PERMISSION.READ]), PermissionController.getPermissions);
+const controller = new PermissionController();
+
+router.get(
+  '/',
+  verifyActiveAccount,
+  checkPermission([PERMISSIONS.PERMISSION.READ]),
+  controller.getPermissions
+);
+
 export default router;

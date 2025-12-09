@@ -13,10 +13,8 @@ export const CalendarApi = {
         return createdData as Calendar;
     },
 
-    async getCalendars(options: GetCalendarOptions): Promise<Calendar[]> {
-        const query = new URLSearchParams();
-        if (options.status) query.append("status", options.status);
-        const data = await ApiClient.get(`${end_point}?${query.toString()}`);
+    async getCalendars(): Promise<Calendar[]> {
+        const data = await ApiClient.get(end_point);
         return data as Calendar[];
     },
 

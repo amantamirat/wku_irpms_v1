@@ -1,8 +1,8 @@
 export enum COLLECTIONS {
-  APPLICANT = "applicants",
-  POSITION = "positions",
-  SPECIALIZATION = "specializations",
   ORGANIZATION = "organizations",
+  SPECIALIZATION = "specializations",
+  APPLICANT = "applicants",
+  POSITION = "positions", 
   EXPERIENCE = "experiences",
   THEME = "themes",
   EVALUATION = "evaluations",

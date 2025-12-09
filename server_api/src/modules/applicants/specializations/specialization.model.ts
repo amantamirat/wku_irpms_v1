@@ -1,6 +1,6 @@
-import { Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { AcademicLevel } from "../../../common/constants/enums";
-
+import { COLLECTIONS } from "../../../util/collections.enum";
 
 export interface ISpecialization extends Document {
     name: string,
@@ -9,7 +9,7 @@ export interface ISpecialization extends Document {
     updatedAt?: Date;
 }
 
-const ProgramSchema = new Schema<ISpecialization>({
+const SpecializationSchema = new Schema<ISpecialization>({
     name: {
         type: String,
         required: true
@@ -20,3 +20,5 @@ const ProgramSchema = new Schema<ISpecialization>({
         required: true
     },
 }, { timestamps: true });
+
+export const Specialization = mongoose.model<ISpecialization>(COLLECTIONS.SPECIALIZATION, SpecializationSchema);

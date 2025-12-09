@@ -160,13 +160,13 @@ const SaveDialog = ({ visible, organization, hasParent, parentType, onHide, onCo
                                 <label htmlFor="academic_level">Academic Level</label>
                                 <Dropdown
                                     id="academic_level"
-                                    value={localOrganization.academic_level}
+                                    value={localOrganization.academicLevel}
                                     options={Object.values(AcademicLevel).map(level => ({ label: level, value: level }))}
-                                    onChange={(e) => setLocalOrganization({ ...localOrganization, academic_level: e.value })}
+                                    onChange={(e) => setLocalOrganization({ ...localOrganization, academicLevel: e.value })}
                                     placeholder="Select Ac. Level"
-                                    className={classNames({ 'p-invalid': submitted && !localOrganization.academic_level })}
+                                    className={classNames({ 'p-invalid': submitted && !localOrganization.academicLevel })}
                                 />
-                                {submitted && !localOrganization.academic_level && (
+                                {submitted && !localOrganization.academicLevel && (
                                     <small className="p-invalid">Ac. Level is required.</small>
                                 )}
                             </div>

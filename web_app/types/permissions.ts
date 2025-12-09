@@ -77,6 +77,12 @@ export const PERMISSIONS = {
     UPDATE: "calendar:update",
     DELETE: "calendar:delete",
   },
+  SPECIALIZATION: {
+    CREATE: "specialization:create",
+    READ: "specialization:read",
+    UPDATE: "specialization:update",
+    DELETE: "specialization:delete",
+  },
   GRANT: {
     CREATE: "grant:create",
     READ: "grant:read",

@@ -54,7 +54,7 @@ export type Organization = {
     _id?: string;
     name: string;
     type: OrgnUnit;
-    academic_level?: AcademicLevel;
+    academicLevel?: AcademicLevel;
     classification?: Classification;
     ownership?: Ownership;
     address?: Address;
@@ -107,7 +107,7 @@ export const validateOrganization = (
 
     switch (organization.type) {
         case OrgnUnit.Program:
-            if (!organization.academic_level) {
+            if (!organization.academicLevel) {
                 return { valid: false, message: 'Academic level is required for Program.' };
             }
             if (!organization.classification) {

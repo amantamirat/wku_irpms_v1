@@ -8,6 +8,7 @@ import organizationRoutes from './modules/organization/organization.routes';
 import applicantRoutes from './modules/applicants/applicant.routes';
 import positionRoutes from './modules/applicants/positions/position.routes';
 import experienceRoutes from './modules/applicants/experiences/experience.routes';
+import specializationRoutes from './modules/applicants/specializations/specialization.routes';
 import themeRoutes from './modules/themes/theme.routes';
 
 import evaluationRoutes from './modules/evaluations/evaluation.routes';
@@ -27,14 +28,14 @@ import phaseRoutes from './modules/projects/phase/phase.routes';
 import stageRoutes2 from './modules/cycles/stages/projects/project-stage.routes';
 import reviewerRoutes from './modules/cycles/stages/projects/reviewers/reviewer.routes';
 import resultRoutes from './modules/cycles/stages/projects/reviewers/results/result.routes';
+
 import userRoutes from './modules/users/user.routes';
 import roleRoutes from './modules/users/roles/role.routes';
 import permissionRoutes from './modules/users/permissions/permission.routes';
+import path from 'path';
 
 import { PermissionService } from './modules/users/permissions/permission.service';
-import { UserService } from './modules/users/user.service';
-import path from 'path';
-import { RoleService } from './modules/users/roles/role.service';
+
 
 
 dotenv.config();
@@ -50,7 +51,9 @@ app.use("/api/permissions", permissionRoutes);
 
 app.use("/api/applicants", applicantRoutes);
 app.use("/api/organizations", organizationRoutes);
+app.use("/api/specializations", specializationRoutes);
 app.use("/api/positions", positionRoutes);
+
 app.use("/api/experiences", experienceRoutes);
 app.use("/api/themes", themeRoutes);
 //app.use("/api/evals", evalRoutes);
@@ -84,7 +87,7 @@ const PORT = process.env.SERVER_PORT || 5000;
     }
     await mongoose.connect(MONGO_URL);
     console.log('database connection established');
-    await PermissionService.seedPermissions();
+    //await PermissionService.seedPermissions();
    // await RoleService.initAdminRole();
    // await UserService.initAdminUser();
 

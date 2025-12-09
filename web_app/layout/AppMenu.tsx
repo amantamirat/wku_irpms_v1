@@ -126,6 +126,7 @@ const AppMenu = () => {
             visible: hasPermission(
                 [
                     PERMISSIONS.CALENDAR.CREATE,
+                    PERMISSIONS.SPECIALIZATION.CREATE,
                     PERMISSIONS.POSITION.CREATE
                 ]
             ),
@@ -141,6 +142,16 @@ const AppMenu = () => {
                             PERMISSIONS.CALENDAR.DELETE
                         ]
                     )
+                },
+                {
+                    label: 'Specializations',
+                    icon: 'pi pi-fw pi-filter-fill',
+                    to: '/specializations',
+                    visible: hasPermission([
+                        PERMISSIONS.SPECIALIZATION.CREATE,
+                        PERMISSIONS.SPECIALIZATION.UPDATE,
+                        PERMISSIONS.SPECIALIZATION.DELETE
+                    ])
                 },
                 {
                     label: 'Positions',

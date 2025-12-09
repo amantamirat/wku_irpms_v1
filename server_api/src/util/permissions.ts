@@ -1,12 +1,6 @@
-
-
 export const PERMISSIONS = {
-  USER: {
-    CREATE: "user:create",
-    READ: "user:read",
-    UPDATE: "user:update",
-    DELETE: "user:delete",
-    RESET: "user:reset",
+  PERMISSION: {
+    READ: "permission:read",
   },
   ROLE: {
     CREATE: "role:create",
@@ -14,11 +8,14 @@ export const PERMISSIONS = {
     UPDATE: "role:update",
     DELETE: "role:delete",
   },
-  PERMISSION: {
-    READ: "permission:read",
+  USER: {
+    CREATE: "user:create",
+    READ: "user:read",
+    UPDATE: "user:update",
+    DELETE: "user:delete",
+    // RESET: "user:reset",
   },
-
-
+  
   ORGANIAZTION: {
     COLLEGE: {
       CREATE: "college:create",
@@ -63,12 +60,19 @@ export const PERMISSIONS = {
     },
   },
 
+  SPECIALIZATION: {
+    CREATE: "specialization:create",
+    READ: "specialization:read",
+    UPDATE: "specialization:update",
+    DELETE: "specialization:delete",
+  },
+
   APPLICANT: {
     CREATE: "applicant:create",
     READ: "applicant:read",
     UPDATE: "applicant:update",
     DELETE: "applicant:delete",
-    UPDATE_ROLES:"applicant:update_roles"
+    UPDATE_ROLES: "applicant:update_roles"
   },
 
 
@@ -78,12 +82,12 @@ export const PERMISSIONS = {
     UPDATE: "calendar:update",
     DELETE: "calendar:delete",
   },
-  
 
 
 
 
-  
+
+
   EXPERIENCE: {
     CREATE: "experience:create",
     READ: "experience:read",
