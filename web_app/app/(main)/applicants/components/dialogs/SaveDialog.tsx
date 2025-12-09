@@ -16,6 +16,8 @@ import { useAuth } from '@/contexts/auth-context';
 import { Role } from '@/app/(main)/roles/models/role.model';
 import { RoleApi } from '@/app/(main)/roles/api/role.api';
 import { PERMISSIONS } from '@/types/permissions';
+import { Specialization } from '@/app/(main)/specializations/models/specialization.model';
+import { SpecializationApi } from '@/app/(main)/specializations/api/specialization.api';
 
 interface SaveApplicantDialogProps {
     visible: boolean;
@@ -30,8 +32,10 @@ const SaveApplicantDialog = ({ visible, applicant, hasWorkspace, onHide, onCompl
 
     const { getOrganizationsByType, hasPermission } = useAuth();
     const canReadRoles = hasPermission([PERMISSIONS.ROLE.READ]);
+    const canReadSpecializations = hasPermission([PERMISSIONS.SPECIALIZATION.READ]);
 
     const [localApplicant, setLocalApplicant] = useState<Applicant>({ ...applicant });
+    const [specializations, setSpecializations] = useState<Specialization[]>([]);
     const [roles, setRoles] = useState<Role[]>([]);
     const [userOrganizations, setUserOrganizations] = useState<Organization[]>([]);
     const [ownerships, setOwnerships] = useState<Organization[]>([]);
@@ -69,6 +73,22 @@ const SaveApplicantDialog = ({ visible, applicant, hasWorkspace, onHide, onCompl
             }
         };
         fetchRoles();
+    }, []);
+
+
+    useEffect(() => {
+        if (!canReadSpecializations) {
+            return;
+        }
+        const fetchSpecs = async () => {
+            try {
+                const specs = await SpecializationApi.getSpecializations();
+                setSpecializations(specs);
+            } catch (err) {
+                console.error('Failed to fetch specializations:', err);
+            }
+        };
+        fetchSpecs();
     }, []);
 
     useEffect(() => {
@@ -270,6 +290,22 @@ const SaveApplicantDialog = ({ visible, applicant, hasWorkspace, onHide, onCompl
                             display="chip"
                         />
                     </div>
+
+                    {isEdit &&
+                        <div className="field">
+                            <label htmlFor="specializations">Specializations</label>
+                            <MultiSelect
+                                id="specializations"
+                                dataKey="_id"
+                                value={localApplicant.specializations}
+                                options={specializations}
+                                optionLabel="name"
+                                onChange={(e) => setLocalApplicant({ ...localApplicant, specializations: e.value })}
+                                placeholder="select specializations"
+                                display="chip"
+                            />
+                        </div>
+                    }
 
                     {(canReadRoles && isEdit) && <>
                         <div className="field">

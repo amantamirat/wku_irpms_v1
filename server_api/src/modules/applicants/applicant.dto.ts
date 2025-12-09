@@ -23,6 +23,7 @@ export interface UpdateApplicantDTO {
         fin: string;
         orcid: string;
         accessibility: Accessibility[];
+        specializations: string[];
         roles: string[];
         ownerships: string[];
     }>;

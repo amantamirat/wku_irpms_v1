@@ -10,6 +10,7 @@ export interface IApplicant extends Document {
     email: string;
     fin?: string;
     orcid?: string;
+    specializations?: mongoose.Types.ObjectId[];
     accessibility?: Accessibility[];
     roles?: mongoose.Types.ObjectId[];
     ownerships?: mongoose.Types.ObjectId[];
@@ -58,6 +59,11 @@ const ApplicantSchema = new Schema<IApplicant>({
         sparse: true,
         match: [/^\d{4}-\d{4}-\d{4}-\d{4}$/, "Invalid ORCID format"]
     },
+    //no compeletion date is specified here
+    specializations: [{
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.SPECIALIZATION
+    }],
     accessibility: {
         type: [String],
         enum: Object.values(Accessibility),

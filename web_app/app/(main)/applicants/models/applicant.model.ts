@@ -1,5 +1,6 @@
 import { Organization, OrgnUnit } from "../../organizations/models/organization.model";
 import { Role } from "../../roles/models/role.model";
+import { Specialization } from "../../specializations/models/specialization.model";
 
 export enum Gender {
     Male = 'Male',
@@ -25,6 +26,7 @@ export type Applicant = {
     fin?: string;
     orcid?: string;
     accessibility?: Accessibility[];
+    specializations?: Specialization[] | string[];
     roles?: Role[] | string[];
     ownerships?: Organization[] | string[];
     createdAt?: Date;
@@ -98,6 +100,15 @@ export function sanitizeApplicant(applicant: Partial<Applicant>): Partial<Applic
             typeof applicant.workspace === 'object' && applicant.workspace !== null
                 ? (applicant.workspace as any)._id
                 : applicant.workspace,
+
+        specializations: applicant.specializations
+            ?.map(spec =>
+                typeof spec === 'object' && spec !== null
+                    ? (spec as any)._id
+                    : spec
+            )
+            .filter((id): id is string => typeof id === 'string'),
+
         roles: applicant.roles
             ?.map(role =>
                 typeof role === 'object' && role !== null

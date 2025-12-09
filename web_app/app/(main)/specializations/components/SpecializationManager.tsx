@@ -9,9 +9,13 @@ import { PERMISSIONS } from "@/types/permissions";
 import { SpecializationApi } from "../api/specialization.api";
 import { Specialization } from "../models/specialization.model";
 import SaveSpecializationDialog from "../dialogs/SaveCalendarDialog";
+import { Applicant } from "../../applicants/models/applicant.model";
 
+interface SpecManagerProps {
+    applicant?: Applicant;
+}
 
-const SpecializationManager = () => {
+const SpecializationManager = ({ applicant }: SpecManagerProps) => {
 
     const emptySpecialization: Specialization = {
         name: "",
@@ -20,9 +24,9 @@ const SpecializationManager = () => {
     const { hasPermission } = useAuth();
     const confirm = useConfirmDialog();
 
-    const canCreate = hasPermission([PERMISSIONS.CALENDAR.CREATE]);
-    const canEdit = hasPermission([PERMISSIONS.CALENDAR.UPDATE]);
-    const canDelete = hasPermission([PERMISSIONS.CALENDAR.DELETE]);
+    const canCreate = !applicant && hasPermission([PERMISSIONS.CALENDAR.CREATE]);
+    const canEdit = !applicant && hasPermission([PERMISSIONS.CALENDAR.UPDATE]);
+    const canDelete = !applicant && hasPermission([PERMISSIONS.CALENDAR.DELETE]);
 
     // CRUD hook
     const {
@@ -41,6 +45,10 @@ const SpecializationManager = () => {
 
     /** Fetch specializations */
     useEffect(() => {
+        if (applicant) {
+            setAll(applicant.specializations as Specialization[]);
+            return
+        }
         const fetchSpecializations = async () => {
             try {
                 setLoading(true);
@@ -53,7 +61,7 @@ const SpecializationManager = () => {
             }
         };
         fetchSpecializations();
-    }, []);
+    }, [applicant]);
 
     /** Save callback */
     const onSaveComplete = (saved: Specialization) => {
@@ -119,11 +127,11 @@ const SpecializationManager = () => {
                     })
                 }
 
-                enableSearch
+                enableSearch={!applicant}
             />
 
             {/* Save Dialog */}
-            {specialization && (
+            {(specialization && (canCreate || canEdit)) && (
                 <SaveSpecializationDialog
                     visible={showSaveDialog}
                     specialization={specialization}

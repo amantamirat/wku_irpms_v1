@@ -3,6 +3,7 @@ import ReviewerManager from "../../projects/reviewers/components/ReviewerManager
 import { Applicant } from "../models/applicant.model";
 import ExperienceManager from "../experiences/components/ExperienceManager";
 import CollaboratorManager from "../../projects/collaborators/components/CollaboratorManager";
+import SpecializationManager from "../../specializations/components/SpecializationManager";
 
 interface ApplicantDetailProps {
     applicant: Applicant;
@@ -22,7 +23,7 @@ const ApplicantDetail = ({ applicant }: ApplicantDetailProps) => {
                     <ExperienceManager applicant={applicant} />
                 </TabPanel>
                 <TabPanel header="Specializations">
-
+                    <SpecializationManager applicant={applicant} />
                 </TabPanel>
                 <TabPanel header="Publications">
 

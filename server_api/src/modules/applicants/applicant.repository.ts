@@ -50,6 +50,7 @@ export class ApplicantRepository implements IApplicantRepository {
 
         return Applicant.find(query).
             populate("workspace").
+            populate("specializations").
             populate("roles").
             populate("ownerships")
             .lean<IApplicant[]>()
@@ -89,6 +90,9 @@ export class ApplicantRepository implements IApplicantRepository {
         if (dtoData.fin) toUpdate.fin = dtoData.fin;
         if (dtoData.orcid) toUpdate.orcid = dtoData.orcid;
         if (dtoData.accessibility) toUpdate.accessibility = dtoData.accessibility;
+        if (dtoData.specializations) {
+            toUpdate.specializations = dtoData.specializations?.map(id => new mongoose.Types.ObjectId(id))
+        }
         if (dtoData.roles) {
             toUpdate.roles = dtoData.roles?.map(id => new mongoose.Types.ObjectId(id))
         }

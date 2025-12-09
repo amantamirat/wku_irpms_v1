@@ -70,6 +70,7 @@ export class ApplicantController {
                 orcid,
                 email,
                 accessibility,
+                specializations,
                 roles,
                 ownerships,
             } = req.body;
@@ -85,6 +86,7 @@ export class ApplicantController {
                     orcid,
                     email,
                     accessibility,
+                    specializations,
                     roles,
                     ownerships
                 },
