@@ -30,17 +30,18 @@ router.get(
   EvaluationController.getEvaluations
 );
 
+/*
 router.get(
   '/user',
   verifyActiveAccount,
   checkPermission([
-    PERMISSIONS.EVALUATION.CREATE,
+    PERMISSIONS.EVALUATION.READ,
     PERMISSIONS.EVALUATION.UPDATE,
     PERMISSIONS.EVALUATION.DELETE
   ]),
   EvaluationController.getUserEvaluations
 );
-
+*/
 /**
  * @route PUT /evaluations/:id
  * @desc Update an existing evaluation

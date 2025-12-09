@@ -1,72 +1,67 @@
-import mongoose from "mongoose";
-import { Criterion } from "./criteria/criterion.model";
 import { CacheService } from "../../util/cache/cache.service";
+import { DeleteDto } from "../../util/delete.dto";
 import { Directorate } from "../organization/organization.model";
-import { Evaluation } from "./evaluation.model";
-import { CreateEvaluationDTO, UpdateEvaluationDTO } from "./evaluation.dto";
+import { CreateEvaluationDTO, GetEvaluationsDTO, UpdateEvaluationDTO } from "./evaluation.dto";
+import { EvaluationRepository, IEvaluationRepository } from "./evaluation.repository";
 
 export class EvaluationService {
-    
-    static async createEvaluation(dto: CreateEvaluationDTO) {
-        const {  directorate, title, userId } = dto;
 
-        // Validate ownership
-        await CacheService.validateOwnership(userId, directorate);
+    private repository: IEvaluationRepository;
 
-        // Validate directorate
-        const dir = await Directorate.findById(directorate);
-        if (!dir) throw new Error("Directorate not found.");
-
-        const evalDoc = await Evaluation.create({
-            directorate: directorate,
-            title,
-        });
-
-        return evalDoc;
+    constructor(repository?: IEvaluationRepository) {
+        this.repository = repository || new EvaluationRepository();
     }
 
-    static async getEvaluations(directorate?: mongoose.Types.ObjectId) {
-        const filter: any = {};
-        if (directorate) filter.directorate = directorate;
+    async createEvaluation(dto: CreateEvaluationDTO) {
+        await CacheService.validateOwnership(dto.userId, dto.directorate);
 
-        return await Evaluation.find(filter)
-            .populate("directorate")
-            .sort({ createdAt: -1 })
-            .lean();
-    }
-
-
-    static async getUserEvaluations(userId: string) {
-        const orgs = await CacheService.getUserOrganizations(userId);
-        if (!orgs.length) {
-            return [];
+        const directorateDoc = await Directorate.findById(dto.directorate).lean();
+        if (!directorateDoc) {
+            throw new Error("Directorate not found");
         }
-        const evals = await Evaluation.find({ directorate: { $in: orgs } }).populate('directorate').lean();
-        return evals;
+        const createdEvaluation = await this.repository.create(dto);
+        return createdEvaluation;
     }
 
-    static async updateEvaluation(dto: UpdateEvaluationDTO) {
+    async getEvaluations(options: GetEvaluationsDTO) {
+        return await this.repository.find(options);
+    }
+
+    /*
+
+    async getUserEvaluations(userId: string) {
+        const organizations = await CacheService.getUserOrganizations(userId);
+        if (!organizations.length) return [];
+        return await Evaluation.find({ directorate: { $in: organizations } })
+                               .populate("directorate")
+                               .lean();
+    }
+
+    */
+
+    async updateEvaluation(dto: UpdateEvaluationDTO) {
         const { id, data, userId } = dto;
-
-        const evalDoc = await Evaluation.findById(id);
+        const evalDoc = await this.repository.findById(id);
         if (!evalDoc) throw new Error("Evaluation not found");
 
         await CacheService.validateOwnership(userId, evalDoc.directorate);
 
-        Object.assign(evalDoc, data);
-        return evalDoc.save();
+        return await this.repository.update(id, data);
     }
 
-    static async deleteEvaluation(id: string, userId: string) {
-        const evalDoc = await Evaluation.findById(id);
+    async deleteEvaluation(dto: DeleteDto) {
+        const { id, userId } = dto;
+        const evalDoc = await this.repository.findById(id);
         if (!evalDoc) throw new Error("Evaluation not found");
 
         await CacheService.validateOwnership(userId, evalDoc.directorate);
 
-        const countCriteria = await Criterion.countDocuments({ evaluation: id });
-        if (countCriteria > 0)
+        /*
+        const countCriteria = await this.repository.countCriteria(id);
+        if (countCriteria > 0) {
             throw new Error("Cannot delete evaluation with existing criteria.");
-
-        return await evalDoc.deleteOne();
+        }
+*/
+        return await this.repository.delete(id);
     }
 }

@@ -1,6 +1,7 @@
 import { CacheService } from "../../util/cache/cache.service";
+import { DeleteDto } from "../../util/delete.dto";
 import { Directorate } from "../organization/organization.model";
-import { CreateGrantDTO, DeleteGrantDTO, GetGrantsDTO, UpdateGrantDTO } from "./grant.dto";
+import { CreateGrantDTO, GetGrantsDTO, UpdateGrantDTO } from "./grant.dto";
 import { GrantRepository, IGrantRepository } from "./grant.repository";
 
 
@@ -43,7 +44,7 @@ export class GrantService {
         return this.repository.update(id, data);
     }
 
-    async deleteGrant(dto: DeleteGrantDTO) {
+    async deleteGrant(dto: DeleteDto) {
         const { id, userId } = dto;
         const grantDoc = await this.repository.findById(id);
         if (!grantDoc) throw new Error("Grant not found");

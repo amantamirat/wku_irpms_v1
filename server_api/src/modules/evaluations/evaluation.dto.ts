@@ -13,3 +13,7 @@ export interface UpdateEvaluationDTO {
     };
     userId: string;
 }
+
+export interface GetEvaluationsDTO {
+    directorate?: string;
+}
