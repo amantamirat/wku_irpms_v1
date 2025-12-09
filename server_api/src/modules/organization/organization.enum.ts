@@ -1,10 +1,10 @@
 // Enum for Organization Types
 export enum Unit {
     College = 'College',//base
-    Department = 'Department',
-    Program = 'Program',
+    Department = 'Department',//child
+    Program = 'Program',//child
     Directorate = 'Directorate',//base
-    Center = 'Center',
+    Center = 'Center',//child
     External = 'External',//base
 }
 

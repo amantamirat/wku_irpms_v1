@@ -115,7 +115,7 @@ const OrganizationManager = ({ type, parent }: OrganizationManagerProps) => {
         ...(type === OrgnUnit.Program //|| type === OrgnUnit.Specialization
             ? [{
                 header: "Ac. Level",
-                field: "academic_level",
+                field: "academicLevel",
                 sortable: true,
                 body: (r: Organization) => (
                     <span className={`academic-badge level-${r.academic_level?.toLowerCase()}`}>

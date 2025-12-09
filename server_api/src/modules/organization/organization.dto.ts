@@ -16,9 +16,6 @@ interface WithParentDTO {
     parent: string;
 }
 
-/**
- * Create DTO for each discriminator type
- */
 
 export interface CreateCollegeDTO extends BaseOrganizationDTO {
     type: Unit.College;
@@ -28,16 +25,6 @@ export interface CreateDirectorateDTO extends BaseOrganizationDTO {
     type: Unit.Directorate;
 }
 
-/*
-export interface CreateSectorDTO extends BaseOrganizationDTO {
-    type: Unit.Sector;
-}
-
-export interface CreateSpecializationDTO extends BaseOrganizationDTO {
-    type: Unit.Specialization;
-    academic_level: AcademicLevel;
-}
-*/
 export interface CreateDepartmentDTO extends BaseOrganizationDTO, WithParentDTO {
     type: Unit.Department;
 }
@@ -48,7 +35,7 @@ export interface CreateCenterDTO extends BaseOrganizationDTO, WithParentDTO {
 
 export interface CreateProgramDTO extends BaseOrganizationDTO, WithParentDTO {
     type: Unit.Program;
-    academic_level: AcademicLevel;
+    academicLevel: AcademicLevel;
     classification: Classification;
 }
 
@@ -75,7 +62,7 @@ export interface UpdateOrganizationDTO {
     data: Partial<{
         name: string;
         parent: string;
-        academic_level: AcademicLevel;
+        academicLevel: AcademicLevel;
         classification: Classification;
         ownership: Ownership;
     }>;

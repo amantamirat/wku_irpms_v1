@@ -77,7 +77,7 @@ export const Center = Organization.discriminator<CenterDocument>(Unit.Center, Ce
 
 interface ProgramDocument extends SubOrganizationDocument {
     type: Unit.Program;
-    academic_level: AcademicLevel;
+    academicLevel: AcademicLevel;
     classification: Classification;
 }
 
@@ -87,7 +87,7 @@ const ProgramSchema = new Schema<ProgramDocument>({
         ref: Department.modelName,
         required: true
     },
-    academic_level: {
+    academicLevel: {
         type: String,
         enum: Object.values(AcademicLevel),
         required: true

@@ -71,8 +71,8 @@ export class OrganizationRepository implements IOrganizationRepository {
         }
 
         // Add Special fields
-        if ("academic_level" in dto) {
-            data.academic_level = dto.academic_level;
+        if ("academicLevel" in dto) {
+            data.academicLevel = dto.academicLevel;
         }
 
         if ("classification" in dto) {
@@ -105,8 +105,8 @@ export class OrganizationRepository implements IOrganizationRepository {
             updated.parent = new mongoose.Types.ObjectId(dtoData.parent);
         }
 
-        if (dtoData.academic_level) {
-            updated.academic_level = dtoData.academic_level;
+        if (dtoData.academicLevel) {
+            updated.academic_level = dtoData.academicLevel;
         }
 
         if (dtoData.classification) {
