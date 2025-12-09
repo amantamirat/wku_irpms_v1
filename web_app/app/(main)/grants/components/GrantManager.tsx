@@ -49,7 +49,6 @@ const GrantManger = ({ directorate }: GrantManagerProps) => {
 
     const [grant, setGrant] = useState<Grant>(emptyGrant);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [expandedRows, setExpandedRows] = useState<any[]>([]);
 
     // ✅ Fetch grants
     useEffect(() => {
@@ -114,8 +113,7 @@ const GrantManger = ({ directorate }: GrantManagerProps) => {
                 onCreate={() => { setGrant(emptyGrant); setShowSaveDialog(true); }}
                 onEdit={(row) => { setGrant(row); setShowSaveDialog(true); }}
                 onDelete={(row) => confirm.ask({ item: row.title, onConfirmAsync: () => deleteGrant(row) })}
-                expandedRows={expandedRows}
-                onRowToggle={(e) => setExpandedRows(e.data)}
+                
                 rowExpansionTemplate={(row) => <ConstraintContainer grant={row as Grant} />}
             />
 

@@ -74,7 +74,7 @@ const ThemeManager = ({ type, parent, themeLevel }: ThemeManagerProps) => {
         let data: Theme[] = [];
         try {
             if (type === ThemeType.thematic_area) {
-                data = await ThemeApi.getUserThemes();
+                data = await ThemeApi.getThemes({type:ThemeType.thematic_area});
             } else if (parent) {
                 data = await ThemeApi.getThemes({ type, parent: parent._id || '' });
             }

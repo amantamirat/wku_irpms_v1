@@ -107,6 +107,19 @@ const AppMenu = () => {
                         ]
                     )
                 },
+
+                {
+                    label: 'Thematics',
+                    icon: 'pi pi-fw pi-tags',
+                    to: '/thematics',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.THEME.CREATE,
+                            PERMISSIONS.THEME.UPDATE,
+                            PERMISSIONS.THEME.DELETE
+                        ]
+                    )
+                },
                 {
                     label: 'Grants',
                     icon: 'pi pi-cog',
