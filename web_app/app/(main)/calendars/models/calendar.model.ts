@@ -6,8 +6,8 @@ export enum CalendarStatus {
 export type Calendar = {
     _id?: string;
     year: number;
-    start_date: Date | null;
-    end_date: Date | null;
+    startDate: Date | null;
+    endDate: Date | null;
     status: CalendarStatus;
     createdAt?: Date;
     updatedAt?: Date;
@@ -28,15 +28,15 @@ export const validateCalendar = (
         };
     }
 
-    if (!calendar.start_date || isNaN(new Date(calendar.start_date).getTime())) {
+    if (!calendar.startDate || isNaN(new Date(calendar.startDate).getTime())) {
         return { valid: false, message: "Start date is not a valid date." };
     }
 
-    if (!calendar.end_date || isNaN(new Date(calendar.end_date).getTime())) {
+    if (!calendar.endDate || isNaN(new Date(calendar.endDate).getTime())) {
         return { valid: false, message: "End date is not a valid date." };
     }
 
-    if (new Date(calendar.start_date) >= new Date(calendar.end_date)) {
+    if (new Date(calendar.startDate) >= new Date(calendar.endDate)) {
         return { valid: false, message: "Start date must be before end date." };
     }
 

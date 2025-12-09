@@ -106,41 +106,28 @@ const SaveCalendarDialog = ({ visible, calendar, onHide, onComplete }: SaveCalen
                 </div>
 
                 <div className="field">
-                    <label htmlFor="start_date">Start Date</label>
+                    <label htmlFor="startDate">Start Date</label>
                     <PrimeCalendar
-                        id="start_date"
-                        value={localCalendar.start_date ? new Date(localCalendar.start_date) : undefined}
-                        onChange={(e) => setLocalCalendar({ ...localCalendar, start_date: e.value || null })}
+                        id="startDate"
+                        value={localCalendar.startDate ? new Date(localCalendar.startDate) : undefined}
+                        onChange={(e) => setLocalCalendar({ ...localCalendar, startDate: e.value || null })}
                         dateFormat="yy-mm-dd"
                         showIcon
-                        className={classNames({ 'p-invalid': submitted && !localCalendar.start_date })}
+                        className={classNames({ 'p-invalid': submitted && !localCalendar.startDate })}
                     />
                 </div>
 
                 <div className="field">
-                    <label htmlFor="end_date">End Date</label>
+                    <label htmlFor="endDate">End Date</label>
                     <PrimeCalendar
-                        id="end_date"
-                        value={localCalendar.end_date ? new Date(localCalendar.end_date) : undefined}
-                        onChange={(e) => setLocalCalendar({ ...localCalendar, end_date: e.value || null })}
+                        id="endDate"
+                        value={localCalendar.endDate ? new Date(localCalendar.endDate) : undefined}
+                        onChange={(e) => setLocalCalendar({ ...localCalendar, endDate: e.value || null })}
                         dateFormat="yy-mm-dd"
                         showIcon
-                        className={classNames({ 'p-invalid': submitted && !localCalendar.end_date })}
+                        className={classNames({ 'p-invalid': submitted && !localCalendar.endDate })}
                     />
                 </div>
-
-                {isEdit && (
-                    <div className="field">
-                        <label htmlFor="status">Status</label>
-                        <Dropdown
-                            id="status"
-                            value={localCalendar.status}
-                            options={Object.values(CalendarStatus).map((s) => ({ label: s, value: s }))}
-                            onChange={(e) => setLocalCalendar({ ...localCalendar, status: e.value })}
-                            placeholder="Select Status"
-                        />
-                    </div>
-                )}
 
                 {errorMessage && <small className="p-error">{errorMessage}</small>}
             </Dialog>
