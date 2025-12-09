@@ -27,6 +27,10 @@ export class CacheService {
         const userKey = `user:${userId}:permissions`;
         let userPermissions = cache.get(userKey) as string[] | undefined;
         if (!userPermissions) {
+            //note ===>>>> system user can not be find here 
+            if (userId === "system") {
+                throw new Error("Please Logout and Login Again");
+            }
             const user = await User.findById(userId)
                 .populate({
                     path: 'roles',

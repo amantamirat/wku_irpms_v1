@@ -97,9 +97,9 @@ export class OrganizationController {
 
             const { id } = req.params;
 
-            await service.delete(id);
+           const deleted =  await service.delete(id);
 
-            successResponse(res, 200, "Organization deleted successfully", null);
+            successResponse(res, 200, "Organization deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }

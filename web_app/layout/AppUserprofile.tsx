@@ -27,43 +27,35 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
     return (
         <>
             <Sidebar visible={props.visible} position="right" onHide={() => props.setVisible(false)}>
-                <h2>Welcome, {((user?.applicant) as Applicant).name || 'User'}</h2>
+                <h2>Welcome, {(user?.applicant) ? (user?.applicant as Applicant).name : 'User'}</h2>
                 <p>
                     You are signed in. Use the buttons below to access your account features.
                 </p>
                 <Divider />
-                <p>
-                    <Button
-                        label="My Profile"
-                        severity="help"
-                        icon="pi pi-list"
-                        className="w-full"
-                        onClick={() => setShowApplicantDetailDialog(true)}
-                    />
-                </p>
-                {
-                    /**
-                     * <p>
-                    <Button
-                        label="My Profile"
-                        severity="info"
-                        icon="pi pi-user"
-                        className="w-full"
-                        onClick={() => setShowProfileDialog(true)}
-                    />
-                </p>
-                    */
+                {user?.applicant &&
+                    <>
+                        <p>
+                            <Button
+                                label="My Profile"
+                                severity="help"
+                                icon="pi pi-list"
+                                className="w-full"
+                                onClick={() => setShowApplicantDetailDialog(true)}
+                            />
+                        </p>
+
+                        <p>
+                            <Button
+                                label="Change Password"
+                                severity="warning"
+                                icon="pi pi-key"
+                                className="w-full"
+                                onClick={() => setShowPasswordDialog(true)}
+                            />
+                        </p>
+                    </>
                 }
 
-                <p>
-                    <Button
-                        label="Change Password"
-                        severity="warning"
-                        icon="pi pi-key"
-                        className="w-full"
-                        onClick={() => setShowPasswordDialog(true)}
-                    />
-                </p>
                 <p>
                     <Button
                         label="Sign Out"
