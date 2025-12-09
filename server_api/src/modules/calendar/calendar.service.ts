@@ -1,43 +1,41 @@
 import { Cycle } from "../cycles/cycle.model";
-import { CalendarStatus } from "./calendar.enum";
-import { Calendar } from "./calendar.model";
-
-export interface CreateCalendarDto {
-    year: number;
-    start_date: Date | string;
-    end_date: Date | string;
-    status?: CalendarStatus;
-}
-
-export interface GetCalendarOptions {
-    status?: CalendarStatus;
-}
+import { CreateCalendarDTO, UpdateCalendarDTO } from "./calendar.dto";
+import { ICalendarRepository, CalendarRepository } from "./calendar.repository";
 
 export class CalendarService {
 
-    static async createCalendar(data: CreateCalendarDto) {
-        const createdCalendar = await Calendar.create({ ...data });
-        return createdCalendar;
+    private repository: ICalendarRepository;
+
+    constructor(repository?: ICalendarRepository) {
+        this.repository = repository || new CalendarRepository();
     }
 
-    static async getCalendars(options: GetCalendarOptions) {
-        const filter: any = {};
-        if (options.status) filter.status = options.status;
-        return await Calendar.find(filter).lean();
+    async create(dto: CreateCalendarDTO) {
+        return await this.repository.create(dto);
     }
 
-    static async updateCalendar(id: string, data: Partial<CreateCalendarDto>) {
-        const calendar = await Calendar.findById(id);
-        if (!calendar) throw new Error("Calendar not found");
-        Object.assign(calendar, data);
-        return calendar.save();
+    async getAll() {
+        const calendars = await this.repository.findAll();
+        return calendars;
     }
 
-    static async deleteCalendar(id: string) {
-        const calendar = await Calendar.findById(id);
-        if (!calendar) throw new Error("Calendar not found");
-        const referencedByCycle = await Cycle.exists({ calendar: calendar._id });
-        if (referencedByCycle) throw new Error(`Can not delete ${calendar.year}, cycle exist.`);
-        return await calendar.deleteOne();
+    async update(dto: UpdateCalendarDTO) {
+        const { id, data } = dto;
+
+        const updated = await this.repository.update(id, data);
+        if (!updated) throw new Error("Calendar not found.");
+
+        return updated;
+    }
+
+    async delete(id: string) {
+        // Check if referenced by Cycle
+        const exists = await Cycle.exists({ calendar: id });
+        if (exists) {
+            throw new Error("Cannot delete calendar: A cycle is already linked to this calendar.");
+        }
+        // Perform delete
+        await this.repository.delete(id);
+        return { message: "Calendar deleted successfully" };
     }
 }

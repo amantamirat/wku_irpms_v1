@@ -16,10 +16,7 @@ router.get(
   '/',
   verifyActiveAccount,
   checkPermission([
-    PERMISSIONS.CALENDAR.READ,
-    PERMISSIONS.CALENDAR.CREATE,
-    PERMISSIONS.CALENDAR.UPDATE,
-    PERMISSIONS.CALENDAR.DELETE
+    PERMISSIONS.CALENDAR.READ
   ]),
   CalendarController.getCalendars
 );

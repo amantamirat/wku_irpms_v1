@@ -4,10 +4,10 @@ import { COLLECTIONS } from '../../util/collections.enum';
 import { CalendarStatus } from './calendar.enum';
 
 
-interface ICalendar extends Document {
+export interface ICalendar extends Document {
   year: number;
-  start_date: Date;
-  end_date: Date;
+  startDate: Date;
+  endDate: Date;
   status: CalendarStatus;
   createdAt?: Date;
   updatedAt?: Date;
@@ -21,11 +21,11 @@ const CalendarSchema = new Schema<ICalendar>({
     required: true,
     unique: true
   },
-  start_date: {
+  startDate: {
     type: Date,
     required: true,
   },
-  end_date: {
+  endDate: {
     type: Date,
     required: true,
   },
@@ -38,7 +38,6 @@ const CalendarSchema = new Schema<ICalendar>({
 }, {
   timestamps: true
 });
-
 
 export const Calendar = mongoose.model<ICalendar>(COLLECTIONS.CALENDAR, CalendarSchema);
 

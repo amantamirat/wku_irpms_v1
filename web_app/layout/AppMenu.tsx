@@ -94,6 +94,19 @@ const AppMenu = () => {
                         ]
                     )
                 },
+
+                {
+                    label: 'Thematic Areas',
+                    icon: 'pi pi-fw pi-tags',
+                    to: '/thematic_areas',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.THEME.CREATE,
+                            PERMISSIONS.THEME.UPDATE,
+                            PERMISSIONS.THEME.DELETE
+                        ]
+                    )
+                },
                 {
                     label: 'Grants',
                     icon: 'pi pi-cog',
@@ -106,18 +119,6 @@ const AppMenu = () => {
                         ]
                     )
                 },
-                {
-                    label: 'Thematic Areas',
-                    icon: 'pi pi-fw pi-tags',
-                    to: '/thematic_areas',
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.THEME.CREATE,
-                            PERMISSIONS.THEME.UPDATE,
-                            PERMISSIONS.THEME.DELETE
-                        ]
-                    )
-                }
             ]
         },
         {

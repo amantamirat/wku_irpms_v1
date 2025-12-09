@@ -1,14 +1,15 @@
 import { Request, Response } from 'express';
 import { errorResponse, successResponse } from '../../util/response';
-import { CalendarService, CreateCalendarDto, GetCalendarOptions } from './calendar.service';
-import { CalendarStatus } from './calendar.enum';
+import { CalendarService } from './calendar.service';
+import { CreateCalendarDTO, UpdateCalendarDTO } from './calendar.dto';
 
+const service = new CalendarService();
 export class CalendarController {
 
   static async createCalendar(req: Request, res: Response) {
     try {
-      const data: CreateCalendarDto = req.body;
-      const calendar = await CalendarService.createCalendar(data);
+      const data: CreateCalendarDTO = req.body;
+      const calendar = await service.create(data);
       successResponse(res, 201, "Calendar created successfully", calendar);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
@@ -17,11 +18,7 @@ export class CalendarController {
 
   static async getCalendars(req: Request, res: Response) {
     try {
-      const { status } = req.query;
-      const options: GetCalendarOptions = {
-        status: status as CalendarStatus ?? undefined
-      }
-      const calendars = await CalendarService.getCalendars(options);
+      const calendars = await service.getAll();
       successResponse(res, 200, 'Calendars fetched successfully', calendars);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
@@ -31,8 +28,17 @@ export class CalendarController {
   static async updateCalendar(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const data: Partial<CreateCalendarDto> = req.body;
-      const updated = await CalendarService.updateCalendar(id, data);
+      const { year, startDate, endDate } = req.body;
+      const dto: UpdateCalendarDTO = {
+        id,
+        data: {
+          year,
+          startDate,
+          endDate
+        },
+        // userId: req.user._id,
+      };
+      const updated = await service.update(dto);
       successResponse(res, 201, "Calendar updated successfully", updated);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
@@ -42,7 +48,7 @@ export class CalendarController {
   static async deleteCalendar(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const deleted = await CalendarService.deleteCalendar(id);
+      const deleted = await service.delete(id);
       successResponse(res, 201, "Calendar deleted successfully", deleted);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
