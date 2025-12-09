@@ -3,7 +3,6 @@ import bcrypt from "bcryptjs";
 import crypto from 'crypto';
 import nodemailer, { Transporter } from 'nodemailer';
 import { DeleteDto } from "../../util/delete.dto";
-import { Role } from "./roles/role.model";
 import JwtPayload, { ChangePasswordDTO, CreateUserDTO, LoginDto, UpdateUserDTO, VerfyUserDto } from "./user.dto";
 import { UserStatus } from "./user.enum";
 import { IUserRepository, UserRepository } from "./user.repository";
@@ -11,6 +10,7 @@ import { UserStateMachine } from "./user.state-machine";
 import { ApplicantRepository, IApplicantRepository } from "../applicants/applicant.repository";
 import { CacheService } from "../../util/cache/cache.service";
 import { RoleRepository } from './roles/role.repository';
+import { PermissionRepository } from './permissions/permission.repository';
 
 
 
@@ -259,12 +259,8 @@ export class UserService {
         if (dto.email !== email || dto.password !== password) {
             return null; // not system login
         }
-        const roleRepository = new RoleRepository();
-        const adminRole = await roleRepository.findByName("admin");
-        if (!adminRole) {
-            throw new Error("Admin role not initialized.");
-        }
-        const permissions = adminRole.permissions?.map((p: any) => p.name) || [];
+        const perms = await new PermissionRepository().findAll();
+        const permissions = perms?.map((p: any) => p.name) || [];
         CacheService.setUserPermissions("system", permissions);
         const payload: JwtPayload = {
             _id: "system",      // no actual DB user
@@ -285,25 +281,5 @@ export class UserService {
     }
 
 
-    /*
-    static async initAdminUser() {
-        const repository = new UserRepository();
-        const email = process.env.EMAIL;
-        const password = process.env.PASSWORD;
-        if (!email || !password) {
-            throw new Error('Default Admin credentials are not found in environment variables.');
-        }
-        const exist = await repository.findByEmail(email);
-        if (!exist) {
-            const adminRole = await Role.findOne({ role_name: "admin" });
-            if (!adminRole) {
-                throw new Error("Admin role not initialized.");
-            }
-            const hashed = await this.prepareHash(password);
-            const data = { email: email, password: hashed, status: UserStatus.active, roles: [adminRole._id as string] };
-            await repository.create(data);
-            console.log('Default admin user created successfully.');
-        }
-    }
-        */
+
 }

@@ -85,7 +85,7 @@ const PORT = process.env.SERVER_PORT || 5000;
     await mongoose.connect(MONGO_URL);
     console.log('database connection established');
     await PermissionService.seedPermissions();
-    await RoleService.initAdminRole();
+   // await RoleService.initAdminRole();
    // await UserService.initAdminUser();
 
     app.listen(PORT, () => {

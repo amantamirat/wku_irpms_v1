@@ -40,6 +40,7 @@ export class RoleService {
         return await role.deleteOne();
     }
 
+    /*
     static async initAdminRole() {
         const roleRepository = new RoleRepository();
         const permReposiroty = new PermissionRepository();
@@ -69,4 +70,5 @@ export class RoleService {
         }
         return adminRole;
     }
+        */
 }
