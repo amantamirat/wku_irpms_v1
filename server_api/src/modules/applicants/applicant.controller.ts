@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { errorResponse, successResponse } from '../../util/response';
 import { AuthenticatedRequest } from '../users/user.middleware';
-import { ApplicantService } from './app.licant.service';
+import { ApplicantService } from './applicant.service';
 import { CreateApplicantDTO, GetApplicantsDTO, UpdateApplicantDTO } from './applicant.dto';
 
 const service = new ApplicantService();

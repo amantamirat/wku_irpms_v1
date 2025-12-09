@@ -5,8 +5,6 @@ import {
     Organization,
     College,
     Directorate,
-    //Sector,
-    //Specialization,
     Department,
     Center,
     Program,
@@ -142,9 +140,7 @@ export class OrganizationRepository implements IOrganizationRepository {
             case Unit.Program: return Program;
             case Unit.Directorate: return Directorate;
             case Unit.Center: return Center;
-            //case "Sector": return Sector;
             case Unit.External: return External;
-            //case Unit.Specialization: return Specialization;
             default:
                 throw new Error(`Unknown organization type: ${type}`);
         }

@@ -26,22 +26,12 @@ export class GrantRepository implements IGrantRepository {
     async find(filters: GetGrantsDTO) {
         const query: any = {};
 
-        /**
-         * if (filters.userId) {
-            query.createdBy = new mongoose.Types.ObjectId(filters.userId);
-        }
-         */
-
-
         if (filters.directorateId) {
             query.cycle = new mongoose.Types.ObjectId(filters.directorateId);
         }
 
         return Grant.find(query)
             .populate("directorate")
-            //.populate("createdBy")
-            //.skip(filters.skip ?? 0)
-            //.limit(filters.limit ?? 0)
             .lean<IGrant[]>()
             .exec();
     }
@@ -59,8 +49,8 @@ export class GrantRepository implements IGrantRepository {
     async update(id: string, dtoData: UpdateGrantDTO["data"]): Promise<IGrant> {
         const updateData: Partial<IGrant> = {};
 
-        if (dtoData.title !== undefined) updateData.title = dtoData.title;
-        if (dtoData.description !== undefined) updateData.description = dtoData.description;       
+        if (dtoData.title) updateData.title = dtoData.title;
+        if (dtoData.description) updateData.description = dtoData.description;       
 
         const updated = await Grant.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),

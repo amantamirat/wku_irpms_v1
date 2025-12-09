@@ -1,6 +1,5 @@
-import { Directorate } from "../organization/organization.model";
-import { Grant } from "./grant.model";
 import { CacheService } from "../../util/cache/cache.service";
+import { Directorate } from "../organization/organization.model";
 import { CreateGrantDTO, DeleteGrantDTO, GetGrantsDTO, UpdateGrantDTO } from "./grant.dto";
 import { GrantRepository, IGrantRepository } from "./grant.repository";
 

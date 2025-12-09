@@ -64,8 +64,6 @@ export interface CreateExternalDTO extends BaseOrganizationDTO //, WithParentDTO
 export type CreateOrganizationDTO =
     | CreateCollegeDTO
     | CreateDirectorateDTO
-    //| CreateSectorDTO
-    //| CreateSpecializationDTO
     | CreateDepartmentDTO
     | CreateCenterDTO
     | CreateProgramDTO

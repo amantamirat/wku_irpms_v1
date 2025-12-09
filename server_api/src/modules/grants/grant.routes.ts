@@ -21,19 +21,6 @@ router.get(
   GrantController.getGrants
 );
 
-/*
-router.get(
-  '/user',
-  verifyActiveAccount,
-  checkPermission([
-    PERMISSIONS.GRANT.CREATE,
-    PERMISSIONS.GRANT.UPDATE,
-    PERMISSIONS.GRANT.DELETE
-  ]),
-  GrantController.getUserGrants
-);
-*/
-
 router.put(
   '/:id',
   verifyActiveAccount,
