@@ -72,7 +72,9 @@ const AppMenu = () => {
                         PERMISSIONS.CYCLE.CALL.DELETE,
                     ])
                 },
-                {
+                /**
+                 * 
+                 * {
                     label: 'Programs',
                     icon: 'pi pi-circle-fill',
                     to: '/cycles/programs',
@@ -82,6 +84,8 @@ const AppMenu = () => {
                         PERMISSIONS.CYCLE.PROGRAM.DELETE
                     ])
                 },
+                 */
+                
                 {
                     label: 'Evaluations',
                     icon: 'pi pi-chart-bar',

@@ -9,7 +9,7 @@ router.post(
   '/',
   verifyActiveAccount,
   checkPermission([PERMISSIONS.CALENDAR.CREATE]),
-  CalendarController.createCalendar
+  CalendarController.create
 );
 
 router.get(
@@ -18,21 +18,21 @@ router.get(
   checkPermission([
     PERMISSIONS.CALENDAR.READ
   ]),
-  CalendarController.getCalendars
+  CalendarController.get
 );
 
 router.put(
   '/:id',
   verifyActiveAccount,
   checkPermission([PERMISSIONS.CALENDAR.UPDATE]),
-  CalendarController.updateCalendar
+  CalendarController.update
 );
 
 router.delete(
   '/:id',
   verifyActiveAccount,
   checkPermission([PERMISSIONS.CALENDAR.DELETE]),
-  CalendarController.deleteCalendar
+  CalendarController.delete
 );
 
 export default router;

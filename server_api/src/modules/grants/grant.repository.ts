@@ -27,7 +27,7 @@ export class GrantRepository implements IGrantRepository {
         const query: any = {};
 
         if (filters.directorateId) {
-            query.cycle = new mongoose.Types.ObjectId(filters.directorateId);
+            query.directorate = new mongoose.Types.ObjectId(filters.directorateId);
         }
 
         return Grant.find(query)

@@ -6,7 +6,7 @@ import { CreateCalendarDTO, UpdateCalendarDTO } from './calendar.dto';
 const service = new CalendarService();
 export class CalendarController {
 
-  static async createCalendar(req: Request, res: Response) {
+  static async create(req: Request, res: Response) {
     try {
       const data: CreateCalendarDTO = req.body;
       const calendar = await service.create(data);
@@ -16,7 +16,7 @@ export class CalendarController {
     }
   }
 
-  static async getCalendars(req: Request, res: Response) {
+  static async get(req: Request, res: Response) {
     try {
       const calendars = await service.getAll();
       successResponse(res, 200, 'Calendars fetched successfully', calendars);
@@ -25,7 +25,7 @@ export class CalendarController {
     }
   }
 
-  static async updateCalendar(req: Request, res: Response) {
+  static async update(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const { year, startDate, endDate } = req.body;
@@ -45,7 +45,7 @@ export class CalendarController {
     }
   }
 
-  static async deleteCalendar(req: Request, res: Response) {
+  static async delete(req: Request, res: Response) {
     try {
       const { id } = req.params;
       const deleted = await service.delete(id);

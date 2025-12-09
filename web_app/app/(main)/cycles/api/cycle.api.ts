@@ -26,7 +26,7 @@ export const CycleApi = {
   // ---------------------------
   async getCycles(options: GetCyclesOptions): Promise<Cycle[]> {
     const query = new URLSearchParams();
-    if (options.user) query.append("user", "true");
+    //if (options.user) query.append("user", "true");
     if (options.calendar) query.append("calendar", options.calendar);
     if (options.grant) query.append("grant", options.grant);
     if (options.type) query.append("type", options.type);

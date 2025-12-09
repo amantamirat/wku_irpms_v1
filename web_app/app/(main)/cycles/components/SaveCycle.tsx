@@ -43,7 +43,8 @@ const SaveCycle = ({ type, visible, cycle, onHide, onComplete }: SaveCycleProps)
     useEffect(() => {
         const loadCalendars = async () => {
             try {
-                const data = await CalendarApi.getCalendars({ status: CalendarStatus.active });
+                //filter by status??
+                const data = await CalendarApi.getCalendars();
                 setCalendars(data);
             } catch (err) {
                 console.error('Failed to load calendars:', err);
