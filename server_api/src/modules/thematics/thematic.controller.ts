@@ -24,7 +24,8 @@ export class ThematicController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const thematics = await this.service.getThematics({});
+            const { directorate } = req.query;
+            const thematics = await this.service.getThematics({ directorate: directorate as string });
             successResponse(res, 200, 'Thematics fetched successfully', thematics);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

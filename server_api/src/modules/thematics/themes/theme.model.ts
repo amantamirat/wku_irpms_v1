@@ -13,15 +13,12 @@ export interface ITheme extends Document {
 const ThemeSchema = new Schema<ITheme>(
   {
     title: { type: String, required: true },
-
-    priority: { type: Number },
-    
+    priority: { type: Number },    
     parent: {
       type: Schema.Types.ObjectId,
       ref: COLLECTIONS.THEME,
       required: true
-    },
-    
+    },    
     thematicArea: {
       type: Schema.Types.ObjectId,
       ref: COLLECTIONS.THEMATIC,

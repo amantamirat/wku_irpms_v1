@@ -10,6 +10,7 @@ import positionRoutes from './modules/applicants/positions/position.routes';
 import experienceRoutes from './modules/applicants/experiences/experience.routes';
 import specializationRoutes from './modules/applicants/specializations/specialization.routes';
 import thematicRoutes from './modules/thematics/thematic.routes';
+import themeRoutes2 from './modules/thematics/themes/theme.routes'
 
 import themeRoutes from './modules/themes/theme.routes';
 
@@ -58,6 +59,7 @@ app.use("/api/positions", positionRoutes);
 
 app.use("/api/experiences", experienceRoutes);
 app.use("/api/thematics", thematicRoutes);
+app.use("/api/themes2", themeRoutes2);
 app.use("/api/themes", themeRoutes);
 //app.use("/api/evals", evalRoutes);
 app.use("/api/evaluations", evaluationRoutes);
@@ -91,8 +93,8 @@ const PORT = process.env.SERVER_PORT || 5000;
     await mongoose.connect(MONGO_URL);
     console.log('database connection established');
     //await PermissionService.seedPermissions();
-   // await RoleService.initAdminRole();
-   // await UserService.initAdminUser();
+    // await RoleService.initAdminRole();
+    // await UserService.initAdminUser();
 
     app.listen(PORT, () => {
       console.log(`Server API is running at http://127.0.0.1:${PORT}`);
