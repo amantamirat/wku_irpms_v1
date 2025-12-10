@@ -59,7 +59,7 @@ app.use("/api/positions", positionRoutes);
 
 app.use("/api/experiences", experienceRoutes);
 app.use("/api/thematics", thematicRoutes);
-app.use("/api/themes2", themeRoutes2);
+app.use("/api/thematics/themes", themeRoutes2);
 app.use("/api/themes", themeRoutes);
 //app.use("/api/evals", evalRoutes);
 app.use("/api/evaluations", evaluationRoutes);
