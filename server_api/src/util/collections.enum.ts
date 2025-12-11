@@ -5,6 +5,7 @@ export enum COLLECTIONS {
   POSITION = "positions", 
   EXPERIENCE = "experiences",
   THEMATIC = "thematics",
+  THEME_NEW = "themesnews",
   THEME = "themes",
   EVALUATION = "evaluations",
   CRITERION = "criteria",

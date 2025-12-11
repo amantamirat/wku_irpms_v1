@@ -1,28 +1,28 @@
 'use client';
 
 import { CrudManager } from "@/components/CrudManager";
+import { useAuth } from "@/contexts/auth-context";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useCrudList } from "@/hooks/useCrudList";
-import { useEffect, useState } from "react";
-import { useAuth } from "@/contexts/auth-context";
 import { PERMISSIONS } from "@/types/permissions";
-import { Thematic } from "../models/thematic.model";
-import { ThematicApi } from "../api/thematic.api";
-import MyBadge from "@/templates/MyBadge";
-import { Organization } from "../../organizations/models/organization.model";
+import { useEffect, useState } from "react";
+import { Thematic } from "../../models/thematic.model";
+import { ThemeApi } from "../api/theme.api";
+import { Theme } from "../models/theme.model";
 import SaveDialog from "./SaveDialog";
-import ThemeManager from "../themes/components/ThematicManager";
 
-interface ThematicManagerProps {
-    directorate?: Organization;
+interface ThemeManagerProps {
+    thematicArea: Thematic;
+    parent?: Theme;
 }
 
 
-const ThematicManager = ({ directorate }: ThematicManagerProps) => {
+const ThemeManager = ({ thematicArea, parent }: ThemeManagerProps) => {
 
-    const emptyThematic: Thematic = {
-        directorate: directorate ?? '',
-        title: ''
+    const emptyTheme: Theme = {
+        title: '',
+        thematicArea: thematicArea,
+        parent: parent
     };
 
     const { hasPermission } = useAuth();
@@ -34,7 +34,7 @@ const ThematicManager = ({ directorate }: ThematicManagerProps) => {
 
     // CRUD hook
     const {
-        items: thematics,
+        items: themes,
         setAll,
         updateItem,
         removeItem,
@@ -42,36 +42,36 @@ const ThematicManager = ({ directorate }: ThematicManagerProps) => {
         setLoading,
         error,
         setError
-    } = useCrudList<Thematic>();
+    } = useCrudList<Theme>();
 
-    const [thematic, setThematic] = useState<Thematic>(emptyThematic);
+    const [theme, setTheme] = useState<Theme>(emptyTheme);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
 
-    /** Fetch thematics */
+    /** Fetch themes */
     useEffect(() => {
-        const fetchThematics = async () => {
+        const fetchThemes = async () => {
             try {
                 setLoading(true);
-                const data = await ThematicApi.getThematics({});
+                const data = await ThemeApi.getThemes({ thematicArea, parent });
                 setAll(data);
             } catch (err: any) {
-                setError("Failed to fetch thematics. " + (err?.message ?? ""));
+                setError("Failed to fetch themes. " + (err?.message ?? ""));
             } finally {
                 setLoading(false);
             }
         };
-        fetchThematics();
+        fetchThemes();
     }, []);
 
     /** Save callback */
-    const onSaveComplete = (saved: Thematic) => {
+    const onSaveComplete = (saved: Theme) => {
         updateItem(saved);
         hideDialogs();
     };
 
     /** Delete */
-    const deleteThematic = async (row: Thematic) => {
-        const ok = await ThematicApi.deleteThematic(row);
+    const deleteTheme = async (row: Theme) => {
+        const ok = await ThemeApi.deleteTheme(row);
         if (ok) removeItem(row);
     };
 
@@ -82,27 +82,16 @@ const ThematicManager = ({ directorate }: ThematicManagerProps) => {
 
     /** Columns shown in CRUD table */
     const columns = [
-        { field: "directorate.name", header: "Directorate", sortable: true },
         { field: "title", header: "Title", sortable: true },
-        { field: "description", header: "Description", sortable: true },
-        {
-            header: "Level",
-            field: "level",
-            sortable: true,
-            body: (r: Thematic) => (
-                <span className={`theme-level-badge theme-${r.level?.toLowerCase()}`}>
-                    {r.level}
-                </span>
-            )
-        }
+        { field: "priority", header: "Priority", sortable: true },
     ];
 
     return (
         <>
             <CrudManager
-                headerTitle="Manage Thematics"
-                itemName="Thematic"
-                items={thematics}
+                headerTitle="Manage Themes"
+                itemName="Theme"
+                items={themes}
                 dataKey="_id"
                 columns={columns}
                 loading={loading}
@@ -113,31 +102,30 @@ const ThematicManager = ({ directorate }: ThematicManagerProps) => {
                 canDelete={canDelete}
 
                 onCreate={() => {
-                    setThematic({ ...emptyThematic });
+                    setTheme({ ...emptyTheme });
                     setShowSaveDialog(true);
                 }}
 
                 onEdit={(row) => {
-                    setThematic({ ...row });
+                    setTheme({ ...row });
                     setShowSaveDialog(true);
                 }}
 
                 onDelete={(row) =>
                     confirm.ask({
                         item: String(row.title),
-                        onConfirmAsync: () => deleteThematic(row)
+                        onConfirmAsync: () => deleteTheme(row)
                     })
                 }
 
-                rowExpansionTemplate={(row) => <ThemeManager thematicArea={row as Thematic} />}
                 enableSearch
             />
 
             {/* Save Dialog */}
-            {thematic && (
+            {theme && (
                 <SaveDialog
                     visible={showSaveDialog}
-                    thematic={thematic}
+                    theme={theme}
                     onComplete={onSaveComplete}
                     onHide={hideDialogs}
                 />
@@ -146,4 +134,4 @@ const ThematicManager = ({ directorate }: ThematicManagerProps) => {
     );
 };
 
-export default ThematicManager;
+export default ThemeManager;

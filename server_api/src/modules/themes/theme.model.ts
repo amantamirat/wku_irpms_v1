@@ -72,7 +72,7 @@ const ThemeSchema = new Schema<ThemeDocument>({
   }
 });
 
-export const Theme = BaseTheme.discriminator<ThemeDocument>(ThemeType.theme, ThemeSchema);
+export const Them = BaseTheme.discriminator<ThemeDocument>(ThemeType.theme, ThemeSchema);
 
 interface ComponentDocument extends ChildThemeDocument {
   type: ThemeType.componenet;
@@ -82,7 +82,7 @@ const ComponenetSchema = new Schema<ComponentDocument>({
   ...childThemeFields,
   parent: {
     type: Schema.Types.ObjectId,
-    ref: Theme.modelName,
+    ref: Them.modelName,
     required: true
   }
 });

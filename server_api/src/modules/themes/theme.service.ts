@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { ThemeType, ThemeLevel } from "./theme.enum";
-import { BaseTheme, Componenet, FocusArea, ThematicArea, Theme } from "./theme.model";
+import { BaseTheme, Componenet, FocusArea, ThematicArea, Them } from "./theme.model";
 import { ProjectTheme } from "../projects/themes/project.theme.model";
 import { Directorate } from "../organization/organization.model";
 import { CacheService } from "../../util/cache/cache.service";
@@ -158,7 +158,7 @@ export class ThemeService {
         const createdThemes: any[] = [];
 
         for (const themeItem of data) {
-            const themeDoc = await Theme.create({
+            const themeDoc = await Them.create({
                 title: themeItem.title,
                 type: ThemeType.theme,
                 thematic_area: thematicArea._id,

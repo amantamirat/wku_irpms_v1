@@ -15,6 +15,7 @@ export class ThemeController {
 
     create = async (req: Request, res: Response) => {
         try {
+            //const { title, priority, parent, thematicArea } = req.body;
             const data: CreateThemeDTO = req.body;
             const theme = await this.service.create(data);
             successResponse(res, 201, "Theme created successfully", theme);

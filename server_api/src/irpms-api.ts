@@ -11,7 +11,6 @@ import experienceRoutes from './modules/applicants/experiences/experience.routes
 import specializationRoutes from './modules/applicants/specializations/specialization.routes';
 import thematicRoutes from './modules/thematics/thematic.routes';
 import themeRoutes2 from './modules/thematics/themes/theme.routes'
-
 import themeRoutes from './modules/themes/theme.routes';
 
 import evaluationRoutes from './modules/evaluations/evaluation.routes';

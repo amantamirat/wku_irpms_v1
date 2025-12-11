@@ -16,8 +16,7 @@ const ThemeSchema = new Schema<ITheme>(
     priority: { type: Number },    
     parent: {
       type: Schema.Types.ObjectId,
-      ref: COLLECTIONS.THEME,
-      required: true
+      ref: COLLECTIONS.THEME_NEW,
     },    
     thematicArea: {
       type: Schema.Types.ObjectId,
@@ -28,7 +27,7 @@ const ThemeSchema = new Schema<ITheme>(
   { timestamps: true } // discriminatorKey
 );
 
-export const Theme = model<ITheme>(COLLECTIONS.THEME, ThemeSchema);
+export const Theme = model<ITheme>(COLLECTIONS.THEME_NEW, ThemeSchema);
 
 
 
