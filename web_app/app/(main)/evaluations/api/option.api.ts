@@ -1,22 +1,12 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Option } from "../models/option.model";
+import { GetOptionsFilter, Option, sanitizeOption } from "../models/option.model";
 import { Criterion } from "../models/criterion.model";
 
 const end_point = '/options';
 
-function sanitizeOption(option: Partial<Option>): Partial<Option> {
-    return {
-        ...option,
-        criterion:
-            typeof option.criterion === 'object' && option.criterion !== null
-                ? (option.criterion as Criterion)._id
-                : option.criterion
-    };
-}
 
-export interface GetOptionsFilter {
-    criterion?: string;
-}
+
+
 
 export const OptionApi = {
 
@@ -26,9 +16,10 @@ export const OptionApi = {
         return createdData as Option;
     },
 
-    async getOptions(filter: GetOptionsFilter = {}): Promise<Option[]> {
+    async getOptions(filter: GetOptionsFilter): Promise<Option[]> {
         const query = new URLSearchParams();
-        if (filter.criterion) query.append("criterion", filter.criterion);
+        const sanitized = sanitizeOption(filter);
+        if (filter.criterion) query.append("criterion", sanitized.criterion as string);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Option[];
     },

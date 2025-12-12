@@ -1,204 +1,134 @@
 'use client';
 
-import ConfirmDialog from '@/components/ConfirmationDialog';
-import ErrorCard from '@/components/ErrorCard';
-import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
-import { Button } from 'primereact/button';
-import { Column } from 'primereact/column';
-import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
-import { InputText } from 'primereact/inputtext';
-import { Toast } from 'primereact/toast';
-import { Toolbar } from 'primereact/toolbar';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { OptionApi } from '../api/option.api';
-import { Option } from '../models/option.model';
-import { Criterion } from '../models/criterion.model';
-import SaveOption from './SaveOption';
-
+import { CrudManager } from "@/components/CrudManager";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import { useCrudList } from "@/hooks/useCrudList";
+import { useEffect, useState } from "react";
+import { Option } from "../models/option.model";
+import { Criterion } from "../models/criterion.model";
+import { OptionApi } from "../api/option.api";
+import SaveOption from "./SaveOption";
+import { useAuth } from "@/contexts/auth-context";
+import { PERMISSIONS } from "@/types/permissions";
 
 interface OptionManagerProps {
     criterion: Criterion;
 }
 
 const OptionManager = ({ criterion }: OptionManagerProps) => {
+
     const emptyOption: Option = {
-        title: '',
+        title: "",
         score: 0,
         criterion: criterion,
     };
 
-    const [options, setOptions] = useState<Option[]>([]);
-    const [error, setError] = useState<string | null>(null);
-    const dt = useRef<any>(null);
-    const [globalFilter, setGlobalFilter] = useState('');
-    const [filters, setFilters] = useState<DataTableFilterMeta>({});
-    const [selectedOption, setSelectedOption] = useState<Option>(emptyOption);
+    const { hasPermission } = useAuth();
+    const confirm = useConfirmDialog();
+
+    const canCreate = true//hasPermission([PERMISSIONS.OPTION.CREATE]);
+    const canEdit = true//hasPermission([PERMISSIONS.OPTION.UPDATE]);
+    const canDelete = true//hasPermission([PERMISSIONS.OPTION.DELETE]);
+
+    /** CRUD Hook */
+    const {
+        items: options,
+        setAll,
+        updateItem,
+        removeItem,
+        loading,
+        setLoading,
+        error,
+        setError,
+    } = useCrudList<Option>();
+
+    const [option, setOption] = useState<Option>(emptyOption);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const toast = useRef<Toast>(null);
 
-    // Initialize filters
+    /** Fetch options for this criterion */
     useEffect(() => {
-        setFilters(initFilters());
-        setGlobalFilter('');
-    }, []);
+        const fetchOptions = async () => {
+            try {
+                setLoading(true);
+                const data = await OptionApi.getOptions({ criterion});
+                setAll(data);
+            } catch (err: any) {
+                setError("Failed to load options. " + (err?.message ?? ""));
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
-    };
-
-    // Fetch options for this criterion
-    const fetchOptions = useCallback(async () => {
-        try {
-            const data = await OptionApi.getOptions({ criterion: String(criterion._id) });
-            setOptions(data);
-        } catch (err) {
-            setError(`Failed to load options: ${err}`);
-        }
+        fetchOptions();
     }, [criterion]);
 
-    useEffect(() => {
-        if (criterion._id) fetchOptions();
-    }, [criterion, fetchOptions]);
-
-    if (error) {
-        return <ErrorCard errorMessage={error} />;
-    }
-
-    // Handle save (create/update)
-    const onSaveComplete = (savedOption: Option) => {
-        let _options = [...options];
-        const index = _options.findIndex((o) => o._id === savedOption._id);
-        if (index !== -1) {
-            _options[index] = { ...savedOption };
-        } else {
-            _options.push({ ...savedOption });
-        }
-        setOptions(_options);
+    /** Save callback */
+    const onSaveComplete = (saved: Option) => {
+        updateItem(saved);
         hideDialogs();
     };
 
-    // Delete option
-    const deleteOption = async () => {
-        const deleted = await OptionApi.deleteOption(selectedOption);
-        if (deleted) {
-            setOptions(options.filter((o) => o._id !== selectedOption._id));
-            hideDialogs();
-        }
+    /** Delete */
+    const deleteOption = async (row: Option) => {
+        const ok = await OptionApi.deleteOption(row);
+        if (ok) removeItem(row);
     };
 
+    /** Hide dialogs */
     const hideDialogs = () => {
         setShowSaveDialog(false);
-        setShowDeleteDialog(false);
-        setSelectedOption(emptyOption);
     };
 
-    const startToolbarTemplate = () => (
-        <div className="my-2">
-            <Button
-                label="New Option"
-                icon="pi pi-plus"
-                severity="success"
-                className="mr-2"
-                onClick={() => {
-                    setSelectedOption(emptyOption);
-                    setShowSaveDialog(true);
-                }}
-            />
-        </div>
-    );
-
-    const header = (
-        <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage Options for "{criterion.title}"</h5>
-            <span className="block mt-2 md:mt-0 p-input-icon-left">
-                <i className="pi pi-search" />
-                <InputText
-                    type="search"
-                    value={globalFilter}
-                    onChange={onGlobalFilterChange}
-                    placeholder="Search..."
-                    className="w-full md:w-1/3"
-                />
-            </span>
-        </div>
-    );
-
-    const actionBodyTemplate = (rowData: Option) => (
-        <>
-            <Button
-                icon="pi pi-pencil"
-                rounded
-                severity="success"
-                className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }}
-                onClick={() => {
-                    setSelectedOption(rowData);
-                    setShowSaveDialog(true);
-                }}
-            />
-            <Button
-                icon="pi pi-trash"
-                rounded
-                severity="warning"
-                className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }}
-                onClick={() => {
-                    setSelectedOption(rowData);
-                    setShowDeleteDialog(true);
-                }}
-            />
-        </>
-    );
+    /** CRUD table columns */
+    const columns = [
+        { header: "Title", field: "title" },
+        { header: "Score", field: "score" },
+    ];
 
     return (
-        <div className="card">
-            <Toast ref={toast} />
-            <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
-
-            <DataTable
-                ref={dt}
-                value={options}
-                selection={selectedOption}
-                onSelectionChange={(e) => setSelectedOption(e.value as Option)}
+        <>
+            <CrudManager
+                headerTitle={`Manage Options for "${criterion.title}"`}
+                itemName="Option"
+                items={options}
                 dataKey="_id"
-                paginator
-                rows={10}
-                rowsPerPageOptions={[5, 10, 25]}
-                className="datatable-responsive"
-                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} options"
-                globalFilter={globalFilter}
-                emptyMessage="No options found."
-                header={header}
-                scrollable
-                filters={filters}
-            >
-                <Column selectionMode="single" headerStyle={{ width: '3em' }}/>
-                <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                <Column field="title" header="Title" sortable />
-                <Column field="score" header="Score" sortable />
-                <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
-            </DataTable>
+                columns={columns}
+                loading={loading}
+                error={error}
 
-            {selectedOption && (
+                enableSearch
+                canCreate={canCreate}
+                canEdit={canEdit}
+                canDelete={canDelete}
+
+                onCreate={() => {
+                    setOption({ ...emptyOption });
+                    setShowSaveDialog(true);
+                }}
+
+                onEdit={(row) => {
+                    setOption({ ...row });
+                    setShowSaveDialog(true);
+                }}
+
+                onDelete={(row) =>
+                    confirm.ask({
+                        item: row.title,
+                        onConfirmAsync: () => deleteOption(row),
+                    })
+                }
+            />
+
+            {/* Save Dialog */}
+            {option && (
                 <SaveOption
                     visible={showSaveDialog}
-                    option={selectedOption}
+                    option={option}
                     onComplete={onSaveComplete}
-                    onHide={() => setShowSaveDialog(false)}
+                    onHide={hideDialogs}
                 />
             )}
-
-            {selectedOption && (
-                <ConfirmDialog
-                    showDialog={showDeleteDialog}
-                    item={String(selectedOption.title)}
-                    onConfirmAsync={deleteOption}
-                    onHide={() => setShowDeleteDialog(false)}
-                />
-            )}
-        </div>
+        </>
     );
 };
 

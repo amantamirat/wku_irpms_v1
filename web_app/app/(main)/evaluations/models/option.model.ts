@@ -10,6 +10,10 @@ export type Option = {
     updatedAt?: Date;
 };
 
+export interface GetOptionsFilter {
+    criterion?: string | Criterion;
+}
+
 export const validateOption = (
     option: Option
 ): { valid: boolean; message?: string } => {
@@ -24,3 +28,14 @@ export const validateOption = (
     }
     return { valid: true };
 };
+
+
+export function sanitizeOption(option: Partial<Option>): Partial<Option> {
+    return {
+        ...option,
+        criterion:
+            typeof option.criterion === 'object' && option.criterion !== null
+                ? (option.criterion as Criterion)._id
+                : option.criterion
+    };
+}
