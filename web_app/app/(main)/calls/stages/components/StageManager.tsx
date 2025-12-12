@@ -1,27 +1,25 @@
 'use client';
 
-import { useEffect, useState } from "react";
-import { CrudManager } from "@/components/CrudManager";
-import ErrorCard from "@/components/ErrorCard";
-import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-import ListSkeleton from "@/components/ListSkeleton";
-import SaveStage from "./SaveStage";
-import MyBadge from "@/templates/MyBadge";
-import { useCrudList } from "@/hooks/useCrudList";
-import { Stage, StageStatus, StageType } from "../models/stage.model";
-import { StageApi } from "../api/stage.api";
-import { Call } from "../../models/call.model";
 import ProjectStageManager from "@/app/(main)/projects/stages/components/ProjectStageManager";
+import { CrudManager } from "@/components/CrudManager";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import { useCrudList } from "@/hooks/useCrudList";
+import MyBadge from "@/templates/MyBadge";
+import { useEffect, useState } from "react";
+import { Call } from "../../models/call.model";
+import { StageApi } from "../api/stage.api";
+import { Stage, StageStatus, StageType } from "../models/stage.model";
+import SaveStage from "./SaveStage";
 
 interface StageManagerProps {
-    cycle: Call;
+    call: Call;
 }
 
-const StageManager = ({ cycle }: StageManagerProps) => {
+const StageManager = ({ call }: StageManagerProps) => {
     const confirm = useConfirmDialog();
 
     const emptyStage: Stage = {
-        cycle: cycle,
+        call: call,
         name: "",
         type: StageType.evaluation,
         evaluation: "",
@@ -46,14 +44,13 @@ const StageManager = ({ cycle }: StageManagerProps) => {
 
     const [selectedStage, setSelectedStage] = useState<Stage>(emptyStage);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [expandedRows, setExpandedRows] = useState<any[]>([]);
 
     // Fetch stages for this cycle
     useEffect(() => {
         const fetchStages = async () => {
             try {
                 setLoading(true);
-                const data = await StageApi.getStages({ cycle: cycle._id });
+                const data = await StageApi.getStages({ call });
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to fetch stages. " + (err.message ?? ""));
@@ -62,8 +59,8 @@ const StageManager = ({ cycle }: StageManagerProps) => {
             }
         };
 
-        if (cycle?._id) fetchStages();
-    }, [cycle?._id]);
+       fetchStages();
+    }, [call]);
 
 
     // Save (create/update)
@@ -134,8 +131,6 @@ const StageManager = ({ cycle }: StageManagerProps) => {
                 }
                 loading={loading}
                 error={error}
-                expandedRows={expandedRows}
-                onRowToggle={(e) => setExpandedRows(e.data)}
                 rowExpansionTemplate={(row: Stage) => (
                     <ProjectStageManager stage={row} />
                 )}
@@ -146,7 +141,7 @@ const StageManager = ({ cycle }: StageManagerProps) => {
             <SaveStage
                 visible={showSaveDialog}
                 stage={selectedStage}
-                cycle={cycle}
+                cycle={call}
                 onComplete={onSaveComplete}
                 onHide={hideSaveDialog}
             />

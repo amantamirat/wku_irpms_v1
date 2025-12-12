@@ -8,17 +8,16 @@ const service = new StageService();
 export class StageController {
     static async createStage(req: Request, res: Response) {
         try {
-            const { cycle, name, type, evaluation, deadline } = req.body;
+            const { call, name, type, evaluation, deadline } = req.body;
             const dto: CreateStageDTO = {
-                cycle: cycle as string,
+                call: call as string,
                 name,
-                type,
                 evaluation: evaluation as string,
                 deadline,
                 //status: StageStatus.planned
             };
 
-            const stage = await service.createStage(dto);
+            const stage = await service.create(dto);
             successResponse(res, 201, "Stage created successfully", stage);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -30,7 +29,7 @@ export class StageController {
             const { cycle, order, status } = req.query;
 
             const dto: GetStagesDTO = {
-                cycle: cycle as string,
+                call: cycle as string,
                 order: order ? Number(order) : undefined,
                 status: status as StageStatus
             };

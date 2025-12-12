@@ -1,7 +1,6 @@
 import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
 import { Call } from "../../models/call.model";
 
-
 export enum StageStatus {
     planned = "planned",
     active = "active",
@@ -16,7 +15,7 @@ export enum StageType {
 
 export type Stage = {
     _id?: string;
-    cycle: string | Call;
+    call: string | Call;
     name: string;
     type: StageType;
     evaluation: string | Evaluation;
@@ -26,6 +25,10 @@ export type Stage = {
     updatedAt?: Date;
 };
 
+export interface GetStagesDTO {
+    call?: string | Call;
+}
+
 /**
  * Validate stage fields before submission
  */
@@ -34,8 +37,8 @@ export const validateStage = (stage: Stage): { valid: boolean; message?: string 
         return { valid: false, message: "Stage name is required." };
     }
 
-    if (!stage.cycle) {
-        return { valid: false, message: "Cycle reference is required." };
+    if (!stage.call) {
+        return { valid: false, message: "Call reference is required." };
     }
 
     if (!stage.evaluation) {
@@ -66,10 +69,10 @@ export const validateStage = (stage: Stage): { valid: boolean; message?: string 
 export const sanitizeStage = (stage: Partial<Stage>): Partial<Stage> => {
     return {
         ...stage,
-        cycle:
-            typeof stage.cycle === "object" && stage.cycle !== null
-                ? (stage.cycle as Call)._id
-                : stage.cycle,
+        call:
+            typeof stage.call === "object" && stage.call !== null
+                ? (stage.call as Call)._id
+                : stage.call,
         evaluation:
             typeof stage.evaluation === "object" && stage.evaluation !== null
                 ? (stage.evaluation as Evaluation)._id

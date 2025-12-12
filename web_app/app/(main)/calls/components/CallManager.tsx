@@ -127,7 +127,7 @@ const CallManager = () => {
                 //enableSearch
 
                 /** Expand: Stage Manager */
-                //rowExpansionTemplate={(row) => <StageManager cycle={row} />}
+                rowExpansionTemplate={(row) => <StageManager call={row} />}
             />
 
             {/* Save Dialog */}

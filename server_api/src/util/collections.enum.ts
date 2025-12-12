@@ -11,7 +11,7 @@ export enum COLLECTIONS {
   OPTION = "options",
   CALENDAR = "calendars",
   CALL = "calls",
-  STAGE = "cyclestages",
+  STAGE = "callstages",
   GRANT = "grants",
   CONSTRAINT = "constraints",
   //PROJECT_CONSTRAINT = "projectconstraints",

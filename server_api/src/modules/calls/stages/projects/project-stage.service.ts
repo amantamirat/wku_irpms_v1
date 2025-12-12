@@ -48,7 +48,7 @@ export class ProjectStageService {
 
             const prevStage = await this.stageRepository.findByOrderAndCycle({
                 order: stage.order - 1,
-                cycle: stage.cycle.toString()
+                call: stage.call.toString()
             });
 
 

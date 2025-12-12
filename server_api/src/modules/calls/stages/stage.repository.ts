@@ -17,16 +17,14 @@ export class StageRepository implements IStageRepository {
 
     async findById(id: string) {
         return Stage.findById(new mongoose.Types.ObjectId(id))
-            //.populate("cycle")
-            //.populate("evaluation")
             .lean<IStage>()
             .exec();
     }
 
     async findLastStageByCycle(options: GetStagesDTO): Promise<IStage | null> {
         const query: any = {};
-        if (options.cycle) {
-            query.cycle = new mongoose.Types.ObjectId(options.cycle);
+        if (options.call) {
+            query.call = new mongoose.Types.ObjectId(options.call);
         }
         return Stage.findOne(query)
             .sort({ order: -1 }).lean<IStage>();
@@ -34,8 +32,8 @@ export class StageRepository implements IStageRepository {
 
     findByOrderAndCycle(options: GetStagesDTO): Promise<IStage | null> {
         const query: any = {};
-        if (options.cycle) {
-            query.cycle = new mongoose.Types.ObjectId(options.cycle);
+        if (options.call) {
+            query.call = new mongoose.Types.ObjectId(options.call);
         }
         if (options.order) {
             query.order = options.order;
@@ -45,29 +43,24 @@ export class StageRepository implements IStageRepository {
 
     async find(filters: GetStagesDTO) {
         const query: any = {};
-        if (filters.cycle) {
-            query.cycle = new mongoose.Types.ObjectId(filters.cycle);
+        if (filters.call) {
+            query.cycle = new mongoose.Types.ObjectId(filters.call);
         }
 
         if (filters.status) {
             query.status = filters.status;
         }
         return Stage.find(query)
-            .populate("cycle")
+            .populate("call")
             .populate("evaluation")
             .lean<IStage[]>()
             .exec();
     }
 
     async create(dto: CreateStageDTO) {
-        const data: Partial<IStage> = {
-            cycle: new mongoose.Types.ObjectId(dto.cycle),
-            name: dto.name,
-            type: dto.type,
-            evaluation: new mongoose.Types.ObjectId(dto.evaluation),
-            deadline: dto.deadline
-        };
-        return Stage.create(data);
+        return Stage.create({...dto, call: new mongoose.Types.ObjectId(dto.call),
+            evaluation: new mongoose.Types.ObjectId(dto.evaluation)
+        });
     }
 
     async update(id: string, dtoData: UpdateStageDTO["data"]): Promise<IStage> {

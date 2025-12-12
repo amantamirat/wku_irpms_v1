@@ -1,11 +1,9 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Stage, sanitizeStage } from "../models/stage.model";
+import { GetStagesDTO, Stage, sanitizeStage } from "../models/stage.model";
 
-const end_point = "/cycle/stages";
+const end_point = "/call/stages";
 
-export interface GetStagesDTO {
-    cycle?: string;
-}
+
 
 export const StageApi = {
     async createStage(stage: Partial<Stage>): Promise<Stage> {
@@ -16,7 +14,8 @@ export const StageApi = {
 
     async getStages(options: GetStagesDTO): Promise<Stage[]> {
         const query = new URLSearchParams();
-        if (options.cycle) query.append("cycle", options.cycle);
+        const sanitized = sanitizeStage(options);
+        if (options.call) query.append("call", sanitized.call as string);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Stage[];
     },

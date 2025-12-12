@@ -1,24 +1,24 @@
 import mongoose, { Schema, model } from "mongoose";
 import { COLLECTIONS } from "../../../util/collections.enum";
-import { StageStatus, StageType } from "./stage.enum";
 import { Evaluation } from "../../evaluations/evaluation.model";
+import { StageStatus } from "./stage.enum";
 
 
 export interface IStage extends Document {
     _id: string;
-    cycle: mongoose.Types.ObjectId;
+    call: mongoose.Types.ObjectId;
     name: string;
-    type: StageType;
     order: number;
-    evaluation: mongoose.Types.ObjectId; // Refers to Evaluation
-    deadline: Date; //Submission Deadline
+    evaluation: mongoose.Types.ObjectId;
+    deadline: Date;
+    isValidation?: boolean;
     status: StageStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
 const StageSchema = new Schema<IStage>({
-    cycle: {
+    call: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.CALL,
         required: true,
@@ -28,17 +28,10 @@ const StageSchema = new Schema<IStage>({
         type: String,
         required: true
     },
-    type: {
-        type: String,
-        enum: Object.values(StageType),
-        default: StageType.evaluation,
-        required: true,
-        immutable: true,
-    },
     order: {
         type: Number,
         required: true,
-        //immutable: true,
+        immutable: true,
     },
     evaluation: {
         type: Schema.Types.ObjectId,
@@ -48,6 +41,9 @@ const StageSchema = new Schema<IStage>({
     },
     deadline: {
         type: Date,
+    },
+    isValidation: {
+        type: Boolean,
     },
     status: {
         type: String,

@@ -1,16 +1,17 @@
-import { StageStatus, StageType } from "./stage.enum";
+import { StageStatus } from "./stage.enum";
 
 export interface GetStagesDTO {
-    cycle?: string;
-    type?: StageType;
+    call?: string;
+    //type?: StageType;
     order?: number;
     status?: StageStatus;
 }
 
 export interface CreateStageDTO {
-    cycle: string;
+    call: string;
     name: string;
-    type: StageType;
+    //type: StageType;
+    order?:number;
     evaluation: string;
     deadline?: Date;
     status?: StageStatus.planned;
