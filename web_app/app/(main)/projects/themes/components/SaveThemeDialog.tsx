@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { ProjectTheme, validateProjectTheme } from "../models/project.theme.model";
 import { Project } from "../../models/project.model";
 import { Theme } from "@/app/(main)/thematics/themes/models/theme.model";
-import { Cycle } from "@/app/(main)/cycles/models/cycle.model";
+import { Call } from "@/app/(main)/calls/models/call.model";
 import { ThemeApi } from "@/app/(main)/thematics/themes/api/theme.api";
 
 
@@ -61,7 +61,7 @@ export default function SaveThemeDialog({ project, projectTheme, setProjectTheme
 
     useEffect(() => {
         const fetchThemes = async () => {
-            const theme = (project.cycle as Cycle).theme;
+            const theme = (project.cycle as Call).thematic;
             const catalogId =
                 typeof theme === "object" && theme !== null
                     ? (theme as any)._id

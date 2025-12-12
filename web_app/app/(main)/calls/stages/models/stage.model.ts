@@ -1,5 +1,5 @@
 import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
-import { Cycle } from "../../models/cycle.model";
+import { Call } from "../../models/call.model";
 
 
 export enum StageStatus {
@@ -16,7 +16,7 @@ export enum StageType {
 
 export type Stage = {
     _id?: string;
-    cycle: string | Cycle;
+    cycle: string | Call;
     name: string;
     type: StageType;
     evaluation: string | Evaluation;
@@ -68,7 +68,7 @@ export const sanitizeStage = (stage: Partial<Stage>): Partial<Stage> => {
         ...stage,
         cycle:
             typeof stage.cycle === "object" && stage.cycle !== null
-                ? (stage.cycle as Cycle)._id
+                ? (stage.cycle as Call)._id
                 : stage.cycle,
         evaluation:
             typeof stage.evaluation === "object" && stage.evaluation !== null

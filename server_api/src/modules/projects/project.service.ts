@@ -7,7 +7,7 @@ import {
 } from "./project.dto";
 
 import { CacheService } from "../../util/cache/cache.service";
-import { Cycle } from "../cycles/cycle.model";
+import { Call } from "../calls/call.model";
 import Applicant from "../applicants/applicant.model";
 import { Collaborator } from "./collaborators/collaborator.model";
 import { DeleteDto } from "../../util/delete.dto";
@@ -23,16 +23,12 @@ export class ProjectService {
     // ---------------------------------------------------
     async createProject(dto: CreateProjectDTO) {
         // Validate Cycle
-        const cycle = await Cycle.findById(dto.cycleId).lean();
+        const cycle = await Call.findById(dto.cycleId).lean();
         if (!cycle) throw new Error("Cycle not found");
         // Validate Lead PI
         const leadPI = await Applicant.findOne({ user: dto.userId }).lean();
         if (!leadPI) throw new Error("Lead PI Applicant not found");
 
-        // Ownership validation for PROGRAM cycles
-        if (cycle.type === "Program") {
-            await CacheService.validateOwnership(dto.userId, cycle.organization);
-        }
         // Create via repository
         return this.repository.create({
             ...dto,
@@ -50,8 +46,8 @@ export class ProjectService {
         if (options.userId) {
             const organizations = await CacheService.getUserOrganizations(options.userId);
 
-            const cycles = await Cycle.find({
-                organization: { $in: organizations }
+            const cycles = await Call.find({
+                directorate: { $in: organizations }
             })
                 .select("_id")
                 .lean();

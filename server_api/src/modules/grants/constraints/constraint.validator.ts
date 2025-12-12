@@ -1,4 +1,4 @@
-import { Cycle } from "../../cycles/cycle.model";
+import { Call } from "../../calls/call.model";
 import { ICollaboratorRepository, CollaboratorRepository } from "../../projects/collaborators/collaborator.repository";
 import { PhaseDto } from "../../projects/phase/phase.dto";
 import { IPhaseRepository, PhaseRepository } from "../../projects/phase/phase.repository";
@@ -50,7 +50,7 @@ export class ConstraintValidator {
             cycleId = projectDto.cycle;
         }
 
-        const cycleDoc = await Cycle.findById(cycleId);
+        const cycleDoc = await Call.findById(cycleId);
         if (!cycleDoc) {
             throw new Error("Cycle Not Found!");
         }

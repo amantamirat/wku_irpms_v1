@@ -5,10 +5,10 @@ import { Calendar } from "../calendars/models/calendar.model";
 import { Organization } from "../organizations/models/organization.model";
 import ApplyWizard from "./apply/ApplyWizard";
 import CallViewDialog from "./CallViewDialog";
-import { Cycle } from "../cycles/models/cycle.model";
+import { Call } from "../calls/models/call.model";
 
 interface CallCardProps {
-    call: Cycle;
+    call: Call;
 }
 
 const CallCard = ({ call }: CallCardProps) => {
@@ -59,7 +59,7 @@ const CallCard = ({ call }: CallCardProps) => {
                 title={<span className="font-semibold text-lg">{truncate(call.title, 45)}</span>}
                 subTitle={
                     <div className="flex flex-column gap-1 text-sm text-600">
-                        <span>{(call.organization as Organization).name}</span>
+                        <span>{(call.directorate as Organization).name}</span>
                         <span>{(call.calendar as Calendar).year}</span>
                         <span>
                             <strong className="text-red-500">

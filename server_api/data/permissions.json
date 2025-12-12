@@ -310,46 +310,6 @@
     "description": "Delete call entries"
   },
   {
-    "category": "Cycle Management",
-    "name": "cycle:call:create",
-    "description": "Create call cycles"
-  },
-  {
-    "category": "Cycle Management",
-    "name": "cycle:call:read",
-    "description": "Read call cycles"
-  },
-  {
-    "category": "Cycle Management",
-    "name": "cycle:call:update",
-    "description": "Update call cycles"
-  },
-  {
-    "category": "Cycle Management",
-    "name": "cycle:call:delete",
-    "description": "Delete call cycles"
-  },
-  {
-    "category": "Cycle Management",
-    "name": "cycle:program:create",
-    "description": "Create program cycles"
-  },
-  {
-    "category": "Cycle Management",
-    "name": "cycle:program:read",
-    "description": "Read program cycles"
-  },
-  {
-    "category": "Cycle Management",
-    "name": "cycle:program:update",
-    "description": "Update program cycles"
-  },
-  {
-    "category": "Cycle Management",
-    "name": "cycle:program:delete",
-    "description": "Delete program cycles"
-  },
-  {
     "category": "Evaluation Management",
     "name": "evaluation:create",
     "description": "Create evaluation entries"

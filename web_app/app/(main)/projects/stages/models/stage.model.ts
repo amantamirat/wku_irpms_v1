@@ -1,5 +1,5 @@
 
-import { Stage } from "@/app/(main)/cycles/stages/models/stage.model";
+import { Stage } from "@/app/(main)/calls/stages/models/stage.model";
 import { Project } from "../../models/project.model";
 
 

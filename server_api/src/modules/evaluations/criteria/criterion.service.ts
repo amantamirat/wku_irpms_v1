@@ -1,4 +1,4 @@
-import { Stage } from "../../cycles/stages/stage.model";
+import { Stage } from "../../calls/stages/stage.model";
 import { Evaluation } from "../evaluation.model";
 import { Option } from "./options/option.model";
 import {
@@ -10,7 +10,7 @@ import {
 } from "./criterion.dto";
 import { FormType } from "./criterion.enum";
 import { Criterion } from "./criterion.model";
-import { Reviewer } from "../../cycles/stages/projects/reviewers/reviewer.model";
+import { Reviewer } from "../../calls/stages/projects/reviewers/reviewer.model";
 import mongoose from "mongoose";
 import { COLLECTIONS } from "../../../util/collections.enum";
 import { CriterionRepository, ICriterionRepository } from "./criterion.repository";

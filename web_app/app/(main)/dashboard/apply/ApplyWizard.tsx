@@ -16,12 +16,12 @@ import { Toast } from "primereact/toast";
 import { useAuth } from "@/contexts/auth-context";
 import { Collaborator, CollaboratorStatus } from "../../projects/collaborators/models/collaborator.model";
 import { Applicant } from "../../applicants/models/applicant.model";
-import { Cycle } from "../../cycles/models/cycle.model";
+import { Call } from "../../calls/models/call.model";
 
 
 interface ApplyWizardProps {
     visible: boolean;
-    call: Cycle;
+    call: Call;
     onCancel: () => void;
 }
 
@@ -166,7 +166,7 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
                 {activeStep === 2 && <CollaboratorManager project={project} onSave={addCollaborator} />}
                 {activeStep === 3 && <ProjectThemeManager project={project} setProject={setProject} />}
                 {activeStep === 4 && <PhaseManager project={project} setProject={setProject} phaseType={PhaseType.phase} />}
-                {activeStep === items.length - 1 && <Confirmation project={project} call={project.cycle as Cycle} />}
+                {activeStep === items.length - 1 && <Confirmation project={project} call={project.cycle as Call} />}
             </Dialog>
         </>
     );

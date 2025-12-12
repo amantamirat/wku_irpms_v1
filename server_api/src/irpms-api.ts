@@ -16,8 +16,8 @@ import evaluationRoutes from './modules/evaluations/evaluation.routes';
 import criterionRoutes from './modules/evaluations/criteria/criterion.routes';
 import optionRoutes from './modules/evaluations/criteria/options/option.routes';
 import calendarRoutes from './modules/calendar/calendar.routes';
-import cycleRoutes from './modules/cycles/cycle.routes';
-import cycleStageRoutes from './modules/cycles/stages/stage.routes';
+import callRoutes from './modules/calls/call.routes';
+import cycleStageRoutes from './modules/calls/stages/stage.routes';
 import grantRoutes from './modules/grants/grant.routes';
 import constraintRoutes from './modules/grants/constraints/constraint.routes';
 import compositionRoutes from './modules/grants/constraints/applicant/compositions/composition.routes';
@@ -26,9 +26,9 @@ import collaboratorRoutes from './modules/projects/collaborators/collaborator.ro
 import assignmentRoutes from './modules/projects/collaborators/assignment/assignment.routes';
 import projectThemeRoutes from './modules/projects/themes/project.theme.routes';
 import phaseRoutes from './modules/projects/phase/phase.routes';
-import stageRoutes2 from './modules/cycles/stages/projects/project-stage.routes';
-import reviewerRoutes from './modules/cycles/stages/projects/reviewers/reviewer.routes';
-import resultRoutes from './modules/cycles/stages/projects/reviewers/results/result.routes';
+import stageRoutes2 from './modules/calls/stages/projects/project-stage.routes';
+import reviewerRoutes from './modules/calls/stages/projects/reviewers/reviewer.routes';
+import resultRoutes from './modules/calls/stages/projects/reviewers/results/result.routes';
 
 import userRoutes from './modules/users/user.routes';
 import roleRoutes from './modules/users/roles/role.routes';
@@ -64,7 +64,7 @@ app.use("/api/criteria", criterionRoutes);
 app.use("/api/options", optionRoutes);
 
 app.use("/api/calendars", calendarRoutes);
-app.use("/api/cycles", cycleRoutes);
+app.use("/api/calls", callRoutes);
 app.use("/api/cycle/stages", cycleStageRoutes);
 app.use("/api/grants", grantRoutes);
 app.use("/api/grants/constraints", constraintRoutes);

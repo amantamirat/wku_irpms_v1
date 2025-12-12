@@ -1,4 +1,4 @@
-import { IProjectStageRepository } from "../cycles/stages/projects/project-stage.repository";
+import { IProjectStageRepository } from "../calls/stages/projects/project-stage.repository";
 import { ProjectStatus } from "./project.enum";
 import { IProject } from "./project.model";
 import { IProjectRepository } from "./project.repository";

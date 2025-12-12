@@ -9,8 +9,8 @@ import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { Project, validateProject } from '../models/project.model';
 import { ProjectApi } from '../api/project.api';
-import { CycleApi } from '../../cycles/api/cycle.api';
-import { Cycle } from '../../cycles/models/cycle.model';
+import { CallApi } from '../../calls/api/call.api';
+import { Call } from '../../calls/models/call.model';
 
 interface SaveProjectDialogProps {
     visible: boolean;
@@ -24,13 +24,13 @@ const SaveProjectDialog = ({ visible, project, onHide, onComplete }: SaveProject
     const toast = useRef<Toast>(null);
     const [localProject, setLocalProject] = useState<Project>({ ...project });
     const [submitted, setSubmitted] = useState(false);
-    const [cycles, setCycles] = useState<Cycle[]>([]);
+    const [cycles, setCycles] = useState<Call[]>([]);
 
     // Fetch active calls if no call selected
     useEffect(() => {
         const fetchCycles = async () => {
             try {
-                const data = await CycleApi.getCycles({});
+                const data = await CallApi.getCalls({});
                 setCycles(data);
             } catch (err) {
                 console.error('Failed to fetch calls:', err);

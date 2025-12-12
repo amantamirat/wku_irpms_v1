@@ -10,11 +10,11 @@ import MyBadge from "@/templates/MyBadge";
 import { useCrudList } from "@/hooks/useCrudList";
 import { Stage, StageStatus, StageType } from "../models/stage.model";
 import { StageApi } from "../api/stage.api";
-import { Cycle } from "../../models/cycle.model";
+import { Call } from "../../models/call.model";
 import ProjectStageManager from "@/app/(main)/projects/stages/components/ProjectStageManager";
 
 interface StageManagerProps {
-    cycle: Cycle;
+    cycle: Call;
 }
 
 const StageManager = ({ cycle }: StageManagerProps) => {

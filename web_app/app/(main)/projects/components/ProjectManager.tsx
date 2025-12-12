@@ -1,5 +1,5 @@
 'use client';
-import { Cycle } from "@/app/(main)/cycles/models/cycle.model";
+import { Call } from "@/app/(main)/calls/models/call.model";
 import { CrudManager } from "@/components/CrudManager";
 import ErrorCard from "@/components/ErrorCard";
 import { useAuth } from "@/contexts/auth-context";
@@ -15,7 +15,7 @@ import MyBadge from "@/templates/MyBadge";
 import ProjectDetail from "./ProjectDetail";
 
 interface ProjectManagerProps {
-    cycle?: Cycle;
+    cycle?: Call;
 }
 
 const ProjectManager = ({ cycle }: ProjectManagerProps) => {

@@ -1,7 +1,7 @@
 import { ApiClient } from "@/api/ApiClient";
 import { GetProjectStageOptions, ProjectStage, sanitizeProjectStage } from "../models/stage.model";
 import { Project } from "../../models/project.model";
-import { Stage } from "@/app/(main)/cycles/stages/models/stage.model";
+import { Stage } from "@/app/(main)/calls/stages/models/stage.model";
 const end_point = '/project/stages/';
 
 

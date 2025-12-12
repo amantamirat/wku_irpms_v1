@@ -16,7 +16,7 @@ export interface IProject extends Document {
 const ProjectSchema = new Schema<IProject>({
     cycle: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.CYCLE,
+        ref: COLLECTIONS.CALL,
         required: true,
         immutable: true
     },

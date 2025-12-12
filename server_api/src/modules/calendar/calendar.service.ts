@@ -1,4 +1,4 @@
-import { Cycle } from "../cycles/cycle.model";
+import { Call } from "../calls/call.model";
 import { CreateCalendarDTO, UpdateCalendarDTO } from "./calendar.dto";
 import { ICalendarRepository, CalendarRepository } from "./calendar.repository";
 
@@ -30,7 +30,7 @@ export class CalendarService {
 
     async delete(id: string) {
         // Check if referenced by Cycle
-        const exists = await Cycle.exists({ calendar: id });
+        const exists = await Call.exists({ calendar: id });
         if (exists) {
             throw new Error("Cannot delete calendar: A cycle is already linked to this calendar.");
         }

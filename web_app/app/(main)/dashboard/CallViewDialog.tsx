@@ -4,11 +4,11 @@ import { GrantApi } from "../grants/api/grant.api";
 import { ConstraintApi } from "../grants/constraints/api/constraint.api";
 import { Constraint, ConstraintType } from "../grants/constraints/models/constraint.model";
 import { Grant } from "../grants/models/grant.model";
-import { Cycle } from "../cycles/models/cycle.model";
+import { Call } from "../calls/models/call.model";
 
 interface CallViewDialogProps {
     visible: boolean;
-    call: Cycle;
+    call: Call;
     onHide: () => void;
 }
 

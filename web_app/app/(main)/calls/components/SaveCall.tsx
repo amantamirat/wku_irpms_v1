@@ -9,29 +9,28 @@ import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 import { CalendarApi } from '../../calendars/api/calendar.api';
-import { Calendar, CalendarStatus } from '../../calendars/models/calendar.model';
+import { Calendar } from '../../calendars/models/calendar.model';
 import { GrantApi } from '../../grants/api/grant.api';
 import { Grant } from '../../grants/models/grant.model';
 import { Organization, OrgnUnit } from '../../organizations/models/organization.model';
-import { Cycle, CycleStatus, validateCycle } from '../models/cycle.model';
-import { CycleType } from '../models/cycle.model';
-import { CycleApi } from '../api/cycle.api';
-import { Theme } from '../../thematics/themes/models/theme.model';
 import { ThemeApi } from '../../thematics/themes/api/theme.api';
+import { Theme } from '../../thematics/themes/models/theme.model';
+import { CallApi } from '../api/call.api';
+import { Call, CycleStatus, validateCall } from '../models/call.model';
+import { ThematicApi } from '../../thematics/api/thematic.api';
 
-interface SaveCycleProps {
-    type: CycleType;
+interface SaveCallProps {
     visible: boolean;
-    cycle: Cycle;
+    call: Call;
     onHide: () => void;
-    onComplete?: (saved: Cycle) => void;
+    onComplete?: (saved: Call) => void;
 }
 
-const SaveCycle = ({ type, visible, cycle, onHide, onComplete }: SaveCycleProps) => {
+const SaveCall = ({ visible, call, onHide, onComplete }: SaveCallProps) => {
     const toast = useRef<Toast>(null);
     const { getOrganizationsByType } = useAuth();
 
-    const [localCycle, setLocalCycle] = useState<Cycle>({ ...cycle });
+    const [localCycle, setLocalCycle] = useState<Call>({ ...call });
     const [calendars, setCalendars] = useState<Calendar[]>([]);
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [grants, setGrants] = useState<Grant[]>([]);
@@ -55,87 +54,59 @@ const SaveCycle = ({ type, visible, cycle, onHide, onComplete }: SaveCycleProps)
 
     // Load organizations
     useEffect(() => {
-        const orgType = type === 'Program' ? [OrgnUnit.Center] : [OrgnUnit.Directorate];
-        const data = getOrganizationsByType(orgType);
+        const data = getOrganizationsByType([OrgnUnit.Directorate]);
         setOrganizations(data);
-    }, [type, getOrganizationsByType]);
+    }, []);
 
     // Load grants
     useEffect(() => {
         const loadGrants = async () => {
             try {
-                if (!localCycle.organization) return;
-
-                let directorateId: string | undefined;
-                if (type === 'Program') {
-                    const org = localCycle.organization as any;
-                    directorateId = org?.parent;
-                } else {
-                    directorateId = (localCycle.organization as any)?._id;
-                }
-
-                if (!directorateId) return;
-
-                const data = await GrantApi.getGrants({ directorate: directorateId });
+                const data = await GrantApi.getGrants({ directorate: localCycle.directorate });
                 setGrants(data);
             } catch (err) {
                 console.error('Failed to load grants:', err);
             }
         };
 
-        loadGrants();
-    }, [localCycle.organization, type]);
-
-    // Load themes
-    useEffect(() => {
-        const loadThemes = async () => {
+        const loadThematics = async () => {
             try {
-                if (!localCycle.organization) return;
-
-                let directorateId: string | undefined;
-                if (type === 'Program') {
-                    const org = localCycle.organization as any;
-                    directorateId = org?.parent;
-                } else {
-                    directorateId = (localCycle.organization as any)?._id;
-                }
-
-                if (!directorateId) return;
-
-                const data = await ThemeApi.getThemes({ });
+                const data = await ThematicApi.getThematics({ directorate: localCycle.directorate });
                 setThemes(data);
             } catch (err) {
                 console.error('Failed to load themes:', err);
             }
         };
 
-        loadThemes();
-    }, [localCycle.organization, type]);
+        loadGrants();
+        loadThematics();
+    }, [localCycle]);
+
+
 
     // Save handler
     const save = async () => {
         try {
             setSubmitted(true);
-            const validation = validateCycle(localCycle);
+            const validation = validateCall(localCycle);
             if (!validation.valid) throw new Error(validation.message);
 
-            let saved: Cycle;
-            if (localCycle._id) saved = await CycleApi.updateCycle(localCycle);
-            else saved = await CycleApi.createCycle(localCycle);
+            let saved: Call;
+            if (localCycle._id) saved = await CallApi.update(localCycle);
+            else saved = await CallApi.create(localCycle);
 
             saved = {
                 ...saved,
                 calendar: localCycle.calendar,
-                organization: localCycle.organization,
-                theme: localCycle.theme,
-                //evaluation: localCall.evaluation,
+                directorate: localCycle.directorate,
+                thematic: localCycle.thematic,
                 grant: localCycle.grant
             };
 
             toast.current?.show({
                 severity: 'success',
                 summary: 'Success',
-                detail: `${type} saved successfully`,
+                detail: `Saved successfully`,
                 life: 2000,
             });
 
@@ -143,7 +114,7 @@ const SaveCycle = ({ type, visible, cycle, onHide, onComplete }: SaveCycleProps)
         } catch (err: any) {
             toast.current?.show({
                 severity: 'error',
-                summary: `Failed to save ${type}`,
+                summary: `Failed to save`,
                 detail: err.message || String(err),
                 life: 2000,
             });
@@ -153,11 +124,11 @@ const SaveCycle = ({ type, visible, cycle, onHide, onComplete }: SaveCycleProps)
     // Reset form when visible
     useEffect(() => {
         if (visible) {
-            setLocalCycle({ ...cycle });
+            setLocalCycle({ ...call });
             setSubmitted(false);
             setErrorMessage(undefined);
         }
-    }, [visible, cycle]);
+    }, [visible, call]);
 
     const hide = () => {
         setSubmitted(false);
@@ -178,7 +149,7 @@ const SaveCycle = ({ type, visible, cycle, onHide, onComplete }: SaveCycleProps)
             <Dialog
                 visible={visible}
                 style={{ width: '600px' }}
-                header={localCycle._id ? `Edit ${type}` : `New ${type}`}
+                header={localCycle._id ? `Edit Call` : `New Call`}
                 modal
                 className="p-fluid"
                 footer={footer}
@@ -203,16 +174,16 @@ const SaveCycle = ({ type, visible, cycle, onHide, onComplete }: SaveCycleProps)
 
                             <div className="field">
                                 <label htmlFor="organization">
-                                    {type === 'Program' ? 'Center' : 'Directorate'}
+                                    Directorate
                                 </label>
                                 <Dropdown
                                     id="organization"
-                                    value={localCycle.organization}
+                                    value={localCycle.directorate}
                                     options={organizations}
                                     optionLabel="name"
-                                    onChange={(e) => setLocalCycle({ ...localCycle, organization: e.value })}
-                                    placeholder={`Select ${type === 'Program' ? 'Center' : 'Directorate'}`}
-                                    className={classNames({ 'p-invalid': submitted && !localCycle.organization })}
+                                    onChange={(e) => setLocalCycle({ ...localCycle, directorate: e.value })}
+                                    placeholder={`Select 'Directorate'`}
+                                    className={classNames({ 'p-invalid': submitted && !localCycle.directorate })}
                                 />
                             </div>
                         </>
@@ -262,28 +233,14 @@ const SaveCycle = ({ type, visible, cycle, onHide, onComplete }: SaveCycleProps)
                                 <Dropdown
                                     id="theme"
                                     dataKey="_id"
-                                    value={localCycle.theme}
+                                    value={localCycle.thematic}
                                     options={themes}
                                     optionLabel="title"
-                                    onChange={(e) => setLocalCycle({ ...localCycle, theme: e.value })}
+                                    onChange={(e) => setLocalCycle({ ...localCycle, thematic: e.value })}
                                     placeholder="Select Theme"
                                 />
                             </div>
                         </>
-                    )}
-
-                    {localCycle._id && (
-                        <div className="field">
-                            <label htmlFor="status">Status</label>
-                            <Dropdown
-                                id="status"
-                                value={localCycle.status}
-                                options={Object.values(CycleStatus).map((s) => ({ label: s, value: s }))}
-                                onChange={(e) => setLocalCycle({ ...localCycle, status: e.value })}
-                                placeholder="Select Status"
-                                className={classNames({ 'p-invalid': submitted && !localCycle.status })}
-                            />
-                        </div>
                     )}
 
                     {errorMessage && <small className="p-error">{errorMessage}</small>}
@@ -293,4 +250,4 @@ const SaveCycle = ({ type, visible, cycle, onHide, onComplete }: SaveCycleProps)
     );
 };
 
-export default SaveCycle;
+export default SaveCall;

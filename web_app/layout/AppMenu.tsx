@@ -55,8 +55,7 @@ const AppMenu = () => {
         {
             label: 'Directorate',
             visible: hasPermission([
-                PERMISSIONS.CYCLE.CALL.CREATE,
-                PERMISSIONS.CYCLE.PROGRAM.CREATE,
+                PERMISSIONS.CALL.CREATE,
                 PERMISSIONS.EVALUATION.CREATE,
                 PERMISSIONS.GRANT.CREATE,
                 PERMISSIONS.THEME.CREATE,
@@ -65,27 +64,13 @@ const AppMenu = () => {
                 {
                     label: 'Calls',
                     icon: 'pi pi-fw pi-megaphone',
-                    to: '/cycles/calls',
+                    to: '/calls',
                     visible: hasPermission([
-                        PERMISSIONS.CYCLE.CALL.CREATE,
-                        PERMISSIONS.CYCLE.CALL.UPDATE,
-                        PERMISSIONS.CYCLE.CALL.DELETE,
+                        PERMISSIONS.CALL.CREATE,
+                        PERMISSIONS.CALL.UPDATE,
+                        PERMISSIONS.CALL.DELETE,
                     ])
                 },
-                /**
-                 * 
-                 * {
-                    label: 'Programs',
-                    icon: 'pi pi-circle-fill',
-                    to: '/cycles/programs',
-                    visible: hasPermission([
-                        PERMISSIONS.CYCLE.PROGRAM.CREATE,
-                        PERMISSIONS.CYCLE.PROGRAM.UPDATE,
-                        PERMISSIONS.CYCLE.PROGRAM.DELETE
-                    ])
-                },
-                 */
-                
                 {
                     label: 'Evaluations',
                     icon: 'pi pi-chart-bar',

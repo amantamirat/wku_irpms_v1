@@ -11,13 +11,13 @@ import { StageApi } from '../api/stage.api';
 import { Stage, StageStatus, StageType, validateStage } from '../models/stage.model';
 import { EvaluationApi } from '@/app/(main)/evaluations/api/evaluation.api';
 import { Evaluation } from '@/app/(main)/evaluations/models/evaluation.model';
-import { Cycle } from '../../models/cycle.model';
+import { Call } from '../../models/call.model';
 
 
 interface SaveStageProps {
     visible: boolean;
     stage: Stage;
-    cycle?: Cycle;
+    cycle?: Call;
     onComplete?: (savedStage: Stage) => void;
     onHide: () => void;
 }
@@ -31,14 +31,14 @@ const SaveStage = ({ visible, stage, cycle, onComplete, onHide }: SaveStageProps
     useEffect(() => {
         const fetchEvaluations = async () => {
             try {
-                if (cycle?.organization) {
+                if (cycle?.directorate) {
                     let directorateId: string;
-                    if (typeof cycle.organization === 'object' && cycle.organization !== null) {
+                    if (typeof cycle.directorate === 'object' && cycle.directorate !== null) {
                         if (cycle.type === 'Program') {
-                            directorateId = (cycle.organization as any).parent;
+                            directorateId = (cycle.directorate as any).parent;
                         }
                         else {
-                            directorateId = (cycle.organization as any)._id;
+                            directorateId = (cycle.directorate as any)._id;
                         }
                     } else {
                         return; // invalid directorate, do nothing

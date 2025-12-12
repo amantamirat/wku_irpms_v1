@@ -1,4 +1,4 @@
-import { Cycle } from "../../cycles/models/cycle.model";
+import { Call } from "../../calls/models/call.model";
 import { User } from "../../users/models/user.model";
 import { Collaborator, sanitizeCollaborator } from "../collaborators/models/collaborator.model";
 import { Phase, sanitizePhase } from "../phases/models/phase.model";
@@ -11,7 +11,7 @@ export enum ProjectStatus {
 
 export type Project = {
     _id?: string;
-    cycle?: string | Cycle;
+    cycle?: string | Call;
     title: string;
     summary?: string;
     status?: ProjectStatus;
@@ -25,7 +25,7 @@ export type Project = {
 }
 
 export interface GetProjectsOptions {
-    cycle?: string | Cycle;
+    cycle?: string | Call;
 }
 
 export const validateProject = (project: Project): { valid: boolean; message?: string } => {
@@ -59,7 +59,7 @@ export const sanitizeProject = (project: Partial<Project>): Partial<Project> => 
         ...project,
         cycle:
             typeof project.cycle === 'object' && project.cycle !== null
-                ? (project.cycle as Cycle)._id
+                ? (project.cycle as Call)._id
                 : project.cycle,
         collaborators: project.collaborators?.map(c => sanitizeCollaborator(c)),
         themes: project.themes?.map(t => sanitizeProjectTheme(t)),
@@ -72,7 +72,7 @@ export const sanitizeGetProjectsOptions = (options: Partial<GetProjectsOptions>)
         ...options,
         cycle:
             typeof options.cycle === 'object' && options.cycle !== null
-                ? (options.cycle as Cycle)._id
+                ? (options.cycle as Call)._id
                 : options.cycle,
     };
 };

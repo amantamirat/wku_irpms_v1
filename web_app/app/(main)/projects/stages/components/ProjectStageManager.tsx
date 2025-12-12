@@ -14,7 +14,7 @@ import { ProjectStageApi } from "../api/project.stage.api";
 import { Project } from "../../models/project.model";
 import { useCrudList } from "@/hooks/useCrudList";
 import { BASE_URL } from "@/api/ApiClient";
-import { Stage } from "@/app/(main)/cycles/stages/models/stage.model";
+import { Stage } from "@/app/(main)/calls/stages/models/stage.model";
 
 interface ProjectStageManagerProps {
     project?: Project;

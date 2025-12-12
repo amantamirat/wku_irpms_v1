@@ -20,7 +20,7 @@ export interface IStage extends Document {
 const StageSchema = new Schema<IStage>({
     cycle: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.CYCLE,
+        ref: COLLECTIONS.CALL,
         required: true,
         immutable: true,
     },

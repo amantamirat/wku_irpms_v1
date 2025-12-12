@@ -1,17 +1,16 @@
 'use client';
 
 import { CrudManager } from "@/components/CrudManager";
+import { useAuth } from "@/contexts/auth-context";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useCrudList } from "@/hooks/useCrudList";
-import { useEffect, useState } from "react";
-import { useAuth } from "@/contexts/auth-context";
 import { PERMISSIONS } from "@/types/permissions";
-import { Thematic } from "../models/thematic.model";
-import { ThematicApi } from "../api/thematic.api";
-import MyBadge from "@/templates/MyBadge";
+import { useEffect, useState } from "react";
 import { Organization } from "../../organizations/models/organization.model";
-import SaveDialog from "./SaveDialog";
+import { ThematicApi } from "../api/thematic.api";
+import { Thematic } from "../models/thematic.model";
 import ThemeManager from "../themes/components/ThematicManager";
+import SaveDialog from "./SaveDialog";
 
 interface ThematicManagerProps {
     directorate?: Organization;
