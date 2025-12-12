@@ -12,6 +12,7 @@ export const ProjectApi = {
         const sanitizedOptions = sanitizeGetProjectsOptions(options);
         const query = new URLSearchParams();
         if (sanitizedOptions.call) query.append("call", sanitizedOptions.call as string);
+        if (sanitizedOptions.leadPI) query.append("leadPI", sanitizedOptions.leadPI as string);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Project[];
     },

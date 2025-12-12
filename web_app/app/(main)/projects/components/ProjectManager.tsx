@@ -1,30 +1,31 @@
 'use client';
 import { Call } from "@/app/(main)/calls/models/call.model";
 import { CrudManager } from "@/components/CrudManager";
-import ErrorCard from "@/components/ErrorCard";
 import { useAuth } from "@/contexts/auth-context";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import { useCrudList } from "@/hooks/useCrudList";
+import MyBadge from "@/templates/MyBadge";
 import { PERMISSIONS } from "@/types/permissions";
 import { useEffect, useState } from "react";
+import { Applicant } from "../../applicants/models/applicant.model";
 import { ProjectApi } from "../api/project.api";
-import { Project, GetProjectsOptions } from "../models/project.model";
-import { useCrudList } from "@/hooks/useCrudList";
-import ListSkeleton from "@/components/ListSkeleton";
-import SaveProjectDialog from "./SaveProjectDialog";
-import MyBadge from "@/templates/MyBadge";
+import { Project } from "../models/project.model";
 import ProjectDetail from "./ProjectDetail";
+import SaveProjectDialog from "./SaveProjectDialog";
 
 interface ProjectManagerProps {
-    cycle?: Call;
+    call?: Call;
+    leadPI?: Applicant;
 }
 
-const ProjectManager = ({ cycle }: ProjectManagerProps) => {
+const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
     const { hasPermission } = useAuth();
     const confirm = useConfirmDialog();
 
     const emptyProject: Project = {
-        call: cycle,
-        title: ""
+        call: call,
+        title: "",
+        leadPI: leadPI
     };
 
     // ✅ Permissions
@@ -46,15 +47,14 @@ const ProjectManager = ({ cycle }: ProjectManagerProps) => {
 
     const [project, setProject] = useState<Project>(emptyProject);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [expandedRows, setExpandedRows] = useState<any[]>([]);
+
 
     // ✅ Fetch projects
     useEffect(() => {
         const fetchProjects = async () => {
             try {
                 setLoading(true);
-                const options: GetProjectsOptions = { call: cycle };
-                const data = await ProjectApi.getProjects(options);
+                const data = await ProjectApi.getProjects({ call, leadPI });
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to fetch projects. " + (err.message ?? ""));
@@ -63,10 +63,9 @@ const ProjectManager = ({ cycle }: ProjectManagerProps) => {
             }
         };
         fetchProjects();
-    }, [cycle]);
+    }, [call, leadPI]);
 
-    if (loading) return <ListSkeleton rows={10} />;
-    if (error) return <ErrorCard errorMessage={error} />;
+
 
     // ✅ Save / update
     const onSaveComplete = (savedProject: Project) => {
@@ -87,7 +86,7 @@ const ProjectManager = ({ cycle }: ProjectManagerProps) => {
     const columns = [
         { header: "Call", field: "call.title" },
         { header: "Title", field: "title" },
-        { header: "PI", field: "leadPI.name" },
+        { header: "Lead PI", field: "leadPI.name" },
         {
             header: "Status", field: "status", body: (p: Project) =>
                 <MyBadge type="status" value={p.status ?? 'Unknown'} />
@@ -102,6 +101,8 @@ const ProjectManager = ({ cycle }: ProjectManagerProps) => {
                 items={projects}
                 dataKey="_id"
                 columns={columns}
+                loading={loading}
+                error={error}
                 canCreate={canCreate}
                 canEdit={canEdit}
                 canDelete={canDelete}

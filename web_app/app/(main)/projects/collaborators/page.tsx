@@ -7,5 +7,4 @@ const CollaboratorPage = () => {
         <CollaboratorManager />
     );
 };
-
 export default CollaboratorPage;

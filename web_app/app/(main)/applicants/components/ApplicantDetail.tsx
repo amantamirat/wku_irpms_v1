@@ -4,6 +4,7 @@ import { Applicant } from "../models/applicant.model";
 import ExperienceManager from "../experiences/components/ExperienceManager";
 import CollaboratorManager from "../../projects/collaborators/components/CollaboratorManager";
 import SpecializationManager from "../../specializations/components/SpecializationManager";
+import ProjectManager from "../../projects/components/ProjectManager";
 
 interface ApplicantDetailProps {
     applicant: Applicant;
@@ -13,6 +14,9 @@ const ApplicantDetail = ({ applicant }: ApplicantDetailProps) => {
     return (
         <>
             <TabView>
+                <TabPanel header="Projects">
+                    <ProjectManager leadPI={applicant} />
+                </TabPanel>
                 <TabPanel header="Collaborations">
                     <CollaboratorManager applicant={applicant} />
                 </TabPanel>

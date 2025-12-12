@@ -24,7 +24,7 @@ export class ProjectService {
         this.appRepository = new ApplicantRepository();
         this.callRepository = new CallRepository();
     }
-   
+
     async createProject(dto: CreateProjectDTO) {
         const callDoc = await this.callRepository.findById(dto.call);
         if (!callDoc) throw new Error("Cycle not found");
@@ -34,6 +34,7 @@ export class ProjectService {
     }
 
     async getProjects(options: GetProjectsDTO) {
+        /*
         const filter: any = {};
 
         if (options.leadPI) {
@@ -50,22 +51,23 @@ export class ProjectService {
 
         if (options.call) filter.cycleId = options.call;
         if (options.status) filter.status = options.status;
-
-        return this.repository.find(filter);
+*/
+        return this.repository.find(options);
     }
 
     // ---------------------------------------------------
     // UPDATE
     // ---------------------------------------------------
     async updateProject(dto: UpdateProjectDTO) {
-        const existing = await this.repository.findById(dto.id);
-        if (!existing) throw new Error("Project not found");
-        /**
-         * // Only creator can update
-        if (String(existing.createdBy) !== dto.userId) {
+        const { id, data, userId } = dto;
+
+        const projectDoc = await this.repository.findById(id);
+        if (!projectDoc) throw new Error("Project not found");
+
+        if (String(projectDoc.leadPI) !== userId) {
             throw new Error("Unauthorized: You cannot update this project.");
         }
-         */
+
         return this.repository.update(dto.id, dto.data);
     }
 
@@ -78,19 +80,14 @@ export class ProjectService {
         const project = await this.repository.findById(id);
         if (!project) throw new Error("Project not found");
 
-        /**
-         * // Only creator can delete
-        if (project.createdBy.toString() !== dto.userId) {
+        if (project.leadPI.toString() !== dto.userId) {
             throw new Error("Unauthorized: You cannot delete this project.");
         }
-         */
 
-        // Check collaborators
         const collaborator = await Collaborator.exists({ project: id });
         if (collaborator) {
             throw new Error(`Cannot delete: collaborator exists.`);
         }
-
         return this.repository.delete(dto.id);
     }
 }

@@ -2,6 +2,7 @@ import { ProjectStatus } from "./project.enum";
 
 // project.state-machine.ts
 export class ProjectStateMachine {
+    
     private static readonly transitions: Record<ProjectStatus, ProjectStatus[]> = {
         [ProjectStatus.pending]: [ProjectStatus.submitted],
         [ProjectStatus.submitted]: [ProjectStatus.pending]

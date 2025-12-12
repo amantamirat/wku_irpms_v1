@@ -26,6 +26,7 @@ export type Project = {
 
 export interface GetProjectsOptions {
     call?: string | Call;
+    leadPI?: string | Applicant;
 }
 
 export const validateProject = (project: Project): { valid: boolean; message?: string } => {
