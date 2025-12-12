@@ -15,6 +15,12 @@ export type Criterion = {
     updatedAt?: Date;
 };
 
+export interface GetCriteriaOptions {
+    evaluation?: string | Evaluation;
+    //stage?: string;
+    //reviewer?: string;
+}
+
 export const validateCriterion = (
     criterion: Criterion): { valid: boolean; message?: string } => {
     if (!criterion.title || criterion.title.trim().length === 0) {
@@ -28,3 +34,13 @@ export const validateCriterion = (
     }
     return { valid: true };
 };
+
+export function sanitizeCriterion(criterion: Partial<Criterion>): Partial<Criterion> {
+    return {
+        ...criterion,
+        evaluation:
+            typeof criterion.evaluation === 'object' && criterion.evaluation !== null
+                ? (criterion.evaluation as Evaluation)._id
+                : criterion.evaluation
+    };
+}

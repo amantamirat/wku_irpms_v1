@@ -37,10 +37,11 @@ const StageSchema = new Schema<IStage>({
         type: Schema.Types.ObjectId,
         ref: Evaluation.modelName,
         required: true,
-        //immutable: true,
+        immutable: true,
     },
     deadline: {
         type: Date,
+        required: true
     },
     isValidation: {
         type: Boolean,

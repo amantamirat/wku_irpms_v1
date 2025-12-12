@@ -1,24 +1,7 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Evaluation } from "../../evaluations/models/evaluation.model";
-import { Criterion } from "../models/criterion.model";
+import { Criterion, GetCriteriaOptions, sanitizeCriterion } from "../models/criterion.model";
 
 const end_point = '/criteria';
-
-function sanitizeCriterion(criterion: Partial<Criterion>): Partial<Criterion> {
-    return {
-        ...criterion,
-        evaluation:
-            typeof criterion.evaluation === 'object' && criterion.evaluation !== null
-                ? (criterion.evaluation as Evaluation)._id
-                : criterion.evaluation
-    };
-}
-
-export interface GetCriteriaOptions {
-    evaluation?: string;
-    stage?: string;
-    reviewer?: string;
-}
 
 export const CriterionApi = {
 
@@ -28,11 +11,12 @@ export const CriterionApi = {
         return createdData as Criterion;
     },
 
-    async getCriteria(options: GetCriteriaOptions = {}): Promise<Criterion[]> {
+    async getCriteria(options: GetCriteriaOptions): Promise<Criterion[]> {
         const query = new URLSearchParams();
-        if (options.evaluation) query.append("evaluation", options.evaluation);
-        if (options.stage) query.append("stage", options.stage);
-        if (options.reviewer) query.append("reviewer", options.reviewer);
+        const sanitized = sanitizeCriterion(options);
+        if (options.evaluation) query.append("evaluation", sanitized.evaluation as string);
+        // if (options.stage) query.append("stage", options.stage);
+        // if (options.reviewer) query.append("reviewer", options.reviewer);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Criterion[];
     },

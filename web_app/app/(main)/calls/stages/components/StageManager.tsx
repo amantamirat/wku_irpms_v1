@@ -59,7 +59,7 @@ const StageManager = ({ call }: StageManagerProps) => {
             }
         };
 
-       fetchStages();
+        fetchStages();
     }, [call]);
 
 
@@ -92,11 +92,7 @@ const StageManager = ({ call }: StageManagerProps) => {
             body: (row: Stage) =>
                 row.deadline ? new Date(row.deadline).toLocaleDateString() : ""
         },
-        {
-            header: "Type",
-            body: (row: Stage) => <MyBadge type="stage" value={row.type ?? "Unknown"} />,
-            sortable: true
-        },
+
         {
             header: "Status",
             body: (row: Stage) => <MyBadge type="status" value={row.status ?? "Unknown"} />,
