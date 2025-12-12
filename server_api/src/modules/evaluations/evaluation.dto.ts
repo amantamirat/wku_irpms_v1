@@ -1,16 +1,16 @@
 import mongoose from "mongoose";
 
 export interface CreateEvaluationDTO {
-    directorate: mongoose.Types.ObjectId;
+    directorate: string;
     title: string;
     userId: string;
 }
 
 export interface UpdateEvaluationDTO {
     id: string;
-    data: {
-        title?: string;
-    };
+    data: Partial<{
+        title: string;
+    }>;
     userId: string;
 }
 

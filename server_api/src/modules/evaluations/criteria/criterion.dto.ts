@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { FormType } from "./criterion.enum";
 
 export interface CreateCriterionDTO {
-    evaluation: mongoose.Types.ObjectId;
+    evaluation: string;
     title: string;
     weight: number;
     form_type: FormType;
@@ -18,8 +18,8 @@ export interface UpdateCriterionDTO {
 }
 
 export interface GetCriteriaDTO {
-    evaluation?: mongoose.Types.ObjectId;
-    stage?: mongoose.Types.ObjectId;
+    evaluation?: string;
+    stage?: string;
     reviewer?:string;
 }
 

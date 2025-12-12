@@ -4,11 +4,15 @@ import { AuthenticatedRequest } from "../users/user.middleware";
 import { CreateEvaluationDTO, GetEvaluationsDTO, UpdateEvaluationDTO } from "./evaluation.dto";
 import { EvaluationService } from "./evaluation.service";
 
-const evaluationService = new EvaluationService();
-
 export class EvaluationController {
 
-    static async createEvaluation(req: AuthenticatedRequest, res: Response) {
+    private service: EvaluationService;
+
+    constructor(service?: EvaluationService) {
+        this.service = service || new EvaluationService();
+    }
+
+    async create(req: AuthenticatedRequest, res: Response) {
         try {
             if (!req.user) throw new Error("User not found");
 
@@ -21,21 +25,20 @@ export class EvaluationController {
                 userId: userId
             };
 
-            const evaluation = await evaluationService.createEvaluation(dto);
+            const evaluation = await this.service.createEvaluation(dto);
             successResponse(res, 201, "Evaluation created successfully", evaluation);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
-    static async getEvaluations(req: Request, res: Response) {
+    async getEvaluations(req: Request, res: Response) {
         try {
             const { directorate } = req.query;
             const filter: GetEvaluationsDTO = {
                 directorate: directorate as string | undefined
             };
-
-            const evaluations = await evaluationService.getEvaluations(filter);
+            const evaluations = await this.service.getEvaluations(filter);
             successResponse(res, 200, "Evaluations fetched successfully", evaluations);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -55,7 +58,7 @@ export class EvaluationController {
     }
     */
 
-    static async updateEvaluation(req: AuthenticatedRequest, res: Response) {
+    async update(req: AuthenticatedRequest, res: Response) {
         try {
             if (!req.user) throw new Error("User not found");
 
@@ -69,21 +72,21 @@ export class EvaluationController {
                 userId: userId
             };
 
-            const updated = await evaluationService.updateEvaluation(dto);
+            const updated = await this.service.updateEvaluation(dto);
             successResponse(res, 200, "Evaluation updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
-    static async deleteEvaluation(req: AuthenticatedRequest, res: Response) {
+    async delete(req: AuthenticatedRequest, res: Response) {
         try {
             if (!req.user) throw new Error("User not found");
 
             const userId = req.user._id;
             const { id } = req.params;
 
-            const deleted = await evaluationService.deleteEvaluation({ id, userId });
+            const deleted = await this.service.deleteEvaluation({ id, userId });
             successResponse(res, 200, "Evaluation deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

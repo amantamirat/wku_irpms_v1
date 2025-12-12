@@ -13,7 +13,7 @@ export class CriterionController {
             const { evaluation, title, form_type, weight } = req.body;
 
             const dto: CreateCriterionDTO = {
-                evaluation: new mongoose.Types.ObjectId(evaluation as string),
+                evaluation: evaluation,
                 title,
                 form_type,
                 weight: weight,
@@ -32,9 +32,9 @@ export class CriterionController {
             const { evaluation, stage, reviewer } = req.query;
 
             const dto: GetCriteriaDTO = {
-                evaluation: evaluation ? new mongoose.Types.ObjectId(evaluation as string) : undefined,
-                stage: stage ? new mongoose.Types.ObjectId(stage as string) : undefined,
-                reviewer: reviewer ? String(reviewer) : undefined
+                evaluation: evaluation ? evaluation as string : undefined,
+                stage: stage ? stage as string : undefined,
+                reviewer: reviewer ? reviewer as string : undefined
             };
 
             const criteria = await CriterionService.getCriteria(

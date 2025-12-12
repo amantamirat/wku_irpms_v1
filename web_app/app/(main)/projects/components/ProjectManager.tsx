@@ -107,8 +107,6 @@ const ProjectManager = ({ cycle }: ProjectManagerProps) => {
                 onCreate={() => { setProject(emptyProject); setShowSaveDialog(true); }}
                 onEdit={(row) => { setProject(row); setShowSaveDialog(true); }}
                 onDelete={(row) => confirm.ask({ item: row.title, onConfirmAsync: () => deleteProject(row) })}
-                //expandedRows={expandedRows}
-                //onRowToggle={(e) => setExpandedRows(e.data)}
                 rowExpansionTemplate={(row) => {
                     return <ProjectDetail project={row} updateProjectStatus={updateItem} />;
                 }}

@@ -9,7 +9,6 @@ export type Grant = {
     updatedAt?: Date;
 }
 
-
 export const validateGrant = (grant: Grant): { valid: boolean; message?: string } => {
     if (!grant.title || grant.title.trim().length === 0) {
         return { valid: false, message: 'Title is required.' };

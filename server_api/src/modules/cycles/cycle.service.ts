@@ -3,7 +3,8 @@ import { CalendarStatus } from "../calendar/calendar.enum";
 import { Calendar } from "../calendar/calendar.model";
 import { Grant } from "../grants/grant.model";
 import { Center, Directorate } from "../organization/organization.model";
-import { ThematicArea } from "../themes/theme.model";
+import { Thematic } from "../thematics/thematic.model";
+
 import { CycleStatus } from "./cycle.d";
 
 import {
@@ -38,7 +39,7 @@ export class CycleService {
         if (!grant) throw new Error("Grant Not Found!");
 
         if (dto.theme) {
-            const thematicArea = await ThematicArea.findOne({ _id: dto.theme, directorate: directorateId }).lean();
+            const thematicArea = await Thematic.findOne({ _id: dto.theme, directorate: directorateId }).lean();
             if (!thematicArea) throw new Error("Thematic Area Not Found!");
         }
 

@@ -13,16 +13,25 @@ import { Criterion } from "./criterion.model";
 import { Reviewer } from "../../cycles/stages/projects/reviewers/reviewer.model";
 import mongoose from "mongoose";
 import { COLLECTIONS } from "../../../util/collections.enum";
+import { CriterionRepository, ICriterionRepository } from "./criterion.repository";
+import { EvaluationRepository, IEvaluationRepository } from "../evaluation.repository";
 
 export class CriterionService {
+
+    private repository: ICriterionRepository;
+    private evalRepository: IEvaluationRepository;
+
+    constructor(repository?: ICriterionRepository, evalRepository?: IEvaluationRepository,) {
+        this.repository = repository || new CriterionRepository();
+        this.evalRepository = evalRepository || new EvaluationRepository();
+    }
     /**
      * Create a single criterion.
      */
-    static async createCriterion(dto: CreateCriterionDTO) {
-        const evalDoc = await Evaluation.findById(dto.evaluation);
+    async createCriterion(dto: CreateCriterionDTO) {
+        const evalDoc = await this.evalRepository.findById(dto.evaluation);
         if (!evalDoc) throw new Error("Evaluation not found.");
-
-        return await Criterion.create(dto);
+        return await this.repository.create(dto);
     }
 
     /**
@@ -30,7 +39,7 @@ export class CriterionService {
      */
     static async getCriteria(dto: GetCriteriaDTO) {
         const { evaluation, stage, reviewer } = dto;
-        if(reviewer){
+        if (reviewer) {
             return await this.getCriteriaByReviewer(reviewer);
         }
 
@@ -42,7 +51,8 @@ export class CriterionService {
             if (!stageDoc) {
                 throw new Error("Stage not found.");
             }
-            stageEvaluation = stageDoc.evaluation;
+            //stageEvaluation = stageDoc.evaluation;
+            //stageEvaluation = "";
         }
 
         if (!stageEvaluation) {

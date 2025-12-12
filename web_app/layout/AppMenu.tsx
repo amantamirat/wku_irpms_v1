@@ -98,20 +98,6 @@ const AppMenu = () => {
                         ]
                     )
                 },
-
-                {
-                    label: 'Thematic Areas',
-                    icon: 'pi pi-fw pi-tags',
-                    to: '/thematic_areas',
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.THEME.CREATE,
-                            PERMISSIONS.THEME.UPDATE,
-                            PERMISSIONS.THEME.DELETE
-                        ]
-                    )
-                },
-
                 {
                     label: 'Thematics',
                     icon: 'pi pi-fw pi-tags',

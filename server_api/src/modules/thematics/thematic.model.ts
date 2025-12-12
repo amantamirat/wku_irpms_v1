@@ -1,7 +1,8 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../util/collections.enum";
 import { Directorate } from "../organization/organization.model";
-import { ThemeLevel } from "../themes/theme.enum";
+import { ThemeLevel } from "./thematic.enum";
+
 
 export interface IThematic extends Document {
     directorate: mongoose.Types.ObjectId;

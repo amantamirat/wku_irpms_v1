@@ -3,7 +3,7 @@ import { EvaluationController } from "./evaluation.controller";
 import { PERMISSIONS } from "../../util/permissions";
 import { verifyActiveAccount, checkPermission } from "../users/user.middleware";
 
-
+const controller = new EvaluationController();
 const router = Router();
 
 /**
@@ -15,7 +15,7 @@ router.post(
   "/",
   verifyActiveAccount,
   checkPermission([PERMISSIONS.EVALUATION.CREATE]),
-  EvaluationController.createEvaluation
+  controller.create
 );
 
 /**
@@ -27,7 +27,7 @@ router.get(
   "/",
   verifyActiveAccount,
   checkPermission([PERMISSIONS.EVALUATION.READ]),
-  EvaluationController.getEvaluations
+  controller.getEvaluations
 );
 
 /*
@@ -51,7 +51,7 @@ router.put(
   "/:id",
   verifyActiveAccount,
   checkPermission([PERMISSIONS.EVALUATION.UPDATE]),
-  EvaluationController.updateEvaluation
+  controller.update
 );
 
 /**
@@ -63,7 +63,7 @@ router.delete(
   "/:id",
   verifyActiveAccount,
   checkPermission([PERMISSIONS.EVALUATION.DELETE]),
-  EvaluationController.deleteEvaluation
+  controller.delete
 );
 
 export default router;

@@ -1,7 +1,7 @@
 import { Calendar } from "../../calendars/models/calendar.model";
 import { Grant } from "../../grants/models/grant.model";
 import { Organization } from "../../organizations/models/organization.model";
-import { Theme } from "../../thematic_areas/models/theme.model";
+import { Thematic } from "../../thematics/models/thematic.model";
 
 // -----------------------------
 // Enums
@@ -23,7 +23,7 @@ export type Cycle = {
   grant: string | Grant;
   title: string;
   description?: string | null;
-  theme?: string | Theme;
+  theme?: string | Thematic;
   status: CycleStatus;
   type: CycleType;
   organization: string | Organization; // unified field
@@ -70,7 +70,7 @@ export const sanitizeCycle = (cycle: Partial<Cycle>): Partial<Cycle> => {
     ...cycle,
     calendar: typeof cycle.calendar === "object" ? (cycle.calendar as Calendar)._id : cycle.calendar,
     grant: typeof cycle.grant === "object" ? (cycle.grant as Grant)._id : cycle.grant,
-    theme: typeof cycle.theme === "object" ? (cycle.theme as Theme)._id : cycle.theme,
+    theme: typeof cycle.theme === "object" ? (cycle.theme as Thematic)._id : cycle.theme,
     organization:
       typeof cycle.organization === "object"
         ? (cycle.organization as Organization)._id

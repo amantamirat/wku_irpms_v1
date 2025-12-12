@@ -10,8 +10,7 @@ import positionRoutes from './modules/applicants/positions/position.routes';
 import experienceRoutes from './modules/applicants/experiences/experience.routes';
 import specializationRoutes from './modules/applicants/specializations/specialization.routes';
 import thematicRoutes from './modules/thematics/thematic.routes';
-import themeRoutes2 from './modules/thematics/themes/theme.routes'
-import themeRoutes from './modules/themes/theme.routes';
+import themeRoutes from './modules/thematics/themes/theme.routes'
 
 import evaluationRoutes from './modules/evaluations/evaluation.routes';
 import criterionRoutes from './modules/evaluations/criteria/criterion.routes';
@@ -58,8 +57,7 @@ app.use("/api/positions", positionRoutes);
 
 app.use("/api/experiences", experienceRoutes);
 app.use("/api/thematics", thematicRoutes);
-app.use("/api/thematics/themes", themeRoutes2);
-app.use("/api/themes", themeRoutes);
+app.use("/api/thematics/themes", themeRoutes);
 //app.use("/api/evals", evalRoutes);
 app.use("/api/evaluations", evaluationRoutes);
 app.use("/api/criteria", criterionRoutes);

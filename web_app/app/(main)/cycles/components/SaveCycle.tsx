@@ -12,12 +12,12 @@ import { CalendarApi } from '../../calendars/api/calendar.api';
 import { Calendar, CalendarStatus } from '../../calendars/models/calendar.model';
 import { GrantApi } from '../../grants/api/grant.api';
 import { Grant } from '../../grants/models/grant.model';
-import { ThemeApi } from '../../thematic_areas/api/theme.api';
-import { Theme } from '../../thematic_areas/models/theme.model';
 import { Organization, OrgnUnit } from '../../organizations/models/organization.model';
 import { Cycle, CycleStatus, validateCycle } from '../models/cycle.model';
 import { CycleType } from '../models/cycle.model';
 import { CycleApi } from '../api/cycle.api';
+import { Theme } from '../../thematics/themes/models/theme.model';
+import { ThemeApi } from '../../thematics/themes/api/theme.api';
 
 interface SaveCycleProps {
     type: CycleType;
@@ -102,7 +102,7 @@ const SaveCycle = ({ type, visible, cycle, onHide, onComplete }: SaveCycleProps)
 
                 if (!directorateId) return;
 
-                const data = await ThemeApi.getThemes({ directorate: directorateId });
+                const data = await ThemeApi.getThemes({ });
                 setThemes(data);
             } catch (err) {
                 console.error('Failed to load themes:', err);

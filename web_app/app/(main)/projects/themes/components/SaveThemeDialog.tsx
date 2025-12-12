@@ -5,9 +5,10 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { ProjectTheme, validateProjectTheme } from "../models/project.theme.model";
 import { Project } from "../../models/project.model";
-import { Theme, ThemeType } from "@/app/(main)/thematic_areas/models/theme.model";
-import { Call } from "@/app/(main)/calls/models/call.model";
-import { ThemeApi } from "@/app/(main)/thematic_areas/api/theme.api";
+import { Theme } from "@/app/(main)/thematics/themes/models/theme.model";
+import { Cycle } from "@/app/(main)/cycles/models/cycle.model";
+import { ThemeApi } from "@/app/(main)/thematics/themes/api/theme.api";
+
 
 type Node = {
     key?: string;
@@ -24,7 +25,7 @@ function buildTree(themes: Theme[], parentId?: string): Node[] {
             if (parentId) {
                 return (t.parent ?? null) === parentId;
             }
-            return t.type === ThemeType.broadTheme;
+            return t.parent === undefined;
         })
         .map(t => {
             const children = buildTree(themes, t._id!);
@@ -60,13 +61,13 @@ export default function SaveThemeDialog({ project, projectTheme, setProjectTheme
 
     useEffect(() => {
         const fetchThemes = async () => {
-            const theme = (project.cycle as Call).theme;
+            const theme = (project.cycle as Cycle).theme;
             const catalogId =
                 typeof theme === "object" && theme !== null
                     ? (theme as any)._id
                     : theme;
             const data = await ThemeApi.getThemes({
-                thematic_area: catalogId
+               
             });
             setThemes(data);
             const node = buildTree(data);

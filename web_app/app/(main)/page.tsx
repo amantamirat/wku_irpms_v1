@@ -17,7 +17,10 @@ const Dashboard = () => {
             {/* 🧾 Open Calls */}
             <div className="col-12">
                 <div className="card">
-                    <CallGrid />
+                    {
+                        //<CallGrid />
+                    }
+                    
                 </div>
             </div>
 
