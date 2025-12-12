@@ -7,17 +7,10 @@ export enum StageStatus {
     closed = "closed",
 }
 
-export enum StageType {
-    //screening = "screening",
-    evaluation = "evaluation",
-    validation = 'validation'
-}
-
 export type Stage = {
     _id?: string;
     call: string | Call;
     name: string;
-    type: StageType;
     evaluation: string | Evaluation;
     deadline?: Date;
     status: StageStatus;
@@ -43,10 +36,6 @@ export const validateStage = (stage: Stage): { valid: boolean; message?: string 
 
     if (!stage.evaluation) {
         return { valid: false, message: "Evaluation reference is required." };
-    }
-
-    if (!stage.type) {
-        return { valid: false, message: "Stage type is required." };
     }
 
     if (stage.deadline) {

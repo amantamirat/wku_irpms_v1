@@ -7,7 +7,6 @@ import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useCrudList } from "@/hooks/useCrudList";
 import MyBadge from "@/templates/MyBadge";
 import { useEffect, useState } from "react";
-
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "primereact/button";

@@ -26,13 +26,11 @@ export class ProjectRepository implements IProjectRepository {
 
     async find(filters: GetProjectsDTO) {
         const query: any = {};
-
-        if (filters.userId) {
-            query.createdBy = new mongoose.Types.ObjectId(filters.userId);
+        if (filters.call) {
+            query.call = new mongoose.Types.ObjectId(filters.call);
         }
-
-        if (filters.cycleId) {
-            query.cycle = new mongoose.Types.ObjectId(filters.cycleId);
+        if (filters.leadPI) {
+            query.leadPI = new mongoose.Types.ObjectId(filters.leadPI);
         }
 
         if (filters.status) {
@@ -40,7 +38,7 @@ export class ProjectRepository implements IProjectRepository {
         }
 
         return Project.find(query)
-            .populate("cycle")
+            .populate("call")
             .populate("leadPI")
             //.populate("createdBy")
             //.skip(filters.skip ?? 0)
@@ -50,24 +48,19 @@ export class ProjectRepository implements IProjectRepository {
     }
 
     async create(dto: CreateProjectDTO) {
-        const data: Partial<IProject> = {
-            cycle: new mongoose.Types.ObjectId(dto.cycleId),
-            title: dto.title,
-            summary: dto.summary,
-            status: dto.status,
-            leadPI: new mongoose.Types.ObjectId(dto.leadPIId), // if needed you can change this
-            createdBy: new mongoose.Types.ObjectId(dto.userId)           
-        };
-
-        return Project.create(data);
+        return Project.create({
+            ...dto,
+            call: new mongoose.Types.ObjectId(dto.call),
+            leadPI: new mongoose.Types.ObjectId(dto.leadPI)
+        });
     }
 
     async update(id: string, dtoData: UpdateProjectDTO["data"]): Promise<IProject> {
         const updateData: Partial<IProject> = {};
 
-        if (dtoData.title !== undefined) updateData.title = dtoData.title;
-        if (dtoData.summary !== undefined) updateData.summary = dtoData.summary;
-        if (dtoData.status !== undefined) updateData.status = dtoData.status;
+        if (dtoData.title) updateData.title = dtoData.title;
+        if (dtoData.summary) updateData.summary = dtoData.summary;
+        if (dtoData.status) updateData.status = dtoData.status;
 
         const updated = await Project.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),

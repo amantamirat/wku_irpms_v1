@@ -1,22 +1,8 @@
 import { ApiClient } from "@/api/ApiClient";
 import { Organization } from "../../organizations/models/organization.model";
-import { Evaluation } from "../models/evaluation.model";
+import { Evaluation, GetEvaluationsOptions, sanitizeEvaluation } from "../models/evaluation.model";
 
 const end_point = '/evaluations';
-
-function sanitizeEvaluation(evaluation: Partial<Evaluation>): Partial<Evaluation> {
-    return {
-        ...evaluation,
-        directorate:
-            typeof evaluation.directorate === 'object' && evaluation.directorate !== null
-                ? (evaluation.directorate as Organization)._id
-                : evaluation.directorate
-    };
-}
-
-export interface GetEvaluationsOptions {
-    directorate?: string;
-}
 
 export const EvaluationApi = {
 
@@ -26,9 +12,10 @@ export const EvaluationApi = {
         return createdData as Evaluation;
     },
 
-    async getEvaluations(options: GetEvaluationsOptions = {}): Promise<Evaluation[]> {
+    async getEvaluations(options: GetEvaluationsOptions): Promise<Evaluation[]> {
         const query = new URLSearchParams();
-        if (options.directorate) query.append("directorate", options.directorate);
+        const sanitized = sanitizeEvaluation(options);
+        if (sanitized.directorate) query.append("directorate", sanitized.directorate as string);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Evaluation[];
     },

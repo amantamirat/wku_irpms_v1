@@ -1,5 +1,4 @@
 import { Response } from "express";
-import mongoose from "mongoose";
 import { errorResponse, successResponse } from "../../common/helpers/response";
 import { AuthenticatedRequest } from "../users/user.middleware";
 import { ProjectService } from "./project.service";
@@ -15,13 +14,13 @@ export class ProjectController {
   static async createProject(req: AuthenticatedRequest, res: Response) {
     try {
       if (!req.user) throw new Error("User not found!");
-      const { cycle, title, summary } = req.body;
+      const { call, title, summary } = req.body;
 
       const dto: CreateProjectDTO = {
-        cycleId: cycle,
+        call,
         title,
         summary: summary,
-        userId: req.user._id,
+        leadPI: req.user.applicantId,
       };
 
       const created = await projectService.createProject(dto);

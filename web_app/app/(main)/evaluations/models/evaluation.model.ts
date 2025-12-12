@@ -8,6 +8,10 @@ export type Evaluation = {
     updatedAt?: Date;
 };
 
+export interface GetEvaluationsOptions {
+    directorate?: string | Organization;
+}
+
 export const validateEvaluation = (
     evaluation: Evaluation
 ): { valid: boolean; message?: string } => {
@@ -19,3 +23,14 @@ export const validateEvaluation = (
     }
     return { valid: true };
 };
+
+
+export function sanitizeEvaluation(evaluation: Partial<Evaluation>): Partial<Evaluation> {
+    return {
+        ...evaluation,
+        directorate:
+            typeof evaluation.directorate === 'object' && evaluation.directorate !== null
+                ? (evaluation.directorate as Organization)._id
+                : evaluation.directorate
+    };
+}

@@ -10,7 +10,6 @@ export interface GetStagesDTO {
 export interface CreateStageDTO {
     call: string;
     name: string;
-    //type: StageType;
     order?:number;
     evaluation: string;
     deadline?: Date;

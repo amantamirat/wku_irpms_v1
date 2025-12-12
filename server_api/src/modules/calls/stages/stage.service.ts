@@ -35,9 +35,6 @@ export class StageService {
         const lastStage = await this.repository.findLastStageByCycle({ call: call });
 
         const nextOrder = lastStage ? lastStage.order + 1 : 1;
-
-        console.log(nextOrder)
-
         /*
         if (nextOrder === 1 && type === StageType.validation) {
             throw new Error("The first stage cannot be validation.");

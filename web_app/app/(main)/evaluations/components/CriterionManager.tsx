@@ -10,6 +10,7 @@ import SaveCriterion from "./SaveCriterion";
 import { Evaluation } from "../../evaluations/models/evaluation.model";
 import { useAuth } from "@/contexts/auth-context";
 import OptionManager from "./OptionManager";
+import { FileUpload } from "primereact/fileupload";
 
 
 interface CriterionManagerProps {
@@ -94,6 +95,67 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
         },
     ];
 
+    /*
+    const endToolbarTemplate = () => {
+        const handleImport = async (event: any) => {
+            try {
+                const file = event.files[0];
+                if (!file) return;
+
+                const text = await file.text();
+                const json = JSON.parse(text);
+                let criteriaData;
+                if (Array.isArray(json)) {
+                    criteriaData = json;
+                } else {
+                    criteriaData = json.criteriaData;
+                }
+
+                if (!Array.isArray(criteriaData)) {
+                    toast.current?.show({
+                        severity: 'error',
+                        summary: 'Import Error',
+                        detail: 'Invalid import data',
+                        life: 3000
+                    });
+                    return;
+                }
+                // Call API
+                if (evaluation?._id) {
+                    const result = await CriterionApi.importCriteriaBatch(evaluation._id, criteriaData);
+                    toast.current?.show({
+                        severity: 'success',
+                        summary: 'Import Successful',
+                        detail: `Imported ${result.length} criteria`,
+                        life: 3000
+                    });
+                }
+                // Reload themes
+                await fetchCriteria();
+            } catch (err) {
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Import Failed',
+                    detail: '' + err,
+                    life: 3000
+                });
+            }
+        };
+        return (
+            <div className="my-2">
+                <FileUpload
+                    mode="basic"
+                    accept="application/json"
+                    maxFileSize={1000000}
+                    chooseLabel="Import"
+                    className="mr-2 inline-block"
+                    customUpload
+                    uploadHandler={handleImport}
+                />
+            </div>
+        );
+    };
+*/
     return (
         <>
             <CrudManager

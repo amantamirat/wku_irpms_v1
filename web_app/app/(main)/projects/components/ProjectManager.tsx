@@ -23,7 +23,7 @@ const ProjectManager = ({ cycle }: ProjectManagerProps) => {
     const confirm = useConfirmDialog();
 
     const emptyProject: Project = {
-        cycle: cycle,
+        call: cycle,
         title: ""
     };
 
@@ -53,7 +53,7 @@ const ProjectManager = ({ cycle }: ProjectManagerProps) => {
         const fetchProjects = async () => {
             try {
                 setLoading(true);
-                const options: GetProjectsOptions = { cycle };
+                const options: GetProjectsOptions = { call: cycle };
                 const data = await ProjectApi.getProjects(options);
                 setAll(data);
             } catch (err: any) {
@@ -85,8 +85,9 @@ const ProjectManager = ({ cycle }: ProjectManagerProps) => {
     };
 
     const columns = [
-        { header: "Cycle", field: "cycle.title" },
+        { header: "Call", field: "call.title" },
         { header: "Title", field: "title" },
+        { header: "PI", field: "leadPI.name" },
         {
             header: "Status", field: "status", body: (p: Project) =>
                 <MyBadge type="status" value={p.status ?? 'Unknown'} />

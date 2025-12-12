@@ -35,8 +35,7 @@ const AppMenu = () => {
                     visible: hasPermission([
                         PERMISSIONS.PROJECT.CREATE,
                         PERMISSIONS.PROJECT.UPDATE,
-                        PERMISSIONS.PROJECT.DELETE,
-                        PERMISSIONS.PROJECT.READ
+                        PERMISSIONS.PROJECT.DELETE
                     ])
                 },
                 {

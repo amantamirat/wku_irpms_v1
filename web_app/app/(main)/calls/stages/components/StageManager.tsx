@@ -8,7 +8,7 @@ import MyBadge from "@/templates/MyBadge";
 import { useEffect, useState } from "react";
 import { Call } from "../../models/call.model";
 import { StageApi } from "../api/stage.api";
-import { Stage, StageStatus, StageType } from "../models/stage.model";
+import { Stage, StageStatus } from "../models/stage.model";
 import SaveStage from "./SaveStage";
 
 interface StageManagerProps {
@@ -21,7 +21,6 @@ const StageManager = ({ call }: StageManagerProps) => {
     const emptyStage: Stage = {
         call: call,
         name: "",
-        type: StageType.evaluation,
         evaluation: "",
         status: StageStatus.planned
     };
@@ -137,7 +136,7 @@ const StageManager = ({ call }: StageManagerProps) => {
             <SaveStage
                 visible={showSaveDialog}
                 stage={selectedStage}
-                cycle={call}
+                call={call}
                 onComplete={onSaveComplete}
                 onHide={hideSaveDialog}
             />

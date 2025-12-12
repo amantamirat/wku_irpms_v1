@@ -19,7 +19,7 @@ export default function ProjectDetail({ project, updateProjectStatus }: ProjectD
             <div className="header">
                 <h2>{project.title}</h2>
                 <p>Created At: {new Date(project.createdAt!).toLocaleDateString()}</p>
-                <p>Created By: {project.createdBy as string}</p>
+                <p>Created By: {(project.leadPI as any).name}</p>
                 <p>Status: <span className={`project-badge status-${project.status}`}>{project.status}</span></p>
             </div>
             <Divider />

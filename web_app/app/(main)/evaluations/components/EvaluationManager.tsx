@@ -45,7 +45,7 @@ const EvaluationManager = () => {
         const fetchEvaluations = async () => {
             try {
                 setLoading(true);
-                const data = await EvaluationApi.getEvaluations();
+                const data = await EvaluationApi.getEvaluations({});
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to load evaluations. " + (err?.message ?? ""));

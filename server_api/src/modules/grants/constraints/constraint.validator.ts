@@ -39,7 +39,7 @@ export class ConstraintValidator {
             if (!projectDoc) {
                 throw new Error("Project Not Found!");
             }
-            cycleId = String(projectDoc.cycle);
+            cycleId = String(projectDoc.call);
             const collabs = await this.collabRepository.find({ project: projectId });
             collaborators = collabs.map(c => String(c.applicant));
             phases = await this.phasesRepository.find({ project: projectId });
@@ -47,7 +47,7 @@ export class ConstraintValidator {
         else if (projectDto) {
             collaborators = projectDto.collaborators;
             phases = projectDto.phases;
-            cycleId = projectDto.cycle;
+            cycleId = projectDto.call;
         }
 
         const cycleDoc = await Call.findById(cycleId);

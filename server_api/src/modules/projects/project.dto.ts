@@ -1,23 +1,23 @@
 import { PhaseDto } from "./phase/phase.dto";
 import { ProjectStatus } from "./project.enum";
 
-// GET / Query Projects
+
 export interface GetProjectsDTO {
-    userId?: string;
-    cycleId?: string;
+    call?: string;
+    leadPI?: string;
     status?: ProjectStatus;
     skip?: number;
     limit?: number;
+
 }
 
 // CREATE Project
 export interface CreateProjectDTO {
-    cycleId: string;
+    call: string;
     title: string;
     summary?: string;
     status?: ProjectStatus;
-    leadPIId?: string;  // the lead PI (if it's different from user)
-    userId: string;    // who is creating
+    leadPI: string;
 }
 
 // UPDATE Project
@@ -27,13 +27,13 @@ export interface UpdateProjectDTO {
         title: string;
         summary: string;
         status: ProjectStatus;
-        leadPIId: string;
+        leadPI: string;
     }>;
     userId: string;  // who is making the update
 }
 
 export interface SubmitProjectDTO {
-    cycle: string;
+    call: string;
     title: string;
     summary?: string;
     leadPI: string;

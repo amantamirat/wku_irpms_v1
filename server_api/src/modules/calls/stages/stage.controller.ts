@@ -8,7 +8,7 @@ const service = new StageService();
 export class StageController {
     static async createStage(req: Request, res: Response) {
         try {
-            const { call, name, type, evaluation, deadline } = req.body;
+            const { call, name, evaluation, deadline } = req.body;
             const dto: CreateStageDTO = {
                 call: call as string,
                 name,

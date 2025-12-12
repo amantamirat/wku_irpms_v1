@@ -77,7 +77,7 @@ const SaveProjectStageDialog = ({
             const fetchStages = async () => {
                 try {
                     const data = await StageApi.getStages({
-                        cycle: (project?.cycle as any)?._id,
+                        cycle: (project?.call as any)?._id,
                     });
                     setStages(data);
                 } catch (err) {
@@ -91,7 +91,7 @@ const SaveProjectStageDialog = ({
             };
             fetchStages();
         }
-    }, [visible, projectStage, project?.cycle]);
+    }, [visible, projectStage, project?.call]);
 
     const footer = (
         <>

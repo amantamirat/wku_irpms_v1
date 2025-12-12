@@ -31,8 +31,9 @@ export class EvaluationController {
 
     getEvaluations = async (req: Request, res: Response) => {
         try {
+            const { directorate } = req.query;
             const filter: GetEvaluationsDTO = {
-                directorate: req.query.directorate as string | undefined
+                directorate: directorate as string | undefined
             };
 
             const evaluations = await this.service.getEvaluations(filter);

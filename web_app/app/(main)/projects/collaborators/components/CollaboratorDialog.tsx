@@ -23,7 +23,7 @@ interface CollaboratorDialogProps {
 
 const CollaboratorDialog = ({ collaborator, visible, onSave, onComplete, onHide }: CollaboratorDialogProps) => {
     const [localCollaborator, setLocalCollaborator] = useState<Collaborator>({ ...collaborator });
-    const [scope, setScope] = useState<OrgnUnit>();
+    //const [scope, setScope] = useState<OrgnUnit>();
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [workspace, setWorkspace] = useState<Organization>();
     const [applicants, setApplicants] = useState<Applicant[]>([]);
@@ -37,20 +37,17 @@ const CollaboratorDialog = ({ collaborator, visible, onSave, onComplete, onHide 
     useEffect(() => {
         let isMounted = true;
         const fetchOrganizations = async () => {
-            if (!scope) return;
             try {
-                //const type = scopeToOrganizationUnit[scope];
-                if (scope) {
-                    const data = await OrganizationApi.getOrganizations({ type: scope });
-                    if (isMounted) setOrganizations(data);
-                }
+                const depData = await OrganizationApi.getOrganizations({ type: OrgnUnit.Department });
+                const extData = await OrganizationApi.getOrganizations({ type: OrgnUnit.External });
+                if (isMounted) setOrganizations([...depData, ...extData]);
             } catch (err) {
                 console.error("Failed to fetch organizations:", err);
             }
         };
         fetchOrganizations();
         return () => { isMounted = false; };
-    }, [scope]);
+    }, []);
 
     // Fetch applicants based on workspace
     useEffect(() => {
@@ -126,17 +123,6 @@ const CollaboratorDialog = ({ collaborator, visible, onSave, onComplete, onHide 
             >
                 {(!localCollaborator._id)
                     && <>
-                        <div className="field">
-                            <label htmlFor="scope">Scope</label>
-                            <Dropdown
-                                id="scope"
-                                value={scope}
-                                options={applicantUnits}
-                                onChange={(e) => setScope(e.value)}
-                                placeholder="Select Scope"
-                            />
-                        </div>
-
                         <div className="field">
                             <label htmlFor="workspace">Workspace</label>
                             <Dropdown

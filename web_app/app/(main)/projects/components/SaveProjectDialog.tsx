@@ -24,19 +24,19 @@ const SaveProjectDialog = ({ visible, project, onHide, onComplete }: SaveProject
     const toast = useRef<Toast>(null);
     const [localProject, setLocalProject] = useState<Project>({ ...project });
     const [submitted, setSubmitted] = useState(false);
-    const [cycles, setCycles] = useState<Call[]>([]);
+    const [calls, setCalls] = useState<Call[]>([]);
 
     // Fetch active calls if no call selected
     useEffect(() => {
-        const fetchCycles = async () => {
+        const fetchCalls = async () => {
             try {
                 const data = await CallApi.getCalls({});
-                setCycles(data);
+                setCalls(data);
             } catch (err) {
                 console.error('Failed to fetch calls:', err);
             }
         };
-        fetchCycles();
+        fetchCalls();
     }, []);
 
     const save = async () => {
@@ -55,7 +55,7 @@ const SaveProjectDialog = ({ visible, project, onHide, onComplete }: SaveProject
             }
             saved = {
                 ...saved,
-                cycle: localProject.cycle
+                call: localProject.call
             };
 
             toast.current?.show({
@@ -111,17 +111,17 @@ const SaveProjectDialog = ({ visible, project, onHide, onComplete }: SaveProject
                 <div className="p-fluid formgrid grid">
                     {!localProject._id && (
                         <div className="field col-12">
-                            <label htmlFor="cycle">Cycle</label>
+                            <label htmlFor="call">Call</label>
                             <Dropdown
-                                id="cycle"
+                                id="call"
                                 dataKey="_id"
-                                options={cycles}
-                                value={localProject.cycle}
-                                onChange={(e) => setLocalProject({ ...localProject, cycle: e.value })}
+                                options={calls}
+                                value={localProject.call}
+                                onChange={(e) => setLocalProject({ ...localProject, call: e.value })}
                                 required
                                 optionLabel="title"
-                                placeholder="Select a Cycle"
-                                className={classNames({ 'p-invalid': submitted && !localProject.cycle })}
+                                placeholder="Select a Call"
+                                className={classNames({ 'p-invalid': submitted && !localProject.call })}
                             />
                         </div>
                     )}

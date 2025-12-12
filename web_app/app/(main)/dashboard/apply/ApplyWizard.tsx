@@ -29,7 +29,7 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
     const { user } = useAuth();
     const initializeProject = (): Project => ({
         title: "",
-        cycle: call,
+        call: call,
         collaborators: user?.applicant
             ? [
                 {
@@ -166,7 +166,7 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
                 {activeStep === 2 && <CollaboratorManager project={project} onSave={addCollaborator} />}
                 {activeStep === 3 && <ProjectThemeManager project={project} setProject={setProject} />}
                 {activeStep === 4 && <PhaseManager project={project} setProject={setProject} phaseType={PhaseType.phase} />}
-                {activeStep === items.length - 1 && <Confirmation project={project} call={project.cycle as Call} />}
+                {activeStep === items.length - 1 && <Confirmation project={project} call={project.call as Call} />}
             </Dialog>
         </>
     );

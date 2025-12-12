@@ -8,7 +8,7 @@ import { Calendar } from 'primereact/calendar';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 import { StageApi } from '../api/stage.api';
-import { Stage, StageStatus, StageType, validateStage } from '../models/stage.model';
+import { Stage, StageStatus, validateStage } from '../models/stage.model';
 import { EvaluationApi } from '@/app/(main)/evaluations/api/evaluation.api';
 import { Evaluation } from '@/app/(main)/evaluations/models/evaluation.model';
 import { Call } from '../../models/call.model';
@@ -17,41 +17,31 @@ import { Call } from '../../models/call.model';
 interface SaveStageProps {
     visible: boolean;
     stage: Stage;
-    cycle?: Call;
+    call?: Call;
     onComplete?: (savedStage: Stage) => void;
     onHide: () => void;
 }
 
-const SaveStage = ({ visible, stage, cycle, onComplete, onHide }: SaveStageProps) => {
+const SaveStage = ({ visible, stage, call, onComplete, onHide }: SaveStageProps) => {
     const toast = useRef<Toast>(null);
     const [localStage, setLocalStage] = useState<Stage>({ ...stage });
     const [submitted, setSubmitted] = useState(false);
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
 
     useEffect(() => {
+        if (!call) {
+            return
+        }
         const fetchEvaluations = async () => {
             try {
-                if (cycle?.directorate) {
-                    let directorateId: string;
-                    if (typeof cycle.directorate === 'object' && cycle.directorate !== null) {
-                        if (cycle.type === 'Program') {
-                            directorateId = (cycle.directorate as any).parent;
-                        }
-                        else {
-                            directorateId = (cycle.directorate as any)._id;
-                        }
-                    } else {
-                        return; // invalid directorate, do nothing
-                    }
-                    const data = await EvaluationApi.getEvaluations({ directorate: directorateId });
-                    setEvaluations(data);
-                }
+                const data = await EvaluationApi.getEvaluations({ directorate: call.directorate });
+                setEvaluations(data);
             } catch (err) {
                 console.error('Failed to fetch evaluations:', err);
             }
         };
         fetchEvaluations();
-    }, [cycle]);
+    }, [call]);
 
 
     useEffect(() => {
@@ -124,20 +114,7 @@ const SaveStage = ({ visible, stage, cycle, onComplete, onHide }: SaveStageProps
                 footer={footer}
                 onHide={hide}
             >
-                {/* Stage Type */}
-                {!localStage._id &&
-                    <div className="field">
-                        <label htmlFor="type">Stage Type</label>
-                        <Dropdown
-                            id="type"
-                            value={localStage.type}
-                            options={Object.values(StageType)}
-                            onChange={(e) => setLocalStage({ ...localStage, type: e.value })}
-                            placeholder="Select Stage Type"
-                            className={classNames({ 'p-invalid': submitted && !localStage.type })}
-                        />
-                    </div>
-                }
+
                 {/* Stage Name */}
                 <div className="field">
                     <label htmlFor="name">Stage Name</label>

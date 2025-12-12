@@ -11,7 +11,7 @@ export const ProjectApi = {
         // Sanitize the options first
         const sanitizedOptions = sanitizeGetProjectsOptions(options);
         const query = new URLSearchParams();
-        if (sanitizedOptions.cycle) query.append("cycle", sanitizedOptions.cycle as string);
+        if (sanitizedOptions.call) query.append("call", sanitizedOptions.call as string);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Project[];
     },

@@ -1,5 +1,5 @@
+import { Applicant } from "../../applicants/models/applicant.model";
 import { Call } from "../../calls/models/call.model";
-import { User } from "../../users/models/user.model";
 import { Collaborator, sanitizeCollaborator } from "../collaborators/models/collaborator.model";
 import { Phase, sanitizePhase } from "../phases/models/phase.model";
 import { ProjectTheme, sanitizeProjectTheme } from "../themes/models/project.theme.model";
@@ -11,11 +11,11 @@ export enum ProjectStatus {
 
 export type Project = {
     _id?: string;
-    cycle?: string | Call;
+    call?: string | Call;
     title: string;
     summary?: string;
     status?: ProjectStatus;
-    createdBy?: string | User;
+    leadPI?: string | Applicant;
     createdAt?: Date;
     updatedAt?: Date;
     collaborators?: Collaborator[];
@@ -25,11 +25,11 @@ export type Project = {
 }
 
 export interface GetProjectsOptions {
-    cycle?: string | Call;
+    call?: string | Call;
 }
 
 export const validateProject = (project: Project): { valid: boolean; message?: string } => {
-    if (!project.cycle) {
+    if (!project.call) {
         return { valid: false, message: 'Call is required.' };
     }
     if (!project.title || project.title.trim().length === 0) {
@@ -57,10 +57,10 @@ export const validateApplyProject = (project: Project): { valid: boolean; messag
 export const sanitizeProject = (project: Partial<Project>): Partial<Project> => {
     return {
         ...project,
-        cycle:
-            typeof project.cycle === 'object' && project.cycle !== null
-                ? (project.cycle as Call)._id
-                : project.cycle,
+        call:
+            typeof project.call === 'object' && project.call !== null
+                ? (project.call as Call)._id
+                : project.call,
         collaborators: project.collaborators?.map(c => sanitizeCollaborator(c)),
         themes: project.themes?.map(t => sanitizeProjectTheme(t)),
         phases: project.phases?.map(p => sanitizePhase(p)),
@@ -70,10 +70,10 @@ export const sanitizeProject = (project: Partial<Project>): Partial<Project> => 
 export const sanitizeGetProjectsOptions = (options: Partial<GetProjectsOptions>): Partial<GetProjectsOptions> => {
     return {
         ...options,
-        cycle:
-            typeof options.cycle === 'object' && options.cycle !== null
-                ? (options.cycle as Call)._id
-                : options.cycle,
+        call:
+            typeof options.call === 'object' && options.call !== null
+                ? (options.call as Call)._id
+                : options.call,
     };
 };
 
