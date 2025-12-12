@@ -1,70 +1,73 @@
+import { DeleteDto } from "../../../../util/delete.dto";
 import { FormType } from "../criterion.enum";
-import { Criterion } from "../criterion.model";
+import { CriterionRepository, ICriterionRepository } from "../criterion.repository";
 import {
     CreateOptionDTO,
-    DeleteOptionDTO,
     GetOptionsDTO,
     UpdateOptionDTO,
 } from "./option.dto";
-import { Option } from "./option.model";
+import { IOptionRepository, OptionRepository } from "./option.repository";
 
 export class OptionService {
+
+    private repository: IOptionRepository;
+    private criterionRepo: ICriterionRepository;
+
+    constructor(repository?: IOptionRepository, criterionRepo?: ICriterionRepository,) {
+        this.repository = repository || new OptionRepository();
+        this.criterionRepo = criterionRepo || new CriterionRepository();
+    }
     /**
      * Create a new option under a criterion.
      */
-    static async createOption(dto: CreateOptionDTO) {
+    async create(dto: CreateOptionDTO) {
         const { criterion, title, score } = dto;
 
-        const criterionDoc = await Criterion.findById(criterion);
+        const criterionDoc = await this.criterionRepo.findById(criterion);
         if (!criterionDoc) throw new Error("Criterion not found.");
-        if (criterionDoc.form_type!==FormType.closed) throw new Error("Criterion must be closed.");
+        if (criterionDoc.form_type !== FormType.closed) throw new Error("Criterion must be closed.");
 
         if (score > criterionDoc.weight) {
             throw new Error(
                 `Option weight (${score}) exceeds its criterion limit (${criterionDoc.weight}).`
             );
         }
-
-        return await Option.create(dto);
+        return await this.repository.create(dto);
     }
 
     /**
      * Get all options under a given criterion.
      */
-    static async getOptions(dto: GetOptionsDTO) {
-        const { criterion } = dto;
-        return await Option.find({ criterion: criterion })
-            .sort({ value: -1 })
-            .lean();
+    async getOptions(dto: GetOptionsDTO) {
+        return await this.repository.find(dto);
     }
 
     /**
      * Update an existing option.
      */
-    static async updateOption(dto: UpdateOptionDTO) {
-        const { id, updates } = dto;
+    async update(dto: UpdateOptionDTO) {
+        const { id, data } = dto;
 
-        const option = await Option.findById(id).populate("criterion");
+        const option = await this.repository.findById(id);
         if (!option) throw new Error("Option not found.");
 
-        if (updates.score !== undefined) {
-            const criterion: any = option.criterion;
-            if (updates.score > criterion.weight) {
+        if (data.score) {
+            const criterion = await this.criterionRepo.findById(String(option.criterion));
+            if (!criterion) throw new Error("Criterion not found.");
+            if (data.score > criterion.weight) {
                 throw new Error(
-                    `Option weight (${updates.score}) exceeds its criterion limit (${criterion.weight}).`
+                    `Option weight (${data.score}) exceeds its criterion limit (${criterion.weight}).`
                 );
             }
         }
-
-        Object.assign(option, updates);
-        return option.save();
+        return this.repository.update(id, data);
     }
 
     /**
      * Delete an option by ID.
      */
-    static async deleteOption(dto: DeleteOptionDTO) {
+    async delete(dto: DeleteDto) {
         const { id } = dto;
-        return await Option.findByIdAndDelete(id);
+        return await this.repository.delete(id);
     }
 }

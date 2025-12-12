@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { CriterionController } from "./criterion.controller";
-import { verifyActiveAccount, checkPermission } from "../../users/user.middleware";
 import { PERMISSIONS } from "../../../util/permissions";
+import { checkPermission, verifyActiveAccount } from "../../users/user.middleware";
+import { CriterionController } from "./criterion.controller";
 
+const controller = new CriterionController();
 const router = Router();
 
 // Create a single criterion
@@ -10,7 +11,7 @@ router.post(
     "/",
     verifyActiveAccount,
     checkPermission([PERMISSIONS.EVALUATION.CREATE]),
-    CriterionController.createCriterion
+    controller.create
 );
 
 // Get all criteria for an evaluation
@@ -18,7 +19,7 @@ router.get(
     "/",
     verifyActiveAccount,
     //checkPermission([PERMISSIONS.EVALUATION.READ]),
-    CriterionController.getCriteria
+    controller.getCriteria
 );
 
 // Update a criterion
@@ -26,7 +27,7 @@ router.put(
     "/:id",
     verifyActiveAccount,
     checkPermission([PERMISSIONS.EVALUATION.UPDATE]),
-    CriterionController.updateCriterion
+    controller.update
 );
 
 // Delete a criterion
@@ -34,7 +35,7 @@ router.delete(
     "/:id",
     verifyActiveAccount,
     checkPermission([PERMISSIONS.EVALUATION.DELETE]),
-    CriterionController.deleteCriterion
+    controller.delete
 );
 
 // Batch import criteria with options

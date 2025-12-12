@@ -28,11 +28,54 @@ export class CriterionService {
     /**
      * Create a single criterion.
      */
-    async createCriterion(dto: CreateCriterionDTO) {
+    async create(dto: CreateCriterionDTO) {
         const evalDoc = await this.evalRepository.findById(dto.evaluation);
         if (!evalDoc) throw new Error("Evaluation not found.");
         return await this.repository.create(dto);
     }
+
+    async get(dto: GetCriteriaDTO) {
+        const { evaluation } = dto;
+        return await this.repository.find({ evaluation });
+    }
+
+    /**
+     * Update an existing criterion.
+     */
+    async update(dto: UpdateCriterionDTO) {
+        const { id, data } = dto;
+
+        //const criterion = await Criterion.findById(id);
+        //if (!criterion) throw new Error("Criterion not found.");
+
+        // Validate weight change against existing options
+        if (data.weight) {
+            const options = await Option.find({ criterion: id }).lean();
+            for (const opt of options) {
+                if (opt.score > data.weight) {
+                    throw new Error(
+                        `Option value (${opt.score}) exceeds new criterion weight (${data.weight}).`
+                    );
+                }
+            }
+        }
+        return this.repository.update(id, data);
+    }
+
+    /**
+    * Delete a criterion only if no options exist.
+    */
+    async delete(dto: DeleteCriterionDTO) {
+        const { id } = dto;
+        /*
+        const optionCount = await Option.countDocuments({ criterion: id });
+        if (optionCount > 0)
+            throw new Error("Cannot delete criterion with existing options.");
+        */
+        return await this.repository.delete(id);
+    }
+
+
 
     /**
      * Get all criteria for an evaluation.
@@ -117,44 +160,6 @@ export class CriterionService {
         return criteria;
     }
 
-
-    /**
-     * Update an existing criterion.
-     */
-    static async updateCriterion(dto: UpdateCriterionDTO) {
-        const { id, data } = dto;
-
-        const criterion = await Criterion.findById(id);
-        if (!criterion) throw new Error("Criterion not found.");
-
-        // Validate weight change against existing options
-        if (data.weight !== undefined) {
-            const options = await Option.find({ criterion: id }).lean();
-            for (const opt of options) {
-                if (opt.score > data.weight) {
-                    throw new Error(
-                        `Option value (${opt.score}) exceeds new criterion weight (${data.weight}).`
-                    );
-                }
-            }
-        }
-
-        Object.assign(criterion, data);
-        return criterion.save();
-    }
-
-    /**
-     * Delete a criterion only if no options exist.
-     */
-    static async deleteCriterion(dto: DeleteCriterionDTO) {
-        const { id } = dto;
-
-        const optionCount = await Option.countDocuments({ criterion: id });
-        if (optionCount > 0)
-            throw new Error("Cannot delete criterion with existing options.");
-
-        return await Criterion.findByIdAndDelete(id);
-    }
 
     /**
      * Batch import criteria (with optional options) under a given evaluation.

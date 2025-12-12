@@ -3,6 +3,7 @@ import { OptionController } from "./option.controller";
 import { verifyActiveAccount, checkPermission } from "../../../users/user.middleware";
 import { PERMISSIONS } from "../../../../util/permissions";
 
+const controller = new OptionController();
 const router = Router();
 
 // Create a new option under a criterion
@@ -10,7 +11,7 @@ router.post(
     "/",
     verifyActiveAccount,
     checkPermission([PERMISSIONS.EVALUATION.CREATE]),
-    OptionController.createOption
+    controller.create
 );
 
 // Get all options under a criterion
@@ -18,7 +19,7 @@ router.get(
     "/",
     verifyActiveAccount,
     checkPermission([PERMISSIONS.EVALUATION.READ]),
-    OptionController.getOptions
+    controller.getOptions
 );
 
 // Update an option
@@ -26,7 +27,7 @@ router.put(
     "/:id",
     verifyActiveAccount,
     checkPermission([PERMISSIONS.EVALUATION.UPDATE]),
-    OptionController.updateOption
+    controller.update
 );
 
 // Delete an option
@@ -34,7 +35,7 @@ router.delete(
     "/:id",
     verifyActiveAccount,
     checkPermission([PERMISSIONS.EVALUATION.DELETE]),
-    OptionController.deleteOption
+    controller.delete
 );
 
 export default router;

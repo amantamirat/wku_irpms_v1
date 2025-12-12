@@ -12,7 +12,7 @@ export class EvaluationService {
         this.repository = repository || new EvaluationRepository();
     }
 
-    async createEvaluation(dto: CreateEvaluationDTO) {
+    async create(dto: CreateEvaluationDTO) {
         await CacheService.validateOwnership(dto.userId, dto.directorate);
 
         const directorateDoc = await Directorate.findById(dto.directorate).lean();
@@ -27,19 +27,8 @@ export class EvaluationService {
         return await this.repository.find(options);
     }
 
-    /*
-
-    async getUserEvaluations(userId: string) {
-        const organizations = await CacheService.getUserOrganizations(userId);
-        if (!organizations.length) return [];
-        return await Evaluation.find({ directorate: { $in: organizations } })
-                               .populate("directorate")
-                               .lean();
-    }
-
-    */
-
-    async updateEvaluation(dto: UpdateEvaluationDTO) {
+    
+    async update(dto: UpdateEvaluationDTO) {
         const { id, data, userId } = dto;
         const evalDoc = await this.repository.findById(id);
         if (!evalDoc) throw new Error("Evaluation not found");
@@ -49,7 +38,7 @@ export class EvaluationService {
         return await this.repository.update(id, data);
     }
 
-    async deleteEvaluation(dto: DeleteDto) {
+    async delete(dto: DeleteDto) {
         const { id, userId } = dto;
         const evalDoc = await this.repository.findById(id);
         if (!evalDoc) throw new Error("Evaluation not found");

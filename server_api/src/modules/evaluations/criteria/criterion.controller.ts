@@ -1,53 +1,54 @@
-import { Request, Response } from "express";
-import mongoose from "mongoose";
-import { CriterionService } from "./criterion.service";
-import { CreateCriterionDTO, GetCriteriaDTO, ImportCriteriaBatchDTO, UpdateCriterionDTO } from "./criterion.dto";
+import { Request, Response } from 'express';
 import { successResponse, errorResponse } from "../../../common/helpers/response";
 import { AuthenticatedRequest } from "../../users/user.middleware";
+import { CreateCriterionDTO, GetCriteriaDTO, UpdateCriterionDTO, ImportCriteriaBatchDTO } from "./criterion.dto";
+import { CriterionService } from "./criterion.service";
+import mongoose from "mongoose";
 
 export class CriterionController {
-    static async createCriterion(req: AuthenticatedRequest, res: Response) {
+
+    private service: CriterionService;
+
+    constructor(service?: CriterionService) {
+        this.service = service || new CriterionService();
+    }
+
+    create = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) throw new Error("User not found");
 
             const { evaluation, title, form_type, weight } = req.body;
 
             const dto: CreateCriterionDTO = {
-                evaluation: evaluation,
+                evaluation,
                 title,
                 form_type,
-                weight: weight,
-                //userId: req.user._id
+                weight
             };
 
-            const criterion = await CriterionService.createCriterion(dto);
+            const criterion = await this.service.create(dto);
             successResponse(res, 201, "Criterion created successfully", criterion);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
-    static async getCriteria(req: Request, res: Response) {
+    getCriteria = async (req: Request, res: Response) => {
         try {
-            const { evaluation, stage, reviewer } = req.query;
+            const { evaluation } = req.query;
 
             const dto: GetCriteriaDTO = {
-                evaluation: evaluation ? evaluation as string : undefined,
-                stage: stage ? stage as string : undefined,
-                reviewer: reviewer ? reviewer as string : undefined
+                evaluation: evaluation as string | undefined
             };
 
-            const criteria = await CriterionService.getCriteria(
-                dto
-            );
-
+            const criteria = await this.service.get(dto);
             successResponse(res, 200, "Criteria fetched successfully", criteria);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
-    static async updateCriterion(req: AuthenticatedRequest, res: Response) {
+    update = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) throw new Error("User not found");
 
@@ -59,19 +60,19 @@ export class CriterionController {
                 data: { title, form_type, weight }
             };
 
-            const updated = await CriterionService.updateCriterion(dto);
+            const updated = await this.service.update(dto);
             successResponse(res, 200, "Criterion updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
-    static async deleteCriterion(req: AuthenticatedRequest, res: Response) {
+    delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) throw new Error("User not found");
 
             const { id } = req.params;
-            const deleted = await CriterionService.deleteCriterion({ id });
+            const deleted = await this.service.delete({ id });
 
             successResponse(res, 200, "Criterion deleted successfully", deleted);
         } catch (err: any) {
@@ -79,7 +80,10 @@ export class CriterionController {
         }
     }
 
-    static async importCriteriaBatch(req: AuthenticatedRequest, res: Response) {
+    // static method is fine — it doesn't need arrow function
+
+    static importCriteriaBatch = async (req: AuthenticatedRequest, res: Response) => {
+
         try {
             if (!req.user) throw new Error("User not found");
 

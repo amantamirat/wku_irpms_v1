@@ -33,7 +33,7 @@ export class CriterionRepository implements ICriterionRepository {
         }
 
         return Criterion.find(query)
-            .populate("directorate")
+            .populate("evaluation")
             .lean<ICriterion[]>()
             .exec();
     }
