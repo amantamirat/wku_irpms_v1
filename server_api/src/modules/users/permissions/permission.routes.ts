@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { PERMISSIONS } from '../../../util/permissions';
+import { PERMISSIONS } from '../../../common/constants/permissions';
 import { checkPermission, verifyActiveAccount } from '../user.middleware';
 import { PermissionController } from './permission.controller';
 

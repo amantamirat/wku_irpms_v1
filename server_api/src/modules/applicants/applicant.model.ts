@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema, model } from 'mongoose';
 import { Gender, Accessibility } from './applicant.enum';
-import { COLLECTIONS } from '../../util/collections.enum';
+import { COLLECTIONS } from '../../common/constants/collections.enum';
 
 export interface IApplicant extends Document {
     workspace?: mongoose.Types.ObjectId;

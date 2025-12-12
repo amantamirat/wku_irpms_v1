@@ -12,7 +12,7 @@ import { FormType } from "./criterion.enum";
 import { Criterion } from "./criterion.model";
 import { Reviewer } from "../../calls/stages/projects/reviewers/reviewer.model";
 import mongoose from "mongoose";
-import { COLLECTIONS } from "../../../util/collections.enum";
+import { COLLECTIONS } from "../../../common/constants/collections.enum";
 import { CriterionRepository, ICriterionRepository } from "./criterion.repository";
 import { EvaluationRepository, IEvaluationRepository } from "../evaluation.repository";
 

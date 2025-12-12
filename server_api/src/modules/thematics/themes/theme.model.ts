@@ -1,5 +1,5 @@
 import mongoose, { Schema, model } from "mongoose";
-import { COLLECTIONS } from "../../../util/collections.enum";
+import { COLLECTIONS } from "../../../common/constants/collections.enum";
 
 export interface ITheme extends Document {
   title: string;

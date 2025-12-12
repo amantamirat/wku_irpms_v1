@@ -1,6 +1,6 @@
 import { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
-import { COLLECTIONS } from '../../util/collections.enum';
+import { COLLECTIONS } from '../../common/constants/collections.enum';
 import { CalendarStatus } from './calendar.enum';
 
 

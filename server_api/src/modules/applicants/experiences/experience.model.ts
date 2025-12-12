@@ -1,6 +1,6 @@
 //experience.model.ts
 import mongoose, { model, Schema, Document } from "mongoose";
-import { COLLECTIONS } from "../../../util/collections.enum";
+import { COLLECTIONS } from "../../../common/constants/collections.enum";
 import { Rank } from "../positions/position.model";
 import EmploymentType  from "./employment-type.enum";
 

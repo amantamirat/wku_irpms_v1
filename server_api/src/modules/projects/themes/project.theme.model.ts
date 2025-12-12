@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { COLLECTIONS } from "../../../util/collections.enum";
+import { COLLECTIONS } from "../../../common/constants/collections.enum";
 
 interface IProjectTheme extends Document {
     project: mongoose.Types.ObjectId;

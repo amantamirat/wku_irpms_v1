@@ -1,5 +1,5 @@
 import mongoose, { model, Schema, Document } from "mongoose";
-import { COLLECTIONS } from "../../../util/collections.enum";
+import { COLLECTIONS } from "../../../common/constants/collections.enum";
 import { CollaboratorStatus } from "./collaborator.enum";
 
 

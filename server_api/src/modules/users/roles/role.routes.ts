@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { RoleController } from './role.controller';
 import { checkPermission, verifyActiveAccount } from '../user.middleware';
-import { PERMISSIONS } from '../../../util/permissions';
+import { PERMISSIONS } from '../../../common/constants/permissions';
 
 
 const router: Router = Router();

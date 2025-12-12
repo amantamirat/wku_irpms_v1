@@ -1,6 +1,6 @@
 //result.model.ts
 import mongoose, { model, Schema } from "mongoose";
-import { COLLECTIONS } from "../../../../../../util/collections.enum";
+import { COLLECTIONS } from "../../../../../../common/constants/collections.enum";
 
 //mongo model
 export interface IResult extends Document {

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ReviewerController } from './reviewer.controller';
 import { checkPermission, verifyActiveAccount } from '../../../../users/user.middleware';
-import { PERMISSIONS } from '../../../../../util/permissions';
+import { PERMISSIONS } from '../../../../../common/constants/permissions';
 
 const router: Router = Router();
 

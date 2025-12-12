@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import { COLLECTIONS } from '../../../util/collections.enum';
+import { COLLECTIONS } from '../../../common/constants/collections.enum';
 
 
 export interface IRole extends Document {

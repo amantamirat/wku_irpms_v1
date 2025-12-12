@@ -1,5 +1,5 @@
 import mongoose, { model, Schema } from "mongoose";
-import { COLLECTIONS } from "../../../util/collections.enum";
+import { COLLECTIONS } from "../../../common/constants/collections.enum";
 import { ConstraintType } from "./constraint-type.enum";
 
 export interface IConstraint extends Document {

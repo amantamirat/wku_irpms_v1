@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { ExperienceController } from './experience.controller';
-import { PERMISSIONS } from '../../../util/permissions';
+import { PERMISSIONS } from '../../../common/constants/permissions';
 import { verifyActiveAccount, checkPermission } from '../../users/user.middleware';
 
 

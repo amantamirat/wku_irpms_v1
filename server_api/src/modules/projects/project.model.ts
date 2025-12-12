@@ -1,5 +1,5 @@
 import mongoose, { model, Schema } from "mongoose";
-import { COLLECTIONS } from "../../util/collections.enum";
+import { COLLECTIONS } from "../../common/constants/collections.enum";
 import { ProjectStatus } from "./project.enum";
 
 export interface IProject extends Document {

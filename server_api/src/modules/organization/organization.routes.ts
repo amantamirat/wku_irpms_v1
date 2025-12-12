@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { checkPermission, verifyActiveAccount } from '../users/user.middleware';
 import { OrganizationController } from './organization.controller';
 import { checkUnitPermission } from './organization.middleware';
-import { PERMISSIONS } from '../../util/permissions';
+import { PERMISSIONS } from '../../common/constants/permissions';
 
 const router: Router = Router();
 

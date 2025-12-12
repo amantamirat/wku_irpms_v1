@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { AssignmentType, CollaboratorRole } from "./assignment.enum";
-import { COLLECTIONS } from "../../../../util/collections.enum";
+import { COLLECTIONS } from "../../../../common/constants/collections.enum";
 
 interface ICollaboratorAssignment extends Document {
     collaborator: mongoose.Types.ObjectId;

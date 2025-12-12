@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { AcademicLevel } from "../../../common/constants/enums";
-import { COLLECTIONS } from "../../../util/collections.enum";
+import { COLLECTIONS } from "../../../common/constants/collections.enum";
 
 export interface ISpecialization extends Document {
     name: string,

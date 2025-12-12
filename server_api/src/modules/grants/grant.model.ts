@@ -1,5 +1,5 @@
 import mongoose, { model, Schema } from "mongoose";
-import { COLLECTIONS } from "../../util/collections.enum";
+import { COLLECTIONS } from "../../common/constants/collections.enum";
 import { Directorate } from "../organization/organization.model";
 
 export interface IGrant extends Document {

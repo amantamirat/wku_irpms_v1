@@ -1,6 +1,6 @@
 // reviewer.service.ts
 import { CacheService } from "../../../../../util/cache/cache.service";
-import { PERMISSIONS } from "../../../../../util/permissions";
+import { PERMISSIONS } from "../../../../../common/constants/permissions";
 import Applicant from "../../../../applicants/applicant.model";
 import { Criterion } from "../../../../evaluations/criteria/criterion.model";
 import { Collaborator } from "../../../../projects/collaborators/collaborator.model";

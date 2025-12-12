@@ -1,4 +1,4 @@
-import { COLLECTIONS } from "../../../../util/collections.enum";
+import { COLLECTIONS } from "../../../../common/constants/collections.enum";
 
 export enum CollaboratorRole {
   CO_PI = "CO_PI",  
