@@ -26,6 +26,7 @@ export interface GetStagesDTO {
  * Validate stage fields before submission
  */
 export const validateStage = (stage: Stage): { valid: boolean; message?: string } => {
+    
     if (!stage.name || stage.name.trim().length === 0) {
         return { valid: false, message: "Stage name is required." };
     }
@@ -38,15 +39,16 @@ export const validateStage = (stage: Stage): { valid: boolean; message?: string 
         return { valid: false, message: "Evaluation reference is required." };
     }
 
-    if (stage.deadline) {
-        const deadlineDate = new Date(stage.deadline);
-        if (isNaN(deadlineDate.getTime())) {
-            return { valid: false, message: "Deadline must be a valid date." };
-        }
+    if (!stage.deadline) {
+        throw new Error("Deadline is required.");
     }
-
-    if (!stage.status) {
-        return { valid: false, message: "Stage status is required." };
+    
+    const deadlineDate = new Date(stage.deadline);
+    if (isNaN(deadlineDate.getTime())) {
+        return { valid: false, message: "Deadline must be a valid date." };
+    }
+    if (deadlineDate <= new Date()) {
+        throw new Error("Deadline must be in the future.");
     }
 
     return { valid: true };

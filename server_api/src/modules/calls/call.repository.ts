@@ -43,6 +43,8 @@ export class CallRepository implements ICallRepository {
         const updateData: Partial<ICall> = {};
 
         if (dtoData.title) updateData.title = dtoData.title;
+        if (dtoData.description) updateData.description = dtoData.description;
+        if (dtoData.status) updateData.status = dtoData.status;
 
         const updated = await Call.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),

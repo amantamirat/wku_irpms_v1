@@ -6,11 +6,10 @@ import { Thematic } from "../../thematics/models/thematic.model";
 // -----------------------------
 // Enums
 // -----------------------------
-export enum CycleStatus {
+export enum CallStatus {
   planned = "planned",
   active = "active",
-  closed = "closed",
-  archived = "archived"
+  closed = "closed"
 }
 
 export type Call = {
@@ -21,7 +20,7 @@ export type Call = {
   title: string;
   description?: string | null;
   thematic?: string | Thematic;
-  status: CycleStatus;
+  status: CallStatus;
   createdAt?: Date;
   updatedAt?: Date;
 };
@@ -29,7 +28,7 @@ export type Call = {
 export interface GetCallsOptions {
   calendar?: string | Calendar;
   directorate?: string | Organization;
-  status?: CycleStatus;
+  status?: CallStatus;
 }
 
 // -----------------------------

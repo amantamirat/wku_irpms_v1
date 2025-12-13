@@ -15,7 +15,7 @@ export const PERMISSIONS = {
     DELETE: "user:delete",
     // RESET: "user:reset",
   },
-  
+
   ORGANIAZTION: {
     COLLEGE: {
       CREATE: "college:create",
@@ -74,19 +74,12 @@ export const PERMISSIONS = {
     DELETE: "applicant:delete",
     UPDATE_ROLES: "applicant:update_roles"
   },
-
-
   CALENDAR: {
     CREATE: "calendar:create",
     READ: "calendar:read",
     UPDATE: "calendar:update",
     DELETE: "calendar:delete",
   },
-
-
-
-
-
 
   EXPERIENCE: {
     CREATE: "experience:create",
@@ -111,21 +104,17 @@ export const PERMISSIONS = {
     READ: "call:read",
     UPDATE: "call:update",
     DELETE: "call:delete",
+    CHANGE_STATUS: "call:change_status", // New permission for status transitions
   },
-  CYCLE: {
-    CALL: {
-      CREATE: "cycle:call:create",
-      READ: "cycle:call:read",
-      UPDATE: "cycle:call:update",
-      DELETE: "cycle:call:delete",
-    },
-    PROGRAM: {
-      CREATE: "cycle:program:create",
-      READ: "cycle:program:read",
-      UPDATE: "cycle:program:update",
-      DELETE: "cycle:program:delete",
-    },
+
+  STAGE: {
+    CREATE: "stage:create",
+    READ: "stage:read",
+    UPDATE: "stage:update",
+    DELETE: "stage:delete",
+    CHANGE_STATUS: "stage:change_status", // New permission for status transitions
   },
+
   EVALUATION: {
     CREATE: "evaluation:create",
     READ: "evaluation:read",

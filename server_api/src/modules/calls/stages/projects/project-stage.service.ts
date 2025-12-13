@@ -39,14 +39,14 @@ export class ProjectStageService {
         ////validate/////
         const projectDoc = await this.projectRepository.findById(dto.projectId);
         if (!projectDoc) throw new Error("Project not found");
-        const stage = await this.stageRepository.findById(dto.stageId);
+        const stage = await this.stageRepository.findOne({ _id: dto.stageId });
         if (!stage) throw new Error("Stage not found");
         if (stage.status !== "active") throw new Error("Stage is not active");
         if (stage.deadline < new Date()) throw new Error("Stage deadline has passed");
         // Check previous stage
         if (stage.order > 1) {
 
-            const prevStage = await this.stageRepository.findByOrderAndCycle({
+            const prevStage = await this.stageRepository.findOne({
                 order: stage.order - 1,
                 call: stage.call.toString()
             });
@@ -67,7 +67,7 @@ export class ProjectStageService {
                           */
         }
         //////validation end///////////
-        
+
         try {
             ///grant validator////
             await this.validator.validateProject(projectId, projectDoc);

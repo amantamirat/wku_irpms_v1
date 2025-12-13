@@ -52,6 +52,26 @@ export class CallController {
         }
     }
 
+    changeStatus = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            const { id } = req.params;
+            const { status } = req.body;
+            if (!req.user) {
+                throw new Error("User not found!");
+            }
+            const userId = req.user._id;
+            const dto: UpdateCallDTO = {
+                id,
+                data: { status },
+                userId: userId,
+            };
+            const updated = await this.service.changeStatus(dto);
+            successResponse(res, 200, "Call status updated successfully", updated);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    }
+
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.params;

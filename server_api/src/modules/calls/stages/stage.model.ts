@@ -55,6 +55,6 @@ const StageSchema = new Schema<IStage>({
 }, { timestamps: true });
 
 
-StageSchema.index({ cycle: 1, order: 1 }, { unique: true });
+StageSchema.index({ call: 1, order: 1 }, { unique: true });
 
 export const Stage = model<IStage>(COLLECTIONS.STAGE, StageSchema);

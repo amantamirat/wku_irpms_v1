@@ -1,8 +1,8 @@
 import { StageStatus } from "./stage.enum";
 
-export interface GetStagesDTO {
+export interface FilterStageDTO {
+    _id?:string;
     call?: string;
-    //type?: StageType;
     order?: number;
     status?: StageStatus;
 }

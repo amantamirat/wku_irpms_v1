@@ -1,40 +1,45 @@
 import { Router } from 'express';
 import { StageController } from './stage.controller';
-import { verifyActiveAccount, checkPermission } from '../../users/user.middleware';
 import { PERMISSIONS } from '../../../common/constants/permissions';
+import { verifyActiveAccount, checkPermission } from '../../users/user.middleware';
 
-const router: Router = Router();
+const controller = new StageController();
+const router = Router();
 
-// Create Stage
 router.post(
     '/',
     verifyActiveAccount,
-    //checkPermission([PERMISSIONS.CALL.CREATE]),
-    StageController.createStage
+    checkPermission([PERMISSIONS.STAGE.CREATE]),
+    controller.create
 );
 
-// Get all Stages (optionally by call)
+// Get cycles
 router.get(
     '/',
     verifyActiveAccount,
-    //checkPermission([PERMISSIONS.CALL.READ]),
-    StageController.getStages
+    checkPermission([PERMISSIONS.STAGE.READ]),
+    controller.get
 );
 
-// Update Stage
+// Update cycle
 router.put(
     '/:id',
     verifyActiveAccount,
-    //checkPermission([PERMISSIONS.CALL.UPDATE]),
-    StageController.updateStage
+    checkPermission([PERMISSIONS.STAGE.UPDATE]),
+    controller.update
 );
 
-// Delete Stage
+//change status
+router.put('/:id/status', verifyActiveAccount,
+   checkPermission([PERMISSIONS.STAGE.CHANGE_STATUS]),
+    controller.changeStatus);
+
+// Delete cycle
 router.delete(
     '/:id',
     verifyActiveAccount,
-    //checkPermission([PERMISSIONS.CALL.DELETE]),
-    StageController.deleteStage
+    checkPermission([PERMISSIONS.STAGE.DELETE]),
+    controller.delete
 );
 
 export default router;

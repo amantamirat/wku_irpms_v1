@@ -3,8 +3,6 @@ import { Call, GetCallsOptions, sanitizeCall } from "../models/call.model";
 
 const ENDPOINT = "/calls";
 
-
-
 export const CallApi = {
   // ---------------------------
   // Create
@@ -31,13 +29,15 @@ export const CallApi = {
   // ---------------------------
   // Update
   // ---------------------------
-  async update(call: Partial<Call>): Promise<Call> {
+  async update(call: Partial<Call>, changeStatus = false): Promise<Call> {
     if (!call._id) throw new Error("_id required.");
     const sanitized = sanitizeCall(call);
-    const updated = await ApiClient.put(`${ENDPOINT}/${call._id}`, sanitized);
+    const url = changeStatus
+      ? `${ENDPOINT}/${call._id}/status`
+      : `${ENDPOINT}${call._id}`;
+    const updated = await ApiClient.put(url, sanitized);
     return updated as Call;
   },
-
   // ---------------------------
   // Delete
   // ---------------------------

@@ -4,13 +4,15 @@ import { CrudManager } from "@/components/CrudManager";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useCrudList } from "@/hooks/useCrudList";
 import { useEffect, useState } from "react";
-import { Call, CycleStatus } from "../models/call.model";
+import { Call, CallStatus } from "../models/call.model";
 import { CallApi } from "../api/call.api";
 import SaveCall from "./SaveCall";
 import StageManager from "../stages/components/StageManager";
 import { useAuth } from "@/contexts/auth-context";
 import { PERMISSIONS } from "@/types/permissions";
 import CallTabs from "./CallTabs";
+import MyBadge from "@/templates/MyBadge";
+import { Button } from "primereact/button";
 
 
 
@@ -22,7 +24,7 @@ const CallManager = () => {
         title: "",
         grant: "",
         thematic: "",
-        status: CycleStatus.planned
+        status: CallStatus.planned
     };
 
     const { hasPermission } = useAuth();
@@ -31,6 +33,7 @@ const CallManager = () => {
     const canCreate = hasPermission([PERMISSIONS.CALL.CREATE]);
     const canEdit = hasPermission([PERMISSIONS.CALL.UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.CALL.DELETE]);
+    const canChangeStatus = hasPermission([PERMISSIONS.CALL.CHANGE_STATUS]);
 
     /** CRUD Hook */
     const {
@@ -69,6 +72,67 @@ const CallManager = () => {
         hideDialogs();
     };
 
+    const updateStatus = async (row: Call, next: CallStatus) => {
+        const updated = await CallApi.update({ _id: row._id, status: next }, true);
+        onSaveComplete({
+            ...updated,
+            calendar: row.calendar,
+            directorate: row.directorate,
+            thematic: row.thematic,
+            grant: row.grant
+        });
+    };
+
+
+    const stateTransitionTemplate = (rowData: Call) => {
+        const state = rowData.status;
+        return (<div className="flex gap-2">
+            {(state === CallStatus.planned || state === CallStatus.closed) &&
+                <Button
+                    label="Activate"
+                    icon="pi pi-check"
+                    severity="success"
+                    size="small"
+                    onClick={() => {
+                        confirm.ask({
+                            operation: 'activate',
+                            onConfirmAsync: () => updateStatus(rowData, CallStatus.active)
+                        });
+                    }}
+                />}
+
+            {(state === CallStatus.active) &&
+                <>
+                    <Button
+                        label="Close"
+                        icon="pi pi-lock"
+                        severity="danger"
+                        size="small"
+                        onClick={() => {
+                            confirm.ask({
+                                operation: 'close',
+                                onConfirmAsync: () => updateStatus(rowData, CallStatus.closed)
+                            });
+                        }}
+                    />
+                    <Button
+                        label="Plan"
+                        icon="pi pi-arrow-left"
+                        severity="warning"
+                        size="small"
+                        onClick={() => {
+                            confirm.ask({
+                                operation: 'change to plan',
+                                onConfirmAsync: () => updateStatus(rowData, CallStatus.planned)
+                            });
+                        }}
+                    />
+                </>
+
+            }
+        </div>);
+    }
+
     /** Delete */
     const deleteCall = async (row: Call) => {
         const ok = await CallApi.delete(row);
@@ -86,7 +150,13 @@ const CallManager = () => {
         { header: "Directorate", field: "directorate.name" },
         { header: "Title", field: "title" },
         { header: "Grant", field: "grant.title" },
-        { header: "Theme", field: "thematic.title" }
+        { header: "Theme", field: "thematic.title" },
+        {
+            header: "Status",
+            body: (row: Call) => <MyBadge type="status" value={row.status ?? "Unknown"} />,
+            sortable: true
+        },
+        canChangeStatus && { body: stateTransitionTemplate }
     ];
 
     return (

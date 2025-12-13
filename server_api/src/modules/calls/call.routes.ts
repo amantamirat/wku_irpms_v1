@@ -29,6 +29,11 @@ router.put(
     controller.update
 );
 
+//change status
+router.put('/:id/status', verifyActiveAccount,
+   checkPermission([PERMISSIONS.CALL.CHANGE_STATUS]),
+    controller.changeStatus);
+
 // Delete cycle
 router.delete(
     '/:id',

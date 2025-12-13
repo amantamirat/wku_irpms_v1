@@ -64,8 +64,8 @@ const SaveStage = ({ visible, stage, call, onComplete, onHide }: SaveStageProps)
             if (!validation.valid) throw new Error(validation.message);
 
             let saved = localStage._id
-                ? await StageApi.updateStage(localStage)
-                : await StageApi.createStage(localStage);
+                ? await StageApi.update(localStage)
+                : await StageApi.create(localStage);
 
             saved = {
                 ...saved,

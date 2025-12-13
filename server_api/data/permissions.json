@@ -310,6 +310,36 @@
     "description": "Delete call entries"
   },
   {
+    "category": "Call Management",
+    "name": "call:change_status",
+    "description": "Edit call status like activate, plan"
+  },
+  {
+    "category": "Stage Management",
+    "name": "stage:create",
+    "description": "Create stage entries"
+  },
+  {
+    "category": "Stage Management",
+    "name": "stage:read",
+    "description": "Read stage entries"
+  },
+  {
+    "category": "Stage Management",
+    "name": "stage:update",
+    "description": "Update stage entries"
+  },
+  {
+    "category": "Stage Management",
+    "name": "stage:delete",
+    "description": "Delete stage entries"
+  },
+  {
+    "category": "Stage Management",
+    "name": "stage:change_status",
+    "description": "Edit stage status like activate, plan"
+  },
+  {
     "category": "Evaluation Management",
     "name": "evaluation:create",
     "description": "Create evaluation entries"

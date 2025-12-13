@@ -3,7 +3,7 @@ import { Card } from 'primereact/card';
 import { Skeleton } from 'primereact/skeleton';
 import CallCard from './CallCard';
 import ErrorCard from '@/components/ErrorCard';
-import { Call, CycleStatus } from '../calls/models/call.model';
+import { Call, CallStatus } from '../calls/models/call.model';
 import { CallApi } from '../calls/api/call.api';
 
 const CallGrid = () => {
@@ -15,7 +15,7 @@ const CallGrid = () => {
         const fetchCalls = async () => {
             try {
                 setLoading(true);
-                const data = await CallApi.getCalls({ type: "Call", status: CycleStatus.active });
+                const data = await CallApi.getCalls({ type: "Call", status: CallStatus.active });
                 setCycles(data);
             } catch {
                 setError('Failed to load calls. Please try again later.');

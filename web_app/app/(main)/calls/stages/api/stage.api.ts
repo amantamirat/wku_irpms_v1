@@ -3,10 +3,9 @@ import { GetStagesDTO, Stage, sanitizeStage } from "../models/stage.model";
 
 const end_point = "/call/stages";
 
-
-
 export const StageApi = {
-    async createStage(stage: Partial<Stage>): Promise<Stage> {
+    
+    async create(stage: Partial<Stage>): Promise<Stage> {
         const sanitized = sanitizeStage(stage);
         const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as Stage;
@@ -20,17 +19,19 @@ export const StageApi = {
         return data as Stage[];
     },
 
-    async updateStage(stage: Partial<Stage>): Promise<Stage> {
+    async update(stage: Partial<Stage>, changeStatus = false): Promise<Stage> {
         if (!stage._id) {
             throw new Error("_id required.");
         }
-        const url = `${end_point}/${stage._id}`;
+        const url = changeStatus
+            ? `${end_point}/${stage._id}/status`
+            : `${end_point}${stage._id}`;
         const sanitized = sanitizeStage(stage);
         const updatedStage = await ApiClient.put(url, sanitized);
         return updatedStage as Stage;
     },
 
-    async deleteStage(stage: Partial<Stage>): Promise<boolean> {
+    async delete(stage: Partial<Stage>): Promise<boolean> {
         if (!stage._id) {
             throw new Error("_id required.");
         }

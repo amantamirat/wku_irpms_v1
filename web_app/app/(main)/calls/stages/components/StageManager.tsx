@@ -10,13 +10,15 @@ import { Call } from "../../models/call.model";
 import { StageApi } from "../api/stage.api";
 import { Stage, StageStatus } from "../models/stage.model";
 import SaveStage from "./SaveStage";
+import { useAuth } from "@/contexts/auth-context";
+import { PERMISSIONS } from "@/types/permissions";
+import { Button } from "primereact/button";
 
 interface StageManagerProps {
     call: Call;
 }
 
 const StageManager = ({ call }: StageManagerProps) => {
-    const confirm = useConfirmDialog();
 
     const emptyStage: Stage = {
         call: call,
@@ -25,9 +27,13 @@ const StageManager = ({ call }: StageManagerProps) => {
         status: StageStatus.planned
     };
 
-    const canCreate = true;// hasPermission([PERMISSIONS.STAGE.CREATE]);
-    const canEdit = true; //hasPermission([PERMISSIONS.STAGE.UPDATE]);
-    const canDelete = true;//hasPermission([PERMISSIONS.STAGE.DELETE])
+    const { hasPermission } = useAuth();
+    const confirm = useConfirmDialog();
+
+    const canCreate = hasPermission([PERMISSIONS.STAGE.CREATE]);
+    const canEdit = hasPermission([PERMISSIONS.STAGE.UPDATE]);
+    const canDelete = hasPermission([PERMISSIONS.STAGE.DELETE]);
+    const canChangeStatus = hasPermission([PERMISSIONS.STAGE.CHANGE_STATUS]);
 
     // CRUD Hook
     const {
@@ -68,9 +74,68 @@ const StageManager = ({ call }: StageManagerProps) => {
         hideSaveDialog();
     };
 
+
+    const updateStatus = async (row: Stage, next: StageStatus) => {
+        const updated = await StageApi.update({ _id: row._id, status: next }, true);
+        onSaveComplete({
+            ...updated,
+            evaluation: row.evaluation
+        });
+    };
+
+
+    const stateTransitionTemplate = (rowData: Stage) => {
+        const state = rowData.status;
+        return (<div className="flex gap-2">
+            {(state === StageStatus.planned || state === StageStatus.closed) &&
+                <Button
+                    label="Activate"
+                    icon="pi pi-check"
+                    severity="success"
+                    size="small"
+                    onClick={() => {
+                        confirm.ask({
+                            operation: 'activate',
+                            onConfirmAsync: () => updateStatus(rowData, StageStatus.active)
+                        });
+                    }}
+                />}
+
+            {(state === StageStatus.active) &&
+                <>
+                    <Button
+                        label="Close"
+                        icon="pi pi-lock"
+                        severity="danger"
+                        size="small"
+                        onClick={() => {
+                            confirm.ask({
+                                operation: 'close',
+                                onConfirmAsync: () => updateStatus(rowData, StageStatus.closed)
+                            });
+                        }}
+                    />
+                    <Button
+                        label="Plan"
+                        icon="pi pi-arrow-left"
+                        severity="warning"
+                        size="small"
+                        onClick={() => {
+                            confirm.ask({
+                                operation: 'change to plan',
+                                onConfirmAsync: () => updateStatus(rowData, StageStatus.planned)
+                            });
+                        }}
+                    />
+                </>
+
+            }
+        </div>);
+    }
+
     // Delete
     const deleteStage = async (row: Stage) => {
-        const deleted = await StageApi.deleteStage(row);
+        const deleted = await StageApi.delete(row);
         if (deleted) {
             removeItem(row);
         }
@@ -83,7 +148,7 @@ const StageManager = ({ call }: StageManagerProps) => {
 
     // Table columns
     const columns = [
-        { header: "Order", field: "order", sortable: true },
+        //{ header: "Order", field: "order", sortable: true },
         { header: "Name", field: "name", sortable: true },
         { header: "Evaluation", field: "evaluation.title", sortable: true },
         {
@@ -96,7 +161,8 @@ const StageManager = ({ call }: StageManagerProps) => {
             header: "Status",
             body: (row: Stage) => <MyBadge type="status" value={row.status ?? "Unknown"} />,
             sortable: true
-        }
+        },
+        canChangeStatus && { body: stateTransitionTemplate }
     ];
 
     return (

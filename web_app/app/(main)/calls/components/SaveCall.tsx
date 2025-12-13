@@ -16,7 +16,7 @@ import { Organization, OrgnUnit } from '../../organizations/models/organization.
 import { ThemeApi } from '../../thematics/themes/api/theme.api';
 import { Theme } from '../../thematics/themes/models/theme.model';
 import { CallApi } from '../api/call.api';
-import { Call, CycleStatus, validateCall } from '../models/call.model';
+import { Call, CallStatus, validateCall } from '../models/call.model';
 import { ThematicApi } from '../../thematics/api/thematic.api';
 
 interface SaveCallProps {

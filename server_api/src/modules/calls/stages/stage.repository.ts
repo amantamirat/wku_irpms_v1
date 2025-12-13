@@ -1,12 +1,11 @@
 import mongoose from "mongoose";
-import { CreateStageDTO, GetStagesDTO, UpdateStageDTO } from "./stage.dto";
+import { CreateStageDTO, FilterStageDTO, UpdateStageDTO } from "./stage.dto";
 import { IStage, Stage } from "./stage.model";
 
 export interface IStageRepository {
-    findById(id: string): Promise<IStage | null>;
-    findLastStageByCycle(options: GetStagesDTO): Promise<IStage | null>;
-    findByOrderAndCycle(options: GetStagesDTO): Promise<IStage | null>;
-    find(filters: GetStagesDTO): Promise<Partial<IStage>[]>;
+    findOne(filters: FilterStageDTO): Promise<IStage | null>;
+    find(filters: FilterStageDTO, populate?: boolean): Promise<Partial<IStage>[]>;
+    findLastOrderByCall(callId: string): Promise<number>;
     create(dto: CreateStageDTO): Promise<IStage>;
     update(id: string, data: UpdateStageDTO["data"]): Promise<IStage>;
     delete(id: string): Promise<IStage | null>;
@@ -15,40 +14,43 @@ export interface IStageRepository {
 
 export class StageRepository implements IStageRepository {
 
-    async findById(id: string) {
-        return Stage.findById(new mongoose.Types.ObjectId(id))
-            .lean<IStage>()
-            .exec();
-    }
-
-    async findLastStageByCycle(options: GetStagesDTO): Promise<IStage | null> {
+    async findOne(options: FilterStageDTO) {
         const query: any = {};
-        if (options.call) {
-            query.call = new mongoose.Types.ObjectId(options.call);
+        if (options._id) {
+            query._id = new mongoose.Types.ObjectId(options._id);
         }
-        return Stage.findOne(query)
-            .sort({ order: -1 }).lean<IStage>();
-    }
-
-    findByOrderAndCycle(options: GetStagesDTO): Promise<IStage | null> {
-        const query: any = {};
         if (options.call) {
             query.call = new mongoose.Types.ObjectId(options.call);
         }
         if (options.order) {
             query.order = options.order;
-        }
+        }        
         return Stage.findOne(query).lean<IStage>();
     }
 
-    async find(filters: GetStagesDTO) {
+    async findLastOrderByCall(callId: string): Promise<number> {
+        const stage = await Stage
+            .findOne({ call: callId })
+            .sort({ order: -1 })
+            .select('order')
+            .lean();
+
+        return stage?.order ?? 0;
+    }
+
+    async find(filters: FilterStageDTO, populate: boolean = true) {
         const query: any = {};
         if (filters.call) {
-            query.cycle = new mongoose.Types.ObjectId(filters.call);
+            query.call = new mongoose.Types.ObjectId(filters.call);
         }
 
         if (filters.status) {
             query.status = filters.status;
+        }
+        if (populate === false) {
+            return Stage.find(query)
+                .lean<IStage[]>()
+                .exec();
         }
         return Stage.find(query)
             .populate("call")
@@ -58,27 +60,23 @@ export class StageRepository implements IStageRepository {
     }
 
     async create(dto: CreateStageDTO) {
-        return Stage.create({...dto, call: new mongoose.Types.ObjectId(dto.call),
+        return Stage.create({
+            ...dto, call: new mongoose.Types.ObjectId(dto.call),
             evaluation: new mongoose.Types.ObjectId(dto.evaluation)
         });
     }
 
     async update(id: string, dtoData: UpdateStageDTO["data"]): Promise<IStage> {
         const updateData: Partial<IStage> = {};
-
         if (dtoData.name !== undefined) {
             updateData.name = dtoData.name;
         }
-
-
         if (dtoData.deadline !== undefined) {
             updateData.deadline = dtoData.deadline;
         }
-
         if (dtoData.evaluation !== undefined) {
             updateData.evaluation = new mongoose.Types.ObjectId(dtoData.evaluation);
         }
-
         if (dtoData.status !== undefined) {
             updateData.status = dtoData.status;
         }
