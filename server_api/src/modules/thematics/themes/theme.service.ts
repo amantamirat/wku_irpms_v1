@@ -16,21 +16,22 @@ export class ThemeService {
 
     async create(dto: CreateThemeDTO) {
         const { thematicArea, parent } = dto;
-
         // Validate thematicArea
         const thematicDoc = await this.thematicRepo.findById(thematicArea);
         if (!thematicDoc) {
             throw new Error("Thematic Area Not Found!");
         }
-
         // If parent exists, validate it
         if (parent) {
             const parentDoc = await this.repository.findById(parent);
             if (!parentDoc) {
                 throw new Error("Parent Theme Not Found!");
             }
+            if(String(parentDoc.thematicArea)!==thematicArea){
+                throw new Error("Invalid data (thematic and parent) mismatch");
+            }
+            //level on this is not validated.
         }
-
         return await this.repository.create(dto);
     }
 

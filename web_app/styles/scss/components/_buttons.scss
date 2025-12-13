@@ -1,10 +1,19 @@
+.theme-type-badge {
+    border-radius: var(--border-radius);
+    padding: .25em .5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .3px;
+}
+
 .theme-type-button {
     &.theme {
         background: #FFE0B2; 
         color: #EF6C00;
     }
 
-    &.componenet {
+    &.component {
         background: #BBDEFB; 
         color: #1565C0;
     }

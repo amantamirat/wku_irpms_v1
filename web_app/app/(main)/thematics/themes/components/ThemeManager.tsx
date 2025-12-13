@@ -6,7 +6,7 @@ import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useCrudList } from "@/hooks/useCrudList";
 import { PERMISSIONS } from "@/types/permissions";
 import { useEffect, useState } from "react";
-import { Thematic } from "../../models/thematic.model";
+import { Thematic, themeLevelNumber } from "../../models/thematic.model";
 import { ThemeApi } from "../api/theme.api";
 import { Theme } from "../models/theme.model";
 import SaveDialog from "./SaveDialog";
@@ -14,15 +14,16 @@ import SaveDialog from "./SaveDialog";
 interface ThemeManagerProps {
     thematicArea: Thematic;
     parent?: Theme;
+    level?: number;
 }
 
-
-const ThemeManager = ({ thematicArea, parent }: ThemeManagerProps) => {
+const ThemeManager = ({ thematicArea, parent, level = 0 }: ThemeManagerProps) => {
 
     const emptyTheme: Theme = {
         title: '',
         thematicArea: thematicArea,
-        parent: parent
+        parent: parent,
+        //level: 1
     };
 
     const { hasPermission } = useAuth();
@@ -46,6 +47,8 @@ const ThemeManager = ({ thematicArea, parent }: ThemeManagerProps) => {
 
     const [theme, setTheme] = useState<Theme>(emptyTheme);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
+
+    const themeLevel = themeLevelNumber[thematicArea.level];
 
     /** Fetch themes */
     useEffect(() => {
@@ -86,11 +89,22 @@ const ThemeManager = ({ thematicArea, parent }: ThemeManagerProps) => {
         { field: "priority", header: "Priority", sortable: true },
     ];
 
+    const rowExpansionTemplate =
+        themeLevel > level
+            ? (row: any) => (
+                <ThemeManager
+                    thematicArea={thematicArea}
+                    parent={row}
+                    level={level + 1}
+                />
+            )
+            : undefined;
+
     return (
         <>
             <CrudManager
                 headerTitle="Manage Themes"
-                itemName="Theme"
+                //itemName={`Theme ${level}`}
                 items={themes}
                 dataKey="_id"
                 columns={columns}
@@ -113,10 +127,12 @@ const ThemeManager = ({ thematicArea, parent }: ThemeManagerProps) => {
 
                 onDelete={(row) =>
                     confirm.ask({
-                        item: String(row.title),
+                        item: row.title,
                         onConfirmAsync: () => deleteTheme(row)
                     })
                 }
+
+                rowExpansionTemplate={rowExpansionTemplate}
 
                 enableSearch
             />

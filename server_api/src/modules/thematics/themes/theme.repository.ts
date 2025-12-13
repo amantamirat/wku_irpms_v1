@@ -39,16 +39,13 @@ export class ThemeRepository implements IThemeRepository {
     }
 
     async create(dto: CreateThemeDTO) {
-        const data: Partial<ITheme> = {
-            title: dto.title,
-            priority: dto.priority,
+        const data: any = {
+            ...dto,
             thematicArea: new mongoose.Types.ObjectId(dto.thematicArea),
         };
-
         if (dto.parent) {
             data.parent = new mongoose.Types.ObjectId(dto.parent);
         }
-
         return Theme.create(data);
     }
 

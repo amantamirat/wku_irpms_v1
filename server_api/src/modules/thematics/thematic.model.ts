@@ -1,13 +1,13 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
 import { Directorate } from "../organization/organization.model";
-import { ThemeLeaf } from "./thematic.enum";
+import { ThemeType, ThemeLevel } from "./thematic.enum";
 
 export interface IThematic extends Document {
     directorate: mongoose.Types.ObjectId;
     title: string;
-    node: mongoose.Types.ObjectId;
-    level: ThemeLeaf;
+    type: ThemeType;
+    level: ThemeLevel;
     description?: string;
     createdAt?: Date;
     updatedAt?: Date;
@@ -24,9 +24,15 @@ const ThematicSchema = new Schema<IThematic>({
         type: String,
         required: true
     },
+    type: {
+        type: String,
+        enum: Object.values(ThemeType),
+        required: true,
+        immutable: true
+    },
     level: {
         type: String,
-        enum: Object.values(ThemeLeaf),
+        enum: Object.values(ThemeLevel),
         required: true,
         immutable: true
     },

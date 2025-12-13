@@ -1,8 +1,9 @@
 export interface CreateThemeDTO {
+    thematicArea: string;
+    parent?: string;
     title: string;
     priority?: number;
-    parent?: string;
-    thematicArea: string;
+    level: number;
 }
 
 export interface UpdateThemeDTO {

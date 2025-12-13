@@ -1,11 +1,24 @@
 import { Organization } from "../../organizations/models/organization.model";
 
+export enum ThemeType {
+    theme = 'Theme',
+    component = 'Component'
+}
 
 export enum ThemeLevel {
     broad = 'Broad',
-    componenet = 'Componenet',
-    narrow = 'Narrow'
+    divison = 'Division',
+    narrow = 'Narrow',//focus-area
+    deep = 'Deep',//priority-area
+    //crossCutting="Cross Cutting"
 }
+
+export const themeLevelNumber: Record<ThemeLevel, number> = {
+    [ThemeLevel.broad]: 0,
+    [ThemeLevel.divison]: 1,
+    [ThemeLevel.narrow]: 2,
+    [ThemeLevel.deep]: 3,
+};
 
 
 
@@ -13,7 +26,8 @@ export type Thematic = {
     _id?: string;
     directorate?: string | Organization;
     title: string;
-    level?: ThemeLevel;
+    type?: ThemeType;
+    level: ThemeLevel;
     description?: string;
     createdAt?: Date;
     updatedAt?: Date;
@@ -25,6 +39,9 @@ export interface GetThematicsOptions {
 export const validateThematic = (thmc: Thematic): { valid: boolean; message?: string } => {
     if (!thmc.title || thmc.title.trim().length === 0) {
         return { valid: false, message: 'Title is required.' };
+    }
+    if (!thmc.type) {
+        return { valid: false, message: 'Type is required.' };
     }
     if (!thmc.level) {
         return { valid: false, message: 'Level is required.' };

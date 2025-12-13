@@ -1,0 +1,18 @@
+.my-badge {
+    border-radius: var(--border-radius);
+    padding: .25em .5rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .3px;
+}
+
+.my-badge.theme {
+    background: #FCE4EC;
+    color: #880E4F;
+}
+
+.my-badge.component {
+    background: #880E4F;
+    color: #FCE4EC;
+}

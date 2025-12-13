@@ -6,6 +6,7 @@ import { InputText } from "primereact/inputtext";
 import React, { useState } from "react";
 import ListSkeleton from "./ListSkeleton";
 import ErrorCard from "./ErrorCard";
+import { BreadCrumb } from "primereact/breadcrumb";
 
 interface CrudManagerProps<T> {
     itemName?: string;
@@ -62,6 +63,13 @@ export function CrudManager<T extends { _id?: string }>({
         setGlobalFilter(value);
         setFilters({ ...filters, global: { value, matchMode: 'contains' } });
     };
+
+    const home = { icon: 'pi pi-home', url: '/' }
+    const renderBreadcrumb = () => {
+        return (
+            <BreadCrumb home={home} />
+        );
+    }
 
     const renderToolbar = () => {
         if ((!canCreate || !onCreate) && !toolbarEnd) return null;
@@ -128,37 +136,42 @@ export function CrudManager<T extends { _id?: string }>({
     if (error) return <ErrorCard errorMessage={error} />;
 
     return (
-        <div className="card">
-            {renderToolbar()}
-            <DataTable
-                value={items}
-                dataKey={dataKey}
-                paginator
-                rows={10}
-                rowsPerPageOptions={[5, 10, 25]}
-                scrollable
-                emptyMessage="No data found."
-                expandedRows={rowExpansionTemplate ? expandedRows : undefined}
-                onRowToggle={(e) => setExpandedRows(e.data)}
-                rowExpansionTemplate={rowExpansionTemplate}
-                filters={filters}
-                globalFilter={globalFilter}
-                header={header}
-            >
-                {rowExpansionTemplate && <Column expander style={{ width: "3rem" }} />}
+        <>
+            {
+                //renderBreadcrumb()
+            }
+            <div className="card">
+                {renderToolbar()}
+                <DataTable
+                    value={items}
+                    dataKey={dataKey}
+                    paginator
+                    rows={10}
+                    rowsPerPageOptions={[5, 10, 25]}
+                    scrollable
+                    emptyMessage="No data found."
+                    expandedRows={rowExpansionTemplate ? expandedRows : undefined}
+                    onRowToggle={(e) => setExpandedRows(e.data)}
+                    rowExpansionTemplate={rowExpansionTemplate}
+                    filters={filters}
+                    globalFilter={globalFilter}
+                    header={header}
+                >
+                    {rowExpansionTemplate && <Column expander style={{ width: "3rem" }} />}
 
-                <Column
-                    header="#"
-                    body={(row, options) => options.rowIndex + 1}
-                    style={{ width: "4rem" }}
-                />
+                    <Column
+                        header="#"
+                        body={(row, options) => options.rowIndex + 1}
+                        style={{ width: "4rem" }}
+                    />
 
-                {columns.map((col, idx) => (
-                    <Column key={idx} {...col} />
-                ))}
+                    {columns.map((col, idx) => (
+                        <Column key={idx} {...col} />
+                    ))}
 
-                {(canEdit || canDelete) && <Column body={actionBody} />}
-            </DataTable>
-        </div>
+                    {(canEdit || canDelete) && <Column body={actionBody} />}
+                </DataTable>
+            </div>
+        </>
     );
 }

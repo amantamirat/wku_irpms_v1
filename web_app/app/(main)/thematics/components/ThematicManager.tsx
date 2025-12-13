@@ -8,8 +8,8 @@ import { PERMISSIONS } from "@/types/permissions";
 import { useEffect, useState } from "react";
 import { Organization } from "../../organizations/models/organization.model";
 import { ThematicApi } from "../api/thematic.api";
-import { Thematic } from "../models/thematic.model";
-import ThemeManager from "../themes/components/ThematicManager";
+import { Thematic, ThemeLevel } from "../models/thematic.model";
+import ThemeManager from "../themes/components/ThemeManager";
 import SaveDialog from "./SaveDialog";
 
 interface ThematicManagerProps {
@@ -21,7 +21,8 @@ const ThematicManager = ({ directorate }: ThematicManagerProps) => {
 
     const emptyThematic: Thematic = {
         directorate: directorate ?? '',
-        title: ''
+        title: '',
+        level:ThemeLevel.broad
     };
 
     const { hasPermission } = useAuth();
@@ -83,7 +84,14 @@ const ThematicManager = ({ directorate }: ThematicManagerProps) => {
     const columns = [
         { field: "directorate.name", header: "Directorate", sortable: true },
         { field: "title", header: "Title", sortable: true },
-        { field: "description", header: "Description", sortable: true },
+        {
+            field: "type", header: "Type", sortable: true,
+            body: (r: Thematic) => (
+                <span className={`my-badge ${r.type?.toLowerCase()}`}>
+                    {r.type}
+                </span>
+            )
+        },
         {
             header: "Level",
             field: "level",
@@ -93,7 +101,8 @@ const ThematicManager = ({ directorate }: ThematicManagerProps) => {
                     {r.level}
                 </span>
             )
-        }
+        },
+        { field: "description", header: "Description" },
     ];
 
     return (
@@ -128,7 +137,7 @@ const ThematicManager = ({ directorate }: ThematicManagerProps) => {
                     })
                 }
 
-                rowExpansionTemplate={(row) => <ThemeManager thematicArea={row as Thematic} />}
+                rowExpansionTemplate={(row) => <ThemeManager thematicArea={row as Thematic}  />}
                 enableSearch
             />
 

@@ -10,7 +10,7 @@ import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 import { Organization, OrgnUnit } from '../../organizations/models/organization.model';
 import { ThematicApi } from '../api/thematic.api';
-import { Thematic, ThemeLevel, validateThematic } from '../models/thematic.model';
+import { Thematic, ThemeLevel, ThemeType, validateThematic } from '../models/thematic.model';
 
 
 interface SaveDialogProps {
@@ -138,6 +138,23 @@ const SaveDialog = ({ visible, thematic, onComplete, onHide }: SaveDialogProps) 
                 </div>
 
                 <div className="field">
+                    <label htmlFor="type">Type</label>
+                    <Dropdown
+                        id="type"
+                        value={localThematic.type}
+                        options={Object.values(ThemeType).map((g) => ({
+                            label: g,
+                            value: g,
+                        }))}
+                        onChange={(e) => setLocalThematic({ ...localThematic, type: e.value })}
+                        placeholder="Select Type"
+                        className={classNames({
+                            'p-invalid': submitted && !localThematic.type,
+                        })}
+                    />
+                </div>
+
+                <div className="field">
                     <label htmlFor="level">Level</label>
                     <Dropdown
                         id="level"
@@ -147,7 +164,7 @@ const SaveDialog = ({ visible, thematic, onComplete, onHide }: SaveDialogProps) 
                             value: g,
                         }))}
                         onChange={(e) => setLocalThematic({ ...localThematic, level: e.value })}
-                        placeholder="Select Level"
+                        placeholder="Select Depth"
                         className={classNames({
                             'p-invalid': submitted && !localThematic.level,
                         })}

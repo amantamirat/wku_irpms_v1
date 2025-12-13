@@ -37,20 +37,17 @@ export class ThematicRepository implements IThematicRepository {
     }
 
     async create(dto: CreateThematicDTO) {
-        const data: Partial<IThematic> = {
-            directorate: new mongoose.Types.ObjectId(dto.directorate),
-            title: dto.title,
-            level:dto.level,
-            description: dto.description,
-        };
-        return Thematic.create(data);
+        return Thematic.create({
+            ...dto,
+            directorate: new mongoose.Types.ObjectId(dto.directorate)
+        });
     }
 
     async update(id: string, dtoData: UpdateThematicDTO["data"]): Promise<IThematic> {
         const updateData: Partial<IThematic> = {};
 
         if (dtoData.title) updateData.title = dtoData.title;
-        if (dtoData.description) updateData.description = dtoData.description;       
+        if (dtoData.description) updateData.description = dtoData.description;
 
         const updated = await Thematic.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
