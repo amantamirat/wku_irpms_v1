@@ -6,6 +6,7 @@ export enum COLLECTIONS {
   EXPERIENCE = "experiences",
   THEMATIC = "thematics",
   THEME = "themes",
+  THEME_NODE = "themenodes",
   EVALUATION = "evaluations",
   CRITERION = "criteria",
   OPTION = "options",

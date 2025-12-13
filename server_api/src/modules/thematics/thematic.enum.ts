@@ -1,5 +1,5 @@
-export enum ThemeLevel {
+export enum ThemeLeaf {
     broad = 'Broad',
     componenet = 'Componenet',
-    narrow = 'Narrow',
+    focusArea = 'Focus Area',
 }
