@@ -5,9 +5,9 @@ import Applicant from "../../../../applicants/applicant.model";
 import { Criterion } from "../../../../evaluations/criteria/criterion.model";
 import { Collaborator } from "../../../../projects/collaborators/collaborator.model";
 import { Stage } from "../../stage.model";
-import { ProjectStageStatus } from "../project-stage.enum";
-import { IProjectStageRepository, ProjectStageRepository } from "../project-stage.repository";
-import { ProjectStageSynchronizer } from "../project-stage.synchronizer";
+import { DocumentStatus } from "../document.enum";
+import { IDocumentRepository, DocumentRepository } from "../document.repository";
+import { ProjectStageSynchronizer } from "../document.synchronizer";
 import { IResultRepository, ResultRepository } from "./results/result.repository";
 import { CreateReviewerDTO, DeleteReviewerDTO, GetReviewersDTO, UpdateReviewerDTO } from "./reviewer.dto";
 import { ReviewerStatus } from "./reviewer.enum";
@@ -19,16 +19,16 @@ export class ReviewerService {
 
     private repository: IReviewerRepository;
     private resultRepo: IResultRepository;
-    private projectStageRepo: IProjectStageRepository;
+    private projectStageRepo: IDocumentRepository;
     private projectStageSynchronizer: ProjectStageSynchronizer;
     private permission: ReviewerPermission;
 
     constructor(repository?: IReviewerRepository, resultRepo?: IResultRepository,
-        projectStageRepo?: IProjectStageRepository, projectStageSynchronizer?: ProjectStageSynchronizer
+        projectStageRepo?: IDocumentRepository, projectStageSynchronizer?: ProjectStageSynchronizer
     ) {
         this.repository = repository || new ReviewerRepository();
         this.resultRepo = resultRepo || new ResultRepository();
-        this.projectStageRepo = projectStageRepo || new ProjectStageRepository();
+        this.projectStageRepo = projectStageRepo || new DocumentRepository();
         this.projectStageSynchronizer = projectStageSynchronizer ||
             new ProjectStageSynchronizer(this.projectStageRepo, this.repository);
         this.permission = new ReviewerPermission(this.repository);
@@ -46,7 +46,7 @@ export class ReviewerService {
         const projectStageDoc = await this.projectStageRepo.findById(projectStageId);
         if (!projectStageDoc) throw new Error("Project Stage not found");
 
-        if ([ProjectStageStatus.reviewed, ProjectStageStatus.accepted, ProjectStageStatus.rejected].includes(projectStageDoc.status)) {
+        if ([DocumentStatus.reviewed, DocumentStatus.accepted, DocumentStatus.rejected].includes(projectStageDoc.status)) {
             throw new Error(`This project stage is already ${projectStageDoc.status} and cannot create reviewers.`);
         }
 
@@ -93,7 +93,7 @@ export class ReviewerService {
         const current = reviewerDoc.status;
 
         // Cannot change status if stage is finalized
-        if ([ProjectStageStatus.accepted, ProjectStageStatus.rejected].includes(projectStageDoc.status)) {
+        if ([DocumentStatus.accepted, DocumentStatus.rejected].includes(projectStageDoc.status)) {
             throw new Error(`The project stage is already ${projectStageDoc.status} and cannot be modified.`);
         }
 
@@ -148,7 +148,7 @@ export class ReviewerService {
         if (!projectStageDoc) throw new Error("Project Stage not found");
 
         // Cannot update data if stage is finalized
-        if ([ProjectStageStatus.accepted, ProjectStageStatus.rejected].includes(projectStageDoc.status)) {
+        if ([DocumentStatus.accepted, DocumentStatus.rejected].includes(projectStageDoc.status)) {
             throw new Error(`The project stage is already ${projectStageDoc.status} and cannot be modified.`);
         }
 

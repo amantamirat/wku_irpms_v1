@@ -1,4 +1,4 @@
-import { IProjectStageRepository } from "../calls/stages/projects/project-stage.repository";
+import { IDocumentRepository } from "../calls/stages/documents/document.repository";
 import { ProjectStatus } from "./project.enum";
 import { IProject } from "./project.model";
 import { IProjectRepository } from "./project.repository";
@@ -6,8 +6,8 @@ import { ProjectStateMachine } from "./project.state-machine";
 
 export class ProjectSynchronizer {
     private repository: IProjectRepository;
-    private projectStageRepo: IProjectStageRepository;
-    constructor(repository: IProjectRepository, projectStageRepo: IProjectStageRepository) {
+    private projectStageRepo: IDocumentRepository;
+    constructor(repository: IProjectRepository, projectStageRepo: IDocumentRepository) {
         this.repository = repository;
         this.projectStageRepo = projectStageRepo;
     }
@@ -15,7 +15,7 @@ export class ProjectSynchronizer {
         const projectDoc = project ?? await this.repository.findById(projectId);
         if (!projectDoc || !projectDoc.status) return;
 
-        const projectStages = await this.projectStageRepo.find({ projectId });
+        const projectStages = await this.projectStageRepo.find({ project: projectId });
 
         const currentStatus = projectDoc.status;
         let newStatus: ProjectStatus;

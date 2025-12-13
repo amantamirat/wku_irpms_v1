@@ -1,5 +1,5 @@
 import express from "express";
-import { ProjectStageController } from "./project-stage.controller";
+import { ProjectStageController } from "./document.controller";
 import { upload } from "../../../../util/multer";
 import { verifyActiveAccount } from "../../../users/user.middleware";
 

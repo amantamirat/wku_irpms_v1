@@ -16,7 +16,7 @@ export interface IReviewer extends Document {
 const ReviewerSchema = new Schema<IReviewer>({
     projectStage: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.PROJECT_STAGE,
+        ref: COLLECTIONS.PROJECT_DOCUMENT,
         required: true,
         immutable: true,
     },

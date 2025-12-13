@@ -1,19 +1,19 @@
 //project-stage.ts
 import mongoose, { model, Schema } from "mongoose";
-import { ProjectStageStatus } from "./project-stage.enum";
+import { DocumentStatus } from "./document.enum";
 import { COLLECTIONS } from "../../../../common/constants/collections.enum";
 
-export interface IProjectStage extends Document {
+export interface IProjectDocument extends Document {
     stage: mongoose.Types.ObjectId;
     project: mongoose.Types.ObjectId;
-    status: ProjectStageStatus;
     documentPath: string;
     totalScore?: number;
+    status: DocumentStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
-const ProjectStageSchema = new Schema<IProjectStage>({
+const ProjecDocumentSchema = new Schema<IProjectDocument>({
     stage: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.STAGE,
@@ -36,11 +36,11 @@ const ProjectStageSchema = new Schema<IProjectStage>({
     },
     status: {
         type: String,
-        enum: Object.values(ProjectStageStatus),
-        default: ProjectStageStatus.pending,
+        enum: Object.values(DocumentStatus),
+        default: DocumentStatus.pending,
         required: true
     },
 }, { timestamps: true });
 
-ProjectStageSchema.index({ project: 1, stage: 1 }, { unique: true });
-export const ProjectStage = model<IProjectStage>(COLLECTIONS.PROJECT_STAGE, ProjectStageSchema);
+ProjecDocumentSchema.index({ project: 1, stage: 1 }, { unique: true });
+export const ProjectDocument = model<IProjectDocument>(COLLECTIONS.PROJECT_DOCUMENT, ProjecDocumentSchema);

@@ -1,25 +1,26 @@
-// project-stage.service.ts
-
+// project-document.service.ts
+import { DeleteDto } from "../../../../util/delete.dto";
 import { ConstraintValidator } from "../../../grants/constraints/constraint.validator";
 import { IProjectRepository, ProjectRepository } from "../../../projects/project.repository";
 import { ProjectSynchronizer } from "../../../projects/project.synchronizer";
+import { StageStatus } from "../stage.enum";
 import { IStageRepository, StageRepository } from "../stage.repository";
-import { CreateProjectStageDTO, DeleteProjectStageDTO, GetProjectStagesDTO, UpdateProjectStageDTO } from "./project-stage.dto";
-import { ProjectStageStatus } from "./project-stage.enum";
-import { IProjectStageRepository, ProjectStageRepository } from "./project-stage.repository";
-import { ProjectStageStateMachine } from "./project-stage.state-machine";
+import { CreateProjectDocumentDTO, GetProjectDocumentDTO, UpdateProjectDocumentDTO } from "./document.dto";
+import { DocumentStatus } from "./document.enum";
+import { IDocumentRepository, DocumentRepository } from "./document.repository";
+import { DocumnetStateMachine } from "./document.state-machine";
 
-export class ProjectStageService {
-    private repository: IProjectStageRepository;
+export class DocumentService {
+    private repository: IDocumentRepository;
     private projectRepository: IProjectRepository;
     private stageRepository: IStageRepository;
     private projectSynchronizer: ProjectSynchronizer;
     private validator: ConstraintValidator;
 
-    constructor(repository?: IProjectStageRepository, projectRepository?: IProjectRepository,
+    constructor(repository?: IDocumentRepository, projectRepository?: IProjectRepository,
         stageRepository?: IStageRepository
     ) {
-        this.repository = repository || new ProjectStageRepository();
+        this.repository = repository || new DocumentRepository();
         this.projectRepository = projectRepository || new ProjectRepository();
         this.stageRepository = stageRepository || new StageRepository();
         this.projectSynchronizer = new ProjectSynchronizer(this.projectRepository, this.repository);
@@ -30,25 +31,24 @@ export class ProjectStageService {
     // VALIDATIONS
     // ------------------------------------
 
-    private async validateCreate(dto: CreateProjectStageDTO) {
+    private async validateCreate(dto: CreateProjectDocumentDTO) {
 
     }
 
-    async createProjectStage(dto: CreateProjectStageDTO) {
-        const { projectId, stageId, documentPath } = dto;
+    async create(dto: CreateProjectDocumentDTO) {
+        const { project: project, stage: stageId, documentPath } = dto;
         ////validate/////
-        const projectDoc = await this.projectRepository.findById(dto.projectId);
+        const projectDoc = await this.projectRepository.findById(dto.project);
         if (!projectDoc) throw new Error("Project not found");
-        const stage = await this.stageRepository.findOne({ _id: dto.stageId });
-        if (!stage) throw new Error("Stage not found");
-        if (stage.status !== "active") throw new Error("Stage is not active");
-        if (stage.deadline < new Date()) throw new Error("Stage deadline has passed");
+        const stageDoc = await this.stageRepository.findOne({ _id: dto.stage });
+        if (!stageDoc) throw new Error("Stage not found");
+        if (stageDoc.status !== StageStatus.active) throw new Error("Stage is not active");
+        if (stageDoc.deadline < new Date()) throw new Error("Stage deadline has passed");
         // Check previous stage
-        if (stage.order > 1) {
-
+        if (stageDoc.order > 1) {
             const prevStage = await this.stageRepository.findOne({
-                order: stage.order - 1,
-                call: stage.call.toString()
+                order: stageDoc.order - 1,
+                call: stageDoc.call.toString()
             });
 
 
@@ -70,10 +70,10 @@ export class ProjectStageService {
 
         try {
             ///grant validator////
-            await this.validator.validateProject(projectId, projectDoc);
+            await this.validator.validateProject(project, projectDoc);
             ///grant validator////
             const created = await this.repository.create(dto);
-            const syncedProject = await this.projectSynchronizer.syncProjectStatus(projectId, projectDoc);
+            const syncedProject = await this.projectSynchronizer.syncProjectStatus(project, projectDoc);
             return { created, syncedProject }
         } catch (e: any) {
             throw e;
@@ -81,11 +81,11 @@ export class ProjectStageService {
 
     }
 
-    async getProjectStages(options: GetProjectStagesDTO = {}) {
+    async get(options: GetProjectDocumentDTO = {}) {
         return await this.repository.find(options);
     }
 
-    async updateProjectStage(dto: UpdateProjectStageDTO) {
+    async update(dto: UpdateProjectDocumentDTO) {
         const { id, data } = dto;
         const newStatus = data.status;
         if (!newStatus) {
@@ -94,16 +94,16 @@ export class ProjectStageService {
         const projectStage = await this.repository.findById(id);
         if (!projectStage || !projectStage.status) throw new Error("Project stage not found");
         const currentStatus = projectStage.status;
-        ProjectStageStateMachine.validateTransition(currentStatus, newStatus);
+        DocumnetStateMachine.validateTransition(currentStatus, newStatus);
         return await this.repository.update(dto.id, dto.data);
     }
 
-    async deleteProjectStage(dto: DeleteProjectStageDTO) {
+    async delete(dto: DeleteDto) {
         const { id, userId } = dto;
         const projectStage = await this.repository.findById(id);
         if (!projectStage) throw new Error("Project stage not found");
         //const projectDoc = projectStage.project as IProject;
-        if (projectStage.status !== ProjectStageStatus.pending) {
+        if (projectStage.status !== DocumentStatus.pending) {
             throw new Error("Only project stages with 'pending' status can be deleted.");
         }
         const deleted = await this.repository.delete(id);

@@ -12,6 +12,7 @@ export enum COLLECTIONS {
   CALENDAR = "calendars",
   CALL = "calls",
   STAGE = "callstages",
+  PROJECT_DOCUMENT = "projectdocuments",
   GRANT = "grants",
   CONSTRAINT = "constraints",
   //PROJECT_CONSTRAINT = "projectconstraints",
@@ -24,7 +25,6 @@ export enum COLLECTIONS {
   PHASE = "phases",
   PROJECT_THEMEM = "prothemes",
   COLLABORATOR_ASSIGNMENT = "collaboratorassignments",
-  PROJECT_STAGE = "projectstages",
   REVIEWER = "reviewers",
   RESULT = "results",
 }

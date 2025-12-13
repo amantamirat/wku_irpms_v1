@@ -3,15 +3,15 @@ import fs from "fs";
 import { errorResponse, successResponse } from "../../../../common/helpers/response";
 
 import {
-    CreateProjectStageDTO,
-    DeleteProjectStageDTO,
-    GetProjectStagesDTO,
-    UpdateProjectStageDTO
-} from "./project-stage.dto";
+    CreateProjectDocumentDTO,
+    GetProjectDocumentDTO,
+    UpdateProjectDocumentDTO
+} from "./document.dto";
 import { AuthenticatedRequest } from "../../../users/user.middleware";
-import { ProjectStageService } from "./project-stage.service";
+import { DocumentService } from "./document.service";
+import { DeleteDto } from "../../../../util/delete.dto";
 
-const projectStageService = new ProjectStageService();
+const projectStageService = new DocumentService();
 
 export class ProjectStageController {
 
@@ -27,13 +27,13 @@ export class ProjectStageController {
             if (!project || !stage)
                 throw new Error("projectId and stageId are required");
 
-            const dto: CreateProjectStageDTO = {
-                projectId: project,
-                stageId: stage,
+            const dto: CreateProjectDocumentDTO = {
+                project: project,
+                stage: stage,
                 documentPath: `uploads/${req.file.filename}`
             };
 
-            const created = await projectStageService.createProjectStage(dto);
+            const created = await projectStageService.create(dto);
 
             successResponse(res, 201, "Project stage created successfully", created);
 
@@ -51,15 +51,15 @@ export class ProjectStageController {
         try {
             const { project, stage, status, skip, limit } = req.query;
 
-            const filter: GetProjectStagesDTO = {
-                projectId: project ? String(project) : undefined,
-                stageId: stage ? String(stage) : undefined,
+            const filter: GetProjectDocumentDTO = {
+                project: project ? String(project) : undefined,
+                stage: stage ? String(stage) : undefined,
                 status: status ? String(status) as any : undefined,
                 skip: skip ? Number(skip) : undefined,
                 limit: limit ? Number(limit) : undefined
             };
 
-            const createdDoc = await projectStageService.getProjectStages(filter);
+            const createdDoc = await projectStageService.get(filter);
             successResponse(res, 200, "Project stages fetched successfully", createdDoc);
 
         } catch (err: any) {
@@ -80,12 +80,12 @@ export class ProjectStageController {
                 throw new Error("Status Required");
             }
 
-            const dto: UpdateProjectStageDTO = {
+            const dto: UpdateProjectDocumentDTO = {
                 id,
                 data: status
             };
 
-            const updated = await projectStageService.updateProjectStage(dto);
+            const updated = await projectStageService.update(dto);
 
             successResponse(res, 200, "Project stage updated successfully", updated);
 
@@ -104,12 +104,12 @@ export class ProjectStageController {
 
             const { id } = req.params;
 
-            const dto: DeleteProjectStageDTO = {
+            const dto: DeleteDto = {
                 id,
                 userId: req.user._id
             };
 
-            const deletedDoc = await projectStageService.deleteProjectStage(dto);
+            const deletedDoc = await projectStageService.delete(dto);
             const { deleted } = deletedDoc;
             if (deleted?.documentPath) {
                 fs.unlink(deleted.documentPath, () => { });
