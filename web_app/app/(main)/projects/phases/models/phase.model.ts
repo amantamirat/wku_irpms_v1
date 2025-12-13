@@ -19,6 +19,11 @@ export type Phase = {
     order?: number;
 }
 
+export interface GetPhaseOptions {
+    project?: string | Project;
+    parent?: string | Phase;
+}
+
 export const validatePhase = (pt: Phase): { valid: boolean; message?: string } => {
     if (!pt.type) {
         return { valid: false, message: 'Type is required.' };

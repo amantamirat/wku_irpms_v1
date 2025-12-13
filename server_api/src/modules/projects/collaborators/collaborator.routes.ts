@@ -3,23 +3,23 @@ import { CollaboratorController } from './collaborator.controller';
 import { checkPermission, verifyActiveAccount } from '../../users/user.middleware';
 import { PERMISSIONS } from '../../../common/constants/permissions';
 
-
+const controller = new CollaboratorController();
 const router: Router = Router();
 
 router.post('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.COLLABORATOR.CREATE]),
-    CollaboratorController.createCollaborator);
+    controller.create);
 router.get('/', verifyActiveAccount, 
     checkPermission([PERMISSIONS.COLLABORATOR.READ]),
-    CollaboratorController.getCollaborators);
+    controller.get);
 router.put('/:id', verifyActiveAccount, 
     checkPermission([PERMISSIONS.COLLABORATOR.UPDATE]),
-    CollaboratorController.updateCollaborator);
+    controller.update);
 router.put('/:id/status', verifyActiveAccount,
    checkPermission([PERMISSIONS.COLLABORATOR.CHANGE_STATUS]),
-    CollaboratorController.changeCollaboratorStatus);
+    controller.changeStatus);
 router.delete('/:id', verifyActiveAccount, 
     checkPermission([PERMISSIONS.COLLABORATOR.DELETE]),
-    CollaboratorController.deleteCollaborator);
+    controller.delete);
 
 export default router;

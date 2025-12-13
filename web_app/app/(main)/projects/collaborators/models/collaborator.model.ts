@@ -16,6 +16,10 @@ export type Collaborator = {
     updatedAt?: Date;
 }
 
+export interface GetCollaboratorsOptions {
+    project?: string | Project;
+    applicant?: string | Applicant;
+}
 
 export const sanitizeCollaborator = (collaborator: Partial<Collaborator>): Collaborator => {
     return {
@@ -32,7 +36,3 @@ export const sanitizeCollaborator = (collaborator: Partial<Collaborator>): Colla
 }
 
 
-export interface GetCollaboratorsOptions {
-    project?: string | Project;
-    applicant?: string | Applicant;
-}

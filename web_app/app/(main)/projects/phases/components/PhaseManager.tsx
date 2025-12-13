@@ -42,9 +42,9 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
     // Permissions
     // -------------------------------
 
-    const canCreate = true;//        hasPermission([PERMISSIONS.PHASE.CREATE]) &&    
-    const canEdit = true; //hasPermission([PERMISSIONS.PHASE.UPDATE]) &&
-    const canDelete = true; //hasPermission([PERMISSIONS.PHASE.DELETE]) &&
+    const canCreate = !!project && hasPermission([PERMISSIONS.PHASE.CREATE]);
+    const canEdit = !!project && hasPermission([PERMISSIONS.PHASE.UPDATE]);
+    const canDelete = !!project && hasPermission([PERMISSIONS.PHASE.DELETE]);
 
     // -------------------------------
     // CRUD Hook
@@ -70,10 +70,9 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
         const fetchPhases = async () => {
             try {
                 setLoading(true);
-
                 // If project exists on DB, fetch from API
                 if (project._id) {
-                    const data = await PhaseApi.getPhases({ project: project._id });
+                    const data = await PhaseApi.getPhases({ project });
                     setAll(data);
                 } else {
                     // Use local phases
@@ -87,10 +86,7 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
         };
 
         fetchPhases();
-    }, [project?._id]);
-
-    if (loading) return <ListSkeleton rows={10} />;
-    if (error) return <ErrorCard errorMessage={error} />;
+    }, [project]);
 
     // -------------------------------
     // Save / Create
@@ -158,6 +154,8 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
                 items={phases}
                 dataKey={phases.some(p => p._id) ? "_id" : "order"}
                 columns={columns}
+                loading={loading}
+                error={error}
                 canCreate={canCreate}
                 canEdit={canEdit}
                 canDelete={canDelete}

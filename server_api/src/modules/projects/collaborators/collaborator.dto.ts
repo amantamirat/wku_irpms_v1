@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { CollaboratorStatus } from "./collaborator.enum";
 
 // Base fields for creating a collaborator
@@ -22,9 +21,7 @@ export interface UpdateCollaboratorDto {
 
 // Options for querying collaborators
 export interface GetCollaboratorsOptions {
-    //userId?: string;
     project?: string;
     applicant?: string;
-    //status?:string;
 }
 

@@ -1,19 +1,19 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Phase, sanitizePhase } from "../models/phase.model";
+import { GetPhaseOptions, Phase, sanitizePhase } from "../models/phase.model";
 
 const end_point = '/project/phases/';
 
 
 
-export interface GetPhaseOptions {
-    project?: string;
-}
+
 
 export const PhaseApi = {
 
     async getPhases(options: GetPhaseOptions): Promise<Phase[]> {
         const query = new URLSearchParams();
-        if (options.project) query.append("project", options.project);
+        const sanitized = sanitizePhase(options);
+        if (sanitized.project) query.append("project", sanitized.project as string);
+        if (sanitized.project) query.append("parent", sanitized.parent as string);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Phase[];
     },

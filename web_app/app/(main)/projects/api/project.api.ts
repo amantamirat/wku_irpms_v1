@@ -1,5 +1,5 @@
 import { ApiClient } from "@/api/ApiClient";
-import { GetProjectsOptions, Project, sanitizeGetProjectsOptions, sanitizeProject } from "../models/project.model";
+import { GetProjectsOptions, Project,sanitizeProject } from "../models/project.model";
 const end_point = '/projects';
 
 
@@ -9,7 +9,7 @@ export const ProjectApi = {
 
     async getProjects(options: GetProjectsOptions): Promise<Project[]> {
         // Sanitize the options first
-        const sanitizedOptions = sanitizeGetProjectsOptions(options);
+        const sanitizedOptions = sanitizeProject(options);
         const query = new URLSearchParams();
         if (sanitizedOptions.call) query.append("call", sanitizedOptions.call as string);
         if (sanitizedOptions.leadPI) query.append("leadPI", sanitizedOptions.leadPI as string);

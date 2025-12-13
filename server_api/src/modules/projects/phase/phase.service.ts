@@ -4,8 +4,6 @@ import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto } from "./phase.dto";
 import { PhaseType } from "./phase.enum";
 import { IPhaseRepository, PhaseRepository } from "./phase.repository";
 
-
-
 export class PhaseService {
     private repository: IPhaseRepository;
     private projectRepository: IProjectRepository;

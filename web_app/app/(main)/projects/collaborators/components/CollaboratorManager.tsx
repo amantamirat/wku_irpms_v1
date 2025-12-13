@@ -14,6 +14,7 @@ import { Project } from "../../models/project.model";
 import { CollaboratorApi } from "../api/collaborator.api";
 import { Collaborator, CollaboratorStatus } from "../models/collaborator.model";
 import CollaboratorDialog from "./CollaboratorDialog";
+import { PERMISSIONS } from "@/types/permissions";
 
 interface CollaboratorProps {
     project?: Project;
@@ -33,6 +34,11 @@ const CollaboratorManager = ({ project, applicant, onSave, onRemove }: Collabora
         applicant: applicant ?? "",
         status: CollaboratorStatus.pending
     };
+
+    // ✅ Permissions
+    const canCreate = !!project && hasPermission([PERMISSIONS.COLLABORATOR.CREATE]);
+    const canEdit = !!project && hasPermission([PERMISSIONS.COLLABORATOR.UPDATE]);
+    const canDelete = !!project && hasPermission([PERMISSIONS.COLLABORATOR.DELETE]);
 
     // CRUD state handler
     const {
@@ -127,16 +133,10 @@ const CollaboratorManager = ({ project, applicant, onSave, onRemove }: Collabora
     }
 
     const columns = [
-        /**
-         *  {
-            header: "#", body: (_: any, { rowIndex }: any) => rowIndex + 1,
-        },
-         */
-
         { header: "Workspace", field: "applicant.organization.name", sortable: true },
         {
             header: "Collaborator",
-             field: "applicant.name",
+            field: "applicant.name",
         },
         {
             header: "Gender",
@@ -163,9 +163,10 @@ const CollaboratorManager = ({ project, applicant, onSave, onRemove }: Collabora
                 items={collaborators}
                 dataKey="_id"
                 columns={columns}
-                canCreate={!!project}
-                canDelete={!!project}
-                //enableSearch
+                canCreate={canCreate}
+                canEdit={canEdit}
+                canDelete={canDelete}
+
                 onCreate={() => {
                     setSelectedCollaborator(emptyCollaborator);
                     setShowSaveDialog(true);

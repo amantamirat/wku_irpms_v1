@@ -62,20 +62,14 @@ export const sanitizeProject = (project: Partial<Project>): Partial<Project> => 
             typeof project.call === 'object' && project.call !== null
                 ? (project.call as Call)._id
                 : project.call,
+        leadPI:
+            typeof project.leadPI === 'object' && project.leadPI !== null
+                ? (project.leadPI as any)._id
+                : project.leadPI,
         collaborators: project.collaborators?.map(c => sanitizeCollaborator(c)),
         themes: project.themes?.map(t => sanitizeProjectTheme(t)),
         phases: project.phases?.map(p => sanitizePhase(p)),
     };
 }
-
-export const sanitizeGetProjectsOptions = (options: Partial<GetProjectsOptions>): Partial<GetProjectsOptions> => {
-    return {
-        ...options,
-        call:
-            typeof options.call === 'object' && options.call !== null
-                ? (options.call as Call)._id
-                : options.call,
-    };
-};
 
 

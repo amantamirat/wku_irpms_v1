@@ -6,54 +6,73 @@ import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto } from "./phase.dto";
 import { PhaseType } from "./phase.enum";
 import { PhaseService } from "./phase.service";
 
-const service = new PhaseService();
-
 export class PhaseController {
+    private service: PhaseService;
 
+    constructor(service?: PhaseService) {
+        this.service = service || new PhaseService();
+    }
 
-    static async createPhase(req: AuthenticatedRequest, res: Response) {
+    // -----------------------
+    // Create
+    // -----------------------
+    create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error('User not found!');
-            const { type, activity, duration, budget, description, project, parent } = req.body;
-            const data: CreatePhaseDto = {
-                //type: type as PhaseType,
-                type: PhaseType.phase,
-                activity: activity,
-                duration: duration,
-                budget: budget,
-                description: description ? description : undefined,
-                project: project as string,
-                //parent: type === PhaseType.breakdown ? new mongoose.Types.ObjectId(parent as string) : undefined,
-                //parent: type === PhaseType.breakdown ? new mongoose.Types.ObjectId(parent as string) : undefined,
-                userId: req.user._id,
+            if (!req.user) throw new Error("User not found!");
 
+            const {
+                activity,
+                duration,
+                budget,
+                description,
+                project,
+            } = req.body;
+
+            const data: CreatePhaseDto = {
+                type: PhaseType.phase,
+                activity,
+                duration,
+                budget,
+                description: description ?? undefined,
+                project: project as string,
+                userId: req.user._id,
             };
-            const created = await service.createPhase(data);
+
+            const created = await this.service.createPhase(data);
             successResponse(res, 201, "Phase created successfully", created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
+    };
 
-    static async getPhases(req: Request, res: Response) {
+    // -----------------------
+    // Fetch / Query
+    // -----------------------
+    get = async (req: Request, res: Response) => {
         try {
-            const { project, parent } = req.query;
+            const { project } = req.query;
+
             const filter: GetPhasesOptions = {
-                project: String(project),
-                //parent: parent ? new mongoose.Types.ObjectId(String(parent)) : undefined
+                project: project as string,
             };
-            const phases = await service.getPhases(filter);
+
+            const phases = await this.service.getPhases(filter);
             successResponse(res, 200, "Phases fetched successfully", phases);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
+    };
 
-    static async updatePhase(req: AuthenticatedRequest, res: Response) {
+    // -----------------------
+    // Update
+    // -----------------------
+    update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error('User not found!');
+            if (!req.user) throw new Error("User not found!");
+
             const { id } = req.params;
-            const { activity, duration, budget, description, parent } = req.body;
+            const { activity, duration, budget, description } = req.body;
+
             const dto: UpdatePhaseDto = {
                 id,
                 data: {
@@ -61,26 +80,35 @@ export class PhaseController {
                     duration: duration ?? undefined,
                     budget: budget ?? undefined,
                     description: description ?? undefined,
-                    //parent: parent ? new mongoose.Types.ObjectId(parent as string) : undefined,
                 },
                 userId: req.user._id,
             };
-            const updated = await service.updatePhase(dto);
+
+            const updated = await this.service.updatePhase(dto);
             successResponse(res, 200, "Phase updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
+    };
 
-    static async deletePhase(req: AuthenticatedRequest, res: Response) {
+    // -----------------------
+    // Delete
+    // -----------------------
+    delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error('User not found!');
+            if (!req.user) throw new Error("User not found!");
+
             const { id } = req.params;
-            const dto: DeleteDto = { id, userId: req.user._id };
-            const deleted = await service.deletePhase(dto);
+
+            const dto: DeleteDto = {
+                id,
+                userId: req.user._id,
+            };
+
+            const deleted = await this.service.deletePhase(dto);
             successResponse(res, 200, "Phase deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
+    };
 }

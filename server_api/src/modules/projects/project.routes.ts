@@ -3,20 +3,21 @@ import { ProjectController } from './project.controller';
 import { checkPermission, verifyActiveAccount } from '../users/user.middleware';
 import { PERMISSIONS } from '../../common/constants/permissions';
 
+const controller = new ProjectController();
 const router: Router = Router();
 
 router.post('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.PROJECT.CREATE]),
-    ProjectController.createProject);
+    controller.create);
 //router.post("/submit", verifyActiveAccount, upload.single("document"), ProjectController.submitProject);
 router.get('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.PROJECT.READ]),
-    ProjectController.getProjects);
+    controller.get);
 router.put('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.PROJECT.UPDATE]),
-    ProjectController.updateProject);
+    controller.update);
 router.delete('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.PROJECT.DELETE]),
-    ProjectController.deleteProject);
+    controller.delete);
 
 export default router;

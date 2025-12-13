@@ -3,20 +3,20 @@ import { PhaseController } from './phase.controller';
 import { checkPermission, verifyActiveAccount } from '../../users/user.middleware';
 import { PERMISSIONS } from '../../../common/constants/permissions';
 
-
+const controller = new PhaseController();
 const router: Router = Router();
 
 router.post('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.PHASE.CREATE]),
-    PhaseController.createPhase);
+    controller.create);
 router.get('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.PHASE.READ]),
-    PhaseController.getPhases);
+    controller.get);
 router.put('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.PHASE.UPDATE]),
-    PhaseController.updatePhase);
+    controller.update);
 router.delete('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.PHASE.DELETE]),
-    PhaseController.deletePhase);
+    controller.delete);
 
 export default router;

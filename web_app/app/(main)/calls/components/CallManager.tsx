@@ -10,6 +10,7 @@ import SaveCall from "./SaveCall";
 import StageManager from "../stages/components/StageManager";
 import { useAuth } from "@/contexts/auth-context";
 import { PERMISSIONS } from "@/types/permissions";
+import CallTabs from "./CallTabs";
 
 
 
@@ -98,7 +99,7 @@ const CallManager = () => {
                 columns={columns}
                 loading={loading}
                 error={error}
-                
+
 
                 /** Permissions */
                 canCreate={canCreate}
@@ -125,9 +126,7 @@ const CallManager = () => {
                     })
                 }
                 //enableSearch
-
-                /** Expand: Stage Manager */
-                rowExpansionTemplate={(row) => <StageManager call={row} />}
+                rowExpansionTemplate={(row) => <CallTabs call={row} />}
             />
 
             {/* Save Dialog */}
