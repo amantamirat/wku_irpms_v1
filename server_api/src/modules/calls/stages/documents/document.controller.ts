@@ -11,14 +11,14 @@ import { AuthenticatedRequest } from "../../../users/user.middleware";
 import { DocumentService } from "./document.service";
 import { DeleteDto } from "../../../../util/delete.dto";
 
-const projectStageService = new DocumentService();
+const service = new DocumentService();
 
-export class ProjectStageController {
+export class ProjectDocController {
 
     // ---------------------------------------------------
     // CREATE
     // ---------------------------------------------------
-    static async createProjectStage(req: AuthenticatedRequest, res: Response) {
+    static async create(req: AuthenticatedRequest, res: Response) {
         try {
             if (!req.file) throw new Error("Document required");
 
@@ -28,12 +28,12 @@ export class ProjectStageController {
                 throw new Error("projectId and stageId are required");
 
             const dto: CreateProjectDocumentDTO = {
-                project: project,
-                stage: stage,
+                project,
+                stage,
                 documentPath: `uploads/${req.file.filename}`
             };
 
-            const created = await projectStageService.create(dto);
+            const created = await service.create(dto);
 
             successResponse(res, 201, "Project stage created successfully", created);
 
@@ -47,7 +47,7 @@ export class ProjectStageController {
     // ---------------------------------------------------
     // GET
     // ---------------------------------------------------
-    static async getProjectStages(req: Request, res: Response) {
+    static async get(req: Request, res: Response) {
         try {
             const { project, stage, status, skip, limit } = req.query;
 
@@ -59,8 +59,8 @@ export class ProjectStageController {
                 limit: limit ? Number(limit) : undefined
             };
 
-            const createdDoc = await projectStageService.get(filter);
-            successResponse(res, 200, "Project stages fetched successfully", createdDoc);
+            const docs = await service.get(filter);
+            successResponse(res, 200, "Project stages fetched successfully", docs);
 
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -70,7 +70,7 @@ export class ProjectStageController {
     // ---------------------------------------------------
     // UPDATE
     // ---------------------------------------------------
-    static async updateProjectStage(req: AuthenticatedRequest, res: Response) {
+    static async update(req: AuthenticatedRequest, res: Response) {
         try {
             const { id } = req.params;
             if (!id) throw new Error("id is required");
@@ -85,7 +85,7 @@ export class ProjectStageController {
                 data: status
             };
 
-            const updated = await projectStageService.update(dto);
+            const updated = await service.update(dto);
 
             successResponse(res, 200, "Project stage updated successfully", updated);
 
@@ -98,7 +98,7 @@ export class ProjectStageController {
     // ---------------------------------------------------
     // DELETE
     // ---------------------------------------------------
-    static async deleteProjectStage(req: AuthenticatedRequest, res: Response) {
+    static async delete(req: AuthenticatedRequest, res: Response) {
         try {
             if (!req.user) throw new Error("User not found!");
 
@@ -109,7 +109,7 @@ export class ProjectStageController {
                 userId: req.user._id
             };
 
-            const deletedDoc = await projectStageService.delete(dto);
+            const deletedDoc = await service.delete(dto);
             const { deleted } = deletedDoc;
             if (deleted?.documentPath) {
                 fs.unlink(deleted.documentPath, () => { });

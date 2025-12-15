@@ -1,6 +1,6 @@
 // project-document.synchronizer.ts
 import { IDocumentRepository } from "./document.repository";
-import { DocumentStatus } from "./document.enum";
+import { ProjectDocStatus } from "./document.enum";
 import { DocumnetStateMachine } from "./document.state-machine";
 import { IProjectDocument } from "./document.model";
 import { IReviewerRepository } from "./reviewers/reviewer.repository";
@@ -22,33 +22,33 @@ export class ProjectStageSynchronizer {
     const currentStatus = stage.status;
     // Fetch all reviewers
     const reviewers = await this.reviewerRepo.findByProjectStage(projectStageId);
-    let newStatus: DocumentStatus;
+    let newStatus: ProjectDocStatus;
     let totalScore: number | undefined = undefined;
     // 1. No reviewers → pending
     if (reviewers.length === 0) {
-      newStatus = DocumentStatus.pending;
+      newStatus = ProjectDocStatus.pending;
     }
     else {
       // Check for at least one active reviewer
       const hasActiveOrSubmitted = reviewers.some(
         r => r.status === ReviewerStatus.active || r.status === ReviewerStatus.submitted);
       if (hasActiveOrSubmitted) {
-        if (currentStatus === DocumentStatus.reviewed) {
+        if (currentStatus === ProjectDocStatus.reviewed) {
           totalScore = 0;
         }
-        newStatus = DocumentStatus.on_review;
+        newStatus = ProjectDocStatus.on_review;
       }
       else {
         const allApproved = reviewers.every(r => r.status === ReviewerStatus.approved);
         if (allApproved) {
-          newStatus = DocumentStatus.reviewed;
+          newStatus = ProjectDocStatus.reviewed;
           const totalWeight = reviewers.reduce((sum, r) => sum + (r.weight ?? 1), 0);
           totalScore = reviewers.reduce((sum, r) => sum + (r.score ?? 0) * (r.weight ?? 1), 0) / totalWeight;
           //totalScore = reviewers.reduce((sum, r) => sum + (r.weight ?? 1) * (r.score ?? 0), 0) / reviewers.length;
         }
         else {
           // Otherwise → submitted i.e. every pending → submitted
-          newStatus = DocumentStatus.submitted;
+          newStatus = ProjectDocStatus.submitted;
         }
       }
     }

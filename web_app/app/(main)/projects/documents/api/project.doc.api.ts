@@ -1,27 +1,21 @@
 import { ApiClient } from "@/api/ApiClient";
-import { GetProjectStageOptions, ProjectStage, sanitizeProjectStage } from "../models/stage.model";
-import { Project } from "../../models/project.model";
-import { Stage } from "@/app/(main)/calls/stages/models/stage.model";
-const end_point = '/project/stages/';
+import { GetProjectStageOptions, ProjectDoc, sanitizeProjectStage } from "../models/document.model";
 
+const end_point = '/project/documents/';
 
+export const ProjectDocApi = {
 
-
-
-
-export const ProjectStageApi = {
-
-    async getProjectStages(options: GetProjectStageOptions): Promise<ProjectStage[]> {
+    async getProjectDocs(options: GetProjectStageOptions): Promise<ProjectDoc[]> {
         const query = new URLSearchParams();
         const sanitized = sanitizeProjectStage(options);
         if (sanitized.project) query.append("project", sanitized.project as string);
         if (sanitized.stage) query.append("stage", sanitized.stage as string);
         //if (options.status) query.append("status", options.status);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
-        return data as ProjectStage[];
+        return data as ProjectDoc[];
     },
 
-    async createProjectStage(projectStage: Partial<ProjectStage>): Promise<any> {
+    async createProjectStage(projectStage: Partial<ProjectDoc>): Promise<any> {
         const sanitized = sanitizeProjectStage(projectStage);
         const formData = new FormData();
         formData.append("project", sanitized.project as string);
@@ -32,16 +26,16 @@ export const ProjectStageApi = {
         return createdData;
     },
 
-    async updateProjectStage(projectStage: Partial<ProjectStage>): Promise<ProjectStage> {
+    async updateProjectStage(projectStage: Partial<ProjectDoc>): Promise<ProjectDoc> {
         if (!projectStage._id) {
             throw new Error("_id required.");
         }
         const url = `${end_point}${projectStage._id}`;
         const updatedProjectStage = await ApiClient.put(url, sanitizeProjectStage(projectStage));
-        return updatedProjectStage as ProjectStage;
+        return updatedProjectStage as ProjectDoc;
     },
 
-    async deleteProjectStage(projectStage: Partial<ProjectStage>): Promise<any> {
+    async deleteProjectStage(projectStage: Partial<ProjectDoc>): Promise<any> {
         if (!projectStage._id) {
             throw new Error("_id required.");
         }

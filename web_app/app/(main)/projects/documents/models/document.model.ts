@@ -1,10 +1,7 @@
-
 import { Stage } from "@/app/(main)/calls/stages/models/stage.model";
 import { Project } from "../../models/project.model";
 
-
-
-export enum ProjectStageStatus {
+export enum ProjectDocStatus {
     pending = 'pending',
     submitted = 'submitted',
     on_review = 'on_review',
@@ -13,19 +10,19 @@ export enum ProjectStageStatus {
     rejected = 'rejected'
 }
 
-export type ProjectStage = {
+export type ProjectDoc = {
     _id?: string;
     project: string | Project;
     stage?: string | Stage;
     documentPath?: string;
     file?: File;
     totalScore?: number;
-    status: ProjectStageStatus;
+    status: ProjectDocStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
-export const validateProjectStage = (ps: ProjectStage): { valid: boolean; message?: string } => {
+export const validateProjectDoc = (ps: ProjectDoc): { valid: boolean; message?: string } => {
     if (!ps.stage) {
         return { valid: false, message: "Stage is required." };
     }
@@ -36,7 +33,7 @@ export const validateProjectStage = (ps: ProjectStage): { valid: boolean; messag
 }
 
 
-export const sanitizeProjectStage = (ps: Partial<ProjectStage>): Partial<ProjectStage> => {
+export const sanitizeProjectStage = (ps: Partial<ProjectDoc>): Partial<ProjectDoc> => {
     return {
         ...ps,
         project:

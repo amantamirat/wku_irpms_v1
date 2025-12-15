@@ -11,15 +11,15 @@ import MyBadge from "@/templates/MyBadge";
 import ResultManager from "../../results/components/ResultManager";
 import { Reviewer, ReviewerStatus, GetReviewersOptions } from "../models/reviewer.model";
 import { ReviewerApi } from "../api/reviewer.api";
-import { ProjectStage, ProjectStageStatus } from "../../stages/models/stage.model";
+import { ProjectDoc, ProjectDocStatus } from "../../documents/models/document.model";
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
 import { useCrudList } from "@/hooks/useCrudList";
 import { PERMISSIONS } from "@/types/permissions";
 import { Button } from "primereact/button";
 
 interface ReviewerManagerProps {
-    projectStage?: ProjectStage;
-    updateProjectStage?: (projectStage: ProjectStage) => void;
+    projectStage?: ProjectDoc;
+    updateProjectStage?: (projectStage: ProjectDoc) => void;
     applicant?: Applicant;
     showControllers?: boolean;
 }
@@ -38,7 +38,7 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
     };
 
     const stageStatus = projectStage?.status;
-    const creationStatus = [ProjectStageStatus.pending, ProjectStageStatus.submitted, ProjectStageStatus.on_review];
+    const creationStatus = [ProjectDocStatus.pending, ProjectDocStatus.submitted, ProjectDocStatus.on_review];
     const canCreate = hasPermission([PERMISSIONS.REVIEWER.CREATE]) && stageStatus && creationStatus.includes(stageStatus);
     const canEdit = hasPermission([PERMISSIONS.REVIEWER.UPDATE]) && stageStatus && creationStatus.includes(stageStatus);
     const canDelete = hasPermission([PERMISSIONS.REVIEWER.DELETE]) && stageStatus && creationStatus.includes(stageStatus);
@@ -82,8 +82,6 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
         fetchReviewers();
     }, [applicant, projectStage]);
 
-    if (loading) return <ListSkeleton rows={10} />;
-    if (error) return <ErrorCard errorMessage={error} />;
 
     // ✅ Save / update
     const onSaveComplete = (saved: Reviewer) => {
@@ -217,8 +215,6 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
                 onCreate={() => { setReviewer(emptyReviewer); setShowSaveDialog(true); }}
                 onEdit={(row) => { setReviewer(row); setShowSaveDialog(true); }}
                 onDelete={(row: any) => confirm.ask({ item: row.applicant?.first_name ?? "", onConfirmAsync: () => deleteReviewer(row) })}
-                expandedRows={expandedRows}
-                onRowToggle={(e) => setExpandedRows(e.data)}
                 rowExpansionTemplate={(row) => <ResultManager reviewer={row} updateReviewerStatus={updateStatus} />}
 
             />

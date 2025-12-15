@@ -9,38 +9,38 @@ import ListSkeleton from "@/components/ListSkeleton";
 import SaveProjectStageDialog from "./SaveProjectStageDialog";
 import ReviewerManager from "../../reviewers/components/ReviewerManager";
 import MyBadge from "@/templates/MyBadge";
-import { ProjectStage, ProjectStageStatus } from "../models/stage.model";
-import { ProjectStageApi } from "../api/project.stage.api";
+import { ProjectDoc, ProjectDocStatus } from "../models/document.model";
+import { ProjectDocApi } from "../api/project.doc.api";
 import { Project } from "../../models/project.model";
 import { useCrudList } from "@/hooks/useCrudList";
 import { BASE_URL } from "@/api/ApiClient";
 import { Stage } from "@/app/(main)/calls/stages/models/stage.model";
 
-interface ProjectStageManagerProps {
+interface ProjectDocManagerProps {
     project?: Project;
     updateProjectStatus?: (project: Project) => void;
     stage?: Stage;
 }
 
-const ProjectStageManager = ({ project, updateProjectStatus, stage }: ProjectStageManagerProps) => {
+const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocManagerProps) => {
     const confirm = useConfirmDialog();
     const { getLinkedApplicant } = useAuth();
     const linkedApplicant = getLinkedApplicant();
     const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
+    //const isLeadPI = loggedApplicantId === (project?.leadPI as any)._id;
 
-    const emptyStage: ProjectStage = {
+    const emptyStage: ProjectDoc = {
         project: project ?? "",
-        status: ProjectStageStatus.pending
+        status: ProjectDocStatus.pending
     };
 
     // ✅ Permissions (adjust if needed)
     const canCreate = !!project;
     //const canEdit = true;
     const canDelete = !!project;
-
     // ✅ State + CRUD Hook
     const {
-        items: stages,
+        items: projectDocs,
         updateItem,
         removeItem,
         setAll,
@@ -48,18 +48,18 @@ const ProjectStageManager = ({ project, updateProjectStatus, stage }: ProjectSta
         setLoading,
         error,
         setError
-    } = useCrudList<ProjectStage>();
+    } = useCrudList<ProjectDoc>();
 
-    const [selectedStage, setSelectedStage] = useState<ProjectStage>(emptyStage);
+    const [selectedStage, setSelectedStage] = useState<ProjectDoc>(emptyStage);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [expandedRows, setExpandedRows] = useState<any[]>([]);
+
 
     // ✅ Fetch project stages
     useEffect(() => {
-        const fetchStages = async () => {
+        const fetchDocs = async () => {
             try {
                 setLoading(true);
-                const data = await ProjectStageApi.getProjectStages({ project: project?._id });
+                const data = await ProjectDocApi.getProjectDocs({ project: project });
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to fetch project stages. " + (err.message ?? ""));
@@ -67,14 +67,12 @@ const ProjectStageManager = ({ project, updateProjectStatus, stage }: ProjectSta
                 setLoading(false);
             }
         };
-        fetchStages();
-    }, [project?._id]);
+        fetchDocs();
+    }, [project]);
 
-    if (loading) return <ListSkeleton rows={10} />;
-    if (error) return <ErrorCard errorMessage={error} />;
 
     // ✅ Save / update
-    const onSaveComplete = (savedStage: ProjectStage, syncedProject?: Project) => {
+    const onSaveComplete = (savedStage: ProjectDoc, syncedProject?: Project) => {
         updateItem(savedStage);
         if (updateProjectStatus) {
             if (project && syncedProject) {
@@ -84,8 +82,8 @@ const ProjectStageManager = ({ project, updateProjectStatus, stage }: ProjectSta
         hideSaveDialog();
     };
 
-    const deleteStage = async (row: ProjectStage) => {
-        const deleted = await ProjectStageApi.deleteProjectStage(row);
+    const deleteStage = async (row: ProjectDoc) => {
+        const deleted = await ProjectDocApi.deleteProjectStage(row);
         if (deleted) {
             removeItem(row);
             if (updateProjectStatus) {
@@ -107,7 +105,7 @@ const ProjectStageManager = ({ project, updateProjectStatus, stage }: ProjectSta
         { header: "Project", field: "project.title", sortable: true },
         {
             header: "Document",
-            body: (row: ProjectStage) => {
+            body: (row: ProjectDoc) => {
                 if (!row.documentPath) return "No document";
                 const url = `${BASE_URL}/${row.documentPath.replace(/^\\/, "")}`;
                 return <button className="p-button p-button-text" onClick={() => window.open(url, "_blank")}>View</button>;
@@ -115,8 +113,8 @@ const ProjectStageManager = ({ project, updateProjectStatus, stage }: ProjectSta
         },
         {
             header: "Score",
-            body: (row: ProjectStage) => {
-                if ([ProjectStageStatus.reviewed, ProjectStageStatus.accepted, ProjectStageStatus.rejected].includes(row.status)) {
+            body: (row: ProjectDoc) => {
+                if ([ProjectDocStatus.reviewed, ProjectDocStatus.accepted, ProjectDocStatus.rejected].includes(row.status)) {
                     return row.totalScore ?? "-";
                 }
                 return "-";
@@ -124,23 +122,25 @@ const ProjectStageManager = ({ project, updateProjectStatus, stage }: ProjectSta
         },
         {
             header: "Status",
-            body: (row: ProjectStage) => <MyBadge type="status" value={row.status ?? "Unknown"} />
+            body: (row: ProjectDoc) => <MyBadge type="status" value={row.status ?? "Unknown"} />
         }
     ];
 
     return (
         <>
             <CrudManager
-                headerTitle="Project Stages"
-                items={stages}
+                headerTitle="Project Docs"
+                items={projectDocs}
                 dataKey="_id"
                 columns={columns}
+                loading={loading}
+                error={error}
+                
                 canCreate={canCreate}
                 canDelete={canDelete}
                 onCreate={() => { setSelectedStage(emptyStage); setShowSaveDialog(true); }}
                 onDelete={(row: any) => confirm.ask({ item: row.stage?.name ?? "", onConfirmAsync: () => deleteStage(row) })}
-                expandedRows={expandedRows}
-                onRowToggle={(e) => setExpandedRows(e.data)}
+
                 rowExpansionTemplate={(row) => <ReviewerManager projectStage={row}
                     updateProjectStage={onSaveComplete} showControllers />}
                 enableSearch
@@ -159,4 +159,4 @@ const ProjectStageManager = ({ project, updateProjectStatus, stage }: ProjectSta
     );
 };
 
-export default ProjectStageManager;
+export default ProjectDocManager;

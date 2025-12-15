@@ -1,6 +1,6 @@
 'use client';
 
-import ProjectStageManager from "@/app/(main)/projects/stages/components/ProjectStageManager";
+import ProjectDocManager from "@/app/(main)/projects/documents/components/ProjectDocManager";
 import { CrudManager } from "@/components/CrudManager";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useCrudList } from "@/hooks/useCrudList";
@@ -193,7 +193,7 @@ const StageManager = ({ call }: StageManagerProps) => {
                 loading={loading}
                 error={error}
                 rowExpansionTemplate={(row: Stage) => (
-                    <ProjectStageManager stage={row} />
+                    <ProjectDocManager stage={row} />
                 )}
             //enableSearch
             />

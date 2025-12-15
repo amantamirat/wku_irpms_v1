@@ -49,7 +49,7 @@ export const checkPermission = (requiredPermission: string[]) => {
       const userId = req.user._id;
       const hasPermission = await CacheService.hasPermissions(userId, requiredPermission);
       if (!hasPermission) {
-        return errorResponse(res, 403, "Forbidden. Permission missing.");
+        return errorResponse(res, 403, `Forbidden. ${requiredPermission}, Permission missing.`);
       }
       next();
     } catch (err) {

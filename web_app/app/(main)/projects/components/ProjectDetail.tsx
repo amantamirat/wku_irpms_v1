@@ -5,7 +5,7 @@ import CollaboratorManager from "../collaborators/components/CollaboratorManager
 import ProjectThemeManager from "../themes/components/ThemeManager";
 import PhaseManager from "../phases/components/PhaseManager";
 import { PhaseType } from "../phases/models/phase.model";
-import ProjectStageManager from "../stages/components/ProjectStageManager";
+import ProjectDocManager from "../documents/components/ProjectDocManager";
 
 
 interface ProjectDetailProps {
@@ -39,7 +39,7 @@ export default function ProjectDetail({ project, updateProjectStatus }: ProjectD
                         <ProjectThemeManager project={project} />
                     </TabPanel>
                     <TabPanel header="Documents">
-                        <ProjectStageManager project={project} updateProjectStatus={updateProjectStatus} />
+                        <ProjectDocManager project={project} updateProjectStatus={updateProjectStatus} />
                     </TabPanel>
                 </TabView>
             </>

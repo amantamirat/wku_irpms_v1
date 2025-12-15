@@ -1,9 +1,9 @@
 'use client';
-import ProjectStageManager from "../stages/components/ProjectStageManager";
+import ProjectDocManager from "../documents/components/ProjectDocManager";
 
 const ReviwerPage = () => {
     return (
-        <ProjectStageManager />
+        <ProjectDocManager />
     );
 };
 export default ReviwerPage;

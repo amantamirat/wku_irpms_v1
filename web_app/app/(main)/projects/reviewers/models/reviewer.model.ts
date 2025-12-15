@@ -1,5 +1,5 @@
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
-import { ProjectStage } from "../../stages/models/stage.model";
+import { ProjectDoc } from "../../documents/models/document.model";
 
 
 export enum ReviewerStatus {
@@ -11,7 +11,7 @@ export enum ReviewerStatus {
 
 export type Reviewer = {
     _id?: string;
-    projectStage?: string | ProjectStage;
+    projectStage?: string | ProjectDoc;
     applicant?: string | Applicant;
     weight?: number;
     score?: number;
@@ -35,7 +35,7 @@ export const sanitizeReviewer = (reviewer: Partial<Reviewer>): Reviewer => {
         ...reviewer,
         projectStage:
             typeof reviewer.projectStage === "object" && reviewer.projectStage !== null
-                ? (reviewer.projectStage as ProjectStage)._id
+                ? (reviewer.projectStage as ProjectDoc)._id
                 : reviewer.projectStage,
         applicant:
             typeof reviewer.applicant === "object" && reviewer.applicant !== null
@@ -46,5 +46,5 @@ export const sanitizeReviewer = (reviewer: Partial<Reviewer>): Reviewer => {
 
 export interface GetReviewersOptions {
     applicant?: string | Applicant;
-    projectStage?: string | ProjectStage;
+    projectStage?: string | ProjectDoc;
 }

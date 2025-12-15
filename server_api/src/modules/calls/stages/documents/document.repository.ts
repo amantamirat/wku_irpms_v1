@@ -9,7 +9,7 @@ import {
 
 export interface IDocumentRepository {
     findById(id: string): Promise<IProjectDocument | null>; // <-- allow POJO
-    find(filters: GetProjectDocumentDTO): Promise<Partial<IProjectDocument>[]>;
+    find(filters: GetProjectDocumentDTO, populate?: boolean): Promise<Partial<IProjectDocument>[]>;
     create(dto: CreateProjectDocumentDTO): Promise<IProjectDocument>;
     update(id: string, status: UpdateProjectDocumentDTO["data"]): Promise<IProjectDocument>;
     delete(id: string): Promise<IProjectDocument | null>;
@@ -27,7 +27,7 @@ export class DocumentRepository implements IDocumentRepository {
             .exec();
     }
 
-    async find(filters: GetProjectDocumentDTO) {
+    async find(filters: GetProjectDocumentDTO, populate: boolean = true) {
         const query: any = {};
 
         if (filters.project) {
@@ -41,7 +41,11 @@ export class DocumentRepository implements IDocumentRepository {
         if (filters.status) {
             query.status = filters.status;
         }
-
+        if (!populate) {
+            return ProjectDocument.find(query)
+                .lean<IProjectDocument[]>()
+                .exec();
+        }
         return ProjectDocument.find(query)
             .populate("project")
             .populate("stage")

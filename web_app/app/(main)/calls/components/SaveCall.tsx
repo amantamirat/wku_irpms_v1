@@ -30,7 +30,7 @@ const SaveCall = ({ visible, call, onHide, onComplete }: SaveCallProps) => {
     const toast = useRef<Toast>(null);
     const { getOrganizationsByType } = useAuth();
 
-    const [localCycle, setLocalCycle] = useState<Call>({ ...call });
+    const [localCall, setLocalCall] = useState<Call>({ ...call });
     const [calendars, setCalendars] = useState<Calendar[]>([]);
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [grants, setGrants] = useState<Grant[]>([]);
@@ -62,7 +62,7 @@ const SaveCall = ({ visible, call, onHide, onComplete }: SaveCallProps) => {
     useEffect(() => {
         const loadGrants = async () => {
             try {
-                const data = await GrantApi.getGrants({ directorate: localCycle.directorate });
+                const data = await GrantApi.getGrants({ directorate: localCall.directorate });
                 setGrants(data);
             } catch (err) {
                 console.error('Failed to load grants:', err);
@@ -71,7 +71,7 @@ const SaveCall = ({ visible, call, onHide, onComplete }: SaveCallProps) => {
 
         const loadThematics = async () => {
             try {
-                const data = await ThematicApi.getThematics({ directorate: localCycle.directorate });
+                const data = await ThematicApi.getThematics({ directorate: localCall.directorate });
                 setThemes(data);
             } catch (err) {
                 console.error('Failed to load themes:', err);
@@ -80,7 +80,7 @@ const SaveCall = ({ visible, call, onHide, onComplete }: SaveCallProps) => {
 
         loadGrants();
         loadThematics();
-    }, [localCycle]);
+    }, [localCall]);
 
 
 
@@ -88,19 +88,19 @@ const SaveCall = ({ visible, call, onHide, onComplete }: SaveCallProps) => {
     const save = async () => {
         try {
             setSubmitted(true);
-            const validation = validateCall(localCycle);
+            const validation = validateCall(localCall);
             if (!validation.valid) throw new Error(validation.message);
 
             let saved: Call;
-            if (localCycle._id) saved = await CallApi.update(localCycle);
-            else saved = await CallApi.create(localCycle);
+            if (localCall._id) saved = await CallApi.update(localCall);
+            else saved = await CallApi.create(localCall);
 
             saved = {
                 ...saved,
-                calendar: localCycle.calendar,
-                directorate: localCycle.directorate,
-                thematic: localCycle.thematic,
-                grant: localCycle.grant
+                calendar: localCall.calendar,
+                directorate: localCall.directorate,
+                thematic: localCall.thematic,
+                grant: localCall.grant
             };
 
             toast.current?.show({
@@ -124,7 +124,7 @@ const SaveCall = ({ visible, call, onHide, onComplete }: SaveCallProps) => {
     // Reset form when visible
     useEffect(() => {
         if (visible) {
-            setLocalCycle({ ...call });
+            setLocalCall({ ...call });
             setSubmitted(false);
             setErrorMessage(undefined);
         }
@@ -149,7 +149,7 @@ const SaveCall = ({ visible, call, onHide, onComplete }: SaveCallProps) => {
             <Dialog
                 visible={visible}
                 style={{ width: '600px' }}
-                header={localCycle._id ? `Edit Call` : `New Call`}
+                header={localCall._id ? `Edit Call` : `New Call`}
                 modal
                 className="p-fluid"
                 footer={footer}
@@ -157,18 +157,18 @@ const SaveCall = ({ visible, call, onHide, onComplete }: SaveCallProps) => {
                 maximizable
             >
                 <div className="p-fluid">
-                    {!localCycle._id && (
+                    {!localCall._id && (
                         <>
                             <div className="field">
                                 <label htmlFor="calendar">Calendar</label>
                                 <Dropdown
                                     id="calendar"
-                                    value={localCycle.calendar}
+                                    value={localCall.calendar}
                                     options={calendars}
                                     optionLabel="year"
-                                    onChange={(e) => setLocalCycle({ ...localCycle, calendar: e.value })}
+                                    onChange={(e) => setLocalCall({ ...localCall, calendar: e.value })}
                                     placeholder="Select Calendar"
-                                    className={classNames({ 'p-invalid': submitted && !localCycle.calendar })}
+                                    className={classNames({ 'p-invalid': submitted && !localCall.calendar })}
                                 />
                             </div>
 
@@ -178,12 +178,12 @@ const SaveCall = ({ visible, call, onHide, onComplete }: SaveCallProps) => {
                                 </label>
                                 <Dropdown
                                     id="organization"
-                                    value={localCycle.directorate}
+                                    value={localCall.directorate}
                                     options={organizations}
                                     optionLabel="name"
-                                    onChange={(e) => setLocalCycle({ ...localCycle, directorate: e.value })}
+                                    onChange={(e) => setLocalCall({ ...localCall, directorate: e.value })}
                                     placeholder={`Select 'Directorate'`}
-                                    className={classNames({ 'p-invalid': submitted && !localCycle.directorate })}
+                                    className={classNames({ 'p-invalid': submitted && !localCall.directorate })}
                                 />
                             </div>
                         </>
@@ -193,11 +193,11 @@ const SaveCall = ({ visible, call, onHide, onComplete }: SaveCallProps) => {
                         <label htmlFor="title">Title</label>
                         <InputText
                             id="title"
-                            value={localCycle.title}
-                            onChange={(e) => setLocalCycle({ ...localCycle, title: e.target.value })}
+                            value={localCall.title}
+                            onChange={(e) => setLocalCall({ ...localCall, title: e.target.value })}
                             required
                             autoFocus
-                            className={classNames({ 'p-invalid': submitted && !localCycle.title })}
+                            className={classNames({ 'p-invalid': submitted && !localCall.title })}
                         />
                     </div>
 
@@ -205,26 +205,26 @@ const SaveCall = ({ visible, call, onHide, onComplete }: SaveCallProps) => {
                         <label htmlFor="description">Description</label>
                         <InputTextarea
                             id="description"
-                            value={localCycle.description ?? ''}
-                            onChange={(e) => setLocalCycle({ ...localCycle, description: e.target.value })}
+                            value={localCall.description ?? ''}
+                            onChange={(e) => setLocalCall({ ...localCall, description: e.target.value })}
                             rows={5}
                             cols={30}
                         />
                     </div>
 
-                    {!localCycle._id && (
+                    {!localCall._id && (
                         <>
                             <div className="field">
                                 <label htmlFor="grant">Grant</label>
                                 <Dropdown
                                     id="grant"
                                     dataKey="_id"
-                                    value={localCycle.grant}
+                                    value={localCall.grant}
                                     options={grants}
                                     optionLabel="title"
-                                    onChange={(e) => setLocalCycle({ ...localCycle, grant: e.value })}
+                                    onChange={(e) => setLocalCall({ ...localCall, grant: e.value })}
                                     placeholder="Select Grant"
-                                    className={classNames({ 'p-invalid': submitted && !localCycle.grant })}
+                                    className={classNames({ 'p-invalid': submitted && !localCall.grant })}
                                 />
                             </div>
 
@@ -233,10 +233,10 @@ const SaveCall = ({ visible, call, onHide, onComplete }: SaveCallProps) => {
                                 <Dropdown
                                     id="theme"
                                     dataKey="_id"
-                                    value={localCycle.thematic}
+                                    value={localCall.thematic}
                                     options={themes}
                                     optionLabel="title"
-                                    onChange={(e) => setLocalCycle({ ...localCycle, thematic: e.value })}
+                                    onChange={(e) => setLocalCall({ ...localCall, thematic: e.value })}
                                     placeholder="Select Theme"
                                 />
                             </div>

@@ -6,7 +6,7 @@ import { ProjectSynchronizer } from "../../../projects/project.synchronizer";
 import { StageStatus } from "../stage.enum";
 import { IStageRepository, StageRepository } from "../stage.repository";
 import { CreateProjectDocumentDTO, GetProjectDocumentDTO, UpdateProjectDocumentDTO } from "./document.dto";
-import { DocumentStatus } from "./document.enum";
+import { ProjectDocStatus } from "./document.enum";
 import { IDocumentRepository, DocumentRepository } from "./document.repository";
 import { DocumnetStateMachine } from "./document.state-machine";
 
@@ -15,6 +15,7 @@ export class DocumentService {
     private projectRepository: IProjectRepository;
     private stageRepository: IStageRepository;
     private projectSynchronizer: ProjectSynchronizer;
+
     private validator: ConstraintValidator;
 
     constructor(repository?: IDocumentRepository, projectRepository?: IProjectRepository,
@@ -36,42 +37,30 @@ export class DocumentService {
     }
 
     async create(dto: CreateProjectDocumentDTO) {
-        const { project: project, stage: stageId, documentPath } = dto;
-        ////validate/////
-        const projectDoc = await this.projectRepository.findById(dto.project);
+        const { project, stage, documentPath } = dto;
+
+        const projectDoc = await this.projectRepository.findById(project);
         if (!projectDoc) throw new Error("Project not found");
-        const stageDoc = await this.stageRepository.findOne({ _id: dto.stage });
+        
+        const stageDoc = await this.stageRepository.findOne({ _id: stage, call: String(projectDoc.call) });
         if (!stageDoc) throw new Error("Stage not found");
         if (stageDoc.status !== StageStatus.active) throw new Error("Stage is not active");
         if (stageDoc.deadline < new Date()) throw new Error("Stage deadline has passed");
-        // Check previous stage
+        
         if (stageDoc.order > 1) {
-            const prevStage = await this.stageRepository.findOne({
-                order: stageDoc.order - 1,
-                call: stageDoc.call.toString()
-            });
-
-
-            if (!prevStage) throw new Error("Previous stage not found");
-            /*
-                       const prevProjectStage = await ProjectStage.findOne({
-                           project: dto.projectId,
-                           stage: prevStage._id
-                       }).lean();
-           
-                       if (!prevProjectStage) throw new Error("Previous project stage not found");
-           
-                       if (prevProjectStage.status !== ProjectStageStatus.reviewed) {
-                          // throw new Error("Previous project stage is not accepted");
-                       }
-                          */
+            const previousDocs = await this.repository.find({ project }, false);
+            const hasNotAccepted = previousDocs.some(
+                doc => doc.status !== ProjectDocStatus.accepted
+            );
+            if (hasNotAccepted) {
+                throw new Error('Previous documents must be accepted before proceeding.');
+            }
         }
-        //////validation end///////////
 
         try {
             ///grant validator////
             await this.validator.validateProject(project, projectDoc);
-            ///grant validator////
+
             const created = await this.repository.create(dto);
             const syncedProject = await this.projectSynchronizer.syncProjectStatus(project, projectDoc);
             return { created, syncedProject }
@@ -103,7 +92,7 @@ export class DocumentService {
         const projectStage = await this.repository.findById(id);
         if (!projectStage) throw new Error("Project stage not found");
         //const projectDoc = projectStage.project as IProject;
-        if (projectStage.status !== DocumentStatus.pending) {
+        if (projectStage.status !== ProjectDocStatus.pending) {
             throw new Error("Only project stages with 'pending' status can be deleted.");
         }
         const deleted = await this.repository.delete(id);

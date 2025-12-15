@@ -6,16 +6,16 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import UploadForm from "../../components/UploadForm";
 import { Project } from "../../models/project.model";
-import { ProjectStage, validateProjectStage } from "../models/stage.model";
+import { ProjectDoc, validateProjectDoc } from "../models/document.model";
 import { StageApi } from "@/app/(main)/calls/stages/api/stage.api";
 import { Stage } from "@/app/(main)/calls/stages/models/stage.model";
-import { ProjectStageApi } from "../api/project.stage.api";
+import { ProjectDocApi } from "../api/project.doc.api";
 
 interface SaveProjectStageDialogProps {
     project?: Project;
     visible: boolean;
-    projectStage: ProjectStage;
-    onComplete?: (saved: ProjectStage, syncedProject?: Project) => void;
+    projectStage: ProjectDoc;
+    onComplete?: (saved: ProjectDoc, syncedProject?: Project) => void;
     onHide: () => void;
 }
 
@@ -27,25 +27,25 @@ const SaveProjectStageDialog = ({
     onHide,
 }: SaveProjectStageDialogProps) => {
 
-    const [localProjectStage, setLocalProjectStage] = useState<ProjectStage>({ ...projectStage });
+    const [localProjectStage, setLocalProjectStage] = useState<ProjectDoc>({ ...projectStage });
     const [stages, setStages] = useState<Stage[]>([]);
     const toast = useRef<Toast>(null);
 
-    const updateField = (field: keyof ProjectStage, value: any) => {
+    const updateField = (field: keyof ProjectDoc, value: any) => {
         setLocalProjectStage({ ...localProjectStage, [field]: value });
     };
 
     const saveProjectStage = async () => {
         try {
-            const validation = validateProjectStage(localProjectStage);
+            const validation = validateProjectDoc(localProjectStage);
             if (!validation.valid) throw new Error(validation.message);
 
-            let saved: ProjectStage;
+            let saved: ProjectDoc;
             let syncedProject: Project | undefined = undefined;
             if (localProjectStage._id) {
-                saved = await ProjectStageApi.updateProjectStage(localProjectStage);
+                saved = await ProjectDocApi.updateProjectStage(localProjectStage);
             } else {
-                const { created, syncedProject: sp } = await ProjectStageApi.createProjectStage(localProjectStage);
+                const { created, syncedProject: sp } = await ProjectDocApi.createProjectStage(localProjectStage);
                 saved = created;
                 syncedProject = sp;
             }
@@ -77,7 +77,7 @@ const SaveProjectStageDialog = ({
             const fetchStages = async () => {
                 try {
                     const data = await StageApi.getStages({
-                        cycle: (project?.call as any)?._id,
+                        call: project?.call,
                     });
                     setStages(data);
                 } catch (err) {

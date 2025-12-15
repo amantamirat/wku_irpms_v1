@@ -10,7 +10,7 @@ import { DataTable } from "primereact/datatable";
 import { Skeleton } from "primereact/skeleton";
 import { useEffect, useState } from "react";
 import { Reviewer, ReviewerStatus } from "../../reviewers/models/reviewer.model";
-import { ProjectStage, sanitizeProjectStage } from "../../stages/models/stage.model";
+import { ProjectDoc, sanitizeProjectStage } from "../../documents/models/document.model";
 import { ResultApi } from "../api/result.api";
 import { Result } from "../models/result.model";
 import SaveResultDialog from "./SaveResultDialog";
@@ -42,7 +42,7 @@ const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) =
             try {
                 setLoading(true);
                 if (!reviewer?._id || !reviewer?.projectStage) return;
-                const projectStage = reviewer.projectStage as ProjectStage;
+                const projectStage = reviewer.projectStage as ProjectDoc;
                 const sanitizedPS = sanitizeProjectStage(projectStage);
                 //call here getCriteria by reviewer or evaluation
                 //const fetchedCriteria = await CriterionApi.getCriteria({ reviewer: reviewer._id });

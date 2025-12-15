@@ -425,6 +425,26 @@
     "description": "Delete phase entries"
   },
   {
+    "category": "Document Management",
+    "name": "document:create",
+    "description": "Create document entries"
+  },
+  {
+    "category": "Document Management",
+    "name": "document:read",
+    "description": "Read document entries"
+  },
+  {
+    "category": "Document Management",
+    "name": "document:update",
+    "description": "Update document entries"
+  },
+  {
+    "category": "Document Management",
+    "name": "document:delete",
+    "description": "Delete document entries"
+  },
+  {
     "category": "Reviewer Management",
     "name": "reviewer:create",
     "description": "Create new reviewers"

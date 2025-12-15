@@ -1,18 +1,22 @@
 import express from "express";
-import { ProjectStageController } from "./document.controller";
+import { ProjectDocController } from "./document.controller";
 import { upload } from "../../../../util/multer";
-import { verifyActiveAccount } from "../../../users/user.middleware";
-
+import { checkPermission, verifyActiveAccount } from "../../../users/user.middleware";
+import { PERMISSIONS } from "../../../../common/constants/permissions";
 
 const router = express.Router();
 
 router.post("/", verifyActiveAccount,
-    upload.single("document"), ProjectStageController.createProjectStage);
+    checkPermission([PERMISSIONS.DOCUMENT.CREATE]),
+    upload.single("document"), ProjectDocController.create);
 router.get("/", verifyActiveAccount,
-    ProjectStageController.getProjectStages);
+    checkPermission([PERMISSIONS.DOCUMENT.READ]),
+    ProjectDocController.get);
 router.put("/:id", verifyActiveAccount,
-    ProjectStageController.updateProjectStage);
+    checkPermission([PERMISSIONS.DOCUMENT.UPDATE]),
+    ProjectDocController.update);
 router.delete("/:id", verifyActiveAccount,
-    ProjectStageController.deleteProjectStage);
+    checkPermission([PERMISSIONS.DOCUMENT.DELETE]),
+    ProjectDocController.delete);
 
 export default router;
