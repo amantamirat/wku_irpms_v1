@@ -24,7 +24,10 @@ interface PhaseManagerProps {
 
 export default function PhaseManager({ project, phaseType, setProject }: PhaseManagerProps) {
     const confirm = useConfirmDialog();
-    const { hasPermission } = useAuth();
+    const { getLinkedApplicant, hasPermission } = useAuth();
+    const linkedApplicant = getLinkedApplicant();
+    const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
+    const isLeadPI = loggedApplicantId === (project?.leadPI as any)._id;
 
     // -------------------------------
     // Empty Phase
@@ -42,9 +45,9 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
     // Permissions
     // -------------------------------
 
-    const canCreate = !!project && hasPermission([PERMISSIONS.PHASE.CREATE]);
-    const canEdit = !!project && hasPermission([PERMISSIONS.PHASE.UPDATE]);
-    const canDelete = !!project && hasPermission([PERMISSIONS.PHASE.DELETE]);
+    const canCreate = !!project && isLeadPI && hasPermission([PERMISSIONS.PHASE.CREATE]);
+    const canEdit = !!project && isLeadPI && hasPermission([PERMISSIONS.PHASE.UPDATE]);
+    const canDelete = !!project && isLeadPI && hasPermission([PERMISSIONS.PHASE.DELETE]);
 
     // -------------------------------
     // CRUD Hook
@@ -168,7 +171,6 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
                     })
                 }
             />
-
             <SavePhaseDialog
                 visible={showDialog}
                 phase={phase}

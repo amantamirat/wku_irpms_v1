@@ -1,5 +1,7 @@
 // collaborator.service.ts
 import { DeleteDto } from "../../../util/delete.dto";
+import { ApplicantRepository, IApplicantRepository } from "../../applicants/applicant.repository";
+import { ProjectStatus } from "../project.enum";
 import { IProjectRepository, ProjectRepository } from "../project.repository";
 import {
     CreateCollaboratorDto,
@@ -14,24 +16,31 @@ import { CollaboratorStateMachine } from "./collaborator.state-machine";
 export class CollaboratorService {
     private repository: ICollaboratorRepository;
     private projectRepository: IProjectRepository;
+    private applicantRepo: IApplicantRepository;
     private permission: CollaboratorPermission;
 
-    constructor(repository: ICollaboratorRepository = new CollaboratorRepository(), projectRepository?: IProjectRepository) {
+    constructor(repository: ICollaboratorRepository = new CollaboratorRepository(),
+        projectRepository?: IProjectRepository, applicantRepo?: IApplicantRepository) {
         this.repository = repository;
         this.projectRepository = projectRepository || new ProjectRepository();
+        this.applicantRepo = applicantRepo || new ApplicantRepository();
         this.permission = new CollaboratorPermission(this.repository);
     }
 
     async createCollaborator(dto: CreateCollaboratorDto) {
-        const { applicant, project, userId, isLeadPI, status } = dto;
-
-        const projectDoc = this.projectRepository.findById(project);
-
+        const { applicant, project, applicantId, isLeadPI, status } = dto;
+        const projectDoc = await this.projectRepository.findById(project);
         if (!projectDoc) throw new Error("Project not found");
-        //if (!applicantExists) throw new Error("Applicant not found");
-
-        const createdCollaborator = await this.repository.create(dto);
-        return createdCollaborator;
+        if (projectDoc.status !== ProjectStatus.pending) {
+            throw new Error("Can not add collaborators on non pending projects.");
+        }
+        if (String(projectDoc.leadPI) !== applicantId) {
+            throw new Error("Only Lead PI can add collaborators.");
+        }
+        const appDoc = await this.applicantRepo.findOne({ id: applicant });
+        if (!appDoc) throw new Error("Applicant not found");
+        const created = await this.repository.create(dto);
+        return created;
     }
 
     async getCollaborators(options: GetCollaboratorsOptions) {
@@ -43,12 +52,12 @@ export class CollaboratorService {
     }
 
     async updateCollaborator(dto: UpdateCollaboratorDto) {
-        const updatedCollaborator = await this.repository.update(dto.id, dto.data);
-        return updatedCollaborator;
+        const updated = await this.repository.update(dto.id, dto.data);
+        return updated;
     }
 
     async changeCollaboratorStatus(dto: UpdateCollaboratorDto) {
-        const { id, data, userId } = dto;
+        const { id, data, applicantId: userId } = dto;
         const collaboratorDoc = await this.repository.findById(id);
         if (!collaboratorDoc) throw new Error("Collaborator not found");
         const projectDoc = await this.projectRepository.findById(String(collaboratorDoc.project));

@@ -27,8 +27,8 @@ export class ProjectService {
 
     async createProject(dto: CreateProjectDTO) {
         const callDoc = await this.callRepository.findById(dto.call);
-        if (!callDoc) throw new Error("Cycle not found");
-        const leadPIDoc = await this.appRepository.find({ id: dto.leadPI });
+        if (!callDoc) throw new Error("Call not found");
+        const leadPIDoc = await this.appRepository.findOne({ id: dto.leadPI });
         if (!leadPIDoc) throw new Error("Lead PI Applicant not found");
         return this.repository.create(dto);
     }

@@ -40,7 +40,7 @@ export class UserService {
         }
         const userId = String(userDoc._id);
         const applicantId = String(userDoc.applicant);
-        const applicantDoc = await this.appRepository.find({ id: applicantId });
+        const applicantDoc = await this.appRepository.findOne({ id: applicantId });
         if (!applicantDoc) {
             throw new Error("Applicant not found.");
         }
@@ -76,7 +76,7 @@ export class UserService {
     };
 
     async create(data: CreateUserDTO) {
-        const applicantDoc = await this.appRepository.find({ email: data.email });
+        const applicantDoc = await this.appRepository.findOne({ email: data.email });
         if (!applicantDoc) {
             throw Error("Applicant Not Found!");
         }

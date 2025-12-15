@@ -20,6 +20,7 @@ export class PhaseService {
         }
         const project = await this.projectRepository.findById(dto.project);
         if (!project) throw new Error("Project not found");
+        
         return await this.repository.create(dto);
     }
 

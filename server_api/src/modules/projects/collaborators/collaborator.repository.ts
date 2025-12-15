@@ -45,7 +45,7 @@ export class CollaboratorRepository implements ICollaboratorRepository {
 
         return Collaborator.find(query)
             .populate([
-                { path: 'applicant', populate: { path: 'organization' } },
+                { path: 'applicant', populate: { path: 'workspace' } },
                 { path: 'project' }
             ])
             .lean<ICollaborator[]>()

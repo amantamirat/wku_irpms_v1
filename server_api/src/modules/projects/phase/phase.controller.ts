@@ -35,7 +35,7 @@ export class PhaseController {
                 budget,
                 description: description ?? undefined,
                 project: project as string,
-                userId: req.user._id,
+                applicantId: req.user.applicantId,
             };
 
             const created = await this.service.createPhase(data);

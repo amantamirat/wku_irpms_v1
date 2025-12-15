@@ -6,7 +6,7 @@ export interface CreateCollaboratorDto {
     applicant: string;
     isLeadPI?: boolean;
     status?: CollaboratorStatus;
-    userId: string; // actor performing the operation
+    applicantId: string; // actor performing the operation
 }
 
 // Base fields for updating a collaborator
@@ -16,7 +16,7 @@ export interface UpdateCollaboratorDto {
         isLeadPI: boolean;
         status: CollaboratorStatus;
     }>;
-    userId: string;
+    applicantId: string;
 }
 
 // Options for querying collaborators

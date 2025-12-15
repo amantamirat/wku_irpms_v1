@@ -28,7 +28,7 @@ export class CollaboratorController {
                 applicant: applicant as string,
                 project: project as string,
                 isLeadPI: isLeadPI ? true : undefined,
-                userId: req.user._id,
+                applicantId: req.user.applicantId,
             };
 
             const created = await this.service.createCollaborator(dto);
@@ -70,7 +70,7 @@ export class CollaboratorController {
             const dto: UpdateCollaboratorDto = {
                 id,
                 data: { status },
-                userId: req.user._id,
+                applicantId: req.user._id,
             };
 
             const updated = await this.service.changeCollaboratorStatus(dto);
@@ -101,7 +101,7 @@ export class CollaboratorController {
                     isLeadPI: isLeadPI ? true : undefined,
                     // status can be added here if needed
                 },
-                userId: req.user._id,
+                applicantId: req.user._id,
             };
 
             const updated = await this.service.updateCollaborator(dto);

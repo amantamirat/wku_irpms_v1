@@ -28,6 +28,7 @@ const CollaboratorManager = ({ project, applicant, onSave, onRemove }: Collabora
     const { getLinkedApplicant, hasPermission } = useAuth();
     const linkedApplicant = getLinkedApplicant();
     const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
+    const isLeadPI = loggedApplicantId === (project?.leadPI as Applicant)._id;
 
     const emptyCollaborator: Collaborator = {
         project: project ?? "",
@@ -36,9 +37,9 @@ const CollaboratorManager = ({ project, applicant, onSave, onRemove }: Collabora
     };
 
     // ✅ Permissions
-    const canCreate = !!project && hasPermission([PERMISSIONS.COLLABORATOR.CREATE]);
-    const canEdit = !!project && hasPermission([PERMISSIONS.COLLABORATOR.UPDATE]);
-    const canDelete = !!project && hasPermission([PERMISSIONS.COLLABORATOR.DELETE]);
+    const canCreate = !!project && isLeadPI && hasPermission([PERMISSIONS.COLLABORATOR.CREATE]);
+    //const canEdit = !!project && hasPermission([PERMISSIONS.COLLABORATOR.UPDATE]);
+    const canDelete = !!project && isLeadPI && hasPermission([PERMISSIONS.COLLABORATOR.DELETE]);
 
     // CRUD state handler
     const {
@@ -72,8 +73,6 @@ const CollaboratorManager = ({ project, applicant, onSave, onRemove }: Collabora
         fetchData();
     }, [project, applicant]);
 
-    if (loading) return <ListSkeleton rows={10} />;
-    if (error) return <ErrorCard errorMessage={error} />;
 
     // Save or update collaborator
     const onSaveComplete = (saved: Collaborator) => {
@@ -133,7 +132,7 @@ const CollaboratorManager = ({ project, applicant, onSave, onRemove }: Collabora
     }
 
     const columns = [
-        { header: "Workspace", field: "applicant.organization.name", sortable: true },
+        { header: "Workspace", field: "applicant.workspace.name", sortable: true },
         {
             header: "Collaborator",
             field: "applicant.name",
@@ -162,9 +161,11 @@ const CollaboratorManager = ({ project, applicant, onSave, onRemove }: Collabora
                 headerTitle="Collaborators"
                 items={collaborators}
                 dataKey="_id"
+                loading={loading}
+                error={error}
                 columns={columns}
                 canCreate={canCreate}
-                canEdit={canEdit}
+                //canEdit={canEdit}
                 canDelete={canDelete}
 
                 onCreate={() => {
