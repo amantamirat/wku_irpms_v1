@@ -28,7 +28,7 @@ const CollaboratorManager = ({ project, applicant, onSave, onRemove }: Collabora
     const { getLinkedApplicant, hasPermission } = useAuth();
     const linkedApplicant = getLinkedApplicant();
     const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
-    const isLeadPI = loggedApplicantId === (project?.leadPI as Applicant)._id;
+    const isLeadPI = project ? loggedApplicantId === (project?.leadPI as any)._id : false;
 
     const emptyCollaborator: Collaborator = {
         project: project ?? "",

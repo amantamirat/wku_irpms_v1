@@ -15,6 +15,13 @@ router.post(
     controller.create
 );
 
+router.post(
+    '/import',
+    verifyActiveAccount,
+    checkPermission([PERMISSIONS.THEME.IMPORT]),
+    controller.import
+);
+
 router.get(
     '/',
     verifyActiveAccount,

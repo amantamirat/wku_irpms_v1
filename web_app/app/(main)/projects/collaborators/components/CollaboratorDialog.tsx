@@ -33,7 +33,7 @@ const CollaboratorDialog = ({ collaborator, visible, onSave, onComplete, onHide 
         setLocalCollaborator({ ...collaborator });
     }, [collaborator]);
 
-    // Fetch organizations based on scope
+    // Fetch organizations
     useEffect(() => {
         let isMounted = true;
         const fetchOrganizations = async () => {
@@ -55,7 +55,7 @@ const CollaboratorDialog = ({ collaborator, visible, onSave, onComplete, onHide 
         const fetchApplicants = async () => {
             if (!workspace) return;
             try {
-                const data = await ApplicantApi.getApplicants({ workspace: workspace._id });
+                const data = await ApplicantApi.getApplicants({ workspace: workspace});
                 if (isMounted) setApplicants(data);
             } catch (err) {
                 console.error("Failed to fetch applicants:", err);

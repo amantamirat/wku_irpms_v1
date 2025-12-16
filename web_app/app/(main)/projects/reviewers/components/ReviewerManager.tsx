@@ -189,7 +189,7 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
     const columns = [       
         { header: "Stage", field: "projectStage.stage.name", sortable: true },
         { header: "Project", field: "projectStage.project.title", sortable: true },
-         { header: "Reviewer", field: "applicant.first_name" },
+         { header: "Reviewer", field: "applicant.name" },
         {
             header: "Score",
             field: "score",

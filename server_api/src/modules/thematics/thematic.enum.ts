@@ -10,3 +10,10 @@ export enum ThemeLevel {
     deep = 'Deep',//priority-area
     //crossCutting="Cross Cutting"
 }
+
+export const themeLevelIndex: Record<ThemeLevel, number> = {
+    [ThemeLevel.broad]: 0,
+    [ThemeLevel.divison]: 1,
+    [ThemeLevel.narrow]: 2,
+    [ThemeLevel.deep]: 3,
+};

@@ -502,6 +502,11 @@
   },
   {
     "category": "Theme Management",
+    "name": "theme:import",
+    "description": "Import theme by batch entries"
+  },
+  {
+    "category": "Theme Management",
     "name": "theme:update",
     "description": "Update theme entries"
   },

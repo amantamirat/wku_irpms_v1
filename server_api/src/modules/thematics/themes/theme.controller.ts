@@ -26,8 +26,12 @@ export class ThemeController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { parent, thematicArea } = req.query;
-            const themes = await this.service.getThemes({ parent: parent as string, thematicArea: thematicArea as string });
+            const { parent, thematicArea, level } = req.query;
+            const themes = await this.service.getThemes({
+                parent: parent as string,
+                thematicArea: thematicArea as string,
+                level: level !== undefined ? Number(level) : undefined
+            });
             successResponse(res, 200, "Themes fetched successfully", themes);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -74,4 +78,28 @@ export class ThemeController {
             errorResponse(res, 400, err.message, err);
         }
     }
+    import = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            const { thematicAreaId, themesData } = req.body;
+            if (!thematicAreaId || !Array.isArray(themesData)) {
+                return errorResponse(res, 400, "thematic_areaId and themesData are required");
+            }
+            if (!req.user) {
+                throw new Error("User not found!");
+            }
+            const result = await this.service.importThemes(
+                thematicAreaId as any,
+                themesData
+            );
+
+            successResponse(
+                res,
+                201,
+                "Themes imported successfully",
+                result
+            );
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
 }

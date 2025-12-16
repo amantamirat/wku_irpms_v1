@@ -2,11 +2,12 @@ import mongoose, { Schema, model } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
 
 export interface ITheme extends Document {
+  _id: mongoose.Types.ObjectId;
   thematicArea: mongoose.Types.ObjectId;
   parent?: mongoose.Types.ObjectId;
   title: string;
   priority?: number;
-  //level: number;
+  level: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -24,7 +25,7 @@ const ThemeSchema = new Schema<ITheme>(
     },
     title: { type: String, required: true },
     priority: { type: Number },
-    //level: { type: Number, required: true, min: 1, max: 5, immutable: true },
+    level: { type: Number, required: true, default: 0, min: 0, max: 4, immutable: true },
   },
   { timestamps: true } // discriminatorKey
 );

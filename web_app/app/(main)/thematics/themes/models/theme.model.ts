@@ -6,7 +6,7 @@ export type Theme = {
     thematicArea?: string | Thematic;
     parent?: string | Theme;
     priority?: number;
-    //level?: number;
+    level?: number;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -14,6 +14,7 @@ export type Theme = {
 export interface GetThemesOptions {
     parent?: string | Theme;
     thematicArea?: string | Thematic;
+    level?: number;
 }
 
 

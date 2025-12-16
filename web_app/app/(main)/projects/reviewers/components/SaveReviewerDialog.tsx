@@ -22,7 +22,6 @@ interface ReviewerDialogProps {
 export default function SaveReviewerDialog({ visible, reviewer, onCompelete, onHide }: ReviewerDialogProps) {
 
     const toast = useRef<Toast>(null);
-    const [scope, setScope] = useState<OrgnUnit>();
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [workspace, setWorkspace] = useState<Organization>();
     const [applicants, setApplicants] = useState<Applicant[]>([]);
@@ -36,14 +35,10 @@ export default function SaveReviewerDialog({ visible, reviewer, onCompelete, onH
         let isMounted = true;
         const fetchOrganizations = async () => {
             try {
-                if (!scope) return;
                 //const type = scopeToOrganizationUnit[scope];
-                if (scope) {
-                    const data = await OrganizationApi.getOrganizations({ type: scope });
-                    if (isMounted) {
-                        setOrganizations(data);
-                    }
-                }
+                const depData = await OrganizationApi.getOrganizations({ type: OrgnUnit.Department });
+                const extData = await OrganizationApi.getOrganizations({ type: OrgnUnit.External });
+                if (isMounted) setOrganizations([...depData, ...extData]);
             } catch (err) {
                 console.error("Failed to fetch organizations:", err);
             }
@@ -52,14 +47,14 @@ export default function SaveReviewerDialog({ visible, reviewer, onCompelete, onH
         return () => {
             isMounted = false;
         };
-    }, [scope]);
+    }, []);
 
     useEffect(() => {
         let isMounted = true;
         const fetchApplicants = async () => {
             try {
                 if (!workspace) return;
-                const data = await ApplicantApi.getApplicants({ workspace: workspace._id });
+                const data = await ApplicantApi.getApplicants({ workspace: workspace });
                 if (isMounted) {
                     setApplicants(data);
                 }
@@ -133,27 +128,12 @@ export default function SaveReviewerDialog({ visible, reviewer, onCompelete, onH
             >
                 {!reviewer._id && <>
                     <div className="field">
-                        <label htmlFor="scope">Scope</label>
-                        <Dropdown
-                            id="scope"
-                            value={scope}
-                            options={Object.values(applicantUnits).map(g => ({ label: g, value: g }))}
-                            onChange={(e) =>
-                                setScope(e.value)
-                            }
-                            placeholder="Select Scope"
-                        />
-                    </div>
-
-                    <div className="field">
                         <label htmlFor="workspace">Workspace</label>
                         <Dropdown
                             id="workspace"
                             value={workspace}
                             options={organizations}
-                            onChange={(e) =>
-                                setWorkspace(e.value)
-                            }
+                            onChange={(e) => setWorkspace(e.value)}
                             optionLabel="name"
                             placeholder="Select a Workspace"
                         />
@@ -173,7 +153,7 @@ export default function SaveReviewerDialog({ visible, reviewer, onCompelete, onH
                             valueTemplate={(option) =>
                                 option
                                     ? applicantTemplate(option)
-                                    : <span className="p-placeholder">Select a Collaborator</span>
+                                    : <span className="p-placeholder">Select a Reviewer</span>
                             }
                             placeholder="Select an Applicant"
                         />

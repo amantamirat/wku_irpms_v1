@@ -15,6 +15,7 @@ import { Project } from "../../models/project.model";
 import { useCrudList } from "@/hooks/useCrudList";
 import { BASE_URL } from "@/api/ApiClient";
 import { Stage } from "@/app/(main)/calls/stages/models/stage.model";
+import { PERMISSIONS } from "@/types/permissions";
 
 interface ProjectDocManagerProps {
     project?: Project;
@@ -24,10 +25,10 @@ interface ProjectDocManagerProps {
 
 const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocManagerProps) => {
     const confirm = useConfirmDialog();
-    const { getLinkedApplicant } = useAuth();
+    const { getLinkedApplicant, hasPermission } = useAuth();
     const linkedApplicant = getLinkedApplicant();
     const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
-    //const isLeadPI = loggedApplicantId === (project?.leadPI as any)._id;
+    const isLeadPI = project ? loggedApplicantId === (project?.leadPI as any)._id : false;
 
     const emptyStage: ProjectDoc = {
         project: project ?? "",
@@ -35,9 +36,9 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
     };
 
     // ✅ Permissions (adjust if needed)
-    const canCreate = !!project;
+    const canCreate = !!project && isLeadPI && hasPermission([PERMISSIONS.DOCUMENT.CREATE]);
     //const canEdit = true;
-    const canDelete = !!project;
+    const canDelete = !!project && isLeadPI && hasPermission([PERMISSIONS.DOCUMENT.CREATE]);;
     // ✅ State + CRUD Hook
     const {
         items: projectDocs,
@@ -101,8 +102,12 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
     };
 
     const columns = [
-        { header: "Stage", field: "stage.name", sortable: true },
-        { header: "Project", field: "project.title", sortable: true },
+        ...((!stage) ? [
+            { header: "Stage", field: "stage.name", sortable: true },
+        ] : []),
+        ...((!project) ? [
+            { header: "Project", field: "project.title", sortable: true },
+        ] : []),
         {
             header: "Document",
             body: (row: ProjectDoc) => {
@@ -135,7 +140,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
                 columns={columns}
                 loading={loading}
                 error={error}
-                
+
                 canCreate={canCreate}
                 canDelete={canDelete}
                 onCreate={() => { setSelectedStage(emptyStage); setShowSaveDialog(true); }}

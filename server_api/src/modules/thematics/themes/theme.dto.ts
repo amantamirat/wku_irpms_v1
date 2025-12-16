@@ -3,7 +3,7 @@ export interface CreateThemeDTO {
     parent?: string;
     title: string;
     priority?: number;
-    level: number;
+    level?: number;
 }
 
 export interface UpdateThemeDTO {
@@ -18,4 +18,5 @@ export interface UpdateThemeDTO {
 export interface GetThemeDTO {
     parent?: string;
     thematicArea?: string;
+    level?:number;
 }

@@ -1,13 +1,7 @@
 import { ApiClient } from "@/api/ApiClient";
 import { GetThemesOptions, sanitizeTheme, Theme } from "../models/theme.model";
 
-
-
 const end_point = '/thematics/themes';
-
-
-
-
 
 export const ThemeApi = {
 
@@ -22,11 +16,11 @@ export const ThemeApi = {
         const sanitized = sanitizeTheme(options);
         if (options.parent) query.append("parent", sanitized.parent as string);
         if (options.thematicArea) query.append("thematicArea", sanitized.thematicArea as string);
+        if (options.level !== undefined)
+            query.append("level", String(sanitized.level));
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Theme[];
     },
-
-   
 
     async updateTheme(theme: Partial<Theme>): Promise<Theme> {
         if (!theme._id) {
@@ -47,13 +41,12 @@ export const ThemeApi = {
         return response;
     },
 
-    /*
-    async importThemesBatch(thematicAreaId: string, themesData: any[]): Promise<any> {
-        const response = await ApiClient.post(`${end_point}/import-themes`, {
+    async importThemes(thematicAreaId: string, themesData: any[]): Promise<any> {
+        const response = await ApiClient.post(`${end_point}/import`, {
             thematicAreaId,
             themesData
         });
         return response;
     },
-    */
+
 };

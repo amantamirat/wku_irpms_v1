@@ -91,7 +91,10 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
         {
             header: "Form Type",
             field: "form_type",
-            body: (row: Criterion) => row.form_type
+            body: (row: Criterion) =>
+                <span className={`form-badge form-type-${row.form_type?.toLowerCase()}`}>
+                    {row.form_type}
+                </span>
         },
     ];
 

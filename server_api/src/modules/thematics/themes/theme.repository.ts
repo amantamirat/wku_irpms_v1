@@ -22,15 +22,15 @@ export class ThemeRepository implements IThemeRepository {
 
     async find(filters: GetThemeDTO) {
         const query: any = {};
-
-        if (filters.parent) {
-            query.parent = new mongoose.Types.ObjectId(filters.parent);
-        }
-
         if (filters.thematicArea) {
             query.thematicArea = new mongoose.Types.ObjectId(filters.thematicArea);
         }
-
+        if (filters.parent) {
+            query.parent = new mongoose.Types.ObjectId(filters.parent);
+        }
+        if (filters.level !== undefined) {//explicitly for zero
+            query.level = filters.level;
+        }
         return Theme.find(query)
             .populate("parent")
             .populate("thematicArea")
