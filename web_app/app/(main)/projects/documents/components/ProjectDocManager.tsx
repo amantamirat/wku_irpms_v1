@@ -30,6 +30,8 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
     const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
     const isLeadPI = project ? loggedApplicantId === (project?.leadPI as any)._id : false;
 
+    const [selectedDocs, setSelectedDocs] = useState<ProjectDoc[]>([]);
+
     const emptyStage: ProjectDoc = {
         project: project ?? "",
         status: ProjectDocStatus.pending
@@ -60,7 +62,10 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
         const fetchDocs = async () => {
             try {
                 setLoading(true);
-                const data = await ProjectDocApi.getProjectDocs({ project: project });
+                const data = await ProjectDocApi.getProjectDocs({
+                    project,
+                    stage
+                });
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to fetch project stages. " + (err.message ?? ""));
@@ -149,6 +154,11 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
                 rowExpansionTemplate={(row) => <ReviewerManager projectStage={row}
                     updateProjectStage={onSaveComplete} showControllers />}
                 enableSearch
+
+                enableSelection={!!stage}
+                selectionMode={stage ? "multiple" : undefined}
+                selectedItems={selectedDocs}
+                onSelectionChange={(value) => setSelectedDocs((value ?? []) as ProjectDoc[])}
             />
 
             {project && (

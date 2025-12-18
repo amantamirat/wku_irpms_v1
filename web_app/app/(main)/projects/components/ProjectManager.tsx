@@ -19,8 +19,11 @@ interface ProjectManagerProps {
 }
 
 const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
-    const { hasPermission } = useAuth();
     const confirm = useConfirmDialog();
+    const { getLinkedApplicant, hasPermission } = useAuth();
+    const linkedApplicant = getLinkedApplicant();
+    const isOwner = linkedApplicant?._id === leadPI?._id;
+
 
     const emptyProject: Project = {
         call: call,
@@ -29,9 +32,9 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
     };
 
     // ✅ Permissions
-    const canCreate = hasPermission([PERMISSIONS.PROJECT.CREATE]);
-    const canEdit = hasPermission([PERMISSIONS.PROJECT.UPDATE]);
-    const canDelete = hasPermission([PERMISSIONS.PROJECT.DELETE]);
+    const canCreate = isOwner && hasPermission([PERMISSIONS.PROJECT.CREATE]);
+    const canEdit = isOwner && hasPermission([PERMISSIONS.PROJECT.UPDATE]);
+    const canDelete = isOwner && hasPermission([PERMISSIONS.PROJECT.DELETE]);
 
     // ✅ State + CRUD Hook
     const {

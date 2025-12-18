@@ -24,11 +24,12 @@ interface CrudManagerProps<T> {
     onDelete?: (row: T) => void;
     extraActions?: (row: T) => React.ReactNode;
     toolbarEnd?: React.ReactNode;
-    //expandedRows?: any[] | DataTableExpandedRows;
-    //onRowToggle?: (exp: any) => void;
     rowExpansionTemplate?: (row: T) => React.ReactNode;
-    /** Optional search filter */
     enableSearch?: boolean;
+    enableSelection?: boolean;
+    selectionMode?: "single" | "multiple";
+    selectedItems?: T[] | T | null;
+    onSelectionChange?: (value: T[] | T | null) => void;
 }
 
 export function CrudManager<T extends { _id?: string }>({
@@ -47,10 +48,13 @@ export function CrudManager<T extends { _id?: string }>({
     onDelete,
     extraActions,
     toolbarEnd,
-    // expandedRows,
-    // onRowToggle,
     rowExpansionTemplate,
-    enableSearch = false
+    enableSearch = false,
+    enableSelection = false,
+    selectionMode = "single",
+    selectedItems,
+    onSelectionChange,
+
 }: CrudManagerProps<T>) {
 
     const [globalFilter, setGlobalFilter] = useState('');
@@ -63,6 +67,7 @@ export function CrudManager<T extends { _id?: string }>({
         setGlobalFilter(value);
         setFilters({ ...filters, global: { value, matchMode: 'contains' } });
     };
+
 
     const home = { icon: 'pi pi-home', url: '/' }
     const renderBreadcrumb = () => {
@@ -137,10 +142,10 @@ export function CrudManager<T extends { _id?: string }>({
 
     return (
         <>
-            {
-                //renderBreadcrumb()
-            }
             <div className="card">
+                {
+                    //renderBreadcrumb()
+                }
                 {renderToolbar()}
                 <DataTable
                     value={items}
@@ -156,9 +161,22 @@ export function CrudManager<T extends { _id?: string }>({
                     filters={filters}
                     globalFilter={globalFilter}
                     header={header}
+
+                    selection={enableSelection ? selectedItems : undefined}
+                    //selectionMode={enableSelection ? selectionMode : undefined}
+                    onSelectionChange={
+                        enableSelection
+                            ? (e:any) =>
+                                onSelectionChange?.(e.value)
+                            : undefined
+                    }
+
                 >
                     {rowExpansionTemplate && <Column expander style={{ width: "3rem" }} />}
 
+                    {enableSelection && (
+                        <Column selectionMode={selectionMode} headerStyle={{ width: "3rem" }} />
+                    )}
                     <Column
                         header="#"
                         body={(row, options) => options.rowIndex + 1}

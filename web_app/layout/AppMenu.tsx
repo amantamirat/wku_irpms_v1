@@ -24,11 +24,13 @@ const AppMenu = () => {
         {
             label: 'Project',
             visible: hasPermission([
-                PERMISSIONS.PROJECT.CREATE,
+                //PERMISSIONS.PROJECT.CREATE,
                 PERMISSIONS.REVIEWER.CREATE,
             ]),
             items: [
-                {
+                /**
+                 * 
+                 * {
                     label: 'Projects',
                     icon: PrimeIcons.BRIEFCASE,
                     to: '/projects',
@@ -38,6 +40,7 @@ const AppMenu = () => {
                         PERMISSIONS.PROJECT.DELETE
                     ])
                 },
+                 */
                 {
                     label: 'Reviewers',
                     icon: 'pi pi-fw pi-eye',

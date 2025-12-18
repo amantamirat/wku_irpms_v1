@@ -72,7 +72,7 @@ const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDi
                 life: 2000
             });
             if (onCompelete) {
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 onCompelete(saved);
             }
         } catch (err) {
