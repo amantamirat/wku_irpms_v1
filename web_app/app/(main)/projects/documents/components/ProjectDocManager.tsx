@@ -16,6 +16,7 @@ import { useCrudList } from "@/hooks/useCrudList";
 import { BASE_URL } from "@/api/ApiClient";
 import { Stage } from "@/app/(main)/calls/stages/models/stage.model";
 import { PERMISSIONS } from "@/types/permissions";
+import { Button } from "primereact/button";
 
 interface ProjectDocManagerProps {
     project?: Project;
@@ -106,6 +107,27 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
         setShowSaveDialog(false);
     };
 
+    const endToolbarTemplate = () => {
+        return (
+            <div className="my-2 flex gap-2" >
+                <Button
+                    label="Accept"
+                    icon="pi pi-check"
+                    severity="success"
+                    //onClick={onCreate}
+                    disabled={selectedDocs.length === 0}
+                />
+                <Button
+                    label="Reject"
+                    icon="pi pi-minus"
+                    severity="danger"
+                    //onClick={onCreate}
+                    disabled={selectedDocs.length === 0}
+                />
+            </div>
+        );
+    }
+
     const columns = [
         ...((!stage) ? [
             { header: "Stage", field: "stage.name", sortable: true },
@@ -123,12 +145,14 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
         },
         {
             header: "Score",
+            field: "totalScore",
             body: (row: ProjectDoc) => {
                 if ([ProjectDocStatus.reviewed, ProjectDocStatus.accepted, ProjectDocStatus.rejected].includes(row.status)) {
                     return row.totalScore ?? "-";
                 }
                 return "-";
-            }
+            },
+            sortable: true
         },
         {
             header: "Status",
@@ -150,6 +174,8 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
                 canDelete={canDelete}
                 onCreate={() => { setSelectedStage(emptyStage); setShowSaveDialog(true); }}
                 onDelete={(row: any) => confirm.ask({ item: row.stage?.name ?? "", onConfirmAsync: () => deleteStage(row) })}
+
+                toolbarEnd={endToolbarTemplate()}
 
                 rowExpansionTemplate={(row) => <ReviewerManager projectStage={row}
                     updateProjectStage={onSaveComplete} showControllers />}

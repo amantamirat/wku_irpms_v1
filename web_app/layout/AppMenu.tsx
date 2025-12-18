@@ -42,9 +42,9 @@ const AppMenu = () => {
                 },
                  */
                 {
-                    label: 'Reviewers',
+                    label: 'Documents',
                     icon: 'pi pi-fw pi-eye',
-                    to: '/projects/reviewers',
+                    to: '/projects/documents',
                     visible: hasPermission([
                         PERMISSIONS.REVIEWER.CREATE,
                         PERMISSIONS.REVIEWER.UPDATE,

@@ -38,7 +38,7 @@ export class ProjectDocController {
             successResponse(res, 201, "Project stage created successfully", created);
 
         } catch (err: any) {
-            
+
             if (req.file) fs.unlink(`uploads/${req.file.filename}`, () => { });
             errorResponse(res, 400, err.message, err);
         }
@@ -80,14 +80,17 @@ export class ProjectDocController {
                 throw new Error("Status Required");
             }
 
+            /*
             const dto: UpdateProjectDocumentDTO = {
                 id,
-                data: status
+                //data: status
             };
+            */
+            throw new Error("Method is not supported");
 
-            const updated = await service.update(dto);
+            //const updated = await service.update({});
 
-            successResponse(res, 200, "Project stage updated successfully", updated);
+            //successResponse(res, 200, "Project stage updated successfully", updated);
 
         } catch (err: any) {
             //if (newFilePath) fs.unlink(newFilePath, () => { });

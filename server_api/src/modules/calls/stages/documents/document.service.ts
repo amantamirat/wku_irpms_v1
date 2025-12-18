@@ -91,7 +91,6 @@ export class DocumentService {
         const { id, userId } = dto;
         const projectStage = await this.repository.findById(id);
         if (!projectStage) throw new Error("Project stage not found");
-        //const projectDoc = projectStage.project as IProject;
         if (projectStage.status !== ProjectDocStatus.pending) {
             throw new Error("Only project stages with 'pending' status can be deleted.");
         }

@@ -1,9 +1,10 @@
 'use client';
-import ProjectDocManager from "../documents/components/ProjectDocManager";
+
+import ReviewerManager from "./components/ReviewerManager";
 
 const ReviwerPage = () => {
     return (
-        <ProjectDocManager />
+        <ReviewerManager />
     );
 };
 export default ReviwerPage;
