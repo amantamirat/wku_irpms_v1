@@ -1,13 +1,14 @@
 import mongoose from "mongoose";
 import { CreateStageDTO, FilterStageDTO, UpdateStageDTO } from "./stage.dto";
 import { IStage, Stage } from "./stage.model";
+import { UpdateStatusDTO } from "./documents/document.dto";
 
 export interface IStageRepository {
     findOne(filters: FilterStageDTO): Promise<IStage | null>;
     find(filters: FilterStageDTO, populate?: boolean): Promise<Partial<IStage>[]>;
-    findLastOrderByCall(callId: string): Promise<number>;
+    findLastStageByCall(callId: string): Promise<IStage | null>;
     create(dto: CreateStageDTO): Promise<IStage>;
-    update(id: string, data: UpdateStageDTO["data"]): Promise<IStage>;
+    update(id: string, data: UpdateStageDTO["data"] | UpdateStatusDTO["data"]): Promise<IStage>;
     delete(id: string): Promise<IStage | null>;
 }
 
@@ -24,18 +25,15 @@ export class StageRepository implements IStageRepository {
         }
         if (options.order) {
             query.order = options.order;
-        }        
+        }
         return Stage.findOne(query).lean<IStage>();
     }
 
-    async findLastOrderByCall(callId: string): Promise<number> {
-        const stage = await Stage
+    async findLastStageByCall(callId: string): Promise<IStage|null> {
+        return await Stage
             .findOne({ call: callId })
             .sort({ order: -1 })
-            .select('order')
-            .lean();
-
-        return stage?.order ?? 0;
+            .lean<IStage>();
     }
 
     async find(filters: FilterStageDTO, populate: boolean = true) {

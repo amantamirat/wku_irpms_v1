@@ -49,19 +49,16 @@ export class StageController {
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.params;
-            const { name, evaluation, deadline, status } = req.body;
-
+            const { name, evaluation, deadline } = req.body;
             const dto: UpdateStageDTO = {
                 id,
                 data: {
                     name,
                     evaluation: evaluation ? (evaluation as string) : undefined,
-                    deadline,
-                    status,
+                    deadline
                 },
             };
-
-            const updated = await this.service.updateStage(dto);
+            const updated = await this.service.update(dto);
             successResponse(res, 200, 'Stage updated successfully', updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -78,8 +75,7 @@ export class StageController {
             const userId = req.user._id;
             const dto: UpdateStageDTO = {
                 id,
-                data: { status },
-                //userId: userId,
+                data: { status }
             };
             const updated = await this.service.changeStatus(dto);
             successResponse(res, 200, "Stage status updated successfully", updated);
@@ -92,7 +88,7 @@ export class StageController {
         try {
             const { id } = req.params;
 
-            const deleted = await this.service.deleteStage(id);
+            const deleted = await this.service.delete(id);
             successResponse(res, 200, 'Stage deleted successfully', deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

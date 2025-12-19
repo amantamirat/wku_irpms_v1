@@ -1,7 +1,7 @@
 import { StageStatus } from "./stage.enum";
 
 export interface FilterStageDTO {
-    _id?:string;
+    _id?: string;
     call?: string;
     order?: number;
     status?: StageStatus;
@@ -10,7 +10,7 @@ export interface FilterStageDTO {
 export interface CreateStageDTO {
     call: string;
     name: string;
-    order?:number;
+    order?: number;
     evaluation: string;
     deadline?: Date;
     status?: StageStatus.planned;
@@ -25,5 +25,6 @@ export interface UpdateStageDTO {
         status: StageStatus;
     }>;
 }
+
 
 
