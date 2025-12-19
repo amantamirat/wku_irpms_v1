@@ -38,7 +38,7 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
     };
 
     const stageStatus = projectStage?.status;
-    const creationStatus = [DocStatus.pending, DocStatus.submitted, DocStatus.on_review];
+    const creationStatus = [DocStatus.pending, DocStatus.submitted];
     const canCreate = hasPermission([PERMISSIONS.REVIEWER.CREATE]) && stageStatus && creationStatus.includes(stageStatus);
     const canEdit = hasPermission([PERMISSIONS.REVIEWER.UPDATE]) && stageStatus && creationStatus.includes(stageStatus);
     const canDelete = hasPermission([PERMISSIONS.REVIEWER.DELETE]) && stageStatus && creationStatus.includes(stageStatus);

@@ -28,8 +28,10 @@ export class ProjectStageSynchronizer {
     if (reviewers.length === 0) {
       newStatus = ProjectDocStatus.pending;
     }
-    else {
-      // Check for at least one active reviewer
+    //else {
+      /**
+       * 
+       *  // Check for at least one active reviewer
       const hasActiveOrSubmitted = reviewers.some(
         r => r.status === ReviewerStatus.active || r.status === ReviewerStatus.submitted);
       if (hasActiveOrSubmitted) {
@@ -38,6 +40,8 @@ export class ProjectStageSynchronizer {
         }
         newStatus = ProjectDocStatus.on_review;
       }
+       */
+     
       else {
         const allApproved = reviewers.every(r => r.status === ReviewerStatus.approved);
         if (allApproved) {
@@ -51,7 +55,7 @@ export class ProjectStageSynchronizer {
           newStatus = ProjectDocStatus.submitted;
         }
       }
-    }
+   // }
 
 
     // Prepare update payload safely

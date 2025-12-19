@@ -3,9 +3,10 @@ import { ProjectDocStatus } from "./document.enum";
 export class DocumentStateMachine {
     private static readonly transitions: Record<ProjectDocStatus, ProjectDocStatus[]> = {
         [ProjectDocStatus.pending]: [ProjectDocStatus.submitted],
-        [ProjectDocStatus.submitted]: [ProjectDocStatus.on_review, ProjectDocStatus.pending],
-        [ProjectDocStatus.on_review]: [ProjectDocStatus.reviewed, ProjectDocStatus.submitted],
-        [ProjectDocStatus.reviewed]: [ProjectDocStatus.accepted, ProjectDocStatus.rejected, ProjectDocStatus.on_review],
+        [ProjectDocStatus.submitted]: [ProjectDocStatus.reviewed, 
+            ProjectDocStatus.pending],
+        //[ProjectDocStatus.on_review]: [ProjectDocStatus.reviewed, ProjectDocStatus.submitted],
+        [ProjectDocStatus.reviewed]: [ProjectDocStatus.accepted, ProjectDocStatus.rejected, ProjectDocStatus.submitted],
         [ProjectDocStatus.accepted]: [ProjectDocStatus.reviewed],
         [ProjectDocStatus.rejected]: [ProjectDocStatus.reviewed]
     };

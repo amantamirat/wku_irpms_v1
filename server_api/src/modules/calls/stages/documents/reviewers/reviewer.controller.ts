@@ -91,7 +91,7 @@ export class ReviewerController {
                 userId: req.user._id
             };
 
-            const deleted = await reviewerService.deleteReviewer(dto);
+            const deleted = await reviewerService.delete(dto);
             successResponse(res, 200, "Reviewer deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

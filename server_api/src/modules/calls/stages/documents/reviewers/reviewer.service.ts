@@ -166,16 +166,14 @@ export class ReviewerService {
         return updated;
     }
 
-    async deleteReviewer(dto: DeleteReviewerDTO) {
+    async delete(dto: DeleteReviewerDTO) {
         const reviewerDoc = await this.repository.findById(dto.id);
         if (!reviewerDoc) throw new Error("Reviewer not found");
 
-        if (reviewerDoc.status === ReviewerStatus.approved) {
-            throw new Error("Cannot delete approved reviewer");
+        if (reviewerDoc.status !== ReviewerStatus.pending) {
+            throw new Error("Cannot delete non pending reviewer");
         }
-        //delete the result too
-        const deleted = await this.repository.delete(dto.id);
-        // don't forget to delete many results here (call repository that handles results if needed)        
+        const deleted = await this.repository.delete(dto.id);      
         await this.projectStageSynchronizer.syncProjectStageStatus(reviewerDoc.projectStage.toString());
         return deleted
     }

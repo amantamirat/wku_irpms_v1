@@ -60,7 +60,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage, enableMultiSel
     const items = [
         {
             label: 'Pending', icon: 'pi pi-home'
-            , value: 'pending' 
+            , value: 'pending'
 
         },
         {
@@ -172,6 +172,34 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage, enableMultiSel
         );
     }
 
+
+    const stateTransitionTemplate = (rowData: ProjectDoc) => {
+        if (!canUpdateStatus) {
+            return
+        }
+        const state = rowData.status;
+        return (
+            <div className="flex gap-2">
+                {(state === DocStatus.accepted || state === DocStatus.rejected) && (
+                    <Button
+                        tooltip="revert"
+                        icon="pi pi-undo"
+                        severity="warning"
+                        size="small"
+                        onClick={() =>
+                            confirm.ask({
+                                operation: "revert",
+                                //onConfirmAsync: () =>
+                                //updateStatus(rowData, DocStatus.submitted)
+                            })
+                        }
+                    />
+                )}
+            </div>
+        );
+    };
+
+
     const columns = [
         ...((!stage) ? [
             { header: "Stage", field: "stage.name", sortable: true },
@@ -201,7 +229,8 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage, enableMultiSel
         {
             header: "Status",
             body: (row: ProjectDoc) => <MyBadge type="status" value={row.status ?? "Unknown"} />
-        }
+        },
+        { body: stateTransitionTemplate }
     ];
 
     return (
@@ -220,18 +249,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage, enableMultiSel
                 onDelete={(row: any) => confirm.ask({ item: row.stage?.name ?? "", onConfirmAsync: () => deleteStage(row) })}
 
                 toolbarEnd={endToolbarTemplate()}
-                toolbarTop={
 
-                    /** 
-                     *  <div className="flex justify-content-center mb-4">
-                    <SelectButton value={size} onChange={(e) => setSize(e.value)} options={sizeOptions} />
-                </div>
-                    */
-                    <TabMenu model={items} activeIndex={activeIndex} onTabChange={(e) => {
-                        setActiveIndex(e.index);
-                        //console.log(e)
-                    }} />
-                }
                 rowExpansionTemplate={(row) => <ReviewerManager projectStage={row}
                     updateProjectStage={onSaveComplete} showControllers />}
                 enableSearch
