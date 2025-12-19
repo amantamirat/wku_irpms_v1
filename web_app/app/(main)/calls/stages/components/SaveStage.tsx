@@ -12,6 +12,7 @@ import { Stage, StageStatus, validateStage } from '../models/stage.model';
 import { EvaluationApi } from '@/app/(main)/evaluations/api/evaluation.api';
 import { Evaluation } from '@/app/(main)/evaluations/models/evaluation.model';
 import { Call } from '../../models/call.model';
+import { Checkbox } from 'primereact/checkbox';
 
 
 interface SaveStageProps {
@@ -129,20 +130,22 @@ const SaveStage = ({ visible, stage, call, onComplete, onHide }: SaveStageProps)
                 </div>
 
                 {/* Evaluation Selector */}
-                <div className="field">
-                    <label htmlFor="evaluation">Evaluation</label>
-                    <Dropdown
-                        id="evaluation"
-                        dataKey="_id"
-                        value={localStage.evaluation}
-                        options={evaluations}
-                        optionLabel="title"
-                        onChange={(e) => setLocalStage({ ...localStage, evaluation: e.value })}
-                        placeholder="Select Evaluation"
-                        className={classNames({ 'p-invalid': submitted && !localStage.evaluation })}
-                    />
-                </div>
-
+                {!localStage._id
+                    &&
+                    <div className="field">
+                        <label htmlFor="evaluation">Evaluation</label>
+                        <Dropdown
+                            id="evaluation"
+                            dataKey="_id"
+                            value={localStage.evaluation}
+                            options={evaluations}
+                            optionLabel="title"
+                            onChange={(e) => setLocalStage({ ...localStage, evaluation: e.value })}
+                            placeholder="Select Evaluation"
+                            className={classNames({ 'p-invalid': submitted && !localStage.evaluation })}
+                        />
+                    </div>
+                }
                 {/* Deadline */}
                 <div className="field">
                     <label htmlFor="deadline">Deadline</label>
@@ -154,6 +157,19 @@ const SaveStage = ({ visible, stage, call, onComplete, onHide }: SaveStageProps)
                         dateFormat="yy-mm-dd"
                         placeholder="Select Deadline"
                     />
+                </div>
+                {/* Final Stage */}
+                <div className="field-checkbox">
+                    <Checkbox
+                        inputId="isFinal"
+                        checked={!!localStage.isFinal}
+                        onChange={(e) =>
+                            setLocalStage({ ...localStage, isFinal: e.checked ?? false })
+                        }
+                    />
+                    <label htmlFor="isFinal" className="ml-2">
+                        Final Stage
+                    </label>
                 </div>
             </Dialog>
         </>

@@ -25,7 +25,7 @@ export const StageApi = {
         }
         const url = changeStatus
             ? `${end_point}/${stage._id}/status`
-            : `${end_point}${stage._id}`;
+            : `${end_point}/${stage._id}`;
         const sanitized = sanitizeStage(stage);
         const updatedStage = await ApiClient.put(url, sanitized);
         return updatedStage as Stage;

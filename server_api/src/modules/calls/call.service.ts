@@ -73,7 +73,7 @@ export class CallService {
         const { id, userId } = dto;
         const callDoc = await this.repository.findById(id);
         if (!callDoc) throw new Error("Call not found");
-        if (callDoc.status! = CallStatus.planned) {
+        if (callDoc.status !== CallStatus.planned) {
             throw new Error("Only planned calls can be deleted.");
         }
         //await CacheService.validateOwnership(userId, callDoc.directorate);       

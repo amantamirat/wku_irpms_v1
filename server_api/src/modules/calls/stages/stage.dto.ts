@@ -24,6 +24,7 @@ export interface UpdateStageDTO {
         name: string;
         evaluation: string;
         deadline: Date;
+        isFinal: boolean;
         status: StageStatus;
     }>;
 }

@@ -34,7 +34,7 @@ export const CallApi = {
     const sanitized = sanitizeCall(call);
     const url = changeStatus
       ? `${ENDPOINT}/${call._id}/status`
-      : `${ENDPOINT}${call._id}`;
+      : `${ENDPOINT}/${call._id}`;
     const updated = await ApiClient.put(url, sanitized);
     return updated as Call;
   },

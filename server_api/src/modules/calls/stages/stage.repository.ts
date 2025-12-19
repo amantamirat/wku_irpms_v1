@@ -81,12 +81,14 @@ export class StageRepository implements IStageRepository {
         if (dtoData.status !== undefined) {
             updateData.status = dtoData.status;
         }
+        if (dtoData.isFinal !== undefined) {
+            updateData.isFinal = dtoData.isFinal;
+        }
         const updated = await Stage.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },
             { new: true }
         ).exec();
-
         if (!updated) throw new Error("Stage not found");
         return updated;
     }
