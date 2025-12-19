@@ -1,27 +1,27 @@
-import { ProjectDocStatus } from "./document.enum";
+import { DocStatus } from "./document.enum";
 
 export class DocumentStateMachine {
-    private static readonly transitions: Record<ProjectDocStatus, ProjectDocStatus[]> = {
-        [ProjectDocStatus.pending]: [ProjectDocStatus.submitted],
-        [ProjectDocStatus.submitted]: [ProjectDocStatus.reviewed, 
-            ProjectDocStatus.pending],
+    private static readonly transitions: Record<DocStatus, DocStatus[]> = {
+        [DocStatus.pending]: [DocStatus.submitted],
+        [DocStatus.submitted]: [DocStatus.reviewed, 
+            DocStatus.pending],
         //[ProjectDocStatus.on_review]: [ProjectDocStatus.reviewed, ProjectDocStatus.submitted],
-        [ProjectDocStatus.reviewed]: [ProjectDocStatus.accepted, ProjectDocStatus.rejected, ProjectDocStatus.submitted],
-        [ProjectDocStatus.accepted]: [ProjectDocStatus.reviewed],
-        [ProjectDocStatus.rejected]: [ProjectDocStatus.reviewed]
+        [DocStatus.reviewed]: [DocStatus.accepted, DocStatus.rejected, DocStatus.submitted],
+        [DocStatus.accepted]: [DocStatus.reviewed],
+        [DocStatus.rejected]: [DocStatus.reviewed]
     };
 
-    static canTransition(from: ProjectDocStatus, to: ProjectDocStatus): boolean {
+    static canTransition(from: DocStatus, to: DocStatus): boolean {
         return this.transitions[from]?.includes(to) ?? false;
     }
 
-    static validateTransition(from: ProjectDocStatus, to: ProjectDocStatus): void {
+    static validateTransition(from: DocStatus, to: DocStatus): void {
         if (!this.canTransition(from, to)) {
             throw new Error(`Invalid stage transition: ${from} → ${to}`);
         }
     }
 
-    static getAllowedTransitions(from: ProjectDocStatus): ProjectDocStatus[] {
+    static getAllowedTransitions(from: DocStatus): DocStatus[] {
         return this.transitions[from] ?? [];
     }
 }

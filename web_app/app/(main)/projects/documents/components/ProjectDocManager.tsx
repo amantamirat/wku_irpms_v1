@@ -143,7 +143,11 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage, enableMultiSel
                             confirm.ask({
                                 operation: `Accept ${selectedDocs.length} projects`,
                                 onConfirmAsync: async () => {
-                                    //
+                                    if (!selectedDocs.every(d => d.status === DocStatus.reviewed)) {
+                                        throw new Error(
+                                            "All selected documents must be reviewed before acceptance."
+                                        );
+                                    }
                                     await ProjectDocApi.updateStatus({ documents: selectedDocs, status: DocStatus.accepted })
                                 }
                             });
@@ -160,7 +164,11 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage, enableMultiSel
                             confirm.ask({
                                 operation: `Reject ${selectedDocs.length} projects`,
                                 onConfirmAsync: async () => {
-                                    //
+                                    if (!selectedDocs.every(d => d.status === DocStatus.reviewed)) {
+                                        throw new Error(
+                                            "All selected documents must be reviewed before rejection."
+                                        );
+                                    }
                                     await ProjectDocApi.updateStatus({ documents: selectedDocs, status: DocStatus.rejected })
                                 }
                             });
@@ -189,8 +197,9 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage, enableMultiSel
                         onClick={() =>
                             confirm.ask({
                                 operation: "revert",
-                                //onConfirmAsync: () =>
-                                //updateStatus(rowData, DocStatus.submitted)
+                                onConfirmAsync: async () => {
+                                    await ProjectDocApi.updateStatus({ documents: [rowData], status: DocStatus.reviewed })
+                                }
                             })
                         }
                     />

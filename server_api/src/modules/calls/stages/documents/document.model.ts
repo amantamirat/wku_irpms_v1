@@ -1,6 +1,6 @@
 //project-stage.ts
 import mongoose, { model, Schema } from "mongoose";
-import { ProjectDocStatus } from "./document.enum";
+import { DocStatus } from "./document.enum";
 import { COLLECTIONS } from "../../../../common/constants/collections.enum";
 
 export interface IProjectDocument extends Document {
@@ -8,7 +8,7 @@ export interface IProjectDocument extends Document {
     project: mongoose.Types.ObjectId;
     documentPath: string;
     totalScore?: number;
-    status: ProjectDocStatus;
+    status: DocStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -36,8 +36,8 @@ const ProjecDocumentSchema = new Schema<IProjectDocument>({
     },
     status: {
         type: String,
-        enum: Object.values(ProjectDocStatus),
-        default: ProjectDocStatus.pending,
+        enum: Object.values(DocStatus),
+        default: DocStatus.pending,
         required: true
     },
 }, { timestamps: true });

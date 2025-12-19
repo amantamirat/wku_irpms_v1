@@ -1,4 +1,4 @@
-export enum ProjectDocStatus {
+export enum DocStatus {
   pending = 'pending',
   submitted = 'submitted',
   reviewed = 'reviewed',

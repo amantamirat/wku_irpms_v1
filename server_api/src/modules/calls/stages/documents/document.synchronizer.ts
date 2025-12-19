@@ -1,6 +1,6 @@
 // project-document.synchronizer.ts
 import { IDocumentRepository } from "./document.repository";
-import { ProjectDocStatus } from "./document.enum";
+import { DocStatus } from "./document.enum";
 import { DocumentStateMachine } from "./document.state-machine";
 import { IProjectDocument } from "./document.model";
 import { IReviewerRepository } from "./reviewers/reviewer.repository";
@@ -22,40 +22,26 @@ export class ProjectStageSynchronizer {
     const currentStatus = stage.status;
     // Fetch all reviewers
     const reviewers = await this.reviewerRepo.findByProjectStage(projectStageId);
-    let newStatus: ProjectDocStatus;
+    let newStatus: DocStatus;
     let totalScore: number | undefined = undefined;
     // 1. No reviewers → pending
     if (reviewers.length === 0) {
-      newStatus = ProjectDocStatus.pending;
+      newStatus = DocStatus.pending;
     }
-    //else {
-      /**
-       * 
-       *  // Check for at least one active reviewer
-      const hasActiveOrSubmitted = reviewers.some(
-        r => r.status === ReviewerStatus.active || r.status === ReviewerStatus.submitted);
-      if (hasActiveOrSubmitted) {
-        if (currentStatus === ProjectDocStatus.reviewed) {
-          totalScore = 0;
-        }
-        newStatus = ProjectDocStatus.on_review;
+    else {
+      const allApproved = reviewers.every(r => r.status === ReviewerStatus.approved);
+      if (allApproved) {
+        newStatus = DocStatus.reviewed;
+        const totalWeight = reviewers.reduce((sum, r) => sum + (r.weight ?? 1), 0);
+        totalScore = reviewers.reduce((sum, r) => sum + (r.score ?? 0) * (r.weight ?? 1), 0) / totalWeight;
+        //totalScore = reviewers.reduce((sum, r) => sum + (r.weight ?? 1) * (r.score ?? 0), 0) / reviewers.length;
       }
-       */
-     
       else {
-        const allApproved = reviewers.every(r => r.status === ReviewerStatus.approved);
-        if (allApproved) {
-          newStatus = ProjectDocStatus.reviewed;
-          const totalWeight = reviewers.reduce((sum, r) => sum + (r.weight ?? 1), 0);
-          totalScore = reviewers.reduce((sum, r) => sum + (r.score ?? 0) * (r.weight ?? 1), 0) / totalWeight;
-          //totalScore = reviewers.reduce((sum, r) => sum + (r.weight ?? 1) * (r.score ?? 0), 0) / reviewers.length;
-        }
-        else {
-          // Otherwise → submitted i.e. every pending → submitted
-          newStatus = ProjectDocStatus.submitted;
-        }
+        // Otherwise → submitted i.e. every pending → submitted
+        newStatus = DocStatus.submitted;
       }
-   // }
+    }
+    // }
 
 
     // Prepare update payload safely

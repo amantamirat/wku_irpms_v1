@@ -1,10 +1,10 @@
 // project-stage.dto.ts
-import { ProjectDocStatus } from "./document.enum";
+import { DocStatus } from "./document.enum";
 
 export interface GetDocumentDTO {
     project?: string;
     stage?: string;
-    status?: ProjectDocStatus;
+    status?: DocStatus;
     skip?: number;
     limit?: number;
 }
@@ -18,7 +18,7 @@ export interface CreateDocumentDTO {
 export interface UpdateDocumentDTO {
     id: string;
     data: Partial<{
-        status: ProjectDocStatus;
+        status: DocStatus;
         totalScore: number;
     }>;
 }
@@ -26,7 +26,7 @@ export interface UpdateDocumentDTO {
 export interface UpdateStatusDTO {
     data: Partial<{
         documents: string[];
-        status: ProjectDocStatus;
+        status: DocStatus;
     }>;
 }
 

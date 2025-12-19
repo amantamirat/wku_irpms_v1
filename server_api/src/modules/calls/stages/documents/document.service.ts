@@ -6,7 +6,7 @@ import { ProjectSynchronizer } from "../../../projects/project.synchronizer";
 import { StageStatus } from "../stage.enum";
 import { IStageRepository, StageRepository } from "../stage.repository";
 import { CreateDocumentDTO, GetDocumentDTO, UpdateDocumentDTO, UpdateStatusDTO } from "./document.dto";
-import { ProjectDocStatus } from "./document.enum";
+import { DocStatus } from "./document.enum";
 import { IDocumentRepository, DocumentRepository } from "./document.repository";
 import { DocumentStateMachine } from "./document.state-machine";
 
@@ -50,7 +50,7 @@ export class DocumentService {
         if (stageDoc.order > 1) {
             const previousDocs = await this.repository.find({ project }, false);
             const hasNotAccepted = previousDocs.some(
-                doc => doc.status !== ProjectDocStatus.accepted
+                doc => doc.status !== DocStatus.accepted
             );
             if (hasNotAccepted) {
                 throw new Error('Previous documents must be accepted before proceeding.');
@@ -74,6 +74,7 @@ export class DocumentService {
         return await this.repository.find(options);
     }
 
+    /*
     async update(dto: UpdateDocumentDTO) {
         const { id, data } = dto;
         const newStatus = data.status;
@@ -86,6 +87,7 @@ export class DocumentService {
         DocumentStateMachine.validateTransition(currentStatus, newStatus);
         return await this.repository.update(dto.id, dto.data);
     }
+        */
 
 
     /**
@@ -104,8 +106,16 @@ export class DocumentService {
             documents.map(async (id) => {
                 const doc = await this.repository.findById(id);
                 if (!doc) throw new Error(`Document not found: ${id}`);
+                /*
+                if (newStatus === DocStatus.submitted) {
+                    const projectDocs = await this.repository.find({ project: String(doc.project) }, false);
+                    
+                }
+                    */
                 DocumentStateMachine.validateTransition(doc.status, newStatus);
-                return this.repository.update(id, { status: newStatus });
+                const updated = this.repository.update(id, { status: newStatus });
+                const syncedProject = this.projectSynchronizer.syncProjectStatus(String(doc.project));
+                return updated;
             })
         );
         return result;
@@ -116,7 +126,7 @@ export class DocumentService {
         const { id, userId } = dto;
         const projectStage = await this.repository.findById(id);
         if (!projectStage) throw new Error("Project stage not found");
-        if (projectStage.status !== ProjectDocStatus.pending) {
+        if (projectStage.status !== DocStatus.pending) {
             throw new Error("Only project stages with 'pending' status can be deleted.");
         }
         const deleted = await this.repository.delete(id);

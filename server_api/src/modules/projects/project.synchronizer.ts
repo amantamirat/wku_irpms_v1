@@ -1,3 +1,4 @@
+import { DocStatus } from "../calls/stages/documents/document.enum";
 import { IDocumentRepository } from "../calls/stages/documents/document.repository";
 import { ProjectStatus } from "./project.enum";
 import { IProject } from "./project.model";
@@ -6,16 +7,16 @@ import { ProjectStateMachine } from "./project.state-machine";
 
 export class ProjectSynchronizer {
     private repository: IProjectRepository;
-    private projectStageRepo: IDocumentRepository;
+    private documentRepository: IDocumentRepository;
     constructor(repository: IProjectRepository, projectStageRepo: IDocumentRepository) {
         this.repository = repository;
-        this.projectStageRepo = projectStageRepo;
+        this.documentRepository = projectStageRepo;
     }
     async syncProjectStatus(projectId: string, project?: Partial<IProject>) {
         const projectDoc = project ?? await this.repository.findById(projectId);
         if (!projectDoc || !projectDoc.status) return;
 
-        const projectStages = await this.projectStageRepo.find({ project: projectId });
+        const projectStages = await this.documentRepository.find({ project: projectId });
 
         const currentStatus = projectDoc.status;
         let newStatus: ProjectStatus;
@@ -23,7 +24,11 @@ export class ProjectSynchronizer {
             newStatus = ProjectStatus.pending;
         }
         else {
-            newStatus = ProjectStatus.submitted;
+            if (projectStages.some(d => d.status === DocStatus.rejected)) {
+                newStatus = ProjectStatus.rejected;
+            } else {
+                newStatus = ProjectStatus.submitted;
+            }
         }
         // Update only if allowed by the state machine
         if (!ProjectStateMachine.canTransition(currentStatus, newStatus)) {

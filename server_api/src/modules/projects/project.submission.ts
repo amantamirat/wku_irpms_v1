@@ -10,7 +10,7 @@ import { IPhase } from "./phase/phase.model";
 import { ProjectStatus } from "./project.enum";
 import { Project } from "./project.model";
 import { CreateProjectDto } from "./project.service";
-import { ProjectDocStatus } from "../calls/stages/documents/document.enum";
+import { DocStatus } from "../calls/stages/documents/document.enum";
 import { ProjectDocument } from "../calls/stages/documents/document.model";
 import { CreateProjectStageDto } from "../calls/stages/documents/document.service";
 import { ProjectTheme } from "./themes/project.theme.model";
@@ -80,7 +80,7 @@ export class ProService {
             project: submittedProject._id,
             //stage: stage._id,
             documentPath: dto.documentPath,
-            status: ProjectDocStatus.pending
+            status: DocStatus.pending
         }
         await Collaborator.insertMany(collaborators);
         await ProjectTheme.insertMany(themes);
