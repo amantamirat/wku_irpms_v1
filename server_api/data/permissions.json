@@ -296,18 +296,27 @@
   },
   {
     "category": "Call Management",
-    "name": "call:read",
-    "description": "Read call entries"
+    "name": "call:read"
   },
   {
     "category": "Call Management",
-    "name": "call:update",
-    "description": "Update call entries"
+    "name": "call:update"
   },
   {
     "category": "Call Management",
-    "name": "call:delete",
-    "description": "Delete call entries"
+    "name": "call:status.planned"
+  },
+  {
+    "category": "Call Management",
+    "name": "call:status.active"
+  },
+  {
+    "category": "Call Management",
+    "name": "call:status.closed"
+  },
+  {
+    "category": "Call Management",
+    "name": "call:delete"
   },
   {
     "category": "Call Management",

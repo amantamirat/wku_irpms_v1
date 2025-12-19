@@ -99,6 +99,11 @@ export const PERMISSIONS = {
     CREATE: "call:create",
     READ: "call:read",
     UPDATE: "call:update",
+    STATUS: {
+      PLANNED: "call:status.planned",
+      ACTIVATE: "call:status.active",
+      CLOSE: "call:status.closed",
+    },
     DELETE: "call:delete",
     CHANGE_STATUS: "call:change_status",
   },

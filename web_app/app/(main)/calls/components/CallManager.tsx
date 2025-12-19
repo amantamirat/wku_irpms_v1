@@ -33,6 +33,11 @@ const CallManager = () => {
     const canCreate = hasPermission([PERMISSIONS.CALL.CREATE]);
     const canEdit = hasPermission([PERMISSIONS.CALL.UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.CALL.DELETE]);
+
+    const canPlan = hasPermission([PERMISSIONS.CALL.STATUS.PLANNED]);
+    const canActivate = hasPermission([PERMISSIONS.CALL.STATUS.ACTIVATE]);
+    const canClose = hasPermission([PERMISSIONS.CALL.STATUS.CLOSE]);
+
     const canChangeStatus = hasPermission([PERMISSIONS.CALL.CHANGE_STATUS]);
 
     /** CRUD Hook */
@@ -52,7 +57,7 @@ const CallManager = () => {
 
     /** Fetch cycles */
     useEffect(() => {
-        const loadCycles = async () => {
+        const fetchCalls = async () => {
             try {
                 setLoading(true);
                 const data = await CallApi.getCalls({});
@@ -63,7 +68,7 @@ const CallManager = () => {
                 setLoading(false);
             }
         };
-        loadCycles();
+        fetchCalls();
     }, []);
 
     /** Save cycle */
@@ -73,7 +78,10 @@ const CallManager = () => {
     };
 
     const updateStatus = async (row: Call, next: CallStatus) => {
-        const updated = await CallApi.update({ _id: row._id, status: next }, true);
+        if (!row._id) {
+            return
+        }
+        const updated = await CallApi.updateStatus(row._id, next);
         onSaveComplete({
             ...updated,
             calendar: row.calendar,
@@ -86,51 +94,58 @@ const CallManager = () => {
 
     const stateTransitionTemplate = (rowData: Call) => {
         const state = rowData.status;
-        return (<div className="flex gap-2">
-            {(state === CallStatus.planned || state === CallStatus.closed) &&
-                <Button
-                    label="Activate"
-                    icon="pi pi-check"
-                    severity="success"
-                    size="small"
-                    onClick={() => {
-                        confirm.ask({
-                            operation: 'activate',
-                            onConfirmAsync: () => updateStatus(rowData, CallStatus.active)
-                        });
-                    }}
-                />}
+        return (
+            <div className="flex gap-2">
+                {canActivate && <>
+                    {(state === CallStatus.planned || state === CallStatus.closed) &&
+                        <Button
+                            label="Activate"
+                            icon="pi pi-check"
+                            severity="success"
+                            size="small"
+                            onClick={() => {
+                                confirm.ask({
+                                    operation: 'activate',
+                                    onConfirmAsync: () => updateStatus(rowData, CallStatus.active)
+                                });
+                            }}
+                        />
+                    }
+                </>}
+                {canClose && <>
+                    {(state === CallStatus.active) &&
+                        <Button
+                            label="Close"
+                            icon="pi pi-lock"
+                            severity="danger"
+                            size="small"
+                            onClick={() => {
+                                confirm.ask({
+                                    operation: 'close',
+                                    onConfirmAsync: () => updateStatus(rowData, CallStatus.closed)
+                                });
+                            }}
+                        />
+                    }
+                </>}
 
-            {(state === CallStatus.active) &&
-                <>
-                    <Button
-                        label="Close"
-                        icon="pi pi-lock"
-                        severity="danger"
-                        size="small"
-                        onClick={() => {
-                            confirm.ask({
-                                operation: 'close',
-                                onConfirmAsync: () => updateStatus(rowData, CallStatus.closed)
-                            });
-                        }}
-                    />
-                    <Button
-                        label="Plan"
-                        icon="pi pi-arrow-left"
-                        severity="warning"
-                        size="small"
-                        onClick={() => {
-                            confirm.ask({
-                                operation: 'change to plan',
-                                onConfirmAsync: () => updateStatus(rowData, CallStatus.planned)
-                            });
-                        }}
-                    />
-                </>
-
-            }
-        </div>);
+                {canPlan && <>
+                    {(state === CallStatus.active) &&
+                        <Button
+                            label="Plan"
+                            icon="pi pi-arrow-left"
+                            severity="warning"
+                            size="small"
+                            onClick={() => {
+                                confirm.ask({
+                                    operation: 'change to plan',
+                                    onConfirmAsync: () => updateStatus(rowData, CallStatus.planned)
+                                });
+                            }}
+                        />
+                    }
+                </>}
+            </div>);
     }
 
     /** Delete */

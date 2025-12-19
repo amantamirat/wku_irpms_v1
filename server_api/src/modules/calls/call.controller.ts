@@ -3,6 +3,7 @@ import { CallService } from './call.service';
 import { CreateCallDTO, UpdateCallDTO } from './call.dto';
 import { AuthenticatedRequest } from '../users/user.middleware';
 import { successResponse, errorResponse } from '../../common/helpers/response';
+import { CallStatus } from './call.enum';
 
 export class CallController {
 
@@ -34,19 +35,38 @@ export class CallController {
 
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const { id } = req.params;
-            const { title, description } = req.body;
             if (!req.user) {
                 throw new Error("User not found!");
             }
             const userId = req.user._id;
+            const { id } = req.query;
+            if (!id) {
+                throw new Error("id not found!");
+            }
+            const { title, description } = req.body;
             const dto: UpdateCallDTO = {
-                id,
+                id: String(id),
                 data: { title, description },
                 userId: userId,
             };
             const updated = await this.service.update(dto);
             successResponse(res, 200, "Call updated successfully", updated);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    }
+
+    updateStatus = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            const { id } = req.query;
+            const { status } = req.params;
+            const dto: UpdateCallDTO = {
+                id: id as string,
+                data: { status: status as CallStatus },
+                userId: "",
+            };
+            const updated = await this.service.changeStatus(dto);
+            successResponse(res, 200, "Call status updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }

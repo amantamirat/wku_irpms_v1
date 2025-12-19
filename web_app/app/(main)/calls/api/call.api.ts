@@ -1,5 +1,5 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Call, GetCallsOptions, sanitizeCall } from "../models/call.model";
+import { Call, CallStatus, GetCallsOptions, sanitizeCall } from "../models/call.model";
 
 const ENDPOINT = "/calls";
 
@@ -31,11 +31,22 @@ export const CallApi = {
   // ---------------------------
   async update(call: Partial<Call>, changeStatus = false): Promise<Call> {
     if (!call._id) throw new Error("_id required.");
+    const query = new URLSearchParams();
+    query.append("id", call._id);
     const sanitized = sanitizeCall(call);
     const url = changeStatus
       ? `${ENDPOINT}/${call._id}/status`
-      : `${ENDPOINT}/${call._id}`;
-    const updated = await ApiClient.put(url, sanitized);
+      : `${ENDPOINT}`;
+    const updated = await ApiClient.put(`${url}?${query.toString()}`, sanitized);
+    return updated as Call;
+  },
+
+
+  async updateStatus(id: string, status: CallStatus): Promise<Call> {
+    const query = new URLSearchParams();
+    query.append("id", id);
+    const url = `${ENDPOINT}/${status}`;
+    const updated = await ApiClient.put(`${url}?${query.toString()}`);
     return updated as Call;
   },
   // ---------------------------

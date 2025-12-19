@@ -33,7 +33,7 @@ export const verifyActiveAccount = (req: AuthenticatedRequest, res: Response, ne
     if (error.name === 'TokenExpiredError') {
       return errorResponse(res, 401, "Session expired. Please log in again.", { code: "TOKEN_EXPIRED" });
     } else {
-      console.log("Token verification error:", error);
+      //console.log("Token verification error:", error);
       return errorResponse(res, 401, "Invalid token. Please log in again.", { code: "TOKEN_INVALID" });
     }
   }
@@ -58,6 +58,34 @@ export const checkPermission = (requiredPermission: string[]) => {
     }
   };
 };
+
+
+export const checkStatusPermission = (resource: string) => {
+  return async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      if (!req.user) {
+        return errorResponse(res, 401, "Unauthorized");
+      }
+      const status = req.params.status;
+      const permission = `${resource}:status.${status}`;
+      const hasPermission = await CacheService.hasPermissions(
+        req.user._id,
+        [permission]
+      );
+      if (!hasPermission) {
+        return errorResponse(res, 403, `Forbidden. Missing permission: ${permission}`
+        );
+      }
+      next();
+    } catch (err) {
+      return errorResponse(res, 500, "Permission check failed");
+    }
+  };
+}
 
 
 

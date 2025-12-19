@@ -26,11 +26,11 @@ export class CallRepository implements ICallRepository {
             query.directorate = new mongoose.Types.ObjectId(filters.directorate);
         }
 
-        return Call.find(query)
+        return await Call.find(query)
             .populate("calendar")
             .populate("directorate")
             .populate("grant")
-            .populate("thematic")
+            //.populate("thematic")
             .lean<ICall[]>()
             .exec();
     }

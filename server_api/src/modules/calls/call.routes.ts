@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
-import { checkPermission, verifyActiveAccount } from '../users/user.middleware';
+import { checkPermission, checkStatusPermission, verifyActiveAccount } from '../users/user.middleware';
 import { CallController } from './call.controller';
 
 const controller = new CallController();
@@ -21,17 +21,24 @@ router.get(
     controller.get
 );
 
-// Update cycle
+// Update call
 router.put(
-    '/:id',
+    '/',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.CALL.UPDATE]),
     controller.update
 );
 
+router.put(
+    '/:status',
+    verifyActiveAccount,
+    checkStatusPermission("call"),
+    controller.updateStatus
+);
+
 //change status
 router.put('/:id/status', verifyActiveAccount,
-   checkPermission([PERMISSIONS.CALL.CHANGE_STATUS]),
+    checkPermission([PERMISSIONS.CALL.CHANGE_STATUS]),
     controller.changeStatus);
 
 // Delete cycle
