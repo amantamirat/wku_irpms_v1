@@ -11,7 +11,7 @@ import MyBadge from "@/templates/MyBadge";
 import ResultManager from "../../results/components/ResultManager";
 import { Reviewer, ReviewerStatus, GetReviewersOptions } from "../models/reviewer.model";
 import { ReviewerApi } from "../api/reviewer.api";
-import { ProjectDoc, ProjectDocStatus } from "../../documents/models/document.model";
+import { ProjectDoc, DocStatus } from "../../documents/models/document.model";
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
 import { useCrudList } from "@/hooks/useCrudList";
 import { PERMISSIONS } from "@/types/permissions";
@@ -38,7 +38,7 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
     };
 
     const stageStatus = projectStage?.status;
-    const creationStatus = [ProjectDocStatus.pending, ProjectDocStatus.submitted, ProjectDocStatus.on_review];
+    const creationStatus = [DocStatus.pending, DocStatus.submitted, DocStatus.on_review];
     const canCreate = hasPermission([PERMISSIONS.REVIEWER.CREATE]) && stageStatus && creationStatus.includes(stageStatus);
     const canEdit = hasPermission([PERMISSIONS.REVIEWER.UPDATE]) && stageStatus && creationStatus.includes(stageStatus);
     const canDelete = hasPermission([PERMISSIONS.REVIEWER.DELETE]) && stageStatus && creationStatus.includes(stageStatus);

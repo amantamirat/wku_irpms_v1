@@ -5,10 +5,10 @@ import { IProjectRepository, ProjectRepository } from "../../../projects/project
 import { ProjectSynchronizer } from "../../../projects/project.synchronizer";
 import { StageStatus } from "../stage.enum";
 import { IStageRepository, StageRepository } from "../stage.repository";
-import { CreateProjectDocumentDTO, GetProjectDocumentDTO, UpdateProjectDocumentDTO } from "./document.dto";
+import { CreateDocumentDTO, GetDocumentDTO, UpdateDocumentDTO, UpdateStatusDTO } from "./document.dto";
 import { ProjectDocStatus } from "./document.enum";
 import { IDocumentRepository, DocumentRepository } from "./document.repository";
-import { DocumnetStateMachine } from "./document.state-machine";
+import { DocumentStateMachine } from "./document.state-machine";
 
 export class DocumentService {
     private repository: IDocumentRepository;
@@ -32,21 +32,21 @@ export class DocumentService {
     // VALIDATIONS
     // ------------------------------------
 
-    private async validateCreate(dto: CreateProjectDocumentDTO) {
+    private async validateCreate(dto: CreateDocumentDTO) {
 
     }
 
-    async create(dto: CreateProjectDocumentDTO) {
+    async create(dto: CreateDocumentDTO) {
         const { project, stage, documentPath } = dto;
 
         const projectDoc = await this.projectRepository.findById(project);
         if (!projectDoc) throw new Error("Project not found");
-        
+
         const stageDoc = await this.stageRepository.findOne({ _id: stage, call: String(projectDoc.call) });
         if (!stageDoc) throw new Error("Stage not found");
         if (stageDoc.status !== StageStatus.active) throw new Error("Stage is not active");
         if (stageDoc.deadline < new Date()) throw new Error("Stage deadline has passed");
-        
+
         if (stageDoc.order > 1) {
             const previousDocs = await this.repository.find({ project }, false);
             const hasNotAccepted = previousDocs.some(
@@ -70,11 +70,11 @@ export class DocumentService {
 
     }
 
-    async get(options: GetProjectDocumentDTO = {}) {
+    async get(options: GetDocumentDTO = {}) {
         return await this.repository.find(options);
     }
 
-    async update(dto: UpdateProjectDocumentDTO) {
+    async update(dto: UpdateDocumentDTO) {
         const { id, data } = dto;
         const newStatus = data.status;
         if (!newStatus) {
@@ -83,9 +83,34 @@ export class DocumentService {
         const projectStage = await this.repository.findById(id);
         if (!projectStage || !projectStage.status) throw new Error("Project stage not found");
         const currentStatus = projectStage.status;
-        DocumnetStateMachine.validateTransition(currentStatus, newStatus);
+        DocumentStateMachine.validateTransition(currentStatus, newStatus);
         return await this.repository.update(dto.id, dto.data);
     }
+
+
+    /**
+         * Change Status
+    */
+
+    async changeStatus(dto: UpdateStatusDTO) {
+        const { documents, status: newStatus } = dto.data;
+        if (!documents || documents.length === 0) {
+            throw new Error("No documents provided");
+        }
+        if (!newStatus) {
+            throw new Error("Status not found");
+        }
+        const result = await Promise.all(
+            documents.map(async (id) => {
+                const doc = await this.repository.findById(id);
+                if (!doc) throw new Error(`Document not found: ${id}`);
+                DocumentStateMachine.validateTransition(doc.status, newStatus);
+                return this.repository.update(id, { status: newStatus });
+            })
+        );
+        return result;
+    }
+
 
     async delete(dto: DeleteDto) {
         const { id, userId } = dto;

@@ -1,7 +1,7 @@
 // project-document.synchronizer.ts
 import { IDocumentRepository } from "./document.repository";
 import { ProjectDocStatus } from "./document.enum";
-import { DocumnetStateMachine } from "./document.state-machine";
+import { DocumentStateMachine } from "./document.state-machine";
 import { IProjectDocument } from "./document.model";
 import { IReviewerRepository } from "./reviewers/reviewer.repository";
 import { ReviewerStatus } from "./reviewers/reviewer.enum";
@@ -63,7 +63,7 @@ export class ProjectStageSynchronizer {
     }
     let updatedProjectStage;
     // Update only if allowed by the state machine
-    if (DocumnetStateMachine.canTransition(currentStatus, newStatus)) {
+    if (DocumentStateMachine.canTransition(currentStatus, newStatus)) {
       updatedProjectStage = await this.projectStageRepo.update(projectStageId, updateData);
     }
     return updatedProjectStage;

@@ -1,13 +1,13 @@
 import { ApiClient } from "@/api/ApiClient";
-import { GetProjectStageOptions, ProjectDoc, sanitizeProjectStage } from "../models/document.model";
+import { GetProjectStageOptions, ProjectDoc, sanitizeProjectDoc, sanitizeUpdateStatusDTO, UpdateStatusDTO } from "../models/document.model";
 
-const end_point = '/project/documents/';
+const end_point = '/project/documents';
 
 export const ProjectDocApi = {
 
     async getProjectDocs(options: GetProjectStageOptions): Promise<ProjectDoc[]> {
         const query = new URLSearchParams();
-        const sanitized = sanitizeProjectStage(options);
+        const sanitized = sanitizeProjectDoc(options);
         if (sanitized.project) query.append("project", sanitized.project as string);
         if (sanitized.stage) query.append("stage", sanitized.stage as string);
         //if (options.status) query.append("status", options.status);
@@ -16,7 +16,7 @@ export const ProjectDocApi = {
     },
 
     async createProjectStage(projectStage: Partial<ProjectDoc>): Promise<any> {
-        const sanitized = sanitizeProjectStage(projectStage);
+        const sanitized = sanitizeProjectDoc(projectStage);
         const formData = new FormData();
         formData.append("project", sanitized.project as string);
         formData.append("stage", sanitized.stage as string);
@@ -26,6 +26,14 @@ export const ProjectDocApi = {
         return createdData;
     },
 
+    async updateStatus(dto: Partial<UpdateStatusDTO>): Promise<any> {
+        const sanitized = sanitizeUpdateStatusDTO(dto);
+        const url = `${end_point}/updateStatus`;
+        const updated = await ApiClient.put(url, sanitized);
+        return updated;
+    },
+
+    /*
     async updateProjectStage(projectStage: Partial<ProjectDoc>): Promise<ProjectDoc> {
         if (!projectStage._id) {
             throw new Error("_id required.");
@@ -34,12 +42,13 @@ export const ProjectDocApi = {
         const updatedProjectStage = await ApiClient.put(url, sanitizeProjectStage(projectStage));
         return updatedProjectStage as ProjectDoc;
     },
+    */
 
     async deleteProjectStage(projectStage: Partial<ProjectDoc>): Promise<any> {
         if (!projectStage._id) {
             throw new Error("_id required.");
         }
-        const url = `${end_point}${projectStage._id}`;
+        const url = `${end_point}/${projectStage._id}`;
         const response = await ApiClient.delete(url);
         return response;
     },

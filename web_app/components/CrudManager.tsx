@@ -24,6 +24,7 @@ interface CrudManagerProps<T> {
     onDelete?: (row: T) => void;
     extraActions?: (row: T) => React.ReactNode;
     toolbarEnd?: React.ReactNode;
+    toolbarTop?: React.ReactNode;
     rowExpansionTemplate?: (row: T) => React.ReactNode;
     enableSearch?: boolean;
     enableSelection?: boolean;
@@ -48,6 +49,7 @@ export function CrudManager<T extends { _id?: string }>({
     onDelete,
     extraActions,
     toolbarEnd,
+    toolbarTop,
     rowExpansionTemplate,
     enableSearch = false,
     enableSelection = false,
@@ -146,6 +148,9 @@ export function CrudManager<T extends { _id?: string }>({
                 {
                     //renderBreadcrumb()
                 }
+                {
+                    toolbarTop
+                }
                 {renderToolbar()}
                 <DataTable
                     value={items}
@@ -166,7 +171,7 @@ export function CrudManager<T extends { _id?: string }>({
                     //selectionMode={enableSelection ? selectionMode : undefined}
                     onSelectionChange={
                         enableSelection
-                            ? (e:any) =>
+                            ? (e: any) =>
                                 onSelectionChange?.(e.value)
                             : undefined
                     }

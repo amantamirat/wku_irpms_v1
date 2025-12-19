@@ -1,7 +1,7 @@
 // project-stage.dto.ts
 import { ProjectDocStatus } from "./document.enum";
 
-export interface GetProjectDocumentDTO {
+export interface GetDocumentDTO {
     project?: string;
     stage?: string;
     status?: ProjectDocStatus;
@@ -9,17 +9,24 @@ export interface GetProjectDocumentDTO {
     limit?: number;
 }
 
-export interface CreateProjectDocumentDTO {
+export interface CreateDocumentDTO {
     project: string;
     stage: string;
     documentPath: string;
 }
 
-export interface UpdateProjectDocumentDTO {
+export interface UpdateDocumentDTO {
     id: string;
     data: Partial<{
         status: ProjectDocStatus;
         totalScore: number;
+    }>;
+}
+
+export interface UpdateStatusDTO {
+    data: Partial<{
+        documents: string[];
+        status: ProjectDocStatus;
     }>;
 }
 

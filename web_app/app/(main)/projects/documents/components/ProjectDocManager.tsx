@@ -9,7 +9,7 @@ import ListSkeleton from "@/components/ListSkeleton";
 import SaveProjectStageDialog from "./SaveProjectStageDialog";
 import ReviewerManager from "../../reviewers/components/ReviewerManager";
 import MyBadge from "@/templates/MyBadge";
-import { ProjectDoc, ProjectDocStatus } from "../models/document.model";
+import { ProjectDoc, DocStatus } from "../models/document.model";
 import { ProjectDocApi } from "../api/project.doc.api";
 import { Project } from "../../models/project.model";
 import { useCrudList } from "@/hooks/useCrudList";
@@ -17,14 +17,17 @@ import { BASE_URL } from "@/api/ApiClient";
 import { Stage } from "@/app/(main)/calls/stages/models/stage.model";
 import { PERMISSIONS } from "@/types/permissions";
 import { Button } from "primereact/button";
+import { SelectButton } from "primereact/selectbutton";
+import { TabMenu } from "primereact/tabmenu";
 
 interface ProjectDocManagerProps {
     project?: Project;
     updateProjectStatus?: (project: Project) => void;
     stage?: Stage;
+    enableMultiSelection?: boolean;
 }
 
-const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocManagerProps) => {
+const ProjectDocManager = ({ project, updateProjectStatus, stage, enableMultiSelection = false }: ProjectDocManagerProps) => {
     const confirm = useConfirmDialog();
     const { getLinkedApplicant, hasPermission } = useAuth();
     const linkedApplicant = getLinkedApplicant();
@@ -35,13 +38,13 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
 
     const emptyStage: ProjectDoc = {
         project: project ?? "",
-        status: ProjectDocStatus.pending
+        status: DocStatus.pending
     };
 
     // ✅ Permissions (adjust if needed)
     const canCreate = !!project && isLeadPI && hasPermission([PERMISSIONS.DOCUMENT.CREATE]);
-    //const canEdit = true;
-    const canDelete = !!project && isLeadPI && hasPermission([PERMISSIONS.DOCUMENT.CREATE]);;
+    const canDelete = !!project && isLeadPI && hasPermission([PERMISSIONS.DOCUMENT.CREATE]);
+    const canUpdateStatus = enableMultiSelection && hasPermission([PERMISSIONS.DOCUMENT.UPDATE_STATUS]);
     // ✅ State + CRUD Hook
     const {
         items: projectDocs,
@@ -53,10 +56,28 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
         error,
         setError
     } = useCrudList<ProjectDoc>();
+    const [activeIndex, setActiveIndex] = useState(0);
+    const items = [
+        {
+            label: 'Pending', icon: 'pi pi-home'
+            , value: 'pending' 
+
+        },
+        {
+            label: 'Submitted', icon: 'pi pi-chart-line'
+            //, value: 'submitted' 
+        },
+        {
+            label: 'Archived', icon: 'pi pi-list'
+            //, value: 'accepted' 
+        }
+    ];
+
+
+
 
     const [selectedStage, setSelectedStage] = useState<ProjectDoc>(emptyStage);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-
 
     // ✅ Fetch project stages
     useEffect(() => {
@@ -108,20 +129,43 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
     };
 
     const endToolbarTemplate = () => {
+        if (!canUpdateStatus) {
+            return undefined;
+        }
         return (
-            <div className="my-2 flex gap-2" >
+            <div className="my-2 mb-3 flex gap-2" >
                 <Button
                     label="Accept"
                     icon="pi pi-check"
                     severity="success"
-                    //onClick={onCreate}
+                    onClick={
+                        () => {
+                            confirm.ask({
+                                operation: `Accept ${selectedDocs.length} projects`,
+                                onConfirmAsync: async () => {
+                                    //
+                                    await ProjectDocApi.updateStatus({ documents: selectedDocs, status: DocStatus.accepted })
+                                }
+                            });
+                        }
+                    }
                     disabled={selectedDocs.length === 0}
                 />
                 <Button
                     label="Reject"
                     icon="pi pi-minus"
                     severity="danger"
-                    //onClick={onCreate}
+                    onClick={
+                        () => {
+                            confirm.ask({
+                                operation: `Reject ${selectedDocs.length} projects`,
+                                onConfirmAsync: async () => {
+                                    //
+                                    await ProjectDocApi.updateStatus({ documents: selectedDocs, status: DocStatus.rejected })
+                                }
+                            });
+                        }
+                    }
                     disabled={selectedDocs.length === 0}
                 />
             </div>
@@ -147,7 +191,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
             header: "Score",
             field: "totalScore",
             body: (row: ProjectDoc) => {
-                if ([ProjectDocStatus.reviewed, ProjectDocStatus.accepted, ProjectDocStatus.rejected].includes(row.status)) {
+                if ([DocStatus.reviewed, DocStatus.accepted, DocStatus.rejected].includes(row.status)) {
                     return row.totalScore ?? "-";
                 }
                 return "-";
@@ -176,14 +220,25 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
                 onDelete={(row: any) => confirm.ask({ item: row.stage?.name ?? "", onConfirmAsync: () => deleteStage(row) })}
 
                 toolbarEnd={endToolbarTemplate()}
+                toolbarTop={
 
+                    /** 
+                     *  <div className="flex justify-content-center mb-4">
+                    <SelectButton value={size} onChange={(e) => setSize(e.value)} options={sizeOptions} />
+                </div>
+                    */
+                    <TabMenu model={items} activeIndex={activeIndex} onTabChange={(e) => {
+                        setActiveIndex(e.index);
+                        //console.log(e)
+                    }} />
+                }
                 rowExpansionTemplate={(row) => <ReviewerManager projectStage={row}
                     updateProjectStage={onSaveComplete} showControllers />}
                 enableSearch
 
-                enableSelection={!!stage}
-                selectionMode={stage ? "multiple" : undefined}
-                selectedItems={selectedDocs}
+                enableSelection={enableMultiSelection}
+                selectionMode={enableMultiSelection ? "multiple" : undefined}
+                selectedItems={enableMultiSelection ? selectedDocs : undefined}
                 onSelectionChange={(value) => setSelectedDocs((value ?? []) as ProjectDoc[])}
             />
 

@@ -1,6 +1,6 @@
 import { ProjectDocStatus } from "./document.enum";
 
-export class DocumnetStateMachine {
+export class DocumentStateMachine {
     private static readonly transitions: Record<ProjectDocStatus, ProjectDocStatus[]> = {
         [ProjectDocStatus.pending]: [ProjectDocStatus.submitted],
         [ProjectDocStatus.submitted]: [ProjectDocStatus.on_review, ProjectDocStatus.pending],

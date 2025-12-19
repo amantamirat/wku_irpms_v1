@@ -441,6 +441,11 @@
   },
   {
     "category": "Document Management",
+    "name": "document:update_status",
+    "description": "Approve/Reject/Undo document entries"
+  },
+  {
+    "category": "Document Management",
     "name": "document:delete",
     "description": "Delete document entries"
   },

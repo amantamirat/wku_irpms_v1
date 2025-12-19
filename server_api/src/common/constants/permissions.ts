@@ -144,7 +144,8 @@ export const PERMISSIONS = {
     CREATE: "document:create",
     READ: "document:read",
     UPDATE: "document:update",
-    DELETE: "document:delete",
+    UPDATE_STATUS: "document:update_status",
+    DELETE: "document:delete",    
   },
   REVIEWER: {
     CREATE: "reviewer:create",

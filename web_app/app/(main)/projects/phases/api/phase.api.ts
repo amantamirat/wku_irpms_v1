@@ -4,9 +4,6 @@ import { GetPhaseOptions, Phase, sanitizePhase } from "../models/phase.model";
 const end_point = '/project/phases/';
 
 
-
-
-
 export const PhaseApi = {
 
     async getPhases(options: GetPhaseOptions): Promise<Phase[]> {

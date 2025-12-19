@@ -2,16 +2,16 @@
 import mongoose, { HydratedDocument } from "mongoose";
 import { ProjectDocument, IProjectDocument } from "./document.model";
 import {
-    CreateProjectDocumentDTO,
-    GetProjectDocumentDTO,
-    UpdateProjectDocumentDTO
+    CreateDocumentDTO,
+    GetDocumentDTO,
+    UpdateDocumentDTO
 } from "./document.dto";
 
 export interface IDocumentRepository {
     findById(id: string): Promise<IProjectDocument | null>; // <-- allow POJO
-    find(filters: GetProjectDocumentDTO, populate?: boolean): Promise<Partial<IProjectDocument>[]>;
-    create(dto: CreateProjectDocumentDTO): Promise<IProjectDocument>;
-    update(id: string, status: UpdateProjectDocumentDTO["data"]): Promise<IProjectDocument>;
+    find(filters: GetDocumentDTO, populate?: boolean): Promise<Partial<IProjectDocument>[]>;
+    create(dto: CreateDocumentDTO): Promise<IProjectDocument>;
+    update(id: string, status: UpdateDocumentDTO["data"]): Promise<IProjectDocument>;
     delete(id: string): Promise<IProjectDocument | null>;
 }
 
@@ -27,7 +27,7 @@ export class DocumentRepository implements IDocumentRepository {
             .exec();
     }
 
-    async find(filters: GetProjectDocumentDTO, populate: boolean = true) {
+    async find(filters: GetDocumentDTO, populate: boolean = true) {
         const query: any = {};
 
         if (filters.project) {
@@ -55,7 +55,7 @@ export class DocumentRepository implements IDocumentRepository {
             .exec();
     }
 
-    async create(dto: CreateProjectDocumentDTO): Promise<HydratedDocument<IProjectDocument>> {
+    async create(dto: CreateDocumentDTO): Promise<HydratedDocument<IProjectDocument>> {
         const data: Partial<IProjectDocument> = {
             project: new mongoose.Types.ObjectId(dto.project),
             stage: new mongoose.Types.ObjectId(dto.stage),
@@ -65,7 +65,7 @@ export class DocumentRepository implements IDocumentRepository {
         return ProjectDocument.create(data);
     }
 
-    async update(id: string, dtoData: UpdateProjectDocumentDTO["data"]): Promise<IProjectDocument> {
+    async update(id: string, dtoData: UpdateDocumentDTO["data"]): Promise<IProjectDocument> {
         const updateData: Partial<IProjectDocument> = {};
 
         if (dtoData.totalScore !== undefined) {

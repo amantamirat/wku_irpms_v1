@@ -1,107 +1,104 @@
 import { Request, Response } from "express";
 import fs from "fs";
-import { errorResponse, successResponse } from "../../../../common/helpers/response";
+import { successResponse, errorResponse } from "../../../../common/helpers/response";
 
 import {
-    CreateProjectDocumentDTO,
-    GetProjectDocumentDTO,
-    UpdateProjectDocumentDTO
+    CreateDocumentDTO,
+    GetDocumentDTO,
+    UpdateStatusDTO
 } from "./document.dto";
+
 import { AuthenticatedRequest } from "../../../users/user.middleware";
 import { DocumentService } from "./document.service";
 import { DeleteDto } from "../../../../util/delete.dto";
 
-const service = new DocumentService();
-
 export class ProjectDocController {
+
+    private service: DocumentService;
+
+    constructor(service?: DocumentService) {
+        this.service = service || new DocumentService();
+    }
 
     // ---------------------------------------------------
     // CREATE
     // ---------------------------------------------------
-    static async create(req: AuthenticatedRequest, res: Response) {
+    create = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.file) throw new Error("Document required");
 
             const { project, stage } = req.body;
+            if (!project || !stage) {
+                throw new Error("project and stage are required");
+            }
 
-            if (!project || !stage)
-                throw new Error("projectId and stageId are required");
-
-            const dto: CreateProjectDocumentDTO = {
+            const dto: CreateDocumentDTO = {
                 project,
                 stage,
-                documentPath: `uploads/${req.file.filename}`
+                documentPath: `uploads/${req.file.filename}`,
             };
 
-            const created = await service.create(dto);
-
-            successResponse(res, 201, "Project stage created successfully", created);
+            const created = await this.service.create(dto);
+            successResponse(res, 201, "Project document created successfully", created);
 
         } catch (err: any) {
-
-            if (req.file) fs.unlink(`uploads/${req.file.filename}`, () => { });
+            if (req.file) {
+                fs.unlink(`uploads/${req.file.filename}`, () => { });
+            }
             errorResponse(res, 400, err.message, err);
         }
-    }
+    };
+
+    // ---------------------------------------------------
+    // Update Status
+    // ---------------------------------------------------
+    changeStatus = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            const { documents, status } = req.body;
+            if (!req.user) {
+                throw new Error("User not found!");
+            }
+            const userId = req.user._id;
+            const dto: UpdateStatusDTO = {
+                data: { documents, status },
+                //userId: userId,
+            };
+            const updated = await this.service.changeStatus(dto);
+            successResponse(res, 200, "Stage status updated successfully", updated);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
 
     // ---------------------------------------------------
     // GET
     // ---------------------------------------------------
-    static async get(req: Request, res: Response) {
+    get = async (req: Request, res: Response) => {
         try {
             const { project, stage, status, skip, limit } = req.query;
 
-            const filter: GetProjectDocumentDTO = {
-                project: project ? String(project) : undefined,
-                stage: stage ? String(stage) : undefined,
-                status: status ? String(status) as any : undefined,
+            const dto: GetDocumentDTO = {
+                project: project as string,
+                stage: stage as string,
+                status: status as any,
                 skip: skip ? Number(skip) : undefined,
-                limit: limit ? Number(limit) : undefined
+                limit: limit ? Number(limit) : undefined,
             };
 
-            const docs = await service.get(filter);
-            successResponse(res, 200, "Project stages fetched successfully", docs);
+            const docs = await this.service.get(dto);
+            successResponse(res, 200, "Project documents fetched successfully", docs);
 
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
+    };
 
-    // ---------------------------------------------------
-    // UPDATE
-    // ---------------------------------------------------
-    static async update(req: AuthenticatedRequest, res: Response) {
-        try {
-            const { id } = req.params;
-            if (!id) throw new Error("id is required");
 
-            const { status } = req.body;
-            if (!status) {
-                throw new Error("Status Required");
-            }
-
-            /*
-            const dto: UpdateProjectDocumentDTO = {
-                id,
-                //data: status
-            };
-            */
-            throw new Error("Method is not supported");
-
-            //const updated = await service.update({});
-
-            //successResponse(res, 200, "Project stage updated successfully", updated);
-
-        } catch (err: any) {
-            //if (newFilePath) fs.unlink(newFilePath, () => { });
-            errorResponse(res, 400, err.message, err);
-        }
-    }
 
     // ---------------------------------------------------
     // DELETE
     // ---------------------------------------------------
-    static async delete(req: AuthenticatedRequest, res: Response) {
+    delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) throw new Error("User not found!");
 
@@ -109,18 +106,24 @@ export class ProjectDocController {
 
             const dto: DeleteDto = {
                 id,
-                userId: req.user._id
+                userId: req.user._id,
             };
 
-            const deletedDoc = await service.delete(dto);
-            const { deleted } = deletedDoc;
-            if (deleted?.documentPath) {
-                fs.unlink(deleted.documentPath, () => { });
+            const deletedDoc = await this.service.delete(dto);
+
+            if (deletedDoc?.deleted?.documentPath) {
+                fs.unlink(deletedDoc.deleted.documentPath, () => { });
             }
-            successResponse(res, 200, "Project stage deleted successfully", deletedDoc);
+
+            successResponse(
+                res,
+                200,
+                "Project document deleted successfully",
+                deletedDoc
+            );
 
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
+    };
 }

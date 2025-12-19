@@ -1,7 +1,7 @@
 import { Stage } from "@/app/(main)/calls/stages/models/stage.model";
 import { Project } from "../../models/project.model";
 
-export enum ProjectDocStatus {
+export enum DocStatus {
     pending = 'pending',
     submitted = 'submitted',
     on_review = 'on_review',
@@ -17,9 +17,17 @@ export type ProjectDoc = {
     documentPath?: string;
     file?: File;
     totalScore?: number;
-    status: ProjectDocStatus;
+    status: DocStatus;
     createdAt?: Date;
     updatedAt?: Date;
+}
+
+
+
+export interface GetProjectStageOptions {
+    project?: string | Project;
+    stage?: string | Stage;
+    //status?: string;
 }
 
 export const validateProjectDoc = (ps: ProjectDoc): { valid: boolean; message?: string } => {
@@ -33,7 +41,7 @@ export const validateProjectDoc = (ps: ProjectDoc): { valid: boolean; message?: 
 }
 
 
-export const sanitizeProjectStage = (ps: Partial<ProjectDoc>): Partial<ProjectDoc> => {
+export const sanitizeProjectDoc = (ps: Partial<ProjectDoc>): Partial<ProjectDoc> => {
     return {
         ...ps,
         project:
@@ -47,8 +55,24 @@ export const sanitizeProjectStage = (ps: Partial<ProjectDoc>): Partial<ProjectDo
     };
 }
 
-export interface GetProjectStageOptions {
-    project?: string | Project;
-    stage?: string | Stage;
-    //status?: string;
+export interface UpdateStatusDTO {
+    documents: string[] | ProjectDoc[];
+    status: DocStatus;
 }
+
+export const sanitizeUpdateStatusDTO = (dto: Partial<UpdateStatusDTO>): Partial<UpdateStatusDTO> => {
+    if (!dto.documents) {
+        return dto as UpdateStatusDTO;
+    }
+    const documents = dto.documents.map((doc) =>
+        typeof doc === "string" ? doc : doc._id ?? ''
+    ).filter(Boolean);
+    return {
+        ...dto,
+        documents,
+    };
+};
+
+
+
+
