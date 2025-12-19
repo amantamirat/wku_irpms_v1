@@ -155,22 +155,6 @@ const SaveStage = ({ visible, stage, call, onComplete, onHide }: SaveStageProps)
                         placeholder="Select Deadline"
                     />
                 </div>
-
-                {/* Status */}
-                {localStage._id &&
-                    <div className="field">
-                        <label htmlFor="status">Status</label>
-                        <Dropdown
-                            id="status"
-                            value={localStage.status}
-                            options={Object.values(StageStatus)}
-                            onChange={(e) => setLocalStage({ ...localStage, status: e.value })}
-                            placeholder="Select Status"
-                            className={classNames({ 'p-invalid': submitted && !localStage.status })}
-                        />
-                    </div>
-                }
-
             </Dialog>
         </>
     );

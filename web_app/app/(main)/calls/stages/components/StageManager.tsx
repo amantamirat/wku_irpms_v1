@@ -148,7 +148,6 @@ const StageManager = ({ call }: StageManagerProps) => {
 
     // Table columns
     const columns = [
-        //{ header: "Order", field: "order", sortable: true },
         { header: "Name", field: "name", sortable: true },
         { header: "Evaluation", field: "evaluation.title", sortable: true },
         {

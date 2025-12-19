@@ -26,10 +26,13 @@ export class StageRepository implements IStageRepository {
         if (options.order) {
             query.order = options.order;
         }
+        if (options.isFinal === true) {
+            query.isFinal = true;
+        }
         return Stage.findOne(query).lean<IStage>();
     }
 
-    async findLastStageByCall(callId: string): Promise<IStage|null> {
+    async findLastStageByCall(callId: string): Promise<IStage | null> {
         return await Stage
             .findOne({ call: callId })
             .sort({ order: -1 })

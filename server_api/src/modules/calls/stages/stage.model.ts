@@ -11,7 +11,8 @@ export interface IStage extends Document {
     order: number;
     evaluation: mongoose.Types.ObjectId;
     deadline: Date;
-    isValidation?: boolean;
+    isFinal?: boolean;
+    //isValidation?: boolean;
     status: StageStatus;
     createdAt?: Date;
     updatedAt?: Date;
@@ -43,9 +44,14 @@ const StageSchema = new Schema<IStage>({
         type: Date,
         required: true
     },
+    isFinal: {
+        type: Boolean,
+    },
+    /*
     isValidation: {
         type: Boolean,
     },
+    */
     status: {
         type: String,
         enum: Object.values(StageStatus),
