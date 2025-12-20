@@ -65,14 +65,16 @@ export class CallController {
                 data: { status: status as CallStatus },
                 userId: "",
             };
-            const updated = await this.service.changeStatus(dto);
+            const updated = await this.service.updateStatus(dto);
             successResponse(res, 200, "Call status updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
-    changeStatus = async (req: AuthenticatedRequest, res: Response) => {
+    /**
+     * 
+     * changeStatus = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.params;
             const { status } = req.body;
@@ -85,12 +87,13 @@ export class CallController {
                 data: { status },
                 userId: userId,
             };
-            const updated = await this.service.changeStatus(dto);
+            const updated = await this.service.updateStatus(dto);
             successResponse(res, 200, "Call status updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
+    }     
+     */
 
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {

@@ -132,7 +132,7 @@ const CallManager = () => {
                 {canPlan && <>
                     {(state === CallStatus.active) &&
                         <Button
-                            label="Plan"
+                            tooltip="Plan"
                             icon="pi pi-arrow-left"
                             severity="warning"
                             size="small"

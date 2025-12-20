@@ -12,7 +12,6 @@ router.post(
     checkPermission([PERMISSIONS.CALL.CREATE]),
     controller.create
 );
-
 // Get cycles
 router.get(
     '/',
@@ -20,7 +19,6 @@ router.get(
     checkPermission([PERMISSIONS.CALL.READ]),
     controller.get
 );
-
 // Update call
 router.put(
     '/',
@@ -28,18 +26,13 @@ router.put(
     checkPermission([PERMISSIONS.CALL.UPDATE]),
     controller.update
 );
-
+// Update status
 router.put(
     '/:status',
     verifyActiveAccount,
     checkStatusPermission("call"),
     controller.updateStatus
 );
-
-//change status
-router.put('/:id/status', verifyActiveAccount,
-    checkPermission([PERMISSIONS.CALL.CHANGE_STATUS]),
-    controller.changeStatus);
 
 // Delete cycle
 router.delete(

@@ -43,12 +43,11 @@ export class CallService {
         const { id, data, userId } = dto;
         const callDoc = await this.repository.findById(id);
         if (!callDoc) throw new Error("Call not found");
-        //await CacheService.validateOwnership(userId, evalDoc.directorate);
         return await this.repository.update(id, data);
     }
 
-    async changeStatus(dto: UpdateCallDTO) {
-        const { id, data, userId } = dto;
+    async updateStatus(dto: UpdateCallDTO) {
+        const { id, data } = dto;
         const nextState = data.status;
         if (!nextState) throw new Error("Status not found");
         const callDoc = await this.repository.findById(id);
@@ -75,8 +74,7 @@ export class CallService {
         if (!callDoc) throw new Error("Call not found");
         if (callDoc.status !== CallStatus.planned) {
             throw new Error("Only planned calls can be deleted.");
-        }
-        //await CacheService.validateOwnership(userId, callDoc.directorate);       
+        } 
         return await this.repository.delete(id);
     }
 }

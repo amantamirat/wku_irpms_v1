@@ -29,15 +29,12 @@ export const CallApi = {
   // ---------------------------
   // Update
   // ---------------------------
-  async update(call: Partial<Call>, changeStatus = false): Promise<Call> {
+  async update(call: Partial<Call>): Promise<Call> {
     if (!call._id) throw new Error("_id required.");
     const query = new URLSearchParams();
     query.append("id", call._id);
     const sanitized = sanitizeCall(call);
-    const url = changeStatus
-      ? `${ENDPOINT}/${call._id}/status`
-      : `${ENDPOINT}`;
-    const updated = await ApiClient.put(`${url}?${query.toString()}`, sanitized);
+    const updated = await ApiClient.put(`${ENDPOINT}?${query.toString()}`, sanitized);
     return updated as Call;
   },
 
