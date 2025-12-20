@@ -1,35 +1,54 @@
-import { CacheService } from "../../util/cache/cache.service";
 import { DeleteDto } from "../../util/delete.dto";
-import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
-import { Unit } from "../organization/organization.enum";
-import { Directorate } from "../organization/organization.model";
+import { CalendarStatus } from "../calendar/calendar.enum";
+import { CalendarRepository, ICalendarRepository } from "../calendar/calendar.repository";
 import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
+import { IThematicRepository, ThematicRepository } from "../thematics/thematic.repository";
+import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
+import { IStageRepository, StageRepository } from "./stages/stage.repository";
+import { Unit } from "../organization/organization.enum";
 import { CreateCallDTO, GetCallsOptions, UpdateCallDTO } from "./call.dto";
 import { CallStatus } from "./call.enum";
 import { CallRepository, ICallRepository } from "./call.repository";
 import { CallStateMachine } from "./call.state-machine";
-import { IStageRepository, StageRepository } from "./stages/stage.repository";
 
 export class CallService {
 
     private repository: ICallRepository;
+    private calendarRepo: ICalendarRepository;
     private organizationRepo: IOrganizationRepository;
     private grantRepo: IGrantRepository;
-
+    private thematicsRepo: IThematicRepository;
     private stageRepository: IStageRepository;
 
-    constructor(repository?: ICallRepository) {
+    constructor(repository?: ICallRepository, calendarRepo?: ICalendarRepository,
+        thematicsRepo?: IThematicRepository
+    ) {
         this.repository = repository || new CallRepository();
         this.organizationRepo = new OrganizationRepository();
+        this.calendarRepo = calendarRepo || new CalendarRepository();
+        this.thematicsRepo = thematicsRepo || new ThematicRepository();
         this.grantRepo = new GrantRepository();
         this.stageRepository = new StageRepository();
     }
 
     async create(dto: CreateCallDTO) {
-        //await CacheService.validateOwnership(dto.userId, dto.directorate);
+        const calendarDoc = await this.calendarRepo.findById(dto.calendar);
+        if (!calendarDoc || calendarDoc.status !== CalendarStatus.active) {
+            throw new Error("Calendar Not Found!");
+        }
         const directorateDoc = await this.organizationRepo.findById(dto.directorate);
         if (!directorateDoc || directorateDoc.type !== Unit.Directorate) {
             throw new Error("Directorate Not Found!");
+        }
+        const grantDoc = await this.grantRepo.findById(dto.grant);
+        if (!grantDoc) {
+            throw new Error("Grant Not Found!");
+        }
+        if (dto.thematic) {
+            const thematicsDoc = await this.thematicsRepo.findById(dto.thematic);
+            if (!thematicsDoc) {
+                throw new Error("Thematics Not Found!");
+            }
         }
         const createdCall = await this.repository.create(dto);
         return createdCall;
@@ -55,13 +74,10 @@ export class CallService {
         const current = callDoc.status;
         // --- State Machine Validation ---
         CallStateMachine.validateTransition(current, nextState);
-        if (nextState === CallStatus.planned || nextState === CallStatus.closed) {
+        if (nextState === CallStatus.planned) {
             const stages = await this.stageRepository.find({ call: id }, false);
-            if (nextState === CallStatus.planned && stages.length > 0) {
+            if (stages.length > 0) {
                 throw new Error("Can not change the call to planned, stages already exist!");
-            }
-            if (nextState === CallStatus.closed) {
-                //all must be closed the stages.
             }
         }
         const updated = await this.repository.update(dto.id, { status: nextState });
@@ -74,7 +90,7 @@ export class CallService {
         if (!callDoc) throw new Error("Call not found");
         if (callDoc.status !== CallStatus.planned) {
             throw new Error("Only planned calls can be deleted.");
-        } 
+        }
         return await this.repository.delete(id);
     }
 }

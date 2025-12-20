@@ -14,7 +14,6 @@ export class StageService {
 
     constructor(repository?: IStageRepository, callRepository?: ICallRepository,
         evalRepository?: IEvaluationRepository) {
-
         this.repository = repository || new StageRepository();
         this.callRepository = callRepository || new CallRepository();
         this.evalRepository = evalRepository || new EvaluationRepository();
