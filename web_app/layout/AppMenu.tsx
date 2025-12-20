@@ -116,6 +116,8 @@ const AppMenu = () => {
             visible: hasPermission(
                 [
                     PERMISSIONS.CALENDAR.CREATE,
+                    PERMISSIONS.PROJECT.CREATE,
+                    PERMISSIONS.APPLICANT.CREATE,
                     PERMISSIONS.SPECIALIZATION.CREATE,
                     PERMISSIONS.POSITION.CREATE
                 ]
@@ -132,6 +134,28 @@ const AppMenu = () => {
                             PERMISSIONS.CALENDAR.DELETE
                         ]
                     )
+                },
+                {
+                    label: 'Projects',
+                    icon: PrimeIcons.BRIEFCASE,
+                    to: '/projects',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.PROJECT.CREATE,
+                            PERMISSIONS.PROJECT.UPDATE,
+                            PERMISSIONS.PROJECT.DELETE
+                        ]
+                    )
+                },
+                {
+                    label: 'Applicants',
+                    icon: PrimeIcons.USERS,
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.APPLICANT.CREATE,
+                        ]
+                    ),
+                    to: '/applicants',
                 },
                 {
                     label: 'Specializations',
@@ -237,25 +261,14 @@ const AppMenu = () => {
             label: 'Account',
             visible: hasPermission(
                 [
-                    PERMISSIONS.APPLICANT.CREATE,
                     PERMISSIONS.USER.CREATE,
                     PERMISSIONS.ROLE.CREATE
                 ]
             ),
             items: [
                 {
-                    label: 'Applicants',
-                    icon: 'pi pi-address-book',
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.APPLICANT.CREATE,
-                        ]
-                    ),
-                    to: '/applicants',
-                },
-                {
                     label: 'Credentials',
-                    icon: PrimeIcons.USERS,
+                    icon: PrimeIcons.SHIELD,
                     to: '/users',
                     visible: hasPermission(
                         [

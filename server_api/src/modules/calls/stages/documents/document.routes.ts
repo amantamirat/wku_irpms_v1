@@ -10,6 +10,7 @@ const router = express.Router();
 router.post("/", verifyActiveAccount,
     checkPermission([PERMISSIONS.DOCUMENT.CREATE]),
     upload.single("document"), controller.create);
+
 router.get("/", verifyActiveAccount,
     checkPermission([PERMISSIONS.DOCUMENT.READ]),
     controller.get);

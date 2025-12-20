@@ -5,12 +5,13 @@ import { IProjectRepository, ProjectRepository } from "../../../projects/project
 import { ProjectSynchronizer } from "../../../projects/project.synchronizer";
 import { StageStatus } from "../stage.enum";
 import { IStageRepository, StageRepository } from "../stage.repository";
-import { CreateDocumentDTO, GetDocumentDTO, UpdateDocumentDTO, UpdateStatusDTO } from "./document.dto";
+import { CreateDocumentDTO, GetDocumentDTO, UpdateStatusDTO } from "./document.dto";
 import { DocStatus } from "./document.enum";
 import { IDocumentRepository, DocumentRepository } from "./document.repository";
 import { DocumentStateMachine } from "./document.state-machine";
 
 export class DocumentService {
+
     private repository: IDocumentRepository;
     private projectRepository: IProjectRepository;
     private stageRepository: IStageRepository;
@@ -28,46 +29,37 @@ export class DocumentService {
         this.validator = new ConstraintValidator(this.projectRepository);
     }
 
-    // ------------------------------------
-    // VALIDATIONS
-    // ------------------------------------
-
-    private async validateCreate(dto: CreateDocumentDTO) {
-
-    }
 
     async create(dto: CreateDocumentDTO) {
-        const { project, stage, documentPath } = dto;
-
-        const projectDoc = await this.projectRepository.findById(project);
-        if (!projectDoc) throw new Error("Project not found");
-
-        const stageDoc = await this.stageRepository.findOne({ _id: stage, call: String(projectDoc.call) });
-        if (!stageDoc) throw new Error("Stage not found");
-        if (stageDoc.status !== StageStatus.active) throw new Error("Stage is not active");
-        if (stageDoc.deadline < new Date()) throw new Error("Stage deadline has passed");
-
-        if (stageDoc.order > 1) {
-            const previousDocs = await this.repository.find({ project }, false);
-            const hasNotAccepted = previousDocs.some(
-                doc => doc.status !== DocStatus.accepted
-            );
-            if (hasNotAccepted) {
-                throw new Error('Previous documents must be accepted before proceeding.');
-            }
-        }
-
         try {
+            const { project, stage } = dto;
+            const projectDoc = await this.projectRepository.findById(project);
+            if (!projectDoc) throw new Error("Project not found");
+            
+            const stageDoc = await this.stageRepository.findOne({ _id: stage, call: String(projectDoc.call) });
+            if (!stageDoc) throw new Error("Stage not found");
+            if (stageDoc.status !== StageStatus.active)
+                throw new Error("Stage is not active");
+            if (stageDoc.deadline < new Date())
+                throw new Error("Stage deadline has passed");
+
+            if (stageDoc.order > 1) {
+                const previousDocs = await this.repository.find({ project }, false);
+                const hasNotAccepted = previousDocs.some(
+                    doc => doc.status !== DocStatus.accepted
+                );
+                if (hasNotAccepted) {
+                    throw new Error('Previous documents must be accepted before proceeding.');
+                }
+            }
             ///grant validator////
             await this.validator.validateProject(project, projectDoc);
-
             const created = await this.repository.create(dto);
             const syncedProject = await this.projectSynchronizer.syncProjectStatus(project, projectDoc);
             return { created, syncedProject }
         } catch (e: any) {
             throw e;
         }
-
     }
 
     async get(options: GetDocumentDTO = {}) {
