@@ -1,10 +1,10 @@
 import { ApiClient } from "@/api/ApiClient";
-import { GetStagesDTO, Stage, sanitizeStage } from "../models/stage.model";
+import { GetStagesDTO, Stage, StageStatus, sanitizeStage } from "../models/stage.model";
 
 const end_point = "/call/stages";
 
 export const StageApi = {
-    
+
     async create(stage: Partial<Stage>): Promise<Stage> {
         const sanitized = sanitizeStage(stage);
         const createdData = await ApiClient.post(end_point, sanitized);
@@ -19,16 +19,23 @@ export const StageApi = {
         return data as Stage[];
     },
 
-    async update(stage: Partial<Stage>, changeStatus = false): Promise<Stage> {
+    async update(stage: Partial<Stage>): Promise<Stage> {
         if (!stage._id) {
             throw new Error("_id required.");
         }
-        const url = changeStatus
-            ? `${end_point}/${stage._id}/status`
-            : `${end_point}/${stage._id}`;
+        const query = new URLSearchParams();
+        query.append("id", stage._id);
         const sanitized = sanitizeStage(stage);
-        const updatedStage = await ApiClient.put(url, sanitized);
-        return updatedStage as Stage;
+        const updated = await ApiClient.put(`${end_point}?${query.toString()}`, sanitized);
+        return updated as Stage;
+    },
+
+    async updateStatus(id: string, status: StageStatus): Promise<Stage> {
+        const query = new URLSearchParams();
+        query.append("id", id);
+        const url = `${end_point}/${status}`;
+        const updated = await ApiClient.put(`${url}?${query.toString()}`);
+        return updated as Stage;
     },
 
     async delete(stage: Partial<Stage>): Promise<boolean> {

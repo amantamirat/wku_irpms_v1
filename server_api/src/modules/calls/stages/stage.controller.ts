@@ -3,6 +3,8 @@ import { StageService } from './stage.service';
 import { CreateStageDTO, FilterStageDTO, UpdateStageDTO } from './stage.dto';
 import { successResponse, errorResponse } from '../../../common/helpers/response';
 import { AuthenticatedRequest } from '../../users/user.middleware';
+import { string } from 'joi';
+import { StageStatus } from './stage.enum';
 
 
 export class StageController {
@@ -49,10 +51,10 @@ export class StageController {
 
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const { id } = req.params;
+            const { id } = req.query;
             const { name, deadline, isFinal } = req.body;
             const dto: UpdateStageDTO = {
-                id,
+                id: id as string,
                 data: {
                     name,
                     //evaluation: evaluation ? (evaluation as string) : undefined,
@@ -67,19 +69,15 @@ export class StageController {
         }
     };
 
-    changeStatus = async (req: AuthenticatedRequest, res: Response) => {
+    updateStatus = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const { id } = req.params;
-            const { status } = req.body;
-            if (!req.user) {
-                throw new Error("User not found!");
-            }
-            const userId = req.user._id;
+            const { id } = req.query;
+            const { status } = req.params;
             const dto: UpdateStageDTO = {
-                id,
-                data: { status }
+                id: id as string,
+                data: { status: status as StageStatus }
             };
-            const updated = await this.service.changeStatus(dto);
+            const updated = await this.service.updateStatus(dto);
             successResponse(res, 200, "Stage status updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

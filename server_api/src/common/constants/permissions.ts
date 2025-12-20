@@ -116,6 +116,11 @@ export const PERMISSIONS = {
     CREATE: "stage:create",
     READ: "stage:read",
     UPDATE: "stage:update",
+    STATUS: {
+      PLANNED: "stage:status.planned",
+      ACTIVATE: "stage:status.active",
+      CLOSE: "stage:status.closed",
+    },
     DELETE: "stage:delete",
     CHANGE_STATUS: "stage:change_status", // New permission for status transitions
   },

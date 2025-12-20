@@ -1,6 +1,7 @@
 import { EvaluationRepository, IEvaluationRepository } from "../../evaluations/evaluation.repository";
 import { CallStatus } from "../call.enum";
 import { CallRepository, ICallRepository } from "../call.repository";
+import { DocumentRepository, IDocumentRepository } from "./documents/document.repository";
 import { CreateStageDTO, FilterStageDTO, UpdateStageDTO } from "./stage.dto";
 import { StageStatus } from "./stage.enum";
 import { IStageRepository, StageRepository } from "./stage.repository";
@@ -10,33 +11,36 @@ export class StageService {
 
     private repository: IStageRepository;
     private callRepository: ICallRepository;
-    private evalRepository: IEvaluationRepository;
+    private evaluationRepo: IEvaluationRepository;
+    private documentRepo: IDocumentRepository;
 
     constructor(repository?: IStageRepository, callRepository?: ICallRepository,
-        evalRepository?: IEvaluationRepository) {
+        evalRepository?: IEvaluationRepository, documentRepo?: IDocumentRepository) {
         this.repository = repository || new StageRepository();
         this.callRepository = callRepository || new CallRepository();
-        this.evalRepository = evalRepository || new EvaluationRepository();
+        this.evaluationRepo = evalRepository || new EvaluationRepository();
+        this.documentRepo = documentRepo || new DocumentRepository();
     }
     /**
      * Create a new stage
      */
     async create(dto: CreateStageDTO) {
         const { call, evaluation } = dto;
+
+        const callDoc = await this.callRepository.findById(call);
+        if (!callDoc) throw new Error("Call not found.");
+        if (callDoc.status !== CallStatus.active) throw new Error("Call is not active.");
+
+        const evalDoc = await this.evaluationRepo.findById(evaluation);
+        if (!evalDoc) throw new Error("Evaluation not found.");
+
         //Last doc
         const lastDoc = await this.repository.findLastStageByCall(call);
         if (lastDoc?.isFinal === true) {
             throw new Error("Final stage already exists.");
         }
-        // Validate call existence and activatation
-        const callDoc = await this.callRepository.findById(call);
-        if (!callDoc) throw new Error("Evaluation not found.");
-        if (callDoc.status !== CallStatus.active) throw new Error("Call is not active.");
-        // Validate evaluation existence
-        const evalDoc = await this.evalRepository.findById(evaluation);
-        if (!evalDoc) throw new Error("Evaluation not found.");
-
         const nextOrder = lastDoc?.order ? lastDoc.order + 1 : 1;
+
         const stage = await this.repository.create({ ...dto, order: nextOrder, status: StageStatus.planned });
         return stage;
     }
@@ -57,8 +61,8 @@ export class StageService {
             if (!stageDoc) {
                 throw new Error("Stage Not Found.");
             }
-            const lastDoc = await this.repository.findLastStageByCall(String(stageDoc.call));
-            if (String(lastDoc?._id) !== id) {
+            const lastStageDoc = await this.repository.findLastStageByCall(String(stageDoc.call));
+            if (String(lastStageDoc?._id) !== id) {
                 throw new Error("Only last stage can be final.");
             }
         }
@@ -67,9 +71,9 @@ export class StageService {
         return
     }
     /**
-    * Change Status
+    * Update Status
     */
-    async changeStatus(dto: UpdateStageDTO) {
+    async updateStatus(dto: UpdateStageDTO) {
         const { id, data } = dto;
         const nextState = data.status;
         if (!nextState) throw new Error("Status not found");
@@ -79,9 +83,9 @@ export class StageService {
         // --- State Machine Validation ---
         StageStateMachine.validateTransition(current, nextState);
         if (nextState === StageStatus.planned) {
-            const stages = await this.repository.find({ call: String(stageDoc.call) }, false);
-            if (stages.length > 0) {
-                throw new Error("Can not change the call to planned, stages already exist!");
+            const documents = await this.documentRepo.find({ stage: id }, false);
+            if (documents.length > 0) {
+                throw new Error("Can not change to planned, document already exist!");
             }
         }
         const updated = await this.repository.update(dto.id, { status: nextState });

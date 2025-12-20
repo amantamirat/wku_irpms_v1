@@ -35,6 +35,10 @@ const StageManager = ({ call }: StageManagerProps) => {
     const canDelete = hasPermission([PERMISSIONS.STAGE.DELETE]);
     const canChangeStatus = hasPermission([PERMISSIONS.STAGE.CHANGE_STATUS]);
 
+    const canPlan = hasPermission([PERMISSIONS.STAGE.STATUS.PLANNED]);
+    const canActivate = hasPermission([PERMISSIONS.STAGE.STATUS.ACTIVATE]);
+    const canClose = hasPermission([PERMISSIONS.STAGE.STATUS.CLOSE]);
+
     // CRUD Hook
     const {
         items: stages,
@@ -76,7 +80,10 @@ const StageManager = ({ call }: StageManagerProps) => {
 
 
     const updateStatus = async (row: Stage, next: StageStatus) => {
-        const updated = await StageApi.update({ _id: row._id, status: next }, true);
+        if (!row._id) {
+            return;
+        }
+        const updated = await StageApi.updateStatus(row._id, next);
         onSaveComplete({
             ...updated,
             evaluation: row.evaluation
@@ -87,7 +94,8 @@ const StageManager = ({ call }: StageManagerProps) => {
     const stateTransitionTemplate = (rowData: Stage) => {
         const state = rowData.status;
         return (<div className="flex gap-2">
-            {(state === StageStatus.planned || state === StageStatus.closed) &&
+            {(canActivate && (state === StageStatus.planned || state === StageStatus.closed))
+                &&
                 <Button
                     label="Activate"
                     icon="pi pi-check"
@@ -99,36 +107,36 @@ const StageManager = ({ call }: StageManagerProps) => {
                             onConfirmAsync: () => updateStatus(rowData, StageStatus.active)
                         });
                     }}
-                />}
-
-            {(state === StageStatus.active) &&
-                <>
-                    <Button
-                        label="Close"
-                        icon="pi pi-lock"
-                        severity="danger"
-                        size="small"
-                        onClick={() => {
-                            confirm.ask({
-                                operation: 'close',
-                                onConfirmAsync: () => updateStatus(rowData, StageStatus.closed)
-                            });
-                        }}
-                    />
-                    <Button
-                        label="Plan"
-                        icon="pi pi-arrow-left"
-                        severity="warning"
-                        size="small"
-                        onClick={() => {
-                            confirm.ask({
-                                operation: 'change to plan',
-                                onConfirmAsync: () => updateStatus(rowData, StageStatus.planned)
-                            });
-                        }}
-                    />
-                </>
-
+                />
+            }
+            {(canClose && (state === StageStatus.active)) &&
+                <Button
+                    tooltip="Close"
+                    icon="pi pi-lock"
+                    severity="danger"
+                    size="small"
+                    onClick={() => {
+                        confirm.ask({
+                            operation: 'close',
+                            onConfirmAsync: () => updateStatus(rowData, StageStatus.closed)
+                        });
+                    }}
+                />
+            }
+            {(canPlan && (state === StageStatus.active)) &&
+                <Button
+                    tooltip="Plan"
+                    icon="pi pi-arrow-left"
+                    severity="warning"
+                    size="small"
+                    hidden={!canPlan}
+                    onClick={() => {
+                        confirm.ask({
+                            operation: 'change to plan',
+                            onConfirmAsync: () => updateStatus(rowData, StageStatus.planned)
+                        });
+                    }}
+                />
             }
         </div>);
     }

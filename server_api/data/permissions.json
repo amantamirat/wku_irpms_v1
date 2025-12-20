@@ -340,6 +340,18 @@
   },
   {
     "category": "Stage Management",
+    "name": "stage:status.planned"
+  },
+  {
+    "category": "Stage Management",
+    "name": "stage:status.active"
+  },
+  {
+    "category": "Stage Management",
+    "name": "stage:status.closed"
+  },
+  {
+    "category": "Stage Management",
     "name": "stage:delete",
     "description": "Delete stage entries"
   },

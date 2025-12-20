@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { StageController } from './stage.controller';
 import { PERMISSIONS } from '../../../common/constants/permissions';
-import { verifyActiveAccount, checkPermission } from '../../users/user.middleware';
+import { verifyActiveAccount, checkPermission, checkStatusPermission } from '../../users/user.middleware';
 
 const controller = new StageController();
 const router = Router();
@@ -23,17 +23,19 @@ router.get(
 
 // Update cycle
 router.put(
-    '/:id',
+    '/',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.STAGE.UPDATE]),
     controller.update
 );
 
-//change status
-router.put('/:id/status', verifyActiveAccount,
-   checkPermission([PERMISSIONS.STAGE.CHANGE_STATUS]),
-    controller.changeStatus);
-
+//update status
+router.put(
+    '/:status',
+    verifyActiveAccount,
+    checkStatusPermission("stage"),
+    controller.updateStatus
+);
 // Delete cycle
 router.delete(
     '/:id',
