@@ -115,7 +115,7 @@ const CallManager = () => {
                 {canClose && <>
                     {(state === CallStatus.active) &&
                         <Button
-                            label="Close"
+                            tooltip="Close"
                             icon="pi pi-lock"
                             severity="danger"
                             size="small"
