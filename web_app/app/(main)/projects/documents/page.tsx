@@ -2,7 +2,7 @@
 import ProjectDocManager from "./components/ProjectDocManager";
 const DocumentPage = () => {
     return (
-        <ProjectDocManager enableMultiSelection />
+        <ProjectDocManager />
     );
 };
 export default DocumentPage;

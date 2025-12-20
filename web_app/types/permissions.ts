@@ -119,6 +119,18 @@ export const PERMISSIONS = {
     DELETE: "stage:delete",
     CHANGE_STATUS: "stage:change_status", // New permission for status transitions
   },
+  DOCUMENT: {
+    CREATE: "document:create",
+    READ: "document:read",
+    UPDATE: "document:update",
+    STATUS: {
+      ACCEPT: "document:status.accepted",
+      REJECT: "document:status.rejected",
+      REVIEW: "document:status.reviewed",
+    },
+    UPDATE_STATUS: "document:update_status",//old status permission can be removed
+    DELETE: "document:delete",
+  },
   EVALUATION: {
     CREATE: "evaluation:create",
     READ: "evaluation:read",
@@ -157,13 +169,7 @@ export const PERMISSIONS = {
     UPDATE: "phase:update",
     DELETE: "phase:delete",
   },
-  DOCUMENT: {
-    CREATE: "document:create",
-    READ: "document:read",
-    UPDATE: "document:update",
-    UPDATE_STATUS: "document:update_status",
-    DELETE: "document:delete",
-  },
+
   REVIEWER: {
     CREATE: "reviewer:create",
     READ: "reviewer:read",

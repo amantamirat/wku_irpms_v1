@@ -1,33 +1,27 @@
 'use client';
-
-import { useEffect, useState } from "react";
-import { CrudManager } from "@/components/CrudManager";
-import ErrorCard from "@/components/ErrorCard";
-import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-import { useAuth } from "@/contexts/auth-context";
-import ListSkeleton from "@/components/ListSkeleton";
-import SaveProjectStageDialog from "./SaveProjectStageDialog";
-import ReviewerManager from "../../reviewers/components/ReviewerManager";
-import MyBadge from "@/templates/MyBadge";
-import { ProjectDoc, DocStatus } from "../models/document.model";
-import { ProjectDocApi } from "../api/project.doc.api";
-import { Project } from "../../models/project.model";
-import { useCrudList } from "@/hooks/useCrudList";
 import { BASE_URL } from "@/api/ApiClient";
 import { Stage } from "@/app/(main)/calls/stages/models/stage.model";
+import { CrudManager } from "@/components/CrudManager";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import { useAuth } from "@/contexts/auth-context";
+import { useCrudList } from "@/hooks/useCrudList";
+import MyBadge from "@/templates/MyBadge";
 import { PERMISSIONS } from "@/types/permissions";
 import { Button } from "primereact/button";
-import { SelectButton } from "primereact/selectbutton";
-import { TabMenu } from "primereact/tabmenu";
+import { useEffect, useState } from "react";
+import { Project } from "../../models/project.model";
+import ReviewerManager from "../../reviewers/components/ReviewerManager";
+import { ProjectDocApi } from "../api/project.doc.api";
+import { DocStatus, ProjectDoc } from "../models/document.model";
+import SaveProjectStageDialog from "./SaveProjectStageDialog";
 
 interface ProjectDocManagerProps {
     project?: Project;
     updateProjectStatus?: (project: Project) => void;
     stage?: Stage;
-    enableMultiSelection?: boolean;
 }
 
-const ProjectDocManager = ({ project, updateProjectStatus, stage, enableMultiSelection = false }: ProjectDocManagerProps) => {
+const ProjectDocManager = ({ project, updateProjectStatus, stage}: ProjectDocManagerProps) => {
     const confirm = useConfirmDialog();
     const { getLinkedApplicant, hasPermission } = useAuth();
     const linkedApplicant = getLinkedApplicant();
@@ -43,8 +37,15 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage, enableMultiSel
 
     // ✅ Permissions (adjust if needed)
     const canCreate = !!project && isLeadPI && hasPermission([PERMISSIONS.DOCUMENT.CREATE]);
-    const canDelete = !!project && isLeadPI && hasPermission([PERMISSIONS.DOCUMENT.CREATE]);
-    const canUpdateStatus = enableMultiSelection && hasPermission([PERMISSIONS.DOCUMENT.UPDATE_STATUS]);
+    const canDelete = !!project && isLeadPI && hasPermission([PERMISSIONS.DOCUMENT.DELETE]);
+    //Status Permissions
+    const canAccept = hasPermission([PERMISSIONS.DOCUMENT.STATUS.ACCEPT]);
+    const canReject = hasPermission([PERMISSIONS.DOCUMENT.STATUS.REJECT]);
+    const canReview = hasPermission([PERMISSIONS.DOCUMENT.STATUS.REVIEW]);
+
+    const enableMultiSelection = canAccept || canReject;
+
+    //const canUpdateStatus = enableMultiSelection && hasPermission([PERMISSIONS.DOCUMENT.UPDATE_STATUS]);
     // ✅ State + CRUD Hook
     const {
         items: projectDocs,
@@ -129,60 +130,65 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage, enableMultiSel
     };
 
     const endToolbarTemplate = () => {
-        if (!canUpdateStatus) {
+        if (!canAccept && !canReject) {
             return undefined;
         }
         return (
             <div className="my-2 mb-3 flex gap-2" >
-                <Button
-                    label="Accept"
-                    icon="pi pi-check"
-                    severity="success"
-                    onClick={
-                        () => {
-                            confirm.ask({
-                                operation: `Accept ${selectedDocs.length} projects`,
-                                onConfirmAsync: async () => {
-                                    if (!selectedDocs.every(d => d.status === DocStatus.reviewed)) {
-                                        throw new Error(
-                                            "All selected documents must be reviewed before acceptance."
-                                        );
+                {canAccept &&
+                    <Button
+                        label="Accept"
+                        icon="pi pi-check"
+                        severity="success"
+                        onClick={
+                            () => {
+                                confirm.ask({
+                                    operation: `Accept ${selectedDocs.length} projects`,
+                                    onConfirmAsync: async () => {
+                                        if (!selectedDocs.every(d => d.status === DocStatus.reviewed)) {
+                                            throw new Error(
+                                                "All selected documents must be reviewed before acceptance."
+                                            );
+                                        }
+                                        await ProjectDocApi.updateStatus({ documents: selectedDocs }, DocStatus.accepted)
                                     }
-                                    await ProjectDocApi.updateStatus({ documents: selectedDocs, status: DocStatus.accepted })
-                                }
-                            });
+                                });
+                            }
                         }
-                    }
-                    disabled={selectedDocs.length === 0}
-                />
-                <Button
-                    label="Reject"
-                    icon="pi pi-minus"
-                    severity="danger"
-                    onClick={
-                        () => {
-                            confirm.ask({
-                                operation: `Reject ${selectedDocs.length} projects`,
-                                onConfirmAsync: async () => {
-                                    if (!selectedDocs.every(d => d.status === DocStatus.reviewed)) {
-                                        throw new Error(
-                                            "All selected documents must be reviewed before rejection."
-                                        );
+                        disabled={selectedDocs.length === 0}
+                    />
+                }
+                {
+                    canReject &&
+                    <Button
+                        label="Reject"
+                        icon="pi pi-minus"
+                        severity="danger"
+                        onClick={
+                            () => {
+                                confirm.ask({
+                                    operation: `Reject ${selectedDocs.length} projects`,
+                                    onConfirmAsync: async () => {
+                                        if (!selectedDocs.every(d => d.status === DocStatus.reviewed)) {
+                                            throw new Error(
+                                                "All selected documents must be reviewed before rejection."
+                                            );
+                                        }
+                                        await ProjectDocApi.updateStatus({ documents: selectedDocs }, DocStatus.rejected)
                                     }
-                                    await ProjectDocApi.updateStatus({ documents: selectedDocs, status: DocStatus.rejected })
-                                }
-                            });
+                                });
+                            }
                         }
-                    }
-                    disabled={selectedDocs.length === 0}
-                />
+                        disabled={selectedDocs.length === 0}
+                    />
+                }
             </div>
         );
     }
 
 
     const stateTransitionTemplate = (rowData: ProjectDoc) => {
-        if (!canUpdateStatus) {
+        if (!canReview) {
             return
         }
         const state = rowData.status;
@@ -198,7 +204,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage, enableMultiSel
                             confirm.ask({
                                 operation: "revert",
                                 onConfirmAsync: async () => {
-                                    await ProjectDocApi.updateStatus({ documents: [rowData], status: DocStatus.reviewed })
+                                    await ProjectDocApi.updateStatus({ documents: [rowData] }, DocStatus.reviewed)
                                 }
                             })
                         }

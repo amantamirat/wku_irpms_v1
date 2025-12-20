@@ -1,5 +1,5 @@
 // project-stage.dto.ts
-import { DocStatus } from "./document.enum";
+import { DocStatus } from "./document.status";
 
 export interface GetDocumentDTO {
     project?: string;

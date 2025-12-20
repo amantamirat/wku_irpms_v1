@@ -33,10 +33,10 @@ const CallManager = () => {
     const canCreate = hasPermission([PERMISSIONS.CALL.CREATE]);
     const canEdit = hasPermission([PERMISSIONS.CALL.UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.CALL.DELETE]);
-
-    const canPlan = hasPermission([PERMISSIONS.CALL.STATUS.PLANNED]);
+    
     const canActivate = hasPermission([PERMISSIONS.CALL.STATUS.ACTIVATE]);
     const canClose = hasPermission([PERMISSIONS.CALL.STATUS.CLOSE]);
+    const canPlan = hasPermission([PERMISSIONS.CALL.STATUS.PLANNED]);
 
     const canChangeStatus = hasPermission([PERMISSIONS.CALL.CHANGE_STATUS]);
 
@@ -211,7 +211,7 @@ const CallManager = () => {
                     })
                 }
                 //enableSearch
-                rowExpansionTemplate={(row) => <CallTabs call={row} />}
+                rowExpansionTemplate={(row) => <StageManager call={row}/>}
             />
 
             {/* Save Dialog */}

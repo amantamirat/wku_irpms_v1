@@ -11,6 +11,7 @@ import {
 import { AuthenticatedRequest } from "../../../users/user.middleware";
 import { DocumentService } from "./document.service";
 import { DeleteDto } from "../../../../util/delete.dto";
+import { DocStatus } from "./document.status";
 
 export class ProjectDocController {
 
@@ -52,18 +53,20 @@ export class ProjectDocController {
     // ---------------------------------------------------
     // Update Status
     // ---------------------------------------------------
-    changeStatus = async (req: AuthenticatedRequest, res: Response) => {
+    updateStatus = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const { documents, status } = req.body;
             if (!req.user) {
                 throw new Error("User not found!");
             }
             const userId = req.user._id;
+            const { status } = req.params;
+            const { documents } = req.body;
+            
             const dto: UpdateStatusDTO = {
-                data: { documents, status },
+                data: { documents, status: status as DocStatus },
                 //userId: userId,
             };
-            const updated = await this.service.changeStatus(dto);
+            const updated = await this.service.updateStatus(dto);
             successResponse(res, 200, "Stage status updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

@@ -1,4 +1,4 @@
-import { CallStatus } from "./call.enum";
+import { CallStatus } from "./call.status";
 
 // call.state-machine.ts
 export class CallStateMachine {

@@ -361,6 +361,44 @@
     "description": "Edit stage status like activate, plan"
   },
   {
+    "category": "Document Management",
+    "name": "document:create",
+    "description": "Create document entries"
+  },
+  {
+    "category": "Document Management",
+    "name": "document:read",
+    "description": "Read document entries"
+  },
+  {
+    "category": "Document Management",
+    "name": "document:update",
+    "description": "Update document entries"
+  },
+  {
+    "category": "Document Management",
+    "name": "document:status.accepted"
+  },
+  {
+    "category": "Document Management",
+    "name": "document:status.rejected"
+  },
+  {
+    "category": "Document Management",
+    "name": "document:status.reviewed",
+    "description": "perform undo operation from rejected to reviewed or accepted to reviwed note that when this permission given to user user can modify other actions, if rejcted and accpted given for different roles."
+  },
+  {
+    "category": "Document Management",
+    "name": "document:delete",
+    "description": "Delete document entries"
+  },
+  {
+    "category": "Document Management",
+    "name": "document:update_status",
+    "description": "Approve/Reject/Undo document entries"
+  },
+  {
     "category": "Evaluation Management",
     "name": "evaluation:create",
     "description": "Create evaluation entries"
@@ -444,31 +482,6 @@
     "category": "Phase Management",
     "name": "phase:delete",
     "description": "Delete phase entries"
-  },
-  {
-    "category": "Document Management",
-    "name": "document:create",
-    "description": "Create document entries"
-  },
-  {
-    "category": "Document Management",
-    "name": "document:read",
-    "description": "Read document entries"
-  },
-  {
-    "category": "Document Management",
-    "name": "document:update",
-    "description": "Update document entries"
-  },
-  {
-    "category": "Document Management",
-    "name": "document:update_status",
-    "description": "Approve/Reject/Undo document entries"
-  },
-  {
-    "category": "Document Management",
-    "name": "document:delete",
-    "description": "Delete document entries"
   },
   {
     "category": "Reviewer Management",

@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema, model } from "mongoose";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
-import { CallStatus } from "./call.enum";
+import { CallStatus } from "./call.status";
 
 
 

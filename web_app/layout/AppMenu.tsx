@@ -21,26 +21,15 @@ const AppMenu = () => {
             label: 'Home',
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
         },
-        {
+        /**
+         * 
+         * {
             label: 'Project',
             visible: hasPermission([
-                //PERMISSIONS.PROJECT.CREATE,
                 PERMISSIONS.REVIEWER.CREATE,
             ]),
             items: [
-                /**
-                 * 
-                 * {
-                    label: 'Projects',
-                    icon: PrimeIcons.BRIEFCASE,
-                    to: '/projects',
-                    visible: hasPermission([
-                        PERMISSIONS.PROJECT.CREATE,
-                        PERMISSIONS.PROJECT.UPDATE,
-                        PERMISSIONS.PROJECT.DELETE
-                    ])
-                },
-                 */
+               
                 {
                     label: 'Documents',
                     icon: 'pi pi-fw pi-eye',
@@ -54,6 +43,7 @@ const AppMenu = () => {
                 },
             ]
         },
+         */
         {
             label: 'Directorate',
             visible: hasPermission([

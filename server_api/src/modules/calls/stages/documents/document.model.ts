@@ -1,6 +1,6 @@
 //project-stage.ts
 import mongoose, { model, Schema } from "mongoose";
-import { DocStatus } from "./document.enum";
+import { DocStatus } from "./document.status";
 import { COLLECTIONS } from "../../../../common/constants/collections.enum";
 
 export interface IProjectDocument extends Document {

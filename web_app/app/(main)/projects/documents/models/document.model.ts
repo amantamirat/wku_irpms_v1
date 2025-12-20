@@ -57,7 +57,7 @@ export const sanitizeProjectDoc = (ps: Partial<ProjectDoc>): Partial<ProjectDoc>
 
 export interface UpdateStatusDTO {
     documents: string[] | ProjectDoc[];
-    status: DocStatus;
+    //status: DocStatus;
 }
 
 export const sanitizeUpdateStatusDTO = (dto: Partial<UpdateStatusDTO>): Partial<UpdateStatusDTO> => {

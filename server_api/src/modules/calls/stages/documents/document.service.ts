@@ -3,10 +3,10 @@ import { DeleteDto } from "../../../../util/delete.dto";
 import { ConstraintValidator } from "../../../grants/constraints/constraint.validator";
 import { IProjectRepository, ProjectRepository } from "../../../projects/project.repository";
 import { ProjectSynchronizer } from "../../../projects/project.synchronizer";
-import { StageStatus } from "../stage.enum";
+import { StageStatus } from "../stage.status";
 import { IStageRepository, StageRepository } from "../stage.repository";
 import { CreateDocumentDTO, GetDocumentDTO, UpdateStatusDTO } from "./document.dto";
-import { DocStatus } from "./document.enum";
+import { DocStatus } from "./document.status";
 import { IDocumentRepository, DocumentRepository } from "./document.repository";
 import { DocumentStateMachine } from "./document.state-machine";
 
@@ -86,7 +86,7 @@ export class DocumentService {
          * Change Status
     */
 
-    async changeStatus(dto: UpdateStatusDTO) {
+    async updateStatus(dto: UpdateStatusDTO) {
         const { documents, status: newStatus } = dto.data;
         if (!documents || documents.length === 0) {
             throw new Error("No documents provided");

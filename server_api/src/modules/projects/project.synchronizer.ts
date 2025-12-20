@@ -1,4 +1,4 @@
-import { DocStatus } from "../calls/stages/documents/document.enum";
+import { DocStatus } from "../calls/stages/documents/document.status";
 import { IDocumentRepository } from "../calls/stages/documents/document.repository";
 import { ProjectStatus } from "./project.enum";
 import { IProject } from "./project.model";

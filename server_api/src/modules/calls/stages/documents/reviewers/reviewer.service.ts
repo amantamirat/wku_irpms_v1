@@ -5,7 +5,7 @@ import Applicant from "../../../../applicants/applicant.model";
 import { Criterion } from "../../../../evaluations/criteria/criterion.model";
 import { Collaborator } from "../../../../projects/collaborators/collaborator.model";
 import { Stage } from "../../stage.model";
-import { DocStatus } from "../document.enum";
+import { DocStatus } from "../document.status";
 import { IDocumentRepository, DocumentRepository } from "../document.repository";
 import { ProjectStageSynchronizer } from "../document.synchronizer";
 import { IResultRepository, ResultRepository } from "./results/result.repository";

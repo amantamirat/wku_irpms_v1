@@ -33,6 +33,7 @@ export class ProjectService {
         return this.repository.create(dto);
     }
 
+    //based on ownerships // and collaborations // and pi
     async getProjects(options: GetProjectsDTO) {
         return this.repository.find(options);
     }

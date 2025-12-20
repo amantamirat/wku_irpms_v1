@@ -3,7 +3,7 @@ import { CallService } from './call.service';
 import { CreateCallDTO, UpdateCallDTO } from './call.dto';
 import { AuthenticatedRequest } from '../users/user.middleware';
 import { successResponse, errorResponse } from '../../common/helpers/response';
-import { CallStatus } from './call.enum';
+import { CallStatus } from './call.status';
 
 export class CallController {
 

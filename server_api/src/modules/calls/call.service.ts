@@ -7,7 +7,7 @@ import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
 import { IStageRepository, StageRepository } from "./stages/stage.repository";
 import { Unit } from "../organization/organization.enum";
 import { CreateCallDTO, GetCallsOptions, UpdateCallDTO } from "./call.dto";
-import { CallStatus } from "./call.enum";
+import { CallStatus } from "./call.status";
 import { CallRepository, ICallRepository } from "./call.repository";
 import { CallStateMachine } from "./call.state-machine";
 

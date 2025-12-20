@@ -1,6 +1,6 @@
 // project-document.synchronizer.ts
 import { IDocumentRepository } from "./document.repository";
-import { DocStatus } from "./document.enum";
+import { DocStatus } from "./document.status";
 import { DocumentStateMachine } from "./document.state-machine";
 import { IProjectDocument } from "./document.model";
 import { IReviewerRepository } from "./reviewers/reviewer.repository";

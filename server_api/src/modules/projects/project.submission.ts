@@ -10,7 +10,7 @@ import { IPhase } from "./phase/phase.model";
 import { ProjectStatus } from "./project.enum";
 import { Project } from "./project.model";
 import { CreateProjectDto } from "./project.service";
-import { DocStatus } from "../calls/stages/documents/document.enum";
+import { DocStatus } from "../calls/stages/documents/document.status";
 import { ProjectDocument } from "../calls/stages/documents/document.model";
 import { CreateProjectStageDto } from "../calls/stages/documents/document.service";
 import { ProjectTheme } from "./themes/project.theme.model";

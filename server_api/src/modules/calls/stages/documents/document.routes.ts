@@ -1,7 +1,7 @@
 import express from "express";
 import { ProjectDocController } from "./document.controller";
 import { upload } from "../../../../util/multer";
-import { checkPermission, verifyActiveAccount } from "../../../users/user.middleware";
+import { checkPermission, checkStatusPermission, verifyActiveAccount } from "../../../users/user.middleware";
 import { PERMISSIONS } from "../../../../common/constants/permissions";
 
 const controller = new ProjectDocController();
@@ -20,9 +20,9 @@ router.put("/:id", verifyActiveAccount,
     controller.update);
     */
 
-router.put("/updateStatus", verifyActiveAccount,
-    checkPermission([PERMISSIONS.DOCUMENT.UPDATE_STATUS]),
-    controller.changeStatus);
+router.put("/:status", verifyActiveAccount,
+    checkStatusPermission("document"),
+    controller.updateStatus);
 
 router.delete("/:id", verifyActiveAccount,
     checkPermission([PERMISSIONS.DOCUMENT.DELETE]),

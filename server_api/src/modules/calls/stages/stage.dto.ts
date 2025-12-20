@@ -1,4 +1,4 @@
-import { StageStatus } from "./stage.enum";
+import { StageStatus } from "./stage.status";
 
 export interface FilterStageDTO {
     _id?: string;

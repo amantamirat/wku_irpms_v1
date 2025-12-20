@@ -1,4 +1,4 @@
-import { DocStatus } from "./document.enum";
+import { DocStatus } from "./document.status";
 
 export class DocumentStateMachine {
     private static readonly transitions: Record<DocStatus, DocStatus[]> = {

@@ -1,5 +1,5 @@
 import { ApiClient } from "@/api/ApiClient";
-import { GetProjectStageOptions, ProjectDoc, sanitizeProjectDoc, sanitizeUpdateStatusDTO, UpdateStatusDTO } from "../models/document.model";
+import { DocStatus, GetProjectStageOptions, ProjectDoc, sanitizeProjectDoc, sanitizeUpdateStatusDTO, UpdateStatusDTO } from "../models/document.model";
 
 const end_point = '/project/documents';
 
@@ -26,12 +26,23 @@ export const ProjectDocApi = {
         return createdData;
     },
 
-    async updateStatus(dto: Partial<UpdateStatusDTO>): Promise<any> {
+
+    async updateStatus(dto: Partial<UpdateStatusDTO>, status: DocStatus): Promise<any> {
         const sanitized = sanitizeUpdateStatusDTO(dto);
-        const url = `${end_point}/updateStatus`;
+        const url = `${end_point}/${status}`;
         const updated = await ApiClient.put(url, sanitized);
         return updated;
     },
+
+    /*
+        async updateStatus(dto: Partial<UpdateStatusDTO>, status: DocStatus): Promise<ProjectDoc> {
+            const query = new URLSearchParams();
+            query.append("id", id);
+            const url = `${end_point}/${status}`;
+            const updated = await ApiClient.put(`${url}?${query.toString()}`);
+            return updated as ProjectDoc;
+        },
+        */
 
     /*
     async updateProjectStage(projectStage: Partial<ProjectDoc>): Promise<ProjectDoc> {
