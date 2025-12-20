@@ -7,6 +7,7 @@ export interface IProject extends Document {
     title: string;
     summary?: string;
     leadPI: mongoose.Types.ObjectId;
+    currentStage: mongoose.Types.ObjectId;
     status: ProjectStatus;
     createdAt?: Date;
     updatedAt?: Date;
@@ -30,6 +31,10 @@ const ProjectSchema = new Schema<IProject>({
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.APPLICANT,
         required: true
+    },
+    currentStage: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.PROJECT_DOCUMENT
     },
     status: {
         type: String,

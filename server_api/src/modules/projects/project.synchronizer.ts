@@ -16,24 +16,23 @@ export class ProjectSynchronizer {
         const projectDoc = project ?? await this.repository.findById(projectId);
         if (!projectDoc || !projectDoc.status) return;
 
-        const projectStages = await this.documentRepository.find({ project: projectId });
+        const projectDocs = await this.documentRepository.find({ project: projectId });
 
         const currentStatus = projectDoc.status;
         let newStatus: ProjectStatus;
-        if (projectStages.length === 0) {
+        if (projectDocs.length === 0) {
             newStatus = ProjectStatus.pending;
         }
         else {
-            if (projectStages.some(d => d.status === DocStatus.rejected)) {
+            if (projectDocs.some(d => d.status === DocStatus.rejected)) {
                 newStatus = ProjectStatus.rejected;
             } else {
                 newStatus = ProjectStatus.submitted;
             }
         }
         // Update only if allowed by the state machine
-        if (!ProjectStateMachine.canTransition(currentStatus, newStatus)) {
-            return;// or throw an error
-        }
+        ProjectStateMachine.validateTransition(currentStatus, newStatus);
+        
         const updated = await this.repository.update(projectId, { status: newStatus })
         return updated;
     }

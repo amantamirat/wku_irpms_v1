@@ -16,7 +16,6 @@ export class DocumentService {
     private projectRepository: IProjectRepository;
     private stageRepository: IStageRepository;
     private projectSynchronizer: ProjectSynchronizer;
-
     private validator: ConstraintValidator;
 
     constructor(repository?: IDocumentRepository, projectRepository?: IProjectRepository,
@@ -29,19 +28,25 @@ export class DocumentService {
         this.validator = new ConstraintValidator(this.projectRepository);
     }
 
-
     async create(dto: CreateDocumentDTO) {
         try {
             const { project, stage } = dto;
             const projectDoc = await this.projectRepository.findById(project);
             if (!projectDoc) throw new Error("Project not found");
-            
+
             const stageDoc = await this.stageRepository.findOne({ _id: stage, call: String(projectDoc.call) });
+
             if (!stageDoc) throw new Error("Stage not found");
             if (stageDoc.status !== StageStatus.active)
                 throw new Error("Stage is not active");
             if (stageDoc.deadline < new Date())
                 throw new Error("Stage deadline has passed");
+
+            //const curentStageDoc = await this.stageRepository.findOne({ _id: String(projectDoc.currentStage) });
+
+            //if (curentStageDoc) { }
+
+
 
             if (stageDoc.order > 1) {
                 const previousDocs = await this.repository.find({ project }, false);
@@ -98,13 +103,13 @@ export class DocumentService {
             documents.map(async (id) => {
                 const doc = await this.repository.findById(id);
                 if (!doc) throw new Error(`Document not found: ${id}`);
+                const current = doc.status;
+                DocumentStateMachine.validateTransition(current, newStatus);
                 /*
                 if (newStatus === DocStatus.submitted) {
                     const projectDocs = await this.repository.find({ project: String(doc.project) }, false);
-                    
                 }
-                    */
-                DocumentStateMachine.validateTransition(doc.status, newStatus);
+                */
                 const updated = this.repository.update(id, { status: newStatus });
                 const syncedProject = this.projectSynchronizer.syncProjectStatus(String(doc.project));
                 return updated;
