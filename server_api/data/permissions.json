@@ -507,6 +507,14 @@
   },
   {
     "category": "Project Management",
+    "name": "project:status.under_review"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:status.accepted"
+  },
+  {
+    "category": "Project Management",
     "name": "project:delete",
     "description": "Delete project entries"
   },

@@ -7,11 +7,12 @@ import { useCrudList } from "@/hooks/useCrudList";
 import MyBadge from "@/templates/MyBadge";
 import { PERMISSIONS } from "@/types/permissions";
 import { useEffect, useState } from "react";
-import { Applicant } from "../../applicants/models/applicant.model";
 import { ProjectApi } from "../api/project.api";
-import { Project } from "../models/project.model";
+import { Project, ProjectStatus } from "../models/project.model";
 import ProjectDetail from "./ProjectDetail";
 import SaveProjectDialog from "./SaveProjectDialog";
+import { Applicant } from "../../applicants/models/applicant.model";
+import { Button } from "primereact/button";
 
 interface ProjectManagerProps {
     call?: Call;
@@ -19,6 +20,7 @@ interface ProjectManagerProps {
 }
 
 const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
+
     const confirm = useConfirmDialog();
     const { getLinkedApplicant, hasPermission } = useAuth();
     const linkedApplicant = getLinkedApplicant();
@@ -27,13 +29,16 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
     const emptyProject: Project = {
         call: call,
         title: "",
-        leadPI: leadPI
+        leadPI: "", //leadPI
     };
 
     // ✅ Permissions
-    const canCreate = hasPermission([PERMISSIONS.PROJECT.CREATE])// && isOwenr;
+    const canCreate = hasPermission([PERMISSIONS.PROJECT.CREATE]);
     const canEdit = hasPermission([PERMISSIONS.PROJECT.UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.PROJECT.DELETE]);
+    // State permissions
+    const canUnderReview = hasPermission([PERMISSIONS.PROJECT.STATUS.UNDER_REVIEW]);
+    const canAccept = hasPermission([PERMISSIONS.PROJECT.STATUS.ACCEPT]);
 
     // ✅ State + CRUD Hook
     const {
@@ -75,8 +80,56 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
         hideSaveDialog();
     };
 
+    const updateStatus = async (row: Project, next: ProjectStatus) => {
+        if (!row._id) {
+            return;
+        }
+        const updated = await ProjectApi.updateStatus(row._id, next);
+        onSaveComplete({
+            ...updated,
+            call: row.call,
+            leadPI: row.leadPI
+        });
+    };
+
+
+    const stateTransitionTemplate = (rowData: Project) => {
+        const state = rowData.status;
+        return (<div className="flex gap-2">
+            {(canUnderReview && state === ProjectStatus.accepted)
+                &&
+                <Button
+                    tooltip="Budget Review"
+                    icon="pi pi-bitcoin"
+                    severity="success"
+                    size="small"
+                    onClick={() => {
+                        confirm.ask({
+                            operation: 'budget review',
+                            onConfirmAsync: () => updateStatus(rowData, ProjectStatus.under_review)
+                        });
+                    }}
+                />
+            }
+            {(canAccept && state === ProjectStatus.under_review) &&
+                <Button
+                    tooltip="Back to accept"
+                    icon="pi pi-undo"
+                    severity="warning"
+                    size="small"
+                    onClick={() => {
+                        confirm.ask({
+                            operation: 'back to activate',
+                            onConfirmAsync: () => updateStatus(rowData, ProjectStatus.accepted)
+                        });
+                    }}
+                />
+            }
+        </div>);
+    }
+
     const deleteProject = async (row: Project) => {
-        const deleted = await ProjectApi.deleteProject(row);
+        const deleted = await ProjectApi.delete(row);
         if (deleted) removeItem(row);
     };
 
@@ -86,13 +139,15 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
     };
 
     const columns = [
-        { header: "Call", field: "call.title" },
-        { header: "Title", field: "title" },
-        { header: "Lead PI", field: "leadPI.name" },
+        { header: "Call", field: "call.title", sortable: true },
+        { header: "Title", field: "title", sortable: true },
+        { header: "Lead PI", field: "leadPI.name", sortable: true },
         {
-            header: "Status", field: "status", body: (p: Project) =>
+            header: "Status", field: "status", sortable: true,
+            body: (p: Project) =>
                 <MyBadge type="status" value={p.status ?? 'Unknown'} />
-        }
+        },
+        { body: stateTransitionTemplate }
     ];
 
     return (

@@ -6,7 +6,11 @@ import { ProjectTheme, sanitizeProjectTheme } from "../themes/models/project.the
 
 export enum ProjectStatus {
     pending = 'pending',
-    closed = 'closed'
+    submitted = "submitted",
+    rejected = "rejected",
+    accepted = "accepted",
+    under_review = "under_review"
+    //closed = 'closed'
 }
 
 export type Project = {

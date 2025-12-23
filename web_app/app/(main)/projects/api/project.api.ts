@@ -1,24 +1,22 @@
 import { ApiClient } from "@/api/ApiClient";
-import { GetProjectsOptions, Project,sanitizeProject } from "../models/project.model";
+import { GetProjectsOptions, Project, ProjectStatus, sanitizeProject } from "../models/project.model";
+
 const end_point = '/projects';
-
-
-
 
 export const ProjectApi = {
 
     async getProjects(options: GetProjectsOptions): Promise<Project[]> {
         // Sanitize the options first
-        const sanitizedOptions = sanitizeProject(options);
+        const sanitized = sanitizeProject(options);
         const query = new URLSearchParams();
-        if (sanitizedOptions.call) query.append("call", sanitizedOptions.call as string);
-        if (sanitizedOptions.leadPI) query.append("leadPI", sanitizedOptions.leadPI as string);
+        if (sanitized.call) query.append("call", sanitized.call as string);
+        if (sanitized.leadPI) query.append("leadPI", sanitized.leadPI as string);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Project[];
     },
 
 
-    async createProject(project: Partial<Project>): Promise<Project> {
+    async create(project: Partial<Project>): Promise<Project> {
         const sanitized = sanitizeProject(project);
         const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as Project;
@@ -36,20 +34,25 @@ export const ProjectApi = {
         return submittedData as Project;
     },
 
-    async updateProject(project: Partial<Project>): Promise<Project> {
-        if (!project._id) {
-            throw new Error("_id required.");
-        }
-        const sanitized = sanitizeProject(project);
-        const url = `${end_point}/${project._id}`;
-        const updatedProject = await ApiClient.put(url, sanitized);
+    async update(project: Partial<Project>): Promise<Project> {
+        if (!project._id) throw new Error("_id required.");
+        const query = new URLSearchParams();
+        query.append("id", project._id);
+        const sanitized = sanitizeProject(project);        
+        const updatedProject = await ApiClient.put(`${end_point}?${query.toString()}`, sanitized);
         return updatedProject as Project;
     },
 
-    async deleteProject(project: Partial<Project>): Promise<boolean> {
-        if (!project._id) {
-            throw new Error("_id required.");
-        }
+    async updateStatus(id: string, status: ProjectStatus): Promise<Project> {
+        const query = new URLSearchParams();
+        query.append("id", id);
+        const url = `${end_point}/${status}`;
+        const updated = await ApiClient.put(`${url}?${query.toString()}`);
+        return updated as Project;
+    },
+
+    async delete(project: Partial<Project>): Promise<boolean> {
+        if (!project._id) throw new Error("_id required.");
         const url = `${end_point}/${project._id}`;
         const response = await ApiClient.delete(url);
         return response;

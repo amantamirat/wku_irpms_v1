@@ -146,6 +146,7 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
         { field: "duration", header: "Duration (Days)", sortable: true },
         { field: "budget", header: "Budget (ETB)", sortable: true },
         { field: "description", header: "Description" },
+        { field: "status", header: "Status" },
     ];
 
     return (

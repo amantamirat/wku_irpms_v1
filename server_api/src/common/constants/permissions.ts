@@ -135,6 +135,10 @@ export const PERMISSIONS = {
     CREATE: "project:create",
     READ: "project:read",
     UPDATE: "project:update",
+    STATUS: {
+      UNDER_REVIEW: "project:status.under_review",
+      ACCEPT: "project:status.accepted"
+    },
     DELETE: "project:delete",
   },
   COLLABORATOR: {

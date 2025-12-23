@@ -49,9 +49,9 @@ const SaveProjectDialog = ({ visible, project, onHide, onComplete }: SaveProject
 
             let saved: Project;
             if (localProject._id) {
-                saved = await ProjectApi.updateProject(localProject);
+                saved = await ProjectApi.update(localProject);
             } else {
-                saved = await ProjectApi.createProject(localProject);
+                saved = await ProjectApi.create(localProject);
             }
             saved = {
                 ...saved,

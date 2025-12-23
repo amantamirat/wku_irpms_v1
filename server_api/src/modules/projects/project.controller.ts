@@ -61,11 +61,11 @@ export class ProjectController {
     try {
       if (!req.user) throw new Error("User not found!");
 
-      const { id } = req.params;
+      const { id } = req.query;
       const { title, summary } = req.body;
 
       const dto: UpdateProjectDTO = {
-        id,
+        id: id as string,
         data: { title, summary },
         applicantId: req.user.applicantId,
       };
@@ -83,8 +83,7 @@ export class ProjectController {
   updateStatus = async (req: AuthenticatedRequest, res: Response) => {
     try {
       if (!req.user) throw new Error("User not found!");
-
-      //const userId = req.user._id;
+      
       const { id } = req.query;
       const { status } = req.params;
 
