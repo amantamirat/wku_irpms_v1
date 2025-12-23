@@ -16,6 +16,7 @@ router.get('/', verifyActiveAccount,
 router.put('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.PROJECT.UPDATE]),
     controller.update);
+
 router.delete('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.PROJECT.DELETE]),
     controller.delete);

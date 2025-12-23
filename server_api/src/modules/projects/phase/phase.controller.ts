@@ -12,7 +12,6 @@ export class PhaseController {
     constructor(service?: PhaseService) {
         this.service = service || new PhaseService();
     }
-
     // -----------------------
     // Create
     // -----------------------
@@ -38,7 +37,7 @@ export class PhaseController {
                 applicantId: req.user.applicantId,
             };
 
-            const created = await this.service.createPhase(data);
+            const created = await this.service.create(data);
             successResponse(res, 201, "Phase created successfully", created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -81,10 +80,10 @@ export class PhaseController {
                     budget: budget ?? undefined,
                     description: description ?? undefined,
                 },
-                userId: req.user._id,
+                applicantId: req.user._id,
             };
 
-            const updated = await this.service.updatePhase(dto);
+            const updated = await this.service.update(dto);
             successResponse(res, 200, "Phase updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -105,7 +104,7 @@ export class PhaseController {
                 userId: req.user._id,
             };
 
-            const deleted = await this.service.deletePhase(dto);
+            const deleted = await this.service.delete(dto);
             successResponse(res, 200, "Phase deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

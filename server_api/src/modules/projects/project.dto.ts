@@ -1,14 +1,12 @@
 import { PhaseDto } from "./phase/phase.dto";
 import { ProjectStatus } from "./project.status";
 
-
 export interface GetProjectsDTO {
     call?: string;
     leadPI?: string;
     status?: ProjectStatus;
     skip?: number;
     limit?: number;
-
 }
 
 // CREATE Project
@@ -17,7 +15,7 @@ export interface CreateProjectDTO {
     title: string;
     summary?: string;
     status?: ProjectStatus;
-    leadPI: string;
+    applicantId: string;
 }
 
 // UPDATE Project
@@ -26,10 +24,17 @@ export interface UpdateProjectDTO {
     data: Partial<{
         title: string;
         summary: string;
-        status: ProjectStatus;
         leadPI: string;
+        status: ProjectStatus;
     }>;
-    userId: string;  // who is making the update
+    applicantId: string;
+}
+
+export interface UpdateStatusDTO {
+    data: {
+        id: string;
+        status: ProjectStatus;
+    };
 }
 
 export interface SubmitProjectDTO {

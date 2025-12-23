@@ -24,7 +24,7 @@ export interface UpdatePhaseDto {
         budget: number;
         description?: string;
     }>;
-    userId: string;
+    applicantId: string;
 }
 
 // ---------- GET / QUERY OPTIONS ----------

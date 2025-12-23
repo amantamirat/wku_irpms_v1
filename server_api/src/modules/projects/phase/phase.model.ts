@@ -1,13 +1,17 @@
 import mongoose, { model, Schema } from "mongoose";
 import { PhaseType } from "./phase.enum";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
+import { PhaseStatus } from "./phase.status";
 
 interface BasePhaseDocument extends Document {
     type: PhaseType;
     activity: string;
-    duration: number;
-    budget: number;
+    duration: number; //proposed duration
+    budget: number; //proposed budget
+    reviewedDuration?: number;
+    reviewedBudget?: number;
     description?: string;
+    status: PhaseStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -34,9 +38,23 @@ const BasePhaseSchema = new Schema<BasePhaseDocument>(
             min: 0,
             required: true
         },
+        reviewedDuration: {
+            type: Number,
+            min: 0
+        },
+        reviewedBudget: {
+            type: Number,
+            min: 0
+        },
         description: {
             type: String
         },
+        status: {
+            type: String,
+            enum: Object.values(PhaseStatus),
+            default: PhaseStatus.proposed,
+            required: true
+        }
     },
     { timestamps: true, discriminatorKey: "type" } // discriminatorKey
 );

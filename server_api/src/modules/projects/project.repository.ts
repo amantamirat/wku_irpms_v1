@@ -51,7 +51,7 @@ export class ProjectRepository implements IProjectRepository {
         return Project.create({
             ...dto,
             call: new mongoose.Types.ObjectId(dto.call),
-            leadPI: new mongoose.Types.ObjectId(dto.leadPI)
+            leadPI: new mongoose.Types.ObjectId(dto.applicantId)
         });
     }
 

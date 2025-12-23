@@ -2,6 +2,7 @@ import { CollaboratorStatus } from "./collaborator.status";
 
 // collaborator.state-machine.ts
 export class CollaboratorStateMachine {
+
     private static readonly transitions: Record<CollaboratorStatus, CollaboratorStatus[]> = {
         [CollaboratorStatus.pending]: [CollaboratorStatus.verify],
         [CollaboratorStatus.verify]: [CollaboratorStatus.pending]
@@ -12,9 +13,8 @@ export class CollaboratorStateMachine {
     }
 
     static validateTransition(from: CollaboratorStatus, to: CollaboratorStatus): void {
-        if (!this.canTransition(from, to)) {
+        if (!this.canTransition(from, to))
             throw new Error(`Invalid state transition: ${from} → ${to}`);
-        }
     }
 
     static getAllowedTransitions(from: CollaboratorStatus): CollaboratorStatus[] {
