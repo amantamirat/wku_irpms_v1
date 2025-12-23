@@ -1,4 +1,4 @@
-import { CollaboratorStatus } from "./collaborator.enum";
+import { CollaboratorStatus } from "./collaborator.status";
 
 // collaborator.state-machine.ts
 export class CollaboratorStateMachine {

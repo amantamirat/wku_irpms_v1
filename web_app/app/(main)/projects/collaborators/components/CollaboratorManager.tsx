@@ -28,7 +28,7 @@ const CollaboratorManager = ({ project, applicant, onSave, onRemove }: Collabora
     const { getLinkedApplicant, hasPermission } = useAuth();
     const linkedApplicant = getLinkedApplicant();
     const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
-    const isLeadPI = project ? loggedApplicantId === (project?.leadPI as any)._id : false;
+    const isLeadPI = project ? loggedApplicantId === (project.leadPI as any)._id : false;
 
     const emptyCollaborator: Collaborator = {
         project: project ?? "",
@@ -38,8 +38,10 @@ const CollaboratorManager = ({ project, applicant, onSave, onRemove }: Collabora
 
     // ✅ Permissions
     const canCreate = !!project && isLeadPI && hasPermission([PERMISSIONS.COLLABORATOR.CREATE]);
-    //const canEdit = !!project && hasPermission([PERMISSIONS.COLLABORATOR.UPDATE]);
     const canDelete = !!project && isLeadPI && hasPermission([PERMISSIONS.COLLABORATOR.DELETE]);
+
+    const canVerify = hasPermission([PERMISSIONS.COLLABORATOR.STATUS.VERIFY]);
+    const canPend = hasPermission([PERMISSIONS.COLLABORATOR.STATUS.PEND]);
 
     // CRUD state handler
     const {
@@ -92,7 +94,10 @@ const CollaboratorManager = ({ project, applicant, onSave, onRemove }: Collabora
     };
 
     const updateStatus = async (row: Collaborator, next: CollaboratorStatus) => {
-        const updated = await CollaboratorApi.updateCollaborator({ _id: row._id, status: next }, true);
+        if (!row._id) {
+            return;
+        }
+        const updated = await CollaboratorApi.updateStatus(row._id, next);
         updateItem({ ...updated, applicant: row.applicant, project: row.project });
     };
 
@@ -100,7 +105,7 @@ const CollaboratorManager = ({ project, applicant, onSave, onRemove }: Collabora
         const state = rowData.status;
         const isOwner = (rowData?.applicant as any)._id === loggedApplicantId;
         return (<div className="flex gap-2">
-            {(isOwner && state === CollaboratorStatus.pending) &&
+            {(canVerify && isOwner && state === CollaboratorStatus.pending) &&
                 <Button
                     label="Verify"
                     icon="pi pi-check"
@@ -114,7 +119,7 @@ const CollaboratorManager = ({ project, applicant, onSave, onRemove }: Collabora
                     }}
                 />}
 
-            {(isOwner && state === CollaboratorStatus.verify) &&
+            {(canPend && isOwner && state === CollaboratorStatus.verify) &&
                 <Button
                     label="Pend"
                     icon="pi pi-arrow-left"

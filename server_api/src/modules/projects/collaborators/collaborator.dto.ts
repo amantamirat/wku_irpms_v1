@@ -1,4 +1,4 @@
-import { CollaboratorStatus } from "./collaborator.enum";
+import { CollaboratorStatus } from "./collaborator.status";
 
 // Base fields for creating a collaborator
 export interface CreateCollaboratorDto {
@@ -6,7 +6,7 @@ export interface CreateCollaboratorDto {
     applicant: string;
     isLeadPI?: boolean;
     status?: CollaboratorStatus;
-    applicantId: string; // actor performing the operation
+    leadPI: string;
 }
 
 // Base fields for updating a collaborator

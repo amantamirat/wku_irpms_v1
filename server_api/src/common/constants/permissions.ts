@@ -141,7 +141,10 @@ export const PERMISSIONS = {
     CREATE: "collaborator:create",
     READ: "collaborator:read",
     UPDATE: "collaborator:update",
-    CHANGE_STATUS: "collaborator:change_status", // New permission for status transitions
+    STATUS: {
+      VERIFY: "collaborator:status.verified",
+      PEND: "collaborator:status.pending"
+    },
     DELETE: "collaborator:delete",
   },
   PHASE: {

@@ -3,7 +3,7 @@ import { CallStatus } from "../call/call.enum";
 import { Call } from "../call/call.model";
 import { ConstraintValidatorOld } from "../grants/constraints/constraint.validator.old";
 import { BaseTheme } from "../themes/theme.model";
-import { CollaboratorStatus } from "./collaborators/collaborator.enum";
+import { CollaboratorStatus } from "./collaborators/collaborator.status";
 import { Collaborator } from "./collaborators/collaborator.model";
 import { PhaseType } from "./phase/phase.enum";
 import { IPhase } from "./phase/phase.model";

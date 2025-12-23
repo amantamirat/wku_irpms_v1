@@ -14,9 +14,13 @@ const ApplicantDetail = ({ applicant }: ApplicantDetailProps) => {
     return (
         <>
             <TabView>
-                <TabPanel header="Projects">
+                {
+                    /**
+                     * <TabPanel header="Projects">
                     <ProjectManager leadPI={applicant} />
                 </TabPanel>
+                     */
+                }                
                 <TabPanel header="Collaborations">
                     <CollaboratorManager applicant={applicant} />
                 </TabPanel>

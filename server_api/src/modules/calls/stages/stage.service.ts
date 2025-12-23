@@ -33,7 +33,7 @@ export class StageService {
 
         const evalDoc = await this.evalRepository.findById(evaluation);
         if (!evalDoc) throw new Error("Evaluation not found.");
-        
+
         const lastDoc = await this.repository.findLastStageByCall(call);
         if (!lastDoc) throw new Error("Last stage doc not found.");
         if (lastDoc.isFinal === true) throw new Error("Final stage already exists.");
@@ -99,7 +99,8 @@ export class StageService {
         }
         //Rule 2 Only last stage can be Deleted
         const lastDoc = await this.repository.findLastStageByCall(String(stageDoc.call));
-        if (lastDoc?.order !== stageDoc.order) {
+        if (!lastDoc) throw new Error("Last stage is not found");
+        if (lastDoc.order !== stageDoc.order) {
             throw new Error("Only the last stage can be deleted.");
         }
         // Proceed with deletion

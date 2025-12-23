@@ -45,26 +45,6 @@
     "description": "Delete roles"
   },
   {
-    "category": "Specialization Management",
-    "name": "specialization:create",
-    "description": "Create specialization entries"
-  },
-  {
-    "category": "Specialization Management",
-    "name": "specialization:read",
-    "description": "Read specialization entries"
-  },
-  {
-    "category": "Specialization Management",
-    "name": "specialization:update",
-    "description": "Update specialization entries"
-  },
-  {
-    "category": "Specialization Management",
-    "name": "specialization:delete",
-    "description": "Delete specialization entries"
-  },
-  {
     "category": "Organization Management",
     "name": "college:create",
     "description": "Create new colleges"
@@ -185,6 +165,26 @@
     "description": "Delete external units"
   },
   {
+    "category": "Specialization Management",
+    "name": "specialization:create",
+    "description": "Create specialization entries"
+  },
+  {
+    "category": "Specialization Management",
+    "name": "specialization:read",
+    "description": "Read specialization entries"
+  },
+  {
+    "category": "Specialization Management",
+    "name": "specialization:update",
+    "description": "Update specialization entries"
+  },
+  {
+    "category": "Specialization Management",
+    "name": "specialization:delete",
+    "description": "Delete specialization entries"
+  },
+  {
     "category": "Applicant Management",
     "name": "applicant:create",
     "description": "Create new applicants"
@@ -210,26 +210,6 @@
     "description": "Delete applicants"
   },
   {
-    "category": "Calendar Management",
-    "name": "calendar:create",
-    "description": "Create calendar entries"
-  },
-  {
-    "category": "Calendar Management",
-    "name": "calendar:read",
-    "description": "Read calendar entries"
-  },
-  {
-    "category": "Calendar Management",
-    "name": "calendar:update",
-    "description": "Update calendar entries"
-  },
-  {
-    "category": "Calendar Management",
-    "name": "calendar:delete",
-    "description": "Delete calendar entries"
-  },
-  {
     "category": "Experience Management",
     "name": "experience:create",
     "description": "Create experience records"
@@ -248,6 +228,42 @@
     "category": "Experience Management",
     "name": "experience:delete",
     "description": "Delete experience records"
+  },
+  {
+    "category": "Position Management",
+    "name": "position:create"
+  },
+  {
+    "category": "Position Management",
+    "name": "position:read"
+  },
+  {
+    "category": "Position Management",
+    "name": "position:update"
+  },
+  {
+    "category": "Position Management",
+    "name": "position:delete"
+  },
+  {
+    "category": "Calendar Management",
+    "name": "calendar:create",
+    "description": "Create calendar entries"
+  },
+  {
+    "category": "Calendar Management",
+    "name": "calendar:read",
+    "description": "Read calendar entries"
+  },
+  {
+    "category": "Calendar Management",
+    "name": "calendar:update",
+    "description": "Update calendar entries"
+  },
+  {
+    "category": "Calendar Management",
+    "name": "calendar:delete",
+    "description": "Delete calendar entries"
   },
   {
     "category": "Grant Management",
@@ -319,11 +335,6 @@
     "name": "call:delete"
   },
   {
-    "category": "Call Management",
-    "name": "call:change_status",
-    "description": "Edit call status like activate, plan"
-  },
-  {
     "category": "Stage Management",
     "name": "stage:create",
     "description": "Create stage entries"
@@ -354,11 +365,6 @@
     "category": "Stage Management",
     "name": "stage:delete",
     "description": "Delete stage entries"
-  },
-  {
-    "category": "Stage Management",
-    "name": "stage:change_status",
-    "description": "Edit stage status like activate, plan"
   },
   {
     "category": "Document Management",
@@ -394,11 +400,6 @@
     "description": "Delete document entries"
   },
   {
-    "category": "Document Management",
-    "name": "document:update_status",
-    "description": "Approve/Reject/Undo document entries"
-  },
-  {
     "category": "Evaluation Management",
     "name": "evaluation:create",
     "description": "Create evaluation entries"
@@ -417,71 +418,6 @@
     "category": "Evaluation Management",
     "name": "evaluation:delete",
     "description": "Delete evaluation entries"
-  },
-  {
-    "category": "Project Management",
-    "name": "project:create",
-    "description": "Create project entries"
-  },
-  {
-    "category": "Project Management",
-    "name": "project:read",
-    "description": "Read project entries"
-  },
-  {
-    "category": "Project Management",
-    "name": "project:update",
-    "description": "Update project entries"
-  },
-  {
-    "category": "Project Management",
-    "name": "project:delete",
-    "description": "Delete project entries"
-  },
-  {
-    "category": "Collaborator Management",
-    "name": "collaborator:create",
-    "description": "Create new collaborators"
-  },
-  {
-    "category": "Collaborator Management",
-    "name": "collaborator:read",
-    "description": "View collaborators"
-  },
-  {
-    "category": "Collaborator Management",
-    "name": "collaborator:update",
-    "description": "Edit collaborator details like weight"
-  },
-  {
-    "category": "Collaborator Management",
-    "name": "collaborator:change_status",
-    "description": "Edit collaborator status like activate, pend"
-  },
-  {
-    "category": "Collaborator Management",
-    "name": "collaborator:delete",
-    "description": "Delete collaborators"
-  },
-  {
-    "category": "Phase Management",
-    "name": "phase:create",
-    "description": "Create phase entries"
-  },
-  {
-    "category": "Phase Management",
-    "name": "phase:read",
-    "description": "Read phase entries"
-  },
-  {
-    "category": "Phase Management",
-    "name": "phase:update",
-    "description": "Update phase entries"
-  },
-  {
-    "category": "Phase Management",
-    "name": "phase:delete",
-    "description": "Delete phase entries"
   },
   {
     "category": "Reviewer Management",
@@ -555,19 +491,71 @@
     "description": "Delete theme entries"
   },
   {
-    "category": "Position Management",
-    "name": "position:create"
+    "category": "Project Management",
+    "name": "project:create",
+    "description": "Create project entries"
   },
   {
-    "category": "Position Management",
-    "name": "position:read"
+    "category": "Project Management",
+    "name": "project:read",
+    "description": "Read project entries"
   },
   {
-    "category": "Position Management",
-    "name": "position:update"
+    "category": "Project Management",
+    "name": "project:update",
+    "description": "Update project entries"
   },
   {
-    "category": "Position Management",
-    "name": "position:delete"
+    "category": "Project Management",
+    "name": "project:delete",
+    "description": "Delete project entries"
+  },
+  {
+    "category": "Collaborator Management",
+    "name": "collaborator:create",
+    "description": "Create new collaborators"
+  },
+  {
+    "category": "Collaborator Management",
+    "name": "collaborator:read",
+    "description": "View collaborators"
+  },
+  {
+    "category": "Collaborator Management",
+    "name": "collaborator:update",
+    "description": "Edit collaborator details"
+  },
+  {
+    "category": "Collaborator Management",
+    "name": "collaborator:status.verified"
+  },
+  {
+    "category": "Collaborator Management",
+    "name": "collaborator:status.pending"
+  },
+  {
+    "category": "Collaborator Management",
+    "name": "collaborator:delete",
+    "description": "Delete collaborators"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:create",
+    "description": "Create phase entries"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:read",
+    "description": "Read phase entries"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:update",
+    "description": "Update phase entries"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:delete",
+    "description": "Delete phase entries"
   }
 ]

@@ -1,5 +1,5 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Collaborator, GetCollaboratorsOptions, sanitizeCollaborator } from "../models/collaborator.model";
+import { Collaborator, CollaboratorStatus, GetCollaboratorsOptions, sanitizeCollaborator } from "../models/collaborator.model";
 const end_point = '/project/collaborators/';
 
 
@@ -20,15 +20,23 @@ export const CollaboratorApi = {
         return createdData as Collaborator;
     },
 
-    async updateCollaborator(collaborator: Partial<Collaborator>, changeStatus = false): Promise<Collaborator> {
+
+    async updateCollaborator(collaborator: Partial<Collaborator>): Promise<Collaborator> {
         if (!collaborator._id) {
             throw new Error("_id required.");
         }
-        const url = changeStatus
-            ? `${end_point}${collaborator._id}/status`
-            : `${end_point}${collaborator._id}`;
-        const updatedCollaborator = await ApiClient.put(url, sanitizeCollaborator(collaborator));
+        const query = new URLSearchParams();
+        query.append("id", collaborator._id);
+        const updatedCollaborator = await ApiClient.put(`${end_point}?${query.toString()}`, sanitizeCollaborator(collaborator));
         return updatedCollaborator as Collaborator;
+    },
+
+    async updateStatus(id: string, status: CollaboratorStatus): Promise<Collaborator> {
+        const query = new URLSearchParams();
+        query.append("id", id);
+        const url = `${end_point}${status}`;
+        const updated = await ApiClient.put(`${url}?${query.toString()}`);
+        return updated as Collaborator;
     },
 
     async deleteCollaborator(collaborator: Partial<Collaborator>): Promise<boolean> {

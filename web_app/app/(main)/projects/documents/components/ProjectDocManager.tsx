@@ -26,7 +26,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
     const { getLinkedApplicant, hasPermission } = useAuth();
     const linkedApplicant = getLinkedApplicant();
     const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
-    const isLeadPI = project ? loggedApplicantId === (project?.leadPI as any)._id : false;
+    const isLeadPI = project ? loggedApplicantId === (project.leadPI as any)._id : false;
 
     const [selectedDocs, setSelectedDocs] = useState<ProjectDoc[]>([]);
 
@@ -57,22 +57,6 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
         error,
         setError
     } = useCrudList<ProjectDoc>();
-    const [activeIndex, setActiveIndex] = useState(0);
-    const items = [
-        {
-            label: 'Pending', icon: 'pi pi-home'
-            , value: 'pending'
-
-        },
-        {
-            label: 'Submitted', icon: 'pi pi-chart-line'
-            //, value: 'submitted' 
-        },
-        {
-            label: 'Archived', icon: 'pi pi-list'
-            //, value: 'accepted' 
-        }
-    ];
 
     const [selectedStage, setSelectedStage] = useState<ProjectDoc>(emptyStage);
     const [showSaveDialog, setShowSaveDialog] = useState(false);

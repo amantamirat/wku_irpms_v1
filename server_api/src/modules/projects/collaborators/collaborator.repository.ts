@@ -6,7 +6,7 @@ import {
     GetCollaboratorsOptions,
     UpdateCollaboratorDto,
 } from "./collaborator.dto";
-import { CollaboratorStatus } from "./collaborator.enum";
+import { CollaboratorStatus } from "./collaborator.status";
 
 export interface ICollaboratorRepository {
     findById(id: string): Promise<ICollaborator | null>;

@@ -8,6 +8,7 @@ import {
     UpdateCollaboratorDto,
 } from './collaborator.dto';
 import { CollaboratorService } from './collaborator.service';
+import { CollaboratorStatus } from './collaborator.status';
 
 export class CollaboratorController {
     private service: CollaboratorService;
@@ -28,7 +29,7 @@ export class CollaboratorController {
                 applicant: applicant as string,
                 project: project as string,
                 isLeadPI: isLeadPI ? true : undefined,
-                applicantId: req.user.applicantId,
+                leadPI: req.user.applicantId,
             };
 
             const created = await this.service.createCollaborator(dto);
@@ -60,20 +61,20 @@ export class CollaboratorController {
     // -----------------------
     // Change Status
     // -----------------------
-    changeStatus = async (req: AuthenticatedRequest, res: Response) => {
+    updateStatus = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) throw new Error('User not found!');
 
-            const { id } = req.params;
-            const { status } = req.body;
+            const { id } = req.query;
+            const { status } = req.params;
 
             const dto: UpdateCollaboratorDto = {
-                id,
-                data: { status },
-                applicantId: req.user._id,
+                id: id as string,
+                data: { status: status as CollaboratorStatus },
+                applicantId: req.user.applicantId,
             };
 
-            const updated = await this.service.changeCollaboratorStatus(dto);
+            const updated = await this.service.updateStatus(dto);
             successResponse(
                 res,
                 200,
@@ -85,10 +86,8 @@ export class CollaboratorController {
         }
     };
 
-    // -----------------------
-    // Update
-    // -----------------------
-    update = async (req: AuthenticatedRequest, res: Response) => {
+    /**
+     * update = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) throw new Error('User not found!');
 
@@ -110,6 +109,9 @@ export class CollaboratorController {
             errorResponse(res, 400, err.message, err);
         }
     };
+     * 
+     */
+
 
     // -----------------------
     // Delete
@@ -122,10 +124,10 @@ export class CollaboratorController {
 
             const dto: DeleteDto = {
                 id,
-                userId: req.user._id,
+                userId: req.user.applicantId,
             };
 
-            const deleted = await this.service.deleteCollaborator(dto);
+            const deleted = await this.service.delete(dto);
             successResponse(res, 200, 'Collaborator deleted successfully', deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

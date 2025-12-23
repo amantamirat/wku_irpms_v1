@@ -1,17 +1,15 @@
 'use client';
 
-import { useEffect, useState } from "react";
 import { CrudManager } from "@/components/CrudManager";
-import ErrorCard from "@/components/ErrorCard";
-import ListSkeleton from "@/components/ListSkeleton";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useAuth } from "@/contexts/auth-context";
+import { useEffect, useState } from "react";
 
 import SavePhaseDialog from "./SavePhaseDialog";
 
 import { Project } from "../../models/project.model";
-import { Phase, PhaseType } from "../models/phase.model";
 import { PhaseApi } from "../api/phase.api";
+import { Phase, PhaseType } from "../models/phase.model";
 
 import { useCrudList } from "@/hooks/useCrudList";
 import { PERMISSIONS } from "@/types/permissions";
@@ -27,7 +25,7 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
     const { getLinkedApplicant, hasPermission } = useAuth();
     const linkedApplicant = getLinkedApplicant();
     const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
-    const isLeadPI = loggedApplicantId === (project?.leadPI as any)._id;
+    const isLeadPI = loggedApplicantId === (project.leadPI as any)._id;
 
     // -------------------------------
     // Empty Phase
