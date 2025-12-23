@@ -1,11 +1,13 @@
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Calendar } from "../calendars/models/calendar.model";
 import { Organization } from "../organizations/models/organization.model";
 import ApplyWizard from "./apply/ApplyWizard";
 import CallViewDialog from "./CallViewDialog";
 import { Call } from "../calls/models/call.model";
+import { Stage } from "../calls/stages/models/stage.model";
+import { StageApi } from "../calls/stages/api/stage.api";
 
 interface CallCardProps {
     call: Call;
@@ -15,6 +17,22 @@ const CallCard = ({ call }: CallCardProps) => {
 
     const [showApplyDialog, setShowApplyDialog] = useState(false);
     const [showViewDialog, setShowViewDialog] = useState(false);
+
+    const [stages, setStages] = useState<Stage[]>([]);
+
+    useEffect(() => {
+        const fetchStages = async () => {
+            try {
+                const data = await StageApi.getStages({ call });
+                setStages(data);
+            } catch (err: any) {
+                //setError("Failed to fetch stages. " + (err.message ?? ""));
+            } finally {
+                //setLoading(false);
+            }
+        };
+        fetchStages();
+    }, [call]);
 
     const header = (
         <div className="relative overflow-hidden border-round-top-lg">
@@ -62,10 +80,17 @@ const CallCard = ({ call }: CallCardProps) => {
                         <span>{(call.directorate as Organization).name}</span>
                         <span>{(call.calendar as Calendar).year}</span>
                         <span>
-                            <strong className="text-red-500">
-                                Deadline:
-                            </strong>{" "}
-                            {/* {new Date(call.deadline).toLocaleDateString()} */}
+                            <strong className="text-red-500">Deadlines:</strong>
+                            <div className="mt-1 space-y-1">
+                                {stages.map((stage) => (
+                                    stage.deadline && (
+                                        <div key={stage._id}>
+                                            <span className="font-medium">{stage.name}:</span>{" "}
+                                            {new Date(stage.deadline).toLocaleDateString()}
+                                        </div>
+                                    )
+                                ))}
+                            </div>
                         </span>
                     </div>
                 }

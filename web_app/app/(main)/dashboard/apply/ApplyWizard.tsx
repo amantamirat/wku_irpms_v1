@@ -26,19 +26,13 @@ interface ApplyWizardProps {
 }
 
 const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
-    const { user } = useAuth();
+    //const { user } = useAuth();
+    const { getLinkedApplicant } = useAuth();
+    const linkedApplicant = getLinkedApplicant();
     const initializeProject = (): Project => ({
         title: "",
         call: call,
-        collaborators: user?.applicant
-            ? [
-                {
-                    applicant: user.applicant,
-                    status: CollaboratorStatus.verify,
-                    isLeadPI: true,
-                } as Collaborator,
-            ]
-            : [],
+        leadPI:linkedApplicant
     });
     const toast = useRef<Toast>(null);
     const [loading, setLoading] = useState(false);
@@ -48,7 +42,7 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
         if (visible) {
             setProject(initializeProject());
         }
-    }, [visible, call, user]);
+    }, [visible, call]);
 
     const updateFile = (file: File) => {
         setProject({ ...project, ["file"]: file });

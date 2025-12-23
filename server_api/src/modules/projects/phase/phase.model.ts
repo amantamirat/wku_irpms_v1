@@ -4,6 +4,7 @@ import { COLLECTIONS } from "../../../common/constants/collections.enum";
 import { PhaseStatus } from "./phase.status";
 
 interface BasePhaseDocument extends Document {
+    _id: mongoose.Types.ObjectId;
     type: PhaseType;
     activity: string;
     duration: number; //proposed duration

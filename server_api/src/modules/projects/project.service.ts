@@ -14,6 +14,9 @@ import { CollaboratorRepository, ICollaboratorRepository } from "./collaborators
 import { ProjectStatus } from "./project.status";
 import { CallStatus } from "../calls/call.status";
 import { ProjectStateMachine } from "./project.state-machine";
+import { IPhaseRepository, PhaseRepository } from "./phase/phase.repository";
+import { PhaseStatus } from "./phase/phase.status";
+import { PhaseStateMachine } from "./phase/phase.state-machine";
 
 export class ProjectService {
 
@@ -21,12 +24,14 @@ export class ProjectService {
     private callRepository: ICallRepository;
     private appRepository: IApplicantRepository;
     private collabRepository: ICollaboratorRepository;
+    private phaseRepository: IPhaseRepository;
 
-    constructor(repository?: IProjectRepository) {
+    constructor(repository?: IProjectRepository, phaseRepository?: IPhaseRepository) {
         this.repository = repository || new ProjectRepository();
         this.appRepository = new ApplicantRepository();
         this.callRepository = new CallRepository();
         this.collabRepository = new CollaboratorRepository();
+        this.phaseRepository = phaseRepository || new PhaseRepository();
     }
 
     async create(dto: CreateProjectDTO) {
@@ -35,7 +40,9 @@ export class ProjectService {
         if (callDoc.status !== CallStatus.active) throw new Error("Call is not active");
         const leadPIDoc = await this.appRepository.findOne({ id: dto.applicantId });
         if (!leadPIDoc) throw new Error("Lead PI not found");
-        return this.repository.create(dto);
+        const created = await this.repository.create(dto);
+        await this.collabRepository.create({ applicant: dto.applicantId, project: String(created._id) });
+        return created;
     }
 
     //based on ownerships // and collaborations // and pi
@@ -71,9 +78,28 @@ export class ProjectService {
 
         const projectDoc = await this.repository.findById(id);
         if (!projectDoc) throw new Error("Project not found");
-        const current = projectDoc.status;
 
+        const current = projectDoc.status;
         ProjectStateMachine.validateTransition(current, next);
+
+        if (next === ProjectStatus.under_review || next === ProjectStatus.accepted) {
+            const nextPhaseStatus = next === ProjectStatus.under_review ? PhaseStatus.under_review :
+                PhaseStatus.proposed;
+
+            const phases = await this.phaseRepository.find({ project: id });
+            const validPhases = [];
+
+            for (const phase of phases) {
+                const current = phase.status;
+                PhaseStateMachine.validateTransition(current, nextPhaseStatus);
+                validPhases.push(phase);
+            }
+
+            await Promise.all(validPhases.map(async (phase) => {
+                await this.phaseRepository.update(String(phase._id), { status: nextPhaseStatus });
+            }));
+        }
+
         const updated = await this.repository.update(id, { status: next });
         return updated;
 

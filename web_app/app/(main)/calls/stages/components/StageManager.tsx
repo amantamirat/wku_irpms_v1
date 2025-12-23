@@ -77,8 +77,7 @@ const StageManager = ({ call }: StageManagerProps) => {
         updateItem(savedStage);
         hideSaveDialog();
     };
-
-
+    
     const updateStatus = async (row: Stage, next: StageStatus) => {
         if (!row._id) {
             return;

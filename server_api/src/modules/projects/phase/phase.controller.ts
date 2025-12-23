@@ -96,14 +96,11 @@ export class PhaseController {
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) throw new Error("User not found!");
-
             const { id } = req.params;
-
             const dto: DeleteDto = {
                 id,
                 userId: req.user._id,
             };
-
             const deleted = await this.service.delete(dto);
             successResponse(res, 200, "Phase deleted successfully", deleted);
         } catch (err: any) {

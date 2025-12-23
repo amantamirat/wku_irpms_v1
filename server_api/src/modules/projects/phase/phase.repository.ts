@@ -66,6 +66,9 @@ export class PhaseRepository implements IPhaseRepository {
         if (dtoData.description) {
             updateData.description = dtoData.description;
         }
+        if (dtoData.status) {
+            updateData.status = dtoData.status;
+        }
         const updated = await Phase.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },

@@ -89,6 +89,7 @@ export class DocumentService {
                 if (projectDocs.length > currentStageDoc.order) {
                     throw new Error(`Can not change the status of ${currentStageDoc.name} of the project`);
                 }
+                //if project is not rejected or approved throw an error
             }
             validDocs.push(doc);
         }

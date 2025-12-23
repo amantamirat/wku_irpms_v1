@@ -3,6 +3,7 @@ import { COLLECTIONS } from "../../common/constants/collections.enum";
 import { ProjectStatus } from "./project.status";
 
 export interface IProject extends Document {
+    _id: mongoose.Types.ObjectId;
     call: mongoose.Types.ObjectId;
     title: string;
     summary?: string;

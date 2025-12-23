@@ -1,5 +1,6 @@
 
 import { PhaseType } from "./phase.enum";
+import { PhaseStatus } from "./phase.status";
 
 export interface PhaseDto {
     activity: string;
@@ -23,6 +24,7 @@ export interface UpdatePhaseDto {
         duration: number;
         budget: number;
         description?: string;
+        status: PhaseStatus;
     }>;
     applicantId: string;
 }

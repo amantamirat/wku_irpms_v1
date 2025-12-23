@@ -36,7 +36,6 @@ export class ProjectSynchronizer {
         else if (projectDocs.every(d => d.status === DocStatus.accepted)) {
             newStatus = ProjectStatus.accepted;
         }
-        // ProjectStateMachine.validateTransition(currentStatus, newStatus);
         if (ProjectStateMachine.canTransition(currentStatus, newStatus)) {
             const updated = await this.repository.update(projectId, { status: newStatus })
             return updated;

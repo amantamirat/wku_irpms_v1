@@ -14,20 +14,24 @@ import { ReviewerStatus } from "./reviewer.enum";
 import { ReviewerPermission } from "./reviewer.permission";
 import { IReviewerRepository, ReviewerRepository } from "./reviewer.repository";
 import { ReviewerStateMachine } from "./reviewer.state-machine";
+import { IProjectRepository, ProjectRepository } from "../../../../projects/project.repository";
 
 export class ReviewerService {
 
     private repository: IReviewerRepository;
     private resultRepo: IResultRepository;
+    private projectRepository: IProjectRepository;
     private projectStageRepo: IDocumentRepository;
     private projectStageSynchronizer: ProjectStageSynchronizer;
     private permission: ReviewerPermission;
 
     constructor(repository?: IReviewerRepository, resultRepo?: IResultRepository,
+        projectRepository?: IProjectRepository,
         projectStageRepo?: IDocumentRepository, projectStageSynchronizer?: ProjectStageSynchronizer
     ) {
         this.repository = repository || new ReviewerRepository();
         this.resultRepo = resultRepo || new ResultRepository();
+        this.projectRepository = projectRepository || new ProjectRepository();
         this.projectStageRepo = projectStageRepo || new DocumentRepository();
         this.projectStageSynchronizer = projectStageSynchronizer ||
             new ProjectStageSynchronizer(this.projectStageRepo, this.repository);
@@ -51,13 +55,19 @@ export class ReviewerService {
         }
 
         ///////////////////////////will be modified//////////////////////////////////////////
-        const applicantDoc = await Applicant.findById(applicantId).lean();
-        if (!applicantDoc) throw new Error("Applicant not found");
+        const projectDoc = await this.projectRepository.findById(String(projectStageDoc.project));
+        if (!projectDoc) throw new Error("Project not found");
+
+        if (String(projectDoc.leadPI)===applicantId){
+            throw new Error("Reviewer applicant is already a lead pi on the project");
+        }       
 
         const collaborators = await Collaborator.find({ project: projectStageDoc.project }).lean();
         if (collaborators.find(c => String(c.applicant) === applicantId)) {
             throw new Error("Reviewer applicant is already a collaborator on the project");
         }
+        const applicantDoc = await Applicant.findById(applicantId).lean();
+        if (!applicantDoc) throw new Error("Applicant not found");
         /////////////////////////////////////////////////////////////
 
         const createdReviewer = await this.repository.create(dto);
@@ -135,8 +145,8 @@ export class ReviewerService {
         const updated = await this.repository.update(id, { status: nextState, score: dto.data.score });
         const syncedProjectStage = await this.projectStageSynchronizer.syncProjectStageStatus(reviewerDoc.projectStage.toString(), projectStageDoc);
 
-        return {updated, syncedProjectStage};
-    }    
+        return { updated, syncedProjectStage };
+    }
 
     // --- Update reviewer data (weight, etc.) ---
     async updateReviewerData(dto: UpdateReviewerDTO) {
@@ -173,7 +183,7 @@ export class ReviewerService {
         if (reviewerDoc.status !== ReviewerStatus.pending) {
             throw new Error("Cannot delete non pending reviewer");
         }
-        const deleted = await this.repository.delete(dto.id);      
+        const deleted = await this.repository.delete(dto.id);
         await this.projectStageSynchronizer.syncProjectStageStatus(reviewerDoc.projectStage.toString());
         return deleted
     }

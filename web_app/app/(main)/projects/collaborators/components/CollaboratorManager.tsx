@@ -71,8 +71,9 @@ const CollaboratorManager = ({ project, applicant, onSave, onRemove }: Collabora
                 setLoading(false);
             }
         };
-
-        fetchData();
+        if (project?._id || applicant?._id) {
+            fetchData();
+        }
     }, [project, applicant]);
 
 

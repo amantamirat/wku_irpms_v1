@@ -5,9 +5,10 @@ import CallCard from './CallCard';
 import ErrorCard from '@/components/ErrorCard';
 import { Call, CallStatus } from '../calls/models/call.model';
 import { CallApi } from '../calls/api/call.api';
+import ListSkeleton from '@/components/ListSkeleton';
 
 const CallGrid = () => {
-    const [cycles, setCycles] = useState<Call[]>([]);
+    const [calls, setCalls] = useState<Call[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -15,8 +16,8 @@ const CallGrid = () => {
         const fetchCalls = async () => {
             try {
                 setLoading(true);
-                const data = await CallApi.getCalls({ type: "Call", status: CallStatus.active });
-                setCycles(data);
+                const data = await CallApi.getCalls({ status: CallStatus.active });
+                setCalls(data);
             } catch {
                 setError('Failed to load calls. Please try again later.');
             } finally {
@@ -28,24 +29,13 @@ const CallGrid = () => {
 
     if (loading) {
         return (
-            <div className="grid gap-3">
-                {[...Array(4)].map((_, i) => (
-                    <div key={i} className="col-12 sm:col-6 lg:col-4 xl:col-3">
-                        <Card className="h-full">
-                            <Skeleton width="100%" height="160px" className="mb-3" />
-                            <Skeleton width="80%" height="1.5rem" className="mb-2" />
-                            <Skeleton width="60%" height="1rem" className="mb-2" />
-                            <Skeleton width="90%" height="3rem" />
-                        </Card>
-                    </div>
-                ))}
-            </div>
+            <ListSkeleton />
         );
     }
 
     if (error) return <ErrorCard errorMessage={error} />;
 
-    if (cycles.length === 0)
+    if (calls.length === 0)
         return (
             <div className="flex justify-content-center align-items-center py-6">
                 <div className="text-center">
@@ -57,7 +47,7 @@ const CallGrid = () => {
 
     return (
         <div className="grid gap-4">
-            {cycles.map((call) => (
+            {calls.map((call) => (
                 <div key={call._id} className="col-12 sm:col-6 lg:col-4 xl:col-3">
                     <CallCard call={call} />
                 </div>
