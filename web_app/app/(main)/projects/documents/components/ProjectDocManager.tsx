@@ -21,7 +21,7 @@ interface ProjectDocManagerProps {
     stage?: Stage;
 }
 
-const ProjectDocManager = ({ project, updateProjectStatus, stage}: ProjectDocManagerProps) => {
+const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocManagerProps) => {
     const confirm = useConfirmDialog();
     const { getLinkedApplicant, hasPermission } = useAuth();
     const linkedApplicant = getLinkedApplicant();
@@ -73,9 +73,6 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage}: ProjectDocMan
             //, value: 'accepted' 
         }
     ];
-
-
-
 
     const [selectedStage, setSelectedStage] = useState<ProjectDoc>(emptyStage);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -129,6 +126,22 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage}: ProjectDocMan
         setShowSaveDialog(false);
     };
 
+    const updateStatus = async (docs: ProjectDoc[], next: DocStatus) => {
+        if (next !== DocStatus.reviewed && !docs.every(d => d.status === DocStatus.reviewed)) {
+            throw new Error(
+                "All selected documents must be reviewed before acceptance."
+            );
+        }
+        const updatedDocs = await ProjectDocApi.updateStatus({ documents: docs }, next);
+        for (const updatedDoc of updatedDocs) {
+            const doc = projectDocs.find(d => d._id === updatedDoc._id);
+            if (doc) {
+                updateItem({ ...updatedDoc, stage: doc.stage, project: doc.project });
+            }
+        }
+        setSelectedDocs([]);
+    };
+
     const endToolbarTemplate = () => {
         if (!canAccept && !canReject) {
             return undefined;
@@ -144,14 +157,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage}: ProjectDocMan
                             () => {
                                 confirm.ask({
                                     operation: `Accept ${selectedDocs.length} projects`,
-                                    onConfirmAsync: async () => {
-                                        if (!selectedDocs.every(d => d.status === DocStatus.reviewed)) {
-                                            throw new Error(
-                                                "All selected documents must be reviewed before acceptance."
-                                            );
-                                        }
-                                        await ProjectDocApi.updateStatus({ documents: selectedDocs }, DocStatus.accepted)
-                                    }
+                                    onConfirmAsync: () => updateStatus(selectedDocs, DocStatus.accepted)
                                 });
                             }
                         }
@@ -168,14 +174,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage}: ProjectDocMan
                             () => {
                                 confirm.ask({
                                     operation: `Reject ${selectedDocs.length} projects`,
-                                    onConfirmAsync: async () => {
-                                        if (!selectedDocs.every(d => d.status === DocStatus.reviewed)) {
-                                            throw new Error(
-                                                "All selected documents must be reviewed before rejection."
-                                            );
-                                        }
-                                        await ProjectDocApi.updateStatus({ documents: selectedDocs }, DocStatus.rejected)
-                                    }
+                                    onConfirmAsync: async () => updateStatus(selectedDocs, DocStatus.rejected)
                                 });
                             }
                         }
@@ -203,9 +202,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage}: ProjectDocMan
                         onClick={() =>
                             confirm.ask({
                                 operation: "revert",
-                                onConfirmAsync: async () => {
-                                    await ProjectDocApi.updateStatus({ documents: [rowData] }, DocStatus.reviewed)
-                                }
+                                onConfirmAsync: () => updateStatus([rowData], DocStatus.reviewed)
                             })
                         }
                     />

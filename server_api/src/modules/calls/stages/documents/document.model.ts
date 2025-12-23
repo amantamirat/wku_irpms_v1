@@ -4,6 +4,7 @@ import { DocStatus } from "./document.status";
 import { COLLECTIONS } from "../../../../common/constants/collections.enum";
 
 export interface IProjectDocument extends Document {
+    _id: string;
     stage: mongoose.Types.ObjectId;
     project: mongoose.Types.ObjectId;
     documentPath: string;

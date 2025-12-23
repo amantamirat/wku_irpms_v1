@@ -1,19 +1,18 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
-import { ProjectStatus } from "./project.enum";
+import { ProjectStatus } from "./project.status";
 
 export interface IProject extends Document {
     call: mongoose.Types.ObjectId;
     title: string;
     summary?: string;
     leadPI: mongoose.Types.ObjectId;
-    currentStage: mongoose.Types.ObjectId;
     status: ProjectStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
-const ProjectSchema = new Schema<IProject>({
+const ProjectSchema = new Schema<IProject>({    
     call: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.CALL,
@@ -32,10 +31,6 @@ const ProjectSchema = new Schema<IProject>({
         ref: COLLECTIONS.APPLICANT,
         required: true
     },
-    currentStage: {
-        type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.PROJECT_DOCUMENT
-    },
     status: {
         type: String,
         enum: Object.values(ProjectStatus),
@@ -44,5 +39,10 @@ const ProjectSchema = new Schema<IProject>({
     }
 
 }, { timestamps: true });
+
+ProjectSchema.index(
+    { currentDocument: 1 },
+    { unique: true, partialFilterExpression: { currentDocument: { $exists: true } } }
+);
 
 export const Project = model<IProject>(COLLECTIONS.PROJECT, ProjectSchema);

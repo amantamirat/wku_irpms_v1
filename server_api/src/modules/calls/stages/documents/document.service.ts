@@ -9,6 +9,7 @@ import { CreateDocumentDTO, GetDocumentDTO, UpdateStatusDTO } from "./document.d
 import { DocStatus } from "./document.status";
 import { IDocumentRepository, DocumentRepository } from "./document.repository";
 import { DocumentStateMachine } from "./document.state-machine";
+import { ProjectStatus } from "../../../projects/project.status";
 
 export class DocumentService {
 
@@ -24,7 +25,8 @@ export class DocumentService {
         this.repository = repository || new DocumentRepository();
         this.projectRepository = projectRepository || new ProjectRepository();
         this.stageRepository = stageRepository || new StageRepository();
-        this.projectSynchronizer = new ProjectSynchronizer(this.projectRepository, this.repository);
+        this.projectSynchronizer =
+            new ProjectSynchronizer(this.projectRepository, this.repository);
         this.validator = new ConstraintValidator(this.projectRepository);
     }
 
@@ -32,35 +34,28 @@ export class DocumentService {
         try {
             const { project, stage } = dto;
             const projectDoc = await this.projectRepository.findById(project);
-            if (!projectDoc) throw new Error("Project not found");
-
-            const stageDoc = await this.stageRepository.findOne({ _id: stage, call: String(projectDoc.call) });
-
-            if (!stageDoc) throw new Error("Stage not found");
-            if (stageDoc.status !== StageStatus.active)
-                throw new Error("Stage is not active");
-            if (stageDoc.deadline < new Date())
-                throw new Error("Stage deadline has passed");
-
-            //const curentStageDoc = await this.stageRepository.findOne({ _id: String(projectDoc.currentStage) });
-
-            //if (curentStageDoc) { }
-
-
-
-            if (stageDoc.order > 1) {
-                const previousDocs = await this.repository.find({ project }, false);
-                const hasNotAccepted = previousDocs.some(
-                    doc => doc.status !== DocStatus.accepted
-                );
-                if (hasNotAccepted) {
-                    throw new Error('Previous documents must be accepted before proceeding.');
-                }
+            if (!projectDoc) throw new Error("Project not found.");
+            if (projectDoc.status === ProjectStatus.rejected) {
+                throw new Error("Project is rejected.");
             }
-            ///grant validator////
+            const projectDocs = await this.repository.find({ project }, false);
+            const hasNotAccepted = projectDocs.some(doc => doc.status !== DocStatus.accepted);
+            if (hasNotAccepted) {
+                throw new Error('Previous project documents must be accepted before proceeding.');
+            }
+            const nextOrder = projectDocs.length + 1;
+            const nextStageDoc = await this.stageRepository.findOne({ call: String(projectDoc.call), order: nextOrder });
+            if (!nextStageDoc) throw new Error("Next stage not found");
+            if (nextStageDoc.status !== StageStatus.active) throw new Error(`${nextStageDoc.name} stage is not active`);
+            if (nextStageDoc.deadline < new Date()) throw new Error(`${nextStageDoc.name} stage deadline has passed`);
+
             await this.validator.validateProject(project, projectDoc);
-            const created = await this.repository.create(dto);
-            const syncedProject = await this.projectSynchronizer.syncProjectStatus(project, projectDoc);
+
+            const created = await this.repository.create({ ...dto, stage: String(nextStageDoc._id) });
+            let syncedProject;
+            if (created) {
+                syncedProject = await this.projectSynchronizer.syncProjectStatus(project, projectDoc, projectDocs);
+            }
             return { created, syncedProject }
         } catch (e: any) {
             throw e;
@@ -70,27 +65,9 @@ export class DocumentService {
     async get(options: GetDocumentDTO = {}) {
         return await this.repository.find(options);
     }
-
-    /*
-    async update(dto: UpdateDocumentDTO) {
-        const { id, data } = dto;
-        const newStatus = data.status;
-        if (!newStatus) {
-            throw new Error("Status Not Fouund!");
-        }
-        const projectStage = await this.repository.findById(id);
-        if (!projectStage || !projectStage.status) throw new Error("Project stage not found");
-        const currentStatus = projectStage.status;
-        DocumentStateMachine.validateTransition(currentStatus, newStatus);
-        return await this.repository.update(dto.id, dto.data);
-    }
-        */
-
-
     /**
-         * Change Status
+        * Update Status
     */
-
     async updateStatus(dto: UpdateStatusDTO) {
         const { documents, status: newStatus } = dto.data;
         if (!documents || documents.length === 0) {
@@ -99,35 +76,47 @@ export class DocumentService {
         if (!newStatus) {
             throw new Error("Status not found");
         }
-        const result = await Promise.all(
-            documents.map(async (id) => {
-                const doc = await this.repository.findById(id);
-                if (!doc) throw new Error(`Document not found: ${id}`);
-                const current = doc.status;
-                DocumentStateMachine.validateTransition(current, newStatus);
-                /*
-                if (newStatus === DocStatus.submitted) {
-                    const projectDocs = await this.repository.find({ project: String(doc.project) }, false);
+        const validDocs = [];
+        for (const id of documents) {
+            const doc = await this.repository.findById(id);
+            if (!doc) throw new Error(`Document not found: ${id}`);
+            const current = doc.status;
+            DocumentStateMachine.validateTransition(current, newStatus);
+            if (newStatus === DocStatus.reviewed) {
+                const currentStageDoc = await this.stageRepository.findOne({ _id: String(doc.stage) });
+                if (!currentStageDoc) throw new Error("Current stage not found");
+                const projectDocs = await this.repository.find({ project: String(doc.project) }, false);
+                if (projectDocs.length > currentStageDoc.order) {
+                    throw new Error(`Can not change the status of ${currentStageDoc.name} of the project`);
                 }
-                */
-                const updated = this.repository.update(id, { status: newStatus });
-                const syncedProject = this.projectSynchronizer.syncProjectStatus(String(doc.project));
+            }
+            validDocs.push(doc);
+        }
+
+        const results = await Promise.all(
+            validDocs.map(async (doc) => {
+                const updated = await this.repository.update(doc._id, {
+                    status: newStatus
+                });
+                if (updated) {
+                    await this.projectSynchronizer.syncProjectStatus(
+                        String(doc.project));
+                }
                 return updated;
             })
         );
-        return result;
+        return results;
     }
-
 
     async delete(dto: DeleteDto) {
         const { id, userId } = dto;
-        const projectStage = await this.repository.findById(id);
-        if (!projectStage) throw new Error("Project stage not found");
-        if (projectStage.status !== DocStatus.pending) {
-            throw new Error("Only project stages with 'pending' status can be deleted.");
-        }
+        const projectStageDoc = await this.repository.findById(id);
+        if (!projectStageDoc) throw new Error("Project stage not found");
+        if (projectStageDoc.status !== DocStatus.pending) throw new Error("Pending document not found.");
         const deleted = await this.repository.delete(id);
-        const syncedProject = await this.projectSynchronizer.syncProjectStatus(projectStage.project.toString());
-        return { deleted, syncedProject };
+        if (deleted) {
+            await this.projectSynchronizer.syncProjectStatus(projectStageDoc.project.toString());
+        }
+        return { deleted };
     }
 }

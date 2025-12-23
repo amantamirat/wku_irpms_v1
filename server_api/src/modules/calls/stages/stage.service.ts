@@ -11,14 +11,14 @@ export class StageService {
 
     private repository: IStageRepository;
     private callRepository: ICallRepository;
-    private evaluationRepo: IEvaluationRepository;
+    private evalRepository: IEvaluationRepository;
     private documentRepo: IDocumentRepository;
 
     constructor(repository?: IStageRepository, callRepository?: ICallRepository,
         evalRepository?: IEvaluationRepository, documentRepo?: IDocumentRepository) {
         this.repository = repository || new StageRepository();
         this.callRepository = callRepository || new CallRepository();
-        this.evaluationRepo = evalRepository || new EvaluationRepository();
+        this.evalRepository = evalRepository || new EvaluationRepository();
         this.documentRepo = documentRepo || new DocumentRepository();
     }
     /**
@@ -31,16 +31,14 @@ export class StageService {
         if (!callDoc) throw new Error("Call not found.");
         if (callDoc.status !== CallStatus.active) throw new Error("Call is not active.");
 
-        const evalDoc = await this.evaluationRepo.findById(evaluation);
+        const evalDoc = await this.evalRepository.findById(evaluation);
         if (!evalDoc) throw new Error("Evaluation not found.");
-
-        //Last doc
+        
         const lastDoc = await this.repository.findLastStageByCall(call);
-        if (lastDoc?.isFinal === true) {
-            throw new Error("Final stage already exists.");
-        }
-        const nextOrder = lastDoc?.order ? lastDoc.order + 1 : 1;
+        if (!lastDoc) throw new Error("Last stage doc not found.");
+        if (lastDoc.isFinal === true) throw new Error("Final stage already exists.");
 
+        const nextOrder = lastDoc?.order ? lastDoc.order + 1 : 1;
         const stage = await this.repository.create({ ...dto, order: nextOrder, status: StageStatus.planned });
         return stage;
     }
@@ -58,13 +56,10 @@ export class StageService {
         delete data.status
         if (data.isFinal === true) {
             const stageDoc = await this.repository.findOne({ _id: id });
-            if (!stageDoc) {
-                throw new Error("Stage Not Found.");
-            }
+            if (!stageDoc) throw new Error("Stage not found.");
             const lastStageDoc = await this.repository.findLastStageByCall(String(stageDoc.call));
-            if (String(lastStageDoc?._id) !== id) {
-                throw new Error("Only last stage can be final.");
-            }
+            if (!lastStageDoc) throw new Error("Last stage not found.");
+            if (String(lastStageDoc._id) !== id) throw new Error("Only last stage can be final.");
         }
         const stage = await this.repository.update(id, data);
         if (!stage) throw new Error("Stage not found");

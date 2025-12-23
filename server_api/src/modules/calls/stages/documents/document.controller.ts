@@ -29,9 +29,6 @@ export class ProjectDocController {
             if (!req.file) throw new Error("Document required");
 
             const { project, stage } = req.body;
-            if (!project || !stage) {
-                throw new Error("project and stage are required");
-            }
 
             const dto: CreateDocumentDTO = {
                 project,
@@ -61,7 +58,7 @@ export class ProjectDocController {
             const userId = req.user._id;
             const { status } = req.params;
             const { documents } = req.body;
-            
+
             const dto: UpdateStatusDTO = {
                 data: { documents, status: status as DocStatus },
                 //userId: userId,

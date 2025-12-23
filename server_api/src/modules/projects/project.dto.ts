@@ -1,5 +1,5 @@
 import { PhaseDto } from "./phase/phase.dto";
-import { ProjectStatus } from "./project.enum";
+import { ProjectStatus } from "./project.status";
 
 
 export interface GetProjectsDTO {

@@ -7,7 +7,7 @@ import { CollaboratorStatus } from "./collaborators/collaborator.enum";
 import { Collaborator } from "./collaborators/collaborator.model";
 import { PhaseType } from "./phase/phase.enum";
 import { IPhase } from "./phase/phase.model";
-import { ProjectStatus } from "./project.enum";
+import { ProjectStatus } from "./project.status";
 import { Project } from "./project.model";
 import { CreateProjectDto } from "./project.service";
 import { DocStatus } from "../calls/stages/documents/document.status";

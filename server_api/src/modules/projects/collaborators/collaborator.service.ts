@@ -1,7 +1,7 @@
 // collaborator.service.ts
 import { DeleteDto } from "../../../util/delete.dto";
 import { ApplicantRepository, IApplicantRepository } from "../../applicants/applicant.repository";
-import { ProjectStatus } from "../project.enum";
+import { ProjectStatus } from "../project.status";
 import { IProjectRepository, ProjectRepository } from "../project.repository";
 import {
     CreateCollaboratorDto,
