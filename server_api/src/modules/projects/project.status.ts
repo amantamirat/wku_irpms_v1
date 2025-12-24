@@ -3,6 +3,6 @@ export enum ProjectStatus {
     submitted = "submitted",
     rejected = "rejected",
     accepted = "accepted",
-    negotiation = "negotiation"
-    //closed = 'closed'
+    negotiation = "negotiation",
+    approved = 'approved'
 }

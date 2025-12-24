@@ -80,6 +80,17 @@ export class DocumentService {
         for (const id of documents) {
             const doc = await this.repository.findById(id);
             if (!doc) throw new Error(`Document not found: ${id}`);
+
+            const projectDoc = await this.projectRepository.findById(String(doc.project));
+            if (!projectDoc) throw new Error(`Project not found: ${doc.project}`);
+            const projectStatus = projectDoc.status;
+
+            if (projectStatus !== ProjectStatus.submitted &&
+                projectStatus !== ProjectStatus.accepted &&
+                projectStatus !== ProjectStatus.rejected
+            ) {
+                throw new Error("INVALID_PROJECT_STATUS_FOR_DOCUMENT_UPDATE");
+            }
             const current = doc.status;
             DocumentStateMachine.validateTransition(current, newStatus);
             if (newStatus === DocStatus.reviewed) {
@@ -89,7 +100,6 @@ export class DocumentService {
                 if (projectDocs.length > currentStageDoc.order) {
                     throw new Error(`Can not change the status of ${currentStageDoc.name} of the project`);
                 }
-                //if project is not rejected or approved throw an error
             }
             validDocs.push(doc);
         }

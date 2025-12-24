@@ -1,4 +1,4 @@
 export enum CollaboratorStatus {
     pending = 'pending',
-    verify = 'verified'
+    verified = 'verified'
 }

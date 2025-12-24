@@ -155,10 +155,11 @@ export const PERMISSIONS = {
     READ: "project:read",
     UPDATE: "project:update",
     STATUS: {
+      ACCEPT: "project:status.accepted",
       NEGOTIATE: "project:status.negotiation",
-      ACCEPT: "project:status.accepted"
+      APPROVE: "project:status.approved"
     },
-    DELETE: "project:delete",
+    DELETE: "project:delete"
   },
   COLLABORATOR: {
     CREATE: "collaborator:create",

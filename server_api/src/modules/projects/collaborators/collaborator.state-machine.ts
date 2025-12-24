@@ -4,8 +4,8 @@ import { CollaboratorStatus } from "./collaborator.status";
 export class CollaboratorStateMachine {
 
     private static readonly transitions: Record<CollaboratorStatus, CollaboratorStatus[]> = {
-        [CollaboratorStatus.pending]: [CollaboratorStatus.verify],
-        [CollaboratorStatus.verify]: [CollaboratorStatus.pending]
+        [CollaboratorStatus.pending]: [CollaboratorStatus.verified],
+        [CollaboratorStatus.verified]: [CollaboratorStatus.pending]
     };
 
     static canTransition(from: CollaboratorStatus, to: CollaboratorStatus): boolean {

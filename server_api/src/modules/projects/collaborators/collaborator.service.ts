@@ -10,6 +10,7 @@ import {
 } from "./collaborator.dto";
 import { CollaboratorRepository, ICollaboratorRepository } from "./collaborator.repository";
 import { CollaboratorStateMachine } from "./collaborator.state-machine";
+import { CollaboratorStatus } from "./collaborator.status";
 
 export class CollaboratorService {
     private repository: ICollaboratorRepository;
@@ -58,26 +59,41 @@ export class CollaboratorService {
 
     async updateStatus(dto: UpdateCollaboratorDto) {
         const { id, data, applicantId } = dto;
-        const collaboratorDoc = await this.repository.findById(id);
-        if (!collaboratorDoc) throw new Error("Collaborator not found");
+        const collabDoc = await this.repository.findById(id);
+        if (!collabDoc) throw new Error("Collaborator not found");
+
+        const projectDoc = await this.projectRepository.findById(String(collabDoc.project));
+        if (!projectDoc) throw new Error("Project not found");
+
+        const projectStatus = projectDoc.status;
+        if (projectStatus !== ProjectStatus.pending &&
+            projectStatus !== ProjectStatus.submitted &&
+            projectStatus !== ProjectStatus.accepted &&
+            projectStatus !== ProjectStatus.negotiation
+        ) {
+            throw new Error("INVALID_PROJECT_STATUS_FOR_COLLABORATOR_UPDATE");
+        }
+
         const nextState = data.status;
         if (!nextState) throw new Error("Status is required");
-        if (String(collaboratorDoc.applicant) !== applicantId) {
+
+        if (String(collabDoc.applicant) !== applicantId) {
             throw new Error(`User not authorized to perform ${nextState}`);
         }
-        const current = collaboratorDoc.status;
+        const current = collabDoc.status;
         // --- State Machine Validation ---
         CollaboratorStateMachine.validateTransition(current, nextState);
+
         const updated = await this.repository.update(dto.id, dto.data);
         return updated;
     }
 
     async delete(dto: DeleteDto) {
         const { id, userId } = dto;
-        
+
         const collaboratorDoc = await this.repository.findById(id);
         if (!collaboratorDoc) throw new Error("Collaborator not found");
-        
+
         const projectDoc = await this.projectRepository.findById(String(collaboratorDoc.project));
         if (!projectDoc) throw new Error("Project not found");
         if (projectDoc.status !== ProjectStatus.pending) {
@@ -86,7 +102,7 @@ export class CollaboratorService {
         if (String(projectDoc.leadPI) !== userId) {
             throw new Error("User not authorized. Lead PI not found.");
         }
-        
+
         const deleted = await this.repository.delete(id);
         return deleted;
     }

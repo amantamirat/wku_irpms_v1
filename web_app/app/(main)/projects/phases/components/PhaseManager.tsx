@@ -23,7 +23,7 @@ interface PhaseManagerProps {
 }
 
 export default function PhaseManager({ project, phaseType, setProject }: PhaseManagerProps) {
-    
+
     const confirm = useConfirmDialog();
     const { getLinkedApplicant, hasPermission } = useAuth();
     const linkedApplicant = getLinkedApplicant();
@@ -164,7 +164,7 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
         const state = rowData.status;
         return (<div className="flex gap-2">
             {(canVerify &&
-                state === PhaseStatus.proposed)
+                ((state === PhaseStatus.proposed && isLeadPI) || state === PhaseStatus.approved))
                 &&
                 <Button
                     tooltip="Verify"
@@ -180,7 +180,7 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
                 />
             }
             {(canApprove &&
-                state === PhaseStatus.approved)
+                state === PhaseStatus.verified)
                 &&
                 <Button
                     tooltip="Approve"

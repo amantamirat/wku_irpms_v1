@@ -507,11 +507,15 @@
   },
   {
     "category": "Project Management",
+    "name": "project:status.accepted"
+  },
+  {
+    "category": "Project Management",
     "name": "project:status.negotiation"
   },
   {
     "category": "Project Management",
-    "name": "project:status.accepted"
+    "name": "project:status.approved"
   },
   {
     "category": "Project Management",

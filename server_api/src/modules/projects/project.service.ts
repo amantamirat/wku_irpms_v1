@@ -15,6 +15,8 @@ import { CollaboratorRepository, ICollaboratorRepository } from "./collaborators
 import { IPhaseRepository, PhaseRepository } from "./phase/phase.repository";
 import { ProjectStateMachine } from "./project.state-machine";
 import { ProjectStatus } from "./project.status";
+import { PhaseStatus } from "./phase/phase.status";
+import { CollaboratorStatus } from "./collaborators/collaborator.status";
 
 export class ProjectService {
 
@@ -79,26 +81,23 @@ export class ProjectService {
 
         const current = projectDoc.status;
         ProjectStateMachine.validateTransition(current, next);
-
         /*
-        if (next === ProjectStatus.under_review || next === ProjectStatus.accepted) {
-            const nextPhaseStatus = next === ProjectStatus.under_review ? PhaseStatus.under_review :
-                PhaseStatus.proposed;
-
-            const phases = await this.phaseRepository.find({ project: id });
-            const validPhases = [];
-
-            for (const phase of phases) {
-                const current = phase.status;
-                PhaseStateMachine.validateTransition(current, nextPhaseStatus);
-                validPhases.push(phase);
-            }
-
-            await Promise.all(validPhases.map(async (phase) => {
-                await this.phaseRepository.update(String(phase._id), { status: nextPhaseStatus });
-            }));
+        if (next === ProjectStatus.negotiation) {
+            if (!phases.every(p => p.status === PhaseStatus.proposed))
+                throw new Error("PHASES_NOT_FULLY_PROPSED");
         }
         */
+        if (next === ProjectStatus.approved) {
+            const phases = await this.phaseRepository.find({ project: id });
+            //validate against grant in here
+            if (!phases.every(p => p.status === PhaseStatus.approved))
+                throw new Error("PHASES_NOT_FULLY_APPROVED");
+            
+            const collabs = await this.collabRepository.find({ project: id });
+            if (!collabs.every(c => c.status === CollaboratorStatus.verified))
+                throw new Error("COLLABORATORS_NOT_FULLY_VERIFIED");
+        }
+
         const updated = await this.repository.update(id, { status: next });
         return updated;
 

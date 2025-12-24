@@ -63,7 +63,7 @@ export class ProService {
         ).map(c => ({
             ...c,
             project: submittedProject._id,
-            status: c.isLeadPI ? CollaboratorStatus.verify : CollaboratorStatus.pending
+            status: c.isLeadPI ? CollaboratorStatus.verified : CollaboratorStatus.pending
         }));
         const themes = dto.themes?.filter((t, index, self) =>
             index === self.findIndex(tt => tt.theme.toString() === t.theme.toString())

@@ -64,7 +64,7 @@ export class PhaseService {
     // UPDATE STATUS
     // ---------------------------------------------------
     async updateStatus(dto: UpdatePhaseDto) {
-        const { id, data } = dto;
+        const { id, data, applicantId } = dto;
         const next = data.status;
         if (!next) throw new Error("Status not found");
 
@@ -74,12 +74,17 @@ export class PhaseService {
         const projectDoc = await this.projectRepository.findById(String(phaseDoc.project));
         if (!projectDoc) throw new Error("Project not found");
 
+        if (projectDoc.status !== ProjectStatus.negotiation) {
+            throw new Error("PROJECT_STATUS_INVALID_FOR_PHASE_UPDATE");
+        }
+
         const current = phaseDoc.status;
         PhaseStateMachine.validateTransition(current, next);
 
         if (next === PhaseStatus.verified) {
-            if (projectDoc.status !== ProjectStatus.negotiation) {
-                throw new Error("PROJECT_STATUS_INVALID_FOR_PHASE_UPDATE");
+            if (current === PhaseStatus.proposed) {
+                if (String(projectDoc.leadPI) !== applicantId)
+                    throw new Error("USER_NOT_LEAD_PI");
             }
         }
 
@@ -87,12 +92,12 @@ export class PhaseService {
         return updated;
     }
 
-    async delete(dto: DeleteDto) {        
+    async delete(dto: DeleteDto) {
         const { id, userId } = dto;
-        
+
         const phaseDoc = await this.repository.findById(id);
         if (!phaseDoc) throw new Error("Phase not found");
-        
+
         if (phaseDoc.status !== PhaseStatus.proposed)
             throw new Error("PHASE_STATUS_INVALID_FOR_PHASE_DELETE");
 

@@ -37,8 +37,9 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
     const canEdit = hasPermission([PERMISSIONS.PROJECT.UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.PROJECT.DELETE]);
     // State permissions
-    const canNegotiate = hasPermission([PERMISSIONS.PROJECT.STATUS.NEGOTIATE]);
     const canAccept = hasPermission([PERMISSIONS.PROJECT.STATUS.ACCEPT]);
+    const canNegotiate = hasPermission([PERMISSIONS.PROJECT.STATUS.NEGOTIATE]);
+    const canApprove = hasPermission([PERMISSIONS.PROJECT.STATUS.APPROVE]);
 
     // ✅ State + CRUD Hook
     const {
@@ -96,17 +97,32 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
     const stateTransitionTemplate = (rowData: Project) => {
         const state = rowData.status;
         return (<div className="flex gap-2">
-            {(canNegotiate && state === ProjectStatus.accepted)
+            {(canNegotiate && (state === ProjectStatus.accepted || state === ProjectStatus.approved))
                 &&
                 <Button
                     tooltip="Negotiate"
                     icon="pi pi-bitcoin"
-                    severity="success"
+                    severity="info"
                     size="small"
                     onClick={() => {
                         confirm.ask({
                             operation: 'Negotiate',
                             onConfirmAsync: () => updateStatus(rowData, ProjectStatus.negotiation)
+                        });
+                    }}
+                />
+            }
+            {(canApprove && state === ProjectStatus.negotiation)
+                &&
+                <Button
+                    tooltip="Approve"
+                    icon="pi pi-check"
+                    severity="success"
+                    size="small"
+                    onClick={() => {
+                        confirm.ask({
+                            operation: 'Approve',
+                            onConfirmAsync: () => updateStatus(rowData, ProjectStatus.approved)
                         });
                     }}
                 />
@@ -119,7 +135,7 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
                     size="small"
                     onClick={() => {
                         confirm.ask({
-                            operation: 'back to activate',
+                            operation: 'back to accepted',
                             onConfirmAsync: () => updateStatus(rowData, ProjectStatus.accepted)
                         });
                     }}
