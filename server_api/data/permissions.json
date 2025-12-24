@@ -507,7 +507,7 @@
   },
   {
     "category": "Project Management",
-    "name": "project:status.under_review"
+    "name": "project:status.negotiation"
   },
   {
     "category": "Project Management",
@@ -560,6 +560,18 @@
     "category": "Phase Management",
     "name": "phase:update",
     "description": "Update phase entries"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:status.proposed"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:status.verified"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:status.approved"
   },
   {
     "category": "Phase Management",

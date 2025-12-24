@@ -36,7 +36,7 @@ const StageSchema = new Schema<IStage>({
     },
     evaluation: {
         type: Schema.Types.ObjectId,
-        ref: Evaluation.modelName,
+        ref: COLLECTIONS.EVALUATION,
         required: true,
         immutable: true,
     },

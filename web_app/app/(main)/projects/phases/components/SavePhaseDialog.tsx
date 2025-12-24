@@ -37,9 +37,9 @@ const SavePhaseDialog=({ phase, visible, onSave, onComplete, onHide }: SavePhase
                 onSave(localPhase);
             } else {
                 if (localPhase._id) {
-                    saved = await PhaseApi.updatePhase(localPhase);
+                    saved = await PhaseApi.update(localPhase);
                 } else {
-                    saved = await PhaseApi.createPhase(localPhase);
+                    saved = await PhaseApi.create(localPhase);
                 }
                 saved = { ...saved, project: localPhase.project, type: localPhase.type };
                 toast.current?.show({

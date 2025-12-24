@@ -5,6 +5,7 @@ import { AuthenticatedRequest } from "../../users/user.middleware";
 import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto } from "./phase.dto";
 import { PhaseType } from "./phase.enum";
 import { PhaseService } from "./phase.service";
+import { PhaseStatus } from "./phase.status";
 
 export class PhaseController {
     private service: PhaseService;
@@ -61,7 +62,6 @@ export class PhaseController {
             errorResponse(res, 400, err.message, err);
         }
     };
-
     // -----------------------
     // Update
     // -----------------------
@@ -69,18 +69,18 @@ export class PhaseController {
         try {
             if (!req.user) throw new Error("User not found!");
 
-            const { id } = req.params;
+            const { id } = req.query;
             const { activity, duration, budget, description } = req.body;
 
             const dto: UpdatePhaseDto = {
-                id,
+                id: id as string,
                 data: {
                     activity: activity ?? undefined,
                     duration: duration ?? undefined,
                     budget: budget ?? undefined,
                     description: description ?? undefined,
                 },
-                applicantId: req.user._id,
+                applicantId: req.user.applicantId,
             };
 
             const updated = await this.service.update(dto);
@@ -89,7 +89,28 @@ export class PhaseController {
             errorResponse(res, 400, err.message, err);
         }
     };
+    // ---------------------------------------------------
+    // Update Status
+    // ---------------------------------------------------
+    updateStatus = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            if (!req.user) throw new Error("User not found!");
+            const { id } = req.query;
+            const { status } = req.params;
 
+            const dto: UpdatePhaseDto = {
+                id: id as string,
+                data: {
+                    status: status as PhaseStatus
+                },
+                applicantId: req.user.applicantId,
+            };
+            const updated = await this.service.updateStatus(dto);
+            successResponse(res, 200, "Stage status updated successfully", updated);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
     // -----------------------
     // Delete
     // -----------------------
@@ -99,7 +120,7 @@ export class PhaseController {
             const { id } = req.params;
             const dto: DeleteDto = {
                 id,
-                userId: req.user._id,
+                userId: req.user.applicantId,
             };
             const deleted = await this.service.delete(dto);
             successResponse(res, 200, "Phase deleted successfully", deleted);

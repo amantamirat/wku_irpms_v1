@@ -136,7 +136,7 @@ export const PERMISSIONS = {
     READ: "project:read",
     UPDATE: "project:update",
     STATUS: {
-      UNDER_REVIEW: "project:status.under_review",
+      NEGOTIATE: "project:status.negotiation",
       ACCEPT: "project:status.accepted"
     },
     DELETE: "project:delete",
@@ -155,6 +155,11 @@ export const PERMISSIONS = {
     CREATE: "phase:create",
     READ: "phase:read",
     UPDATE: "phase:update",
+    STATUS: {
+      PROPOSE: "phase:status.proposed",
+      VERIFY: "phase:status.verified",
+      APPROVE: "phase:status.approved",
+    },
     DELETE: "phase:delete",
   },
   DOCUMENT: {

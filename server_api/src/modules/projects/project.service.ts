@@ -10,13 +10,11 @@ import { IProjectRepository, ProjectRepository } from "./project.repository";
 import { DeleteDto } from "../../util/delete.dto";
 import { ApplicantRepository, IApplicantRepository } from "../applicants/applicant.repository";
 import { CallRepository, ICallRepository } from "../calls/call.repository";
-import { CollaboratorRepository, ICollaboratorRepository } from "./collaborators/collaborator.repository";
-import { ProjectStatus } from "./project.status";
 import { CallStatus } from "../calls/call.status";
-import { ProjectStateMachine } from "./project.state-machine";
+import { CollaboratorRepository, ICollaboratorRepository } from "./collaborators/collaborator.repository";
 import { IPhaseRepository, PhaseRepository } from "./phase/phase.repository";
-import { PhaseStatus } from "./phase/phase.status";
-import { PhaseStateMachine } from "./phase/phase.state-machine";
+import { ProjectStateMachine } from "./project.state-machine";
+import { ProjectStatus } from "./project.status";
 
 export class ProjectService {
 
@@ -82,6 +80,7 @@ export class ProjectService {
         const current = projectDoc.status;
         ProjectStateMachine.validateTransition(current, next);
 
+        /*
         if (next === ProjectStatus.under_review || next === ProjectStatus.accepted) {
             const nextPhaseStatus = next === ProjectStatus.under_review ? PhaseStatus.under_review :
                 PhaseStatus.proposed;
@@ -99,7 +98,7 @@ export class ProjectService {
                 await this.phaseRepository.update(String(phase._id), { status: nextPhaseStatus });
             }));
         }
-
+        */
         const updated = await this.repository.update(id, { status: next });
         return updated;
 

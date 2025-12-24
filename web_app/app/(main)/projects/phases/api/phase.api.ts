@@ -1,7 +1,7 @@
 import { ApiClient } from "@/api/ApiClient";
-import { GetPhaseOptions, Phase, sanitizePhase } from "../models/phase.model";
+import { GetPhaseOptions, Phase, PhaseStatus, sanitizePhase } from "../models/phase.model";
 
-const end_point = '/project/phases/';
+const end_point = '/project/phases';
 
 
 export const PhaseApi = {
@@ -15,25 +15,34 @@ export const PhaseApi = {
         return data as Phase[];
     },
 
-    async createPhase(phase: Partial<Phase>): Promise<Phase> {
+    async create(phase: Partial<Phase>): Promise<Phase> {
         const createdData = await ApiClient.post(end_point, sanitizePhase(phase));
         return createdData as Phase;
     },
 
-    async updatePhase(phase: Partial<Phase>): Promise<Phase> {
-        if (!phase._id) {
-            throw new Error("_id required.");
-        }
-        const url = `${end_point}${phase._id}`;
-        const updatedPhase = await ApiClient.put(url, sanitizePhase(phase));
+    async update(phase: Partial<Phase>): Promise<Phase> {
+        if (!phase._id) throw new Error("_id required.");
+        const query = new URLSearchParams();
+        query.append("id", phase._id);
+        const url = `${end_point}?${query.toString()}`;
+        const sanitized = sanitizePhase(phase);
+        const updatedPhase = await ApiClient.put(url, sanitized);
         return updatedPhase as Phase;
     },
 
-    async deletePhase(phase: Partial<Phase>): Promise<boolean> {
+    async updateStatus(id: string, status: PhaseStatus): Promise<Phase> {
+        const query = new URLSearchParams();
+        query.append("id", id);
+        const url = `${end_point}/${status}`;
+        const updated = await ApiClient.put(`${url}?${query.toString()}`);
+        return updated as Phase;
+    },
+
+    async delete(phase: Partial<Phase>): Promise<boolean> {
         if (!phase._id) {
             throw new Error("_id required.");
         }
-        const url = `${end_point}${phase._id}`;
+        const url = `${end_point}/${phase._id}`;
         const response = await ApiClient.delete(url);
         return response;
     },

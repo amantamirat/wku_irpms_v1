@@ -37,7 +37,7 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
     const canEdit = hasPermission([PERMISSIONS.PROJECT.UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.PROJECT.DELETE]);
     // State permissions
-    const canUnderReview = hasPermission([PERMISSIONS.PROJECT.STATUS.UNDER_REVIEW]);
+    const canNegotiate = hasPermission([PERMISSIONS.PROJECT.STATUS.NEGOTIATE]);
     const canAccept = hasPermission([PERMISSIONS.PROJECT.STATUS.ACCEPT]);
 
     // ✅ State + CRUD Hook
@@ -96,22 +96,22 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
     const stateTransitionTemplate = (rowData: Project) => {
         const state = rowData.status;
         return (<div className="flex gap-2">
-            {(canUnderReview && state === ProjectStatus.accepted)
+            {(canNegotiate && state === ProjectStatus.accepted)
                 &&
                 <Button
-                    tooltip="Budget Review"
+                    tooltip="Negotiate"
                     icon="pi pi-bitcoin"
                     severity="success"
                     size="small"
                     onClick={() => {
                         confirm.ask({
-                            operation: 'budget review',
-                            onConfirmAsync: () => updateStatus(rowData, ProjectStatus.under_review)
+                            operation: 'Negotiate',
+                            onConfirmAsync: () => updateStatus(rowData, ProjectStatus.negotiation)
                         });
                     }}
                 />
             }
-            {(canAccept && state === ProjectStatus.under_review) &&
+            {(canAccept && state === ProjectStatus.negotiation) &&
                 <Button
                     tooltip="Back to accept"
                     icon="pi pi-undo"

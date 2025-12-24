@@ -7,12 +7,14 @@ import { useEffect, useState } from "react";
 
 import SavePhaseDialog from "./SavePhaseDialog";
 
-import { Project } from "../../models/project.model";
+import { Project, ProjectStatus } from "../../models/project.model";
 import { PhaseApi } from "../api/phase.api";
-import { Phase, PhaseType } from "../models/phase.model";
+import { Phase, PhaseStatus, PhaseType } from "../models/phase.model";
 
 import { useCrudList } from "@/hooks/useCrudList";
 import { PERMISSIONS } from "@/types/permissions";
+import MyBadge from "@/templates/MyBadge";
+import { Button } from "primereact/button";
 
 interface PhaseManagerProps {
     project: Project;
@@ -21,6 +23,7 @@ interface PhaseManagerProps {
 }
 
 export default function PhaseManager({ project, phaseType, setProject }: PhaseManagerProps) {
+    
     const confirm = useConfirmDialog();
     const { getLinkedApplicant, hasPermission } = useAuth();
     const linkedApplicant = getLinkedApplicant();
@@ -42,11 +45,16 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
     // -------------------------------
     // Permissions
     // -------------------------------
+    const isValidStatus = project ? (project.status === ProjectStatus.pending ||
+        project.status === ProjectStatus.negotiation) : false;
 
-    const canCreate = !!project && isLeadPI && hasPermission([PERMISSIONS.PHASE.CREATE]);
-    const canEdit = !!project && isLeadPI && hasPermission([PERMISSIONS.PHASE.UPDATE]);
-    const canDelete = !!project && isLeadPI && hasPermission([PERMISSIONS.PHASE.DELETE]);
-
+    const canCreate = isValidStatus && isLeadPI && hasPermission([PERMISSIONS.PHASE.CREATE]);
+    const canEdit = isValidStatus && isLeadPI && hasPermission([PERMISSIONS.PHASE.UPDATE]);
+    const canDelete = isValidStatus && isLeadPI && hasPermission([PERMISSIONS.PHASE.DELETE]);
+    // State permissions
+    const canVerify = (project.status === ProjectStatus.negotiation) && hasPermission([PERMISSIONS.PHASE.STATUS.VERIFY]);
+    const canApprove = hasPermission([PERMISSIONS.PHASE.STATUS.APPROVE]);
+    const canPropose = hasPermission([PERMISSIONS.PHASE.STATUS.PROPOSE]);
     // -------------------------------
     // CRUD Hook
     // -------------------------------
@@ -112,7 +120,7 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
     // -------------------------------
     const deletePhase = async (row: Phase) => {
         if (project._id) {
-            const deleted = await PhaseApi.deletePhase(row);
+            const deleted = await PhaseApi.delete(row);
             if (deleted) removeItem(row);
         } else {
             const updated = project.phases?.filter(p => p.activity !== row.activity) ?? [];
@@ -141,12 +149,86 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
         setShowDialog(true);
     };
 
+    const updateStatus = async (row: Phase, next: PhaseStatus) => {
+        if (!row._id) {
+            return;
+        }
+        const updated = await PhaseApi.updateStatus(row._id, next);
+        onSaveComplete({
+            ...updated,
+            project: row.project
+        });
+    };
+
+    const stateTransitionTemplate = (rowData: Phase) => {
+        const state = rowData.status;
+        return (<div className="flex gap-2">
+            {(canVerify &&
+                state === PhaseStatus.proposed)
+                &&
+                <Button
+                    tooltip="Verify"
+                    icon="pi pi-verified"
+                    severity="info"
+                    size="small"
+                    onClick={() => {
+                        confirm.ask({
+                            operation: 'Verify',
+                            onConfirmAsync: () => updateStatus(rowData, PhaseStatus.verified)
+                        });
+                    }}
+                />
+            }
+            {(canApprove &&
+                state === PhaseStatus.approved)
+                &&
+                <Button
+                    tooltip="Approve"
+                    icon="pi pi-check-circle"
+                    severity="success"
+                    size="small"
+                    onClick={() => {
+                        confirm.ask({
+                            operation: 'Approve',
+                            onConfirmAsync: () => updateStatus(rowData, PhaseStatus.approved)
+                        });
+                    }}
+                />
+            }
+            {(canPropose &&
+                state === PhaseStatus.verified)
+                &&
+                <Button
+                    tooltip="Back to proposed"
+                    icon="pi pi-undo"
+                    severity="warning"
+                    size="small"
+                    onClick={() => {
+                        confirm.ask({
+                            operation: 'back to proposed',
+                            onConfirmAsync: () => updateStatus(rowData, PhaseStatus.proposed)
+                        });
+                    }}
+                />
+            }
+        </div>);
+    }
+
+
+
+
+
     const columns = [
         { field: "activity", header: "Activity", sortable: true },
         { field: "duration", header: "Duration (Days)", sortable: true },
         { field: "budget", header: "Budget (ETB)", sortable: true },
         { field: "description", header: "Description" },
-        { field: "status", header: "Status" },
+        {
+            field: "status", header: "Status", sortable: true,
+            body: (p: Phase) =>
+                <MyBadge type="status" value={p.status ?? 'Unknown'} />
+        },
+        { body: stateTransitionTemplate }
     ];
 
     return (

@@ -10,6 +10,7 @@
 .status-badge {
 
     &.status-pending,
+    &.status-proposed,
     &.status-planned {
         background: #FFF9C4;
         color: #8A6D3B;
@@ -17,7 +18,8 @@
 
     &.status-submitted,
     &.status-linked,
-    &.status-verified, 
+    &.status-verified,
+    &.status-accepted,
     &.status-active {
         background: #C8E6C9;
         color: #256029;
@@ -32,17 +34,18 @@
         color: #d80517;
     }
 
-    &.status-accepted,
+
     &.status-approved,
     &.status-closed {
         background: #F3E5F5;
         color: #4A148C;
     }
 
-    &.status-under_review {
+    &.status-negotiation {
         background: #BBDEFB;
-        color: #0D47A1;
+        color: #02193d;
     }
+
     &.status-reviewed {
         background: #fbbbf0;
         color: #a10d95;

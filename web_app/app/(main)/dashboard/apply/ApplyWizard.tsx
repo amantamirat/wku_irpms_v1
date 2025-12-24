@@ -157,7 +157,7 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
                 <Steps model={items} activeIndex={activeStep} readOnly className="mb-4" />
                 {activeStep === 0 && <UploadForm file={project.file} onUpload={updateFile} />}
                 {activeStep === 1 && <ProjectForm project={project} setProject={setProject} />}
-                {activeStep === 2 && <CollaboratorManager project={project} onSave={addCollaborator} />}
+                {activeStep === 2 && <CollaboratorManager project={project} onSave={addCollaborator} flyMode />}
                 {activeStep === 3 && <ProjectThemeManager project={project} setProject={setProject} />}
                 {activeStep === 4 && <PhaseManager project={project} setProject={setProject} phaseType={PhaseType.phase} />}
                 {activeStep === items.length - 1 && <Confirmation project={project} call={project.call as Call} />}

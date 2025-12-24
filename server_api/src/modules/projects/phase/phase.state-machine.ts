@@ -2,11 +2,11 @@ import { PhaseStatus } from "./phase.status";
 
 // phase.state-machine.ts
 export class PhaseStateMachine {
-    
+
     private static readonly transitions: Record<PhaseStatus, PhaseStatus[]> = {
-        [PhaseStatus.proposed]: [PhaseStatus.under_review],
-        [PhaseStatus.under_review]: [PhaseStatus.reviewed, PhaseStatus.proposed],
-        [PhaseStatus.reviewed]: [PhaseStatus.under_review]
+        [PhaseStatus.proposed]: [PhaseStatus.verified],
+        [PhaseStatus.verified]: [PhaseStatus.approved, PhaseStatus.proposed],
+        [PhaseStatus.approved]: [PhaseStatus.verified]
     };
 
     static canTransition(from: PhaseStatus, to: PhaseStatus): boolean {

@@ -1,29 +1,28 @@
 "use client";
 
+import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
 import { CrudManager } from "@/components/CrudManager";
-import ErrorCard from "@/components/ErrorCard";
-import ListSkeleton from "@/components/ListSkeleton";
+import { useAuth } from "@/contexts/auth-context";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useCrudList } from "@/hooks/useCrudList";
 import MyBadge from "@/templates/MyBadge";
-import { useEffect, useState } from "react";
-import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
-import { useAuth } from "@/contexts/auth-context";
+import { PERMISSIONS } from "@/types/permissions";
 import { Button } from "primereact/button";
+import { useEffect, useState } from "react";
 import { Project } from "../../models/project.model";
 import { CollaboratorApi } from "../api/collaborator.api";
 import { Collaborator, CollaboratorStatus } from "../models/collaborator.model";
 import CollaboratorDialog from "./CollaboratorDialog";
-import { PERMISSIONS } from "@/types/permissions";
 
 interface CollaboratorProps {
     project?: Project;
     applicant?: Applicant;
+    flyMode?: boolean;
     onSave?: (collaborator: Collaborator) => void;
     onRemove?: (collaborator: Collaborator) => void;
 }
 
-const CollaboratorManager = ({ project, applicant, onSave, onRemove }: CollaboratorProps) => {
+const CollaboratorManager = ({ project, applicant, flyMode, onSave, onRemove }: CollaboratorProps) => {
     const confirm = useConfirmDialog();
     const { getLinkedApplicant, hasPermission } = useAuth();
     const linkedApplicant = getLinkedApplicant();
@@ -74,23 +73,30 @@ const CollaboratorManager = ({ project, applicant, onSave, onRemove }: Collabora
         if (project?._id || applicant?._id) {
             fetchData();
         }
+        if (flyMode && project) {
+            setAll(project?.collaborators ?? []);
+        }
     }, [project, applicant]);
 
 
     // Save or update collaborator
     const onSaveComplete = (saved: Collaborator) => {
         updateItem(saved);
-        if (onSave) onSave(saved);
+        if (flyMode) {
+
+        }
         setSelectedCollaborator(emptyCollaborator);
         setShowSaveDialog(false);
     };
 
     // Delete collaborator
     const deleteCollaborator = async (row: Collaborator) => {
+        if (flyMode) {
+            //remove from
+        }
         const deleted = await CollaboratorApi.deleteCollaborator(row);
         if (deleted) {
             removeItem(row);
-            if (onRemove) onRemove(row);
         }
     };
 
@@ -166,7 +172,7 @@ const CollaboratorManager = ({ project, applicant, onSave, onRemove }: Collabora
             <CrudManager
                 headerTitle="Collaborators"
                 items={collaborators}
-                dataKey="_id"
+                dataKey="applicant._id"
                 loading={loading}
                 error={error}
                 columns={columns}
@@ -190,6 +196,7 @@ const CollaboratorManager = ({ project, applicant, onSave, onRemove }: Collabora
                 <CollaboratorDialog
                     collaborator={selectedCollaborator}
                     visible={showSaveDialog}
+                    onSave={onSave}
                     onComplete={onSaveComplete}
                     onHide={() => setShowSaveDialog(false)}
                 />

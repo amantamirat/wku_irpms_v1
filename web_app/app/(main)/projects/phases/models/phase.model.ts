@@ -5,15 +5,22 @@ export enum PhaseType {
     breakdown = 'breakdown'
 }
 
+export enum PhaseStatus {
+    proposed = 'proposed',
+    verified = 'verified',
+    approved = 'approved'
+}
+
 export type Phase = {
     _id?: string;
     type: PhaseType;
     project?: string | Project;
+    parent?: string | Phase;
     activity: string;
     duration: number;
     budget: number;
     description?: string;
-    parent?: string | Phase;
+    status?: PhaseStatus;
     createdAt?: Date;
     updatedAt?: Date;
     order?: number;

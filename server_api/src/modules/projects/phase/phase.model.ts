@@ -7,10 +7,12 @@ interface BasePhaseDocument extends Document {
     _id: mongoose.Types.ObjectId;
     type: PhaseType;
     activity: string;
-    duration: number; //proposed duration
-    budget: number; //proposed budget
+    duration: number;
+    budget: number;
+    /*
     reviewedDuration?: number;
     reviewedBudget?: number;
+    */
     description?: string;
     status: PhaseStatus;
     createdAt?: Date;
@@ -39,6 +41,7 @@ const BasePhaseSchema = new Schema<BasePhaseDocument>(
             min: 0,
             required: true
         },
+        /*
         reviewedDuration: {
             type: Number,
             min: 0
@@ -47,6 +50,7 @@ const BasePhaseSchema = new Schema<BasePhaseDocument>(
             type: Number,
             min: 0
         },
+        */
         description: {
             type: String
         },

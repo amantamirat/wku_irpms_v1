@@ -9,7 +9,7 @@ export enum ProjectStatus {
     submitted = "submitted",
     rejected = "rejected",
     accepted = "accepted",
-    under_review = "under_review"
+    negotiation = "negotiation"
     //closed = 'closed'
 }
 

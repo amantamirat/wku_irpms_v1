@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PhaseController } from './phase.controller';
-import { checkPermission, verifyActiveAccount } from '../../users/user.middleware';
+import { checkPermission, checkStatusPermission, verifyActiveAccount } from '../../users/user.middleware';
 import { PERMISSIONS } from '../../../common/constants/permissions';
 
 const controller = new PhaseController();
@@ -12,9 +12,15 @@ router.post('/', verifyActiveAccount,
 router.get('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.PHASE.READ]),
     controller.get);
-router.put('/:id', verifyActiveAccount,
+router.put('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.PHASE.UPDATE]),
     controller.update);
+//update status
+router.put(
+    '/:status', verifyActiveAccount,
+    checkStatusPermission("phase"),
+    controller.updateStatus
+);
 router.delete('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.PHASE.DELETE]),
     controller.delete);
