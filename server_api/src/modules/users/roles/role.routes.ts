@@ -3,31 +3,31 @@ import { RoleController } from './role.controller';
 import { checkPermission, verifyActiveAccount } from '../user.middleware';
 import { PERMISSIONS } from '../../../common/constants/permissions';
 
-
+const controller = new RoleController();
 const router: Router = Router();
 
 router.post('/',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.ROLE.CREATE]),
-    RoleController.createRole
+    controller.create
 );
 
 router.get('/',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.ROLE.READ]),
-    RoleController.getRoles
+    controller.get
 );
 
 router.put('/:id',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.ROLE.UPDATE]),
-    RoleController.updateRole
+    controller.update
 );
 
 router.delete('/:id',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.ROLE.DELETE]),
-    RoleController.deleteRole
+    controller.delete
 );
 
 export default router;

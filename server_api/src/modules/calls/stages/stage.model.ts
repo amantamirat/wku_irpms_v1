@@ -44,11 +44,13 @@ const StageSchema = new Schema<IStage>({
         type: Date,
         required: true
     },
+    
     isFinal: {
         type: Boolean,
         required: true,
         default: false
     },
+    
     /*
     isValidation: {
         type: Boolean,

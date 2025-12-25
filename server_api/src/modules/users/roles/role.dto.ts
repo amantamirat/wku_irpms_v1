@@ -1,6 +1,7 @@
 export interface CreateRoleDto {
     name: string;
     permissions: string[];
+    isDefault: boolean;
 }
 
 export interface UpdateRoleDto {
@@ -8,6 +9,7 @@ export interface UpdateRoleDto {
     data: Partial<{
         name: string;
         permissions: string[];
+        isDefault: boolean;
     }>;
     userId?: string;
 }

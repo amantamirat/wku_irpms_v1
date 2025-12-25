@@ -1,41 +1,22 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
-import { UserStatus } from './user.enum';
+import { UserStatus } from './user.status';
 import { COLLECTIONS } from '../../common/constants/collections.enum';
 
 //assumption it is auth just username and passowd
 export interface IUser extends Document {
-  applicant: mongoose.Types.ObjectId;
-  user_name: string;
-  password: string;
   email: string;
-  status: UserStatus;
-  roles: mongoose.Types.ObjectId[]; //remove
-  organizations?: mongoose.Types.ObjectId[]; //remove
+  password: string;
+  applicant: mongoose.Types.ObjectId;
   resetCode?: String;
   resetCodeExpires?: Date;
   lastLogin?: Date,
-  createdBy?: mongoose.Types.ObjectId;
+  status: UserStatus;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 const UserSchema = new Schema<IUser>(
   {
-    applicant: {
-      type: Schema.Types.ObjectId,
-      ref: COLLECTIONS.APPLICANT,
-      immutable: true,
-      unique: true
-    },
-    user_name: {
-      type: String,
-      //required: true,
-      //unique: true,
-    },
-    password: {
-      type: String,
-      required: true,
-    },
     email: {
       type: String,
       unique: true,
@@ -46,21 +27,16 @@ const UserSchema = new Schema<IUser>(
         'Please provide a valid email',
       ]
     },
-    status: {
+    password: {
       type: String,
-      enum: Object.values(UserStatus),
-      default: UserStatus.pending,
       required: true,
     },
-
-    roles: [{
+    applicant: {
       type: Schema.Types.ObjectId,
-      ref: COLLECTIONS.ROLE
-    }],
-    organizations: [{
-      type: Schema.Types.ObjectId,
-      ref: COLLECTIONS.ORGANIZATION
-    }],
+      ref: COLLECTIONS.APPLICANT,
+      immutable: true,
+      unique: true
+    },
     resetCode: {
       type: String
     },
@@ -70,11 +46,12 @@ const UserSchema = new Schema<IUser>(
     lastLogin: {
       type: Date
     },
-    createdBy: {
-      type: Schema.Types.ObjectId,
-      ref: COLLECTIONS.USER,
-      immutable: true
-    },
+    status: {
+      type: String,
+      enum: Object.values(UserStatus),
+      default: UserStatus.pending,
+      required: true,
+    }
   },
   { timestamps: true }
 );

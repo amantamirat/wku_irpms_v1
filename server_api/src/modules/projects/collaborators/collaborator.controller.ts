@@ -29,10 +29,10 @@ export class CollaboratorController {
                 applicant: applicant as string,
                 project: project as string,
                 isLeadPI: isLeadPI ? true : undefined,
-                leadPI: req.user.applicantId,
+                applicantId: req.user.applicantId,
             };
 
-            const created = await this.service.createCollaborator(dto);
+            const created = await this.service.create(dto);
             successResponse(res, 201, 'Collaborator created successfully', created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

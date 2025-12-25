@@ -10,16 +10,20 @@ import SaveCall from "./SaveCall";
 import StageManager from "../stages/components/StageManager";
 import { useAuth } from "@/contexts/auth-context";
 import { PERMISSIONS } from "@/types/permissions";
-import CallTabs from "./CallTabs";
 import MyBadge from "@/templates/MyBadge";
 import { Button } from "primereact/button";
+import { Calendar } from "../../calendars/models/calendar.model";
+import ProjectManager from "../../projects/components/ProjectManager";
 
+interface CallManagerProps {
+    calendar?: Calendar;
+    next?: "stage" | "project";
+}
 
-
-const CallManager = () => {
+const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
 
     const emptyCycle: Call = {
-        calendar: "",
+        calendar: calendar ?? "",
         directorate: "",
         title: "",
         grant: "",
@@ -33,12 +37,12 @@ const CallManager = () => {
     const canCreate = hasPermission([PERMISSIONS.CALL.CREATE]);
     const canEdit = hasPermission([PERMISSIONS.CALL.UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.CALL.DELETE]);
-    
+
     const canActivate = hasPermission([PERMISSIONS.CALL.STATUS.ACTIVATE]);
     const canClose = hasPermission([PERMISSIONS.CALL.STATUS.CLOSE]);
     const canPlan = hasPermission([PERMISSIONS.CALL.STATUS.PLANNED]);
 
-    const canChangeStatus = hasPermission([PERMISSIONS.CALL.CHANGE_STATUS]);
+    //const canChangeStatus = hasPermission([PERMISSIONS.CALL.CHANGE_STATUS]);
 
     /** CRUD Hook */
     const {
@@ -60,10 +64,10 @@ const CallManager = () => {
         const fetchCalls = async () => {
             try {
                 setLoading(true);
-                const data = await CallApi.getCalls({});
+                const data = await CallApi.getCalls({ calendar });
                 setAll(data);
             } catch (err: any) {
-                setError("Failed to load cycles. " + (err?.message ?? ""));
+                setError("Failed to load calendars. " + (err?.message ?? ""));
             } finally {
                 setLoading(false);
             }
@@ -171,7 +175,7 @@ const CallManager = () => {
             body: (row: Call) => <MyBadge type="status" value={row.status ?? "Unknown"} />,
             sortable: true
         },
-        canChangeStatus && { body: stateTransitionTemplate }
+        { body: stateTransitionTemplate }
     ];
 
     return (
@@ -211,7 +215,12 @@ const CallManager = () => {
                     })
                 }
                 //enableSearch
-                rowExpansionTemplate={(row) => <StageManager call={row}/>}
+                rowExpansionTemplate={(row) => {
+                    if (next === "project") {
+                        return (<ProjectManager call={row} />)
+                    }
+                    return (<StageManager call={row} />)
+                }}
             />
 
             {/* Save Dialog */}

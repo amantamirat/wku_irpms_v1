@@ -1,4 +1,4 @@
-import { UserStatus } from "./user.enum";
+import { UserStatus } from "./user.status";
 
 // user.state-machine.ts
 export class UserStateMachine {

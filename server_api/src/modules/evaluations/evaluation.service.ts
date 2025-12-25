@@ -33,7 +33,7 @@ export class EvaluationService {
         const evalDoc = await this.repository.findById(id);
         if (!evalDoc) throw new Error("Evaluation not found");
 
-        await CacheService.validateOwnership(userId, evalDoc.directorate);
+        //await CacheService.validateOwnership(userId, evalDoc.directorate);
 
         return await this.repository.update(id, data);
     }
@@ -43,7 +43,7 @@ export class EvaluationService {
         const evalDoc = await this.repository.findById(id);
         if (!evalDoc) throw new Error("Evaluation not found");
 
-        await CacheService.validateOwnership(userId, evalDoc.directorate);
+        //await CacheService.validateOwnership(userId, evalDoc.directorate);
 
         /*
         const countCriteria = await this.repository.countCriteria(id);

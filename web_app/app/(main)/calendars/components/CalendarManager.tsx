@@ -10,6 +10,7 @@ import { Calendar, CalendarStatus } from "../models/calendar.model";
 import { CalendarApi } from "../api/calendar.api";
 import SaveCalendarDialog from "../dialogs/SaveCalendarDialog";
 import MyBadge from "@/templates/MyBadge";
+import CallManager from "../../calls/components/CallManager";
 
 const CalendarManager = () => {
 
@@ -80,7 +81,7 @@ const CalendarManager = () => {
         { header: "Year", field: "year" },
         { header: "Start Date", body: (r: Calendar) => new Date(r.startDate!).toLocaleDateString("en-CA") },
         { header: "End Date", body: (r: Calendar) => new Date(r.endDate!).toLocaleDateString("en-CA") },
-      {
+        {
             header: "Status",
             field: "status",
             body: (u: Calendar) => <MyBadge type="status" value={u.status ?? "Unknown"} />
@@ -118,8 +119,8 @@ const CalendarManager = () => {
                         onConfirmAsync: () => deleteCalendar(row)
                     })
                 }
-
                 enableSearch
+                rowExpansionTemplate={(row) => <CallManager calendar={row} next="project" />}
             />
 
             {/* Save Dialog */}

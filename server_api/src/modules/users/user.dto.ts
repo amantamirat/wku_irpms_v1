@@ -1,13 +1,10 @@
-import { UserStatus } from "./user.enum";
-
-
+import { UserStatus } from "./user.status";
 
 export interface CreateUserDTO {
     applicant?: string;
     email: string;
     password: string;
     status?: UserStatus;
-    //createdBy?: string;
 }
 
 export interface UpdateUserDTO {

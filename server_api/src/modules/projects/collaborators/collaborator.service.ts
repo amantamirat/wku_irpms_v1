@@ -26,8 +26,8 @@ export class CollaboratorService {
         //this.permission = new CollaboratorPermission(this.repository);
     }
 
-    async createCollaborator(dto: CreateCollaboratorDto) {
-        const { applicant, project, leadPI: applicantId, isLeadPI, status } = dto;
+    async create(dto: CreateCollaboratorDto) {
+        const { applicant, project, applicantId, isLeadPI, status } = dto;
         const projectDoc = await this.projectRepository.findById(project);
         if (!projectDoc) throw new Error("Project not found");
         if (projectDoc.status !== ProjectStatus.pending) {

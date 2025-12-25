@@ -2,13 +2,12 @@ import mongoose from "mongoose";
 import { Role, IRole } from "./role.model";
 import { CreateRoleDto, UpdateRoleDto } from "./role.dto";
 
-
 export interface IRoleRepository {
     findById(id: string): Promise<IRole | null>;
     findAll(): Promise<Partial<IRole>[]>;
     findByName(roleName: string): Promise<IRole | null>;
     create(data: CreateRoleDto): Promise<IRole>;
-    update(id: string, data: UpdateRoleDto["data"]): Promise<IRole>;
+    update(id: string, data: UpdateRoleDto["data"]): Promise<IRole | null>;
     delete(id: string): Promise<IRole | null>;
 }
 
@@ -19,7 +18,6 @@ export class RoleRepository implements IRoleRepository {
         return Role.findOne({ name: roleName }).populate("permissions")
             .lean<IRole>();
     }
-
 
     async findById(id: string) {
         return Role.findById(new mongoose.Types.ObjectId(id))
@@ -54,17 +52,15 @@ export class RoleRepository implements IRoleRepository {
             toUpdate.permissions = dtoData.permissions.map(p => new mongoose.Types.ObjectId(p));
         }
 
-        const updated = await Role.findByIdAndUpdate(
+        if (dtoData.isDefault !== undefined) {
+            toUpdate.isDefault = dtoData.isDefault;
+        }
+
+        return await Role.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: toUpdate },
             { new: true }
         ).lean<IRole>();
-
-        if (!updated) {
-            throw new Error("Role not found.");
-        }
-
-        return updated;
     }
 
     async delete(id: string) {

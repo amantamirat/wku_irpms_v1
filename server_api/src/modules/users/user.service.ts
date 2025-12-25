@@ -1,18 +1,15 @@
-import jwt from 'jsonwebtoken';
 import bcrypt from "bcryptjs";
 import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 import nodemailer, { Transporter } from 'nodemailer';
+import { CacheService } from "../../util/cache/cache.service";
 import { DeleteDto } from "../../util/delete.dto";
+import { ApplicantRepository, IApplicantRepository } from "../applicants/applicant.repository";
+import { PermissionRepository } from './permissions/permission.repository';
 import JwtPayload, { ChangePasswordDTO, CreateUserDTO, LoginDto, UpdateUserDTO, VerfyUserDto } from "./user.dto";
-import { UserStatus } from "./user.enum";
 import { IUserRepository, UserRepository } from "./user.repository";
 import { UserStateMachine } from "./user.state-machine";
-import { ApplicantRepository, IApplicantRepository } from "../applicants/applicant.repository";
-import { CacheService } from "../../util/cache/cache.service";
-import { RoleRepository } from './roles/role.repository';
-import { PermissionRepository } from './permissions/permission.repository';
-
-
+import { UserStatus } from "./user.status";
 
 
 export class UserService {

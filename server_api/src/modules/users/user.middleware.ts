@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { CacheService } from '../../util/cache/cache.service';
 import { errorResponse } from '../../common/helpers/response';
-import { UserStatus } from './user.enum';
+import { UserStatus } from './user.status';
 import JwtPayload from './user.dto';
 
 dotenv.config();

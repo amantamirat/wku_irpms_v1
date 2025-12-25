@@ -5,26 +5,6 @@
     "description": "View permissions"
   },
   {
-    "category": "User Management",
-    "name": "user:create",
-    "description": "Create new users"
-  },
-  {
-    "category": "User Management",
-    "name": "user:read",
-    "description": "View user list and details"
-  },
-  {
-    "category": "User Management",
-    "name": "user:update",
-    "description": "Edit user details, or reset passwords"
-  },
-  {
-    "category": "User Management",
-    "name": "user:delete",
-    "description": "Delete users"
-  },
-  {
     "category": "Role Management",
     "name": "role:create",
     "description": "Create new roles"
@@ -43,6 +23,26 @@
     "category": "Role Management",
     "name": "role:delete",
     "description": "Delete roles"
+  },
+  {
+    "category": "User Management",
+    "name": "user:create",
+    "description": "Create new users"
+  },
+  {
+    "category": "User Management",
+    "name": "user:read",
+    "description": "View user list and details"
+  },
+  {
+    "category": "User Management",
+    "name": "user:update",
+    "description": "Edit user details, or reset passwords"
+  },
+  {
+    "category": "User Management",
+    "name": "user:delete",
+    "description": "Delete users"
   },
   {
     "category": "Organization Management",

@@ -21,29 +21,6 @@ const AppMenu = () => {
             label: 'Home',
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
         },
-        /**
-         * 
-         * {
-            label: 'Project',
-            visible: hasPermission([
-                PERMISSIONS.REVIEWER.CREATE,
-            ]),
-            items: [
-               
-                {
-                    label: 'Documents',
-                    icon: 'pi pi-fw pi-eye',
-                    to: '/projects/documents',
-                    visible: hasPermission([
-                        PERMISSIONS.REVIEWER.CREATE,
-                        PERMISSIONS.REVIEWER.UPDATE,
-                        PERMISSIONS.REVIEWER.DELETE,
-                        PERMISSIONS.REVIEWER.APPROVE
-                    ])
-                },
-            ]
-        },
-         */
         {
             label: 'Directorate',
             visible: hasPermission([
@@ -126,18 +103,6 @@ const AppMenu = () => {
                     )
                 },
                 {
-                    label: 'Projects',
-                    icon: PrimeIcons.BRIEFCASE,
-                    to: '/projects',
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.PROJECT.CREATE,
-                            PERMISSIONS.PROJECT.UPDATE,
-                            PERMISSIONS.PROJECT.DELETE
-                        ]
-                    )
-                },
-                {
                     label: 'Applicants',
                     icon: PrimeIcons.USERS,
                     visible: hasPermission(
@@ -166,7 +131,20 @@ const AppMenu = () => {
                         PERMISSIONS.POSITION.UPDATE,
                         PERMISSIONS.POSITION.DELETE
                     ])
-                },
+                }
+                ,
+                {
+                    label: 'My Projects',
+                    icon: PrimeIcons.BRIEFCASE,
+                    to: '/projects',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.PROJECT.CREATE,
+                            PERMISSIONS.PROJECT.UPDATE,
+                            PERMISSIONS.PROJECT.DELETE
+                        ]
+                    )
+                }
 
             ]
         },

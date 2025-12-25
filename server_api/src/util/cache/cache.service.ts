@@ -1,12 +1,12 @@
-import mongoose from "mongoose";
-import { User } from "../../modules/users/user.model";
 import { cache } from "./cache";
 
 export class CacheService {
 
+
     static async getUserOrganizations(userId: string) {
         const userKey = `user:${userId}:organizations`;
-        let orgs = cache.get(userKey) as string[] | undefined;
+        let orgs = cache.get(userKey) as string[] || [];
+        /*
         if (!orgs) {
             //console.log(`[Cache MISS] ${userKey}`);
             const user = await User.findById(userId).populate("organizations", "_id");
@@ -14,18 +14,22 @@ export class CacheService {
             orgs = user.organizations?.map((org: any) => org._id) ?? [];
             this.setUserOrganizations(userId, orgs);
         }
+        */
         //console.log(`[Cache HIT] ${userKey}`);
         return orgs;
     }
+
 
     static setUserOrganizations(userId: string, organizations: string[]) {
         const userKey = `user:${userId}:organizations`;
         cache.set(userKey, organizations);
     }
 
+
     static async getUserPermissions(userId: string) {
         const userKey = `user:${userId}:permissions`;
-        let userPermissions = cache.get(userKey) as string[] | undefined;
+        let userPermissions = cache.get(userKey) as string[] || [];
+        /*
         if (!userPermissions) {
             //note ===>>>> system user can not be find here 
             if (userId === "system") {
@@ -42,6 +46,7 @@ export class CacheService {
             ) || [];
             this.setUserPermissions(userId, userPermissions);
         }
+        */
         return userPermissions;
     }
 
@@ -50,17 +55,19 @@ export class CacheService {
         cache.set(userKey, permissions);
     }
 
-    static async hasOrganizationOwnership(userId: string, organizationId: string | mongoose.Types.ObjectId): Promise<boolean> {
+
+    static async hasOrganizationOwnership(userId: string, organizationId: string): Promise<boolean> {
         const orgs = await this.getUserOrganizations(userId);
         return orgs.map(o => o.toString()).includes(organizationId.toString());
     }
+
 
     static async hasPermissions(userId: string, permissions: string[]): Promise<boolean> {
         let userPermissions = await this.getUserPermissions(userId);
         return permissions.some((perm) => userPermissions.includes(perm));
     }
 
-    static async validateOwnership(userId: string, organizationId: string | mongoose.Types.ObjectId) {
+    static async validateOwnership(userId: string, organizationId: string) {
         const ownsOrg = await this.hasOrganizationOwnership(userId, organizationId);
         if (!ownsOrg) {
             throw new Error("User does not have ownership of the organization.");

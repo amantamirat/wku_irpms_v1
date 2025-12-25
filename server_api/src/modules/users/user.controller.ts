@@ -4,7 +4,7 @@ import { errorResponse, successResponse } from '../../common/helpers/response';
 import { AuthenticatedRequest } from './user.middleware';
 import { ChangePasswordDTO, CreateUserDTO, LoginDto, UpdateUserDTO, VerfyUserDto } from './user.dto';
 import { UserService } from './user.service';
-import { UserStatus } from './user.enum';
+import { UserStatus } from './user.status';
 
 const service = new UserService();
 

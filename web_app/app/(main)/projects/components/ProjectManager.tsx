@@ -22,8 +22,8 @@ interface ProjectManagerProps {
 const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
 
     const confirm = useConfirmDialog();
-    const { getLinkedApplicant, hasPermission } = useAuth();
-    const linkedApplicant = getLinkedApplicant();
+    const { hasPermission } = useAuth();
+    //const linkedApplicant = getLinkedApplicant();
     //const isOwner = linkedApplicant?._id === leadPI?._id;
 
     const emptyProject: Project = {
