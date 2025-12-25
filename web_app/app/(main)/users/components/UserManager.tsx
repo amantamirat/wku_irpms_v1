@@ -1,5 +1,4 @@
 'use client';
-
 import { CrudManager } from "@/components/CrudManager";
 import { useAuth } from "@/contexts/auth-context";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
@@ -23,15 +22,23 @@ const UserManager = () => {
     };
 
     const { hasPermission } = useAuth();
-
     const confirm = useConfirmDialog();
 
+    const canCreate = hasPermission([PERMISSIONS.USER.CREATE]);
+    const canEdit = hasPermission([PERMISSIONS.USER.UPDATE]);
+    const canDelete = hasPermission([PERMISSIONS.USER.DELETE]);
+
+    const canActivate = hasPermission([PERMISSIONS.USER.STATUS.ACTIVATE]);
+    //const canPend = hasPermission([PERMISSIONS.USER.STATUS.PEND]);
+    const canSuspend = hasPermission([PERMISSIONS.USER.STATUS.SUSPEND]);
+
+
+    /*
     const [allUsers, setAllUsers] = useState<User[]>([]);
     const [showDeleted, setShowDeleted] = useState(false);
+    */
 
-    const canCreate = !showDeleted && hasPermission([PERMISSIONS.USER.CREATE]);
-    const canEdit = !showDeleted && hasPermission([PERMISSIONS.USER.UPDATE]);
-    const canDelete = hasPermission([PERMISSIONS.USER.DELETE]);
+
     // const canReset = !showDeleted && hasPermission([PERMISSIONS.USER.RESET]);
 
     // CRUD hook
@@ -56,7 +63,7 @@ const UserManager = () => {
             try {
                 setLoading(true);
                 const data = await UserApi.getUsers(); // fetch ALL without filter
-                setAllUsers(data);
+                setAll(data);
             } catch (err: any) {
                 setError("Failed to fetch users. " + (err?.message ?? ""));
             } finally {
@@ -68,6 +75,7 @@ const UserManager = () => {
     }, []);
 
 
+    /*
     useEffect(() => {
         if (showDeleted) {
             setAll(allUsers.filter(u => u.status === UserStatus.deleted));
@@ -75,10 +83,13 @@ const UserManager = () => {
             setAll(allUsers.filter(u => u.status !== UserStatus.deleted));
         }
     }, [showDeleted, allUsers]);
+    */
 
 
     // Save callback
     const onSaveComplete = (saved: User, hide: boolean = true) => {
+        updateItem(saved);
+        /*
         setAllUsers(prev => {
             const index = prev.findIndex(i => i._id === saved._id);
             // If user exists → update it
@@ -90,22 +101,39 @@ const UserManager = () => {
             // If not exists → add it
             return [...prev, saved];
         });
-
+        */
         if (hide)
             hideDialogs();
     };
 
-    // Permanent or soft delete
+    const updateStatus = async (row: User, next: UserStatus) => {
+        if (!row._id) {
+            return
+        }
+        const updated = await UserApi.updateStatus(row._id, next);
+        onSaveComplete({
+            ...updated,
+            applicant: row.applicant
+        }, false);
+    };
+
+    // Permanent 
     const deleteUser = async (row: User) => {
-        const deleted = await UserApi.deleteUser(row);
-        if (deleted && row.status === UserStatus.deleted) {
+        if (!row._id) {
+            return
+        }
+        const ok = await UserApi.delete(row._id);
+        if (ok) removeItem(row);
+        /*
+        if (ok && row.status === UserStatus.deleted) {
             setAllUsers(allUsers.filter(u => u._id !== row._id));
             return
         }
         onSaveComplete({
-            ...deleted,
+            ...ok,
             applicant: row.applicant,
         }, false);
+        */
     };
 
     const hideDialogs = () => {
@@ -114,6 +142,7 @@ const UserManager = () => {
         // setShowPasswordDialog(false);
     };
 
+    /*
     const updateStatus = async (row: User, next: UserStatus) => {
         const updated = await UserApi.updateUser({ _id: row._id, status: next }, true);
         onSaveComplete({
@@ -122,14 +151,15 @@ const UserManager = () => {
         }, false);
         //updateItem({ ...updated, roles: row.roles, organizations: row.organizations });
     };
+    */
 
     const stateTransitionTemplate = (rowData: User) => {
         const state = rowData.status;
 
         return (<div className="flex gap-2">
-            {(state === UserStatus.pending) &&
+            {(canActivate && (state === UserStatus.pending || state === UserStatus.suspended)) &&
                 <Button
-                    label="Activate"
+                    tooltip="Activate"
                     icon="pi pi-check"
                     severity="success"
                     size="small"
@@ -141,16 +171,16 @@ const UserManager = () => {
                     }}
                 />}
 
-            {(state === UserStatus.deleted) &&
+            {(canSuspend && state === UserStatus.active) &&
                 <Button
-                    label="Pend"
-                    icon="pi pi-arrow-left"
-                    severity="warning"
+                    tooltip="Suspend"
+                    icon="pi pi-stop"
+                    severity="danger"
                     size="small"
                     onClick={() => {
                         confirm.ask({
-                            operation: 'pend',
-                            onConfirmAsync: () => updateStatus(rowData, UserStatus.pending)
+                            operation: 'Suspend',
+                            onConfirmAsync: () => updateStatus(rowData, UserStatus.suspended)
                         });
                     }}
                 />
@@ -186,7 +216,7 @@ const UserManager = () => {
     return (
         <>
             <CrudManager
-                headerTitle={showDeleted ? "Trash" : "Manage Users"}
+                headerTitle={"Manage Users"}
                 itemName="User"
                 items={users}
                 dataKey="_id"
@@ -225,22 +255,23 @@ const UserManager = () => {
                 }
                  */
 
-
-                toolbarEnd={
-                    <ToggleButton checked={showDeleted}
-                        onChange={(e) => setShowDeleted(e.value)}
-                        offLabel="Trash"
-                        onLabel="Users"
-                        offIcon="pi pi-trash"
-                        onIcon="pi pi-users"
-                    />
-                }
+                /*
+                                toolbarEnd={
+                                    <ToggleButton checked={showDeleted}
+                                        onChange={(e) => setShowDeleted(e.value)}
+                                        offLabel="Trash"
+                                        onLabel="Users"
+                                        offIcon="pi pi-trash"
+                                        onIcon="pi pi-users"
+                                    />
+                                }
+                                    */
                 enableSearch
             />
 
             {/* Save User Dialog */}
             {
-                (user && showSaveDialog) && <SaveDialog
+                user && <SaveDialog
                     visible={showSaveDialog}
                     user={user}
                     enableCurrentPassword={false}

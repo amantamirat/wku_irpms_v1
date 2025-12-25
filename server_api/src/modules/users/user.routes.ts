@@ -1,34 +1,39 @@
 import { Router } from 'express';
 import { UserController } from './user.controller';
-import { checkPermission, verifyActiveAccount } from './user.middleware';
+import { checkPermission, checkStatusPermission, verifyActiveAccount } from './user.middleware';
 import { PERMISSIONS } from '../../common/constants/permissions';
 
+const controller = new UserController();
 const router: Router = Router();
 
-router.post("/login", UserController.login);
 router.post('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.USER.CREATE]),
-    UserController.create);
+    controller.create);
 router.get('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.USER.READ])
-    , UserController.getUsers);
-router.put('/:id', verifyActiveAccount,
+    , controller.get);
+router.put('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.USER.UPDATE]),
-    UserController.update);
-router.put('/:id/status', verifyActiveAccount,
-    UserController.changeStatus);
-router.delete('/:id', verifyActiveAccount,
+    controller.update);
+router.put('/:status', verifyActiveAccount,
+    checkStatusPermission("user"),
+    controller.updateStatus);
+router.delete('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.USER.DELETE]),
-    UserController.deleteUser);
+    controller.delete);
 
-router.patch("/:id/change-password", verifyActiveAccount,
-    UserController.changePassword);
+router.patch("/change-password", verifyActiveAccount,
+    controller.changePassword);
+
+//////////////
+
+router.post("/login", controller.login);
 
 router.post("/send-verification-code",
-    UserController.sendVerificationCode);
+    controller.sendVerificationCode);
 router.post("/reset-password",
-    UserController.resetUser);
+    controller.resetUser);
 router.post("/activate-user",
-    UserController.activateUser);
+    controller.activateUser);
 
 export default router;

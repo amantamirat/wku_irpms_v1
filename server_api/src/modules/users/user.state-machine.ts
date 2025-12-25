@@ -3,9 +3,9 @@ import { UserStatus } from "./user.status";
 // user.state-machine.ts
 export class UserStateMachine {
     private static readonly transitions: Record<UserStatus, UserStatus[]> = {
-        [UserStatus.pending]: [UserStatus.active, UserStatus.deleted],
-        [UserStatus.active]: [UserStatus.deleted],
-        [UserStatus.deleted]: [UserStatus.pending]
+        [UserStatus.pending]: [UserStatus.active],
+        [UserStatus.active]: [UserStatus.suspended],
+        [UserStatus.suspended]: [UserStatus.active]
     };
 
     static canTransition(from: UserStatus, to: UserStatus): boolean {

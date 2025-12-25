@@ -12,8 +12,12 @@ export const PERMISSIONS = {
     CREATE: "user:create",
     READ: "user:read",
     UPDATE: "user:update",
-    DELETE: "user:delete",
-    // RESET: "user:reset",
+    STATUS: {
+      //PEND: "user:status.pending",
+      ACTIVATE: "user:status.active",
+      SUSPEND: "user:status.suspended"
+    },
+    DELETE: "user:delete"
   },
 
   ORGANIAZTION: {

@@ -41,8 +41,16 @@
   },
   {
     "category": "User Management",
+    "name": "user:status.active"
+  },
+  {
+    "category": "User Management",
+    "name": "user:status.suspended"
+  },
+  {
+    "category": "User Management",
     "name": "user:delete",
-    "description": "Delete users"
+    "description": "Delete user accounts"
   },
   {
     "category": "Organization Management",

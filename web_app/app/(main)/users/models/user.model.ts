@@ -1,9 +1,9 @@
 import { Applicant } from "../../applicants/models/applicant.model";
 
 export enum UserStatus {
-    pending = 'Pending',
-    active = 'Active',
-    deleted = 'Deleted'
+    pending = 'pending',
+    active = 'active',
+    suspended = 'suspended'
 }
 
 export type User = {

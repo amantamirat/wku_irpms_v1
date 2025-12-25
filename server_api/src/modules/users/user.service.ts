@@ -10,7 +10,7 @@ import JwtPayload, { ChangePasswordDTO, CreateUserDTO, LoginDto, UpdateUserDTO, 
 import { IUserRepository, UserRepository } from "./user.repository";
 import { UserStateMachine } from "./user.state-machine";
 import { UserStatus } from "./user.status";
-
+import { IUser } from "./user.model";
 
 export class UserService {
 
@@ -21,6 +21,93 @@ export class UserService {
         this.repository = repository || new UserRepository();
         this.appRepository = appRepository || new ApplicantRepository();
     }
+
+    static async prepareHash(password: string): Promise<string> {
+        const salt = await bcrypt.genSalt(10);
+        return await bcrypt.hash(password, salt);
+    };
+
+    removePassword(user: Partial<IUser>) {
+        const { password, ...rest } = user;
+        return rest;
+    }
+
+    async create(data: CreateUserDTO) {
+        const applicantDoc = await this.appRepository.findOne({ email: data.email });
+        if (!applicantDoc) {
+            throw Error("Applicant Not Found!");
+        }
+        const hashed = await UserService.prepareHash(data.password);
+        const dto = {
+            ...data,
+            applicant: String(applicantDoc._id),
+            password: hashed,
+            status: UserStatus.pending
+        };
+        const created = await this.repository.create(dto);
+        const user = this.removePassword(created);
+        return { ...user, applicant: applicantDoc };
+    }
+
+    async getUsers() {
+        const users = await this.repository.findAll();
+        return users.map((u) => this.removePassword(u));
+    }
+
+    async update(dto: UpdateUserDTO) {
+        const { id, data, userId } = dto;
+        const userDoc = await this.repository.findById(id);
+        if (!userDoc) throw new Error("User not found");
+        if (data.password) {
+            const hashed = await UserService.prepareHash(data.password);
+            data.password = hashed;
+        }
+        const updated = await this.repository.update(id, data);
+        if (!updated) throw new Error("User not found.");
+        return this.removePassword(updated);
+    }
+
+    async updateStatus(dto: UpdateUserDTO) {
+        const { id, data, userId } = dto;
+        const userDoc = await this.repository.findById(id);
+        if (!userDoc) throw new Error("User not found");
+
+        const nextState = data.status;
+        if (!nextState) throw new Error("Status is required");
+        const current = userDoc.status;
+        // --- State Machine Validation ---
+        UserStateMachine.validateTransition(current, nextState);
+        const updated = await this.repository.update(dto.id, dto.data);
+        return this.removePassword(updated);
+    }
+
+    async delete(dto: DeleteDto) {
+        const { id, userId } = dto;
+        const userDoc = await this.repository.findById(id);
+        if (!userDoc) throw new Error("User not found");
+        if (userDoc.status === UserStatus.active) {
+            throw new Error("ACTIVE_USER_FOUND");
+        }
+        return await this.repository.delete(id);
+    }
+
+
+    async changePassword(dto: ChangePasswordDTO) {
+        const { id, data, userId } = dto;
+        const { currentPassword, password: newPassword } = data;
+
+        const user = await this.repository.findById(id);
+        if (!user) throw new Error("User not found");
+
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) throw new Error("Current password is incorrect");
+
+        const hashed = await UserService.prepareHash(newPassword);
+        const updated = await this.repository.update(id, { password: hashed });
+
+        return this.removePassword(updated);
+    }
+
 
     async login(dto: LoginDto) {
         const systemLogin = await this.handleSystemLogin(dto);
@@ -67,98 +154,11 @@ export class UserService {
         return { token, user: response };
     }
 
-    static async prepareHash(password: string): Promise<string> {
-        const salt = await bcrypt.genSalt(10);
-        return await bcrypt.hash(password, salt);
-    };
 
-    async create(data: CreateUserDTO) {
-        const applicantDoc = await this.appRepository.findOne({ email: data.email });
-        if (!applicantDoc) {
-            throw Error("Applicant Not Found!");
-        }
-        const hashed = await UserService.prepareHash(data.password);
-        const dto = {
-            ...data,
-            applicant: String(applicantDoc._id),
-            password: hashed,
-            status: UserStatus.pending
-        };
-        const createdUser = await this.repository.create(dto);
-        const { password, ...rest } = createdUser;
-        return { ...rest, applicant: applicantDoc };
-    }
-
-    async getUsers() {
-        const users = await this.repository.findAll();
-        return users.map(({ password, ...rest }) => rest);
-    }
-
-    async update(dto: UpdateUserDTO) {
-        const { id, data, userId } = dto;
-        const userDoc = await this.repository.findById(id);
-        if (!userDoc) throw new Error("User not found");
-        if (data.password) {
-            const hashed = await UserService.prepareHash(data.password);
-            data.password = hashed;
-        }
-        const updated = await this.repository.update(id, data);
-        if (!updated) throw new Error("User not found.");
-        const { password, ...rest } = updated;
-        return rest;
-    }
-
-    async changeStatus(dto: UpdateUserDTO) {
-        const { id, data, userId } = dto;
-        const userDoc = await this.repository.findById(id);
-        if (!userDoc) throw new Error("User not found");
-
-        const nextState = data.status;
-        if (!nextState) throw new Error("Status is required");
-        const current = userDoc.status;
-        // --- State Machine Validation ---
-        UserStateMachine.validateTransition(current, nextState);
-        const updated = await this.repository.update(dto.id, dto.data);
-        const { password, ...rest } = updated;
-        return rest;
-    }
-
-    async delete(dto: DeleteDto) {
-        const { id, userId } = dto;
-        const userDoc = await this.repository.findById(id);
-        if (!userDoc) throw new Error("User not found");
-        if (userDoc.status === UserStatus.deleted) {
-            return await this.repository.delete(id);
-        }
-        //soft deletion
-        const deleted = await this.changeStatus({ id, data: { status: UserStatus.deleted }, userId });
-        if (!deleted) throw new Error("User not found");
-        return deleted;
-    }
-
-
-    async changePassword(dto: ChangePasswordDTO) {
-        const { id, data, userId } = dto;
-        const { currentPassword, password: newPassword } = data;
-        if (id !== userId) {
-            throw new Error("You are not authorized to change this password.");
-        }
-        const user = await this.repository.findById(id);
-        if (!user) throw new Error("User not found");
-
-        const isMatch = await bcrypt.compare(currentPassword, user.password);
-        if (!isMatch) throw new Error("Current password is incorrect");
-
-        const hashed = await UserService.prepareHash(newPassword);
-        const updated = await this.repository.update(id, { password: hashed });
-
-        const { password, ...rest } = updated;
-        return rest;
-    }
 
     async sendCode(email: string): Promise<void> {
         const userDoc = await this.repository.findByEmail(email);
-        if (!userDoc || userDoc.status === UserStatus.deleted) {
+        if (!userDoc || userDoc.status === UserStatus.suspended) {
             throw new Error("User does not exist.");
         }
         const now = new Date();
@@ -215,7 +215,7 @@ export class UserService {
             throw new Error("Password not found!");
         }
         const userDoc = await this.repository.findByEmail(email);
-        if (!userDoc || userDoc.status === UserStatus.deleted) {
+        if (!userDoc || userDoc.status === UserStatus.suspended) {
             throw new Error("User does not exist.");
         }
         if (!userDoc.resetCodeExpires || userDoc.resetCodeExpires < new Date()) {
@@ -232,7 +232,7 @@ export class UserService {
     async activateUser(data: VerfyUserDto): Promise<void> {
         const { email, resetCode } = data;
         const userDoc = await this.repository.findByEmail(email);
-        if (!userDoc || userDoc.status === UserStatus.deleted) {
+        if (!userDoc || userDoc.status === UserStatus.suspended) {
             throw new Error("User does not exist.");
         }
         if (!userDoc.resetCodeExpires || userDoc.resetCodeExpires < new Date()) {

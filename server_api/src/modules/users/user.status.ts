@@ -1,5 +1,5 @@
 export enum UserStatus {
-  pending = 'Pending',
-  active = 'Active',
-  deleted = 'Deleted'
+  pending = 'pending',
+  active = 'active',
+  suspended = 'suspended'
 }

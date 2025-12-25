@@ -45,14 +45,14 @@ const SaveUserDialog = ({ visible, user, enableCurrentPassword, onHide, onComple
                     saved = await UserApi.changePassword(localUser);
                 }
                 else {
-                    saved = await UserApi.updateUser(localUser);
+                    saved = await UserApi.update(localUser._id, localUser);
                 }
                 saved = {
                     ...saved,
                     applicant: localUser.applicant,
                 };
             } else {
-                saved = await UserApi.createUser(localUser);
+                saved = await UserApi.create(localUser);
             }
 
             toast.current?.show({

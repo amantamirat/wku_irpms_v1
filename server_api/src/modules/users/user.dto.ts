@@ -25,7 +25,7 @@ export interface ChangePasswordDTO {
         currentPassword: string;
         password: string;
     };
-    userId: string;
+    userId?: string;
 }
 
 export interface LoginDto {
