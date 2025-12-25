@@ -12,7 +12,7 @@ export class ApplicantController {
             if (!req.user) {
                 throw new Error("User not found!");
             }
-            const userId = req.user._id;
+            const userId = req.user.userId;
             const {
                 workspace,
                 name,
@@ -59,7 +59,7 @@ export class ApplicantController {
             if (!req.user) {
                 throw new Error("User not found!");
             }
-            const userId = req.user._id;
+            const userId = req.user.userId;
             const { id } = req.params;
             const {
                 workspace,

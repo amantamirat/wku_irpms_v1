@@ -19,7 +19,7 @@ export class ResultController {
                 criterionId: criterion,
                 score,
                 selectedOptionId: selectedOption,
-                userId: req.user._id,
+                userId: req.user.userId,
                 comment
             };
 
@@ -59,7 +59,7 @@ export class ResultController {
                     selectedOptionId: selectedOption ?? undefined,
                     comment: comment ?? undefined
                 },
-                userId: req.user._id
+                userId: req.user.userId
             };
 
             const updated = await resultService.updateResult(dto);
@@ -76,7 +76,7 @@ export class ResultController {
 
             const dto: DeleteResultDTO = {
                 id,
-                userId: req.user._id
+                userId: req.user.userId
             };
 
             const deleted = await resultService.deleteResult(dto);

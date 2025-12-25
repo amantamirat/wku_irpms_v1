@@ -55,7 +55,7 @@ export class UserController {
         data: {
           password
         },
-        userId: req.user._id,
+        userId: req.user.userId,
       };
       const updated = await service.update(dto);
       successResponse(res, 201, "User updated successfully", updated);
@@ -73,7 +73,7 @@ export class UserController {
       const dto: UpdateUserDTO = {
         id,
         data: { status },
-        userId: req.user._id,
+        userId: req.user.userId,
       };
       if (status === UserStatus.deleted) {
         throw new Error("deletetion through this function is not supported");
@@ -91,7 +91,7 @@ export class UserController {
       const { id } = req.params;
       const dto: DeleteDto = {
         id,
-        userId: req.user._id
+        userId: req.user.userId
       };
       const deleted = await service.delete(dto);
       successResponse(res, 201, "User deleted successfully", deleted);
@@ -110,7 +110,7 @@ export class UserController {
       {
         id,
         data: { currentPassword, password: password },
-        userId: req.user._id,
+        userId: req.user.userId,
       };
       const updated = await service.changePassword(dto);
       successResponse(res, 200, "Password changed successfully", updated);

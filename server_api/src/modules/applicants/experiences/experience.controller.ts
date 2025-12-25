@@ -40,7 +40,7 @@ export class ExperienceController {
                 endDate,
                 isCurrent,
                 employmentType,
-                userId: req.user._id
+                userId: req.user.userId
             };
 
             const created = await experienceService.createExperience(dto);
@@ -97,7 +97,7 @@ export class ExperienceController {
                     isCurrent: isCurrent ?? undefined,
                     employmentType: employmentType ?? undefined
                 },
-                userId: req.user._id
+                userId: req.user.userId
             };
 
             const updated = await experienceService.updateExperience(dto);
@@ -117,7 +117,7 @@ export class ExperienceController {
 
             const dto: DeleteExperienceDTO = {
                 id,
-                userId: req.user._id
+                userId: req.user.userId
             };
 
             const deleted = await experienceService.deleteExperience(dto);

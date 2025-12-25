@@ -49,7 +49,7 @@ export class UserService {
         CacheService.setUserPermissions(userId, permissions);
         CacheService.setUserOrganizations(userId, ownerships);
         const payload: JwtPayload = {
-            _id: userId,
+            userId: userId,
             applicantId,
             email,
             status: userDoc.status
@@ -260,7 +260,7 @@ export class UserService {
         const permissions = perms?.map((p: any) => p.name) || [];
         CacheService.setUserPermissions("system", permissions);
         const payload: JwtPayload = {
-            _id: "system",      // no actual DB user
+            userId: "system",      // no actual DB user
             applicantId: "system",
             email: process.env.EMAIL!,
             status: UserStatus.active,

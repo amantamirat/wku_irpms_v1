@@ -55,7 +55,7 @@ export class ProjectDocController {
             if (!req.user) {
                 throw new Error("User not found!");
             }
-            const userId = req.user._id;
+            const userId = req.user.userId;
             const { status } = req.params;
             const { documents } = req.body;
 
@@ -106,7 +106,7 @@ export class ProjectDocController {
 
             const dto: DeleteDto = {
                 id,
-                userId: req.user._id,
+                userId: req.user.userId,
             };
 
             const deletedDoc = await this.service.delete(dto);

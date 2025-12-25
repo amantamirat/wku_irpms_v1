@@ -41,7 +41,7 @@ export class RoleController {
             const dto: UpdateRoleDto = {
                 id,
                 data: { name, permissions, isDefault},
-                userId: req.user._id,
+                userId: req.user.userId,
             };
 
             const updated = await this.service.update(dto);
@@ -58,7 +58,7 @@ export class RoleController {
             const { id } = req.params;
             const deleted = await this.service.delete({
                 id,
-                userId: req.user._id,
+                userId: req.user.userId,
             });
 
             successResponse(res, 200, 'Role deleted successfully', deleted);

@@ -39,9 +39,8 @@ export interface VerfyUserDto {
     resetCode: string;
 }
 
-
 export default interface JwtPayload {
-    _id: string;
+    userId: string;
     applicantId: string;
     email: string;
     status: UserStatus;

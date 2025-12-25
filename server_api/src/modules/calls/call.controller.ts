@@ -38,7 +38,7 @@ export class CallController {
             if (!req.user) {
                 throw new Error("User not found!");
             }
-            const userId = req.user._id;
+            const userId = req.user.userId;
             const { id } = req.query;
             if (!id) {
                 throw new Error("id not found!");
@@ -101,7 +101,7 @@ export class CallController {
             if (!req.user) {
                 throw new Error("User not found!");
             }
-            const userId = req.user._id;
+            const userId = req.user.userId;
             const deleted = await this.service.delete({ id: id, userId: userId });
             successResponse(res, 200, "Call deleted successfully", deleted);
         } catch (err: any) {

@@ -19,7 +19,7 @@ export class ReviewerController {
                 projectStageId: projectStage,
                 applicantId: applicant,
                 weight: weight,
-                userId: req.user._id
+                userId: req.user.userId
             };
 
             const created = await reviewerService.createReviewer(data);
@@ -52,7 +52,7 @@ export class ReviewerController {
             const { id } = req.params;
             const { status } = req.body;
 
-            const dto: UpdateReviewerDTO = { id, data: { status }, userId: req.user._id };
+            const dto: UpdateReviewerDTO = { id, data: { status }, userId: req.user.userId };
             const updated = await reviewerService.changeReviewerStatus(dto);
 
             successResponse(res, 200, `Reviewer status changed to ${status}`, updated);
@@ -71,7 +71,7 @@ export class ReviewerController {
             const dto: UpdateReviewerDTO = {
                 id,
                 data: { weight },
-                userId: req.user._id
+                userId: req.user.userId
             };
 
             const updated = await reviewerService.updateReviewerData(dto);
@@ -88,7 +88,7 @@ export class ReviewerController {
             const { id } = req.params;
             const dto: DeleteReviewerDTO = {
                 id,
-                userId: req.user._id
+                userId: req.user.userId
             };
 
             const deleted = await reviewerService.delete(dto);
