@@ -35,7 +35,7 @@ export class UserRepository implements IUserRepository {
     async findAll() {
         const filter: any = {};
         return User.find(filter).populate("applicant")
-            .populate("roles").populate("organizations")
+            //.populate("roles").populate("organizations")
             .lean<IUser[]>()
             .exec();
     }

@@ -35,7 +35,8 @@ export class RoleRepository implements IRoleRepository {
 
     async findAll() {
         const filter: any = {};
-        return await Role.find(filter).populate("permissions")
+        return await Role.find(filter)
+            //.populate("permissions")
             .lean<IRole[]>()
             .exec();
     }

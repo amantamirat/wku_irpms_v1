@@ -4,7 +4,6 @@ import { CrudManager } from "@/components/CrudManager";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useCrudList } from "@/hooks/useCrudList";
 import { useEffect, useState } from "react";
-
 import { RoleApi } from "../api/role.api";
 import { Role } from "../models/role.model";
 import SaveDialog from "./SaveDialog";
@@ -16,7 +15,8 @@ const RoleManager = () => {
 
     const emptyRole: Role = {
         name: "",
-        permissions: []
+        permissions: [],
+        isDefault: false
     };
 
     const { hasPermission } = useAuth();
@@ -72,7 +72,7 @@ const RoleManager = () => {
 
     /** Hide dialogs */
     const hideDialogs = () => {
-       // setRole({});
+        // setRole({});
         setShowSaveDialog(false);
     };
 
