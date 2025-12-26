@@ -1,6 +1,7 @@
 // organization.dto.ts
 import { AcademicLevel } from "../../common/constants/enums";
-import { Classification, Ownership, Unit } from "./organization.enum";
+import { Classification, Ownership } from "./organization.enum";
+import { Unit } from "./organization.type";
 
 /**
  * Base DTO fields shared by all organizations
@@ -71,6 +72,6 @@ export interface UpdateOrganizationDTO {
 }
 
 export interface GetOrganizationsDTO {
-    type?: Unit;
+    type: Unit;
     parent?: string;
 }

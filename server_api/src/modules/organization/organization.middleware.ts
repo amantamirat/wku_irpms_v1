@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { PermissionAction, PERMISSIONS } from "../../common/constants/permissions";
 import { errorResponse } from "../../common/helpers/response";
 import { checkPermission } from "../users/user.middleware";
-import { Unit } from "./organization.enum";
+import { Unit } from './organization.type';
 
 const UNIT_PERMISSION_KEY: Record<Unit, keyof typeof PERMISSIONS.ORGANIAZTION> = {
     [Unit.College]: "COLLEGE",
@@ -15,7 +15,7 @@ const UNIT_PERMISSION_KEY: Record<Unit, keyof typeof PERMISSIONS.ORGANIAZTION> =
 
 export function checkUnitPermission(action: PermissionAction) {
     return (req: Request, res: Response, next: NextFunction) => {
-        const unitInput = (req.body && req.body.type) || req.query?.unit;
+        const unitInput = (req.body && req.body.type) || req.query?.type;
         const unit = unitInput as Unit;
         // Validate unit
         if (!Object.values(Unit).includes(unit)) {

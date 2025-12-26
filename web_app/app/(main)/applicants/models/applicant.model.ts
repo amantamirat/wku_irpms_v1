@@ -16,6 +16,11 @@ export enum Accessibility {
     //Other = 'Other'
 }
 
+export type Ownership = {
+    unitType: OrgnUnit;
+    scope: string[] | '*';
+};
+
 export type Applicant = {
     _id?: string;
     workspace: string | Organization;
@@ -27,8 +32,8 @@ export type Applicant = {
     orcid?: string;
     accessibility?: Accessibility[];
     specializations?: Specialization[] | string[];
-    roles?: Role[] | string[];
-    ownerships?: Organization[] | string[];
+    roles?: string[];
+    ownerships?: Ownership[];
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -117,13 +122,14 @@ export function sanitizeApplicant(applicant: Partial<Applicant>): Partial<Applic
             )
             .filter((id): id is string => typeof id === 'string'),
 
-        ownerships: applicant.ownerships
-            ?.map(org =>
-                typeof org === 'object' && org !== null
-                    ? (org as Organization)._id
-                    : org
-            )
-            .filter((id): id is string => typeof id === 'string'),
+        /*
+    ownerships: applicant.ownerships
+        ?.map(org =>
+            typeof org === 'object' && org !== null
+                ? (org as Organization)._id
+                : org
+        )
+        .filter((id): id is string => typeof id === 'string'),*/
     };
 }
 

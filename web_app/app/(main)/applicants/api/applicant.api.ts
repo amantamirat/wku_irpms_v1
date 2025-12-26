@@ -1,17 +1,12 @@
 import { ApiClient } from "@/api/ApiClient";
 import { Applicant, GetApplicantsOptions, sanitizeApplicant } from "../models/applicant.model";
-import { sanitizeOrganization } from "../../organizations/models/organization.model";
-
-const end_point = '/applicants/';
 
 
-
-
-
+const end_point = '/applicants';
 
 export const ApplicantApi = {
 
-    async createApplicant(applicant: Partial<Applicant>): Promise<Applicant> {
+    async create(applicant: Partial<Applicant>): Promise<Applicant> {
         const sanitized = sanitizeApplicant(applicant);
         const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as Applicant;
@@ -34,27 +29,31 @@ export const ApplicantApi = {
         return data as Applicant[];
     },
 
-    async updateApplicant(applicant: Partial<Applicant>): Promise<Applicant> {
+    async update(applicant: Partial<Applicant>): Promise<Applicant> {
         if (!applicant._id) {
             throw new Error("_id required.");
         }
         const sanitized = sanitizeApplicant(applicant);
-        const url = `${end_point}${applicant._id}`;
+        const url = `${end_point}/${applicant._id}`;
         const updatedApplicant = await ApiClient.put(url, sanitized);
         return updatedApplicant as Applicant;
     },
 
-    /*
+
     async updateRoles(applicant: Partial<Applicant>): Promise<Applicant> {
-        if (!applicant._id) {
-            throw new Error("_id required.");
-        }
+        if (!applicant._id) throw new Error("_id required.");
         const sanitized = sanitizeApplicant(applicant);
-        const url = `${end_point}${applicant._id}`;
-        const updatedApplicant = await ApiClient.patch(url, sanitized);
+        const url = `${end_point}/${applicant._id}/roles`;
+        const updatedApplicant = await ApiClient.put(url, sanitized);
         return updatedApplicant as Applicant;
     },
-    */
+
+    async updateOwnerships(id: string, applicant: Partial<Applicant>): Promise<Applicant> {
+        const sanitized = sanitizeApplicant(applicant);
+        const url = `${end_point}/${id}/ownerships`;
+        const updatedApplicant = await ApiClient.put(url, sanitized);
+        return updatedApplicant as Applicant;
+    },
 
     async deleteApplicant(applicant: Partial<Applicant>): Promise<boolean> {
         if (!applicant._id) {

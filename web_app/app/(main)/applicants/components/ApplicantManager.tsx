@@ -12,6 +12,8 @@ import ApplicantDetail from "./ApplicantDetail";
 import { PERMISSIONS } from "@/types/permissions";
 import { Button } from "primereact/button";
 import { Organization } from "../../organizations/models/organization.model";
+import RoleDialog from "./dialogs/RoleDialog";
+import OwnershipDialog from "./dialogs/OwnershipDialog";
 
 interface ApplicantManagerProps {
     workspace?: Organization;
@@ -34,7 +36,8 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
 
     const canCreate = hasPermission([PERMISSIONS.APPLICANT.CREATE]);
     const canEdit = hasPermission([PERMISSIONS.APPLICANT.UPDATE]);
-    const canUpdateRoles = hasPermission([PERMISSIONS.APPLICANT.UPDATE_ROLES]);
+    const canUpdateRoles = hasPermission([PERMISSIONS.APPLICANT.ROLE_UPDATE]);
+    const canUpdateOwnerships = hasPermission([PERMISSIONS.APPLICANT.OWNERSHIP_UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.APPLICANT.DELETE]);
 
     const hasWorkspace = !!workspace;
@@ -52,7 +55,8 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
 
     const [selectedApplicant, setSelectedApplicant] = useState<Applicant>(emptyApplicant);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [showRolesDialog, setShowRolesDialog] = useState(false);
+    const [showRoleDialog, setShowRoleDialog] = useState(false);
+    const [showOwnershipDialog, setShowOwnershipDialog] = useState(false);
 
     /** FETCH Applicants */
     useEffect(() => {
@@ -83,24 +87,13 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
         if (ok) removeItem(row);
     };
 
-    /** LINK USER */
-    /*
-    const linkApplicant = async (row: Applicant) => {
-        let linked = await ApplicantApi.linkApplicant(row);
 
-        linked = {
-            ...linked,
-            organization: row.organization
-        };
-
-        updateItem(linked);
-    };
-    */
 
     const hideDialogs = () => {
         setSelectedApplicant({ ...emptyApplicant });
         setShowSaveDialog(false);
-        setShowRolesDialog(false);
+        setShowRoleDialog(false);
+        setShowOwnershipDialog(false);
     };
 
     /** TABLE COLUMNS */
@@ -169,23 +162,34 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
                     <ApplicantDetail applicant={row} />
                 )}
 
-                /** 
-                 * extraActions={
+                extraActions={
                     (row) =>
-                        canUpdateRoles &&
-                        <Button icon="pi pi-shield" rounded
-                            severity="secondary"
-                            className="p-button-rounded p-button-text"
-                            style={{ fontSize: '2rem' }}
-                            onClick={() => {
-                                setSelectedApplicant({ ...row });
-                                setShowRolesDialog(true);
-                                setShowSaveDialog(true);
-                            }}
-                        />
+                        <>
+                            {canUpdateRoles &&
+                                <Button icon="pi pi-crown" rounded
+                                    tooltip="Roles"
+                                    severity="secondary"
+                                    className="p-button-rounded p-button-text"
+                                    style={{ fontSize: '2rem' }}
+                                    onClick={() => {
+                                        setSelectedApplicant({ ...row });
+                                        setShowRoleDialog(true);
+                                    }}
+                                />}
+                            {canUpdateOwnerships &&
+                                <Button icon="pi pi-sparkles" rounded
+                                    tooltip="Ownerships"
+                                    severity="info"
+                                    className="p-button-rounded p-button-text"
+                                    style={{ fontSize: '2rem' }}
+                                    onClick={() => {
+                                        setSelectedApplicant({ ...row });
+                                        setShowOwnershipDialog(true);
+                                    }}
+                                />}
+                        </>
                 }
-                 * 
-                */
+
                 enableSearch
             />
 
@@ -195,6 +199,26 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
                     visible={showSaveDialog}
                     applicant={selectedApplicant}
                     hasWorkspace={hasWorkspace}
+                    onComplete={onSaveComplete}
+                    onHide={hideDialogs}
+                />
+            ))}
+
+            {/* ROLE DIALOG */}
+            {((selectedApplicant && canUpdateRoles) && (
+                <RoleDialog
+                    visible={showRoleDialog}
+                    applicant={selectedApplicant}
+                    onComplete={onSaveComplete}
+                    onHide={hideDialogs}
+                />
+            ))}
+
+            {/* OWNERSHIP DIALOG */}
+            {((selectedApplicant && canUpdateOwnerships) && (
+                <OwnershipDialog
+                    visible={showOwnershipDialog}
+                    applicant={selectedApplicant}
                     onComplete={onSaveComplete}
                     onHide={hideDialogs}
                 />

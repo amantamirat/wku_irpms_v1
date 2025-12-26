@@ -5,7 +5,7 @@ import { Organization, OrgnUnit, sanitizeOrganization } from "../models/organiza
 const end_point = '/organizations/';
 
 export interface GetOrganizationsOptions {
-    type?: OrgnUnit;
+    type: OrgnUnit;
     parent?: Organization;
 }
 

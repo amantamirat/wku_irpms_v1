@@ -1,4 +1,15 @@
 export const PERMISSIONS = {
+  PERMISSION: {
+    READ: "permission:read",
+  },
+
+  ROLE: {
+    CREATE: "role:create",
+    READ: "role:read",
+    UPDATE: "role:update",
+    DELETE: "role:delete",
+  },
+
   USER: {
     CREATE: "user:create",
     READ: "user:read",
@@ -10,15 +21,16 @@ export const PERMISSIONS = {
     },
     DELETE: "user:delete"
   },
-  ROLE: {
-    CREATE: "role:create",
-    READ: "role:read",
-    UPDATE: "role:update",
-    DELETE: "role:delete",
+
+  APPLICANT: {
+    CREATE: "applicant:create",
+    READ: "applicant:read",
+    UPDATE: "applicant:update",
+    ROLE_UPDATE: "applicant:role:update",
+    OWNERSHIP_UPDATE: "applicant:ownership:update",
+    DELETE: "applicant:delete"
   },
-  PERMISSION: {
-    READ: "permission:read",
-  },
+
   ORGANIAZTION: {
     COLLEGE: {
       CREATE: "college:create",
@@ -62,30 +74,27 @@ export const PERMISSIONS = {
       DELETE: "external:delete",
     },
   },
-  APPLICANT: {
-    CREATE: "applicant:create",
-    READ: "applicant:read",
-    UPDATE: "applicant:update",
-    DELETE: "applicant:delete",
-    UPDATE_ROLES: "applicant:update_roles"
+
+  SPECIALIZATION: {
+    CREATE: "specialization:create",
+    READ: "specialization:read",
+    UPDATE: "specialization:update",
+    DELETE: "specialization:delete",
   },
-  EXPERIENCE: {
-    CREATE: "experience:create",
-    READ: "experience:read",
-    UPDATE: "experience:update",
-    DELETE: "experience:delete",
-  },
+
+
   CALENDAR: {
     CREATE: "calendar:create",
     READ: "calendar:read",
     UPDATE: "calendar:update",
     DELETE: "calendar:delete",
   },
-  SPECIALIZATION: {
-    CREATE: "specialization:create",
-    READ: "specialization:read",
-    UPDATE: "specialization:update",
-    DELETE: "specialization:delete",
+
+  EXPERIENCE: {
+    CREATE: "experience:create",
+    READ: "experience:read",
+    UPDATE: "experience:update",
+    DELETE: "experience:delete",
   },
   GRANT: {
     CREATE: "grant:create",
@@ -109,8 +118,9 @@ export const PERMISSIONS = {
       CLOSE: "call:status.closed",
     },
     DELETE: "call:delete",
-    CHANGE_STATUS: "call:change_status",
+    CHANGE_STATUS: "call:change_status", // New permission for status transitions
   },
+
   STAGE: {
     CREATE: "stage:create",
     READ: "stage:read",
@@ -123,36 +133,12 @@ export const PERMISSIONS = {
     DELETE: "stage:delete",
     CHANGE_STATUS: "stage:change_status", // New permission for status transitions
   },
-  DOCUMENT: {
-    CREATE: "document:create",
-    READ: "document:read",
-    UPDATE: "document:update",
-    STATUS: {
-      ACCEPT: "document:status.accepted",
-      REJECT: "document:status.rejected",
-      REVIEW: "document:status.reviewed",
-    },
-    UPDATE_STATUS: "document:update_status",//old status permission can be removed
-    DELETE: "document:delete",
-  },
+
   EVALUATION: {
     CREATE: "evaluation:create",
     READ: "evaluation:read",
     UPDATE: "evaluation:update",
     DELETE: "evaluation:delete",
-  },
-  THEME: {
-    CREATE: "theme:create",
-    IMPORT: "theme:import",
-    READ: "theme:read",
-    UPDATE: "theme:update",
-    DELETE: "theme:delete",
-  },
-  POSITION: {
-    CREATE: "position:create",
-    READ: "position:read",
-    UPDATE: "position:update",
-    DELETE: "position:delete",
   },
   PROJECT: {
     CREATE: "project:create",
@@ -163,7 +149,7 @@ export const PERMISSIONS = {
       NEGOTIATE: "project:status.negotiation",
       APPROVE: "project:status.approved"
     },
-    DELETE: "project:delete"
+    DELETE: "project:delete",
   },
   COLLABORATOR: {
     CREATE: "collaborator:create",
@@ -186,13 +172,38 @@ export const PERMISSIONS = {
     },
     DELETE: "phase:delete",
   },
-
+  DOCUMENT: {
+    CREATE: "document:create",
+    READ: "document:read",
+    UPDATE: "document:update",
+    STATUS: {
+      ACCEPT: "document:status.accepted",
+      REJECT: "document:status.rejected",
+      REVIEW: "document:status.reviewed",
+    },
+    DELETE: "document:delete",
+    UPDATE_STATUS: "document:update_status",
+  },
   REVIEWER: {
     CREATE: "reviewer:create",
     READ: "reviewer:read",
     UPDATE: "reviewer:update",
-    APPROVE: "reviewer:approve",
+    CHANGE_STATUS: "reviewer:change_status", // New permission for status transitions
+    APPROVE: "reviewer:approve",      // Keep as special approval permission
     DELETE: "reviewer:delete",
+  },
+  THEME: {
+    CREATE: "theme:create",
+    IMPORT: "theme:import",
+    READ: "theme:read",
+    UPDATE: "theme:update",
+    DELETE: "theme:delete",
+  },
+  POSITION: {
+    CREATE: "position:create",
+    READ: "position:read",
+    UPDATE: "position:update",
+    DELETE: "position:delete",
   },
   RESULT: {
     CREATE: "result:create",
@@ -201,3 +212,6 @@ export const PERMISSIONS = {
     DELETE: "result:delete",
   }
 } as const;
+
+
+export type PermissionAction = "CREATE" | "READ" | "UPDATE" | "DELETE";

@@ -1,5 +1,5 @@
-import Applicant, { IApplicant } from "./applicant.model";
-import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO, FindApplicantDTO } from "./applicant.dto";
+import Applicant, { IApplicant, IOwnership } from "./applicant.model";
+import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO, FindApplicantDTO, UpdateRolesDTO } from "./applicant.dto";
 import mongoose from "mongoose";
 
 export interface IApplicantRepository {
@@ -7,7 +7,10 @@ export interface IApplicantRepository {
     findAll(filter?: GetApplicantsDTO): Promise<IApplicant[]>;
     create(data: CreateApplicantDTO): Promise<IApplicant>;
     update(id: string, data: UpdateApplicantDTO["data"]): Promise<IApplicant>;
-    //updateRoles(id: string, data: UpdateRolesDTO["data"]): Promise<IApplicant>;
+    // Roles management
+    updateRoles(userId: string, dto: UpdateRolesDTO): Promise<IApplicant | null>;
+    // ownership management
+    updateOwnerships(id: string, ownerships: IOwnership[]): Promise<IApplicant | null>;
     delete(id: string): Promise<IApplicant | null>;
 }
 
@@ -37,7 +40,6 @@ export class ApplicantRepository implements IApplicantRepository {
             lean<IApplicant>().
             exec();
     }
-
     // -------------------------
     // FIND ALL WITH OPTIONAL FILTER
     // -------------------------
@@ -51,12 +53,11 @@ export class ApplicantRepository implements IApplicantRepository {
         return Applicant.find(query).
             populate("workspace").
             populate("specializations").
-            populate("roles").
+            //populate("roles").
             populate("ownerships")
             .lean<IApplicant[]>()
             .exec();
     }
-
     // -------------------------
     // CREATE
     // -------------------------
@@ -74,7 +75,6 @@ export class ApplicantRepository implements IApplicantRepository {
 
         return Applicant.create(data);
     }
-
     // -------------------------
     // UPDATE
     // -------------------------
@@ -93,12 +93,14 @@ export class ApplicantRepository implements IApplicantRepository {
         if (dtoData.specializations) {
             toUpdate.specializations = dtoData.specializations?.map(id => new mongoose.Types.ObjectId(id))
         }
-        if (dtoData.roles) {
-            toUpdate.roles = dtoData.roles?.map(id => new mongoose.Types.ObjectId(id))
-        }
+
+        /*
+
         if (dtoData.ownerships) {
             toUpdate.ownerships = dtoData.ownerships?.map(id => new mongoose.Types.ObjectId(id))
         }
+
+        */
 
         const updated = await Applicant.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
@@ -112,7 +114,32 @@ export class ApplicantRepository implements IApplicantRepository {
 
         return updated;
     }
+    // -------------------------
+    // ROLES UPDATE
+    // -------------------------
+    async updateRoles(id: string, dto: UpdateRolesDTO): Promise<IApplicant | null> {
 
+        return Applicant.findByIdAndUpdate(
+            id,
+            { $set: { roles: dto.roles.map(id => new mongoose.Types.ObjectId(id)), updatedAt: new Date() } },
+            { new: true }
+        ).lean<IApplicant>();
+
+        //if (!updated) throw new Error("User not found");
+        // Optional: audit log
+        // await AuditLog.create({ actor: dto.updatedBy, action: "user:role:update", target: userId, payload: dto.roles });
+        //return updated;
+    }
+    // -------------------------
+    // OWNERSHIP UPDATE
+    // -------------------------
+    async updateOwnerships(id: string, ownerships: IOwnership[]) {
+        return Applicant.findByIdAndUpdate(
+            id,
+            { ownerships },
+            { new: true }
+        );
+    }
     // -------------------------
     // DELETE
     // -------------------------

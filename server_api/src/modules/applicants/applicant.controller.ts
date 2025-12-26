@@ -2,12 +2,12 @@ import { Request, Response } from 'express';
 import { errorResponse, successResponse } from '../../common/helpers/response';
 import { AuthenticatedRequest } from '../users/user.middleware';
 import { ApplicantService } from './applicant.service';
-import { CreateApplicantDTO, GetApplicantsDTO, UpdateApplicantDTO } from './applicant.dto';
+import { CreateApplicantDTO, GetApplicantsDTO, UpdateApplicantDTO, UpdateOwnershipsDTO, UpdateRolesDTO } from './applicant.dto';
 
 const service = new ApplicantService();
 export class ApplicantController {
 
-    static async createApplicant(req: AuthenticatedRequest, res: Response) {
+    static async create(req: AuthenticatedRequest, res: Response) {
         try {
             if (!req.user) {
                 throw new Error("User not found!");
@@ -54,7 +54,7 @@ export class ApplicantController {
     }
 
 
-    static async updateApplicant(req: AuthenticatedRequest, res: Response) {
+    static async update(req: AuthenticatedRequest, res: Response) {
         try {
             if (!req.user) {
                 throw new Error("User not found!");
@@ -71,8 +71,8 @@ export class ApplicantController {
                 email,
                 accessibility,
                 specializations,
-                roles,
-                ownerships,
+                //roles,
+                //ownerships,
             } = req.body;
 
             const dto: UpdateApplicantDTO = {
@@ -87,8 +87,8 @@ export class ApplicantController {
                     email,
                     accessibility,
                     specializations,
-                    roles,
-                    ownerships
+                    //roles,
+                    //ownerships
                 },
                 userId: userId
             };
@@ -99,9 +99,50 @@ export class ApplicantController {
         }
     }
 
+    static async updateRoles(req: AuthenticatedRequest, res: Response) {
+        try {
+            if (!req.user) throw new Error("User not found!");
+            const applicantId = req.user.applicantId;
+            const { id } = req.params;
+            const {
+                roles
+            } = req.body;
+
+            const dto: UpdateRolesDTO = {
+                id,
+                roles,
+                applicantId
+            };
+            const updated = await service.updateRoles(dto);
+            successResponse(res, 201, "Applicant updated successfully", updated);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    }
+
+    static async updateOwnerships(req: AuthenticatedRequest, res: Response) {
+        try {
+            if (!req.user) throw new Error("User not found!");
+
+            const applicantId = req.user.applicantId; // actor
+            const { id } = req.params;                 // target
+            const { ownerships } = req.body;
+
+            const dto: UpdateOwnershipsDTO = {
+                id,
+                ownerships,
+                applicantId
+            };
+
+            const updated = await service.updateOwnerships(dto);
+            successResponse(res, 201, "Applicant ownerships updated successfully", updated);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    }
 
 
-    static async deleteApplicant(req: AuthenticatedRequest, res: Response) {
+    static async delete(req: AuthenticatedRequest, res: Response) {
         try {
             if (!req.user) {
                 throw new Error("User not found!");

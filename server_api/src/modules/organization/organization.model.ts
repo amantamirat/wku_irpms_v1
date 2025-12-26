@@ -1,7 +1,8 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
-import { Classification, Ownership, Unit } from "./organization.enum";
+import { Classification, Ownership } from "./organization.enum";
 import { AcademicLevel } from "../../common/constants/enums";
+import { Unit } from "./organization.type";
 
 interface IBaseOrganization extends Document {
     type: Unit;
@@ -74,7 +75,6 @@ const CenterSchema = new Schema<CenterDocument>({
 });
 
 export const Center = Organization.discriminator<CenterDocument>(Unit.Center, CenterSchema);
-
 
 interface ProgramDocument extends SubOrganizationDocument {
     type: Unit.Program;

@@ -2,12 +2,14 @@ export const PERMISSIONS = {
   PERMISSION: {
     READ: "permission:read",
   },
+
   ROLE: {
     CREATE: "role:create",
     READ: "role:read",
     UPDATE: "role:update",
     DELETE: "role:delete",
   },
+
   USER: {
     CREATE: "user:create",
     READ: "user:read",
@@ -18,6 +20,15 @@ export const PERMISSIONS = {
       SUSPEND: "user:status.suspended"
     },
     DELETE: "user:delete"
+  },
+
+  APPLICANT: {
+    CREATE: "applicant:create",
+    READ: "applicant:read",
+    UPDATE: "applicant:update",
+    ROLE_UPDATE: "applicant:role:update",
+    OWNERSHIP_UPDATE: "applicant:ownership:update",
+    DELETE: "applicant:delete"
   },
 
   ORGANIAZTION: {
@@ -71,13 +82,7 @@ export const PERMISSIONS = {
     DELETE: "specialization:delete",
   },
 
-  APPLICANT: {
-    CREATE: "applicant:create",
-    READ: "applicant:read",
-    UPDATE: "applicant:update",
-    DELETE: "applicant:delete",
-    UPDATE_ROLES: "applicant:update_roles"
-  },
+
   CALENDAR: {
     CREATE: "calendar:create",
     READ: "calendar:read",

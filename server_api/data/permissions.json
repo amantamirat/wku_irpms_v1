@@ -53,6 +53,36 @@
     "description": "Delete user accounts"
   },
   {
+    "category": "Applicant Management",
+    "name": "applicant:create",
+    "description": "Create new applicants"
+  },
+  {
+    "category": "Applicant Management",
+    "name": "applicant:read",
+    "description": "View applicants"
+  },
+  {
+    "category": "Applicant Management",
+    "name": "applicant:update",
+    "description": "Edit applicants"
+  },
+  {
+    "category": "Applicant Management",
+    "name": "applicant:role:update",
+    "description": "Assign or remove roles from a applicant"
+  },
+  {
+    "category": "Applicant Management",
+    "name": "applicant:ownership:update",
+    "description": "Assign or modify organizational ownership scope for an applicant"
+  },
+  {
+    "category": "Applicant Management",
+    "name": "applicant:delete",
+    "description": "Delete applicants"
+  },
+  {
     "category": "Organization Management",
     "name": "college:create",
     "description": "Create new colleges"
@@ -191,31 +221,6 @@
     "category": "Specialization Management",
     "name": "specialization:delete",
     "description": "Delete specialization entries"
-  },
-  {
-    "category": "Applicant Management",
-    "name": "applicant:create",
-    "description": "Create new applicants"
-  },
-  {
-    "category": "Applicant Management",
-    "name": "applicant:read",
-    "description": "View applicants"
-  },
-  {
-    "category": "Applicant Management",
-    "name": "applicant:update",
-    "description": "Edit applicants"
-  },
-  {
-    "category": "Applicant Management",
-    "name": "applicant:update_roles",
-    "description": "Update applicants roles and ownerships"
-  },
-  {
-    "category": "Applicant Management",
-    "name": "applicant:delete",
-    "description": "Delete applicants"
   },
   {
     "category": "Experience Management",

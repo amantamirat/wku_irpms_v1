@@ -8,34 +8,42 @@ const router: Router = Router();
 router.post('/',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.APPLICANT.CREATE]),
-    ApplicantController.createApplicant
+    ApplicantController.create
 );
 
 router.get('/',
     verifyActiveAccount,
-    checkPermission([
-        PERMISSIONS.APPLICANT.READ,
-    ]),
+    checkPermission([PERMISSIONS.APPLICANT.READ]),
     ApplicantController.getApplicants
 );
 
 router.put('/:id',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.APPLICANT.UPDATE]),
-    ApplicantController.updateApplicant
+    ApplicantController.update
+);
+
+router.put(
+    '/:id/roles',
+    verifyActiveAccount,
+    checkPermission([PERMISSIONS.APPLICANT.ROLE_UPDATE]),
+    ApplicantController.updateRoles
+);
+
+router.put(
+    '/:id/ownerships',
+    verifyActiveAccount,
+    checkPermission([PERMISSIONS.APPLICANT.OWNERSHIP_UPDATE]),
+    ApplicantController.updateOwnerships
 );
 
 router.delete('/:id',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.APPLICANT.DELETE]),
-    ApplicantController.deleteApplicant
+    ApplicantController.delete
 );
 
-/*
-router.patch('/:id',
-    verifyActiveAccount,
-    checkPermission([PERMISSIONS.APPLICANT.UPDATE_ROLES]),
-    ApplicantController.updateRoles
-);
-*/
+
+
+
 export default router;

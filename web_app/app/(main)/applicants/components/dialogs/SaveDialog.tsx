@@ -114,9 +114,9 @@ const SaveApplicantDialog = ({ visible, applicant, hasWorkspace, onHide, onCompl
             }
             let saved: Applicant;
             if (localApplicant._id) {
-                saved = await ApplicantApi.updateApplicant(localApplicant);
+                saved = await ApplicantApi.update(localApplicant);
             } else {
-                saved = await ApplicantApi.createApplicant(localApplicant);
+                saved = await ApplicantApi.create(localApplicant);
             }
             saved = {
                 ...saved,
@@ -308,19 +308,6 @@ const SaveApplicantDialog = ({ visible, applicant, hasWorkspace, onHide, onCompl
                     }
 
                     {(canReadRoles && isEdit) && <>
-                        <div className="field">
-                            <label htmlFor="roles">Roles</label>
-                            <MultiSelect
-                                id="roles"
-                                dataKey="_id"
-                                value={localApplicant.roles}
-                                options={roles}
-                                optionLabel="name"
-                                onChange={(e) => setLocalApplicant({ ...localApplicant, roles: e.value })}
-                                placeholder="select roles"
-                                display="chip"
-                            />
-                        </div>
 
                         <div className="field">
                             <label htmlFor="ownerships">Ownerships</label>

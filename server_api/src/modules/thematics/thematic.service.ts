@@ -1,6 +1,6 @@
 import { DeleteDto } from "../../util/delete.dto";
-import { Unit } from "../organization/organization.enum";
 import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
+import { Unit } from "../organization/organization.type";
 import { CreateThematicDTO, GetThematicsDTO, UpdateThematicDTO } from "./thematic.dto";
 import { IThematicRepository, ThematicRepository } from "./thematic.repository";
 

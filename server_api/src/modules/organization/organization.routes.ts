@@ -15,14 +15,15 @@ router.post('/',
 
 router.get('/',
     verifyActiveAccount,
-    //checkUnitPermission('READ'),
+    checkUnitPermission('READ'),
+    /*
     checkPermission([PERMISSIONS.ORGANIAZTION.COLLEGE.READ,
     PERMISSIONS.ORGANIAZTION.DEPARTMENT.READ,
     PERMISSIONS.ORGANIAZTION.PROGRAM.READ,
     PERMISSIONS.ORGANIAZTION.DIRECTORATE.READ,
     PERMISSIONS.ORGANIAZTION.CENTER.READ,
     PERMISSIONS.ORGANIAZTION.EXTERNAL.READ
-    ]),
+    ]),*/
     OrganizationController.getAll
 );
 

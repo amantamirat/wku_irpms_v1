@@ -1,4 +1,5 @@
-import { Unit } from "../organization/organization.enum";
+import { Unit } from "../organization/organization.type";
+
 
 export enum Gender {
   Male = 'Male',

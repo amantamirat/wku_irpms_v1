@@ -1,6 +1,7 @@
-import { Unit } from "../organization/organization.enum";
+
 import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
-import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO } from "./applicant.dto";
+import { Unit } from "../organization/organization.type";
+import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO, UpdateRolesDTO, UpdateOwnershipsDTO } from "./applicant.dto";
 import { IApplicantRepository, ApplicantRepository } from "./applicant.repository";
 
 export class ApplicantService {
@@ -17,7 +18,7 @@ export class ApplicantService {
         const organDoc = await this.orgnRepo.findById(workspace);
         if (!organDoc) {
             throw new Error('Workspace is not found');
-        }        
+        }
         if (organDoc.type !== Unit.Department && organDoc.type !== Unit.External) {
             throw new Error("Invalid Workspace.");
         }
@@ -35,7 +36,7 @@ export class ApplicantService {
     // -------------------------
     async getAll(filter?: GetApplicantsDTO) {
         return await this.repository.findAll(filter);
-    }  
+    }
     // -------------------------
     // UPDATE
     // -------------------------
@@ -49,17 +50,38 @@ export class ApplicantService {
         if (!updated) throw new Error("Applicant not found");
         return updated;
     }
-
-    /*
+    // -------------------------
+    // UPDATE_ROLES
     // -------------------------
     async updateRoles(dto: UpdateRolesDTO) {
-        const { id, data } = dto;
-        const updated = await this.repository.updateRoles(id, data);
+        const updated = await this.repository.updateRoles(dto.id, dto);
         if (!updated) throw new Error("Applicant not found");
         return updated;
     }
-        */
-
+    // -------------------------
+    // UPDATE_OWNERSHIP
+    // -------------------------
+    async updateOwnerships(dto: UpdateOwnershipsDTO) {
+        const { id, ownerships } = dto;
+        if (!ownerships || ownerships.length === 0) {
+            dto.ownerships = []
+        }
+        const unitTypes = ownerships.map(o => o.unitType);
+        if (new Set(unitTypes).size !== unitTypes.length) {
+            throw new Error("Duplicate unitType in ownerships");
+        }
+        for (const o of ownerships) {
+            if (!Object.values(Unit).includes(o.unitType)) {
+                throw new Error(`Invalid unitType: ${o.unitType}`);
+            }
+            if (o.scope !== "*" && !Array.isArray(o.scope)) {
+                throw new Error(`Invalid scope for unitType ${o.unitType}`);
+            }
+        }
+        const updated = await this.repository.updateOwnerships(id, ownerships);
+        if (!updated) throw new Error("Applicant not found");
+        return updated;
+    }
     // -------------------------
     // DELETE
     // -------------------------

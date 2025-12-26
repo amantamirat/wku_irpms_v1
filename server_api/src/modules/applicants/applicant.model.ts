@@ -1,9 +1,15 @@
 import mongoose, { Document, Schema, model } from 'mongoose';
 import { Gender, Accessibility } from './applicant.enum';
 import { COLLECTIONS } from '../../common/constants/collections.enum';
+import { Unit } from '../organization/organization.type';
+
+export interface IOwnership {
+    unitType: Unit;          // College | Department | Directorate | ...
+    scope: string[] | "*";   // resource IDs OR wildcard
+}
 
 export interface IApplicant extends Document {
-    workspace?: mongoose.Types.ObjectId;
+    workspace: mongoose.Types.ObjectId;
     name: string;
     birthDate: Date;
     gender: Gender;
@@ -12,17 +18,32 @@ export interface IApplicant extends Document {
     orcid?: string;
     specializations?: mongoose.Types.ObjectId[];
     accessibility?: Accessibility[];
-    roles?: mongoose.Types.ObjectId[];
-    ownerships?: mongoose.Types.ObjectId[];
+    roles: mongoose.Types.ObjectId[];
+    ownerships: IOwnership[];
     createdAt?: Date;
     updatedAt?: Date;
 }
+
+const OwnershipSchema = new Schema<IOwnership>(
+    {
+        unitType: {
+            type: String,
+            enum: Object.values(Unit),
+            required: true
+        },
+        scope: {
+            type: Schema.Types.Mixed,
+            required: true
+        }
+    },
+    { _id: false }
+);
 
 const ApplicantSchema = new Schema<IApplicant>({
     workspace: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.ORGANIZATION,
-        //required: true
+        required: true
     },
     name: {
         type: String,
@@ -73,10 +94,10 @@ const ApplicantSchema = new Schema<IApplicant>({
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.ROLE
     }],
-    ownerships: [{
-        type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.ORGANIZATION
-    }],
+    ownerships: {
+        type: [OwnershipSchema],
+        default: []
+    }
 }, { timestamps: true });
 
 const Applicant = model<IApplicant>(COLLECTIONS.APPLICANT, ApplicantSchema);

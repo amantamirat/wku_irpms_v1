@@ -5,7 +5,7 @@ import {
     GetOrganizationsDTO,
     UpdateOrganizationDTO
 } from "./organization.dto";
-import { Unit } from "./organization.enum";
+import { Unit } from "./organization.type";
 
 export class OrganizationService {
 

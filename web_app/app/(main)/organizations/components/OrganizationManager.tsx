@@ -64,8 +64,6 @@ const OrganizationManager = ({ type, parent }: OrganizationManagerProps) => {
     const canEdit = hasPermission([PERMISSIONS.ORGANIAZTION[permissionKey].UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.ORGANIAZTION[permissionKey].DELETE]);
 
-
-
     const [selectedItem, setSelectedItem] = useState<Organization>(emptyOrganization);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
 
