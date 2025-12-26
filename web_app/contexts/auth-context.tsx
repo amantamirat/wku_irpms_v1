@@ -15,7 +15,7 @@ interface AuthContextType {
     hasPermission: (perms: string[]) => boolean;
     hasOrganizationType: (types: OrgnUnit[]) => boolean;
     getOrganizationsByType: (types: OrgnUnit[]) => any[];
-    getLinkedApplicant: () => any | null;
+    getApplicant: () => any | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -79,7 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     return (
-        <AuthContext.Provider value={{ user, loading, loggedIn: !!user, login, logout, hasPermission, hasOrganizationType, getOrganizationsByType, getLinkedApplicant: getApplicant }}>
+        <AuthContext.Provider value={{ user, loading, loggedIn: !!user, login, logout, hasPermission, hasOrganizationType, getOrganizationsByType, getApplicant }}>
             {children}
         </AuthContext.Provider>
     );

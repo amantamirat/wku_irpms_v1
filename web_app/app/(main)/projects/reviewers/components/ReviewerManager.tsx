@@ -26,7 +26,7 @@ interface ReviewerManagerProps {
 
 const ReviewerManager = ({ projectStage, applicant, showControllers, updateProjectStage }: ReviewerManagerProps) => {
     const confirm = useConfirmDialog();
-    const { getLinkedApplicant, hasPermission } = useAuth();
+    const { getApplicant: getLinkedApplicant, hasPermission } = useAuth();
     const linkedApplicant = getLinkedApplicant();
     const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
 

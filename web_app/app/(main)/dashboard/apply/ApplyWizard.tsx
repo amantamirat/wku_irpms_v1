@@ -27,7 +27,7 @@ interface ApplyWizardProps {
 
 const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
     //const { user } = useAuth();
-    const { getLinkedApplicant } = useAuth();
+    const { getApplicant: getLinkedApplicant } = useAuth();
     const linkedApplicant = getLinkedApplicant();
     const initializeProject = (): Project => ({
         title: "",

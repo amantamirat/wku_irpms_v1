@@ -24,7 +24,7 @@ interface CollaboratorProps {
 
 const CollaboratorManager = ({ project, applicant, flyMode, onSave, onRemove }: CollaboratorProps) => {
     const confirm = useConfirmDialog();
-    const { getLinkedApplicant, hasPermission } = useAuth();
+    const { getApplicant: getLinkedApplicant, hasPermission } = useAuth();
     const linkedApplicant = getLinkedApplicant();
     const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
     const isLeadPI = project ? loggedApplicantId === (project.leadPI as any)._id : false;

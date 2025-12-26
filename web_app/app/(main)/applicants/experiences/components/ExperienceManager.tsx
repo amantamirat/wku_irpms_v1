@@ -17,7 +17,7 @@ interface ExperienceManagerProps {
 
 const ExperienceManager = ({ applicant }: ExperienceManagerProps) => {
 
-    const { getLinkedApplicant, hasPermission } = useAuth();
+    const { getApplicant: getLinkedApplicant, hasPermission } = useAuth();
     const linkedApplicant = getLinkedApplicant();
     //const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
     

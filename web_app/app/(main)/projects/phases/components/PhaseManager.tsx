@@ -25,7 +25,7 @@ interface PhaseManagerProps {
 export default function PhaseManager({ project, phaseType, setProject }: PhaseManagerProps) {
 
     const confirm = useConfirmDialog();
-    const { getLinkedApplicant, hasPermission } = useAuth();
+    const { getApplicant: getLinkedApplicant, hasPermission } = useAuth();
     const linkedApplicant = getLinkedApplicant();
     const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
     const isLeadPI = loggedApplicantId === (project.leadPI as any)._id;

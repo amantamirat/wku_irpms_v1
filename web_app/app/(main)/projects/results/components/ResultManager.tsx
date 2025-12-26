@@ -24,7 +24,7 @@ interface ResultManagerProps {
 const ResultManager = ({ reviewer, updateReviewerStatus }: ResultManagerProps) => {
 
 
-    const { getLinkedApplicant } = useAuth();
+    const { getApplicant: getLinkedApplicant } = useAuth();
     const applicant = getLinkedApplicant();
     const loggedApplicantId = applicant?._id ?? applicant;
     const isOwner = (reviewer?.applicant as any)._id === loggedApplicantId;
