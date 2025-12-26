@@ -10,11 +10,9 @@ import { MenuProvider } from './context/menucontext';
 import { useAuth } from '@/contexts/auth-context';
 import { PERMISSIONS } from '@/types/permissions';
 
-
 const AppMenu = () => {
-    const { hasPermission, hasOrganizationType } = useAuth();
+    const { hasPermission } = useAuth();
     const { layoutConfig } = useContext(LayoutContext);
-    //const icons = ['pi pi-mars', 'pi pi-microchip', 'pi pi-prime', 'pi pi-sparkles', 'pi pi-venus'];   
 
     const model: AppMenuItem[] = [
         {
@@ -145,10 +143,8 @@ const AppMenu = () => {
                         ]
                     )
                 }
-
             ]
         },
-
         {
             label: 'Organizations',
             visible: hasPermission(

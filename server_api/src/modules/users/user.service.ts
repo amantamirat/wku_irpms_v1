@@ -11,6 +11,8 @@ import { IUserRepository, UserRepository } from "./user.repository";
 import { UserStateMachine } from "./user.state-machine";
 import { UserStatus } from "./user.status";
 import { IUser } from "./user.model";
+import { Unit } from "../organization/organization.type";
+import { IOwnership } from "../applicants/applicant.model";
 
 export class UserService {
 
@@ -91,7 +93,6 @@ export class UserService {
         return await this.repository.delete(id);
     }
 
-
     async changePassword(dto: ChangePasswordDTO) {
         const { id, data, userId } = dto;
         const { currentPassword, password: newPassword } = data;
@@ -107,7 +108,6 @@ export class UserService {
 
         return this.removePassword(updated);
     }
-
 
     async login(dto: LoginDto) {
         const systemLogin = await this.handleSystemLogin(dto);
@@ -129,12 +129,12 @@ export class UserService {
             throw new Error("Applicant not found.");
         }
         const permissions = applicantDoc.roles?.flatMap((role: any) =>
-            role.permissions?.map((p: any) => p.name)
-        ) || [];
+            role.permissions?.map((p: any) => p.name)) || [];
+        const ownerships = applicantDoc.ownerships;
 
-        const ownerships = applicantDoc.ownerships?.map((org: any) => org._id) || []
         CacheService.setUserPermissions(userId, permissions);
-        CacheService.setUserOrganizations(userId, ownerships);
+        CacheService.setUserOwnerships(applicantId, ownerships);
+
         const payload: JwtPayload = {
             userId: userId,
             applicantId,
@@ -146,6 +146,7 @@ export class UserService {
         const response = {
             ...payload,
             permissions: permissions,
+            ownerships: ownerships,
             organizations: applicantDoc.ownerships || [],
             applicant: applicantDoc
         };
@@ -153,8 +154,6 @@ export class UserService {
         await this.repository.update(userId, { lastLogin: new Date() });
         return { token, user: response };
     }
-
-
 
     async sendCode(email: string): Promise<void> {
         const userDoc = await this.repository.findByEmail(email);
@@ -228,7 +227,6 @@ export class UserService {
         await this.repository.update(String(userDoc._id), { password: hashed, resetCode: "", resetCodeExpires: new Date() });
     }
 
-
     async activateUser(data: VerfyUserDto): Promise<void> {
         const { email, resetCode } = data;
         const userDoc = await this.repository.findByEmail(email);
@@ -249,7 +247,6 @@ export class UserService {
     }
 
     async handleSystemLogin(dto: LoginDto) {
-
         const email = process.env.EMAIL;
         const password = process.env.EMAIL_PASSWORD;
         // 1. Check system credentials
@@ -258,7 +255,16 @@ export class UserService {
         }
         const perms = await new PermissionRepository().findAll();
         const permissions = perms?.map((p: any) => p.name) || [];
+        const ownerships: IOwnership[] = Object.values(Unit).map(
+            (unit) => ({
+                unitType: unit,
+                scope: "*",
+            })
+        );
+
         CacheService.setUserPermissions("system", permissions);
+        CacheService.setUserOwnerships("system", ownerships);
+
         const payload: JwtPayload = {
             userId: "system",      // no actual DB user
             applicantId: "system",
@@ -271,12 +277,10 @@ export class UserService {
             user: {
                 ...payload,
                 permissions,
-                organizations: [],
+                ownerships,
                 applicant: null
             }
         };
     }
-
-
 
 }

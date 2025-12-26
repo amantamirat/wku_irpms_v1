@@ -307,23 +307,7 @@ const SaveApplicantDialog = ({ visible, applicant, hasWorkspace, onHide, onCompl
                         </div>
                     }
 
-                    {(canReadRoles && isEdit) && <>
-
-                        <div className="field">
-                            <label htmlFor="ownerships">Ownerships</label>
-                            <MultiSelect
-                                id="ownerships"
-                                dataKey="_id"
-                                value={localApplicant.ownerships}
-                                options={ownerships}
-                                optionLabel="name"
-                                onChange={(e) => setLocalApplicant({ ...localApplicant, ownerships: e.value })}
-                                placeholder="select ownerships"
-                                display="chip"
-                            />
-                        </div>
-                    </>
-                    }
+                    
                 </>
 
                 {

@@ -69,14 +69,14 @@ export const UserApi = {
     ////////////////////////////////////////
 
     async loginUser(credentials: User): Promise<any> {
-        const loggedInData = await ApiClient.post(login_end_point, credentials);
-        const { token, user } = loggedInData;
+        const userIfo = await ApiClient.post(login_end_point, credentials);
+        const { token, user } = userIfo;
         localStorage.setItem(tokenStorage, token);
         localStorage.setItem(userStorage, JSON.stringify(user));
         return user;
     },
 
-    getLoggedInUser(): User | null {
+    getLoggedInUser(): any | null {
         const userInfo = localStorage.getItem(userStorage);
         if (userInfo) {
             return JSON.parse(userInfo);

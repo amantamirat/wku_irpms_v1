@@ -10,15 +10,15 @@ export type User = {
     _id?: string;
     applicant?: string | Applicant;
     email: string;
-    password: string;
+    password?: string;
     currentPassword?: string;
     confirmedPassword?: string;
     resetCode?: string;
     resetCodeExpires?: Date;
     status?: UserStatus;
     //other informations
-    permissions?: string[];
-    organizations?: any;
+    //permissions?: string[];
+    //organizations?: any;
     iat?: number;
     exp?: number;
 };

@@ -1,3 +1,4 @@
+import { IOwnership } from "../../modules/applicants/applicant.model";
 import { cache } from "./cache";
 
 export class CacheService {
@@ -20,9 +21,9 @@ export class CacheService {
     }
 
 
-    static setUserOrganizations(userId: string, organizations: string[]) {
+    static setUserOwnerships(userId: string, ownerships: IOwnership[]) {
         const userKey = `user:${userId}:organizations`;
-        cache.set(userKey, organizations);
+        cache.set(userKey, ownerships);
     }
 
 

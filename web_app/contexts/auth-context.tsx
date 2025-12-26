@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { OrgnUnit } from '@/app/(main)/organizations/models/organization.model';
 import { UserApi } from '@/app/(main)/users/api/UserService';
 import { User } from '@/app/(main)/users/models/user.model';
+import { IOwnership } from '@/app/(main)/applicants/models/applicant.model';
 
 
 interface AuthContextType {
@@ -22,28 +23,29 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     //const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
+    const [permissions, setPermissions] = useState<string[]>();
+    const [ownerships, setOwnerships] = useState<IOwnership[]>();
     const [loading, setLoading] = useState(true);
+
 
     useEffect(() => {
         const userInfo = UserApi.getLoggedInUser();
+        setUser(userInfo ?? null);
         if (userInfo) {
-            try {
-                setUser(userInfo);
-            } catch {
-                setUser(null);
-            }
+            setPermissions(userInfo.permissions);
+            setOwnerships(userInfo.ownerships);
         }
         setLoading(false);
     }, []);
 
-
     const login = async (user: User) => {
         try {
-            //const loggedInUser = await AuthApi.loginUser(dto);
-            const loggedInUser = await UserApi.loginUser(user);
-            setUser(loggedInUser);
+            const userInfo = await UserApi.loginUser(user);
+            setUser(userInfo);
+            setPermissions(userInfo.permissions);
+            setOwnerships(userInfo.ownerships);
             return true;
-        } catch(err) {
+        } catch (err) {
             throw err;
             //return false;
         }
@@ -56,26 +58,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const hasPermission = (perms: string[]): boolean => {
-        return perms.some((p) => user?.permissions?.includes(p));
+        return perms.some((p) => permissions?.includes(p));
     };
 
     const hasOrganizationType = (types: OrgnUnit[]): boolean => {
-        if (!user?.organizations) return false;
-        return user.organizations.some((org: any) => types.includes(org.type));
+        return false;
+        //if (!user?.organizations) return false;
+        //return user.organizations.some((org: any) => types.includes(org.type));
     };
 
     const getOrganizationsByType = (types: OrgnUnit[]): any[] => {
-        if (!user?.organizations) return [];
-        return user.organizations.filter((org: any) => types.includes(org.type));
+        return [];
+        //if (!user?.organizations) return [];
+        //return user.organizations.filter((org: any) => types.includes(org.type));
     };
 
-    const getLinkedApplicant = (): any | null => {
+    const getApplicant = (): any | null => {
         if (!user || !user.applicant) return null;
         return user.applicant;
     }
 
     return (
-        <AuthContext.Provider value={{ user, loading, loggedIn: !!user, login, logout, hasPermission, hasOrganizationType, getOrganizationsByType, getLinkedApplicant }}>
+        <AuthContext.Provider value={{ user, loading, loggedIn: !!user, login, logout, hasPermission, hasOrganizationType, getOrganizationsByType, getLinkedApplicant: getApplicant }}>
             {children}
         </AuthContext.Provider>
     );

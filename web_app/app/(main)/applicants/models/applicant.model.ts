@@ -16,7 +16,7 @@ export enum Accessibility {
     //Other = 'Other'
 }
 
-export type Ownership = {
+export type IOwnership = {
     unitType: OrgnUnit;
     scope: string[] | '*';
 };
@@ -33,7 +33,7 @@ export type Applicant = {
     accessibility?: Accessibility[];
     specializations?: Specialization[] | string[];
     roles?: string[];
-    ownerships?: Ownership[];
+    ownerships?: IOwnership[];
     createdAt?: Date;
     updatedAt?: Date;
 }

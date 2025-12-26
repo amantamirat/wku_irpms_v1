@@ -54,8 +54,8 @@ export class ApplicantRepository implements IApplicantRepository {
             populate("workspace").
             populate("specializations").
             //populate("roles").
-            populate("ownerships")
-            .lean<IApplicant[]>()
+            //populate("ownerships").
+            lean<IApplicant[]>()
             .exec();
     }
     // -------------------------

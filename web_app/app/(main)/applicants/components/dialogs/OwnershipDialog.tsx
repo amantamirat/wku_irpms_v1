@@ -8,7 +8,7 @@ import { Checkbox } from 'primereact/checkbox';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { ApplicantApi } from '../../api/applicant.api';
-import { Applicant, Ownership } from '../../models/applicant.model';
+import { Applicant, IOwnership } from '../../models/applicant.model';
 import { OrgnUnit } from '@/app/(main)/organizations/models/organization.model';
 import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
 import { useConfirmDialog } from '@/contexts/ConfirmDialogContext';
@@ -26,7 +26,7 @@ const OwnershipDialog = ({ visible, applicant, onHide, onComplete }: OwnershipDi
 
     const confirm = useConfirmDialog();
 
-    const [ownerships, setOwnerships] = useState<Ownership[]>(applicant.ownerships || []);
+    const [ownerships, setOwnerships] = useState<IOwnership[]>(applicant.ownerships || []);
 
     const [orgOptions, setOrgOptions] = useState<Record<OrgnUnit, any[]>>({} as Record<OrgnUnit, any[]>);
 
@@ -54,7 +54,7 @@ const OwnershipDialog = ({ visible, applicant, onHide, onComplete }: OwnershipDi
         setOwnerships(applicant.ownerships || []);
     }, [applicant]);
 
-    const updateOwnership = (index: number, patch: Partial<Ownership>) => {
+    const updateOwnership = (index: number, patch: Partial<IOwnership>) => {
         setOwnerships(prev =>
             prev.map((o, i) => i === index ? { ...o, ...patch } : o)
         );
