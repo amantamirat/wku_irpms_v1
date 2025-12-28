@@ -19,7 +19,7 @@ interface SaveDialogProps {
 }
 
 const SaveDialog = ({ visible, theme, onComplete, onHide }: SaveDialogProps) => {
-    const { getOrganizationsByType } = useAuth();
+    const { getScopesByUnits: getOrganizationsByType } = useAuth();
     const toast = useRef<Toast>(null);
     const [localTheme, setLocalTheme] = useState<Theme>({ ...theme });
     const [submitted, setSubmitted] = useState(false);

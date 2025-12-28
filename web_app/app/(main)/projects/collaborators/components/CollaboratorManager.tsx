@@ -144,12 +144,12 @@ const CollaboratorManager = ({ project, applicant, flyMode, onSave, onRemove }: 
     }
 
     const columns = [
-        { header: "Workspace", field: "applicant.workspace.name", sortable: true },
-        {
+        !applicant && { header: "Workspace", field: "applicant.workspace.name", sortable: true },
+        !applicant && {
             header: "Collaborator",
             field: "applicant.name",
         },
-        {
+        !applicant && {
             header: "Gender",
             field: "applicant.gender",
             sortable: true,
@@ -172,7 +172,8 @@ const CollaboratorManager = ({ project, applicant, flyMode, onSave, onRemove }: 
             <CrudManager
                 headerTitle="Collaborators"
                 items={collaborators}
-                dataKey="applicant._id"
+                dataKey={applicant ? "_id" : "applicant._id"}
+                //dataKey="applicant._id"
                 loading={loading}
                 error={error}
                 columns={columns}
@@ -184,11 +185,13 @@ const CollaboratorManager = ({ project, applicant, flyMode, onSave, onRemove }: 
                     setSelectedCollaborator(emptyCollaborator);
                     setShowSaveDialog(true);
                 }}
-                onDelete={(row: Collaborator) =>
+                onDelete={(row: Collaborator) => {
                     confirm.ask({
                         item: `${(row.applicant as Applicant).name}`,
-                        onConfirmAsync: () => deleteCollaborator(row),
+                        onConfirm: flyMode && onRemove ? () => onRemove(row) : undefined,
+                        onConfirmAsync: !flyMode ? () => deleteCollaborator(row) : undefined,
                     })
+                }
                 }
             />
 

@@ -10,20 +10,24 @@ import SaveEvaluation from "./SaveEvaluation";
 import CriterionManager from "./CriterionManager";
 import { useAuth } from "@/contexts/auth-context";
 import { PERMISSIONS } from "@/types/permissions";
+import { DirectorateSelector } from "@/components/DirectorateSelector";
+import { useDirectorate } from "@/contexts/DirectorateContext";
 
 const EvaluationManager = () => {
-
-    const emptyEvaluation: Evaluation = {
-        directorate: "",
-        title: ""
-    };
 
     const confirm = useConfirmDialog();
     const { hasPermission } = useAuth();
 
-    const canCreate =  hasPermission([PERMISSIONS.EVALUATION.CREATE]);
+    const canCreate = hasPermission([PERMISSIONS.EVALUATION.CREATE]);
     const canEdit = hasPermission([PERMISSIONS.EVALUATION.UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.EVALUATION.DELETE]);
+
+    const { directorate, directorates } = useDirectorate();
+
+    const emptyEvaluation: Evaluation = {
+        directorate: directorate ?? "",
+        title: ""
+    };
 
     /** CRUD Hook */
     const {
@@ -42,6 +46,9 @@ const EvaluationManager = () => {
 
     /** Fetch evaluations */
     useEffect(() => {
+        if (!directorate) {
+            return
+        }
         const fetchEvaluations = async () => {
             try {
                 setLoading(true);
@@ -55,7 +62,7 @@ const EvaluationManager = () => {
         };
 
         fetchEvaluations();
-    }, []);
+    }, [directorate]);
 
     /** Save callback */
     const onSaveComplete = (saved: Evaluation) => {
@@ -76,10 +83,14 @@ const EvaluationManager = () => {
 
     /** Table columns */
     const columns = [
-        { header: "Directorate", field: "directorate.name" },
+        //{ header: "Directorate", field: "directorate.name" },
         { header: "Title", field: "title" },
         { header: "Description", field: "description" },
     ];
+
+    const topTemplate = () => {
+        return (<DirectorateSelector />)
+    };
 
     return (
         <>
@@ -91,8 +102,6 @@ const EvaluationManager = () => {
                 columns={columns}
                 loading={loading}
                 error={error}
-
-
 
                 /** Permissions */
                 canCreate={canCreate}
@@ -116,6 +125,8 @@ const EvaluationManager = () => {
                         onConfirmAsync: () => deleteEvaluation(row),
                     })
                 }
+
+                topTemplate={topTemplate()}
                 enableSearch
                 /** Expand row → show criteria manager */
                 rowExpansionTemplate={(row) => (
@@ -127,6 +138,7 @@ const EvaluationManager = () => {
             <SaveEvaluation
                 visible={showSaveDialog}
                 evaluation={evaluation}
+                directorates={directorates}
                 onComplete={onSaveComplete}
                 onHide={hideDialogs}
             />

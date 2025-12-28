@@ -14,6 +14,11 @@ import MyBadge from "@/templates/MyBadge";
 import { Button } from "primereact/button";
 import { Calendar } from "../../calendars/models/calendar.model";
 import ProjectManager from "../../projects/components/ProjectManager";
+import { Organization, OrgnUnit } from "../../organizations/models/organization.model";
+import { OrganizationApi } from "../../organizations/api/organization.api";
+import { Dropdown } from "primereact/dropdown";
+import { useDirectorate } from "@/contexts/DirectorateContext";
+import { DirectorateSelector } from "@/components/DirectorateSelector";
 
 interface CallManagerProps {
     calendar?: Calendar;
@@ -22,14 +27,6 @@ interface CallManagerProps {
 
 const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
 
-    const emptyCycle: Call = {
-        calendar: calendar ?? "",
-        directorate: "",
-        title: "",
-        grant: "",
-        thematic: "",
-        status: CallStatus.planned
-    };
 
     const { hasPermission } = useAuth();
     const confirm = useConfirmDialog();
@@ -56,15 +53,54 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
         setError
     } = useCrudList<Call>();
 
-    const [cycle, setCycle] = useState<Call>(emptyCycle);
+    const { directorate, directorates } = useDirectorate();
+
+    // const [directorates, setDirectorates] = useState<Organization[] | undefined>(undefined);
+    // const [directorate, setDirectorate] = useState<Organization | undefined>(undefined);
+
+    const emptyCycle: Call = {
+        calendar: calendar ?? "",
+        directorate: directorate ?? "",
+        title: "",
+        grant: "",
+        thematic: "",
+        status: CallStatus.planned
+    };
+
+    const [calls, setCalls] = useState<Call>(emptyCycle);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
 
-    /** Fetch cycles */
+
+    /** 
+     * useEffect(() => {
+        const fetchDirectorates = async () => {
+            try {
+                setLoading(true);
+                let directorates = getScopesByUnit(OrgnUnit.Department);
+                if (directorates === "*") {
+                    directorates = await OrganizationApi.getOrganizations({ type: OrgnUnit.Directorate });
+                }
+                setDirectorates(directorates);
+            } catch (err: any) {
+                setError("Failed to load directorates: " + err?.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchDirectorates();
+    }, []);
+    */
+
+
+    /** Fetch calls */
     useEffect(() => {
+        if (!directorate && !calendar) {
+            return
+        }
         const fetchCalls = async () => {
             try {
                 setLoading(true);
-                const data = await CallApi.getCalls({ calendar });
+                const data = await CallApi.getCalls({ calendar, directorate });
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to load calendars. " + (err?.message ?? ""));
@@ -73,7 +109,7 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
             }
         };
         fetchCalls();
-    }, []);
+    }, [calendar, directorate]);
 
     /** Save cycle */
     const onSaveComplete = (saved: Call) => {
@@ -165,8 +201,8 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
 
     /** Columns for CrudManager */
     const columns = [
-        { header: "Calendar", field: "calendar.year" },
-        { header: "Directorate", field: "directorate.name" },
+        !calendar && { header: "Calendar", field: "calendar.year" },
+        calendar && { header: "Directorate", field: "directorate.name" },
         { header: "Title", field: "title" },
         { header: "Grant", field: "grant.title" },
         { header: "Theme", field: "thematic.title" },
@@ -178,6 +214,38 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
         { body: stateTransitionTemplate }
     ];
 
+    const topTemplate = () => {
+        if (calendar) {
+            return undefined;
+        }
+        return (<DirectorateSelector />)
+    };
+
+    /*
+    const topTemplate = () => {
+        if (calendar) {
+            return undefined;
+        }
+        return (
+            <div className="card p-fluid">
+                <div className="formgrid grid">
+                    <div className="field col-12 md:col-6 lg:col-4">
+                        <label htmlFor="directorate">Directorate</label>
+                        <Dropdown
+                            id="workspace"
+                            value={directorate}
+                            options={directorates}
+                            onChange={(e) => setDirectorate(e.value)}
+                            optionLabel="name"
+                            placeholder="Select Directorate"
+                        />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+        */
+
     return (
         <>
             <CrudManager
@@ -188,8 +256,6 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
                 columns={columns}
                 loading={loading}
                 error={error}
-
-
                 /** Permissions */
                 canCreate={canCreate}
                 canEdit={canEdit}
@@ -197,13 +263,13 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
 
                 /** Create */
                 onCreate={() => {
-                    setCycle({ ...emptyCycle });
+                    setCalls({ ...emptyCycle });
                     setShowSaveDialog(true);
                 }}
 
                 /** Edit */
                 onEdit={(row) => {
-                    setCycle({ ...row });
+                    setCalls({ ...row });
                     setShowSaveDialog(true);
                 }}
 
@@ -214,6 +280,8 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
                         onConfirmAsync: () => deleteCall(row)
                     })
                 }
+
+                topTemplate={topTemplate()}
                 //enableSearch
                 rowExpansionTemplate={(row) => {
                     if (next === "project") {
@@ -224,10 +292,11 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
             />
 
             {/* Save Dialog */}
-            {cycle && (
+            {calls && (
                 <SaveCall
                     visible={showSaveDialog}
-                    call={cycle}
+                    call={calls}
+                    directorates={directorates}
                     onComplete={onSaveComplete}
                     onHide={hideDialogs}
                 />

@@ -12,29 +12,29 @@ import { CalendarApi } from '../../calendars/api/calendar.api';
 import { Calendar } from '../../calendars/models/calendar.model';
 import { GrantApi } from '../../grants/api/grant.api';
 import { Grant } from '../../grants/models/grant.model';
-import { Organization, OrgnUnit } from '../../organizations/models/organization.model';
-import { ThemeApi } from '../../thematics/themes/api/theme.api';
-import { Theme } from '../../thematics/themes/models/theme.model';
-import { CallApi } from '../api/call.api';
-import { Call, CallStatus, validateCall } from '../models/call.model';
+import { Organization } from '../../organizations/models/organization.model';
 import { ThematicApi } from '../../thematics/api/thematic.api';
+import { Thematic } from '../../thematics/models/thematic.model';
+import { CallApi } from '../api/call.api';
+import { Call, validateCall } from '../models/call.model';
 
 interface SaveCallProps {
     visible: boolean;
     call: Call;
+    directorates?: Organization[]
     onHide: () => void;
     onComplete?: (saved: Call) => void;
 }
 
-const SaveCall = ({ visible, call, onHide, onComplete }: SaveCallProps) => {
+const SaveCall = ({ visible, call, directorates, onHide, onComplete }: SaveCallProps) => {
     const toast = useRef<Toast>(null);
-    const { getOrganizationsByType } = useAuth();
+    const { getScopesByUnit: getOrganizationsByType } = useAuth();
 
     const [localCall, setLocalCall] = useState<Call>({ ...call });
     const [calendars, setCalendars] = useState<Calendar[]>([]);
-    const [organizations, setOrganizations] = useState<Organization[]>([]);
+    //const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [grants, setGrants] = useState<Grant[]>([]);
-    const [themes, setThemes] = useState<Theme[]>([]);
+    const [themes, setThemes] = useState<Thematic[]>([]);
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string>();
 
@@ -52,11 +52,6 @@ const SaveCall = ({ visible, call, onHide, onComplete }: SaveCallProps) => {
         loadCalendars();
     }, []);
 
-    // Load organizations
-    useEffect(() => {
-        const data = getOrganizationsByType([OrgnUnit.Directorate]);
-        setOrganizations(data);
-    }, []);
 
     // Load grants
     useEffect(() => {
@@ -179,7 +174,7 @@ const SaveCall = ({ visible, call, onHide, onComplete }: SaveCallProps) => {
                                 <Dropdown
                                     id="organization"
                                     value={localCall.directorate}
-                                    options={organizations}
+                                    options={directorates}
                                     optionLabel="name"
                                     onChange={(e) => setLocalCall({ ...localCall, directorate: e.value })}
                                     placeholder={`Select 'Directorate'`}

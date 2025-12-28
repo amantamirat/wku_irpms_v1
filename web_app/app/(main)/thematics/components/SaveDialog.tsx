@@ -16,29 +16,19 @@ import { Thematic, ThemeLevel, ThemeType, validateThematic } from '../models/the
 interface SaveDialogProps {
     visible: boolean;
     thematic: Thematic;
+    directorates?: Organization[]
     onComplete?: (savedThematic: Thematic) => void;
     onHide: () => void;
 }
 
-const SaveDialog = ({ visible, thematic, onComplete, onHide }: SaveDialogProps) => {
-    const { getOrganizationsByType } = useAuth();
+const SaveDialog = ({ visible, thematic, directorates, onComplete, onHide }: SaveDialogProps) => {
+
     const toast = useRef<Toast>(null);
 
     const [localThematic, setLocalThematic] = useState<Thematic>({ ...thematic });
     const [submitted, setSubmitted] = useState(false);
-    const [organizations, setOrganizations] = useState<Organization[]>([]);
+    //const [organizations, setOrganizations] = useState<Organization[]>([]);
 
-    useEffect(() => {
-        const fetchOrganizations = async () => {
-            try {
-                const data = getOrganizationsByType([OrgnUnit.Directorate]);
-                setOrganizations(data);
-            } catch (err) {
-                console.error('Failed to fetch organizations:', err);
-            }
-        };
-        fetchOrganizations();
-    }, []);
 
     useEffect(() => {
         setLocalThematic({ ...thematic });
@@ -116,7 +106,7 @@ const SaveDialog = ({ visible, thematic, onComplete, onHide }: SaveDialogProps) 
                     <Dropdown
                         id="directorate"
                         value={localThematic.directorate}
-                        options={organizations}
+                        options={directorates}
                         optionLabel="name"
                         onChange={(e) => setLocalThematic({ ...localThematic, directorate: e.value })}
                         placeholder="Select Directorate"

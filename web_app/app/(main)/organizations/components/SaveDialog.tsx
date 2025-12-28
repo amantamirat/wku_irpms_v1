@@ -12,17 +12,17 @@ import { Toast } from 'primereact/toast';
 interface SaveDialogProps {
     visible: boolean;
     organization: Organization;
-    hasParent?: boolean;
     parentType?: OrgnUnit;
+    parents?: Organization[];
     onHide: () => void;
     onComplete: (savedOrganization: Organization) => void;
 }
 
-const SaveDialog = ({ visible, organization, hasParent, parentType, onHide, onComplete }: SaveDialogProps) => {
+const SaveDialog = ({ visible, organization, parents, parentType, onHide, onComplete }: SaveDialogProps) => {
+    
     const toast = useRef<Toast>(null);
     const [localOrganization, setLocalOrganization] = useState<Organization>({ ...organization });
     const [submitted, setSubmitted] = useState(false);
-    const [parents, setParents] = useState<Organization[] | undefined>(undefined);
 
     useEffect(() => {
         setLocalOrganization({ ...organization });
@@ -32,24 +32,7 @@ const SaveDialog = ({ visible, organization, hasParent, parentType, onHide, onCo
     // const isSpecialization = localOrganization.type === OrgnUnit.Specialization;
     const isExternal = localOrganization.type === OrgnUnit.External;
 
-    useEffect(() => {
-        if (hasParent || !parentType) return;
-        const fetchParentTypes = async () => {
-            try {
-                const data = await OrganizationApi.getOrganizations({ type: parentType });
-                setParents(data);
-            } catch (err) {
-                console.error("Failed to fetch parents:", err);
-                toast.current?.show({
-                    severity: 'error',
-                    summary: `Failed to fetch parents: ${parentType}`,
-                    detail: '' + err,
-                    life: 2000,
-                });
-            }
-        };
-        fetchParentTypes();
-    }, [hasParent, parentType]);
+
 
     const saveOrganization = async () => {
         try {
@@ -120,7 +103,7 @@ const SaveDialog = ({ visible, organization, hasParent, parentType, onHide, onCo
                 footer={footer}
                 onHide={hide}
             >
-                {(parentType && !hasParent) &&
+                {(parents && parentType) &&
                     <div className="field">
                         <label htmlFor="parent">
                             {parentType}

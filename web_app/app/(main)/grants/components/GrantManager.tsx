@@ -12,18 +12,21 @@ import { GrantApi } from "../api/grant.api";
 import { GetGrantsOptions, Grant } from "../models/grant.model";
 import SaveDialog from "./SaveDialog";
 import ConstraintContainer from "../constraints/components/ConstraintContainer";
+import { useDirectorate } from "@/contexts/DirectorateContext";
+import { DirectorateSelector } from "@/components/DirectorateSelector";
 
 interface GrantManagerProps {
     directorate?: Organization;
 }
 
-const GrantManger = ({ directorate }: GrantManagerProps) => {
+const GrantManger = () => {
 
-    const { getApplicant: getLinkedApplicant, hasPermission } = useAuth();
-    const linkedApplicant = getLinkedApplicant();
+    const { hasPermission } = useAuth();
+    //const linkedApplicant = getLinkedApplicant();
     //const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
 
     const confirm = useConfirmDialog();
+    const { directorate, directorates } = useDirectorate();
 
     const emptyGrant: Grant = {
         directorate: directorate ?? '',
@@ -52,6 +55,9 @@ const GrantManger = ({ directorate }: GrantManagerProps) => {
 
     // ✅ Fetch grants
     useEffect(() => {
+        if (!directorate) {
+            return
+        }
         const fetchGrants = async () => {
             try {
                 setLoading(true);
@@ -60,10 +66,7 @@ const GrantManger = ({ directorate }: GrantManagerProps) => {
                 };
                 const data = await GrantApi.getGrants(options);
                 setAll(
-                    data.map(g => ({
-                        ...g,
-                        directorate: directorate ?? g.directorate
-                    }))
+                    data
                 );
             } catch (err: any) {
                 setError("Failed to fetch grants. " + (err.message ?? ""));
@@ -95,10 +98,14 @@ const GrantManger = ({ directorate }: GrantManagerProps) => {
 
 
     const columns = [
-        { field: "directorate.name", header: "Directorate", sortable: true },
+        //{ field: "directorate.name", header: "Directorate", sortable: true },
         { field: "title", header: "Title", sortable: true },
         { field: "description", header: "Description", sortable: true },
     ];
+
+    const topTemplate = () => {
+        return (<DirectorateSelector />)
+    };
 
     return (
         <>
@@ -114,6 +121,7 @@ const GrantManger = ({ directorate }: GrantManagerProps) => {
                 onEdit={(row) => { setGrant(row); setShowSaveDialog(true); }}
                 onDelete={(row) => confirm.ask({ item: row.title, onConfirmAsync: () => deleteGrant(row) })}
                 
+                topTemplate={topTemplate()}
                 rowExpansionTemplate={(row) => <ConstraintContainer grant={row as Grant} />}
             />
 
@@ -121,6 +129,7 @@ const GrantManger = ({ directorate }: GrantManagerProps) => {
                 <SaveDialog
                     visible={showSaveDialog}
                     grant={grant}
+                    directorates={directorates}
                     onComplete={onSaveComplete}
                     onHide={() => setShowSaveDialog(false)}
                 />

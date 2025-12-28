@@ -10,6 +10,7 @@ import '../styles/demo/Demos.scss';
 import { Suspense } from 'react';
 import { AuthProvider } from '@/contexts/auth-context';
 import { ConfirmDialogProvider } from '@/contexts/ConfirmDialogContext';
+import { DirectorateProvider } from '@/contexts/DirectorateContext';
 
 interface RootLayoutProps {
     children: React.ReactNode;
@@ -27,7 +28,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
                         <Suspense fallback={<div>Loading...</div>}>
                             <ConfirmDialogProvider>
                                 <AuthProvider>
-                                    {children}
+                                    <DirectorateProvider>
+                                        {children}
+                                    </DirectorateProvider>
                                 </AuthProvider>
                             </ConfirmDialogProvider>
                         </Suspense>

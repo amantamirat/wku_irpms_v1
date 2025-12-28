@@ -18,7 +18,7 @@ export enum Accessibility {
 
 export type IOwnership = {
     unitType: OrgnUnit;
-    scope: string[] | '*';
+    scope: any[] | '*';
 };
 
 export type Applicant = {
@@ -39,7 +39,7 @@ export type Applicant = {
 }
 
 export interface GetApplicantsOptions {
-    workspace?: string | Organization;
+    workspace: string | Organization;
 }
 
 export const applicantUnits = [OrgnUnit.Department, OrgnUnit.External]

@@ -44,7 +44,7 @@ export interface UpdateOwnershipsDTO {
 }
 
 export interface GetApplicantsDTO {
-    workspace?: string;
+    workspace: string;
 }
 
 export interface FindApplicantDTO {

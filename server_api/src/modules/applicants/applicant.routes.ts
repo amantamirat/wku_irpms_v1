@@ -3,47 +3,45 @@ import { PERMISSIONS } from '../../common/constants/permissions';
 import { verifyActiveAccount, checkPermission } from '../users/user.middleware';
 import { ApplicantController } from './applicant.controller';
 
+const controller = new ApplicantController();
 const router: Router = Router();
 
 router.post('/',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.APPLICANT.CREATE]),
-    ApplicantController.create
+    controller.create
 );
 
 router.get('/',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.APPLICANT.READ]),
-    ApplicantController.getApplicants
+    controller.get
 );
 
 router.put('/:id',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.APPLICANT.UPDATE]),
-    ApplicantController.update
+    controller.update
 );
 
 router.put(
     '/:id/roles',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.APPLICANT.ROLE_UPDATE]),
-    ApplicantController.updateRoles
+    controller.updateRoles
 );
 
 router.put(
     '/:id/ownerships',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.APPLICANT.OWNERSHIP_UPDATE]),
-    ApplicantController.updateOwnerships
+    controller.updateOwnerships
 );
 
 router.delete('/:id',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.APPLICANT.DELETE]),
-    ApplicantController.delete
+    controller.delete
 );
-
-
-
 
 export default router;

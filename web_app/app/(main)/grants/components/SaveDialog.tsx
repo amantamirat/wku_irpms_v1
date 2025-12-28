@@ -15,29 +15,17 @@ import { Grant, validateGrant } from '../models/grant.model';
 interface SaveDialogProps {
     visible: boolean;
     grant: Grant;
+    directorates?: Organization[]
     onComplete?: (savedGrant: Grant) => void;
     onHide: () => void;
 }
 
-const SaveDialog = ({ visible, grant, onComplete, onHide }: SaveDialogProps) => {
-    const { getOrganizationsByType } = useAuth();
+const SaveDialog = ({ visible, grant, directorates, onComplete, onHide }: SaveDialogProps) => {
+    
     const toast = useRef<Toast>(null);
 
     const [localGrant, setLocalGrant] = useState<Grant>({ ...grant });
-    const [submitted, setSubmitted] = useState(false);
-    const [organizations, setOrganizations] = useState<Organization[]>([]);
-
-    useEffect(() => {
-        const fetchOrganizations = async () => {
-            try {
-                const data = getOrganizationsByType([OrgnUnit.Directorate]);
-                setOrganizations(data);
-            } catch (err) {
-                console.error('Failed to fetch organizations:', err);
-            }
-        };
-        fetchOrganizations();
-    }, []);
+    const [submitted, setSubmitted] = useState(false); 
 
     useEffect(() => {
         setLocalGrant({ ...grant });
@@ -115,7 +103,7 @@ const SaveDialog = ({ visible, grant, onComplete, onHide }: SaveDialogProps) => 
                     <Dropdown
                         id="directorate"
                         value={localGrant.directorate}
-                        options={organizations}
+                        options={directorates}
                         optionLabel="name"
                         onChange={(e) => setLocalGrant({ ...localGrant, directorate: e.value })}
                         placeholder="Select Directorate"

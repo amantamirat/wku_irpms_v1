@@ -43,7 +43,7 @@ export class ApplicantRepository implements IApplicantRepository {
     // -------------------------
     // FIND ALL WITH OPTIONAL FILTER
     // -------------------------
-    async findAll(filter: GetApplicantsDTO = {}): Promise<IApplicant[]> {
+    async findAll(filter: GetApplicantsDTO): Promise<IApplicant[]> {
         const query: any = {};
 
         if (filter.workspace) {
@@ -83,7 +83,6 @@ export class ApplicantRepository implements IApplicantRepository {
 
         if (dtoData.workspace) toUpdate.organization = new mongoose.Types.ObjectId(dtoData.workspace);
         if (dtoData.name) toUpdate.name = dtoData.name;
-        //if (dtoData.lastName) toUpdate.last_name = dtoData.lastName;
         if (dtoData.birthDate) toUpdate.birth_date = dtoData.birthDate;
         if (dtoData.gender) toUpdate.gender = dtoData.gender;
         if (dtoData.email) toUpdate.email = dtoData.email;
@@ -93,15 +92,6 @@ export class ApplicantRepository implements IApplicantRepository {
         if (dtoData.specializations) {
             toUpdate.specializations = dtoData.specializations?.map(id => new mongoose.Types.ObjectId(id))
         }
-
-        /*
-
-        if (dtoData.ownerships) {
-            toUpdate.ownerships = dtoData.ownerships?.map(id => new mongoose.Types.ObjectId(id))
-        }
-
-        */
-
         const updated = await Applicant.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: toUpdate },

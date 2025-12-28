@@ -22,35 +22,34 @@ import { SpecializationApi } from '@/app/(main)/specializations/api/specializati
 interface SaveApplicantDialogProps {
     visible: boolean;
     applicant: Applicant;
-    hasWorkspace: boolean;
+    //hasWorkspace: boolean;
+    workspaces?: Organization[]
     onHide: () => void;
     onComplete?: (savedApplicant: Applicant) => void;
 }
 
-const SaveApplicantDialog = ({ visible, applicant, hasWorkspace, onHide, onComplete }: SaveApplicantDialogProps) => {
+const SaveApplicantDialog = ({ visible, applicant, workspaces, onHide, onComplete }: SaveApplicantDialogProps) => {
 
-
-    const { getOrganizationsByType, hasPermission } = useAuth();
-    const canReadRoles = hasPermission([PERMISSIONS.ROLE.READ]);
+    const { hasPermission } = useAuth();
     const canReadSpecializations = hasPermission([PERMISSIONS.SPECIALIZATION.READ]);
 
     const [localApplicant, setLocalApplicant] = useState<Applicant>({ ...applicant });
     const [specializations, setSpecializations] = useState<Specialization[]>([]);
-    const [roles, setRoles] = useState<Role[]>([]);
-    const [userOrganizations, setUserOrganizations] = useState<Organization[]>([]);
-    const [ownerships, setOwnerships] = useState<Organization[]>([]);
+    //const [userOrganizations, setUserOrganizations] = useState<Organization[]>([]);
+    //const [ownerships, setOwnerships] = useState<Organization[]>([]);
     const [submitted, setSubmitted] = useState(false);
     const toast = useRef<Toast>(null);
 
+    /*
     useEffect(() => {
         if (hasWorkspace) return
         const fetchOrganizations = async () => {
             try {
                 const depData = await OrganizationApi.getOrganizations({ type: OrgnUnit.Department });
                 const extData = await OrganizationApi.getOrganizations({ type: OrgnUnit.External });
-                const dirData = await OrganizationApi.getOrganizations({ type: OrgnUnit.Directorate });
+                //const dirData = await OrganizationApi.getOrganizations({ type: OrgnUnit.Directorate });
                 setUserOrganizations([...depData, ...extData]);
-                setOwnerships([...dirData, ...depData, ...extData]);
+                //setOwnerships([...dirData, ...depData, ...extData]);
                 //}
             } catch (err) {
                 console.error('Failed to fetch organizations:', err);
@@ -58,23 +57,7 @@ const SaveApplicantDialog = ({ visible, applicant, hasWorkspace, onHide, onCompl
         };
         fetchOrganizations();
     }, [hasWorkspace]);
-
-
-    useEffect(() => {
-        if (!canReadRoles) {
-            return;
-        }
-        const fetchRoles = async () => {
-            try {
-                const rolesData = await RoleApi.getRoles();
-                setRoles(rolesData);
-            } catch (err) {
-                console.error('Failed to fetch roles:', err);
-            }
-        };
-        fetchRoles();
-    }, []);
-
+*/
 
     useEffect(() => {
         if (!canReadSpecializations) {
@@ -161,10 +144,8 @@ const SaveApplicantDialog = ({ visible, applicant, hasWorkspace, onHide, onCompl
                 onHide={onHide}
                 maximized
             >
-
-
                 <>
-                    {!hasWorkspace
+                    {workspaces
                         &&
                         <div className="field">
                             <label htmlFor="workspace">
@@ -174,7 +155,7 @@ const SaveApplicantDialog = ({ visible, applicant, hasWorkspace, onHide, onCompl
                                 id="workspace"
                                 dataKey="_id"
                                 value={localApplicant.workspace}
-                                options={userOrganizations}
+                                options={workspaces}
                                 optionLabel="name"
                                 onChange={(e) => setLocalApplicant({ ...localApplicant, workspace: e.value })}
                                 placeholder="Select Workspace"
@@ -291,7 +272,7 @@ const SaveApplicantDialog = ({ visible, applicant, hasWorkspace, onHide, onCompl
                         />
                     </div>
 
-                    {isEdit &&
+                    {
                         <div className="field">
                             <label htmlFor="specializations">Specializations</label>
                             <MultiSelect
@@ -307,7 +288,7 @@ const SaveApplicantDialog = ({ visible, applicant, hasWorkspace, onHide, onCompl
                         </div>
                     }
 
-                    
+
                 </>
 
                 {

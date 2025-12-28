@@ -4,14 +4,14 @@ import { Classification, Ownership } from "./organization.enum";
 import { AcademicLevel } from "../../common/constants/enums";
 import { Unit } from "./organization.type";
 
-interface IBaseOrganization extends Document {
+export interface IOrganization extends Document {
     type: Unit;
     name: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
-const OrganizationSchema = new Schema<IBaseOrganization>(
+const OrganizationSchema = new Schema<IOrganization>(
     {
         type: { type: String, enum: Object.values(Unit), required: true },
         name: { type: String, required: true }
@@ -19,20 +19,20 @@ const OrganizationSchema = new Schema<IBaseOrganization>(
     { timestamps: true, discriminatorKey: "type" } // discriminatorKey
 );
 
-export const Organization = model<IBaseOrganization>(COLLECTIONS.ORGANIZATION, OrganizationSchema);
+export const Organization = model<IOrganization>(COLLECTIONS.ORGANIZATION, OrganizationSchema);
 
-interface ICollege extends IBaseOrganization {
+interface ICollege extends IOrganization {
     type: Unit.College;
 }
 export const College = Organization.discriminator<ICollege>(Unit.College, new Schema({}));
 
-interface IDirectorate extends IBaseOrganization {
+interface IDirectorate extends IOrganization {
     type: Unit.Directorate;
 }
 
 export const Directorate = Organization.discriminator<IDirectorate>(Unit.Directorate, new Schema({}));
 
-interface IExternal extends IBaseOrganization {
+interface IExternal extends IOrganization {
     type: Unit.External;
     ownership: Ownership;
 }
@@ -44,7 +44,7 @@ const ExternalSchema = new Schema<IExternal>({
 export const External = Organization.discriminator<IExternal>(Unit.External, ExternalSchema);
 
 
-interface SubOrganizationDocument extends IBaseOrganization {
+interface SubOrganizationDocument extends IOrganization {
     parent: mongoose.Types.ObjectId;
 }
 

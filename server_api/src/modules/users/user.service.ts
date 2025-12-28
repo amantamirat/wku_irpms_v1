@@ -13,15 +13,20 @@ import { UserStatus } from "./user.status";
 import { IUser } from "./user.model";
 import { Unit } from "../organization/organization.type";
 import { IOwnership } from "../applicants/applicant.model";
+import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
 
 export class UserService {
 
     private repository: IUserRepository;
     private appRepository: IApplicantRepository;
+    private organizationRepository: IOrganizationRepository;
 
-    constructor(repository?: IUserRepository, appRepository?: IApplicantRepository) {
+    constructor(repository?: IUserRepository, appRepository?: IApplicantRepository,
+        organizationRepository?: IOrganizationRepository
+    ) {
         this.repository = repository || new UserRepository();
         this.appRepository = appRepository || new ApplicantRepository();
+        this.organizationRepository = organizationRepository || new OrganizationRepository();
     }
 
     static async prepareHash(password: string): Promise<string> {
@@ -135,6 +140,21 @@ export class UserService {
         CacheService.setUserPermissions(userId, permissions);
         CacheService.setUserOwnerships(applicantId, ownerships);
 
+        const ownershipsDocs = await Promise.all(
+            (ownerships || []).map(async (ownership: any) => {
+                if (ownership.scope === "*") {
+                    return ownership;
+                }
+                const populatedScope = await this.organizationRepository.findByIds(
+                    ownership.scope
+                );
+                return {
+                    ...ownership,
+                    scope: populatedScope
+                };
+            })
+        );
+
         const payload: JwtPayload = {
             userId: userId,
             applicantId,
@@ -146,8 +166,7 @@ export class UserService {
         const response = {
             ...payload,
             permissions: permissions,
-            ownerships: ownerships,
-            organizations: applicantDoc.ownerships || [],
+            ownerships: ownershipsDocs,
             applicant: applicantDoc
         };
 

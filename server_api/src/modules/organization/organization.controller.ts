@@ -28,7 +28,7 @@ export class OrganizationController {
                 type: req.body.type,
                 name: req.body.name,
                 parent: req.body.parent,
-                academicLevel: req.body.academic_level,
+                academicLevel: req.body.academicLevel,
                 classification: req.body.classification,
                 ownership: req.body.ownership,
             };
@@ -73,7 +73,7 @@ export class OrganizationController {
                 data: {
                     name: req.body.name,
                     parent: req.body.parent,
-                    academicLevel: req.body.academic_level,
+                    academicLevel: req.body.academicLevel,
                     classification: req.body.classification,
                     ownership: req.body.ownership,
                 },

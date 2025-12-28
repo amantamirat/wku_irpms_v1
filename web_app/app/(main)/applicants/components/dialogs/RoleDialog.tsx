@@ -21,7 +21,7 @@ interface RoleDialogProps {
 
 const RoleDialog = ({ visible, applicant, onHide, onComplete }: RoleDialogProps) => {
 
-    const { getOrganizationsByType, hasPermission } = useAuth();
+    const { hasPermission } = useAuth();
     const canReadRoles = hasPermission([PERMISSIONS.ROLE.READ]);
 
     const [localApplicant, setLocalApplicant] = useState<Applicant>({ ...applicant });

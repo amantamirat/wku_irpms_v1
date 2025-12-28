@@ -1,5 +1,4 @@
 'use client';
-import { useAuth } from '@/contexts/auth-context';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
@@ -7,36 +6,25 @@ import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
-import { Organization, OrgnUnit } from '../../organizations/models/organization.model';
+import { Organization } from '../../organizations/models/organization.model';
 import { EvaluationApi } from '../api/evaluation.api';
 import { Evaluation, validateEvaluation } from '../models/evaluation.model';
 
 interface SaveEvaluatioProps {
     visible: boolean;
     evaluation: Evaluation;
+    directorates?: Organization[]
     onComplete?: (savedEvaluation: Evaluation) => void;
     onHide: () => void;
 }
 
-const SaveEvaluation = ({ visible, evaluation, onComplete, onHide }: SaveEvaluatioProps) => {
-    const { getOrganizationsByType } = useAuth();
+const SaveEvaluation = ({ visible, evaluation, directorates, onComplete, onHide }: SaveEvaluatioProps) => {
+
     const toast = useRef<Toast>(null);
 
     const [localEvaluation, setLocalEvaluation] = useState<Evaluation>({ ...evaluation });
     const [submitted, setSubmitted] = useState(false);
-    const [organizations, setOrganizations] = useState<Organization[]>([]);
-
-    useEffect(() => {
-        const fetchOrganizations = async () => {
-            try {
-                const data = getOrganizationsByType([OrgnUnit.Directorate]);
-                setOrganizations(data);
-            } catch (err) {
-                console.error('Failed to fetch organizations:', err);
-            }
-        };
-        fetchOrganizations();
-    }, []);
+    //const [organizations, setOrganizations] = useState<Organization[]>([]);
 
     useEffect(() => {
         setLocalEvaluation({ ...evaluation });
@@ -116,7 +104,7 @@ const SaveEvaluation = ({ visible, evaluation, onComplete, onHide }: SaveEvaluat
                     <Dropdown
                         id="directorate"
                         value={localEvaluation.directorate}
-                        options={organizations}
+                        options={directorates}
                         optionLabel="name"
                         onChange={(e) => setLocalEvaluation({ ...localEvaluation, directorate: e.value })}
                         placeholder="Select Directorate"

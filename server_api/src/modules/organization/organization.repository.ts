@@ -20,6 +20,7 @@ import { Unit } from "./organization.type";
 
 export interface IOrganizationRepository {
     findById(id: string): Promise<any | null>;
+    findByIds(ids: string[]): Promise<any[]>;
     find(options: GetOrganizationsDTO): Promise<any[]>;
     create(data: CreateOrganizationDTO): Promise<any>;
     update(id: string, data: UpdateOrganizationDTO["data"]): Promise<any>;
@@ -27,7 +28,6 @@ export interface IOrganizationRepository {
 }
 
 export class OrganizationRepository implements IOrganizationRepository {
-
     // ------------------------------------
     // GET BY ID
     // ------------------------------------
@@ -51,6 +51,18 @@ export class OrganizationRepository implements IOrganizationRepository {
             query.parent = new mongoose.Types.ObjectId(filters.parent);
         }
         return Organization.find(query).populate("parent")
+            .lean()
+            .exec();
+    }
+
+    // ------------------------------------
+    // FIND BY MANY IDS
+    // ------------------------------------
+    async findByIds(ids: string[]) {
+        return Organization.find({
+            _id: { $in: ids.map(id => new mongoose.Types.ObjectId(id)) }
+        })
+            .populate("parent")
             .lean()
             .exec();
     }
@@ -106,7 +118,7 @@ export class OrganizationRepository implements IOrganizationRepository {
         }
 
         if (dtoData.academicLevel) {
-            updated.academic_level = dtoData.academicLevel;
+            updated.academicLevel = dtoData.academicLevel;
         }
 
         if (dtoData.classification) {

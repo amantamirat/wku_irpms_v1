@@ -11,19 +11,15 @@ import { ThematicApi } from "../api/thematic.api";
 import { Thematic, ThemeLevel } from "../models/thematic.model";
 import ThemeManager from "../themes/components/ThemeManager";
 import SaveDialog from "./SaveDialog";
+import { DirectorateSelector } from "@/components/DirectorateSelector";
+import { useDirectorate } from "@/contexts/DirectorateContext";
 
 interface ThematicManagerProps {
     directorate?: Organization;
 }
 
 
-const ThematicManager = ({ directorate }: ThematicManagerProps) => {
-
-    const emptyThematic: Thematic = {
-        directorate: directorate ?? '',
-        title: '',
-        level:ThemeLevel.broad
-    };
+const ThematicManager = () => {
 
     const { hasPermission } = useAuth();
     const confirm = useConfirmDialog();
@@ -31,6 +27,13 @@ const ThematicManager = ({ directorate }: ThematicManagerProps) => {
     const canCreate = hasPermission([PERMISSIONS.THEME.CREATE]);
     const canEdit = hasPermission([PERMISSIONS.THEME.UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.THEME.DELETE]);
+
+    const { directorate, directorates } = useDirectorate();
+    const emptyThematic: Thematic = {
+        directorate: directorate ?? '',
+        title: '',
+        level: ThemeLevel.broad
+    };
 
     // CRUD hook
     const {
@@ -49,10 +52,13 @@ const ThematicManager = ({ directorate }: ThematicManagerProps) => {
 
     /** Fetch thematics */
     useEffect(() => {
+        if(!directorate){
+            return
+        }
         const fetchThematics = async () => {
             try {
                 setLoading(true);
-                const data = await ThematicApi.getThematics({});
+                const data = await ThematicApi.getThematics({directorate});
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to fetch thematics. " + (err?.message ?? ""));
@@ -61,7 +67,7 @@ const ThematicManager = ({ directorate }: ThematicManagerProps) => {
             }
         };
         fetchThematics();
-    }, []);
+    }, [directorate]);
 
     /** Save callback */
     const onSaveComplete = (saved: Thematic) => {
@@ -105,6 +111,10 @@ const ThematicManager = ({ directorate }: ThematicManagerProps) => {
         { field: "description", header: "Description" },
     ];
 
+    const topTemplate = () => {
+        return (<DirectorateSelector />)
+    };
+
     return (
         <>
             <CrudManager
@@ -137,7 +147,8 @@ const ThematicManager = ({ directorate }: ThematicManagerProps) => {
                     })
                 }
 
-                rowExpansionTemplate={(row) => <ThemeManager thematicArea={row as Thematic}  />}
+                topTemplate={topTemplate()}
+                rowExpansionTemplate={(row) => <ThemeManager thematicArea={row as Thematic} />}
                 enableSearch
             />
 
@@ -146,6 +157,7 @@ const ThematicManager = ({ directorate }: ThematicManagerProps) => {
                 <SaveDialog
                     visible={showSaveDialog}
                     thematic={thematic}
+                    directorates={directorates}
                     onComplete={onSaveComplete}
                     onHide={hideDialogs}
                 />

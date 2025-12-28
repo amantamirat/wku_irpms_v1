@@ -132,7 +132,7 @@ const AppMenu = () => {
                 }
                 ,
                 {
-                    label: 'My Projects',
+                    label: 'Projects',
                     icon: PrimeIcons.BRIEFCASE,
                     to: '/projects',
                     visible: hasPermission(

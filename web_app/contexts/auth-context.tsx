@@ -5,7 +5,6 @@ import { UserApi } from '@/app/(main)/users/api/UserService';
 import { User } from '@/app/(main)/users/models/user.model';
 import { IOwnership } from '@/app/(main)/applicants/models/applicant.model';
 
-
 interface AuthContextType {
     user: User | null;
     loading: boolean;
@@ -13,8 +12,9 @@ interface AuthContextType {
     login: (user: User) => Promise<boolean>;
     logout: () => void;
     hasPermission: (perms: string[]) => boolean;
-    hasOrganizationType: (types: OrgnUnit[]) => boolean;
-    getOrganizationsByType: (types: OrgnUnit[]) => any[];
+    //hasOrganizationType: (types: OrgnUnit[]) => boolean;
+    getScopesByUnit: (unit: OrgnUnit) => any[] | "*";
+    //getScopesByUnits: (units: OrgnUnit[]) => any[];
     getApplicant: () => any | null;
 }
 
@@ -26,7 +26,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [permissions, setPermissions] = useState<string[]>();
     const [ownerships, setOwnerships] = useState<IOwnership[]>();
     const [loading, setLoading] = useState(true);
-
 
     useEffect(() => {
         const userInfo = UserApi.getLoggedInUser();
@@ -61,17 +60,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return perms.some((p) => permissions?.includes(p));
     };
 
-    const hasOrganizationType = (types: OrgnUnit[]): boolean => {
+    /*
+const hasOrganizationType = (types: OrgnUnit[]): boolean => {
         return false;
         //if (!user?.organizations) return false;
         //return user.organizations.some((org: any) => types.includes(org.type));
     };
+    */
 
-    const getOrganizationsByType = (types: OrgnUnit[]): any[] => {
-        return [];
-        //if (!user?.organizations) return [];
-        //return user.organizations.filter((org: any) => types.includes(org.type));
+    const getScopesByUnit = (unit: OrgnUnit) => {
+        const ownership = ownerships?.find(o => o.unitType === unit);
+        if (!ownership) return [];
+        return ownership.scope;
+        //return ownership.scope === '*' ? '*' : ownership.scope;
     };
+
+    /*
+    const getScopesByUnits = (types: OrgnUnit[]): any[] => {
+        return ownerships
+            ?.filter(o => types.includes(o.unitType))
+            .flatMap(o => o.scope === '*' ? [] : o.scope)
+            ?? [];
+    };
+    */
 
     const getApplicant = (): any | null => {
         if (!user || !user.applicant) return null;
@@ -79,7 +90,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     return (
-        <AuthContext.Provider value={{ user, loading, loggedIn: !!user, login, logout, hasPermission, hasOrganizationType, getOrganizationsByType, getApplicant }}>
+        <AuthContext.Provider value={{
+            user, loading, loggedIn: !!user, login, logout, hasPermission, //hasOrganizationType, 
+            getScopesByUnit,
+            // getScopesByUnits,
+            getApplicant
+        }}>
             {children}
         </AuthContext.Provider>
     );

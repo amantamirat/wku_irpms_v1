@@ -1,4 +1,3 @@
-
 import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
 import { Unit } from "../organization/organization.type";
 import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO, UpdateRolesDTO, UpdateOwnershipsDTO } from "./applicant.dto";
@@ -34,7 +33,7 @@ export class ApplicantService {
     // -------------------------
     // GET ALL (with optional filter)
     // -------------------------
-    async getAll(filter?: GetApplicantsDTO) {
+    async getAll(filter: GetApplicantsDTO) {
         return await this.repository.findAll(filter);
     }
     // -------------------------

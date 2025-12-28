@@ -7,7 +7,7 @@ const ProjectPage = () => {
     const linkedApplicant = getLinkedApplicant();
     //const isOwner = linkedApplicant?._id === leadPI?._id;
     return (
-        <ProjectManager leadPI={linkedApplicant} />
+        <ProjectManager />
     );
 };
 

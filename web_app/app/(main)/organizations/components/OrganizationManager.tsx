@@ -3,8 +3,7 @@ import { CrudManager } from "@/components/CrudManager";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useCrudList } from "@/hooks/useCrudList";
 import { useAuth } from "@/contexts/auth-context";
-import React, { useEffect, useState, useCallback } from "react";
-
+import React, { useEffect, useState } from "react";
 import { OrganizationApi } from "../api/organization.api";
 import {
     Organization,
@@ -15,8 +14,7 @@ import {
 
 import SaveDialog from "./SaveDialog";
 import { PERMISSIONS } from "@/types/permissions";
-import { TabView, TabPanel } from "primereact/tabview";
-import ApplicantManager from "../../applicants/components/ApplicantManager";
+import { Dropdown } from "primereact/dropdown";
 
 
 const ORG_PERMISSION_KEY: Record<OrgnUnit, keyof typeof PERMISSIONS.ORGANIAZTION> = {
@@ -34,16 +32,32 @@ interface OrganizationManagerProps {
 }
 
 const OrganizationManager = ({ type, parent }: OrganizationManagerProps) => {
+    const { hasPermission, getScopesByUnit } = useAuth();
+    const confirm = useConfirmDialog();
+
+    const permissionKey = ORG_PERMISSION_KEY[type];
+    const canCreate = hasPermission([PERMISSIONS.ORGANIAZTION[permissionKey].CREATE]);
+    const canEdit = hasPermission([PERMISSIONS.ORGANIAZTION[permissionKey].UPDATE]);
+    const canDelete = hasPermission([PERMISSIONS.ORGANIAZTION[permissionKey].DELETE]);
+
+    const childType = getChildType(type);
+    const parentType = getParentType(type);
+
+    const childPermKey = childType && ORG_PERMISSION_KEY[childType];
+    const canReadChild = childPermKey && hasPermission([PERMISSIONS.ORGANIAZTION[childPermKey].READ]);
+
+    const [localParent, setLocalParent] = useState<Organization | undefined>(
+        parent ? { ...parent } : undefined
+    );
+    const [parents, setParents] = useState<Organization[] | undefined>(undefined);
+
+    //const hasParent = !!localParent && !!parentType;
 
     const emptyOrganization: Organization = {
         name: "",
         type,
-        parent: parent
+        parent: localParent
     };
-
-    const childType = getChildType(type);
-    const parentType = getParentType(type);
-    const hasParent = !!parent;
 
     const {
         items: organizations,
@@ -56,33 +70,63 @@ const OrganizationManager = ({ type, parent }: OrganizationManagerProps) => {
         setError
     } = useCrudList<Organization>();
 
-    const { hasPermission } = useAuth();
-    const confirm = useConfirmDialog();
+    useEffect(() => {
+        setLocalParent(parent ? { ...parent } : undefined);
+        setParents(undefined);
+        setAll([]);
+        setSelectedItem({
+            name: "",
+            type,
+            parent: parent ? { ...parent } : undefined
+        });
+    }, [type]);
 
-    const permissionKey = ORG_PERMISSION_KEY[type];
-    const canCreate = hasPermission([PERMISSIONS.ORGANIAZTION[permissionKey].CREATE]);
-    const canEdit = hasPermission([PERMISSIONS.ORGANIAZTION[permissionKey].UPDATE]);
-    const canDelete = hasPermission([PERMISSIONS.ORGANIAZTION[permissionKey].DELETE]);
+
+    /** FETCH Parents*/
+    useEffect(() => {
+        if (!parentType) {
+            return;
+        }
+        const fetchParents = async () => {
+            try {
+                setLoading(true);
+                let parents = getScopesByUnit(parentType);
+                if (parents === "*") {
+                    parents = await OrganizationApi.getOrganizations({ type: parentType });
+                }
+                setParents(parents);
+            } catch (err: any) {
+                setError("Failed to load parents: " + err?.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchParents();
+    }, [parentType, getScopesByUnit]);
+
+
+    /** FETCH oranganizations*/
+    useEffect(() => {
+        const fetchOranizations = async () => {
+            try {
+                setLoading(true);
+                if (parentType && !localParent) {
+                    setAll([]);
+                    return;
+                }
+                const data = await OrganizationApi.getOrganizations({ type, parent: localParent });
+                setAll(data);
+            } catch (err: any) {
+                setError("Failed to load parents: " + err?.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchOranizations();
+    }, [type, localParent, parentType]);
 
     const [selectedItem, setSelectedItem] = useState<Organization>(emptyOrganization);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-
-    /** Fetch organizations */
-    const fetchOrganizations = useCallback(async () => {
-        try {
-            setLoading(true);
-            const data = await OrganizationApi.getOrganizations({ parent: parent, type })
-            setAll(data);
-        } catch (err: any) {
-            setError("Failed to load organizations. " + (err?.message || ""));
-        } finally {
-            setLoading(false);
-        }
-    }, [parent, type]);
-
-    useEffect(() => {
-        fetchOrganizations();
-    }, [fetchOrganizations]);
 
     /** Save callback */
     const onSaveComplete = (saved: Organization) => {
@@ -104,13 +148,9 @@ const OrganizationManager = ({ type, parent }: OrganizationManagerProps) => {
 
     /** Column definitions */
     const columns = [
-        ...((!hasParent && parentType) ? [
-            { header: parentType, field: "parent.name", sortable: true }
-        ] : []),
-
         { header: "Name", field: "name", sortable: true },
 
-        ...(type === OrgnUnit.Program //|| type === OrgnUnit.Specialization
+        ...(type === OrgnUnit.Program
             ? [{
                 header: "Ac. Level",
                 field: "academicLevel",
@@ -153,10 +193,34 @@ const OrganizationManager = ({ type, parent }: OrganizationManagerProps) => {
         ),
     ];
 
+    const topTemplate = () => {
+        if (!parentType) {
+            return undefined;
+        }
+        return (
+            <div className="card p-fluid">
+                <div className="formgrid grid">
+                    <div className="field col-12 md:col-6 lg:col-4">
+                        <label htmlFor="parent">{parentType}</label>
+                        <Dropdown
+                            id="parents"
+                            value={localParent}
+                            options={parents}
+                            onChange={(e) => setLocalParent(e.value)}
+                            optionLabel="name"
+                            placeholder={`Select ${parentType}`}
+                        />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <>
             <CrudManager
-                headerTitle={`Manage ${parent?.name ?? ""} ${type}s`}
+                //headerTitle={`Manage ${localParent?.name ?? ""} ${type}s`}
+                headerTitle={`Manage ${type}s`}
                 itemName={type}
                 items={organizations}
                 dataKey="_id"
@@ -167,7 +231,9 @@ const OrganizationManager = ({ type, parent }: OrganizationManagerProps) => {
                 canCreate={canCreate}
                 canEdit={canEdit}
                 canDelete={canDelete}
-
+                
+                topTemplate={topTemplate()}
+                
                 onCreate={() => {
                     setSelectedItem({ ...emptyOrganization });
                     setShowSaveDialog(true);
@@ -184,39 +250,11 @@ const OrganizationManager = ({ type, parent }: OrganizationManagerProps) => {
                         onConfirmAsync: () => deleteOrganization(row)
                     })
                 }
-                rowExpansionTemplate={(!childType && type !== OrgnUnit.External) ? undefined : (row) => {
-                    if (type === OrgnUnit.Department) {
-                        return (
-                            <>
-                                <TabView>
-                                    <TabPanel header="Programs">
-                                        <OrganizationManager
-                                            type={childType!}
-                                            parent={row}
-                                        />
-                                    </TabPanel>
-                                    <TabPanel header="Staff">
-                                        <ApplicantManager workspace={row} />
-                                    </TabPanel>
-                                </TabView>
-                            </>);
-                    }
-                    else if (type === OrgnUnit.External) {
-                        return (<ApplicantManager workspace={row} />);
-                    }
-                    return (
-                        <OrganizationManager
-                            type={childType!}
-                            parent={row}
-                        />
-                    );
-                }}
             />
-
             <SaveDialog
                 visible={showSaveDialog}
                 organization={selectedItem}
-                hasParent={hasParent}
+                parents={parents}
                 parentType={parentType}
                 onComplete={onSaveComplete}
                 onHide={hideDialogs}
