@@ -7,12 +7,12 @@ import { DeleteDto } from "../../util/delete.dto";
 import { ProjectStatus } from "./project.status";
 
 export class ProjectController {
+  
   private service: ProjectService;
 
   constructor(service?: ProjectService) {
     this.service = service || new ProjectService();
   }
-
   // -----------------------
   // Create
   // -----------------------

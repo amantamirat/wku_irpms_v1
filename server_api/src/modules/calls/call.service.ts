@@ -50,8 +50,8 @@ export class CallService {
                 throw new Error("Thematics Not Found!");
             }
         }
-        const createdCall = await this.repository.create(dto);
-        return createdCall;
+        const created = await this.repository.create(dto);
+        return created;
     }
 
     async getCalls(options: GetCallsOptions) {

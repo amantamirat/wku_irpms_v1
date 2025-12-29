@@ -1,48 +1,68 @@
-import { Request, Response } from 'express';
-
-import { errorResponse, successResponse } from '../../../common/helpers/response';
-import { CreateProjectThemeDto, GetProjectThemeOptions, ProjectThemeService } from './project.theme.service';
-import mongoose from 'mongoose';
+import { Request, Response } from "express";
+import { errorResponse, successResponse } from "../../../common/helpers/response";
+import { AuthenticatedRequest } from "../../users/user.middleware";
+import { CreateProjectThemeDTO, GetProjectThemeOptions } from "./project.theme.dto";
+import { ProjectThemeService } from "./project.theme.service";
 
 export class ProjectThemeController {
+    
+    private service: ProjectThemeService;
 
-    static async createProjectTheme(req: Request, res: Response) {
+    constructor(service?: ProjectThemeService) {
+        this.service = service || new ProjectThemeService();
+    }
+    // -----------------------
+    // Create
+    // -----------------------
+    create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const data: CreateProjectThemeDto = {
-                theme: req.body.theme,
-                project: req.body.project
+            if (!req.user) throw new Error("User not found!");
+
+            const { theme, project } = req.body;
+
+            const dto: CreateProjectThemeDTO = {
+                theme,
+                project,
             };
-            const theme = await ProjectThemeService.createProjectTheme(data);
-            successResponse(res, 201, "Project Theme created successfully", theme);
+
+            const created = await this.service.create(dto);
+            successResponse(res, 201, "Project Theme created successfully", created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
+    };
 
-    static async getProjectThemes(req: Request, res: Response) {
+    // -----------------------
+    // Fetch / Query
+    // -----------------------
+    get = async (req: Request, res: Response) => {
         try {
             const { project } = req.query;
-            const filter = {
-                project: project ? new mongoose.Types.ObjectId(project as string) : undefined
-            } as GetProjectThemeOptions;
-            const proThemes = await ProjectThemeService.getProjectThemes(filter);
-            successResponse(res, 200, 'ProjectThemes fetched successfully', proThemes);
+
+            const filter: GetProjectThemeOptions = {
+                project: project as string,
+            };
+
+            const themes = await this.service.get(filter);
+            successResponse(res, 200, "Project Themes fetched successfully", themes);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
+    };
 
-
-    static async deleteProjectTheme(req: Request, res: Response) {
+    // -----------------------
+    // Delete
+    // -----------------------
+    delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
+            if (!req.user) throw new Error("User not found!");
+
             const { id } = req.params;
-            const deleted = await ProjectThemeService.deleteProjectTheme(id);
-            successResponse(res, 201, "ProjectTheme deleted successfully", deleted);
+            const deleted = await this.service.delete(id);
+
+            successResponse(res, 200, "Project Theme deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
-
+    };
 }
-
-

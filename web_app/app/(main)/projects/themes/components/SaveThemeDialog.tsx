@@ -1,121 +1,156 @@
+'use client';
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { TreeSelect } from "primereact/treeselect";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
+
 import { ProjectTheme, validateProjectTheme } from "../models/project.theme.model";
+import { ProjectThemeApi } from "../api/project.theme.api";
 import { Project } from "../../models/project.model";
 import { Theme } from "@/app/(main)/thematics/themes/models/theme.model";
-import { Call } from "@/app/(main)/calls/models/call.model";
 import { ThemeApi } from "@/app/(main)/thematics/themes/api/theme.api";
-
+import { Thematic } from "@/app/(main)/thematics/models/thematic.model";
 
 type Node = {
     key?: string;
     label: string;
     value?: any;
-    icon?: string;
     children?: Node[];
+    selectable?: boolean;
 };
 
-
-function buildTree(themes: Theme[], parentId?: string): Node[] {
+// -------------------------------
+// Build Theme Tree
+// -------------------------------
+const buildTree = (themes: Theme[], parentId?: string): Node[] => {
     return themes
         .filter(t => {
-            if (parentId) {
-                return (t.parent ?? null) === parentId;
+            if (!parentId) {
+                // root nodes (level 0 OR no parent)
+                return !t.parent;
             }
-            return t.parent === undefined;
+            // child nodes
+            return typeof t.parent === "object"
+                ? t.parent._id === parentId
+                : t.parent === parentId;
         })
+        .sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0))
         .map(t => {
-            const children = buildTree(themes, t._id!);
+            const children = buildTree(themes, t._id);
             return {
                 key: t._id,
                 label: t.title,
-                value: t,
-                ...(children.length > 0
-                    ? { children, selectable: false }
-                    : { selectable: true })
+                value: t._id,
+                selectable: children.length === 0,
+                ...(children.length > 0 ? { children } : {})
             };
         });
-}
+};
+
 
 interface SaveThemeDialogProps {
-    project: Project;
+    project?: Project;
     projectTheme: ProjectTheme;
-    setProjectTheme: (theme: ProjectTheme) => void;
     visible: boolean;
-    onSave?: () => Promise<void>;
-    onAdd?: () => void;
+    thematic?: Thematic | string;
+    onSave?: (saved: ProjectTheme) => void;
+    onComplete?: (saved: ProjectTheme) => void;
     onHide: () => void;
 }
 
-
-export default function SaveThemeDialog({ project, projectTheme, setProjectTheme, visible, onSave, onAdd, onHide }: SaveThemeDialogProps) {
+const SaveThemeDialog = ({
+    //project,
+    projectTheme,
+    visible,
+    thematic,
+    onSave,
+    onComplete,
+    onHide
+}: SaveThemeDialogProps) => {
 
     const toast = useRef<Toast>(null);
-    const [errorMessage, setErrorMessage] = useState<string | undefined>();
-    const [nodes, setNodes] = useState([]);
+
+    const [localProjectTheme, setLocalProjectTheme] = useState<ProjectTheme>({ ...projectTheme });
     const [themes, setThemes] = useState<Theme[]>([]);
+    const [nodes, setNodes] = useState<Node[]>([]);
 
-
+    // -------------------------------
+    // Fetch themes
+    // -------------------------------
     useEffect(() => {
         const fetchThemes = async () => {
-            const theme = (project.call as Call).thematic;
-            const catalogId =
-                typeof theme === "object" && theme !== null
-                    ? (theme as any)._id
-                    : theme;
             const data = await ThemeApi.getThemes({
-               
+                thematicArea: thematic
             });
             setThemes(data);
-            const node = buildTree(data);
-            setNodes(node as any);
+            setNodes(buildTree(data));
         };
-        fetchThemes();
-    }, [project?.call]);
 
-    const addProjectTheme = async () => {
+        fetchThemes();
+    }, [thematic]);
+
+    // -------------------------------
+    // Reset on open
+    // -------------------------------
+    useEffect(() => {
+        if (visible) {
+            setLocalProjectTheme({ ...projectTheme });
+        }
+    }, [visible, projectTheme]);
+
+    // -------------------------------
+    // Save Theme
+    // -------------------------------
+    const saveTheme = async () => {
         try {
-            const result = validateProjectTheme(projectTheme);
-            if (!result.valid) {
-                setErrorMessage(result.message);
-                return;
+            const validation = validateProjectTheme(localProjectTheme);
+            if (!validation.valid) {
+                throw new Error(validation.message);
             }
-            setErrorMessage(undefined);
-            const theme = themes.find((thm) => thm._id === (projectTheme.theme as string));
-            if (!theme) {
-                throw new Error("Theme not found!");
-            }
-            projectTheme.theme = theme;
+
+            let saved: ProjectTheme;
+
             if (onSave) {
-                await onSave();
+                saved = { ...localProjectTheme, theme: themes.find(t => t._id === localProjectTheme.theme)! };
+                //console.log("calling onsave");
+                onSave(saved);
+            } else {
+                if (localProjectTheme._id) {
+                    //saved = await ProjectThemeApi.updateProjectTheme(localProjectTheme);
+                    return;
+                } else {
+                    saved = await ProjectThemeApi.create(localProjectTheme);
+                }
+                saved = {
+                    ...saved,
+                    //project: project,
+                    theme: themes.find(t => t._id === saved.theme) ?? saved.theme
+                };
             }
-            if (onAdd) {
-                onAdd();
-            }
+            //console.log("from dialog", saved);
             toast.current?.show({
-                severity: 'success',
-                summary: 'Successful',
-                detail: "[Project Theme Saved]",
+                severity: "success",
+                summary: "Successful",
+                detail: "Project theme saved successfully",
                 life: 2000
             });
+
+            if (onComplete) onComplete(saved);
         } catch (err) {
             toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to save project theme',
-                detail: '' + err,
-                life: 3000
+                severity: "error",
+                summary: "Failed to save project theme",
+                detail: String(err),
+                life: 2500
             });
         }
-    }
-
+    };
 
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
-            <Button label="Add" icon="pi pi-check" text onClick={addProjectTheme} />
+            <Button label="Save" icon="pi pi-check" text onClick={saveTheme} />
         </>
     );
 
@@ -124,7 +159,7 @@ export default function SaveThemeDialog({ project, projectTheme, setProjectTheme
             <Toast ref={toast} />
             <Dialog
                 visible={visible}
-                style={{ width: "90%", maxWidth: "400px" }}
+                style={{ width: "600px" }}
                 header="Project Theme"
                 modal
                 className="p-fluid"
@@ -132,21 +167,26 @@ export default function SaveThemeDialog({ project, projectTheme, setProjectTheme
                 onHide={onHide}
             >
                 <div className="field">
+                    <label htmlFor="theme">Theme</label>
                     <TreeSelect
                         id="theme"
-                        value={projectTheme.theme as string}
+                        value={localProjectTheme.theme as string}
                         options={nodes}
-                        onChange={(e) => setProjectTheme({ ...projectTheme, theme: e.value as string })}
+                        onChange={(e) =>
+                            setLocalProjectTheme({
+                                ...localProjectTheme,
+                                theme: e.value ? String(e.value) : ""
+                            })
+                        }
                         placeholder="Select a Theme"
                         scrollHeight="400px"
                         className="w-full"
                         display="chip"
                     />
                 </div>
-                {errorMessage && (
-                    <small className="p-error">{errorMessage}</small>
-                )}
             </Dialog>
         </>
     );
-}
+};
+
+export default SaveThemeDialog;

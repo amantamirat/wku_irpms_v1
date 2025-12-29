@@ -100,7 +100,10 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
         const fetchCalls = async () => {
             try {
                 setLoading(true);
-                const data = await CallApi.getCalls({ calendar, directorate });
+                const query = calendar
+                    ? { calendar }
+                    : { directorate };
+                const data = await CallApi.getCalls(query);
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to load calendars. " + (err?.message ?? ""));

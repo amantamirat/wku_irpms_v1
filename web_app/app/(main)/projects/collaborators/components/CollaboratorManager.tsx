@@ -22,7 +22,7 @@ interface CollaboratorProps {
     onRemove?: (collaborator: Collaborator) => void;
 }
 
-const CollaboratorManager = ({ project, applicant, flyMode, onSave, onRemove }: CollaboratorProps) => {
+const CollaboratorManager = ({ project, applicant, flyMode = false, onSave, onRemove }: CollaboratorProps) => {
     const confirm = useConfirmDialog();
     const { getApplicant: getLinkedApplicant, hasPermission } = useAuth();
     const linkedApplicant = getLinkedApplicant();

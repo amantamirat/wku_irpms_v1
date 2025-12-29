@@ -30,8 +30,9 @@ export class CollaboratorService {
         const { applicant, project, applicantId, isLeadPI, status } = dto;
         const projectDoc = await this.projectRepository.findById(project);
         if (!projectDoc) throw new Error("Project not found");
-        if (projectDoc.status !== ProjectStatus.pending) {
-            throw new Error("Can not add collaborators on non pending projects.");
+        if (projectDoc.status !== ProjectStatus.pending &&
+            projectDoc.status !== ProjectStatus.negotiation) {
+            throw new Error("INVALID_PROJECT_STATUS_FOR_COLLABORATOR_CREATE");
         }
         if (String(projectDoc.leadPI) !== applicantId) {
             throw new Error("User not authorized. Lead PI not found.");

@@ -1,10 +1,14 @@
-import { Theme } from "@/app/(main)/thematic_areas/models/theme.model";
+import { Theme } from "@/app/(main)/thematics/themes/models/theme.model";
 import { Project } from "../../models/project.model";
 
 export type ProjectTheme = {
     _id?: string;
     project: string | Project;
     theme: string | Theme;
+}
+
+export interface GetProjectThemeOptions {
+    project?: string|Project;
 }
 
 export const validateProjectTheme = (pt: ProjectTheme): { valid: boolean; message?: string } => {

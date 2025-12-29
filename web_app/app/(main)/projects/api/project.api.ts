@@ -26,19 +26,19 @@ export const ProjectApi = {
         if (!project.file)
             throw new Error("File required.");
         const sanitized = sanitizeProject(project);
-        const url = `${end_point}submit`;
+        const url = `${end_point}/submit`;
         const formData = new FormData();
         formData.append("project", JSON.stringify(sanitized));
         formData.append("document", project.file);
-        const submittedData = await ApiClient.post(url, formData);
-        return submittedData as Project;
+        const submitted = await ApiClient.post(url, formData);
+        return submitted as Project;
     },
 
     async update(project: Partial<Project>): Promise<Project> {
         if (!project._id) throw new Error("_id required.");
         const query = new URLSearchParams();
         query.append("id", project._id);
-        const sanitized = sanitizeProject(project);        
+        const sanitized = sanitizeProject(project);
         const updatedProject = await ApiClient.put(`${end_point}?${query.toString()}`, sanitized);
         return updatedProject as Project;
     },

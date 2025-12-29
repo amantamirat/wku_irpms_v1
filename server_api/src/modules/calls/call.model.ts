@@ -29,6 +29,7 @@ const CallSchema = new Schema<ICall>(
     { timestamps: true }
 );
 
+/*
 CallSchema.virtual('firstStage', {
     ref: COLLECTIONS.STAGE,
     localField: '_id',
@@ -36,5 +37,6 @@ CallSchema.virtual('firstStage', {
     justOne: true,
     match: { order: 1 } // 👈 fetch stage with order 1 for this cycle
 });
+*/
 
 export const Call = model<ICall>(COLLECTIONS.CALL, CallSchema);

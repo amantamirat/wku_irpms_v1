@@ -19,10 +19,12 @@ import { Button } from "primereact/button";
 interface PhaseManagerProps {
     project: Project;
     phaseType: PhaseType;
-    setProject?: (project: Project) => void;
+    flyMode?: boolean;
+    onSave?: (phase: Phase) => void;
+    onRemove?: (pahse: Phase) => void;
 }
 
-export default function PhaseManager({ project, phaseType, setProject }: PhaseManagerProps) {
+export default function PhaseManager({ project, phaseType, flyMode = false, onSave, onRemove }: PhaseManagerProps) {
 
     const confirm = useConfirmDialog();
     const { getApplicant: getLinkedApplicant, hasPermission } = useAuth();
@@ -40,6 +42,7 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
         duration: 0,
         budget: 0,
         description: "",
+        status: PhaseStatus.proposed
     };
 
     // -------------------------------
@@ -79,21 +82,18 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
         const fetchPhases = async () => {
             try {
                 setLoading(true);
-                // If project exists on DB, fetch from API
-                if (project._id) {
-                    const data = await PhaseApi.getPhases({ project });
-                    setAll(data);
-                } else {
-                    // Use local phases
-                    setAll(project.phases ?? []);
-                }
+                const data = await PhaseApi.getPhases({ project });
+                setAll(data);
             } catch (err: any) {
                 setError("Failed to fetch phases. " + (err.message ?? ""));
             } finally {
                 setLoading(false);
             }
         };
-
+        if (flyMode && project) {
+            setAll(project?.phases ?? []);
+            return
+        }
         fetchPhases();
     }, [project]);
 
@@ -105,28 +105,13 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
         hideDialog();
     };
 
-    const addLocalPhase = (saved: Phase) => {
-        const exists = phases.some(p => p.order === saved.order);
-        if (exists) throw new Error("The order is already added!");
-
-        const updated = [...(project.phases ?? []), saved];
-        setProject?.({ ...project, phases: updated });
-
-        hideDialog();
-    };
 
     // -------------------------------
     // Delete
     // -------------------------------
     const deletePhase = async (row: Phase) => {
-        if (project._id) {
-            const deleted = await PhaseApi.delete(row);
-            if (deleted) removeItem(row);
-        } else {
-            const updated = project.phases?.filter(p => p.activity !== row.activity) ?? [];
-            setProject?.({ ...project, phases: updated });
-            removeItem(row);
-        }
+        const deleted = await PhaseApi.delete(row);
+        if (deleted) removeItem(row);
     };
 
     // -------------------------------
@@ -214,10 +199,6 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
         </div>);
     }
 
-
-
-
-
     const columns = [
         { field: "activity", header: "Activity", sortable: true },
         { field: "duration", header: "Duration (Days)", sortable: true },
@@ -248,14 +229,15 @@ export default function PhaseManager({ project, phaseType, setProject }: PhaseMa
                 onDelete={(row) =>
                     confirm.ask({
                         item: row.activity,
-                        onConfirmAsync: () => deletePhase(row),
+                        onConfirm: flyMode && onRemove ? () => onRemove(row) : undefined,
+                        onConfirmAsync: !flyMode ? () => deletePhase(row) : undefined,
                     })
                 }
             />
             <SavePhaseDialog
                 visible={showDialog}
                 phase={phase}
-                onSave={!project._id ? addLocalPhase : undefined}
+                onSave={flyMode && onSave ? onSave : undefined}
                 onComplete={onSaveComplete}
                 onHide={hideDialog}
             />

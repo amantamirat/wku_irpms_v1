@@ -30,13 +30,19 @@ export class CallRepository implements ICallRepository {
             .populate("calendar")
             .populate("directorate")
             .populate("grant")
-            //.populate("thematic")
+            .populate("thematic")
             .lean<ICall[]>()
             .exec();
     }
 
     async create(dto: CreateCallDTO) {
-        return Call.create({ ...dto, directorate: new mongoose.Types.ObjectId(dto.directorate) });
+        return Call.create({
+            ...dto,
+            directorate: new mongoose.Types.ObjectId(dto.directorate),
+            calendar: new mongoose.Types.ObjectId(dto.calendar),
+            grant: new mongoose.Types.ObjectId(dto.grant),
+            thematic: new mongoose.Types.ObjectId(dto.thematic),
+        });
     }
 
     async update(id: string, dtoData: UpdateCallDTO["data"]): Promise<ICall> {

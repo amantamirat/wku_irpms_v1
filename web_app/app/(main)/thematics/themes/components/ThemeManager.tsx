@@ -55,7 +55,7 @@ const ThemeManager = ({ thematicArea, parent, level = 0 }: ThemeManagerProps) =>
     const fetchThemes = async () => {
         try {
             setLoading(true);
-            const data = await ThemeApi.getThemes({ thematicArea, parent, level });
+            const data = await ThemeApi.getThemes({ thematicArea: thematicArea, parent, level });
             setAll(data);
         } catch (err: any) {
             setError("Failed to fetch themes. " + (err?.message ?? ""));

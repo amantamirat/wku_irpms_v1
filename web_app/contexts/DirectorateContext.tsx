@@ -33,7 +33,6 @@ export const DirectorateProvider = ({ children }: { children: React.ReactNode })
     const fetchDirectorates = async () => {
         try {
             let scopes = getScopesByUnit(OrgnUnit.Directorate);
-            console.log('Directorate scopes:', scopes);
 
             let result: Organization[];
 

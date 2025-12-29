@@ -1,170 +1,173 @@
-import ConfirmDialog from "@/components/ConfirmationDialog";
-import { Button } from "primereact/button";
-import { Column } from "primereact/column";
-import { DataTable } from "primereact/datatable";
-import { Toolbar } from "primereact/toolbar";
+'use client';
+
+import { CrudManager } from "@/components/CrudManager";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import { useAuth } from "@/contexts/auth-context";
 import { useEffect, useState } from "react";
+
 import { Project } from "../../models/project.model";
+import { Theme } from "@/app/(main)/thematics/themes/models/theme.model";
+
 import { ProjectThemeApi } from "../api/project.theme.api";
 import { ProjectTheme } from "../models/project.theme.model";
 import SaveThemeDialog from "./SaveThemeDialog";
-import { Theme } from "@/app/(main)/thematics/themes/models/theme.model";
 
-interface ProjectInfoStepProps {
+import { useCrudList } from "@/hooks/useCrudList";
+import { PERMISSIONS } from "@/types/permissions";
+import { Call } from "@/app/(main)/calls/models/call.model";
+
+interface ProjectThemeManagerProps {
     project: Project;
-    setProject?: (project: Project) => void;
+    flyMode?: boolean;
+    onSave?: (pt: ProjectTheme) => void;
+    onRemove?: (pt: ProjectTheme) => void;
 }
 
-export default function ProjectThemeManager({ project, setProject }: ProjectInfoStepProps) {
+export default function ProjectThemeManager({
+    project,
+    flyMode = false,
+    onSave,
+    onRemove
+}: ProjectThemeManagerProps) {
 
+    const confirm = useConfirmDialog();
+    const { hasPermission } = useAuth();
+
+    // -------------------------------
+    // Empty ProjectTheme
+    // -------------------------------
     const emptyProjectTheme: ProjectTheme = {
-        theme: "",
-        project: project
+        project: !flyMode ? project : "-",
+        theme: ""
     };
 
-    const [projectTheme, setProjectTheme] = useState<ProjectTheme>(emptyProjectTheme);
-    const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const [projectThemes, setProjectThemes] = useState<ProjectTheme[]>([]);
+    // -------------------------------
+    // Permissions
+    // -------------------------------
+    const canCreate = true; //hasPermission([PERMISSIONS.PROJECT_THEME?.CREATE]);
+    const canEdit = true; //hasPermission([PERMISSIONS.PROJECT_THEME?.UPDATE]);
+    const canDelete = true; //hasPermission([PERMISSIONS.PROJECT_THEME?.DELETE]);
 
+    // -------------------------------
+    // CRUD Hook
+    // -------------------------------
+    const {
+        items: projectThemes,
+        setAll,
+        updateItem,
+        removeItem,
+        loading,
+        setLoading,
+        error,
+        setError
+    } = useCrudList<ProjectTheme>();
+
+    const [projectTheme, setProjectTheme] = useState<ProjectTheme>(emptyProjectTheme);
+    const [showDialog, setShowDialog] = useState(false);
+
+    // -------------------------------
+    // Fetch project themes
+    // -------------------------------
     useEffect(() => {
         const fetchProjectThemes = async () => {
             try {
-                const data = await ProjectThemeApi.getProjectThemes({ project: project._id });
-                setProjectThemes(data);
-            } catch (err) {
-                console.error("Failed to fetch project themes:", err);
+                setLoading(true);
+                const data = await ProjectThemeApi.getProjectThemes({ project });
+                setAll(data);
+            } catch (err: any) {
+                setError("Failed to fetch project themes. " + (err?.message ?? ""));
+            } finally {
+                setLoading(false);
             }
         };
-        if (project?._id) {
-            fetchProjectThemes();
-        }
-        else {
-            setProjectThemes(project.themes ?? []);
-        }
-    }, [project?._id]);
 
-
-    const saveProjectTheme = async () => {
-        let _projectThemes = [...projectThemes];
-        if (projectTheme._id) {
-            const updated = await ProjectThemeApi.updateProjectTheme(projectTheme);
-            const index = _projectThemes.findIndex((p) => p._id === updated._id);
-            _projectThemes[index] = { ...updated, project: project, theme: projectTheme.theme };
-        } else {
-            const created = await ProjectThemeApi.createProjectTheme(projectTheme);
-            _projectThemes.push({ ...created, project: project, theme: projectTheme.theme });
+        if (flyMode && project) {
+            setAll(project.themes ?? []);
+            return;
         }
-        setProjectThemes(_projectThemes);
-        hideDialogs();
+
+        fetchProjectThemes();
+
+    }, [project]);
+
+    // -------------------------------
+    // Save / Create
+    // -------------------------------
+    const onSaveComplete = (saved: ProjectTheme) => {
+        updateItem(saved);
+        hideDialog();
     };
 
-    const deleteProjectTheme = async () => {
-        const deleted = await ProjectThemeApi.deleteProjectTheme(projectTheme);
-        if (deleted) {
-            setProjectThemes(projectThemes.filter((pt) => pt._id !== projectTheme._id));
-            hideDialogs();
-        }
+    // -------------------------------
+    // Delete
+    // -------------------------------
+    const deleteProjectTheme = async (row: ProjectTheme) => {
+        const deleted = await ProjectThemeApi.delete(row);
+        if (deleted) removeItem(row);
     };
 
-    const addProjectTheme = () => {
-        const exists =
-            project.themes?.some(
-                (c) => (c.theme as Theme)._id === (projectTheme.theme as Theme)._id
-            ) ?? false;
-        if (exists) {
-            throw new Error("The theme is already added!");
-        }
-        const updatedProjectThemes = [...(project.themes || []), projectTheme];
-        if (setProject) {
-            setProject({ ...project, themes: updatedProjectThemes });
-        }
-        setProjectThemes(updatedProjectThemes);
-        hideDialogs();
-    };
-
-    const removeProjectTheme = () => {
-        const updatedCollaborators = project.themes?.filter(
-            (c) => (c.theme as Theme)._id !== (projectTheme.theme as Theme)._id
-        ) || [];
-
-        if (setProject) {
-            setProject({ ...project, themes: updatedCollaborators });
-        }
-        setProjectThemes(updatedCollaborators);
-        hideDialogs();
-    };
-
-    const hideDialogs = () => {
+    // -------------------------------
+    // Helpers
+    // -------------------------------
+    const hideDialog = () => {
         setProjectTheme(emptyProjectTheme);
-        setShowSaveDialog(false);
-        setShowDeleteDialog(false);
-    }
+        setShowDialog(false);
+    };
 
-    const actionBodyTemplate = (rowData: ProjectTheme) => (
-        <>
-            <Button icon="pi pi-times" rounded severity="warning" className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }} onClick={() => {
-                    setProjectTheme(rowData);
-                    setShowDeleteDialog(true);
-                }} />
-        </>
-    );
+    const handleCreate = () => {
+        setProjectTheme(emptyProjectTheme);
+        setShowDialog(true);
+    };
 
-    const startToolbarTemplate = () => (
-        <div className="my-2">
-            <Button icon="pi pi-plus" severity="success" className="mr-2" tooltip={"Add Theme"}
-                onClick={() => {
-                    setProjectTheme(emptyProjectTheme);
-                    setShowSaveDialog(true);
-                }}
-            />
-        </div>
-    );
+    const handleEdit = (row: ProjectTheme) => {
+        setProjectTheme(row);
+        setShowDialog(true);
+    };
+
+    // -------------------------------
+    // Table Columns
+    // -------------------------------
+    const columns = [
+        {
+            field: "theme.title",
+            header: "Theme",
+            sortable: true
+        }
+    ];
 
     return (
-        <div className="card">
-            <Toolbar className="mb-4" start={startToolbarTemplate} />
-            <DataTable
-                value={projectThemes}
-                selection={projectTheme}
-                onSelectionChange={(e) => setProjectTheme(e.value as ProjectTheme)}
-                dataKey="theme._id"
-                paginator
-                rows={10}
-                rowsPerPageOptions={[5, 10, 25]}
-                className="datatable-responsive"
-                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                emptyMessage={'No theme found.'}
-                scrollable
-                tableStyle={{ minWidth: '50rem' }}
-            >
-                <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
-                <Column header="#" body={(rowData, options) => options.rowIndex + 1} style={{ width: '50px' }} />
-                <Column field="theme.title" header="Theme" sortable headerStyle={{ minWidth: '15rem' }} />
-                <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }} />
-            </DataTable>
+        <>
+            <CrudManager
+                headerTitle="Project Themes"
+                items={projectThemes}
+                dataKey={flyMode ? "theme._id" : "_id"}
+                //dataKey={projectThemes.some(pt => pt._id) ? "_id" : "theme._id"}
+                columns={columns}
+                loading={loading}
+                error={error}
+                canCreate={canCreate}
+                //canEdit={canEdit}
+                canDelete={canDelete}
+                onCreate={handleCreate}
+                //onEdit={handleEdit}
+                onDelete={(row) =>
+                    confirm.ask({
+                        item: String((row.theme as Theme)?.title ?? "Theme"),
+                        onConfirm: flyMode && onRemove ? () => onRemove(row) : undefined,
+                        onConfirmAsync: !flyMode ? () => deleteProjectTheme(row) : undefined
+                    })
+                }
+            />
 
-
-            {projectTheme && (
-                <SaveThemeDialog
-                    project={project}
-                    projectTheme={projectTheme}
-                    setProjectTheme={setProjectTheme}
-                    visible={showSaveDialog}
-                    onSave={project._id ? saveProjectTheme : undefined}
-                    onAdd={!project._id ? addProjectTheme : undefined}
-                    onHide={hideDialogs} />
-            )}
-            {projectTheme && (
-                <ConfirmDialog
-                    showDialog={showDeleteDialog}
-                    item={String((projectTheme.theme as any).title)}
-                    onConfirmAsync={project._id ? deleteProjectTheme : undefined}
-                    onConfirm={!project._id ? removeProjectTheme : undefined}
-                    onHide={hideDialogs}
-                />
-            )}
-        </div>
-    )
+            <SaveThemeDialog
+                //project={project}
+                projectTheme={projectTheme}
+                visible={showDialog}
+                onSave={flyMode && onSave ? onSave : undefined}
+                thematic={(project.call as Call).thematic}
+                onComplete={onSaveComplete}
+                onHide={hideDialog}
+            />
+        </>
+    );
 }

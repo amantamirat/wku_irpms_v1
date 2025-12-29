@@ -1,22 +1,24 @@
+import { useAuth } from "@/contexts/auth-context";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Steps } from "primereact/steps";
-import { useEffect, useRef, useState } from "react";
-import { Grant } from "../../grants/models/grant.model";
-import CollaboratorManager from "../../projects/collaborators/components/CollaboratorManager";
-import ProjectForm from "./ProjectForm";
-import { Project, validateApplyProject } from "../../projects/models/project.model";
-import ProjectThemeManager from "../../projects/themes/components/ThemeManager";
-import { PhaseType } from "../../projects/phases/models/phase.model";
-import PhaseManager from "../../projects/phases/components/PhaseManager";
-import UploadForm from "../../projects/components/UploadForm";
-import Confirmation from "./Confirmation";
-import { ProjectApi } from "../../projects/api/project.api";
 import { Toast } from "primereact/toast";
-import { useAuth } from "@/contexts/auth-context";
-import { Collaborator, CollaboratorStatus } from "../../projects/collaborators/models/collaborator.model";
+import { useEffect, useRef, useState } from "react";
 import { Applicant } from "../../applicants/models/applicant.model";
 import { Call } from "../../calls/models/call.model";
+import { Grant } from "../../grants/models/grant.model";
+import { ProjectApi } from "../../projects/api/project.api";
+import CollaboratorManager from "../../projects/collaborators/components/CollaboratorManager";
+import { Collaborator } from "../../projects/collaborators/models/collaborator.model";
+import UploadForm from "../../projects/components/UploadForm";
+import { Project, ProjectStatus, validateApplyProject } from "../../projects/models/project.model";
+import PhaseManager from "../../projects/phases/components/PhaseManager";
+import { Phase, PhaseType } from "../../projects/phases/models/phase.model";
+import ProjectThemeManager from "../../projects/themes/components/ThemeManager";
+import { ProjectTheme } from "../../projects/themes/models/project.theme.model";
+import { Theme } from "../../thematics/themes/models/theme.model";
+import Confirmation from "./Confirmation";
+import ProjectForm from "./ProjectForm";
 
 
 interface ApplyWizardProps {
@@ -26,13 +28,14 @@ interface ApplyWizardProps {
 }
 
 const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
-    //const { user } = useAuth();
+
     const { getApplicant: getLinkedApplicant } = useAuth();
     const linkedApplicant = getLinkedApplicant();
     const initializeProject = (): Project => ({
         title: "",
         call: call,
-        leadPI:linkedApplicant
+        leadPI: linkedApplicant,
+        status: ProjectStatus.pending
     });
     const toast = useRef<Toast>(null);
     const [loading, setLoading] = useState(false);
@@ -48,8 +51,8 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
         setProject({ ...project, ["file"]: file });
     }
 
-    const addCollaborator = (savedCollaborator: Collaborator) => {
-        const applicant = savedCollaborator.applicant as Applicant;
+    const addCollaborator = (collaborator: Collaborator) => {
+        const applicant = collaborator.applicant as Applicant;
         if (!applicant || !applicant._id) {
             throw new Error("Please select a valid collaborator.");
         }
@@ -61,15 +64,55 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
         if (exists) {
             throw new Error("This collaborator is already added!");
         }
-        const updatedCollaborators = [...(project.collaborators || []), savedCollaborator];
+        const updatedCollaborators = [...(project.collaborators || []), collaborator];
         setProject({ ...project, collaborators: updatedCollaborators });
     };
 
-    const removeCollaborator = (collaborator:Collaborator) => {
+    const removeCollaborator = (collaborator: Collaborator) => {
         const updatedCollaborators = project.collaborators?.filter(
             (c) => (c.applicant as Applicant)._id !== (collaborator.applicant as Applicant)._id
         ) || [];
-        setProject({ ...project, collaborators: updatedCollaborators });        
+        setProject({ ...project, collaborators: updatedCollaborators });
+    };
+
+    const addPhase = (phase: Phase) => {
+        const exists =
+            project.phases?.some(
+                (p) => p.order === phase.order
+            ) ?? false;
+
+        if (exists) {
+            throw new Error("The order is already added!");
+        }
+        const updatedPhases = [...(project.phases || []), phase];
+        setProject({ ...project, phases: updatedPhases });
+    };
+
+    const removePhase = (phase: Phase) => {
+        const updatedPhases = project.phases?.filter(
+            (p) => p.order !== phase.order
+        ) || [];
+        setProject({ ...project, phases: updatedPhases });
+    };
+
+    const addProjectTheme = (thm: ProjectTheme) => {
+        const exists =
+            project.themes?.some(
+                (t) => (t.theme as Theme)._id === (thm.theme as Theme)._id
+            ) ?? false;
+
+        if (exists) {
+            throw new Error("The theme is already added!");
+        }
+        const updated = [...(project.themes || []), thm];
+        setProject({ ...project, themes: updated });
+    };
+
+    const removeProjectTheme = (thm: ProjectTheme) => {
+        const updated = project.themes?.filter(
+            (t) => (t.theme as Theme)._id !== (thm.theme as Theme)._id
+        ) || [];
+        setProject({ ...project, themes: updated });
     };
 
     const submit = async () => {
@@ -86,7 +129,7 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
                 detail: 'Your Application Submitted Successfully',
                 life: 2500
             });
-            setTimeout(() => onHide(), 2500);
+            setTimeout(() => onHide(), 1000);
         } catch (err) {
             toast.current?.show({
                 severity: 'error',
@@ -139,16 +182,13 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
     );
 
 
-
-
-
     return (
         <>
             <Toast ref={toast} />
             <Dialog
                 header="Apply for Call"
                 visible={visible}
-                style={{ width: '700px'}}
+                style={{ width: '700px' }}
                 footer={footer}
                 onHide={onHide}
                 maximized
@@ -157,9 +197,9 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
                 <Steps model={items} activeIndex={activeStep} readOnly className="mb-4" />
                 {activeStep === 0 && <UploadForm file={project.file} onUpload={updateFile} />}
                 {activeStep === 1 && <ProjectForm project={project} setProject={setProject} />}
-                {activeStep === 2 && <CollaboratorManager project={project} onSave={addCollaborator} onRemove={removeCollaborator} flyMode />}
-                {activeStep === 3 && <ProjectThemeManager project={project} setProject={setProject} />}
-                {activeStep === 4 && <PhaseManager project={project} setProject={setProject} phaseType={PhaseType.phase} />}
+                {activeStep === 2 && <CollaboratorManager project={project} onSave={addCollaborator} onRemove={removeCollaborator} flyMode={true} />}
+                {activeStep === 3 && <ProjectThemeManager project={project} onSave={addProjectTheme} onRemove={removeProjectTheme} flyMode />}
+                {activeStep === 4 && <PhaseManager project={project} phaseType={PhaseType.phase} flyMode={true} onSave={addPhase} onRemove={removePhase} />}
                 {activeStep === items.length - 1 && <Confirmation project={project} call={project.call as Call} />}
             </Dialog>
         </>
