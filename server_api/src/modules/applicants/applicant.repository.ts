@@ -70,6 +70,8 @@ export class ApplicantRepository implements IApplicantRepository {
             email: dto.email,
             fin: dto.fin,
             orcid: dto.orcid,
+            roles: dto.roles?.map(role => new mongoose.Types.ObjectId(role)),
+            specializations: dto.specializations?.map(spec => new mongoose.Types.ObjectId(spec)),
             accessibility: dto.accessibility ?? []
         };
 

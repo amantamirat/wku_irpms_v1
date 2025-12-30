@@ -99,7 +99,7 @@ export class ProjectController {
       const submitted = await this.service.submit(dto);
       successResponse(res, 201, "Project submitted successfully", submitted);
     } catch (err: any) {      
-      safeDeleteFile(uploadedFilePath);
+      //safeDeleteFile(uploadedFilePath);
       errorResponse(res, 400, err.message, err);
     }
   };

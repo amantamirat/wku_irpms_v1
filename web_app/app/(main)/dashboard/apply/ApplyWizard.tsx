@@ -19,6 +19,7 @@ import { ProjectTheme } from "../../projects/themes/models/project.theme.model";
 import { Theme } from "../../thematics/themes/models/theme.model";
 import Confirmation from "./Confirmation";
 import ProjectForm from "./ProjectForm";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 
 
 interface ApplyWizardProps {
@@ -29,6 +30,7 @@ interface ApplyWizardProps {
 
 const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
 
+    const confirm = useConfirmDialog();
     const { getApplicant: getLinkedApplicant } = useAuth();
     const linkedApplicant = getLinkedApplicant();
     const initializeProject = (): Project => ({
@@ -176,7 +178,11 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
             {activeStep < items.length - 1 && (<Button label="Next" icon="pi pi-angle-right" onClick={nextStep} iconPos="right" outlined />
             )}
             {activeStep === items.length - 1 && (
-                <Button label="Submit" icon="pi pi-check" loading={loading} outlined onClick={submit} />
+                <Button label="Submit" icon="pi pi-check" loading={loading}
+                    outlined onClick={() => confirm.ask({
+                        operation: "submit",
+                        onConfirmAsync: () => submit()
+                    })} />
             )}
         </div>
     );

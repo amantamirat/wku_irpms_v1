@@ -12,6 +12,7 @@ export interface ICollaboratorRepository {
     findById(id: string): Promise<ICollaborator | null>;
     find(filters: GetCollaboratorsOptions): Promise<ICollaborator[]>;
     create(dto: CreateCollaboratorDto): Promise<ICollaborator>;
+    createMany(dtos: CreateCollaboratorDto[]): Promise<ICollaborator[]>;
     update(id: string, data: UpdateCollaboratorDto["data"]): Promise<ICollaborator>;
     delete(id: string): Promise<ICollaborator | null>;
     //checkProjectAndApplicantExist(projectId: string, applicantId: string): Promise<{ projectExists: boolean; applicantExists: boolean }>;
@@ -63,6 +64,15 @@ export class CollaboratorRepository implements ICollaboratorRepository {
         return Collaborator.create(data);
     }
 
+    // ✅ NEW: bulk insert
+    async createMany(dtos: CreateCollaboratorDto[]) {
+        const data: Partial<ICollaborator>[] = dtos.map(dto => ({
+            project: new mongoose.Types.ObjectId(dto.project),
+            applicant: new mongoose.Types.ObjectId(dto.applicant),
+        }));
+        return Collaborator.insertMany(data, { ordered: true });
+    }
+
     async update(id: string, dtoData: UpdateCollaboratorDto["data"]): Promise<ICollaborator> {
         const updateData: Partial<ICollaborator> = {};
 
@@ -87,11 +97,11 @@ export class CollaboratorRepository implements ICollaboratorRepository {
 
     async delete(id: string) {
         return await Collaborator.findByIdAndDelete(new mongoose.Types.ObjectId(id))
-             /*    
-            .populate([
-                    { path: 'applicant', populate: { path: 'organization' } },
-                    { path: 'project' }
-                ])*/
+            /*    
+           .populate([
+                   { path: 'applicant', populate: { path: 'organization' } },
+                   { path: 'project' }
+               ])*/
             .exec();
     }
 

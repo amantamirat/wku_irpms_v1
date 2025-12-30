@@ -12,6 +12,7 @@ export interface IPhaseRepository {
     findById(id: string): Promise<IPhase | null>;
     find(filters: GetPhasesOptions): Promise<IPhase[]>;
     create(dto: CreatePhaseDto): Promise<IPhase>;
+    createMany(dtos: CreatePhaseDto[]): Promise<IPhase[]>;
     update(id: string, data: UpdatePhaseDto["data"]): Promise<IPhase>;
     delete(id: string): Promise<IPhase | null>;
 }
@@ -49,6 +50,20 @@ export class PhaseRepository implements IPhaseRepository {
             description: dto.description
         };
         return Phase.create(data);
+    }
+
+    // ✅ NEW: bulk insert
+    async createMany(dtos: CreatePhaseDto[]) {
+        const data: Partial<IPhase>[] = dtos.map(dto => ({
+            project: new mongoose.Types.ObjectId(dto.project),
+            activity: dto.activity,
+            duration: dto.duration,
+            budget: dto.budget,
+            description: dto.description,
+            type: dto.type
+        }));
+
+        return Phase.insertMany(data, { ordered: true });
     }
 
     async update(id: string, dtoData: UpdatePhaseDto["data"]): Promise<IPhase> {

@@ -11,6 +11,7 @@ export interface IProjectThemeRepository {
     find(filters: GetProjectThemeOptions): Promise<IProjectTheme[]>;
     create(dto: CreateProjectThemeDTO): Promise<IProjectTheme>;
     //update(id: string, data: UpdateProjectThemeDto["data"]): Promise<IProjectTheme>;
+    createMany(dtos: CreateProjectThemeDTO[]): Promise<IProjectTheme[]>;
     delete(id: string): Promise<IProjectTheme | null>;
 }
 
@@ -45,6 +46,16 @@ export class ProjectThemeRepository implements IProjectThemeRepository {
             theme: new mongoose.Types.ObjectId(dto.theme),
         };
         return ProjectTheme.create(data);
+    }
+
+    // ✅ NEW: bulk insert
+    async createMany(dtos: CreateProjectThemeDTO[]) {
+        const data: Partial<IProjectTheme>[] = dtos.map(dto => ({
+            project: new mongoose.Types.ObjectId(dto.project),
+            theme: new mongoose.Types.ObjectId(dto.theme),
+        }));
+
+        return ProjectTheme.insertMany(data, { ordered: true });
     }
 
 

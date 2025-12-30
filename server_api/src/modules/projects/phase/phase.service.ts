@@ -37,7 +37,7 @@ export class PhaseService {
     async create(dto: CreatePhaseDto) {
         if (dto.type !== PhaseType.phase)
             throw new Error("Operation not supported.");
-
+        if (!dto.applicantId) { throw new Error("Lead PI not found"); }
         await this.validate(dto.project, dto.applicantId);
 
         return await this.repository.create(dto);

@@ -31,7 +31,8 @@ export class ApplicantController {
                 fin,
                 orcid,
                 email,
-                accessibility
+                accessibility, 
+                specializations
             } = req.body;
 
             const dto: CreateApplicantDTO = {
@@ -42,7 +43,8 @@ export class ApplicantController {
                 fin,
                 orcid,
                 email,
-                accessibility: accessibility || []
+                accessibility: accessibility || [],
+                specializations
             };
 
             const created = await this.service.create(dto);

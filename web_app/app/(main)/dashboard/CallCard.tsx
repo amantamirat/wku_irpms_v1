@@ -38,7 +38,7 @@ const CallCard = ({ call }: CallCardProps) => {
         <div className="relative overflow-hidden border-round-top-lg">
             <img
                 alt="Call Poster"
-                src={"/images/callcard.png"}
+                src={"/images/call-card-1.png"}
                 className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
             />
         </div>

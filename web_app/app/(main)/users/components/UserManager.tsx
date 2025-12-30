@@ -203,7 +203,7 @@ const UserManager = () => {
 
         },
         {
-            // header: "Organizations", body: (u: User) => u.organizations?.length ?? 0 
+            header: "Last Seen", field:"lastLogin"
         },
         {
             header: "Status",

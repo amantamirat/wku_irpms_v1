@@ -10,6 +10,8 @@ export interface CreateApplicantDTO {
     fin?: string;
     orcid?: string;
     accessibility?: Accessibility[];
+    roles?: string[];
+    specializations?: string[];
     userId?: string;
 }
 

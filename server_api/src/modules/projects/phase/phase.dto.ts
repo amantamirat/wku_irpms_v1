@@ -12,7 +12,7 @@ export interface PhaseDto {
 export interface CreatePhaseDto extends PhaseDto {
     type: PhaseType.phase;
     project: string;
-    applicantId: string; // actor performing the operation
+    applicantId?: string; // actor performing the operation
 }
 
 // ---------- UPDATE DTO ----------

@@ -5,6 +5,7 @@ import { CreateRoleDto, UpdateRoleDto } from "./role.dto";
 export interface IRoleRepository {
     findById(id: string): Promise<IRole | null>;
     findAll(): Promise<Partial<IRole>[]>;
+    findDefaults(): Promise<Partial<IRole>[]>;
     findByName(roleName: string): Promise<IRole | null>;
     create(data: CreateRoleDto): Promise<IRole>;
     update(id: string, data: UpdateRoleDto["data"]): Promise<IRole | null>;
@@ -41,6 +42,11 @@ export class RoleRepository implements IRoleRepository {
             .exec();
     }
 
+    async findDefaults() {
+        return await Role.find({ isDefault: true })
+            .lean<IRole[]>()
+            .exec();
+    }
 
     async update(id: string, dtoData: UpdateRoleDto["data"]) {
         const toUpdate: any = {};

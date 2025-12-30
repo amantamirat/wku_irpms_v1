@@ -195,7 +195,7 @@ const CollaboratorManager = ({ project, applicant, flyMode = false, onSave, onRe
                 }
             />
 
-            {project && (
+            {(project && showSaveDialog) && (
                 <CollaboratorDialog
                     collaborator={selectedCollaborator}
                     visible={showSaveDialog}

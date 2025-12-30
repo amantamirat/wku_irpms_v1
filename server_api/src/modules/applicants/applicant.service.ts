@@ -1,5 +1,6 @@
 import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
 import { Unit } from "../organization/organization.type";
+import { IRoleRepository, RoleRepository } from "../users/roles/role.repository";
 import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO, UpdateRolesDTO, UpdateOwnershipsDTO } from "./applicant.dto";
 import { IApplicantRepository, ApplicantRepository } from "./applicant.repository";
 
@@ -7,10 +8,14 @@ export class ApplicantService {
 
     private repository: IApplicantRepository;
     private orgnRepo: IOrganizationRepository;
+    private roleRepository: IRoleRepository;
 
-    constructor(repository?: IApplicantRepository, orgnRepo?: IOrganizationRepository) {
+    constructor(repository?: IApplicantRepository, orgnRepo?: IOrganizationRepository,
+        roleRepository?: IRoleRepository
+    ) {
         this.repository = repository || new ApplicantRepository();
         this.orgnRepo = orgnRepo || new OrganizationRepository();
+        this.roleRepository = roleRepository || new RoleRepository();
     }
 
     async validateWorkspace(workspace: string) {
@@ -27,7 +32,9 @@ export class ApplicantService {
     // -------------------------
     async create(dto: CreateApplicantDTO) {
         await this.validateWorkspace(dto.workspace);
-        const created = await this.repository.create(dto);
+        const defaultRoles = await this.roleRepository.findDefaults();
+        const roles = defaultRoles.map(role => String(role._id));
+        const created = await this.repository.create({ ...dto, roles });
         return created;
     }
     // -------------------------

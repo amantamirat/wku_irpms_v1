@@ -21,6 +21,10 @@ import { CollaboratorStatus } from "./collaborators/collaborator.status";
 import { IThemeRepository, ThemeRepository } from "../thematics/themes/theme.repository";
 import { IStageRepository, StageRepository } from "../calls/stages/stage.repository";
 import { StageStatus } from "../calls/stages/stage.status";
+import { ConstraintValidator } from "../grants/constraints/constraint.validator";
+import { PhaseType } from "./phase/phase.enum";
+import { IProjectThemeRepository, ProjectThemeRepository } from "./themes/project.theme.repository";
+import { DocumentRepository, IDocumentRepository } from "../calls/stages/documents/document.repository";
 
 export class ProjectService {
 
@@ -30,10 +34,13 @@ export class ProjectService {
     private collabRepository: ICollaboratorRepository;
     private phaseRepository: IPhaseRepository;
     private themeRepository: IThemeRepository;
+    private projectThemeRepository: IProjectThemeRepository;
     private stageRepository: IStageRepository;
+    private docRepository: IDocumentRepository;
+    private validator: ConstraintValidator;
 
     constructor(repository?: IProjectRepository, phaseRepository?: IPhaseRepository,
-        themeRepository?: IThemeRepository, stageRepository?: IStageRepository
+        themeRepository?: IThemeRepository, stageRepository?: IStageRepository,
     ) {
         this.repository = repository || new ProjectRepository();
         this.appRepository = new ApplicantRepository();
@@ -42,6 +49,9 @@ export class ProjectService {
         this.phaseRepository = phaseRepository || new PhaseRepository();
         this.themeRepository = themeRepository || new ThemeRepository();
         this.stageRepository = stageRepository || new StageRepository();
+        this.validator = new ConstraintValidator(this.repository);
+        this.projectThemeRepository = new ProjectThemeRepository();
+        this.docRepository = new DocumentRepository();
     }
 
     async create(dto: CreateProjectDTO) {
@@ -62,7 +72,8 @@ export class ProjectService {
 
     //submit project
     async submit(dto: SubmitProjectDTO) {
-        const { call, leadPI, collaborators, themes } = dto;
+
+        const { call, title, summary, leadPI, collaborators, phases, themes, documentPath } = dto;
 
         const callDoc = await this.callRepository.findById(call);
         if (!callDoc) throw new Error("Call not found");
@@ -89,6 +100,45 @@ export class ProjectService {
             if (!themeDoc) throw new Error(`Theme not found: ${theme}`);
             themeDocs.push(themeDoc);
         }
+
+        await this.validator.validateProjectConstraints(String(callDoc.grant), collaborators, phases);
+
+        const projectDoc = await this.repository.create({ call, title, applicantId: leadPI, summary });
+        const projectId = String(projectDoc._id);
+
+        await this.collabRepository.createMany(
+            collaborators.map(col => ({
+                project: projectId,
+                applicant: col
+            }))
+        );
+
+        await this.phaseRepository.createMany(
+            phases.map(phase => ({
+                type: PhaseType.phase,
+                project: projectId,
+                activity: phase.activity,
+                budget: phase.budget,
+                duration: phase.duration,
+                description: phase.description
+            }))
+        );
+
+        await this.projectThemeRepository.createMany(
+            themes.map(thm => ({
+                project: projectId,
+                theme: thm
+            }))
+        );
+
+        await this.docRepository.create({
+            project: projectId,
+            stage: String(firstStageDoc._id),
+            documentPath: documentPath
+        });
+
+        await this.repository.update(projectId, { status: ProjectStatus.submitted });
+
     }
 
     // ---------------------------------------------------
@@ -106,6 +156,7 @@ export class ProjectService {
         if (String(projectDoc.leadPI) !== userId) {
             throw new Error("Unauthorized: You cannot update this project.");
         }
+
         return this.repository.update(dto.id, dto.data);
     }
 
@@ -157,12 +208,7 @@ export class ProjectService {
         if (String(projectDoc.leadPI) !== dto.userId) {
             throw new Error("Unauthorized: You cannot delete this project.");
         }
-        /*
-        const collaborators = await this.collabRepository.find({ project: id });
-        if (collaborators.length > 0) {
-            throw new Error(`Cannot delete:  ${collaborators.length} collaborators exists.`);
-        }
-        */
+
         return this.repository.delete(dto.id);
     }
 }

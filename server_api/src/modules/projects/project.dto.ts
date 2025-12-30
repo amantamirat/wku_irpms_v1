@@ -45,5 +45,5 @@ export interface SubmitProjectDTO {
     collaborators: string[];
     phases: PhaseDto[];
     themes: string[];
-    documentPath?: string;
+    documentPath: string;
 }
