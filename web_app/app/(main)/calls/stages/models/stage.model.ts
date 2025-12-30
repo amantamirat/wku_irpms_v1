@@ -13,7 +13,7 @@ export type Stage = {
     name: string;
     evaluation: string | Evaluation;
     deadline?: Date;
-    isFinal?:boolean;
+    //isFinal?:boolean;
     status: StageStatus;
     createdAt?: Date;
     updatedAt?: Date;

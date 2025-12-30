@@ -5,7 +5,7 @@ export interface FilterStageDTO {
     call?: string;
     order?: number;
     status?: StageStatus;
-    isFinal?: boolean;
+    //isFinal?: boolean;
 }
 
 export interface CreateStageDTO {
@@ -14,7 +14,7 @@ export interface CreateStageDTO {
     order?: number;
     evaluation: string;
     deadline?: Date;
-    isFinal?: boolean;
+    //isFinal?: boolean;
     status?: StageStatus.planned;
 }
 
@@ -24,7 +24,7 @@ export interface UpdateStageDTO {
         name: string;
         evaluation: string;
         deadline: Date;
-        isFinal: boolean;
+        //isFinal: boolean;
         status: StageStatus;
     }>;
 }

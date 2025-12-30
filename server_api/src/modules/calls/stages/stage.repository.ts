@@ -6,7 +6,7 @@ import { UpdateStatusDTO } from "./documents/document.dto";
 export interface IStageRepository {
     findOne(filters: FilterStageDTO): Promise<IStage | null>;
     find(filters: FilterStageDTO, populate?: boolean): Promise<Partial<IStage>[]>;
-    findLastStageByCall(callId: string): Promise<IStage | null>;
+    //findLastStageByCall(callId: string): Promise<IStage | null>;
     create(dto: CreateStageDTO): Promise<IStage>;
     update(id: string, data: UpdateStageDTO["data"] | UpdateStatusDTO["data"]): Promise<IStage>;
     delete(id: string): Promise<IStage | null>;
@@ -26,18 +26,22 @@ export class StageRepository implements IStageRepository {
         if (options.order) {
             query.order = options.order;
         }
+        /*
         if (options.isFinal === true) {
             query.isFinal = true;
         }
+        */
         return Stage.findOne(query).lean<IStage>();
     }
 
+    /*
     async findLastStageByCall(callId: string): Promise<IStage | null> {
         return await Stage
             .findOne({ call: callId })
             .sort({ order: -1 })
             .lean<IStage>();
     }
+            */
 
     async find(filters: FilterStageDTO, populate: boolean = true) {
         const query: any = {};
@@ -81,9 +85,11 @@ export class StageRepository implements IStageRepository {
         if (dtoData.status !== undefined) {
             updateData.status = dtoData.status;
         }
+        /*
         if (dtoData.isFinal !== undefined) {
             updateData.isFinal = dtoData.isFinal;
         }
+        */
         const updated = await Stage.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },

@@ -34,11 +34,15 @@ export class StageService {
         const evalDoc = await this.evalRepository.findById(evaluation);
         if (!evalDoc) throw new Error("Evaluation not found.");
 
-        const lastDoc = await this.repository.findLastStageByCall(call);
-        if (!lastDoc) throw new Error("Last stage doc not found.");
-        if (lastDoc.isFinal === true) throw new Error("Final stage already exists.");
+        const stages = await this.repository.find({ call }, false);
 
-        const nextOrder = lastDoc?.order ? lastDoc.order + 1 : 1;
+        /*
+                const lastDoc = await this.repository.findLastStageByCall(call);
+                if (!lastDoc) throw new Error("Last stage doc not found.");
+                if (lastDoc.isFinal === true) throw new Error("Final stage already exists.");
+        const nextOrder = lastDoc?.order ? lastDoc.order + 1 : 1;     
+        */
+        const nextOrder = stages.length + 1;
         const stage = await this.repository.create({ ...dto, order: nextOrder, status: StageStatus.planned });
         return stage;
     }
@@ -54,6 +58,7 @@ export class StageService {
     async update(dto: UpdateStageDTO) {
         const { id, data } = dto;
         delete data.status
+        /*
         if (data.isFinal === true) {
             const stageDoc = await this.repository.findOne({ _id: id });
             if (!stageDoc) throw new Error("Stage not found.");
@@ -61,6 +66,7 @@ export class StageService {
             if (!lastStageDoc) throw new Error("Last stage not found.");
             if (String(lastStageDoc._id) !== id) throw new Error("Only last stage can be final.");
         }
+            */
         const stage = await this.repository.update(id, data);
         if (!stage) throw new Error("Stage not found");
         return
@@ -80,7 +86,7 @@ export class StageService {
         if (nextState === StageStatus.planned) {
             const documents = await this.documentRepo.find({ stage: id }, false);
             if (documents.length > 0) {
-                throw new Error("Can not change to planned, document already exist!");
+                throw new Error("Can not change to planned, documents already exist!");
             }
         }
         const updated = await this.repository.update(dto.id, { status: nextState });
@@ -97,12 +103,19 @@ export class StageService {
         if (stageDoc.status !== StageStatus.planned) {
             throw new Error("Only planned stages can be deleted.");
         }
+
+        if (stageDoc.order > 1) {
+            throw new Error("Method is not supprorted, rearanging is not implemented yet");
+        }
+
+        /*
         //Rule 2 Only last stage can be Deleted
         const lastDoc = await this.repository.findLastStageByCall(String(stageDoc.call));
         if (!lastDoc) throw new Error("Last stage is not found");
         if (lastDoc.order !== stageDoc.order) {
             throw new Error("Only the last stage can be deleted.");
         }
+        */
         // Proceed with deletion
         const deleted = await this.repository.delete(id); //stage.deleteOne();
         return deleted;

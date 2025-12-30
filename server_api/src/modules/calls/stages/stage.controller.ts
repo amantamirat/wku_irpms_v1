@@ -23,7 +23,7 @@ export class StageController {
                 name,
                 evaluation: evaluation as string,
                 deadline,
-                isFinal
+                //isFinal
             };
 
             const stage = await this.service.create(dto);
@@ -58,7 +58,7 @@ export class StageController {
                     name,
                     //evaluation: evaluation ? (evaluation as string) : undefined,
                     deadline,
-                    isFinal
+                    //isFinal
                 },
             };
             const updated = await this.service.update(dto);

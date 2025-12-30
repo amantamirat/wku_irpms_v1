@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { Card } from 'primereact/card';
-import { Skeleton } from 'primereact/skeleton';
 import CallCard from './CallCard';
 import ErrorCard from '@/components/ErrorCard';
 import { Call, CallStatus } from '../calls/models/call.model';
 import { CallApi } from '../calls/api/call.api';
 import ListSkeleton from '@/components/ListSkeleton';
+import { useAuth } from '@/contexts/auth-context';
+import { PERMISSIONS } from '@/types/permissions';
 
 const CallGrid = () => {
     const [calls, setCalls] = useState<Call[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { hasPermission } = useAuth();
+    const canRead = hasPermission([PERMISSIONS.CALL.READ]);
+    if (!canRead) {
+        return (<></>);
+    }
 
     useEffect(() => {
         const fetchCalls = async () => {

@@ -1,24 +1,21 @@
 'use client';
 
 import { CrudManager } from "@/components/CrudManager";
-import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-import { useCrudList } from "@/hooks/useCrudList";
-import { useEffect, useState } from "react";
-import { Call, CallStatus } from "../models/call.model";
-import { CallApi } from "../api/call.api";
-import SaveCall from "./SaveCall";
-import StageManager from "../stages/components/StageManager";
+import { DirectorateSelector } from "@/components/DirectorateSelector";
 import { useAuth } from "@/contexts/auth-context";
-import { PERMISSIONS } from "@/types/permissions";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import { useDirectorate } from "@/contexts/DirectorateContext";
+import { useCrudList } from "@/hooks/useCrudList";
 import MyBadge from "@/templates/MyBadge";
+import { PERMISSIONS } from "@/types/permissions";
 import { Button } from "primereact/button";
+import { useEffect, useState } from "react";
 import { Calendar } from "../../calendars/models/calendar.model";
 import ProjectManager from "../../projects/components/ProjectManager";
-import { Organization, OrgnUnit } from "../../organizations/models/organization.model";
-import { OrganizationApi } from "../../organizations/api/organization.api";
-import { Dropdown } from "primereact/dropdown";
-import { useDirectorate } from "@/contexts/DirectorateContext";
-import { DirectorateSelector } from "@/components/DirectorateSelector";
+import { CallApi } from "../api/call.api";
+import { Call, CallStatus } from "../models/call.model";
+import StageManager from "../stages/components/StageManager";
+import SaveCall from "./SaveCall";
 
 interface CallManagerProps {
     calendar?: Calendar;

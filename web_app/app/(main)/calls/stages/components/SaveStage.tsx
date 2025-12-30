@@ -158,7 +158,7 @@ const SaveStage = ({ visible, stage, call, onComplete, onHide }: SaveStageProps)
                         placeholder="Select Deadline"
                     />
                 </div>
-                {/* Final Stage */}
+                {/* Final Stage
                 <div className="field-checkbox">
                     <Checkbox
                         inputId="isFinal"
@@ -171,6 +171,8 @@ const SaveStage = ({ visible, stage, call, onComplete, onHide }: SaveStageProps)
                         Final Stage
                     </label>
                 </div>
+                */}
+
             </Dialog>
         </>
     );

@@ -77,16 +77,15 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
         setProject({ ...project, collaborators: updatedCollaborators });
     };
 
-    const addPhase = (phase: Phase) => {
-        const exists =
-            project.phases?.some(
-                (p) => p.order === phase.order
-            ) ?? false;
+    const savePhase = (phase: Phase) => {
+        const phases = project.phases ?? [];
+        const index = phases.findIndex(p => p.order === phase.order);
 
-        if (exists) {
-            throw new Error("The order is already added!");
-        }
-        const updatedPhases = [...(project.phases || []), phase];
+        const updatedPhases =
+            index >= 0
+                ? phases.map(p => p.order === phase.order ? phase : p)
+                : [...phases, phase];
+
         setProject({ ...project, phases: updatedPhases });
     };
 
@@ -205,7 +204,7 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
                 {activeStep === 1 && <ProjectForm project={project} setProject={setProject} />}
                 {activeStep === 2 && <CollaboratorManager project={project} onSave={addCollaborator} onRemove={removeCollaborator} flyMode={true} />}
                 {activeStep === 3 && <ProjectThemeManager project={project} onSave={addProjectTheme} onRemove={removeProjectTheme} flyMode />}
-                {activeStep === 4 && <PhaseManager project={project} phaseType={PhaseType.phase} flyMode={true} onSave={addPhase} onRemove={removePhase} />}
+                {activeStep === 4 && <PhaseManager project={project} phaseType={PhaseType.phase} flyMode={true} onSave={savePhase} onRemove={removePhase} />}
                 {activeStep === items.length - 1 && <Confirmation project={project} call={project.call as Call} />}
             </Dialog>
         </>

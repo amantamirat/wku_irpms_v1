@@ -22,7 +22,7 @@ interface DirectorateContextType {
 const DirectorateContext = createContext<DirectorateContextType | undefined>(undefined);
 
 export const DirectorateProvider = ({ children }: { children: React.ReactNode }) => {
-    const { getScopesByUnit } = useAuth();
+    const { getScopesByUnit, loggedIn } = useAuth();
 
     const [directorates, setDirectorates] = useState<Organization[]>();
     const [directorate, setDirectorate] = useState<Organization>();
@@ -43,7 +43,6 @@ export const DirectorateProvider = ({ children }: { children: React.ReactNode })
             } else {
                 result = scopes as Organization[];
             }
-
             setDirectorates(result);
         } catch (err: any) {
             console.error('Failed to load directorates', err);
@@ -53,8 +52,9 @@ export const DirectorateProvider = ({ children }: { children: React.ReactNode })
     /** Fetch once on mount (or when auth changes) */
     useEffect(() => {
         if (!getScopesByUnit) return;
+        if(!loggedIn) return;
         fetchDirectorates();
-    }, [getScopesByUnit]);
+    }, [getScopesByUnit, loggedIn]);
 
 
     return (

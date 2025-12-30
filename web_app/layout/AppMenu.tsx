@@ -111,6 +111,16 @@ const AppMenu = () => {
                     to: '/applicants',
                 },
                 {
+                    label: 'Projects',
+                    icon: PrimeIcons.BRIEFCASE,
+                    to: '/projects',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.PROJECT.CREATE
+                        ]
+                    )
+                },
+                {
                     label: 'Specializations',
                     icon: 'pi pi-fw pi-filter-fill',
                     to: '/specializations',
@@ -130,19 +140,7 @@ const AppMenu = () => {
                         PERMISSIONS.POSITION.DELETE
                     ])
                 }
-                ,
-                {
-                    label: 'Projects',
-                    icon: PrimeIcons.BRIEFCASE,
-                    to: '/projects',
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.PROJECT.CREATE,
-                            PERMISSIONS.PROJECT.UPDATE,
-                            PERMISSIONS.PROJECT.DELETE
-                        ]
-                    )
-                }
+
             ]
         },
         {
