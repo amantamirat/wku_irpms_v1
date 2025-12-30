@@ -2,6 +2,7 @@
 import {
     CreateProjectDTO,
     GetProjectsDTO,
+    SubmitProjectDTO,
     UpdateProjectDTO,
     UpdateStatusDTO
 } from "./project.dto";
@@ -17,6 +18,9 @@ import { ProjectStateMachine } from "./project.state-machine";
 import { ProjectStatus } from "./project.status";
 import { PhaseStatus } from "./phase/phase.status";
 import { CollaboratorStatus } from "./collaborators/collaborator.status";
+import { IThemeRepository, ThemeRepository } from "../thematics/themes/theme.repository";
+import { IStageRepository, StageRepository } from "../calls/stages/stage.repository";
+import { StageStatus } from "../calls/stages/stage.status";
 
 export class ProjectService {
 
@@ -25,13 +29,19 @@ export class ProjectService {
     private appRepository: IApplicantRepository;
     private collabRepository: ICollaboratorRepository;
     private phaseRepository: IPhaseRepository;
+    private themeRepository: IThemeRepository;
+    private stageRepository: IStageRepository;
 
-    constructor(repository?: IProjectRepository, phaseRepository?: IPhaseRepository) {
+    constructor(repository?: IProjectRepository, phaseRepository?: IPhaseRepository,
+        themeRepository?: IThemeRepository, stageRepository?: IStageRepository
+    ) {
         this.repository = repository || new ProjectRepository();
         this.appRepository = new ApplicantRepository();
         this.callRepository = new CallRepository();
         this.collabRepository = new CollaboratorRepository();
         this.phaseRepository = phaseRepository || new PhaseRepository();
+        this.themeRepository = themeRepository || new ThemeRepository();
+        this.stageRepository = stageRepository || new StageRepository();
     }
 
     async create(dto: CreateProjectDTO) {
@@ -48,6 +58,37 @@ export class ProjectService {
     //based on ownerships // and collaborations // and pi
     async getProjects(options: GetProjectsDTO) {
         return this.repository.find(options);
+    }
+
+    //submit project
+    async submit(dto: SubmitProjectDTO) {
+        const { call, leadPI, collaborators, themes } = dto;
+
+        const callDoc = await this.callRepository.findById(call);
+        if (!callDoc) throw new Error("Call not found");
+        if (callDoc.status !== CallStatus.active) throw new Error("Call is not active");
+
+        const firstStageDoc = await this.stageRepository.findOne({ call, order: 1 });
+        if (!firstStageDoc) throw new Error("Stage not found");
+        if (firstStageDoc.status !== StageStatus.active) throw new Error(`${firstStageDoc.name} stage is not active`);
+        if (firstStageDoc.deadline < new Date()) throw new Error(`${firstStageDoc.name} stage deadline has passed`);
+
+        const leadPIDoc = await this.appRepository.findOne({ id: leadPI });
+        if (!leadPIDoc) throw new Error("Lead PI not found");
+
+        const collabDocs = [];
+        for (const collab of collaborators) {
+            const collabDoc = await this.appRepository.findOne({ id: collab });
+            if (!collabDoc) throw new Error(`Applicant not found: ${collab}`);
+            collabDocs.push(collabDoc);
+        }
+
+        const themeDocs = [];
+        for (const theme of themes) {
+            const themeDoc = await this.themeRepository.findById(theme);
+            if (!themeDoc) throw new Error(`Theme not found: ${theme}`);
+            themeDocs.push(themeDoc);
+        }
     }
 
     // ---------------------------------------------------
@@ -71,7 +112,6 @@ export class ProjectService {
     // ---------------------------------------------------
     // UPDATE STATUS
     // ---------------------------------------------------
-
     async updateStatus(dto: UpdateStatusDTO) {
         const { id, status } = dto.data;
         const next = status;
@@ -92,7 +132,7 @@ export class ProjectService {
             //validate against grant in here
             if (!phases.every(p => p.status === PhaseStatus.approved))
                 throw new Error("PHASES_NOT_FULLY_APPROVED");
-            
+
             const collabs = await this.collabRepository.find({ project: id });
             if (!collabs.every(c => c.status === CollaboratorStatus.verified))
                 throw new Error("COLLABORATORS_NOT_FULLY_VERIFIED");
@@ -105,7 +145,7 @@ export class ProjectService {
     // ---------------------------------------------------
     // DELETE
     // ---------------------------------------------------
-    async deleteProject(dto: DeleteDto) {
+    async delete(dto: DeleteDto) {
         const { id } = dto;
         const projectDoc = await this.repository.findById(id);
         if (!projectDoc)

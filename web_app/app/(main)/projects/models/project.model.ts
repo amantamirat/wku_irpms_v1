@@ -22,8 +22,8 @@ export type Project = {
     leadPI?: string | Applicant;
     createdAt?: Date;
     updatedAt?: Date;
-    collaborators?: Collaborator[];
-    themes?: ProjectTheme[];
+    collaborators?: Collaborator[];// | string[];
+    themes?: ProjectTheme[];// | string[];
     phases?: Phase[];
     file?: File;
 }

@@ -1,6 +1,6 @@
 import express from "express";
 import { ProjectDocController } from "./document.controller";
-import { upload } from "../../../../util/multer";
+import { upload } from "../../../../common/helpers/multer";
 import { checkPermission, checkStatusPermission, verifyActiveAccount } from "../../../users/user.middleware";
 import { PERMISSIONS } from "../../../../common/constants/permissions";
 

@@ -2,12 +2,13 @@ import { Response } from "express";
 import { errorResponse, successResponse } from "../../common/helpers/response";
 import { AuthenticatedRequest } from "../users/user.middleware";
 import { ProjectService } from "./project.service";
-import { CreateProjectDTO, UpdateProjectDTO, UpdateStatusDTO } from "./project.dto";
+import { CreateProjectDTO, SubmitProjectDTO, UpdateProjectDTO, UpdateStatusDTO } from "./project.dto";
 import { DeleteDto } from "../../util/delete.dto";
 import { ProjectStatus } from "./project.status";
+import safeDeleteFile from "../../common/helpers/safe-delete";
 
 export class ProjectController {
-  
+
   private service: ProjectService;
 
   constructor(service?: ProjectService) {
@@ -53,6 +54,55 @@ export class ProjectController {
       errorResponse(res, 400, err.message, err);
     }
   };
+  // -----------------------
+  // SUBMIT
+  // -----------------------
+  submit = async (req: AuthenticatedRequest, res: Response) => {
+    let uploadedFilePath: string | undefined;
+    try {
+      //add zod validation here amanuel
+      if (!req.user) throw new Error("User not found!");
+      if (!req.file) throw new Error("Document not found!");
+
+      uploadedFilePath = req.file.path;
+      //console.log(uploadedFilePath);
+      //console.log(`uploads/${req.file.filename}`);
+
+      const project = JSON.parse(req.body.project);
+
+      const dto: SubmitProjectDTO = {
+        call: project.call,
+        title: project.title,
+        summary: project.summary, // optional
+        leadPI: req.user.applicantId,
+
+        collaborators: project.collaborators.map(
+          (c: any) => c.applicant
+        ),
+
+        themes: project.themes.map(
+          (t: any) => t.theme
+        ),
+
+        phases: project.phases.map((p: any) => ({
+          type: p.type,
+          activity: p.activity,
+          duration: p.duration,
+          budget: p.budget,
+          description: p.description,
+          status: p.status,
+          order: p.order
+        })),
+
+        documentPath: `uploads/${req.file.filename}`
+      };
+      const submitted = await this.service.submit(dto);
+      successResponse(res, 201, "Project submitted successfully", submitted);
+    } catch (err: any) {      
+      safeDeleteFile(uploadedFilePath);
+      errorResponse(res, 400, err.message, err);
+    }
+  };
 
   // -----------------------
   // Update
@@ -83,7 +133,7 @@ export class ProjectController {
   updateStatus = async (req: AuthenticatedRequest, res: Response) => {
     try {
       if (!req.user) throw new Error("User not found!");
-      
+
       const { id } = req.query;
       const { status } = req.params;
 
@@ -115,7 +165,7 @@ export class ProjectController {
         userId: req.user.applicantId,
       };
 
-      const deleted = await this.service.deleteProject(dto);
+      const deleted = await this.service.delete(dto);
       successResponse(res, 200, "Project deleted successfully", deleted);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);

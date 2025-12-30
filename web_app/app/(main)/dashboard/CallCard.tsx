@@ -52,6 +52,7 @@ const CallCard = ({ call }: CallCardProps) => {
                 severity="info"
                 rounded
                 outlined
+                disabled
                 onClick={() => setShowViewDialog(true)}
             />
             <Button
