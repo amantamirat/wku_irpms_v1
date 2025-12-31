@@ -6,7 +6,7 @@ import { CreateResultDTO, UpdateResultDTO } from "./result.dto";
 export interface IResultRepository {
     findById(id: string): Promise<IResult | null>;
     findByReviewer(reviewerId: string): Promise<Partial<any>[]>;
-    countByReviewer(reviewerId: string): Promise<number>;
+    //countByReviewer(reviewerId: string): Promise<number>;
     create(data: CreateResultDTO): Promise<IResult>;
     update(id: string, data: UpdateResultDTO["data"]): Promise<IResult>;
     delete(id: string): Promise<void>;
@@ -25,15 +25,17 @@ export class ResultRepository implements IResultRepository {
             .exec();
     }
 
+    /*
     async countByReviewer(reviewerId: string) {
         return Result.countDocuments({ reviewer: new mongoose.Types.ObjectId(reviewerId) }).exec();
     }
+        */
 
     async create(dto: CreateResultDTO) {
         const data: Partial<IResult> = {
-            reviewer: new mongoose.Types.ObjectId(dto.reviewerId),
-            criterion: new mongoose.Types.ObjectId(dto.criterionId),
-            selectedOption: dto.selectedOptionId ? new mongoose.Types.ObjectId(dto.selectedOptionId) : undefined,
+            reviewer: new mongoose.Types.ObjectId(dto.reviewer),
+            criterion: new mongoose.Types.ObjectId(dto.criterion),
+            selectedOption: dto.selectedOption ? new mongoose.Types.ObjectId(dto.selectedOption) : undefined,
             score: dto.score,
             comment: dto.comment
         };
@@ -46,7 +48,7 @@ export class ResultRepository implements IResultRepository {
 
         const updatedData: Partial<IResult> = {
             score: dtoData.score,
-            selectedOption: dtoData.selectedOptionId ? new mongoose.Types.ObjectId(dtoData.selectedOptionId) : undefined,
+            selectedOption: dtoData.selectedOption ? new mongoose.Types.ObjectId(dtoData.selectedOption) : undefined,
             comment: dtoData.comment
         };
 

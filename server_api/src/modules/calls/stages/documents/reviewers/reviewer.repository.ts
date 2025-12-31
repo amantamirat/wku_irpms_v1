@@ -38,8 +38,8 @@ export class ReviewerRepository implements IReviewerRepository {
 
     async create(dto: CreateReviewerDTO) {
         const data: Partial<IReviewer> = {
-            projectStage: new mongoose.Types.ObjectId(dto.projectStageId),
-            applicant: new mongoose.Types.ObjectId(dto.applicantId),
+            projectStage: new mongoose.Types.ObjectId(dto.projectStage),
+            applicant: new mongoose.Types.ObjectId(dto.applicant),
         };
         return Reviewer.create(data);
     }

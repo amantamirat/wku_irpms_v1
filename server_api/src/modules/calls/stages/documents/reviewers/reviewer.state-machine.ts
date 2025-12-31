@@ -1,11 +1,11 @@
-import { ReviewerStatus } from "./reviewer.enum";
+import { ReviewerStatus } from "./reviewer.status";
 
 // reviewer.state-machine.ts
 export class ReviewerStateMachine {
     private static readonly transitions: Record<ReviewerStatus, ReviewerStatus[]> = {
-        [ReviewerStatus.pending]: [ReviewerStatus.active],
-        [ReviewerStatus.active]: [ReviewerStatus.submitted, ReviewerStatus.pending],
-        [ReviewerStatus.submitted]: [ReviewerStatus.approved, ReviewerStatus.active],
+        [ReviewerStatus.pending]: [ReviewerStatus.verified],
+        [ReviewerStatus.verified]: [ReviewerStatus.submitted, ReviewerStatus.pending],
+        [ReviewerStatus.submitted]: [ReviewerStatus.approved, ReviewerStatus.verified],
         [ReviewerStatus.approved]: [ReviewerStatus.submitted]
     };
 

@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { errorResponse, successResponse } from "../../../../../../common/helpers/response";
 import { ResultService } from "./result.service";
-import { CreateResultDTO, GetResultsDTO, UpdateResultDTO, DeleteResultDTO } from "./result.dto";
+import { CreateResultDTO, GetResultsDTO, UpdateResultDTO} from "./result.dto";
 import { AuthenticatedRequest } from "../../../../../users/user.middleware";
+import { DeleteDto } from "../../../../../../util/delete.dto";
 
 const resultService = new ResultService();
 
@@ -15,15 +16,15 @@ export class ResultController {
 
             // Map to DTO with *Id properties
             const data: CreateResultDTO = {
-                reviewerId: reviewer,
-                criterionId: criterion,
+                reviewer: reviewer,
+                criterion: criterion,
                 score,
-                selectedOptionId: selectedOption,
-                userId: req.user.userId,
+                selectedOption: selectedOption,
+                applicantId: req.user.userId,
                 comment
             };
 
-            const created = await resultService.createResult(data);
+            const created = await resultService.create(data);
             successResponse(res, 201, "Result created successfully", created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -56,13 +57,13 @@ export class ResultController {
                 id,
                 data: {
                     score: score ?? undefined,
-                    selectedOptionId: selectedOption ?? undefined,
+                    selectedOption: selectedOption ?? undefined,
                     comment: comment ?? undefined
                 },
-                userId: req.user.userId
+                applicantId: req.user.userId
             };
 
-            const updated = await resultService.updateResult(dto);
+            const updated = await resultService.update(dto);
             successResponse(res, 200, "Result updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -74,12 +75,12 @@ export class ResultController {
             if (!req.user) throw new Error("User not found!");
             const { id } = req.params;
 
-            const dto: DeleteResultDTO = {
+            const dto: DeleteDto = {
                 id,
-                userId: req.user.userId
+                userId: req.user.applicantId
             };
 
-            const deleted = await resultService.deleteResult(dto);
+            const deleted = await resultService.delete(dto);
             successResponse(res, 200, "Result deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

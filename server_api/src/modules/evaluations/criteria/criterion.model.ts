@@ -8,6 +8,7 @@ import { FormType } from "./criterion.enum";
 import { Evaluation } from "../evaluation.model";
 
 export interface ICriterion extends Document {
+    _id: mongoose.Types.ObjectId;
     evaluation: mongoose.Types.ObjectId;
     title: string;
     weight: number;

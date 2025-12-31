@@ -1,14 +1,14 @@
-import { ReviewerStatus } from "./reviewer.enum";
+import { ReviewerStatus } from "./reviewer.status";
 
 // reviewer.dto.ts
 export interface GetReviewersDTO {
-    projectStageId?: string;
-    applicantId?: string;
+    projectStage?: string;
+    applicant?: string;
 }
 
 export interface CreateReviewerDTO {
-    projectStageId: string;
-    applicantId: string;
+    projectStage: string;
+    applicant: string;
     weight?: number;
     userId: string;
 }
@@ -16,11 +16,11 @@ export interface CreateReviewerDTO {
 export interface UpdateReviewerDTO {
     id: string;
     data: Partial<{
-        status: ReviewerStatus;
         score: number;
         weight: number;
+        status: ReviewerStatus;
     }>;
-    userId: string;
+    applicantId: string;
 }
 
 export interface DeleteReviewerDTO {

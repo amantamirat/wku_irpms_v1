@@ -449,13 +449,15 @@
   },
   {
     "category": "Reviewer Management",
-    "name": "reviewer:change_status",
-    "description": "Edit reviewer status like activate, pend"
+    "name": "reviewer:status.verified"
   },
   {
     "category": "Reviewer Management",
-    "name": "reviewer:approve",
-    "description": "Approve reviewer status permission"
+    "name": "reviewer:status.submitted"
+  },
+  {
+    "category": "Reviewer Management",
+    "name": "reviewer:status.approved"
   },
   {
     "category": "Reviewer Management",

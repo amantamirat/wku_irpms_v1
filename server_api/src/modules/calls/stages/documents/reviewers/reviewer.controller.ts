@@ -16,13 +16,13 @@ export class ReviewerController {
             const { projectStage, applicant, weight } = req.body;
 
             const data: CreateReviewerDTO = {
-                projectStageId: projectStage,
-                applicantId: applicant,
-                weight: weight,
+                projectStage,
+                applicant,
+                weight,
                 userId: req.user.userId
             };
 
-            const created = await reviewerService.createReviewer(data);
+            const created = await reviewerService.create(data);
             successResponse(res, 201, "Reviewer created successfully", created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -34,8 +34,8 @@ export class ReviewerController {
             const { projectStage, applicant } = req.query;
             // map to DTO
             const filter: GetReviewersDTO = {
-                projectStageId: projectStage ? String(projectStage) : undefined,
-                applicantId: applicant ? String(applicant) : undefined
+                projectStage: projectStage ? String(projectStage) : undefined,
+                applicant: applicant ? String(applicant) : undefined
             };
             const reviewers = await reviewerService.getReviewers(filter);
             successResponse(res, 200, "Reviewers fetched successfully", reviewers);
@@ -45,15 +45,15 @@ export class ReviewerController {
     }
 
     // Change reviewer status (activate, submit, approve)
-    static async changeReviewerStatus(req: AuthenticatedRequest, res: Response) {
+    static async updateStatus(req: AuthenticatedRequest, res: Response) {
         try {
             if (!req.user) throw new Error("User not found!");
 
             const { id } = req.params;
             const { status } = req.body;
 
-            const dto: UpdateReviewerDTO = { id, data: { status }, userId: req.user.userId };
-            const updated = await reviewerService.changeReviewerStatus(dto);
+            const dto: UpdateReviewerDTO = { id, data: { status }, applicantId: req.user.applicantId };
+            const updated = await reviewerService.updateStatus(dto);
 
             successResponse(res, 200, `Reviewer status changed to ${status}`, updated);
         } catch (err: any) {
@@ -71,10 +71,10 @@ export class ReviewerController {
             const dto: UpdateReviewerDTO = {
                 id,
                 data: { weight },
-                userId: req.user.userId
+                applicantId: req.user.userId
             };
 
-            const updated = await reviewerService.updateReviewerData(dto);
+            const updated = await reviewerService.update(dto);
             successResponse(res, 200, "Reviewer updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

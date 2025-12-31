@@ -82,7 +82,6 @@ export const PERMISSIONS = {
     DELETE: "specialization:delete",
   },
 
-
   CALENDAR: {
     CREATE: "calendar:create",
     READ: "calendar:read",
@@ -96,12 +95,14 @@ export const PERMISSIONS = {
     UPDATE: "experience:update",
     DELETE: "experience:delete",
   },
+
   GRANT: {
     CREATE: "grant:create",
     READ: "grant:read",
     UPDATE: "grant:update",
     DELETE: "grant:delete",
   },
+
   CONSTRAINT: {
     CREATE: "constraint:create",
     READ: "constraint:read",
@@ -182,14 +183,19 @@ export const PERMISSIONS = {
       REVIEW: "document:status.reviewed",
     },
     DELETE: "document:delete",
-    UPDATE_STATUS: "document:update_status",
+    //UPDATE_STATUS: "document:update_status",
   },
   REVIEWER: {
     CREATE: "reviewer:create",
     READ: "reviewer:read",
     UPDATE: "reviewer:update",
-    CHANGE_STATUS: "reviewer:change_status", // New permission for status transitions
-    APPROVE: "reviewer:approve",      // Keep as special approval permission
+    // CHANGE_STATUS: "reviewer:change_status", // New permission for status transitions
+    // APPROVE: "reviewer:approve",      // Keep as special approval permission
+    STATUS: {
+      SUBMIT: "reviewer:status.submitted",
+      VERIFY: "reviewer:status.verified",
+      APPROVE: "reviewer:status.approved"
+    },
     DELETE: "reviewer:delete",
   },
   THEME: {

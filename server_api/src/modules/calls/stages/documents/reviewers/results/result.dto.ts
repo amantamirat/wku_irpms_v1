@@ -5,25 +5,21 @@ export interface GetResultsDTO {
 }
 
 export interface CreateResultDTO {
-    reviewerId: string;
-    criterionId: string;
+    reviewer: string;
+    criterion: string;
     score?: number;
-    selectedOptionId?: string;
+    selectedOption?: string;
     comment?: string;
-    userId: string;
+    applicantId: string;
 }
 
 export interface UpdateResultDTO {
     id: string;
     data: Partial<{
         score: number;
-        selectedOptionId: string;
+        selectedOption: string;
         comment: string;
     }>;
-    userId: string;
+    applicantId: string;
 }
 
-export interface DeleteResultDTO {
-    id: string;
-    userId: string;
-}

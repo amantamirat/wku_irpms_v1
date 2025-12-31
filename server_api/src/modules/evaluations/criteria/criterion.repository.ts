@@ -13,6 +13,7 @@ export interface ICriterionRepository {
     find(filters: GetCriteriaDTO): Promise<Partial<ICriterion>[]>;
     create(dto: CreateCriterionDTO): Promise<ICriterion>;
     update(id: string, data: UpdateCriterionDTO["data"]): Promise<ICriterion>;
+    countDocuments(evaluation: string): Promise<number>;
     delete(id: string): Promise<ICriterion | null>;
 }
 
@@ -54,7 +55,7 @@ export class CriterionRepository implements ICriterionRepository {
         if (dtoData.title) updateData.title = dtoData.title;
         if (dtoData.formType) updateData.formType = dtoData.formType;
         if (dtoData.weight) updateData.weight = dtoData.weight;
-        
+
         const updated = await Criterion.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },
@@ -63,6 +64,10 @@ export class CriterionRepository implements ICriterionRepository {
 
         if (!updated) throw new Error("Criterion not found");
         return updated;
+    }
+
+    async countDocuments(evaluation: string) {
+        return Criterion.countDocuments({ evaluation: new mongoose.Types.ObjectId(evaluation) });
     }
 
     async delete(id: string) {

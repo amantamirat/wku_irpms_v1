@@ -70,7 +70,13 @@ export const checkStatusPermission = (resource: string) => {
       if (!req.user) {
         return errorResponse(res, 401, "Unauthorized");
       }
-      const status = req.params.status;
+      let status = req.params.status;
+      if (!status) {
+        status = req.body.status;
+      }
+      if (!status) {
+        return errorResponse(res, 400, "Status not provided");
+      }
       const permission = `${resource}:status.${status}`;
       const hasPermission = await CacheService.hasPermissions(req.user.userId, [permission]);
       if (!hasPermission) {
