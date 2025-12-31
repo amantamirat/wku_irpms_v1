@@ -31,6 +31,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
     const [selectedDocs, setSelectedDocs] = useState<ProjectDoc[]>([]);
 
     const emptyStage: ProjectDoc = {
+        stage:"-",
         project: project ?? "",
         status: DocStatus.pending
     };

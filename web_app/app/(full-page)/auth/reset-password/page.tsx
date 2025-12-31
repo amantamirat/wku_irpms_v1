@@ -18,6 +18,7 @@ export default function ResetPassword() {
   let emptyVerification: User = {
     email: email,
     password: "",
+    confirmedPassword:"",
     resetCode: ''
   };
 

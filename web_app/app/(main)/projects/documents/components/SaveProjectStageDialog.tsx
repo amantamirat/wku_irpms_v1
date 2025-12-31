@@ -43,7 +43,8 @@ const SaveProjectStageDialog = ({
             let saved: ProjectDoc;
             let syncedProject: Project | undefined = undefined;
             if (localProjectStage._id) {
-                saved = await ProjectDocApi.updateProjectStage(localProjectStage);
+                return;
+                // saved = await ProjectDocApi.updateProjectStage(localProjectStage);
             } else {
                 const { created, syncedProject: sp } = await ProjectDocApi.createProjectStage(localProjectStage);
                 saved = created;
@@ -114,18 +115,22 @@ const SaveProjectStageDialog = ({
             >
                 {!localProjectStage._id &&
                     <>
-                        <div className="field">
-                            <label htmlFor="stage">Stage</label>
-                            <Dropdown
-                                id="stage"
-                                value={localProjectStage.stage}
-                                options={stages}
-                                onChange={(e) => updateField("stage", e.value)}
-                                placeholder="Select Stage"
-                                optionLabel="name"
-                            />
-                        </div>
-
+                        {
+                            /**
+                             * 
+                             * <div className="field">
+                                <label htmlFor="stage">Stage</label>
+                                <Dropdown
+                                    id="stage"
+                                    value={localProjectStage.stage}
+                                    options={stages}
+                                    onChange={(e) => updateField("stage", e.value)}
+                                    placeholder="Select Stage"
+                                    optionLabel="name"
+                                />
+                            </div>
+                             */
+                        }
                         <UploadForm
                             onUpload={(file) => updateField("file", file)}
                         />

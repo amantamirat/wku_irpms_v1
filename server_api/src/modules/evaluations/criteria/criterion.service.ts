@@ -180,13 +180,13 @@ export class CriterionService {
                 evaluation: evaluation,
                 title: criterion.title,
                 weight: criterion.weight,
-                form_type: criterion.form_type,
+                formType: criterion.formType,
             });
 
             let createdOptions = [];
 
             // If closed form, process options
-            if (criterion.form_type === FormType.closed && Array.isArray(criterion.options)) {
+            if (criterion.formType === FormType.closed && Array.isArray(criterion.options)) {
                 for (const opt of criterion.options) {
                     if (opt.score > criterion.weight) continue; // skip invalid option
 

@@ -31,7 +31,7 @@ export class EvaluationController {
 
     getEvaluations = async (req: Request, res: Response) => {
         try {
-            const { directorate } = req.query;
+            const { directorate, reviewer } = req.query;
             const filter: GetEvaluationsDTO = {
                 directorate: directorate as string | undefined
             };

@@ -11,7 +11,7 @@ export interface ICriterion extends Document {
     evaluation: mongoose.Types.ObjectId;
     title: string;
     weight: number;
-    form_type: FormType;
+    formType: FormType;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -31,7 +31,7 @@ const CriterionSchema = new Schema<ICriterion>(
             max: 100,
             required: true,
         },
-        form_type: {
+        formType: {
             type: String,
             enum: Object.values(FormType),
             required: true,

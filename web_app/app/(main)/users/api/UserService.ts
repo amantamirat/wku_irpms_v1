@@ -99,7 +99,6 @@ export const UserApi = {
     },
 
 
-
     async sendVerificationCode(email: string): Promise<any> {
         const response = await ApiClient.post(send_verification_code_end_point, { email: email });
         return response;

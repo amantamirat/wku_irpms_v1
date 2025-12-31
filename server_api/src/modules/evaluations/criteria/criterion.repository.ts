@@ -42,6 +42,8 @@ export class CriterionRepository implements ICriterionRepository {
         const data: Partial<ICriterion> = {
             evaluation: new mongoose.Types.ObjectId(dto.evaluation),
             title: dto.title,
+            formType: dto.formType,
+            weight: dto.weight
         };
         return Criterion.create(data);
     }
@@ -50,7 +52,9 @@ export class CriterionRepository implements ICriterionRepository {
         const updateData: Partial<ICriterion> = {};
 
         if (dtoData.title) updateData.title = dtoData.title;
-
+        if (dtoData.formType) updateData.formType = dtoData.formType;
+        if (dtoData.weight) updateData.weight = dtoData.weight;
+        
         const updated = await Criterion.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },

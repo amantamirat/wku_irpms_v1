@@ -10,7 +10,7 @@ export type Criterion = {
     evaluation: string | Evaluation;
     title: string;
     weight: number;
-    form_type: FormType;
+    formType: FormType;
     createdAt?: Date;
     updatedAt?: Date;
 };
@@ -29,7 +29,7 @@ export const validateCriterion = (
     if (criterion.weight === undefined || criterion.weight <= 0) {
         return { valid: false, message: "Weight must be greater than zero." };
     }
-    if (!criterion.form_type) {
+    if (!criterion.formType) {
         return { valid: false, message: "Form type is required." };
     }
     return { valid: true };

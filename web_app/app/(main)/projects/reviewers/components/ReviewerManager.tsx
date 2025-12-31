@@ -1,21 +1,20 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
 import { CrudManager } from "@/components/CrudManager";
-import ErrorCard from "@/components/ErrorCard";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useAuth } from "@/contexts/auth-context";
-import ListSkeleton from "@/components/ListSkeleton";
-import SaveReviewerDialog from "./SaveReviewerDialog";
-import MyBadge from "@/templates/MyBadge";
-import ResultManager from "../../results/components/ResultManager";
-import { Reviewer, ReviewerStatus, GetReviewersOptions } from "../models/reviewer.model";
-import { ReviewerApi } from "../api/reviewer.api";
-import { ProjectDoc, DocStatus } from "../../documents/models/document.model";
-import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
 import { useCrudList } from "@/hooks/useCrudList";
+import MyBadge from "@/templates/MyBadge";
 import { PERMISSIONS } from "@/types/permissions";
 import { Button } from "primereact/button";
+import { TabPanel, TabView } from "primereact/tabview";
+import { useEffect, useState } from "react";
+import { DocStatus, ProjectDoc } from "../../documents/models/document.model";
+import { ReviewerApi } from "../api/reviewer.api";
+import { GetReviewersOptions, Reviewer, ReviewerStatus } from "../models/reviewer.model";
+import SaveReviewerDialog from "./SaveReviewerDialog";
+import ResultManager from "../../results/components/ResultManager";
 
 interface ReviewerManagerProps {
     projectStage?: ProjectDoc;
@@ -186,10 +185,10 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
     }
 
 
-    const columns = [       
+    const columns = [
         { header: "Stage", field: "projectStage.stage.name", sortable: true },
         { header: "Project", field: "projectStage.project.title", sortable: true },
-         { header: "Reviewer", field: "applicant.name" },
+        { header: "Reviewer", field: "applicant.name" },
         {
             header: "Score",
             field: "score",
@@ -215,8 +214,9 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
                 onCreate={() => { setReviewer(emptyReviewer); setShowSaveDialog(true); }}
                 onEdit={(row) => { setReviewer(row); setShowSaveDialog(true); }}
                 onDelete={(row: any) => confirm.ask({ item: row.applicant?.first_name ?? "", onConfirmAsync: () => deleteReviewer(row) })}
-                rowExpansionTemplate={(row) => <ResultManager reviewer={row} updateReviewerStatus={updateStatus} />}
-
+                rowExpansionTemplate={(row) =>
+                    <ResultManager reviewer={row} updateStatus={updateStatus} />
+                }
             />
 
             {reviewer && (

@@ -13,7 +13,7 @@ export class EvaluationService {
     }
 
     async create(dto: CreateEvaluationDTO) {
-        await CacheService.validateOwnership(dto.userId, dto.directorate);
+        //await CacheService.validateOwnership(dto.userId, dto.directorate);
 
         const directorateDoc = await Directorate.findById(dto.directorate).lean();
         if (!directorateDoc) {

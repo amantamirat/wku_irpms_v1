@@ -5,7 +5,6 @@ import { COLLECTIONS } from "../../../../common/constants/collections.enum";
 // 3️⃣ Option
 // =========================
 
-
 export interface IOption extends Document {
     criterion: mongoose.Types.ObjectId;
     title: string;

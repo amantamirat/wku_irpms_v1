@@ -120,7 +120,7 @@ export class UserService {
 
         const { email, password } = dto;
         const userDoc = await this.repository.findByEmail(email);
-        if (!userDoc || userDoc.status !== UserStatus.active) {
+        if (!userDoc || userDoc.status === UserStatus.suspended) {
             throw new Error("User not found");
         }
         const isMatch = await bcrypt.compare(password, userDoc.password);
@@ -187,18 +187,18 @@ export class UserService {
         const code = crypto.randomInt(100000000, 999999999).toString(); // 9-digit code
         const expiry = new Date(Date.now() + 120 * 60 * 1000); //120  mins       
 
-        const system_email = process.env.SYS_EMAIL;
+        const systemEmail = process.env.EMAIL;
         const password = process.env.EMAIL_PASSWORD;
         const transporter: Transporter = nodemailer.createTransport({
             service: 'Gmail',
             auth: {
-                user: system_email,
+                user: systemEmail,
                 pass: password,
             },
         });
 
         const myOptions = {
-            from: system_email,
+            from: systemEmail,
             to: userDoc.email,
             subject: 'Your Verification Code',
             text: `Hello, Welcome! Here is your verification code: ${code}`,

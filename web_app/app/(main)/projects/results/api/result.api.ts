@@ -1,17 +1,14 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Result, sanitizeResult } from "../models/result.model";
+import { GetResultOptions, Result, sanitizeResult } from "../models/result.model";
 
 const end_point = '/project/results/';
 
-export interface GetResultOptions {
-    reviewer: string;
-}
-
 export const ResultApi = {
-    
+
     async getResults(options: GetResultOptions): Promise<Result[]> {
         const query = new URLSearchParams();
-        query.append("reviewer", options.reviewer);
+        const sanitized = sanitizeResult(options);
+        query.append("reviewer", sanitized.reviewer as string);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Result[];
     },

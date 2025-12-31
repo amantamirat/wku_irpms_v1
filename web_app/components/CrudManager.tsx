@@ -196,7 +196,7 @@ export function CrudManager<T extends { _id?: string }>({
                                 <Column key={idx} {...col} />
                             ))}
 
-                            {(canEdit || canDelete) && <Column body={actionBody} />}
+                            {<Column body={actionBody} />}
                         </DataTable>
                 }
 

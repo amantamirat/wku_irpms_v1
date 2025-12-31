@@ -25,14 +25,16 @@ router.delete('/', verifyActiveAccount,
 router.patch("/change-password", verifyActiveAccount,
     controller.changePassword);
 
-//////////////
+///////////////////////////////////////
 
 router.post("/login", controller.login);
 
 router.post("/send-verification-code",
     controller.sendVerificationCode);
+
 router.post("/reset-password",
     controller.resetUser);
+
 router.post("/activate-user",
     controller.activateUser);
 

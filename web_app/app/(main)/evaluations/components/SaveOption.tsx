@@ -110,12 +110,12 @@ const SaveOption = ({ visible, option, onComplete, onHide }: SaveOptionProps) =>
                     <label htmlFor="value">Value</label>
                     <InputNumber
                         id="value"
-                        value={localOption.value}
-                        onValueChange={(e) => setLocalOption({ ...localOption, value: e.value || 0 })}
+                        value={localOption.score}
+                        onValueChange={(e) => setLocalOption({ ...localOption, score: e.value || 0 })}
                         required
                         mode="decimal"
                         min={0}
-                        className={classNames({ 'p-invalid': submitted && (localOption.value === undefined || localOption.value < 0) })}
+                        className={classNames({ 'p-invalid': submitted && (localOption.score === undefined || localOption.score < 0) })}
                     />
                 </div>
             </Dialog>

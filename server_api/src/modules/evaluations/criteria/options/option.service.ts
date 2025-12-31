@@ -25,7 +25,7 @@ export class OptionService {
 
         const criterionDoc = await this.criterionRepo.findById(criterion);
         if (!criterionDoc) throw new Error("Criterion not found.");
-        if (criterionDoc.form_type !== FormType.closed) throw new Error("Criterion must be closed.");
+        if (criterionDoc.formType !== FormType.closed) throw new Error("Criterion must be closed.");
 
         if (score > criterionDoc.weight) {
             throw new Error(
@@ -47,7 +47,6 @@ export class OptionService {
      */
     async update(dto: UpdateOptionDTO) {
         const { id, data } = dto;
-
         const option = await this.repository.findById(id);
         if (!option) throw new Error("Option not found.");
 

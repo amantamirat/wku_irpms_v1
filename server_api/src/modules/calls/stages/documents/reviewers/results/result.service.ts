@@ -27,7 +27,7 @@ export class ResultService {
         const criterionDoc = await Criterion.findById(criterionId).lean();
         if (!criterionDoc) throw new Error("Criterion not found");
 
-        if (criterionDoc.form_type === FormType.open) {
+        if (criterionDoc.formType === FormType.open) {
             // For open form type, score should be directly provided
             if (score === undefined || score === null) {
                 throw new Error("Score is required");
@@ -38,7 +38,7 @@ export class ResultService {
             }
 
         }
-        else if (criterionDoc.form_type === FormType.closed) {
+        else if (criterionDoc.formType === FormType.closed) {
             // For closed form type, get score from selected option
             if (!selectedOptionId) {
                 throw new Error("Selected option ID is required for closed form type");

@@ -1,4 +1,3 @@
-//import { Evaluation, evaluationTemplate, FormType } from "@/app/(main)/evals/models/evaluation.model";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputNumber } from "primereact/inputnumber";
@@ -13,73 +12,99 @@ import { OptionApi } from "@/app/(main)/evaluations/api/option.api";
 import { InputTextarea } from "primereact/inputtextarea";
 
 interface SaveResultDialogProps {
-    result: Result;
+    result?: Result; // ✅ OPTIONAL
     visible: boolean;
-    onCompelete?: (savedResult: Result) => void;
+    onCompelete?: (saved: Result) => void;
     onHide: () => void;
 }
 
-const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDialogProps) => {
+const SaveResultDialog = ({
+    visible,
+    result,
+    onCompelete,
+    onHide
+}: SaveResultDialogProps) => {
 
     const toast = useRef<Toast>(null);
     const [submitting, setSubmitting] = useState(false);
     const [options, setOptions] = useState<Option[]>([]);
-    const [localResult, setLocalResult] = useState<Result>(result);
-    const criterion = result.criterion as Criterion;
+    const [localResult, setLocalResult] = useState<Result | null>(null);
 
+    /* --------------------------------
+       Sync result → localResult
+    --------------------------------- */
     useEffect(() => {
-        setLocalResult(result || {});
+        if (!result) {
+            setLocalResult(null);
+            return;
+        }
+
+        setLocalResult({
+            _id: result._id,
+            criterion: result.criterion,
+            reviewer: result.reviewer,
+            score: result.score ?? 0,
+            selectedOption: result.selectedOption,
+            comment: result.comment ?? ""
+        });
     }, [result]);
 
+    /* --------------------------------
+       Fetch options (guarded)
+    --------------------------------- */
     useEffect(() => {
-        if ((result.criterion as Criterion).form_type === FormType.closed) {
-            const fetchOptions = async () => {
-                try {
-                    const data = await OptionApi.getOptions({ criterion: criterion._id });
-                    setOptions(data);
-                } catch (err) {
-                    console.error("Failed to fetch options:", err);
-                }
-            };
-            fetchOptions();
-        }
-    }, [criterion.form_type]);
+        if (!localResult) return;
 
+        const criterion = localResult.criterion as Criterion;
+        if (criterion.formType !== FormType.closed) return;
 
+        const fetchOptions = async () => {
+            try {
+                const data = await OptionApi.getOptions({ criterion: criterion._id });
+                setOptions(data);
+            } catch (err) {
+                console.error("Failed to fetch options:", err);
+            }
+        };
+
+        fetchOptions();
+    }, [localResult]);
+
+    /* --------------------------------
+       Save
+    --------------------------------- */
     const saveResult = async () => {
+        if (!localResult) return;
+
         try {
             setSubmitting(true);
+
             const validation = validateResult(localResult);
             if (!validation.valid) {
                 throw new Error(validation.message);
             }
-            let saved: Result;
-            if (localResult._id) {
-                saved = await ResultApi.updateResult(localResult);
-            } else {
-                saved = await ResultApi.createResult(localResult);
-            }
-            saved = {
-                ...saved,
-                reviewer: localResult.reviewer,
-                criterion: localResult.criterion,
-                selectedOption: localResult.selectedOption
-            };
+
+            const saved = localResult._id
+                ? await ResultApi.updateResult(localResult)
+                : await ResultApi.createResult(localResult);
+
             toast.current?.show({
-                severity: 'success',
-                summary: 'Successful',
-                detail: `Result Saved.`,
+                severity: "success",
+                summary: "Successful",
+                detail: "Result Saved.",
                 life: 2000
             });
-            if (onCompelete) {
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                onCompelete(saved);
-            }
+
+            onCompelete?.({
+                ...saved, criterion: localResult.criterion,
+                selectedOption: localResult.selectedOption
+            });
+            onHide();
         } catch (err) {
             toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to Save Result',
-                detail: '' + err,
+                severity: "error",
+                summary: "Failed to Save Result",
+                detail: String(err),
                 life: 2000
             });
         } finally {
@@ -87,12 +112,7 @@ const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDi
         }
     };
 
-    const footer = (
-        <>
-            <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
-            <Button label="Save" loading={submitting} disabled={submitting} icon="pi pi-check" text onClick={saveResult} />
-        </>
-    );
+    const criterion = localResult?.criterion as Criterion | undefined;
 
     return (
         <>
@@ -103,60 +123,83 @@ const SaveResultDialog = ({ visible, result, onCompelete, onHide }: SaveResultDi
                 header="Result Details"
                 modal
                 className="p-fluid"
-                footer={footer}
+                footer={
+                    <>
+                        <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
+                        <Button
+                            label="Save"
+                            icon="pi pi-check"
+                            text
+                            loading={submitting}
+                            disabled={!localResult || submitting}
+                            onClick={saveResult}
+                        />
+                    </>
+                }
                 onHide={onHide}
             >
-                <h3 className="mb-3 text-center text-xl font-semibold break-words">
-                    {criterion.title}
-                </h3>
-                {
-                    (result.criterion && criterion.form_type === FormType.closed) &&
-                    <div className="field">
-                        <label htmlFor="selectedOption">Score</label>
-                        <Dropdown
-                            id="selectedOption"
-                            dataKey="_id"
-                            value={localResult.selectedOption}
-                            options={options}
-                            onChange={(e) => {
-                                setLocalResult({ ...localResult, selectedOption: e.value });
-                            }}
-                            optionLabel="title"
-                            placeholder="Select Option"
-                        />
-                    </div>
+                {!localResult || !criterion ? (
+                    <p className="text-center text-gray-400">Loading...</p>
+                ) : (
+                    <>
+                        <h3 className="mb-3 text-center text-xl font-semibold">
+                            {criterion.title}
+                        </h3>
 
-                }
-                {
-                    (result.criterion && criterion.form_type === FormType.open) &&
-                    <div className="field">
-                        <label htmlFor="score">Score</label>
-                        <InputNumber
-                            id="score"
-                            value={localResult.score}
-                            onValueChange={(e) => setLocalResult({ ...localResult, score: e.value ?? 0 })}
-                            min={0}
-                            max={criterion.weight}
-                            placeholder="Enter score"
-                        />
-                    </div>
-                }
-                {/* Comment Field */}
-                <div className="field">
-                    <label htmlFor="comment">Comment</label>
-                    <InputTextarea
-                        id="comment"
-                        value={localResult.comment ?? ''}
-                        onChange={(e) => setLocalResult({ ...localResult, comment: e.target.value })}
-                        rows={4}
-                        cols={30}
-                        maxLength={2000}
-                    />
-                </div>
+                        {criterion.formType === FormType.closed && (
+                            <div className="field">
+                                <label>Score</label>
+                                <Dropdown
+                                    value={localResult.selectedOption}
+                                    dataKey="_id"
+                                    options={options}
+                                    optionLabel="title"
+                                    placeholder="Select Option"
+                                    onChange={(e) =>
+                                        setLocalResult({
+                                            ...localResult,
+                                            selectedOption: e.value
+                                        })
+                                    }
+                                />
+                            </div>
+                        )}
 
+                        {criterion.formType === FormType.open && (
+                            <div className="field">
+                                <label>Score</label>
+                                <InputNumber
+                                    value={localResult.score}
+                                    min={0}
+                                    max={criterion.weight}
+                                    onValueChange={(e) =>
+                                        setLocalResult({
+                                            ...localResult,
+                                            score: e.value ?? 0
+                                        })
+                                    }
+                                />
+                            </div>
+                        )}
+
+                        <div className="field">
+                            <label>Comment</label>
+                            <InputTextarea
+                                rows={4}
+                                value={localResult.comment}
+                                onChange={(e) =>
+                                    setLocalResult({
+                                        ...localResult,
+                                        comment: e.target.value
+                                    })
+                                }
+                            />
+                        </div>
+                    </>
+                )}
             </Dialog>
         </>
     );
-}
+};
 
 export default SaveResultDialog;

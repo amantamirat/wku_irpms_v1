@@ -17,12 +17,12 @@ export class CriterionController {
         try {
             if (!req.user) throw new Error("User not found");
 
-            const { evaluation, title, form_type, weight } = req.body;
+            const { evaluation, title, formType, weight } = req.body;
 
             const dto: CreateCriterionDTO = {
                 evaluation,
                 title,
-                form_type,
+                formType,
                 weight
             };
 
@@ -53,11 +53,11 @@ export class CriterionController {
             if (!req.user) throw new Error("User not found");
 
             const { id } = req.params;
-            const { title, form_type, weight } = req.body;
+            const { title, form_type: formType, weight } = req.body;
 
             const dto: UpdateCriterionDTO = {
                 id,
-                data: { title, form_type, weight }
+                data: { title, formType, weight }
             };
 
             const updated = await this.service.update(dto);

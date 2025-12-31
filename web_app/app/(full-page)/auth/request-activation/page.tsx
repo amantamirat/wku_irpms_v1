@@ -26,7 +26,7 @@ export default function RequestActivationPage() {
       if (res.success) {
         msgs.current?.clear();
         msgs.current?.show({ severity: 'success', summary: 'Almost There!', detail: 'Verfication code has been sent to your email.' });
-        setTimeout(() => router.push(`/auth/activate-account`), 3000);
+        setTimeout(() => router.push(`/auth/activate-account`), 1000);
       }
     } catch (err: any) {
       msgs.current?.clear();

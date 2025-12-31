@@ -5,7 +5,7 @@ export interface CreateCriterionDTO {
     evaluation: string;
     title: string;
     weight: number;
-    form_type: FormType;
+    formType: FormType;
 }
 
 export interface UpdateCriterionDTO {
@@ -13,7 +13,7 @@ export interface UpdateCriterionDTO {
     data: Partial<{
         title: string;
         weight: number;
-        form_type: FormType;
+        formType: FormType;
     }>;
 }
 
@@ -35,7 +35,7 @@ export interface ImportCriterionOptionDTO {
 export interface ImportCriterionDTO {
     title: string;
     weight: number;
-    form_type: FormType;
+    formType: FormType;
     options?: ImportCriterionOptionDTO[];
 }
 

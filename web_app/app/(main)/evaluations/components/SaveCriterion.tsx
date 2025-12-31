@@ -144,14 +144,14 @@ const SaveCriterion = ({ visible, criterion, onComplete, onHide }: SaveCriterion
 
                 {/* Form Type Field */}
                 <div className="field">
-                    <label htmlFor="form_type">Form Type</label>
+                    <label htmlFor="formType">Form Type</label>
                     <Dropdown
-                        id="form_type"
-                        value={localCriterion.form_type}
+                        id="formType"
+                        value={localCriterion.formType}
                         options={formTypeOptions}
-                        onChange={(e) => setLocalCriterion({ ...localCriterion, form_type: e.value })}
+                        onChange={(e) => setLocalCriterion({ ...localCriterion, formType: e.value })}
                         placeholder="Select Form Type"
-                        className={classNames({ 'p-invalid': submitted && !localCriterion.form_type })}
+                        className={classNames({ 'p-invalid': submitted && !localCriterion.formType })}
                     />
                 </div>
             </Dialog>

@@ -50,7 +50,6 @@ export class OptionController {
                     score: req.body.score
                 },
             };
-
             const updated = await this.service.update(dto);
             successResponse(res, 200, "Option updated successfully", updated);
         } catch (err: any) {

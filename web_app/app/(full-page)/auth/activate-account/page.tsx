@@ -18,9 +18,6 @@ export default function ActivateAccountPage() {
   const msgs = useRef<Messages>(null);
   const { user, logout } = useAuth();
 
-
-
-
   const activateAccount = async () => {
     try {
       setActivating(true);
@@ -33,7 +30,8 @@ export default function ActivateAccountPage() {
       if (data.success) {
         msgs.current?.clear();
         msgs.current?.show({ severity: 'success', summary: 'Success!', detail: 'Your account has been activated successfully.' });
-        setTimeout(() => logout(), 3000);
+        logout();
+        setTimeout(() => router.push(`/`), 1000);
       }
     } catch (err: any) {
       console.error(err);
@@ -95,7 +93,7 @@ export default function ActivateAccountPage() {
                 className="mt-4"
                 severity="danger"
                 outlined
-                onClick={logout} />
+                onClick={() => { logout(); router.push(`/`); }} />
             </div>
           </div>
         </div>

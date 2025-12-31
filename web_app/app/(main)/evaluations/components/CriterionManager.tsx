@@ -10,11 +10,12 @@ import SaveCriterion from "./SaveCriterion";
 import { Evaluation } from "../../evaluations/models/evaluation.model";
 import { useAuth } from "@/contexts/auth-context";
 import OptionManager from "./OptionManager";
-import { FileUpload } from "primereact/fileupload";
-
+import { Reviewer } from "../../projects/reviewers/models/reviewer.model";
+import { Stage } from "../../calls/stages/models/stage.model";
+import { ProjectDoc } from "../../projects/documents/models/document.model";
 
 interface CriterionManagerProps {
-    evaluation: Evaluation;
+    evaluation?: Evaluation;
 }
 
 const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
@@ -22,8 +23,8 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
     const emptyCriterion: Criterion = {
         title: "",
         weight: 0,
-        form_type: FormType.closed,
-        evaluation
+        formType: FormType.closed,
+        evaluation: evaluation ?? ''
     };
 
     const confirm = useConfirmDialog();
@@ -50,6 +51,9 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
 
     /** Fetch criteria for the evaluation */
     useEffect(() => {
+        if (!evaluation) {
+            return;
+        }
         const fetchCriteria = async () => {
             try {
                 setLoading(true);
@@ -63,7 +67,6 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
                 setLoading(false);
             }
         };
-
         fetchCriteria();
     }, [evaluation]);
 
@@ -90,10 +93,10 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
         { header: "Weight", field: "weight" },
         {
             header: "Form Type",
-            field: "form_type",
+            field: "formType",
             body: (row: Criterion) =>
-                <span className={`form-badge form-type-${row.form_type?.toLowerCase()}`}>
-                    {row.form_type}
+                <span className={`form-badge form-type-${row.formType?.toLowerCase()}`}>
+                    {row.formType}
                 </span>
         },
     ];
@@ -162,7 +165,7 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
     return (
         <>
             <CrudManager
-                headerTitle={`Manage Criteria for "${evaluation.title}"`}
+                headerTitle={"Manage Criteria"}
                 itemName="Criterion"
                 items={criteria}
                 dataKey="_id"
@@ -170,7 +173,6 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
                 loading={loading}
                 error={error}
 
-                enableSearch
                 canCreate={canCreate}
                 canEdit={canEdit}
                 canDelete={canDelete}
@@ -196,7 +198,7 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
             />
 
             {/* Save Dialog */}
-            {criterion && (
+            {(criterion && showSaveDialog) && (
                 <SaveCriterion
                     visible={showSaveDialog}
                     criterion={criterion}

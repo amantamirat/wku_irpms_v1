@@ -2,17 +2,20 @@ import { Reviewer } from "../../reviewers/models/reviewer.model";
 import { Criterion } from "@/app/(main)/evaluations/models/criterion.model";
 import { Option } from "@/app/(main)/evaluations/models/option.model";
 
-
 export type Result = {
     _id?: string;
-    reviewer: string | Reviewer;
     criterion: string | Criterion;
+    reviewer: string | Reviewer;
     score?: number;
     selectedOption?: string | Option;
     comment?: string;
     createdAt?: Date;
     updatedAt?: Date;
 };
+
+export interface GetResultOptions {
+    reviewer: Reviewer | string;
+}
 
 
 export const validateResult = (result: Result): { valid: boolean; message?: string } => {
