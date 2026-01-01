@@ -124,7 +124,7 @@ export class CollaboratorController {
 
             const dto: DeleteDto = {
                 id,
-                userId: req.user.applicantId,
+                applicantId: req.user.applicantId,
             };
 
             const deleted = await this.service.delete(dto);

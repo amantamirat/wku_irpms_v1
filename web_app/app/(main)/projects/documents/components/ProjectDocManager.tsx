@@ -9,7 +9,7 @@ import MyBadge from "@/templates/MyBadge";
 import { PERMISSIONS } from "@/types/permissions";
 import { Button } from "primereact/button";
 import { useEffect, useState } from "react";
-import { Project } from "../../models/project.model";
+import { Project, ProjectStatus } from "../../models/project.model";
 import ReviewerManager from "../../reviewers/components/ReviewerManager";
 import { ProjectDocApi } from "../api/project.doc.api";
 import { DocStatus, ProjectDoc } from "../models/document.model";
@@ -31,14 +31,16 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
     const [selectedDocs, setSelectedDocs] = useState<ProjectDoc[]>([]);
 
     const emptyStage: ProjectDoc = {
-        stage:"-",
+        stage: "-",
         project: project ?? "",
         status: DocStatus.pending
     };
 
     // ✅ Permissions (adjust if needed)
-    const canCreate = !!project && isLeadPI && hasPermission([PERMISSIONS.DOCUMENT.CREATE]);
-    const canDelete = !!project && isLeadPI && hasPermission([PERMISSIONS.DOCUMENT.DELETE]);
+    const isValidStatus = project ? (project.status === ProjectStatus.pending ||
+        project.status === ProjectStatus.accepted) : false;
+    const canCreate = isValidStatus && isLeadPI && hasPermission([PERMISSIONS.DOCUMENT.CREATE]);
+    const canDelete = isValidStatus && hasPermission([PERMISSIONS.DOCUMENT.DELETE]);
     //Status Permissions
     const canAccept = hasPermission([PERMISSIONS.DOCUMENT.STATUS.ACCEPT]);
     const canReject = hasPermission([PERMISSIONS.DOCUMENT.STATUS.REJECT]);
@@ -257,7 +259,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
                 onSelectionChange={(value) => setSelectedDocs((value ?? []) as ProjectDoc[])}
             />
 
-            {project && (
+            {(isValidStatus && showSaveDialog) && (
                 <SaveProjectStageDialog
                     visible={showSaveDialog}
                     project={project}

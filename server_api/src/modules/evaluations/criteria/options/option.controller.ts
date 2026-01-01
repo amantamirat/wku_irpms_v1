@@ -63,7 +63,7 @@ export class OptionController {
 
             const deleted = await this.service.delete({
                 id: req.params.id,
-                userId: req.user.userId
+                applicantId: req.user.userId
             });
 
             successResponse(res, 200, "Option deleted successfully", deleted);

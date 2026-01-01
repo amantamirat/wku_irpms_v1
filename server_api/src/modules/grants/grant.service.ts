@@ -44,7 +44,7 @@ export class GrantService {
     }
 
     async deleteGrant(dto: DeleteDto) {
-        const { id, userId } = dto;
+        const { id, applicantId: userId } = dto;
         const grantDoc = await this.repository.findById(id);
         if (!grantDoc) throw new Error("Grant not found");
         //await CacheService.validateOwnership(userId, grantDoc.directorate);

@@ -116,7 +116,7 @@ const RoleManager = () => {
             />
 
             {/* Save Role Dialog */}
-            {(role) && (
+            {(role && showSaveDialog) && (
                 <SaveDialog
                     visible={showSaveDialog}
                     role={role}

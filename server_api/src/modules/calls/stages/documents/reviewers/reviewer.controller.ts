@@ -3,8 +3,7 @@ import { ReviewerService } from "./reviewer.service";
 import {
     CreateReviewerDTO,
     GetReviewersDTO,
-    UpdateReviewerDTO,
-    DeleteReviewerDTO
+    UpdateReviewerDTO
 } from "./reviewer.dto";
 import { AuthenticatedRequest } from "../../../../users/user.middleware";
 import { successResponse, errorResponse } from "../../../../../common/helpers/response";
@@ -127,15 +126,9 @@ export class ReviewerController {
             if (!req.user) {
                 throw new Error("User not found!");
             }
-
             const { id } = req.params;
 
-            const dto: DeleteReviewerDTO = {
-                id,
-                userId: req.user.userId
-            };
-
-            const deleted = await this.service.delete(dto);
+            const deleted = await this.service.delete(id);
             successResponse(res, 200, "Reviewer deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

@@ -120,7 +120,7 @@ export class PhaseController {
             const { id } = req.params;
             const dto: DeleteDto = {
                 id,
-                userId: req.user.applicantId,
+                applicantId: req.user.applicantId,
             };
             const deleted = await this.service.delete(dto);
             successResponse(res, 200, "Phase deleted successfully", deleted);

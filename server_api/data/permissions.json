@@ -600,5 +600,21 @@
     "category": "Phase Management",
     "name": "phase:delete",
     "description": "Delete phase entries"
+  },
+  {
+    "category": "Project Theme Management",
+    "name": "project:theme:create"
+  },
+  {
+    "category": "Project Theme Management",
+    "name": "project:theme:read"
+  },
+  {
+    "category": "Project Theme Management",
+    "name": "project:theme:update"
+  },
+  {
+    "category": "Project Theme Management",
+    "name": "project:theme:delete"
   }
 ]

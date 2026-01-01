@@ -32,11 +32,11 @@ export default function ProjectDetail({ project, updateProjectStatus }: ProjectD
                     <TabPanel header="Collaborators">
                         <CollaboratorManager project={project} />
                     </TabPanel>
-                    <TabPanel header="Phases">
-                        <PhaseManager project={project} phaseType={PhaseType.phase} />
-                    </TabPanel>
                     <TabPanel header="Themes">
                         <ProjectThemeManager project={project} />
+                    </TabPanel>
+                    <TabPanel header="Phases">
+                        <PhaseManager project={project} phaseType={PhaseType.phase} />
                     </TabPanel>
                     <TabPanel header="Documents">
                         <ProjectDocManager project={project} updateProjectStatus={updateProjectStatus} />

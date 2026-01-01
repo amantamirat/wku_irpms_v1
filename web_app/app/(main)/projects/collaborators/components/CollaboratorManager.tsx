@@ -9,10 +9,11 @@ import MyBadge from "@/templates/MyBadge";
 import { PERMISSIONS } from "@/types/permissions";
 import { Button } from "primereact/button";
 import { useEffect, useState } from "react";
-import { Project } from "../../models/project.model";
+import { Project, ProjectStatus } from "../../models/project.model";
 import { CollaboratorApi } from "../api/collaborator.api";
 import { Collaborator, CollaboratorStatus } from "../models/collaborator.model";
 import CollaboratorDialog from "./CollaboratorDialog";
+import ProjectDetail from "../../components/ProjectDetail";
 
 interface CollaboratorProps {
     project?: Project;
@@ -24,8 +25,8 @@ interface CollaboratorProps {
 
 const CollaboratorManager = ({ project, applicant, flyMode = false, onSave, onRemove }: CollaboratorProps) => {
     const confirm = useConfirmDialog();
-    const { getApplicant: getLinkedApplicant, hasPermission } = useAuth();
-    const linkedApplicant = getLinkedApplicant();
+    const { getApplicant: getApplicant, hasPermission } = useAuth();
+    const linkedApplicant = getApplicant();
     const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
     const isLeadPI = project ? loggedApplicantId === (project.leadPI as any)._id : false;
 
@@ -35,9 +36,11 @@ const CollaboratorManager = ({ project, applicant, flyMode = false, onSave, onRe
         status: CollaboratorStatus.pending
     };
 
-    // ✅ Permissions
-    const canCreate = !!project && isLeadPI && hasPermission([PERMISSIONS.COLLABORATOR.CREATE]);
-    const canDelete = !!project && isLeadPI && hasPermission([PERMISSIONS.COLLABORATOR.DELETE]);
+    const isValidStatus = project ? project.status === ProjectStatus.pending ||
+        project.status === ProjectStatus.negotiation : false;
+    // ✅ Permissions    
+    const canCreate = isValidStatus && isLeadPI && hasPermission([PERMISSIONS.COLLABORATOR.CREATE]);
+    const canDelete = isValidStatus && isLeadPI && hasPermission([PERMISSIONS.COLLABORATOR.DELETE]);
 
     const canVerify = hasPermission([PERMISSIONS.COLLABORATOR.STATUS.VERIFY]);
     const canPend = hasPermission([PERMISSIONS.COLLABORATOR.STATUS.PEND]);
@@ -167,6 +170,14 @@ const CollaboratorManager = ({ project, applicant, flyMode = false, onSave, onRe
         { body: stateTransitionTemplate }
     ].filter(Boolean);
 
+
+    const projectDetailTemplate = (row: Collaborator) => {
+        if (project) {
+            return undefined
+        }
+        return <ProjectDetail project={row.project as Project} />;
+    }
+
     return (
         <>
             <CrudManager
@@ -193,9 +204,13 @@ const CollaboratorManager = ({ project, applicant, flyMode = false, onSave, onRe
                     })
                 }
                 }
+
+                rowExpansionTemplate={!project ? (row) => {
+                    return projectDetailTemplate(row);
+                } : undefined}
             />
 
-            {(project && showSaveDialog) && (
+            {(isValidStatus && showSaveDialog) && (
                 <CollaboratorDialog
                     collaborator={selectedCollaborator}
                     visible={showSaveDialog}

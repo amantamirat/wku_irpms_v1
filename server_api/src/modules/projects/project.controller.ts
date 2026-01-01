@@ -27,7 +27,7 @@ export class ProjectController {
         call,
         title,
         summary,
-        applicantId: req.user.applicantId,
+        leadPI: req.user.applicantId,
       };
 
       const created = await this.service.create(dto);
@@ -162,9 +162,8 @@ export class ProjectController {
 
       const dto: DeleteDto = {
         id,
-        userId: req.user.applicantId,
+        applicantId: req.user.applicantId,
       };
-
       const deleted = await this.service.delete(dto);
       successResponse(res, 200, "Project deleted successfully", deleted);
     } catch (err: any) {

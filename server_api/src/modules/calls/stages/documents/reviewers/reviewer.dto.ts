@@ -22,8 +22,3 @@ export interface UpdateReviewerDTO {
     }>;
     applicantId: string;
 }
-
-export interface DeleteReviewerDTO {
-    id: string;
-    userId: string;
-}

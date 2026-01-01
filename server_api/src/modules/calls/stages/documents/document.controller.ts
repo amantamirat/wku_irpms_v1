@@ -26,6 +26,9 @@ export class ProjectDocController {
     // ---------------------------------------------------
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
+            if (!req.user) {
+                throw new Error("User not found!");
+            }
             if (!req.file) throw new Error("Document required");
 
             const { project, stage } = req.body;
@@ -34,6 +37,7 @@ export class ProjectDocController {
                 project,
                 stage,
                 documentPath: `uploads/${req.file.filename}`,
+                applicantId: req.user.applicantId
             };
 
             const created = await this.service.create(dto);
@@ -106,7 +110,7 @@ export class ProjectDocController {
 
             const dto: DeleteDto = {
                 id,
-                userId: req.user.userId,
+                applicantId: req.user.applicantId,
             };
 
             const deletedDoc = await this.service.delete(dto);

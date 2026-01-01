@@ -58,7 +58,7 @@ export class RoleController {
             const { id } = req.params;
             const deleted = await this.service.delete({
                 id,
-                userId: req.user.userId,
+                applicantId: req.user.userId,
             });
 
             successResponse(res, 200, 'Role deleted successfully', deleted);

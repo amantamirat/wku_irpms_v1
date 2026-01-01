@@ -1,3 +1,5 @@
+import { AppError } from "../../../common/errors/app.error";
+import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { IThemeRepository, ThemeRepository } from "../../thematics/themes/theme.repository";
 import { IProjectRepository, ProjectRepository } from "../project.repository";
 import { ProjectStatus } from "../project.status";
@@ -21,7 +23,7 @@ export class ProjectThemeService {
     async create(data: CreateProjectThemeDTO) {
         const { project, theme } = data;
         const projectDoc = await this.projectRepository.findById(project);
-        if (!projectDoc) throw new Error("Project not found");
+        if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
         if (projectDoc.status !== ProjectStatus.pending &&
             projectDoc.status !== ProjectStatus.negotiation) {
             throw new Error("INVALID_PROJECT_STATUS_FOR_PROJECT_THEME_CREATE");

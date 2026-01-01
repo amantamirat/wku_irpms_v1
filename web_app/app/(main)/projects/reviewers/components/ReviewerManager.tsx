@@ -24,6 +24,7 @@ interface ReviewerManagerProps {
 }
 
 const ReviewerManager = ({ projectStage, applicant, showControllers, updateProjectStage }: ReviewerManagerProps) => {
+    
     const confirm = useConfirmDialog();
     const { getApplicant: getLinkedApplicant, hasPermission } = useAuth();
     const linkedApplicant = getLinkedApplicant();
@@ -168,7 +169,7 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
                     {/* approved → submitted */}
                     {state === ReviewerStatus.approved && (
                         <Button
-                            label="Revert"
+                            tooltip="Revert"
                             icon="pi pi-undo"
                             severity="warning"
                             size="small"

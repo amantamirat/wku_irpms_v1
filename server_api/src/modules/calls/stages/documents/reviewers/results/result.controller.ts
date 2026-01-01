@@ -20,7 +20,7 @@ export class ResultController {
                 criterion: criterion,
                 score,
                 selectedOption: selectedOption,
-                applicantId: req.user.userId,
+                applicantId: req.user.applicantId,
                 comment
             };
 
@@ -77,7 +77,7 @@ export class ResultController {
 
             const dto: DeleteDto = {
                 id,
-                userId: req.user.applicantId
+                applicantId: req.user.applicantId
             };
 
             const deleted = await resultService.delete(dto);

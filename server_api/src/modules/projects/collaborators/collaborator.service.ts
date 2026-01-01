@@ -90,7 +90,7 @@ export class CollaboratorService {
     }
 
     async delete(dto: DeleteDto) {
-        const { id, userId } = dto;
+        const { id, applicantId: userId } = dto;
 
         const collaboratorDoc = await this.repository.findById(id);
         if (!collaboratorDoc) throw new Error("Collaborator not found");

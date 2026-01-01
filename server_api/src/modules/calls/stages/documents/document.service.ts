@@ -10,6 +10,9 @@ import { DocStatus } from "./document.status";
 import { IDocumentRepository, DocumentRepository } from "./document.repository";
 import { DocumentStateMachine } from "./document.state-machine";
 import { ProjectStatus } from "../../../projects/project.status";
+import { AppError } from "../../../../common/errors/app.error";
+import { ERROR_CODES } from "../../../../common/errors/error.codes";
+import { SYSTEM } from "../../../../common/constants/system.constant";
 
 export class DocumentService {
 
@@ -32,30 +35,33 @@ export class DocumentService {
 
     async create(dto: CreateDocumentDTO) {
         try {
-            const { project, stage } = dto;
+            const { project, stage, applicantId } = dto;
+
             const projectDoc = await this.projectRepository.findById(project);
-            if (!projectDoc) throw new Error("Project not found.");
-            if (projectDoc.status === ProjectStatus.rejected) {
-                throw new Error("Project is rejected.");
-            }
+            if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
+
+            if (String(projectDoc.leadPI) !== applicantId && SYSTEM.SU_USER !== applicantId)
+                throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
+            if (projectDoc.status === ProjectStatus.rejected)
+                throw new AppError(ERROR_CODES.PROJECT_REJECTED);
+
             const projectDocs = await this.repository.find({ project }, false);
             const hasNotAccepted = projectDocs.some(doc => doc.status !== DocStatus.accepted);
-            if (hasNotAccepted) {
-                throw new Error('Previous project documents must be accepted before proceeding.');
-            }
+            if (hasNotAccepted)
+                throw new AppError(ERROR_CODES.PROJECT_DOC_NOT_ACCEPTED);
+
             const nextOrder = projectDocs.length + 1;
             const nextStageDoc = await this.stageRepository.findOne({ call: String(projectDoc.call), order: nextOrder });
-            if (!nextStageDoc) throw new Error("Next stage not found");
-            if (nextStageDoc.status !== StageStatus.active) throw new Error(`${nextStageDoc.name} stage is not active`);
-            if (nextStageDoc.deadline < new Date()) throw new Error(`${nextStageDoc.name} stage deadline has passed`);
+            if (!nextStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+
+            if (nextStageDoc.status !== StageStatus.active) throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
+            if (nextStageDoc.deadline < new Date()) throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
 
             await this.validator.validateProject(project, projectDoc);
 
             const created = await this.repository.create({ ...dto, stage: String(nextStageDoc._id) });
-            let syncedProject;
-            if (created) {
-                syncedProject = await this.projectSynchronizer.syncProjectStatus(project, projectDoc, projectDocs);
-            }
+            const syncedProject = await this.projectSynchronizer.syncProjectStatus(project, projectDoc, [...projectDocs, created]);
+
             return { created, syncedProject }
         } catch (e: any) {
             throw e;
@@ -120,10 +126,21 @@ export class DocumentService {
     }
 
     async delete(dto: DeleteDto) {
-        const { id, userId } = dto;
+        const { id, applicantId: userId } = dto;
+
         const projectStageDoc = await this.repository.findById(id);
-        if (!projectStageDoc) throw new Error("Project stage not found");
-        if (projectStageDoc.status !== DocStatus.pending) throw new Error("Pending document not found.");
+        if (!projectStageDoc)
+            throw new AppError(ERROR_CODES.PROJECT_DOC_NOT_FOUND);
+        if (projectStageDoc.status !== DocStatus.pending)
+            throw new AppError(ERROR_CODES.PROJECT_DOC_NOT_PENDING);
+
+        const projectDoc = await this.projectRepository.findById(String(projectStageDoc.project));
+        if (!projectDoc)
+            throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
+        if (String(projectDoc.leadPI) !== userId && SYSTEM.SU_USER !== userId)
+            throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
+
+
         const deleted = await this.repository.delete(id);
         if (deleted) {
             await this.projectSynchronizer.syncProjectStatus(projectStageDoc.project.toString());

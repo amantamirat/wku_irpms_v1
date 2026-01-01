@@ -25,6 +25,8 @@ import { ConstraintValidator } from "../grants/constraints/constraint.validator"
 import { PhaseType } from "./phase/phase.enum";
 import { IProjectThemeRepository, ProjectThemeRepository } from "./themes/project.theme.repository";
 import { DocumentRepository, IDocumentRepository } from "../calls/stages/documents/document.repository";
+import { ERROR_CODES } from "../../common/errors/error.codes";
+import { AppError } from "../../common/errors/app.error";
 
 export class ProjectService {
 
@@ -55,13 +57,17 @@ export class ProjectService {
     }
 
     async create(dto: CreateProjectDTO) {
-        const callDoc = await this.callRepository.findById(dto.call);
-        if (!callDoc) throw new Error("Call not found");
-        if (callDoc.status !== CallStatus.active) throw new Error("Call is not active");
-        const leadPIDoc = await this.appRepository.findOne({ id: dto.applicantId });
-        if (!leadPIDoc) throw new Error("Lead PI not found");
+        const { call, leadPI } = dto
+
+        const callDoc = await this.callRepository.findById(call);
+        if (!callDoc) throw new Error(ERROR_CODES.CALL_NOT_FOUND);
+        if (callDoc.status !== CallStatus.active) throw new Error(ERROR_CODES.CALL_NOT_ACTIVE);
+
+        const leadPIDoc = await this.appRepository.findOne({ id: leadPI });
+        if (!leadPIDoc) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
+
         const created = await this.repository.create(dto);
-        await this.collabRepository.create({ applicant: dto.applicantId, project: String(created._id) });
+        //await this.collabRepository.create({ applicant: dto.applicantId, project: String(created._id) });
         return created;
     }
 
@@ -103,7 +109,7 @@ export class ProjectService {
 
         await this.validator.validateProjectConstraints(String(callDoc.grant), collaborators, phases);
 
-        const projectDoc = await this.repository.create({ call, title, applicantId: leadPI, summary });
+        const projectDoc = await this.repository.create({ call, title, leadPI: leadPI, summary });
         const projectId = String(projectDoc._id);
 
         await this.collabRepository.createMany(
@@ -134,7 +140,8 @@ export class ProjectService {
         await this.docRepository.create({
             project: projectId,
             stage: String(firstStageDoc._id),
-            documentPath: documentPath
+            documentPath: documentPath,
+            applicantId: ""
         });
 
         await this.repository.update(projectId, { status: ProjectStatus.submitted });
@@ -150,12 +157,11 @@ export class ProjectService {
         const projectDoc = await this.repository.findById(id);
         if (!projectDoc) throw new Error("Project not found");
 
+        if (String(projectDoc.leadPI) !== userId || "system" !== userId)
+            throw new Error(ERROR_CODES.USER_NOT_LEAD_PI);
+
         if (projectDoc.status !== ProjectStatus.pending)
             throw new Error("Project not is not pending");
-
-        if (String(projectDoc.leadPI) !== userId) {
-            throw new Error("Unauthorized: You cannot update this project.");
-        }
 
         return this.repository.update(dto.id, dto.data);
     }
@@ -168,7 +174,7 @@ export class ProjectService {
         const next = status;
 
         const projectDoc = await this.repository.findById(id);
-        if (!projectDoc) throw new Error("Project not found");
+        if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
 
         const current = projectDoc.status;
         ProjectStateMachine.validateTransition(current, next);
@@ -197,17 +203,17 @@ export class ProjectService {
     // DELETE
     // ---------------------------------------------------
     async delete(dto: DeleteDto) {
-        const { id } = dto;
+        const { id, applicantId: userId } = dto;
         const projectDoc = await this.repository.findById(id);
-        if (!projectDoc)
-            throw new Error("Project not found");
+        if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
+        if (String(projectDoc.leadPI) !== userId || "system" !== userId)
+            throw new Error(ERROR_CODES.USER_NOT_LEAD_PI);
+
 
         if (projectDoc.status !== ProjectStatus.pending)
             throw new Error("Project not is not pending");
 
-        if (String(projectDoc.leadPI) !== dto.userId) {
-            throw new Error("Unauthorized: You cannot delete this project.");
-        }
+
 
         return this.repository.delete(dto.id);
     }

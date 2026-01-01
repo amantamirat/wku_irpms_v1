@@ -5,7 +5,7 @@ import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useAuth } from "@/contexts/auth-context";
 import { useEffect, useState } from "react";
 
-import { Project } from "../../models/project.model";
+import { Project, ProjectStatus } from "../../models/project.model";
 import { Theme } from "@/app/(main)/thematics/themes/models/theme.model";
 
 import { ProjectThemeApi } from "../api/project.theme.api";
@@ -44,9 +44,11 @@ export default function ProjectThemeManager({
     // -------------------------------
     // Permissions
     // -------------------------------
-    const canCreate = true; //hasPermission([PERMISSIONS.PROJECT_THEME?.CREATE]);
-    const canEdit = true; //hasPermission([PERMISSIONS.PROJECT_THEME?.UPDATE]);
-    const canDelete = true; //hasPermission([PERMISSIONS.PROJECT_THEME?.DELETE]);
+    const isValidStatus = project.status === ProjectStatus.pending ||
+        project.status === ProjectStatus.negotiation;
+    const canCreate = isValidStatus && hasPermission([PERMISSIONS.PROJECT_THEME.CREATE]);
+    const canEdit = isValidStatus && hasPermission([PERMISSIONS.PROJECT_THEME.UPDATE]);
+    const canDelete = isValidStatus && hasPermission([PERMISSIONS.PROJECT_THEME.DELETE]);
 
     // -------------------------------
     // CRUD Hook
@@ -158,16 +160,18 @@ export default function ProjectThemeManager({
                     })
                 }
             />
+            {
+                (isValidStatus && showDialog) && <SaveThemeDialog
+                    //project={project}
+                    projectTheme={projectTheme}
+                    visible={showDialog}
+                    onSave={flyMode && onSave ? onSave : undefined}
+                    thematic={(project.call as Call).thematic}
+                    onComplete={onSaveComplete}
+                    onHide={hideDialog}
+                />
+            }
 
-            <SaveThemeDialog
-                //project={project}
-                projectTheme={projectTheme}
-                visible={showDialog}
-                onSave={flyMode && onSave ? onSave : undefined}
-                thematic={(project.call as Call).thematic}
-                onComplete={onSaveComplete}
-                onHide={hideDialog}
-            />
         </>
     );
 }

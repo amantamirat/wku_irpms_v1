@@ -93,7 +93,7 @@ export class PhaseService {
     }
 
     async delete(dto: DeleteDto) {
-        const { id, userId } = dto;
+        const { id, applicantId: userId } = dto;
 
         const phaseDoc = await this.repository.findById(id);
         if (!phaseDoc) throw new Error("Phase not found");

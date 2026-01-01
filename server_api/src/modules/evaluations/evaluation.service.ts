@@ -39,7 +39,7 @@ export class EvaluationService {
     }
 
     async delete(dto: DeleteDto) {
-        const { id, userId } = dto;
+        const { id, applicantId: userId } = dto;
         const evalDoc = await this.repository.findById(id);
         if (!evalDoc) throw new Error("Evaluation not found");
 

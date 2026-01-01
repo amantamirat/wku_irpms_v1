@@ -1,4 +1,7 @@
 // reviewer.service.ts
+import { SYSTEM } from "../../../../../common/constants/system.constant";
+import { AppError } from "../../../../../common/errors/app.error";
+import { ERROR_CODES } from "../../../../../common/errors/error.codes";
 import Applicant from "../../../../applicants/applicant.model";
 import { CriterionRepository, ICriterionRepository } from "../../../../evaluations/criteria/criterion.repository";
 import { Collaborator } from "../../../../projects/collaborators/collaborator.model";
@@ -8,7 +11,7 @@ import { DocumentRepository, IDocumentRepository } from "../document.repository"
 import { DocStatus } from "../document.status";
 import { ProjectStageSynchronizer } from "../document.synchronizer";
 import { IResultRepository, ResultRepository } from "./results/result.repository";
-import { CreateReviewerDTO, DeleteReviewerDTO, GetReviewersDTO, UpdateReviewerDTO } from "./reviewer.dto";
+import { CreateReviewerDTO, GetReviewersDTO, UpdateReviewerDTO } from "./reviewer.dto";
 import { IReviewerRepository, ReviewerRepository } from "./reviewer.repository";
 import { ReviewerStateMachine } from "./reviewer.state-machine";
 import { ReviewerStatus } from "./reviewer.status";
@@ -133,9 +136,8 @@ export class ReviewerService {
         // Submitted status validation
         if (current === ReviewerStatus.verified && next === ReviewerStatus.submitted) {
 
-            if (String(reviewerDoc.applicant) !== applicantId) {
-                throw new Error("NOT_AUTHORIZED");
-            }
+            if (String(reviewerDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
+                throw new AppError(ERROR_CODES.USER_NOT_REVIEWER);
 
             const stage = String(projectStageDoc.stage);
             const stageDoc = await this.stageRepository.findOne({ _id: stage });
@@ -195,14 +197,12 @@ export class ReviewerService {
         return updated;
     }
 
-    async delete(dto: DeleteReviewerDTO) {
-        const reviewerDoc = await this.repository.findById(dto.id);
-        if (!reviewerDoc) throw new Error("Reviewer not found");
-
-        if (reviewerDoc.status !== ReviewerStatus.pending) {
-            throw new Error("INVALID_REVIEWER_STATUS_FOR_REVIEWER_DELETE");
-        }
-        const deleted = await this.repository.delete(dto.id);
+    async delete(id: string) {
+        const reviewerDoc = await this.repository.findById(id);
+        if (!reviewerDoc) throw new AppError(ERROR_CODES.REVIEWER_NOT_FOUND);
+        if (reviewerDoc.status !== ReviewerStatus.pending)
+            throw new AppError(ERROR_CODES.REVIEWER_NOT_PENDING);
+        const deleted = await this.repository.delete(id);
         await this.projectStageSynchronizer.syncProjectStageStatus(reviewerDoc.projectStage.toString());
         return deleted
     }

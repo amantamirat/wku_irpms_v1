@@ -27,13 +27,9 @@ export class RoleService {
     }
 
     async delete(dto: DeleteDto) {
-        const { id, userId } = dto;
-        const role = await this.repository.delete(id);
-        if (!role) throw new Error("Role not found");
-        //const isAssigned = await User.exists({ roles: id });
-        //if (isAssigned) {
-        //throw new Error("Cannot delete role: it is assigned to one or more users");
-        // }
-        return await role.deleteOne();
+        const { id, applicantId: userId } = dto;
+        const deleted = await this.repository.delete(id);
+        if (!deleted) throw new Error("Role not found");        
+        return deleted;
     }
 }

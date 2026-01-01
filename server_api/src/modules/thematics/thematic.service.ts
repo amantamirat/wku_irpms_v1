@@ -33,7 +33,7 @@ export class ThematicService {
     }
 
     async delete(dto: DeleteDto) {
-        const { id, userId } = dto;
+        const { id, applicantId: userId } = dto;
         return await this.repository.delete(id);
     }
 }

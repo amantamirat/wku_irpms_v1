@@ -8,6 +8,9 @@ import { DeleteDto } from "../../../../../../util/delete.dto";
 import { CriterionRepository, ICriterionRepository } from "../../../../../evaluations/criteria/criterion.repository";
 import { IOptionRepository, OptionRepository } from "../../../../../evaluations/criteria/options/option.repository";
 import { ReviewerStatus } from "../reviewer.status";
+import { ERROR_CODES } from "../../../../../../common/errors/error.codes";
+import { AppError } from "../../../../../../common/errors/app.error";
+import { SYSTEM } from "../../../../../../common/constants/system.constant";
 
 
 export class ResultService {
@@ -59,13 +62,16 @@ export class ResultService {
 
     async create(dto: CreateResultDTO) {
         const { reviewer, applicantId } = dto;
+        
         const reviewerDoc = await this.reviewerRepo.findById(reviewer);
-        if (!reviewerDoc) throw new Error("Reviwer not found");
+        if (!reviewerDoc) throw new AppError(ERROR_CODES.REVIEWER_NOT_FOUND);
+
         if (reviewerDoc.status !== ReviewerStatus.verified)
-            throw new Error("INVALID_REVIEWER_STATUS_FOR_RESULT_CREATE");
-        if (String(reviewerDoc.applicant) !== applicantId) {
-            throw new Error("NOT_AUTHORIZED");
-        }
+            throw new AppError(ERROR_CODES.REVIEWER_NOT_VERIFIED);
+        
+        if (String(reviewerDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
+            throw new AppError(ERROR_CODES.USER_NOT_REVIEWER);
+
         await this.validateResult(dto.criterion, dto);
         return this.repository.create(dto);
     }
@@ -80,27 +86,32 @@ export class ResultService {
         if (!resultDoc) throw new Error("Result not found");
 
         const reviewerDoc = await this.reviewerRepo.findById(String(resultDoc.reviewer));
-        if (!reviewerDoc) throw new Error("Reviwer not found");
+        if (!reviewerDoc) throw new AppError(ERROR_CODES.REVIEWER_NOT_FOUND);
 
-        if (String(reviewerDoc.applicant) !== applicantId) {
-            throw new Error("NOT_AUTHORIZED");
-        }
+        if (reviewerDoc.status !== ReviewerStatus.verified)
+            throw new AppError(ERROR_CODES.REVIEWER_NOT_VERIFIED);
+
+        if (String(reviewerDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
+            throw new AppError(ERROR_CODES.USER_NOT_REVIEWER);
+
         await this.validateResult(String(resultDoc.criterion), dto.data);
         return this.repository.update(dto.id, dto.data);
     }
 
     async delete(dto: DeleteDto) {
-        const { id, userId } = dto;
-        const resultDoc = await this.repository.findById(dto.id);
+        const { id, applicantId } = dto;
+        const resultDoc = await this.repository.findById(id);
         if (!resultDoc) throw new Error("Result not found");
 
         const reviewerDoc = await this.reviewerRepo.findById(String(resultDoc.reviewer));
-        if (!reviewerDoc) throw new Error("Reviwer not found");
+        if (!reviewerDoc) throw new AppError(ERROR_CODES.REVIEWER_NOT_FOUND);
 
-        if (String(reviewerDoc.applicant) !== userId) {
-            throw new Error("NOT_AUTHORIZED");
-        }
+        if (reviewerDoc.status !== ReviewerStatus.verified)
+            throw new AppError(ERROR_CODES.REVIEWER_NOT_VERIFIED);
 
-        return this.repository.delete(dto.id);
+        if (String(reviewerDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
+            throw new AppError(ERROR_CODES.USER_NOT_REVIEWER);
+
+        return this.repository.delete(id);
     }
 }

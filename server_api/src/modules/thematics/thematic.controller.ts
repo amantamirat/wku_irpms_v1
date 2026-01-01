@@ -59,7 +59,7 @@ export class ThematicController {
                 throw new Error("User not found!");
             }
             const userId = req.user.userId;
-            const deleted = await this.service.delete({ id: id, userId: userId });
+            const deleted = await this.service.delete({ id: id, applicantId: userId });
             successResponse(res, 200, "Thematic deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

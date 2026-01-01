@@ -1,7 +1,6 @@
 import { IProjectDocument } from "../calls/stages/documents/document.model";
 import { IDocumentRepository } from "../calls/stages/documents/document.repository";
 import { DocStatus } from "../calls/stages/documents/document.status";
-import { IStageRepository } from "../calls/stages/stage.repository";
 import { ProjectStatus } from "./project.status";
 import { IProject } from "./project.model";
 import { IProjectRepository } from "./project.repository";

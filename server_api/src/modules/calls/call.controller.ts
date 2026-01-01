@@ -102,7 +102,7 @@ export class CallController {
                 throw new Error("User not found!");
             }
             const userId = req.user.userId;
-            const deleted = await this.service.delete({ id: id, userId: userId });
+            const deleted = await this.service.delete({ id: id, applicantId: userId });
             successResponse(res, 200, "Call deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

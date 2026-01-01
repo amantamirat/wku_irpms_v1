@@ -14,6 +14,7 @@ import { IUser } from "./user.model";
 import { Unit } from "../organization/organization.type";
 import { IOwnership } from "../applicants/applicant.model";
 import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
+import { SYSTEM } from "../../common/constants/system.constant";
 
 export class UserService {
 
@@ -89,7 +90,7 @@ export class UserService {
     }
 
     async delete(dto: DeleteDto) {
-        const { id, userId } = dto;
+        const { id, applicantId: userId } = dto;
         const userDoc = await this.repository.findById(id);
         if (!userDoc) throw new Error("User not found");
         if (userDoc.status === UserStatus.active) {
@@ -281,12 +282,12 @@ export class UserService {
             })
         );
 
-        CacheService.setUserPermissions("system", permissions);
-        CacheService.setUserOwnerships("system", ownerships);
+        CacheService.setUserPermissions(SYSTEM.SU_USER, permissions);
+        CacheService.setUserOwnerships(SYSTEM.SU_USER, ownerships);
 
         const payload: JwtPayload = {
-            userId: "system",      // no actual DB user
-            applicantId: "system",
+            userId: SYSTEM.SU_USER,      // no actual DB user
+            applicantId: SYSTEM.SU_USER,
             email: process.env.EMAIL!,
             status: UserStatus.active,
         };

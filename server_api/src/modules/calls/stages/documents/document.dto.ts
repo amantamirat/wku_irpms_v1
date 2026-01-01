@@ -13,6 +13,7 @@ export interface CreateDocumentDTO {
     project: string;
     stage: string;
     documentPath: string;
+    applicantId:string;
 }
 
 export interface UpdateDocumentDTO {
@@ -21,6 +22,7 @@ export interface UpdateDocumentDTO {
         status: DocStatus;
         totalScore: number;
     }>;
+     applicantId:string;
 }
 
 export interface UpdateStatusDTO {

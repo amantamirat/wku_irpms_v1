@@ -1,21 +1,20 @@
 'use client';
-import { Button } from 'primereact/button';
-import { Dialog } from 'primereact/dialog';
-import { InputText } from 'primereact/inputtext';
-import { classNames } from 'primereact/utils';
-import { useEffect, useRef, useState } from 'react';
-import { Role, validateRole } from '../models/role.model';
-import { RoleApi } from '../api/role.api';
-import { Toast } from 'primereact/toast';
-import { Permission } from '../permission/model/permission.model';
-import { PermissionApi } from '../permission/api/permission.api';
-import { MultiSelect } from 'primereact/multiselect';
 import { useAuth } from '@/contexts/auth-context';
 import { PERMISSIONS } from '@/types/permissions';
+import { Button } from 'primereact/button';
+import { Card } from 'primereact/card';
 import { Checkbox } from 'primereact/checkbox';
+import { Dialog } from 'primereact/dialog';
+import { InputText } from 'primereact/inputtext';
+import { Toast } from 'primereact/toast';
 import { TreeNode } from 'primereact/treenode';
 import { TreeSelect } from 'primereact/treeselect';
-import { Card } from 'primereact/card';
+import { classNames } from 'primereact/utils';
+import { useEffect, useRef, useState } from 'react';
+import { RoleApi } from '../api/role.api';
+import { Role, validateRole } from '../models/role.model';
+import { PermissionApi } from '../permission/api/permission.api';
+import { Permission } from '../permission/model/permission.model';
 
 interface SaveDialogProps {
     visible: boolean;
@@ -25,6 +24,9 @@ interface SaveDialogProps {
 }
 
 
+/* ---------------------------------------------
+   BUILD PERMISSION TREE
+---------------------------------------------- */
 const buildPermissionTree = (permissions: Permission[]): TreeNode[] => {
     const map = new Map<string, TreeNode>();
 
@@ -39,7 +41,7 @@ const buildPermissionTree = (permissions: Permission[]): TreeNode[] => {
         }
 
         map.get(perm.category)!.children!.push({
-            key: perm._id!,
+            key: perm._id!, // ObjectId string
             label: perm.name,
             data: perm,
         });
@@ -48,6 +50,8 @@ const buildPermissionTree = (permissions: Permission[]): TreeNode[] => {
     return Array.from(map.values());
 };
 
+const isObjectId = (value: string) =>
+    /^[a-fA-F0-9]{24}$/.test(value);
 
 const SaveDialog = (props: SaveDialogProps) => {
     const { visible, role, onComplete, onHide } = props;
@@ -71,7 +75,8 @@ const SaveDialog = (props: SaveDialogProps) => {
             try {
                 const data = await PermissionApi.getPermissions();
                 //setPermissions(data);
-                setPermissionTree(buildPermissionTree(data));
+                const tree = buildPermissionTree(data);
+                setPermissionTree(tree);
             } catch (err) {
                 console.error("Failed to fetch permissions:", err);
             }
@@ -87,8 +92,10 @@ const SaveDialog = (props: SaveDialogProps) => {
         if (!localRole.permissions) return;
 
         const keys = localRole.permissions.reduce(
-            (acc: Record<string, any>, id: string) => {
-                acc[id] = { checked: true };
+            (acc: Record<string, any>, key: string) => {
+                if (isObjectId(key)) {
+                    acc[key] = { checked: true };
+                }
                 return acc;
             },
             {}
@@ -96,6 +103,19 @@ const SaveDialog = (props: SaveDialogProps) => {
 
         setSelectedKeys(keys);
     }, [localRole.permissions]);
+
+    const onPermissionChange = (e: any) => {
+        setSelectedKeys(e.value);
+
+        const selectedIds = Object.keys(e.value || {}).filter(
+            (key) => e.value[key]?.checked && isObjectId(key)
+        );
+
+        setLocalRole({
+            ...localRole,
+            permissions: selectedIds,
+        });
+    };
 
 
     const saveRole = async () => {
@@ -150,18 +170,7 @@ const SaveDialog = (props: SaveDialogProps) => {
         //setLocalRole({ ...role });
     };
 
-    const onPermissionChange = (e: any) => {
-        setSelectedKeys(e.value);
 
-        const selectedIds = Object.keys(e.value || {}).filter(
-            (key) => e.value[key]?.checked
-        );
-
-        setLocalRole({
-            ...localRole,
-            permissions: selectedIds,
-        });
-    };
 
 
     return (
@@ -216,6 +225,7 @@ const SaveDialog = (props: SaveDialogProps) => {
                         selectionMode="checkbox"
                         display="chip"
                         placeholder="Select Permissions"
+                        metaKeySelection={false}
                         className={classNames({
                             'p-invalid': submitted && !localRole.permissions.length,
                         })}

@@ -82,7 +82,7 @@ export class GrantController {
             }
             const userId = req.user.userId;
             const { id } = req.params;
-            const deleted = await grantService.deleteGrant({ id: id, userId: userId });
+            const deleted = await grantService.deleteGrant({ id: id, applicantId: userId });
             successResponse(res, 201, "Grant deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

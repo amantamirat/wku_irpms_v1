@@ -16,13 +16,19 @@
         color: #8A6D3B;
     }
 
-    &.status-submitted,
+
     &.status-linked,
     &.status-verified,
     &.status-accepted,
     &.status-active {
         background: #C8E6C9;
         color: #256029;
+    }
+
+    &.status-submitted,
+    .status-submitted {
+        background: #BBDEFB;
+        color: #0D47A1;
     }
 
     &.status-notlinked,
@@ -42,14 +48,15 @@
     }
 
     &.status-negotiation {
-        background: #BBDEFB;
-        color: #02193d;
+        background: #E3F2FD;
+        color: #0D47A1;
     }
 
     &.status-reviewed {
-        background: #fbbbf0;
-        color: #a10d95;
+        background: #FCE4EC;
+        color: #880E4F;
     }
+
 }
 
 ///////////////

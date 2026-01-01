@@ -85,7 +85,7 @@ export class CallService {
     }
 
     async delete(dto: DeleteDto) {
-        const { id, userId } = dto;
+        const { id, applicantId: userId } = dto;
         const callDoc = await this.repository.findById(id);
         if (!callDoc) throw new Error("Call not found");
         if (callDoc.status !== CallStatus.planned) {
