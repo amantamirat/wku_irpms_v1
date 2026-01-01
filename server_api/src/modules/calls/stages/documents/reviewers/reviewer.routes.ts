@@ -3,26 +3,24 @@ import { ReviewerController } from './reviewer.controller';
 import { checkPermission, checkStatusPermission, verifyActiveAccount } from '../../../../users/user.middleware';
 import { PERMISSIONS } from '../../../../../common/constants/permissions';
 
+const controller = new ReviewerController();
 const router: Router = Router();
 
 router.post('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.REVIEWER.CREATE]),
-    ReviewerController.createReviewer);
+    controller.create);
 router.get('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.REVIEWER.READ]),
-    ReviewerController.getReviewers);
+    controller.get);
 router.put('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.REVIEWER.UPDATE]),
-    ReviewerController.updateReviewer);
-router.put('/:id/status', verifyActiveAccount,
-    //checkPermission([PERMISSIONS.REVIEWER.CHANGE_STATUS, PERMISSIONS.REVIEWER.APPROVE]),
-    ReviewerController.updateStatus);
+    controller.update);
 
 router.patch('/:id', verifyActiveAccount,
     checkStatusPermission("reviewer"),
-    ReviewerController.updateStatus);
+    controller.updateStatus);
 router.delete('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.REVIEWER.DELETE]),
-    ReviewerController.deleteReviewer);
+    controller.delete);
 
 export default router;

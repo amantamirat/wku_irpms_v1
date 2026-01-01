@@ -449,6 +449,10 @@
   },
   {
     "category": "Reviewer Management",
+    "name": "reviewer:status.pending"
+  },
+  {
+    "category": "Reviewer Management",
     "name": "reviewer:status.verified"
   },
   {

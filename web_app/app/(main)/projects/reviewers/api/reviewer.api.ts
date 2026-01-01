@@ -1,7 +1,7 @@
 import { ApiClient } from "@/api/ApiClient";
-import { GetReviewersOptions, Reviewer, sanitizeReviewer } from "../models/reviewer.model";
+import { GetReviewersOptions, Reviewer, ReviewerStatus, sanitizeReviewer } from "../models/reviewer.model";
 
-const end_point = '/project/reviewers/';
+const end_point = '/project/reviewers';
 
 
 export const ReviewerApi = {
@@ -21,27 +21,27 @@ export const ReviewerApi = {
         return createdData as Reviewer;
     },
 
-    async updateReviewer(reviewer: Partial<Reviewer>, changeStatus = false): Promise<any> {
-        if (!reviewer._id) {
-            throw new Error("_id required.");        }
-
+    async update(reviewer: Partial<Reviewer>, changeStatus = false): Promise<any> {
+        if (!reviewer._id) throw new Error("_id required.");
         const sanitized = sanitizeReviewer(reviewer);
-
         // URL points to /reviewers/:id or /reviewers/:id/status
-        const url = changeStatus
-            ? `${end_point}${reviewer._id}/status`
-            : `${end_point}${reviewer._id}`;
-
+        const url = `${end_point}/${reviewer._id}`;
         const updatedReviewer = await ApiClient.put(url, sanitized);
         return updatedReviewer as Reviewer;
     },
 
+    async updateStatus(id: string, status: ReviewerStatus): Promise<any> {
+        const query = new URLSearchParams();
+        query.append("id", id);
+        const url = `${end_point}/${id}`;
+        const updated = await ApiClient.patch(url, { status });
+        return updated;
+    },
+
 
     async deleteReviewer(reviewer: Partial<Reviewer>): Promise<boolean> {
-        if (!reviewer._id) {
-            throw new Error("_id required.");
-        }
-        const url = `${end_point}${reviewer._id}`;
+        if (!reviewer._id) throw new Error("_id required.");
+        const url = `${end_point}/${reviewer._id}`;
         const response = await ApiClient.delete(url);
         return response;
     },

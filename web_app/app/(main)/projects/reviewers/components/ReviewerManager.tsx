@@ -42,7 +42,9 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
     const canEdit = hasPermission([PERMISSIONS.REVIEWER.UPDATE]) && stageStatus && creationStatus.includes(stageStatus);
     const canDelete = hasPermission([PERMISSIONS.REVIEWER.DELETE]) && stageStatus && creationStatus.includes(stageStatus);
 
-    const canApprove = hasPermission([PERMISSIONS.REVIEWER.APPROVE]);
+    const canPend = hasPermission([PERMISSIONS.REVIEWER.STATUS.PEND]);
+    const canVerify = hasPermission([PERMISSIONS.REVIEWER.STATUS.VERIFY]);
+    const canApprove = hasPermission([PERMISSIONS.REVIEWER.STATUS.APPROVE]);
 
 
     // ✅ CRUD Hook
@@ -59,7 +61,6 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
 
     const [reviewer, setReviewer] = useState<Reviewer>(emptyReviewer);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [expandedRows, setExpandedRows] = useState<any[]>([]);
 
     // ✅ Fetch reviewers
     useEffect(() => {
@@ -81,6 +82,14 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
         fetchReviewers();
     }, [applicant, projectStage]);
 
+    const updateDocument = (projectDoc: ProjectDoc) => {
+        if (updateProjectStage && projectStage) {
+            updateProjectStage({
+                ...projectDoc,
+                project: projectStage.project, stage: projectStage.stage
+            });
+        }
+    }
 
     // ✅ Save / update
     const onSaveComplete = (saved: Reviewer) => {
@@ -94,17 +103,10 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
     };
 
     const updateStatus = async (row: Reviewer, next: ReviewerStatus) => {
-        const { updated, syncedProjectStage } = await ReviewerApi.updateReviewer({ _id: row._id, status: next }, true);
+        if (!row._id) return;
+        const { updated, syncedProjectStage } = await ReviewerApi.updateStatus(row._id, next);
         updateItem({ ...updated, applicant: row.applicant, projectStage: row.projectStage });
-
-        if (updateProjectStage && projectStage) {
-            updateProjectStage({
-                ...syncedProjectStage,
-                project: projectStage.project, stage: projectStage.stage
-            });
-        }
-
-
+        updateDocument(syncedProjectStage);
     };
 
     const hideSaveDialog = () => {
@@ -114,45 +116,42 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
 
     const stateTransitionTemplate = (rowData: Reviewer) => {
         const state = rowData.status;
-        const isOwner = (rowData?.applicant as any)._id === loggedApplicantId;
+        const isReviewer = (rowData?.applicant as any)._id === loggedApplicantId;
         // const isActiveReviewer = isOwner && reviewer?.status === ReviewerStatus.active;
         return (
             <div className="flex gap-2">
-                {isOwner && (<>
-                    {/* pending → active */}
-                    {state === ReviewerStatus.pending && (
-                        <Button
-                            label="Activate"
-                            icon="pi pi-check"
-                            severity="success"
-                            size="small"
-                            onClick={() => {
-                                confirm.ask({
-                                    operation: 'activate',
-                                    onConfirmAsync: () => updateStatus(rowData, ReviewerStatus.active)
-                                });
-                            }}
-                        />
-                    )}
+                {/* pending → active */}
+                {(isReviewer && applicant && canVerify && state === ReviewerStatus.pending) && (
+                    <Button
+                        label="Verify"
+                        icon="pi pi-check"
+                        severity="success"
+                        size="small"
+                        onClick={() => {
+                            confirm.ask({
+                                operation: 'activate',
+                                onConfirmAsync: () => updateStatus(rowData, ReviewerStatus.verified)
+                            });
+                        }}
+                    />
+                )}
 
-                    {/* active → pending*/}
-                    {state === ReviewerStatus.active && (
-                        <>
-                            <Button
-                                label="Pend"
-                                icon="pi pi-arrow-left"
-                                severity="warning"
-                                size="small"
-                                onClick={() => {
-                                    confirm.ask({
-                                        operation: 'pend',
-                                        onConfirmAsync: () => updateStatus(rowData, ReviewerStatus.pending)
-                                    });
-                                }}
-                            />
-                        </>
-                    )}
-                </>)}
+                {/* active → pending*/}
+                {canPend && state === ReviewerStatus.verified && (
+                    <Button
+                        label="Pend"
+                        icon="pi pi-arrow-left"
+                        severity="warning"
+                        size="small"
+                        onClick={() => {
+                            confirm.ask({
+                                operation: 'pend',
+                                onConfirmAsync: () => updateStatus(rowData, ReviewerStatus.pending)
+                            });
+                        }}
+                    />
+                )}
+
                 {canApprove && (<>
                     {/* submitted → approved */}
                     {state === ReviewerStatus.submitted && (
@@ -184,14 +183,13 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
         );
     }
 
-
     const columns = [
-        { header: "Stage", field: "projectStage.stage.name", sortable: true },
-        { header: "Project", field: "projectStage.project.title", sortable: true },
-        { header: "Reviewer", field: "applicant.name" },
+        applicant && { header: "Stage", field: "projectStage.stage.name", sortable: true },
+        applicant && { header: "Project", field: "projectStage.project.title", sortable: true },
+        projectStage && { header: "Workspace", field: "applicant.workspace.name" },
+        projectStage && { header: "Reviewer", field: "applicant.name" },
         {
-            header: "Score",
-            field: "score",
+            header: "Score", field: "score",
             body: (row: Reviewer) => [ReviewerStatus.submitted, ReviewerStatus.approved].includes(row.status) ? row.score ?? "-" : "-"
         },
         {
@@ -199,7 +197,7 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
                 <MyBadge type="status" value={p.status ?? 'Unknown'} />
         },
         { body: stateTransitionTemplate }
-    ];
+    ].filter(Boolean);
 
     return (
         <>

@@ -21,7 +21,7 @@ export class ReviewerRepository implements IReviewerRepository {
 
     async findByProjectStage(projectStageId: string) {
         return Reviewer.find({ projectStage: new mongoose.Types.ObjectId(projectStageId) })
-            .populate("applicant")
+            .populate({ path: 'applicant', populate: { path: 'workspace' } })
             .exec();
     }
 
