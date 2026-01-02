@@ -16,7 +16,6 @@
         color: #8A6D3B;
     }
 
-
     &.status-linked,
     &.status-verified,
     &.status-accepted,
@@ -25,8 +24,7 @@
         color: #256029;
     }
 
-    &.status-submitted,
-    .status-submitted {
+    &.status-submitted {
         background: #BBDEFB;
         color: #0D47A1;
     }
@@ -40,9 +38,9 @@
         color: #d80517;
     }
 
-
     &.status-approved,
-    &.status-closed {
+    &.status-closed,
+    &.status-granted {
         background: #F3E5F5;
         color: #4A148C;
     }
@@ -58,5 +56,6 @@
     }
 
 }
+
 
 ///////////////

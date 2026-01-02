@@ -40,6 +40,7 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
     const canAccept = hasPermission([PERMISSIONS.PROJECT.STATUS.ACCEPT]);
     const canNegotiate = hasPermission([PERMISSIONS.PROJECT.STATUS.NEGOTIATE]);
     const canApprove = hasPermission([PERMISSIONS.PROJECT.STATUS.APPROVE]);
+    const canGrant = hasPermission([PERMISSIONS.PROJECT.STATUS.GRANT]);
 
     // ✅ State + CRUD Hook
     const {
@@ -127,6 +128,21 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
                     }}
                 />
             }
+            {(canGrant && state === ProjectStatus.approved) &&
+                <Button
+                    tooltip="Grant"
+                    icon="pi pi-star"   // or: pi-star, pi-shield, pi-lock-open
+                    severity="success"
+                    size="small"
+                    onClick={() => {
+                        confirm.ask({
+                            operation: 'Grant',
+                            onConfirmAsync: () =>
+                                updateStatus(rowData, ProjectStatus.granted)
+                        });
+                    }}
+                />
+            }
             {((canAccept && state === ProjectStatus.negotiation) ||
                 (canNegotiate && state === ProjectStatus.approved)) &&
                 <Button
@@ -180,8 +196,13 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
                 loading={loading}
                 error={error}
                 canCreate={canCreate}
+
+                canEditRow={(row: Project) => row.status === ProjectStatus.pending || row.status === ProjectStatus.negotiation}
+                canDeleteRow={(row: Project) => row.status === ProjectStatus.pending || row.status === ProjectStatus.negotiation}
+
                 canEdit={canEdit}
                 canDelete={canDelete}
+
                 onCreate={() => { setProject(emptyProject); setShowSaveDialog(true); }}
                 onEdit={(row) => { setProject(row); setShowSaveDialog(true); }}
                 onDelete={(row) => confirm.ask({ item: row.title, onConfirmAsync: () => deleteProject(row) })}
@@ -191,7 +212,7 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
                 enableSearch
             />
 
-            {project && (
+            {(project && showSaveDialog) && (
                 <SaveProjectDialog
                     visible={showSaveDialog}
                     project={project}

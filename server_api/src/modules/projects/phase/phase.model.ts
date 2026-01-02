@@ -9,10 +9,6 @@ interface BasePhaseDocument extends Document {
     activity: string;
     duration: number;
     budget: number;
-    /*
-    reviewedDuration?: number;
-    reviewedBudget?: number;
-    */
     description?: string;
     status: PhaseStatus;
     createdAt?: Date;

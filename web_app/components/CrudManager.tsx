@@ -19,6 +19,8 @@ interface CrudManagerProps<T> {
     canCreate?: boolean;
     canEdit?: boolean;
     canDelete?: boolean;
+    canEditRow?: (row: T) => boolean;
+    canDeleteRow?: (row: T) => boolean;
     onCreate?: () => void;
     onEdit?: (row: T) => void;
     onDelete?: (row: T) => void;
@@ -44,6 +46,8 @@ export function CrudManager<T extends { _id?: string }>({
     canCreate,
     canEdit,
     canDelete,
+    canEditRow,
+    canDeleteRow,
     onCreate,
     onEdit,
     onDelete,
@@ -116,38 +120,41 @@ export function CrudManager<T extends { _id?: string }>({
         </div>
     ) : undefined;
 
-    const actionBody = (row: T) => (
-        <div className="flex gap-2">
-            {/* ➕ Inject extra actions from parent */}
-            {extraActions && extraActions(row)}
-            {canEdit && (
-                <Button
-                    icon="pi pi-pencil"
-                    rounded
-                    severity="success"
-                    className="p-button-text"
-                    onClick={() => onEdit?.(row)}
-                />
-            )}
-            {canDelete && (
-                <Button
-                    icon="pi pi-trash"
-                    rounded
-                    severity="danger"
-                    className="p-button-text"
-                    onClick={() => onDelete?.(row)}
-                />
-            )}
-        </div>
-    );
-
+    const actionBody = (row: T) => {
+        const editable = canEdit && (!canEditRow || canEditRow(row));
+        const deletable = canDelete && (!canDeleteRow || canDeleteRow(row));
+        return (
+            <div className="flex gap-2">
+                {/* ➕ Inject extra actions from parent */}
+                {extraActions && extraActions(row)}
+                {editable && (
+                    <Button
+                        icon="pi pi-pencil"
+                        rounded
+                        severity="success"
+                        className="p-button-text"
+                        onClick={() => onEdit?.(row)}
+                    />
+                )}
+                {deletable && (
+                    <Button
+                        icon="pi pi-trash"
+                        rounded
+                        severity="danger"
+                        className="p-button-text"
+                        onClick={() => onDelete?.(row)}
+                    />
+                )}
+            </div>
+        );
+    }
     // if (loading) return <ListSkeleton rows={10} />;
     if (error) return <ErrorCard errorMessage={error} />;
 
     return (
         <div className="card">
             {
-               // renderBreadcrumb()
+                // renderBreadcrumb()
             }
             <div>
                 {

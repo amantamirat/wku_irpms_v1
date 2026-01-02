@@ -10,7 +10,8 @@ export enum ProjectStatus {
     rejected = "rejected",
     accepted = "accepted",
     negotiation = "negotiation",
-    approved = "approved"
+    approved = "approved",
+    granted = "granted"
 }
 
 export type Project = {

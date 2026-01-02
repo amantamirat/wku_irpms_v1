@@ -147,7 +147,8 @@ export const PERMISSIONS = {
     STATUS: {
       ACCEPT: "project:status.accepted",
       NEGOTIATE: "project:status.negotiation",
-      APPROVE: "project:status.approved"
+      APPROVE: "project:status.approved",
+      GRANT: "project:status.granted"
     },
     DELETE: "project:delete",
   },

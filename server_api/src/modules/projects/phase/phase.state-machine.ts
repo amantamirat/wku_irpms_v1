@@ -6,7 +6,8 @@ export class PhaseStateMachine {
     private static readonly transitions: Record<PhaseStatus, PhaseStatus[]> = {
         [PhaseStatus.proposed]: [PhaseStatus.verified],
         [PhaseStatus.verified]: [PhaseStatus.approved, PhaseStatus.proposed],
-        [PhaseStatus.approved]: [PhaseStatus.verified]
+        [PhaseStatus.approved]: [PhaseStatus.active, PhaseStatus.verified],
+        [PhaseStatus.active]: [PhaseStatus.approved]
     };
 
     static canTransition(from: PhaseStatus, to: PhaseStatus): boolean {

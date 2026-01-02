@@ -15,6 +15,7 @@ import { useCrudList } from "@/hooks/useCrudList";
 import { PERMISSIONS } from "@/types/permissions";
 import MyBadge from "@/templates/MyBadge";
 import { Button } from "primereact/button";
+import PhaseDocManager from "../documents/components/PhaseDocManager";
 
 interface PhaseManagerProps {
     project: Project;
@@ -233,6 +234,9 @@ export default function PhaseManager({ project, phaseType, flyMode = false, onSa
                         onConfirmAsync: !flyMode ? () => deletePhase(row) : undefined,
                     })
                 }
+                rowExpansionTemplate={project.status === ProjectStatus.granted ? (row) => {
+                    return <PhaseDocManager phase={row._id || ''} />;
+                } : undefined}
             />
             <SavePhaseDialog
                 visible={showDialog}

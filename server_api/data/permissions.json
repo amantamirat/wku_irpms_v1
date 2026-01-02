@@ -525,6 +525,10 @@
   },
   {
     "category": "Project Management",
+    "name": "project:status.granted"
+  },
+  {
+    "category": "Project Management",
     "name": "project:delete",
     "description": "Delete project entries"
   },

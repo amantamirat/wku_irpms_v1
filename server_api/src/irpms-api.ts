@@ -27,6 +27,7 @@ import projectRoutes from './modules/projects/project.routes';
 import collaboratorRoutes from './modules/projects/collaborators/collaborator.routes';
 import assignmentRoutes from './modules/projects/collaborators/assignment/assignment.routes';
 import phaseRoutes from './modules/projects/phase/phase.routes';
+import phaseDocRoutes from './modules/projects/phase/documents/phase.doc.routes';
 import projectThemeRoutes from './modules/projects/themes/project.theme.routes';
 
 import documentRoutes from './modules/projects/documents/document.routes';
@@ -66,16 +67,18 @@ app.use("/api/grants/compositions", compositionRoutes);
 app.use("/api/calendars", calendarRoutes);
 app.use("/api/calls", callRoutes);
 app.use("/api/call/stages", callStageRoutes);
+app.use("/api/project/reviewers", reviewerRoutes);
+app.use("/api/project/results", resultRoutes);
 
 app.use("/api/projects", projectRoutes);
 app.use("/api/project/themes", projectThemeRoutes);
 app.use("/api/project/phases", phaseRoutes);
+app.use("/api/project/phase/documents", phaseDocRoutes);
 app.use("/api/project/collaborators", collaboratorRoutes);
 app.use("/api/collaborator/assignments", assignmentRoutes);
 
 app.use("/api/project/documents", documentRoutes);
-app.use("/api/project/reviewers", reviewerRoutes);
-app.use("/api/project/results", resultRoutes);
+
 
 app.use("/api/uploads", express.static(path.join(process.cwd(), "uploads")));
 

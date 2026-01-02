@@ -14,8 +14,8 @@ export class ThemeRepository implements IThemeRepository {
 
     async findById(id: string) {
         return Theme.findById(new mongoose.Types.ObjectId(id))
-            .populate("parent")
-            .populate("thematicArea")
+            //.populate("parent")
+            //.populate("thematicArea")
             .lean<ITheme>()
             .exec();
     }

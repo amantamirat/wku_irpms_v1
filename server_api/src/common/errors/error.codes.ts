@@ -1,6 +1,7 @@
 export const ERROR_CODES = {
     USER_NOT_LEAD_PI: "USER_NOT_LEAD_PI",
     USER_NOT_REVIEWER: "USER_NOT_REVIEWER",
+    USER_NOT_FOUND: "USER_NOT_FOUND",
 
     // ---------- APPLICANT ----------
     APPLICANT_NOT_FOUND: "APPLICANT_NOT_FOUND",
@@ -28,6 +29,13 @@ export const ERROR_CODES = {
     // ---------- PROJECT ----------
     PROJECT_NOT_FOUND: "PROJECT_NOT_FOUND",
     PROJECT_REJECTED: "PROJECT_REJECTED",
+
+    // ---------- PHASE ----------
+    PHASE_NOT_FOUND: "PHASE_NOT_FOUND",
+    PHASE_NOT_ACTIVE: "PHASE_NOT_ACTIVE",
+
+    // ---------- PHASE_DOCUMENT ----------
+    PHASE_DOCUMENT_NOT_FOUND: "PHASE_DOCUMENT_NOT_FOUND"
 
 
 };

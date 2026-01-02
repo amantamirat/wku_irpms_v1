@@ -52,9 +52,6 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
 
     const { directorate, directorates } = useDirectorate();
 
-    // const [directorates, setDirectorates] = useState<Organization[] | undefined>(undefined);
-    // const [directorate, setDirectorate] = useState<Organization | undefined>(undefined);
-
     const emptyCycle: Call = {
         calendar: calendar ?? "",
         directorate: directorate ?? "",
@@ -66,28 +63,6 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
 
     const [calls, setCalls] = useState<Call>(emptyCycle);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-
-
-    /** 
-     * useEffect(() => {
-        const fetchDirectorates = async () => {
-            try {
-                setLoading(true);
-                let directorates = getScopesByUnit(OrgnUnit.Department);
-                if (directorates === "*") {
-                    directorates = await OrganizationApi.getOrganizations({ type: OrgnUnit.Directorate });
-                }
-                setDirectorates(directorates);
-            } catch (err: any) {
-                setError("Failed to load directorates: " + err?.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchDirectorates();
-    }, []);
-    */
-
 
     /** Fetch calls */
     useEffect(() => {
@@ -221,31 +196,6 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
         return (<DirectorateSelector />)
     };
 
-    /*
-    const topTemplate = () => {
-        if (calendar) {
-            return undefined;
-        }
-        return (
-            <div className="card p-fluid">
-                <div className="formgrid grid">
-                    <div className="field col-12 md:col-6 lg:col-4">
-                        <label htmlFor="directorate">Directorate</label>
-                        <Dropdown
-                            id="workspace"
-                            value={directorate}
-                            options={directorates}
-                            onChange={(e) => setDirectorate(e.value)}
-                            optionLabel="name"
-                            placeholder="Select Directorate"
-                        />
-                    </div>
-                </div>
-            </div>
-        );
-    }
-        */
-
     return (
         <>
             <CrudManager
@@ -266,6 +216,9 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
                     setCalls({ ...emptyCycle });
                     setShowSaveDialog(true);
                 }}
+
+                canEditRow={(row: Call) => row.status === CallStatus.planned}
+                canDeleteRow={(row: Call) => row.status === CallStatus.planned}
 
                 /** Edit */
                 onEdit={(row) => {
@@ -292,7 +245,7 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
             />
 
             {/* Save Dialog */}
-            {calls && (
+            {(calls && showSaveDialog) && (
                 <SaveCall
                     visible={showSaveDialog}
                     call={calls}
