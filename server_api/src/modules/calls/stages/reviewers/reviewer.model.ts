@@ -1,7 +1,7 @@
 //reviewer.model.ts
 import mongoose, { model, Schema } from "mongoose";
 import { ReviewerStatus } from "./reviewer.status";
-import { COLLECTIONS } from "../../../../../common/constants/collections.enum";
+import { COLLECTIONS } from "../../../../common/constants/collections.enum";
 
 export interface IReviewer extends Document {
     projectStage: mongoose.Types.ObjectId;

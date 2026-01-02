@@ -29,9 +29,9 @@ import assignmentRoutes from './modules/projects/collaborators/assignment/assign
 import phaseRoutes from './modules/projects/phase/phase.routes';
 import projectThemeRoutes from './modules/projects/themes/project.theme.routes';
 
-import documentRoutes from './modules/calls/stages/documents/document.routes';
-import reviewerRoutes from './modules/calls/stages/documents/reviewers/reviewer.routes';
-import resultRoutes from './modules/calls/stages/documents/reviewers/results/result.routes';
+import documentRoutes from './modules/projects/documents/document.routes';
+import reviewerRoutes from './modules/calls/stages/reviewers/reviewer.routes';
+import resultRoutes from './modules/calls/stages/reviewers/results/result.routes';
 
 import userRoutes from './modules/users/user.routes';
 import roleRoutes from './modules/users/roles/role.routes';

@@ -24,9 +24,9 @@ import { StageStatus } from "../calls/stages/stage.status";
 import { ConstraintValidator } from "../grants/constraints/constraint.validator";
 import { PhaseType } from "./phase/phase.enum";
 import { IProjectThemeRepository, ProjectThemeRepository } from "./themes/project.theme.repository";
-import { DocumentRepository, IDocumentRepository } from "../calls/stages/documents/document.repository";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { AppError } from "../../common/errors/app.error";
+import { IDocumentRepository, DocumentRepository } from "./documents/document.repository";
 
 export class ProjectService {
 

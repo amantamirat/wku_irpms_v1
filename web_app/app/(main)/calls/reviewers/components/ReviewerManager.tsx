@@ -8,13 +8,12 @@ import { useCrudList } from "@/hooks/useCrudList";
 import MyBadge from "@/templates/MyBadge";
 import { PERMISSIONS } from "@/types/permissions";
 import { Button } from "primereact/button";
-import { TabPanel, TabView } from "primereact/tabview";
 import { useEffect, useState } from "react";
-import { DocStatus, ProjectDoc } from "../../documents/models/document.model";
+import ResultManager from "../../results/components/ResultManager";
 import { ReviewerApi } from "../api/reviewer.api";
 import { GetReviewersOptions, Reviewer, ReviewerStatus } from "../models/reviewer.model";
 import SaveReviewerDialog from "./SaveReviewerDialog";
-import ResultManager from "../../results/components/ResultManager";
+import { ProjectDoc, DocStatus } from "@/app/(main)/projects/documents/models/document.model";
 
 interface ReviewerManagerProps {
     projectStage?: ProjectDoc;

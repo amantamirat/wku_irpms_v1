@@ -1,14 +1,14 @@
 import mongoose from "mongoose";
 import { CreateStageDTO, FilterStageDTO, UpdateStageDTO } from "./stage.dto";
 import { IStage, Stage } from "./stage.model";
-import { UpdateStatusDTO } from "./documents/document.dto";
+
 
 export interface IStageRepository {
     findOne(filters: FilterStageDTO): Promise<IStage | null>;
     find(filters: FilterStageDTO, populate?: boolean): Promise<Partial<IStage>[]>;
     //findLastStageByCall(callId: string): Promise<IStage | null>;
     create(dto: CreateStageDTO): Promise<IStage>;
-    update(id: string, data: UpdateStageDTO["data"] | UpdateStatusDTO["data"]): Promise<IStage>;
+    update(id: string, data: UpdateStageDTO["data"]): Promise<IStage>;
     delete(id: string): Promise<IStage | null>;
 }
 

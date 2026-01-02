@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import fs from "fs";
-import { successResponse, errorResponse } from "../../../../common/helpers/response";
+import { successResponse, errorResponse } from "../../../common/helpers/response";
 
 import {
     CreateDocumentDTO,
@@ -8,9 +8,9 @@ import {
     UpdateStatusDTO
 } from "./document.dto";
 
-import { AuthenticatedRequest } from "../../../users/user.middleware";
+import { AuthenticatedRequest } from "../../users/user.middleware";
 import { DocumentService } from "./document.service";
-import { DeleteDto } from "../../../../util/delete.dto";
+import { DeleteDto } from "../../../util/delete.dto";
 import { DocStatus } from "./document.status";
 
 export class ProjectDocController {

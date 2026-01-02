@@ -141,6 +141,21 @@ export const PERMISSIONS = {
     UPDATE: "evaluation:update",
     DELETE: "evaluation:delete",
   },
+  THEMATIC: {
+    CREATE: "thematic:create",
+    READ: "thematic:read",
+    UPDATE: "thematic:update",
+    DELETE: "thematic:delete",
+  },
+
+  THEME: {
+    CREATE: "theme:create",
+    IMPORT: "theme:import",
+    READ: "theme:read",
+    UPDATE: "theme:update",
+    DELETE: "theme:delete",
+  },
+
   PROJECT: {
     CREATE: "project:create",
     READ: "project:read",
@@ -205,13 +220,7 @@ export const PERMISSIONS = {
     },
     DELETE: "reviewer:delete",
   },
-  THEME: {
-    CREATE: "theme:create",
-    IMPORT: "theme:import",
-    READ: "theme:read",
-    UPDATE: "theme:update",
-    DELETE: "theme:delete",
-  },
+  
   POSITION: {
     CREATE: "position:create",
     READ: "position:read",

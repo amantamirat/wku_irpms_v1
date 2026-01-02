@@ -1,6 +1,6 @@
 import { TabPanel, TabView } from "primereact/tabview";
 import CollaboratorManager from "../../projects/collaborators/components/CollaboratorManager";
-import ReviewerManager from "../../projects/reviewers/components/ReviewerManager";
+import ReviewerManager from "../../calls/reviewers/components/ReviewerManager";
 import SpecializationManager from "../../specializations/components/SpecializationManager";
 import ExperienceManager from "../experiences/components/ExperienceManager";
 import { Applicant } from "../models/applicant.model";

@@ -10,28 +10,28 @@ const router: Router = Router();
 router.post(
     '/',
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.THEME.CREATE]),
+    checkPermission([PERMISSIONS.THEMATIC.CREATE]),
     controller.create
 );
 
 router.get(
     '/',
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.THEME.READ]),
+    checkPermission([PERMISSIONS.THEMATIC.READ]),
     controller.get
 );
 
 router.put(
     '/:id',
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.THEME.UPDATE]),
+    checkPermission([PERMISSIONS.THEMATIC.UPDATE]),
     controller.update
 );
 
 router.delete(
     '/:id',
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.THEME.DELETE]),
+    checkPermission([PERMISSIONS.THEMATIC.DELETE]),
     controller.delete
 );
 

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ResultController } from './result.controller';
-import { checkPermission, verifyActiveAccount } from '../../../../../users/user.middleware';
-import { PERMISSIONS } from '../../../../../../common/constants/permissions';
+import { PERMISSIONS } from '../../../../../common/constants/permissions';
+import { verifyActiveAccount, checkPermission } from '../../../../users/user.middleware';
 
 const router: Router = Router();
 

@@ -25,7 +25,7 @@ const AppMenu = () => {
                 PERMISSIONS.CALL.CREATE,
                 PERMISSIONS.EVALUATION.CREATE,
                 PERMISSIONS.GRANT.CREATE,
-                PERMISSIONS.THEME.CREATE,
+                PERMISSIONS.THEMATIC.CREATE,
             ]),
             items: [
                 {
@@ -34,8 +34,6 @@ const AppMenu = () => {
                     to: '/calls',
                     visible: hasPermission([
                         PERMISSIONS.CALL.CREATE,
-                        PERMISSIONS.CALL.UPDATE,
-                        PERMISSIONS.CALL.DELETE,
                     ])
                 },
                 {
@@ -45,8 +43,6 @@ const AppMenu = () => {
                     visible: hasPermission(
                         [
                             PERMISSIONS.EVALUATION.CREATE,
-                            PERMISSIONS.EVALUATION.UPDATE,
-                            PERMISSIONS.EVALUATION.DELETE
                         ]
                     )
                 },
@@ -56,9 +52,7 @@ const AppMenu = () => {
                     to: '/thematics',
                     visible: hasPermission(
                         [
-                            PERMISSIONS.THEME.CREATE,
-                            PERMISSIONS.THEME.UPDATE,
-                            PERMISSIONS.THEME.DELETE
+                            PERMISSIONS.THEMATIC.CREATE
                         ]
                     )
                 },

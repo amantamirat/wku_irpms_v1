@@ -1,18 +1,19 @@
 // project-document.service.ts
-import { DeleteDto } from "../../../../util/delete.dto";
-import { ConstraintValidator } from "../../../grants/constraints/constraint.validator";
-import { IProjectRepository, ProjectRepository } from "../../../projects/project.repository";
-import { ProjectSynchronizer } from "../../../projects/project.synchronizer";
-import { StageStatus } from "../stage.status";
-import { IStageRepository, StageRepository } from "../stage.repository";
+import { SYSTEM } from "../../../common/constants/system.constant";
+import { AppError } from "../../../common/errors/app.error";
+import { ERROR_CODES } from "../../../common/errors/error.codes";
+import { DeleteDto } from "../../../util/delete.dto";
+import { IStageRepository, StageRepository } from "../../calls/stages/stage.repository";
+import { StageStatus } from "../../calls/stages/stage.status";
+import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
+import { IProjectRepository, ProjectRepository } from "../project.repository";
+import { ProjectStatus } from "../project.status";
+import { ProjectSynchronizer } from "../project.synchronizer";
 import { CreateDocumentDTO, GetDocumentDTO, UpdateStatusDTO } from "./document.dto";
-import { DocStatus } from "./document.status";
 import { IDocumentRepository, DocumentRepository } from "./document.repository";
 import { DocumentStateMachine } from "./document.state-machine";
-import { ProjectStatus } from "../../../projects/project.status";
-import { AppError } from "../../../../common/errors/app.error";
-import { ERROR_CODES } from "../../../../common/errors/error.codes";
-import { SYSTEM } from "../../../../common/constants/system.constant";
+import { DocStatus } from "./document.status";
+
 
 export class DocumentService {
 

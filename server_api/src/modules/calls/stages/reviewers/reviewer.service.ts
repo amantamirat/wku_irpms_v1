@@ -1,15 +1,15 @@
 // reviewer.service.ts
-import { SYSTEM } from "../../../../../common/constants/system.constant";
-import { AppError } from "../../../../../common/errors/app.error";
-import { ERROR_CODES } from "../../../../../common/errors/error.codes";
-import Applicant from "../../../../applicants/applicant.model";
-import { CriterionRepository, ICriterionRepository } from "../../../../evaluations/criteria/criterion.repository";
-import { Collaborator } from "../../../../projects/collaborators/collaborator.model";
-import { IProjectRepository, ProjectRepository } from "../../../../projects/project.repository";
-import { IStageRepository, StageRepository } from "../../stage.repository";
-import { DocumentRepository, IDocumentRepository } from "../document.repository";
-import { DocStatus } from "../document.status";
-import { ProjectStageSynchronizer } from "../document.synchronizer";
+import { SYSTEM } from "../../../../common/constants/system.constant";
+import { AppError } from "../../../../common/errors/app.error";
+import { ERROR_CODES } from "../../../../common/errors/error.codes";
+import Applicant from "../../../applicants/applicant.model";
+import { ICriterionRepository, CriterionRepository } from "../../../evaluations/criteria/criterion.repository";
+import { Collaborator } from "../../../projects/collaborators/collaborator.model";
+import { DocumentRepository, IDocumentRepository } from "../../../projects/documents/document.repository";
+import { DocStatus } from "../../../projects/documents/document.status";
+import { ProjectStageSynchronizer } from "../../../projects/documents/document.synchronizer";
+import { IProjectRepository, ProjectRepository } from "../../../projects/project.repository";
+import { IStageRepository, StageRepository } from "../stage.repository";
 import { IResultRepository, ResultRepository } from "./results/result.repository";
 import { CreateReviewerDTO, GetReviewersDTO, UpdateReviewerDTO } from "./reviewer.dto";
 import { IReviewerRepository, ReviewerRepository } from "./reviewer.repository";

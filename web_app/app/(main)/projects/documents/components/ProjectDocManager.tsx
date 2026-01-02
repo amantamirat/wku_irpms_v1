@@ -10,10 +10,10 @@ import { PERMISSIONS } from "@/types/permissions";
 import { Button } from "primereact/button";
 import { useEffect, useState } from "react";
 import { Project, ProjectStatus } from "../../models/project.model";
-import ReviewerManager from "../../reviewers/components/ReviewerManager";
 import { ProjectDocApi } from "../api/project.doc.api";
 import { DocStatus, ProjectDoc } from "../models/document.model";
 import SaveProjectStageDialog from "./SaveProjectStageDialog";
+import ReviewerManager from "@/app/(main)/calls/reviewers/components/ReviewerManager";
 
 interface ProjectDocManagerProps {
     project?: Project;
@@ -42,9 +42,9 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
     const canCreate = isValidStatus && isLeadPI && hasPermission([PERMISSIONS.DOCUMENT.CREATE]);
     const canDelete = isValidStatus && hasPermission([PERMISSIONS.DOCUMENT.DELETE]);
     //Status Permissions
-    const canAccept = hasPermission([PERMISSIONS.DOCUMENT.STATUS.ACCEPT]);
-    const canReject = hasPermission([PERMISSIONS.DOCUMENT.STATUS.REJECT]);
-    const canReview = hasPermission([PERMISSIONS.DOCUMENT.STATUS.REVIEW]);
+    const canAccept = !!stage && hasPermission([PERMISSIONS.DOCUMENT.STATUS.ACCEPT]);
+    const canReject = !!stage && hasPermission([PERMISSIONS.DOCUMENT.STATUS.REJECT]);
+    const canReview = !!stage && hasPermission([PERMISSIONS.DOCUMENT.STATUS.REVIEW]);
 
     const enableMultiSelection = canAccept || canReject;
 
@@ -126,6 +126,14 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
                 updateItem({ ...updatedDoc, stage: doc.stage, project: doc.project });
             }
         }
+        /*
+        if (updateProjectStatus && project && updatedDocs.length === 1) {
+            updateProjectStatus({
+                ...project, status: next === DocStatus.accepted ?
+                    ProjectStatus.accepted : ProjectStatus.rejected
+            })
+        }
+        */
         setSelectedDocs([]);
     };
 

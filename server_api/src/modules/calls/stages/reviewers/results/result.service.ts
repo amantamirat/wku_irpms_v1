@@ -1,16 +1,15 @@
 //result.service.ts
-import { FormType } from "../../../../../evaluations/criteria/criterion.enum";
+import { SYSTEM } from "../../../../../common/constants/system.constant";
+import { AppError } from "../../../../../common/errors/app.error";
+import { ERROR_CODES } from "../../../../../common/errors/error.codes";
+import { DeleteDto } from "../../../../../util/delete.dto";
+import { FormType } from "../../../../evaluations/criteria/criterion.enum";
+import { ICriterionRepository, CriterionRepository } from "../../../../evaluations/criteria/criterion.repository";
+import { IOptionRepository, OptionRepository } from "../../../../evaluations/criteria/options/option.repository";
 import { IReviewerRepository, ReviewerRepository } from "../reviewer.repository";
-import { CreateResultDTO, GetResultsDTO, UpdateResultDTO } from "./result.dto";
-import { IResultRepository, ResultRepository } from "./result.repository";
-//import { ReviewerPermission } from "../reviewer.permission";
-import { DeleteDto } from "../../../../../../util/delete.dto";
-import { CriterionRepository, ICriterionRepository } from "../../../../../evaluations/criteria/criterion.repository";
-import { IOptionRepository, OptionRepository } from "../../../../../evaluations/criteria/options/option.repository";
 import { ReviewerStatus } from "../reviewer.status";
-import { ERROR_CODES } from "../../../../../../common/errors/error.codes";
-import { AppError } from "../../../../../../common/errors/app.error";
-import { SYSTEM } from "../../../../../../common/constants/system.constant";
+import { UpdateResultDTO, CreateResultDTO, GetResultsDTO } from "./result.dto";
+import { IResultRepository, ResultRepository } from "./result.repository";
 
 
 export class ResultService {

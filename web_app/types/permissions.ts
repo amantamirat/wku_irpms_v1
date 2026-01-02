@@ -204,6 +204,14 @@ export const PERMISSIONS = {
     },
     DELETE: "reviewer:delete",
   },
+
+  THEMATIC: {
+    CREATE: "thematic:create",
+    READ: "thematic:read",
+    UPDATE: "thematic:update",
+    DELETE: "thematic:delete",
+  },
+
   THEME: {
     CREATE: "theme:create",
     IMPORT: "theme:import",

@@ -1,8 +1,8 @@
 import express from "express";
 import { ProjectDocController } from "./document.controller";
-import { upload } from "../../../../util/multer";
-import { checkPermission, checkStatusPermission, verifyActiveAccount } from "../../../users/user.middleware";
-import { PERMISSIONS } from "../../../../common/constants/permissions";
+import { upload } from "../../../util/multer";
+import { checkPermission, checkStatusPermission, verifyActiveAccount } from "../../users/user.middleware";
+import { PERMISSIONS } from "../../../common/constants/permissions";
 
 const controller = new ProjectDocController();
 const router = express.Router();

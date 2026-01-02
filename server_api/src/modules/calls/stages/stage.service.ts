@@ -1,11 +1,11 @@
 import { EvaluationRepository, IEvaluationRepository } from "../../evaluations/evaluation.repository";
 import { CallStatus } from "../call.status";
 import { CallRepository, ICallRepository } from "../call.repository";
-import { DocumentRepository, IDocumentRepository } from "./documents/document.repository";
 import { CreateStageDTO, FilterStageDTO, UpdateStageDTO } from "./stage.dto";
 import { StageStatus } from "./stage.status";
 import { IStageRepository, StageRepository } from "./stage.repository";
 import { StageStateMachine } from "./stage.state-machine";
+import { DocumentRepository, IDocumentRepository } from "../../projects/documents/document.repository";
 
 export class StageService {
 

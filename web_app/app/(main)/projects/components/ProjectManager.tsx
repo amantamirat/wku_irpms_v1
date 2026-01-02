@@ -97,7 +97,7 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
     const stateTransitionTemplate = (rowData: Project) => {
         const state = rowData.status;
         return (<div className="flex gap-2">
-            {(canNegotiate && (state === ProjectStatus.accepted || state === ProjectStatus.approved))
+            {(canNegotiate && (state === ProjectStatus.accepted))
                 &&
                 <Button
                     tooltip="Negotiate"
@@ -127,16 +127,19 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
                     }}
                 />
             }
-            {(canAccept && state === ProjectStatus.negotiation) &&
+            {((canAccept && state === ProjectStatus.negotiation) ||
+                (canNegotiate && state === ProjectStatus.approved)) &&
                 <Button
-                    tooltip="Back to accept"
+                    tooltip={`Back to ${state === ProjectStatus.negotiation ? 'accept' : 'negotiate'}`}
                     icon="pi pi-undo"
                     severity="warning"
                     size="small"
                     onClick={() => {
                         confirm.ask({
-                            operation: 'back to accepted',
-                            onConfirmAsync: () => updateStatus(rowData, ProjectStatus.accepted)
+                            operation: 'undo',
+                            onConfirmAsync: () => updateStatus(rowData,
+                                state === ProjectStatus.negotiation ?
+                                    ProjectStatus.accepted : ProjectStatus.negotiation)
                         });
                     }}
                 />

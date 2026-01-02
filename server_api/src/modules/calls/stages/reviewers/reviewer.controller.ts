@@ -5,8 +5,8 @@ import {
     GetReviewersDTO,
     UpdateReviewerDTO
 } from "./reviewer.dto";
-import { AuthenticatedRequest } from "../../../../users/user.middleware";
-import { successResponse, errorResponse } from "../../../../../common/helpers/response";
+import { AuthenticatedRequest } from "../../../users/user.middleware";
+import { successResponse, errorResponse } from "../../../../common/helpers/response";
 
 export class ReviewerController {
 

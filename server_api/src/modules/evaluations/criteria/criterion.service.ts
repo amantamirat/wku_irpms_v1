@@ -10,7 +10,7 @@ import {
 } from "./criterion.dto";
 import { FormType } from "./criterion.enum";
 import { Criterion } from "./criterion.model";
-import { Reviewer } from "../../calls/stages/documents/reviewers/reviewer.model";
+import { Reviewer } from "../../calls/stages/reviewers/reviewer.model";
 import mongoose from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
 import { CriterionRepository, ICriterionRepository } from "./criterion.repository";

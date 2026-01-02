@@ -3,8 +3,8 @@ import { IDocumentRepository } from "./document.repository";
 import { DocStatus } from "./document.status";
 import { DocumentStateMachine } from "./document.state-machine";
 import { IProjectDocument } from "./document.model";
-import { IReviewerRepository } from "./reviewers/reviewer.repository";
-import { ReviewerStatus } from "./reviewers/reviewer.status";
+import { IReviewerRepository } from "../../calls/stages/reviewers/reviewer.repository";
+import { ReviewerStatus } from "../../calls/stages/reviewers/reviewer.status";
 
 export class ProjectStageSynchronizer {
   private projectStageRepo: IDocumentRepository;
