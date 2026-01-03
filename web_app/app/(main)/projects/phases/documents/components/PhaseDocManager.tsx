@@ -9,6 +9,7 @@ import { PERMISSIONS } from "@/types/permissions";
 import { Phase } from "../../models/phase.model";
 import { PhaseDocType, PhaseDocument } from "../model/phase.doc";
 import { PhaseDocApi } from "../api/phase.doc.api";
+import SavePhaseDocDialog from "./SavePhaseDocDialog";
 
 interface PhaseDocManagerProps {
     phase: string;
@@ -33,9 +34,9 @@ export default function PhaseDocManager({
     /*
     const isValidStatus = project.status === ProjectStatus.pending ||
         project.status === ProjectStatus.negotiation;*/
-    const canCreate = true;
-    const canEdit = true;
-    const canDelete = true;
+    const canCreate = hasPermission([PERMISSIONS.PHASE_DOCUMENT.CREATE]);
+    const canEdit = hasPermission([PERMISSIONS.PHASE_DOCUMENT.UPDATE]);
+    const canDelete = hasPermission([PERMISSIONS.PHASE_DOCUMENT.DELETE]);
 
     // -------------------------------
     // CRUD Hook
@@ -140,6 +141,14 @@ export default function PhaseDocManager({
                     })
                 }
             />
+            {(showDialog) && (
+                <SavePhaseDocDialog
+                    visible={showDialog}
+                    phaseDoc={phaseDoc}
+                    onComplete={onSaveComplete}
+                    onHide={hideDialog}
+                />
+            )}
         </>
     );
 }

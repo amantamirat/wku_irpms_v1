@@ -148,7 +148,8 @@ export const PERMISSIONS = {
       ACCEPT: "project:status.accepted",
       NEGOTIATE: "project:status.negotiation",
       APPROVE: "project:status.approved",
-      GRANT: "project:status.granted"
+      GRANT: "project:status.granted",
+      COMPLETE: "project:status.completed"
     },
     DELETE: "project:delete",
   },
@@ -170,8 +171,16 @@ export const PERMISSIONS = {
       PROPOSE: "phase:status.proposed",
       VERIFY: "phase:status.verified",
       APPROVE: "phase:status.approved",
+      ACTIVATE: "phase:status.active",
+      COMPLETE: "phase:status.completed"
     },
     DELETE: "phase:delete",
+  },
+  PHASE_DOCUMENT: {
+    CREATE: "phase:document:create",
+    READ: "phase:document:read",
+    UPDATE: "phase:document:update",
+    DELETE: "phase:document:delete",
   },
   PROJECT_THEME: {
     CREATE: "project:theme:create",

@@ -8,7 +8,9 @@ export enum PhaseType {
 export enum PhaseStatus {
     proposed = 'proposed',
     verified = 'verified',
-    approved = 'approved'
+    approved = 'approved',
+    active = 'active',
+    completed = 'completed',
 }
 
 export type Phase = {

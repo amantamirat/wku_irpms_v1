@@ -208,12 +208,8 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
 
 
     const columns = [
-        ...((!stage) ? [
-            { header: "Stage", field: "stage.name", sortable: true },
-        ] : []),
-        ...((!project) ? [
-            { header: "Project", field: "project.title", sortable: true },
-        ] : []),
+        !stage && { header: "Stage", field: "stage.name", sortable: true },
+        !project && { header: "Project", field: "project.title", sortable: true },
         {
             header: "Document",
             body: (row: ProjectDoc) => {
@@ -238,7 +234,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
             body: (row: ProjectDoc) => <MyBadge type="status" value={row.status ?? "Unknown"} />
         },
         { body: stateTransitionTemplate }
-    ];
+    ].filter(Boolean);
 
     return (
         <>

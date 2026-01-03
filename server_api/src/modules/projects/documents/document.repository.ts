@@ -6,10 +6,12 @@ import {
     GetDocumentDTO,
     UpdateDocumentDTO
 } from "./document.dto";
+import { populate } from "dotenv";
 
 export interface IDocumentRepository {
     findById(id: string): Promise<IProjectDocument | null>; // <-- allow POJO
     find(filters: GetDocumentDTO, populate?: boolean): Promise<Partial<IProjectDocument>[]>;
+    findByStage(stage: string): Promise<Partial<IProjectDocument>[]>;
     create(dto: CreateDocumentDTO): Promise<IProjectDocument>;
     update(id: string, status: UpdateDocumentDTO["data"]): Promise<IProjectDocument>;
     delete(id: string): Promise<IProjectDocument | null>;
@@ -51,6 +53,26 @@ export class DocumentRepository implements IDocumentRepository {
             .populate("stage")
             //.skip(filters.skip ?? 0)
             //.limit(filters.limit ?? 0)
+            .lean<IProjectDocument[]>()
+            .exec();
+    }
+
+    async findByStage(stage: string) {
+        return ProjectDocument.find({ stage: new mongoose.Types.ObjectId(stage) })
+            .populate({
+                path: "project",
+                populate: { path: "leadPI", populate: { path: "workspace" } }
+            })
+            .lean<IProjectDocument[]>()
+            .exec();
+    }
+
+    async findByProject(stage: string) {
+        return ProjectDocument.find({ stage: new mongoose.Types.ObjectId(stage) })
+            .populate({
+                path: "project",
+                populate: { path: "leadPI", populate: { path: "workspace" } }
+            })
             .lean<IProjectDocument[]>()
             .exec();
     }

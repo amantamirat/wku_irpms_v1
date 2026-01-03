@@ -56,7 +56,7 @@ export class DocumentService {
             if (!nextStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
 
             if (nextStageDoc.status !== StageStatus.active) throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
-            if (nextStageDoc.deadline < new Date()) throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
+            if (nextStageDoc.deadline < new Date()) throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
 
             await this.validator.validateProject(project, projectDoc);
 

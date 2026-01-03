@@ -7,11 +7,11 @@ const controller = new PhaseDocController();
 const router: Router = Router();
 
 router.post('/', verifyActiveAccount,
-    checkPermission([PERMISSIONS.PHASE.CREATE]),
+    checkPermission([PERMISSIONS.PHASE_DOCUMENT.CREATE]),
     controller.create);
 
 router.get('/', verifyActiveAccount,
-    checkPermission([PERMISSIONS.PHASE.READ]),
+    checkPermission([PERMISSIONS.PHASE_DOCUMENT.READ]),
     controller.get);
 /*    
 router.put('/', verifyActiveAccount,
@@ -19,7 +19,7 @@ router.put('/', verifyActiveAccount,
     controller.update);*/
 
 router.delete('/:id', verifyActiveAccount,
-    checkPermission([PERMISSIONS.PHASE.DELETE]),
+    checkPermission([PERMISSIONS.PHASE_DOCUMENT.DELETE]),
     controller.delete);
 
 export default router;

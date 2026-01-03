@@ -529,6 +529,10 @@
   },
   {
     "category": "Project Management",
+    "name": "project:status.completed"
+  },
+  {
+    "category": "Project Management",
     "name": "project:delete",
     "description": "Delete project entries"
   },
@@ -589,8 +593,32 @@
   },
   {
     "category": "Phase Management",
+    "name": "phase:status.active"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:status.completed"
+  },
+  {
+    "category": "Phase Management",
     "name": "phase:delete",
     "description": "Delete phase entries"
+  },
+  {
+    "category": "Phase Document Management",
+    "name": "phase:document:create"
+  },
+  {
+    "category": "Phase Document Management",
+    "name": "phase:document:read"
+  },
+  {
+    "category": "Phase Document Management",
+    "name": "phase:document:update"
+  },
+  {
+    "category": "Phase Document Management",
+    "name": "phase:document:delete"
   },
   {
     "category": "Document Management",

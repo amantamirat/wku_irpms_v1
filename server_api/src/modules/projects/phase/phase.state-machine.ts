@@ -7,7 +7,8 @@ export class PhaseStateMachine {
         [PhaseStatus.proposed]: [PhaseStatus.verified],
         [PhaseStatus.verified]: [PhaseStatus.approved, PhaseStatus.proposed],
         [PhaseStatus.approved]: [PhaseStatus.active, PhaseStatus.verified],
-        [PhaseStatus.active]: [PhaseStatus.approved]
+        [PhaseStatus.active]: [PhaseStatus.completed, PhaseStatus.approved],
+        [PhaseStatus.completed]: [PhaseStatus.active]
     };
 
     static canTransition(from: PhaseStatus, to: PhaseStatus): boolean {

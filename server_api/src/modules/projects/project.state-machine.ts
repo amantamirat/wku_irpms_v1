@@ -10,7 +10,8 @@ export class ProjectStateMachine {
         [ProjectStatus.accepted]: [ProjectStatus.negotiation, ProjectStatus.submitted],
         [ProjectStatus.negotiation]: [ProjectStatus.approved, ProjectStatus.accepted],
         [ProjectStatus.approved]: [ProjectStatus.granted, ProjectStatus.negotiation],
-        [ProjectStatus.granted]: [ProjectStatus.approved]
+        [ProjectStatus.granted]: [ProjectStatus.completed,ProjectStatus.approved],
+        [ProjectStatus.completed]: [ProjectStatus.granted]
     };
 
     static canTransition(from: ProjectStatus, to: ProjectStatus): boolean {

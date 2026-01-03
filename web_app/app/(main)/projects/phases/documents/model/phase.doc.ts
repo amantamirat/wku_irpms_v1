@@ -8,6 +8,7 @@ export type PhaseDocument = {
     phase: string;
     description?: string;
     //documentPath: string;
+    file?: File;
 }
 
 export interface GetPhaseDocOptions {

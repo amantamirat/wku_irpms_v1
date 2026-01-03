@@ -151,6 +151,16 @@ export function CrudManager<T extends { _id?: string }>({
     // if (loading) return <ListSkeleton rows={10} />;
     if (error) return <ErrorCard errorMessage={error} />;
 
+    const emptyTemplete = () =>
+    (
+        <div className="flex justify-content-center align-items-center py-6">
+            <div className="text-center">
+                <i className="pi pi-inbox text-4xl text-500 mb-3" />
+                <p className="text-500">No {itemName} data found at the moment.</p>
+            </div>
+        </div>
+    )
+
     return (
         <div className="card">
             {
@@ -163,51 +173,52 @@ export function CrudManager<T extends { _id?: string }>({
                 {renderToolbar()}
                 {
                     loading ? <ListSkeleton rows={10} /> :
-                        <DataTable
-                            value={items}
-                            dataKey={dataKey}
-                            paginator
-                            rows={10}
-                            rowsPerPageOptions={[5, 10, 25]}
-                            scrollable
-                            emptyMessage="No data found."
-                            expandedRows={rowExpansionTemplate ? expandedRows : undefined}
-                            onRowToggle={(e) => setExpandedRows(e.data)}
-                            rowExpansionTemplate={rowExpansionTemplate}
-                            filters={filters}
-                            globalFilter={globalFilter}
-                            header={header}
+                        items.length === 0 ? emptyTemplete() :
+                            <DataTable
+                                value={items}
+                                dataKey={dataKey}
+                                paginator
+                                rows={10}
+                                rowsPerPageOptions={[5, 10, 25]}
+                                scrollable
+                                emptyMessage="No data found."
+                                expandedRows={rowExpansionTemplate ? expandedRows : undefined}
+                                onRowToggle={(e) => setExpandedRows(e.data)}
+                                rowExpansionTemplate={rowExpansionTemplate}
+                                filters={filters}
+                                globalFilter={globalFilter}
+                                header={header}
 
-                            selection={enableSelection ? selectedItems : undefined}
-                            //selectionMode={enableSelection ? selectionMode : undefined}
-                            onSelectionChange={
-                                enableSelection
-                                    ? (e: any) =>
-                                        onSelectionChange?.(e.value)
-                                    : undefined
-                            }
+                                selection={enableSelection ? selectedItems : undefined}
+                                //selectionMode={enableSelection ? selectionMode : undefined}
+                                onSelectionChange={
+                                    enableSelection
+                                        ? (e: any) =>
+                                            onSelectionChange?.(e.value)
+                                        : undefined
+                                }
 
-                        >
-                            {rowExpansionTemplate && <Column expander style={{ width: "3rem" }} />}
+                            >
+                                {rowExpansionTemplate && <Column expander style={{ width: "3rem" }} />}
 
-                            {enableSelection && (
-                                <Column selectionMode={selectionMode} headerStyle={{ width: "3rem" }} />
-                            )}
-                            <Column
-                                header="#"
-                                body={(row, options) => options.rowIndex + 1}
-                                style={{ width: "4rem" }}
-                            />
+                                {enableSelection && (
+                                    <Column selectionMode={selectionMode} headerStyle={{ width: "3rem" }} />
+                                )}
+                                <Column
+                                    header="#"
+                                    body={(row, options) => options.rowIndex + 1}
+                                    style={{ width: "4rem" }}
+                                />
 
-                            {columns.map((col, idx) => (
-                                <Column key={idx} {...col} />
-                            ))}
+                                {columns.map((col, idx) => (
+                                    <Column key={idx} {...col} />
+                                ))}
 
-                            {<Column body={actionBody} />}
-                        </DataTable>
+                                {<Column body={actionBody} />}
+                            </DataTable>
                 }
 
             </div>
-        </div>
+        </div >
     );
 }

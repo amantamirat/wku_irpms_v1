@@ -1,3 +1,5 @@
+import { AppError } from "../../../common/errors/app.error";
+import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { DeleteDto } from "../../../util/delete.dto";
 import { IProjectRepository, ProjectRepository } from "../project.repository";
 import { ProjectStatus } from "../project.status";
@@ -69,16 +71,19 @@ export class PhaseService {
         if (!next) throw new Error("Status not found");
 
         const phaseDoc = await this.repository.findById(id);
-        if (!phaseDoc) throw new Error("Phase not found");
+        if (!phaseDoc) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
 
         const projectDoc = await this.projectRepository.findById(String(phaseDoc.project));
-        if (!projectDoc) throw new Error("Project not found");
+        if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
 
+        const current = phaseDoc.status;
+        /*
         if (projectDoc.status !== ProjectStatus.negotiation) {
             throw new Error("PROJECT_STATUS_INVALID_FOR_PHASE_UPDATE");
         }
+        */
 
-        const current = phaseDoc.status;
+
         PhaseStateMachine.validateTransition(current, next);
 
         if (next === PhaseStatus.verified) {

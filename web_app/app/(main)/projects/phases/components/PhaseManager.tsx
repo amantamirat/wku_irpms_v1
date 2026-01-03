@@ -16,6 +16,7 @@ import { PERMISSIONS } from "@/types/permissions";
 import MyBadge from "@/templates/MyBadge";
 import { Button } from "primereact/button";
 import PhaseDocManager from "../documents/components/PhaseDocManager";
+import { stat } from "fs";
 
 interface PhaseManagerProps {
     project: Project;
@@ -56,9 +57,12 @@ export default function PhaseManager({ project, phaseType, flyMode = false, onSa
     const canEdit = isValidStatus && isLeadPI && hasPermission([PERMISSIONS.PHASE.UPDATE]);
     const canDelete = isValidStatus && isLeadPI && hasPermission([PERMISSIONS.PHASE.DELETE]);
     // State permissions
+    const canPropose = hasPermission([PERMISSIONS.PHASE.STATUS.PROPOSE]);
     const canVerify = (project.status === ProjectStatus.negotiation) && hasPermission([PERMISSIONS.PHASE.STATUS.VERIFY]);
     const canApprove = hasPermission([PERMISSIONS.PHASE.STATUS.APPROVE]);
-    const canPropose = hasPermission([PERMISSIONS.PHASE.STATUS.PROPOSE]);
+    const canActivate = hasPermission([PERMISSIONS.PHASE.STATUS.ACTIVATE]);
+    const canComplete = hasPermission([PERMISSIONS.PHASE.STATUS.COMPLETE]);
+
     // -------------------------------
     // CRUD Hook
     // -------------------------------
@@ -148,56 +152,95 @@ export default function PhaseManager({ project, phaseType, flyMode = false, onSa
 
     const stateTransitionTemplate = (rowData: Phase) => {
         const state = rowData.status;
-        return (<div className="flex gap-2">
-            {(canVerify &&
-                ((state === PhaseStatus.proposed && isLeadPI) || state === PhaseStatus.approved))
-                &&
-                <Button
-                    tooltip="Verify"
-                    icon="pi pi-verified"
-                    severity="info"
-                    size="small"
-                    onClick={() => {
-                        confirm.ask({
-                            operation: 'Verify',
-                            onConfirmAsync: () => updateStatus(rowData, PhaseStatus.verified)
-                        });
-                    }}
-                />
-            }
-            {(canApprove &&
-                state === PhaseStatus.verified)
-                &&
-                <Button
-                    tooltip="Approve"
-                    icon="pi pi-check-circle"
-                    severity="success"
-                    size="small"
-                    onClick={() => {
-                        confirm.ask({
-                            operation: 'Approve',
-                            onConfirmAsync: () => updateStatus(rowData, PhaseStatus.approved)
-                        });
-                    }}
-                />
-            }
-            {(canPropose &&
-                state === PhaseStatus.verified)
-                &&
-                <Button
-                    tooltip="Back to proposed"
-                    icon="pi pi-undo"
-                    severity="warning"
-                    size="small"
-                    onClick={() => {
-                        confirm.ask({
-                            operation: 'back to proposed',
-                            onConfirmAsync: () => updateStatus(rowData, PhaseStatus.proposed)
-                        });
-                    }}
-                />
-            }
-        </div>);
+        let undo = undefined;
+        if (state === PhaseStatus.verified && canVerify) {
+            undo = PhaseStatus.proposed
+        } else if (state === PhaseStatus.approved && canApprove) {
+            undo = PhaseStatus.verified
+        } else if (state === PhaseStatus.active && canActivate) {
+            undo = PhaseStatus.approved
+        }
+        else if (state === PhaseStatus.completed && canComplete) {
+            undo = PhaseStatus.active
+        }
+        return (
+            <div className="flex gap-2">
+                {(canVerify && state === PhaseStatus.proposed)
+                    &&
+                    <Button
+                        tooltip="Verify"
+                        icon="pi pi-verified"
+                        severity="info"
+                        size="small"
+                        onClick={() => {
+                            confirm.ask({
+                                operation: 'Verify',
+                                onConfirmAsync: () => updateStatus(rowData, PhaseStatus.verified)
+                            });
+                        }}
+                    />
+                }
+                {(canApprove && state === PhaseStatus.verified)
+                    &&
+                    <Button
+                        tooltip="Approve"
+                        icon="pi pi-check-circle"
+                        severity="success"
+                        size="small"
+                        onClick={() => {
+                            confirm.ask({
+                                operation: 'Approve',
+                                onConfirmAsync: () => updateStatus(rowData, PhaseStatus.approved)
+                            });
+                        }}
+                    />
+                }
+                {(canActivate && state === PhaseStatus.approved)
+                    &&
+                    <Button
+                        tooltip="Activate"
+                        icon="pi pi-check"
+                        severity="success"
+                        size="small"
+                        onClick={() => {
+                            confirm.ask({
+                                operation: 'Activate',
+                                onConfirmAsync: () => updateStatus(rowData, PhaseStatus.active)
+                            });
+                        }}
+                    />
+                }
+                {(canComplete && state === PhaseStatus.active)
+                    &&
+                    <Button
+                        tooltip="complete"
+                        icon="pi pi-list-check"
+                        severity="success"
+                        size="small"
+                        onClick={() => {
+                            confirm.ask({
+                                operation: "complete",
+                                onConfirmAsync: () => updateStatus(rowData, PhaseStatus.completed)
+                            });
+                        }}
+                    />
+                }
+                {(undo)
+                    &&
+                    <Button
+                        tooltip={`Back to ${undo}`}
+                        icon="pi pi-undo"
+                        severity="warning"
+                        size="small"
+                        onClick={() => {
+                            confirm.ask({
+                                operation: `back to ${undo}`,
+                                onConfirmAsync: () => updateStatus(rowData, undo)
+                            });
+                        }}
+                    />
+                }
+            </div>);
     }
 
     const columns = [

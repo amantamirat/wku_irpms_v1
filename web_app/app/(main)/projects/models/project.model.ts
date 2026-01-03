@@ -11,7 +11,8 @@ export enum ProjectStatus {
     accepted = "accepted",
     negotiation = "negotiation",
     approved = "approved",
-    granted = "granted"
+    granted = "granted",
+    completed = 'completed'
 }
 
 export type Project = {

@@ -41,6 +41,7 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
     const canNegotiate = hasPermission([PERMISSIONS.PROJECT.STATUS.NEGOTIATE]);
     const canApprove = hasPermission([PERMISSIONS.PROJECT.STATUS.APPROVE]);
     const canGrant = hasPermission([PERMISSIONS.PROJECT.STATUS.GRANT]);
+    const canComplete = hasPermission([PERMISSIONS.PROJECT.STATUS.COMPLETE]);
 
     // ✅ State + CRUD Hook
     const {
@@ -95,67 +96,73 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
     };
 
 
-    const stateTransitionTemplate = (rowData: Project) => {
-        const state = rowData.status;
-        return (<div className="flex gap-2">
-            {(canNegotiate && (state === ProjectStatus.accepted))
-                &&
-                <Button
-                    tooltip="Negotiate"
-                    icon="pi pi-bitcoin"
-                    severity="info"
-                    size="small"
-                    onClick={() => {
-                        confirm.ask({
-                            operation: 'Negotiate',
-                            onConfirmAsync: () => updateStatus(rowData, ProjectStatus.negotiation)
-                        });
-                    }}
-                />
+    const stateTransitionTemplate = (row: Project) => {
+        const current = row.status;
+        let prev = undefined;
+        let next = undefined;
+        if (current === ProjectStatus.accepted) {
+            if (canNegotiate) {
+                next = ProjectStatus.negotiation;
             }
-            {(canApprove && state === ProjectStatus.negotiation)
+        }
+        else if (current === ProjectStatus.negotiation) {
+            if (canApprove) {
+                next = ProjectStatus.approved;
+            }
+            if (canNegotiate) {
+                prev = ProjectStatus.accepted;
+            }
+        }
+        else if (current === ProjectStatus.approved) {
+            if (canGrant) {
+                next = ProjectStatus.granted;
+            }
+            if (canApprove) {
+                prev = ProjectStatus.negotiation;
+            }
+        }
+        else if (current === ProjectStatus.granted) {
+            if (canComplete) {
+                next = ProjectStatus.completed;
+            }
+            if (canGrant) {
+                prev = ProjectStatus.approved
+            }
+        }
+        else if (current === ProjectStatus.completed) {
+            if (canComplete) {
+                prev = ProjectStatus.granted
+            }
+        }
+
+
+        return (<div className="flex gap-2">
+            {(next)
                 &&
                 <Button
-                    tooltip="Approve"
+                    tooltip={`Make ${next}`}
                     icon="pi pi-check"
                     severity="success"
                     size="small"
                     onClick={() => {
                         confirm.ask({
-                            operation: 'Approve',
-                            onConfirmAsync: () => updateStatus(rowData, ProjectStatus.approved)
+                            operation: `Make to ${next}`,
+                            onConfirmAsync: () => updateStatus(row, next)
                         });
                     }}
                 />
             }
-            {(canGrant && state === ProjectStatus.approved) &&
+            {(prev)
+                &&
                 <Button
-                    tooltip="Grant"
-                    icon="pi pi-star"   // or: pi-star, pi-shield, pi-lock-open
-                    severity="success"
-                    size="small"
-                    onClick={() => {
-                        confirm.ask({
-                            operation: 'Grant',
-                            onConfirmAsync: () =>
-                                updateStatus(rowData, ProjectStatus.granted)
-                        });
-                    }}
-                />
-            }
-            {((canAccept && state === ProjectStatus.negotiation) ||
-                (canNegotiate && state === ProjectStatus.approved)) &&
-                <Button
-                    tooltip={`Back to ${state === ProjectStatus.negotiation ? 'accept' : 'negotiate'}`}
+                    tooltip={`Back to ${prev}`}
                     icon="pi pi-undo"
                     severity="warning"
                     size="small"
                     onClick={() => {
                         confirm.ask({
-                            operation: 'undo',
-                            onConfirmAsync: () => updateStatus(rowData,
-                                state === ProjectStatus.negotiation ?
-                                    ProjectStatus.accepted : ProjectStatus.negotiation)
+                            operation: `back to ${prev}`,
+                            onConfirmAsync: () => updateStatus(row, prev)
                         });
                     }}
                 />
