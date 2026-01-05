@@ -77,9 +77,6 @@ const GrantManger = () => {
         fetchGrants();
     }, [directorate]);
 
-    if (loading) return <ListSkeleton rows={10} />;
-    if (error) return <ErrorCard errorMessage={error} />;
-
     // ✅ Save / update
     const onSaveComplete = (savedGrant: Grant) => {
         updateItem(savedGrant);

@@ -2,8 +2,12 @@ import { Router } from 'express';
 import { RoleController } from './role.controller';
 import { checkPermission, verifyActiveAccount } from '../user.middleware';
 import { PERMISSIONS } from '../../../common/constants/permissions';
+import { RoleService } from './role.service';
+import { RoleRepository } from './role.repository';
 
-const controller = new RoleController();
+const repository = new RoleRepository();
+const service = new RoleService(repository);
+const controller = new RoleController(service);
 const router: Router = Router();
 
 router.post('/',

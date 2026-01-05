@@ -4,9 +4,12 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 
 import organizationRoutes from './modules/organization/organization.routes';
+
 import applicantRoutes from './modules/applicants/applicant.routes';
 import positionRoutes from './modules/applicants/positions/position.routes';
+import studentRoutes from './modules/applicants/students/student.routes';
 import experienceRoutes from './modules/applicants/experiences/experience.routes';
+import publicationRoutes from './modules/applicants/publications/publication.routes';
 import specializationRoutes from './modules/applicants/specializations/specialization.routes';
 
 import thematicRoutes from './modules/thematics/thematic.routes';
@@ -51,6 +54,8 @@ app.use("/api/roles", roleRoutes);
 
 app.use("/api/organizations", organizationRoutes);
 app.use("/api/applicants", applicantRoutes);
+app.use("/api/students", studentRoutes);
+app.use("/api/publications", publicationRoutes);
 app.use("/api/specializations", specializationRoutes);
 app.use("/api/positions", positionRoutes);
 app.use("/api/experiences", experienceRoutes);
@@ -76,7 +81,6 @@ app.use("/api/project/phases", phaseRoutes);
 app.use("/api/project/phase/documents", phaseDocRoutes);
 app.use("/api/project/collaborators", collaboratorRoutes);
 app.use("/api/collaborator/assignments", assignmentRoutes);
-
 app.use("/api/project/documents", documentRoutes);
 
 

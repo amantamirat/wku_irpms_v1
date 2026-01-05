@@ -203,6 +203,46 @@
     "description": "Delete external units"
   },
   {
+    "category": "Student Management",
+    "name": "student:create",
+    "description": "Create new students"
+  },
+  {
+    "category": "Student Management",
+    "name": "student:read",
+    "description": "View students"
+  },
+  {
+    "category": "Student Management",
+    "name": "student:update",
+    "description": "Edit student records"
+  },
+  {
+    "category": "Student Management",
+    "name": "student:delete",
+    "description": "Delete students"
+  },
+  {
+    "category": "Publication Management",
+    "name": "publication:create",
+    "description": "Create new publications"
+  },
+  {
+    "category": "Publication Management",
+    "name": "publication:read",
+    "description": "View publications"
+  },
+  {
+    "category": "Publication Management",
+    "name": "publication:update",
+    "description": "Edit publication records"
+  },
+  {
+    "category": "Publication Management",
+    "name": "publication:delete",
+    "description": "Delete publications"
+  },
+  {
     "category": "Specialization Management",
     "name": "specialization:create",
     "description": "Create specialization entries"

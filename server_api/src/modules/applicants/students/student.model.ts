@@ -3,7 +3,7 @@ import { COLLECTIONS } from '../../../common/constants/collections.enum';
 import { Program } from '../../organization/organization.model';
 
 export interface IStudent extends Document {
-  academic_calendar: mongoose.Types.ObjectId;
+  calendar: mongoose.Types.ObjectId;
   program: mongoose.Types.ObjectId;
   applicant: mongoose.Types.ObjectId;
   createdAt?: Date;
@@ -11,9 +11,8 @@ export interface IStudent extends Document {
 }
 
 
-
 const StudentSchema = new Schema<IStudent>({
-  academic_calendar: {
+  calendar: {
     type: Schema.Types.ObjectId,
     ref: COLLECTIONS.CALENDAR,
     required: true
@@ -32,10 +31,10 @@ const StudentSchema = new Schema<IStudent>({
   timestamps: true
 });
 
-StudentSchema.index({ applicant: 1, academic_calendar: 1 }, { unique: true });
+StudentSchema.index({ applicant: 1, calendar: 1 }, { unique: true });
 
 StudentSchema.index({ applicant: 1, program: 1 }, { unique: true });
 
-const Student = mongoose.model<IStudent>('Student', StudentSchema);
+const Student = mongoose.model<IStudent>(COLLECTIONS.STUDNET, StudentSchema);
 
 export default Student;

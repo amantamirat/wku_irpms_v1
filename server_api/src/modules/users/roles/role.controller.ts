@@ -8,8 +8,8 @@ export class RoleController {
 
     private service: RoleService;
 
-    constructor(service?: RoleService) {
-        this.service = service || new RoleService();
+    constructor(service: RoleService) {
+        this.service = service;
     }
 
     create = async (req: Request, res: Response) => {

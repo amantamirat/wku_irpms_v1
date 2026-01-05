@@ -6,15 +6,12 @@ export class PermissionService {
 
     private repository: IPermissionRepository;
 
-    constructor(repository?: IPermissionRepository) {
-        this.repository = repository || new PermissionRepository();        
-        
+    constructor(repository: IPermissionRepository) {
+        this.repository = repository;        
         (async () => {
             await this.seedPermissions();
         })();
-
     }
-
 
     async getPermissions() {
         return await this.repository.findAll();

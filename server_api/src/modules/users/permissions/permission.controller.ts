@@ -6,8 +6,8 @@ export class PermissionController {
 
   private service: PermissionService;
 
-  constructor(service?: PermissionService) {
-    this.service = service || new PermissionService();
+  constructor(service: PermissionService) {
+    this.service = service;
   }
 
   getPermissions = async (req: Request, res: Response) => {

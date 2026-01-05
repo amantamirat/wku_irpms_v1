@@ -75,6 +75,20 @@ export const PERMISSIONS = {
     },
   },
 
+  STUDENT: {
+    CREATE: "student:create",
+    READ: "student:read",
+    UPDATE: "student:update",
+    DELETE: "student:delete",
+  },
+
+  PUBLICATION: {
+    CREATE: "publication:create",
+    READ: "publication:read",
+    UPDATE: "publication:update",
+    DELETE: "publication:delete",
+  },
+
   SPECIALIZATION: {
     CREATE: "specialization:create",
     READ: "specialization:read",

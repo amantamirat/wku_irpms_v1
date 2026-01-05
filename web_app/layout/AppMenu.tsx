@@ -115,6 +115,16 @@ const AppMenu = () => {
                     )
                 },
                 {
+                    label: 'Students',
+                    icon: PrimeIcons.BOOK,
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.STUDENT.READ,
+                        ]
+                    ),
+                    to: '/applicants/students',
+                },
+                {
                     label: 'Specializations',
                     icon: 'pi pi-fw pi-filter-fill',
                     to: '/specializations',
