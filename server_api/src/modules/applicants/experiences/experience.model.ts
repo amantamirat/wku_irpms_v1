@@ -2,17 +2,23 @@
 import mongoose, { model, Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
 import { Rank } from "../positions/position.model";
-import EmploymentType  from "./employment-type.enum";
 
+export enum EmploymentType {
+    FullTime = "Full-Time",
+    PartTime = "Part-Time",
+    Contract = "Contract",
+    Internship = "Internship",
+    Volunteer = "Volunteer"
+}
 
 // Mongo model interface
 export interface IExperience extends Document {
     applicant: mongoose.Types.ObjectId;
-    jobTitle?: string;
+    jobTitle: string;
     organization: mongoose.Types.ObjectId;
     rank: mongoose.Types.ObjectId;
     startDate: Date;
-    endDate?: Date | null;
+    endDate: Date | null;
     isCurrent: boolean;
     employmentType: EmploymentType;
     createdAt?: Date;
@@ -60,7 +66,5 @@ const ExperienceSchema = new Schema<IExperience>({
     },
 }, { timestamps: true });
 
-// Optional: unique index to prevent duplicate active experiences per applicant
-// ExperienceSchema.index({ applicant: 1, jobTitle: 1, organization: 1, startDate: 1 }, { unique: true });
 
 export const Experience = model<IExperience>(COLLECTIONS.EXPERIENCE, ExperienceSchema);

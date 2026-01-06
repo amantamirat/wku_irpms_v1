@@ -1,16 +1,15 @@
 //experience.dto.ts
-import EmploymentType  from "./employment-type.enum";
-
+import { EmploymentType } from "./experience.model";
 
 export interface GetExperiencesDTO {
-    applicantId: string;
+    applicant?: string;
 }
 
 export interface CreateExperienceDTO {
-    applicantId: string;
+    applicant: string;
     jobTitle?: string;
-    organizationId: string;
-    rankId: string;
+    organization: string;
+    rank: string;
     startDate: Date;
     endDate?: Date | null;
     isCurrent: boolean;
@@ -21,15 +20,15 @@ export interface CreateExperienceDTO {
 export interface UpdateExperienceDTO {
     id: string;
     data: Partial<{
-        jobTitle?: string;
-        organizationId?: string;
-        rankId?: string;
-        startDate?: Date;
-        endDate?: Date | null;
-        isCurrent?: boolean;
-        employmentType?: EmploymentType;
+        jobTitle: string;
+        organization: string;
+        rank: string;
+        startDate: Date;
+        endDate: Date | null;
+        isCurrent: boolean;
+        employmentType: EmploymentType;
     }>;
-    userId: string;
+    userId?: string;
 }
 
 export interface DeleteExperienceDTO {

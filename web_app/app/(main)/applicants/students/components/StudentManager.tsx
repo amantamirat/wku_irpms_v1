@@ -82,15 +82,25 @@ const StudentManager = ({ applicant }: StudentManagerProps) => {
     const columns = [
         { header: "Calendar", field: "calendar.year" },
         { header: "Program", field: "program.name" },
-        { header: "Ac. Level", field: "program.academicLevel" },
+       // { header: "Ac. Level", field: "program.academicLevel" },
+        {
+            header: "Ac. Level",
+            field: "academicLevel",
+            sortable: true,
+            body: (s: Student) => (
+                <span className={`academic-badge level-${(s.program as any).academicLevel.toLowerCase()}`}>
+                    {(s.program as any).academicLevel}
+                </span>
+            )
+        },
         !applicant && { header: "Student", field: "applicant.name" },
     ].filter(Boolean);
 
     return (
         <>
             <CrudManager
-                headerTitle="Manage Students"
-                itemName="Student"
+                headerTitle="Manage Enrollments"
+                //itemName="Student"
                 items={students}
                 dataKey="_id"
                 columns={columns}

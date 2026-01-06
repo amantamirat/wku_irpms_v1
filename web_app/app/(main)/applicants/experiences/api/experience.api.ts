@@ -14,13 +14,13 @@ export const ExperienceApi = {
         return data as Experience[];
     },
 
-    async createExperience(exp: Partial<Experience>): Promise<Experience> {
+    async create(exp: Partial<Experience>): Promise<Experience> {
         const sanitized = sanitizeExperience(exp);
         const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as Experience;
     },
 
-    async updateExperience(exp: Partial<Experience>): Promise<Experience> {
+    async update(exp: Partial<Experience>): Promise<Experience> {
         if (!exp._id) {
             throw new Error("_id required.");
         }
@@ -30,7 +30,7 @@ export const ExperienceApi = {
         return updatedData as Experience;
     },
 
-    async deleteExperience(exp: Partial<Experience>): Promise<boolean> {
+    async delete(exp: Partial<Experience>): Promise<boolean> {
         if (!exp._id) {
             throw new Error("_id required.");
         }

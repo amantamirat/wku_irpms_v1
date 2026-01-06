@@ -1,117 +1,95 @@
-import { Request, Response } from "express";
-import { AuthenticatedRequest } from "../../users/user.middleware";
-import { successResponse, errorResponse } from "../../../common/helpers/response";
-import { ExperienceService } from "./experience.service";
+import { Request, Response } from 'express';
+import { ExperienceService } from './experience.service';
 import {
     CreateExperienceDTO,
     UpdateExperienceDTO,
     GetExperiencesDTO,
     DeleteExperienceDTO
-} from "./experience.dto";
-
-
-
-const experienceService = new ExperienceService();
+} from './experience.dto';
+import { successResponse, errorResponse } from '../../../common/helpers/response';
+import { AuthenticatedRequest } from '../../users/user.middleware';
+import { AppError } from '../../../common/errors/app.error';
+import { ERROR_CODES } from '../../../common/errors/error.codes';
 
 export class ExperienceController {
 
-    // --- Create Experience ---
-    static async createExperience(req: AuthenticatedRequest, res: Response) {
-        try {
-            if (!req.user) throw new Error("User not found!");
+    private service: ExperienceService;
 
-            const {
-                applicant,
-                jobTitle,
-                organization,
-                rank,
-                startDate,
-                endDate,
-                isCurrent,
-                employmentType
-            } = req.body;
+    constructor(service: ExperienceService) {
+        this.service = service;
+    }
+
+    // --- Create Experience ---
+    create = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            if (!req.user) {
+                throw new AppError(ERROR_CODES.USER_NOT_FOUND);
+            }
 
             const dto: CreateExperienceDTO = {
-                applicantId: applicant,
-                jobTitle,
-                organizationId: organization,
-                rankId: rank,
-                startDate,
-                endDate,
-                isCurrent,
-                employmentType,
+                ...req.body,
                 userId: req.user.userId
             };
 
-            const created = await experienceService.createExperience(dto);
-            successResponse(res, 201, "Experience created successfully", created);
-
+            const created = await this.service.create(dto);
+            successResponse(res, 201, 'Experience created successfully', created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
+    };
 
-    // --- List Experiences by Applicant ---
-    static async getExperiences(req: Request, res: Response) {
+    // --- Get Experiences ---
+    get = async (req: Request, res: Response) => {
         try {
             const { applicant } = req.query;
-            if (!applicant) throw new Error("applicant is required");
 
             const filter: GetExperiencesDTO = {
-                applicantId: String(applicant)
+                applicant: applicant ? applicant as string : undefined
             };
 
-            const experiences = await experienceService.getExperiences(filter);
-            successResponse(res, 200, "Experiences fetched successfully", experiences);
-
+            const experiences = await this.service.getExperiences(filter);
+            successResponse(res, 200, 'Experiences fetched successfully', experiences);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
+    };
 
     // --- Update Experience ---
-    static async updateExperience(req: AuthenticatedRequest, res: Response) {
+    update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error("User not found!");
+            if (!req.user) {
+                throw new AppError(ERROR_CODES.USER_NOT_FOUND);
+            }
 
             const { id } = req.params;
-
-            const {
-                jobTitle,
-                organization,
-                rank,
-                startDate,
-                endDate,
-                isCurrent,
-                employmentType
-            } = req.body;
 
             const dto: UpdateExperienceDTO = {
                 id,
                 data: {
-                    jobTitle: jobTitle ?? undefined,
-                    organizationId: organization ?? undefined,
-                    rankId: rank ?? undefined,
-                    startDate: startDate ?? undefined,
-                    endDate: endDate ?? undefined,
-                    isCurrent: isCurrent ?? undefined,
-                    employmentType: employmentType ?? undefined
+                    jobTitle: req.body.jobTitle,
+                    organization: req.body.organization,
+                    rank: req.body.rank,
+                    startDate: req.body.startDate,
+                    endDate: req.body.endDate,
+                    isCurrent: req.body.isCurrent,
+                    employmentType: req.body.employmentType
                 },
                 userId: req.user.userId
             };
 
-            const updated = await experienceService.updateExperience(dto);
-            successResponse(res, 200, "Experience updated successfully", updated);
-
+            const updated = await this.service.update(dto);
+            successResponse(res, 200, 'Experience updated successfully', updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
+    };
 
     // --- Delete Experience ---
-    static async deleteExperience(req: AuthenticatedRequest, res: Response) {
+    delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error("User not found!");
+            if (!req.user) {
+                throw new AppError(ERROR_CODES.USER_NOT_FOUND);
+            }
 
             const { id } = req.params;
 
@@ -120,11 +98,10 @@ export class ExperienceController {
                 userId: req.user.userId
             };
 
-            const deleted = await experienceService.deleteExperience(dto);
-            successResponse(res, 200, "Experience deleted successfully", deleted);
-
+            const deleted = await this.service.delete(dto);
+            successResponse(res, 200, 'Experience deleted successfully', deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
+    };
 }

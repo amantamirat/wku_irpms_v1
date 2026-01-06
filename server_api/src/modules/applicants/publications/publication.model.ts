@@ -39,7 +39,7 @@ const PublicationSchema = new Schema<IPublication>(
     {
         applicant: {
             type: Schema.Types.ObjectId,
-            ref: "Applicant",
+            ref: COLLECTIONS.APPLICANT,
             required: true,
             index: true,
         },
@@ -69,6 +69,7 @@ const PublicationSchema = new Schema<IPublication>(
         doi: {
             type: String,
             trim: true,
+            unique:true
         },
 
         url: {

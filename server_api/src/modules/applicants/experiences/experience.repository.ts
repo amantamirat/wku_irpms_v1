@@ -5,9 +5,10 @@ import { CreateExperienceDTO, UpdateExperienceDTO } from "./experience.dto";
 export interface IExperienceRepository {
     findById(id: string): Promise<IExperience | null>;
     findByApplicant(applicantId: string): Promise<Partial<any>[]>;
+    findAll(): Promise<Partial<IExperience>[]>;
     create(data: CreateExperienceDTO): Promise<IExperience>;
     update(id: string, data: UpdateExperienceDTO["data"]): Promise<IExperience>;
-    delete(id: string): Promise<void>;
+    delete(id: string): Promise<IExperience | null>;
 }
 
 export class ExperienceRepository implements IExperienceRepository {
@@ -27,12 +28,19 @@ export class ExperienceRepository implements IExperienceRepository {
             .exec();
     }
 
+    async findAll(): Promise<Partial<IExperience>[]> {
+        return Experience.find({})
+            .populate("applicant")
+            .lean<IExperience[]>()
+            .exec();
+    }
+
     async create(dto: CreateExperienceDTO) {
         const data: Partial<IExperience> = {
-            applicant: new mongoose.Types.ObjectId(dto.applicantId),
+            applicant: new mongoose.Types.ObjectId(dto.applicant),
             jobTitle: dto.jobTitle,
-            organization: new mongoose.Types.ObjectId(dto.organizationId),
-            rank: new mongoose.Types.ObjectId(dto.rankId),
+            organization: new mongoose.Types.ObjectId(dto.organization),
+            rank: new mongoose.Types.ObjectId(dto.rank),
             startDate: dto.startDate,
             endDate: dto.endDate ?? null,
             isCurrent: dto.isCurrent,
@@ -54,11 +62,11 @@ export class ExperienceRepository implements IExperienceRepository {
             endDate: dtoData.endDate,
             isCurrent: dtoData.isCurrent,
             employmentType: dtoData.employmentType,
-            organization: dtoData.organizationId
-                ? new mongoose.Types.ObjectId(dtoData.organizationId)
+            organization: dtoData.organization
+                ? new mongoose.Types.ObjectId(dtoData.organization)
                 : undefined,
-            rank: dtoData.rankId
-                ? new mongoose.Types.ObjectId(dtoData.rankId)
+            rank: dtoData.rank
+                ? new mongoose.Types.ObjectId(dtoData.rank)
                 : undefined
         };
 
@@ -67,6 +75,6 @@ export class ExperienceRepository implements IExperienceRepository {
     }
 
     async delete(id: string) {
-        await Experience.findByIdAndDelete(new mongoose.Types.ObjectId(id)).exec();
+        return await Experience.findByIdAndDelete(new mongoose.Types.ObjectId(id)).exec();
     }
 }

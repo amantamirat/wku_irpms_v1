@@ -53,7 +53,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const logout = () => {
         UserApi.logout();
         setUser(null);
-        //router.push('/auth/login');
     };
 
     const hasPermission = (perms: string[]): boolean => {

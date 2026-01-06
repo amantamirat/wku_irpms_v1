@@ -1,15 +1,14 @@
 'use client';
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
 import { CrudManager } from "@/components/CrudManager";
-import ErrorCard from "@/components/ErrorCard";
 import { useAuth } from "@/contexts/auth-context";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import { useCrudList } from "@/hooks/useCrudList";
 import { PERMISSIONS } from "@/types/permissions";
 import { useEffect, useState } from "react";
 import { ExperienceApi } from "../api/experience.api";
-import { Experience, GetExperiencesOptions } from "../models/experience.model";
-import { useCrudList } from "@/hooks/useCrudList";
-import ListSkeleton from "@/components/ListSkeleton";
+import { Experience } from "../models/experience.model";
+import SaveExperienceDialog from "./SaveExperienceDialog";
 
 interface ExperienceManagerProps {
     applicant?: Applicant;
@@ -17,10 +16,8 @@ interface ExperienceManagerProps {
 
 const ExperienceManager = ({ applicant }: ExperienceManagerProps) => {
 
-    const { getApplicant: getLinkedApplicant, hasPermission } = useAuth();
-    const linkedApplicant = getLinkedApplicant();
-    //const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
-    
+    const { getApplicant, hasPermission } = useAuth();
+
     const confirm = useConfirmDialog();
 
     const emptyExperience: Experience = {
@@ -53,16 +50,8 @@ const ExperienceManager = ({ applicant }: ExperienceManagerProps) => {
         const fetchExperiences = async () => {
             try {
                 setLoading(true);
-                const options: GetExperiencesOptions = {
-                    applicant: applicant,
-                };
-                const data = await ExperienceApi.getExperiences(options);
-                setAll(
-                    data.map(r => ({
-                        ...r,
-                        applicant: applicant ?? r.applicant
-                    }))
-                );
+                const data = await ExperienceApi.getExperiences({ applicant });
+                setAll(data);
             } catch (err: any) {
                 setError("Failed to fetch experiences. " + (err.message ?? ""));
             } finally {
@@ -72,8 +61,7 @@ const ExperienceManager = ({ applicant }: ExperienceManagerProps) => {
         fetchExperiences();
     }, [applicant]);
 
-    if (loading) return <ListSkeleton rows={10} />;
-    if (error) return <ErrorCard errorMessage={error} />;
+
 
     // ✅ Save / update
     const onSaveComplete = (savedExperience: Experience) => {
@@ -82,7 +70,7 @@ const ExperienceManager = ({ applicant }: ExperienceManagerProps) => {
     };
 
     const deleteExperience = async (row: Experience) => {
-        const deleted = await ExperienceApi.deleteExperience(row);
+        const deleted = await ExperienceApi.delete(row);
         if (deleted) removeItem(row);
     };
 
@@ -114,24 +102,19 @@ const ExperienceManager = ({ applicant }: ExperienceManagerProps) => {
                 canEdit={canEdit}
                 canDelete={canDelete}
                 onCreate={() => { setExperience(emptyExperience); setShowSaveDialog(true); }}
-                onEdit={(row) => { setExperience(row); setShowSaveDialog(true); }}
+                onEdit={(row) => { setExperience({ ...row }); setShowSaveDialog(true); }}
                 onDelete={(row) => confirm.ask({ item: row.jobTitle, onConfirmAsync: () => deleteExperience(row) })}
-            //expandedRows={expandedRows}
-            //onRowToggle={(e) => setExpandedRows(e.data)}
-            //rowExpansionTemplate={resultExpansionTemplate}
             />
 
             {
-                /**
-                 * {experience && projectStage && (
-                            <SaveExperienceDialog
-                                visible={showSaveDialog}
-                                experience={experience}
-                                onCompelete={onSaveComplete}
-                                onHide={hideSaveDialog}
-                            />
-                        )}
-                 */
+                showSaveDialog &&
+                <SaveExperienceDialog
+                    visible={showSaveDialog}
+                    experience={experience}
+                    applicantProvided={!!applicant}
+                    onComplete={onSaveComplete}
+                    onHide={hideSaveDialog}
+                />
             }
 
         </>
