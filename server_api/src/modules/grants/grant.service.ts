@@ -13,7 +13,7 @@ export class GrantService {
     }
 
     async createGrant(dto: CreateGrantDTO) {
-        await CacheService.validateOwnership(dto.userId, dto.directorateId);
+       // await CacheService.validateOwnership(dto.userId, dto.directorateId);
         const directorateDoc = await Directorate.findById(dto.directorateId).lean();
         if (!directorateDoc) {
             throw new Error("Directorate Not Found!");

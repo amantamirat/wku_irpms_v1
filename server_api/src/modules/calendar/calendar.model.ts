@@ -1,7 +1,7 @@
 import { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import { COLLECTIONS } from '../../common/constants/collections.enum';
-import { CalendarStatus } from './calendar.enum';
+import { CalendarStatus } from './calendar.status';
 
 
 export interface ICalendar extends Document {
@@ -32,7 +32,7 @@ const CalendarSchema = new Schema<ICalendar>({
   status: {
     type: String,
     enum: Object.values(CalendarStatus),
-    default: CalendarStatus.active,
+    default: CalendarStatus.planned,
     required: true
   },
 }, {

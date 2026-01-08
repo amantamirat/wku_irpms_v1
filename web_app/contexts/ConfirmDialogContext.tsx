@@ -71,7 +71,7 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
             });
 
         } finally {
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            await new Promise(resolve => setTimeout(resolve, 1000));
             setLoading(false);
             close();
         }

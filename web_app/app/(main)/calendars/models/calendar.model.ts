@@ -1,4 +1,5 @@
 export enum CalendarStatus {
+    planned = 'planned',
     active = 'active',
     closed = 'closed'
 }
@@ -8,7 +9,7 @@ export type Calendar = {
     year: number;
     startDate: Date | null;
     endDate: Date | null;
-    status: CalendarStatus;
+    status?: CalendarStatus;
     createdAt?: Date;
     updatedAt?: Date;
 };

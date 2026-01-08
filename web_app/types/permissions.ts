@@ -101,6 +101,11 @@ export const PERMISSIONS = {
     CREATE: "calendar:create",
     READ: "calendar:read",
     UPDATE: "calendar:update",
+    STATUS: {
+      PLANNED: "calendar:status.planned",
+      ACTIVATE: "calendar:status.active",
+      CLOSE: "calendar:status.closed",
+    },
     DELETE: "calendar:delete",
   },
 

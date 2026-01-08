@@ -24,7 +24,6 @@ interface CallManagerProps {
 
 const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
 
-
     const { hasPermission } = useAuth();
     const confirm = useConfirmDialog();
 

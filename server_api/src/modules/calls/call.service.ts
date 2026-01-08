@@ -1,5 +1,5 @@
 import { DeleteDto } from "../../util/delete.dto";
-import { CalendarStatus } from "../calendar/calendar.enum";
+import { CalendarStatus } from "../calendar/calendar.status";
 import { CalendarRepository, ICalendarRepository } from "../calendar/calendar.repository";
 import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
 import { IThematicRepository, ThematicRepository } from "../thematics/thematic.repository";
@@ -55,7 +55,7 @@ export class CallService {
     }
 
     async getCalls(options: GetCallsOptions) {
-        return await this.repository.find(options);
+        return await this.repository.find({ ...options, populate: true });
     }
 
     async update(dto: UpdateCallDTO) {

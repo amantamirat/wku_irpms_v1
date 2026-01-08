@@ -1,6 +1,6 @@
 export enum CalendarStatus {
-    pending = 'pending',
+    planned = 'planned',
     active = 'active',
     closed = 'closed',
-    archived = 'archived'
+    //archived = 'archived'
 }

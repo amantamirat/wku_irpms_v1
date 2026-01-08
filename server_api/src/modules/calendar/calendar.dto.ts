@@ -1,4 +1,4 @@
-import { CalendarStatus } from "./calendar.enum";
+import { CalendarStatus } from "./calendar.status";
 
 export interface CreateCalendarDTO {
     year: number;
@@ -17,6 +17,11 @@ export interface UpdateCalendarDTO {
         status: CalendarStatus;
     }>;
     //userId: string;
+}
+
+export interface UpdateCalendarStatusDTO {
+    id: string;
+    status: CalendarStatus;
 }
 
 

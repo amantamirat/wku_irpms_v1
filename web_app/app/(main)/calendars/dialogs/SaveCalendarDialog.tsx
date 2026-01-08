@@ -47,9 +47,9 @@ const SaveCalendarDialog = ({ visible, calendar, onHide, onComplete }: SaveCalen
 
             let saved: Calendar;
             if (localCalendar._id) {
-                saved = await CalendarApi.updateCalendar(localCalendar);
+                saved = await CalendarApi.update(localCalendar);
             } else {
-                saved = await CalendarApi.createCalendar(localCalendar);
+                saved = await CalendarApi.create(localCalendar);
             }
 
             toast.current?.show({

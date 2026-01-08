@@ -315,6 +315,18 @@
   },
   {
     "category": "Calendar Management",
+    "name": "calendar:status.planned"
+  },
+  {
+    "category": "Calendar Management",
+    "name": "calendar:status.active"
+  },
+  {
+    "category": "Calendar Management",
+    "name": "calendar:status.closed"
+  },
+  {
+    "category": "Calendar Management",
     "name": "calendar:delete",
     "description": "Delete calendar entries"
   },

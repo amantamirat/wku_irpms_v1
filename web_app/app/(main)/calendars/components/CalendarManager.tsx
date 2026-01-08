@@ -11,6 +11,7 @@ import { CalendarApi } from "../api/calendar.api";
 import SaveCalendarDialog from "../dialogs/SaveCalendarDialog";
 import MyBadge from "@/templates/MyBadge";
 import CallManager from "../../calls/components/CallManager";
+import { Button } from "primereact/button";
 
 const CalendarManager = () => {
 
@@ -27,6 +28,11 @@ const CalendarManager = () => {
     const canCreate = hasPermission([PERMISSIONS.CALENDAR.CREATE]);
     const canEdit = hasPermission([PERMISSIONS.CALENDAR.UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.CALENDAR.DELETE]);
+
+    const canPlan = hasPermission([PERMISSIONS.CALENDAR.STATUS.PLANNED]);
+    const canActivate = hasPermission([PERMISSIONS.CALENDAR.STATUS.ACTIVATE]);
+    const canClose = hasPermission([PERMISSIONS.CALENDAR.STATUS.CLOSE]);
+
 
     // CRUD hook
     const {
@@ -65,9 +71,76 @@ const CalendarManager = () => {
         hideDialogs();
     };
 
+    const updateStatus = async (row: Calendar, next: CalendarStatus) => {
+        if (!row._id) {
+            return;
+        }
+        const updated = await CalendarApi.updateStatus(row._id, next);
+        onSaveComplete({
+            ...updated,
+        });
+    };
+
+    const stateTransitionTemplate = (row: Calendar) => {
+        const current = row.status;
+        let prev = undefined;
+        let next = undefined;
+        if (current === CalendarStatus.planned) {
+            if (canActivate) {
+                next = CalendarStatus.active;
+            }
+        }
+        else if (current === CalendarStatus.active) {
+            if (canClose) {
+                next = CalendarStatus.closed;
+            }
+            if (canPlan) {
+                prev = CalendarStatus.planned;
+            }
+        }
+        else if (current === CalendarStatus.closed) {
+            if (canActivate) {
+                prev = CalendarStatus.active;
+            }
+        }
+
+        return (<div className="flex gap-2">
+            {(next)
+                &&
+                <Button
+                    tooltip={`Make ${next}`}
+                    icon={next === CalendarStatus.closed ? "pi pi-lock" : "pi pi-check"}
+                    severity={next === CalendarStatus.closed ? "danger" : "success"}
+                    size="small"
+                    onClick={() => {
+                        confirm.ask({
+                            operation: `Make to ${next}`,
+                            onConfirmAsync: () => updateStatus(row, next)
+                        });
+                    }}
+                />
+            }
+            {(prev)
+                &&
+                <Button
+                    tooltip={`Back to ${prev}`}
+                    icon="pi pi-undo"
+                    severity="warning"
+                    size="small"
+                    onClick={() => {
+                        confirm.ask({
+                            operation: `back to ${prev}`,
+                            onConfirmAsync: () => updateStatus(row, prev)
+                        });
+                    }}
+                />
+            }
+        </div>);
+    }
+
     /** Delete */
     const deleteCalendar = async (row: Calendar) => {
-        const ok = await CalendarApi.deleteCalendar(row);
+        const ok = await CalendarApi.delete(row);
         if (ok) removeItem(row);
     };
 
@@ -86,6 +159,7 @@ const CalendarManager = () => {
             field: "status",
             body: (u: Calendar) => <MyBadge type="status" value={u.status ?? "Unknown"} />
         },
+        { body: stateTransitionTemplate }
     ];
 
     return (

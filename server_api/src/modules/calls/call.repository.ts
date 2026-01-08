@@ -1,10 +1,12 @@
 import mongoose from "mongoose";
 import { CreateCallDTO, GetCallsOptions, UpdateCallDTO } from "./call.dto";
 import { Call, ICall } from "./call.model";
+import { CallStatus } from "./call.status";
 
 export interface ICallRepository {
     findById(id: string): Promise<ICall | null>;
     find(filters: GetCallsOptions): Promise<Partial<ICall>[]>;
+    // findByStatus(status:CallStatus): Promise<Partial<ICall>[]>;
     create(dto: CreateCallDTO): Promise<ICall>;
     update(id: string, data: UpdateCallDTO["data"]): Promise<ICall>;
     delete(id: string): Promise<ICall | null>;
@@ -22,18 +24,27 @@ export class CallRepository implements ICallRepository {
     async find(filters: GetCallsOptions) {
         const query: any = {};
 
+        if (filters.calendar) {
+            query.calendar = new mongoose.Types.ObjectId(filters.calendar);
+        }
+
         if (filters.directorate) {
             query.directorate = new mongoose.Types.ObjectId(filters.directorate);
         }
 
-        return await Call.find(query)
-            .populate("calendar")
-            .populate("directorate")
-            .populate("grant")
-            .populate("thematic")
-            .lean<ICall[]>()
-            .exec();
+        let dbQuery = Call.find(query);
+
+        if (filters.populate) {
+            dbQuery = dbQuery
+                .populate('calendar')
+                .populate('directorate')
+                .populate('grant')
+                .populate('thematic');
+        }
+
+        return dbQuery.lean<ICall[]>().exec();
     }
+
 
     async create(dto: CreateCallDTO) {
         return Call.create({

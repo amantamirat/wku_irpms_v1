@@ -27,7 +27,8 @@ export interface UpdateCallDTO {
 export interface GetCallsOptions {
     calendar?: string;
     directorate?: string;
-    status?: CallStatus;
+    //status?: CallStatus;
+    populate?: boolean;
     userId?: string;
 }
 
