@@ -9,7 +9,7 @@ import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 import { CalendarApi } from '../../calendars/api/calendar.api';
-import { Calendar } from '../../calendars/models/calendar.model';
+import { Calendar, CalendarStatus } from '../../calendars/models/calendar.model';
 import { GrantApi } from '../../grants/api/grant.api';
 import { Grant } from '../../grants/models/grant.model';
 import { Organization } from '../../organizations/models/organization.model';
@@ -42,8 +42,7 @@ const SaveCall = ({ visible, call, directorates, onHide, onComplete }: SaveCallP
     useEffect(() => {
         const loadCalendars = async () => {
             try {
-                //filter by status??
-                const data = await CalendarApi.getCalendars();
+                const data = await CalendarApi.getCalendars({ status: CalendarStatus.active });
                 setCalendars(data);
             } catch (err) {
                 console.error('Failed to load calendars:', err);

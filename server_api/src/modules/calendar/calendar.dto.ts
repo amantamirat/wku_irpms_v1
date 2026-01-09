@@ -24,4 +24,7 @@ export interface UpdateCalendarStatusDTO {
     status: CalendarStatus;
 }
 
+export interface GetCalendarDTO {
+    status?: CalendarStatus;
+}
 

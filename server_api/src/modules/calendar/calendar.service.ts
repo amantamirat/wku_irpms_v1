@@ -1,7 +1,7 @@
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { CallRepository } from "../calls/call.repository";
-import { CreateCalendarDTO, UpdateCalendarDTO, UpdateCalendarStatusDTO } from "./calendar.dto";
+import { CreateCalendarDTO, GetCalendarDTO, UpdateCalendarDTO, UpdateCalendarStatusDTO } from "./calendar.dto";
 import { CalendarRepository } from "./calendar.repository";
 import { CalendarStateMachine } from "./calendar.state-machine";
 import { CalendarStatus } from "./calendar.status";
@@ -26,8 +26,8 @@ export class CalendarService {
         }
     }
 
-    async getAll() {
-        const calendars = await this.repository.findAll();
+    async get(option:GetCalendarDTO) {
+        const calendars = await this.repository.find(option);
         return calendars;
     }
 

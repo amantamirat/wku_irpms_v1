@@ -7,6 +7,7 @@ import {
 } from './calendar.dto';
 import { successResponse, errorResponse } from '../../common/helpers/response';
 import { AuthenticatedRequest } from '../users/user.middleware';
+import { CalendarStatus } from './calendar.status';
 // import { AuthenticatedRequest } from '../users/user.middleware';
 // import { AppError } from '../../common/errors/app.error';
 // import { ERROR_CODES } from '../../common/errors/error.codes';
@@ -31,7 +32,10 @@ export class CalendarController {
 
   get = async (req: Request, res: Response) => {
     try {
-      const calendars = await this.service.getAll();
+      const { status } = req.query;
+      const calendars = await this.service.get(
+        { status: status ? status as CalendarStatus : undefined }
+      );
       successResponse(res, 200, 'Calendars fetched successfully', calendars);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);

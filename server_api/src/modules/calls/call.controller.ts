@@ -9,8 +9,8 @@ export class CallController {
 
     private service: CallService;
 
-    constructor(service?: CallService) {
-        this.service = service || new CallService();
+    constructor(service: CallService) {
+        this.service = service;
     }
 
     create = async (req: Request, res: Response) => {

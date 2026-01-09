@@ -1,10 +1,14 @@
 import mongoose from "mongoose";
 import { Calendar, ICalendar } from "./calendar.model";
-import { CreateCalendarDTO, UpdateCalendarDTO, UpdateCalendarStatusDTO } from "./calendar.dto";
+import { CreateCalendarDTO, GetCalendarDTO, UpdateCalendarDTO, UpdateCalendarStatusDTO } from "./calendar.dto";
 
-export interface ICalendarRepository {
+
+export interface ICalendarReadRepository {
     findById(id: string): Promise<ICalendar | null>;
-    findAll(): Promise<ICalendar[]>;
+    find(option: GetCalendarDTO): Promise<ICalendar[]>;
+}
+
+export interface ICalendarRepository extends ICalendarReadRepository {
     create(data: CreateCalendarDTO): Promise<ICalendar>;
     update(id: string, data: UpdateCalendarDTO["data"]): Promise<ICalendar | null>;
     updateStatus(id: string, data: UpdateCalendarStatusDTO): Promise<ICalendar | null>;
@@ -19,8 +23,12 @@ export class CalendarRepository implements ICalendarRepository {
             .exec();
     }
 
-    async findAll() {
-        return Calendar.find()
+    async find(option: GetCalendarDTO) {
+        const query: any = {};
+        if (option.status) {
+            query.status = option.status;
+        }
+        return Calendar.find(query)
             .sort({ year: -1 })
             .lean<ICalendar[]>()
             .exec();

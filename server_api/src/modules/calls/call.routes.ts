@@ -2,8 +2,15 @@ import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
 import { checkPermission, checkStatusPermission, verifyActiveAccount } from '../users/user.middleware';
 import { CallController } from './call.controller';
+import { CallRepository } from './call.repository';
+import { CallService } from './call.service';
+import { CalendarRepository } from '../calendar/calendar.repository';
 
-const controller = new CallController();
+
+const repository = new CallRepository();
+const calendarRepository = new CalendarRepository();
+const service = new CallService(repository, calendarRepository);
+const controller = new CallController(service);
 const router = Router();
 
 router.post(

@@ -1,41 +1,46 @@
+import { AppError } from "../../common/errors/app.error";
+import { ERROR_CODES } from "../../common/errors/error.codes";
 import { DeleteDto } from "../../util/delete.dto";
+import { ICalendarReadRepository } from "../calendar/calendar.repository";
 import { CalendarStatus } from "../calendar/calendar.status";
-import { CalendarRepository, ICalendarRepository } from "../calendar/calendar.repository";
-import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
-import { IThematicRepository, ThematicRepository } from "../thematics/thematic.repository";
 import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
-import { IStageRepository, StageRepository } from "./stages/stage.repository";
-import { CreateCallDTO, GetCallsOptions, UpdateCallDTO } from "./call.dto";
-import { CallStatus } from "./call.status";
-import { CallRepository, ICallRepository } from "./call.repository";
-import { CallStateMachine } from "./call.state-machine";
+import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
 import { Unit } from "../organization/organization.type";
+import { IThematicRepository, ThematicRepository } from "../thematics/thematic.repository";
+import { CreateCallDTO, GetCallsOptions, UpdateCallDTO } from "./call.dto";
+import { CallRepository } from "./call.repository";
+import { CallStateMachine } from "./call.state-machine";
+import { CallStatus } from "./call.status";
+import { IStageRepository, StageRepository } from "./stages/stage.repository";
 
 export class CallService {
 
-    private repository: ICallRepository;
-    private calendarRepo: ICalendarRepository;
     private organizationRepo: IOrganizationRepository;
     private grantRepo: IGrantRepository;
     private thematicsRepo: IThematicRepository;
     private stageRepository: IStageRepository;
 
-    constructor(repository?: ICallRepository, calendarRepo?: ICalendarRepository,
+    constructor(private readonly repository: CallRepository,
+        private readonly calendarRepository: ICalendarReadRepository,
         thematicsRepo?: IThematicRepository
     ) {
-        this.repository = repository || new CallRepository();
+        this.repository = repository;
+        this.calendarRepository = calendarRepository;
+        
         this.organizationRepo = new OrganizationRepository();
-        this.calendarRepo = calendarRepo || new CalendarRepository();
+
         this.thematicsRepo = thematicsRepo || new ThematicRepository();
         this.grantRepo = new GrantRepository();
         this.stageRepository = new StageRepository();
     }
 
     async create(dto: CreateCallDTO) {
-        const calendarDoc = await this.calendarRepo.findById(dto.calendar);
-        if (!calendarDoc || calendarDoc.status !== CalendarStatus.active) {
-            throw new Error("Calendar Not Found!");
-        }
+        const calendarDoc = await this.calendarRepository.findById(dto.calendar);
+        if (!calendarDoc) throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
+        if (calendarDoc.status !== CalendarStatus.active) throw new AppError(ERROR_CODES.CALENDAR_NOT_ACTIVE);
+
+
+
         const directorateDoc = await this.organizationRepo.findById(dto.directorate);
         if (!directorateDoc || directorateDoc.type !== Unit.Directorate) {
             throw new Error("Directorate Not Found!");
