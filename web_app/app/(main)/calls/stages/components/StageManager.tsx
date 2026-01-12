@@ -15,13 +15,13 @@ import { PERMISSIONS } from "@/types/permissions";
 import { Button } from "primereact/button";
 
 interface StageManagerProps {
-    call: Call;
+    call?: Call;
 }
 
 const StageManager = ({ call }: StageManagerProps) => {
 
     const emptyStage: Stage = {
-        call: call,
+        call: call ?? "",
         name: "",
         evaluation: "",
         status: StageStatus.planned
@@ -77,7 +77,7 @@ const StageManager = ({ call }: StageManagerProps) => {
         updateItem(savedStage);
         hideSaveDialog();
     };
-    
+
     const updateStatus = async (row: Stage, next: StageStatus) => {
         if (!row._id) {
             return;
@@ -85,60 +85,68 @@ const StageManager = ({ call }: StageManagerProps) => {
         const updated = await StageApi.updateStatus(row._id, next);
         onSaveComplete({
             ...updated,
+            call: row.call,
             evaluation: row.evaluation
         });
     };
 
+    const stateTransitionTemplate = (row: Stage) => {
+        const current = row.status;
+        let prev = undefined;
+        let next = undefined;
+        if (current === StageStatus.planned) {
+            if (canActivate) {
+                next = StageStatus.active;
+            }
+        }
+        else if (current === StageStatus.active) {
+            if (canClose) {
+                next = StageStatus.closed;
+            }
+            if (canPlan) {
+                prev = StageStatus.planned;
+            }
+        }
+        else if (current === StageStatus.closed) {
+            if (canActivate) {
+                prev = StageStatus.active;
+            }
+        }
 
-    const stateTransitionTemplate = (rowData: Stage) => {
-        const state = rowData.status;
         return (<div className="flex gap-2">
-            {(canActivate && (state === StageStatus.planned || state === StageStatus.closed))
+            {(next)
                 &&
                 <Button
-                    label="Activate"
-                    icon="pi pi-check"
-                    severity="success"
+                    tooltip={`Make ${next}`}
+                    icon={next === StageStatus.closed ? "pi pi-lock" : "pi pi-check"}
+                    severity={next === StageStatus.closed ? "danger" : "success"}
                     size="small"
                     onClick={() => {
                         confirm.ask({
-                            operation: 'activate',
-                            onConfirmAsync: () => updateStatus(rowData, StageStatus.active)
+                            operation: `Make to ${next}`,
+                            onConfirmAsync: () => updateStatus(row, next)
                         });
                     }}
                 />
             }
-            {(canClose && (state === StageStatus.active)) &&
+            {(prev)
+                &&
                 <Button
-                    tooltip="Close"
-                    icon="pi pi-lock"
-                    severity="danger"
-                    size="small"
-                    onClick={() => {
-                        confirm.ask({
-                            operation: 'close',
-                            onConfirmAsync: () => updateStatus(rowData, StageStatus.closed)
-                        });
-                    }}
-                />
-            }
-            {(canPlan && (state === StageStatus.active)) &&
-                <Button
-                    tooltip="Plan"
-                    icon="pi pi-arrow-left"
+                    tooltip={`Back to ${prev}`}
+                    icon="pi pi-undo"
                     severity="warning"
                     size="small"
-                    hidden={!canPlan}
                     onClick={() => {
                         confirm.ask({
-                            operation: 'change to plan',
-                            onConfirmAsync: () => updateStatus(rowData, StageStatus.planned)
+                            operation: `back to ${prev}`,
+                            onConfirmAsync: () => updateStatus(row, prev)
                         });
                     }}
                 />
             }
         </div>);
     }
+
 
     // Delete
     const deleteStage = async (row: Stage) => {
@@ -155,6 +163,7 @@ const StageManager = ({ call }: StageManagerProps) => {
 
     // Table columns
     const columns = [
+        !call && { header: "Call", field: "call.title" },
         { header: "Name", field: "name", sortable: true },
         { header: "Evaluation", field: "evaluation.title", sortable: true },
         {
@@ -208,7 +217,7 @@ const StageManager = ({ call }: StageManagerProps) => {
             <SaveStage
                 visible={showSaveDialog}
                 stage={selectedStage}
-                call={call}
+                callProvided={!!call}
                 onComplete={onSaveComplete}
                 onHide={hideSaveDialog}
             />

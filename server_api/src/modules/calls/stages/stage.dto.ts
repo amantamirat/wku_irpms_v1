@@ -1,11 +1,14 @@
 import { StageStatus } from "./stage.status";
 
-export interface FilterStageDTO {
-    _id?: string;
+export interface FindStageDTO {
+    call: string;
+    order: number;
+}
+
+export interface GetStageDTO {
     call?: string;
-    order?: number;
     status?: StageStatus;
-    //isFinal?: boolean;
+    populate?: boolean;
 }
 
 export interface CreateStageDTO {
@@ -14,7 +17,6 @@ export interface CreateStageDTO {
     order?: number;
     evaluation: string;
     deadline?: Date;
-    //isFinal?: boolean;
     status?: StageStatus.planned;
 }
 
@@ -27,6 +29,11 @@ export interface UpdateStageDTO {
         //isFinal: boolean;
         status: StageStatus;
     }>;
+}
+
+export interface UpdateStageStatusDTO {
+    id: string;
+    status: StageStatus;
 }
 
 

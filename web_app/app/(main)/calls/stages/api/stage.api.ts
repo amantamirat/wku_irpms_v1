@@ -20,9 +20,7 @@ export const StageApi = {
     },
 
     async update(stage: Partial<Stage>): Promise<Stage> {
-        if (!stage._id) {
-            throw new Error("_id required.");
-        }
+        if (!stage._id) throw new Error("_id required.");        
         const query = new URLSearchParams();
         query.append("id", stage._id);
         const sanitized = sanitizeStage(stage);
@@ -30,12 +28,12 @@ export const StageApi = {
         return updated as Stage;
     },
 
-    async updateStatus(id: string, status: StageStatus): Promise<Stage> {
+    async updateStatus(id: string, status: StageStatus): Promise<any> {
         const query = new URLSearchParams();
         query.append("id", id);
-        const url = `${end_point}/${status}`;
-        const updated = await ApiClient.put(`${url}?${query.toString()}`);
-        return updated as Stage;
+        const url = `${end_point}/${id}`;
+        const updated = await ApiClient.patch(url, { status });
+        return updated;
     },
 
     async delete(stage: Partial<Stage>): Promise<boolean> {

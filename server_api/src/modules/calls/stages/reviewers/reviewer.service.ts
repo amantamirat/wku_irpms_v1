@@ -140,7 +140,7 @@ export class ReviewerService {
                 throw new AppError(ERROR_CODES.USER_NOT_REVIEWER);
 
             const stage = String(projectStageDoc.stage);
-            const stageDoc = await this.stageRepository.findOne({ _id: stage });
+            const stageDoc = await this.stageRepository.findById(stage);
             if (!stageDoc) throw new Error("Stage not found");
 
             const criteriaCount = await this.criterionRepository.countDocuments(String(stageDoc.evaluation));

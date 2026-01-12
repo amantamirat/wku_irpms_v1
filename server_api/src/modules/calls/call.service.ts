@@ -72,7 +72,7 @@ export class CallService {
         // --- State Machine Validation ---
         CallStateMachine.validateTransition(current, nextState);
         if (nextState === CallStatus.planned) {
-            const stages = await this.stageRepository.find({ call: id }, false);
+            const stages = await this.stageRepository.find({ call: id });
             if (stages.length > 0) {
                 throw new AppError(ERROR_CODES.CALL_STAGE_ALREADY_EXISTS);
             }

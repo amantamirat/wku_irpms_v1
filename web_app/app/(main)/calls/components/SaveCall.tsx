@@ -32,7 +32,7 @@ const SaveCall = ({ visible, call, calendarProvided, directorateProvided, onHide
     const toast = useRef<Toast>(null);
 
     const [localCall, setLocalCall] = useState<Call>({ ...call });
-    const [calendars, setCalendars] = useState<Calendar[]>([]);
+    const [calendars, setCalendars] = useState<Calendar[]|undefined>(undefined);
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [grants, setGrants] = useState<Grant[]>([]);
     const [themes, setThemes] = useState<Thematic[]>([]);

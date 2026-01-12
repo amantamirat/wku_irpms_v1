@@ -1,48 +1,63 @@
 'use client';
+import { EvaluationApi } from '@/app/(main)/evaluations/api/evaluation.api';
+import { Evaluation } from '@/app/(main)/evaluations/models/evaluation.model';
 import { Button } from 'primereact/button';
+import { Calendar } from 'primereact/calendar';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
-import { Calendar } from 'primereact/calendar';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
+import { Call, CallStatus } from '../../models/call.model';
 import { StageApi } from '../api/stage.api';
-import { Stage, StageStatus, validateStage } from '../models/stage.model';
-import { EvaluationApi } from '@/app/(main)/evaluations/api/evaluation.api';
-import { Evaluation } from '@/app/(main)/evaluations/models/evaluation.model';
-import { Call } from '../../models/call.model';
-import { Checkbox } from 'primereact/checkbox';
-
+import { Stage, validateStage } from '../models/stage.model';
+import { CallApi } from '../../api/call.api';
 
 interface SaveStageProps {
     visible: boolean;
     stage: Stage;
-    call?: Call;
+    callProvided: boolean;
     onComplete?: (savedStage: Stage) => void;
     onHide: () => void;
 }
 
-const SaveStage = ({ visible, stage, call, onComplete, onHide }: SaveStageProps) => {
+const SaveStage = ({ visible, stage, callProvided, onComplete, onHide }: SaveStageProps) => {
+
     const toast = useRef<Toast>(null);
     const [localStage, setLocalStage] = useState<Stage>({ ...stage });
     const [submitted, setSubmitted] = useState(false);
+
+    const [calls, setCalls] = useState<Call[] | undefined>(undefined);
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
 
+    // Load active calendars
     useEffect(() => {
-        if (!call) {
+        if (callProvided) {
             return
         }
+        const loadCalls = async () => {
+            try {
+                const data = await CallApi.getCalls({ status: CallStatus.active });
+                setCalls(data);
+            } catch (err) {
+                console.error('Failed to load calls:', err);
+            }
+        };
+        loadCalls();
+    }, [callProvided]);
+
+    useEffect(() => {
         const fetchEvaluations = async () => {
             try {
-                const data = await EvaluationApi.getEvaluations({ directorate: call.directorate });
+                const data = await EvaluationApi.getEvaluations({ directorate: (localStage.call as Call).directorate });
                 setEvaluations(data);
             } catch (err) {
                 console.error('Failed to fetch evaluations:', err);
             }
         };
         fetchEvaluations();
-    }, [call]);
+    }, [localStage.call]);
 
 
     useEffect(() => {
@@ -116,6 +131,22 @@ const SaveStage = ({ visible, stage, call, onComplete, onHide }: SaveStageProps)
                 onHide={hide}
             >
 
+                {
+                    (!callProvided && !localStage._id) &&
+                    <div className="field">
+                        <label htmlFor="call">Call</label>
+                        <Dropdown
+                            id="call"
+                            value={localStage.call}
+                            options={calls}
+                            optionLabel="title"
+                            onChange={(e) => setLocalStage({ ...localStage, call: e.value })}
+                            placeholder="Select Call"
+                            className={classNames({ 'p-invalid': submitted && !localStage.call })}
+                        />
+                    </div>
+                }
+
                 {/* Stage Name */}
                 <div className="field">
                     <label htmlFor="name">Stage Name</label>
@@ -158,20 +189,6 @@ const SaveStage = ({ visible, stage, call, onComplete, onHide }: SaveStageProps)
                         placeholder="Select Deadline"
                     />
                 </div>
-                {/* Final Stage
-                <div className="field-checkbox">
-                    <Checkbox
-                        inputId="isFinal"
-                        checked={!!localStage.isFinal}
-                        onChange={(e) =>
-                            setLocalStage({ ...localStage, isFinal: e.checked ?? false })
-                        }
-                    />
-                    <label htmlFor="isFinal" className="ml-2">
-                        Final Stage
-                    </label>
-                </div>
-                */}
 
             </Dialog>
         </>

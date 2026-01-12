@@ -101,7 +101,7 @@ export class DocumentService {
             const current = doc.status;
             DocumentStateMachine.validateTransition(current, newStatus);
             if (newStatus === DocStatus.reviewed) {
-                const currentStageDoc = await this.stageRepository.findOne({ _id: String(doc.stage) });
+                const currentStageDoc = await this.stageRepository.findById(String(doc.stage));
                 if (!currentStageDoc) throw new Error("Current stage not found");
                 const projectDocs = await this.repository.find({ project: String(doc.project) }, false);
                 if (projectDocs.length > currentStageDoc.order) {

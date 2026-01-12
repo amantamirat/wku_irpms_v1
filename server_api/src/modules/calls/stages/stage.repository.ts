@@ -1,50 +1,39 @@
 import mongoose from "mongoose";
-import { CreateStageDTO, FilterStageDTO, UpdateStageDTO } from "./stage.dto";
+import { CreateStageDTO, FindStageDTO, GetStageDTO, UpdateStageDTO } from "./stage.dto";
 import { IStage, Stage } from "./stage.model";
 
 
 export interface IStageRepository {
-    findOne(filters: FilterStageDTO): Promise<IStage | null>;
-    find(filters: FilterStageDTO, populate?: boolean): Promise<Partial<IStage>[]>;
-    //findLastStageByCall(callId: string): Promise<IStage | null>;
+    findById(id: string): Promise<IStage | null>;
+    find(filters: GetStageDTO): Promise<Partial<IStage>[]>;
+    findOne(option: FindStageDTO): Promise<IStage | null>;
     create(dto: CreateStageDTO): Promise<IStage>;
-    update(id: string, data: UpdateStageDTO["data"]): Promise<IStage>;
+    update(id: string, data: UpdateStageDTO["data"]): Promise<IStage | null>;
+    updateMany(filter: any, update: any): Promise<any>;
     delete(id: string): Promise<IStage | null>;
 }
 
 
 export class StageRepository implements IStageRepository {
 
-    async findOne(options: FilterStageDTO) {
-        const query: any = {};
-        if (options._id) {
-            query._id = new mongoose.Types.ObjectId(options._id);
-        }
-        if (options.call) {
-            query.call = new mongoose.Types.ObjectId(options.call);
-        }
-        if (options.order) {
-            query.order = options.order;
-        }
-        /*
-        if (options.isFinal === true) {
-            query.isFinal = true;
-        }
-        */
-        return Stage.findOne(query).lean<IStage>();
+    async findById(id: string) {
+        return Stage.findById(new mongoose.Types.ObjectId(id))
+            .lean<IStage>()
+            .exec();
     }
 
-    /*
-    async findLastStageByCall(callId: string): Promise<IStage | null> {
-        return await Stage
-            .findOne({ call: callId })
-            .sort({ order: -1 })
-            .lean<IStage>();
+    async findOne(option: FindStageDTO) {
+        return Stage.findOne({
+            call: new mongoose.Types.ObjectId(option.call),
+            order: option.order
+        })
+            .lean<IStage>()
+            .exec();
     }
-            */
 
-    async find(filters: FilterStageDTO, populate: boolean = true) {
+    async find(filters: GetStageDTO) {
         const query: any = {};
+
         if (filters.call) {
             query.call = new mongoose.Types.ObjectId(filters.call);
         }
@@ -52,16 +41,16 @@ export class StageRepository implements IStageRepository {
         if (filters.status) {
             query.status = filters.status;
         }
-        if (populate === false) {
-            return Stage.find(query)
-                .lean<IStage[]>()
-                .exec();
+
+        let dbQuery = Stage.find(query);
+
+        if (filters.populate) {
+            dbQuery = dbQuery
+                .populate('call')
+                .populate('evaluation');
         }
-        return Stage.find(query)
-            .populate("call")
-            .populate("evaluation")
-            .lean<IStage[]>()
-            .exec();
+
+        return dbQuery.lean<IStage[]>().exec();
     }
 
     async create(dto: CreateStageDTO) {
@@ -71,7 +60,7 @@ export class StageRepository implements IStageRepository {
         });
     }
 
-    async update(id: string, dtoData: UpdateStageDTO["data"]): Promise<IStage> {
+    async update(id: string, dtoData: UpdateStageDTO["data"]): Promise<IStage | null> {
         const updateData: Partial<IStage> = {};
         if (dtoData.name !== undefined) {
             updateData.name = dtoData.name;
@@ -85,18 +74,15 @@ export class StageRepository implements IStageRepository {
         if (dtoData.status !== undefined) {
             updateData.status = dtoData.status;
         }
-        /*
-        if (dtoData.isFinal !== undefined) {
-            updateData.isFinal = dtoData.isFinal;
-        }
-        */
-        const updated = await Stage.findByIdAndUpdate(
+        return Stage.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },
             { new: true }
         ).exec();
-        if (!updated) throw new Error("Stage not found");
-        return updated;
+    }
+
+    async updateMany(filter: any, update: any) {
+        return Stage.updateMany(filter, update).exec();
     }
 
     async delete(id: string) {

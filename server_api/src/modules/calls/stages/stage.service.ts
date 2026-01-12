@@ -1,25 +1,26 @@
-import { EvaluationRepository, IEvaluationRepository } from "../../evaluations/evaluation.repository";
+import { AppError } from "../../../common/errors/app.error";
+import { ERROR_CODES } from "../../../common/errors/error.codes";
+import { IEvaluationRepository } from "../../evaluations/evaluation.repository";
+import { IDocumentRepository } from "../../projects/documents/document.repository";
+import { ICallRepository } from "../call.repository";
 import { CallStatus } from "../call.status";
-import { CallRepository, ICallRepository } from "../call.repository";
-import { CreateStageDTO, FilterStageDTO, UpdateStageDTO } from "./stage.dto";
-import { StageStatus } from "./stage.status";
-import { IStageRepository, StageRepository } from "./stage.repository";
+import { CreateStageDTO, GetStageDTO, UpdateStageDTO, UpdateStageStatusDTO } from "./stage.dto";
+import { IStageRepository } from "./stage.repository";
 import { StageStateMachine } from "./stage.state-machine";
-import { DocumentRepository, IDocumentRepository } from "../../projects/documents/document.repository";
+import { StageStatus } from "./stage.status";
 
 export class StageService {
 
-    private repository: IStageRepository;
-    private callRepository: ICallRepository;
-    private evalRepository: IEvaluationRepository;
-    private documentRepo: IDocumentRepository;
-
-    constructor(repository?: IStageRepository, callRepository?: ICallRepository,
-        evalRepository?: IEvaluationRepository, documentRepo?: IDocumentRepository) {
-        this.repository = repository || new StageRepository();
-        this.callRepository = callRepository || new CallRepository();
-        this.evalRepository = evalRepository || new EvaluationRepository();
-        this.documentRepo = documentRepo || new DocumentRepository();
+    constructor(
+        private readonly repository: IStageRepository,
+        private readonly callRepository: ICallRepository,
+        private readonly evalRepository: IEvaluationRepository,
+        private readonly docRepository: IDocumentRepository,
+    ) {
+        this.repository = repository;
+        this.callRepository = callRepository;
+        this.evalRepository = evalRepository;
+        this.docRepository = docRepository;
     }
     /**
      * Create a new stage
@@ -28,20 +29,13 @@ export class StageService {
         const { call, evaluation } = dto;
 
         const callDoc = await this.callRepository.findById(call);
-        if (!callDoc) throw new Error("Call not found.");
-        if (callDoc.status !== CallStatus.active) throw new Error("Call is not active.");
+        if (!callDoc) throw new Error(ERROR_CODES.CALL_NOT_FOUND);
+        if (callDoc.status !== CallStatus.active) throw new Error(ERROR_CODES.CALL_NOT_ACTIVE);
 
         const evalDoc = await this.evalRepository.findById(evaluation);
-        if (!evalDoc) throw new Error("Evaluation not found.");
+        if (!evalDoc) throw new Error(ERROR_CODES.EVALUATION_NOT_FOUND);
 
-        const stages = await this.repository.find({ call }, false);
-
-        /*
-                const lastDoc = await this.repository.findLastStageByCall(call);
-                if (!lastDoc) throw new Error("Last stage doc not found.");
-                if (lastDoc.isFinal === true) throw new Error("Final stage already exists.");
-        const nextOrder = lastDoc?.order ? lastDoc.order + 1 : 1;     
-        */
+        const stages = await this.repository.find({ call });
         const nextOrder = stages.length + 1;
         const stage = await this.repository.create({ ...dto, order: nextOrder, status: StageStatus.planned });
         return stage;
@@ -49,75 +43,62 @@ export class StageService {
     /**
      * Get all stages or by call
      */
-    async getStages(dto: FilterStageDTO) {
-        return await this.repository.find(dto);
+    async getStages(dto: GetStageDTO) {
+        return await this.repository.find({ ...dto, populate: true });
     }
     /**
      * Update a stage
      */
     async update(dto: UpdateStageDTO) {
         const { id, data } = dto;
-        delete data.status
-        /*
-        if (data.isFinal === true) {
-            const stageDoc = await this.repository.findOne({ _id: id });
-            if (!stageDoc) throw new Error("Stage not found.");
-            const lastStageDoc = await this.repository.findLastStageByCall(String(stageDoc.call));
-            if (!lastStageDoc) throw new Error("Last stage not found.");
-            if (String(lastStageDoc._id) !== id) throw new Error("Only last stage can be final.");
-        }
-            */
         const stage = await this.repository.update(id, data);
-        if (!stage) throw new Error("Stage not found");
+        if (!stage) throw new Error(ERROR_CODES.STAGE_NOT_FOUND);
         return
     }
     /**
     * Update Status
     */
-    async updateStatus(dto: UpdateStageDTO) {
-        const { id, data } = dto;
-        const nextState = data.status;
-        if (!nextState) throw new Error("Status not found");
-        const stageDoc = await this.repository.findOne({ _id: id });
-        if (!stageDoc) throw new Error("Stage not found");
+    async updateStatus(dto: UpdateStageStatusDTO) {
+        const { id, status } = dto;
+        const nextState = status;
+        const stageDoc = await this.repository.findById(id);
+        if (!stageDoc) throw new Error(ERROR_CODES.STAGE_NOT_FOUND);
         const current = stageDoc.status;
+
         // --- State Machine Validation ---
         StageStateMachine.validateTransition(current, nextState);
         if (nextState === StageStatus.planned) {
-            const documents = await this.documentRepo.find({ stage: id }, false);
+            const documents = await this.docRepository.find({ stage: id }, false);
             if (documents.length > 0) {
-                throw new Error("Can not change to planned, documents already exist!");
+                throw new AppError(ERROR_CODES.STAGE_DOCUMENT_ALREADY_EXISTS);
             }
         }
+
         const updated = await this.repository.update(dto.id, { status: nextState });
         return updated;
     }
     /**
      * Delete a stage
     */
-    async delete(id: string, callId?: string) {
-        //before all of just accept the call Id then find the last and delete it, if it is planned.
-        const stageDoc = await this.repository.findOne({ _id: id });
-        if (!stageDoc) throw new Error("Stage not found");
-        // Rule 1: Only planned (pending) stages can be deleted
-        if (stageDoc.status !== StageStatus.planned) {
-            throw new Error("Only planned stages can be deleted.");
-        }
+    async delete(id: string) {
+        const stageDoc = await this.repository.findById(id);
+        if (!stageDoc) throw new Error(ERROR_CODES.STAGE_NOT_FOUND);
+        if (stageDoc.status !== StageStatus.planned) throw new Error(ERROR_CODES.STAGE_NOT_PLANNED);
 
-        if (stageDoc.order > 1) {
-            throw new Error("Method is not supprorted, rearanging is not implemented yet");
+        const { call, order } = stageDoc;
+        const deleted = await this.repository.delete(id);
+        // Re-arrange orders of remaining stages
+        if (deleted) {
+            await this.repository.updateMany(
+                {
+                    call,
+                    order: { $gt: order }
+                },
+                {
+                    $inc: { order: -1 }
+                }
+            );
         }
-
-        /*
-        //Rule 2 Only last stage can be Deleted
-        const lastDoc = await this.repository.findLastStageByCall(String(stageDoc.call));
-        if (!lastDoc) throw new Error("Last stage is not found");
-        if (lastDoc.order !== stageDoc.order) {
-            throw new Error("Only the last stage can be deleted.");
-        }
-        */
-        // Proceed with deletion
-        const deleted = await this.repository.delete(id); //stage.deleteOne();
-        return deleted;
+        return deleted
     }
 }

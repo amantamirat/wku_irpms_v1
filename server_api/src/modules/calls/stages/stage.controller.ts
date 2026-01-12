@@ -1,22 +1,21 @@
 import { Request, Response } from 'express';
 import { StageService } from './stage.service';
-import { CreateStageDTO, FilterStageDTO, UpdateStageDTO } from './stage.dto';
+import { CreateStageDTO, GetStageDTO, UpdateStageDTO, UpdateStageStatusDTO } from './stage.dto';
 import { successResponse, errorResponse } from '../../../common/helpers/response';
 import { AuthenticatedRequest } from '../../users/user.middleware';
-import { StageStatus } from './stage.status';
 
 
 export class StageController {
 
-    private service: StageService;
+    private readonly service: StageService;
 
-    constructor(service?: StageService) {
-        this.service = service || new StageService();
+    constructor(service: StageService) {
+        this.service = service;
     }
 
     create = async (req: Request, res: Response) => {
         try {
-            const { call, name, evaluation, deadline, isFinal } = req.body;
+            const { call, name, evaluation, deadline } = req.body;
 
             const dto: CreateStageDTO = {
                 call: call as string,
@@ -37,7 +36,7 @@ export class StageController {
         try {
             const { call } = req.query;
 
-            const dto: FilterStageDTO = {
+            const dto: GetStageDTO = {
                 call: call as string,
             };
 
@@ -51,14 +50,13 @@ export class StageController {
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.query;
-            const { name, deadline, isFinal } = req.body;
+            const { name, deadline } = req.body;
             const dto: UpdateStageDTO = {
                 id: id as string,
                 data: {
                     name,
                     //evaluation: evaluation ? (evaluation as string) : undefined,
-                    deadline,
-                    //isFinal
+                    deadline
                 },
             };
             const updated = await this.service.update(dto);
@@ -70,11 +68,11 @@ export class StageController {
 
     updateStatus = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const { id } = req.query;
-            const { status } = req.params;
-            const dto: UpdateStageDTO = {
-                id: id as string,
-                data: { status: status as StageStatus }
+            const { id } = req.params;
+            const { status } = req.body;
+            const dto: UpdateStageStatusDTO = {
+                id: String(id),
+                status
             };
             const updated = await this.service.updateStatus(dto);
             successResponse(res, 200, "Stage status updated successfully", updated);
@@ -86,7 +84,6 @@ export class StageController {
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.params;
-
             const deleted = await this.service.delete(id);
             successResponse(res, 200, 'Stage deleted successfully', deleted);
         } catch (err: any) {
