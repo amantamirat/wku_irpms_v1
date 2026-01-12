@@ -28,7 +28,8 @@ export class CallController {
             const { directorate, calendar, status } = req.query;
             const calls = await this.service.getCalls({
                 directorate: directorate as string,
-                calendar: calendar as string
+                calendar: calendar as string,
+                status: status as CallStatus,
             });
             successResponse(res, 200, 'Calls fetched successfully', calls);
         } catch (err: any) {

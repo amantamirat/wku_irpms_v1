@@ -6,7 +6,6 @@ import { CallStatus } from "./call.status";
 export interface ICallRepository {
     findById(id: string): Promise<ICall | null>;
     find(filters: GetCallsOptions): Promise<Partial<ICall>[]>;
-    // findByStatus(status:CallStatus): Promise<Partial<ICall>[]>;
     create(dto: CreateCallDTO): Promise<ICall>;
     update(id: string, data: UpdateCallDTO["data"]): Promise<ICall>;
     delete(id: string): Promise<ICall | null>;
@@ -30,6 +29,10 @@ export class CallRepository implements ICallRepository {
 
         if (filters.directorate) {
             query.directorate = new mongoose.Types.ObjectId(filters.directorate);
+        }
+
+        if (filters.status) {
+            query.status = filters.status;
         }
 
         let dbQuery = Call.find(query);

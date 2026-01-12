@@ -21,7 +21,7 @@ export const CallApi = {
     const sanitized = sanitizeCall(options);
     if (options.calendar) query.append("calendar", sanitized.calendar as string);
     if (options.directorate) query.append("directorate", sanitized.directorate as string);
-    //if (options.status) query.append("status", options.status);
+    if (options.status) query.append("status", options.status);
     const data = await ApiClient.get(`${ENDPOINT}?${query.toString()}`);
     return data as Call[];
   },
