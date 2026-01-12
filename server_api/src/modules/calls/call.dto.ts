@@ -6,9 +6,9 @@ export interface CreateCallDTO {
     grant: string;
     title: string;
     description?: string;
-    thematic?: string;
+    thematic: string;
     status?: CallStatus;
-    userId: string;
+    userId?: string;
 }
 
 // Base fields for updating any call
@@ -20,7 +20,12 @@ export interface UpdateCallDTO {
         thematic: string;
         status: CallStatus;
     }>;
-    userId: string;
+    userId?: string;
+}
+
+export interface UpdateCallStatusDTO {
+    id: string;
+    status: CallStatus;
 }
 
 // Options for querying calls

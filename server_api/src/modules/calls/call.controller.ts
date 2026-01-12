@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { CallService } from './call.service';
-import { CreateCallDTO, UpdateCallDTO } from './call.dto';
+import { CreateCallDTO, UpdateCallDTO, UpdateCallStatusDTO } from './call.dto';
 import { AuthenticatedRequest } from '../users/user.middleware';
 import { successResponse, errorResponse } from '../../common/helpers/response';
 import { CallStatus } from './call.status';
@@ -15,8 +15,13 @@ export class CallController {
 
     create = async (req: Request, res: Response) => {
         try {
-            const data: CreateCallDTO = req.body;
-            const call = await this.service.create(data);
+            const { calendar, directorate, grant,
+                title, description, thematic } = req.body;
+            const dto: CreateCallDTO = {
+                calendar, directorate, title,
+                description, grant, thematic
+            };
+            const call = await this.service.create(dto);
             successResponse(res, 201, "Call created successfully", call);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -62,12 +67,11 @@ export class CallController {
 
     updateStatus = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const { id } = req.query;
-            const { status } = req.params;
-            const dto: UpdateCallDTO = {
-                id: id as string,
-                data: { status: status as CallStatus },
-                userId: "",
+            const { id } = req.params;
+            const { status } = req.body;
+            const dto: UpdateCallStatusDTO = {
+                id: String(id),
+                status
             };
             const updated = await this.service.updateStatus(dto);
             successResponse(res, 200, "Call status updated successfully", updated);
@@ -75,29 +79,6 @@ export class CallController {
             errorResponse(res, 400, err.message, err);
         }
     }
-
-    /**
-     * 
-     * changeStatus = async (req: AuthenticatedRequest, res: Response) => {
-        try {
-            const { id } = req.params;
-            const { status } = req.body;
-            if (!req.user) {
-                throw new Error("User not found!");
-            }
-            const userId = req.user._id;
-            const dto: UpdateCallDTO = {
-                id,
-                data: { status },
-                userId: userId,
-            };
-            const updated = await this.service.updateStatus(dto);
-            successResponse(res, 200, "Call status updated successfully", updated);
-        } catch (err: any) {
-            errorResponse(res, 400, err.message, err);
-        }
-    }     
-     */
 
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {

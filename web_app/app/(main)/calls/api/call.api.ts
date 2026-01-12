@@ -38,13 +38,12 @@ export const CallApi = {
     return updated as Call;
   },
 
-
-  async updateStatus(id: string, status: CallStatus): Promise<Call> {
+  async updateStatus(id: string, status: CallStatus): Promise<any> {
     const query = new URLSearchParams();
     query.append("id", id);
-    const url = `${ENDPOINT}/${status}`;
-    const updated = await ApiClient.put(`${url}?${query.toString()}`);
-    return updated as Call;
+    const url = `${ENDPOINT}/${id}`;
+    const updated = await ApiClient.patch(url, { status });
+    return updated;
   },
   // ---------------------------
   // Delete

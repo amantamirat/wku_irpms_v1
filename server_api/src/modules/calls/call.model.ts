@@ -8,7 +8,7 @@ export interface ICall extends Document {
     grant: mongoose.Types.ObjectId;
     title: string;
     description?: string;
-    thematic?: mongoose.Types.ObjectId;
+    thematic: mongoose.Types.ObjectId;
     status: CallStatus;
     createdAt?: Date;
     updatedAt?: Date;
