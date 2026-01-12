@@ -1,9 +1,9 @@
 export interface GetGrantsDTO {
-    directorateId?: string;
+    directorate?: string;
 }
 
 export interface CreateGrantDTO {
-    directorateId: string;
+    directorate: string;
     title: string;
     description?: string;
     userId: string;

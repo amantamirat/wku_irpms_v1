@@ -2,14 +2,22 @@ import { Router } from 'express';
 import { GrantController } from './grant.controller';
 import { verifyActiveAccount, checkPermission } from '../users/user.middleware';
 import { PERMISSIONS } from '../../common/constants/permissions';
+import { GrantRepository } from './grant.repository';
+import { OrganizationRepository } from '../organization/organization.repository';
+import { GrantService } from './grant.service';
 
-const router: Router = Router();
+const repository = new GrantRepository();
+const organizationRepository = new OrganizationRepository();
+
+const service = new GrantService(repository, organizationRepository);
+const controller = new GrantController(service);
+const router = Router();
 
 router.post(
   '/',
   verifyActiveAccount,
   checkPermission([PERMISSIONS.GRANT.CREATE]),
-  GrantController.createGrant
+  controller.create
 );
 
 router.get(
@@ -18,21 +26,21 @@ router.get(
   checkPermission([
     PERMISSIONS.GRANT.READ
   ]),
-  GrantController.getGrants
+  controller.get
 );
 
 router.put(
   '/:id',
   verifyActiveAccount,
   checkPermission([PERMISSIONS.GRANT.UPDATE]),
-  GrantController.updateGrant
+  controller.update
 );
 
 router.delete(
   '/:id',
   verifyActiveAccount,
   checkPermission([PERMISSIONS.GRANT.DELETE]),
-  GrantController.deleteGrant
+  controller.delete
 );
 
 export default router;

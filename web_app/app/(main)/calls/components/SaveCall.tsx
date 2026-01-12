@@ -12,27 +12,28 @@ import { CalendarApi } from '../../calendars/api/calendar.api';
 import { Calendar, CalendarStatus } from '../../calendars/models/calendar.model';
 import { GrantApi } from '../../grants/api/grant.api';
 import { Grant } from '../../grants/models/grant.model';
-import { Organization } from '../../organizations/models/organization.model';
+import { Organization, OrgnUnit } from '../../organizations/models/organization.model';
 import { ThematicApi } from '../../thematics/api/thematic.api';
 import { Thematic } from '../../thematics/models/thematic.model';
 import { CallApi } from '../api/call.api';
 import { Call, validateCall } from '../models/call.model';
+import { OrganizationApi } from '../../organizations/api/organization.api';
 
 interface SaveCallProps {
     visible: boolean;
     call: Call;
-    directorates?: Organization[]
+    calendarProvided: boolean;
+    directorateProvided: boolean;
     onHide: () => void;
     onComplete?: (saved: Call) => void;
 }
 
-const SaveCall = ({ visible, call, directorates, onHide, onComplete }: SaveCallProps) => {
+const SaveCall = ({ visible, call, calendarProvided, directorateProvided, onHide, onComplete }: SaveCallProps) => {
     const toast = useRef<Toast>(null);
-    const { getScopesByUnit: getOrganizationsByType } = useAuth();
 
     const [localCall, setLocalCall] = useState<Call>({ ...call });
     const [calendars, setCalendars] = useState<Calendar[]>([]);
-    //const [organizations, setOrganizations] = useState<Organization[]>([]);
+    const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [grants, setGrants] = useState<Grant[]>([]);
     const [themes, setThemes] = useState<Thematic[]>([]);
     const [submitted, setSubmitted] = useState(false);
@@ -40,6 +41,9 @@ const SaveCall = ({ visible, call, directorates, onHide, onComplete }: SaveCallP
 
     // Load active calendars
     useEffect(() => {
+        if (calendarProvided) {
+            return
+        }
         const loadCalendars = async () => {
             try {
                 const data = await CalendarApi.getCalendars({ status: CalendarStatus.active });
@@ -49,7 +53,23 @@ const SaveCall = ({ visible, call, directorates, onHide, onComplete }: SaveCallP
             }
         };
         loadCalendars();
-    }, []);
+    }, [calendarProvided]);
+
+
+    useEffect(() => {
+        if (directorateProvided) {
+            return
+        }
+        const loadDirectorates = async () => {
+            try {
+                const data = await OrganizationApi.getOrganizations({ type: OrgnUnit.Directorate });
+                setOrganizations(data);
+            } catch (err) {
+                console.error('Failed to load directorates:', err);
+            }
+        };
+        loadDirectorates();
+    }, [directorateProvided]);
 
 
     // Load grants
@@ -153,33 +173,39 @@ const SaveCall = ({ visible, call, directorates, onHide, onComplete }: SaveCallP
                 <div className="p-fluid">
                     {!localCall._id && (
                         <>
-                            <div className="field">
-                                <label htmlFor="calendar">Calendar</label>
-                                <Dropdown
-                                    id="calendar"
-                                    value={localCall.calendar}
-                                    options={calendars}
-                                    optionLabel="year"
-                                    onChange={(e) => setLocalCall({ ...localCall, calendar: e.value })}
-                                    placeholder="Select Calendar"
-                                    className={classNames({ 'p-invalid': submitted && !localCall.calendar })}
-                                />
-                            </div>
+                            {
+                                !calendarProvided &&
+                                <div className="field">
+                                    <label htmlFor="calendar">Calendar</label>
+                                    <Dropdown
+                                        id="calendar"
+                                        value={localCall.calendar}
+                                        options={calendars}
+                                        optionLabel="year"
+                                        onChange={(e) => setLocalCall({ ...localCall, calendar: e.value })}
+                                        placeholder="Select Calendar"
+                                        className={classNames({ 'p-invalid': submitted && !localCall.calendar })}
+                                    />
+                                </div>
+                            }
+                            {
+                                !directorateProvided &&
 
-                            <div className="field">
-                                <label htmlFor="organization">
-                                    Directorate
-                                </label>
-                                <Dropdown
-                                    id="organization"
-                                    value={localCall.directorate}
-                                    options={directorates}
-                                    optionLabel="name"
-                                    onChange={(e) => setLocalCall({ ...localCall, directorate: e.value })}
-                                    placeholder={`Select 'Directorate'`}
-                                    className={classNames({ 'p-invalid': submitted && !localCall.directorate })}
-                                />
-                            </div>
+                                <div className="field">
+                                    <label htmlFor="organization">
+                                        Directorate
+                                    </label>
+                                    <Dropdown
+                                        id="organization"
+                                        value={localCall.directorate}
+                                        options={organizations}
+                                        optionLabel="name"
+                                        onChange={(e) => setLocalCall({ ...localCall, directorate: e.value })}
+                                        placeholder={'Select Directorate'}
+                                        className={classNames({ 'p-invalid': submitted && !localCall.directorate })}
+                                    />
+                                </div>
+                            }
                         </>
                     )}
 

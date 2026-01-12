@@ -5,11 +5,14 @@ import { CallController } from './call.controller';
 import { CallRepository } from './call.repository';
 import { CallService } from './call.service';
 import { CalendarRepository } from '../calendar/calendar.repository';
+import { OrganizationRepository } from '../organization/organization.repository';
 
 
 const repository = new CallRepository();
 const calendarRepository = new CalendarRepository();
-const service = new CallService(repository, calendarRepository);
+const organizationRepository = new OrganizationRepository();
+
+const service = new CallService(repository, calendarRepository, organizationRepository);
 const controller = new CallController(service);
 const router = Router();
 

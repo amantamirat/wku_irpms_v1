@@ -54,7 +54,7 @@ const CalendarManager = () => {
         const fetchCalendars = async () => {
             try {
                 setLoading(true);
-                const data = await CalendarApi.getCalendars();
+                const data = await CalendarApi.getCalendars({});
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to fetch calendars. " + (err?.message ?? ""));

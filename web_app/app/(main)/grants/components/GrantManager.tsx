@@ -1,7 +1,5 @@
 'use client';
 import { CrudManager } from "@/components/CrudManager";
-import ErrorCard from "@/components/ErrorCard";
-import ListSkeleton from "@/components/ListSkeleton";
 import { useAuth } from "@/contexts/auth-context";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useCrudList } from "@/hooks/useCrudList";
@@ -9,24 +7,19 @@ import { PERMISSIONS } from "@/types/permissions";
 import { useEffect, useState } from "react";
 import { Organization } from "../../organizations/models/organization.model";
 import { GrantApi } from "../api/grant.api";
-import { GetGrantsOptions, Grant } from "../models/grant.model";
-import SaveDialog from "./SaveDialog";
 import ConstraintContainer from "../constraints/components/ConstraintContainer";
-import { useDirectorate } from "@/contexts/DirectorateContext";
-import { DirectorateSelector } from "@/components/DirectorateSelector";
+import { Grant } from "../models/grant.model";
+import SaveDialog from "./SaveDialog";
 
 interface GrantManagerProps {
     directorate?: Organization;
 }
 
-const GrantManger = () => {
+const GrantManger = ({ directorate }: GrantManagerProps) => {
 
     const { hasPermission } = useAuth();
-    //const linkedApplicant = getLinkedApplicant();
-    //const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
 
     const confirm = useConfirmDialog();
-    const { directorate, directorates } = useDirectorate();
 
     const emptyGrant: Grant = {
         directorate: directorate ?? '',
@@ -61,13 +54,8 @@ const GrantManger = () => {
         const fetchGrants = async () => {
             try {
                 setLoading(true);
-                const options: GetGrantsOptions = {
-                    directorate: directorate,
-                };
-                const data = await GrantApi.getGrants(options);
-                setAll(
-                    data
-                );
+                const data = await GrantApi.getGrants({ directorate });
+                setAll(data);
             } catch (err: any) {
                 setError("Failed to fetch grants. " + (err.message ?? ""));
             } finally {
@@ -100,10 +88,7 @@ const GrantManger = () => {
         { field: "description", header: "Description", sortable: true },
     ];
 
-    const topTemplate = () => {
-        return (<DirectorateSelector />)
-    };
-
+   
     return (
         <>
             <CrudManager
@@ -117,8 +102,7 @@ const GrantManger = () => {
                 onCreate={() => { setGrant(emptyGrant); setShowSaveDialog(true); }}
                 onEdit={(row) => { setGrant(row); setShowSaveDialog(true); }}
                 onDelete={(row) => confirm.ask({ item: row.title, onConfirmAsync: () => deleteGrant(row) })}
-                
-                topTemplate={topTemplate()}
+
                 rowExpansionTemplate={(row) => <ConstraintContainer grant={row as Grant} />}
             />
 
@@ -126,7 +110,7 @@ const GrantManger = () => {
                 <SaveDialog
                     visible={showSaveDialog}
                     grant={grant}
-                    directorates={directorates}
+                    directorateProvided={!!directorate}
                     onComplete={onSaveComplete}
                     onHide={() => setShowSaveDialog(false)}
                 />

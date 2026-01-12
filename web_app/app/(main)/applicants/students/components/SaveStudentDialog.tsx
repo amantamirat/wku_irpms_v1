@@ -7,15 +7,13 @@ import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 import { Student, validateStudent } from '../models/student.model';
 import { useAuth } from '@/contexts/auth-context';
-import { Calendar } from '@/app/(main)/calendars/models/calendar.model';
+import { Calendar, CalendarStatus } from '@/app/(main)/calendars/models/calendar.model';
 import { Applicant } from '../../models/applicant.model';
 import { Organization, OrgnUnit } from '@/app/(main)/organizations/models/organization.model';
 import { CalendarApi } from '@/app/(main)/calendars/api/calendar.api';
 import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
 import { ApplicantApi } from '../../api/applicant.api';
 import { StudentApi } from '../api/student.api';
-
-
 
 interface SaveStudentDialogProps {
     visible: boolean;
@@ -41,7 +39,7 @@ const SaveStudentDialog = ({ visible, student, applicantProvided, onHide, onComp
         const fetchData = async () => {
             try {
                 const [calData, progData] = await Promise.all([
-                    CalendarApi.getCalendars(),
+                    CalendarApi.getCalendars({ status: CalendarStatus.active }),
                     OrganizationApi.getOrganizations({ type: OrgnUnit.Program }),
                 ]);
                 setCalendars(calData);

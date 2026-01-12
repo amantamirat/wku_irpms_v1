@@ -10,7 +10,7 @@ export interface IGrantRepository {
     findById(id: string): Promise<IGrant | null>;
     find(filters: GetGrantsDTO): Promise<Partial<IGrant>[]>;
     create(dto: CreateGrantDTO): Promise<IGrant>;
-    update(id: string, data: UpdateGrantDTO["data"]): Promise<IGrant>;
+    update(id: string, data: UpdateGrantDTO["data"]): Promise<IGrant | null>;
     delete(id: string): Promise<IGrant | null>;
 }
 
@@ -26,8 +26,8 @@ export class GrantRepository implements IGrantRepository {
     async find(filters: GetGrantsDTO) {
         const query: any = {};
 
-        if (filters.directorateId) {
-            query.directorate = new mongoose.Types.ObjectId(filters.directorateId);
+        if (filters.directorate) {
+            query.directorate = new mongoose.Types.ObjectId(filters.directorate);
         }
 
         return Grant.find(query)
@@ -38,7 +38,7 @@ export class GrantRepository implements IGrantRepository {
 
     async create(dto: CreateGrantDTO) {
         const data: Partial<IGrant> = {
-            directorate: new mongoose.Types.ObjectId(dto.directorateId),
+            directorate: new mongoose.Types.ObjectId(dto.directorate),
             title: dto.title,
             description: dto.description,
             //createdBy: new mongoose.Types.ObjectId(dto.userId)
@@ -46,20 +46,17 @@ export class GrantRepository implements IGrantRepository {
         return Grant.create(data);
     }
 
-    async update(id: string, dtoData: UpdateGrantDTO["data"]): Promise<IGrant> {
+    async update(id: string, dtoData: UpdateGrantDTO["data"]): Promise<IGrant | null> {
         const updateData: Partial<IGrant> = {};
 
         if (dtoData.title) updateData.title = dtoData.title;
-        if (dtoData.description) updateData.description = dtoData.description;       
+        if (dtoData.description) updateData.description = dtoData.description;
 
-        const updated = await Grant.findByIdAndUpdate(
+        return Grant.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },
             { new: true }
         ).exec();
-
-        if (!updated) throw new Error("Grant not found");
-        return updated;
     }
 
     async delete(id: string) {

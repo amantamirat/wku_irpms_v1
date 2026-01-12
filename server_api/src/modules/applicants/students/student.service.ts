@@ -26,7 +26,8 @@ export class StudentService {
         if (!applicantDoc) throw new AppError(ERROR_CODES.APPLICANT_NOT_FOUND);
 
         const programDoc = await this.programRepository.findById(program);
-        if (!programDoc || programDoc.type !== Unit.Program) throw new AppError(ERROR_CODES.PROGRAM_NOT_FOUND);
+        if (!programDoc) throw new AppError(ERROR_CODES.PROGRAM_NOT_FOUND);
+        if (programDoc.type !== Unit.Program) throw new AppError(ERROR_CODES.INVALID_ORGANIZATION_TYPE);
 
         try {
             return await this.repository.create(dto);

@@ -1,94 +1,84 @@
 import { Request, Response } from 'express';
-import { errorResponse, successResponse } from '../../common/helpers/response';
-import { AuthenticatedRequest } from '../users/user.middleware';
-import { CreateGrantDTO, GetGrantsDTO, UpdateGrantDTO } from './grant.dto';
 import { GrantService } from './grant.service';
+import { CreateGrantDTO, GetGrantsDTO, UpdateGrantDTO } from './grant.dto';
+import { AuthenticatedRequest } from '../users/user.middleware';
+import { successResponse, errorResponse } from '../../common/helpers/response';
 
-const grantService = new GrantService();
 export class GrantController {
 
-    static async createGrant(req: AuthenticatedRequest, res: Response) {
+    private service: GrantService;
+
+    constructor(service: GrantService) {
+        this.service = service;
+    }
+
+    create = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) {
                 throw new Error("User not found!");
             }
+
             const userId = req.user.userId;
-            const { directorate, title, description } = req.body;
-            const dto: CreateGrantDTO = {
-                directorateId: directorate as string,
-                title: title,
-                description: description ?? undefined,
-                userId: userId
+            const data: CreateGrantDTO = {
+                ...req.body,
+                userId
             };
-            const grant = await grantService.createGrant(dto);
+
+            const grant = await this.service.create(data);
             successResponse(res, 201, "Grant created successfully", grant);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
-    static async getGrants(req: Request, res: Response) {
+    get = async (req: Request, res: Response) => {
         try {
             const { directorate } = req.query;
-            const filter = {
-                directorateId: directorate
-            } as GetGrantsDTO;
-            const grants = await grantService.getGrants(filter);
-            successResponse(res, 200, 'Grants fetched successfully', grants);
-        } catch (err: any) {
-            errorResponse(res, 400, err.message, err);
-        }
-    }
 
-    /*
-    static async getUserGrants(req: AuthenticatedRequest, res: Response) {
-        try {
-            if (!req.user) {
-                throw new Error("User not found!");
-            }
-            const userId = req.user._id;
-            const grants = await GrantService.getUserGrants(userId);
-            successResponse(res, 200, 'Grants fetched successfully', grants);
-        } catch (err: any) {
-            errorResponse(res, 400, err.message, err);
-        }
-    }
-        */
-
-    static async updateGrant(req: AuthenticatedRequest, res: Response) {
-        try {
-            if (!req.user) {
-                throw new Error("User not found!");
-            }
-            const userId = req.user.userId;
-            const { id } = req.params;
-            const { title, description } = req.body;
-            const dto: UpdateGrantDTO = {
-                id,
-                data: { title, description },
-                userId: userId,
+            const options: GetGrantsDTO = {
+                directorate: directorate as string
             };
-            const updated = await grantService.updateGrant(dto);
-            successResponse(res, 201, "Grant updated successfully", updated);
+
+            const grants = await this.service.getGrants(options);
+            successResponse(res, 200, "Grants fetched successfully", grants);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
-    static async deleteGrant(req: AuthenticatedRequest, res: Response) {
+    update = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) {
                 throw new Error("User not found!");
             }
+
+            const { id } = req.query;
+            if (!id) {
+                throw new Error("id not found!");
+            }
+
             const userId = req.user.userId;
-            const { id } = req.params;
-            const deleted = await grantService.deleteGrant({ id: id, applicantId: userId });
-            successResponse(res, 201, "Grant deleted successfully", deleted);
+
+            const dto: UpdateGrantDTO = {
+                id: String(id),
+                data: req.body,
+                userId
+            };
+
+            const updated = await this.service.update(dto);
+            successResponse(res, 200, "Grant updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
+    delete = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            const { id } = req.params;
+            const deleted = await this.service.delete(id);
+            successResponse(res, 200, "Grant deleted successfully", deleted);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    }
 }
-
-

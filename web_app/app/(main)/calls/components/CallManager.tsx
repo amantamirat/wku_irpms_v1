@@ -1,16 +1,14 @@
 'use client';
-
 import { CrudManager } from "@/components/CrudManager";
-import { DirectorateSelector } from "@/components/DirectorateSelector";
 import { useAuth } from "@/contexts/auth-context";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-import { useDirectorate } from "@/contexts/DirectorateContext";
 import { useCrudList } from "@/hooks/useCrudList";
 import MyBadge from "@/templates/MyBadge";
 import { PERMISSIONS } from "@/types/permissions";
 import { Button } from "primereact/button";
 import { useEffect, useState } from "react";
 import { Calendar } from "../../calendars/models/calendar.model";
+import { Organization } from "../../organizations/models/organization.model";
 import ProjectManager from "../../projects/components/ProjectManager";
 import { CallApi } from "../api/call.api";
 import { Call, CallStatus } from "../models/call.model";
@@ -18,11 +16,12 @@ import StageManager from "../stages/components/StageManager";
 import SaveCall from "./SaveCall";
 
 interface CallManagerProps {
+    directorate?: Organization;
     calendar?: Calendar;
     next?: "stage" | "project";
 }
 
-const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
+const CallManager = ({ calendar, directorate, next = "stage" }: CallManagerProps) => {
 
     const { hasPermission } = useAuth();
     const confirm = useConfirmDialog();
@@ -31,11 +30,9 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
     const canEdit = hasPermission([PERMISSIONS.CALL.UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.CALL.DELETE]);
 
+    const canPlan = hasPermission([PERMISSIONS.CALL.STATUS.PLANNED]);
     const canActivate = hasPermission([PERMISSIONS.CALL.STATUS.ACTIVATE]);
     const canClose = hasPermission([PERMISSIONS.CALL.STATUS.CLOSE]);
-    const canPlan = hasPermission([PERMISSIONS.CALL.STATUS.PLANNED]);
-
-    //const canChangeStatus = hasPermission([PERMISSIONS.CALL.CHANGE_STATUS]);
 
     /** CRUD Hook */
     const {
@@ -48,8 +45,6 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
         error,
         setError
     } = useCrudList<Call>();
-
-    const { directorate, directorates } = useDirectorate();
 
     const emptyCycle: Call = {
         calendar: calendar ?? "",
@@ -71,10 +66,7 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
         const fetchCalls = async () => {
             try {
                 setLoading(true);
-                const query = calendar
-                    ? { calendar }
-                    : { directorate };
-                const data = await CallApi.getCalls(query);
+                const data = await CallApi.getCalls({ calendar, directorate });
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to load calendars. " + (err?.message ?? ""));
@@ -92,9 +84,7 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
     };
 
     const updateStatus = async (row: Call, next: CallStatus) => {
-        if (!row._id) {
-            return
-        }
+        if (!row._id) return
         const updated = await CallApi.updateStatus(row._id, next);
         onSaveComplete({
             ...updated,
@@ -105,61 +95,61 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
         });
     };
 
+    const stateTransitionTemplate = (row: Call) => {
+        const current = row.status;
+        let prev = undefined;
+        let next = undefined;
+        if (current === CallStatus.planned) {
+            if (canActivate) {
+                next = CallStatus.active;
+            }
+        }
+        else if (current === CallStatus.active) {
+            if (canClose) {
+                next = CallStatus.closed;
+            }
+            if (canPlan) {
+                prev = CallStatus.planned;
+            }
+        }
+        else if (current === CallStatus.closed) {
+            if (canActivate) {
+                prev = CallStatus.active;
+            }
+        }
 
-    const stateTransitionTemplate = (rowData: Call) => {
-        const state = rowData.status;
-        return (
-            <div className="flex gap-2">
-                {canActivate && <>
-                    {(state === CallStatus.planned || state === CallStatus.closed) &&
-                        <Button
-                            label="Activate"
-                            icon="pi pi-check"
-                            severity="success"
-                            size="small"
-                            onClick={() => {
-                                confirm.ask({
-                                    operation: 'activate',
-                                    onConfirmAsync: () => updateStatus(rowData, CallStatus.active)
-                                });
-                            }}
-                        />
-                    }
-                </>}
-                {canClose && <>
-                    {(state === CallStatus.active) &&
-                        <Button
-                            tooltip="Close"
-                            icon="pi pi-lock"
-                            severity="danger"
-                            size="small"
-                            onClick={() => {
-                                confirm.ask({
-                                    operation: 'close',
-                                    onConfirmAsync: () => updateStatus(rowData, CallStatus.closed)
-                                });
-                            }}
-                        />
-                    }
-                </>}
-
-                {canPlan && <>
-                    {(state === CallStatus.active) &&
-                        <Button
-                            tooltip="Plan"
-                            icon="pi pi-arrow-left"
-                            severity="warning"
-                            size="small"
-                            onClick={() => {
-                                confirm.ask({
-                                    operation: 'change to plan',
-                                    onConfirmAsync: () => updateStatus(rowData, CallStatus.planned)
-                                });
-                            }}
-                        />
-                    }
-                </>}
-            </div>);
+        return (<div className="flex gap-2">
+            {(next)
+                &&
+                <Button
+                    tooltip={`Make ${next}`}
+                    icon={next === CallStatus.closed ? "pi pi-lock" : "pi pi-check"}
+                    severity={next === CallStatus.closed ? "danger" : "success"}
+                    size="small"
+                    onClick={() => {
+                        confirm.ask({
+                            operation: `Make to ${next}`,
+                            onConfirmAsync: () => updateStatus(row, next)
+                        });
+                    }}
+                />
+            }
+            {(prev)
+                &&
+                <Button
+                    tooltip={`Back to ${prev}`}
+                    icon="pi pi-undo"
+                    severity="warning"
+                    size="small"
+                    onClick={() => {
+                        confirm.ask({
+                            operation: `back to ${prev}`,
+                            onConfirmAsync: () => updateStatus(row, prev)
+                        });
+                    }}
+                />
+            }
+        </div>);
     }
 
     /** Delete */
@@ -176,7 +166,7 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
     /** Columns for CrudManager */
     const columns = [
         !calendar && { header: "Calendar", field: "calendar.year" },
-        calendar && { header: "Directorate", field: "directorate.name" },
+        !directorate && { header: "Directorate", field: "directorate.name" },
         { header: "Title", field: "title" },
         { header: "Grant", field: "grant.title" },
         { header: "Theme", field: "thematic.title" },
@@ -187,13 +177,6 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
         },
         { body: stateTransitionTemplate }
     ];
-
-    const topTemplate = () => {
-        if (calendar) {
-            return undefined;
-        }
-        return (<DirectorateSelector />)
-    };
 
     return (
         <>
@@ -233,7 +216,6 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
                     })
                 }
 
-                topTemplate={topTemplate()}
                 //enableSearch
                 rowExpansionTemplate={(row) => {
                     if (next === "project") {
@@ -248,7 +230,8 @@ const CallManager = ({ calendar, next = "stage" }: CallManagerProps) => {
                 <SaveCall
                     visible={showSaveDialog}
                     call={calls}
-                    directorates={directorates}
+                    calendarProvided={!!calendar}
+                    directorateProvided={!!directorate}
                     onComplete={onSaveComplete}
                     onHide={hideDialogs}
                 />

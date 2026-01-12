@@ -1,10 +1,10 @@
 import { DocStatus } from "./document.status";
 
 export class DocumentStateMachine {
+    
     private static readonly transitions: Record<DocStatus, DocStatus[]> = {
         [DocStatus.pending]: [DocStatus.submitted],
-        [DocStatus.submitted]: [DocStatus.reviewed, 
-            DocStatus.pending],
+        [DocStatus.submitted]: [DocStatus.reviewed, DocStatus.pending],
         //[ProjectDocStatus.on_review]: [ProjectDocStatus.reviewed, ProjectDocStatus.submitted],
         [DocStatus.reviewed]: [DocStatus.accepted, DocStatus.rejected, DocStatus.submitted],
         [DocStatus.accepted]: [DocStatus.reviewed],

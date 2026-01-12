@@ -3,7 +3,7 @@ import { COLLECTIONS } from "../../common/constants/collections.enum";
 import { Directorate } from "../organization/organization.model";
 
 export interface IGrant extends Document {
-    directorate: mongoose.Types.ObjectId;
+    directorate: mongoose.Types.ObjectId; //Funder Organization
     title: string;
     fundingSource?: string;//Internal or External if External Organization reference required
     description?: string;

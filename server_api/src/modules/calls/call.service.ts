@@ -15,19 +15,19 @@ import { IStageRepository, StageRepository } from "./stages/stage.repository";
 
 export class CallService {
 
-    private organizationRepo: IOrganizationRepository;
+
     private grantRepo: IGrantRepository;
     private thematicsRepo: IThematicRepository;
     private stageRepository: IStageRepository;
 
     constructor(private readonly repository: CallRepository,
         private readonly calendarRepository: ICalendarReadRepository,
+        private readonly organizationRepository: IOrganizationRepository,
         thematicsRepo?: IThematicRepository
     ) {
         this.repository = repository;
         this.calendarRepository = calendarRepository;
-        
-        this.organizationRepo = new OrganizationRepository();
+        this.organizationRepository = organizationRepository;
 
         this.thematicsRepo = thematicsRepo || new ThematicRepository();
         this.grantRepo = new GrantRepository();
@@ -35,20 +35,17 @@ export class CallService {
     }
 
     async create(dto: CreateCallDTO) {
+
         const calendarDoc = await this.calendarRepository.findById(dto.calendar);
         if (!calendarDoc) throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
         if (calendarDoc.status !== CalendarStatus.active) throw new AppError(ERROR_CODES.CALENDAR_NOT_ACTIVE);
 
+        const directorateDoc = await this.organizationRepository.findById(dto.directorate);
+        if (!directorateDoc || directorateDoc.type !== Unit.Directorate) throw new AppError(ERROR_CODES.DIRECTORATE_NOT_FOUND);
 
-
-        const directorateDoc = await this.organizationRepo.findById(dto.directorate);
-        if (!directorateDoc || directorateDoc.type !== Unit.Directorate) {
-            throw new Error("Directorate Not Found!");
-        }
         const grantDoc = await this.grantRepo.findById(dto.grant);
-        if (!grantDoc) {
-            throw new Error("Grant Not Found!");
-        }
+        if (!grantDoc) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
+
         if (dto.thematic) {
             const thematicsDoc = await this.thematicsRepo.findById(dto.thematic);
             if (!thematicsDoc) {
@@ -66,7 +63,7 @@ export class CallService {
     async update(dto: UpdateCallDTO) {
         const { id, data, userId } = dto;
         const callDoc = await this.repository.findById(id);
-        if (!callDoc) throw new Error("Call not found");
+        if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
         return await this.repository.update(id, data);
     }
 

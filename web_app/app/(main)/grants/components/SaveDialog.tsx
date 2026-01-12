@@ -11,25 +11,42 @@ import { useEffect, useRef, useState } from 'react';
 import { Organization, OrgnUnit } from '../../organizations/models/organization.model';
 import { GrantApi } from '../api/grant.api';
 import { Grant, validateGrant } from '../models/grant.model';
+import { OrganizationApi } from '../../organizations/api/organization.api';
 
 interface SaveDialogProps {
     visible: boolean;
     grant: Grant;
-    directorates?: Organization[]
+    directorateProvided: boolean;
     onComplete?: (savedGrant: Grant) => void;
     onHide: () => void;
 }
 
-const SaveDialog = ({ visible, grant, directorates, onComplete, onHide }: SaveDialogProps) => {
-    
+const SaveDialog = ({ visible, grant, directorateProvided, onComplete, onHide }: SaveDialogProps) => {
+
     const toast = useRef<Toast>(null);
 
+    const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [localGrant, setLocalGrant] = useState<Grant>({ ...grant });
-    const [submitted, setSubmitted] = useState(false); 
+    const [submitted, setSubmitted] = useState(false);
 
     useEffect(() => {
         setLocalGrant({ ...grant });
     }, [grant]);
+
+    useEffect(() => {
+        if (directorateProvided) {
+            return
+        }
+        const loadDirectorates = async () => {
+            try {
+                const data = await OrganizationApi.getOrganizations({ type: OrgnUnit.Directorate });
+                setOrganizations(data);
+            } catch (err) {
+                console.error('Failed to load directorates:', err);
+            }
+        };
+        loadDirectorates();
+    }, [directorateProvided]);
 
     useEffect(() => {
         if (!visible) clearForm();
@@ -97,19 +114,20 @@ const SaveDialog = ({ visible, grant, directorates, onComplete, onHide }: SaveDi
                 footer={footer}
                 onHide={hide}
             >
-                {/* Directorate Selector */}
-                <div className="field">
-                    <label htmlFor="directorate">Directorate</label>
-                    <Dropdown
-                        id="directorate"
-                        value={localGrant.directorate}
-                        options={directorates}
-                        optionLabel="name"
-                        onChange={(e) => setLocalGrant({ ...localGrant, directorate: e.value })}
-                        placeholder="Select Directorate"
-                        className={classNames({ 'p-invalid': submitted && !localGrant.directorate })}
-                    />
-                </div>
+                {!directorateProvided &&
+                    <div className="field">
+                        <label htmlFor="directorate">Directorate</label>
+                        <Dropdown
+                            id="directorate"
+                            value={localGrant.directorate}
+                            options={organizations}
+                            optionLabel="name"
+                            onChange={(e) => setLocalGrant({ ...localGrant, directorate: e.value })}
+                            placeholder="Select Directorate"
+                            className={classNames({ 'p-invalid': submitted && !localGrant.directorate })}
+                        />
+                    </div>
+                }
 
                 {/* Title Field */}
                 <div className="field">
