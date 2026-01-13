@@ -63,7 +63,7 @@ const CollaboratorManager = ({ project, applicant, flyMode = false, onSave, onRe
 
     // Fetch collaborators for project
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchCollabs = async () => {
             try {
                 setLoading(true);
                 const data = await CollaboratorApi.getCollaborators({ project, applicant });
@@ -79,9 +79,7 @@ const CollaboratorManager = ({ project, applicant, flyMode = false, onSave, onRe
             setAll(project?.collaborators ?? []);
         }
         else {
-            //if (project?._id || applicant?._id) {
-            fetchData();
-            //}
+            fetchCollabs();
         }
     }, [project, applicant]);
 

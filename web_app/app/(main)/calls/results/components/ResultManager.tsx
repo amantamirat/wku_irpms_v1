@@ -8,7 +8,6 @@ import { useAuth } from "@/contexts/auth-context";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useCrudList } from "@/hooks/useCrudList";
 import { useEffect, useMemo, useState } from "react";
-import { ProjectDoc } from "../../documents/models/document.model";
 import { Reviewer, ReviewerStatus } from "../../reviewers/models/reviewer.model";
 import { Button } from "primereact/button";
 import { ResultApi } from "../api/result.api";
@@ -46,7 +45,7 @@ const ResultManager = ({ reviewer, updateStatus }: ResultManagerProps) => {
     useEffect(() => {
         if (!reviewer) return;
 
-        const projectDoc = reviewer.projectStage as ProjectDoc;
+        const projectDoc = reviewer.projectStage as any;
         const stage = projectDoc?.stage as Stage;
         const evaluation = stage?.evaluation;
 

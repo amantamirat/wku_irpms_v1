@@ -13,7 +13,7 @@ export interface IPhaseRepository {
     find(filters: GetPhasesOptions): Promise<IPhase[]>;
     create(dto: CreatePhaseDto): Promise<IPhase>;
     createMany(dtos: CreatePhaseDto[]): Promise<IPhase[]>;
-    update(id: string, data: UpdatePhaseDto["data"]): Promise<IPhase>;
+    update(id: string, data: UpdatePhaseDto["data"]): Promise<IPhase | null>;
     delete(id: string): Promise<IPhase | null>;
 }
 
@@ -60,13 +60,13 @@ export class PhaseRepository implements IPhaseRepository {
             duration: dto.duration,
             budget: dto.budget,
             description: dto.description,
-            type: dto.type
+            //type: dto.type
         }));
 
         return Phase.insertMany(data, { ordered: true });
     }
 
-    async update(id: string, dtoData: UpdatePhaseDto["data"]): Promise<IPhase> {
+    async update(id: string, dtoData: UpdatePhaseDto["data"]): Promise<IPhase | null> {
         const updateData: Partial<IPhase> = {};
 
         if (dtoData.activity) {
@@ -84,15 +84,12 @@ export class PhaseRepository implements IPhaseRepository {
         if (dtoData.status) {
             updateData.status = dtoData.status;
         }
-        const updated = await Phase.findByIdAndUpdate(
+        return Phase.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },
             { new: true, runValidators: true }
         )
             .exec();
-
-        if (!updated) throw new Error("Phase not found");
-        return updated;
     }
 
     async delete(id: string) {

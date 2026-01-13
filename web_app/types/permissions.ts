@@ -188,7 +188,7 @@ export const PERMISSIONS = {
     UPDATE: "phase:update",
     STATUS: {
       PROPOSE: "phase:status.proposed",
-      VERIFY: "phase:status.verified",
+      REVIEW: "phase:status.reviewed",
       APPROVE: "phase:status.approved",
       ACTIVATE: "phase:status.active",
       COMPLETE: "phase:status.completed"

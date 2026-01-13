@@ -16,10 +16,10 @@ import { PERMISSIONS } from "@/types/permissions";
 import MyBadge from "@/templates/MyBadge";
 import { Button } from "primereact/button";
 import PhaseDocManager from "../documents/components/PhaseDocManager";
-import { stat } from "fs";
+
 
 interface PhaseManagerProps {
-    project: Project;
+    project?: Project;
     phaseType: PhaseType;
     flyMode?: boolean;
     onSave?: (phase: Phase) => void;
@@ -29,14 +29,11 @@ interface PhaseManagerProps {
 export default function PhaseManager({ project, phaseType, flyMode = false, onSave, onRemove }: PhaseManagerProps) {
 
     const confirm = useConfirmDialog();
-    const { getApplicant: getLinkedApplicant, hasPermission } = useAuth();
-    const linkedApplicant = getLinkedApplicant();
-    const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
-    const isLeadPI = loggedApplicantId === (project.leadPI as any)._id;
+    const { getApplicant, hasPermission } = useAuth();
+    //const linkedApplicant = getLinkedApplicant();
+    //const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
+    //const isLeadPI = loggedApplicantId === (project.leadPI as any)._id;
 
-    // -------------------------------
-    // Empty Phase
-    // -------------------------------
     const emptyPhase: Phase = {
         project: project,
         type: phaseType,
@@ -53,12 +50,12 @@ export default function PhaseManager({ project, phaseType, flyMode = false, onSa
     const isValidStatus = project ? (project.status === ProjectStatus.pending ||
         project.status === ProjectStatus.negotiation) : false;
 
-    const canCreate = isValidStatus && isLeadPI && hasPermission([PERMISSIONS.PHASE.CREATE]);
-    const canEdit = isValidStatus && isLeadPI && hasPermission([PERMISSIONS.PHASE.UPDATE]);
-    const canDelete = isValidStatus && isLeadPI && hasPermission([PERMISSIONS.PHASE.DELETE]);
+    const canCreate = isValidStatus && hasPermission([PERMISSIONS.PHASE.CREATE]);
+    const canEdit = isValidStatus && hasPermission([PERMISSIONS.PHASE.UPDATE]);
+    const canDelete = isValidStatus && hasPermission([PERMISSIONS.PHASE.DELETE]);
     // State permissions
     const canPropose = hasPermission([PERMISSIONS.PHASE.STATUS.PROPOSE]);
-    const canVerify = (project.status === ProjectStatus.negotiation) && hasPermission([PERMISSIONS.PHASE.STATUS.VERIFY]);
+    const canReview = hasPermission([PERMISSIONS.PHASE.STATUS.REVIEW]);
     const canApprove = hasPermission([PERMISSIONS.PHASE.STATUS.APPROVE]);
     const canActivate = hasPermission([PERMISSIONS.PHASE.STATUS.ACTIVATE]);
     const canComplete = hasPermission([PERMISSIONS.PHASE.STATUS.COMPLETE]);
@@ -97,9 +94,9 @@ export default function PhaseManager({ project, phaseType, flyMode = false, onSa
         };
         if (flyMode && project) {
             setAll(project?.phases ?? []);
-            return
+        } else {
+            fetchPhases();
         }
-        fetchPhases();
     }, [project]);
 
     // -------------------------------
@@ -109,7 +106,6 @@ export default function PhaseManager({ project, phaseType, flyMode = false, onSa
         updateItem(saved);
         hideDialog();
     };
-
 
     // -------------------------------
     // Delete
@@ -150,103 +146,97 @@ export default function PhaseManager({ project, phaseType, flyMode = false, onSa
         });
     };
 
-    const stateTransitionTemplate = (rowData: Phase) => {
-        const state = rowData.status;
-        let undo = undefined;
-        if (state === PhaseStatus.verified && canVerify) {
-            undo = PhaseStatus.proposed
-        } else if (state === PhaseStatus.approved && canApprove) {
-            undo = PhaseStatus.verified
-        } else if (state === PhaseStatus.active && canActivate) {
-            undo = PhaseStatus.approved
+    const stateTransitionTemplate = (row: Phase) => {
+        const current = row.status;
+        let prev: PhaseStatus | undefined;
+        let next: PhaseStatus | undefined;
+
+        if (current === PhaseStatus.proposed) {
+            if (canReview && project?.status === ProjectStatus.negotiation) {
+                next = PhaseStatus.reviewed;
+            }
         }
-        else if (state === PhaseStatus.completed && canComplete) {
-            undo = PhaseStatus.active
+        else if (current === PhaseStatus.reviewed) {
+            if (canApprove) {
+                next = PhaseStatus.approved;
+            }
+            if (canPropose) {
+                prev = PhaseStatus.proposed;
+            }
         }
+        else if (current === PhaseStatus.approved) {
+            if (canActivate) {
+                next = PhaseStatus.active;
+            }
+            if (canReview && project?.status === ProjectStatus.negotiation) {
+                prev = PhaseStatus.reviewed;
+            }
+        }
+        else if (current === PhaseStatus.active) {
+            if (canComplete) {
+                next = PhaseStatus.completed;
+            }
+            if (canApprove) {
+                prev = PhaseStatus.approved;
+            }
+        }
+        else if (current === PhaseStatus.completed) {
+            if (canActivate) {
+                prev = PhaseStatus.active;
+            }
+        }
+
         return (
             <div className="flex gap-2">
-                {(canVerify && state === PhaseStatus.proposed)
-                    &&
+                {(next) &&
                     <Button
-                        tooltip="Verify"
-                        icon="pi pi-verified"
-                        severity="info"
-                        size="small"
-                        onClick={() => {
-                            confirm.ask({
-                                operation: 'Verify',
-                                onConfirmAsync: () => updateStatus(rowData, PhaseStatus.verified)
-                            });
-                        }}
-                    />
-                }
-                {(canApprove && state === PhaseStatus.verified)
-                    &&
-                    <Button
-                        tooltip="Approve"
-                        icon="pi pi-check-circle"
-                        severity="success"
-                        size="small"
-                        onClick={() => {
-                            confirm.ask({
-                                operation: 'Approve',
-                                onConfirmAsync: () => updateStatus(rowData, PhaseStatus.approved)
-                            });
-                        }}
-                    />
-                }
-                {(canActivate && state === PhaseStatus.approved)
-                    &&
-                    <Button
-                        tooltip="Activate"
+                        tooltip={`Make ${next}`}
                         icon="pi pi-check"
                         severity="success"
                         size="small"
                         onClick={() => {
                             confirm.ask({
-                                operation: 'Activate',
-                                onConfirmAsync: () => updateStatus(rowData, PhaseStatus.active)
+                                operation: `Make to ${next}`,
+                                onConfirmAsync: () => updateStatus(row, next)
                             });
                         }}
                     />
                 }
-                {(canComplete && state === PhaseStatus.active)
-                    &&
+
+                {(prev) &&
                     <Button
-                        tooltip="complete"
-                        icon="pi pi-list-check"
-                        severity="success"
-                        size="small"
-                        onClick={() => {
-                            confirm.ask({
-                                operation: "complete",
-                                onConfirmAsync: () => updateStatus(rowData, PhaseStatus.completed)
-                            });
-                        }}
-                    />
-                }
-                {(undo)
-                    &&
-                    <Button
-                        tooltip={`Back to ${undo}`}
+                        tooltip={`Back to ${prev}`}
                         icon="pi pi-undo"
                         severity="warning"
                         size="small"
                         onClick={() => {
                             confirm.ask({
-                                operation: `back to ${undo}`,
-                                onConfirmAsync: () => updateStatus(rowData, undo)
+                                operation: `Back to ${prev}`,
+                                onConfirmAsync: () => updateStatus(row, prev)
                             });
                         }}
                     />
                 }
-            </div>);
-    }
+            </div>
+        );
+    };
+
+    const calculateTotalBudget = () =>
+        phases.reduce((sum, p) => sum + (p.budget ?? 0), 0);
+
+    const calculateTotalDuration = () =>
+        phases.reduce((sum, p) => sum + (p.duration ?? 0), 0);
 
     const columns = [
         { field: "activity", header: "Activity", sortable: true },
-        { field: "duration", header: "Duration (Days)", sortable: true },
-        { field: "budget", header: "Budget (ETB)", sortable: true },
+        {
+            field: "duration", header: "Duration (Days)", sortable: true,
+            footer: <strong>Total Durations: {calculateTotalDuration()}</strong>
+        },
+        {
+            field: "budget", header: "Budget (ETB)", sortable: true,
+            footer: <strong>Total Budget: {calculateTotalBudget().toLocaleString()}</strong>
+        },
         { field: "description", header: "Description" },
         {
             field: "status", header: "Status", sortable: true,
@@ -261,7 +251,7 @@ export default function PhaseManager({ project, phaseType, flyMode = false, onSa
             <CrudManager
                 headerTitle={`${phaseType} Phases`}
                 items={phases}
-                dataKey={phases.some(p => p._id) ? "_id" : "order"}
+                dataKey={flyMode ? "order" : "_id"}
                 columns={columns}
                 loading={loading}
                 error={error}
@@ -277,7 +267,7 @@ export default function PhaseManager({ project, phaseType, flyMode = false, onSa
                         onConfirmAsync: !flyMode ? () => deletePhase(row) : undefined,
                     })
                 }
-                rowExpansionTemplate={project.status === ProjectStatus.granted ? (row) => {
+                rowExpansionTemplate={project?.status === ProjectStatus.granted ? (row) => {
                     return <PhaseDocManager phase={row._id || ''} />;
                 } : undefined}
             />

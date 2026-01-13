@@ -2,10 +2,11 @@ import { Request, Response } from "express";
 import { DeleteDto } from "../../../util/delete.dto";
 import { errorResponse, successResponse } from "../../../common/helpers/response";
 import { AuthenticatedRequest } from "../../users/user.middleware";
-import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto } from "./phase.dto";
+import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto, UpdatePhaseStatusDto } from "./phase.dto";
 import { PhaseType } from "./phase.enum";
 import { PhaseService } from "./phase.service";
 import { PhaseStatus } from "./phase.status";
+import { ERROR_CODES } from "../../../common/errors/error.codes";
 
 export class PhaseController {
     private service: PhaseService;
@@ -29,7 +30,6 @@ export class PhaseController {
             } = req.body;
 
             const data: CreatePhaseDto = {
-                type: PhaseType.phase,
                 activity,
                 duration,
                 budget,
@@ -94,19 +94,17 @@ export class PhaseController {
     // ---------------------------------------------------
     updateStatus = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error("User not found!");
-            const { id } = req.query;
-            const { status } = req.params;
-
-            const dto: UpdatePhaseDto = {
-                id: id as string,
-                data: {
-                    status: status as PhaseStatus
-                },
+            if (!req.user) throw new Error(ERROR_CODES.USER_NOT_FOUND);
+            
+            const { id } = req.params;
+            const { status } = req.body;
+            const dto: UpdatePhaseStatusDto = {
+                id: String(id),
+                status: status as PhaseStatus,
                 applicantId: req.user.applicantId,
             };
             const updated = await this.service.updateStatus(dto);
-            successResponse(res, 200, "Stage status updated successfully", updated);
+            successResponse(res, 200, "Phase status updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }

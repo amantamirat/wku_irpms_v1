@@ -15,9 +15,8 @@ router.get('/', verifyActiveAccount,
 router.put('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.PHASE.UPDATE]),
     controller.update);
-//update status
-router.put(
-    '/:status', verifyActiveAccount,
+router.patch(
+    '/:id', verifyActiveAccount,
     checkStatusPermission("phase"),
     controller.updateStatus
 );

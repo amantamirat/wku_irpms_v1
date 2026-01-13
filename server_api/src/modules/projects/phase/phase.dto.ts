@@ -1,4 +1,3 @@
-import { PhaseType } from "./phase.enum";
 import { PhaseStatus } from "./phase.status";
 
 export interface PhaseDto {
@@ -10,7 +9,6 @@ export interface PhaseDto {
 
 // ---------- CREATE DTO ----------
 export interface CreatePhaseDto extends PhaseDto {
-    type: PhaseType.phase;
     project: string;
     applicantId?: string; // actor performing the operation
 }
@@ -28,9 +26,16 @@ export interface UpdatePhaseDto {
     applicantId: string;
 }
 
-// ---------- GET / QUERY OPTIONS ----------
+// ---------- GET_OPTIONS ----------
 export interface GetPhasesOptions {
     project: string;
+}
+
+//------
+export interface UpdatePhaseStatusDto {
+    id: string;
+    status: PhaseStatus;
+    applicantId: string;
 }
 
 

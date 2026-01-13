@@ -3,9 +3,9 @@ import { PhaseType } from "./phase.enum";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
 import { PhaseStatus } from "./phase.status";
 
-interface BasePhaseDocument extends Document {
+export interface IPhase extends Document {
     _id: mongoose.Types.ObjectId;
-    type: PhaseType;
+    project: mongoose.Types.ObjectId;
     activity: string;
     duration: number;
     budget: number;
@@ -15,13 +15,12 @@ interface BasePhaseDocument extends Document {
     updatedAt?: Date;
 }
 
-const BasePhaseSchema = new Schema<BasePhaseDocument>(
+const PhaseSchema = new Schema<IPhase>(
     {
-        type: {
-            type: String,
-            enum: Object.values(PhaseType),
-            required: true,
-            immutable: true
+        project: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.PROJECT,
+            required: true
         },
         activity: {
             type: String,
@@ -37,16 +36,6 @@ const BasePhaseSchema = new Schema<BasePhaseDocument>(
             min: 0,
             required: true
         },
-        /*
-        reviewedDuration: {
-            type: Number,
-            min: 0
-        },
-        reviewedBudget: {
-            type: Number,
-            min: 0
-        },
-        */
         description: {
             type: String
         },
@@ -57,37 +46,14 @@ const BasePhaseSchema = new Schema<BasePhaseDocument>(
             required: true
         }
     },
-    { timestamps: true, discriminatorKey: "type" } // discriminatorKey
+    { timestamps: true }
 );
 
-export const BasePhase = model<BasePhaseDocument>(COLLECTIONS.PHASE, BasePhaseSchema);
+export const Phase = model<IPhase>(COLLECTIONS.PHASE, PhaseSchema);
 
-export interface IPhase extends BasePhaseDocument {
-    type: PhaseType.phase;
-    project: mongoose.Types.ObjectId;
-}
 
-const PhaseSchema = new Schema<IPhase>({
-    project: {
-        type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.PROJECT,
-        required: true,
-    }
-});
 
-export const Phase = BasePhase.discriminator<IPhase>(PhaseType.phase, PhaseSchema);
 
-interface BreakdownDocument extends BasePhaseDocument {
-    type: PhaseType.breakdown;
-    parent: mongoose.Types.ObjectId;
-}
 
-const BreakdownSchema = new Schema<BreakdownDocument>({
-    parent: {
-        type: Schema.Types.ObjectId,
-        ref: Phase.modelName,
-        required: true,
-    }
-});
 
-export const Breakdown = BasePhase.discriminator<BreakdownDocument>(PhaseType.breakdown, BreakdownSchema);
+

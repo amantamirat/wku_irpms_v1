@@ -1,4 +1,4 @@
-import { PhaseDto } from "./phase/phase.dto";
+import { CreatePhaseDto } from "./phase/phase.dto";
 import { ProjectStatus } from "./project.status";
 
 export interface GetProjectsDTO {
@@ -43,7 +43,7 @@ export interface SubmitProjectDTO {
     summary?: string;
     leadPI: string;
     collaborators: string[];
-    phases: PhaseDto[];
+    phases: CreatePhaseDto[];
     themes: string[];
     documentPath: string;
 }

@@ -30,12 +30,12 @@ export const PhaseApi = {
         return updatedPhase as Phase;
     },
 
-    async updateStatus(id: string, status: PhaseStatus): Promise<Phase> {
+    async updateStatus(id: string, status: PhaseStatus): Promise<any> {
         const query = new URLSearchParams();
         query.append("id", id);
-        const url = `${end_point}/${status}`;
-        const updated = await ApiClient.put(`${url}?${query.toString()}`);
-        return updated as Phase;
+        const url = `${end_point}/${id}`;
+        const updated = await ApiClient.patch(url, { status });
+        return updated;
     },
 
     async delete(phase: Partial<Phase>): Promise<boolean> {
