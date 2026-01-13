@@ -5,11 +5,11 @@ import { CreateProjectThemeDTO, GetProjectThemeOptions } from "./project.theme.d
 import { ProjectThemeService } from "./project.theme.service";
 
 export class ProjectThemeController {
-    
+
     private service: ProjectThemeService;
 
-    constructor(service?: ProjectThemeService) {
-        this.service = service || new ProjectThemeService();
+    constructor(service: ProjectThemeService) {
+        this.service = service;
     }
     // -----------------------
     // Create
@@ -23,6 +23,7 @@ export class ProjectThemeController {
             const dto: CreateProjectThemeDTO = {
                 theme,
                 project,
+                applicantId: req.user.applicantId
             };
 
             const created = await this.service.create(dto);
@@ -56,10 +57,8 @@ export class ProjectThemeController {
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) throw new Error("User not found!");
-
             const { id } = req.params;
-            const deleted = await this.service.delete(id);
-
+            const deleted = await this.service.delete({ id, applicantId: req.user.applicantId });
             successResponse(res, 200, "Project Theme deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

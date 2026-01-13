@@ -9,7 +9,6 @@ import { ProjectStatus } from "../project.status";
 import {
     CreateCollaboratorDto,
     GetCollaboratorsOptions,
-    UpdateCollaboratorDto,
     UpdateCollabStatusDTO,
 } from "./collaborator.dto";
 import { ICollaboratorRepository } from "./collaborator.repository";

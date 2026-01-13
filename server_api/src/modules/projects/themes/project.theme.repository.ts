@@ -26,11 +26,9 @@ export class ProjectThemeRepository implements IProjectThemeRepository {
 
     async find(filters: GetProjectThemeOptions) {
         const query: any = {};
-
         if (filters.project) {
             query.project = new mongoose.Types.ObjectId(filters.project);
         }
-
         return ProjectTheme.find(query)
             .populate([
                 { path: 'project' },
@@ -48,50 +46,17 @@ export class ProjectThemeRepository implements IProjectThemeRepository {
         return ProjectTheme.create(data);
     }
 
-    // ✅ NEW: bulk insert
+    // bulk insert
     async createMany(dtos: CreateProjectThemeDTO[]) {
         const data: Partial<IProjectTheme>[] = dtos.map(dto => ({
             project: new mongoose.Types.ObjectId(dto.project),
             theme: new mongoose.Types.ObjectId(dto.theme),
         }));
-
         return ProjectTheme.insertMany(data, { ordered: true });
     }
 
-
-    /*
-        async update(id: string, dtoData: UpdateProjectThemeDto["data"]): Promise<IProjectTheme> {
-            const updateData: Partial<IProjectTheme> = {};
-    
-            if (dtoData.activity) {
-                updateData.activity = dtoData.activity;
-            }
-            if (dtoData.duration) {
-                updateData.duration = dtoData.duration;
-            }
-            if (dtoData.budget) {
-                updateData.budget = dtoData.budget;
-            }
-            if (dtoData.description) {
-                updateData.description = dtoData.description;
-            }
-            if (dtoData.status) {
-                updateData.status = dtoData.status;
-            }
-            const updated = await ProjectTheme.findByIdAndUpdate(
-                new mongoose.Types.ObjectId(id),
-                { $set: updateData },
-                { new: true, runValidators: true }
-            )
-                .exec();
-    
-            if (!updated) throw new Error("ProjectTheme not found");
-            return updated;
-        }
-            */
-
     async delete(id: string) {
-        return await ProjectTheme.findByIdAndDelete(new mongoose.Types.ObjectId(id))
+        return ProjectTheme.findByIdAndDelete(new mongoose.Types.ObjectId(id))
             .exec();
     }
 }
