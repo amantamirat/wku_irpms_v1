@@ -26,9 +26,10 @@ interface CollaboratorProps {
 const CollaboratorManager = ({ project, applicant, flyMode = false, onSave, onRemove }: CollaboratorProps) => {
     const confirm = useConfirmDialog();
     const { getApplicant: getApplicant, hasPermission } = useAuth();
+
     const linkedApplicant = getApplicant();
     const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
-    const isLeadPI = project ? loggedApplicantId === (project.leadPI as any)._id : false;
+    //const isLeadPI = project ? loggedApplicantId === (project.leadPI as any)._id : false;
 
     const emptyCollaborator: Collaborator = {
         project: project ?? "",
@@ -39,8 +40,8 @@ const CollaboratorManager = ({ project, applicant, flyMode = false, onSave, onRe
     const isValidStatus = project ? project.status === ProjectStatus.pending ||
         project.status === ProjectStatus.negotiation : false;
     // ✅ Permissions    
-    const canCreate = isValidStatus && isLeadPI && hasPermission([PERMISSIONS.COLLABORATOR.CREATE]);
-    const canDelete = isValidStatus && isLeadPI && hasPermission([PERMISSIONS.COLLABORATOR.DELETE]);
+    const canCreate = isValidStatus && hasPermission([PERMISSIONS.COLLABORATOR.CREATE]);
+    const canDelete = isValidStatus && hasPermission([PERMISSIONS.COLLABORATOR.DELETE]);
 
     const canVerify = hasPermission([PERMISSIONS.COLLABORATOR.STATUS.VERIFY]);
     const canPend = hasPermission([PERMISSIONS.COLLABORATOR.STATUS.PEND]);
@@ -65,7 +66,7 @@ const CollaboratorManager = ({ project, applicant, flyMode = false, onSave, onRe
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const data = await CollaboratorApi.getCollaborators({ project: project, applicant: applicant });
+                const data = await CollaboratorApi.getCollaborators({ project, applicant });
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to fetch collaborators. " + (err.message ?? ""));
@@ -73,11 +74,14 @@ const CollaboratorManager = ({ project, applicant, flyMode = false, onSave, onRe
                 setLoading(false);
             }
         };
-        if (project?._id || applicant?._id) {
-            fetchData();
-        }
+
         if (flyMode && project) {
             setAll(project?.collaborators ?? []);
+        }
+        else {
+            //if (project?._id || applicant?._id) {
+            fetchData();
+            //}
         }
     }, [project, applicant]);
 
@@ -97,7 +101,7 @@ const CollaboratorManager = ({ project, applicant, flyMode = false, onSave, onRe
         if (flyMode) {
             //remove from
         }
-        const deleted = await CollaboratorApi.deleteCollaborator(row);
+        const deleted = await CollaboratorApi.delete(row);
         if (deleted) {
             removeItem(row);
         }
@@ -183,7 +187,7 @@ const CollaboratorManager = ({ project, applicant, flyMode = false, onSave, onRe
             <CrudManager
                 headerTitle="Collaborators"
                 items={collaborators}
-                dataKey={applicant ? "_id" : "applicant._id"}
+                dataKey={flyMode ? "applicant._id" : "_id"}
                 //dataKey="applicant._id"
                 loading={loading}
                 error={error}

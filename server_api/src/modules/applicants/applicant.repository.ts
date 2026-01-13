@@ -3,6 +3,7 @@ import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO, FindApplicant
 import mongoose from "mongoose";
 
 export interface IApplicantRepository {
+    findById(id: string): Promise<IApplicant | null>;
     findOne(option: Partial<FindApplicantDTO>): Promise<IApplicant | null>;
     findAll(filter?: GetApplicantsDTO): Promise<IApplicant[]>;
     create(data: CreateApplicantDTO): Promise<IApplicant>;
@@ -19,6 +20,13 @@ export class ApplicantRepository implements IApplicantRepository {
     // -------------------------
     // FIND BY ID
     // -------------------------
+
+    async findById(id: string): Promise<IApplicant | null> {
+        return Applicant.findById(new mongoose.Types.ObjectId(id))
+            .lean<IApplicant>()
+            .exec();
+    }
+
     async findOne(option: Partial<FindApplicantDTO>): Promise<IApplicant | null> {
         const query: any = {};
 

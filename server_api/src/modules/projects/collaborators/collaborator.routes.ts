@@ -2,8 +2,17 @@ import { Router } from 'express';
 import { CollaboratorController } from './collaborator.controller';
 import { checkPermission, checkStatusPermission, verifyActiveAccount } from '../../users/user.middleware';
 import { PERMISSIONS } from '../../../common/constants/permissions';
+import { CollaboratorRepository } from './collaborator.repository';
+import { CollaboratorService } from './collaborator.service';
+import { ProjectRepository } from '../project.repository';
+import { ApplicantRepository } from '../../applicants/applicant.repository';
 
-const controller = new CollaboratorController();
+const repository = new CollaboratorRepository();
+const proRepository = new ProjectRepository();
+const appRepository = new ApplicantRepository();
+
+const service = new CollaboratorService(repository, proRepository, appRepository)
+const controller = new CollaboratorController(service);
 const router: Router = Router();
 
 router.post('/', verifyActiveAccount,
@@ -17,7 +26,7 @@ router.put('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.COLLABORATOR.UPDATE]),
     controller.update);
 */
-router.put('/:status', verifyActiveAccount,
+router.patch('/:id', verifyActiveAccount,
     checkStatusPermission("collaborator"),
     controller.updateStatus);
 

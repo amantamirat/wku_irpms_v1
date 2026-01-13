@@ -11,7 +11,7 @@ export interface GetProjectsDTO {
 
 // CREATE Project
 export interface CreateProjectDTO {
-    call: string;
+    call?: string;
     title: string;
     summary?: string;
     status?: ProjectStatus;

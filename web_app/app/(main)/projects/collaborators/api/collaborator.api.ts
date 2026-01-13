@@ -1,6 +1,6 @@
 import { ApiClient } from "@/api/ApiClient";
 import { Collaborator, CollaboratorStatus, GetCollaboratorsOptions, sanitizeCollaborator } from "../models/collaborator.model";
-const end_point = '/project/collaborators/';
+const end_point = '/project/collaborators';
 
 
 
@@ -31,19 +31,19 @@ export const CollaboratorApi = {
         return updatedCollaborator as Collaborator;
     },
 
-    async updateStatus(id: string, status: CollaboratorStatus): Promise<Collaborator> {
+    async updateStatus(id: string, status: CollaboratorStatus): Promise<any> {
         const query = new URLSearchParams();
         query.append("id", id);
-        const url = `${end_point}${status}`;
-        const updated = await ApiClient.put(`${url}?${query.toString()}`);
-        return updated as Collaborator;
+        const url = `${end_point}/${id}`;
+        const updated = await ApiClient.patch(url, { status });
+        return updated;
     },
 
-    async deleteCollaborator(collaborator: Partial<Collaborator>): Promise<boolean> {
+    async delete(collaborator: Partial<Collaborator>): Promise<boolean> {
         if (!collaborator._id) {
             throw new Error("_id required.");
         }
-        const url = `${end_point}${collaborator._id}`;
+        const url = `${end_point}/${collaborator._id}`;
         const response = await ApiClient.delete(url);
         return response;
     },

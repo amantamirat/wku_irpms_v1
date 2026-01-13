@@ -20,6 +20,7 @@ export class DocumentService {
     private repository: IDocumentRepository;
     private projectRepository: IProjectRepository;
     private stageRepository: IStageRepository;
+    
     private projectSynchronizer: ProjectSynchronizer;
     private validator: ConstraintValidator;
 

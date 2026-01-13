@@ -1,52 +1,61 @@
 // collaborator.service.ts
+import { SYSTEM } from "../../../common/constants/system.constant";
+import { AppError } from "../../../common/errors/app.error";
+import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { DeleteDto } from "../../../util/delete.dto";
-import { ApplicantRepository, IApplicantRepository } from "../../applicants/applicant.repository";
+import { IApplicantRepository } from "../../applicants/applicant.repository";
+import { IProjectRepository } from "../project.repository";
 import { ProjectStatus } from "../project.status";
-import { IProjectRepository, ProjectRepository } from "../project.repository";
 import {
     CreateCollaboratorDto,
     GetCollaboratorsOptions,
     UpdateCollaboratorDto,
+    UpdateCollabStatusDTO,
 } from "./collaborator.dto";
-import { CollaboratorRepository, ICollaboratorRepository } from "./collaborator.repository";
+import { ICollaboratorRepository } from "./collaborator.repository";
 import { CollaboratorStateMachine } from "./collaborator.state-machine";
 import { CollaboratorStatus } from "./collaborator.status";
 
-export class CollaboratorService {
-    private repository: ICollaboratorRepository;
-    private projectRepository: IProjectRepository;
-    private applicantRepo: IApplicantRepository;
-    //private permission: CollaboratorPermission;
 
-    constructor(repository: ICollaboratorRepository = new CollaboratorRepository(),
-        projectRepository?: IProjectRepository, applicantRepo?: IApplicantRepository) {
+export class CollaboratorService {
+
+    constructor(
+        private readonly repository: ICollaboratorRepository,
+        private readonly projectRepository: IProjectRepository,
+        private readonly appRepository: IApplicantRepository) {
         this.repository = repository;
-        this.projectRepository = projectRepository || new ProjectRepository();
-        this.applicantRepo = applicantRepo || new ApplicantRepository();
-        //this.permission = new CollaboratorPermission(this.repository);
+        this.projectRepository = projectRepository;
+        this.appRepository = appRepository;
     }
 
     async create(dto: CreateCollaboratorDto) {
-        const { applicant, project, applicantId, isLeadPI, status } = dto;
+        const { applicant, project, applicantId } = dto;
+
         const projectDoc = await this.projectRepository.findById(project);
-        if (!projectDoc) throw new Error("Project not found");
+        if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
+
+        if (String(projectDoc.leadPI) !== applicantId && SYSTEM.SU_USER !== applicantId)
+            throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
+
         if (projectDoc.status !== ProjectStatus.pending &&
             projectDoc.status !== ProjectStatus.negotiation) {
-            throw new Error("INVALID_PROJECT_STATUS_FOR_COLLABORATOR_CREATE");
+            throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
         }
-        if (String(projectDoc.leadPI) !== applicantId) {
-            throw new Error("User not authorized. Lead PI not found.");
+
+        const appDoc = await this.appRepository.findById(applicant);
+        if (!appDoc) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
+
+        try {
+            return await this.repository.create(dto);
+        } catch (err: any) {
+            if (err?.code === 11000) {
+                throw new AppError(ERROR_CODES.COLLABORATOR_ALREADY_EXISTS);
+            }
+            throw err;
         }
-        const appDoc = await this.applicantRepo.findOne({ id: applicant });
-        if (!appDoc) throw new Error("Applicant not found");
-        const created = await this.repository.create(dto);
-        return created;
     }
 
-    async getCollaborators(options: GetCollaboratorsOptions) {
-        if (!options.project && !options.applicant) {
-            throw new Error("At least one filter option (project or applicant) must be provided");
-        }
+    async get(options: GetCollaboratorsOptions) {
         const collaborators = await this.repository.find(options);
         return collaborators;
     }
@@ -58,53 +67,55 @@ export class CollaboratorService {
     }
     */
 
-    async updateStatus(dto: UpdateCollaboratorDto) {
-        const { id, data, applicantId } = dto;
+    async updateStatus(dto: UpdateCollabStatusDTO) {
+        const { id, status, applicantId } = dto;
+        const nextStatus = status;
+
         const collabDoc = await this.repository.findById(id);
-        if (!collabDoc) throw new Error("Collaborator not found");
+        if (!collabDoc) throw new AppError(ERROR_CODES.COLLABORATOR_NOT_FOUND);
+        if (String(collabDoc.applicant) !== applicantId) throw new AppError(ERROR_CODES.USER_NOT_COLLABORATOR);
 
-        const projectDoc = await this.projectRepository.findById(String(collabDoc.project));
-        if (!projectDoc) throw new Error("Project not found");
-
-        const projectStatus = projectDoc.status;
-        if (projectStatus !== ProjectStatus.pending &&
-            projectStatus !== ProjectStatus.submitted &&
-            projectStatus !== ProjectStatus.accepted &&
-            projectStatus !== ProjectStatus.negotiation
-        ) {
-            throw new Error("INVALID_PROJECT_STATUS_FOR_COLLABORATOR_UPDATE");
-        }
-
-        const nextState = data.status;
-        if (!nextState) throw new Error("Status is required");
-
-        if (String(collabDoc.applicant) !== applicantId) {
-            throw new Error(`User not authorized to perform ${nextState}`);
-        }
         const current = collabDoc.status;
         // --- State Machine Validation ---
-        CollaboratorStateMachine.validateTransition(current, nextState);
+        CollaboratorStateMachine.validateTransition(current, nextStatus);
+        if (nextStatus === CollaboratorStatus.pending) {
 
-        const updated = await this.repository.update(dto.id, dto.data);
+            const projectDoc = await this.projectRepository.findById(String(collabDoc.project));
+            if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
+            const projectStatus = projectDoc.status;
+
+            if (projectStatus !== ProjectStatus.pending &&
+                projectStatus !== ProjectStatus.submitted &&
+                projectStatus !== ProjectStatus.accepted &&
+                projectStatus !== ProjectStatus.negotiation
+            ) {
+                throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
+            }
+        }
+        const updated = await this.repository.update(dto.id, { status: nextStatus });
         return updated;
     }
 
     async delete(dto: DeleteDto) {
-        const { id, applicantId: userId } = dto;
+        const { id, applicantId } = dto;
 
         const collaboratorDoc = await this.repository.findById(id);
-        if (!collaboratorDoc) throw new Error("Collaborator not found");
+        if (!collaboratorDoc) throw new Error(ERROR_CODES.COLLABORATOR_NOT_FOUND);
+
+        if (collaboratorDoc.status !== CollaboratorStatus.pending)
+            throw new AppError(ERROR_CODES.COLLABORATOR_NOT_PENDING);
 
         const projectDoc = await this.projectRepository.findById(String(collaboratorDoc.project));
-        if (!projectDoc) throw new Error("Project not found");
-        if (projectDoc.status !== ProjectStatus.pending) {
-            throw new Error("Can not remove collaborators on non pending projects.");
-        }
-        if (String(projectDoc.leadPI) !== userId) {
-            throw new Error("User not authorized. Lead PI not found.");
+        if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
+
+        if (String(projectDoc.leadPI) !== applicantId && SYSTEM.SU_USER !== applicantId)
+            throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
+
+        if (projectDoc.status !== ProjectStatus.pending &&
+            projectDoc.status !== ProjectStatus.negotiation) {
+            throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
         }
 
-        const deleted = await this.repository.delete(id);
-        return deleted;
+        return await this.repository.delete(id);
     }
 }

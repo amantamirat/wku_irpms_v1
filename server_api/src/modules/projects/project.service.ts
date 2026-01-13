@@ -59,15 +59,17 @@ export class ProjectService {
     async create(dto: CreateProjectDTO) {
         const { call, leadPI } = dto
 
-        const callDoc = await this.callRepository.findById(call);
-        if (!callDoc) throw new Error(ERROR_CODES.CALL_NOT_FOUND);
-        if (callDoc.status !== CallStatus.active) throw new Error(ERROR_CODES.CALL_NOT_ACTIVE);
+        if (call) {
+            const callDoc = await this.callRepository.findById(call);
+            if (!callDoc) throw new Error(ERROR_CODES.CALL_NOT_FOUND);
+            if (callDoc.status !== CallStatus.active) throw new Error(ERROR_CODES.CALL_NOT_ACTIVE);
+
+        }
 
         const leadPIDoc = await this.appRepository.findOne({ id: leadPI });
         if (!leadPIDoc) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
 
         const created = await this.repository.create(dto);
-        //await this.collabRepository.create({ applicant: dto.applicantId, project: String(created._id) });
         return created;
     }
 

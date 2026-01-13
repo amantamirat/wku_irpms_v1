@@ -6,15 +6,17 @@ import {
     CreateCollaboratorDto,
     GetCollaboratorsOptions,
     UpdateCollaboratorDto,
+    UpdateCollabStatusDTO,
 } from './collaborator.dto';
 import { CollaboratorService } from './collaborator.service';
 import { CollaboratorStatus } from './collaborator.status';
+import { ERROR_CODES } from '../../../common/errors/error.codes';
 
 export class CollaboratorController {
     private service: CollaboratorService;
 
-    constructor(service?: CollaboratorService) {
-        this.service = service || new CollaboratorService();
+    constructor(service: CollaboratorService) {
+        this.service = service;
     }
     // -----------------------
     // Create
@@ -51,7 +53,7 @@ export class CollaboratorController {
                 applicant: applicant ? (applicant as string) : undefined,
             };
 
-            const collaborators = await this.service.getCollaborators(filter);
+            const collaborators = await this.service.get(filter);
             successResponse(res, 200, 'Collaborators fetched successfully', collaborators);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -63,21 +65,18 @@ export class CollaboratorController {
     // -----------------------
     updateStatus = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error('User not found!');
-
-            const { id } = req.query;
-            const { status } = req.params;
-
-            const dto: UpdateCollaboratorDto = {
-                id: id as string,
-                data: { status: status as CollaboratorStatus },
+            if (!req.user) throw new Error(ERROR_CODES.USER_NOT_FOUND);
+            const { id } = req.params;
+            const { status } = req.body;
+            
+            const dto: UpdateCollabStatusDTO = {
+                id: String(id),
+                status: status as CollaboratorStatus,
                 applicantId: req.user.applicantId,
             };
 
             const updated = await this.service.updateStatus(dto);
-            successResponse(
-                res,
-                200,
+            successResponse(res, 200,
                 `Collaborator status changed to ${status}`,
                 updated
             );

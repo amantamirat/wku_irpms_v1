@@ -13,10 +13,8 @@ export interface ICollaboratorRepository {
     find(filters: GetCollaboratorsOptions): Promise<ICollaborator[]>;
     create(dto: CreateCollaboratorDto): Promise<ICollaborator>;
     createMany(dtos: CreateCollaboratorDto[]): Promise<ICollaborator[]>;
-    update(id: string, data: UpdateCollaboratorDto["data"]): Promise<ICollaborator>;
+    update(id: string, data: UpdateCollaboratorDto["data"]): Promise<ICollaborator | null>;
     delete(id: string): Promise<ICollaborator | null>;
-    //checkProjectAndApplicantExist(projectId: string, applicantId: string): Promise<{ projectExists: boolean; applicantExists: boolean }>;
-    //verifyUserCanDelete(collaboratorId: string, userId: string): Promise<boolean>;
 }
 
 // MongoDB implementation
@@ -24,11 +22,6 @@ export class CollaboratorRepository implements ICollaboratorRepository {
 
     async findById(id: string) {
         return Collaborator.findById(new mongoose.Types.ObjectId(id))
-            /*    
-            .populate([
-                    { path: 'applicant', populate: { path: 'organization' } },
-                    { path: 'project' }
-                ])*/
             .lean<ICollaborator>()
             .exec();
     }
@@ -73,70 +66,21 @@ export class CollaboratorRepository implements ICollaboratorRepository {
         return Collaborator.insertMany(data, { ordered: true });
     }
 
-    async update(id: string, dtoData: UpdateCollaboratorDto["data"]): Promise<ICollaborator> {
+    async update(id: string, dtoData: UpdateCollaboratorDto["data"]): Promise<ICollaborator | null> {
         const updateData: Partial<ICollaborator> = {};
 
         if (dtoData.isLeadPI !== undefined) updateData.isLeadPI = dtoData.isLeadPI;
         if (dtoData.status !== undefined) updateData.status = dtoData.status;
 
-        const updated = await Collaborator.findByIdAndUpdate(
+        return Collaborator.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },
             { new: true, runValidators: true }
-        )
-            /*    
-            .populate([
-                    { path: 'applicant', populate: { path: 'organization' } },
-                    { path: 'project' }
-                ])*/
-            .exec();
+        ).exec();
 
-        if (!updated) throw new Error("Collaborator not found");
-        return updated;
     }
 
     async delete(id: string) {
-        return await Collaborator.findByIdAndDelete(new mongoose.Types.ObjectId(id))
-            /*    
-           .populate([
-                   { path: 'applicant', populate: { path: 'organization' } },
-                   { path: 'project' }
-               ])*/
-            .exec();
+        return await Collaborator.findByIdAndDelete(new mongoose.Types.ObjectId(id)).exec();
     }
-
-    /**
-     * 
-     * async checkProjectAndApplicantExist(projectId: string, applicantId: string) {
-        const [project, applicant] = await Promise.all([
-            mongoose.model("Project").findById(new mongoose.Types.ObjectId(projectId)).lean().exec(),
-            mongoose.model("Applicant").findById(new mongoose.Types.ObjectId(applicantId)).lean().exec()
-        ]);
-
-        return {
-            projectExists: !!project,
-            applicantExists: !!applicant
-        };
-    }
-
-    async verifyUserCanDelete(collaboratorId: string, userId: string): Promise<boolean> {
-        const collaborator = await Collaborator.findById(new mongoose.Types.ObjectId(collaboratorId))
-            .populate('project')
-            .lean()
-            .exec();
-
-        if (!collaborator) return false;
-
-        const project = collaborator.project as any;
-        if (!project || !project.createdBy) return false;
-
-        // Check if user is the project creator and collaborator is not active
-        const isProjectCreator = project.createdBy.toString() === userId;
-        const isNotActive = collaborator.status !== CollaboratorStatus.active;
-
-        return isProjectCreator && isNotActive;
-    }
-     */
-
-
 }

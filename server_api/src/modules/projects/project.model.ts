@@ -4,10 +4,10 @@ import { ProjectStatus } from "./project.status";
 
 export interface IProject extends Document {
     _id: mongoose.Types.ObjectId;
-    call: mongoose.Types.ObjectId;
+    call: mongoose.Types.ObjectId;//can be removed
     title: string;
     summary?: string;
-    leadPI: mongoose.Types.ObjectId;
+    leadPI: mongoose.Types.ObjectId;//change to pi
     status: ProjectStatus;
     createdAt?: Date;
     updatedAt?: Date;
@@ -17,8 +17,8 @@ const ProjectSchema = new Schema<IProject>({
     call: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.CALL,
-        required: true,
-        immutable: true
+        //required: true,
+        //immutable: true
     },
     title: {
         type: String,
@@ -41,9 +41,5 @@ const ProjectSchema = new Schema<IProject>({
 
 }, { timestamps: true });
 
-ProjectSchema.index(
-    { currentDocument: 1 },
-    { unique: true, partialFilterExpression: { currentDocument: { $exists: true } } }
-);
 
 export const Project = model<IProject>(COLLECTIONS.PROJECT, ProjectSchema);

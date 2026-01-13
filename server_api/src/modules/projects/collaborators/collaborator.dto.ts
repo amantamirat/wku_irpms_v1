@@ -19,6 +19,12 @@ export interface UpdateCollaboratorDto {
     applicantId: string;
 }
 
+export interface UpdateCollabStatusDTO {
+    id: string;
+    status: CollaboratorStatus;
+    applicantId: string;
+}
+
 // Options for querying collaborators
 export interface GetCollaboratorsOptions {
     project?: string;
