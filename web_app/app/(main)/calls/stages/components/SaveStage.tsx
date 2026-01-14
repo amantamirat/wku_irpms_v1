@@ -74,17 +74,19 @@ const SaveStage = ({ visible, stage, callProvided, onComplete, onHide }: SaveSta
     };
 
     const saveStage = async () => {
-        setSubmitted(true);
         try {
+            setSubmitted(true);
             const validation = validateStage(localStage);
             if (!validation.valid) throw new Error(validation.message);
 
-            let saved = localStage._id
-                ? await StageApi.update(localStage)
-                : await StageApi.create(localStage);
+            let saved: Stage;
+
+            if (localStage._id) saved = await StageApi.update(localStage);
+            else saved = await StageApi.create(localStage);
 
             saved = {
                 ...saved,
+                call: localStage.call,
                 evaluation: localStage.evaluation
             };
 
@@ -95,13 +97,13 @@ const SaveStage = ({ visible, stage, callProvided, onComplete, onHide }: SaveSta
                 life: 2000,
             });
 
-            if (onComplete) setTimeout(() => onComplete(saved), 1000);
+            onComplete?.(saved);
         } catch (err: any) {
             toast.current?.show({
                 severity: 'error',
                 summary: 'Error',
                 detail: err.message || 'Failed to save Stage',
-                life: 2500,
+                life: 2000,
             });
         }
     };

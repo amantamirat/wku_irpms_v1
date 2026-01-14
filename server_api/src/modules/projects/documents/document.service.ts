@@ -3,54 +3,52 @@ import { SYSTEM } from "../../../common/constants/system.constant";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { DeleteDto } from "../../../util/delete.dto";
-import { IStageRepository, StageRepository } from "../../calls/stages/stage.repository";
+import { IStageRepository } from "../../calls/stages/stage.repository";
 import { StageStatus } from "../../calls/stages/stage.status";
 import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
-import { IProjectRepository, ProjectRepository } from "../project.repository";
+import { IProjectRepository } from "../project.repository";
 import { ProjectStatus } from "../project.status";
 import { ProjectSynchronizer } from "../project.synchronizer";
 import { CreateDocumentDTO, GetDocumentDTO, UpdateStatusDTO } from "./document.dto";
-import { IDocumentRepository, DocumentRepository } from "./document.repository";
+import { IDocumentRepository } from "./document.repository";
 import { DocumentStateMachine } from "./document.state-machine";
 import { DocStatus } from "./document.status";
 
-
 export class DocumentService {
 
-    private repository: IDocumentRepository;
-    private projectRepository: IProjectRepository;
-    private stageRepository: IStageRepository;
-    
-    private projectSynchronizer: ProjectSynchronizer;
-    private validator: ConstraintValidator;
+    private readonly projectSynchronizer: ProjectSynchronizer;
+    private readonly validator: ConstraintValidator;
 
-    constructor(repository?: IDocumentRepository, projectRepository?: IProjectRepository,
-        stageRepository?: IStageRepository
+    constructor(
+        private readonly repository: IDocumentRepository,
+        private readonly projectRepository: IProjectRepository,
+        private readonly stageRepository: IStageRepository,
     ) {
-        this.repository = repository || new DocumentRepository();
-        this.projectRepository = projectRepository || new ProjectRepository();
-        this.stageRepository = stageRepository || new StageRepository();
-        this.projectSynchronizer =
-            new ProjectSynchronizer(this.projectRepository, this.repository);
+        this.projectSynchronizer = new ProjectSynchronizer(
+            this.projectRepository,
+            this.repository
+        );
+
         this.validator = new ConstraintValidator(this.projectRepository);
     }
 
     async create(dto: CreateDocumentDTO) {
         try {
-            const { project, stage, applicantId } = dto;
+            const { project, applicantId } = dto;
 
             const projectDoc = await this.projectRepository.findById(project);
             if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
 
-            if (String(projectDoc.leadPI) !== applicantId && SYSTEM.SU_USER !== applicantId)
-                throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
             if (projectDoc.status === ProjectStatus.rejected)
                 throw new AppError(ERROR_CODES.PROJECT_REJECTED);
 
-            const projectDocs = await this.repository.find({ project }, false);
+            if (String(projectDoc.leadPI) !== applicantId && SYSTEM.SU_USER !== applicantId)
+                throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
+
+            const projectDocs = await this.repository.find({ project });
             const hasNotAccepted = projectDocs.some(doc => doc.status !== DocStatus.accepted);
             if (hasNotAccepted)
-                throw new AppError(ERROR_CODES.PROJECT_DOC_NOT_ACCEPTED);
+                throw new AppError(ERROR_CODES.DOC_NOT_ACCEPTED);
 
             const nextOrder = projectDocs.length + 1;
             const nextStageDoc = await this.stageRepository.findOne({ call: String(projectDoc.call), order: nextOrder });
@@ -62,60 +60,76 @@ export class DocumentService {
             await this.validator.validateProject(project, projectDoc);
 
             const created = await this.repository.create({ ...dto, stage: String(nextStageDoc._id) });
-            const syncedProject = await this.projectSynchronizer.syncProjectStatus(project, projectDoc, [...projectDocs, created]);
+
+            const syncedProject = await this.projectSynchronizer.syncProjectStatus(project);
 
             return { created, syncedProject }
-        } catch (e: any) {
-            throw e;
+        } catch (err: any) {
+            if (err?.code === 11000) {
+                throw new AppError(ERROR_CODES.DOC_ALREADY_EXISTS);
+            }
+            throw err;
         }
     }
 
     async get(options: GetDocumentDTO = {}) {
-        return await this.repository.find(options);
+        return await this.repository.find({ ...options, populate: true });
     }
     /**
         * Update Status
     */
     async updateStatus(dto: UpdateStatusDTO) {
-        const { documents, status: newStatus } = dto.data;
+        const { documents, status: next } = dto;
         if (!documents || documents.length === 0) {
-            throw new Error("No documents provided");
-        }
-        if (!newStatus) {
-            throw new Error("Status not found");
+            throw new Error(ERROR_CODES.DOC_NOT_FOUND);
         }
         const validDocs = [];
         for (const id of documents) {
-            const doc = await this.repository.findById(id);
-            if (!doc) throw new Error(`Document not found: ${id}`);
+            const docDoc = await this.repository.findById(id);
+            if (!docDoc) throw new Error(ERROR_CODES.DOC_NOT_FOUND);
 
-            const projectDoc = await this.projectRepository.findById(String(doc.project));
-            if (!projectDoc) throw new Error(`Project not found: ${doc.project}`);
+            const stageDoc = await this.stageRepository.findById(String(docDoc.stage));
+            if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+            if (stageDoc.status !== StageStatus.active) throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
+
+            const projectDoc = await this.projectRepository.findById(String(docDoc.project));
+            if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
             const projectStatus = projectDoc.status;
 
             if (projectStatus !== ProjectStatus.submitted &&
                 projectStatus !== ProjectStatus.accepted &&
                 projectStatus !== ProjectStatus.rejected
             ) {
-                throw new Error("INVALID_PROJECT_STATUS_FOR_DOCUMENT_UPDATE");
+                throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
             }
-            const current = doc.status;
-            DocumentStateMachine.validateTransition(current, newStatus);
-            if (newStatus === DocStatus.reviewed) {
-                const currentStageDoc = await this.stageRepository.findById(String(doc.stage));
-                if (!currentStageDoc) throw new Error("Current stage not found");
-                const projectDocs = await this.repository.find({ project: String(doc.project) }, false);
-                if (projectDocs.length > currentStageDoc.order) {
-                    throw new Error(`Can not change the status of ${currentStageDoc.name} of the project`);
+
+            const current = docDoc.status;
+            DocumentStateMachine.validateTransition(current, next);
+
+            //backwards
+            if (next === DocStatus.submitted || next === DocStatus.reviewed) {
+                if (projectStatus !== ProjectStatus.accepted && projectStatus !== ProjectStatus.rejected) {
+                    throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
                 }
+                if (next === DocStatus.submitted && docDoc.totalScore) {
+                    throw new AppError(ERROR_CODES.DOC_SCORE_ALREADY_EXISTS);
+                }
+                if (next === DocStatus.reviewed && !docDoc.totalScore) {
+                    throw new AppError(ERROR_CODES.DOC_SCORE_NOT_EXISTS);
+                }
+                const projectDocs = await this.repository.find({ project: String(docDoc.project) });
+                if (projectDocs.length > stageDoc.order) {
+                    throw new AppError(ERROR_CODES.NEXT_DOC_ALREADY_EXISTS);
+                }
+
             }
-            validDocs.push(doc);
+            validDocs.push(docDoc);
         }
 
         const results = await Promise.all(
             validDocs.map(async (doc) => {
-                const updated = await this.repository.update(doc._id, {
-                    status: newStatus
+                const updated = await this.repository.update(String(doc._id), {
+                    status: next
                 });
                 if (updated) {
                     await this.projectSynchronizer.syncProjectStatus(
@@ -128,24 +142,21 @@ export class DocumentService {
     }
 
     async delete(dto: DeleteDto) {
-        const { id, applicantId: userId } = dto;
+        const { id, applicantId } = dto;
+        const projectDocument = await this.repository.findById(id);
+        if (!projectDocument) throw new AppError(ERROR_CODES.DOC_NOT_FOUND);
+        if (projectDocument.status !== DocStatus.submitted)
+            throw new AppError(ERROR_CODES.DOC_NOT_SUBMITTED);
 
-        const projectStageDoc = await this.repository.findById(id);
-        if (!projectStageDoc)
-            throw new AppError(ERROR_CODES.PROJECT_DOC_NOT_FOUND);
-        if (projectStageDoc.status !== DocStatus.pending)
-            throw new AppError(ERROR_CODES.PROJECT_DOC_NOT_PENDING);
-
-        const projectDoc = await this.projectRepository.findById(String(projectStageDoc.project));
+        const projectDoc = await this.projectRepository.findById(String(projectDocument.project));
         if (!projectDoc)
             throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
-        if (String(projectDoc.leadPI) !== userId && SYSTEM.SU_USER !== userId)
+        if (String(projectDoc.leadPI) !== applicantId && SYSTEM.SU_USER !== applicantId)
             throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
-
 
         const deleted = await this.repository.delete(id);
         if (deleted) {
-            await this.projectSynchronizer.syncProjectStatus(projectStageDoc.project.toString());
+            await this.projectSynchronizer.syncProjectStatus(String(projectDoc._id));
         }
         return { deleted };
     }

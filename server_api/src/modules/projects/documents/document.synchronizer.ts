@@ -26,7 +26,7 @@ export class ProjectStageSynchronizer {
     let totalScore: number | undefined = undefined;
     // 1. No reviewers → pending
     if (reviewers.length === 0) {
-      newStatus = DocStatus.pending;
+      newStatus = DocStatus.submitted;
     }
     else {
       const allApproved = reviewers.every(r => r.status === ReviewerStatus.approved);
@@ -38,7 +38,7 @@ export class ProjectStageSynchronizer {
       }
       else {
         // Otherwise → submitted i.e. every pending → submitted
-        newStatus = DocStatus.submitted;
+        newStatus = DocStatus.selected;
       }
     }
     // }

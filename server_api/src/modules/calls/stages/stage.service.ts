@@ -53,7 +53,7 @@ export class StageService {
         const { id, data } = dto;
         const stage = await this.repository.update(id, data);
         if (!stage) throw new Error(ERROR_CODES.STAGE_NOT_FOUND);
-        return
+        return stage;
     }
     /**
     * Update Status
@@ -68,7 +68,7 @@ export class StageService {
         // --- State Machine Validation ---
         StageStateMachine.validateTransition(current, nextState);
         if (nextState === StageStatus.planned) {
-            const documents = await this.docRepository.find({ stage: id }, false);
+            const documents = await this.docRepository.find({ stage: id });
             if (documents.length > 0) {
                 throw new AppError(ERROR_CODES.STAGE_DOCUMENT_ALREADY_EXISTS);
             }

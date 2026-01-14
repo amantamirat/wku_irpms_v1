@@ -689,6 +689,16 @@
   },
   {
     "category": "Document Management",
+    "name": "document:status.submitted",
+    "description": "used for undo operation on the selected documents"
+  },
+  {
+    "category": "Document Management",
+    "name": "document:status.selected",
+    "description": "selected for reviewers to be assigned"
+  },
+  {
+    "category": "Document Management",
     "name": "document:status.accepted"
   },
   {

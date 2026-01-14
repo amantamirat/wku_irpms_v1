@@ -12,13 +12,14 @@ import { AuthenticatedRequest } from "../../users/user.middleware";
 import { DocumentService } from "./document.service";
 import { DeleteDto } from "../../../util/delete.dto";
 import { DocStatus } from "./document.status";
+import { ERROR_CODES } from "../../../common/errors/error.codes";
 
 export class ProjectDocController {
 
     private service: DocumentService;
 
-    constructor(service?: DocumentService) {
-        this.service = service || new DocumentService();
+    constructor(service: DocumentService) {
+        this.service = service;
     }
 
     // ---------------------------------------------------
@@ -56,16 +57,9 @@ export class ProjectDocController {
     // ---------------------------------------------------
     updateStatus = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) {
-                throw new Error("User not found!");
-            }
-            const userId = req.user.userId;
-            const { status } = req.params;
-            const { documents } = req.body;
-
+            const { status, documents } = req.body;
             const dto: UpdateStatusDTO = {
-                data: { documents, status: status as DocStatus },
-                //userId: userId,
+                documents, status: status as DocStatus,
             };
             const updated = await this.service.updateStatus(dto);
             successResponse(res, 200, "Stage status updated successfully", updated);

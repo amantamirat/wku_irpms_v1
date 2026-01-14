@@ -2,8 +2,9 @@ import { Stage } from "@/app/(main)/calls/stages/models/stage.model";
 import { Project } from "../../models/project.model";
 
 export enum DocStatus {
-    pending = 'pending',
     submitted = 'submitted',
+    selected = 'selected',
+    //selected_for_review = 'selected_for_review',
     //on_review = 'on_review',
     reviewed = 'reviewed',
     accepted = 'accepted',

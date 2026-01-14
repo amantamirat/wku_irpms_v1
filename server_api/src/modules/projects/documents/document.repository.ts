@@ -6,12 +6,11 @@ import {
     GetDocumentDTO,
     UpdateDocumentDTO
 } from "./document.dto";
-import { populate } from "dotenv";
 
 export interface IDocumentRepository {
-    findById(id: string): Promise<IProjectDocument | null>; // <-- allow POJO
-    find(filters: GetDocumentDTO, populate?: boolean): Promise<Partial<IProjectDocument>[]>;
-    findByStage(stage: string): Promise<Partial<IProjectDocument>[]>;
+    findById(id: string): Promise<IProjectDocument | null>;
+    find(filters: GetDocumentDTO): Promise<Partial<IProjectDocument>[]>;
+    //findByStage(stage: string): Promise<Partial<IProjectDocument>[]>;
     create(dto: CreateDocumentDTO): Promise<IProjectDocument>;
     update(id: string, status: UpdateDocumentDTO["data"]): Promise<IProjectDocument>;
     delete(id: string): Promise<IProjectDocument | null>;
@@ -23,27 +22,25 @@ export class DocumentRepository implements IDocumentRepository {
 
     async findById(id: string) {
         return ProjectDocument.findById(new mongoose.Types.ObjectId(id))
-            //.populate("project")
-            //.populate("stage")
             .lean<IProjectDocument>()
             .exec();
     }
 
-    async find(filters: GetDocumentDTO, populate: boolean = true) {
+    async find(options: GetDocumentDTO) {
         const query: any = {};
 
-        if (filters.project) {
-            query.project = new mongoose.Types.ObjectId(filters.project);
+        if (options.project) {
+            query.project = new mongoose.Types.ObjectId(options.project);
         }
 
-        if (filters.stage) {
-            query.stage = new mongoose.Types.ObjectId(filters.stage);
+        if (options.stage) {
+            query.stage = new mongoose.Types.ObjectId(options.stage);
         }
 
-        if (filters.status) {
-            query.status = filters.status;
+        if (options.status) {
+            query.status = options.status;
         }
-        if (!populate) {
+        if (!options.populate) {
             return ProjectDocument.find(query)
                 .lean<IProjectDocument[]>()
                 .exec();
@@ -51,12 +48,11 @@ export class DocumentRepository implements IDocumentRepository {
         return ProjectDocument.find(query)
             .populate("project")
             .populate("stage")
-            //.skip(filters.skip ?? 0)
-            //.limit(filters.limit ?? 0)
             .lean<IProjectDocument[]>()
             .exec();
     }
 
+    /*
     async findByStage(stage: string) {
         return ProjectDocument.find({ stage: new mongoose.Types.ObjectId(stage) })
             .populate({
@@ -66,6 +62,7 @@ export class DocumentRepository implements IDocumentRepository {
             .lean<IProjectDocument[]>()
             .exec();
     }
+    */
 
     async findByProject(stage: string) {
         return ProjectDocument.find({ stage: new mongoose.Types.ObjectId(stage) })

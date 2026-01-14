@@ -228,6 +228,8 @@ export const PERMISSIONS = {
     READ: "document:read",
     UPDATE: "document:update",
     STATUS: {
+      SUBMIT: "document:status.submitted",
+      SELECT: "document:status.selected",
       ACCEPT: "document:status.accepted",
       REJECT: "document:status.rejected",
       REVIEW: "document:status.reviewed",

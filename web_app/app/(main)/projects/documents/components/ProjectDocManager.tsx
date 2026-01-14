@@ -33,22 +33,25 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
     const emptyStage: ProjectDoc = {
         stage: "-",
         project: project ?? "",
-        status: DocStatus.pending
+        status: DocStatus.submitted
     };
 
-    // ✅ Permissions (adjust if needed)
+    // Permissions (adjust if needed)
     const isValidStatus = project ? (project.status === ProjectStatus.pending ||
         project.status === ProjectStatus.accepted) : false;
-    const canCreate = isValidStatus && isLeadPI && hasPermission([PERMISSIONS.DOCUMENT.CREATE]);
-    const canDelete = isValidStatus && hasPermission([PERMISSIONS.DOCUMENT.DELETE]);
+
+    const canCreate = isValidStatus && hasPermission([PERMISSIONS.DOCUMENT.CREATE]);
+    const canDelete = hasPermission([PERMISSIONS.DOCUMENT.DELETE]);
+    
     //Status Permissions
-    const canAccept = !!stage && hasPermission([PERMISSIONS.DOCUMENT.STATUS.ACCEPT]);
-    const canReject = !!stage && hasPermission([PERMISSIONS.DOCUMENT.STATUS.REJECT]);
-    const canReview = !!stage && hasPermission([PERMISSIONS.DOCUMENT.STATUS.REVIEW]);
+    const canSubmit = !project && hasPermission([PERMISSIONS.DOCUMENT.STATUS.SUBMIT]);
+    const canSelect = !project && hasPermission([PERMISSIONS.DOCUMENT.STATUS.SELECT]);
+    const canReview = !project && hasPermission([PERMISSIONS.DOCUMENT.STATUS.REVIEW]);
+    const canAccept = !project && hasPermission([PERMISSIONS.DOCUMENT.STATUS.ACCEPT]);
+    const canReject = !project && hasPermission([PERMISSIONS.DOCUMENT.STATUS.REJECT]);
 
-    const enableMultiSelection = canAccept || canReject;
+    const enableMultiSelection = canAccept || canReject || canSelect;
 
-    //const canUpdateStatus = enableMultiSelection && hasPermission([PERMISSIONS.DOCUMENT.UPDATE_STATUS]);
     // ✅ State + CRUD Hook
     const {
         items: projectDocs,
@@ -95,7 +98,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
         hideSaveDialog();
     };
 
-    const deleteStage = async (row: ProjectDoc) => {
+    const deleteDoc = async (row: ProjectDoc) => {
         const deleted = await ProjectDocApi.deleteProjectStage(row);
         if (deleted) {
             removeItem(row);
@@ -114,11 +117,13 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
     };
 
     const updateStatus = async (docs: ProjectDoc[], next: DocStatus) => {
+        /*
         if (next !== DocStatus.reviewed && !docs.every(d => d.status === DocStatus.reviewed)) {
             throw new Error(
                 "All selected documents must be reviewed before acceptance."
             );
         }
+        */
         const updatedDocs = await ProjectDocApi.updateStatus({ documents: docs }, next);
         for (const updatedDoc of updatedDocs) {
             const doc = projectDocs.find(d => d._id === updatedDoc._id);
@@ -138,11 +143,24 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
     };
 
     const endToolbarTemplate = () => {
-        if (!canAccept && !canReject) {
-            return undefined;
-        }
         return (
             <div className="my-2 mb-3 flex gap-2" >
+                {canAccept &&
+                    <Button
+                        label="Select"
+                        icon="pi pi-eye"
+                        severity="secondary"
+                        onClick={
+                            () => {
+                                confirm.ask({
+                                    operation: `Select for review ${selectedDocs.length} projects`,
+                                    onConfirmAsync: () => updateStatus(selectedDocs, DocStatus.selected)
+                                });
+                            }
+                        }
+                        disabled={selectedDocs.length === 0}
+                    />
+                }
                 {canAccept &&
                     <Button
                         label="Accept"
@@ -181,23 +199,35 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
     }
 
 
-    const stateTransitionTemplate = (rowData: ProjectDoc) => {
-        if (!canReview) {
-            return
+    const stateTransitionTemplate = (row: ProjectDoc) => {
+        const current = row.status;
+        let prev = undefined;
+        let next = undefined;
+        if (current === DocStatus.selected) {
+            if (canSubmit) {
+                prev = DocStatus.submitted;
+            }
         }
-        const state = rowData.status;
+        if (current === DocStatus.accepted || current === DocStatus.rejected) {
+            if (row.totalScore && canReview) {
+                prev = DocStatus.reviewed;
+            }
+            if (!row.totalScore && canSubmit) {
+                prev = DocStatus.submitted;
+            }
+        }
         return (
             <div className="flex gap-2">
-                {(state === DocStatus.accepted || state === DocStatus.rejected) && (
+                {prev && (
                     <Button
-                        tooltip="revert"
+                        tooltip={`Back to ${prev}`}
                         icon="pi pi-undo"
                         severity="warning"
                         size="small"
                         onClick={() =>
                             confirm.ask({
                                 operation: "revert",
-                                onConfirmAsync: () => updateStatus([rowData], DocStatus.reviewed)
+                                onConfirmAsync: () => updateStatus([row], prev)
                             })
                         }
                     />
@@ -249,12 +279,15 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
                 canCreate={canCreate}
                 canDelete={canDelete}
                 onCreate={() => { setSelectedStage(emptyStage); setShowSaveDialog(true); }}
-                onDelete={(row: any) => confirm.ask({ item: row.stage?.name ?? "", onConfirmAsync: () => deleteStage(row) })}
+                onDelete={(row: any) => confirm.ask({ item: row.stage?.name ?? "", onConfirmAsync: () => deleteDoc(row) })}
 
                 toolbarEnd={endToolbarTemplate()}
 
+                /*
                 rowExpansionTemplate={(row) => <ReviewerManager projectStage={row}
                     updateProjectStage={onSaveComplete} showControllers />}
+                */
+
                 enableSearch
 
                 enableSelection={enableMultiSelection}

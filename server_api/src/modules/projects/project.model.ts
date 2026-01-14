@@ -8,17 +8,19 @@ export interface IProject extends Document {
     title: string;
     summary?: string;
     leadPI: mongoose.Types.ObjectId;//change to pi
+    totalBudget?: number;
+    totalDuration?: number;
     status: ProjectStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
-const ProjectSchema = new Schema<IProject>({    
+const ProjectSchema = new Schema<IProject>({
     call: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.CALL,
         //required: true,
-        //immutable: true
+        immutable: true
     },
     title: {
         type: String,
@@ -32,6 +34,7 @@ const ProjectSchema = new Schema<IProject>({
         ref: COLLECTIONS.APPLICANT,
         required: true
     },
+    
     status: {
         type: String,
         enum: Object.values(ProjectStatus),

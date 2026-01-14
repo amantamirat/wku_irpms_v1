@@ -1,7 +1,7 @@
 'use client';
 
 import { ApplicantApi } from "@/app/(main)/applicants/api/applicant.api";
-import { Applicant, applicantUnits } from "@/app/(main)/applicants/models/applicant.model";
+import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
 import { applicantTemplate } from "@/app/(main)/applicants/models/applicant.template";
 import { OrganizationApi } from "@/app/(main)/organizations/api/organization.api";
 import { Organization, OrgnUnit } from "@/app/(main)/organizations/models/organization.model";
@@ -11,7 +11,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { CollaboratorApi } from "../api/collaborator.api";
-import { Collaborator, CollaboratorStatus } from "../models/collaborator.model";
+import { Collaborator } from "../models/collaborator.model";
 
 interface CollaboratorDialogProps {
     collaborator: Collaborator;

@@ -1,6 +1,6 @@
 export enum DocStatus {
-  pending = 'pending',
   submitted = 'submitted',
+  selected = 'selected',
   //selected_for_review = 'selected_for_review',
   reviewed = 'reviewed',
   accepted = 'accepted',

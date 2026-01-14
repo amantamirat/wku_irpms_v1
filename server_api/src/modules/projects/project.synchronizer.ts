@@ -8,23 +8,18 @@ import { DocStatus } from "./documents/document.status";
 
 export class ProjectSynchronizer {
 
-    private repository: IProjectRepository;
-    private documentRepository: IDocumentRepository;
+    constructor(
+        private readonly repository: IProjectRepository,
+        private readonly documentRepository: IDocumentRepository
+    ) { }
 
-    constructor(repository: IProjectRepository, documentRepo: IDocumentRepository
-    ) {
-        this.repository = repository;
-        this.documentRepository = documentRepo;
-    }
+    async syncProjectStatus(project: string) {
+        const projectDoc = await this.repository.findById(project);
+        if (!projectDoc) return;
 
-    async syncProjectStatus(projectId: string, project?: Partial<IProject>,
-        docs?: Partial<IProjectDocument>[]
-    ) {
-        const projectDoc = project ?? await this.repository.findById(projectId);
-        if (!projectDoc || !projectDoc.status) return;
-        const projectDocs = docs ?? await this.documentRepository.find({ project: projectId });
-
+        const projectDocs = await this.documentRepository.find({ project });
         const currentStatus = projectDoc.status;
+
         let newStatus = ProjectStatus.submitted;
         if (projectDocs.length === 0) {
             newStatus = ProjectStatus.pending;
@@ -35,8 +30,9 @@ export class ProjectSynchronizer {
         else if (projectDocs.every(d => d.status === DocStatus.accepted)) {
             newStatus = ProjectStatus.accepted;
         }
-        if (ProjectStateMachine.canTransition(currentStatus, newStatus)) {
-            const updated = await this.repository.update(projectId, { status: newStatus })
+        if (newStatus !== currentStatus &&
+            ProjectStateMachine.canTransition(currentStatus, newStatus)) {
+            const updated = await this.repository.update(project, { status: newStatus })
             return updated;
         }
     }

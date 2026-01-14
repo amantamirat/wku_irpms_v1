@@ -4,7 +4,7 @@ import { DocStatus } from "./document.status";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
 
 export interface IProjectDocument extends Document {
-    _id: string;
+    _id: mongoose.Types.ObjectId;
     stage: mongoose.Types.ObjectId;
     project: mongoose.Types.ObjectId;
     documentPath: string;
@@ -38,7 +38,7 @@ const ProjecDocumentSchema = new Schema<IProjectDocument>({
     status: {
         type: String,
         enum: Object.values(DocStatus),
-        default: DocStatus.pending,
+        default: DocStatus.submitted,
         required: true
     },
 }, { timestamps: true });

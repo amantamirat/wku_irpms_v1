@@ -147,7 +147,6 @@ const StageManager = ({ call }: StageManagerProps) => {
         </div>);
     }
 
-
     // Delete
     const deleteStage = async (row: Stage) => {
         const deleted = await StageApi.delete(row);
@@ -187,15 +186,20 @@ const StageManager = ({ call }: StageManagerProps) => {
                 items={stages}
                 dataKey="_id"
                 columns={columns}
+
+                loading={loading}
+                error={error}
+
                 canCreate={canCreate}
                 canEdit={canEdit}
                 canDelete={canDelete}
+
                 onCreate={() => {
-                    setSelectedStage(emptyStage);
+                    setSelectedStage({ ...emptyStage });
                     setShowSaveDialog(true);
                 }}
                 onEdit={(row: Stage) => {
-                    setSelectedStage(row);
+                    setSelectedStage({ ...row });
                     setShowSaveDialog(true);
                 }
                 }
@@ -205,11 +209,13 @@ const StageManager = ({ call }: StageManagerProps) => {
                         onConfirmAsync: () => deleteStage(row)
                     })
                 }
-                loading={loading}
-                error={error}
-                rowExpansionTemplate={(row: Stage) => (
-                    <ProjectDocManager stage={row} />
-                )}
+
+                rowExpansionTemplate={(row: Stage) => {
+                    return (
+                        <ProjectDocManager stage={row} />
+                    )
+                }
+                }
             //enableSearch
             />
 

@@ -3,8 +3,17 @@ import { ProjectDocController } from "./document.controller";
 import { upload } from "../../../util/multer";
 import { checkPermission, checkStatusPermission, verifyActiveAccount } from "../../users/user.middleware";
 import { PERMISSIONS } from "../../../common/constants/permissions";
+import { StageRepository } from "../../calls/stages/stage.repository";
+import { ProjectRepository } from "../project.repository";
+import { DocumentRepository } from "./document.repository";
+import { DocumentService } from "./document.service";
 
-const controller = new ProjectDocController();
+const repository = new DocumentRepository();
+const projectRepository = new ProjectRepository();
+const stageRepository = new StageRepository();
+
+const service = new DocumentService(repository, projectRepository, stageRepository);
+const controller = new ProjectDocController(service);
 const router = express.Router();
 
 router.post("/", verifyActiveAccount,
@@ -20,7 +29,7 @@ router.put("/:id", verifyActiveAccount,
     controller.update);
     */
 
-router.put("/:status", verifyActiveAccount,
+router.patch("/", verifyActiveAccount,
     checkStatusPermission("document"),
     controller.updateStatus);
 

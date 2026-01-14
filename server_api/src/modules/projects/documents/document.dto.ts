@@ -5,6 +5,7 @@ export interface GetDocumentDTO {
     project?: string;
     stage?: string;
     status?: DocStatus;
+    populate?: boolean;
     skip?: number;
     limit?: number;
 }
@@ -13,7 +14,7 @@ export interface CreateDocumentDTO {
     project: string;
     stage: string;
     documentPath: string;
-    applicantId:string;
+    applicantId: string;
 }
 
 export interface UpdateDocumentDTO {
@@ -22,13 +23,11 @@ export interface UpdateDocumentDTO {
         status: DocStatus;
         totalScore: number;
     }>;
-     applicantId:string;
+    applicantId: string;
 }
 
 export interface UpdateStatusDTO {
-    data: Partial<{
-        documents: string[];
-        status: DocStatus;
-    }>;
+    documents: string[];
+    status: DocStatus;
 }
 

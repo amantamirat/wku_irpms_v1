@@ -51,23 +51,27 @@ const SaveProjectStageDialog = ({
                 syncedProject = sp;
             }
 
-            saved = { ...saved, project: localProjectStage.project, stage: localProjectStage.stage };
+            saved = {
+                ...saved,
+                project: localProjectStage.project,
+                stage: localProjectStage.stage
+            };
 
             toast.current?.show({
                 severity: "success",
                 summary: "Successful",
-                detail: "Project stage saved successfully",
+                detail: "Project document submitted successfully",
                 life: 2000,
             });
 
             if (onComplete) onComplete(saved, syncedProject);
-            //onHide()
+           
         } catch (err) {
             toast.current?.show({
                 severity: "error",
                 summary: "Failed to save project stage",
                 detail: String(err),
-                life: 3000,
+                life: 2000,
             });
         }
     };

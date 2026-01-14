@@ -26,11 +26,10 @@ export const ProjectDocApi = {
         return createdData;
     },
 
-
     async updateStatus(dto: Partial<UpdateStatusDTO>, status: DocStatus): Promise<any> {
         const sanitized = sanitizeUpdateStatusDTO(dto);
-        const url = `${end_point}/${status}`;
-        const updated = await ApiClient.put(url, sanitized);
+        const url = `${end_point}`;
+        const updated = await ApiClient.patch(url, { ...sanitized, status });
         return updated;
     },
 
