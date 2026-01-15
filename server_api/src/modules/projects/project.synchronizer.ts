@@ -1,19 +1,27 @@
-import { ProjectStatus } from "./project.status";
-import { IProject } from "./project.model";
-import { IProjectRepository } from "./project.repository";
-import { ProjectStateMachine } from "./project.state-machine";
-import { IProjectDocument } from "./documents/document.model";
 import { IDocumentRepository } from "./documents/document.repository";
 import { DocStatus } from "./documents/document.status";
+import { IPhaseRepository } from "./phase/phase.repository";
+import { IProjectRepository } from "./project.repository";
+import { ProjectStateMachine } from "./project.state-machine";
+import { ProjectStatus } from "./project.status";
 
-export class ProjectSynchronizer {
+export abstract class ProjectSynchronizer {
+    constructor(
+        protected readonly projectRepository: IProjectRepository
+    ) { }
+    abstract sync(project: string): Promise<any>;
+}
+
+export class StatusSynchronizer extends ProjectSynchronizer {
 
     constructor(
         private readonly repository: IProjectRepository,
-        private readonly documentRepository: IDocumentRepository
-    ) { }
+        private readonly documentRepository: IDocumentRepository,
+    ) {
+        super(repository);
+    }
 
-    async syncProjectStatus(project: string) {
+    async sync(project: string) {
         const projectDoc = await this.repository.findById(project);
         if (!projectDoc) return;
 
@@ -35,5 +43,30 @@ export class ProjectSynchronizer {
             const updated = await this.repository.update(project, { status: newStatus })
             return updated;
         }
+    }
+}
+
+export class PhaseSynchronizer extends ProjectSynchronizer {
+
+    constructor(
+        private readonly repository: IProjectRepository,
+        private readonly phaseRepository: IPhaseRepository,
+    ) {
+        super(repository);
+    }
+
+    async sync(project: string): Promise<void> {
+        const phases = await this.phaseRepository.find({ project });
+
+        const { totalBudget, totalDuration } = phases.reduce(
+            (acc, phase) => {
+                acc.totalBudget += phase.budget ?? 0;
+                acc.totalDuration += phase.duration ?? 0;
+                return acc;
+            },
+            { totalBudget: 0, totalDuration: 0 }
+        );
+
+        await this.repository.update(project, { totalBudget, totalDuration });
     }
 }

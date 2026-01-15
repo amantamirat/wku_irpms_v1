@@ -25,6 +25,8 @@ export interface UpdateProjectDTO {
         title: string;
         summary: string;
         leadPI: string;
+        totalBudget: number;
+        totalDuration: number;
         status: ProjectStatus;
     }>;
     applicantId: string;

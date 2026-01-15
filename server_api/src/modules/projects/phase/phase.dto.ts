@@ -29,6 +29,7 @@ export interface UpdatePhaseDto {
 // ---------- GET_OPTIONS ----------
 export interface GetPhasesOptions {
     project: string;
+    populate?:boolean;
 }
 
 //------

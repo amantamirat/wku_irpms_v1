@@ -4,6 +4,7 @@ import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { DeleteDto } from "../../../util/delete.dto";
 import { IProjectRepository, ProjectRepository } from "../project.repository";
 import { ProjectStatus } from "../project.status";
+import { PhaseSynchronizer, ProjectSynchronizer } from "../project.synchronizer";
 import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto, UpdatePhaseStatusDto } from "./phase.dto";
 import { IPhaseRepository, PhaseRepository } from "./phase.repository";
 import { PhaseStateMachine } from "./phase.state-machine";
@@ -11,10 +12,13 @@ import { PhaseStatus } from "./phase.status";
 
 export class PhaseService {
 
+    private readonly projectSynchronizer: ProjectSynchronizer;
     constructor(
         private readonly repository: IPhaseRepository = new PhaseRepository(),
         private readonly projectRepository: IProjectRepository = new ProjectRepository()
-    ) { }
+    ) {
+        this.projectSynchronizer = new PhaseSynchronizer(projectRepository, repository);
+    }
 
     async validate(project: string, applicantId: string) {
 
@@ -35,7 +39,11 @@ export class PhaseService {
 
         this.validate(project ?? "", applicantId ?? "");
 
-        return await this.repository.create(dto);
+        const created = await this.repository.create(dto);
+
+        await this.projectSynchronizer.sync(project);
+
+        return created;
     }
 
     async getPhases(options: GetPhasesOptions) {
@@ -47,13 +55,16 @@ export class PhaseService {
 
         const phaseDoc = await this.repository.findById(id);
         if (!phaseDoc) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
+        const project = String(phaseDoc.project);
 
-        await this.validate(String(phaseDoc.project), applicantId);
+        await this.validate(project, applicantId);
 
         if (phaseDoc.status !== PhaseStatus.proposed)
             throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
 
-        return await this.repository.update(id, data);
+        const updated = await this.repository.update(id, data);
+        await this.projectSynchronizer.sync(project);
+        return updated;
     }
 
     async delete(dto: DeleteDto) {
@@ -61,13 +72,16 @@ export class PhaseService {
 
         const phaseDoc = await this.repository.findById(id);
         if (!phaseDoc) throw new Error(ERROR_CODES.PHASE_NOT_FOUND);
+        const project = String(phaseDoc.project);
 
         await this.validate(String(phaseDoc.project), applicantId);
 
         if (phaseDoc.status !== PhaseStatus.proposed)
             throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
 
-        return await this.repository.delete(id);
+        const deleted = await this.repository.delete(id);
+        await this.projectSynchronizer.sync(project);
+        return deleted;
     }
     // ---------------------------------------------------
     // UPDATE STATUS
@@ -88,18 +102,18 @@ export class PhaseService {
         PhaseStateMachine.validateTransition(current, next);
 
         if (next === PhaseStatus.reviewed) {
-            if (projectStatus !== ProjectStatus.negotiation) 
+            if (projectStatus !== ProjectStatus.negotiation)
                 throw new AppError(ERROR_CODES.PROJECT_NOT_IN_NEGOTIATION);
-            
+
             if (current === PhaseStatus.proposed) {
                 if (String(projectDoc.leadPI) !== applicantId && SYSTEM.SU_USER !== applicantId)
                     throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
             }
         }
-        
+
         if (next === PhaseStatus.active) {
-            if (projectStatus !== ProjectStatus.granted) 
-                throw new AppError(ERROR_CODES.PROJECT_NOT_GRANTED);   
+            if (projectStatus !== ProjectStatus.granted)
+                throw new AppError(ERROR_CODES.PROJECT_NOT_GRANTED);
         }
 
         const updated = await this.repository.update(id, { status: next });

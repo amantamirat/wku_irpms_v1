@@ -26,20 +26,24 @@ export class PhaseRepository implements IPhaseRepository {
             .exec();
     }
 
-    async find(filters: GetPhasesOptions) {
-        const query: any = {};
+    async find(filters: GetPhasesOptions): Promise<IPhase[]> {
+        const query: Record<string, unknown> = {};
 
         if (filters.project) {
             query.project = new mongoose.Types.ObjectId(filters.project);
         }
 
-        return Phase.find(query)
-            .populate([
-                { path: 'project' }
-            ])
+        let phaseQuery = Phase.find(query);
+
+        if (filters.populate) {
+            phaseQuery = phaseQuery.populate({ path: 'project' });
+        }
+
+        return phaseQuery
             .lean<IPhase[]>()
             .exec();
     }
+
 
     async create(dto: CreatePhaseDto) {
         const data: Partial<IPhase> = {

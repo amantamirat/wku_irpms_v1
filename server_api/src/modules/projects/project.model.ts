@@ -34,6 +34,15 @@ const ProjectSchema = new Schema<IProject>({
         ref: COLLECTIONS.APPLICANT,
         required: true
     },
+
+    totalBudget: {
+        type: Number,
+        min: 0
+    },
+    totalDuration: {
+        type: Number,
+        min: 0
+    },
     
     status: {
         type: String,

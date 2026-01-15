@@ -6,9 +6,10 @@ import { DeleteDto } from "../../../util/delete.dto";
 import { IStageRepository } from "../../calls/stages/stage.repository";
 import { StageStatus } from "../../calls/stages/stage.status";
 import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
+import { PhaseRepository } from "../phase/phase.repository";
 import { IProjectRepository } from "../project.repository";
 import { ProjectStatus } from "../project.status";
-import { ProjectSynchronizer } from "../project.synchronizer";
+import { ProjectSynchronizer, StatusSynchronizer } from "../project.synchronizer";
 import { CreateDocumentDTO, GetDocumentDTO, UpdateStatusDTO } from "./document.dto";
 import { IDocumentRepository } from "./document.repository";
 import { DocumentStateMachine } from "./document.state-machine";
@@ -16,7 +17,7 @@ import { DocStatus } from "./document.status";
 
 export class DocumentService {
 
-    private readonly projectSynchronizer: ProjectSynchronizer;
+    private projectSynchronizer: ProjectSynchronizer;
     private readonly validator: ConstraintValidator;
 
     constructor(
@@ -24,11 +25,7 @@ export class DocumentService {
         private readonly projectRepository: IProjectRepository,
         private readonly stageRepository: IStageRepository,
     ) {
-        this.projectSynchronizer = new ProjectSynchronizer(
-            this.projectRepository,
-            this.repository
-        );
-
+        this.projectSynchronizer = new StatusSynchronizer(this.projectRepository,this.repository);
         this.validator = new ConstraintValidator(this.projectRepository);
     }
 
@@ -61,7 +58,7 @@ export class DocumentService {
 
             const created = await this.repository.create({ ...dto, stage: String(nextStageDoc._id) });
 
-            const syncedProject = await this.projectSynchronizer.syncProjectStatus(project);
+            const syncedProject = await this.projectSynchronizer.sync(project);
 
             return { created, syncedProject }
         } catch (err: any) {
@@ -132,7 +129,7 @@ export class DocumentService {
                     status: next
                 });
                 if (updated) {
-                    await this.projectSynchronizer.syncProjectStatus(
+                    await this.projectSynchronizer.sync(
                         String(doc.project));
                 }
                 return updated;
@@ -156,7 +153,7 @@ export class DocumentService {
 
         const deleted = await this.repository.delete(id);
         if (deleted) {
-            await this.projectSynchronizer.syncProjectStatus(String(projectDoc._id));
+            await this.projectSynchronizer.sync(String(projectDoc._id));
         }
         return { deleted };
     }
