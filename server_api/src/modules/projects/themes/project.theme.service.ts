@@ -25,7 +25,7 @@ export class ProjectThemeService {
         const projectDoc = await this.projectRepository.findById(project);
         if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
 
-        if (String(projectDoc.leadPI) !== applicantId && SYSTEM.SU_USER !== applicantId)
+        if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
             throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
 
         if (projectDoc.status !== ProjectStatus.pending &&
@@ -58,7 +58,7 @@ export class ProjectThemeService {
         const projectDoc = await this.projectRepository.findById(String(proThemeDoc.project));
         if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
 
-        if (String(projectDoc.leadPI) !== applicantId && SYSTEM.SU_USER !== applicantId)
+        if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
             throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
 
         if (projectDoc.status !== ProjectStatus.pending &&

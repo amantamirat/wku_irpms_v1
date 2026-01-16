@@ -25,7 +25,7 @@ export class PhaseService {
         const projectDoc = await this.projectRepository.findById(project);
         if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
 
-        if (String(projectDoc.leadPI) !== applicantId && SYSTEM.SU_USER !== applicantId)
+        if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
             throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
 
         if (projectDoc.status !== ProjectStatus.pending &&
@@ -106,7 +106,7 @@ export class PhaseService {
                 throw new AppError(ERROR_CODES.PROJECT_NOT_IN_NEGOTIATION);
 
             if (current === PhaseStatus.proposed) {
-                if (String(projectDoc.leadPI) !== applicantId && SYSTEM.SU_USER !== applicantId)
+                if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
                     throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
             }
         }

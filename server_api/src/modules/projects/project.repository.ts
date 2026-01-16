@@ -29,17 +29,16 @@ export class ProjectRepository implements IProjectRepository {
         if (filters.call) {
             query.call = new mongoose.Types.ObjectId(filters.call);
         }
-        if (filters.leadPI) {
-            query.leadPI = new mongoose.Types.ObjectId(filters.leadPI);
+        if (filters.applicant) {
+            query.applicant = new mongoose.Types.ObjectId(filters.applicant);
         }
-
         if (filters.status) {
             query.status = filters.status;
         }
 
         return Project.find(query)
             .populate("call")
-            .populate("leadPI")
+            .populate("applicant")
             //.populate("createdBy")
             //.skip(filters.skip ?? 0)
             //.limit(filters.limit ?? 0)
@@ -51,7 +50,7 @@ export class ProjectRepository implements IProjectRepository {
         return Project.create({
             ...dto,
             call: new mongoose.Types.ObjectId(dto.call),
-            leadPI: new mongoose.Types.ObjectId(dto.leadPI)
+            applicant: new mongoose.Types.ObjectId(dto.applicant)
         });
     }
 

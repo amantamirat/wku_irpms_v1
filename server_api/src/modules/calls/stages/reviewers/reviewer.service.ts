@@ -64,7 +64,7 @@ export class ReviewerService {
         const projectDoc = await this.projectRepository.findById(String(projectStageDoc.project));
         if (!projectDoc) throw new Error("Project not found");
 
-        if (String(projectDoc.leadPI) === applicant) {
+        if (String(projectDoc.applicant) === applicant) {
             throw new Error("Reviewer applicant is already a lead pi on the project");
         }
 

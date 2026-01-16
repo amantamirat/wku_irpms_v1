@@ -1,5 +1,5 @@
 export enum ProjectStatus {
-    pending = 'pending',
+    pending = 'pending',//draft
     submitted = "submitted",
     rejected = "rejected",
     accepted = "accepted",

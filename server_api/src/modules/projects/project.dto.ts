@@ -3,7 +3,7 @@ import { ProjectStatus } from "./project.status";
 
 export interface GetProjectsDTO {
     call?: string;
-    leadPI?: string;
+    applicant?: string;
     status?: ProjectStatus;
     skip?: number;
     limit?: number;
@@ -11,11 +11,11 @@ export interface GetProjectsDTO {
 
 // CREATE Project
 export interface CreateProjectDTO {
-    call?: string;
+    call: string;
     title: string;
     summary?: string;
     status?: ProjectStatus;
-    leadPI: string;
+    applicant: string;
 }
 
 // UPDATE Project
@@ -24,7 +24,7 @@ export interface UpdateProjectDTO {
     data: Partial<{
         title: string;
         summary: string;
-        leadPI: string;
+        applicant: string;
         totalBudget: number;
         totalDuration: number;
         totalCollabs:number;

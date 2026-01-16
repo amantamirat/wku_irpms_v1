@@ -26,7 +26,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
     const { getApplicant: getLinkedApplicant, hasPermission } = useAuth();
     const linkedApplicant = getLinkedApplicant();
     const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
-    const isLeadPI = project ? loggedApplicantId === (project.leadPI as any)._id : false;
+    const isLeadPI = project ? loggedApplicantId === (project.applicant as any)._id : false;
 
     const [selectedDocs, setSelectedDocs] = useState<ProjectDoc[]>([]);
 

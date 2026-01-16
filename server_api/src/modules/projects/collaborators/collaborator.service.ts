@@ -22,9 +22,6 @@ export class CollaboratorService {
         private readonly repository: ICollaboratorRepository,
         private readonly projectRepository: IProjectRepository,
         private readonly appRepository: IApplicantRepository) {
-        this.repository = repository;
-        this.projectRepository = projectRepository;
-        this.appRepository = appRepository;
     }
 
     async create(dto: CreateCollaboratorDto) {
@@ -33,7 +30,7 @@ export class CollaboratorService {
         const projectDoc = await this.projectRepository.findById(project);
         if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
 
-        if (String(projectDoc.leadPI) !== applicantId && SYSTEM.SU_USER !== applicantId)
+        if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
             throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
 
         if (projectDoc.status !== ProjectStatus.pending &&
@@ -107,7 +104,7 @@ export class CollaboratorService {
         const projectDoc = await this.projectRepository.findById(String(collaboratorDoc.project));
         if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
 
-        if (String(projectDoc.leadPI) !== applicantId && SYSTEM.SU_USER !== applicantId)
+        if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
             throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
 
         if (projectDoc.status !== ProjectStatus.pending &&

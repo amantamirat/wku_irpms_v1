@@ -29,7 +29,7 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
     const emptyProject: Project = {
         call: call,
         title: "",
-        leadPI: "", //leadPI
+        applicant: "", //leadPI
     };
 
     // ✅ Permissions
@@ -91,7 +91,7 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
         onSaveComplete({
             ...updated,
             call: row.call,
-            leadPI: row.leadPI
+            applicant: row.applicant
         });
     };
 
@@ -183,7 +183,7 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
     const columns = [
         { header: "Call", field: "call.title", sortable: true },
         { header: "Title", field: "title", sortable: true },
-        { header: "Lead PI", field: "leadPI.name", sortable: true },
+        { header: "Lead PI", field: "applicant.name", sortable: true },
         {
             header: "Budget", field: "totalBudget",
             body: (row: Project) => {

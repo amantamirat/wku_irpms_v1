@@ -36,7 +36,7 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
     const initializeProject = (): Project => ({
         title: "",
         call: call,
-        leadPI: linkedApplicant,
+        applicant: linkedApplicant,
         status: ProjectStatus.pending
     });
     const toast = useRef<Toast>(null);

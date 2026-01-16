@@ -7,7 +7,7 @@ export interface IProject extends Document {
     call: mongoose.Types.ObjectId;//can be removed
     title: string;
     summary?: string;
-    leadPI: mongoose.Types.ObjectId;//change to pi
+    applicant: mongoose.Types.ObjectId;//user
     totalBudget?: number;
     totalDuration?: number;
     totalCollabs?: number;
@@ -20,7 +20,7 @@ const ProjectSchema = new Schema<IProject>({
     call: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.CALL,
-        //required: true,
+        required: true,
         immutable: true
     },
     title: {
@@ -30,7 +30,7 @@ const ProjectSchema = new Schema<IProject>({
     summary: {
         type: String,
     },
-    leadPI: {
+    applicant: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.APPLICANT,
         required: true

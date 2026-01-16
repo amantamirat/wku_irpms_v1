@@ -21,7 +21,7 @@ export type Project = {
     title: string;
     summary?: string;
     status?: ProjectStatus;
-    leadPI?: string | Applicant;
+    applicant?: string | Applicant;
     totalBudget?:number;
     totalDuration?:number;
     createdAt?: Date;
@@ -70,10 +70,10 @@ export const sanitizeProject = (project: Partial<Project>): Partial<Project> => 
             typeof project.call === 'object' && project.call !== null
                 ? (project.call as Call)._id
                 : project.call,
-        leadPI:
-            typeof project.leadPI === 'object' && project.leadPI !== null
-                ? (project.leadPI as any)._id
-                : project.leadPI,
+        applicant:
+            typeof project.applicant === 'object' && project.applicant !== null
+                ? (project.applicant as any)._id
+                : project.applicant,
         collaborators: project.collaborators?.map(c => sanitizeCollaborator(c)),
         themes: project.themes?.map(t => sanitizeProjectTheme(t)),
         phases: project.phases?.map(p => sanitizePhase(p)),

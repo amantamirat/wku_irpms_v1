@@ -27,7 +27,7 @@ export class ProjectController {
         call,
         title,
         summary,
-        leadPI: req.user.applicantId,
+        applicant: req.user.applicantId,
       };
 
       const created = await this.service.create(dto);
@@ -46,7 +46,7 @@ export class ProjectController {
 
       const projects = await this.service.getProjects({
         call: call as string,
-        leadPI: leadPI as string,
+        applicant: leadPI as string,
       });
 
       successResponse(res, 200, "Projects fetched successfully", projects);

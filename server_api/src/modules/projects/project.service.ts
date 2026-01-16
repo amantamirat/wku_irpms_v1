@@ -57,17 +57,14 @@ export class ProjectService {
     }
 
     async create(dto: CreateProjectDTO) {
-        const { call, leadPI } = dto
+        const { call, applicant } = dto
 
-        if (call) {
-            const callDoc = await this.callRepository.findById(call);
-            if (!callDoc) throw new Error(ERROR_CODES.CALL_NOT_FOUND);
-            if (callDoc.status !== CallStatus.active) throw new Error(ERROR_CODES.CALL_NOT_ACTIVE);
+        const callDoc = await this.callRepository.findById(call);
+        if (!callDoc) throw new Error(ERROR_CODES.CALL_NOT_FOUND);
+        if (callDoc.status !== CallStatus.active) throw new Error(ERROR_CODES.CALL_NOT_ACTIVE);
 
-        }
-
-        const leadPIDoc = await this.appRepository.findOne({ id: leadPI });
-        if (!leadPIDoc) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
+        const appDoc = await this.appRepository.findOne({ id: applicant });
+        if (!appDoc) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
 
         const created = await this.repository.create(dto);
         return created;
@@ -111,7 +108,7 @@ export class ProjectService {
 
         await this.validator.validateProjectConstraints(String(callDoc.grant), collaborators, phases);
 
-        const projectDoc = await this.repository.create({ call, title, leadPI: leadPI, summary });
+        const projectDoc = await this.repository.create({ call, title, applicant: leadPI, summary });
         const projectId = String(projectDoc._id);
 
         await this.collabRepository.createMany(
@@ -159,7 +156,7 @@ export class ProjectService {
         const projectDoc = await this.repository.findById(id);
         if (!projectDoc) throw new Error("Project not found");
 
-        if (String(projectDoc.leadPI) !== userId || "system" !== userId)
+        if (String(projectDoc.applicant) !== userId || "system" !== userId)
             throw new Error(ERROR_CODES.USER_NOT_LEAD_PI);
 
         if (projectDoc.status !== ProjectStatus.pending)
@@ -208,7 +205,7 @@ export class ProjectService {
         const { id, applicantId: userId } = dto;
         const projectDoc = await this.repository.findById(id);
         if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
-        if (String(projectDoc.leadPI) !== userId || "system" !== userId)
+        if (String(projectDoc.applicant) !== userId || "system" !== userId)
             throw new Error(ERROR_CODES.USER_NOT_LEAD_PI);
 
 
