@@ -14,20 +14,20 @@ import { ProjectDocApi } from "../api/project.doc.api";
 interface SaveProjectStageDialogProps {
     project?: Project;
     visible: boolean;
-    projectStage: ProjectDoc;
-    onComplete?: (saved: ProjectDoc, syncedProject?: Project) => void;
+    projectDoc: ProjectDoc;
+    onComplete?: (saved: ProjectDoc) => void;
     onHide: () => void;
 }
 
 const SaveProjectStageDialog = ({
     project,
     visible,
-    projectStage,
+    projectDoc,
     onComplete,
     onHide,
 }: SaveProjectStageDialogProps) => {
 
-    const [localProjectStage, setLocalProjectStage] = useState<ProjectDoc>({ ...projectStage });
+    const [localProjectStage, setLocalProjectStage] = useState<ProjectDoc>({ ...projectDoc });
     const [stages, setStages] = useState<Stage[]>([]);
     const toast = useRef<Toast>(null);
 
@@ -41,18 +41,13 @@ const SaveProjectStageDialog = ({
             if (!validation.valid) throw new Error(validation.message);
 
             let saved: ProjectDoc;
-            let syncedProject: Project | undefined = undefined;
             if (localProjectStage._id) {
                 return;
-                // saved = await ProjectDocApi.updateProjectStage(localProjectStage);
-            } else {
-                const { created, syncedProject: sp } = await ProjectDocApi.createProjectStage(localProjectStage);
-                saved = created;
-                syncedProject = sp;
             }
+            const created = await ProjectDocApi.create(localProjectStage);
 
             saved = {
-                ...saved,
+                ...created,
                 project: localProjectStage.project,
                 stage: localProjectStage.stage
             };
@@ -64,8 +59,8 @@ const SaveProjectStageDialog = ({
                 life: 2000,
             });
 
-            if (onComplete) onComplete(saved, syncedProject);
-           
+           if (onComplete) setTimeout(() => onComplete(saved), 2000);
+
         } catch (err) {
             toast.current?.show({
                 severity: "error",
@@ -78,26 +73,31 @@ const SaveProjectStageDialog = ({
 
     useEffect(() => {
         if (visible) {
-            setLocalProjectStage({ ...projectStage });
-            const fetchStages = async () => {
-                try {
-                    const data = await StageApi.getStages({
-                        call: project?.call,
-                    });
-                    setStages(data);
-                } catch (err) {
-                    toast.current?.show({
-                        severity: "error",
-                        summary: "Failed to fetch stages",
-                        detail: String(err),
-                        life: 3000,
-                    });
-                }
-            };
-            fetchStages();
+            setLocalProjectStage({ ...projectDoc });
         }
-    }, [visible, projectStage, project?.call]);
+    }, [visible]);
 
+    /*
+    useEffect(() => {
+        const fetchStages = async () => {
+            try {
+                const data = await StageApi.getStages({
+                    call: project?.call,
+                });
+                setStages(data);
+            } catch (err) {
+                toast.current?.show({
+                    severity: "error",
+                    summary: "Failed to fetch stages",
+                    detail: String(err),
+                    life: 3000,
+                });
+            }
+        };
+        fetchStages();
+
+    }, [projectDoc, project?.call]);
+*/
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />

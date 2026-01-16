@@ -8,8 +8,8 @@ export class EvaluationController {
 
     private service: EvaluationService;
 
-    constructor(service?: EvaluationService) {
-        this.service = service || new EvaluationService();
+    constructor(service: EvaluationService) {
+        this.service = service;
     }
 
     create = async (req: AuthenticatedRequest, res: Response) => {

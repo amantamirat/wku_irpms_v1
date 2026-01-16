@@ -15,7 +15,7 @@ export const ProjectDocApi = {
         return data as ProjectDoc[];
     },
 
-    async createProjectStage(projectStage: Partial<ProjectDoc>): Promise<any> {
+    async create(projectStage: Partial<ProjectDoc>): Promise<any> {
         const sanitized = sanitizeProjectDoc(projectStage);
         const formData = new FormData();
         formData.append("project", sanitized.project as string);
@@ -54,10 +54,8 @@ export const ProjectDocApi = {
     },
     */
 
-    async deleteProjectStage(projectStage: Partial<ProjectDoc>): Promise<any> {
-        if (!projectStage._id) {
-            throw new Error("_id required.");
-        }
+    async delete(projectStage: Partial<ProjectDoc>): Promise<any> {
+        if (!projectStage._id) throw new Error("_id required.");        
         const url = `${end_point}/${projectStage._id}`;
         const response = await ApiClient.delete(url);
         return response;

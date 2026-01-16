@@ -42,7 +42,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
 
     const canCreate = isValidStatus && hasPermission([PERMISSIONS.DOCUMENT.CREATE]);
     const canDelete = hasPermission([PERMISSIONS.DOCUMENT.DELETE]);
-    
+
     //Status Permissions
     const canSubmit = !project && hasPermission([PERMISSIONS.DOCUMENT.STATUS.SUBMIT]);
     const canSelect = !project && hasPermission([PERMISSIONS.DOCUMENT.STATUS.SELECT]);
@@ -88,25 +88,20 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
 
 
     // ✅ Save / update
-    const onSaveComplete = (savedStage: ProjectDoc, syncedProject?: Project) => {
-        updateItem(savedStage);
-        if (updateProjectStatus) {
-            if (project && syncedProject) {
-                updateProjectStatus({ ...project, status: syncedProject.status })
-            }
+    const onSaveComplete = (saved: ProjectDoc) => {
+        updateItem(saved);
+        if (updateProjectStatus && project) {
+            updateProjectStatus({ ...project, status: ProjectStatus.submitted })
         }
         hideSaveDialog();
     };
 
     const deleteDoc = async (row: ProjectDoc) => {
-        const deleted = await ProjectDocApi.deleteProjectStage(row);
+        const deleted = await ProjectDocApi.delete(row);
         if (deleted) {
             removeItem(row);
-            if (updateProjectStatus) {
-                const { projectStage, syncedProject } = deleted;
-                if (project && syncedProject) {
-                    updateProjectStatus({ ...project, status: syncedProject.status })
-                }
+            if (updateProjectStatus && project) {
+                updateProjectStatus({ ...project, status: projectDocs.length > 0 ? ProjectStatus.accepted : ProjectStatus.submitted })
             }
         };
     };
@@ -240,6 +235,16 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
     const columns = [
         !stage && { header: "Stage", field: "stage.name", sortable: true },
         !project && { header: "Project", field: "project.title", sortable: true },
+        !project && {
+            header: "Budget", field: "project.totalBudget",
+            body: (row: ProjectDoc) => {
+                const budget = (row.project as Project)?.totalBudget;
+                return typeof budget === "number"
+                    ? budget.toLocaleString()
+                    : "-";
+            },
+            sortable: true
+        },
         {
             header: "Document",
             body: (row: ProjectDoc) => {
@@ -278,7 +283,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
 
                 canCreate={canCreate}
                 canDelete={canDelete}
-                onCreate={() => { setSelectedStage(emptyStage); setShowSaveDialog(true); }}
+                onCreate={() => { setSelectedStage({ ...emptyStage }); setShowSaveDialog(true); }}
                 onDelete={(row: any) => confirm.ask({ item: row.stage?.name ?? "", onConfirmAsync: () => deleteDoc(row) })}
 
                 toolbarEnd={endToolbarTemplate()}
@@ -300,7 +305,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
                 <SaveProjectStageDialog
                     visible={showSaveDialog}
                     project={project}
-                    projectStage={selectedStage}
+                    projectDoc={selectedStage}
                     onComplete={onSaveComplete}
                     onHide={hideSaveDialog}
                 />

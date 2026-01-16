@@ -2,14 +2,12 @@ import { CacheService } from "../../util/cache/cache.service";
 import { DeleteDto } from "../../util/delete.dto";
 import { Directorate } from "../organization/organization.model";
 import { CreateEvaluationDTO, GetEvaluationsDTO, UpdateEvaluationDTO } from "./evaluation.dto";
-import { EvaluationRepository, IEvaluationRepository } from "./evaluation.repository";
+import { IEvaluationRepository } from "./evaluation.repository";
 
-export class EvaluationService {
+export class EvaluationService {    
 
-    private repository: IEvaluationRepository;
-
-    constructor(repository?: IEvaluationRepository) {
-        this.repository = repository || new EvaluationRepository();
+    constructor(private readonly repository: IEvaluationRepository) 
+    {
     }
 
     async create(dto: CreateEvaluationDTO) {

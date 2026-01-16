@@ -185,6 +185,16 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
         { header: "Title", field: "title", sortable: true },
         { header: "Lead PI", field: "leadPI.name", sortable: true },
         {
+            header: "Budget", field: "totalBudget",
+            body: (row: Project) => {
+                const budget = row?.totalBudget;
+                return typeof budget === "number"
+                    ? budget.toLocaleString()
+                    : "-";
+            },
+            sortable: true
+        },
+        {
             header: "Status", field: "status", sortable: true,
             body: (p: Project) =>
                 <MyBadge type="status" value={p.status ?? 'Unknown'} />

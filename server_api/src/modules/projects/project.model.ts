@@ -10,6 +10,7 @@ export interface IProject extends Document {
     leadPI: mongoose.Types.ObjectId;//change to pi
     totalBudget?: number;
     totalDuration?: number;
+    totalCollabs?: number;
     status: ProjectStatus;
     createdAt?: Date;
     updatedAt?: Date;
@@ -43,7 +44,12 @@ const ProjectSchema = new Schema<IProject>({
         type: Number,
         min: 0
     },
-    
+
+    totalCollabs: {
+        type: Number,
+        min: 0
+    },
+
     status: {
         type: String,
         enum: Object.values(ProjectStatus),

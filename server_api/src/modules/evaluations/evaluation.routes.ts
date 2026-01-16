@@ -2,8 +2,12 @@ import { Router } from "express";
 import { EvaluationController } from "./evaluation.controller";
 import { PERMISSIONS } from "../../common/constants/permissions";
 import { verifyActiveAccount, checkPermission } from "../users/user.middleware";
+import { EvaluationRepository } from "./evaluation.repository";
+import { EvaluationService } from "./evaluation.service";
 
-const controller = new EvaluationController();
+const repository = new EvaluationRepository();
+const service = new EvaluationService(repository);
+const controller = new EvaluationController(service);
 const router = Router();
 
 /**

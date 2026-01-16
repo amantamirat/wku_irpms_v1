@@ -6,10 +6,9 @@ import { DeleteDto } from "../../../util/delete.dto";
 import { IStageRepository } from "../../calls/stages/stage.repository";
 import { StageStatus } from "../../calls/stages/stage.status";
 import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
-import { PhaseRepository } from "../phase/phase.repository";
 import { IProjectRepository } from "../project.repository";
 import { ProjectStatus } from "../project.status";
-import { ProjectSynchronizer, StatusSynchronizer } from "../project.synchronizer";
+import { ProjectSynchronizer, DocStatusSynchronizer } from "../project.synchronizer";
 import { CreateDocumentDTO, GetDocumentDTO, UpdateStatusDTO } from "./document.dto";
 import { IDocumentRepository } from "./document.repository";
 import { DocumentStateMachine } from "./document.state-machine";
@@ -25,7 +24,7 @@ export class DocumentService {
         private readonly projectRepository: IProjectRepository,
         private readonly stageRepository: IStageRepository,
     ) {
-        this.projectSynchronizer = new StatusSynchronizer(this.projectRepository,this.repository);
+        this.projectSynchronizer = new DocStatusSynchronizer(this.projectRepository, this.repository);
         this.validator = new ConstraintValidator(this.projectRepository);
     }
 
@@ -57,10 +56,10 @@ export class DocumentService {
             await this.validator.validateProject(project, projectDoc);
 
             const created = await this.repository.create({ ...dto, stage: String(nextStageDoc._id) });
-
-            const syncedProject = await this.projectSynchronizer.sync(project);
-
-            return { created, syncedProject }
+            
+            if (created) await this.projectSynchronizer.sync(project);
+            
+            return created;
         } catch (err: any) {
             if (err?.code === 11000) {
                 throw new AppError(ERROR_CODES.DOC_ALREADY_EXISTS);
@@ -140,21 +139,21 @@ export class DocumentService {
 
     async delete(dto: DeleteDto) {
         const { id, applicantId } = dto;
+
         const projectDocument = await this.repository.findById(id);
         if (!projectDocument) throw new AppError(ERROR_CODES.DOC_NOT_FOUND);
         if (projectDocument.status !== DocStatus.submitted)
             throw new AppError(ERROR_CODES.DOC_NOT_SUBMITTED);
 
-        const projectDoc = await this.projectRepository.findById(String(projectDocument.project));
-        if (!projectDoc)
-            throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
+        const project = String(projectDocument.project)
+        const projectDoc = await this.projectRepository.findById(project);
+        if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
+
         if (String(projectDoc.leadPI) !== applicantId && SYSTEM.SU_USER !== applicantId)
             throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
 
         const deleted = await this.repository.delete(id);
-        if (deleted) {
-            await this.projectSynchronizer.sync(String(projectDoc._id));
-        }
-        return { deleted };
+        if (deleted) await this.projectSynchronizer.sync(project);
+        return deleted;
     }
 }

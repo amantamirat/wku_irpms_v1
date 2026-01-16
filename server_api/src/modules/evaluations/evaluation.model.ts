@@ -2,9 +2,7 @@ import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
 import { Directorate } from "../organization/organization.model";
 
-// =========================
-// 1️⃣ Evaluation (Root)
-// =========================
+
 
 export interface IEvaluation extends Document {
     directorate: mongoose.Types.ObjectId;

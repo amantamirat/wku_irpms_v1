@@ -12,7 +12,6 @@ import { AuthenticatedRequest } from "../../users/user.middleware";
 import { DocumentService } from "./document.service";
 import { DeleteDto } from "../../../util/delete.dto";
 import { DocStatus } from "./document.status";
-import { ERROR_CODES } from "../../../common/errors/error.codes";
 
 export class ProjectDocController {
 
@@ -21,7 +20,6 @@ export class ProjectDocController {
     constructor(service: DocumentService) {
         this.service = service;
     }
-
     // ---------------------------------------------------
     // CREATE
     // ---------------------------------------------------
@@ -67,7 +65,6 @@ export class ProjectDocController {
             errorResponse(res, 400, err.message, err);
         }
     };
-
     // ---------------------------------------------------
     // GET
     // ---------------------------------------------------
@@ -90,9 +87,6 @@ export class ProjectDocController {
             errorResponse(res, 400, err.message, err);
         }
     };
-
-
-
     // ---------------------------------------------------
     // DELETE
     // ---------------------------------------------------
@@ -109,8 +103,8 @@ export class ProjectDocController {
 
             const deletedDoc = await this.service.delete(dto);
 
-            if (deletedDoc?.deleted?.documentPath) {
-                fs.unlink(deletedDoc.deleted.documentPath, () => { });
+            if (deletedDoc?.documentPath) {
+                fs.unlink(deletedDoc.documentPath, () => { });
             }
 
             successResponse(

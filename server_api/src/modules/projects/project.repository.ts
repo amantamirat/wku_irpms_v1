@@ -60,6 +60,8 @@ export class ProjectRepository implements IProjectRepository {
 
         if (dtoData.title) updateData.title = dtoData.title;
         if (dtoData.summary) updateData.summary = dtoData.summary;
+        if (dtoData.totalBudget) updateData.totalBudget = dtoData.totalBudget;
+        if (dtoData.totalDuration) updateData.totalDuration = dtoData.totalDuration;
         if (dtoData.status) updateData.status = dtoData.status;
 
         const updated = await Project.findByIdAndUpdate(

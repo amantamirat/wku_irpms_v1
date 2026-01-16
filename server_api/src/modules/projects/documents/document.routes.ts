@@ -7,7 +7,7 @@ import { StageRepository } from "../../calls/stages/stage.repository";
 import { ProjectRepository } from "../project.repository";
 import { DocumentRepository } from "./document.repository";
 import { DocumentService } from "./document.service";
-import { StatusSynchronizer } from "../project.synchronizer";
+import { DocStatusSynchronizer } from "../project.synchronizer";
 import { PhaseRepository } from "../phase/phase.repository";
 
 const repository = new DocumentRepository();

@@ -22,6 +22,8 @@ export type Project = {
     summary?: string;
     status?: ProjectStatus;
     leadPI?: string | Applicant;
+    totalBudget?:number;
+    totalDuration?:number;
     createdAt?: Date;
     updatedAt?: Date;
     collaborators?: Collaborator[];// | string[];

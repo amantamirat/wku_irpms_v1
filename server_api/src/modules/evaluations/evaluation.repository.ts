@@ -10,7 +10,7 @@ export interface IEvaluationRepository {
     findById(id: string): Promise<IEvaluation | null>;
     find(filters: GetEvaluationsDTO): Promise<Partial<IEvaluation>[]>;
     create(dto: CreateEvaluationDTO): Promise<IEvaluation>;
-    update(id: string, data: UpdateEvaluationDTO["data"]): Promise<IEvaluation>;
+    update(id: string, data: UpdateEvaluationDTO["data"]): Promise<IEvaluation | null>;
     delete(id: string): Promise<IEvaluation | null>;
 }
 
@@ -44,19 +44,16 @@ export class EvaluationRepository implements IEvaluationRepository {
         return Evaluation.create(data);
     }
 
-    async update(id: string, dtoData: UpdateEvaluationDTO["data"]): Promise<IEvaluation> {
+    async update(id: string, dtoData: UpdateEvaluationDTO["data"]): Promise<IEvaluation | null> {
         const updateData: Partial<IEvaluation> = {};
 
         if (dtoData.title) updateData.title = dtoData.title;
 
-        const updated = await Evaluation.findByIdAndUpdate(
+        return Evaluation.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },
             { new: true }
         ).exec();
-
-        if (!updated) throw new Error("Evaluation not found");
-        return updated;
     }
 
     async delete(id: string) {

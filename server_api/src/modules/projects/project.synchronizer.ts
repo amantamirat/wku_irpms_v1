@@ -1,3 +1,4 @@
+import { ICollaboratorRepository } from "./collaborators/collaborator.repository";
 import { IDocumentRepository } from "./documents/document.repository";
 import { DocStatus } from "./documents/document.status";
 import { IPhaseRepository } from "./phase/phase.repository";
@@ -12,7 +13,7 @@ export abstract class ProjectSynchronizer {
     abstract sync(project: string): Promise<any>;
 }
 
-export class StatusSynchronizer extends ProjectSynchronizer {
+export class DocStatusSynchronizer extends ProjectSynchronizer {
 
     constructor(
         private readonly repository: IProjectRepository,
@@ -68,5 +69,21 @@ export class PhaseSynchronizer extends ProjectSynchronizer {
         );
 
         await this.repository.update(project, { totalBudget, totalDuration });
+    }
+}
+
+export class CollabSynchronizer extends ProjectSynchronizer {
+
+    constructor(
+        private readonly repository: IProjectRepository,
+        private readonly collabRepository: ICollaboratorRepository,
+    ) {
+        super(repository);
+    }
+
+    async sync(project: string): Promise<void> {
+        const collabs = await this.collabRepository.find({ project });
+        const totalCollabs = collabs.length + 1;
+        await this.repository.update(project, { totalCollabs });
     }
 }

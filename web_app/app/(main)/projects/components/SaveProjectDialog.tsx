@@ -64,8 +64,7 @@ const SaveProjectDialog = ({ visible, project, onHide, onComplete }: SaveProject
                 detail: 'Project saved successfully',
                 life: 2000,
             });
-
-            if (onComplete) onComplete(saved);
+           if (onComplete) setTimeout(() => onComplete(saved), 2000);
         } catch (err: any) {
             toast.current?.show({
                 severity: 'error',
