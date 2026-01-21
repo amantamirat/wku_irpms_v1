@@ -8,6 +8,7 @@ export interface FindStageDTO {
 export interface GetStageDTO {
     call?: string;
     status?: StageStatus;
+    order?: number;
     populate?: boolean;
 }
 

@@ -76,7 +76,7 @@ const CollaboratorManager = ({ project, applicant, flyMode = false, onSave, onRe
         };
 
         if (flyMode && project) {
-            setAll(project?.collaborators ?? []);
+            setAll(project.collaborators ?? []);
         }
         else {
             fetchCollabs();
@@ -90,7 +90,7 @@ const CollaboratorManager = ({ project, applicant, flyMode = false, onSave, onRe
         if (flyMode) {
 
         }
-        setSelectedCollaborator(emptyCollaborator);
+        setSelectedCollaborator({...emptyCollaborator});
         setShowSaveDialog(false);
     };
 
@@ -195,7 +195,7 @@ const CollaboratorManager = ({ project, applicant, flyMode = false, onSave, onRe
                 canDelete={canDelete}
 
                 onCreate={() => {
-                    setSelectedCollaborator(emptyCollaborator);
+                    setSelectedCollaborator({...emptyCollaborator});
                     setShowSaveDialog(true);
                 }}
                 onDelete={(row: Collaborator) => {

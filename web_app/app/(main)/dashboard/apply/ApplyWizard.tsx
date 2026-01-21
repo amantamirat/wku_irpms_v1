@@ -31,12 +31,12 @@ interface ApplyWizardProps {
 const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
 
     const confirm = useConfirmDialog();
-    const { getApplicant: getLinkedApplicant } = useAuth();
-    const linkedApplicant = getLinkedApplicant();
+    const { getApplicant } = useAuth();
+    const applicant = getApplicant();
     const initializeProject = (): Project => ({
         title: "",
         call: call,
-        applicant: linkedApplicant,
+        applicant: applicant,
         status: ProjectStatus.pending
     });
     const toast = useRef<Toast>(null);
@@ -198,12 +198,14 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
                 onHide={onHide}
                 maximized
             >
-                <h3>{call.title} ({(call.grant as Grant).title})</h3>
+                <h3>{call.title} ({
+                    (call.grant as Grant).title
+                })</h3>
                 <Steps model={items} activeIndex={activeStep} readOnly className="mb-4" />
                 {activeStep === 0 && <UploadForm file={project.file} onUpload={updateFile} />}
                 {activeStep === 1 && <ProjectForm project={project} setProject={setProject} />}
                 {activeStep === 2 && <CollaboratorManager project={project} onSave={addCollaborator} onRemove={removeCollaborator} flyMode={true} />}
-                {activeStep === 3 && <ProjectThemeManager project={project} onSave={addProjectTheme} onRemove={removeProjectTheme} flyMode />}
+                {activeStep === 3 && <ProjectThemeManager project={project} onSave={addProjectTheme} onRemove={removeProjectTheme} flyMode={true} />}
                 {activeStep === 4 && <PhaseManager project={project} phaseType={PhaseType.phase} flyMode={true} onSave={savePhase} onRemove={removePhase} />}
                 {activeStep === items.length - 1 && <Confirmation project={project} call={project.call as Call} />}
             </Dialog>

@@ -9,7 +9,7 @@ export default function QuickLinks() {
             <Link href="/">
                 <Button label="View All Calls" icon="pi pi-bullhorn" className="p-button-info p-button-rounded" />
             </Link>
-            <Link href="/">
+            <Link  href="/projects">
                 <Button label="Manage Projects" icon="pi pi-briefcase" className="p-button-success p-button-rounded" />
             </Link>
             <Link href="/">

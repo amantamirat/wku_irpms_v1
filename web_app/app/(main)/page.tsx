@@ -2,6 +2,7 @@
 'use client';
 import CallGrid from "./dashboard/CallGrid";
 import QuickLinks from "./dashboard/QuickLinks";
+import StageGrid from "./dashboard/StageGrid";
 
 
 
@@ -14,13 +15,26 @@ const Dashboard = () => {
                 {/*<ProjectStats />*/}
             </div>
 
-            {/* 🧾 Open Calls */}
+            {/* 
+            
             <div className="col-12">
                 <div className="card">
                     {
                         <CallGrid />
                     }
-                    
+
+                </div>
+            </div>
+            */}
+            
+
+            {/* 🧾 Open Calls */}
+            <div className="col-12">
+                <div className="card">
+                    {
+                        <StageGrid />
+                    }
+
                 </div>
             </div>
 

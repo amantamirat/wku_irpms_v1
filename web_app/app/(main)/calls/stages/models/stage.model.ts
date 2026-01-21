@@ -13,7 +13,7 @@ export type Stage = {
     name: string;
     evaluation: string | Evaluation;
     deadline?: Date;
-    //isFinal?:boolean;
+    order?: number;
     status: StageStatus;
     createdAt?: Date;
     updatedAt?: Date;
@@ -21,13 +21,15 @@ export type Stage = {
 
 export interface GetStagesDTO {
     call?: string | Call;
+    status?: StageStatus;
+    order?: number;
 }
 
 /**
  * Validate stage fields before submission
  */
 export const validateStage = (stage: Stage): { valid: boolean; message?: string } => {
-    
+
     if (!stage.name || stage.name.trim().length === 0) {
         return { valid: false, message: "Stage name is required." };
     }
@@ -43,7 +45,7 @@ export const validateStage = (stage: Stage): { valid: boolean; message?: string 
     if (!stage.deadline) {
         throw new Error("Deadline is required.");
     }
-    
+
     const deadlineDate = new Date(stage.deadline);
     if (isNaN(deadlineDate.getTime())) {
         return { valid: false, message: "Deadline must be a valid date." };

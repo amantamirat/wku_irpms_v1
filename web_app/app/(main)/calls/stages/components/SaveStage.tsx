@@ -189,6 +189,8 @@ const SaveStage = ({ visible, stage, callProvided, onComplete, onHide }: SaveSta
                         showIcon
                         dateFormat="yy-mm-dd"
                         placeholder="Select Deadline"
+                        showTime 
+                        hourFormat="12"
                     />
                 </div>
 

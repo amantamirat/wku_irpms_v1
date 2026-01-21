@@ -34,10 +34,12 @@ export class StageController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { call } = req.query;
+            const { call, status, order } = req.query;
 
             const dto: GetStageDTO = {
                 call: call as string,
+                status: status as any,
+                order: order ? Number(order) : undefined,
             };
 
             const stages = await this.service.getStages(dto);

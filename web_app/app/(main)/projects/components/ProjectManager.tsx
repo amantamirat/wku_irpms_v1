@@ -16,10 +16,10 @@ import { Button } from "primereact/button";
 
 interface ProjectManagerProps {
     call?: Call;
-    leadPI?: Applicant;
+    applicant?: Applicant;
 }
 
-const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
+const ProjectManager = ({ call, applicant }: ProjectManagerProps) => {
 
     const confirm = useConfirmDialog();
     const { hasPermission } = useAuth();
@@ -29,7 +29,7 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
     const emptyProject: Project = {
         call: call,
         title: "",
-        applicant: "", //leadPI
+        applicant: applicant, //leadPI
     };
 
     // ✅ Permissions
@@ -64,7 +64,7 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
         const fetchProjects = async () => {
             try {
                 setLoading(true);
-                const data = await ProjectApi.getProjects({ call, leadPI });
+                const data = await ProjectApi.getProjects({ call, leadPI: applicant });
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to fetch projects. " + (err.message ?? ""));
@@ -73,7 +73,7 @@ const ProjectManager = ({ call, leadPI }: ProjectManagerProps) => {
             }
         };
         fetchProjects();
-    }, [call, leadPI]);
+    }, [call, applicant]);
 
 
 

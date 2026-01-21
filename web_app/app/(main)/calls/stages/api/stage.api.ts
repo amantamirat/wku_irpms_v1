@@ -15,12 +15,14 @@ export const StageApi = {
         const query = new URLSearchParams();
         const sanitized = sanitizeStage(options);
         if (options.call) query.append("call", sanitized.call as string);
+        if (options.status) query.append("status", options.status as string);
+        if (options.order) query.append("order", String(options.order));
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Stage[];
     },
 
     async update(stage: Partial<Stage>): Promise<Stage> {
-        if (!stage._id) throw new Error("_id required.");        
+        if (!stage._id) throw new Error("_id required.");
         const query = new URLSearchParams();
         query.append("id", stage._id);
         const sanitized = sanitizeStage(stage);

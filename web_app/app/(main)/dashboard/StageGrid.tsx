@@ -1,0 +1,66 @@
+import React, { useEffect, useState } from 'react';
+import StageCard from './StageCard';
+import ErrorCard from '@/components/ErrorCard';
+import ListSkeleton from '@/components/ListSkeleton';
+import { useAuth } from '@/contexts/auth-context';
+import { PERMISSIONS } from '@/types/permissions';
+import { StageApi } from '../calls/stages/api/stage.api';
+import { Stage, StageStatus } from '../calls/stages/models/stage.model';
+
+const StageGrid = () => {
+    const [stages, setStages] = useState<Stage[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const { hasPermission } = useAuth();
+    const canRead = hasPermission([PERMISSIONS.STAGE.READ]);
+    if (!canRead) {
+        return (<></>);
+    }
+
+    useEffect(() => {
+        const fetchStages = async () => {
+            try {
+                const data = await StageApi.getStages({
+                    status: StageStatus.active, order: 1
+                });
+                setStages(data);
+            } catch (err: any) {
+                setError("Failed to fetch stages. " + (err.message ?? ""));
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchStages();
+    }, []);
+
+    if (loading) {
+        return (
+            <ListSkeleton />
+        );
+    }
+
+    if (error) return <ErrorCard errorMessage={error} />;
+
+    if (stages.length === 0)
+        return (
+            <div className="flex justify-content-center align-items-center py-6">
+                <div className="text-center">
+                    <i className="pi pi-inbox text-4xl text-500 mb-3" />
+                    <p className="text-500">No open calls at the moment.</p>
+                </div>
+            </div>
+        );
+
+    return (
+        <div className="grid gap-4">
+            {stages.map((stage) => (
+                <div key={stage._id} className="col-12 sm:col-6 lg:col-4 xl:col-3">
+                    <StageCard stage={stage} />
+                </div>
+            ))}
+        </div>
+    );
+}
+
+export default StageGrid;

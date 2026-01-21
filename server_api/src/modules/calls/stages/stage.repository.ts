@@ -38,6 +38,10 @@ export class StageRepository implements IStageRepository {
             query.call = new mongoose.Types.ObjectId(filters.call);
         }
 
+        if (filters.order) {
+            query.order = filters.order;
+        }
+
         if (filters.status) {
             query.status = filters.status;
         }
