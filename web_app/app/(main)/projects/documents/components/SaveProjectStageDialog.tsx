@@ -111,7 +111,7 @@ const SaveProjectStageDialog = ({
             <Dialog
                 visible={visible}
                 style={{ width: "600px" }}
-                header="Project Stage Details"
+                header="Project Doc Details"
                 modal
                 className="p-fluid"
                 footer={footer}

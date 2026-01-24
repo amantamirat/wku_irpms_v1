@@ -167,7 +167,7 @@ const ResultManager = ({ reviewer, updateStatus }: ResultManagerProps) => {
 
         return (
             <div className="my-2">
-                {state === ReviewerStatus.verified && (
+                {state === ReviewerStatus.accepted && (
                     <Button label="Submit" icon="pi pi-check" outlined severity="success"
                         onClick={() => {
                             if (!reviewer || !updateStatus) return;
@@ -185,7 +185,7 @@ const ResultManager = ({ reviewer, updateStatus }: ResultManagerProps) => {
                             if (!reviewer || !updateStatus) return;
                             confirm.ask({
                                 operation: 'Recall Submission',
-                                onConfirmAsync: () => updateStatus(reviewer, ReviewerStatus.verified)
+                                onConfirmAsync: () => updateStatus(reviewer, ReviewerStatus.accepted)
                             });
                         }}
                     />

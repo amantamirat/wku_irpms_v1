@@ -6,6 +6,7 @@ import { PhaseStatus } from "./phase.status";
 export interface IPhase extends Document {
     _id: mongoose.Types.ObjectId;
     project: mongoose.Types.ObjectId;
+    order: number;
     activity: string;
     duration: number;
     budget: number;
@@ -21,6 +22,11 @@ const PhaseSchema = new Schema<IPhase>(
             type: Schema.Types.ObjectId,
             ref: COLLECTIONS.PROJECT,
             required: true
+        },
+        order: {
+            type: Number,
+            //required: true,
+            //immutable: true,
         },
         activity: {
             type: String,
@@ -48,7 +54,7 @@ const PhaseSchema = new Schema<IPhase>(
     },
     { timestamps: true }
 );
-
+//PhaseSchema.index({ project: 1, order: 1 }, { unique: true });
 export const Phase = model<IPhase>(COLLECTIONS.PHASE, PhaseSchema);
 
 

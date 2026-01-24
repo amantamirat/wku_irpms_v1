@@ -75,7 +75,7 @@ const AppMenu = () => {
             visible: hasPermission(
                 [
                     PERMISSIONS.CALENDAR.CREATE,
-                    PERMISSIONS.PROJECT.CREATE,
+                    //PERMISSIONS.PROJECT.CREATE,
                     PERMISSIONS.APPLICANT.CREATE,
                     PERMISSIONS.SPECIALIZATION.CREATE,
                     PERMISSIONS.POSITION.CREATE
@@ -104,6 +104,7 @@ const AppMenu = () => {
                     ),
                     to: '/applicants',
                 },
+                /*
                 {
                     label: 'Projects',
                     icon: PrimeIcons.BRIEFCASE,
@@ -114,6 +115,7 @@ const AppMenu = () => {
                         ]
                     )
                 },
+                */
                 {
                     label: 'Students',
                     icon: PrimeIcons.BOOK,

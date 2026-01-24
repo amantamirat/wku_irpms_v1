@@ -6,57 +6,40 @@ import { IProjectDocument } from "./document.model";
 import { IReviewerRepository } from "../../calls/stages/reviewers/reviewer.repository";
 import { ReviewerStatus } from "../../calls/stages/reviewers/reviewer.status";
 
-export class ProjectStageSynchronizer {
-  private projectStageRepo: IDocumentRepository;
-  private reviewerRepo: IReviewerRepository;
+export class DocumentSynchronizer {
 
-  constructor(projectStageRepo: IDocumentRepository, reviewerRepo: IReviewerRepository) {
-    this.projectStageRepo = projectStageRepo;
-    this.reviewerRepo = reviewerRepo;
+  constructor(
+    private readonly documentRepository: IDocumentRepository,
+    private readonly reviewerRepository: IReviewerRepository
+  ) {
+
   }
 
-  async syncProjectStageStatus(projectStageId: string, projectStage?: Partial<IProjectDocument>) {
-    // Fetch project stage if not provided
-    const stage = projectStage ?? await this.projectStageRepo.findById(projectStageId);
-    if (!stage || !stage.status) return;
-    const currentStatus = stage.status;
-    // Fetch all reviewers
-    const reviewers = await this.reviewerRepo.findByProjectStage(projectStageId);
-    let newStatus: DocStatus;
+  async sync(docId: string) {
+    const proDoc = await this.documentRepository.findById(docId);
+    if (!proDoc || !proDoc.status) return;
+
+    const currentStatus = proDoc.status;
+    const reviewers = await this.reviewerRepository.find({ projectStage: docId });
+
+    let newStatus: DocStatus = DocStatus.selected;
+
     let totalScore: number | undefined = undefined;
-    // 1. No reviewers → pending
-    if (reviewers.length === 0) {
-      newStatus = DocStatus.submitted;
-    }
-    else {
-      const allApproved = reviewers.every(r => r.status === ReviewerStatus.approved);
-      if (allApproved) {
-        newStatus = DocStatus.reviewed;
-        const totalWeight = reviewers.reduce((sum, r) => sum + (r.weight ?? 1), 0);
-        totalScore = reviewers.reduce((sum, r) => sum + (r.score ?? 0) * (r.weight ?? 1), 0) / totalWeight;
-        //totalScore = reviewers.reduce((sum, r) => sum + (r.weight ?? 1) * (r.score ?? 0), 0) / reviewers.length;
-      }
-      else {
-        // Otherwise → submitted i.e. every pending → submitted
-        newStatus = DocStatus.selected;
-      }
-    }
-    // }
 
-
-    // Prepare update payload safely
-    const updateData: Partial<IProjectDocument> = { status: newStatus };
-
-    // Only attach score when it exists
-    if (totalScore !== undefined) {
-      updateData.totalScore = totalScore;
+    const allApproved = reviewers.every(r => r.status === ReviewerStatus.approved);
+    if (allApproved) {
+      newStatus = DocStatus.reviewed;
+      const totalWeight = reviewers.reduce((sum, r) => sum + (r.weight ?? 1), 0);
+      totalScore = reviewers.reduce((sum, r) => sum + (r.score ?? 0) * (r.weight ?? 1), 0) / totalWeight;
     }
-    let updatedProjectStage;
-    // Update only if allowed by the state machine
-    if (DocumentStateMachine.canTransition(currentStatus, newStatus)) {
-      updatedProjectStage = await this.projectStageRepo.update(projectStageId, updateData);
+
+    if (newStatus !== currentStatus &&
+      DocumentStateMachine.canTransition(currentStatus, newStatus)) {
+      const updated = await this.documentRepository.update(docId,
+        { status: newStatus, totalScore: totalScore });
+      return updated;
     }
-    return updatedProjectStage;
+
   }
 
 }

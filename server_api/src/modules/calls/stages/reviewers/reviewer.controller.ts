@@ -3,10 +3,13 @@ import { ReviewerService } from "./reviewer.service";
 import {
     CreateReviewerDTO,
     GetReviewersDTO,
-    UpdateReviewerDTO
+    UpdateReviewerDTO,
+    UpdateReviewerStatusDTO
 } from "./reviewer.dto";
 import { AuthenticatedRequest } from "../../../users/user.middleware";
 import { successResponse, errorResponse } from "../../../../common/helpers/response";
+import { ReviewerStatus } from "./reviewer.status";
+import { ERROR_CODES } from "../../../../common/errors/error.codes";
 
 export class ReviewerController {
 
@@ -31,7 +34,7 @@ export class ReviewerController {
                 projectStage,
                 applicant,
                 weight,
-                userId: req.user.userId
+                // userId: req.user.userId
             };
 
             const created = await this.service.create(dto);
@@ -95,14 +98,14 @@ export class ReviewerController {
     updateStatus = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) {
-                throw new Error("User not found!");
+                throw new Error(ERROR_CODES.USER_NOT_FOUND);
             }
-            const { id } = req.params; 
+            const { id } = req.params;
             const { status } = req.body;
 
-            const dto: UpdateReviewerDTO = {
+            const dto: UpdateReviewerStatusDTO = {
                 id: String(id),
-                data: { status },
+                status: status as ReviewerStatus,
                 applicantId: req.user.applicantId
             };
 

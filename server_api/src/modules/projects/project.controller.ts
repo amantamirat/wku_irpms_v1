@@ -42,11 +42,11 @@ export class ProjectController {
   // -----------------------
   get = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { call, leadPI } = req.query;
+      const { call, applicant } = req.query;
 
       const projects = await this.service.getProjects({
         call: call as string,
-        applicant: leadPI as string,
+        applicant: applicant as string,
       });
 
       successResponse(res, 200, "Projects fetched successfully", projects);

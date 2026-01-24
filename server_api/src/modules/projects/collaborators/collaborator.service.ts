@@ -52,7 +52,7 @@ export class CollaboratorService {
     }
 
     async get(options: GetCollaboratorsOptions) {
-        const collaborators = await this.repository.find(options);
+        const collaborators = await this.repository.find({ ...options, populate: true });
         return collaborators;
     }
 

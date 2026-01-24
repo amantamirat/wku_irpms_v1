@@ -44,7 +44,6 @@ const ProjectSchema = new Schema<IProject>({
         type: Number,
         min: 0
     },
-
     totalCollabs: {
         type: Number,
         min: 0

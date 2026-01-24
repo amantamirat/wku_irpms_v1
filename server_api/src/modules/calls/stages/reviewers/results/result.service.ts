@@ -65,7 +65,7 @@ export class ResultService {
         const reviewerDoc = await this.reviewerRepo.findById(reviewer);
         if (!reviewerDoc) throw new AppError(ERROR_CODES.REVIEWER_NOT_FOUND);
 
-        if (reviewerDoc.status !== ReviewerStatus.verified)
+        if (reviewerDoc.status !== ReviewerStatus.accepted)
             throw new AppError(ERROR_CODES.REVIEWER_NOT_VERIFIED);
         
         if (String(reviewerDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
@@ -87,7 +87,7 @@ export class ResultService {
         const reviewerDoc = await this.reviewerRepo.findById(String(resultDoc.reviewer));
         if (!reviewerDoc) throw new AppError(ERROR_CODES.REVIEWER_NOT_FOUND);
 
-        if (reviewerDoc.status !== ReviewerStatus.verified)
+        if (reviewerDoc.status !== ReviewerStatus.accepted)
             throw new AppError(ERROR_CODES.REVIEWER_NOT_VERIFIED);
 
         if (String(reviewerDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
@@ -105,7 +105,7 @@ export class ResultService {
         const reviewerDoc = await this.reviewerRepo.findById(String(resultDoc.reviewer));
         if (!reviewerDoc) throw new AppError(ERROR_CODES.REVIEWER_NOT_FOUND);
 
-        if (reviewerDoc.status !== ReviewerStatus.verified)
+        if (reviewerDoc.status !== ReviewerStatus.accepted)
             throw new AppError(ERROR_CODES.REVIEWER_NOT_VERIFIED);
 
         if (String(reviewerDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)

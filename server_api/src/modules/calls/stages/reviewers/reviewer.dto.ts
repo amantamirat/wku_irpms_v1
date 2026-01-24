@@ -4,13 +4,14 @@ import { ReviewerStatus } from "./reviewer.status";
 export interface GetReviewersDTO {
     projectStage?: string;
     applicant?: string;
+    populate?: boolean;
 }
 
 export interface CreateReviewerDTO {
     projectStage: string;
     applicant: string;
     weight?: number;
-    userId: string;
+    // userId: string;
 }
 
 export interface UpdateReviewerDTO {
@@ -22,3 +23,10 @@ export interface UpdateReviewerDTO {
     }>;
     applicantId: string;
 }
+
+export interface UpdateReviewerStatusDTO {
+    id: string;
+    status: ReviewerStatus;
+    applicantId: string;
+}
+

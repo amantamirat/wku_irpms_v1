@@ -11,41 +11,40 @@ import { Button } from "primereact/button";
 import { useEffect, useState } from "react";
 import ResultManager from "../../results/components/ResultManager";
 import { ReviewerApi } from "../api/reviewer.api";
-import { GetReviewersOptions, Reviewer, ReviewerStatus } from "../models/reviewer.model";
+import { Reviewer, ReviewerStatus } from "../models/reviewer.model";
 import SaveReviewerDialog from "./SaveReviewerDialog";
 import { ProjectDoc, DocStatus } from "@/app/(main)/projects/documents/models/document.model";
 
 interface ReviewerManagerProps {
-    projectStage?: ProjectDoc;
-    updateProjectStage?: (projectStage: ProjectDoc) => void;
+    projectDoc?: ProjectDoc;
     applicant?: Applicant;
-    showControllers?: boolean;
+    updateProjectDoc?: (projectDoc: ProjectDoc) => void;
 }
 
-const ReviewerManager = ({ projectStage, applicant, showControllers, updateProjectStage }: ReviewerManagerProps) => {
-    
+const ReviewerManager = ({ projectDoc, applicant, updateProjectDoc }: ReviewerManagerProps) => {
+
     const confirm = useConfirmDialog();
-    const { getApplicant: getLinkedApplicant, hasPermission } = useAuth();
-    const linkedApplicant = getLinkedApplicant();
-    const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
+    const { getApplicant, hasPermission } = useAuth();
+    const loggedInApplicant = getApplicant();
+
 
     const emptyReviewer: Reviewer = {
-        projectStage: projectStage ?? undefined,
+        projectStage: projectDoc ?? undefined,
         applicant: applicant ?? undefined,
         weight: 1,
         status: ReviewerStatus.pending
     };
 
-    const stageStatus = projectStage?.status;
+    const stageStatus = projectDoc?.status;
     const creationStatus = [DocStatus.submitted, DocStatus.selected];
-    const canCreate = hasPermission([PERMISSIONS.REVIEWER.CREATE]) && stageStatus && creationStatus.includes(stageStatus);
-    const canEdit = hasPermission([PERMISSIONS.REVIEWER.UPDATE]) && stageStatus && creationStatus.includes(stageStatus);
-    const canDelete = hasPermission([PERMISSIONS.REVIEWER.DELETE]) && stageStatus && creationStatus.includes(stageStatus);
+
+    const canCreate = hasPermission([PERMISSIONS.REVIEWER.CREATE]) //&& stageStatus && creationStatus.includes(stageStatus);
+    const canEdit = hasPermission([PERMISSIONS.REVIEWER.UPDATE]) //&& stageStatus && creationStatus.includes(stageStatus);
+    const canDelete = hasPermission([PERMISSIONS.REVIEWER.DELETE]) //&& stageStatus && creationStatus.includes(stageStatus);
 
     const canPend = hasPermission([PERMISSIONS.REVIEWER.STATUS.PEND]);
-    const canVerify = hasPermission([PERMISSIONS.REVIEWER.STATUS.VERIFY]);
+    const canAccept = hasPermission([PERMISSIONS.REVIEWER.STATUS.ACCEPT]);
     const canApprove = hasPermission([PERMISSIONS.REVIEWER.STATUS.APPROVE]);
-
 
     // ✅ CRUD Hook
     const {
@@ -67,12 +66,8 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
         const fetchReviewers = async () => {
             try {
                 setLoading(true);
-                const options: GetReviewersOptions = {
-                    applicant: applicant,
-                    projectStage: projectStage
-                };
-                const data = await ReviewerApi.getReviewers(options);
-                setAll(data.map(r => ({ ...r, applicant: applicant ?? r.applicant, projectStage: projectStage ?? r.projectStage })));
+                const data = await ReviewerApi.getReviewers({ applicant, projectStage: projectDoc });
+                setAll(data);
             } catch (err: any) {
                 setError("Failed to fetch reviewers. " + (err.message ?? ""));
             } finally {
@@ -80,13 +75,13 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
             }
         };
         fetchReviewers();
-    }, [applicant, projectStage]);
+    }, [applicant, projectDoc]);
 
     const updateDocument = (projectDoc: ProjectDoc) => {
-        if (updateProjectStage && projectStage) {
-            updateProjectStage({
+        if (updateProjectDoc && projectDoc) {
+            updateProjectDoc({
                 ...projectDoc,
-                project: projectStage.project, stage: projectStage.stage
+                project: projectDoc.project, stage: projectDoc.stage
             });
         }
     }
@@ -104,9 +99,9 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
 
     const updateStatus = async (row: Reviewer, next: ReviewerStatus) => {
         if (!row._id) return;
-        const { updated, syncedProjectStage } = await ReviewerApi.updateStatus(row._id, next);
-        updateItem({ ...updated, applicant: row.applicant, projectStage: row.projectStage });
-        updateDocument(syncedProjectStage);
+        const updated = await ReviewerApi.updateStatus(row._id, next);
+        updateItem({ ...row, status: updated.status });
+        //updateDocument(syncedProjectStage);
     };
 
     const hideSaveDialog = () => {
@@ -114,80 +109,78 @@ const ReviewerManager = ({ projectStage, applicant, showControllers, updateProje
         setShowSaveDialog(false);
     };
 
-    const stateTransitionTemplate = (rowData: Reviewer) => {
-        const state = rowData.status;
-        const isReviewer = (rowData?.applicant as any)._id === loggedApplicantId;
-        // const isActiveReviewer = isOwner && reviewer?.status === ReviewerStatus.active;
+    const stateTransitionTemplate = (row: Reviewer) => {
+        const current = row.status;
+
+        const isReviewer = loggedInApplicant ? row.applicant === loggedInApplicant._id : false;
+
+        let prev: ReviewerStatus | undefined;
+        let next: ReviewerStatus | undefined;
+
+        // pending → accepted
+        if (current === ReviewerStatus.pending) {
+            if (isReviewer && canAccept) {
+                next = ReviewerStatus.accepted;
+            }
+        }
+        // accepted → pending (Pend)
+        if (current === ReviewerStatus.accepted) {
+            if (canPend) {
+                prev = ReviewerStatus.pending;
+            }
+        }
+
+        // submitted ↔ approved
+        if (canApprove) {
+            if (current === ReviewerStatus.submitted) {
+                next = ReviewerStatus.approved;
+            }
+            if (current === ReviewerStatus.approved) {
+                prev = ReviewerStatus.submitted;
+            }
+        }
+
         return (
             <div className="flex gap-2">
-                {/* pending → active */}
-                {(isReviewer && applicant && canVerify && state === ReviewerStatus.pending) && (
+                {next && (
                     <Button
-                        label="Verify"
+                        tooltip={`Make ${next}`}
                         icon="pi pi-check"
                         severity="success"
                         size="small"
-                        onClick={() => {
+                        onClick={() =>
                             confirm.ask({
-                                operation: 'activate',
-                                onConfirmAsync: () => updateStatus(rowData, ReviewerStatus.verified)
-                            });
-                        }}
+                                operation: `move to ${next}`,
+                                onConfirmAsync: () => updateStatus(row, next)
+                            })
+                        }
                     />
                 )}
-
-                {/* active → pending*/}
-                {canPend && state === ReviewerStatus.verified && (
+                {prev && (
                     <Button
-                        label="Pend"
-                        icon="pi pi-arrow-left"
+                        tooltip={`Back to ${prev}`}
+                        icon="pi pi-undo"
                         severity="warning"
                         size="small"
-                        onClick={() => {
+                        onClick={() =>
                             confirm.ask({
-                                operation: 'pend',
-                                onConfirmAsync: () => updateStatus(rowData, ReviewerStatus.pending)
-                            });
-                        }}
+                                operation: `revert to ${prev}`,
+                                onConfirmAsync: () => updateStatus(row, prev)
+                            })
+                        }
                     />
                 )}
 
-                {canApprove && (<>
-                    {/* submitted → approved */}
-                    {state === ReviewerStatus.submitted && (
-                        <Button
-                            label="Approve"
-                            icon="pi pi-check-circle"
-                            severity="info"
-                            size="small"
-                            onClick={() => confirm.ask({
-                                operation: 'Approve',
-                                onConfirmAsync: () => updateStatus(rowData, ReviewerStatus.approved)
-                            })}
-                        />)}
-                    {/* approved → submitted */}
-                    {state === ReviewerStatus.approved && (
-                        <Button
-                            tooltip="Revert"
-                            icon="pi pi-undo"
-                            severity="warning"
-                            size="small"
-                            onClick={() => confirm.ask({
-                                operation: 'revert to submitted',
-                                onConfirmAsync: () => updateStatus(rowData, ReviewerStatus.submitted)
-                            })}
-                        />
-                    )}
-                </>)}
             </div>
         );
-    }
+    };
+
 
     const columns = [
         applicant && { header: "Stage", field: "projectStage.stage.name", sortable: true },
         applicant && { header: "Project", field: "projectStage.project.title", sortable: true },
-        projectStage && { header: "Workspace", field: "applicant.workspace.name" },
-        projectStage && { header: "Reviewer", field: "applicant.name" },
+        projectDoc && canCreate && { header: "Workspace", field: "applicant.workspace.name" },
+        projectDoc && canCreate && { header: "Reviewer", field: "applicant.name" },
         {
             header: "Score", field: "score",
             body: (row: Reviewer) => [ReviewerStatus.submitted, ReviewerStatus.approved].includes(row.status) ? row.score ?? "-" : "-"

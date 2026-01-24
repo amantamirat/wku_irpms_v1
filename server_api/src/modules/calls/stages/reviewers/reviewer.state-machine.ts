@@ -3,9 +3,9 @@ import { ReviewerStatus } from "./reviewer.status";
 // reviewer.state-machine.ts
 export class ReviewerStateMachine {
     private static readonly transitions: Record<ReviewerStatus, ReviewerStatus[]> = {
-        [ReviewerStatus.pending]: [ReviewerStatus.verified],
-        [ReviewerStatus.verified]: [ReviewerStatus.submitted, ReviewerStatus.pending],
-        [ReviewerStatus.submitted]: [ReviewerStatus.approved, ReviewerStatus.verified],
+        [ReviewerStatus.pending]: [ReviewerStatus.accepted],
+        [ReviewerStatus.accepted]: [ReviewerStatus.submitted, ReviewerStatus.pending],
+        [ReviewerStatus.submitted]: [ReviewerStatus.approved, ReviewerStatus.accepted],
         [ReviewerStatus.approved]: [ReviewerStatus.submitted]
     };
 

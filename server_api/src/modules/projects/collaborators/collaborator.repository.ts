@@ -37,14 +37,20 @@ export class CollaboratorRepository implements ICollaboratorRepository {
             query.applicant = new mongoose.Types.ObjectId(filters.applicant);
         }
 
-        return Collaborator.find(query)
-            .populate([
+        let mongooseQuery = Collaborator.find(query);
+
+        if (filters.populate) {
+            mongooseQuery = mongooseQuery.populate([
                 { path: 'applicant', populate: { path: 'workspace' } },
                 { path: 'project' }
-            ])
+            ]);
+        }
+
+        return mongooseQuery
             .lean<ICollaborator[]>()
             .exec();
     }
+
 
     async create(dto: CreateCollaboratorDto) {
         const data: Partial<ICollaborator> = {

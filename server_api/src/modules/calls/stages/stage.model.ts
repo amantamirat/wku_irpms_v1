@@ -30,7 +30,7 @@ const StageSchema = new Schema<IStage>({
     order: {
         type: Number,
         required: true,
-        immutable: true,
+        //immutable: true,
     },
     evaluation: {
         type: Schema.Types.ObjectId,

@@ -246,7 +246,7 @@ export const PERMISSIONS = {
     STATUS: {
       PEND: "reviewer:status.pending",
       SUBMIT: "reviewer:status.submitted",
-      VERIFY: "reviewer:status.verified",
+      ACCEPT: "reviewer:status.accepted",
       APPROVE: "reviewer:status.approved"
     },
     DELETE: "reviewer:delete",

@@ -52,23 +52,11 @@ export class DocumentRepository implements IDocumentRepository {
             .exec();
     }
 
-    /*
-    async findByStage(stage: string) {
-        return ProjectDocument.find({ stage: new mongoose.Types.ObjectId(stage) })
-            .populate({
-                path: "project",
-                populate: { path: "leadPI", populate: { path: "workspace" } }
-            })
-            .lean<IProjectDocument[]>()
-            .exec();
-    }
-    */
-
     async findByProject(stage: string) {
         return ProjectDocument.find({ stage: new mongoose.Types.ObjectId(stage) })
             .populate({
                 path: "project",
-                populate: { path: "leadPI", populate: { path: "workspace" } }
+                populate: { path: "applicant", populate: { path: "workspace" } }
             })
             .lean<IProjectDocument[]>()
             .exec();

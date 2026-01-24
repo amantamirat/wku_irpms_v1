@@ -36,14 +36,19 @@ export class PhaseService {
 
     async create(dto: CreatePhaseDto) {
         const { project, applicantId } = dto;
-
         this.validate(project ?? "", applicantId ?? "");
+        try {
+            const created = await this.repository.create(dto);
+            await this.projectSynchronizer.sync(project);
+            return created;
+        }
+        catch (err: any) {
+            if (err?.code === 11000) {
+                throw new AppError(ERROR_CODES.PHASE_ALREADY_EXISTS);
+            }
+            throw err;
+        }
 
-        const created = await this.repository.create(dto);
-
-        await this.projectSynchronizer.sync(project);
-
-        return created;
     }
 
     async getPhases(options: GetPhasesOptions) {

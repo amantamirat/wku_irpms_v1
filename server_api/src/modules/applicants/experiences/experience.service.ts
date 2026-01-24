@@ -29,7 +29,7 @@ export class ExperienceService {
     async create(dto: CreateExperienceDTO) {
         const { applicant, organization } = dto;
 
-        const applicantDoc = await this.applicantRepository.findOne({ id: applicant });
+        const applicantDoc = await this.applicantRepository.findById(applicant);
         if (!applicantDoc)
             throw new AppError(ERROR_CODES.APPLICANT_NOT_FOUND);
 

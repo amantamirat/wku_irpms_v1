@@ -1,6 +1,6 @@
 export enum ReviewerStatus {
     pending = 'pending',
-    verified = 'verified',
+    accepted = 'accepted',
     //decliend
     submitted = 'submitted',
     approved = 'approved',

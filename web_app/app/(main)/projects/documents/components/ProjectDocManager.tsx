@@ -14,6 +14,7 @@ import { ProjectDocApi } from "../api/project.doc.api";
 import { DocStatus, ProjectDoc } from "../models/document.model";
 import SaveProjectStageDialog from "./SaveProjectStageDialog";
 import ReviewerManager from "@/app/(main)/calls/reviewers/components/ReviewerManager";
+import { Dialog } from "primereact/dialog";
 
 interface ProjectDocManagerProps {
     project?: Project;
@@ -23,12 +24,7 @@ interface ProjectDocManagerProps {
 
 const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocManagerProps) => {
     const confirm = useConfirmDialog();
-    const { getApplicant: getLinkedApplicant, hasPermission } = useAuth();
-    const linkedApplicant = getLinkedApplicant();
-    const loggedApplicantId = linkedApplicant?._id ?? linkedApplicant;
-    const isLeadPI = project ? loggedApplicantId === (project.applicant as any)._id : false;
-
-    const [selectedDocs, setSelectedDocs] = useState<ProjectDoc[]>([]);
+    const { getApplicant, hasPermission } = useAuth();
 
     const emptyStage: ProjectDoc = {
         stage: "-",
@@ -52,6 +48,13 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
 
     const enableMultiSelection = canAccept || canReject || canSelect;
 
+    const [selectedDoc, setSelectedDoc] = useState<ProjectDoc>(emptyStage);
+    const [selectedDocs, setSelectedDocs] = useState<ProjectDoc[]>([]);
+
+    const [showSaveDialog, setShowSaveDialog] = useState(false);
+    const [showReviewers, setShowReviewers] = useState(false);
+
+
     // ✅ State + CRUD Hook
     const {
         items: projectDocs,
@@ -64,8 +67,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
         setError
     } = useCrudList<ProjectDoc>();
 
-    const [selectedStage, setSelectedStage] = useState<ProjectDoc>(emptyStage);
-    const [showSaveDialog, setShowSaveDialog] = useState(false);
+
 
     // ✅ Fetch project stages
     useEffect(() => {
@@ -107,18 +109,11 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
     };
 
     const hideSaveDialog = () => {
-        setSelectedStage(emptyStage);
+        setSelectedDoc(emptyStage);
         setShowSaveDialog(false);
     };
 
     const updateStatus = async (docs: ProjectDoc[], next: DocStatus) => {
-        /*
-        if (next !== DocStatus.reviewed && !docs.every(d => d.status === DocStatus.reviewed)) {
-            throw new Error(
-                "All selected documents must be reviewed before acceptance."
-            );
-        }
-        */
         const updatedDocs = await ProjectDocApi.updateStatus({ documents: docs }, next);
         for (const updatedDoc of updatedDocs) {
             const doc = projectDocs.find(d => d._id === updatedDoc._id);
@@ -126,21 +121,13 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
                 updateItem({ ...updatedDoc, stage: doc.stage, project: doc.project });
             }
         }
-        /*
-        if (updateProjectStatus && project && updatedDocs.length === 1) {
-            updateProjectStatus({
-                ...project, status: next === DocStatus.accepted ?
-                    ProjectStatus.accepted : ProjectStatus.rejected
-            })
-        }
-        */
         setSelectedDocs([]);
     };
 
     const endToolbarTemplate = () => {
         return (
             <div className="my-2 mb-3 flex gap-2" >
-                {canAccept &&
+                {canSelect &&
                     <Button
                         label="Select"
                         icon="pi pi-eye"
@@ -192,6 +179,30 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
             </div>
         );
     }
+
+
+    const reviewerButton = (row: ProjectDoc) => {
+        const current = row.status;
+        if (current === DocStatus.submitted) {
+            return
+        }
+        return (
+            <div className="flex gap-2">
+                <Button
+                    tooltip="evaluations"
+                    icon="pi pi-chart-bar"
+                    //severity="warning"
+                    size="small"
+                    onClick={() => {
+                        setSelectedDoc({ ...row });
+                        setShowReviewers(true);
+                    }
+                    }
+                />
+
+            </div>
+        );
+    };
 
 
     const stateTransitionTemplate = (row: ProjectDoc) => {
@@ -268,7 +279,8 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
             header: "Status",
             body: (row: ProjectDoc) => <MyBadge type="status" value={row.status ?? "Unknown"} />
         },
-        { body: stateTransitionTemplate }
+        { body: stateTransitionTemplate },
+        { body: reviewerButton }
     ].filter(Boolean);
 
     return (
@@ -277,21 +289,28 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
                 headerTitle="Project Docs"
                 items={projectDocs}
                 dataKey="_id"
+
                 columns={columns}
+
                 loading={loading}
                 error={error}
 
                 canCreate={canCreate}
                 canDelete={canDelete}
-                onCreate={() => { setSelectedStage({ ...emptyStage }); setShowSaveDialog(true); }}
+                onCreate={() => { setSelectedDoc({ ...emptyStage }); setShowSaveDialog(true); }}
                 onDelete={(row: any) => confirm.ask({ item: row.stage?.name ?? "", onConfirmAsync: () => deleteDoc(row) })}
+
 
                 toolbarEnd={endToolbarTemplate()}
 
+                canDeleteRow={(row: ProjectDoc) => row.status === DocStatus.submitted}
+
+
                 /*
-                rowExpansionTemplate={(row) => <ReviewerManager projectStage={row}
-                    updateProjectStage={onSaveComplete} showControllers />}
+                rowExpansionTemplate={(row) => <ReviewerManager projectDoc={row}
+                    updateProjectDoc={onSaveComplete} />}
                 */
+
 
                 enableSearch
 
@@ -305,11 +324,24 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
                 <SaveProjectStageDialog
                     visible={showSaveDialog}
                     project={project}
-                    projectDoc={selectedStage}
+                    projectDoc={selectedDoc}
                     onComplete={onSaveComplete}
                     onHide={hideSaveDialog}
                 />
             )}
+            {(showReviewers && selectedDoc) &&
+                <Dialog visible={showReviewers}
+                    maximizable
+                    style={{ width: '80vw', maxWidth: '1200px' }}
+                    header={"Reviewers"}
+                    onHide={
+                        () => {
+                            setShowReviewers(false);
+                        }
+                    }>
+                    <ReviewerManager projectDoc={selectedDoc} updateProjectDoc={onSaveComplete} />
+                </Dialog>
+            }
         </>
     );
 };

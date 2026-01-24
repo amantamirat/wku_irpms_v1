@@ -64,7 +64,7 @@ const ProjectManager = ({ call, applicant }: ProjectManagerProps) => {
         const fetchProjects = async () => {
             try {
                 setLoading(true);
-                const data = await ProjectApi.getProjects({ call, leadPI: applicant });
+                const data = await ProjectApi.getProjects({ call, applicant });
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to fetch projects. " + (err.message ?? ""));

@@ -1,10 +1,9 @@
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
-import { ProjectDoc } from "../../documents/models/document.model";
-
+import { ProjectDoc } from "@/app/(main)/projects/documents/models/document.model";
 
 export enum ReviewerStatus {
     pending = 'pending',
-    verified = 'verified',
+    accepted = 'accepted',
     submitted = 'submitted',
     approved = 'approved'
 }
