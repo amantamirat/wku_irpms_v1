@@ -1,21 +1,23 @@
-import { CacheService } from "../../util/cache/cache.service";
+import { AppError } from "../../common/errors/app.error";
+import { ERROR_CODES } from "../../common/errors/error.codes";
 import { DeleteDto } from "../../util/delete.dto";
-import { Directorate } from "../organization/organization.model";
+import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
+import { CriterionRepository, ICriterionRepository } from "./criteria/criterion.repository";
 import { CreateEvaluationDTO, GetEvaluationsDTO, UpdateEvaluationDTO } from "./evaluation.dto";
 import { IEvaluationRepository } from "./evaluation.repository";
 
-export class EvaluationService {    
+export class EvaluationService {
 
-    constructor(private readonly repository: IEvaluationRepository) 
-    {
+    constructor(private readonly repository: IEvaluationRepository,
+        private readonly organizationRepository: IOrganizationRepository = new OrganizationRepository(),
+        private readonly criterionRepository: ICriterionRepository = new CriterionRepository(),
+    ) {
     }
 
     async create(dto: CreateEvaluationDTO) {
-        //await CacheService.validateOwnership(dto.userId, dto.directorate);
-
-        const directorateDoc = await Directorate.findById(dto.directorate).lean();
+        const directorateDoc = await this.organizationRepository.findById(dto.directorate);
         if (!directorateDoc) {
-            throw new Error("Directorate not found");
+            throw new Error(ERROR_CODES.DIRECTORATE_NOT_FOUND);
         }
         const createdEvaluation = await this.repository.create(dto);
         return createdEvaluation;
@@ -25,30 +27,22 @@ export class EvaluationService {
         return await this.repository.find(options);
     }
 
-    
+
     async update(dto: UpdateEvaluationDTO) {
         const { id, data, userId } = dto;
-        const evalDoc = await this.repository.findById(id);
-        if (!evalDoc) throw new Error("Evaluation not found");
-
-        //await CacheService.validateOwnership(userId, evalDoc.directorate);
-
-        return await this.repository.update(id, data);
+        const evalDoc = await this.repository.update(id, data);
+        if (!evalDoc) throw new Error(ERROR_CODES.EVALUATION_NOT_FOUND);
+        return evalDoc;
     }
 
     async delete(dto: DeleteDto) {
-        const { id, applicantId: userId } = dto;
+        const { id } = dto;
         const evalDoc = await this.repository.findById(id);
-        if (!evalDoc) throw new Error("Evaluation not found");
-
-        //await CacheService.validateOwnership(userId, evalDoc.directorate);
-
-        /*
-        const countCriteria = await this.repository.countCriteria(id);
+        if (!evalDoc) throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
+        const countCriteria = await this.criterionRepository.countDocuments(id);
         if (countCriteria > 0) {
-            throw new Error("Cannot delete evaluation with existing criteria.");
+            throw new Error(ERROR_CODES.CRITERION_ALREADY_EXISTS);
         }
-*/
         return await this.repository.delete(id);
     }
 }

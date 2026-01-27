@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 
 export interface CreateEvaluationDTO {
     directorate: string;
@@ -16,4 +15,5 @@ export interface UpdateEvaluationDTO {
 
 export interface GetEvaluationsDTO {
     directorate?: string;
+    populate?: boolean;
 }

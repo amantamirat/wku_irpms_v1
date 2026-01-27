@@ -3,6 +3,7 @@ import { successResponse, errorResponse } from "../../common/helpers/response";
 import { AuthenticatedRequest } from "../users/user.middleware";
 import { CreateEvaluationDTO, GetEvaluationsDTO, UpdateEvaluationDTO } from "./evaluation.dto";
 import { EvaluationService } from "./evaluation.service";
+import { ERROR_CODES } from '../../common/errors/error.codes';
 
 export class EvaluationController {
 
@@ -14,7 +15,7 @@ export class EvaluationController {
 
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error("User not found");
+            if (!req.user) throw new Error(ERROR_CODES.USER_NOT_FOUND);
 
             const dto: CreateEvaluationDTO = {
                 directorate: req.body.directorate,
@@ -31,9 +32,9 @@ export class EvaluationController {
 
     getEvaluations = async (req: Request, res: Response) => {
         try {
-            const { directorate, reviewer } = req.query;
+            const { directorate } = req.query;
             const filter: GetEvaluationsDTO = {
-                directorate: directorate as string | undefined
+                directorate: directorate as string
             };
 
             const evaluations = await this.service.getEvaluations(filter);

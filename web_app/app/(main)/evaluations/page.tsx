@@ -10,7 +10,7 @@ const EvaluationPage = () => {
     return (
         <>
             <DirectorateSelector />
-            <EvaluationManager />
+            <EvaluationManager directorate={directorate} />
         </>
 
     );

@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import { CreateCallDTO, GetCallsOptions, UpdateCallDTO } from "./call.dto";
 import { Call, ICall } from "./call.model";
-import { CallStatus } from "./call.status";
 
 export interface ICallRepository {
     findById(id: string): Promise<ICall | null>;

@@ -29,11 +29,13 @@ export class EvaluationRepository implements IEvaluationRepository {
         if (filters.directorate) {
             query.directorate = new mongoose.Types.ObjectId(filters.directorate);
         }
+        let dbQuery = Evaluation.find(query);
 
-        return Evaluation.find(query)
-            .populate("directorate")
-            .lean<IEvaluation[]>()
-            .exec();
+        if (filters.populate) {
+            dbQuery = dbQuery.populate("directorate");
+        }
+
+        return dbQuery.lean<IEvaluation[]>().exec();
     }
 
     async create(dto: CreateEvaluationDTO) {
@@ -57,6 +59,6 @@ export class EvaluationRepository implements IEvaluationRepository {
     }
 
     async delete(id: string) {
-        return await Evaluation.findByIdAndDelete(id).exec();
+        return Evaluation.findByIdAndDelete(id).exec();
     }
 }
