@@ -10,10 +10,13 @@ import SaveEvaluation from "./SaveEvaluation";
 import CriterionManager from "./CriterionManager";
 import { useAuth } from "@/contexts/auth-context";
 import { PERMISSIONS } from "@/types/permissions";
-import { DirectorateSelector } from "@/components/DirectorateSelector";
-import { useDirectorate } from "@/contexts/DirectorateContext";
+import { Organization } from "../../organizations/models/organization.model";
 
-const EvaluationManager = () => {
+interface EvalManagerProps {
+    directorate?: Organization;
+}
+
+const EvaluationManager = ({ directorate }: EvalManagerProps) => {
 
     const confirm = useConfirmDialog();
     const { hasPermission } = useAuth();
@@ -21,8 +24,6 @@ const EvaluationManager = () => {
     const canCreate = hasPermission([PERMISSIONS.EVALUATION.CREATE]);
     const canEdit = hasPermission([PERMISSIONS.EVALUATION.UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.EVALUATION.DELETE]);
-
-    const { directorate, directorates } = useDirectorate();
 
     const emptyEvaluation: Evaluation = {
         directorate: directorate ?? "",
@@ -46,13 +47,11 @@ const EvaluationManager = () => {
 
     /** Fetch evaluations */
     useEffect(() => {
-        if (!directorate) {
-            return
-        }
+        
         const fetchEvaluations = async () => {
             try {
                 setLoading(true);
-                const data = await EvaluationApi.getEvaluations({});
+                const data = await EvaluationApi.getEvaluations({directorate});
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to load evaluations. " + (err?.message ?? ""));
@@ -88,9 +87,6 @@ const EvaluationManager = () => {
         { header: "Description", field: "description" },
     ];
 
-    const topTemplate = () => {
-        return (<DirectorateSelector />)
-    };
 
     return (
         <>
@@ -126,7 +122,7 @@ const EvaluationManager = () => {
                     })
                 }
 
-                topTemplate={topTemplate()}
+
                 enableSearch
                 /** Expand row → show criteria manager */
                 rowExpansionTemplate={(row) => (
@@ -138,7 +134,6 @@ const EvaluationManager = () => {
             <SaveEvaluation
                 visible={showSaveDialog}
                 evaluation={evaluation}
-                directorates={directorates}
                 onComplete={onSaveComplete}
                 onHide={hideDialogs}
             />

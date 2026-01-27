@@ -9,22 +9,22 @@ import { useEffect, useRef, useState } from 'react';
 import { Organization } from '../../organizations/models/organization.model';
 import { EvaluationApi } from '../api/evaluation.api';
 import { Evaluation, validateEvaluation } from '../models/evaluation.model';
+import { useDirectorate } from '@/contexts/DirectorateContext';
 
 interface SaveEvaluatioProps {
     visible: boolean;
     evaluation: Evaluation;
-    directorates?: Organization[]
     onComplete?: (savedEvaluation: Evaluation) => void;
     onHide: () => void;
 }
 
-const SaveEvaluation = ({ visible, evaluation, directorates, onComplete, onHide }: SaveEvaluatioProps) => {
+const SaveEvaluation = ({ visible, evaluation, onComplete, onHide }: SaveEvaluatioProps) => {
 
     const toast = useRef<Toast>(null);
 
     const [localEvaluation, setLocalEvaluation] = useState<Evaluation>({ ...evaluation });
     const [submitted, setSubmitted] = useState(false);
-    //const [organizations, setOrganizations] = useState<Organization[]>([]);
+    const { directorates } = useDirectorate();
 
     useEffect(() => {
         setLocalEvaluation({ ...evaluation });
