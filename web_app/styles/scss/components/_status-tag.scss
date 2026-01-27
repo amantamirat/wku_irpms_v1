@@ -11,24 +11,19 @@
 
     &.status-pending,
     &.status-proposed,
-    &.status-planned {
+    &.status-planned,
+    &.status-submitted {
         background: #FFF9C4;
         color: #8A6D3B;
     }
 
     &.status-linked,
-    &.status-verified,
-    &.status-reviewed,
+    &.status-verified,    
     &.status-accepted,
     &.status-active {
         background: #C8E6C9;
         color: #256029;
-    }
-
-    &.status-submitted {
-        background: #e5e7eb; // light gray
-        color: #374151; // dark gray text
-    }
+    }    
 
     &.status-notlinked,
     &.status-deleted,
@@ -46,11 +41,16 @@
         color: #4A148C;
     }
 
+    &.status-under_review {
+        background: #e5e7eb; // light gray
+        color: #374151; // dark gray text
+    }
+
     &.status-selected {
         background: #BBDEFB;
         color: #0D47A1;
     }
-
+    
     &.status-negotiation {
         background: #ffe066;
         color: #8a6d00;

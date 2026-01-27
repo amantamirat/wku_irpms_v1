@@ -13,25 +13,19 @@ import { IResultRepository, ResultRepository } from "./result.repository";
 
 
 export class ResultService {
-    private repository: IResultRepository;
-    private reviewerRepo: IReviewerRepository;
-    private criterionRepository: ICriterionRepository;
-    private optionRepository: IOptionRepository;
-    //private reviewerPerm: ReviewerPermission;
 
-    constructor(repository?: IResultRepository, reviewerRepo?: IReviewerRepository,
-        criterionRepository?: ICriterionRepository
-    ) {
-        this.repository = repository || new ResultRepository();
-        this.reviewerRepo = reviewerRepo || new ReviewerRepository();
-        this.criterionRepository = criterionRepository || new CriterionRepository();
-        this.optionRepository = new OptionRepository();
-    }
+    constructor(
+        private readonly repository: IResultRepository = new ResultRepository(),
+        private readonly reviewerRepo: IReviewerRepository = new ReviewerRepository(),
+        private readonly criterionRepository: ICriterionRepository = new CriterionRepository(),
+        private readonly optionRepository: IOptionRepository = new OptionRepository(),
+    ) { }
+
 
     private async validateResult(criterion: string, dto: Partial<UpdateResultDTO["data"]>) {
         const { score, selectedOption } = dto;
         const criterionDoc = await this.criterionRepository.findById(criterion);
-        if (!criterionDoc) throw new Error("Criterion not found");
+        if (!criterionDoc) throw new Error(ERROR_CODES.CRITERION_NOT_FOUND);
 
         if (criterionDoc.formType === FormType.open) {
             // For open form type, score should be directly provided
@@ -61,13 +55,13 @@ export class ResultService {
 
     async create(dto: CreateResultDTO) {
         const { reviewer, applicantId } = dto;
-        
+
         const reviewerDoc = await this.reviewerRepo.findById(reviewer);
         if (!reviewerDoc) throw new AppError(ERROR_CODES.REVIEWER_NOT_FOUND);
 
         if (reviewerDoc.status !== ReviewerStatus.accepted)
-            throw new AppError(ERROR_CODES.REVIEWER_NOT_VERIFIED);
-        
+            throw new AppError(ERROR_CODES.REVIEWER_NOT_ACCEPTED);
+
         if (String(reviewerDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
             throw new AppError(ERROR_CODES.USER_NOT_REVIEWER);
 
@@ -88,7 +82,7 @@ export class ResultService {
         if (!reviewerDoc) throw new AppError(ERROR_CODES.REVIEWER_NOT_FOUND);
 
         if (reviewerDoc.status !== ReviewerStatus.accepted)
-            throw new AppError(ERROR_CODES.REVIEWER_NOT_VERIFIED);
+            throw new AppError(ERROR_CODES.REVIEWER_NOT_ACCEPTED);
 
         if (String(reviewerDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
             throw new AppError(ERROR_CODES.USER_NOT_REVIEWER);
@@ -106,7 +100,7 @@ export class ResultService {
         if (!reviewerDoc) throw new AppError(ERROR_CODES.REVIEWER_NOT_FOUND);
 
         if (reviewerDoc.status !== ReviewerStatus.accepted)
-            throw new AppError(ERROR_CODES.REVIEWER_NOT_VERIFIED);
+            throw new AppError(ERROR_CODES.REVIEWER_NOT_ACCEPTED);
 
         if (String(reviewerDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
             throw new AppError(ERROR_CODES.USER_NOT_REVIEWER);

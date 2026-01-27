@@ -26,17 +26,24 @@ export class DocumentSynchronizer {
 
     let totalScore: number | undefined = undefined;
 
-    const allApproved = reviewers.every(r => r.status === ReviewerStatus.approved);
-    if (allApproved) {
-      newStatus = DocStatus.reviewed;
-      const totalWeight = reviewers.reduce((sum, r) => sum + (r.weight ?? 1), 0);
-      totalScore = reviewers.reduce((sum, r) => sum + (r.score ?? 0) * (r.weight ?? 1), 0) / totalWeight;
+    if (reviewers.length > 0) {
+      const allApproved = reviewers.every(r => r.status === ReviewerStatus.approved);
+      if (allApproved) {
+        newStatus = DocStatus.reviewed;
+        const totalWeight = reviewers.reduce((sum, r) => sum + (r.weight ?? 1), 0);
+        totalScore = reviewers.reduce((sum, r) => sum + (r.score ?? 0) * (r.weight ?? 1), 0) / totalWeight;
+      } else {
+        newStatus = DocStatus.under_review;
+      }
     }
 
-    if (newStatus !== currentStatus &&
-      DocumentStateMachine.canTransition(currentStatus, newStatus)) {
-      const updated = await this.documentRepository.update(docId,
-        { status: newStatus, totalScore: totalScore });
+    if (newStatus !== currentStatus && DocumentStateMachine.canTransition(currentStatus, newStatus)) {
+      const updateData: any = { status: newStatus };
+      // only update totalScore if it exists
+      if (totalScore !== undefined) {
+        updateData.totalScore = totalScore;
+      }
+      const updated = await this.documentRepository.update(docId, updateData);
       return updated;
     }
 

@@ -96,79 +96,57 @@ export class ReviewerService {
             throw new AppError(ERROR_CODES.INVALID_DOC_STATUS);
         }
 
+        let score: number | undefined = undefined;
 
-
-
-        const updated = await this.repository.update(id, {
-            status: next,
-            // score: dto.data.score 
-        });
-        await this.docSynchronizer.sync(reviewerDoc.projectStage.toString());
-
-        return updated;
-
-
-
-        /**
-
-        // Submitted status validation
         if (current === ReviewerStatus.accepted && next === ReviewerStatus.submitted) {
-
             if (String(reviewerDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
                 throw new AppError(ERROR_CODES.USER_NOT_REVIEWER);
 
             const stage = String(projectStageDoc.stage);
             const stageDoc = await this.stageRepository.findById(stage);
-            if (!stageDoc) throw new Error("Stage not found");
+            if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
 
             const criteriaCount = await this.criterionRepository.countDocuments(String(stageDoc.evaluation));
             const results = await this.resultRepository.findByReviewer(id);
-
             if (results.length !== criteriaCount) {
-                throw new Error("Please complete all evaluation criteria before submitting.");
+                throw new AppError(ERROR_CODES.INCOMPELTE_CRITERIA);
             }
-
-            const reviewerScore = results.reduce((sum, r) => sum + (r.score ?? 0), 0);
-            // dto.data.score = reviewerScore; // weight can still be applied elsewhere if needed
+            score = results.reduce((sum, r) => sum + (r.score ?? 0), 0);
         }
 
+        const updateData: any = { status: next };
+
+        if (score !== undefined) {
+            updateData.score = score;
+        }
+
+        const updated = await this.repository.update(id, updateData);
+
+        await this.docSynchronizer.sync(reviewerDoc.projectStage.toString());
+        /**
+        // Submitted status validation      
         // Reset score if reverting from submitted to active
         if (current === ReviewerStatus.submitted && next === ReviewerStatus.accepted) {
             // dto.data.score = 0;
         }
-*/
+        */
+        return updated;       
 
     }
 
-    // --- Update reviewer data (weight, etc.) ---
+    // --- Update reviewer data (weight) ---
     async update(dto: UpdateReviewerDTO) {
-        const { id, data, applicantId: userId } = dto;
-        const reviewerDoc = await this.repository.findById(id);
-        if (!reviewerDoc) throw new Error("Reviewer not found");
-
-        if (reviewerDoc.status === ReviewerStatus.approved) {
-            //throw new Error("Cannot update weight for approved reviewer!");
-            throw new Error("INVALID_REVIEWER_STATUS_FOR_REVIEWER_UPDATE");
-        }
-
-        /*
-        const projectStageDoc = await this.documentRepository.findById(reviewerDoc.projectStage.toString());
-        if (!projectStageDoc) throw new Error("Project Stage not found");
-
-
-        // Cannot update data if stage is finalized
-        if ([DocStatus.accepted, DocStatus.rejected].includes(projectStageDoc.status)) {
-            throw new Error(`The project stage is already ${projectStageDoc.status} and cannot be modified.`);
-        }
-*/
+        const { id, data, applicantId } = dto;
         const { weight } = data;
-        if (weight !== undefined) {
-            if (weight <= 0) {
-                throw new Error("Invalid weight value");
-            }
+        const reviewerDoc = await this.repository.findById(id);
+        if (!reviewerDoc) throw new Error(ERROR_CODES.REVIEWER_NOT_FOUND);
+        if (reviewerDoc.status !== ReviewerStatus.pending) {
+            throw new Error(ERROR_CODES.REVIEWER_NOT_PENDING);
         }
+        if (!weight || (weight === 0 || weight < 0))
+            throw new Error(ERROR_CODES.INVALID_REVIEWER_WEIGHT_VALUE);
 
-        const updated = await this.repository.update(id, data);
+        const updated = await this.repository.update(id, { weight });
         return updated;
     }
 

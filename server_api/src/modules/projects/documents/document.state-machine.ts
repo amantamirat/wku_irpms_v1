@@ -6,8 +6,9 @@ export class DocumentStateMachine {
 
     private static readonly transitions: Record<DocStatus, DocStatus[]> = {
         [DocStatus.submitted]: [DocStatus.selected, DocStatus.accepted, DocStatus.rejected,],
-        [DocStatus.selected]: [DocStatus.reviewed, DocStatus.submitted],
-        [DocStatus.reviewed]: [DocStatus.accepted, DocStatus.rejected, DocStatus.selected],
+        [DocStatus.selected]: [DocStatus.under_review, DocStatus.submitted],
+        [DocStatus.under_review]: [DocStatus.reviewed, DocStatus.selected],
+        [DocStatus.reviewed]: [DocStatus.accepted, DocStatus.rejected, DocStatus.under_review],
         [DocStatus.accepted]: [DocStatus.reviewed, DocStatus.submitted],
         [DocStatus.rejected]: [DocStatus.reviewed, DocStatus.submitted]
     };

@@ -4,8 +4,7 @@ import { Project } from "../../models/project.model";
 export enum DocStatus {
     submitted = 'submitted',
     selected = 'selected',
-    //selected_for_review = 'selected_for_review',
-    //on_review = 'on_review',
+    under_review = 'under_review',
     reviewed = 'reviewed',
     accepted = 'accepted',
     rejected = 'rejected'
