@@ -10,8 +10,7 @@ export interface IOptionRepository {
     findById(id: string): Promise<IOption | null>;
     find(filters: GetOptionsDTO): Promise<Partial<IOption>[]>;
     create(dto: CreateOptionDTO): Promise<IOption>;
-    update(id: string, data: UpdateOptionDTO["data"]): Promise<IOption>;
-
+    update(id: string, data: UpdateOptionDTO["data"]): Promise<IOption | null>;
     delete(id: string): Promise<IOption | null>;
 }
 
@@ -50,20 +49,17 @@ export class OptionRepository implements IOptionRepository {
         return Option.create(data);
     }
 
-    async update(id: string, dtoData: UpdateOptionDTO["data"]): Promise<IOption> {
+    async update(id: string, dtoData: UpdateOptionDTO["data"]): Promise<IOption | null> {
         const updateData: Partial<IOption> = {};
 
         if (dtoData.title) updateData.title = dtoData.title;
         if (dtoData.score) updateData.score = dtoData.score;
 
-        const updated = await Option.findByIdAndUpdate(
+        return Option.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },
             { new: true }
         ).exec();
-
-        if (!updated) throw new Error("Option not found");
-        return updated;
     }
 
     async delete(id: string) {

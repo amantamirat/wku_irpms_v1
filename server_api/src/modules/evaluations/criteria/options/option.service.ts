@@ -1,4 +1,7 @@
+import { AppError } from "../../../../common/errors/app.error";
+import { ERROR_CODES } from "../../../../common/errors/error.codes";
 import { DeleteDto } from "../../../../util/delete.dto";
+import { IResultRepository, ResultRepository } from "../../../calls/stages/reviewers/results/result.repository";
 import { FormType } from "../criterion.enum";
 import { CriterionRepository, ICriterionRepository } from "../criterion.repository";
 import {
@@ -10,13 +13,12 @@ import { IOptionRepository, OptionRepository } from "./option.repository";
 
 export class OptionService {
 
-    private repository: IOptionRepository;
-    private criterionRepo: ICriterionRepository;
+    constructor(
+        private readonly repository: IOptionRepository = new OptionRepository(),
+        private readonly criterionRepo: ICriterionRepository = new CriterionRepository(),
+        private readonly resultRepository: IResultRepository = new ResultRepository(),
+    ) { }
 
-    constructor(repository?: IOptionRepository, criterionRepo?: ICriterionRepository,) {
-        this.repository = repository || new OptionRepository();
-        this.criterionRepo = criterionRepo || new CriterionRepository();
-    }
     /**
      * Create a new option under a criterion.
      */
@@ -24,14 +26,13 @@ export class OptionService {
         const { criterion, title, score } = dto;
 
         const criterionDoc = await this.criterionRepo.findById(criterion);
-        if (!criterionDoc) throw new Error("Criterion not found.");
-        if (criterionDoc.formType !== FormType.closed) throw new Error("Criterion must be closed.");
+        if (!criterionDoc) throw new AppError(ERROR_CODES.CRITERION_NOT_FOUND);
+        if (criterionDoc.formType !== FormType.closed)
+            throw new AppError(ERROR_CODES.CRITERION_NOT_CLOSED);
 
-        if (score > criterionDoc.weight) {
-            throw new Error(
-                `Option weight (${score}) exceeds its criterion limit (${criterionDoc.weight}).`
-            );
-        }
+        if (score > criterionDoc.weight)
+            throw new AppError(ERROR_CODES.INVALID_OPTION_WEIGHT);
+
         return await this.repository.create(dto);
     }
 
@@ -47,17 +48,15 @@ export class OptionService {
      */
     async update(dto: UpdateOptionDTO) {
         const { id, data } = dto;
+
         const option = await this.repository.findById(id);
-        if (!option) throw new Error("Option not found.");
+        if (!option) throw new AppError(ERROR_CODES.OPTION_NOT_FOUND);
 
         if (data.score) {
             const criterion = await this.criterionRepo.findById(String(option.criterion));
-            if (!criterion) throw new Error("Criterion not found.");
-            if (data.score > criterion.weight) {
-                throw new Error(
-                    `Option weight (${data.score}) exceeds its criterion limit (${criterion.weight}).`
-                );
-            }
+            if (!criterion) throw new AppError(ERROR_CODES.CRITERION_NOT_CLOSED);
+            if (data.score > criterion.weight)
+                throw new AppError(ERROR_CODES.INVALID_OPTION_WEIGHT);
         }
         return this.repository.update(id, data);
     }
@@ -67,6 +66,9 @@ export class OptionService {
      */
     async delete(dto: DeleteDto) {
         const { id } = dto;
+        const resExists = await this.resultRepository.exists({ selectedOption: id });
+        if (resExists)
+            throw new AppError(ERROR_CODES.RESULT_ALREADY_EXISTS);
         return await this.repository.delete(id);
     }
 }

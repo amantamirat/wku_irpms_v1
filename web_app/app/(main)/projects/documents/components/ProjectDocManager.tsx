@@ -331,6 +331,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
             )}
             {(showReviewers && selectedDoc) &&
                 <Dialog visible={showReviewers}
+                    maximized
                     maximizable
                     style={{ width: '80vw', maxWidth: '1200px' }}
                     header={"Reviewers"}

@@ -85,11 +85,7 @@ export class CriterionService {
             );
         }
         const resExists = await this.resultRepository.exists({ criterion: id });
-        if (resExists) {
-            throw new AppError(
-                ERROR_CODES.RESULT_ALREADY_EXISTS
-            );
-        }
+        if (resExists) throw new AppError(ERROR_CODES.RESULT_ALREADY_EXISTS);
         return await this.repository.delete(id);
     }
 
