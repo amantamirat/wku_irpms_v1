@@ -16,4 +16,5 @@ export interface UpdateOptionDTO {
 
 export interface GetOptionsDTO {
     criterion: string;
+    populate?:boolean;
 }

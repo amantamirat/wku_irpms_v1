@@ -37,7 +37,7 @@ const ResultSchema = new Schema<IResult>({
     },
     comment: {
         type: String,
-        maxlength: 2000 // optional but recommended
+        maxlength: 100 // optional but recommended
     },
 
 }, { timestamps: true });

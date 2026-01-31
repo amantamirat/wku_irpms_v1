@@ -35,7 +35,7 @@ const CriterionSchema = new Schema<ICriterion>(
         formType: {
             type: String,
             enum: Object.values(FormType),
-            required: true,
+            required: true
         },
     },
     { timestamps: true }

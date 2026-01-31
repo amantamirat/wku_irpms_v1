@@ -12,7 +12,7 @@ export interface ICriterionRepository {
     findById(id: string): Promise<ICriterion | null>;
     find(filters: GetCriteriaDTO): Promise<Partial<ICriterion>[]>;
     create(dto: CreateCriterionDTO): Promise<ICriterion>;
-    update(id: string, data: UpdateCriterionDTO["data"]): Promise<ICriterion>;
+    update(id: string, data: UpdateCriterionDTO["data"]): Promise<ICriterion | null>;
     countDocuments(evaluation: string): Promise<number>;
     delete(id: string): Promise<ICriterion | null>;
 }
@@ -33,11 +33,15 @@ export class CriterionRepository implements ICriterionRepository {
             query.evaluation = new mongoose.Types.ObjectId(filters.evaluation);
         }
 
-        return Criterion.find(query)
-            .populate("evaluation")
-            .lean<ICriterion[]>()
-            .exec();
+        let dbQuery = Criterion.find(query);
+
+        if (filters.populate) {
+            dbQuery = dbQuery.populate("evaluation");
+        }
+
+        return dbQuery.lean<ICriterion[]>().exec();
     }
+
 
     async create(dto: CreateCriterionDTO) {
         const data: Partial<ICriterion> = {
@@ -49,28 +53,25 @@ export class CriterionRepository implements ICriterionRepository {
         return Criterion.create(data);
     }
 
-    async update(id: string, dtoData: UpdateCriterionDTO["data"]): Promise<ICriterion> {
+    async update(id: string, dtoData: UpdateCriterionDTO["data"]): Promise<ICriterion | null> {
         const updateData: Partial<ICriterion> = {};
 
         if (dtoData.title) updateData.title = dtoData.title;
         if (dtoData.formType) updateData.formType = dtoData.formType;
         if (dtoData.weight) updateData.weight = dtoData.weight;
 
-        const updated = await Criterion.findByIdAndUpdate(
+        return Criterion.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },
             { new: true }
         ).exec();
-
-        if (!updated) throw new Error("Criterion not found");
-        return updated;
     }
 
     async countDocuments(evaluation: string) {
-        return Criterion.countDocuments({ evaluation: new mongoose.Types.ObjectId(evaluation) });
+        return Criterion.countDocuments({ evaluation: new mongoose.Types.ObjectId(evaluation) }).exec();
     }
 
     async delete(id: string) {
-        return await Criterion.findByIdAndDelete(id).exec();
+        return Criterion.findByIdAndDelete(id).exec();
     }
 }

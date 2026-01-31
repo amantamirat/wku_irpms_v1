@@ -37,7 +37,7 @@ export class ResultController {
             if (!reviewer) throw new Error("reviewer is required");
 
             const filter: GetResultsDTO = {
-                reviewerId: String(reviewer)
+                reviewer: String(reviewer)
             };
 
             const results = await resultService.getResults(filter);

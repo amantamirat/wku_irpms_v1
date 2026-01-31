@@ -4,6 +4,7 @@ import { AuthenticatedRequest } from "../../users/user.middleware";
 import { CreateCriterionDTO, GetCriteriaDTO, UpdateCriterionDTO, ImportCriteriaBatchDTO } from "./criterion.dto";
 import { CriterionService } from "./criterion.service";
 import mongoose from "mongoose";
+import { ERROR_CODES } from '../../../common/errors/error.codes';
 
 export class CriterionController {
 
@@ -15,7 +16,7 @@ export class CriterionController {
 
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error("User not found");
+            if (!req.user) throw new Error(ERROR_CODES.USER_NOT_FOUND);
 
             const { evaluation, title, formType, weight } = req.body;
 
@@ -50,16 +51,15 @@ export class CriterionController {
 
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error("User not found");
+            if (!req.user) throw new Error(ERROR_CODES.USER_NOT_FOUND);
 
             const { id } = req.params;
-            const { title, form_type: formType, weight } = req.body;
+            const { title, formType, weight } = req.body;
 
             const dto: UpdateCriterionDTO = {
                 id,
                 data: { title, formType, weight }
             };
-
             const updated = await this.service.update(dto);
             successResponse(res, 200, "Criterion updated successfully", updated);
         } catch (err: any) {
@@ -72,7 +72,7 @@ export class CriterionController {
             if (!req.user) throw new Error("User not found");
 
             const { id } = req.params;
-            const deleted = await this.service.delete({ id });
+            const deleted = await this.service.delete(id);
 
             successResponse(res, 200, "Criterion deleted successfully", deleted);
         } catch (err: any) {

@@ -1,14 +1,14 @@
 //result.repository.ts
 import mongoose from "mongoose";
 import { Result, IResult } from "./result.model";
-import { CreateResultDTO, UpdateResultDTO } from "./result.dto";
+import { CreateResultDTO, ExistsResultsDTO, GetResultsDTO, UpdateResultDTO } from "./result.dto";
 
 export interface IResultRepository {
     findById(id: string): Promise<IResult | null>;
-    findByReviewer(reviewerId: string): Promise<Partial<any>[]>;
-    //countByReviewer(reviewerId: string): Promise<number>;
+    find(options: GetResultsDTO): Promise<Partial<IResult>[]>;
     create(data: CreateResultDTO): Promise<IResult>;
     update(id: string, data: UpdateResultDTO["data"]): Promise<IResult>;
+    exists(filters: ExistsResultsDTO): Promise<boolean>;
     delete(id: string): Promise<void>;
 }
 
@@ -19,17 +19,21 @@ export class ResultRepository implements IResultRepository {
         return Result.findById(new mongoose.Types.ObjectId(id)).lean<IResult>().exec();
     }
 
-    async findByReviewer(reviewerId: string) {
-        return Result.find({ reviewer: new mongoose.Types.ObjectId(reviewerId) })
-            .populate("criterion selectedOption").lean<IResult[]>()
-            .exec();
-    }
+    async find(options: GetResultsDTO) {
+        const query: any = {};
 
-    /*
-    async countByReviewer(reviewerId: string) {
-        return Result.countDocuments({ reviewer: new mongoose.Types.ObjectId(reviewerId) }).exec();
+        if (options.reviewer) {
+            query.reviewer = new mongoose.Types.ObjectId(options.reviewer);
+        }
+
+        let dbQuery = Result.find(query);
+
+        if (options.populate) {
+            dbQuery = dbQuery.populate("criterion selectedOption");
+        }
+
+        return dbQuery.lean<IResult[]>().exec();
     }
-        */
 
     async create(dto: CreateResultDTO) {
         const data: Partial<IResult> = {
@@ -55,6 +59,26 @@ export class ResultRepository implements IResultRepository {
         Object.assign(result, updatedData);
         return result.save();
     }
+
+    async exists(filters: ExistsResultsDTO): Promise<boolean> {
+        const query: any = {};
+
+        if (filters.reviewer) {
+            query.reviewer = new mongoose.Types.ObjectId(filters.reviewer);
+        }
+
+        if (filters.criterion) {
+            query.criterion = new mongoose.Types.ObjectId(filters.criterion);
+        }
+
+        if (filters.selectedOption) {
+            query.selectedOption = new mongoose.Types.ObjectId(filters.selectedOption);
+        }
+
+        const result = await Result.exists(query).exec();
+        return result !== null;
+    }
+
 
     async delete(id: string) {
         await Result.findByIdAndDelete(new mongoose.Types.ObjectId(id)).exec();

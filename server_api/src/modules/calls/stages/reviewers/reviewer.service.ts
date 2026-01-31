@@ -41,7 +41,7 @@ export class ReviewerService {
         const { projectStage, applicant, weight } = dto;
 
         if (weight && (weight === 0 || weight < 0))
-            throw new Error(ERROR_CODES.INVALID_REVIEWER_WEIGHT_VALUE);
+            throw new Error(ERROR_CODES.INVALID_REVIEWER_WEIGHT);
 
         const projectStageDoc = await this.documentRepository.findById(projectStage);
         if (!projectStageDoc) throw new AppError(ERROR_CODES.DOC_NOT_FOUND);
@@ -98,6 +98,10 @@ export class ReviewerService {
 
         let score: number | undefined = undefined;
 
+        if(next===ReviewerStatus.accepted){
+            //initialize reult 
+        }
+
         if (current === ReviewerStatus.accepted && next === ReviewerStatus.submitted) {
             if (String(reviewerDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
                 throw new AppError(ERROR_CODES.USER_NOT_REVIEWER);
@@ -107,7 +111,7 @@ export class ReviewerService {
             if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
 
             const criteriaCount = await this.criterionRepository.countDocuments(String(stageDoc.evaluation));
-            const results = await this.resultRepository.findByReviewer(id);
+            const results = await this.resultRepository.find({reviewer:id});
             if (results.length !== criteriaCount) {
                 throw new AppError(ERROR_CODES.INCOMPELTE_CRITERIA);
             }
@@ -121,15 +125,7 @@ export class ReviewerService {
         }
 
         const updated = await this.repository.update(id, updateData);
-
         await this.docSynchronizer.sync(reviewerDoc.projectStage.toString());
-        /**
-        // Submitted status validation      
-        // Reset score if reverting from submitted to active
-        if (current === ReviewerStatus.submitted && next === ReviewerStatus.accepted) {
-            // dto.data.score = 0;
-        }
-        */
         return updated;       
 
     }
@@ -144,7 +140,7 @@ export class ReviewerService {
             throw new Error(ERROR_CODES.REVIEWER_NOT_PENDING);
         }
         if (!weight || (weight === 0 || weight < 0))
-            throw new Error(ERROR_CODES.INVALID_REVIEWER_WEIGHT_VALUE);
+            throw new Error(ERROR_CODES.INVALID_REVIEWER_WEIGHT);
 
         const updated = await this.repository.update(id, { weight });
         return updated;

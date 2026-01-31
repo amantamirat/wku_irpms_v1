@@ -11,6 +11,7 @@ export interface IOptionRepository {
     find(filters: GetOptionsDTO): Promise<Partial<IOption>[]>;
     create(dto: CreateOptionDTO): Promise<IOption>;
     update(id: string, data: UpdateOptionDTO["data"]): Promise<IOption>;
+
     delete(id: string): Promise<IOption | null>;
 }
 
@@ -30,11 +31,15 @@ export class OptionRepository implements IOptionRepository {
             query.criterion = new mongoose.Types.ObjectId(filters.criterion);
         }
 
-        return Option.find(query)
-            .populate("criterion")
-            .lean<IOption[]>()
-            .exec();
+        let dbQuery = Option.find(query);
+
+        if (filters.populate) {
+            dbQuery = dbQuery.populate("criterion");
+        }
+
+        return dbQuery.lean<IOption[]>().exec();
     }
+
 
     async create(dto: CreateOptionDTO) {
         const data: Partial<IOption> = {

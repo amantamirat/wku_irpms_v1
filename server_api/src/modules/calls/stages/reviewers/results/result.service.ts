@@ -70,7 +70,7 @@ export class ResultService {
     }
 
     async getResults(options: GetResultsDTO) {
-        return this.repository.findByReviewer(options.reviewerId);
+        return this.repository.find({ ...options, populate: true });
     }
 
     async update(dto: UpdateResultDTO) {

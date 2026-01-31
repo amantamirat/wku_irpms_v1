@@ -1,7 +1,14 @@
 //result.dto.ts
 
 export interface GetResultsDTO {
-    reviewerId: string;
+    reviewer?: string;
+    populate?: boolean;
+}
+
+export interface ExistsResultsDTO {
+    reviewer?: string;
+    criterion?: string;
+    selectedOption?: string;
 }
 
 export interface CreateResultDTO {

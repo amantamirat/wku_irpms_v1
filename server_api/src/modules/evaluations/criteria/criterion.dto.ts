@@ -21,11 +21,9 @@ export interface GetCriteriaDTO {
     evaluation?: string;
     stage?: string;
     reviewer?:string;
+    populate?:boolean;
 }
 
-export interface DeleteCriterionDTO {
-    id: string;
-}
 
 export interface ImportCriterionOptionDTO {
     title: string;
