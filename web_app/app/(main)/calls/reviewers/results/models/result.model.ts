@@ -1,6 +1,6 @@
-import { Reviewer } from "../../reviewers/models/reviewer.model";
 import { Criterion } from "@/app/(main)/evaluations/models/criterion.model";
 import { Option } from "@/app/(main)/evaluations/models/option.model";
+import { Reviewer } from "../../models/reviewer.model";
 
 export type Result = {
     _id?: string;
@@ -9,8 +9,6 @@ export type Result = {
     score?: number;
     selectedOption?: string | Option;
     comment?: string;
-    createdAt?: Date;
-    updatedAt?: Date;
 };
 
 export interface GetResultOptions {

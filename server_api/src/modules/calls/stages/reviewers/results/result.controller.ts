@@ -13,15 +13,14 @@ export class ResultController {
         try {
             if (!req.user) throw new Error("User not found!");
             const { reviewer, criterion, score, selectedOption, comment } = req.body;
-
             // Map to DTO with *Id properties
             const data: CreateResultDTO = {
                 reviewer: reviewer,
                 criterion: criterion,
                 score,
                 selectedOption: selectedOption,
+                comment,
                 applicantId: req.user.applicantId,
-                comment
             };
 
             const created = await resultService.create(data);
@@ -60,7 +59,7 @@ export class ResultController {
                     selectedOption: selectedOption ?? undefined,
                     comment: comment ?? undefined
                 },
-                applicantId: req.user.userId
+                applicantId: req.user.applicantId
             };
 
             const updated = await resultService.update(dto);

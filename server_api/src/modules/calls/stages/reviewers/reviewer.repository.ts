@@ -51,25 +51,7 @@ export class ReviewerRepository implements IReviewerRepository {
         return reviewerQuery.exec();
     }
 
-    /*
-    async findByProjectStage(projectStageId: string) {
-        return Reviewer.find({ projectStage: new mongoose.Types.ObjectId(projectStageId) })
-            .populate({ path: 'applicant', populate: { path: 'workspace' } })
-            .exec();
-    }
-
-    async findByApplicant(applicantId: string) {
-        return Reviewer.find({ applicant: new mongoose.Types.ObjectId(applicantId) })
-            .populate({
-                path: "projectStage",
-                populate: {
-                    path: "stage project",
-                },
-            })
-            .exec();
-    }
-    */
-
+    
     async create(dto: CreateReviewerDTO) {
         const data: Partial<IReviewer> = {
             projectStage: new mongoose.Types.ObjectId(dto.projectStage),

@@ -14,16 +14,16 @@ export interface ExistsResultsDTO {
 export interface CreateResultDTO {
     reviewer: string;
     criterion: string;
-    score?: number;
+    score?: number | null;
     selectedOption?: string;
     comment?: string;
-    applicantId: string;
+    applicantId?: string;
 }
 
 export interface UpdateResultDTO {
     id: string;
     data: Partial<{
-        score: number;
+        score: number | null;
         selectedOption: string;
         comment: string;
     }>;

@@ -66,6 +66,7 @@ export class ResultService {
             throw new AppError(ERROR_CODES.USER_NOT_REVIEWER);
 
         await this.validateResult(dto.criterion, dto);
+        
         return this.repository.create(dto);
     }
 
@@ -76,7 +77,7 @@ export class ResultService {
     async update(dto: UpdateResultDTO) {
         const { id, applicantId } = dto;
         const resultDoc = await this.repository.findById(id);
-        if (!resultDoc) throw new Error("Result not found");
+        if (!resultDoc) throw new AppError(ERROR_CODES.RESULT_NOT_FOUND);
 
         const reviewerDoc = await this.reviewerRepo.findById(String(resultDoc.reviewer));
         if (!reviewerDoc) throw new AppError(ERROR_CODES.REVIEWER_NOT_FOUND);

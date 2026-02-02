@@ -98,35 +98,43 @@ export class ReviewerService {
 
         let score: number | undefined = undefined;
 
-        if(next===ReviewerStatus.accepted){
-            //initialize reult 
+        const stage = String(projectStageDoc.stage);
+        const stageDoc = await this.stageRepository.findById(stage);
+        if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        const evaluation = String(stageDoc.evaluation);
+
+        if (next === ReviewerStatus.accepted) {
+            const existingResults = await this.resultRepository.find({ reviewer: id });
+            if (existingResults.length === 0) {
+                const criteria = await this.criterionRepository.find({ evaluation });
+                await this.resultRepository.insertMany(
+                    criteria.map(c => ({
+                        reviewer: id,
+                        criterion: String(c._id),
+                        score: null
+                    }))
+                );
+            }
         }
 
         if (current === ReviewerStatus.accepted && next === ReviewerStatus.submitted) {
-            if (String(reviewerDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
-                throw new AppError(ERROR_CODES.USER_NOT_REVIEWER);
-
-            const stage = String(projectStageDoc.stage);
-            const stageDoc = await this.stageRepository.findById(stage);
-            if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-
-            const criteriaCount = await this.criterionRepository.countDocuments(String(stageDoc.evaluation));
-            const results = await this.resultRepository.find({reviewer:id});
-            if (results.length !== criteriaCount) {
+            /*if (String(reviewerDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
+                throw new AppError(ERROR_CODES.USER_NOT_REVIEWER);*/
+            const results = await this.resultRepository.find({ reviewer: id });
+            const incomplete = results.some(r => r.score === null || r.score === undefined);
+            if (incomplete) {
                 throw new AppError(ERROR_CODES.INCOMPELTE_CRITERIA);
             }
             score = results.reduce((sum, r) => sum + (r.score ?? 0), 0);
         }
 
         const updateData: any = { status: next };
-
         if (score !== undefined) {
             updateData.score = score;
         }
-
         const updated = await this.repository.update(id, updateData);
         await this.docSynchronizer.sync(reviewerDoc.projectStage.toString());
-        return updated;       
+        return updated;
 
     }
 
@@ -152,7 +160,10 @@ export class ReviewerService {
         if (reviewerDoc.status !== ReviewerStatus.pending)
             throw new AppError(ERROR_CODES.REVIEWER_NOT_PENDING);
         const deleted = await this.repository.delete(id);
-        await this.docSynchronizer.sync(reviewerDoc.projectStage.toString());
+        if (deleted) {
+            await this.resultRepository.deleteByReviewer(id);
+            await this.docSynchronizer.sync(reviewerDoc.projectStage.toString());
+        }        
         return deleted
     }
 }

@@ -7,9 +7,11 @@ export interface IResultRepository {
     findById(id: string): Promise<IResult | null>;
     find(options: GetResultsDTO): Promise<Partial<IResult>[]>;
     create(data: CreateResultDTO): Promise<IResult>;
-    update(id: string, data: UpdateResultDTO["data"]): Promise<IResult>;
+    insertMany(data: CreateResultDTO[]): Promise<IResult[]>;
+    update(id: string, data: UpdateResultDTO["data"]): Promise<IResult | null>;
     exists(filters: ExistsResultsDTO): Promise<boolean>;
     delete(id: string): Promise<void>;
+    deleteByReviewer(reviewerId: string): Promise<number>;
 }
 
 // MongoDB implementation
@@ -40,25 +42,47 @@ export class ResultRepository implements IResultRepository {
             reviewer: new mongoose.Types.ObjectId(dto.reviewer),
             criterion: new mongoose.Types.ObjectId(dto.criterion),
             selectedOption: dto.selectedOption ? new mongoose.Types.ObjectId(dto.selectedOption) : undefined,
-            score: dto.score,
+            score: dto.score ?? null,
             comment: dto.comment
         };
         return Result.create(data);
     }
 
-    async update(id: string, dtoData: UpdateResultDTO["data"]) {
-        const result = await Result.findById(new mongoose.Types.ObjectId(id));
-        if (!result) throw new Error("Result not found");
+    async insertMany(dtos: CreateResultDTO[]): Promise<IResult[]> {
+        if (!dtos.length) return [];
 
-        const updatedData: Partial<IResult> = {
-            score: dtoData.score,
-            selectedOption: dtoData.selectedOption ? new mongoose.Types.ObjectId(dtoData.selectedOption) : undefined,
-            comment: dtoData.comment
-        };
+        const docs = dtos.map(dto => ({
+            reviewer: new mongoose.Types.ObjectId(dto.reviewer),
+            criterion: new mongoose.Types.ObjectId(dto.criterion),
+            score: dto.score ?? null
+        }));
 
-        Object.assign(result, updatedData);
-        return result.save();
+        return Result.insertMany(docs, { ordered: false });
     }
+
+    async update(id: string, dtoData: UpdateResultDTO["data"]): Promise<IResult | null> {
+        const updateData: Partial<IResult> = {};
+
+        if (dtoData.score !== undefined) {
+            updateData.score = dtoData.score;
+        }
+
+        if (dtoData.selectedOption !== undefined) {
+            updateData.selectedOption = dtoData.selectedOption
+                ? new mongoose.Types.ObjectId(dtoData.selectedOption)
+                : undefined;
+        }
+
+        if (dtoData.comment !== undefined) {
+            updateData.comment = dtoData.comment;
+        }
+        return Result.findByIdAndUpdate(
+            id,
+            { $set: updateData },
+            { new: true }
+        ).exec();
+    }
+
 
     async exists(filters: ExistsResultsDTO): Promise<boolean> {
         const query: any = {};
@@ -82,5 +106,13 @@ export class ResultRepository implements IResultRepository {
 
     async delete(id: string) {
         await Result.findByIdAndDelete(new mongoose.Types.ObjectId(id)).exec();
+    }
+
+    async deleteByReviewer(reviewerId: string): Promise<number> {
+        const result = await Result.deleteMany({
+            reviewer: new mongoose.Types.ObjectId(reviewerId)
+        }).exec();
+
+        return result.deletedCount ?? 0;
     }
 }

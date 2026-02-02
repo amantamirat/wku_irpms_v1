@@ -3,13 +3,13 @@ import { Dialog } from "primereact/dialog";
 import { InputNumber } from "primereact/inputnumber";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
-import { ResultApi } from "../api/result.api";
 import { Result, validateResult } from "../models/result.model";
 import { Dropdown } from "primereact/dropdown";
 import { Option } from "@/app/(main)/evaluations/models/option.model";
 import { Criterion, FormType } from "@/app/(main)/evaluations/models/criterion.model";
 import { OptionApi } from "@/app/(main)/evaluations/api/option.api";
 import { InputTextarea } from "primereact/inputtextarea";
+import { ResultApi } from "../api/result.api";
 
 interface SaveResultDialogProps {
     result?: Result; // ✅ OPTIONAL
@@ -74,7 +74,7 @@ const SaveResultDialog = ({
        Save
     --------------------------------- */
     const saveResult = async () => {
-        if (!localResult) return;
+        if (!localResult?._id) return;
 
         try {
             setSubmitting(true);
@@ -84,10 +84,13 @@ const SaveResultDialog = ({
                 throw new Error(validation.message);
             }
 
+            /*
             const saved = localResult._id
                 ? await ResultApi.updateResult(localResult)
                 : await ResultApi.createResult(localResult);
-
+            */
+            const saved = await ResultApi.updateResult(localResult);
+            
             toast.current?.show({
                 severity: "success",
                 summary: "Successful",

@@ -9,7 +9,7 @@ import MyBadge from "@/templates/MyBadge";
 import { PERMISSIONS } from "@/types/permissions";
 import { Button } from "primereact/button";
 import { useEffect, useState } from "react";
-import ResultManager from "../../results/components/ResultManager";
+import ResultManager from "../results/components/ResultManager";
 import { ReviewerApi } from "../api/reviewer.api";
 import { Reviewer, ReviewerStatus } from "../models/reviewer.model";
 import SaveReviewerDialog from "./SaveReviewerDialog";
@@ -202,7 +202,7 @@ const ReviewerManager = ({ projectDoc, applicant, updateProjectDoc }: ReviewerMa
                 canCreate={canCreate}
                 canEdit={canEdit}
                 canDelete={canDelete}
-                onCreate={() => { setReviewer(emptyReviewer); setShowSaveDialog(true); }}
+                onCreate={() => { setReviewer({...emptyReviewer}); setShowSaveDialog(true); }}
                 onEdit={(row) => { setReviewer(row); setShowSaveDialog(true); }}
                 onDelete={(row: any) => confirm.ask({ item: row.applicant?.first_name ?? "", onConfirmAsync: () => deleteReviewer(row) })}
                 rowExpansionTemplate={(row) =>
