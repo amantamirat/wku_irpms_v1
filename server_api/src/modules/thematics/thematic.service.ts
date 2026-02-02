@@ -1,23 +1,25 @@
+import { AppError } from "../../common/errors/app.error";
+import { ERROR_CODES } from "../../common/errors/error.codes";
 import { DeleteDto } from "../../util/delete.dto";
 import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
 import { Unit } from "../organization/organization.type";
 import { CreateThematicDTO, GetThematicsDTO, UpdateThematicDTO } from "./thematic.dto";
 import { IThematicRepository, ThematicRepository } from "./thematic.repository";
+import { IThemeRepository, ThemeRepository } from "./themes/theme.repository";
 
 export class ThematicService {
 
-    private repository: IThematicRepository;
-    private organizationRepo: IOrganizationRepository;
+    constructor(
+        private readonly repository: IThematicRepository = new ThematicRepository(),
+        private readonly themeRepository: IThemeRepository = new ThemeRepository(),
+        private readonly organizationRepo: IOrganizationRepository = new OrganizationRepository(),
+    ) { }
 
-    constructor(repository?: IThematicRepository) {
-        this.repository = repository || new ThematicRepository();
-        this.organizationRepo = new OrganizationRepository();
-    }
 
     async create(dto: CreateThematicDTO) {
         const directorateDoc = await this.organizationRepo.findById(dto.directorate);
         if (!directorateDoc || directorateDoc.type !== Unit.Directorate) {
-            throw new Error("Directorate Not Found!");
+            throw new Error(ERROR_CODES.DIRECTORATE_NOT_FOUND);
         }
         const createdThematic = await this.repository.create(dto);
         return createdThematic;
@@ -33,7 +35,11 @@ export class ThematicService {
     }
 
     async delete(dto: DeleteDto) {
-        const { id, applicantId: userId } = dto;
+        const { id } = dto;
+        const themeExist = await this.themeRepository.exists({ thematicArea: id });
+        if (themeExist) {
+            throw new AppError(ERROR_CODES.THEME_ALREADY_EXISTS);
+        }
         return await this.repository.delete(id);
     }
 }

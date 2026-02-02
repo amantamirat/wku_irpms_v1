@@ -11,24 +11,23 @@ import { useEffect, useRef, useState } from 'react';
 import { Organization, OrgnUnit } from '../../organizations/models/organization.model';
 import { ThematicApi } from '../api/thematic.api';
 import { Thematic, ThemeLevel, ThemeType, validateThematic } from '../models/thematic.model';
+import { useDirectorate } from '@/contexts/DirectorateContext';
 
 
 interface SaveDialogProps {
     visible: boolean;
     thematic: Thematic;
-    directorates?: Organization[]
     onComplete?: (savedThematic: Thematic) => void;
     onHide: () => void;
 }
 
-const SaveDialog = ({ visible, thematic, directorates, onComplete, onHide }: SaveDialogProps) => {
+const SaveDialog = ({ visible, thematic, onComplete, onHide }: SaveDialogProps) => {
 
     const toast = useRef<Toast>(null);
 
     const [localThematic, setLocalThematic] = useState<Thematic>({ ...thematic });
     const [submitted, setSubmitted] = useState(false);
-    //const [organizations, setOrganizations] = useState<Organization[]>([]);
-
+    const { directorates } = useDirectorate();
 
     useEffect(() => {
         setLocalThematic({ ...thematic });

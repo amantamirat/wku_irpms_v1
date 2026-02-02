@@ -44,6 +44,7 @@ const ReviewerManager = ({ projectDoc, applicant, updateProjectDoc }: ReviewerMa
 
     const canPend = hasPermission([PERMISSIONS.REVIEWER.STATUS.PEND]);
     const canAccept = hasPermission([PERMISSIONS.REVIEWER.STATUS.ACCEPT]);
+    const canSubmit = hasPermission([PERMISSIONS.REVIEWER.STATUS.SUBMIT]);
     const canApprove = hasPermission([PERMISSIONS.REVIEWER.STATUS.APPROVE]);
 
     // ✅ CRUD Hook
@@ -100,8 +101,10 @@ const ReviewerManager = ({ projectDoc, applicant, updateProjectDoc }: ReviewerMa
     const updateStatus = async (row: Reviewer, next: ReviewerStatus) => {
         if (!row._id) return;
         const updated = await ReviewerApi.updateStatus(row._id, next);
-        updateItem({ ...row, status: updated.status });
-        //updateDocument(syncedProjectStage);
+        updateItem({
+            ...updated, applicant: row.applicant,
+            projectStage: row.projectStage
+        });
     };
 
     const hideSaveDialog = () => {
@@ -128,15 +131,18 @@ const ReviewerManager = ({ projectDoc, applicant, updateProjectDoc }: ReviewerMa
             if (canPend) {
                 prev = ReviewerStatus.pending;
             }
+            if (canSubmit) {
+                next = ReviewerStatus.submitted;
+            }
         }
 
         // submitted ↔ approved
-        if (canApprove) {
-            if (current === ReviewerStatus.submitted) {
+        if (current === ReviewerStatus.submitted) {
+            if (canApprove) {
                 next = ReviewerStatus.approved;
             }
-            if (current === ReviewerStatus.approved) {
-                prev = ReviewerStatus.submitted;
+            if (canAccept) {
+                prev = ReviewerStatus.accepted;
             }
         }
 
@@ -202,11 +208,11 @@ const ReviewerManager = ({ projectDoc, applicant, updateProjectDoc }: ReviewerMa
                 canCreate={canCreate}
                 canEdit={canEdit}
                 canDelete={canDelete}
-                onCreate={() => { setReviewer({...emptyReviewer}); setShowSaveDialog(true); }}
+                onCreate={() => { setReviewer({ ...emptyReviewer }); setShowSaveDialog(true); }}
                 onEdit={(row) => { setReviewer(row); setShowSaveDialog(true); }}
                 onDelete={(row: any) => confirm.ask({ item: row.applicant?.first_name ?? "", onConfirmAsync: () => deleteReviewer(row) })}
                 rowExpansionTemplate={(row) =>
-                    <ResultManager reviewer={row} updateStatus={updateStatus} />
+                    <ResultManager reviewer={row} />
                 }
             />
 

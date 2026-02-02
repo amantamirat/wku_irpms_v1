@@ -1,12 +1,13 @@
 import mongoose from "mongoose";
 import { Theme, ITheme } from "./theme.model";
-import { CreateThemeDTO, GetThemeDTO, UpdateThemeDTO } from "./theme.dto";
+import { CreateThemeDTO, ExistsThemeDTO, GetThemeDTO, UpdateThemeDTO } from "./theme.dto";
 
 export interface IThemeRepository {
     findById(id: string): Promise<ITheme | null>;
     find(filters: GetThemeDTO): Promise<Partial<ITheme>[]>;
     create(dto: CreateThemeDTO): Promise<ITheme>;
-    update(id: string, data: UpdateThemeDTO["data"]): Promise<ITheme>;
+    update(id: string, data: UpdateThemeDTO["data"]): Promise<ITheme | null>;
+    exists(filters: ExistsThemeDTO): Promise<boolean>;
     delete(id: string): Promise<ITheme | null>;
 }
 
@@ -14,8 +15,6 @@ export class ThemeRepository implements IThemeRepository {
 
     async findById(id: string) {
         return Theme.findById(new mongoose.Types.ObjectId(id))
-            //.populate("parent")
-            //.populate("thematicArea")
             .lean<ITheme>()
             .exec();
     }
@@ -49,21 +48,31 @@ export class ThemeRepository implements IThemeRepository {
         return Theme.create(data);
     }
 
-    async update(id: string, dtoData: UpdateThemeDTO["data"]): Promise<ITheme> {
+    async update(id: string, dtoData: UpdateThemeDTO["data"]): Promise<ITheme | null> {
         const updateData: Partial<ITheme> = {};
 
         if (dtoData.title !== undefined) updateData.title = dtoData.title;
         if (dtoData.priority !== undefined) updateData.priority = dtoData.priority;
 
-        const updated = await Theme.findByIdAndUpdate(
+        return Theme.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },
             { new: true }
         ).exec();
+    }
 
-        if (!updated) throw new Error("Theme not found");
+    async exists(filters: ExistsThemeDTO): Promise<boolean> {
+        const query: any = {};
 
-        return updated;
+        if (filters.thematicArea) {
+            query.thematicArea = new mongoose.Types.ObjectId(filters.thematicArea);
+        }
+
+        if (filters.parent) {
+            query.parent = new mongoose.Types.ObjectId(filters.parent);
+        }
+        const result = await Theme.exists(query).exec();
+        return result !== null;
     }
 
     async delete(id: string) {

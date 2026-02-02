@@ -18,5 +18,10 @@ export interface UpdateThemeDTO {
 export interface GetThemeDTO {
     parent?: string;
     thematicArea?: string;
-    level?:number;
+    level?: number;
+}
+
+export interface ExistsThemeDTO {
+    parent?: string;
+    thematicArea?: string;
 }

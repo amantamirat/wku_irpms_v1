@@ -19,7 +19,7 @@ interface ThematicManagerProps {
 }
 
 
-const ThematicManager = () => {
+const ThematicManager = ({ directorate }: ThematicManagerProps) => {
 
     const { hasPermission } = useAuth();
     const confirm = useConfirmDialog();
@@ -28,7 +28,6 @@ const ThematicManager = () => {
     const canEdit = hasPermission([PERMISSIONS.THEME.UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.THEME.DELETE]);
 
-    const { directorate, directorates } = useDirectorate();
     const emptyThematic: Thematic = {
         directorate: directorate ?? '',
         title: '',
@@ -52,9 +51,6 @@ const ThematicManager = () => {
 
     /** Fetch thematics */
     useEffect(() => {
-        if(!directorate){
-            return
-        }
         const fetchThematics = async () => {
             try {
                 setLoading(true);
@@ -111,10 +107,6 @@ const ThematicManager = () => {
         { field: "description", header: "Description" },
     ];
 
-    const topTemplate = () => {
-        return (<DirectorateSelector />)
-    };
-
     return (
         <>
             <CrudManager
@@ -147,7 +139,6 @@ const ThematicManager = () => {
                     })
                 }
 
-                topTemplate={topTemplate()}
                 rowExpansionTemplate={(row) => <ThemeManager thematicArea={row as Thematic} />}
                 enableSearch
             />
@@ -157,7 +148,6 @@ const ThematicManager = () => {
                 <SaveDialog
                     visible={showSaveDialog}
                     thematic={thematic}
-                    directorates={directorates}
                     onComplete={onSaveComplete}
                     onHide={hideDialogs}
                 />

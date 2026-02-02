@@ -13,17 +13,17 @@ import SaveResultDialog from "./SaveResultDialog";
 
 interface ResultManagerProps {
     reviewer: Reviewer;
-    updateStatus?: (reviewer: Reviewer, next: ReviewerStatus) => Promise<void>;
 }
 
-const ResultManager = ({ reviewer, updateStatus }: ResultManagerProps) => {
+const ResultManager = ({ reviewer }: ResultManagerProps) => {
 
     const confirm = useConfirmDialog();
     const { hasPermission } = useAuth();
+    const isAccepted = reviewer.status === ReviewerStatus.accepted;
 
-    const canCreate = hasPermission([PERMISSIONS.RESULT.CREATE]);
-    const canEdit = hasPermission([PERMISSIONS.RESULT.UPDATE]);
-    const canDelete = hasPermission([PERMISSIONS.RESULT.DELETE]);
+    const canCreate = isAccepted && hasPermission([PERMISSIONS.RESULT.CREATE]);
+    const canEdit = isAccepted && hasPermission([PERMISSIONS.RESULT.UPDATE]);
+    const canDelete = isAccepted && hasPermission([PERMISSIONS.RESULT.DELETE]);
 
     const {
         items: results,
@@ -145,10 +145,6 @@ const ResultManager = ({ reviewer, updateStatus }: ResultManagerProps) => {
                 canDelete={canDelete}
                 //toolbarEnd={endToolbarTemplate()}
 
-                onCreate={() => {
-                    setResult(undefined);
-                    setShowSaveDialog(true);
-                }}
                 onEdit={(row) => {
                     setResult(row);
                     setShowSaveDialog(true);

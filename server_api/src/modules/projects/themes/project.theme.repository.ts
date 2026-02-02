@@ -2,7 +2,7 @@
 import mongoose from "mongoose";
 import { ProjectTheme, IProjectTheme } from "./project.theme.model";
 import {
-    CreateProjectThemeDTO, GetProjectThemeOptions
+    CreateProjectThemeDTO, ExistProjectThemeDto, GetProjectThemeOptions
 } from "./project.theme.dto";
 
 
@@ -10,8 +10,8 @@ export interface IProjectThemeRepository {
     findById(id: string): Promise<IProjectTheme | null>;
     find(filters: GetProjectThemeOptions): Promise<IProjectTheme[]>;
     create(dto: CreateProjectThemeDTO): Promise<IProjectTheme>;
-    //update(id: string, data: UpdateProjectThemeDto["data"]): Promise<IProjectTheme>;
     createMany(dtos: CreateProjectThemeDTO[]): Promise<IProjectTheme[]>;
+    exists(filters: ExistProjectThemeDto): Promise<boolean>;
     delete(id: string): Promise<IProjectTheme | null>;
 }
 
@@ -53,6 +53,15 @@ export class ProjectThemeRepository implements IProjectThemeRepository {
             theme: new mongoose.Types.ObjectId(dto.theme),
         }));
         return ProjectTheme.insertMany(data, { ordered: true });
+    }
+
+    async exists(filters: ExistProjectThemeDto): Promise<boolean> {
+        const query: any = {};
+        if (filters.theme) {
+            query.theme = new mongoose.Types.ObjectId(filters.theme);
+        }
+        const result = await ProjectTheme.exists(query).exec();
+        return result !== null;
     }
 
     async delete(id: string) {

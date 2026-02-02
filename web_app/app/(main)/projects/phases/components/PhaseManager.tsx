@@ -150,9 +150,10 @@ export default function PhaseManager({ project, phaseType, flyMode = false, onSa
         const current = row.status;
         let prev: PhaseStatus | undefined;
         let next: PhaseStatus | undefined;
+        // project?.status === ProjectStatus.negotiation
 
         if (current === PhaseStatus.proposed) {
-            if (canReview && project?.status === ProjectStatus.negotiation) {
+            if (canReview) {
                 next = PhaseStatus.reviewed;
             }
         }
@@ -168,7 +169,7 @@ export default function PhaseManager({ project, phaseType, flyMode = false, onSa
             if (canActivate) {
                 next = PhaseStatus.active;
             }
-            if (canReview && project?.status === ProjectStatus.negotiation) {
+            if (canReview) {
                 prev = PhaseStatus.reviewed;
             }
         }

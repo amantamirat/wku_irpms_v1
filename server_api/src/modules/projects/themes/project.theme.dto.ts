@@ -11,6 +11,10 @@ export interface GetProjectThemeOptions {
     project: string;
 }
 
+export interface ExistProjectThemeDto {
+    theme?: string;
+}
+
 
 
 

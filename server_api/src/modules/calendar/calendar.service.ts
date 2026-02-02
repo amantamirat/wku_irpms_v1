@@ -11,8 +11,6 @@ export class CalendarService {
     constructor(private readonly repository: CalendarRepository,
         private readonly callRepository: CallRepository,
     ) {
-        this.repository = repository;
-        this.callRepository = callRepository;
     }
 
     async create(dto: CreateCalendarDTO) {
@@ -26,7 +24,7 @@ export class CalendarService {
         }
     }
 
-    async get(option:GetCalendarDTO) {
+    async get(option: GetCalendarDTO) {
         const calendars = await this.repository.find(option);
         return calendars;
     }
