@@ -74,7 +74,7 @@ export class CallService {
         if (nextState === CallStatus.planned) {
             const stages = await this.stageRepository.find({ call: id });
             if (stages.length > 0) {
-                throw new AppError(ERROR_CODES.CALL_STAGE_ALREADY_EXISTS);
+                throw new AppError(ERROR_CODES.STAGE_ALREADY_EXISTS);
             }
         }
         const updated = await this.repository.update(dto.id, { status: nextState });

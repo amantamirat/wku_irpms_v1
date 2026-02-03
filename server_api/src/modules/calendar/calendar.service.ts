@@ -52,7 +52,7 @@ export class CalendarService {
         if (next === CalendarStatus.planned) {
             const calls = await this.callRepository.find({ calendar: id });
             if (calls.length > 0) {
-                throw new AppError(ERROR_CODES.CALENDAR_HAS_CALLS);
+                throw new AppError(ERROR_CODES.CALLS_ALREADY_EXISTS);
             }
         }
         return await this.repository.updateStatus(id, dto);
