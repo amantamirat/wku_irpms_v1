@@ -8,22 +8,24 @@ import { useEffect, useState } from "react";
 import { Organization } from "../../organizations/models/organization.model";
 import { GrantApi } from "../api/grant.api";
 import ConstraintContainer from "../constraints/components/ConstraintContainer";
-import { Grant } from "../models/grant.model";
+import { FundingSource, Grant } from "../models/grant.model";
 import SaveDialog from "./SaveDialog";
 
 interface GrantManagerProps {
-    directorate?: Organization;
+    organization?: Organization;
 }
 
-const GrantManger = ({ directorate }: GrantManagerProps) => {
+const GrantManger = ({ organization }: GrantManagerProps) => {
 
     const { hasPermission } = useAuth();
 
     const confirm = useConfirmDialog();
 
     const emptyGrant: Grant = {
-        directorate: directorate ?? '',
-        title: ''
+        //fundingSource: FundingSource.INTERNAL,
+        //organization: organization ?? '',
+        title: '',
+        amount: 0
     };
 
     // ✅ Permissions    
@@ -48,13 +50,10 @@ const GrantManger = ({ directorate }: GrantManagerProps) => {
 
     // ✅ Fetch grants
     useEffect(() => {
-        if (!directorate) {
-            return
-        }
         const fetchGrants = async () => {
             try {
                 setLoading(true);
-                const data = await GrantApi.getGrants({ directorate });
+                const data = await GrantApi.getGrants({ organization });
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to fetch grants. " + (err.message ?? ""));
@@ -63,7 +62,7 @@ const GrantManger = ({ directorate }: GrantManagerProps) => {
             }
         };
         fetchGrants();
-    }, [directorate]);
+    }, [organization]);
 
     // ✅ Save / update
     const onSaveComplete = (savedGrant: Grant) => {
@@ -81,14 +80,14 @@ const GrantManger = ({ directorate }: GrantManagerProps) => {
         setShowSaveDialog(false);
     };
 
-
     const columns = [
-        //{ field: "directorate.name", header: "Directorate", sortable: true },
+        { field: "fundingSource", header: "Source", sortable: true },
+        { field: "organization.name", header: "Organization", sortable: true },
         { field: "title", header: "Title", sortable: true },
         { field: "description", header: "Description", sortable: true },
     ];
 
-   
+
     return (
         <>
             <CrudManager
@@ -106,11 +105,10 @@ const GrantManger = ({ directorate }: GrantManagerProps) => {
                 rowExpansionTemplate={(row) => <ConstraintContainer grant={row as Grant} />}
             />
 
-            {grant && (
+            {(grant && showSaveDialog) && (
                 <SaveDialog
                     visible={showSaveDialog}
                     grant={grant}
-                    directorateProvided={!!directorate}
                     onComplete={onSaveComplete}
                     onHide={() => setShowSaveDialog(false)}
                 />

@@ -10,21 +10,20 @@ import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 import { Organization, OrgnUnit } from '../../organizations/models/organization.model';
 import { GrantApi } from '../api/grant.api';
-import { Grant, validateGrant } from '../models/grant.model';
+import { FundingSource, Grant, validateGrant } from '../models/grant.model';
 import { OrganizationApi } from '../../organizations/api/organization.api';
+import { InputNumber } from 'primereact/inputnumber';
 
 interface SaveDialogProps {
     visible: boolean;
     grant: Grant;
-    directorateProvided: boolean;
     onComplete?: (savedGrant: Grant) => void;
     onHide: () => void;
 }
 
-const SaveDialog = ({ visible, grant, directorateProvided, onComplete, onHide }: SaveDialogProps) => {
+const SaveDialog = ({ visible, grant, onComplete, onHide }: SaveDialogProps) => {
 
     const toast = useRef<Toast>(null);
-
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [localGrant, setLocalGrant] = useState<Grant>({ ...grant });
     const [submitted, setSubmitted] = useState(false);
@@ -34,19 +33,28 @@ const SaveDialog = ({ visible, grant, directorateProvided, onComplete, onHide }:
     }, [grant]);
 
     useEffect(() => {
-        if (directorateProvided) {
-            return
-        }
-        const loadDirectorates = async () => {
+        const loadOrganizations = async () => {
+            if (!localGrant.fundingSource) {
+                setOrganizations([]);
+                return;
+            }
             try {
-                const data = await OrganizationApi.getOrganizations({ type: OrgnUnit.Directorate });
+                const unitType =
+                    localGrant.fundingSource === FundingSource.INTERNAL
+                        ? OrgnUnit.Directorate
+                        : OrgnUnit.External;
+
+                const data = await OrganizationApi.getOrganizations({ type: unitType });
                 setOrganizations(data);
             } catch (err) {
-                console.error('Failed to load directorates:', err);
+                console.error('Failed to load organizations:', err);
+                setOrganizations([]);
             }
         };
-        loadDirectorates();
-    }, [directorateProvided]);
+
+        loadOrganizations();
+    }, [localGrant.fundingSource]);
+
 
     useEffect(() => {
         if (!visible) clearForm();
@@ -70,7 +78,7 @@ const SaveDialog = ({ visible, grant, directorateProvided, onComplete, onHide }:
                 : await GrantApi.createGrant(localGrant);
             saved = {
                 ...saved,
-                directorate: localGrant.directorate
+                organization: localGrant.organization
             };
             toast.current?.show({
                 severity: 'success',
@@ -114,21 +122,43 @@ const SaveDialog = ({ visible, grant, directorateProvided, onComplete, onHide }:
                 footer={footer}
                 onHide={hide}
             >
-                {!directorateProvided &&
-                    <div className="field">
-                        <label htmlFor="directorate">Directorate</label>
-                        <Dropdown
-                            id="directorate"
-                            value={localGrant.directorate}
-                            options={organizations}
-                            optionLabel="name"
-                            onChange={(e) => setLocalGrant({ ...localGrant, directorate: e.value })}
-                            placeholder="Select Directorate"
-                            className={classNames({ 'p-invalid': submitted && !localGrant.directorate })}
-                        />
-                    </div>
-                }
+                <div className="field">
+                    <label htmlFor="source">source</label>
+                    <Dropdown
+                        id="source"
+                        value={localGrant.fundingSource}
+                        options={Object.values(FundingSource).map((f) => ({
+                            label: f,
+                            value: f,
+                        }))}
+                        onChange={(e) =>
+                            setLocalGrant({
+                                ...localGrant,
+                                fundingSource: e.value,
+                                organization: undefined, // 👈 reset
+                            })
+                        }
+                        placeholder="Select Funding Source"
+                        className={classNames({
+                            'p-invalid': submitted && !localGrant.fundingSource,
+                        })}
+                        disabled={!!localGrant._id}
+                    />
+                </div>
 
+                <div className="field">
+                    <label htmlFor="directorate">Directorate</label>
+                    <Dropdown
+                        id="directorate"
+                        value={localGrant.organization}
+                        options={organizations}
+                        optionLabel="name"
+                        onChange={(e) => setLocalGrant({ ...localGrant, organization: e.value })}
+                        placeholder="Select Funder"
+                        className={classNames({ 'p-invalid': submitted && !localGrant.organization })}
+                        disabled={!!localGrant._id}
+                    />
+                </div>
                 {/* Title Field */}
                 <div className="field">
                     <label htmlFor="title">Title</label>
@@ -139,6 +169,15 @@ const SaveDialog = ({ visible, grant, directorateProvided, onComplete, onHide }:
                         required
                         autoFocus
                         className={classNames({ 'p-invalid': submitted && !localGrant.title })}
+                    />
+                </div>
+
+                <div className="field">
+                    <label htmlFor="amount">Amount (ETB)</label>
+                    <InputNumber
+                        id="amount"
+                        value={localGrant.amount}
+                        onValueChange={(e) => setLocalGrant({ ...localGrant, amount: e.value ?? 0 })}
                     />
                 </div>
 
@@ -153,6 +192,7 @@ const SaveDialog = ({ visible, grant, directorateProvided, onComplete, onHide }:
                         cols={30}
                     />
                 </div>
+
             </Dialog>
         </>
     );

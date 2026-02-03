@@ -8,21 +8,41 @@
 }
 
 .theme-level-badge.theme-broad {
-    background: #FFF3E0; /* light orange */
-    color: #EF6C00; /* dark orange */
+    background: #FFF3E0;
+    /* light orange */
+    color: #EF6C00;
+    /* dark orange */
 }
 
 .theme-level-badge.theme-division {
-    background: #E3F2FD; /* light blue */
-    color: #1565C0; /* dark blue */
+    background: #E3F2FD;
+    /* light blue */
+    color: #1565C0;
+    /* dark blue */
 }
 
 .theme-level-badge.theme-narrow {
-    background: #E8F5E9; /* light green */
-    color: #2E7D32; /* dark green */
+    background: #E8F5E9;
+    /* light green */
+    color: #2E7D32;
+    /* dark green */
 }
 
 .theme-level-badge.theme-deep {
-    background: #e2f2e2; 
-    color: #120a01; 
+    background: #e2f2e2;
+    color: #120a01;
+}
+
+.theme-level-badge.theme {
+    background-color: #F3E5F5;
+    /* very soft lavender */
+    color: #5E2A84;
+    /* muted purple */
+}
+
+.theme-level-badge.component {
+    background-color: #E8F0FE;
+    /* soft blue-gray */
+    color: #1F3A5F;
+    /* deep blue */
 }

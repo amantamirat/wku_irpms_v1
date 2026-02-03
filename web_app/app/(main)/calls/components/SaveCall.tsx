@@ -76,7 +76,7 @@ const SaveCall = ({ visible, call, calendarProvided, directorateProvided, onHide
     useEffect(() => {
         const loadGrants = async () => {
             try {
-                const data = await GrantApi.getGrants({ directorate: localCall.directorate });
+                const data = await GrantApi.getGrants({ organization: localCall.directorate });
                 setGrants(data);
             } catch (err) {
                 console.error('Failed to load grants:', err);

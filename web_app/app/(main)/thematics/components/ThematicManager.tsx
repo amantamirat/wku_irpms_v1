@@ -11,8 +11,6 @@ import { ThematicApi } from "../api/thematic.api";
 import { Thematic, ThemeLevel } from "../models/thematic.model";
 import ThemeManager from "../themes/components/ThemeManager";
 import SaveDialog from "./SaveDialog";
-import { DirectorateSelector } from "@/components/DirectorateSelector";
-import { useDirectorate } from "@/contexts/DirectorateContext";
 
 interface ThematicManagerProps {
     directorate?: Organization;
@@ -51,10 +49,13 @@ const ThematicManager = ({ directorate }: ThematicManagerProps) => {
 
     /** Fetch thematics */
     useEffect(() => {
+        if (!directorate) {
+            return
+        }
         const fetchThematics = async () => {
             try {
                 setLoading(true);
-                const data = await ThematicApi.getThematics({directorate});
+                const data = await ThematicApi.getThematics({ directorate });
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to fetch thematics. " + (err?.message ?? ""));
@@ -89,7 +90,7 @@ const ThematicManager = ({ directorate }: ThematicManagerProps) => {
         {
             field: "type", header: "Type", sortable: true,
             body: (r: Thematic) => (
-                <span className={`my-badge ${r.type?.toLowerCase()}`}>
+                <span className={`theme-level-badge ${r.type?.toLowerCase()}`}>
                     {r.type}
                 </span>
             )

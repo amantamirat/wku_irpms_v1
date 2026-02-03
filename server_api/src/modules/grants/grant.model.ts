@@ -2,17 +2,29 @@ import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
 import { Directorate } from "../organization/organization.model";
 
+export enum FundingSource {
+    INTERNAL = "internal",
+    EXTERNAL = "external",
+}
+
 export interface IGrant extends Document {
-    directorate: mongoose.Types.ObjectId; //Funder Organization
+    fundingSource: FundingSource;
+    organization: mongoose.Types.ObjectId; //Funder Organization
     title: string;
-    fundingSource?: string;//Internal or External if External Organization reference required
+    amount: number;
     description?: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
 const GrantSchema = new Schema<IGrant>({
-    directorate: {
+    fundingSource: {
+        type: String,
+        enum: Object.values(FundingSource),
+        required: true,
+        immutable: true
+    },
+    organization: {
         type: Schema.Types.ObjectId,
         ref: Directorate.modelName,
         required: true,
@@ -22,11 +34,15 @@ const GrantSchema = new Schema<IGrant>({
         type: String,
         required: true
     },
-    fundingSource: {
-        type: String,
-    },
     description: {
         type: String,
+    },
+    amount:
+    {
+        type: Number,
+        required: true,
+        default: 0,
+        min: 0
     }
 }, { timestamps: true });
 

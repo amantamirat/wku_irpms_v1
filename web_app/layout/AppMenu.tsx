@@ -24,7 +24,6 @@ const AppMenu = () => {
             visible: hasPermission([
                 PERMISSIONS.CALL.CREATE,
                 PERMISSIONS.EVALUATION.CREATE,
-                PERMISSIONS.GRANT.CREATE,
                 PERMISSIONS.THEMATIC.CREATE,
             ]),
             items: [
@@ -55,19 +54,7 @@ const AppMenu = () => {
                             PERMISSIONS.THEMATIC.CREATE
                         ]
                     )
-                },
-                {
-                    label: 'Grants',
-                    icon: 'pi pi-cog',
-                    to: '/grants',
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.GRANT.CREATE,
-                            PERMISSIONS.GRANT.UPDATE,
-                            PERMISSIONS.GRANT.DELETE
-                        ]
-                    )
-                },
+                }
             ]
         },
         {
@@ -145,7 +132,20 @@ const AppMenu = () => {
                         PERMISSIONS.POSITION.UPDATE,
                         PERMISSIONS.POSITION.DELETE
                     ])
-                }
+                },
+
+                {
+                    label: 'Grants',
+                    icon: 'pi pi-bitcoin',
+                    to: '/grants',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.GRANT.CREATE,
+                            PERMISSIONS.GRANT.UPDATE,
+                            PERMISSIONS.GRANT.DELETE
+                        ]
+                    )
+                },
 
             ]
         },

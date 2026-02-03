@@ -1,12 +1,16 @@
+import { FundingSource } from "./grant.model";
+
 export interface GetGrantsDTO {
-    directorate?: string;
+    organization?: string;
+    fundingSource?: FundingSource;
 }
 
 export interface CreateGrantDTO {
-    directorate: string;
+    fundingSource: FundingSource;
+    organization: string;
     title: string;
+    amount: number;
     description?: string;
-    userId: string;
 }
 
 export interface UpdateGrantDTO {
@@ -14,11 +18,9 @@ export interface UpdateGrantDTO {
     data: Partial<{
         title: string;
         description?: string;
+        amount: number;
     }>;
     userId: string;
 }
 
-export interface DeleteGrantDTO {
-    id: string;
-    userId: string;
-}
+

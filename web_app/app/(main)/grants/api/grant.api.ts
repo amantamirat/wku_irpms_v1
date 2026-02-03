@@ -18,7 +18,7 @@ export const GrantApi = {
     async getGrants(options: GetGrantsOptions): Promise<Grant[]> {
         const query = new URLSearchParams();
         const sanitized = sanitizeGrant(options);
-        if (sanitized.directorate) query.append("directorate", sanitized.directorate as string);
+        if (sanitized.organization) query.append("directorate", sanitized.organization as string);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Grant[];
     },

@@ -6,11 +6,10 @@ import { useDirectorate } from '@/contexts/DirectorateContext';
 
 
 const GrantPage = () => {
-    const { directorate } = useDirectorate();
+    //const { directorate } = useDirectorate();
     return (
         <>
-            <DirectorateSelector />
-            <GrantManager directorate={directorate} />
+            <GrantManager />
         </>
 
     );

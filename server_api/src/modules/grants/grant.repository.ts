@@ -26,40 +26,58 @@ export class GrantRepository implements IGrantRepository {
     async find(filters: GetGrantsDTO) {
         const query: any = {};
 
-        if (filters.directorate) {
-            query.directorate = new mongoose.Types.ObjectId(filters.directorate);
+        if (filters.organization) {
+            query.organization = new mongoose.Types.ObjectId(filters.organization);
         }
 
-        return Grant.find(query)
-            .populate("directorate")
+        if (filters.fundingSource) {
+            query.fundingSource = filters.fundingSource;
+        }
+
+        return Grant.find(query).populate("organization")
             .lean<IGrant[]>()
             .exec();
     }
 
     async create(dto: CreateGrantDTO) {
         const data: Partial<IGrant> = {
-            directorate: new mongoose.Types.ObjectId(dto.directorate),
+            fundingSource: dto.fundingSource,
+            organization: new mongoose.Types.ObjectId(dto.organization),
             title: dto.title,
             description: dto.description,
-            //createdBy: new mongoose.Types.ObjectId(dto.userId)
+            amount: dto.amount
         };
+
         return Grant.create(data);
     }
 
-    async update(id: string, dtoData: UpdateGrantDTO["data"]): Promise<IGrant | null> {
+    async update(
+        id: string,
+        dtoData: UpdateGrantDTO["data"]
+    ): Promise<IGrant | null> {
+
         const updateData: Partial<IGrant> = {};
 
-        if (dtoData.title) updateData.title = dtoData.title;
-        if (dtoData.description) updateData.description = dtoData.description;
+        if (dtoData.title !== undefined)
+            updateData.title = dtoData.title;
+
+        if (dtoData.description !== undefined)
+            updateData.description = dtoData.description;
+
+        if (dtoData.amount !== undefined)
+            updateData.amount = dtoData.amount;
 
         return Grant.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },
             { new: true }
-        ).exec();
+        )
+            .exec();
     }
 
     async delete(id: string) {
-        return await Grant.findByIdAndDelete(id).exec();
+        return Grant.findByIdAndDelete(
+            new mongoose.Types.ObjectId(id)
+        ).exec();
     }
 }
