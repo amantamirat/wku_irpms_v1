@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { GetCompositionDTO, CreateCompositionDTO, UpdateCompositionDTO } from "./composition.dto";
 import { IComposition, Composition } from "./composition.model";
 
@@ -6,7 +7,7 @@ export interface ICompositionRepository {
     find(filters: GetCompositionDTO): Promise<IComposition[]>;
     findById(id: string): Promise<IComposition | null>;
     create(dto: CreateCompositionDTO): Promise<IComposition>;
-    update(dto: UpdateCompositionDTO): Promise<IComposition>;
+    update(dto: UpdateCompositionDTO): Promise<IComposition | null>;
     delete(id: string): Promise<IComposition | null>;
 }
 
@@ -23,24 +24,20 @@ export class CompositionRepository implements ICompositionRepository {
     }
 
     async create(dto: CreateCompositionDTO): Promise<IComposition> {
-        const doc = new Composition(dto);
-        return await doc.save();
+        const data: Partial<IComposition> = {
+            ...dto,
+            constraint: new mongoose.Types.ObjectId(dto.constraint)
+        };
+        return Composition.create(data);
     }
 
-    async update(dto: UpdateCompositionDTO): Promise<IComposition> {
+    async update(dto: UpdateCompositionDTO): Promise<IComposition | null> {
         const { id, data } = dto;
-
-        const updated = await Composition.findByIdAndUpdate(
+        return Composition.findByIdAndUpdate(
             id,
             data,
-            { new: true } // return updated doc
+            { new: true } 
         ).exec();
-
-        if (!updated) {
-            throw new Error("Composition not found");
-        }
-
-        return updated;
     }
 
     async delete(id: string): Promise<IComposition | null> {

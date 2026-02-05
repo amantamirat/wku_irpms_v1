@@ -30,6 +30,5 @@ const ApplicantConstraintSchema = new Schema<IApplicantConstraint>({
 
 });
 
-ApplicantConstraintSchema.index({ grant: 1, type: 1, constraint: 1 }, { unique: true });
 export const ApplicantConstraint = Constraint.discriminator<IApplicantConstraint>(ConstraintType.APPLICANT, ApplicantConstraintSchema);
 

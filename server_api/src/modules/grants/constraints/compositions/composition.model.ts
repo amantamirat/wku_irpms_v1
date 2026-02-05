@@ -1,6 +1,6 @@
 import mongoose, { model, Schema } from "mongoose";
-import { COLLECTIONS } from "../../../../../common/constants/collections.enum";
-import { ApplicantConstraint } from "../applicant-constraint.model";
+import { COLLECTIONS } from "../../../../common/constants/collections.enum";
+import { ApplicantConstraint } from "../applicant/applicant-constraint.model";
 
 export interface IComposition extends Document {
     constraint: mongoose.Types.ObjectId;

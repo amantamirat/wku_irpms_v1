@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { errorResponse, successResponse } from '../../../../../common/helpers/response';
+import { errorResponse, successResponse } from '../../../../common/helpers/response';
 import { GetCompositionDTO, UpdateCompositionDTO } from "./composition.dto";
 import { CompositionService } from "./composition.service";
 

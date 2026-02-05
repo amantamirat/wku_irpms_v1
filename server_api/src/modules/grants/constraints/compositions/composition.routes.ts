@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { CompositionController } from './composition.controller';
-import { PERMISSIONS } from '../../../../../common/constants/permissions';
-import { verifyActiveAccount, checkPermission } from '../../../../users/user.middleware';
+import { PERMISSIONS } from '../../../../common/constants/permissions';
+import { verifyActiveAccount, checkPermission } from '../../../users/user.middleware';
 
 const router: Router = Router();
 

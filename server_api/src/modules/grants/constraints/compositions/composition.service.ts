@@ -1,19 +1,17 @@
 import { CompositionRepository, ICompositionRepository } from "./composition.repository";
-import { IApplicantConstraint } from "../applicant-constraint.model";
-import { isRangeConstraint, isListConstraint, ApplicantConstraintType, getListOptions } from "../applicant-constaint-type";
+import { IApplicantConstraint } from "../applicant/applicant-constraint.model";
+import { isRangeConstraint, isListConstraint, ApplicantConstraintType, getListOptions } from "../applicant/applicant-constaint-type";
 import { CreateCompositionDTO, GetCompositionDTO, UpdateCompositionDTO } from "./composition.dto";
-import { ConstraintRepository, IConstraintRepository } from "../../constraint.repository";
+import { ConstraintRepository, IConstraintRepository } from "../constraint.repository";
 
 
 export class CompositionService {
 
-    private repository: ICompositionRepository;
-    private constraintRepo: IConstraintRepository;
+    constructor(
+        private readonly repository: ICompositionRepository = new CompositionRepository(),
+        private readonly constraintRepo: IConstraintRepository = new ConstraintRepository(),
+    ) { }
 
-    constructor(repository?: ICompositionRepository, constraintRepo?: IConstraintRepository) {
-        this.repository = repository || new CompositionRepository();
-        this.constraintRepo = constraintRepo || new ConstraintRepository();
-    }
 
     //----------------------------------------
     // VALIDATION

@@ -17,7 +17,14 @@ export class ConstraintService {
         const { grant, type, constraint } = dto;
         const grantDoc = await this.grantRepository.findById(grant);
         if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
-        return await this.repository.create(dto);
+        try {
+            return await this.repository.create(dto);
+        } catch (err: any) {
+            if (err?.code === 11000) {
+                throw new AppError(ERROR_CODES.CONSTRAINT_ALREADY_EXISTS);
+            }
+            throw err;
+        }
     }
 
     //----------------------------------------
