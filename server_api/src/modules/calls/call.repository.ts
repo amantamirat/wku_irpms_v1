@@ -1,12 +1,13 @@
 import mongoose from "mongoose";
-import { CreateCallDTO, GetCallsOptions, UpdateCallDTO } from "./call.dto";
+import { CreateCallDTO, ExistsCallDTO, GetCallsOptions, UpdateCallDTO } from "./call.dto";
 import { Call, ICall } from "./call.model";
 
 export interface ICallRepository {
     findById(id: string): Promise<ICall | null>;
     find(filters: GetCallsOptions): Promise<Partial<ICall>[]>;
     create(dto: CreateCallDTO): Promise<ICall>;
-    update(id: string, data: UpdateCallDTO["data"]): Promise<ICall>;
+    update(id: string, data: UpdateCallDTO["data"]): Promise<ICall | null>;
+    exists(filters: ExistsCallDTO): Promise<boolean>;
     delete(id: string): Promise<ICall | null>;
 }
 
@@ -58,21 +59,37 @@ export class CallRepository implements ICallRepository {
         });
     }
 
-    async update(id: string, dtoData: UpdateCallDTO["data"]): Promise<ICall> {
+    async update(id: string, dtoData: UpdateCallDTO["data"]): Promise<ICall | null> {
         const updateData: Partial<ICall> = {};
 
         if (dtoData.title) updateData.title = dtoData.title;
         if (dtoData.description) updateData.description = dtoData.description;
         if (dtoData.status) updateData.status = dtoData.status;
 
-        const updated = await Call.findByIdAndUpdate(
+        return Call.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },
             { new: true }
         ).exec();
+    }
 
-        if (!updated) throw new Error("Call not found");
-        return updated;
+    async exists(filters: ExistsCallDTO): Promise<boolean> {
+        const query: any = {};
+        const { grant, calendar, directorate, thematic } = filters;
+        if (grant) {
+            query.grant = new mongoose.Types.ObjectId(grant);
+        }
+        if (calendar) {
+            query.calendar = new mongoose.Types.ObjectId(calendar);
+        }
+        if (directorate) {
+            query.directorate = new mongoose.Types.ObjectId(directorate);
+        }
+        if (thematic) {
+            query.thematic = new mongoose.Types.ObjectId(thematic);
+        }
+        const result = await Call.exists(query).exec();
+        return result !== null;
     }
 
     async delete(id: string) {

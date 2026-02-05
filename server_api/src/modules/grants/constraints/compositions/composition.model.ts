@@ -20,7 +20,8 @@ const CompositionSchema = new Schema<IComposition>({
     },
     value: {
         type: Number,
-        required: true
+        required: true,
+        min: 0
     },
     max: {
         type: Number,

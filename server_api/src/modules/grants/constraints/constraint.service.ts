@@ -4,6 +4,7 @@ import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { GrantRepository, IGrantRepository } from "../grant.repository";
 import { CreateConstraintDTO, GetConstraintOptions, UpdateConstraintDTO } from "./constraint.dto";
 import { ConstraintType } from "./constraint.model";
+import { CompositionRepository, ICompositionRepository } from "./compositions/composition.repository";
 
 
 export class ConstraintService {
@@ -11,6 +12,7 @@ export class ConstraintService {
     constructor(
         private readonly repository: IConstraintRepository = new ConstraintRepository(),
         private readonly grantRepository: IGrantRepository = new GrantRepository(),
+        private readonly compositionRepo: ICompositionRepository = new CompositionRepository(),
     ) { }
 
     async create(dto: CreateConstraintDTO) {
@@ -46,6 +48,10 @@ export class ConstraintService {
     // DELETE
     //----------------------------------------
     async delete(id: string) {
+        const compositionExist = await this.compositionRepo.exists(id);
+        if (compositionExist)
+            throw new AppError(ERROR_CODES.COMPOSITION_ALREADY_EXISTS);
+
         const deleted = await this.repository.delete(id);
         if (!deleted) throw new Error(ERROR_CODES.CONSTRAINT_NOT_FOUND);
     }

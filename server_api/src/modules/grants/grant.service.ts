@@ -6,6 +6,7 @@ import { IOrganizationRepository, OrganizationRepository } from "../organization
 import { Unit } from "../organization/organization.type";
 import { FundingSource } from "./grant.model";
 import { ConstraintRepository, IConstraintRepository } from "./constraints/constraint.repository";
+import { CallRepository, ICallRepository } from "../calls/call.repository";
 
 export class GrantService {
 
@@ -13,6 +14,7 @@ export class GrantService {
         private readonly grantRepository: IGrantRepository = new GrantRepository(),
         private readonly organizationRepository: IOrganizationRepository = new OrganizationRepository(),
         private readonly constraintRepo: IConstraintRepository = new ConstraintRepository(),
+        private readonly callRepo: ICallRepository = new CallRepository()
     ) { }
 
     async create(dto: CreateGrantDTO) {
@@ -48,9 +50,13 @@ export class GrantService {
     }
 
     async delete(id: string) {
-        const constraintExist = await this.constraintRepo.exists({ grant: id });
-        if (constraintExist)
+        if (await this.callRepo.exists({ grant: id }))
+            throw new AppError(ERROR_CODES.CALL_ALREADY_EXISTS);
+
+        if (await this.constraintRepo.exists({ grant: id }))
             throw new AppError(ERROR_CODES.CONSTRAINT_ALREADY_EXISTS);
-        return await this.grantRepository.delete(id);
+
+        const deleted = await this.grantRepository.delete(id);
+        if (!deleted) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
     }
 }

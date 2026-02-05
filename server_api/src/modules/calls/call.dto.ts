@@ -37,3 +37,9 @@ export interface GetCallsOptions {
     userId?: string;
 }
 
+export interface ExistsCallDTO {
+    grant?: string;
+    calendar?: string;
+    directorate?: string;
+    thematic?: string;
+}

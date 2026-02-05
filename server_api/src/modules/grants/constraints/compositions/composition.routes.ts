@@ -1,36 +1,52 @@
-import { Router } from 'express';
-import { CompositionController } from './composition.controller';
-import { PERMISSIONS } from '../../../../common/constants/permissions';
-import { verifyActiveAccount, checkPermission } from '../../../users/user.middleware';
+import { Router } from "express";
+import { CompositionController } from "./composition.controller";
+import { CompositionService } from "./composition.service";
+import { checkPermission, verifyActiveAccount } from "../../../users/user.middleware";
+import { PERMISSIONS } from "../../../../common/constants/permissions";
+
+const service = new CompositionService();
+const controller = new CompositionController(service);
 
 const router: Router = Router();
 
+//----------------------------------------
+// CREATE COMPOSITION
+//----------------------------------------
 router.post(
-    '/',
+    "/",
     verifyActiveAccount,
     checkPermission([PERMISSIONS.CONSTRAINT.CREATE]),
-    CompositionController.createComposition
+    controller.create
 );
 
+//----------------------------------------
+// GET COMPOSITIONS
+//----------------------------------------
 router.get(
-    '/',
+    "/",
     verifyActiveAccount,
     checkPermission([PERMISSIONS.CONSTRAINT.READ]),
-    CompositionController.getCompositions
+    controller.get
 );
 
+//----------------------------------------
+// UPDATE COMPOSITION
+//----------------------------------------
 router.put(
-    '/:id',
+    "/:id",
     verifyActiveAccount,
     checkPermission([PERMISSIONS.CONSTRAINT.UPDATE]),
-    CompositionController.updateComposition
+    controller.update
 );
 
+//----------------------------------------
+// DELETE COMPOSITION
+//----------------------------------------
 router.delete(
-    '/:id',
+    "/:id",
     verifyActiveAccount,
     checkPermission([PERMISSIONS.CONSTRAINT.DELETE]),
-    CompositionController.deleteComposition
+    controller.delete
 );
 
 export default router;

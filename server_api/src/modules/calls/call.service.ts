@@ -58,9 +58,9 @@ export class CallService {
 
     async update(dto: UpdateCallDTO) {
         const { id, data } = dto;
-        const callDoc = await this.repository.findById(id);
-        if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
-        return await this.repository.update(id, data);
+        const updated = await this.repository.update(id, data);;
+        if (!updated) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+        return updated;
     }
 
     async updateStatus(dto: UpdateCallStatusDTO) {

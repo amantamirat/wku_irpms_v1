@@ -3,6 +3,9 @@ import { IApplicantConstraint } from "../applicant/applicant-constraint.model";
 import { isRangeConstraint, isListConstraint, ApplicantConstraintType, getListOptions } from "../applicant/applicant-constaint-type";
 import { CreateCompositionDTO, GetCompositionDTO, UpdateCompositionDTO } from "./composition.dto";
 import { ConstraintRepository, IConstraintRepository } from "../constraint.repository";
+import { ERROR_CODES } from "../../../../common/errors/error.codes";
+import { ConstraintType } from "../constraint.model";
+import { AppError } from "../../../../common/errors/app.error";
 
 
 export class CompositionService {
@@ -16,42 +19,37 @@ export class CompositionService {
     //----------------------------------------
     // VALIDATION
     //----------------------------------------
-    private async validateComposition(dto: CreateCompositionDTO) {
+    private async validate(dto: CreateCompositionDTO) {
 
-        const constraintDoc = await this.constraintRepo.findById(dto.constraint) as IApplicantConstraint;
-        if (!constraintDoc) throw new Error("Applicant constraint not found.");
+        const {constraint,  min, max } = dto;
+
+        const constraintDoc = await this.constraintRepo.findById(constraint) as IApplicantConstraint;
+        if (!constraintDoc || constraintDoc.type !== ConstraintType.APPLICANT) throw new Error(ERROR_CODES.CONSTRAINT_NOT_FOUND);
 
         const applicantType = constraintDoc.constraint as ApplicantConstraintType;
 
         if (isRangeConstraint(applicantType)) {
-            if (dto.min === undefined || dto.max === undefined) {
-                throw new Error(`Range must be specified for ${applicantType} constraint.`);
-            }
-            if (dto.min > dto.max) {
-                throw new Error('Minimum value cannot be greater than maximum value.');
-            }
+            if (min === undefined || max === undefined)
+                throw new AppError(ERROR_CODES.COMPOSITION_FIELDS_NOT_FOUND);
+            if (min > max)
+                throw new AppError(ERROR_CODES.INVALID_COMPOSITION_VALUE);
         }
+        else if (isListConstraint(applicantType)) {
+            if (!dto.item)
+                throw new Error(ERROR_CODES.COMPOSITION_FIELDS_NOT_FOUND);
 
-        if (isListConstraint(applicantType)) {
-            if (!dto.item) {
-                throw new Error(`Item must be specified for ${applicantType} constraint.`);
-            }
             const allowedOptions = getListOptions(applicantType);
             if (!allowedOptions?.includes(dto.item)) {
-                throw new Error(`Invalid item "${dto.item}" for ${applicantType} constraint. Allowed options: ${allowedOptions?.join(", ")}`);
+                throw new Error(ERROR_CODES.INVALID_COMPOSITION_VALUE);
             }
-        }
-
-        if (dto.value !== undefined && dto.value < 0) {
-            throw new Error("Value must be a positive number.");
         }
     }
 
     //----------------------------------------
     // CREATE
     //----------------------------------------
-    async createComposition(data: CreateCompositionDTO) {
-        await this.validateComposition(data);
+    async create(data: CreateCompositionDTO) {
+        await this.validate(data);
         return this.repository.create(data);
     }
 
@@ -65,23 +63,16 @@ export class CompositionService {
     //----------------------------------------
     // UPDATE
     //----------------------------------------
-    async updateComposition(dto: UpdateCompositionDTO) {
-        const existing = await this.repository.findById(dto.id);
-        if (!existing) throw new Error("Composition not found");
-
-        // Merge updates for validation
-        // const updatedData = { ...existing.toObject(), ...dto.data };
-        //  await this.validateComposition(updatedData);
-
-        return this.repository.update(dto);
+    async update(dto: UpdateCompositionDTO) {
+        const updated = await this.repository.update(dto);
+        if (!updated) throw new Error(ERROR_CODES.COMPOSITION_NOT_FOUND);
     }
 
     //----------------------------------------
     // DELETE
     //----------------------------------------
-    async deleteComposition(id: string) {
-        const existing = await this.repository.findById(id);
-        if (!existing) throw new Error("Composition not found");
-        return this.repository.delete(id);
+    async delete(id: string) {
+        const deleted = await this.repository.delete(id);
+        if (!deleted) throw new Error(ERROR_CODES.COMPOSITION_NOT_FOUND);
     }
 }

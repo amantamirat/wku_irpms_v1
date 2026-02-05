@@ -8,6 +8,7 @@ export interface ICompositionRepository {
     findById(id: string): Promise<IComposition | null>;
     create(dto: CreateCompositionDTO): Promise<IComposition>;
     update(dto: UpdateCompositionDTO): Promise<IComposition | null>;
+    exists(constraint: string): Promise<boolean>;
     delete(id: string): Promise<IComposition | null>;
 }
 
@@ -36,8 +37,15 @@ export class CompositionRepository implements ICompositionRepository {
         return Composition.findByIdAndUpdate(
             id,
             data,
-            { new: true } 
+            { new: true }
         ).exec();
+    }
+
+    async exists(constraint: string): Promise<boolean> {
+        const query: any = {};
+        query.constraint = constraint;
+        const result = await Composition.exists(query).exec();
+        return result !== null;
     }
 
     async delete(id: string): Promise<IComposition | null> {
