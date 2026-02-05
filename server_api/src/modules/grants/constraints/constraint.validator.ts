@@ -5,7 +5,7 @@ import { IPhaseRepository, PhaseRepository } from "../../projects/phase/phase.re
 import { SubmitProjectDTO } from "../../projects/project.dto";
 import { IProject } from "../../projects/project.model";
 import { IProjectRepository, ProjectRepository } from "../../projects/project.repository";
-import { ConstraintType } from "./constraint-type.enum";
+import { ConstraintType } from "./constraint.model";
 import { IConstraintRepository, ConstraintRepository } from "./constraint.repository";
 import { ProjectConstraintType } from "./project/project-constraint-type.enum";
 import { IProjectConstraint } from "./project/project-constraint.model";
@@ -60,7 +60,7 @@ export class ConstraintValidator {
 
     async validateProjectConstraints(grantId: string, collaborators?: string[], phases?: PhaseDto[]) {
         const constraints =
-            await this.constraintRepository.find({ type: ConstraintType.PROJECT, grantId: grantId }) as IProjectConstraint[];
+            await this.constraintRepository.find({ type: ConstraintType.PROJECT, grant: grantId }) as IProjectConstraint[];
 
         if (!constraints || constraints.length === 0) return;
 

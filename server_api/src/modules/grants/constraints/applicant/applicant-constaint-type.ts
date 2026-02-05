@@ -6,6 +6,7 @@ export enum ApplicantConstraintType {
     SCOPE = "SCOPE",                      // Scope constraint (academic, supportive, external)  
     AGE = "AGE",                          // Age constraint (min age, max age)
     EXPERIENCE = "EXPERIENCE",            // Experience-based constraint  
+    //PUBLICATION=
 }
 
 const constraintKindMap: Record<ApplicantConstraintType, "range" | "list"> = {

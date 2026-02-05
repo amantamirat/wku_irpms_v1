@@ -1,16 +1,15 @@
-import { CreateApplicantConstraintDTO } from "./applicant/applicant-constaint.dto";
+import mongoose from "mongoose";
+import { CreateConstraintDTO, ExistsConstraintDTO, GetConstraintOptions, UpdateConstraintDTO } from "./constraint.dto";
+import { Constraint, ConstraintType, IConstraint } from "./constraint.model";
 import { ApplicantConstraint } from "./applicant/applicant-constraint.model";
-import { GetConstraintOptions } from "./constraint.dto";
-import { Constraint, IConstraint } from "./constraint.model";
-import { CreateProjectConstraintDTO, UpdateProjectConstraintDTO } from "./project/project-constraint.dto";
-import { IProjectConstraint, ProjectConstraint } from "./project/project-constraint.model";
+import { ProjectConstraint } from "./project/project-constraint.model";
 
 export interface IConstraintRepository {
     find(filters: GetConstraintOptions): Promise<IConstraint[]>;
     findById(id: string): Promise<IConstraint | null>;
-    createProjectConstraint(dto: CreateProjectConstraintDTO): Promise<IProjectConstraint>;
-    updateProjectConstraint(dto: UpdateProjectConstraintDTO): Promise<IProjectConstraint>;
-    createApplicantConstraint(dto: CreateApplicantConstraintDTO): Promise<IConstraint>;
+    create(dto: CreateConstraintDTO): Promise<IConstraint>;
+    update(dto: UpdateConstraintDTO): Promise<IConstraint | null>;
+    exists(filters: ExistsConstraintDTO): Promise<boolean>;
     delete(id: string): Promise<IConstraint | null>;
 }
 
@@ -20,7 +19,7 @@ export class ConstraintRepository implements IConstraintRepository {
     async find(filters: GetConstraintOptions): Promise<IConstraint[]> {
         const query: any = {};
 
-        if (filters.grantId) query.grant = filters.grantId;
+        if (filters.grant) query.grant = filters.grant;
         if (filters.type) query.type = filters.type;
 
         return Constraint.find(query).exec();
@@ -30,30 +29,48 @@ export class ConstraintRepository implements IConstraintRepository {
         return Constraint.findById(id).lean<IConstraint>().exec();
     }
 
-    async createProjectConstraint(dto: CreateProjectConstraintDTO): Promise<IProjectConstraint> {
-        const doc = new ProjectConstraint(dto);
-        return await doc.save();
+    async create(dto: CreateConstraintDTO): Promise<IConstraint> {
+        const data: Partial<IConstraint> = {
+            ...dto,
+            grant: new mongoose.Types.ObjectId(dto.grant)
+        };
+        switch (dto.type) {
+            case ConstraintType.APPLICANT:
+                return ApplicantConstraint.create(data);
+            case ConstraintType.PROJECT:
+                return ProjectConstraint.create(data);
+            default:
+                return Constraint.create(data);
+        }
     }
 
-    async updateProjectConstraint(dto: UpdateProjectConstraintDTO): Promise<IProjectConstraint> {
+    async update(dto: UpdateConstraintDTO): Promise<IConstraint | null> {
         const { id, data } = dto;
 
-        const updated = await ProjectConstraint.findByIdAndUpdate(
+        return Constraint.findByIdAndUpdate(
             id,
             data,
             { new: true }
         ).exec();
-
-        if (!updated) {
-            throw new Error("Project constraint not found");
-        }
-
-        return updated;
     }
 
-    async createApplicantConstraint(dto: CreateApplicantConstraintDTO): Promise<IConstraint> {
-        const doc = new ApplicantConstraint(dto);
-        return await doc.save();
+    async exists(filters: ExistsConstraintDTO): Promise<boolean> {
+        const query: any = {};
+
+        if (filters.grant) {
+            query.grant = new mongoose.Types.ObjectId(filters.grant);
+        }
+
+        if (filters.type) {
+            query.type = filters.type;
+        }
+
+        if (filters.constraint) {
+            query.constraint = filters.constraint;
+        }
+
+        const result = await Constraint.exists(query).exec();
+        return result !== null;
     }
 
     async delete(id: string): Promise<IConstraint | null> {

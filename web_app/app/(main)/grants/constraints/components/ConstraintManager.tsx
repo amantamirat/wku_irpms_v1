@@ -98,13 +98,11 @@ const ConstraintManager = ({ type, grant }: ConstraintManagerProps) => {
                 canDelete={canDelete}
                 onCreate={() => { setSelectedConstraint(emptyConstraint); setShowSaveDialog(true); }}
                 onEdit={(row) => { setSelectedConstraint(row); setShowSaveDialog(true); }}
-                onDelete={(row) => confirm.ask({ item: String(row.constraint), onConfirmAsync: () => deleteConstraint(row) })}
-                expandedRows={type === ConstraintType.APPLICANT ? expandedRows : undefined}
-                onRowToggle={type === ConstraintType.APPLICANT ? (e) => setExpandedRows(e.data) : undefined}
+                onDelete={(row) => confirm.ask({ item: String(row.constraint), onConfirmAsync: () => deleteConstraint(row) })}                
                 rowExpansionTemplate={type === ConstraintType.APPLICANT ? (row) => <CompositionManager constraint={row} /> : undefined}
             />
 
-            {selectedConstraint && (
+            {(selectedConstraint && showSaveDialog) && (
                 <SaveDialog
                     visible={showSaveDialog}
                     constraint={selectedConstraint}

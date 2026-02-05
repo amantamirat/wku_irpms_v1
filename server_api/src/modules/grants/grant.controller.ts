@@ -3,6 +3,7 @@ import { GrantService } from './grant.service';
 import { CreateGrantDTO, GetGrantsDTO, UpdateGrantDTO } from './grant.dto';
 import { AuthenticatedRequest } from '../users/user.middleware';
 import { successResponse, errorResponse } from '../../common/helpers/response';
+import { ERROR_CODES } from '../../common/errors/error.codes';
 
 export class GrantController {
 
@@ -14,9 +15,8 @@ export class GrantController {
 
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) {
-                throw new Error("User not found!");
-            }
+            if (!req.user)
+                throw new Error(ERROR_CODES.USER_NOT_FOUND);
 
             const userId = req.user.userId;
             const data: CreateGrantDTO = {

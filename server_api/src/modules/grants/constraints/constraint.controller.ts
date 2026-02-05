@@ -1,44 +1,63 @@
 import { Request, Response } from "express";
 import { ConstraintService } from "./constraint.service";
-import { errorResponse, successResponse } from "../../../common/helpers/response";
-import { ConstraintType } from "./constraint-type.enum";
-import { CreateProjectConstraintDTO, UpdateProjectConstraintDTO } from "./project/project-constraint.dto";
-import { CreateApplicantConstraintDTO } from "./applicant/applicant-constaint.dto";
+import { successResponse, errorResponse } from "../../../common/helpers/response";
+import { ConstraintType } from "./constraint.model";
+import { CreateConstraintDTO, UpdateConstraintDTO } from "./constraint.dto";
 
-const service = new ConstraintService();
 export class ConstraintController {
+
+  private service: ConstraintService;
+
+  constructor(service: ConstraintService) {
+    this.service = service;
+  }
+
   //----------------------------------------
   // CREATE CONSTRAINT
   //----------------------------------------
-  static async createConstraint(req: Request, res: Response) {
+  create = async (req: Request, res: Response) => {
     try {
+      /*
       const { type } = req.body;
       let created;
+
       if (type === ConstraintType.PROJECT) {
         const dto: CreateProjectConstraintDTO = req.body;
-        created = await service.createProjectConstraint(dto);
-      }
-      else if (type === ConstraintType.APPLICANT) {
+        created = await this.service.createProjectConstraint(dto);
+
+      } else if (type === ConstraintType.APPLICANT) {
         const dto: CreateApplicantConstraintDTO = req.body;
-        created = await service.createApplicantConstraint(dto);
+        created = await this.service.createApplicantConstraint(dto);
+
+      } else {
+        throw new Error("Invalid constraint type");
       }
+
       successResponse(res, 201, "Constraint created successfully", created);
+      */
+      const data: CreateConstraintDTO = {
+        ...req.body,
+      };
+      const constaint = await this.service.create(data);
+      successResponse(res, 201, "Constraint created successfully", constaint);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
-  }  
+  }
 
   //----------------------------------------
   // GET CONSTRAINTS
   //----------------------------------------
-  static async getConstraints(req: Request, res: Response) {
+  get = async (req: Request, res: Response) => {
     try {
       const { grant, type } = req.query;
+
       const options = {
-        grantId: grant ? grant as string : undefined,
-        type: type ? (type as ConstraintType) : undefined,
+        grant: grant ? String(grant) : undefined,
+        type: type ? type as ConstraintType : undefined
       };
-      const constraints = await service.getConstraints(options);
+
+      const constraints = await this.service.getConstraints(options);
       successResponse(res, 200, "Constraints fetched successfully", constraints);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
@@ -46,16 +65,18 @@ export class ConstraintController {
   }
 
   //----------------------------------------
-  // UPDATE PROJECT CONSTRAINT
+  // UPDATE CONSTRAINT
   //----------------------------------------
-  static async updateProjectConstraint(req: Request, res: Response) {
+  update = async (req: Request, res: Response) => {
     try {
-      const id = req.params.id;
-      const dto: UpdateProjectConstraintDTO = {
+      const { id } = req.params;
+
+      const dto: UpdateConstraintDTO = {
         id,
-        data: req.body, // should only include min/max
+        data: req.body
       };
-      const updated = await service.updateProjectConstraint(dto); // pass userId if needed
+
+      const updated = await this.service.update(dto);
       successResponse(res, 200, "Project constraint updated successfully", updated);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
@@ -65,14 +86,14 @@ export class ConstraintController {
   //----------------------------------------
   // DELETE CONSTRAINT
   //----------------------------------------
-  static async deleteConstraint(req: Request, res: Response) {
+  delete = async (req: Request, res: Response) => {
     try {
-      const id = req.params.id;
-      const deleted = await service.deleteConstraint(id); // pass userId if needed
+      const { id } = req.params;
+
+      const deleted = await this.service.delete(id);
       successResponse(res, 200, "Constraint deleted successfully", deleted);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
   }
-
 }

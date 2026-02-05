@@ -1,6 +1,11 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
-import { ConstraintType } from "./constraint-type.enum";
+
+export enum ConstraintType {
+    PROJECT = "project",
+    APPLICANT = "applicant",
+    //COMPOSITION = "Composition"
+}
 
 export interface IConstraint extends Document {
     grant: mongoose.Types.ObjectId;
@@ -28,7 +33,7 @@ const ConstraintSchema = new Schema<IConstraint>(
     }
 );
 
-ConstraintSchema.index({ grant: 1, constraint: 1 }, { unique: true });
+//ConstraintSchema.index({ grant: 1, constraint: 1 }, { unique: true });
 export const Constraint = model<IConstraint>(COLLECTIONS.CONSTRAINT, ConstraintSchema);
 
 

@@ -1,6 +1,5 @@
 import { Schema } from "mongoose";
-import { ConstraintType } from "../constraint-type.enum";
-import { Constraint, IConstraint } from "../constraint.model";
+import { Constraint, ConstraintType, IConstraint } from "../constraint.model";
 import { ProjectConstraintType } from "./project-constraint-type.enum";
 
 //Project Constraints Model

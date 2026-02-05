@@ -5,12 +5,14 @@ import { GrantRepository, IGrantRepository } from "./grant.repository";
 import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
 import { Unit } from "../organization/organization.type";
 import { FundingSource } from "./grant.model";
+import { ConstraintRepository, IConstraintRepository } from "./constraints/constraint.repository";
 
 export class GrantService {
 
     constructor(
         private readonly grantRepository: IGrantRepository = new GrantRepository(),
-        private readonly organizationRepository: IOrganizationRepository = new OrganizationRepository()
+        private readonly organizationRepository: IOrganizationRepository = new OrganizationRepository(),
+        private readonly constraintRepo: IConstraintRepository = new ConstraintRepository(),
     ) { }
 
     async create(dto: CreateGrantDTO) {
@@ -46,10 +48,9 @@ export class GrantService {
     }
 
     async delete(id: string) {
-        const grantDoc = await this.grantRepository.findById(id);
-        if (!grantDoc) {
-            throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
-        }
+        const constraintExist = await this.constraintRepo.exists({ grant: id });
+        if (constraintExist)
+            throw new AppError(ERROR_CODES.CONSTRAINT_ALREADY_EXISTS);
         return await this.grantRepository.delete(id);
     }
 }

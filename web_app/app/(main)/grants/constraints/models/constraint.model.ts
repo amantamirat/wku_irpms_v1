@@ -2,8 +2,8 @@ import { Grant } from "../../models/grant.model";
 import { ApplicantConstraintType } from "./applicant-constaint-type";
 
 export enum ConstraintType {
-    PROJECT = "Project",
-    APPLICANT = "Applicant"
+    PROJECT = "project",
+    APPLICANT = "applicant"
 }
 
 export enum ProjectConstraintType {

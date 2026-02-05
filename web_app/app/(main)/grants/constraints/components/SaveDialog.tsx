@@ -53,7 +53,7 @@ const SaveDialog = ({ visible, constraint, onComplete, onHide }: SaveDialogProps
                 severity: 'success',
                 summary: 'Success',
                 detail: 'Constraint saved successfully',
-                life: 2000,
+                life: 1000,
             });
 
             if (onComplete) setTimeout(() => onComplete(saved), 1000);
@@ -62,7 +62,7 @@ const SaveDialog = ({ visible, constraint, onComplete, onHide }: SaveDialogProps
                 severity: 'error',
                 summary: 'Error',
                 detail: err.message || 'Failed to save constraint',
-                life: 2500,
+                life: 2000,
             });
         } finally {
             setSubmitted(false);

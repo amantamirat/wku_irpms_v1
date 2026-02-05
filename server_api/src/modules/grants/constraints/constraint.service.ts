@@ -1,53 +1,45 @@
 import { ConstraintRepository, IConstraintRepository } from "./constraint.repository";
-import { CreateProjectConstraintDTO, UpdateProjectConstraintDTO } from "./project/project-constraint.dto";
-import { CreateApplicantConstraintDTO } from "./applicant/applicant-constaint.dto";
-import { ConstraintType } from "./constraint-type.enum";
-import { GetConstraintOptions } from "./constraint.dto";
+import { AppError } from "../../../common/errors/app.error";
+import { ERROR_CODES } from "../../../common/errors/error.codes";
+import { GrantRepository, IGrantRepository } from "../grant.repository";
+import { CreateConstraintDTO, GetConstraintOptions, UpdateConstraintDTO } from "./constraint.dto";
+import { ConstraintType } from "./constraint.model";
 
 
 export class ConstraintService {
 
-    private repository: IConstraintRepository;
+    constructor(
+        private readonly repository: IConstraintRepository = new ConstraintRepository(),
+        private readonly grantRepository: IGrantRepository = new GrantRepository(),
+    ) { }
 
-    constructor(repository?: IConstraintRepository) {
-        this.repository = repository || new ConstraintRepository();
+    async create(dto: CreateConstraintDTO) {
+        const { grant, type, constraint } = dto;
+        const grantDoc = await this.grantRepository.findById(grant);
+        if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+        return await this.repository.create(dto);
     }
+
     //----------------------------------------
     // GET
     //----------------------------------------
     async getConstraints(options: GetConstraintOptions) {
         return await this.repository.find(options);
     }
-    //----------------------------------------
-    // PROJECT CONSTRAINTS
-    //----------------------------------------
-    async createProjectConstraint(dto: CreateProjectConstraintDTO) {
-        return await this.repository.createProjectConstraint(dto);
-    }
 
-    //----------------------------------------
-    // APPLICANT CONSTRAINTS
-    //----------------------------------------
-    async createApplicantConstraint(dto: CreateApplicantConstraintDTO) {
-        return await this.repository.createApplicantConstraint(dto);
-    }
 
-    async updateProjectConstraint(dto: UpdateProjectConstraintDTO) {
-        const existing = await this.repository.findById(dto.id);
-        if (!existing) throw new Error("Constraint not found");
-
-        if (existing.type !== ConstraintType.PROJECT) {
-            throw new Error("Not a project constraint");
-        }
-        return await this.repository.updateProjectConstraint(dto);
+    async update(dto: UpdateConstraintDTO) {
+        const { id } = dto;
+        const constraint = await this.repository.findById(id);
+        if (!constraint || constraint.type !== ConstraintType.PROJECT) throw new AppError(ERROR_CODES.CONSTRAINT_NOT_FOUND);
+        return await this.repository.update(dto);
     }
 
     //----------------------------------------
     // DELETE
     //----------------------------------------
-    async deleteConstraint(id: string) {
-        const existing = await this.repository.findById(id);
-        if (!existing) throw new Error("Constraint not found");
-        return await this.repository.delete(id);
+    async delete(id: string) {
+        const deleted = await this.repository.delete(id);
+        if (!deleted) throw new Error(ERROR_CODES.CONSTRAINT_NOT_FOUND);
     }
 }

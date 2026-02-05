@@ -5,8 +5,8 @@ export enum ProjectConstraintType {
     TIME_TOTAL = "TIME-TOTAL",            // Total project duration
     BUDGET_PHASE = "BUDGET-PHASE",        // Budget per phase    
     TIME_PHASE = "TIME-PHASE",            // Time per phase    
-    STAGES = "STAGE", //count for how many (evaluation) stages a project should passes through before accepted
-    REVIEWER = "REVIEWER",          // Total reviewrs per stage    
+    //STAGES = "STAGE", //count for how many (evaluation) stages a project should passes through before accepted
+    //REVIEWER = "REVIEWER",          // Total reviewrs per stage    
     //PURCHASE_TOTAL = "PURCHASE-TOTAL",   // Total purchases budget
     //PURCHASE_PHASE = "PURCHASE-PHASE",    // Purchases per phase
     //THEME = "THEME",                      // Number of themes

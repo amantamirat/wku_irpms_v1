@@ -84,6 +84,7 @@ const GrantManger = ({ organization }: GrantManagerProps) => {
         { field: "fundingSource", header: "Source", sortable: true },
         { field: "organization.name", header: "Organization", sortable: true },
         { field: "title", header: "Title", sortable: true },
+        { field: "amount", header: "Amount", sortable: true, body: (rowData: any) => rowData.amount.toLocaleString() },
         { field: "description", header: "Description", sortable: true },
     ];
 

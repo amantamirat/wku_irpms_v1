@@ -1,8 +1,11 @@
 import { Schema } from "mongoose";
-import { ConstraintType } from "../constraint-type.enum";
-import { IConstraint, Constraint } from "../constraint.model";
+import { IConstraint, Constraint, ConstraintType } from "../constraint.model";
 import { ApplicantConstraintType } from "./applicant-constaint-type";
-import { OperationMode } from "./operation-mode-type";
+
+export enum OperationMode {
+    COUNT = "COUNT",
+    RATIO = "RATIO"
+}
 
 // Applicant Constraint Model
 export interface IApplicantConstraint extends IConstraint {
@@ -27,5 +30,6 @@ const ApplicantConstraintSchema = new Schema<IApplicantConstraint>({
 
 });
 
+ApplicantConstraintSchema.index({ grant: 1, type: 1, constraint: 1 }, { unique: true });
 export const ApplicantConstraint = Constraint.discriminator<IApplicantConstraint>(ConstraintType.APPLICANT, ApplicantConstraintSchema);
 
