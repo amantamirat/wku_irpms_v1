@@ -50,8 +50,7 @@ export class CalendarService {
         const current = calendarDoc.status;
         CalendarStateMachine.validateTransition(current, next);
         if (next === CalendarStatus.planned) {
-            const calls = await this.callRepository.find({ calendar: id });
-            if (calls.length > 0) {
+            if (await this.callRepository.exists({ calendar: id })) {
                 throw new AppError(ERROR_CODES.CALL_ALREADY_EXISTS);
             }
         }

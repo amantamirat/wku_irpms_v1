@@ -22,8 +22,8 @@ export type Project = {
     summary?: string;
     status?: ProjectStatus;
     applicant?: string | Applicant;
-    totalBudget?:number;
-    totalDuration?:number;
+    totalBudget?: number;
+    totalDuration?: number;
     createdAt?: Date;
     updatedAt?: Date;
     collaborators?: Collaborator[];// | string[];
@@ -50,12 +50,14 @@ export const validateProject = (project: Project): { valid: boolean; message?: s
 export const validateApplyProject = (project: Project): { valid: boolean; message?: string } => {
     const result = validateProject(project);
     if (!result.valid) return result
+    /*
     if (!project.collaborators || project.collaborators.length == 0) {
         return { valid: false, message: 'At least one collaborator is required.' };
     }
     if (!project.phases || project.phases.length === 0) {
         return { valid: false, message: 'At least one phase is required.' };
     }
+    */
     if (!project.file) {
         return { valid: false, message: 'Please select a project file.' };
     }

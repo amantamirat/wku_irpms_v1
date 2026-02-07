@@ -1,12 +1,12 @@
-import { Call } from "../../calls/call.model";
-import { ICollaboratorRepository, CollaboratorRepository } from "../../projects/collaborators/collaborator.repository";
+import { ApplicantRepository } from "../../applicants/applicant.repository";
+import { CollaboratorRepository, ICollaboratorRepository } from "../../projects/collaborators/collaborator.repository";
+import { SubmitProjectDTO } from "../../projects/documents/document.dto";
 import { PhaseDto } from "../../projects/phase/phase.dto";
 import { IPhaseRepository, PhaseRepository } from "../../projects/phase/phase.repository";
-import { SubmitProjectDTO } from "../../projects/project.dto";
-import { IProject } from "../../projects/project.model";
 import { IProjectRepository, ProjectRepository } from "../../projects/project.repository";
+import { ThemeRepository } from "../../thematics/themes/theme.repository";
 import { ConstraintType } from "./constraint.model";
-import { IConstraintRepository, ConstraintRepository } from "./constraint.repository";
+import { ConstraintRepository, IConstraintRepository } from "./constraint.repository";
 import { ProjectConstraintType } from "./project/project-constraint-type.enum";
 import { IProjectConstraint } from "./project/project-constraint.model";
 
@@ -21,7 +21,9 @@ export class ConstraintValidator {
     constructor(projectRepository?: IProjectRepository,
         collabRepository?: ICollaboratorRepository,
         phasesRepository?: IPhaseRepository,
-        constraintRepository?: IConstraintRepository
+        constraintRepository?: IConstraintRepository,
+        private readonly appRepository = new ApplicantRepository(),
+        private readonly themeRepository = new ThemeRepository(),
     ) {
         this.proRepository = projectRepository || new ProjectRepository();
         this.collabRepository = collabRepository || new CollaboratorRepository();
@@ -29,45 +31,20 @@ export class ConstraintValidator {
         this.constraintRepository = constraintRepository || new ConstraintRepository();
     }
 
-    async validateProject(projectId?: string, project?: Partial<IProject>, projectDto?: SubmitProjectDTO) {
-        if (!projectId && !projectDto) {
-            throw new Error("Project Not Found!");
-        }
-        let collaborators, phases, cycleId;
-        if (projectId) {
-            const projectDoc = project ?? await this.proRepository.findById(projectId);
-            if (!projectDoc) {
-                throw new Error("Project Not Found!");
-            }
-            cycleId = String(projectDoc.call);
-            const collabs = await this.collabRepository.find({ project: projectId });
-            collaborators = collabs.map(c => String(c.applicant));
-            phases = await this.phasesRepository.find({ project: projectId });
-        }
-        else if (projectDto) {
-            collaborators = projectDto.collaborators;
-            phases = projectDto.phases;
-            cycleId = projectDto.call;
-        }
-
-        const cycleDoc = await Call.findById(cycleId);
-        if (!cycleDoc) {
-            throw new Error("Cycle Not Found!");
-        }
-       await this.validateProjectConstraints(String(cycleDoc.grant), collaborators, phases);
-    }
-
-
-    async validateProjectConstraints(grantId: string, collaborators?: string[], phases?: PhaseDto[]) {
+    async validateProjectConstraints(grant: string, dto: {
+        collaborators: string[],
+        phases: PhaseDto[]
+    }) {
+        const { collaborators, phases } = dto;
         const constraints =
-            await this.constraintRepository.find({ type: ConstraintType.PROJECT, grant: grantId }) as IProjectConstraint[];
+            await this.constraintRepository.find({ type: ConstraintType.PROJECT, grant: grant }) as IProjectConstraint[];
 
         if (!constraints || constraints.length === 0) return;
 
-        const numParticipants = collaborators?.length ?? 0;
-        const numPhases = phases?.length ?? 0;
-        const totalBudget = (phases ?? []).reduce((sum, p) => sum + (p.budget ?? 0), 0);
-        const totalDuration = (phases ?? []).reduce((sum, p) => sum + (p.duration ?? 0), 0);
+        const numParticipants = collaborators.length;
+        const numPhases = phases.length;
+        const totalBudget = phases.reduce((sum, p) => sum + (p.budget ?? 0), 0);
+        const totalDuration = phases.reduce((sum, p) => sum + (p.duration ?? 0), 0);
 
         for (const constraint of constraints) {
 

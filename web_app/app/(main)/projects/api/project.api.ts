@@ -22,17 +22,7 @@ export const ProjectApi = {
         return createdData as Project;
     },
 
-    async submitProject(project: Partial<Project>): Promise<Project> {
-        if (!project.file)
-            throw new Error("File required.");
-        const sanitized = sanitizeProject(project);
-        const url = `${end_point}/submit`;
-        const formData = new FormData();
-        formData.append("project", JSON.stringify(sanitized));
-        formData.append("document", project.file);
-        const submitted = await ApiClient.post(url, formData);
-        return submitted as Project;
-    },
+    
 
     async update(project: Partial<Project>): Promise<Project> {
         if (!project._id) throw new Error("_id required.");

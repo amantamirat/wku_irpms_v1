@@ -27,7 +27,7 @@ export interface UpdateProjectDTO {
         applicant: string;
         totalBudget: number;
         totalDuration: number;
-        totalCollabs:number;
+        totalCollabs: number;
         status: ProjectStatus;
     }>;
     applicantId: string;
@@ -40,13 +40,3 @@ export interface UpdateStatusDTO {
     };
 }
 
-export interface SubmitProjectDTO {
-    call: string;
-    title: string;
-    summary?: string;
-    leadPI: string;
-    collaborators: string[];
-    phases: CreatePhaseDto[];
-    themes: string[];
-    documentPath: string;
-}

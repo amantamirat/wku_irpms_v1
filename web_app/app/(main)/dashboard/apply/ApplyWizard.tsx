@@ -20,28 +20,32 @@ import { Theme } from "../../thematics/themes/models/theme.model";
 import Confirmation from "./Confirmation";
 import ProjectForm from "./ProjectForm";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-
+import { Stage } from "../../calls/stages/models/stage.model";
+import { ProjectDocApi } from "../../projects/documents/api/project.doc.api";
+import { PERMISSIONS } from "@/types/permissions";
 
 interface ApplyWizardProps {
     visible: boolean;
+    stage?: Stage;
     call: Call;
     onCancel: () => void;
 }
 
-const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
+const ApplyWizard = ({ visible, stage, call, onCancel }: ApplyWizardProps) => {
 
     const confirm = useConfirmDialog();
-    const { getApplicant } = useAuth();
-    const applicant = getApplicant();
+    const { getApplicant, hasPermission } = useAuth();
+    //const applicant = getApplicant();
     const initializeProject = (): Project => ({
         title: "",
         call: call,
-        applicant: applicant,
+        // applicant: applicant,
         status: ProjectStatus.pending
     });
     const toast = useRef<Toast>(null);
     const [loading, setLoading] = useState(false);
     const [project, setProject] = useState<Project>(initializeProject());
+    const canSubmit = hasPermission([PERMISSIONS.DOCUMENT.SUBMIT]);
 
     useEffect(() => {
         if (visible) {
@@ -123,21 +127,19 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
             if (!result.valid) {
                 throw new Error(result.message);
             }
-            const submitted = await ProjectApi.submitProject(project);
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Successful',
-                detail: 'Your Application Submitted Successfully',
-                life: 2500
-            });
-            setTimeout(() => onHide(), 1000);
+            const submitted = await ProjectDocApi.submit(project);
+            if (submitted) {
+                toast.current?.show({
+                    severity: 'success',
+                    summary: 'Successful',
+                    detail: 'Your Application Submitted Successfully',
+                    life: 2000
+                });
+                setTimeout(() => onHide(), 1000);
+            }
+
         } catch (err) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to submit project',
-                detail: '' + err,
-                life: 3000
-            });
+            throw err;
         }
         finally {
             setLoading(false);
@@ -176,7 +178,7 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
             )}
             {activeStep < items.length - 1 && (<Button label="Next" icon="pi pi-angle-right" onClick={nextStep} iconPos="right" outlined />
             )}
-            {activeStep === items.length - 1 && (
+            {(activeStep === items.length - 1 && canSubmit) && (
                 <Button label="Submit" icon="pi pi-check" loading={loading}
                     outlined onClick={() => confirm.ask({
                         operation: "submit",
@@ -198,8 +200,8 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
                 onHide={onHide}
                 maximized
             >
-                <h3>{call.title} ({
-                    (call.grant as Grant).title
+                <h3>{stage?.name} ({
+                    call.title
                 })</h3>
                 <Steps model={items} activeIndex={activeStep} readOnly className="mb-4" />
                 {activeStep === 0 && <UploadForm file={project.file} onUpload={updateFile} />}

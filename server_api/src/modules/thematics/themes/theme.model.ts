@@ -31,14 +31,3 @@ const ThemeSchema = new Schema<ITheme>(
 );
 
 export const Theme = model<ITheme>(COLLECTIONS.THEME, ThemeSchema);
-
-
-
-
-
-
-
-
-
-
-

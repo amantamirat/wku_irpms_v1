@@ -147,6 +147,7 @@ export default function PhaseManager({ project, phaseType, flyMode = false, onSa
     };
 
     const stateTransitionTemplate = (row: Phase) => {
+        if (!row._id) return
         const current = row.status;
         let prev: PhaseStatus | undefined;
         let next: PhaseStatus | undefined;

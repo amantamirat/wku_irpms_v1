@@ -1,4 +1,5 @@
 // project-stage.dto.ts
+import { PhaseDto } from "../phase/phase.dto";
 import { DocStatus } from "./document.status";
 
 export interface GetDocumentDTO {
@@ -29,5 +30,16 @@ export interface UpdateDocumentDTO {
 export interface UpdateStatusDTO {
     documents: string[];
     status: DocStatus;
+}
+
+export interface SubmitProjectDTO {
+    call: string;
+    title: string;
+    summary?: string;
+    applicant: string;
+    collaborators: string[];
+    phases: PhaseDto[];
+    themes: string[];
+    documentPath: string;
 }
 

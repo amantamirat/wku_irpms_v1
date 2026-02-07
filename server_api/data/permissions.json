@@ -712,6 +712,11 @@
   },
   {
     "category": "Document Management",
+    "name": "document:submit",
+    "description": "apply for a call"
+  },
+  {
+    "category": "Document Management",
     "name": "document:delete",
     "description": "Delete document entries"
   },

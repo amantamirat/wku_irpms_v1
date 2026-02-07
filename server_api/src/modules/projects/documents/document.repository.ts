@@ -10,9 +10,8 @@ import {
 export interface IDocumentRepository {
     findById(id: string): Promise<IProjectDocument | null>;
     find(filters: GetDocumentDTO): Promise<Partial<IProjectDocument>[]>;
-    //findByStage(stage: string): Promise<Partial<IProjectDocument>[]>;
     create(dto: CreateDocumentDTO): Promise<IProjectDocument>;
-    update(id: string, status: UpdateDocumentDTO["data"]): Promise<IProjectDocument>;
+    update(id: string, status: UpdateDocumentDTO["data"]): Promise<IProjectDocument | null>;
     delete(id: string): Promise<IProjectDocument | null>;
 }
 
@@ -40,18 +39,22 @@ export class DocumentRepository implements IDocumentRepository {
         if (options.status) {
             query.status = options.status;
         }
-        if (!options.populate) {
-            return ProjectDocument.find(query)
-                .lean<IProjectDocument[]>()
-                .exec();
+
+        const dbQuery = ProjectDocument.find(query);
+
+        if (options.populate) {
+            dbQuery
+                .populate("project")
+                .populate("stage");
         }
-        return ProjectDocument.find(query)
-            .populate("project")
-            .populate("stage")
+
+        return dbQuery
             .lean<IProjectDocument[]>()
             .exec();
     }
 
+
+    /*
     async findByProject(stage: string) {
         return ProjectDocument.find({ stage: new mongoose.Types.ObjectId(stage) })
             .populate({
@@ -61,6 +64,7 @@ export class DocumentRepository implements IDocumentRepository {
             .lean<IProjectDocument[]>()
             .exec();
     }
+            */
 
     async create(dto: CreateDocumentDTO): Promise<HydratedDocument<IProjectDocument>> {
         const data: Partial<IProjectDocument> = {
@@ -72,7 +76,7 @@ export class DocumentRepository implements IDocumentRepository {
         return ProjectDocument.create(data);
     }
 
-    async update(id: string, dtoData: UpdateDocumentDTO["data"]): Promise<IProjectDocument> {
+    async update(id: string, dtoData: UpdateDocumentDTO["data"]): Promise<IProjectDocument | null> {
         const updateData: Partial<IProjectDocument> = {};
 
         if (dtoData.totalScore !== undefined) {
@@ -82,14 +86,12 @@ export class DocumentRepository implements IDocumentRepository {
         if (dtoData.status !== undefined) {
             updateData.status = dtoData.status;
         }
-        const updated = await ProjectDocument.findByIdAndUpdate(
+        return ProjectDocument.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },
             { new: true }
         ).exec();
 
-        if (!updated) throw new Error("ProjectStage not found");
-        return updated;
     }
 
     async delete(id: string) {

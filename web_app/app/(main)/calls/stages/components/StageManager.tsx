@@ -164,6 +164,7 @@ const StageManager = ({ call }: StageManagerProps) => {
     const columns = [
         !call && { header: "Call", field: "call.title" },
         { header: "Name", field: "name", sortable: true },
+        { header: "Level", field: "order", sortable: true },
         { header: "Evaluation", field: "evaluation.title", sortable: true },
         {
             header: "Deadline",

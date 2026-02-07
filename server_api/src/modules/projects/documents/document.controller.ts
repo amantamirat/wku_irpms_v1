@@ -5,6 +5,7 @@ import { successResponse, errorResponse } from "../../../common/helpers/response
 import {
     CreateDocumentDTO,
     GetDocumentDTO,
+    SubmitProjectDTO,
     UpdateStatusDTO
 } from "./document.dto";
 
@@ -12,6 +13,7 @@ import { AuthenticatedRequest } from "../../users/user.middleware";
 import { DocumentService } from "./document.service";
 import { DeleteDto } from "../../../util/delete.dto";
 import { DocStatus } from "./document.status";
+import { ERROR_CODES } from "../../../common/errors/error.codes";
 
 export class ProjectDocController {
 
@@ -84,6 +86,50 @@ export class ProjectDocController {
             successResponse(res, 200, "Project documents fetched successfully", docs);
 
         } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
+    // ---------------------------------------------------
+    // SUBMIT
+    // ---------------------------------------------------
+
+    submit = async (req: AuthenticatedRequest, res: Response) => {
+        let uploadedFilePath: string | undefined;
+        try {
+            if (!req.user) throw new Error(ERROR_CODES.USER_NOT_FOUND);
+            if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
+
+            uploadedFilePath = req.file.path;
+
+            const project = JSON.parse(req.body.project);
+
+            const dto: SubmitProjectDTO = {
+                call: project.call,
+                title: project.title,
+                summary: project.summary,
+                applicant: req.user.applicantId,
+                collaborators: project.collaborators.map(
+                    (c: any) => c.applicant
+                ),
+                themes: project.themes.map(
+                    (t: any) => t.theme
+                ),
+                phases: project.phases.map((p: any) => ({
+                    type: p.type,
+                    activity: p.activity,
+                    duration: p.duration,
+                    budget: p.budget,
+                    description: p.description,
+                    status: p.status,
+                    order: p.order
+                })),
+                documentPath: `uploads/${req.file.filename}`
+            };
+            const submitted = await this.service.submit(dto);
+            successResponse(res, 201, "Project submitted successfully", submitted);
+        } catch (err: any) {
+            //safeDeleteFile(uploadedFilePath);
             errorResponse(res, 400, err.message, err);
         }
     };

@@ -13,7 +13,7 @@ export abstract class ProjectSynchronizer {
     abstract sync(project: string): Promise<any>;
 }
 
-export class DocStatusSynchronizer extends ProjectSynchronizer {
+export class DocSynchronizer extends ProjectSynchronizer {
 
     constructor(
         private readonly repository: IProjectRepository,
@@ -87,3 +87,19 @@ export class CollabSynchronizer extends ProjectSynchronizer {
         await this.repository.update(project, { totalCollabs });
     }
 }
+
+export class ProjectSyncOrchestrator {
+
+    constructor(
+        private readonly docSync: DocSynchronizer,
+        private readonly phaseSync: PhaseSynchronizer,
+        private readonly collabSync: CollabSynchronizer,
+    ) { }
+
+    async sync(projectId: string) {
+        if (this.docSync) await this.docSync.sync(projectId);
+        if (this.phaseSync) await this.phaseSync.sync(projectId);
+        if (this.collabSync) await this.collabSync.sync(projectId);
+    }
+}
+

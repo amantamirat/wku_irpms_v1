@@ -218,6 +218,7 @@ export const PERMISSIONS = {
       REJECT: "document:status.rejected",
       REVIEW: "document:status.reviewed",
     },
+    SUBMIT: "document:submit",
     DELETE: "document:delete",
     UPDATE_STATUS: "document:update_status",
   },

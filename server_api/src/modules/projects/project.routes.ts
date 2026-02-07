@@ -2,7 +2,6 @@ import { Router } from 'express';
 import { ProjectController } from './project.controller';
 import { checkPermission, checkStatusPermission, verifyActiveAccount } from '../users/user.middleware';
 import { PERMISSIONS } from '../../common/constants/permissions';
-import { upload } from '../../util/multer';
 
 const controller = new ProjectController();
 const router: Router = Router();
@@ -15,9 +14,6 @@ router.post('/', verifyActiveAccount,
 router.get('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.PROJECT.READ]),
     controller.get);
-
-router.post("/submit", verifyActiveAccount, upload.single("document"),
-    controller.submit);
 
 //update    
 router.put('/', verifyActiveAccount,

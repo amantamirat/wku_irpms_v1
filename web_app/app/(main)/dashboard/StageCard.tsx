@@ -112,6 +112,7 @@ const StageCard = ({ stage }: StageCardProps) => {
             {(showApplyDialog && stage.call) && (
                 <ApplyWizard
                     visible={showApplyDialog}
+                    stage={stage}
                     call={stage.call as Call}
                     onCancel={() => setShowApplyDialog(false)}
                 />
