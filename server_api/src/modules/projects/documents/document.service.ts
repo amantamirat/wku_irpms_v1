@@ -81,20 +81,31 @@ export class DocumentService {
             if (hasNotAccepted)
                 throw new AppError(ERROR_CODES.DOC_NOT_ACCEPTED);
 
+            const call = String(projectDoc.call);
             const nextOrder = projectDocs.length + 1;
-            const nextStageDoc = await this.stageRepository.findOne({ call: String(projectDoc.call), order: nextOrder });
+            const nextStageDoc = await this.stageRepository.findOne({ call, order: nextOrder });
             if (!nextStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
 
             if (nextStageDoc.status !== StageStatus.active) throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
             if (nextStageDoc.deadline < new Date()) throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
 
-            //await this.validator.validateProject(project, projectDoc);
+
+            if (nextOrder === 1) {
+                const callDoc = await this.callRepository.findById(call);
+                if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+
+                const collaborators = await this.collabRepository.find({ project });
+                const phases = await this.phaseRepository.find({ project });
+                const projectThemes = await this.projectThemeRepository.find({ project });
+                const themes: string[] = projectThemes.map(pt => String(pt.theme));
+                await this.validator.validateProjectConstraints(String(callDoc.grant),
+                    { collaborators, phases, themes });
+            }
 
             const created = await this.docRepository.create({ ...dto, stage: String(nextStageDoc._id) });
-
             if (created) await this.docSynchronizer.sync(project);
-
             return created;
+
         } catch (err: any) {
             if (err?.code === 11000) {
                 throw new AppError(ERROR_CODES.DOC_ALREADY_EXISTS);
@@ -113,24 +124,17 @@ export class DocumentService {
         if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
         if (callDoc.status !== CallStatus.active) throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
 
-        const stageDoc = await this.stageRepository.findOne({ call, order: 1 });
-        if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-        if (stageDoc.status !== StageStatus.active) throw new Error(ERROR_CODES.STAGE_NOT_ACTIVE);
-        if (stageDoc.deadline < new Date()) throw new Error(ERROR_CODES.STAGE_DEADLINE_PASSED);
+        const firstStageDoc = await this.stageRepository.findOne({ call, order: 1 });
+        if (!firstStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        if (firstStageDoc.status !== StageStatus.active) throw new Error(ERROR_CODES.STAGE_NOT_ACTIVE);
+        if (firstStageDoc.deadline < new Date()) throw new Error(ERROR_CODES.STAGE_DEADLINE_PASSED);
 
         const appDocs = [];
         for (const app of collaborators) {
             const appDoc = await this.appRepository.findById(app);
             if (!appDoc) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
             appDocs.push(appDoc);
-        }
-
-        const thmDocs = [];
-        for (const thm of themes) {
-            const thmDoc = await this.themeRepository.findById(thm);
-            if (!thmDoc) throw new Error(ERROR_CODES.THEME_NOT_FOUND);
-            thmDocs.push(thmDoc);
-        }
+        }        
 
         await this.validator.validateProjectConstraints(String(callDoc.grant), dto);
 
@@ -163,7 +167,7 @@ export class DocumentService {
 
         await this.docRepository.create({
             project: projectId,
-            stage: String(stageDoc._id),
+            stage: String(firstStageDoc._id),
             documentPath: documentPath,
             applicantId: applicant
         });

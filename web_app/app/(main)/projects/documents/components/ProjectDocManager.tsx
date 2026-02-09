@@ -312,8 +312,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
                 */
 
 
-                enableSearch
-
+                enableSearch={!project}
                 enableSelection={enableMultiSelection}
                 selectionMode={enableMultiSelection ? "multiple" : undefined}
                 selectedItems={enableMultiSelection ? selectedDocs : undefined}

@@ -45,7 +45,7 @@ export class ProjectThemeService {
     }
 
     async get(options: GetProjectThemeOptions) {
-        const items = await this.repository.find(options);
+        const items = await this.repository.find({ ...options, populate: true });
         return items;
     }
 

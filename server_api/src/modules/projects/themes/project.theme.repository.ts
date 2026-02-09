@@ -29,11 +29,15 @@ export class ProjectThemeRepository implements IProjectThemeRepository {
         if (filters.project) {
             query.project = new mongoose.Types.ObjectId(filters.project);
         }
-        return ProjectTheme.find(query)
-            .populate([
+        let dbQuery = ProjectTheme.find(query);
+
+        if (filters.populate) {
+            dbQuery = dbQuery.populate([
                 { path: 'project' },
                 { path: 'theme' }
-            ])
+            ]);
+        }
+        return dbQuery
             .lean<IProjectTheme[]>()
             .exec();
     }

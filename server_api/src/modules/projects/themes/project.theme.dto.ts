@@ -9,6 +9,7 @@ export interface CreateProjectThemeDTO {
 // ---------- GET / QUERY OPTIONS ----------
 export interface GetProjectThemeOptions {
     project: string;
+    populate?: boolean;
 }
 
 export interface ExistProjectThemeDto {

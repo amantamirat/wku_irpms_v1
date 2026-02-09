@@ -10,11 +10,11 @@ import {
     Constraint,
     ConstraintType,
     OperationMode,
-    ProjectConstraintType,
     validateConstraint,
 } from '../models/constraint.model';
 import { ConstraintApi } from '../api/constraint.api';
 import { ApplicantConstraintType } from '../models/applicant-constaint-type';
+import { ProjectConstraintType } from '../models/project-constraint-type';
 
 interface SaveDialogProps {
     visible: boolean;

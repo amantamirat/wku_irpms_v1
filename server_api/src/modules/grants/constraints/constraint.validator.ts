@@ -1,10 +1,9 @@
-import { ApplicantRepository } from "../../applicants/applicant.repository";
+import { ERROR_CODES } from "../../../common/errors/error.codes";
+import { ApplicantRepository, IApplicantRepository } from "../../applicants/applicant.repository";
 import { CollaboratorRepository, ICollaboratorRepository } from "../../projects/collaborators/collaborator.repository";
-import { SubmitProjectDTO } from "../../projects/documents/document.dto";
-import { PhaseDto } from "../../projects/phase/phase.dto";
 import { IPhaseRepository, PhaseRepository } from "../../projects/phase/phase.repository";
 import { IProjectRepository, ProjectRepository } from "../../projects/project.repository";
-import { ThemeRepository } from "../../thematics/themes/theme.repository";
+import { IThemeRepository, ThemeRepository } from "../../thematics/themes/theme.repository";
 import { ConstraintType } from "./constraint.model";
 import { ConstraintRepository, IConstraintRepository } from "./constraint.repository";
 import { ProjectConstraintType } from "./project/project-constraint-type.enum";
@@ -13,29 +12,23 @@ import { IProjectConstraint } from "./project/project-constraint.model";
 
 export class ConstraintValidator {
 
-    private proRepository: IProjectRepository;
-    private collabRepository: ICollaboratorRepository;
-    private phasesRepository: IPhaseRepository;
-    private constraintRepository: IConstraintRepository;
+    constructor(
+        private readonly proRepository: IProjectRepository = new ProjectRepository(),
+        private readonly collabRepository: ICollaboratorRepository = new CollaboratorRepository(),
+        private readonly phasesRepository: IPhaseRepository = new PhaseRepository(),
+        private readonly constraintRepository: IConstraintRepository = new ConstraintRepository(),
+        private readonly appRepository: IApplicantRepository = new ApplicantRepository(),
+        private readonly themeRepository: IThemeRepository = new ThemeRepository(),
+    ) { }
 
-    constructor(projectRepository?: IProjectRepository,
-        collabRepository?: ICollaboratorRepository,
-        phasesRepository?: IPhaseRepository,
-        constraintRepository?: IConstraintRepository,
-        private readonly appRepository = new ApplicantRepository(),
-        private readonly themeRepository = new ThemeRepository(),
-    ) {
-        this.proRepository = projectRepository || new ProjectRepository();
-        this.collabRepository = collabRepository || new CollaboratorRepository();
-        this.phasesRepository = phasesRepository || new PhaseRepository();
-        this.constraintRepository = constraintRepository || new ConstraintRepository();
-    }
 
-    async validateProjectConstraints(grant: string, dto: {
-        collaborators: string[],
-        phases: PhaseDto[]
-    }) {
-        const { collaborators, phases } = dto;
+    async validateProjectConstraints(grant: string,
+        dto: {
+            collaborators: any[],
+            phases: any[],
+            themes: string[]
+        }) {
+        const { collaborators, phases, themes } = dto;
         const constraints =
             await this.constraintRepository.find({ type: ConstraintType.PROJECT, grant: grant }) as IProjectConstraint[];
 
@@ -45,6 +38,7 @@ export class ConstraintValidator {
         const numPhases = phases.length;
         const totalBudget = phases.reduce((sum, p) => sum + (p.budget ?? 0), 0);
         const totalDuration = phases.reduce((sum, p) => sum + (p.duration ?? 0), 0);
+        const { themeCount, subThemeCount, focusAreaCount, indicatorCount } = await this.countThemeLevels(themes);
 
         for (const constraint of constraints) {
 
@@ -91,11 +85,61 @@ export class ConstraintValidator {
                         }
                     }
                     break;
+                case ProjectConstraintType.THEME:
+                    if (themeCount < min || themeCount > max) {
+                        throw new Error(`Total project theme (${themeCount}) must be between ${min} and ${max}`);
+                    }
+                    break;
+                case ProjectConstraintType.SUB_THEME:
+                    if (subThemeCount < min || subThemeCount > max) {
+                        throw new Error(`Total project sub-theme (${subThemeCount}) must be between ${min} and ${max}`);
+                    }
+                    break;
+                case ProjectConstraintType.FOCUS_AREA:
+                    if (focusAreaCount < min || focusAreaCount > max) {
+                        throw new Error(`Total project focus-area (${focusAreaCount}) must be between ${min} and ${max}`);
+                    }
+                    break;
+                case ProjectConstraintType.INDICATOR:
+                    if (indicatorCount < min || indicatorCount > max) {
+                        throw new Error(`Total project indicator-theme (${indicatorCount}) must be between ${min} and ${max}`);
+                    }
+                    break;
                 default:
                     // For now, ignore other constraint types
                     break;
             }
         }
-
     }
+
+    async countThemeLevels(themes: string[]): Promise<{
+        themeCount: number;
+        subThemeCount: number;
+        focusAreaCount: number;
+        indicatorCount: number;
+    }> {
+        const levelBuckets: Record<number, Set<string>> = {
+            0: new Set(),
+            1: new Set(),
+            2: new Set(),
+            3: new Set(),
+        };
+        for (const thm of themes) {
+            let current = await this.themeRepository.findById(thm); if (!current) throw new Error(ERROR_CODES.THEME_NOT_FOUND);
+            // thmDocs.push(current); 
+            while (current) {
+                levelBuckets[current.level].add(current._id.toString());
+                if (!current.parent) break;
+                current = await this.themeRepository.findById(String(current.parent));
+                if (!current) break;
+            }
+        }
+        return {
+            themeCount: levelBuckets[0].size,
+            subThemeCount: levelBuckets[1].size,
+            focusAreaCount: levelBuckets[2].size,
+            indicatorCount: levelBuckets[3].size,
+        };
+    }
+
 }

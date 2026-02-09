@@ -4,7 +4,7 @@ export enum ProjectConstraintType {
     BUDGET_TOTAL = "BUDGET-TOTAL",        // Total project budget
     TIME_TOTAL = "TIME-TOTAL",            // Total project duration
     BUDGET_PHASE = "BUDGET-PHASE",        // Budget per phase    
-    TIME_PHASE = "TIME-PHASE",            // Time per phase   
+    TIME_PHASE = "TIME-PHASE",            // Time per phase    
     THEME = "THEME",
     SUB_THEME = "SUB_THEME",
     FOCUS_AREA = "FOCUS_AREA",
