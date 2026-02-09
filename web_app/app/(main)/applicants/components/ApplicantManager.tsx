@@ -43,12 +43,9 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
         setError
     } = useCrudList<Applicant>();
 
-    const [localWorkspace, setLocalWorkspace] = useState<Organization | undefined>(
-        workspace ? { ...workspace } : undefined
-    );
-    const [workspaces, setWorkspaces] = useState<Organization[]>([]);
+
     const emptyApplicant: Applicant = {
-        workspace: localWorkspace ?? "",
+        workspace: workspace ?? "",
         name: "",
         birthDate: new Date(),
         gender: Gender.Male,
@@ -58,40 +55,16 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [showRoleDialog, setShowRoleDialog] = useState(false);
     const [showOwnershipDialog, setShowOwnershipDialog] = useState(false);
-    const hasWorkspace = !!localWorkspace;
-
-    /** FETCH Workspace*/
-    useEffect(() => {
-        const fetchWorkspaces = async () => {
-            try {
-                setLoading(true);
-                let departments = getScopesByUnit(OrgnUnit.Department);
-                if (departments === "*") {
-                    departments = await OrganizationApi.getOrganizations({ type: OrgnUnit.Department });
-                }
-                let externals = getScopesByUnit(OrgnUnit.External);
-                if (externals === "*") {
-                    externals = await OrganizationApi.getOrganizations({ type: OrgnUnit.External });
-                }
-                setWorkspaces([...departments, ...externals]);
-            } catch (err: any) {
-                setError("Failed to load workspaces: " + err?.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchWorkspaces();
-    }, []);
+    const hasWorkspace = !!workspace;
 
     /** FETCH Applicants */
     useEffect(() => {
+        if (!workspace) {
+            return
+        }
         const fetchApplicants = async () => {
             try {
-                setLoading(true);
-                if (!localWorkspace) {
-                    return;
-                }
-                const data = await ApplicantApi.getApplicants({ workspace: localWorkspace });
+                const data = await ApplicantApi.getApplicants({ workspace });
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to load applicants: " + err?.message);
@@ -100,7 +73,7 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
             }
         };
         fetchApplicants();
-    }, [localWorkspace]);
+    }, [workspace]);
 
     /** SAVE callback */
     const onSaveComplete = (saved: Applicant) => {
@@ -152,28 +125,7 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
         { header: "Email", field: "email" }
     ];
 
-    const topTemplate = () => {
-        if (workspace) {
-            return undefined;
-        }
-        return (
-            <div className="card p-fluid">
-                <div className="formgrid grid">
-                    <div className="field col-12 md:col-6 lg:col-4">
-                        <label htmlFor="workspace">Workspace</label>
-                        <Dropdown
-                            id="workspace"
-                            value={localWorkspace}
-                            options={workspaces}
-                            onChange={(e) => setLocalWorkspace(e.value)}
-                            optionLabel="name"
-                            placeholder="Select Workspace"
-                        />
-                    </div>
-                </div>
-            </div>
-        );
-    }
+
 
     return (
         <>
@@ -206,8 +158,6 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
                         onConfirmAsync: () => deleteApplicant(row)
                     })
                 }
-
-                topTemplate={topTemplate()}
 
                 /** EXPANSION ROW */
                 rowExpansionTemplate={(row) => (
@@ -246,12 +196,12 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
             />
 
             {/* SAVE DIALOG */}
-            {(selectedApplicant && (
+            {((selectedApplicant && showSaveDialog) && (
                 <SaveDialog
                     visible={showSaveDialog}
                     applicant={selectedApplicant}
                     //hasWorkspace={hasWorkspace}
-                    workspaces={workspaces}
+                    //workspaces={workspaces}
                     onComplete={onSaveComplete}
                     onHide={hideDialogs}
                 />

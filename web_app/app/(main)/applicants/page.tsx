@@ -1,34 +1,23 @@
 'use client';
+import { useState } from 'react';
 import ApplicantManager from './components/ApplicantManager';
-//import { Scope } from './models/applicant.model';
-
-
+import { Organization } from '@/app/(main)/organizations/models/organization.model';
+import { WorkspaceSelector } from '@/components/WorkspaceSelector';
 
 const ApplicantPage = () => {
-
-    /*
-    const searchParams = useSearchParams();
-    const router = useRouter();
-    const scopeParam = searchParams.get('scope');
-
-    const isValidScope = (value: string): value is Scope =>
-        Object.values(Scope).includes(value as Scope);
-
-    const shouldRedirect = !scopeParam || !isValidScope(scopeParam);
-
-    useEffect(() => {
-        if (shouldRedirect) {
-            router.push('/');
-        }
-    }, [shouldRedirect, router]);
-
-    if (shouldRedirect) {
-        return null;
-    }
-    const scope = scopeParam as Scope;
-    */
+    // Step 1: Manage workspace state at page level
+    const [selectedWorkspace, setSelectedWorkspace] = useState<Organization | undefined>();
     return (
-        <ApplicantManager  />
+        <>
+            {/* Step 2: Pass state + setter to WorkspaceSelector */}
+            <WorkspaceSelector
+                value={selectedWorkspace}
+                onChange={setSelectedWorkspace}
+            />
+
+            {/* Step 3: Pass selected workspace to ApplicantManager */}
+            <ApplicantManager workspace={selectedWorkspace} />
+        </>
     );
 };
 

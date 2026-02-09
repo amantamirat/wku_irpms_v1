@@ -13,8 +13,6 @@ import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api
 interface DirectorateContextType {
     directorates?: Organization[];
     directorate?: Organization;
-    //loading: boolean;
-    //error?: string;
     setDirectorate: React.Dispatch<React.SetStateAction<Organization | undefined>>;
     refreshDirectorates: () => Promise<void>;
 }
@@ -26,9 +24,6 @@ export const DirectorateProvider = ({ children }: { children: React.ReactNode })
 
     const [directorates, setDirectorates] = useState<Organization[]>();
     const [directorate, setDirectorate] = useState<Organization>();
-
-    //const [loading, setLoading] = useState(false);
-    //const [error, setError] = useState<string>();
 
     const fetchDirectorates = async () => {
         try {
@@ -62,8 +57,6 @@ export const DirectorateProvider = ({ children }: { children: React.ReactNode })
             value={{
                 directorates,
                 directorate,
-                //loading,
-                //error,
                 setDirectorate,
                 refreshDirectorates: fetchDirectorates
             }}
