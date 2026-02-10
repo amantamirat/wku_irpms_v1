@@ -13,6 +13,7 @@ import {
 
 import {
     CreateOrganizationDTO,
+    ExistsOrganizationDTO,
     GetOrganizationsDTO,
     UpdateOrganizationDTO
 } from "./organization.dto";
@@ -24,6 +25,7 @@ export interface IOrganizationRepository {
     find(options: GetOrganizationsDTO): Promise<any[]>;
     create(data: CreateOrganizationDTO): Promise<any>;
     update(id: string, data: UpdateOrganizationDTO["data"]): Promise<any>;
+    exists(filters: ExistsOrganizationDTO): Promise<boolean>;
     delete(id: string): Promise<void>;
 }
 
@@ -62,7 +64,7 @@ export class OrganizationRepository implements IOrganizationRepository {
         return Organization.find({
             _id: { $in: ids.map(id => new mongoose.Types.ObjectId(id)) }
         })
-            .populate("parent")
+            // .populate("parent")
             .lean()
             .exec();
     }
@@ -78,20 +80,20 @@ export class OrganizationRepository implements IOrganizationRepository {
         };
 
         // Add parent if needed
-        if ("parent" in dto && dto.parent) {
+        if (dto.parent) {
             data.parent = new mongoose.Types.ObjectId(dto.parent);
         }
 
         // Add Special fields
-        if ("academicLevel" in dto) {
+        if (dto.academicLevel) {
             data.academicLevel = dto.academicLevel;
         }
 
-        if ("classification" in dto) {
+        if (dto.classification) {
             data.classification = dto.classification;
         }
 
-        if ("ownership" in dto) {
+        if (dto.ownership) {
             data.ownership = dto.ownership;
         }
 
@@ -103,35 +105,41 @@ export class OrganizationRepository implements IOrganizationRepository {
     // ------------------------------------
     // UPDATE
     // ------------------------------------
-    async update(id: string, dtoData: UpdateOrganizationDTO["data"]) {
-        const org = await Organization.findById(new mongoose.Types.ObjectId(id));
-        if (!org) {
-            throw new Error("Organization not found");
+    async update(
+        id: string,
+        dtoData: UpdateOrganizationDTO["data"]
+    ) {
+        const updateData: any = {};
+
+        if (dtoData.name !== undefined)
+            updateData.name = dtoData.name;
+
+        if (dtoData.parent !== undefined)
+            updateData.parent = new mongoose.Types.ObjectId(dtoData.parent);
+
+        if (dtoData.academicLevel !== undefined)
+            updateData.academicLevel = dtoData.academicLevel;
+
+        if (dtoData.classification !== undefined)
+            updateData.classification = dtoData.classification;
+
+        if (dtoData.ownership !== undefined)
+            updateData.ownership = dtoData.ownership;
+
+        return Organization.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            { $set: updateData },
+            { new: true }
+        ).exec();
+    }
+
+    async exists(filters: ExistsOrganizationDTO): Promise<boolean> {
+        const query: any = {};
+        if (filters.parent) {
+            query.parent = new mongoose.Types.ObjectId(filters.parent);
         }
-
-        const updated: any = {};
-
-        if (dtoData.name) updated.name = dtoData.name;
-
-        if (dtoData.parent) {
-            updated.parent = new mongoose.Types.ObjectId(dtoData.parent);
-        }
-
-        if (dtoData.academicLevel) {
-            updated.academicLevel = dtoData.academicLevel;
-        }
-
-        if (dtoData.classification) {
-            updated.classification = dtoData.classification;
-        }
-
-        if (dtoData.ownership) {
-            updated.ownership = dtoData.ownership;
-        }
-
-        Object.assign(org, updated);
-
-        return org.save();
+        const result = await Organization.exists(query).exec();
+        return result !== null;
     }
 
     // ------------------------------------

@@ -1,5 +1,5 @@
 import Applicant, { IApplicant, IOwnership } from "./applicant.model";
-import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO, FindApplicantDTO, UpdateRolesDTO } from "./applicant.dto";
+import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO, FindApplicantDTO, UpdateRolesDTO, ExistsApplicantDTO } from "./applicant.dto";
 import mongoose from "mongoose";
 
 export interface IApplicantRepository {
@@ -12,6 +12,7 @@ export interface IApplicantRepository {
     updateRoles(userId: string, dto: UpdateRolesDTO): Promise<IApplicant | null>;
     // ownership management
     updateOwnerships(id: string, ownerships: IOwnership[]): Promise<IApplicant | null>;
+    exists(filters: ExistsApplicantDTO): Promise<boolean>;
     delete(id: string): Promise<IApplicant | null>;
 }
 
@@ -139,6 +140,15 @@ export class ApplicantRepository implements IApplicantRepository {
             { ownerships },
             { new: true }
         );
+    }
+
+    async exists(filters: ExistsApplicantDTO): Promise<boolean> {
+        const query: any = {};
+        if (filters.workspace) {
+            query.workspace = new mongoose.Types.ObjectId(filters.workspace);
+        }
+        const result = await Applicant.exists(query).exec();
+        return result !== null;
     }
     // -------------------------
     // DELETE

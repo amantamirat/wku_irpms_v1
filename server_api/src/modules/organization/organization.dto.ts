@@ -3,60 +3,15 @@ import { AcademicLevel } from "../../common/constants/enums";
 import { Classification, Ownership } from "./organization.enum";
 import { Unit } from "./organization.type";
 
-/**
- * Base DTO fields shared by all organizations
- */
-interface BaseOrganizationDTO {
+export interface CreateOrganizationDTO {
     type: Unit;
     name: string;
+    // optional depending on organization type
+    parent?: string;
+    academicLevel?: AcademicLevel;
+    classification?: Classification;
+    ownership?: Ownership;
 }
-
-/**
- * Optional parent for sub-organizations
- */
-interface WithParentDTO {
-    parent: string;
-}
-
-
-export interface CreateCollegeDTO extends BaseOrganizationDTO {
-    type: Unit.College;
-}
-
-export interface CreateDirectorateDTO extends BaseOrganizationDTO {
-    type: Unit.Directorate;
-}
-
-export interface CreateDepartmentDTO extends BaseOrganizationDTO, WithParentDTO {
-    type: Unit.Department;
-}
-
-export interface CreateCenterDTO extends BaseOrganizationDTO, WithParentDTO {
-    type: Unit.Center;
-}
-
-export interface CreateProgramDTO extends BaseOrganizationDTO, WithParentDTO {
-    type: Unit.Program;
-    academicLevel: AcademicLevel;
-    classification: Classification;
-}
-
-export interface CreateExternalDTO extends BaseOrganizationDTO //, WithParentDTO 
-{
-    type: Unit.External;
-    ownership: Ownership;
-}
-
-/**
- * Union of all DTOs
- */
-export type CreateOrganizationDTO =
-    | CreateCollegeDTO
-    | CreateDirectorateDTO
-    | CreateDepartmentDTO
-    | CreateCenterDTO
-    | CreateProgramDTO
-    | CreateExternalDTO;
 
 
 export interface UpdateOrganizationDTO {
@@ -73,5 +28,10 @@ export interface UpdateOrganizationDTO {
 
 export interface GetOrganizationsDTO {
     type: Unit;
+    parent?: string;
+}
+
+
+export interface ExistsOrganizationDTO {
     parent?: string;
 }

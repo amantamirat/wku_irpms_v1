@@ -6,13 +6,15 @@ import {
     UpdateOrganizationDTO
 } from "./organization.dto";
 import { Unit } from "./organization.type";
+import { ERROR_CODES } from "../../common/errors/error.codes";
+import { ApplicantRepository, IApplicantRepository } from "../applicants/applicant.repository";
 
 export class OrganizationService {
 
-    private readonly repo: IOrganizationRepository;
 
-    constructor(repository: IOrganizationRepository) {
-        this.repo = repository;
+    constructor(private readonly repo: IOrganizationRepository,
+        private appRepo: IApplicantRepository = new ApplicantRepository(),
+    ) {
     }
 
     // ----------------------------------------------------
@@ -23,21 +25,18 @@ export class OrganizationService {
     }
 
 
-    async validateParent(type: Unit, parentId: string) {
+    async validateParent(type: Unit, parent: string) {
         if (type === Unit.Department || type === Unit.Program || type === Unit.Center) {
-            const organDoc = await this.repo.findById(parentId);
+            const organDoc = await this.repo.findById(parent);
             if (!organDoc) {
-                throw new Error('Parent is not found');
+                throw new Error(ERROR_CODES.ORGANIZATION_PARENT_NOT_FOUND);
             }
             const parentType = organDoc.type;
             if ((type === Unit.Department && parentType !== Unit.College) ||
                 (type === Unit.Program && parentType !== Unit.Department) ||
                 (type === Unit.Center && parentType !== Unit.Directorate)
             ) {
-                throw new Error(`Invalid parent ${parentType} for ${type} found`);
-                //"Department must belong to a College",
-                //"Center must belong to a Directorate",
-                //"Program must belong to a Department",
+                throw new Error(ERROR_CODES.INVALID_PARENT_TYPE);
             }
         }
     }
@@ -45,32 +44,69 @@ export class OrganizationService {
     // ----------------------------------------------------
     // CREATE ORGANIZATION
     // ----------------------------------------------------
-    async create(data: CreateOrganizationDTO) {
-        if (!data.name || !data.type) {
-            throw new Error("Organization name and type are required");
+    async create(dto: CreateOrganizationDTO) {
+        const { name, type, parent, academicLevel, classification, ownership } = dto;
+        // parent is required for child units
+        if (
+            (type === Unit.Department ||
+                type === Unit.Program ||
+                type === Unit.Center) &&
+            !parent
+        ) {
+            throw new Error(`Parent is required for ${type}`);
         }
-        return this.repo.create(data);
+        // program-specific required fields
+        if (type === Unit.Program) {
+            if (!academicLevel || !classification) {
+                throw new Error(
+                    "academicLevel and classification are required for Program"
+                );
+            }
+        }
+        // external-specific required field
+        if (type === Unit.External && !ownership) {
+            throw new Error("ownership is required for External");
+        }
+        // validate parent relationship
+        if (parent) {
+            await this.validateParent(type, parent);
+        }
+        return this.repo.create(dto);
     }
+
 
     // ----------------------------------------------------
     // UPDATE ORGANIZATION
     // ----------------------------------------------------
-    async update(id: string, dto: UpdateOrganizationDTO) {
-        if (!dto.data || Object.keys(dto.data).length === 0) {
-            throw new Error("No update data provided");
+    async update(dto: UpdateOrganizationDTO) {
+        const { id, data } = dto;
+        const orgDoc = await this.repo.update(id, data);
+        if (!orgDoc) {
+            throw new Error(ERROR_CODES.ORGANIZATION_NOT_FOUND);
         }
-        return this.repo.update(id, dto.data);
+        return orgDoc;
     }
+
 
     // ----------------------------------------------------
     // DELETE ORGANIZATION
     // ----------------------------------------------------
     async delete(id: string) {
-        const existing = await this.repo.findById(id);
-        if (!existing) {
-            throw new Error("Organization not found");
+        const orgnDoc = await this.repo.findById(id);
+        if (!orgnDoc) {
+            throw new Error(ERROR_CODES.ORGANIZATION_NOT_FOUND);
         }
-        await this.repo.delete(id);
-        return { message: "Organization deleted successfully" };
+        const childExist = await this.repo.exists({ parent: id });
+        if (childExist) {
+            throw new Error(ERROR_CODES.ORGANIZATION_HAS_CHILDREN);
+        }
+        if (orgnDoc.type === Unit.External || orgnDoc.type === Unit.Department) {
+            this.appRepo.exists({ workspace: id }).then(exists => {
+                if (exists) {
+                    throw new Error(ERROR_CODES.ORGANIZATION_IN_USE);
+                }
+            });
+        }
+        return await this.repo.delete(id);
     }
 }

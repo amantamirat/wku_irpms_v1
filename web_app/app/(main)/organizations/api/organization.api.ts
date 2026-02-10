@@ -42,7 +42,7 @@ export const OrganizationApi = {
             throw new Error("_id required.");
         }
         const url = `${end_point}${organization._id}`;
-        const response = await ApiClient.delete(url);
+        const response = await ApiClient.delete(url, { type: organization.type });
         return response;
     },
 };

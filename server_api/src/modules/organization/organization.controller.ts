@@ -1,28 +1,31 @@
 // organization.controller.ts
 import { Request, Response } from "express";
-import { errorResponse, successResponse } from "../../common/helpers/response";
-
+import { successResponse, errorResponse } from "../../common/helpers/response";
 import {
     CreateOrganizationDTO,
     GetOrganizationsDTO,
     UpdateOrganizationDTO
 } from "./organization.dto";
-
 import { OrganizationService } from "./organization.service";
-import { OrganizationRepository } from "./organization.repository";
 import { AuthenticatedRequest } from "../users/user.middleware";
 import { Unit } from "./organization.type";
-
-const service = new OrganizationService(new OrganizationRepository());
+import { ERROR_CODES } from "../../common/errors/error.codes";
 
 export class OrganizationController {
+
+    private service: OrganizationService;
+
+    constructor(service: OrganizationService) {
+        this.service = service;
+    }
 
     // ----------------------------------------------------
     // CREATE
     // ----------------------------------------------------
-    static async create(req: AuthenticatedRequest, res: Response) {
+    create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error("User not authorized!");
+            if (!req.user)
+                throw new Error(ERROR_CODES.USER_NOT_FOUND);
 
             const dto: CreateOrganizationDTO = {
                 type: req.body.type,
@@ -33,40 +36,41 @@ export class OrganizationController {
                 ownership: req.body.ownership,
             };
 
-            const created = await service.create(dto);
-
+            const created = await this.service.create(dto);
             successResponse(res, 201, "Organization created successfully", created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
+    };
 
     // ----------------------------------------------------
     // GET ALL (filter: type, parent)
     // ----------------------------------------------------
-    static async getAll(req: Request, res: Response) {
+    getAll = async (req: Request, res: Response) => {
         try {
             const filters: GetOrganizationsDTO = {
                 type: req.query.type as Unit,
-                parent: req.query.parent as string
+                parent: req.query.parent as string,
             };
 
-            const organizations = await service.getAll(filters);
-
+            const organizations = await this.service.getAll(filters);
             successResponse(res, 200, "Organizations fetched successfully", organizations);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
+    };
 
     // ----------------------------------------------------
     // UPDATE
     // ----------------------------------------------------
-    static async update(req: AuthenticatedRequest, res: Response) {
+    update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error("User not authorized!");
+            if (!req.user)
+                throw new Error(ERROR_CODES.USER_NOT_FOUND);
 
             const { id } = req.params;
+            if (!id)
+                throw new Error("id not found!");
 
             const dto: UpdateOrganizationDTO = {
                 id,
@@ -77,31 +81,26 @@ export class OrganizationController {
                     classification: req.body.classification,
                     ownership: req.body.ownership,
                 },
-                userId:req.user.userId,
+                userId: req.user.userId,
             };
 
-            const updated = await service.update(id, dto);
-
+            const updated = await this.service.update(dto);
             successResponse(res, 200, "Organization updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
+    };
 
     // ----------------------------------------------------
     // DELETE
     // ----------------------------------------------------
-    static async delete(req: AuthenticatedRequest, res: Response) {
+    delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error("User not authorized!");
-
             const { id } = req.params;
-
-           const deleted =  await service.delete(id);
-
+            const deleted = await this.service.delete(id);
             successResponse(res, 200, "Organization deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
+    };
 }

@@ -1,44 +1,52 @@
 import { Router } from 'express';
-import { checkPermission, verifyActiveAccount } from '../users/user.middleware';
 import { OrganizationController } from './organization.controller';
+import { checkPermission, verifyActiveAccount } from '../users/user.middleware';
 import { checkUnitPermission } from './organization.middleware';
+import { OrganizationRepository } from './organization.repository';
+import { OrganizationService } from './organization.service';
 import { PERMISSIONS } from '../../common/constants/permissions';
+// import { checkPermission } from '../users/user.middleware';
+// import { PERMISSIONS } from '../../common/constants/permissions';
 
-const router: Router = Router();
+const router = Router();
+/**
+ * Dependencies
+ */
+const repository = new OrganizationRepository();
+const service = new OrganizationService(repository);
+const controller = new OrganizationController(service);
 
-router.post('/',
+/**
+ * Routes
+ */
+router.post(
+    '/',
     verifyActiveAccount,
     checkUnitPermission('CREATE'),
-    // checkPermission([PERMISSIONS.ORGANIAZTION.CREATE]),
-    OrganizationController.create
+    // checkPermission([PERMISSIONS.ORGANIZATION.CREATE]),
+    controller.create
 );
 
-router.get('/',
+router.get(
+    '/',
     verifyActiveAccount,
-    checkUnitPermission('READ'),
-    /*
-    checkPermission([PERMISSIONS.ORGANIAZTION.COLLEGE.READ,
-    PERMISSIONS.ORGANIAZTION.DEPARTMENT.READ,
-    PERMISSIONS.ORGANIAZTION.PROGRAM.READ,
-    PERMISSIONS.ORGANIAZTION.DIRECTORATE.READ,
-    PERMISSIONS.ORGANIAZTION.CENTER.READ,
-    PERMISSIONS.ORGANIAZTION.EXTERNAL.READ
-    ]),*/
-    OrganizationController.getAll
+    controller.getAll
 );
 
-router.put('/:id',
+router.put(
+    '/:id',
     verifyActiveAccount,
     checkUnitPermission('UPDATE'),
-    // checkPermission([PERMISSIONS.ORGANIAZTION.UPDATE]),
-    OrganizationController.update
+    // checkPermission([PERMISSIONS.ORGANIZATION.UPDATE]),
+    controller.update
 );
 
-router.delete('/:id',
+router.delete(
+    '/:id',
     verifyActiveAccount,
     checkUnitPermission('DELETE'),
-    //checkPermission([PERMISSIONS.ORGANIAZTION.DELETE]),
-    OrganizationController.delete
+    //checkPermission([PERMISSIONS.ORGANIZATION.DELETE]),
+    controller.delete
 );
 
 export default router;

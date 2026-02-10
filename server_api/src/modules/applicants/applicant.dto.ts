@@ -54,3 +54,7 @@ export interface FindApplicantDTO {
     email: string;
 }
 
+export interface ExistsApplicantDTO {
+    workspace?: string;
+}
+
