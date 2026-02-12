@@ -1,8 +1,11 @@
 export interface CreateCompositionDTO {
     constraint: string;
-    value: number;
-    max?: number;
-    min?: number;
+    max: number;
+    min: number;
+    range?: {
+        min: number;
+        max: number;
+    };
     item?: string;
 }
 
@@ -12,10 +15,15 @@ export interface GetCompositionDTO {
 
 export interface UpdateCompositionDTO {
     id: string,
-    data: Partial<{
-        value: number;
+    data: Partial<{    
         min: number;
         max: number;
-        item: string;
+        /**
+         *  range: {
+            min?: number;
+            max?: number;
+        };
+         */
+        //item: string;
     }>;
 }

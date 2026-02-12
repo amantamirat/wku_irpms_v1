@@ -13,7 +13,8 @@ import {
     validateConstraint,
 } from '../models/constraint.model';
 import { ConstraintApi } from '../api/constraint.api';
-import { ApplicantConstraintType } from '../models/applicant-constaint-type';
+import { ApplicantConstraintValues, type ApplicantConstraintType } 
+from '../models/applicant-constaint-type';
 import { ProjectConstraintType } from '../models/project-constraint-type';
 
 interface SaveDialogProps {
@@ -113,7 +114,7 @@ const SaveDialog = ({ visible, constraint, onComplete, onHide }: SaveDialogProps
                             options={Object.values(
                                 localConstraint.type === ConstraintType.PROJECT
                                     ? ProjectConstraintType
-                                    : ApplicantConstraintType
+                                    : ApplicantConstraintValues
                             ).map((c) => ({ label: c, value: c }))}
                             onChange={(e) =>
                                 setLocalConstraint({ ...localConstraint, constraint: e.value })

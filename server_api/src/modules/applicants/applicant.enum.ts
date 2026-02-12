@@ -14,5 +14,6 @@ export enum Accessibility {
   Mobility = 'Mobility',
   Speech = 'Speech',
   Cognitive = 'Cognitive',
-  Other = 'Other'
+  Other = 'Other',
+  //Any = '*'
 }

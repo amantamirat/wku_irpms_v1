@@ -1,6 +1,6 @@
 import { CompositionRepository, ICompositionRepository } from "./composition.repository";
 import { IApplicantConstraint } from "../applicant/applicant-constraint.model";
-import { isRangeConstraint, isListConstraint, ApplicantConstraintType, getListOptions } from "../applicant/applicant-constaint-type";
+import { isRangeConstraint, isListConstraint, ApplicantConstraintType, getListOptions } from "../applicant/applicant-constraint-type";
 import { CreateCompositionDTO, GetCompositionDTO, UpdateCompositionDTO } from "./composition.dto";
 import { ConstraintRepository, IConstraintRepository } from "../constraint.repository";
 import { ERROR_CODES } from "../../../../common/errors/error.codes";
@@ -21,7 +21,7 @@ export class CompositionService {
     //----------------------------------------
     private async validate(dto: CreateCompositionDTO) {
 
-        const {constraint,  min, max } = dto;
+        const { constraint, min, max } = dto;
 
         const constraintDoc = await this.constraintRepo.findById(constraint) as IApplicantConstraint;
         if (!constraintDoc || constraintDoc.type !== ConstraintType.APPLICANT) throw new Error(ERROR_CODES.CONSTRAINT_NOT_FOUND);
@@ -48,9 +48,26 @@ export class CompositionService {
     //----------------------------------------
     // CREATE
     //----------------------------------------
-    async create(data: CreateCompositionDTO) {
-        await this.validate(data);
-        return this.repository.create(data);
+    async create(dto: CreateCompositionDTO) {
+        const { constraint, min, max, range, item } = dto;
+        const constraintDoc = await this.constraintRepo.findById(constraint) as IApplicantConstraint;
+        if (!constraintDoc || constraintDoc.type !== ConstraintType.APPLICANT)
+            throw new Error(ERROR_CODES.CONSTRAINT_NOT_FOUND);
+
+        const applicantType = constraintDoc.constraint as ApplicantConstraintType;
+
+        if (isRangeConstraint(applicantType)) {
+            if (!range)
+                throw new AppError(ERROR_CODES.COMPOSITION_RANGE_NOT_FOUND);
+            if (range.min > range.max)
+                throw new AppError(ERROR_CODES.INVALID_RANGE);
+        }
+
+        else if (isListConstraint(applicantType))
+            if (!item)
+                throw new AppError(ERROR_CODES.COMPOSITION_ITEM_NOT_FOUND);
+
+        return this.repository.create(dto);
     }
 
     //----------------------------------------

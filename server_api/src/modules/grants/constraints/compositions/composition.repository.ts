@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import { GetCompositionDTO, CreateCompositionDTO, UpdateCompositionDTO } from "./composition.dto";
 import { IComposition, Composition } from "./composition.model";
 
-
 export interface ICompositionRepository {
     find(filters: GetCompositionDTO): Promise<IComposition[]>;
     findById(id: string): Promise<IComposition | null>;

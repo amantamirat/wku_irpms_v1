@@ -3,8 +3,7 @@ import { COLLECTIONS } from "../../../common/constants/collections.enum";
 
 export enum ConstraintType {
     PROJECT = "project",
-    APPLICANT = "applicant",
-    //COMPOSITION = "Composition"
+    APPLICANT = "applicant"
 }
 
 export interface IConstraint extends Document {

@@ -25,6 +25,13 @@ const CompositionManager = ({ constraint }: CompositionManagerProps) => {
     const canEdit = hasPermission([PERMISSIONS.CONSTRAINT.UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.CONSTRAINT.DELETE]);
 
+    const isRange = isRangeConstraint(
+        constraint.constraint as ApplicantConstraintType
+    );
+
+    const isList = isListConstraint(
+        constraint.constraint as ApplicantConstraintType);
+
     // CRUD Hook
     const {
         items: compositions,
@@ -37,7 +44,7 @@ const CompositionManager = ({ constraint }: CompositionManagerProps) => {
         setError
     } = useCrudList<Composition>();
 
-    const emptyComposition: Composition = { constraint, value: 0 };
+    const emptyComposition: Composition = { constraint, max: 0, min: 0 };
     const [selectedComposition, setSelectedComposition] = useState<Composition>(emptyComposition);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     // Fetch compositions
@@ -76,10 +83,29 @@ const CompositionManager = ({ constraint }: CompositionManagerProps) => {
     };
 
     const columns = [
-        isRangeConstraint(constraint.constraint as ApplicantConstraintType) && { field: 'min', header: 'Min', sortable: true },
-        isRangeConstraint(constraint.constraint as ApplicantConstraintType) && { field: 'max', header: 'Max', sortable: true },
-        isListConstraint(constraint.constraint as ApplicantConstraintType) && { field: 'item', header: 'Item', sortable: true },
-        { field: 'value', header: 'Value', sortable: true }
+        // Composition min/max (always shown)
+        { field: "min", header: "Min Applicants", sortable: true },
+        { field: "max", header: "Max Applicants", sortable: true },
+
+        // Range constraint values (age, experience, etc.)
+        isRange && {
+            field: "range.min",
+            header: `${constraint.constraint} From`,
+            sortable: true,
+        },
+
+        isRange && {
+            field: "range.max",
+            header: `${constraint.constraint} To`,
+            sortable: true,
+        },
+
+        // List constraint value
+        isList && {
+            field: "item",
+            header: "Item",
+            sortable: true,
+        },
     ].filter(Boolean);
 
     return (
@@ -94,10 +120,10 @@ const CompositionManager = ({ constraint }: CompositionManagerProps) => {
                 canDelete={canDelete}
                 onCreate={() => { setSelectedComposition(emptyComposition); setShowSaveDialog(true); }}
                 onEdit={(row) => { setSelectedComposition(row); setShowSaveDialog(true); }}
-                onDelete={(row) => confirm.ask({ item: String(row.value), onConfirmAsync: () => deleteComposition(row) })}
+                onDelete={(row) => confirm.ask({ item: String(row.constraint), onConfirmAsync: () => deleteComposition(row) })}
             />
 
-            {selectedComposition && (
+            {(selectedComposition && showSaveDialog) && (
                 <SaveDialog
                     visible={showSaveDialog}
                     composition={selectedComposition}

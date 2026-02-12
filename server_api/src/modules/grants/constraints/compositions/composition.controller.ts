@@ -14,24 +14,44 @@ export class CompositionController {
     //----------------------------------------
     // CREATE COMPOSITION
     //----------------------------------------
+    //----------------------------------------
+    // CREATE COMPOSITION
+    //----------------------------------------
     create = async (req: Request, res: Response) => {
         try {
-            const { constraint, value, max, min, item } = req.body;
+            const { constraint, min, max, range, item } = req.body;
+
+            if (min > max) {
+                throw new Error("min cannot be greater than max");
+            }
+
+            // Validate range if provided
+            if (range) {
+                if (range.min === undefined || range.max === undefined) {
+                    throw new Error("Both range.min and range.max are required if range is provided");
+                }
+                if (range.min > range.max) {
+                    throw new Error("range.min cannot be greater than range.max");
+                }
+            }
 
             const data = {
                 constraint: constraint as string,
-                value,
-                max,
-                min,
-                item
+                min: Number(min),
+                max: Number(max),
+                range: range ? { min: Number(range.min), max: Number(range.max) } : undefined,
+                item,
             };
 
             const created = await this.service.create(data);
+
             successResponse(res, 201, "Composition created successfully", created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     };
+
+
 
     //----------------------------------------
     // GET COMPOSITIONS
@@ -61,15 +81,16 @@ export class CompositionController {
     update = async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
-            const { value, max, min, item } = req.body;
+            const { range, max, min, item } = req.body;
+
 
             const dto: UpdateCompositionDTO = {
                 id,
                 data: {
-                    value: value ?? undefined,
+                    //range: {} ?? undefined,
                     max: max ?? undefined,
                     min: min ?? undefined,
-                    item: item ?? undefined,
+                    //item: item ?? undefined,
                 }
             };
 

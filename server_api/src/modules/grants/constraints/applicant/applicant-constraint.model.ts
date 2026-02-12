@@ -1,6 +1,6 @@
 import { Schema } from "mongoose";
 import { IConstraint, Constraint, ConstraintType } from "../constraint.model";
-import { ApplicantConstraintType } from "./applicant-constaint-type";
+import { ApplicantConstraintType, ApplicantConstraintValues } from "./applicant-constraint-type";
 
 export enum OperationMode {
     COUNT = "COUNT",
@@ -17,7 +17,7 @@ export interface IApplicantConstraint extends IConstraint {
 const ApplicantConstraintSchema = new Schema<IApplicantConstraint>({
     constraint: {
         type: String,
-        enum: Object.values(ApplicantConstraintType),
+        enum: ApplicantConstraintValues,
         required: true,
         immutable: true,
     },

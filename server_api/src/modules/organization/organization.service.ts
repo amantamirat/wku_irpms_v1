@@ -46,27 +46,6 @@ export class OrganizationService {
     // ----------------------------------------------------
     async create(dto: CreateOrganizationDTO) {
         const { name, type, parent, academicLevel, classification, ownership } = dto;
-        // parent is required for child units
-        if (
-            (type === Unit.Department ||
-                type === Unit.Program ||
-                type === Unit.Center) &&
-            !parent
-        ) {
-            throw new Error(`Parent is required for ${type}`);
-        }
-        // program-specific required fields
-        if (type === Unit.Program) {
-            if (!academicLevel || !classification) {
-                throw new Error(
-                    "academicLevel and classification are required for Program"
-                );
-            }
-        }
-        // external-specific required field
-        if (type === Unit.External && !ownership) {
-            throw new Error("ownership is required for External");
-        }
         // validate parent relationship
         if (parent) {
             await this.validateParent(type, parent);

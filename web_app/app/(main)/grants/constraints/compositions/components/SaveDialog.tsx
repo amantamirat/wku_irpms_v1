@@ -1,16 +1,16 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
-import { Composition, validateComposition } from '../models/composition.model';
-import { accessibilityOptions, applicantUnits, genderOptions } from '@/app/(main)/applicants/models/applicant.model';
-import { CompositionApi } from '../api/composition.api';
-import { ApplicantConstraintType, isRangeConstraint, isListConstraint, getListOptions } from '../../models/applicant-constaint-type';
+import { useEffect, useRef, useState } from 'react';
+import type { ApplicantConstraintType } from '../../models/applicant-constaint-type';
+import { ApplicantListType, getListOptions, isListConstraint, isRangeConstraint } from '../../models/applicant-constaint-type';
 import { Constraint } from '../../models/constraint.model';
+import { CompositionApi } from '../api/composition.api';
+import { Composition, validateComposition } from '../models/composition.model';
 
 interface SaveDialogProps {
     visible: boolean;
@@ -21,7 +21,7 @@ interface SaveDialogProps {
 }
 
 const SaveDialog = ({ visible, composition, onComplete, onHide, parent }: SaveDialogProps) => {
-    const [itemOptions, setItemOptions] = useState<any[] | null>();
+    const [itemOptions, setItemOptions] = useState<any[] | undefined>();
     const [localComposition, setLocalComposition] = useState<Composition>({ ...composition });
     const [submitted, setSubmitted] = useState(false);
     const toast = useRef<Toast>(null);
@@ -32,8 +32,14 @@ const SaveDialog = ({ visible, composition, onComplete, onHide, parent }: SaveDi
     }, [composition]);
 
     useEffect(() => {
-        const options = getListOptions(parent.constraint as ApplicantConstraintType);
-        setItemOptions(options);
+        if (isListConstraint(parent.constraint as ApplicantConstraintType)) {
+            const options = getListOptions(
+                parent.constraint as ApplicantListType
+            );
+            setItemOptions(options);
+        } else {
+            setItemOptions(undefined);
+        }
     }, [parent]);
 
 
@@ -107,61 +113,107 @@ const SaveDialog = ({ visible, composition, onComplete, onHide, parent }: SaveDi
                 footer={footer}
                 onHide={hide}
             >
-                {/* Range constraints */}
+                {/* Composition min/max (ALWAYS REQUIRED) */}
+                <div className="field">
+                    <label htmlFor="compMin">Minimum Applicants</label>
+                    <InputNumber
+                        id="compMin"
+                        value={localComposition.min}
+                        onChange={(e) =>
+                            setLocalComposition({
+                                ...localComposition,
+                                min: e.value ?? 0,
+                            })
+                        }
+                        required
+                        className={classNames({
+                            "p-invalid": submitted && localComposition.min == null,
+                        })}
+                    />
+                </div>
+
+                <div className="field">
+                    <label htmlFor="compMax">Maximum Applicants</label>
+                    <InputNumber
+                        id="compMax"
+                        value={localComposition.max}
+                        onChange={(e) =>
+                            setLocalComposition({
+                                ...localComposition,
+                                max: e.value ?? 0,
+                            })
+                        }
+                        required
+                        className={classNames({
+                            "p-invalid": submitted && localComposition.max == null,
+                        })}
+                    />
+                </div>
+
+                {/* Range filtering (AGE, EXPERIENCE, etc.) */}
                 {isRangeConstraint(parent.constraint as ApplicantConstraintType) && (
                     <>
                         <div className="field">
-                            <label htmlFor="min">Minimum ({parent.constraint})</label>
+                            <label htmlFor="rangeMin">Range Minimum ({parent.constraint})</label>
                             <InputNumber
-                                id="min"
-                                value={localComposition.min}
-                                onChange={(e) => setLocalComposition({ ...localComposition, min: e.value ?? 0 })}
-                                required
-                                className={classNames({ 'p-invalid': submitted && localComposition.min == null })}
+                                id="rangeMin"
+                                value={localComposition.range?.min}
+                                onChange={(e) =>
+                                    setLocalComposition({
+                                        ...localComposition,
+                                        range: {
+                                            min: e.value ?? 0,
+                                            max: localComposition.range?.max ?? 0,
+                                        },
+                                    })
+                                }
                             />
                         </div>
+
                         <div className="field">
-                            <label htmlFor="max">Maximum ({parent.constraint})</label>
+                            <label htmlFor="rangeMax">Range Maximum ({parent.constraint})</label>
                             <InputNumber
-                                id="max"
-                                value={localComposition.max}
-                                onChange={(e) => setLocalComposition({ ...localComposition, max: e.value ?? 0 })}
-                                required
-                                className={classNames({ 'p-invalid': submitted && localComposition.max == null })}
+                                id="rangeMax"
+                                value={localComposition.range?.max}
+                                onChange={(e) =>
+                                    setLocalComposition({
+                                        ...localComposition,
+                                        range: {
+                                            min: localComposition.range?.min ?? 0,
+                                            max: e.value ?? 0,
+                                        },
+                                    })
+                                }
                             />
                         </div>
                     </>
                 )}
 
-                {/* List constraints */}
+                {/* List filtering (Gender, Scope, etc.) */}
                 {isListConstraint(parent.constraint as ApplicantConstraintType) && (
                     <div className="field">
                         <label htmlFor="item">Item ({parent.constraint})</label>
                         <Dropdown
                             id="item"
                             value={localComposition.item}
-                            options={itemOptions?.map(o => ({
+                            options={itemOptions?.map((o) => ({
                                 label: o,
-                                value: o
+                                value: o,
                             }))}
-                            onChange={(e) => setLocalComposition({ ...localComposition, item: e.value })}
+                            onChange={(e) =>
+                                setLocalComposition({
+                                    ...localComposition,
+                                    item: e.value,
+                                })
+                            }
                             placeholder="Select Item"
-                            className={classNames({ 'p-invalid': submitted && !localComposition.item })}
+                            className={classNames({
+                                "p-invalid": submitted && !localComposition.item,
+                            })}
                         />
                     </div>
                 )}
 
-                {/* Value field */}
-                <div className="field">
-                    <label htmlFor="value">Value ({parent.mode})</label>
-                    <InputNumber
-                        id="value"
-                        value={localComposition.value}
-                        onChange={(e) => setLocalComposition({ ...localComposition, value: e.value ?? 0 })}
-                        required
-                        className={classNames({ 'p-invalid': submitted && localComposition.value == null })}
-                    />
-                </div>
             </Dialog>
         </>
     );

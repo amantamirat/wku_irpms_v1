@@ -1,4 +1,4 @@
-import { Accessibility, applicantUnits, Gender } from "@/app/(main)/applicants/models/applicant.model";
+import { Accessibility, applicantUnits, Gender } from "../../../applicants/applicant.enum";
 
 export enum ApplicantRangeType {
     AGE = "AGE",
@@ -40,9 +40,6 @@ const listOptionsMap: Record<ApplicantListType, any> = {
 export function getListOptions(type: ApplicantListType) {
     return Object.values(listOptionsMap[type]);
 }
-
-
-
 
 
 

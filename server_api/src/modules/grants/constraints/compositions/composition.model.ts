@@ -2,14 +2,26 @@ import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../../../common/constants/collections.enum";
 import { ApplicantConstraint } from "../applicant/applicant-constraint.model";
 
-export interface IComposition extends Document {
-    constraint: mongoose.Types.ObjectId;
-    value: number; // Required number or ratio of applicants
-    max?: number; // value for range-based constraints
-    min?: number; // value for range-based constraints
-    item?: string; // Allowed values for enum-based constraints
+export interface IRange {
+    min: number;
+    max: number;
 }
 
+const RangeSchema = new Schema(
+    {
+        min: { type: Number, required: true },
+        max: { type: Number, required: true },
+    },
+    { _id: false } // important: prevents extra _id for subdocument
+);
+
+export interface IComposition extends Document {
+    constraint: mongoose.Types.ObjectId;
+    max: number; // maximum allowed
+    min: number; // minimum required
+    item?: string; // allowed values for enum-based constraints
+    range?: IRange;  // allowed values for range-based constraints
+}
 
 const CompositionSchema = new Schema<IComposition>({
     constraint: {
@@ -18,24 +30,23 @@ const CompositionSchema = new Schema<IComposition>({
         required: true,
         immutable: true
     },
-    value: {
-        type: Number,
-        required: true,
-        min: 0
-    },
     max: {
         type: Number,
         min: 0,
-        default: Number.MAX_SAFE_INTEGER, //Infinity
+        default: Number.MAX_SAFE_INTEGER,
+        required: true
     },
     min: {
         type: Number,
         min: 0,
-        default: 0
+        required: true
     },
     item: {
         type: String,
-    }
+    },
+    range: {
+        type: RangeSchema
+    },
 
 });
 
