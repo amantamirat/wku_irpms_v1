@@ -11,9 +11,15 @@ export enum ApplicantListType {
     SCOPE = "SCOPE",
 }
 
+export enum ApplicantDynamicType {
+    WORKSPACE = "WORKSPACE",
+    SPECIALIZATION = "SPECIALIZATION"
+}
+
 export const ApplicantConstraintValues = [
     ...Object.values(ApplicantRangeType),
     ...Object.values(ApplicantListType),
+    ...Object.values(ApplicantDynamicType),
 ] as const;
 
 export type ApplicantConstraintType =
@@ -28,6 +34,12 @@ export function isRangeConstraint(type: ApplicantConstraintType): type is Applic
 export function isListConstraint(type: ApplicantConstraintType): type is ApplicantListType {
     return Object.values(ApplicantListType).includes(
         type as ApplicantListType
+    );
+}
+
+export function isDynamicConstraint(type: ApplicantConstraintType): type is ApplicantDynamicType {
+    return Object.values(ApplicantDynamicType).includes(
+        type as ApplicantDynamicType
     );
 }
 

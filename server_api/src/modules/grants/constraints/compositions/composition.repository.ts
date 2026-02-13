@@ -16,18 +16,37 @@ export class CompositionRepository implements ICompositionRepository {
     async find(filters: GetCompositionDTO): Promise<IComposition[]> {
         const query: any = {};
         if (filters.constraint) query.constraint = filters.constraint;
-        return Composition.find(query).exec();
+        let dbQuery = Composition.find(query);
+        if (filters.populate) {
+            dbQuery = dbQuery.populate("item");
+        }
+        return dbQuery.exec();
     }
 
     async findById(id: string): Promise<IComposition | null> {
         return Composition.findById(id).exec();
     }
 
-    async create(dto: CreateCompositionDTO): Promise<IComposition> {
-        const data: Partial<IComposition> = {
-            ...dto,
-            constraint: new mongoose.Types.ObjectId(dto.constraint)
+    async create(dto: CreateCompositionDTO) {
+        const data: any = {
+            constraint: new mongoose.Types.ObjectId(dto.constraint),
+            max: dto.max,
+            min: dto.min,
         };
+
+        if (dto.range) {
+            data.range = dto.range;
+        }
+
+        if (dto.enumValue) {
+            data.enumValue = dto.enumValue;
+        }
+
+        if (dto.item) {
+            data.item = new mongoose.Types.ObjectId(dto.item);
+            data.itemModel = dto.itemModel;
+        }
+
         return Composition.create(data);
     }
 

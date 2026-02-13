@@ -19,7 +19,7 @@ export class CompositionController {
     //----------------------------------------
     create = async (req: Request, res: Response) => {
         try {
-            const { constraint, min, max, range, item } = req.body;
+            const { constraint, min, max, range, item, enumValue } = req.body;
 
             if (min > max) {
                 throw new Error("min cannot be greater than max");
@@ -41,6 +41,7 @@ export class CompositionController {
                 max: Number(max),
                 range: range ? { min: Number(range.min), max: Number(range.max) } : undefined,
                 item,
+                enumValue
             };
 
             const created = await this.service.create(data);
@@ -81,7 +82,7 @@ export class CompositionController {
     update = async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
-            const { range, max, min, item } = req.body;
+            const { range, max, min, item, enumValue } = req.body;
 
 
             const dto: UpdateCompositionDTO = {

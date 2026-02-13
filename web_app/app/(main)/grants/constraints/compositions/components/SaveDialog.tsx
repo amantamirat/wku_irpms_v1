@@ -7,10 +7,13 @@ import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 import type { ApplicantConstraintType } from '../../models/applicant-constaint-type';
-import { ApplicantListType, getListOptions, isListConstraint, isRangeConstraint } from '../../models/applicant-constaint-type';
+import { ApplicantDynamicType, ApplicantListType, getListOptions, isDynamicConstraint, isListConstraint, isRangeConstraint } from '../../models/applicant-constaint-type';
 import { Constraint } from '../../models/constraint.model';
 import { CompositionApi } from '../api/composition.api';
 import { Composition, validateComposition } from '../models/composition.model';
+import { OrgnUnit } from '@/app/(main)/organizations/models/organization.model';
+import { SpecializationApi } from '@/app/(main)/specializations/api/specialization.api';
+import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
 
 interface SaveDialogProps {
     visible: boolean;
@@ -25,6 +28,8 @@ const SaveDialog = ({ visible, composition, onComplete, onHide, parent }: SaveDi
     const [localComposition, setLocalComposition] = useState<Composition>({ ...composition });
     const [submitted, setSubmitted] = useState(false);
     const toast = useRef<Toast>(null);
+    const [dynamicOptions, setDynamicOptions] = useState<any[] | undefined>();
+
 
     // Sync prop changes
     useEffect(() => {
@@ -32,15 +37,61 @@ const SaveDialog = ({ visible, composition, onComplete, onHide, parent }: SaveDi
     }, [composition]);
 
     useEffect(() => {
-        if (isListConstraint(parent.constraint as ApplicantConstraintType)) {
-            const options = getListOptions(
-                parent.constraint as ApplicantListType
-            );
+        const constraint = parent.constraint as ApplicantConstraintType;
+
+        // LIST TYPE (Gender, Scope, etc.)
+        if (isListConstraint(constraint)) {
+            const options = getListOptions(constraint);
             setItemOptions(options);
-        } else {
+            setDynamicOptions(undefined);
+        }
+
+        // DYNAMIC TYPE (Workspace, Specialization)
+        else if (isDynamicConstraint(constraint)) {
+            const fetchDynamicOptions = async () => {
+                try {
+                    // SPECIALIZATION
+                    if (constraint === ApplicantDynamicType.SPECIALIZATION) {
+                        const specs = await SpecializationApi.getSpecializations();
+                        setDynamicOptions(specs);
+                    }
+
+                    // WORKSPACE
+                    if (constraint === ApplicantDynamicType.WORKSPACE) {
+                        const departments = await OrganizationApi.getOrganizations({
+                            type: OrgnUnit.Department
+                        });
+
+                        const externals = await OrganizationApi.getOrganizations({
+                            type: OrgnUnit.External
+                        });
+
+                        setDynamicOptions([...departments, ...externals]);
+                    }
+                } catch (err) {
+                    console.error("Failed to fetch dynamic options:", err);
+                }
+            };
+
+            fetchDynamicOptions();
             setItemOptions(undefined);
         }
-    }, [parent]);
+
+        // RANGE TYPE
+        else {
+            setItemOptions(undefined);
+            setDynamicOptions(undefined);
+        }
+    }, [parent.constraint]);
+
+    useEffect(() => {
+        setLocalComposition(prev => ({
+            ...prev,
+            enumValue: undefined,
+            item: undefined,
+            range: undefined
+        }));
+    }, [parent.constraint]);
 
 
     const saveComposition = async () => {
@@ -54,7 +105,8 @@ const SaveDialog = ({ visible, composition, onComplete, onHide, parent }: SaveDi
                 : await CompositionApi.createComposition(localComposition);
             saved = {
                 ...saved,
-                constraint: localComposition.constraint
+                constraint: localComposition.constraint,
+                item: localComposition.item
             };
 
             toast.current?.show({
@@ -190,14 +242,45 @@ const SaveDialog = ({ visible, composition, onComplete, onHide, parent }: SaveDi
                 )}
 
                 {/* List filtering (Gender, Scope, etc.) */}
+                {/* LIST filtering (Gender, Scope, etc.) */}
                 {isListConstraint(parent.constraint as ApplicantConstraintType) && (
                     <div className="field">
-                        <label htmlFor="item">Item ({parent.constraint})</label>
+                        <label htmlFor="enumValue">
+                            {`Select ${parent.constraint}`}
+                        </label>
+
+                        <Dropdown
+                            id="enumValue"
+                            value={localComposition.enumValue}
+                            options={itemOptions?.map((o) => ({
+                                label: o,
+                                value: o,
+                            }))}
+                            onChange={(e) =>
+                                setLocalComposition({
+                                    ...localComposition,
+                                    enumValue: e.value,
+                                })
+                            }
+                            placeholder="Select"
+                        />
+                    </div>
+                )}
+
+                {/* DYNAMIC filtering (Workspace, Specialization) */}
+                {isDynamicConstraint(parent.constraint as ApplicantConstraintType) && (
+                    <div className="field">
+                        <label htmlFor="item">
+                            {parent.constraint === ApplicantDynamicType.SPECIALIZATION
+                                ? "Specialization"
+                                : "Workspace"}
+                        </label>
+
                         <Dropdown
                             id="item"
                             value={localComposition.item}
-                            options={itemOptions?.map((o) => ({
-                                label: o,
+                            options={dynamicOptions?.map((o: any) => ({
+                                label: o.name,
                                 value: o,
                             }))}
                             onChange={(e) =>
@@ -206,10 +289,7 @@ const SaveDialog = ({ visible, composition, onComplete, onHide, parent }: SaveDi
                                     item: e.value,
                                 })
                             }
-                            placeholder="Select Item"
-                            className={classNames({
-                                "p-invalid": submitted && !localComposition.item,
-                            })}
+                            placeholder="Select"
                         />
                     </div>
                 )}

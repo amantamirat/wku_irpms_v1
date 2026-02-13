@@ -1,3 +1,4 @@
+import { ERROR_CODES } from "../../common/errors/error.codes";
 import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
 import { Unit } from "../organization/organization.type";
 import { IRoleRepository, RoleRepository } from "../users/roles/role.repository";
@@ -21,10 +22,10 @@ export class ApplicantService {
     async validateWorkspace(workspace: string) {
         const organDoc = await this.orgnRepo.findById(workspace);
         if (!organDoc) {
-            throw new Error('Workspace is not found');
+            throw new Error(ERROR_CODES.WORKSPACE_NOT_FOUND);
         }
         if (organDoc.type !== Unit.Department && organDoc.type !== Unit.External) {
-            throw new Error("Invalid Workspace.");
+            throw new Error(ERROR_CODES.INVALID_WORKSPACE);
         }
     }
     // -------------------------

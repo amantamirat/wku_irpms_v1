@@ -1,23 +1,35 @@
+import { Organization } from "@/app/(main)/organizations/models/organization.model";
 import { Constraint } from "../../models/constraint.model";
+import { Specialization } from "@/app/(main)/specializations/models/specialization.model";
 
 export type Range = {
     min: number;
     max: number;
 };
 
+
 export type Composition = {
     _id?: string;
+
     constraint: string | Constraint;
 
-    min: number;  // required (composition min)
-    max: number;  // required (composition max)
+    min: number;
+    max: number;
 
-    item?: string;
+    // ✅ For ENUM constraints
+    enumValue?: string;
+
+    // ✅ For DYNAMIC constraints
+    item?: string | any; // ObjectId as string
+    // itemModel?: "Organization" | "Specialization";
+
+    // ✅ For RANGE constraints
     range?: Range;
 
     createdAt?: Date;
     updatedAt?: Date;
 };
+
 
 export const validateComposition = (
     composition: Composition

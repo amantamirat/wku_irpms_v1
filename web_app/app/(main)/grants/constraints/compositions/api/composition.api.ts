@@ -9,7 +9,11 @@ function sanitizeComposition(composition: Partial<Composition>): Partial<Composi
         constraint:
             typeof composition.constraint === 'object' && composition.constraint !== null
                 ? (composition.constraint as any)._id
-                : composition.constraint
+                : composition.constraint,
+        item:
+            typeof composition.item === 'object' && composition.item !== null
+                ? (composition.item as any)._id
+                : composition.item
     };
 }
 

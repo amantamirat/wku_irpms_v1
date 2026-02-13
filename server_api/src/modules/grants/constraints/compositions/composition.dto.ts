@@ -1,29 +1,34 @@
+import { COLLECTIONS } from "../../../../common/constants/collections.enum";
+
 export interface CreateCompositionDTO {
     constraint: string;
     max: number;
     min: number;
+
+    // For range constraints
     range?: {
         min: number;
         max: number;
     };
-    item?: string;
+
+    // For enum constraints
+    enumValue?: string;
+
+    // For dynamic constraints
+    item?: string; // ObjectId as string from frontend
+    itemModel?: COLLECTIONS.ORGANIZATION | COLLECTIONS.SPECIALIZATION;
 }
 
+
 export interface GetCompositionDTO {
-    constraint: string;
+    constraint?: string;
+    populate?: boolean;
 }
 
 export interface UpdateCompositionDTO {
     id: string,
-    data: Partial<{    
+    data: Partial<{
         min: number;
         max: number;
-        /**
-         *  range: {
-            min?: number;
-            max?: number;
-        };
-         */
-        //item: string;
     }>;
 }

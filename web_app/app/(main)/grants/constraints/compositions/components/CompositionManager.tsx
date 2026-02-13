@@ -9,7 +9,7 @@ import { CompositionApi } from '../api/composition.api';
 import { Composition } from '../models/composition.model';
 import SaveDialog from './SaveDialog';
 import { Constraint } from '../../models/constraint.model';
-import { ApplicantConstraintType, isRangeConstraint, isListConstraint } from '../../models/applicant-constaint-type';
+import { ApplicantConstraintType, isRangeConstraint, isListConstraint, isDynamicConstraint } from '../../models/applicant-constaint-type';
 import { useEffect, useState } from 'react';
 import { PERMISSIONS } from '@/types/permissions';
 
@@ -30,6 +30,9 @@ const CompositionManager = ({ constraint }: CompositionManagerProps) => {
     );
 
     const isList = isListConstraint(
+        constraint.constraint as ApplicantConstraintType);
+
+    const isDynamic = isDynamicConstraint(
         constraint.constraint as ApplicantConstraintType);
 
     // CRUD Hook
@@ -102,10 +105,15 @@ const CompositionManager = ({ constraint }: CompositionManagerProps) => {
 
         // List constraint value
         isList && {
-            field: "item",
-            header: "Item",
+            field: "enumValue",
+            header: "Value",
             sortable: true,
         },
+        isDynamic && {
+            field: "item.name",
+            header: "Value",
+            sortable: true
+        }
     ].filter(Boolean);
 
     return (
