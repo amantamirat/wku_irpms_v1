@@ -1,64 +1,68 @@
-import mongoose from "mongoose";
-import { BasePosition, Position, Rank } from "./position.model";
+import { AppError } from "../../../common/errors/app.error";
+import { ERROR_CODES } from "../../../common/errors/error.codes";
+import {
+    CreatePositionDTO,
+    GetPositionsDTO,
+    UpdatePositionDTO
+} from "./position.dto";
 import { PositionType } from "./position.enum";
-//import { Scope } from "../applicant.enum";
-
-
-export interface CreatePositionDto {
-    name: string;
-    type: PositionType;
-    category?: string; // only for Position
-    parent?: mongoose.Types.ObjectId; // only for Rank
-}
-
-export interface GetPositionOptions {
-    type?: PositionType;
-    parent?: string;
-}
+import { IPositionRepository, PositionRepository } from "./position.repository";
 
 export class PositionService {
 
-    private static async validatePosition(data: CreatePositionDto) {
-        if (data.type === PositionType.rank) {
-            const position = await Position.findById(data.parent).lean();
-            if (!position) throw new Error("Position not found");
+    constructor(
+        private readonly positionRepo: IPositionRepository = new PositionRepository()
+    ) { }
+
+    /* =========================
+       Validate for Rank
+    ========================= */
+    private async validatePosition(data: CreatePositionDTO) {
+        if (data.parent) {
+            const parentDoc = await this.positionRepo.findById(data.parent.toString());
+            if (!parentDoc) throw new AppError(ERROR_CODES.POSITION_NOT_FOUND);
         }
     }
 
-    static async createPosition(data: CreatePositionDto) {
-        await this.validatePosition(data);
-        return await BasePosition.create(data);
-    }
+    /* =========================
+       Create Position / Rank
+    ========================= */
+    async create(dto: CreatePositionDTO) {
+        if (dto.type === PositionType.rank) {
+            if (!dto.parent) throw new AppError(ERROR_CODES.POSITION_NOT_FOUND);
 
-    static async getPositions(options: GetPositionOptions = {}) {
-        const filter: any = {};
-        if (options.parent) filter.parent = options.parent;
-        if (options.type) filter.type = options.type;
-
-        if (options.type === PositionType.position) {
-            return await Position.find(filter).lean();
+            const parentDoc = await this.positionRepo.findById(dto.parent);
+            if (!parentDoc) throw new AppError(ERROR_CODES.POSITION_NOT_FOUND);
         }
-        if (options.type === PositionType.rank) {
-            return await Rank.find(filter)
-                .populate("parent")
-                .lean();
-        }
-        return await BasePosition.find(filter).lean();
+        const created = await this.positionRepo.create(dto);
+        return created;
     }
 
-
-    static async updatePosition(id: string, data: Partial<CreatePositionDto>) {
-        const doc = await BasePosition.findById(id);
-        if (!doc) throw new Error("Position not found");
-        await this.validatePosition(data as CreatePositionDto);
-        Object.assign(doc, data);
-        return await doc.save();
+    /* =========================
+       Get / Find Positions
+    ========================= */
+    async find(options: GetPositionsDTO = {}) {
+        return await this.positionRepo.find(options);
     }
 
+    /* =========================
+       Update Position / Rank
+    ========================= */
+    async update(dto: UpdatePositionDTO) {
+        const { id, data: dtoData } = dto;
+        const updated = await this.positionRepo.update(id, dtoData);
+        if (!updated) throw new AppError(ERROR_CODES.POSITION_NOT_FOUND);
+        return updated;
+    }
 
-    static async deletePosition(id: string) {
-        const doc = await BasePosition.findById(id);
-        if (!doc) throw new Error("Position not found");
-        return await doc.deleteOne();
+    /* =========================
+       Delete Position / Rank
+    ========================= */
+    async delete(id: string) {
+        const hasRanks = await this.positionRepo.exists({ parent: id });
+        if (hasRanks) throw new AppError(ERROR_CODES.RANK_ALREADY_EXISTS);
+        const deleted = await this.positionRepo.delete(id);
+        if (!deleted) throw new AppError(ERROR_CODES.POSITION_NOT_FOUND);
+        return deleted;
     }
 }

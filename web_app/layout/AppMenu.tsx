@@ -103,36 +103,8 @@ const AppMenu = () => {
                     )
                 },
                 */
-                {
-                    label: 'Students',
-                    icon: PrimeIcons.BOOK,
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.STUDENT.READ,
-                        ]
-                    ),
-                    to: '/applicants/students',
-                },
-                {
-                    label: 'Specializations',
-                    icon: 'pi pi-fw pi-filter-fill',
-                    to: '/specializations',
-                    visible: hasPermission([
-                        PERMISSIONS.SPECIALIZATION.CREATE,
-                        PERMISSIONS.SPECIALIZATION.UPDATE,
-                        PERMISSIONS.SPECIALIZATION.DELETE
-                    ])
-                },
-                {
-                    label: 'Positions',
-                    icon: 'pi pi-fw pi-flag',
-                    to: '/applicants/positions',
-                    visible: hasPermission([
-                        PERMISSIONS.POSITION.CREATE,
-                        PERMISSIONS.POSITION.UPDATE,
-                        PERMISSIONS.POSITION.DELETE
-                    ])
-                },
+
+
 
                 {
                     label: 'Grants',
@@ -254,6 +226,41 @@ const AppMenu = () => {
                         ]
                     )
                 }
+            ]
+        },
+        {
+            label: 'Miscellaneous',
+            items: [
+                {
+                    label: 'Students',
+                    icon: PrimeIcons.BOOK,
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.STUDENT.READ,
+                        ]
+                    ),
+                    to: '/applicants/students',
+                },
+                {
+                    label: 'Specializations',
+                    icon: 'pi pi-fw pi-filter-fill',
+                    to: '/specializations',
+                    visible: hasPermission([
+                        PERMISSIONS.SPECIALIZATION.CREATE,
+                        PERMISSIONS.SPECIALIZATION.UPDATE,
+                        PERMISSIONS.SPECIALIZATION.DELETE
+                    ])
+                },
+                {
+                    label: 'Positions',
+                    icon: 'pi pi-fw pi-flag',
+                    to: '/applicants/positions',
+                    visible: hasPermission([
+                        PERMISSIONS.POSITION.CREATE,
+                        PERMISSIONS.POSITION.UPDATE,
+                        PERMISSIONS.POSITION.DELETE
+                    ])
+                },
             ]
         },
         {

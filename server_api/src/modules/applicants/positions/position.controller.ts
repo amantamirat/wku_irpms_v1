@@ -1,43 +1,51 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
-import { errorResponse, successResponse } from "../../../common/helpers/response";
-import { CreatePositionDto, GetPositionOptions, PositionService } from "./position.service";
+import { PositionService } from "./position.service";
+import {
+    CreatePositionDTO,
+    GetPositionsDTO,
+    UpdatePositionDTO
+} from "./position.dto";
 import { PositionType } from "./position.enum";
-//import { Scope } from "../applicant.enum";
+import { successResponse, errorResponse } from "../../../common/helpers/response";
 
 export class PositionController {
-    // 🟢 CREATE
-    static async createPosition(req: Request, res: Response) {
-        try {
-            const { type, name, category, parent } = req.body;
 
-            const data: CreatePositionDto = {
-                type: type as PositionType,
-                name: name,
-                category: type === PositionType.position ? category : undefined,
-                parent: type === PositionType.rank && parent
-                    ? new mongoose.Types.ObjectId(parent as string)
-                    : undefined,
+    private service: PositionService;
+
+    constructor(service: PositionService) {
+        this.service = service;
+    }
+
+    // 🟢 CREATE
+    create = async (req: Request, res: Response) => {
+        try {
+
+            const data: CreatePositionDTO = {
+                type: req.body.type,
+                name: req.body.name,
+                parent: req.body.parent,
             };
 
-            const created = await PositionService.createPosition(data);
+            const created = await this.service.create(data);
             successResponse(res, 201, "Position created successfully", created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
-    // 🟡 GET MANY
-    static async getPositions(req: Request, res: Response) {
+    // 🟡 GET / FIND
+    get = async (req: Request, res: Response) => {
         try {
-            const { type, parent } = req.query;
+            const { type, parent, populate } = req.query;
 
-            const filter: GetPositionOptions = {
+            const options: GetPositionsDTO = {
                 type: type ? (type as PositionType) : undefined,
                 parent: parent ? String(parent) : undefined,
+                populate: populate === "true" // query param is string
             };
 
-            const positions = await PositionService.getPositions(filter);
+            const positions = await this.service.find(options);
             successResponse(res, 200, "Positions fetched successfully", positions);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -45,17 +53,17 @@ export class PositionController {
     }
 
     // 🟠 UPDATE
-    static async updatePosition(req: Request, res: Response) {
+    update = async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
-            const { name, category, parent, type } = req.body;
-            const data: Partial<CreatePositionDto> = {
+            const { name, parent } = req.body;
+
+            const dtoData: UpdatePositionDTO["data"] = {
                 name: name ?? undefined,
-                category: category ?? undefined,
-                parent: parent ? new mongoose.Types.ObjectId(parent as string) : undefined,
-                type: type ?? undefined,
+                parent: parent ?? undefined
             };
-            const updated = await PositionService.updatePosition(id, data);
+
+            const updated = await this.service.update({ id, data: dtoData });
             successResponse(res, 200, "Position updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -63,10 +71,10 @@ export class PositionController {
     }
 
     // 🔴 DELETE
-    static async deletePosition(req: Request, res: Response) {
+    delete = async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
-            const deleted = await PositionService.deletePosition(id);
+            const deleted = await this.service.delete(id);
             successResponse(res, 200, "Position deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

@@ -81,23 +81,14 @@ const CompositionSchema = new Schema<IComposition>(
 
 
 // Unique compound index on parent and item, but allow multiple docs with item=null
-// Unique index for dynamic items
-/*
 CompositionSchema.index(
-    { constraint: 1, item: 1, itemModel: 1 },
-    {
-        unique: true,
-        partialFilterExpression: {
-            item: { $exists: true, $ne: null },
-            itemModel: { $exists: true, $ne: null },
-        }
+  { constraint: 1, item: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      item: { $exists: true, $ne: null }
     }
-);
-*/
-
-CompositionSchema.index(
-    { constraint: 1, item: 1, itemModel: 1 },
-    { unique: true, sparse: true }
+  }
 );
 
 

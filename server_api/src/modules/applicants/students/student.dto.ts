@@ -16,3 +16,9 @@ export interface UpdateStudentDTO {
 export interface GetStudentsOptions {
     applicant?: string;
 }
+
+export interface ExistsStudentDTO {
+    calendar?:string;
+    applicant?: string;
+    program?: string;
+}

@@ -56,5 +56,7 @@ export interface FindApplicantDTO {
 
 export interface ExistsApplicantDTO {
     workspace?: string;
+    specialization?: string;
+    role?:string;
 }
 

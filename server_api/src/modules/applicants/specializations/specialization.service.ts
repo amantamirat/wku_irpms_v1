@@ -1,20 +1,21 @@
+import { AppError } from "../../../common/errors/app.error";
+import { ERROR_CODES } from "../../../common/errors/error.codes";
+import { ApplicantRepository, IApplicantRepository } from "../applicant.repository";
 import { CreateSpecializationDTO, UpdateSpecializationDTO } from "./specialization.dto";
 import { ISpecializationRepository, SpecializationRepository } from "./specialization.repository";
 
 export class SpecializationService {
 
-    private repository: ISpecializationRepository;
-
-    constructor(repository?: ISpecializationRepository) {
-        this.repository = repository || new SpecializationRepository();
-    }
+    constructor(private readonly repository: ISpecializationRepository = new SpecializationRepository(),
+        private readonly appRepo: IApplicantRepository = new ApplicantRepository()
+    ) { }
 
     async create(dto: CreateSpecializationDTO) {
         return await this.repository.create(dto);
     }
 
     async getAll() {
-        const specializations = await this.repository.findAll();
+        const specializations = await this.repository.find({});
         return specializations;
     }
 
@@ -22,12 +23,18 @@ export class SpecializationService {
         const { id, data } = dto;
 
         const updated = await this.repository.update(id, data);
-        if (!updated) throw new Error("Specialization not found.");
+        if (!updated) throw new Error(ERROR_CODES.SPECIALIZATION_NOT_FOUND);
 
         return updated;
     }
 
     async delete(id: string) {
-        return await this.repository.delete(id);
+        const exist = await this.appRepo.exists({ specialization: id });
+        if (exist) {
+            throw new AppError(ERROR_CODES.SPECIALIZATION_IN_USE);
+        }
+        const deleted = await this.repository.delete(id);
+        if (!deleted)
+            throw new Error(ERROR_CODES.SPECIALIZATION_NOT_FOUND);
     }
 }

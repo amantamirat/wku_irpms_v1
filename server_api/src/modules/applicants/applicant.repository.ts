@@ -7,7 +7,7 @@ export interface IApplicantRepository {
     findOne(option: Partial<FindApplicantDTO>): Promise<IApplicant | null>;
     findAll(filter?: GetApplicantsDTO): Promise<IApplicant[]>;
     create(data: CreateApplicantDTO): Promise<IApplicant>;
-    update(id: string, data: UpdateApplicantDTO["data"]): Promise<IApplicant>;
+    update(id: string, data: UpdateApplicantDTO["data"]): Promise<IApplicant | null>;
     // Roles management
     updateRoles(userId: string, dto: UpdateRolesDTO): Promise<IApplicant | null>;
     // ownership management
@@ -89,7 +89,7 @@ export class ApplicantRepository implements IApplicantRepository {
     // -------------------------
     // UPDATE
     // -------------------------
-    async update(id: string, dtoData: UpdateApplicantDTO["data"]): Promise<IApplicant> {
+    async update(id: string, dtoData: UpdateApplicantDTO["data"]): Promise<IApplicant | null> {
         const toUpdate: any = {};
 
         if (dtoData.workspace) toUpdate.organization = new mongoose.Types.ObjectId(dtoData.workspace);
@@ -103,17 +103,12 @@ export class ApplicantRepository implements IApplicantRepository {
         if (dtoData.specializations) {
             toUpdate.specializations = dtoData.specializations?.map(id => new mongoose.Types.ObjectId(id))
         }
-        const updated = await Applicant.findByIdAndUpdate(
+        return Applicant.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: toUpdate },
             { new: true }
         ).lean<IApplicant>();
 
-        if (!updated) {
-            throw new Error("Applicant not found.");
-        }
-
-        return updated;
     }
     // -------------------------
     // ROLES UPDATE
@@ -146,6 +141,13 @@ export class ApplicantRepository implements IApplicantRepository {
         const query: any = {};
         if (filters.workspace) {
             query.workspace = new mongoose.Types.ObjectId(filters.workspace);
+        }
+        if (filters.specialization) {
+            query.specializations = new mongoose.Types.ObjectId(filters.specialization);
+            // This automatically checks if the array contains the ObjectId
+        }
+        if (filters.role) {
+            query.roles = new mongoose.Types.ObjectId(filters.role);
         }
         const result = await Applicant.exists(query).exec();
         return result !== null;

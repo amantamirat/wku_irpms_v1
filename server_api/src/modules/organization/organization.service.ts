@@ -8,12 +8,14 @@ import {
 import { Unit } from "./organization.type";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { ApplicantRepository, IApplicantRepository } from "../applicants/applicant.repository";
+import { IStudentRepository, StudentRepository } from "../applicants/students/student.repository";
 
 export class OrganizationService {
 
 
     constructor(private readonly repo: IOrganizationRepository,
         private appRepo: IApplicantRepository = new ApplicantRepository(),
+        private studentRepo: IStudentRepository = new StudentRepository(),
     ) {
     }
 
@@ -75,12 +77,20 @@ export class OrganizationService {
         if (!orgnDoc) {
             throw new Error(ERROR_CODES.ORGANIZATION_NOT_FOUND);
         }
+        const orgType = orgnDoc.type;
         const childExist = await this.repo.exists({ parent: id });
         if (childExist) {
             throw new Error(ERROR_CODES.ORGANIZATION_HAS_CHILDREN);
         }
-        if (orgnDoc.type === Unit.External || orgnDoc.type === Unit.Department) {
+        if (orgType === Unit.External || orgType === Unit.Department) {
             this.appRepo.exists({ workspace: id }).then(exists => {
+                if (exists) {
+                    throw new Error(ERROR_CODES.ORGANIZATION_IN_USE);
+                }
+            });
+        }
+        if (orgType === Unit.Program) {
+            this.studentRepo.exists({ program: id }).then(exists => {
                 if (exists) {
                     throw new Error(ERROR_CODES.ORGANIZATION_IN_USE);
                 }

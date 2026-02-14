@@ -1,15 +1,16 @@
 import mongoose from "mongoose";
+import { CreateSpecializationDTO, UpdateSpecializationDTO, GetSpecializationsOptions } from "./specialization.dto";
 import { Specialization, ISpecialization } from "./specialization.model";
-import { CreateSpecializationDTO, UpdateSpecializationDTO } from "./specialization.dto";
 
 export interface ISpecializationRepository {
     findById(id: string): Promise<ISpecialization | null>;
-    findAll(): Promise<ISpecialization[]>;
-    create(data: CreateSpecializationDTO): Promise<ISpecialization>;
-    update(id: string, data: UpdateSpecializationDTO["data"]): Promise<ISpecialization>;
-    delete(id: string): Promise<void>;
+    find(filters: GetSpecializationsOptions): Promise<Partial<ISpecialization>[]>;
+    create(dto: CreateSpecializationDTO): Promise<ISpecialization>;
+    update(id: string, data: UpdateSpecializationDTO["data"]): Promise<ISpecialization | null>;
+    delete(id: string): Promise<ISpecialization | null>;
 }
 
+// MongoDB implementation
 export class SpecializationRepository implements ISpecializationRepository {
 
     async findById(id: string) {
@@ -18,45 +19,46 @@ export class SpecializationRepository implements ISpecializationRepository {
             .exec();
     }
 
-    async findAll() {
-        return Specialization.find()
-            .lean<ISpecialization[]>()
-            .exec();
+    async find(filters: GetSpecializationsOptions) {
+        const query: any = {};
+
+        if (filters.academicLevel) {
+            query.academicLevel = filters.academicLevel;
+        }
+
+        /*
+
+        if (filters.name) {
+            query.name = { $regex: filters.name, $options: "i" }; // case-insensitive search
+        }
+        */
+
+        return Specialization.find(query).lean<ISpecialization[]>().exec();
     }
 
     async create(dto: CreateSpecializationDTO) {
-        const data: Partial<ISpecialization> = {
+        return Specialization.create({
             name: dto.name,
-            academicLevel: dto.academicLevel
-        };
-        return Specialization.create(data);
+            academicLevel: dto.academicLevel,
+        });
     }
 
-    async update(id: string, dtoData: UpdateSpecializationDTO["data"]) {
-        const toUpdate: any = {};
+    async update(id: string, dtoData: UpdateSpecializationDTO["data"]): Promise<ISpecialization | null> {
+        const updateData: Partial<ISpecialization> = {};
 
-        if (dtoData.name !== undefined) {
-            toUpdate.name = dtoData.name;
-        }
-        if (dtoData.academicLevel) {
-            toUpdate.academicLevel = dtoData.academicLevel;
-        }
+        if (dtoData.name) updateData.name = dtoData.name;
+        if (dtoData.academicLevel) updateData.academicLevel = dtoData.academicLevel;
 
-        const updated = await Specialization.findByIdAndUpdate(
+        return Specialization.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
-            { $set: toUpdate },
+            { $set: updateData },
             { new: true }
-        ).lean<ISpecialization>();
-
-        if (!updated) {
-            throw new Error("Specialization not found.");
-        }
-
-        return updated;
+        ).exec();
     }
+
+
 
     async delete(id: string) {
-        const deleted = await Specialization.findByIdAndDelete(new mongoose.Types.ObjectId(id)).exec();
-        if (!deleted) throw new Error("Specialization not found.");
+        return Specialization.findByIdAndDelete(new mongoose.Types.ObjectId(id)).exec();
     }
 }

@@ -7,17 +7,11 @@ import { IApplicantRepository, ApplicantRepository } from "./applicant.repositor
 
 export class ApplicantService {
 
-    private repository: IApplicantRepository;
-    private orgnRepo: IOrganizationRepository;
-    private roleRepository: IRoleRepository;
-
-    constructor(repository?: IApplicantRepository, orgnRepo?: IOrganizationRepository,
-        roleRepository?: IRoleRepository
-    ) {
-        this.repository = repository || new ApplicantRepository();
-        this.orgnRepo = orgnRepo || new OrganizationRepository();
-        this.roleRepository = roleRepository || new RoleRepository();
-    }
+    constructor(
+        private repository: IApplicantRepository = new ApplicantRepository(),
+        private orgnRepo: IOrganizationRepository = new OrganizationRepository(),
+        private roleRepository: IRoleRepository = new RoleRepository()
+    ) {}
 
     async validateWorkspace(workspace: string) {
         const organDoc = await this.orgnRepo.findById(workspace);
@@ -54,7 +48,7 @@ export class ApplicantService {
         }
         //check permission for roles and ownerships !!!!!!danger
         const updated = await this.repository.update(id, data);
-        if (!updated) throw new Error("Applicant not found");
+        if (!updated) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
         return updated;
     }
     // -------------------------
@@ -62,7 +56,7 @@ export class ApplicantService {
     // -------------------------
     async updateRoles(dto: UpdateRolesDTO) {
         const updated = await this.repository.updateRoles(dto.id, dto);
-        if (!updated) throw new Error("Applicant not found");
+        if (!updated) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
         return updated;
     }
     // -------------------------
@@ -86,7 +80,7 @@ export class ApplicantService {
             }
         }
         const updated = await this.repository.updateOwnerships(id, ownerships);
-        if (!updated) throw new Error("Applicant not found");
+        if (!updated) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
         return updated;
     }
     // -------------------------
@@ -94,7 +88,7 @@ export class ApplicantService {
     // -------------------------
     async delete(id: string) {
         const deleted = await this.repository.delete(id);
-        if (!deleted) throw new Error("Applicant not found");
+        if (!deleted) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
         return deleted;
     }
 }

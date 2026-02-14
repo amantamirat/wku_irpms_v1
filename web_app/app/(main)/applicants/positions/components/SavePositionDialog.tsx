@@ -40,9 +40,9 @@ const SavePositionDialog = (props: SavePositionDialogProps) => {
 
             let saved: Position;
             if (localPosition._id) {
-                saved = await PositionApi.updatePosition(localPosition);
+                saved = await PositionApi.update(localPosition);
             } else {
-                saved = await PositionApi.createPosition(localPosition);
+                saved = await PositionApi.create(localPosition);
             }
 
             toast.current?.show({
@@ -97,22 +97,6 @@ const SavePositionDialog = (props: SavePositionDialogProps) => {
                 footer={footer}
                 onHide={onHide}
             >
-                {/*                
-                <div className="field">
-                    <label htmlFor="type">Type</label>
-                    <Dropdown
-                        id="type"
-                        value={localPosition.type}
-                        options={posTypeOptions}
-                        onChange={(e) => setLocalPosition({ ...localPosition, type: e.value })}
-                        placeholder="Select Type"
-                        className={classNames({ 'p-invalid': submitted && !localPosition.type })}
-                    />
-                    {submitted && !localPosition.type && (
-                        <small className="p-invalid">Type is required.</small>
-                    )}
-                </div>
-                */}
                 {/* Name */}
                 <div className="field">
                     <label htmlFor="name">Name</label>
@@ -127,28 +111,6 @@ const SavePositionDialog = (props: SavePositionDialogProps) => {
                         <small className="p-invalid">Name is required.</small>
                     )}
                 </div>
-
-                {/* Category (for Position type only) */}
-                {localPosition.type === PositionType.position && (
-                    <div className="field">
-                        <label htmlFor="category">Category (Scope)</label>
-                        <Dropdown
-                            id="category"
-                            value={localPosition.category}
-                            options={applicantUnits}
-                            onChange={(e) =>
-                                setLocalPosition({ ...localPosition, category: e.value })
-                            }
-                            placeholder="Select Category"
-                            className={classNames({
-                                'p-invalid': submitted && !localPosition.category,
-                            })}
-                        />
-                        {submitted && !localPosition.category && (
-                            <small className="p-invalid">Category is required.</small>
-                        )}
-                    </div>
-                )}
 
                 {errorMessage && <small className="p-error">{errorMessage}</small>}
             </Dialog>

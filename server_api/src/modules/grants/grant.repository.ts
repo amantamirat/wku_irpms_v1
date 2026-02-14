@@ -51,10 +51,7 @@ export class GrantRepository implements IGrantRepository {
         return Grant.create(data);
     }
 
-    async update(
-        id: string,
-        dtoData: UpdateGrantDTO["data"]
-    ): Promise<IGrant | null> {
+    async update(id: string, dtoData: UpdateGrantDTO["data"]): Promise<IGrant | null> {
 
         const updateData: Partial<IGrant> = {};
 

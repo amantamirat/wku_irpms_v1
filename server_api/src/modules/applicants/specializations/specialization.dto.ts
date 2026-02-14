@@ -11,5 +11,8 @@ export interface UpdateSpecializationDTO {
         name: string;
         academicLevel: AcademicLevel;
     }>;
-    //userId: string;
+}
+
+export interface GetSpecializationsOptions {
+    academicLevel?: AcademicLevel;
 }

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { CreateStudentDTO, UpdateStudentDTO } from "./student.dto";
+import { CreateStudentDTO, ExistsStudentDTO, UpdateStudentDTO } from "./student.dto";
 import Student, { IStudent } from "./student.model";
 
 export interface IStudentRepository {
@@ -9,6 +9,7 @@ export interface IStudentRepository {
     findByProgram(programId: string): Promise<IStudent[]>;
     create(data: CreateStudentDTO): Promise<IStudent>;
     update(id: string, data: UpdateStudentDTO["data"]): Promise<IStudent | null>;
+    exists(filters: ExistsStudentDTO): Promise<boolean>;
     delete(id: string): Promise<IStudent | null>;
 }
 
@@ -76,6 +77,26 @@ export class StudentRepository implements IStudentRepository {
             { new: true }
         ).lean<IStudent>();
     }
+
+    async exists(filters: ExistsStudentDTO): Promise<boolean> {
+        const query: any = {};
+
+        if (filters.calendar) {
+            query.calendar = new mongoose.Types.ObjectId(filters.calendar);
+        }
+
+        if (filters.applicant) {
+            query.applicant = new mongoose.Types.ObjectId(filters.applicant);
+        }
+
+        if (filters.program) {
+            query.program = new mongoose.Types.ObjectId(filters.program);
+        }
+
+        const result = await Student.exists(query).exec();
+        return result !== null;
+    }
+
 
     async delete(id: string): Promise<IStudent | null> {
         return Student.findByIdAndDelete(

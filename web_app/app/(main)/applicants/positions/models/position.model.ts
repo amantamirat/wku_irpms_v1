@@ -10,13 +10,13 @@ export type Position = {
     _id?: string;
     name: string;
     type: PositionType;
-    category?: string ; // for position only
+    //category?: string ; // for position only
     parent?: string | Position; // for rank only
     createdAt?: Date;
     updatedAt?: Date;
 };
 
- const posTypeOptions = Object.values(PositionType).map(t => ({ label: t, value: t }));
+const posTypeOptions = Object.values(PositionType).map(t => ({ label: t, value: t }));
 
 
 export const validatePosition = (pos: Position): { valid: boolean; message?: string } => {
@@ -27,9 +27,12 @@ export const validatePosition = (pos: Position): { valid: boolean; message?: str
         return { valid: false, message: "Name is required." };
     }
 
+    /*
+
     if (pos.type === PositionType.position && !pos.category) {
         return { valid: false, message: "Category is required for Position." };
     }
+        */
 
     if (pos.type === PositionType.rank && !pos.parent) {
         return { valid: false, message: "Parent Position is required for Rank." };
@@ -47,3 +50,9 @@ export const sanitizePosition = (pos: Partial<Position>): Position => {
                 : pos.parent,
     } as Position;
 };
+
+export interface GetPositionOptions {
+    type?: PositionType;
+    parent?: string | Position;
+}
+

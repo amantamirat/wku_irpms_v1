@@ -1,247 +1,137 @@
 'use client';
 
-import ConfirmDialog from '@/components/ConfirmationDialog';
-import { handleGlobalFilterChange, initFilters } from '@/utils/filterUtils';
-import { Button } from 'primereact/button';
-import { Column } from 'primereact/column';
-import { DataTable, DataTableExpandedRows, DataTableFilterMeta } from 'primereact/datatable';
-import { InputText } from 'primereact/inputtext';
-import { Toast } from 'primereact/toast';
-import { Toolbar } from 'primereact/toolbar';
-import React, { useEffect, useRef, useState } from 'react';
-import { PositionApi } from '../api/position.api';
-import { Position, PositionType } from '../models/position.model';
-import SavePositionDialog from './SavePositionDialog';
-import ErrorCard from '@/components/ErrorCard';
+import { CrudManager } from "@/components/CrudManager";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import { useCrudList } from "@/hooks/useCrudList";
+import { useEffect, useState } from "react";
+import { PositionApi } from "../api/position.api";
+import { Position, PositionType } from "../models/position.model";
+import SavePositionDialog from "./SavePositionDialog";
+import { useAuth } from "@/contexts/auth-context";
+import { PERMISSIONS } from "@/types/permissions";
 
-interface PositionProps {
+interface PositionManagerProps {
     posType: PositionType;
     parent?: Position;
 }
 
-const PositionManager = ({ posType, parent }: PositionProps) => {
+const PositionManager = ({ posType, parent }: PositionManagerProps) => {
+
     const emptyPosition: Position = {
         type: posType,
-        name: '',
-        parent: posType === PositionType.rank && parent ? parent : ''
+        name: "",
+        parent,
     };
 
-    const [positions, setPositions] = useState<Position[]>([]);
-    const [error, setError] = useState<string | null>(null);
-    const dt = useRef<DataTable<any>>(null);
-    const [globalFilter, setGlobalFilter] = useState('');
-    const [filters, setFilters] = useState<DataTableFilterMeta>({});
-    const [selectedPosition, setSelectedPosition] = useState<Position>(emptyPosition);
+    const { hasPermission } = useAuth();
+    const confirm = useConfirmDialog();
+
+    const canCreate = hasPermission([PERMISSIONS.POSITION.CREATE]);
+    const canEdit = hasPermission([PERMISSIONS.POSITION.UPDATE]);
+    const canDelete = hasPermission([PERMISSIONS.POSITION.DELETE]);
+
+    // CRUD hook
+    const {
+        items: positions,
+        setAll,
+        updateItem,
+        removeItem,
+        loading,
+        setLoading,
+        error,
+        setError
+    } = useCrudList<Position>();
+
+    const [position, setPosition] = useState<Position>(emptyPosition);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-    const [expandedRows, setExpandedRows] = useState<any[] | DataTableExpandedRows>([]);
-    const toast = useRef<Toast>(null);
 
-    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        handleGlobalFilterChange(e, filters, setFilters, setGlobalFilter);
-    };
-
-    useEffect(() => {
-        setFilters(initFilters());
-        setGlobalFilter('');
-    }, []);
-
+    /** Fetch positions */
     useEffect(() => {
         const fetchPositions = async () => {
             try {
-                const data = await PositionApi.getPositions(
-                    {
-                        type: posType,
-                        parent: parent?._id,
-                    }
-                );
-                setPositions(data);
-            } catch (err) {
-                setError(`Failed to load positions. ${err}`);
+                setLoading(true);
+                const data = await PositionApi.getPositions({
+                    type: posType,
+                    parent: parent
+                });
+                setAll(data);
+            } catch (err: any) {
+                setError("Failed to fetch positions. " + (err?.message ?? ""));
+            } finally {
+                setLoading(false);
             }
         };
         fetchPositions();
     }, []);
 
-    if (error) {
-        return (
-            <ErrorCard errorMessage={error} />
-        );
-    }
-
-    const onSaveComplete = (savedPosition: Position) => {
-        let _positions = [...positions];
-        const index = _positions.findIndex((p) => p._id === savedPosition._id);
-        if (index !== -1) {
-            _positions[index] = { ...savedPosition };
-        } else {
-            _positions.push({ ...savedPosition });
-        }
-        setPositions(_positions);
+    /** Save callback */
+    const onSaveComplete = (saved: Position) => {
+        updateItem(saved);
         hideDialogs();
     };
 
-    const deletePosition = async () => {
-        const deleted = await PositionApi.deletePosition(selectedPosition);
-        if (deleted) {
-            setPositions(positions.filter((p) => p._id !== selectedPosition._id));
-        }
-        hideDialogs();
+    /** Delete function */
+    const deletePosition = async (row: Position) => {
+        const ok = await PositionApi.delete(row);
+        if (ok) removeItem(row);
     };
 
+    /** Hide dialogs */
     const hideDialogs = () => {
-        setShowDeleteDialog(false);
         setShowSaveDialog(false);
-        setSelectedPosition(emptyPosition);
     };
 
-    const startToolbarTemplate = () => (
-        <div className="my-2">
-            <Button
-                label={`New ${posType}`}
-                icon="pi pi-plus"
-                severity="success"
-                className="mr-2"
-                onClick={() => {
-                    setSelectedPosition(emptyPosition);
-                    setShowSaveDialog(true);
-                }}
-            />
-        </div>
-    );
+    /** Columns */
+    const columns = [
+        { header: "Name", field: "name" },
+        //{ header: "Parent", body: (p: Position) => p.parent?._id ?? "-" }
+    ];
 
-    const header = (
-        <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Manage {posType}s</h5>
-            <span className="block mt-2 md:mt-0 p-input-icon-left">
-                <i className="pi pi-search" />
-                <InputText
-                    type="search"
-                    value={globalFilter}
-                    onChange={onGlobalFilterChange}
-                    placeholder="Search..."
-                    className="w-full md:w-1/3"
-                />
-            </span>
-        </div>
+    const expansionTemplate = (row: Position) => (
+        <PositionManager posType={PositionType.rank} parent={row} />
     );
-
-    const actionBodyTemplate = (rowData: Position) => (
-        <>
-            <Button
-                icon="pi pi-pencil"
-                rounded
-                severity="success"
-                className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }}
-                onClick={() => {
-                    setSelectedPosition(rowData);
-                    setShowSaveDialog(true);
-                }}
-            />
-            <Button
-                icon="pi pi-trash"
-                rounded
-                severity="warning"
-                className="p-button-rounded p-button-text"
-                style={{ fontSize: '1.2rem' }}
-                onClick={() => {
-                    setSelectedPosition(rowData);
-                    setShowDeleteDialog(true);
-                }}
-            />
-        </>
-    );
-
-    const categoryBodyTemplate = (rowData: Position) => {
-        return (
-            <span className={`category-badge category-${rowData.category?.toLowerCase()}`}>
-                {rowData.category}
-            </span>
-        );
-    };
 
     return (
-        <div className="grid">
-            <div className="col-12">
-                <div className="card">
-                    <Toast ref={toast} />
-                    <Toolbar className="mb-4" start={startToolbarTemplate}></Toolbar>
-                    <DataTable
-                        ref={dt}
-                        value={positions}
-                        selection={selectedPosition}
-                        onSelectionChange={(e) => setSelectedPosition(e.value as Position)}
-                        dataKey="_id"
-                        paginator
-                        rows={10}
-                        rowsPerPageOptions={[5, 10, 25]}
-                        className="datatable-responsive"
-                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} positions"
-                        globalFilter={globalFilter}
-                        emptyMessage="No position data found."
-                        header={header}
-                        scrollable
-                        filters={filters}
-                        expandedRows={expandedRows}
-                        onRowToggle={(e) => setExpandedRows(e.data)}
-                        rowExpansionTemplate={(rowData) => {
-                            let position = rowData as Position;
-                            if (posType === PositionType.rank) {
-                                return null;
-                            }
-                            return (
-                                <PositionManager
-                                    posType={PositionType.rank}
-                                    parent={position}
-                                />
-                            );
-                        }}
-                    >
-                        {posType === PositionType.position &&
-                            <Column expander style={{ width: '3em' }} />
-                        }
-                        <Column selectionMode="single" headerStyle={{ width: '3em' }}></Column>
-                        <Column
-                            header="#"
-                            body={(rowData, options) => options.rowIndex + 1}
-                            style={{ width: '50px' }}
-                        />
-                        <Column field="name" header="Name" sortable />
+        <>
+            <CrudManager
+                headerTitle={`Manage ${posType}s`}
+                itemName={posType}
+                items={positions}
+                dataKey="_id"
+                columns={columns}
+                loading={loading}
+                error={error}
+                canCreate={canCreate}
+                canEdit={canEdit}
+                canDelete={canDelete}
+                onCreate={() => {
+                    setPosition({ ...emptyPosition });
+                    setShowSaveDialog(true);
+                }}
+                onEdit={(row) => {
+                    setPosition({ ...row });
+                    setShowSaveDialog(true);
+                }}
+                onDelete={(row) =>
+                    confirm.ask({
+                        item: row.name,
+                        onConfirmAsync: () => deletePosition(row)
+                    })
+                }
+                rowExpansionTemplate={posType === PositionType.position ? expansionTemplate : undefined}
+            //enableSearch
+            />
 
-                        {posType === PositionType.position &&
-                            <Column
-                                field="category"
-                                header="Category"
-                                body={categoryBodyTemplate}
-                                style={{ width: '150px', textAlign: 'center' }}
-                            />
-                        }
-
-                        <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
-                    </DataTable>
-
-                    {selectedPosition && (
-                        <SavePositionDialog
-                            visible={showSaveDialog}
-                            position={selectedPosition}
-                            onComplete={onSaveComplete}
-                            onHide={hideDialogs}
-                        />
-                    )}
-
-                    {selectedPosition && (
-                        <ConfirmDialog
-                            showDialog={showDeleteDialog}
-                            item={String(selectedPosition.name)}
-                            onConfirmAsync={deletePosition}
-                            onHide={() => setShowDeleteDialog(false)}
-                        />
-                    )}
-                </div>
-            </div>
-        </div>
+            {/* Save Position Dialog */}
+            {(position && showSaveDialog) && (
+                <SavePositionDialog
+                    visible={showSaveDialog}
+                    position={position}
+                    onComplete={onSaveComplete}
+                    onHide={hideDialogs}
+                />
+            )}
+        </>
     );
 };
 

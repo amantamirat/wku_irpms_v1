@@ -1,10 +1,12 @@
-import mongoose, { Schema, model } from "mongoose";
+import mongoose, { Schema, model, Document } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
-//import { Scope } from "../applicant.enum";
 import { PositionType } from "./position.enum";
-import { applicantUnits } from "../../applicants/applicant.enum";
 
-interface BasePositionDocument extends Document {
+/* =========================
+   Base Model
+========================= */
+
+export interface BasePositionDocument extends Document {
     type: PositionType;
     name: string;
     createdAt?: Date;
@@ -24,23 +26,33 @@ const BasePositionSchema = new Schema<BasePositionDocument>(
             required: true
         }
     },
-    { timestamps: true, discriminatorKey: "type" } // discriminatorKey
-);
-
-export const BasePosition = model<BasePositionDocument>(COLLECTIONS.POSITION, BasePositionSchema);
-
-interface PositionDocument extends BasePositionDocument {
-    type: PositionType.position
-    category: (typeof applicantUnits)[number];
-}
-
-const PositionSchema = new Schema<PositionDocument>(
     {
-        category: { type: String, enum: applicantUnits, required: true },
+        timestamps: true,
+        discriminatorKey: "type"
     }
 );
 
-export const Position = BasePosition.discriminator<PositionDocument>(PositionType.position, PositionSchema);
+export const BasePosition = model<BasePositionDocument>(
+    COLLECTIONS.POSITION,
+    BasePositionSchema
+);
+
+/* =========================
+   Position Model
+========================= */
+
+interface PositionDocument extends BasePositionDocument {
+    type: PositionType.position;
+}
+
+export const Position = BasePosition.discriminator<PositionDocument>(
+    PositionType.position,
+    new Schema({})
+);
+
+/* =========================
+   Rank Model
+========================= */
 
 interface RankDocument extends BasePositionDocument {
     type: PositionType.rank;
@@ -50,9 +62,12 @@ interface RankDocument extends BasePositionDocument {
 const RankSchema = new Schema<RankDocument>({
     parent: {
         type: Schema.Types.ObjectId,
-        ref: Position.modelName,
-        required: true,
+        ref: BasePosition.modelName,
+        required: true
     }
 });
 
-export const Rank = BasePosition.discriminator<RankDocument>(PositionType.rank, RankSchema);
+export const Rank = BasePosition.discriminator<RankDocument>(
+    PositionType.rank,
+    RankSchema
+);
