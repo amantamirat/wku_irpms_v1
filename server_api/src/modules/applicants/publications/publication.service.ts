@@ -37,15 +37,7 @@ export class PublicationService {
     }
 
     async get(options: GetPublicationsOptions) {
-        if (options.applicant) {
-            return await this.repository.findByApplicant(options.applicant);
-        }
-
-        if (options.type) {
-            return await this.repository.findByType(options.type);
-        }
-
-        return await this.repository.findAll();
+        return await this.repository.find(options);
     }
 
     async update(dto: UpdatePublicationDTO) {

@@ -33,4 +33,5 @@ export interface GetPublicationsOptions {
     publisher?: string;
     fromDate?: string; // filter by publishedDate
     toDate?: string;
+    populate?: boolean;
 }

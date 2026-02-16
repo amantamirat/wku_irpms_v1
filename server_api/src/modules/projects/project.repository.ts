@@ -26,6 +26,7 @@ export class ProjectRepository implements IProjectRepository {
 
     async find(filters: GetProjectsDTO) {
         const query: any = {};
+        
         if (filters.call) {
             query.call = new mongoose.Types.ObjectId(filters.call);
         }
@@ -36,12 +37,12 @@ export class ProjectRepository implements IProjectRepository {
             query.status = filters.status;
         }
 
-        return Project.find(query)
-            .populate("call")
-            .populate("applicant")
-            //.populate("createdBy")
-            //.skip(filters.skip ?? 0)
-            //.limit(filters.limit ?? 0)
+        let dbQuery = Project.find(query);
+
+        if (filters.populate) {
+            dbQuery = dbQuery.populate('call applicant');
+        }
+        return dbQuery
             .lean<IProject[]>()
             .exec();
     }

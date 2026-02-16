@@ -69,7 +69,7 @@ const PublicationSchema = new Schema<IPublication>(
         doi: {
             type: String,
             trim: true,
-            unique:true
+            //unique:true
         },
 
         url: {
@@ -98,6 +98,29 @@ const PublicationSchema = new Schema<IPublication>(
         timestamps: true,
     }
 );
+
+
+PublicationSchema.index(
+    { doi: 1 },
+    {
+        unique: true,
+        partialFilterExpression: {
+            doi: { $exists: true, $ne: "" }
+        }
+    }
+);
+
+PublicationSchema.index(
+    { applicant: 1, publicationId: 1 },
+    {
+        unique: true,
+        partialFilterExpression: {
+            publicationId: { $exists: true, $ne: "" }
+        }
+    }
+);
+
+
 
 export const Publication = mongoose.model<IPublication>(
     COLLECTIONS.PUBLICATION,

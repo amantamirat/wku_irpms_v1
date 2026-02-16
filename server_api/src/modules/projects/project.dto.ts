@@ -4,9 +4,11 @@ import { ProjectStatus } from "./project.status";
 export interface GetProjectsDTO {
     call?: string;
     applicant?: string;
+    workspace?: string;
     status?: ProjectStatus;
-    skip?: number;
-    limit?: number;
+    populate?: boolean;
+    //skip?: number;
+    //limit?: number;
 }
 
 // CREATE Project

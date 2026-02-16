@@ -9,9 +9,7 @@ import { IPublication, Publication } from "./publication.model";
 
 export interface IPublicationRepository {
     findById(id: string): Promise<IPublication | null>;
-    findAll(): Promise<Partial<IPublication>[]>;
-    findByApplicant(applicantId: string): Promise<IPublication[]>;
-    findByType(type: string): Promise<IPublication[]>;
+    find(filters: GetPublicationsOptions): Promise<Partial<IPublication>[]>;
     create(data: CreatePublicationDTO): Promise<IPublication>;
     update(id: string, data: UpdatePublicationDTO["data"]): Promise<IPublication | null>;
     delete(id: string): Promise<IPublication | null>;
@@ -25,27 +23,31 @@ export class PublicationRepository implements IPublicationRepository {
             .exec();
     }
 
-    async findAll(): Promise<Partial<IPublication>[]> {
-        return Publication.find({})
-            .populate("applicant")
+    async find(filters: GetPublicationsOptions = {}): Promise<Partial<IPublication>[]> {
+        const query: any = {};
+
+        // Filter by applicant if provided
+        if (filters.applicant) {
+            query.applicant = new mongoose.Types.ObjectId(filters.applicant);
+        }
+
+        // Filter by type if provided
+        if (filters.type) {
+            query.type = filters.type;
+        }
+
+        let dbQuery = Publication.find(query);
+
+        // Populate applicant only if requested
+        if (filters.populate) {
+            dbQuery = dbQuery.populate("applicant");
+        }
+
+        return dbQuery
             .lean<IPublication[]>()
             .exec();
     }
 
-    async findByApplicant(applicantId: string): Promise<IPublication[]> {
-        return Publication.find({
-            applicant: new mongoose.Types.ObjectId(applicantId),
-        })
-            .lean<IPublication[]>()
-            .exec();
-    }
-
-    async findByType(type: string): Promise<IPublication[]> {
-        return Publication.find({ type })
-            .populate("applicant")
-            .lean<IPublication[]>()
-            .exec();
-    }
 
     async create(dto: CreatePublicationDTO): Promise<IPublication> {
         const data: Partial<IPublication> = {
