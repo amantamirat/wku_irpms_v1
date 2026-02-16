@@ -13,8 +13,6 @@ import { Button } from "primereact/button";
 import { Organization, OrgnUnit } from "../../organizations/models/organization.model";
 import RoleDialog from "./dialogs/RoleDialog";
 import OwnershipDialog from "./dialogs/OwnershipDialog";
-import { Dropdown } from "primereact/dropdown";
-import { OrganizationApi } from "../../organizations/api/organization.api";
 
 interface ApplicantManagerProps {
     workspace?: Organization;

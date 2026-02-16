@@ -6,6 +6,7 @@ import { verifyActiveAccount, checkPermission } from '../../users/user.middlewar
 import { ExperienceRepository } from './experience.repository';
 import { ApplicantRepository } from '../applicant.repository';
 import { OrganizationRepository } from '../../organization/organization.repository';
+import { PositionRepository } from '../positions/position.repository';
 
 const router: Router = Router();
 
@@ -13,39 +14,40 @@ const router: Router = Router();
 const experinceRepository = new ExperienceRepository();
 const applicantRepository = new ApplicantRepository();
 const organRepository = new OrganizationRepository();
+const posRepository = new PositionRepository();
 
 const experienceService = new ExperienceService(
-    experinceRepository, applicantRepository, organRepository
+    experinceRepository, applicantRepository, organRepository, posRepository
 );
 
-const experienceController = new ExperienceController(experienceService);
+const controller = new ExperienceController(experienceService);
 
 router.post(
     '/',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.EXPERIENCE.CREATE]),
-    experienceController.create
+    controller.create
 );
 
 router.get(
     '/',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.EXPERIENCE.READ]),
-    experienceController.get
+    controller.get
 );
 
 router.put(
     '/:id',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.EXPERIENCE.UPDATE]),
-    experienceController.update
+    controller.update
 );
 
 router.delete(
     '/:id',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.EXPERIENCE.DELETE]),
-    experienceController.delete
+    controller.delete
 );
 
 export default router;

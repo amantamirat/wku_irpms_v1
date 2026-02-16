@@ -11,7 +11,7 @@ import { Experience } from "../models/experience.model";
 import SaveExperienceDialog from "./SaveExperienceDialog";
 
 interface ExperienceManagerProps {
-    applicant?: Applicant;
+    applicant: Applicant;
 }
 
 const ExperienceManager = ({ applicant }: ExperienceManagerProps) => {
@@ -81,10 +81,9 @@ const ExperienceManager = ({ applicant }: ExperienceManagerProps) => {
 
 
     const columns = [
-        // { header: "Applicant", field: "applicant.name" }, // assumes applicant is populated with name
-        //  { header: "Organization", field: "organization.name" }, // assumes organization populated
-        { header: "Job Title", field: "jobTitle" },
-        //  { header: "Rank", field: "rank.title" }, // assumes rank populated
+        { header: "Organization", field: "organization.name" }, // assumes organization populated
+        { header: "Position", field: "position.name" },
+        { header: "Rank", field: "rank.name" }, // assumes rank populated
         { header: "Start Date", field: "startDate", body: (row: Experience) => new Date(row.startDate!).toLocaleDateString() },
         { header: "End Date", field: "endDate", body: (row: Experience) => row.endDate ? new Date(row.endDate).toLocaleDateString() : "Current" },
         //{ header: "Current", field: "isCurrent", body: currentStatusTemplate },
@@ -103,7 +102,7 @@ const ExperienceManager = ({ applicant }: ExperienceManagerProps) => {
                 canDelete={canDelete}
                 onCreate={() => { setExperience(emptyExperience); setShowSaveDialog(true); }}
                 onEdit={(row) => { setExperience({ ...row }); setShowSaveDialog(true); }}
-                onDelete={(row) => confirm.ask({ item: row.jobTitle, onConfirmAsync: () => deleteExperience(row) })}
+                onDelete={(row) => confirm.ask({ item: (row.rank as any).name, onConfirmAsync: () => deleteExperience(row) })}
             />
 
             {
@@ -111,7 +110,6 @@ const ExperienceManager = ({ applicant }: ExperienceManagerProps) => {
                 <SaveExperienceDialog
                     visible={showSaveDialog}
                     experience={experience}
-                    applicantProvided={!!applicant}
                     onComplete={onSaveComplete}
                     onHide={hideSaveDialog}
                 />

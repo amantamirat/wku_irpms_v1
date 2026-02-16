@@ -22,7 +22,6 @@ import { SpecializationApi } from '@/app/(main)/specializations/api/specializati
 interface SaveApplicantDialogProps {
     visible: boolean;
     applicant: Applicant;
-    //hasWorkspace: boolean;
     workspaces?: Organization[]
     onHide: () => void;
     onComplete?: (savedApplicant: Applicant) => void;
@@ -272,21 +271,20 @@ const SaveApplicantDialog = ({ visible, applicant, workspaces, onHide, onComplet
                         />
                     </div>
 
-                    {
-                        <div className="field">
-                            <label htmlFor="specializations">Specializations</label>
-                            <MultiSelect
-                                id="specializations"
-                                dataKey="_id"
-                                value={localApplicant.specializations}
-                                options={specializations}
-                                optionLabel="name"
-                                onChange={(e) => setLocalApplicant({ ...localApplicant, specializations: e.value })}
-                                placeholder="select specializations"
-                                display="chip"
-                            />
-                        </div>
-                    }
+                    <div className="field">
+                        <label htmlFor="specializations">Specializations</label>
+                        <MultiSelect
+                            id="specializations"
+                            dataKey="_id"
+                            value={localApplicant.specializations}
+                            options={specializations}
+                            optionLabel="name"
+                            onChange={(e) => setLocalApplicant({ ...localApplicant, specializations: e.value })}
+                            placeholder="select specializations"
+                            display="chip"
+                        />
+                    </div>
+
 
 
                 </>

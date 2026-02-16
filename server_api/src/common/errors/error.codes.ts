@@ -31,7 +31,9 @@ export const ERROR_CODES = {
 
     // ---------- POSITION ----------
     POSITION_NOT_FOUND: "POSITION_NOT_FOUND",
+    RANK_NOT_FOUND: "RANK_NOT_FOUND",
     RANK_ALREADY_EXISTS: "RANK_ALREADY_EXISTS",
+    RANK_IN_USE: "RANK_IN_USE",
 
     // ---------- STUDNET ----------
     STUDENT_NOT_FOUND: "STUDENT_NOT_FOUND",

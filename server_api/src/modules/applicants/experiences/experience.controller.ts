@@ -25,12 +25,10 @@ export class ExperienceController {
             if (!req.user) {
                 throw new AppError(ERROR_CODES.USER_NOT_FOUND);
             }
-
             const dto: CreateExperienceDTO = {
                 ...req.body,
                 userId: req.user.userId
             };
-
             const created = await this.service.create(dto);
             successResponse(res, 201, 'Experience created successfully', created);
         } catch (err: any) {
@@ -66,7 +64,7 @@ export class ExperienceController {
             const dto: UpdateExperienceDTO = {
                 id,
                 data: {
-                    jobTitle: req.body.jobTitle,
+                    position: req.body.position,
                     organization: req.body.organization,
                     rank: req.body.rank,
                     startDate: req.body.startDate,

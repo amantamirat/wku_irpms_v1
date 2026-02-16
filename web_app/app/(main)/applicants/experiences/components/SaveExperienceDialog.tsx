@@ -1,27 +1,26 @@
 'use client';
 
 import { Button } from 'primereact/button';
+import { Calendar } from 'primereact/calendar';
+import { Checkbox } from 'primereact/checkbox';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
-import { Calendar } from 'primereact/calendar';
-import { Checkbox } from 'primereact/checkbox';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 
-import { Experience, EmploymentType } from '../models/experience.model';
-import { Applicant } from '../../models/applicant.model';
 import { Organization, OrgnUnit } from '@/app/(main)/organizations/models/organization.model';
+import { EmploymentType, Experience, validateExperience } from '../models/experience.model';
 
-import { ApplicantApi } from '../../api/applicant.api';
 import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
+import { PositionApi } from '../../positions/api/position.api';
+import { Position, PositionType } from '../../positions/models/position.model';
 import { ExperienceApi } from '../api/experience.api';
 
 interface SaveExperienceDialogProps {
     visible: boolean;
     experience: Experience;
-    applicantProvided: boolean;
     onHide: () => void;
     onComplete?: (saved: Experience) => void;
 }
@@ -29,14 +28,14 @@ interface SaveExperienceDialogProps {
 const SaveExperienceDialog = ({
     visible,
     experience,
-    applicantProvided,
     onHide,
     onComplete
 }: SaveExperienceDialogProps) => {
 
     const [localExperience, setLocalExperience] = useState<Experience>({ ...experience });
-    const [applicants, setApplicants] = useState<Applicant[]>([]);
     const [organizations, setOrganizations] = useState<Organization[]>([]);
+    const [positions, setPositions] = useState<Position[]>([]);
+    const [ranks, setRanks] = useState<Position[]>([]);
     const [submitted, setSubmitted] = useState(false);
 
     const toast = useRef<Toast>(null);
@@ -48,8 +47,11 @@ const SaveExperienceDialog = ({
     useEffect(() => {
         const fetchOrganizations = async () => {
             try {
-                const data = await OrganizationApi.getOrganizations({ type: OrgnUnit.Department });
-                setOrganizations(data);
+                const [departments, externals] = await Promise.all([
+                    OrganizationApi.getOrganizations({ type: OrgnUnit.Department }),
+                    OrganizationApi.getOrganizations({ type: OrgnUnit.External })
+                ]);
+                setOrganizations([...departments, ...externals]);
             } catch (err) {
                 console.error('Failed to fetch organizations', err);
             }
@@ -58,18 +60,47 @@ const SaveExperienceDialog = ({
     }, []);
 
     useEffect(() => {
-        if (applicantProvided) return;
-
-        const fetchApplicants = async () => {
+        const fetchPositions = async () => {
             try {
-                const data = await ApplicantApi.getApplicants({});
-                setApplicants(data);
+                const positions = await PositionApi.getPositions({ type: PositionType.position });
+                setPositions(positions);
             } catch (err) {
-                console.error('Failed to fetch applicants', err);
+                console.error('Failed to fetch positions', err);
             }
         };
-        fetchApplicants();
-    }, [applicantProvided]);
+        fetchPositions();
+    }, []);
+
+
+    useEffect(() => {
+        const fetchRanks = async () => {
+
+            // ✅ If no position selected → reset ranks & rank
+            if (!localExperience.position) {
+                setRanks([]);
+                setLocalExperience(prev => ({
+                    ...prev,
+                    rank: undefined
+                }));
+                return;
+            }
+
+            try {
+                const ranks = await PositionApi.getPositions({
+                    parent: typeof localExperience.position === "string"
+                        ? localExperience.position
+                        : localExperience.position._id
+                });
+
+                setRanks(ranks);
+            } catch (err) {
+                console.error('Failed to fetch ranks', err);
+            }
+        };
+
+        fetchRanks();
+    }, [localExperience.position]);
+
 
     /* -------------------- Sync Props -------------------- */
 
@@ -91,17 +122,10 @@ const SaveExperienceDialog = ({
     const saveExperience = async () => {
         try {
             setSubmitted(true);
-
-            if (!localExperience.jobTitle) {
-                throw new Error('Job title is required');
+            const validation = validateExperience(localExperience);
+            if (!validation.valid) {
+                throw new Error(validation.message);
             }
-            if (!localExperience.organization) {
-                throw new Error('Organization is required');
-            }
-            if (!localExperience.startDate) {
-                throw new Error('Start date is required');
-            }
-
             let saved: Experience;
 
             if (localExperience._id) {
@@ -158,20 +182,6 @@ const SaveExperienceDialog = ({
                 onHide={onHide}
                 maximized
             >
-                {/* Job Title */}
-                <div className="field">
-                    <label htmlFor="jobTitle">Job Title</label>
-                    <InputText
-                        id="jobTitle"
-                        value={localExperience.jobTitle || ''}
-                        onChange={(e) =>
-                            setLocalExperience({ ...localExperience, jobTitle: e.target.value })
-                        }
-                        className={classNames({ 'p-invalid': submitted && !localExperience.jobTitle })}
-                    />
-                    {submitted && !localExperience.jobTitle &&
-                        <small className="p-invalid">Job title is required.</small>}
-                </div>
 
                 {/* Organization */}
                 <div className="field">
@@ -192,26 +202,44 @@ const SaveExperienceDialog = ({
                         <small className="p-invalid">Organization is required.</small>}
                 </div>
 
-                {/* Applicant */}
-                {!applicantProvided && (
-                    <div className="field">
-                        <label htmlFor="applicant">Applicant</label>
-                        <Dropdown
-                            id="applicant"
-                            value={localExperience.applicant}
-                            options={applicants}
-                            optionLabel="name"
-                            dataKey="_id"
-                            onChange={(e) =>
-                                setLocalExperience({ ...localExperience, applicant: e.value })
-                            }
-                            placeholder="Select Applicant"
-                            className={classNames({ 'p-invalid': submitted && !localExperience.applicant })}
-                        />
-                        {submitted && !localExperience.applicant &&
-                            <small className="p-invalid">Applicant is required.</small>}
-                    </div>
-                )}
+                {/* Position */}
+                <div className="field">
+                    <label htmlFor="position">Position</label>
+                    <Dropdown
+                        id="position"
+                        value={localExperience.position}
+                        options={positions}
+                        optionLabel="name"
+                        dataKey="_id"
+                        onChange={(e) =>
+                            setLocalExperience({ ...localExperience, position: e.value })
+                        }
+                        placeholder="Select Position"
+                        className={classNames({ 'p-invalid': submitted && !localExperience.position })}
+                    />
+                    {submitted && !localExperience.position &&
+                        <small className="p-invalid">Position is required.</small>}
+                </div>
+
+                {/* Rank */}
+                <div className="field">
+                    <label htmlFor="rank">Rank</label>
+                    <Dropdown
+                        id="rank"
+                        value={localExperience.rank}
+                        options={ranks}
+                        optionLabel="name"
+                        dataKey="_id"
+                        onChange={(e) =>
+                            setLocalExperience({ ...localExperience, rank: e.value })
+                        }
+                        placeholder="Select Rank"
+                        className={classNames({ 'p-invalid': submitted && !localExperience.rank })}
+                    />
+                    {submitted && !localExperience.rank &&
+                        <small className="p-invalid">Rank is required.</small>}
+                </div>
+
 
                 {/* Employment Type */}
                 <div className="field">
