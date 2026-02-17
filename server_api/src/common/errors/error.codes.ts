@@ -7,7 +7,13 @@ export const ERROR_CODES = {
     USER_NOT_LEAD_PI: "USER_NOT_LEAD_PI",
     USER_NOT_REVIEWER: "USER_NOT_REVIEWER",
     USER_NOT_COLLABORATOR: "USER_NOT_COLLABORATOR",
+
+    // ---------- USER ----------
     USER_NOT_FOUND: "USER_NOT_FOUND",
+
+    // ---------- ROLE ----------
+    ROLE_NOT_FOUND: "ROLE_NOT_FOUND",
+    ROLE_IN_USE: "ROLE_IN_USE",
 
     // ---------- ORGANIZATION ----------
     ORGANIZATION_NOT_FOUND: "ORGANIZATION_NOT_FOUND",

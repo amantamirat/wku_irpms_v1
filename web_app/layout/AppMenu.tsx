@@ -62,10 +62,8 @@ const AppMenu = () => {
             visible: hasPermission(
                 [
                     PERMISSIONS.CALENDAR.CREATE,
-                    //PERMISSIONS.PROJECT.CREATE,
-                    PERMISSIONS.APPLICANT.CREATE,
-                    PERMISSIONS.SPECIALIZATION.CREATE,
-                    PERMISSIONS.POSITION.CREATE
+                    PERMISSIONS.PROJECT.CREATE,
+                    PERMISSIONS.GRANT.CREATE,
                 ]
             ),
             items: [
@@ -81,30 +79,17 @@ const AppMenu = () => {
                         ]
                     )
                 },
-                {
-                    label: 'Applicants',
-                    icon: PrimeIcons.USERS,
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.APPLICANT.CREATE,
-                        ]
-                    ),
-                    to: '/applicants',
-                },
-                /*
+
                 {
                     label: 'Projects',
                     icon: PrimeIcons.BRIEFCASE,
-                    to: '/projects',
+                    to: '/projects/workspace',
                     visible: hasPermission(
                         [
                             PERMISSIONS.PROJECT.CREATE
                         ]
                     )
                 },
-                */
-
-
 
                 {
                     label: 'Grants',
@@ -202,10 +187,21 @@ const AppMenu = () => {
             visible: hasPermission(
                 [
                     PERMISSIONS.USER.CREATE,
-                    PERMISSIONS.ROLE.CREATE
+                    PERMISSIONS.ROLE.CREATE,
+                    PERMISSIONS.APPLICANT.CREATE
                 ]
             ),
             items: [
+                {
+                    label: 'Applicants',
+                    icon: PrimeIcons.USERS,
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.APPLICANT.CREATE,
+                        ]
+                    ),
+                    to: '/applicants',
+                },
                 {
                     label: 'Credentials',
                     icon: PrimeIcons.SHIELD,
@@ -230,6 +226,11 @@ const AppMenu = () => {
         },
         {
             label: 'Miscellaneous',
+            visible: hasPermission([
+                PERMISSIONS.STUDENT.CREATE,
+                PERMISSIONS.SPECIALIZATION.CREATE,
+                PERMISSIONS.POSITION.CREATE
+            ]),
             items: [
                 {
                     label: 'Students',

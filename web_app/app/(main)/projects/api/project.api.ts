@@ -11,6 +11,7 @@ export const ProjectApi = {
         const query = new URLSearchParams();
         if (sanitized.call) query.append("call", sanitized.call as string);
         if (sanitized.applicant) query.append("applicant", sanitized.applicant as string);
+        if (sanitized.workspace) query.append("workspace", sanitized.workspace as string);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Project[];
     },

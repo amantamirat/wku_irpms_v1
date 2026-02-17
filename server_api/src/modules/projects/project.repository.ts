@@ -6,6 +6,7 @@ import {
     GetProjectsDTO,
     UpdateProjectDTO
 } from "./project.dto";
+import Applicant from "../applicants/applicant.model";
 
 export interface IProjectRepository {
     findById(id: string): Promise<IProject | null>;
@@ -26,7 +27,7 @@ export class ProjectRepository implements IProjectRepository {
 
     async find(filters: GetProjectsDTO) {
         const query: any = {};
-        
+
         if (filters.call) {
             query.call = new mongoose.Types.ObjectId(filters.call);
         }
@@ -35,6 +36,17 @@ export class ProjectRepository implements IProjectRepository {
         }
         if (filters.status) {
             query.status = filters.status;
+        }
+
+        //add workspace field to the project
+        if (filters.workspace) {
+            const applicants = await Applicant.find({
+                workspace: new mongoose.Types.ObjectId(filters.workspace),
+            }).select("_id");
+
+            const applicantIds = applicants.map(a => a._id);
+
+            query.applicant = { $in: applicantIds };
         }
 
         let dbQuery = Project.find(query);

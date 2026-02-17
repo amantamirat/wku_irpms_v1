@@ -1,5 +1,6 @@
 import { Applicant } from "../../applicants/models/applicant.model";
 import { Call } from "../../calls/models/call.model";
+import { Organization } from "../../organizations/models/organization.model";
 import { Collaborator, sanitizeCollaborator } from "../collaborators/models/collaborator.model";
 import { Phase, sanitizePhase } from "../phases/models/phase.model";
 import { ProjectTheme, sanitizeProjectTheme } from "../themes/models/project.theme.model";
@@ -30,11 +31,13 @@ export type Project = {
     themes?: ProjectTheme[];// | string[];
     phases?: Phase[];
     file?: File;
+    workspace?: string | Organization;
 }
 
 export interface GetProjectsOptions {
     call?: string | Call;
     applicant?: string | Applicant;
+    workspace?: string | Organization;
 }
 
 export const validateProject = (project: Project): { valid: boolean; message?: string } => {
@@ -76,6 +79,10 @@ export const sanitizeProject = (project: Partial<Project>): Partial<Project> => 
             typeof project.applicant === 'object' && project.applicant !== null
                 ? (project.applicant as any)._id
                 : project.applicant,
+        workspace:
+            typeof project.workspace === 'object' && project.workspace !== null
+                ? (project.workspace as any)._id
+                : project.workspace,
         collaborators: project.collaborators?.map(c => sanitizeCollaborator(c)),
         themes: project.themes?.map(t => sanitizeProjectTheme(t)),
         phases: project.phases?.map(p => sanitizePhase(p)),

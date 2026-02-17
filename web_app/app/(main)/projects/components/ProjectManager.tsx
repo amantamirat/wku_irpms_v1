@@ -13,18 +13,18 @@ import ProjectDetail from "./ProjectDetail";
 import SaveProjectDialog from "./SaveProjectDialog";
 import { Applicant } from "../../applicants/models/applicant.model";
 import { Button } from "primereact/button";
+import { Organization } from "../../organizations/models/organization.model";
 
 interface ProjectManagerProps {
     call?: Call;
     applicant?: Applicant;
+    workspace? :Organization;
 }
 
-const ProjectManager = ({ call, applicant }: ProjectManagerProps) => {
+const ProjectManager = ({ call, applicant, workspace }: ProjectManagerProps) => {
 
     const confirm = useConfirmDialog();
     const { hasPermission } = useAuth();
-    //const linkedApplicant = getLinkedApplicant();
-    //const isOwner = linkedApplicant?._id === leadPI?._id;
 
     const emptyProject: Project = {
         call: call,
@@ -64,7 +64,7 @@ const ProjectManager = ({ call, applicant }: ProjectManagerProps) => {
         const fetchProjects = async () => {
             try {
                 setLoading(true);
-                const data = await ProjectApi.getProjects({ call, applicant });
+                const data = await ProjectApi.getProjects({ call, applicant, workspace });
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to fetch projects. " + (err.message ?? ""));
@@ -73,7 +73,7 @@ const ProjectManager = ({ call, applicant }: ProjectManagerProps) => {
             }
         };
         fetchProjects();
-    }, [call, applicant]);
+    }, [call, applicant, workspace]);
 
 
 

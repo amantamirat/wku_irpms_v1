@@ -120,8 +120,6 @@ PublicationSchema.index(
     }
 );
 
-
-
 export const Publication = mongoose.model<IPublication>(
     COLLECTIONS.PUBLICATION,
     PublicationSchema

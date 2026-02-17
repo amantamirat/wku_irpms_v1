@@ -56,7 +56,7 @@ export class ProjectService {
 
 
     async getProjects(options: GetProjectsDTO) {
-        return this.repository.find(options);
+        return this.repository.find({ ...options, populate: true });
     }
 
     // ---------------------------------------------------
