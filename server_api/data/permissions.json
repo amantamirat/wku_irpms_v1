@@ -223,6 +223,26 @@
     "description": "Delete students"
   },
   {
+    "category": "Experience Management",
+    "name": "experience:create",
+    "description": "Create experience records"
+  },
+  {
+    "category": "Experience Management",
+    "name": "experience:read",
+    "description": "View experience records"
+  },
+  {
+    "category": "Experience Management",
+    "name": "experience:update",
+    "description": "Update experience records"
+  },
+  {
+    "category": "Experience Management",
+    "name": "experience:delete",
+    "description": "Delete experience records"
+  },
+  {
     "category": "Publication Management",
     "name": "publication:create",
     "description": "Create new publications"
@@ -261,26 +281,6 @@
     "category": "Specialization Management",
     "name": "specialization:delete",
     "description": "Delete specialization entries"
-  },
-  {
-    "category": "Experience Management",
-    "name": "experience:create",
-    "description": "Create experience records"
-  },
-  {
-    "category": "Experience Management",
-    "name": "experience:read",
-    "description": "View experience records"
-  },
-  {
-    "category": "Experience Management",
-    "name": "experience:update",
-    "description": "Update experience records"
-  },
-  {
-    "category": "Experience Management",
-    "name": "experience:delete",
-    "description": "Delete experience records"
   },
   {
     "category": "Position Management",

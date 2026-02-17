@@ -12,7 +12,7 @@ import SaveStudentDialog from "./SaveStudentDialog";
 import { Applicant } from "../../models/applicant.model";
 
 interface StudentManagerProps {
-    applicant: Applicant;
+    applicant?: Applicant;
 }
 
 const StudentManager = ({ applicant }: StudentManagerProps) => {
@@ -135,7 +135,7 @@ const StudentManager = ({ applicant }: StudentManagerProps) => {
                 <SaveStudentDialog
                     visible={showSaveDialog}
                     student={student}
-                    applicantProvided={!!applicant}
+                    applicant={applicant}
                     onComplete={onSaveComplete}
                     onHide={hideDialogs}
                 />

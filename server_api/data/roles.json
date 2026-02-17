@@ -1,0 +1,46 @@
+[
+    {
+        "name": "admin-admin",
+        "permissions": [
+            "permission:read",
+            "role:*",
+            "user:*",
+            "applicant:*",
+            "college:*",
+            "department:*",
+            "program:*",
+            "directorate:*",
+            "center:*",
+            "external:*",
+            "publication:*", 
+            "student:*",
+            "calendar:read",
+            "experience:*",
+            "position:*"
+        ]
+    },
+    {
+        "name": "president",
+        "permissions": [
+            "calendar:*"
+        ]
+    },
+    {
+        "name": "director",
+        "permissions": [
+            "calendar:read"
+        ]
+    },
+    {
+        "name": "applicant",
+        "permissions": [
+            "calendar:read"
+        ]
+    },
+    {
+        "name": "reviewer",
+        "permissions": [
+            "calendar:read"
+        ]
+    }
+]

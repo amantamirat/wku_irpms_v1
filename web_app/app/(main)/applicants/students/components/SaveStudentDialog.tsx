@@ -18,12 +18,12 @@ import { StudentApi } from '../api/student.api';
 interface SaveStudentDialogProps {
     visible: boolean;
     student: Student;
-    applicantProvided: boolean;
+    applicant?: Applicant;
     onHide: () => void;
     onComplete?: (savedStudent: Student) => void;
 }
 
-const SaveStudentDialog = ({ visible, student, applicantProvided, onHide, onComplete }: SaveStudentDialogProps) => {
+const SaveStudentDialog = ({ visible, student, applicant, onHide, onComplete }: SaveStudentDialogProps) => {
 
     const { hasPermission } = useAuth();
 
@@ -53,7 +53,7 @@ const SaveStudentDialog = ({ visible, student, applicantProvided, onHide, onComp
 
 
     useEffect(() => {
-        if (applicantProvided) {
+        if (applicant) {
             return;
         }
         const fetchApplicants = async () => {
@@ -65,7 +65,7 @@ const SaveStudentDialog = ({ visible, student, applicantProvided, onHide, onComp
             }
         };
         fetchApplicants();
-    }, [applicantProvided]);
+    }, [applicant]);
 
     // Reset localStudent when prop changes
     useEffect(() => {
@@ -140,6 +140,23 @@ const SaveStudentDialog = ({ visible, student, applicantProvided, onHide, onComp
                 onHide={onHide}
                 maximized
             >
+                {/* Applicant */}
+                {!applicant &&
+                    <div className="field">
+                        <label htmlFor="applicant">Applicant</label>
+                        <Dropdown
+                            id="applicant"
+                            value={localStudent.applicant}
+                            options={applicants}
+                            optionLabel="name"
+                            dataKey="_id"
+                            onChange={(e) => setLocalStudent({ ...localStudent, applicant: e.value })}
+                            placeholder="Select Applicant"
+                            className={classNames({ 'p-invalid': submitted && !localStudent.applicant })}
+                        />
+                        {submitted && !localStudent.applicant && <small className="p-invalid">Applicant is required.</small>}
+                    </div>
+                }
                 {/* Calendar */}
                 <div className="field">
                     <label htmlFor="calendar">Calendar</label>
@@ -175,23 +192,7 @@ const SaveStudentDialog = ({ visible, student, applicantProvided, onHide, onComp
                     {submitted && !localStudent.program && <small className="p-invalid">Program is required.</small>}
                 </div>
 
-                {/* Applicant */}
-                {!applicantProvided &&
-                    <div className="field">
-                        <label htmlFor="applicant">Applicant</label>
-                        <Dropdown
-                            id="applicant"
-                            value={localStudent.applicant}
-                            options={applicants}
-                            optionLabel="name"
-                            dataKey="_id"
-                            onChange={(e) => setLocalStudent({ ...localStudent, applicant: e.value })}
-                            placeholder="Select Applicant"
-                            className={classNames({ 'p-invalid': submitted && !localStudent.applicant })}
-                        />
-                        {submitted && !localStudent.applicant && <small className="p-invalid">Applicant is required.</small>}
-                    </div>
-                }
+
             </Dialog>
         </>
     );
