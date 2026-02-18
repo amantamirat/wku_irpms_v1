@@ -4,10 +4,8 @@ import { CollaboratorRepository, ICollaboratorRepository } from "../../projects/
 import { IPhaseRepository, PhaseRepository } from "../../projects/phase/phase.repository";
 import { IProjectRepository, ProjectRepository } from "../../projects/project.repository";
 import { IThemeRepository, ThemeRepository } from "../../thematics/themes/theme.repository";
-import { ConstraintType } from "./constraint.model";
 import { ConstraintRepository, IConstraintRepository } from "./constraint.repository";
-import { ProjectConstraintType } from "./project/project-constraint-type.enum";
-import { IProjectConstraint } from "./project/project-constraint.model";
+import { ProjectConstraintType } from "./project-constraint-type.enum";
 
 
 export class ConstraintValidator {
@@ -30,7 +28,8 @@ export class ConstraintValidator {
         }) {
         const { collaborators, phases, themes } = dto;
         const constraints =
-            await this.constraintRepository.find({ type: ConstraintType.PROJECT, grant: grant }) as IProjectConstraint[];
+            await this.constraintRepository.find({ //type: ConstraintType.PROJECT,
+                 grant: grant });
 
         if (!constraints || constraints.length === 0) return;
 

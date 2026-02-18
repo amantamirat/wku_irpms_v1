@@ -1,20 +1,16 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
+import { useEffect, useRef, useState } from 'react';
+import { ConstraintApi } from '../api/constraint.api';
 import {
     Constraint,
-    ConstraintType,
-    OperationMode,
-    validateConstraint,
+    validateConstraint
 } from '../models/constraint.model';
-import { ConstraintApi } from '../api/constraint.api';
-import { ApplicantConstraintValues, type ApplicantConstraintType } 
-from '../models/applicant-constaint-type';
 import { ProjectConstraintType } from '../models/project-constraint-type';
 
 interface SaveDialogProps {
@@ -105,102 +101,70 @@ const SaveDialog = ({ visible, constraint, onComplete, onHide }: SaveDialogProps
                 onHide={hide}
             >
                 {/* Constraint Selector */}
-                {!localConstraint._id && (
-                    <div className="field">
-                        <label htmlFor="constraint">Constraint</label>
-                        <Dropdown
-                            id="constraint"
-                            value={localConstraint.constraint}
-                            options={Object.values(
-                                localConstraint.type === ConstraintType.PROJECT
-                                    ? ProjectConstraintType
-                                    : ApplicantConstraintValues
-                            ).map((c) => ({ label: c, value: c }))}
-                            onChange={(e) =>
-                                setLocalConstraint({ ...localConstraint, constraint: e.value })
-                            }
-                            placeholder="Select Constraint"
-                            className={classNames({
-                                'p-invalid': submitted && !localConstraint.constraint,
-                            })}
-                        />
-                    </div>
-                )}
+
+                <div className="field">
+                    <label htmlFor="constraint">Constraint</label>
+                    <Dropdown
+                        id="constraint"
+                        value={localConstraint.constraint}
+                        options={Object.values(
+                            ProjectConstraintType
+                        ).map((c) => ({ label: c, value: c }))}
+                        onChange={(e) =>
+                            setLocalConstraint({ ...localConstraint, constraint: e.value })
+                        }
+                        placeholder="Select Constraint"
+                        className={classNames({
+                            'p-invalid': submitted && !localConstraint.constraint,
+                        })}
+                        disabled={!!localConstraint._id}
+                    />
+                </div>
+
 
                 {/* Project Constraint Fields */}
-                {localConstraint.type === ConstraintType.PROJECT && (
-                    <>
-                        <div className="field">
-                            <label htmlFor="min">Minimum {localConstraint.constraint}</label>
-                            <InputNumber
-                                id="min"
-                                value={localConstraint.min}
-                                onChange={(e) =>
-                                    setLocalConstraint({
-                                        ...localConstraint,
-                                        min: e.value ?? 0,
-                                    })
-                                }
-                                required
-                                className={classNames({
-                                    'p-invalid':
-                                        submitted &&
-                                        (localConstraint.min == null ||
-                                            localConstraint.min <= 0),
-                                })}
-                            />
-                        </div>
 
-                        <div className="field">
-                            <label htmlFor="max">Maximum {localConstraint.constraint}</label>
-                            <InputNumber
-                                id="max"
-                                value={localConstraint.max}
-                                onChange={(e) =>
-                                    setLocalConstraint({
-                                        ...localConstraint,
-                                        max: e.value ?? 0,
-                                    })
-                                }
-                                required
-                                className={classNames({
-                                    'p-invalid':
-                                        submitted &&
-                                        (localConstraint.max == null ||
-                                            localConstraint.max <= 0),
-                                })}
-                            />
-                        </div>
-                    </>
-                )}
+                <div className="field">
+                    <label htmlFor="min">Minimum {localConstraint.constraint}</label>
+                    <InputNumber
+                        id="min"
+                        value={localConstraint.min}
+                        onChange={(e) =>
+                            setLocalConstraint({
+                                ...localConstraint,
+                                min: e.value ?? 0,
+                            })
+                        }
+                        required
+                        className={classNames({
+                            'p-invalid':
+                                submitted &&
+                                (localConstraint.min == null ||
+                                    localConstraint.min <= 0),
+                        })}
+                    />
+                </div>
 
-                {/* Applicant Mode Selector */}
-                {localConstraint.type === ConstraintType.APPLICANT && (
-                    <div className="field">
-                        <label htmlFor="mode">Mode</label>
-                        <Dropdown
-                            id="mode"
-                            value={localConstraint.mode}
-                            options={Object.values(OperationMode).map((op) => ({
-                                label: op,
-                                value: op,
-                            }))}
-                            onChange={(e) =>
-                                setLocalConstraint({
-                                    ...localConstraint,
-                                    mode: e.value,
-                                })
-                            }
-                            placeholder="Select Mode"
-                            className={classNames({
-                                'p-invalid':
-                                    submitted &&
-                                    !localConstraint.mode &&
-                                    localConstraint.type === ConstraintType.APPLICANT,
-                            })}
-                        />
-                    </div>
-                )}
+                <div className="field">
+                    <label htmlFor="max">Maximum {localConstraint.constraint}</label>
+                    <InputNumber
+                        id="max"
+                        value={localConstraint.max}
+                        onChange={(e) =>
+                            setLocalConstraint({
+                                ...localConstraint,
+                                max: e.value ?? 0,
+                            })
+                        }
+                        required
+                        className={classNames({
+                            'p-invalid':
+                                submitted &&
+                                (localConstraint.max == null ||
+                                    localConstraint.max <= 0),
+                        })}
+                    />
+                </div>
             </Dialog>
         </>
     );

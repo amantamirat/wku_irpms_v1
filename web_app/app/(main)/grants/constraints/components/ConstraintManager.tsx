@@ -5,26 +5,24 @@ import ListSkeleton from '@/components/ListSkeleton';
 import { useAuth } from '@/contexts/auth-context';
 import { useConfirmDialog } from '@/contexts/ConfirmDialogContext';
 import { useCrudList } from '@/hooks/useCrudList';
-import { ConstraintApi } from '../api/constraint.api';
-import { ConstraintType, Constraint } from '../models/constraint.model';
-import SaveDialog from './SaveDialog';
-import CompositionManager from '../compositions/components/CompositionManager';
-import { useState, useEffect } from 'react';
-import { Grant } from '../../models/grant.model';
 import { PERMISSIONS } from '@/types/permissions';
+import { useEffect, useState } from 'react';
+import { Grant } from '../../models/grant.model';
+import { ConstraintApi } from '../api/constraint.api';
+import { Constraint } from '../models/constraint.model';
+import SaveDialog from './SaveDialog';
 
 interface ConstraintManagerProps {
-    type: ConstraintType;
     grant: Grant;
 }
 
-const ConstraintManager = ({ type, grant }: ConstraintManagerProps) => {
+const ConstraintManager = ({ grant }: ConstraintManagerProps) => {
     const { hasPermission } = useAuth();
     const confirm = useConfirmDialog();
 
     // Permissions
     const canCreate = hasPermission([PERMISSIONS.CONSTRAINT.CREATE]);
-    const canEdit = type === ConstraintType.PROJECT && hasPermission([PERMISSIONS.CONSTRAINT.UPDATE]);
+    const canEdit = hasPermission([PERMISSIONS.CONSTRAINT.UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.CONSTRAINT.DELETE]);
 
     // CRUD State
@@ -39,7 +37,7 @@ const ConstraintManager = ({ type, grant }: ConstraintManagerProps) => {
         setError,
     } = useCrudList<Constraint>();
 
-    const emptyConstraint: Constraint = { grant: grant, type };
+    const emptyConstraint: Constraint = { grant: grant };
     const [selectedConstraint, setSelectedConstraint] = useState<Constraint>(emptyConstraint);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
     const [expandedRows, setExpandedRows] = useState<any[]>([]);
@@ -49,7 +47,7 @@ const ConstraintManager = ({ type, grant }: ConstraintManagerProps) => {
         const fetchConstraints = async () => {
             try {
                 setLoading(true);
-                const data = await ConstraintApi.getConstraints({ grant: grant, type });
+                const data = await ConstraintApi.getConstraints({ grant: grant });
                 setAll(data);
             } catch (err: any) {
                 setError(`Failed to fetch constraints. ${err.message ?? err}`);
@@ -58,7 +56,7 @@ const ConstraintManager = ({ type, grant }: ConstraintManagerProps) => {
             }
         };
         fetchConstraints();
-    }, [grant, type]);
+    }, [grant]);
 
     if (loading) return <ListSkeleton rows={10} />;
     if (error) return <ErrorCard errorMessage={error} />;
@@ -81,15 +79,14 @@ const ConstraintManager = ({ type, grant }: ConstraintManagerProps) => {
 
     const columns = [
         { field: 'constraint', header: 'Constraint', sortable: true },
-        type === ConstraintType.APPLICANT && { field: 'mode', header: 'Mode', sortable: true },
-        type === ConstraintType.PROJECT && { field: 'min', header: 'Min', sortable: true },
-        type === ConstraintType.PROJECT && { field: 'max', header: 'Max', sortable: true },
-    ].filter(Boolean); // remove false values
+        { field: 'min', header: 'Min', sortable: true },
+        { field: 'max', header: 'Max', sortable: true },
+    ].filter(Boolean);
 
     return (
         <>
             <CrudManager
-                headerTitle={`${type} Constraints`}
+                headerTitle={`Constraints`}
                 items={constraints}
                 dataKey="_id"
                 columns={columns as any}
@@ -98,8 +95,7 @@ const ConstraintManager = ({ type, grant }: ConstraintManagerProps) => {
                 canDelete={canDelete}
                 onCreate={() => { setSelectedConstraint(emptyConstraint); setShowSaveDialog(true); }}
                 onEdit={(row) => { setSelectedConstraint(row); setShowSaveDialog(true); }}
-                onDelete={(row) => confirm.ask({ item: String(row.constraint), onConfirmAsync: () => deleteConstraint(row) })}                
-                rowExpansionTemplate={type === ConstraintType.APPLICANT ? (row) => <CompositionManager constraint={row} /> : undefined}
+                onDelete={(row) => confirm.ask({ item: String(row.constraint), onConfirmAsync: () => deleteConstraint(row) })}
             />
 
             {(selectedConstraint && showSaveDialog) && (

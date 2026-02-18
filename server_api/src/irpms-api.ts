@@ -20,7 +20,7 @@ import optionRoutes from './modules/evaluations/criteria/options/option.routes';
 
 import grantRoutes from './modules/grants/grant.routes';
 import constraintRoutes from './modules/grants/constraints/constraint.routes';
-import compositionRoutes from './modules/grants/constraints/compositions/composition.routes';
+import compositionRoutes from './modules/grants/compositions/composition.routes';
 
 import calendarRoutes from './modules/calendar/calendar.routes';
 import callRoutes from './modules/calls/call.routes';

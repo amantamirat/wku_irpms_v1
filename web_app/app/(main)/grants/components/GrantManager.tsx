@@ -10,6 +10,8 @@ import { GrantApi } from "../api/grant.api";
 import ConstraintContainer from "../constraints/components/ConstraintContainer";
 import { FundingSource, Grant } from "../models/grant.model";
 import SaveDialog from "./SaveDialog";
+import CompositionManager from "../compositions/components/CompositionManager";
+import GrantDetail from "./GrantDetail";
 
 interface GrantManagerProps {
     organization?: Organization;
@@ -103,7 +105,7 @@ const GrantManger = ({ organization }: GrantManagerProps) => {
                 onEdit={(row) => { setGrant(row); setShowSaveDialog(true); }}
                 onDelete={(row) => confirm.ask({ item: row.title, onConfirmAsync: () => deleteGrant(row) })}
 
-                rowExpansionTemplate={(row) => <ConstraintContainer grant={row as Grant} />}
+                rowExpansionTemplate={(row) => <GrantDetail grant={row as Grant} />}
             />
 
             {(grant && showSaveDialog) && (

@@ -1,13 +1,10 @@
-import { OperationMode } from "./applicant/applicant-constraint.model";
-import { ConstraintType } from "./constraint.model";
+import { ProjectConstraintType } from "./project-constraint-type.enum";
 
 export interface CreateConstraintDTO {
-    type: ConstraintType;
     grant: string;
-    constraint: string;
-    min?: number;
-    max?: number;
-    mode?:OperationMode;
+    constraint: ProjectConstraintType;
+    min: number;
+    max: number;
 }
 
 export interface UpdateConstraintDTO {
@@ -19,12 +16,10 @@ export interface UpdateConstraintDTO {
 }
 
 export interface GetConstraintOptions {
-    type?: ConstraintType;
     grant?: string
 }
 
 export interface ExistsConstraintDTO {
     grant?: string;                 // Grant ID to filter by
-    type?: ConstraintType;          // Optional constraint type (PROJECT / APPLICANT)
-    constraint?: string;            // Optional specific constraint (like BUDGET_TOTAL)
+    constraint?: ProjectConstraintType;   // Optional specific constraint (like BUDGET_TOTAL)
 }

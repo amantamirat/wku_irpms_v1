@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
 import { CreateConstraintDTO, ExistsConstraintDTO, GetConstraintOptions, UpdateConstraintDTO } from "./constraint.dto";
-import { Constraint, ConstraintType, IConstraint } from "./constraint.model";
-import { ApplicantConstraint } from "./applicant/applicant-constraint.model";
-import { ProjectConstraint } from "./project/project-constraint.model";
+import { Constraint, IConstraint } from "./constraint.model";
+
 
 export interface IConstraintRepository {
     find(filters: GetConstraintOptions): Promise<IConstraint[]>;
@@ -20,7 +19,6 @@ export class ConstraintRepository implements IConstraintRepository {
         const query: any = {};
 
         if (filters.grant) query.grant = filters.grant;
-        if (filters.type) query.type = filters.type;
 
         return Constraint.find(query).exec();
     }
@@ -34,14 +32,7 @@ export class ConstraintRepository implements IConstraintRepository {
             ...dto,
             grant: new mongoose.Types.ObjectId(dto.grant)
         };
-        switch (dto.type) {
-            case ConstraintType.APPLICANT:
-                return ApplicantConstraint.create(data);
-            case ConstraintType.PROJECT:
-                return ProjectConstraint.create(data);
-            default:
-                return Constraint.create(data);
-        }
+         return Constraint.create(data);
     }
 
     async update(dto: UpdateConstraintDTO): Promise<IConstraint | null> {
@@ -59,10 +50,6 @@ export class ConstraintRepository implements IConstraintRepository {
 
         if (filters.grant) {
             query.grant = new mongoose.Types.ObjectId(filters.grant);
-        }
-
-        if (filters.type) {
-            query.type = filters.type;
         }
 
         if (filters.constraint) {

@@ -1,14 +1,12 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
-
-export enum ConstraintType {
-    PROJECT = "project",
-    APPLICANT = "applicant"
-}
+import { ProjectConstraintType } from "./project-constraint-type.enum";
 
 export interface IConstraint extends Document {
     grant: mongoose.Types.ObjectId;
-    type: ConstraintType;
+    constraint: ProjectConstraintType;
+    max: number;
+    min: number;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -20,20 +18,30 @@ const ConstraintSchema = new Schema<IConstraint>(
             required: true,
             immutable: true,
         },
-        type: {
+        constraint: {
             type: String,
-            enum: Object.values(ConstraintType),
+            enum: Object.values(ProjectConstraintType),
             required: true,
             immutable: true,
+        },
+        max: {
+            type: Number,
+            min: 0,
+            required: true
+        },
+        min: {
+            type: Number,
+            min: 0,
+            required: true
         }
     },
     {
-        timestamps: true, discriminatorKey: "type"
+        timestamps: true
     }
 );
 
 
-ConstraintSchema.index({ grant: 1, type: 1, constraint: 1 }, { unique: true });
+ConstraintSchema.index({ grant: 1, constraint: 1 }, { unique: true });
 export const Constraint = model<IConstraint>(COLLECTIONS.CONSTRAINT, ConstraintSchema);
 
 

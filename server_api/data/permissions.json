@@ -371,6 +371,26 @@
     "description": "Delete constraint entries"
   },
   {
+    "category": "Composition Management",
+    "name": "composition:create",
+    "description": "Create composition entries"
+  },
+  {
+    "category": "Composition Management",
+    "name": "composition:read",
+    "description": "Read composition entries"
+  },
+  {
+    "category": "Composition Management",
+    "name": "composition:update",
+    "description": "Update composition entries"
+  },
+  {
+    "category": "Composition Management",
+    "name": "composition:delete",
+    "description": "Delete composition entries"
+  },
+  {
     "category": "Call Management",
     "name": "call:create",
     "description": "Create call entries"

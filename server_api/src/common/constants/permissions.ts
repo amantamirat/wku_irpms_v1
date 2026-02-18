@@ -128,6 +128,14 @@ export const PERMISSIONS = {
     UPDATE: "constraint:update",
     DELETE: "constraint:delete",
   },
+
+  COMPOSITION: {
+    CREATE: "composition:create",
+    READ: "composition:read",
+    UPDATE: "composition:update",
+    DELETE: "composition:delete",
+  },
+  
   CALL: {
     CREATE: "call:create",
     READ: "call:read",

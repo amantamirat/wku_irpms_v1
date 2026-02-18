@@ -1,10 +1,7 @@
 import { ApiClient } from "@/api/ApiClient";
 import { Constraint, GetConstraintsOptions, sanitizeConstraint } from "../models/constraint.model";
 
-
 const end_point = '/grants/constraints';
-
-
 
 export const ConstraintApi = {
 
@@ -18,7 +15,6 @@ export const ConstraintApi = {
         const query = new URLSearchParams();
         const sanitized = sanitizeConstraint(options);
         if (options.grant) query.append("grant", sanitized.grant as string);
-        if (options.type) query.append("type", options.type);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Constraint[];
     },

@@ -1,6 +1,6 @@
 [
     {
-        "name": "admin-admin",
+        "name": "a-admin",
         "permissions": [
             "permission:read",
             "role:*",
@@ -12,17 +12,21 @@
             "directorate:*",
             "center:*",
             "external:*",
-            "publication:*", 
+            "publication:*",
             "student:*",
             "calendar:read",
             "experience:*",
-            "position:*"
+            "position:*",
+            "specialization:*"
         ]
     },
     {
-        "name": "president",
+        "name": "p-president",
         "permissions": [
-            "calendar:*"
+            "calendar:*",
+            "grant:*",
+            "constraint:*",
+            "composition:*"
         ]
     },
     {
@@ -32,9 +36,11 @@
         ]
     },
     {
-        "name": "applicant",
+        "name": "app",
         "permissions": [
-            "calendar:read"
+            "calendar:read",
+            "stage:read",
+            "project:read"
         ]
     },
     {

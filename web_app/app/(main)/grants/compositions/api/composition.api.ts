@@ -1,26 +1,7 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Composition } from "../models/composition.model";
+import { Composition, GetCompositionsOptions, sanitizeComposition } from "../models/composition.model";
 
 const end_point = '/grants/compositions';
-
-function sanitizeComposition(composition: Partial<Composition>): Partial<Composition> {
-    return {
-        ...composition,
-        constraint:
-            typeof composition.constraint === 'object' && composition.constraint !== null
-                ? (composition.constraint as any)._id
-                : composition.constraint,
-        item:
-            typeof composition.item === 'object' && composition.item !== null
-                ? (composition.item as any)._id
-                : composition.item
-    };
-}
-
-export interface GetCompositionsOptions {
-    constraint?: string;
-}
-
 export const CompositionApi = {
     async createComposition(composition: Partial<Composition>): Promise<Composition> {
         const sanitized = sanitizeComposition(composition);
@@ -29,8 +10,9 @@ export const CompositionApi = {
     },
 
     async getCompositions(options: GetCompositionsOptions): Promise<Composition[]> {
+        const sanitized = sanitizeComposition(options);
         const query = new URLSearchParams();
-        if (options.constraint) query.append("constraint", options.constraint);
+        if (options.grant) query.append("grant", sanitized.grant as string);
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Composition[];
     },

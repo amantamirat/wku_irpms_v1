@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { ConstraintService } from "./constraint.service";
 import { successResponse, errorResponse } from "../../../common/helpers/response";
-import { ConstraintType } from "./constraint.model";
 import { CreateConstraintDTO, UpdateConstraintDTO } from "./constraint.dto";
 
 export class ConstraintController {
@@ -16,25 +15,7 @@ export class ConstraintController {
   // CREATE CONSTRAINT
   //----------------------------------------
   create = async (req: Request, res: Response) => {
-    try {
-      /*
-      const { type } = req.body;
-      let created;
-
-      if (type === ConstraintType.PROJECT) {
-        const dto: CreateProjectConstraintDTO = req.body;
-        created = await this.service.createProjectConstraint(dto);
-
-      } else if (type === ConstraintType.APPLICANT) {
-        const dto: CreateApplicantConstraintDTO = req.body;
-        created = await this.service.createApplicantConstraint(dto);
-
-      } else {
-        throw new Error("Invalid constraint type");
-      }
-
-      successResponse(res, 201, "Constraint created successfully", created);
-      */
+    try {      
       const data: CreateConstraintDTO = {
         ...req.body,
       };
@@ -54,7 +35,6 @@ export class ConstraintController {
 
       const options = {
         grant: grant ? String(grant) : undefined,
-        type: type ? type as ConstraintType : undefined
       };
 
       const constraints = await this.service.getConstraints(options);

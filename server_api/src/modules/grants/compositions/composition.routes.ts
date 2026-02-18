@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { CompositionController } from "./composition.controller";
 import { CompositionService } from "./composition.service";
-import { checkPermission, verifyActiveAccount } from "../../../users/user.middleware";
-import { PERMISSIONS } from "../../../../common/constants/permissions";
+import { CompositionController } from "./composition.controller";
+import { PERMISSIONS } from "../../../common/constants/permissions";
+import { verifyActiveAccount, checkPermission } from "../../users/user.middleware";
 
 const service = new CompositionService();
 const controller = new CompositionController(service);
