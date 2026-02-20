@@ -32,9 +32,10 @@ export interface UpdateCallStatusDTO {
 export interface GetCallsOptions {
     calendar?: string;
     directorate?: string;
+    grant?: string;
     status?: CallStatus;
     populate?: boolean;
-    userId?: string;
+   // userId?: string;
 }
 
 export interface ExistsCallDTO {

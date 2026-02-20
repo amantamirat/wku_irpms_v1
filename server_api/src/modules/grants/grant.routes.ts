@@ -7,9 +7,9 @@ import { OrganizationRepository } from '../organization/organization.repository'
 import { GrantService } from './grant.service';
 
 const repository = new GrantRepository();
-const organizationRepository = new OrganizationRepository();
+const orgnRepository = new OrganizationRepository();
 
-const service = new GrantService(repository, organizationRepository);
+const service = new GrantService(repository, orgnRepository);
 const controller = new GrantController(service);
 const router = Router();
 
@@ -28,6 +28,12 @@ router.get(
   ]),
   controller.get
 );
+
+/*
+router.get('/:id', verifyActiveAccount,
+  checkPermission([PERMISSIONS.GRANT.READ]),
+  controller.getById);
+  */
 
 router.put(
   '/:id',

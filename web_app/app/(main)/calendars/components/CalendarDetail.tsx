@@ -1,42 +1,28 @@
 import { useAuth } from "@/contexts/auth-context";
-import { Grant } from "../models/grant.model";
 import { useMemo } from "react";
 import { PERMISSIONS } from "@/types/permissions";
-import ConstraintManager from "../constraints/components/ConstraintManager";
-
-import CompositionManager from "../compositions/components/CompositionManager";
 import { TabPanel, TabView } from "primereact/tabview";
 import CallManager from "../../calls/components/CallManager";
+import { Calendar } from "../models/calendar.model";
 
 
-interface GrantDetailProps {
-    grant: Grant;
+interface CalendarDetailProps {
+    calendar: Calendar;
 }
 
-const GrantDetail = ({ grant }: GrantDetailProps) => {
+const CalendarDetail = ({ calendar }: CalendarDetailProps) => {
 
     const { hasPermission } = useAuth();
-
     /**
      * Define tabs in a scalable configuration array
      */
     const tabs = useMemo(() => [
         {
-            header: "Constraints",
-            permission: PERMISSIONS.CONSTRAINT.READ,
-            content: <ConstraintManager grant={grant} />
-        },
-        {
-            header: "Compositions",
-            permission: PERMISSIONS.CONSTRAINT.READ,
-            content: <CompositionManager grant={grant} />
-        },
-        {
             header: "Calls",
             permission: PERMISSIONS.CALL.READ,
-            content: <CallManager grant={grant} />
+            content: <CallManager calendar={calendar} />
         }
-    ], [grant]);
+    ], [calendar]);
 
     /**
      * Filter tabs based on permissions
@@ -56,5 +42,5 @@ const GrantDetail = ({ grant }: GrantDetailProps) => {
     );
 };
 
-export default GrantDetail;
+export default CalendarDetail;
 

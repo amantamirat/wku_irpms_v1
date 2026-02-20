@@ -15,6 +15,15 @@ export const GrantApi = {
         return createdData as Grant;
     },
 
+    /*
+    async getById(id: string): Promise<Grant> {
+        //const url = `${end_point}/${id}`;
+        //const data = await ApiClient.get(url);
+        //return data as Grant;
+        throw Error("not implemented");
+    },
+    */
+
     async getGrants(options: GetGrantsOptions): Promise<Grant[]> {
         const query = new URLSearchParams();
         const sanitized = sanitizeGrant(options);

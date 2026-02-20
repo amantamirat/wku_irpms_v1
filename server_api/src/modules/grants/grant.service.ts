@@ -36,8 +36,14 @@ export class GrantService {
         return created;
     }
 
-    async getGrants(options: GetGrantsDTO) {
+    async get(options: GetGrantsDTO) {
         return await this.grantRepository.find(options);
+    }
+
+    async getById(id: string) {
+        const grant = await this.grantRepository.findById(id);
+        if (!grant) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+        return grant;
     }
 
     async update(dto: UpdateGrantDTO) {

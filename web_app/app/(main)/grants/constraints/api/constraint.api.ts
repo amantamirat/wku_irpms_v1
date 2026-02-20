@@ -5,7 +5,7 @@ const end_point = '/grants/constraints';
 
 export const ConstraintApi = {
 
-    async createConstraint(constraint: Partial<Constraint>): Promise<Constraint> {
+    async create(constraint: Partial<Constraint>): Promise<Constraint> {
         const sanitized = sanitizeConstraint(constraint);
         const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as Constraint;
@@ -20,7 +20,7 @@ export const ConstraintApi = {
     },
 
 
-    async updateConstraint(constraint: Partial<Constraint>): Promise<Constraint> {
+    async update(constraint: Partial<Constraint>): Promise<Constraint> {
         if (!constraint._id) {
             throw new Error("_id required.");
         }
@@ -30,7 +30,7 @@ export const ConstraintApi = {
         return updatedConstraint as Constraint;
     },
 
-    async deleteConstraint(constraint: Partial<Constraint>): Promise<boolean> {
+    async delete(constraint: Partial<Constraint>): Promise<boolean> {
         if (!constraint._id) {
             throw new Error("_id required.");
         }

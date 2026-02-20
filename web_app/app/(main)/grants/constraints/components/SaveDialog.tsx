@@ -39,8 +39,8 @@ const SaveDialog = ({ visible, constraint, onComplete, onHide }: SaveDialogProps
                 throw new Error(validation.message);
             }
             let saved = localConstraint._id
-                ? await ConstraintApi.updateConstraint(localConstraint)
-                : await ConstraintApi.createConstraint(localConstraint);
+                ? await ConstraintApi.update(localConstraint)
+                : await ConstraintApi.create(localConstraint);
             saved = {
                 ...saved,
                 grant: localConstraint.grant

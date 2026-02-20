@@ -13,6 +13,12 @@ export const CallApi = {
     return created as Call;
   },
 
+  async getById(id: string): Promise<Call> {
+    const url = `${ENDPOINT}/${id}`;
+    const data = await ApiClient.get(url);
+    return data as Call;
+  },
+
   // ---------------------------
   // Fetch / Query
   // ---------------------------
@@ -21,6 +27,7 @@ export const CallApi = {
     const sanitized = sanitizeCall(options);
     if (options.calendar) query.append("calendar", sanitized.calendar as string);
     if (options.directorate) query.append("directorate", sanitized.directorate as string);
+    if (options.grant) query.append("grant", sanitized.grant as string);
     if (options.status) query.append("status", options.status);
     const data = await ApiClient.get(`${ENDPOINT}?${query.toString()}`);
     return data as Call[];

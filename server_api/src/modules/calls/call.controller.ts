@@ -30,10 +30,11 @@ export class CallController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { directorate, calendar, status } = req.query;
+            const { directorate, calendar, grant, status } = req.query;
             const calls = await this.service.getCalls({
                 directorate: directorate as string,
                 calendar: calendar as string,
+                grant: grant as string,
                 status: status as CallStatus,
             });
             successResponse(res, 200, 'Calls fetched successfully', calls);

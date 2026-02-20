@@ -1,7 +1,5 @@
 'use client';
 import { CrudManager } from '@/components/CrudManager';
-import ErrorCard from '@/components/ErrorCard';
-import ListSkeleton from '@/components/ListSkeleton';
 import { useAuth } from '@/contexts/auth-context';
 import { useConfirmDialog } from '@/contexts/ConfirmDialogContext';
 import { useCrudList } from '@/hooks/useCrudList';
@@ -40,7 +38,7 @@ const ConstraintManager = ({ grant }: ConstraintManagerProps) => {
     const emptyConstraint: Constraint = { grant: grant };
     const [selectedConstraint, setSelectedConstraint] = useState<Constraint>(emptyConstraint);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [expandedRows, setExpandedRows] = useState<any[]>([]);
+    //const [expandedRows, setExpandedRows] = useState<any[]>([]);
 
     // Fetch constraints
     useEffect(() => {
@@ -58,8 +56,8 @@ const ConstraintManager = ({ grant }: ConstraintManagerProps) => {
         fetchConstraints();
     }, [grant]);
 
-    if (loading) return <ListSkeleton rows={10} />;
-    if (error) return <ErrorCard errorMessage={error} />;
+    //if (loading) return <ListSkeleton rows={10} />;
+    //if (error) return <ErrorCard errorMessage={error} />;
 
     // Save / update
     const onSaveComplete = (saved: Constraint) => {
@@ -68,7 +66,7 @@ const ConstraintManager = ({ grant }: ConstraintManagerProps) => {
     };
 
     const deleteConstraint = async (row: Constraint) => {
-        const deleted = await ConstraintApi.deleteConstraint(row);
+        const deleted = await ConstraintApi.delete(row);
         if (deleted) removeItem(row);
     };
 
@@ -81,7 +79,7 @@ const ConstraintManager = ({ grant }: ConstraintManagerProps) => {
         { field: 'constraint', header: 'Constraint', sortable: true },
         { field: 'min', header: 'Min', sortable: true },
         { field: 'max', header: 'Max', sortable: true },
-    ].filter(Boolean);
+    ]
 
     return (
         <>

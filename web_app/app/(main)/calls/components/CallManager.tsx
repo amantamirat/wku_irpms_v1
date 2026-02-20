@@ -8,20 +8,21 @@ import { PERMISSIONS } from "@/types/permissions";
 import { Button } from "primereact/button";
 import { useEffect, useState } from "react";
 import { Calendar } from "../../calendars/models/calendar.model";
+import { Grant } from "../../grants/models/grant.model";
 import { Organization } from "../../organizations/models/organization.model";
-import ProjectManager from "../../projects/components/ProjectManager";
 import { CallApi } from "../api/call.api";
 import { Call, CallStatus } from "../models/call.model";
-import StageManager from "../stages/components/StageManager";
+import CallDetail from "./CallDetail";
 import SaveCall from "./SaveCall";
 
 interface CallManagerProps {
     directorate?: Organization;
     calendar?: Calendar;
+    grant?: Grant;
     next?: "stage" | "project";
 }
 
-const CallManager = ({ calendar, directorate, next = "stage" }: CallManagerProps) => {
+const CallManager = ({ calendar, directorate, grant, next = "stage" }: CallManagerProps) => {
 
     const { hasPermission } = useAuth();
     const confirm = useConfirmDialog();
@@ -50,7 +51,7 @@ const CallManager = ({ calendar, directorate, next = "stage" }: CallManagerProps
         calendar: calendar ?? "",
         directorate: directorate ?? "",
         title: "",
-        grant: "",
+        grant: grant ?? "",
         thematic: "",
         status: CallStatus.planned
     };
@@ -60,22 +61,22 @@ const CallManager = ({ calendar, directorate, next = "stage" }: CallManagerProps
 
     /** Fetch calls */
     useEffect(() => {
-        if (!directorate && !calendar) {
+        if (!directorate && !calendar && !grant) {
             return
         }
         const fetchCalls = async () => {
             try {
                 setLoading(true);
-                const data = await CallApi.getCalls({ calendar, directorate });
+                const data = await CallApi.getCalls({ calendar, directorate, grant });
                 setAll(data);
             } catch (err: any) {
-                setError("Failed to load calendars. " + (err?.message ?? ""));
+                setError("Failed to load calls. " + (err?.message ?? ""));
             } finally {
                 setLoading(false);
             }
         };
         fetchCalls();
-    }, [calendar, directorate]);
+    }, [calendar, directorate, grant]);
 
     /** Save cycle */
     const onSaveComplete = (saved: Call) => {
@@ -168,7 +169,7 @@ const CallManager = ({ calendar, directorate, next = "stage" }: CallManagerProps
         !calendar && { header: "Calendar", field: "calendar.year" },
         !directorate && { header: "Directorate", field: "directorate.name" },
         { header: "Title", field: "title" },
-        { header: "Grant", field: "grant.title" },
+        !grant && { header: "Grant", field: "grant.title" },
         { header: "Theme", field: "thematic.title" },
         {
             header: "Status",
@@ -182,7 +183,7 @@ const CallManager = ({ calendar, directorate, next = "stage" }: CallManagerProps
         <>
             <CrudManager
                 headerTitle={`Manage Calls`}
-                itemName="Call"
+                //itemName="Call"
                 items={cycles}
                 dataKey="_id"
                 columns={columns}
@@ -217,12 +218,7 @@ const CallManager = ({ calendar, directorate, next = "stage" }: CallManagerProps
                 }
 
                 //enableSearch
-                rowExpansionTemplate={(row) => {
-                    if (next === "project") {
-                        return (<ProjectManager call={row} />)
-                    }
-                    return (<StageManager call={row} />)
-                }}
+                rowExpansionTemplate={(row) => <CallDetail call={row} />}
             />
 
             {/* Save Dialog */}

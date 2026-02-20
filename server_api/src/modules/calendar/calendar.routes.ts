@@ -21,6 +21,11 @@ router.get('/', verifyActiveAccount,
   controller.get
 );
 
+router.get('/:id', verifyActiveAccount,
+  checkPermission([PERMISSIONS.CALENDAR.READ]),
+  controller.getById
+);
+
 router.put('/:id', verifyActiveAccount,
   checkPermission([PERMISSIONS.CALENDAR.UPDATE]),
   controller.update

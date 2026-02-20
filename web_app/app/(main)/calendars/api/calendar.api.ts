@@ -13,6 +13,12 @@ export const CalendarApi = {
         return createdData as Calendar;
     },
 
+    async getById(id: string): Promise<Calendar> {
+        const url = `${end_point}/${id}`;
+        const data = await ApiClient.get(url);
+        return data as Calendar;
+    },
+
     async getCalendars(options: GetCalendarOptions): Promise<Calendar[]> {
         const query = new URLSearchParams();
         if (options.status) query.append("status", options.status as string);

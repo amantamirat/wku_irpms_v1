@@ -40,6 +40,8 @@ import resultRoutes from './modules/calls/stages/reviewers/results/result.routes
 import userRoutes from './modules/users/user.routes';
 import roleRoutes from './modules/users/roles/role.routes';
 import permissionRoutes from './modules/users/permissions/permission.routes';
+import reportRoutes from './modules/reports/report.routes';
+
 import path from 'path';
 
 dotenv.config();
@@ -82,6 +84,8 @@ app.use("/api/project/phase/documents", phaseDocRoutes);
 app.use("/api/project/collaborators", collaboratorRoutes);
 app.use("/api/collaborator/assignments", assignmentRoutes);
 app.use("/api/project/documents", documentRoutes);
+
+app.use("/api/reports", reportRoutes);
 
 
 app.use("/api/uploads", express.static(path.join(process.cwd(), "uploads")));

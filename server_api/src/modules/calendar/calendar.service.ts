@@ -29,6 +29,12 @@ export class CalendarService {
         return calendars;
     }
 
+    async getById(id: string) {
+        const calendar = await this.repository.findById(id);
+        if (!calendar) throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
+        return calendar;
+    }
+
     async update(dto: UpdateCalendarDTO) {
         const { id, data } = dto;
         try {

@@ -30,6 +30,16 @@ export class CalendarController {
     }
   };
 
+  getById = async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const calendar = await this.service.getById(id);
+      successResponse(res, 200, 'Calendars fetched successfully', calendar);
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
+    }
+  };
+
   get = async (req: Request, res: Response) => {
     try {
       const { status } = req.query;

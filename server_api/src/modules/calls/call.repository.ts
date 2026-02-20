@@ -27,6 +27,10 @@ export class CallRepository implements ICallRepository {
             query.calendar = new mongoose.Types.ObjectId(filters.calendar);
         }
 
+        if (filters.grant) {
+            query.grant = new mongoose.Types.ObjectId(filters.grant);
+        }
+
         if (filters.directorate) {
             query.directorate = new mongoose.Types.ObjectId(filters.directorate);
         }

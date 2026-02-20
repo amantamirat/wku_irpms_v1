@@ -81,17 +81,6 @@ const AppMenu = () => {
                 },
 
                 {
-                    label: 'Projects',
-                    icon: PrimeIcons.BRIEFCASE,
-                    to: '/projects/workspace',
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.PROJECT.CREATE
-                        ]
-                    )
-                },
-
-                {
                     label: 'Grants',
                     icon: 'pi pi-bitcoin',
                     to: '/grants',
@@ -100,6 +89,17 @@ const AppMenu = () => {
                             PERMISSIONS.GRANT.CREATE,
                             PERMISSIONS.GRANT.UPDATE,
                             PERMISSIONS.GRANT.DELETE
+                        ]
+                    )
+                },
+
+                {
+                    label: 'Projects',
+                    icon: PrimeIcons.BRIEFCASE,
+                    to: '/projects/workspace',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.PROJECT.CREATE
                         ]
                     )
                 },
@@ -262,6 +262,16 @@ const AppMenu = () => {
                         PERMISSIONS.POSITION.DELETE
                     ])
                 },
+            ]
+        },
+        {
+            label: 'Reports',
+            items: [
+                {
+                    label: 'Overview',
+                    icon: 'pi pi-circle-on',
+                    to: '/reports/overview'
+                }
             ]
         },
         {

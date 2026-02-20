@@ -7,11 +7,11 @@ import { PERMISSIONS } from "@/types/permissions";
 import { useEffect, useState } from "react";
 import { Organization } from "../../organizations/models/organization.model";
 import { GrantApi } from "../api/grant.api";
-import ConstraintContainer from "../constraints/components/ConstraintContainer";
-import { FundingSource, Grant } from "../models/grant.model";
-import SaveDialog from "./SaveDialog";
-import CompositionManager from "../compositions/components/CompositionManager";
+import { Grant } from "../models/grant.model";
 import GrantDetail from "./GrantDetail";
+import SaveDialog from "./SaveDialog";
+import { Button } from "primereact/button";
+import { useRouter } from "next/navigation";
 
 interface GrantManagerProps {
     organization?: Organization;
@@ -82,12 +82,25 @@ const GrantManger = ({ organization }: GrantManagerProps) => {
         setShowSaveDialog(false);
     };
 
+    const router = useRouter();
+
     const columns = [
         { field: "fundingSource", header: "Source", sortable: true },
         { field: "organization.name", header: "Organization", sortable: true },
         { field: "title", header: "Title", sortable: true },
         { field: "amount", header: "Amount", sortable: true, body: (rowData: any) => rowData.amount.toLocaleString() },
         { field: "description", header: "Description", sortable: true },
+        /*
+        {
+            body: (row: Grant) => (
+                <Button
+                    icon="pi pi-arrow-right"
+                    size="small"
+                    onClick={() => router.push(`/grants/${row._id}`)}
+                />
+            )
+        },
+        */
     ];
 
 
@@ -104,7 +117,6 @@ const GrantManger = ({ organization }: GrantManagerProps) => {
                 onCreate={() => { setGrant(emptyGrant); setShowSaveDialog(true); }}
                 onEdit={(row) => { setGrant(row); setShowSaveDialog(true); }}
                 onDelete={(row) => confirm.ask({ item: row.title, onConfirmAsync: () => deleteGrant(row) })}
-
                 rowExpansionTemplate={(row) => <GrantDetail grant={row as Grant} />}
             />
 

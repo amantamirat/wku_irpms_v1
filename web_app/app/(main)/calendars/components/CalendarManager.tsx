@@ -1,17 +1,17 @@
 'use client';
 
 import { CrudManager } from "@/components/CrudManager";
+import { useAuth } from "@/contexts/auth-context";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useCrudList } from "@/hooks/useCrudList";
-import { useEffect, useState } from "react";
-import { useAuth } from "@/contexts/auth-context";
-import { PERMISSIONS } from "@/types/permissions";
-import { Calendar, CalendarStatus } from "../models/calendar.model";
-import { CalendarApi } from "../api/calendar.api";
-import SaveCalendarDialog from "../dialogs/SaveCalendarDialog";
 import MyBadge from "@/templates/MyBadge";
-import CallManager from "../../calls/components/CallManager";
+import { PERMISSIONS } from "@/types/permissions";
+import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
+import { useEffect, useState } from "react";
+import { CalendarApi } from "../api/calendar.api";
+import { Calendar, CalendarStatus } from "../models/calendar.model";
+import SaveCalendarDialog from "./SaveCalendarDialog";
 
 const CalendarManager = () => {
 
@@ -32,6 +32,8 @@ const CalendarManager = () => {
     const canPlan = hasPermission([PERMISSIONS.CALENDAR.STATUS.PLANNED]);
     const canActivate = hasPermission([PERMISSIONS.CALENDAR.STATUS.ACTIVATE]);
     const canClose = hasPermission([PERMISSIONS.CALENDAR.STATUS.CLOSE]);
+
+    const router = useRouter();
 
 
     // CRUD hook
@@ -159,7 +161,16 @@ const CalendarManager = () => {
             field: "status",
             body: (u: Calendar) => <MyBadge type="status" value={u.status ?? "Unknown"} />
         },
-        { body: stateTransitionTemplate }
+        { body: stateTransitionTemplate },
+        {
+            body: (row: Calendar) => (
+                <Button
+                    icon="pi pi-arrow-right"
+                    size="small"
+                    onClick={() => router.push(`/calendars/${row._id}`)}
+                />
+            )
+        },
     ];
 
     return (
@@ -194,11 +205,11 @@ const CalendarManager = () => {
                     })
                 }
                 enableSearch
-                rowExpansionTemplate={(row) => <CallManager calendar={row} next="project" />}
+            //rowExpansionTemplate={(row) => <CallManager calendar={row} next="project" />}
             />
 
             {/* Save Dialog */}
-            {calendar && (
+            {(calendar && showSaveDialog) && (
                 <SaveCalendarDialog
                     visible={showSaveDialog}
                     calendar={calendar}
