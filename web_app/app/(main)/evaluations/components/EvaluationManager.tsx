@@ -1,16 +1,15 @@
 'use client';
-
 import { CrudManager } from "@/components/CrudManager";
+import { useAuth } from "@/contexts/auth-context";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useCrudList } from "@/hooks/useCrudList";
-import { useEffect, useState } from "react";
-import { Evaluation } from "../models/evaluation.model";
-import { EvaluationApi } from "../api/evaluation.api";
-import SaveEvaluation from "./SaveEvaluation";
-import CriterionManager from "./CriterionManager";
-import { useAuth } from "@/contexts/auth-context";
 import { PERMISSIONS } from "@/types/permissions";
+import { useEffect, useState } from "react";
 import { Organization } from "../../organizations/models/organization.model";
+import { EvaluationApi } from "../api/evaluation.api";
+import { Evaluation } from "../models/evaluation.model";
+import EvaluationDetail from "./EvaluationDetail";
+import SaveEvaluation from "./SaveEvaluation";
 
 interface EvalManagerProps {
     directorate?: Organization;
@@ -47,11 +46,11 @@ const EvaluationManager = ({ directorate }: EvalManagerProps) => {
 
     /** Fetch evaluations */
     useEffect(() => {
-        
+
         const fetchEvaluations = async () => {
             try {
                 setLoading(true);
-                const data = await EvaluationApi.getEvaluations({directorate});
+                const data = await EvaluationApi.getEvaluations({ directorate });
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to load evaluations. " + (err?.message ?? ""));
@@ -92,7 +91,7 @@ const EvaluationManager = ({ directorate }: EvalManagerProps) => {
         <>
             <CrudManager
                 headerTitle="Manage Evaluations"
-                itemName="Evaluation"
+                //itemName="Evaluation"
                 items={evaluations}
                 dataKey="_id"
                 columns={columns}
@@ -122,21 +121,23 @@ const EvaluationManager = ({ directorate }: EvalManagerProps) => {
                     })
                 }
 
-
                 enableSearch
                 /** Expand row → show criteria manager */
                 rowExpansionTemplate={(row) => (
-                    <CriterionManager evaluation={row as Evaluation} />
+                    <EvaluationDetail evaluation={row as Evaluation} />
                 )}
             />
 
             {/* Save Dialog */}
-            <SaveEvaluation
-                visible={showSaveDialog}
-                evaluation={evaluation}
-                onComplete={onSaveComplete}
-                onHide={hideDialogs}
-            />
+            {
+                (evaluation && showSaveDialog) &&
+                <SaveEvaluation
+                    visible={showSaveDialog}
+                    evaluation={evaluation}
+                    onComplete={onSaveComplete}
+                    onHide={hideDialogs}
+                />
+            }
         </>
     );
 };

@@ -10,10 +10,9 @@ import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Dropdown } from "primereact/dropdown";
-import { Bar } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement } from "chart.js";
+import { Chart } from "primereact/chart";
+import ErrorCard from "@/components/ErrorCard";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement);
 export default function InstitutionalOverviewPage() {
 
     const dashboardRef = useRef<HTMLDivElement>(null);
@@ -27,21 +26,78 @@ export default function InstitutionalOverviewPage() {
         endDate: undefined,
     });
 
+    const [chartData, setChartData] = useState<any>({});
+    const [chartOptions, setChartOptions] = useState<any>({});
+    const [error, setError] = useState<string | undefined>(undefined);
+
     useEffect(() => {
         loadOverview();
     }, []);
+
+    useEffect(() => {
+        if (!overview) return;
+
+        const documentStyle = getComputedStyle(document.documentElement);
+
+        const data = {
+            labels: ["Submitted", "Granted", "Completed", "Published"],
+            datasets: [
+                {
+                    data: [
+                        overview.submittedProjects || 0,
+                        overview.grantedProjects || 0,
+                        overview.completedProjects || 0,
+                        overview.publishedProjects || 0
+                    ],
+                    backgroundColor: [
+                        documentStyle.getPropertyValue('--blue-500'),
+                        documentStyle.getPropertyValue('--green-500'),
+                        documentStyle.getPropertyValue('--orange-500'),
+                        documentStyle.getPropertyValue('--purple-500')
+                    ],
+                    hoverBackgroundColor: [
+                        documentStyle.getPropertyValue('--blue-400'),
+                        documentStyle.getPropertyValue('--green-400'),
+                        documentStyle.getPropertyValue('--orange-400'),
+                        documentStyle.getPropertyValue('--purple-400')
+                    ]
+                }
+            ]
+        };
+
+        const options = {
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        usePointStyle: true
+                    }
+                }
+            }
+        };
+
+        setChartData(data);
+        setChartOptions(options);
+    }, [overview]);
 
     const loadOverview = async () => {
         try {
             setLoading(true);
             const data = await ReportApi.getOverview(filter);
             setOverview(data);
-        } catch (error) {
-            console.error(error);
+        } catch (err: any) {
+            console.error(err);
+            setError("Failed to fetch report. " + (err.message ?? ""));
         } finally {
             setLoading(false);
         }
     };
+
+    if (error) {
+        return (
+            <ErrorCard errorMessage={error} />
+        )
+    }
 
     const exportToExcel = () => {
         if (!overview) return;
@@ -138,33 +194,18 @@ export default function InstitutionalOverviewPage() {
 
                 {/* KPI CARDS */}
                 <div className="grid mb-4">
-
                     <KpiCard title="Total Projects" value={overview?.totalProjects} />
                     <KpiCard title="Granted Projects" value={overview?.grantedProjects} />
                     <KpiCard title="Completion Rate" value={`${overview?.completionRate ?? 0}%`} />
                     <KpiCard title="Total Funding" value={overview?.totalFundingSecured} />
-
                 </div>
 
-                {/* CHART */}
+                {/* PIE CHART */}
                 {overview && (
                     <Card className="shadow-2">
-                        <Bar
-                            data={{
-                                labels: ["Submitted", "Granted", "Completed", "Published"],
-                                datasets: [
-                                    {
-                                        label: "Projects",
-                                        data: [
-                                            overview.submittedProjects,
-                                            overview.grantedProjects,
-                                            overview.completedProjects,
-                                            overview.publishedProjects
-                                        ]
-                                    }
-                                ]
-                            }}
-                        />
+                        <div className="card flex justify-content-center">
+                            <Chart type="pie" data={chartData} options={chartOptions} className="w-full md:w-30rem" />
+                        </div>
                     </Card>
                 )}
 

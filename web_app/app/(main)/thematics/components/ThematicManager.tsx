@@ -1,5 +1,4 @@
 'use client';
-
 import { CrudManager } from "@/components/CrudManager";
 import { useAuth } from "@/contexts/auth-context";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
@@ -9,22 +8,21 @@ import { useEffect, useState } from "react";
 import { Organization } from "../../organizations/models/organization.model";
 import { ThematicApi } from "../api/thematic.api";
 import { Thematic, ThemeLevel } from "../models/thematic.model";
-import ThemeManager from "../themes/components/ThemeManager";
 import SaveDialog from "./SaveDialog";
+import ThematicDetail from "./ThematicDetail";
 
 interface ThematicManagerProps {
     directorate?: Organization;
 }
-
 
 const ThematicManager = ({ directorate }: ThematicManagerProps) => {
 
     const { hasPermission } = useAuth();
     const confirm = useConfirmDialog();
 
-    const canCreate = hasPermission([PERMISSIONS.THEME.CREATE]);
-    const canEdit = hasPermission([PERMISSIONS.THEME.UPDATE]);
-    const canDelete = hasPermission([PERMISSIONS.THEME.DELETE]);
+    const canCreate = hasPermission([PERMISSIONS.THEMATIC.CREATE]);
+    const canEdit = hasPermission([PERMISSIONS.THEMATIC.UPDATE]);
+    const canDelete = hasPermission([PERMISSIONS.THEMATIC.DELETE]);
 
     const emptyThematic: Thematic = {
         directorate: directorate ?? '',
@@ -140,12 +138,12 @@ const ThematicManager = ({ directorate }: ThematicManagerProps) => {
                     })
                 }
 
-                rowExpansionTemplate={(row) => <ThemeManager thematicArea={row as Thematic} />}
+                rowExpansionTemplate={(row) => <ThematicDetail thematic={row as Thematic} />}
                 enableSearch
             />
 
             {/* Save Dialog */}
-            {thematic && (
+            {(thematic && showSaveDialog) && (
                 <SaveDialog
                     visible={showSaveDialog}
                     thematic={thematic}

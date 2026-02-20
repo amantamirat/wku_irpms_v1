@@ -7,7 +7,7 @@ export class PermissionService {
     private repository: IPermissionRepository;
 
     constructor(repository: IPermissionRepository) {
-        this.repository = repository;        
+        this.repository = repository;
         (async () => {
             await this.seedPermissions();
         })();
@@ -25,6 +25,7 @@ export class PermissionService {
         let seeded = false;
 
         for (const perm of permissions) {
+            if (!perm.name) continue;
             const exists = await this.repository.findByName(perm.name);
             if (!exists) {
                 await this.repository.create(perm);

@@ -166,6 +166,20 @@ export const PERMISSIONS = {
     UPDATE: "evaluation:update",
     DELETE: "evaluation:delete",
   },
+
+  CRITERION: {
+    CREATE: "criterion:create",
+    READ: "criterion:read",
+    UPDATE: "criterion:update",
+    DELETE: "criterion:delete",
+  },
+
+  OPTION: {
+    CREATE: "option:create",
+    READ: "option:read",
+    UPDATE: "option:update",
+    DELETE: "option:delete",
+  },
   PROJECT: {
     CREATE: "project:create",
     READ: "project:read",
@@ -267,6 +281,9 @@ export const PERMISSIONS = {
     READ: "result:read",
     UPDATE: "result:update",
     DELETE: "result:delete",
+  },
+  REPORT: {
+    OVERVIEW: "report:overview",
   }
 } as const;
 

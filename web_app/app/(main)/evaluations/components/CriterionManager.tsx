@@ -10,9 +10,8 @@ import SaveCriterion from "./SaveCriterion";
 import { Evaluation } from "../../evaluations/models/evaluation.model";
 import { useAuth } from "@/contexts/auth-context";
 import OptionManager from "./OptionManager";
-import { Reviewer } from "../../projects/reviewers/models/reviewer.model";
-import { Stage } from "../../calls/stages/models/stage.model";
-import { ProjectDoc } from "../../projects/documents/models/document.model";
+import { PERMISSIONS } from "@/types/permissions";
+
 
 interface CriterionManagerProps {
     evaluation?: Evaluation;
@@ -30,9 +29,9 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
     const confirm = useConfirmDialog();
     const { hasPermission } = useAuth();
 
-    const canCreate = true; //hasPermission([PERMISSIONS.CRITERION.CREATE]);
-    const canEdit = true; //hasPermission([PERMISSIONS.CRITERION.UPDATE]);
-    const canDelete = true; //hasPermission([PERMISSIONS.CRITERION.DELETE]);
+    const canCreate = hasPermission([PERMISSIONS.CRITERION.CREATE]);
+    const canEdit = hasPermission([PERMISSIONS.CRITERION.UPDATE]);
+    const canDelete = hasPermission([PERMISSIONS.CRITERION.DELETE]);
 
     /** CRUD Hook */
     const {
@@ -166,7 +165,7 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
         <>
             <CrudManager
                 headerTitle={"Manage Criteria"}
-                itemName="Criterion"
+                //itemName="Criterion"
                 items={criteria}
                 dataKey="_id"
                 columns={columns}

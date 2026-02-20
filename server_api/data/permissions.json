@@ -420,6 +420,51 @@
     "name": "call:delete"
   },
   {
+    "category": "Thematic Management",
+    "name": "thematic:create",
+    "description": "Create thematic entries"
+  },
+  {
+    "category": "Thematic Management",
+    "name": "thematic:read",
+    "description": "Read thematic entries"
+  },
+  {
+    "category": "Thematic Management",
+    "name": "thematic:update",
+    "description": "Update thematic entries"
+  },
+  {
+    "category": "Thematic Management",
+    "name": "thematic:delete",
+    "description": "Delete thematic entries"
+  },
+  {
+    "category": "Theme Management",
+    "name": "theme:create",
+    "description": "Create theme entries"
+  },
+  {
+    "category": "Theme Management",
+    "name": "theme:read",
+    "description": "Read theme entries"
+  },
+  {
+    "category": "Theme Management",
+    "name": "theme:import",
+    "description": "Import theme by batch entries"
+  },
+  {
+    "category": "Theme Management",
+    "name": "theme:update",
+    "description": "Update theme entries"
+  },
+  {
+    "category": "Theme Management",
+    "name": "theme:delete",
+    "description": "Delete theme entries"
+  },
+  {
     "category": "Stage Management",
     "name": "stage:create",
     "description": "Create stage entries"
@@ -524,50 +569,46 @@
     "description": "Delete evaluation entries"
   },
   {
-    "category": "Thematic Management",
-    "name": "thematic:create",
-    "description": "Create thematic entries"
+    "category": "Evaluation Management",
+    "name": "criterion:create",
+    "description": "Create criterion entries"
   },
   {
-    "category": "Thematic Management",
-    "name": "thematic:read",
-    "description": "Read thematic entries"
+    "category": "Evaluation Management",
+    "name": "criterion:read",
+    "description": "Read criterion entries"
   },
   {
-    "category": "Thematic Management",
-    "name": "thematic:update",
-    "description": "Update thematic entries"
+    "category": "Evaluation Management",
+    "name": "criterion:update",
+    "description": "Update criterion entries"
   },
   {
-    "category": "Thematic Management",
-    "name": "thematic:delete",
-    "description": "Delete thematic entries"
+    "category": "Evaluation Management",
+    "name": "criterion:delete",
+    "description": "Delete criterion entries"
   },
   {
-    "category": "Theme Management",
-    "name": "theme:create",
-    "description": "Create theme entries"
+    "category": "Evaluation Management",
+    "name": "option:create",
+    "description": "Create option entries"
   },
   {
-    "category": "Theme Management",
-    "name": "theme:read",
-    "description": "Read theme entries"
+    "category": "Evaluation Management",
+    "name": "option:read",
+    "description": "Read option entries"
   },
   {
-    "category": "Theme Management",
-    "name": "theme:import",
-    "description": "Import theme by batch entries"
+    "category": "Evaluation Management",
+    "name": "option:update",
+    "description": "Update option entries"
   },
   {
-    "category": "Theme Management",
-    "name": "theme:update",
-    "description": "Update theme entries"
+    "category": "Evaluation Management",
+    "name": "option:delete",
+    "description": "Delete option entries"
   },
-  {
-    "category": "Theme Management",
-    "name": "theme:delete",
-    "description": "Delete theme entries"
-  },
+  
   {
     "category": "Project Management",
     "name": "project:create",
@@ -755,5 +796,9 @@
   {
     "category": "Project Theme Management",
     "name": "project:theme:delete"
+  },
+  {
+    "category": "Report Management",
+    "name": "report:overview"
   }
 ]

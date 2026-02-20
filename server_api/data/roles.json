@@ -27,13 +27,23 @@
             "grant:*",
             "constraint:*",
             "composition:*",
-            "call:*"
+            "call:*",
+            "thematic:*",
+            "report:*"
         ]
     },
     {
-        "name": "director",
+        "name": "d-director",
         "permissions": [
-            "calendar:read"
+            "calendar:read",
+            "grant:read",
+            "call:*",
+            "thematic:*",
+            "theme:*",
+            "evaluation:*",
+            "criterion:*",
+            "option:*",
+            "stage:*"
         ]
     },
     {

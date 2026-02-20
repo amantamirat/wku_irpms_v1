@@ -135,7 +135,7 @@ export const PERMISSIONS = {
     UPDATE: "composition:update",
     DELETE: "composition:delete",
   },
-  
+
   CALL: {
     CREATE: "call:create",
     READ: "call:read",
@@ -168,13 +168,27 @@ export const PERMISSIONS = {
     UPDATE: "evaluation:update",
     DELETE: "evaluation:delete",
   },
+
+  CRITERION: {
+    CREATE: "criterion:create",
+    READ: "criterion:read",
+    UPDATE: "criterion:update",
+    DELETE: "criterion:delete",
+  },
+
+  OPTION: {
+    CREATE: "option:create",
+    READ: "option:read",
+    UPDATE: "option:update",
+    DELETE: "option:delete",
+  },
+  
   THEMATIC: {
     CREATE: "thematic:create",
     READ: "thematic:read",
     UPDATE: "thematic:update",
     DELETE: "thematic:delete",
   },
-
   THEME: {
     CREATE: "theme:create",
     IMPORT: "theme:import",
@@ -272,6 +286,9 @@ export const PERMISSIONS = {
     READ: "result:read",
     UPDATE: "result:update",
     DELETE: "result:delete",
+  },
+  REPORT: {
+    OVERVIEW: "report:overview",
   }
 } as const;
 

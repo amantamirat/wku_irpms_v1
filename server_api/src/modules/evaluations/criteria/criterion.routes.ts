@@ -10,7 +10,7 @@ const router = Router();
 router.post(
     "/",
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.EVALUATION.CREATE]),
+    checkPermission([PERMISSIONS.CRITERION.CREATE]),
     controller.create
 );
 
@@ -18,7 +18,7 @@ router.post(
 router.get(
     "/",
     verifyActiveAccount,
-    //checkPermission([PERMISSIONS.EVALUATION.READ]),
+    checkPermission([PERMISSIONS.CRITERION.READ]),
     controller.getCriteria
 );
 
@@ -26,7 +26,7 @@ router.get(
 router.put(
     "/:id",
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.EVALUATION.UPDATE]),
+    checkPermission([PERMISSIONS.CRITERION.UPDATE]),
     controller.update
 );
 
@@ -34,7 +34,7 @@ router.put(
 router.delete(
     "/:id",
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.EVALUATION.DELETE]),
+    checkPermission([PERMISSIONS.CRITERION.DELETE]),
     controller.delete
 );
 

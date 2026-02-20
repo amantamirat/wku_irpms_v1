@@ -26,9 +26,9 @@ const OptionManager = ({ criterion }: OptionManagerProps) => {
     const { hasPermission } = useAuth();
     const confirm = useConfirmDialog();
 
-    const canCreate = true//hasPermission([PERMISSIONS.OPTION.CREATE]);
-    const canEdit = true//hasPermission([PERMISSIONS.OPTION.UPDATE]);
-    const canDelete = true//hasPermission([PERMISSIONS.OPTION.DELETE]);
+    const canCreate = hasPermission([PERMISSIONS.OPTION.CREATE]);
+    const canEdit = hasPermission([PERMISSIONS.OPTION.UPDATE]);
+    const canDelete = hasPermission([PERMISSIONS.OPTION.DELETE]);
 
     /** CRUD Hook */
     const {
@@ -50,7 +50,7 @@ const OptionManager = ({ criterion }: OptionManagerProps) => {
         const fetchOptions = async () => {
             try {
                 setLoading(true);
-                const data = await OptionApi.getOptions({ criterion});
+                const data = await OptionApi.getOptions({ criterion });
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to load options. " + (err?.message ?? ""));
@@ -88,8 +88,8 @@ const OptionManager = ({ criterion }: OptionManagerProps) => {
     return (
         <>
             <CrudManager
-                headerTitle={`Manage Options for "${criterion.title}"`}
-                itemName="Option"
+                headerTitle={'Manage Options'}
+                //itemName="Option"
                 items={options}
                 dataKey="_id"
                 columns={columns}
@@ -120,7 +120,7 @@ const OptionManager = ({ criterion }: OptionManagerProps) => {
             />
 
             {/* Save Dialog */}
-            {option && (
+            {(option && showSaveDialog) &&(
                 <SaveOption
                     visible={showSaveDialog}
                     option={option}
