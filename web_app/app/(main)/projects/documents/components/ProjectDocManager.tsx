@@ -15,6 +15,7 @@ import { DocStatus, ProjectDoc } from "../models/document.model";
 import SaveProjectStageDialog from "./SaveProjectStageDialog";
 import ReviewerManager from "@/app/(main)/calls/reviewers/components/ReviewerManager";
 import { Dialog } from "primereact/dialog";
+import DocDetail from "./DocDetail";
 
 interface ProjectDocManagerProps {
     project?: Project;
@@ -288,12 +289,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
 
                 canDeleteRow={(row: ProjectDoc) => row.status === DocStatus.submitted}
 
-
-
-                rowExpansionTemplate={(row) => <ReviewerManager projectDoc={row}
-                    updateProjectDoc={onSaveComplete} />}
-
-
+                rowExpansionTemplate={(row) => <DocDetail doc={row as ProjectDoc} />}
 
                 enableSearch={!project}
                 enableSelection={enableMultiSelection}

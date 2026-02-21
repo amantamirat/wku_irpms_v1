@@ -43,7 +43,10 @@
             "evaluation:*",
             "criterion:*",
             "option:*",
-            "stage:*"
+            "stage:*",
+            "document:read",
+            "reviewer:*",
+            "applicant:read"
         ]
     },
     {
