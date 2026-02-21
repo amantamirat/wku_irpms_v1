@@ -1,41 +1,35 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
+import { PERMISSIONS } from "@/types/permissions";
 import QuickLinks from "./dashboard/QuickLinks";
 import StageGrid from "./dashboard/StageGrid";
+import { useAuth } from "@/contexts/auth-context";
 
 
 
 const Dashboard = () => {
 
+    const { hasPermission } = useAuth();
+    const canReadStages = hasPermission([PERMISSIONS.STAGE.READ]);
+
     return (
         <div className="grid">
-            {/* 📊 Stats Summary */}
+
             <div className="col-12">
                 {/*<ProjectStats />*/}
             </div>
 
-            {/* 
-            
-            <div className="col-12">
-                <div className="card">
-                    {
-                        <CallGrid />
-                    }
-
-                </div>
-            </div>
-            */}
-            
 
             {/* 🧾 Open Calls */}
-            <div className="col-12">
-                <div className="card">
-                    {
-                        <StageGrid />
-                    }
-
+            {canReadStages &&
+                <div className="col-12">
+                    <div className="card">
+                        {
+                            <StageGrid />
+                        }
+                    </div>
                 </div>
-            </div>
+            }
 
             {/* 📈 Performance Chart */}
             <div className="col-12 lg:col-6">
@@ -48,7 +42,7 @@ const Dashboard = () => {
             </div>
 
             {/* ⚡ Quick Access */}
-            <div className="col-12">
+            <div className="col-12">                
                 <QuickLinks />
             </div>
         </div>

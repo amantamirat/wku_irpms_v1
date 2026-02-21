@@ -1,4 +1,6 @@
 import { useAuth } from "@/contexts/auth-context";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import { PERMISSIONS } from "@/types/permissions";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Steps } from "primereact/steps";
@@ -6,11 +8,11 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { Applicant } from "../../applicants/models/applicant.model";
 import { Call } from "../../calls/models/call.model";
-import { Grant } from "../../grants/models/grant.model";
-import { ProjectApi } from "../../projects/api/project.api";
+import { Stage } from "../../calls/stages/models/stage.model";
 import CollaboratorManager from "../../projects/collaborators/components/CollaboratorManager";
 import { Collaborator } from "../../projects/collaborators/models/collaborator.model";
 import UploadForm from "../../projects/components/UploadForm";
+import { ProjectDocApi } from "../../projects/documents/api/project.doc.api";
 import { Project, ProjectStatus, validateApplyProject } from "../../projects/models/project.model";
 import PhaseManager from "../../projects/phases/components/PhaseManager";
 import { Phase, PhaseType } from "../../projects/phases/models/phase.model";
@@ -19,10 +21,6 @@ import { ProjectTheme } from "../../projects/themes/models/project.theme.model";
 import { Theme } from "../../thematics/themes/models/theme.model";
 import Confirmation from "./Confirmation";
 import ProjectForm from "./ProjectForm";
-import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-import { Stage } from "../../calls/stages/models/stage.model";
-import { ProjectDocApi } from "../../projects/documents/api/project.doc.api";
-import { PERMISSIONS } from "@/types/permissions";
 
 interface ApplyWizardProps {
     visible: boolean;

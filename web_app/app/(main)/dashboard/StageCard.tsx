@@ -53,7 +53,10 @@ const StageCard = ({ stage }: StageCardProps) => {
 
     const footer = (
         <div className="flex justify-content-between align-items-center mt-3">
-            <Button
+            {
+                /**
+                 * 
+                 * <Button
                 label="View"
                 icon="pi pi-eye"
                 severity="info"
@@ -61,6 +64,8 @@ const StageCard = ({ stage }: StageCardProps) => {
                 outlined
                 onClick={() => setShowViewDialog(true)}
             />
+                 */
+            }
             <Button
                 label="Apply"
                 icon="pi pi-check-circle"
