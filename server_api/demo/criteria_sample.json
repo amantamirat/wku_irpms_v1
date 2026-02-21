@@ -2,7 +2,7 @@
   {
     "title": "Relevance to Institutional Priorities",
     "weight": 20,
-    "form_type": "Closed",
+    "formType": "Closed",
     "options": [
       { "title": "Highly Relevant", "score": 20 },
       { "title": "Moderately Relevant", "score": 15 },
@@ -13,7 +13,7 @@
   {
     "title": "Research Quality and Innovation",
     "weight": 25,
-    "form_type": "Closed",
+    "formType": "Closed",
     "options": [
       { "title": "Excellent – strong originality and sound methodology", "score": 25 },
       { "title": "Good – some innovation, adequate methodology", "score": 20 },
@@ -24,7 +24,7 @@
   {
     "title": "Team Capacity and Experience",
     "weight": 15,
-    "form_type": "Closed",
+    "formType": "Closed",
     "options": [
       { "title": "Highly Experienced – demonstrated track record", "score": 15 },
       { "title": "Moderately Experienced", "score": 10 },
@@ -34,7 +34,7 @@
   {
     "title": "Budget Justification and Feasibility",
     "weight": 15,
-    "form_type": "Closed",
+    "formType": "Closed",
     "options": [
       { "title": "Well-justified and realistic", "score": 15 },
       { "title": "Partially justified", "score": 10 },
@@ -44,7 +44,7 @@
   {
     "title": "Expected Impact and Sustainability",
     "weight": 15,
-    "form_type": "Closed",
+    "formType": "Closed",
     "options": [
       { "title": "High – strong long-term benefit", "score": 15 },
       { "title": "Moderate – some lasting benefits", "score": 10 },
@@ -54,6 +54,6 @@
   {
     "title": "Comments and Recommendations",
     "weight": 10,
-    "form_type": "Open"
+    "formType": "Open"
   }
 ]

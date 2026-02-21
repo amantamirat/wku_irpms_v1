@@ -46,6 +46,12 @@ export class StageService {
     async getStages(dto: GetStageDTO) {
         return await this.repository.find({ ...dto, populate: true });
     }
+
+    async getById(id: string) {
+        const stage = await this.repository.findById(id);
+        if (!stage) throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
+        return stage;
+    }
     /**
      * Update a stage
      */
@@ -53,7 +59,7 @@ export class StageService {
         const { id, data } = dto;
         const stage = await this.repository.findById(id);
         if (!stage) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-        if (stage.status === StageStatus.closed) 
+        if (stage.status === StageStatus.closed)
             new AppError(ERROR_CODES.STUDENT_ALREADY_EXISTS);
 
         return await this.repository.update(id, data);

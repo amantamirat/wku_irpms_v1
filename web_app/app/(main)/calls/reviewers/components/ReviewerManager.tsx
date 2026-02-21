@@ -114,7 +114,6 @@ const ReviewerManager = ({ projectDoc, applicant, updateProjectDoc }: ReviewerMa
 
     const stateTransitionTemplate = (row: Reviewer) => {
         const current = row.status;
-
         const isReviewer = loggedInApplicant ? row.applicant === loggedInApplicant._id : false;
 
         let prev: ReviewerStatus | undefined;
@@ -148,35 +147,43 @@ const ReviewerManager = ({ projectDoc, applicant, updateProjectDoc }: ReviewerMa
 
         return (
             <div className="flex gap-2">
-                {next && (
-                    <Button
-                        tooltip={`Make ${next}`}
-                        icon="pi pi-check"
-                        severity="success"
-                        size="small"
-                        onClick={() =>
-                            confirm.ask({
-                                operation: `move to ${next}`,
-                                onConfirmAsync: () => updateStatus(row, next)
-                            })
-                        }
-                    />
-                )}
-                {prev && (
-                    <Button
-                        tooltip={`Back to ${prev}`}
-                        icon="pi pi-undo"
-                        severity="warning"
-                        size="small"
-                        onClick={() =>
-                            confirm.ask({
-                                operation: `revert to ${prev}`,
-                                onConfirmAsync: () => updateStatus(row, prev)
-                            })
-                        }
-                    />
-                )}
+                {/* ✅ Next button */}
+                {next && (() => {
+                    const nextStatus = next; // local constant for TS
+                    return (
+                        <Button
+                            tooltip={`Make ${nextStatus}`}
+                            icon="pi pi-check"
+                            severity="success"
+                            size="small"
+                            onClick={() =>
+                                confirm.ask({
+                                    operation: `move to ${nextStatus}`,
+                                    onConfirmAsync: () => updateStatus(row, nextStatus),
+                                })
+                            }
+                        />
+                    );
+                })()}
 
+                {/* ✅ Prev button */}
+                {prev && (() => {
+                    const prevStatus = prev; // local constant for TS
+                    return (
+                        <Button
+                            tooltip={`Back to ${prevStatus}`}
+                            icon="pi pi-undo"
+                            severity="warning"
+                            size="small"
+                            onClick={() =>
+                                confirm.ask({
+                                    operation: `revert to ${prevStatus}`,
+                                    onConfirmAsync: () => updateStatus(row, prevStatus),
+                                })
+                            }
+                        />
+                    );
+                })()}
             </div>
         );
     };
@@ -216,7 +223,7 @@ const ReviewerManager = ({ projectDoc, applicant, updateProjectDoc }: ReviewerMa
                 }
             />
 
-            {reviewer && (
+            {(reviewer && showSaveDialog) && (
                 <SaveReviewerDialog
                     visible={showSaveDialog}
                     reviewer={reviewer}

@@ -1,10 +1,11 @@
 'use client';
 
 import { useAuth } from "@/contexts/auth-context";
-import ReviewerManager from "./components/ReviewerManager";
-import { Divider } from "primereact/divider";
 
-const ReviewerPage = () => {
+import { Divider } from "primereact/divider";
+import CollaboratorManager from "../components/CollaboratorManager";
+
+const CollaboratorPage = () => {
     const { getApplicant } = useAuth();
     const applicant = getApplicant();
 
@@ -13,7 +14,7 @@ const ReviewerPage = () => {
             {/* Page Header */}
             <div className="mb-4">
                 <h2 className="text-2xl font-semibold mb-2">
-                    Review Management Dashboard
+                    Collaboration Management Dashboard
                 </h2>
 
                 {applicant && (
@@ -25,13 +26,12 @@ const ReviewerPage = () => {
 
             <Divider align="left">
                 <span className="text-sm font-semibold text-primary">
-                    Assigned Reviews
+                    Active Collaborations
                 </span>
             </Divider>
-
-            <ReviewerManager applicant={applicant} />
+            {applicant && <CollaboratorManager applicant={applicant} />}
         </div>
     );
 };
 
-export default ReviewerPage;
+export default CollaboratorPage;

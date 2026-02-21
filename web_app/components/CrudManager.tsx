@@ -188,6 +188,7 @@ export function CrudManager<T extends { _id?: string }>({
                                 filters={filters}
                                 globalFilter={globalFilter}
                                 header={header}
+                                //tableStyle={{ tableLayout: 'fixed' }}
 
                                 selection={enableSelection ? selectedItems : undefined}
                                 //selectionMode={enableSelection ? selectionMode : undefined}

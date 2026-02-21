@@ -22,7 +22,6 @@ export class StageController {
                 name,
                 evaluation: evaluation as string,
                 deadline,
-                //isFinal
             };
 
             const stage = await this.service.create(dto);
@@ -44,6 +43,17 @@ export class StageController {
 
             const stages = await this.service.getStages(dto);
             successResponse(res, 200, 'Stages fetched successfully', stages);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
+
+    getById = async (req: Request, res: Response) => {
+        try {
+            const { id } = req.params;
+            const stage = await this.service.getById(id);
+            successResponse(res, 200, 'stage fetched', stage);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }

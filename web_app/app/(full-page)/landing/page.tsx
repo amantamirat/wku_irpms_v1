@@ -75,7 +75,7 @@ const LandingPage = () => {
                                     </Link>
                                 </>
                             ) : (
-                                <p>Welcome back, {user.user_name}!</p>
+                                <p>Welcome back, {user.email}!</p>
                             )}
                         </div>
                     </div>

@@ -147,42 +147,37 @@ export default function PhaseManager({ project, phaseType, flyMode = false, onSa
     };
 
     const stateTransitionTemplate = (row: Phase) => {
-        if (!row._id) return
+        if (!row._id) return;
         const current = row.status;
         let prev: PhaseStatus | undefined;
         let next: PhaseStatus | undefined;
-        // project?.status === ProjectStatus.negotiation
 
         if (current === PhaseStatus.proposed) {
             if (canReview) {
                 next = PhaseStatus.reviewed;
             }
-        }
-        else if (current === PhaseStatus.reviewed) {
+        } else if (current === PhaseStatus.reviewed) {
             if (canApprove) {
                 next = PhaseStatus.approved;
             }
             if (canPropose) {
                 prev = PhaseStatus.proposed;
             }
-        }
-        else if (current === PhaseStatus.approved) {
+        } else if (current === PhaseStatus.approved) {
             if (canActivate) {
                 next = PhaseStatus.active;
             }
             if (canReview) {
                 prev = PhaseStatus.reviewed;
             }
-        }
-        else if (current === PhaseStatus.active) {
+        } else if (current === PhaseStatus.active) {
             if (canComplete) {
                 next = PhaseStatus.completed;
             }
             if (canApprove) {
                 prev = PhaseStatus.approved;
             }
-        }
-        else if (current === PhaseStatus.completed) {
+        } else if (current === PhaseStatus.completed) {
             if (canActivate) {
                 prev = PhaseStatus.active;
             }
@@ -190,35 +185,43 @@ export default function PhaseManager({ project, phaseType, flyMode = false, onSa
 
         return (
             <div className="flex gap-2">
-                {(next) &&
-                    <Button
-                        tooltip={`Make ${next}`}
-                        icon="pi pi-check"
-                        severity="success"
-                        size="small"
-                        onClick={() => {
-                            confirm.ask({
-                                operation: `Make to ${next}`,
-                                onConfirmAsync: () => updateStatus(row, next)
-                            });
-                        }}
-                    />
-                }
+                {/* ✅ Next Button */}
+                {next && (() => {
+                    const nextStatus = next; // local constant for TS
+                    return (
+                        <Button
+                            tooltip={`Make ${nextStatus}`}
+                            icon="pi pi-check"
+                            severity="success"
+                            size="small"
+                            onClick={() =>
+                                confirm.ask({
+                                    operation: `Make to ${nextStatus}`,
+                                    onConfirmAsync: () => updateStatus(row, nextStatus),
+                                })
+                            }
+                        />
+                    );
+                })()}
 
-                {(prev) &&
-                    <Button
-                        tooltip={`Back to ${prev}`}
-                        icon="pi pi-undo"
-                        severity="warning"
-                        size="small"
-                        onClick={() => {
-                            confirm.ask({
-                                operation: `Back to ${prev}`,
-                                onConfirmAsync: () => updateStatus(row, prev)
-                            });
-                        }}
-                    />
-                }
+                {/* ✅ Prev Button */}
+                {prev && (() => {
+                    const prevStatus = prev; // local constant for TS
+                    return (
+                        <Button
+                            tooltip={`Back to ${prevStatus}`}
+                            icon="pi pi-undo"
+                            severity="warning"
+                            size="small"
+                            onClick={() =>
+                                confirm.ask({
+                                    operation: `Back to ${prevStatus}`,
+                                    onConfirmAsync: () => updateStatus(row, prevStatus),
+                                })
+                            }
+                        />
+                    );
+                })()}
             </div>
         );
     };

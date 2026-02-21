@@ -11,6 +11,12 @@ export const StageApi = {
         return createdData as Stage;
     },
 
+    async getById(id: string): Promise<Stage> {
+        const url = `${end_point}/${id}`;
+        const data = await ApiClient.get(url);
+        return data as Stage;
+    },
+
     async getStages(options: GetStagesDTO): Promise<Stage[]> {
         const query = new URLSearchParams();
         const sanitized = sanitizeStage(options);

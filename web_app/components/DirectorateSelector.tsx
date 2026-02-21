@@ -10,7 +10,7 @@ export const DirectorateSelector = () => {
     } = useDirectorate();
 
     return (
-        <div className="card p-fluid">
+        <div className="card p-fluid shadow-2">
             <div className="formgrid grid">
                 <div className="field col-12 md:col-6 lg:col-4">
                     <label htmlFor="directorate">Directorate</label>

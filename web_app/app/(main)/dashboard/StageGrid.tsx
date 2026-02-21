@@ -14,15 +14,15 @@ const StageGrid = () => {
 
     const { hasPermission } = useAuth();
     const canRead = hasPermission([PERMISSIONS.STAGE.READ]);
-    if (!canRead) {
-        return (<></>);
-    }
 
     useEffect(() => {
+        if (!canRead) return; // ✅ condition inside hook
+
         const fetchStages = async () => {
             try {
                 const data = await StageApi.getStages({
-                    status: StageStatus.active, order: 1
+                    status: StageStatus.active,
+                    order: 1
                 });
                 setStages(data);
             } catch (err: any) {
@@ -31,18 +31,19 @@ const StageGrid = () => {
                 setLoading(false);
             }
         };
-        fetchStages();
-    }, []);
 
-    if (loading) {
-        return (
-            <ListSkeleton />
-        );
+        fetchStages();
+    }, [canRead]); // ✅ dependency added
+
+    if (!canRead) {
+        return null; // ✅ after hooks
     }
+
+    if (loading) return <ListSkeleton />;
 
     if (error) return <ErrorCard errorMessage={error} />;
 
-    if (stages.length === 0)
+    if (stages.length === 0) {
         return (
             <div className="flex justify-content-center align-items-center py-6">
                 <div className="text-center">
@@ -51,6 +52,7 @@ const StageGrid = () => {
                 </div>
             </div>
         );
+    }
 
     return (
         <div className="grid gap-4">
@@ -61,6 +63,6 @@ const StageGrid = () => {
             ))}
         </div>
     );
-}
+};
 
 export default StageGrid;

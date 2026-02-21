@@ -1,6 +1,9 @@
 'use client';
-import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
 import { Organization, OrgnUnit } from '@/app/(main)/organizations/models/organization.model';
+import { SpecializationApi } from '@/app/(main)/specializations/api/specialization.api';
+import { Specialization } from '@/app/(main)/specializations/models/specialization.model';
+import { useAuth } from '@/contexts/auth-context';
+import { PERMISSIONS } from '@/types/permissions';
 import { Button } from 'primereact/button';
 import { Calendar as PrimeCalendar } from 'primereact/calendar';
 import { Dialog } from 'primereact/dialog';
@@ -10,53 +13,42 @@ import { MultiSelect } from 'primereact/multiselect';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
-import { accessibilityOptions, Applicant, applicantUnits, genderOptions, validateApplicant } from '../../models/applicant.model';
 import { ApplicantApi } from '../../api/applicant.api';
-import { useAuth } from '@/contexts/auth-context';
-import { Role } from '@/app/(main)/roles/models/role.model';
-import { RoleApi } from '@/app/(main)/roles/api/role.api';
-import { PERMISSIONS } from '@/types/permissions';
-import { Specialization } from '@/app/(main)/specializations/models/specialization.model';
-import { SpecializationApi } from '@/app/(main)/specializations/api/specialization.api';
+import { accessibilityOptions, Applicant, genderOptions, validateApplicant } from '../../models/applicant.model';
+import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
 
 interface SaveApplicantDialogProps {
     visible: boolean;
     applicant: Applicant;
-    workspaces?: Organization[]
     onHide: () => void;
     onComplete?: (savedApplicant: Applicant) => void;
 }
 
-const SaveApplicantDialog = ({ visible, applicant, workspaces, onHide, onComplete }: SaveApplicantDialogProps) => {
+const SaveApplicantDialog = ({ visible, applicant, onHide, onComplete }: SaveApplicantDialogProps) => {
 
     const { hasPermission } = useAuth();
     const canReadSpecializations = hasPermission([PERMISSIONS.SPECIALIZATION.READ]);
 
     const [localApplicant, setLocalApplicant] = useState<Applicant>({ ...applicant });
     const [specializations, setSpecializations] = useState<Specialization[]>([]);
-    //const [userOrganizations, setUserOrganizations] = useState<Organization[]>([]);
-    //const [ownerships, setOwnerships] = useState<Organization[]>([]);
+    const [workspaces, setWorkspaces] = useState<Organization[]>([]);
     const [submitted, setSubmitted] = useState(false);
     const toast = useRef<Toast>(null);
 
-    /*
+
     useEffect(() => {
-        if (hasWorkspace) return
         const fetchOrganizations = async () => {
             try {
                 const depData = await OrganizationApi.getOrganizations({ type: OrgnUnit.Department });
                 const extData = await OrganizationApi.getOrganizations({ type: OrgnUnit.External });
-                //const dirData = await OrganizationApi.getOrganizations({ type: OrgnUnit.Directorate });
-                setUserOrganizations([...depData, ...extData]);
-                //setOwnerships([...dirData, ...depData, ...extData]);
-                //}
+                setWorkspaces([...depData, ...extData]);
             } catch (err) {
                 console.error('Failed to fetch organizations:', err);
             }
         };
         fetchOrganizations();
-    }, [hasWorkspace]);
-*/
+    }, []);
+
 
     useEffect(() => {
         if (!canReadSpecializations) {

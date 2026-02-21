@@ -6,7 +6,6 @@ import { Unit } from "./organization.type";
 export interface CreateOrganizationDTO {
     type: Unit;
     name: string;
-    // optional depending on organization type
     parent?: string;
     academicLevel?: AcademicLevel;
     classification?: Classification;

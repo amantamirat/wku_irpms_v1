@@ -30,9 +30,9 @@ const ThemeManager = ({ thematicArea, parent, level = 0 }: ThemeManagerProps) =>
     const confirm = useConfirmDialog();
 
     const canCreate = hasPermission([PERMISSIONS.THEME.CREATE]);
-    const canImport = level === 0 && hasPermission([PERMISSIONS.THEME.IMPORT]);
     const canEdit = hasPermission([PERMISSIONS.THEME.UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.THEME.DELETE]);
+    const canImport = level === 0 && hasPermission([PERMISSIONS.THEME.IMPORT]);
 
     // CRUD hook
     const {
@@ -105,14 +105,6 @@ const ThemeManager = ({ thematicArea, parent, level = 0 }: ThemeManagerProps) =>
                 }
 
                 if (!Array.isArray(themesData)) {
-                    /*
-                    toast.current?.show({
-                        severity: 'error',
-                        summary: 'Import Error',
-                        detail: 'Invalid import data',
-                        life: 3000
-                    });
-                    */
                     return;
                 }
                 // Call API

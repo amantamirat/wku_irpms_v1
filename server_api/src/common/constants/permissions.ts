@@ -174,6 +174,7 @@ export const PERMISSIONS = {
     READ: "criterion:read",
     UPDATE: "criterion:update",
     DELETE: "criterion:delete",
+    IMPORT: "criterion:import",
   },
 
   OPTION: {
@@ -182,7 +183,7 @@ export const PERMISSIONS = {
     UPDATE: "option:update",
     DELETE: "option:delete",
   },
-  
+
   THEMATIC: {
     CREATE: "thematic:create",
     READ: "thematic:read",

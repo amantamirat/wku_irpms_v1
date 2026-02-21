@@ -181,39 +181,18 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
     }
 
 
-    const reviewerButton = (row: ProjectDoc) => {
-        const current = row.status;
-        if (current === DocStatus.submitted) {
-            return
-        }
-        return (
-            <div className="flex gap-2">
-                <Button
-                    tooltip="evaluations"
-                    icon="pi pi-chart-bar"
-                    //severity="warning"
-                    size="small"
-                    onClick={() => {
-                        setSelectedDoc({ ...row });
-                        setShowReviewers(true);
-                    }
-                    }
-                />
-
-            </div>
-        );
-    };
-
-
     const stateTransitionTemplate = (row: ProjectDoc) => {
         const current = row.status;
-        let prev = undefined;
-        let next = undefined;
+
+        let prev: DocStatus | undefined = undefined;
+        let next: DocStatus | undefined = undefined;
+
         if (current === DocStatus.selected) {
             if (canSubmit) {
                 prev = DocStatus.submitted;
             }
         }
+
         if (current === DocStatus.accepted || current === DocStatus.rejected) {
             if (row.totalScore && canReview) {
                 prev = DocStatus.reviewed;
@@ -222,22 +201,27 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
                 prev = DocStatus.submitted;
             }
         }
+
         return (
             <div className="flex gap-2">
-                {prev && (
-                    <Button
-                        tooltip={`Back to ${prev}`}
-                        icon="pi pi-undo"
-                        severity="warning"
-                        size="small"
-                        onClick={() =>
-                            confirm.ask({
-                                operation: "revert",
-                                onConfirmAsync: () => updateStatus([row], prev)
-                            })
-                        }
-                    />
-                )}
+                {/* ✅ Prev Button */}
+                {prev && (() => {
+                    const prevStatus = prev; // local constant for TS
+                    return (
+                        <Button
+                            tooltip={`Back to ${prevStatus}`}
+                            icon="pi pi-undo"
+                            severity="warning"
+                            size="small"
+                            onClick={() =>
+                                confirm.ask({
+                                    operation: "revert",
+                                    onConfirmAsync: () => updateStatus([row], prevStatus),
+                                })
+                            }
+                        />
+                    );
+                })()}
             </div>
         );
     };
@@ -280,7 +264,6 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
             body: (row: ProjectDoc) => <MyBadge type="status" value={row.status ?? "Unknown"} />
         },
         { body: stateTransitionTemplate },
-        { body: reviewerButton }
     ].filter(Boolean);
 
     return (
@@ -306,10 +289,10 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
                 canDeleteRow={(row: ProjectDoc) => row.status === DocStatus.submitted}
 
 
-                /*
+
                 rowExpansionTemplate={(row) => <ReviewerManager projectDoc={row}
                     updateProjectDoc={onSaveComplete} />}
-                */
+
 
 
                 enableSearch={!project}
@@ -328,20 +311,6 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
                     onHide={hideSaveDialog}
                 />
             )}
-            {(showReviewers && selectedDoc) &&
-                <Dialog visible={showReviewers}
-                    maximized
-                    maximizable
-                    style={{ width: '80vw', maxWidth: '1200px' }}
-                    header={"Reviewers"}
-                    onHide={
-                        () => {
-                            setShowReviewers(false);
-                        }
-                    }>
-                    <ReviewerManager projectDoc={selectedDoc} updateProjectDoc={onSaveComplete} />
-                </Dialog>
-            }
         </>
     );
 };

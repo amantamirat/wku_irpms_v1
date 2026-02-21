@@ -90,27 +90,34 @@ export class CriterionService {
     }
 
 
-
-
-
-
     /**
-     * Batch import criteria (with optional options) under a given evaluation.
-     */
-    static async importCriteriaBatch(dto: ImportCriteriaBatchDTO) {
-        const { evaluation, criteriaData } = dto;
-
+ * Batch import criteria (with optional options) under a given evaluation.
+ * Accepts JSON like:
+ * [
+ *   { title, weight, formType, options? },
+ *   ...
+ * ]
+ */
+    async importCriteriaBatch(
+        evaluationId: string,
+        criteriaData: Array<{
+            title: string;
+            weight: number;
+            formType: FormType;
+            options?: { title: string; score: number }[];
+        }>
+    ) {
         // 1️⃣ Validate evaluation exists
-        const _evaluation = await Evaluation.findById(evaluation);
-        if (!_evaluation) throw new Error("Evaluation not found.");
+        const evaluation = await this.evalRepository.findById(evaluationId);
+        if (!evaluation) throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
 
         const createdResults = [];
 
-        // 2️⃣ Create criteria and options in sequence
+        // 2️⃣ Create criteria and options using injected repositories
         for (const criterion of criteriaData) {
             // Create criterion
-            const criterionDoc = await Criterion.create({
-                evaluation: evaluation,
+            const criterionDoc = await this.repository.create({
+                evaluation: evaluationId,
                 title: criterion.title,
                 weight: criterion.weight,
                 formType: criterion.formType,
@@ -118,13 +125,14 @@ export class CriterionService {
 
             let createdOptions = [];
 
-            // If closed form, process options
+            // If closed form, create options
             if (criterion.formType === FormType.closed && Array.isArray(criterion.options)) {
                 for (const opt of criterion.options) {
-                    if (opt.score > criterion.weight) continue; // skip invalid option
+                    // Skip invalid option if score > criterion weight
+                    if (opt.score > criterion.weight) continue;
 
-                    const optionDoc = await Option.create({
-                        criterion: criterionDoc._id,
+                    const optionDoc = await this.optionRepository.create({
+                        criterion: String(criterionDoc._id),
                         title: opt.title,
                         score: opt.score,
                     });
@@ -138,4 +146,5 @@ export class CriterionService {
 
         return createdResults;
     }
+
 }

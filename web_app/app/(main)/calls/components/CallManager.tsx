@@ -98,60 +98,70 @@ const CallManager = ({ calendar, directorate, grant, next = "stage" }: CallManag
 
     const stateTransitionTemplate = (row: Call) => {
         const current = row.status;
-        let prev = undefined;
-        let next = undefined;
+
+        // ✅ Explicit types
+        let prev: CallStatus | undefined = undefined;
+        let next: CallStatus | undefined = undefined;
+
         if (current === CallStatus.planned) {
             if (canActivate) {
                 next = CallStatus.active;
             }
-        }
-        else if (current === CallStatus.active) {
+        } else if (current === CallStatus.active) {
             if (canClose) {
                 next = CallStatus.closed;
             }
             if (canPlan) {
                 prev = CallStatus.planned;
             }
-        }
-        else if (current === CallStatus.closed) {
+        } else if (current === CallStatus.closed) {
             if (canActivate) {
                 prev = CallStatus.active;
             }
         }
 
-        return (<div className="flex gap-2">
-            {(next)
-                &&
-                <Button
-                    tooltip={`Make ${next}`}
-                    icon={next === CallStatus.closed ? "pi pi-lock" : "pi pi-check"}
-                    severity={next === CallStatus.closed ? "danger" : "success"}
-                    size="small"
-                    onClick={() => {
-                        confirm.ask({
-                            operation: `Make to ${next}`,
-                            onConfirmAsync: () => updateStatus(row, next)
-                        });
-                    }}
-                />
-            }
-            {(prev)
-                &&
-                <Button
-                    tooltip={`Back to ${prev}`}
-                    icon="pi pi-undo"
-                    severity="warning"
-                    size="small"
-                    onClick={() => {
-                        confirm.ask({
-                            operation: `back to ${prev}`,
-                            onConfirmAsync: () => updateStatus(row, prev)
-                        });
-                    }}
-                />
-            }
-        </div>);
-    }
+        return (
+            <div className="flex gap-2">
+                {/* ✅ Next Button */}
+                {next && (() => {
+                    const nextStatus = next; // local constant for TS
+                    return (
+                        <Button
+                            tooltip={`Make ${nextStatus}`}
+                            icon={nextStatus === CallStatus.closed ? "pi pi-lock" : "pi pi-check"}
+                            severity={nextStatus === CallStatus.closed ? "danger" : "success"}
+                            size="small"
+                            onClick={() => {
+                                confirm.ask({
+                                    operation: `Make to ${nextStatus}`,
+                                    onConfirmAsync: () => updateStatus(row, nextStatus),
+                                });
+                            }}
+                        />
+                    );
+                })()}
+
+                {/* ✅ Prev Button */}
+                {prev && (() => {
+                    const prevStatus = prev; // local constant for TS
+                    return (
+                        <Button
+                            tooltip={`Back to ${prevStatus}`}
+                            icon="pi pi-undo"
+                            severity="warning"
+                            size="small"
+                            onClick={() => {
+                                confirm.ask({
+                                    operation: `Back to ${prevStatus}`,
+                                    onConfirmAsync: () => updateStatus(row, prevStatus),
+                                });
+                            }}
+                        />
+                    );
+                })()}
+            </div>
+        );
+    };
 
     /** Delete */
     const deleteCall = async (row: Call) => {

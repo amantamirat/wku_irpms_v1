@@ -12,7 +12,7 @@ export default function QuickLinks() {
     // Configure links with permission requirements
     const links = useMemo(() => [
         {
-            href: '/projects',
+            href: '/projects/applicant',
             label: 'My Projects',
             icon: 'pi pi-briefcase',
             permission: PERMISSIONS.PROJECT.READ,
@@ -26,7 +26,7 @@ export default function QuickLinks() {
             buttonClass: 'p-button-warning'
         },
         {
-            href: '/projects/collaborators',
+            href: '/projects/collaborators/applicant',
             label: 'My Collaborations',
             icon: 'pi pi-users',
             permission: PERMISSIONS.COLLABORATOR.READ,

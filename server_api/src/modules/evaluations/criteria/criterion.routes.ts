@@ -40,10 +40,10 @@ router.delete(
 
 // Batch import criteria with options
 router.post(
-    "/import-batch",
+    "/import",
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.EVALUATION.CREATE]),
-    CriterionController.importCriteriaBatch
+    checkPermission([PERMISSIONS.CRITERION.IMPORT]),
+    controller.import
 );
 
 export default router;

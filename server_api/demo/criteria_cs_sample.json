@@ -1,0 +1,57 @@
+[
+  {
+    "title": "Impact on Community",
+    "weight": 25,
+    "formType": "Closed",
+    "options": [
+      { "title": "High – significant positive change", "score": 25 },
+      { "title": "Moderate – noticeable benefits", "score": 15 },
+      { "title": "Low – minimal impact", "score": 5 }
+    ]
+  },
+  {
+    "title": "Volunteer Participation",
+    "weight": 20,
+    "formType": "Closed",
+    "options": [
+      { "title": "Strong participation – majority of team involved", "score": 20 },
+      { "title": "Average participation – some team members involved", "score": 10 },
+      { "title": "Low participation – few members involved", "score": 5 }
+    ]
+  },
+  {
+    "title": "Sustainability of Initiative",
+    "weight": 20,
+    "formType": "Closed",
+    "options": [
+      { "title": "Highly sustainable – can continue long-term", "score": 20 },
+      { "title": "Moderately sustainable – may need support", "score": 10 },
+      { "title": "Not sustainable – short-term only", "score": 5 }
+    ]
+  },
+  {
+    "title": "Community Engagement and Collaboration",
+    "weight": 15,
+    "formType": "Closed",
+    "options": [
+      { "title": "Excellent – strong collaboration and participation", "score": 15 },
+      { "title": "Good – some collaboration, limited participation", "score": 10 },
+      { "title": "Poor – minimal collaboration", "score": 5 }
+    ]
+  },
+  {
+    "title": "Innovation and Creativity",
+    "weight": 10,
+    "formType": "Closed",
+    "options": [
+      { "title": "Highly innovative – unique approach", "score": 10 },
+      { "title": "Somewhat innovative – minor creativity", "score": 5 },
+      { "title": "Not innovative – standard approach", "score": 0 }
+    ]
+  },
+  {
+    "title": "Comments and Recommendations",
+    "weight": 10,
+    "formType": "Open"
+  }
+]

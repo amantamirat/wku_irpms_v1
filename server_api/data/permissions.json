@@ -590,6 +590,11 @@
   },
   {
     "category": "Evaluation Management",
+    "name": "criterion:import",
+    "description": "Import criterion entries"
+  },
+  {
+    "category": "Evaluation Management",
     "name": "option:create",
     "description": "Create option entries"
   },
@@ -608,7 +613,6 @@
     "name": "option:delete",
     "description": "Delete option entries"
   },
-  
   {
     "category": "Project Management",
     "name": "project:create",

@@ -21,7 +21,7 @@ interface ApplicantManagerProps {
 const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
 
     const confirm = useConfirmDialog();
-    const { getScopesByUnit, hasPermission } = useAuth();
+    const { hasPermission } = useAuth();
 
     const canCreate = hasPermission([PERMISSIONS.APPLICANT.CREATE]);
     const canEdit = hasPermission([PERMISSIONS.APPLICANT.UPDATE]);
@@ -55,11 +55,13 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
     const [showOwnershipDialog, setShowOwnershipDialog] = useState(false);
     const hasWorkspace = !!workspace;
 
-    /** FETCH Applicants */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
+        /*
         if (!workspace) {
             return
         }
+        */
         const fetchApplicants = async () => {
             try {
                 const data = await ApplicantApi.getApplicants({ workspace });
@@ -113,12 +115,6 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
             header: "Birth Date",
             body: (row: Applicant) =>
                 new Date(row.birthDate!).toLocaleDateString("en-CA")
-        },
-        {
-            header: "FIN", field: "fin", sortable: true
-        },
-        {
-            header: "ORCID", field: "orcid", sortable: true
         },
         { header: "Email", field: "email" }
     ];

@@ -71,18 +71,19 @@ const SaveDialog = (props: SaveDialogProps) => {
 
     useEffect(() => {
         if (!readPermission) return;
+
         const fetchPermissions = async () => {
             try {
                 const data = await PermissionApi.getPermissions();
-                //setPermissions(data);
                 const tree = buildPermissionTree(data);
                 setPermissionTree(tree);
             } catch (err) {
                 console.error("Failed to fetch permissions:", err);
             }
         };
+
         fetchPermissions();
-    }, []);
+    }, [readPermission]);
 
     useEffect(() => {
         setLocalRole({ ...role });
@@ -193,7 +194,9 @@ const SaveDialog = (props: SaveDialogProps) => {
                                     <i className="pi pi-exclamation-triangle text-4xl text-500 mb-3" />
                                 </div>
                                 <p className="m-0">
-                                    By modifying role's permissions, you might break the system permissions functionality.
+                                    <p className="m-0">
+                                        By modifying role&apos;s permissions, you might break the system permissions functionality.
+                                    </p>
                                 </p>
                             </Card>
                         </div>

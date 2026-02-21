@@ -51,8 +51,8 @@ const SaveCriterion = ({ visible, criterion, onComplete, onHide }: SaveCriterion
             }
 
             let saved = localCriterion._id
-                ? await CriterionApi.updateCriterion(localCriterion)
-                : await CriterionApi.createCriterion(localCriterion);
+                ? await CriterionApi.update(localCriterion)
+                : await CriterionApi.create(localCriterion);
 
             // keep evaluation reference
             saved = {

@@ -1,12 +1,26 @@
 'use client';
-import { useAuth } from '@/contexts/auth-context';
+
+import { useState } from 'react';
 import ProjectManager from './components/ProjectManager';
+import { Organization } from '../organizations/models/organization.model';
+import { WorkspaceSelector } from '@/components/WorkspaceSelector';
 
 const ProjectPage = () => {
-    const { getApplicant } = useAuth();
-    const applicant = getApplicant();
+    const [selectedWorkspace, setSelectedWorkspace] = useState<Organization | undefined>();
     return (
-        <ProjectManager applicant={applicant} />
+        <>
+            <WorkspaceSelector
+                value={selectedWorkspace}
+                onChange={setSelectedWorkspace}
+            />
+            {!selectedWorkspace && (
+                <div className="p-4 text-gray-500">
+                    Please select a workspace to view projects.
+                </div>
+            )}
+            {selectedWorkspace &&
+                <ProjectManager workspace={selectedWorkspace} />}
+        </>
     );
 };
 

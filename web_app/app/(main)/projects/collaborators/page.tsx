@@ -1,13 +1,22 @@
 'use client';
-
-import { useAuth } from "@/contexts/auth-context";
 import CollaboratorManager from "./components/CollaboratorManager";
+import { Divider } from "primereact/divider";
 
 const CollaboratorPage = () => {
-    const { getApplicant } = useAuth();
-    const applicant = getApplicant();
+    
+
     return (
-        <CollaboratorManager applicant={applicant} />
+        <div className="p-4 md:p-6">
+
+            <Divider align="left">
+                <span className="text-sm font-semibold text-primary">
+                    Active Collaborations
+                </span>
+            </Divider>
+
+            <CollaboratorManager />
+        </div>
     );
 };
+
 export default CollaboratorPage;

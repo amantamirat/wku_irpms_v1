@@ -85,8 +85,9 @@ const CalendarManager = () => {
 
     const stateTransitionTemplate = (row: Calendar) => {
         const current = row.status;
-        let prev = undefined;
-        let next = undefined;
+        let prev: CalendarStatus | undefined = undefined;
+        let next: CalendarStatus | undefined = undefined;
+
         if (current === CalendarStatus.planned) {
             if (canActivate) {
                 next = CalendarStatus.active;
@@ -106,39 +107,46 @@ const CalendarManager = () => {
             }
         }
 
-        return (<div className="flex gap-2">
-            {(next)
-                &&
-                <Button
-                    tooltip={`Make ${next}`}
-                    icon={next === CalendarStatus.closed ? "pi pi-lock" : "pi pi-check"}
-                    severity={next === CalendarStatus.closed ? "danger" : "success"}
-                    size="small"
-                    onClick={() => {
-                        confirm.ask({
-                            operation: `Make to ${next}`,
-                            onConfirmAsync: () => updateStatus(row, next)
-                        });
-                    }}
-                />
-            }
-            {(prev)
-                &&
-                <Button
-                    tooltip={`Back to ${prev}`}
-                    icon="pi pi-undo"
-                    severity="warning"
-                    size="small"
-                    onClick={() => {
-                        confirm.ask({
-                            operation: `back to ${prev}`,
-                            onConfirmAsync: () => updateStatus(row, prev)
-                        });
-                    }}
-                />
-            }
-        </div>);
-    }
+        return (
+            <div className="flex gap-2">
+                {next && (() => {
+                    const nextStatus = next; // ✅ local constant fixes type
+                    return (
+                        <Button
+                            tooltip={`Make ${nextStatus}`}
+                            icon={nextStatus === CalendarStatus.closed ? "pi pi-lock" : "pi pi-check"}
+                            severity={nextStatus === CalendarStatus.closed ? "danger" : "success"}
+                            size="small"
+                            onClick={() => {
+                                confirm.ask({
+                                    operation: `Make to ${nextStatus}`,
+                                    onConfirmAsync: () => updateStatus(row, nextStatus),
+                                });
+                            }}
+                        />
+                    );
+                })()}
+
+                {prev && (() => {
+                    const prevStatus = prev; // ✅ local constant fixes type
+                    return (
+                        <Button
+                            tooltip={`Back to ${prevStatus}`}
+                            icon="pi pi-undo"
+                            severity="warning"
+                            size="small"
+                            onClick={() => {
+                                confirm.ask({
+                                    operation: `Back to ${prevStatus}`,
+                                    onConfirmAsync: () => updateStatus(row, prevStatus),
+                                });
+                            }}
+                        />
+                    );
+                })()}
+            </div>
+        );
+    };
 
     /** Delete */
     const deleteCalendar = async (row: Calendar) => {

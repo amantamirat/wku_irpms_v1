@@ -31,32 +31,49 @@ export class ProjectRepository implements IProjectRepository {
         if (filters.call) {
             query.call = new mongoose.Types.ObjectId(filters.call);
         }
+
         if (filters.applicant) {
             query.applicant = new mongoose.Types.ObjectId(filters.applicant);
         }
+
         if (filters.status) {
             query.status = filters.status;
-        }
-
-        //add workspace field to the project
-        if (filters.workspace) {
-            const applicants = await Applicant.find({
-                workspace: new mongoose.Types.ObjectId(filters.workspace),
-            }).select("_id");
-
-            const applicantIds = applicants.map(a => a._id);
-
-            query.applicant = { $in: applicantIds };
         }
 
         let dbQuery = Project.find(query);
 
         if (filters.populate) {
-            dbQuery = dbQuery.populate('call applicant');
+            dbQuery = dbQuery.populate([
+                {
+                    path: 'call',
+                    match: filters.directorate
+                        ? { directorate: new mongoose.Types.ObjectId(filters.directorate) }
+                        : undefined,
+                    populate: {
+                        path: 'directorate calendar'
+                    }
+                },
+                {
+                    path: 'applicant',
+                    match: filters.workspace
+                        ? { workspace: new mongoose.Types.ObjectId(filters.workspace) }
+                        : undefined,
+                    populate: {
+                        path: 'workspace'
+                    }
+                }
+            ]);
         }
-        return dbQuery
+
+        const result = await dbQuery
             .lean<IProject[]>()
             .exec();
+
+        // Remove unmatched populated docs
+        return result.filter(p =>
+            (!filters.directorate || p.call) &&
+            (!filters.workspace || p.applicant)
+        );
     }
 
     async create(dto: CreateProjectDTO) {

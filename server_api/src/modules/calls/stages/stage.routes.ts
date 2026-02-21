@@ -24,6 +24,11 @@ router.post(
     controller.create
 );
 
+router.get('/:id', verifyActiveAccount,
+    checkPermission([PERMISSIONS.STAGE.READ]),
+    controller.getById
+);
+
 // Get cycles
 router.get(
     '/',

@@ -4,7 +4,7 @@ import { ProjectStatus } from "./project.status";
 
 export interface IProject extends Document {
     _id: mongoose.Types.ObjectId;
-    call: mongoose.Types.ObjectId;//can be removed
+    call: mongoose.Types.ObjectId;
     title: string;
     summary?: string;
     applicant: mongoose.Types.ObjectId;//user

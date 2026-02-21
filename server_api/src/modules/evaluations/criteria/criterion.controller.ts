@@ -80,27 +80,33 @@ export class CriterionController {
         }
     }
 
-    // static method is fine — it doesn't need arrow function
-
-    static importCriteriaBatch = async (req: AuthenticatedRequest, res: Response) => {
-
+    import = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error("User not found");
-
             const { evaluationId, criteriaData } = req.body;
+
+            // Validate input
             if (!evaluationId || !Array.isArray(criteriaData)) {
-                return errorResponse(res, 400, "evaluationId and criteriaData are required");
+                return errorResponse(
+                    res,
+                    400,
+                    "evaluationId and criteriaData are required"
+                );
             }
 
-            const dto: ImportCriteriaBatchDTO = {
-                evaluation: new mongoose.Types.ObjectId(evaluationId as string),
+            // Call service to import criteria
+            const result = await this.service.importCriteriaBatch(
+                evaluationId,
                 criteriaData
-            };
+            );
 
-            const result = await CriterionService.importCriteriaBatch(dto);
-            successResponse(res, 201, "Criteria imported successfully", result);
+            return successResponse(
+                res,
+                201,
+                "Criteria imported successfully",
+                result
+            );
         } catch (err: any) {
-            errorResponse(res, 400, err.message, err);
+            return errorResponse(res, 400, err.message, err);
         }
-    }
+    };
 }

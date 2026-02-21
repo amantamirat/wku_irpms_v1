@@ -2,7 +2,7 @@
   {
     "title": "Alignment with Institutional Technology Transfer Goals",
     "weight": 20,
-    "form_type": "Closed",
+    "formType": "Closed",
     "options": [
       { "title": "Strongly Aligned – directly supports institutional transfer strategy", "score": 20 },
       { "title": "Moderately Aligned – supports goals indirectly", "score": 15 },
@@ -13,7 +13,7 @@
   {
     "title": "Innovation and Commercial Potential",
     "weight": 25,
-    "form_type": "Closed",
+    "formType": "Closed",
     "options": [
       { "title": "High – novel technology with strong market demand", "score": 25 },
       { "title": "Moderate – some innovation with fair market interest", "score": 20 },
@@ -24,7 +24,7 @@
   {
     "title": "Intellectual Property (IP) Readiness and Protection",
     "weight": 15,
-    "form_type": "Closed",
+    "formType": "Closed",
     "options": [
       { "title": "IP secured or in advanced filing stage", "score": 15 },
       { "title": "IP under preparation or review", "score": 10 },
@@ -34,7 +34,7 @@
   {
     "title": "Implementation and Collaboration Feasibility",
     "weight": 15,
-    "form_type": "Closed",
+    "formType": "Closed",
     "options": [
       { "title": "Highly feasible – clear roadmap and strong partners", "score": 15 },
       { "title": "Moderately feasible – partial readiness or limited partners", "score": 10 },
@@ -44,7 +44,7 @@
   {
     "title": "Socioeconomic and Environmental Impact",
     "weight": 15,
-    "form_type": "Closed",
+    "formType": "Closed",
     "options": [
       { "title": "High – significant positive economic or social outcomes", "score": 15 },
       { "title": "Moderate – some benefits with limited scope", "score": 10 },
@@ -54,7 +54,7 @@
   {
     "title": "Scalability and Sustainability",
     "weight": 10,
-    "form_type": "Closed",
+    "formType": "Closed",
     "options": [
       { "title": "High – can be scaled and maintained long-term", "score": 10 },
       { "title": "Moderate – scalable with additional support", "score": 7 },
@@ -64,6 +64,6 @@
   {
     "title": "Comments and Recommendations",
     "weight": 0,
-    "form_type": "Open"
+    "formType": "Open"
   }
 ]

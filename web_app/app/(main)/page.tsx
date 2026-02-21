@@ -1,6 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
-import CallGrid from "./dashboard/CallGrid";
 import QuickLinks from "./dashboard/QuickLinks";
 import StageGrid from "./dashboard/StageGrid";
 

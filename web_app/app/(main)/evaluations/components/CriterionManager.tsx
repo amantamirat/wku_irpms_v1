@@ -11,6 +11,7 @@ import { Evaluation } from "../../evaluations/models/evaluation.model";
 import { useAuth } from "@/contexts/auth-context";
 import OptionManager from "./OptionManager";
 import { PERMISSIONS } from "@/types/permissions";
+import { FileUpload } from "primereact/fileupload";
 
 
 interface CriterionManagerProps {
@@ -32,6 +33,7 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
     const canCreate = hasPermission([PERMISSIONS.CRITERION.CREATE]);
     const canEdit = hasPermission([PERMISSIONS.CRITERION.UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.CRITERION.DELETE]);
+    const canImport = hasPermission([PERMISSIONS.CRITERION.IMPORT]);
 
     /** CRUD Hook */
     const {
@@ -49,23 +51,24 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
     const [showSaveDialog, setShowSaveDialog] = useState(false);
 
     /** Fetch criteria for the evaluation */
+
+    const fetchCriteria = async () => {
+        try {
+            setLoading(true);
+            const data = await CriterionApi.getCriteria({
+                evaluation
+            });
+            setAll(data);
+        } catch (err: any) {
+            setError("Failed to load criteria: " + (err?.message ?? ""));
+        } finally {
+            setLoading(false);
+        }
+    };
     useEffect(() => {
         if (!evaluation) {
             return;
         }
-        const fetchCriteria = async () => {
-            try {
-                setLoading(true);
-                const data = await CriterionApi.getCriteria({
-                    evaluation
-                });
-                setAll(data);
-            } catch (err: any) {
-                setError("Failed to load criteria: " + (err?.message ?? ""));
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchCriteria();
     }, [evaluation]);
 
@@ -77,7 +80,7 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
 
     /** Delete criterion */
     const deleteCriterion = async (row: Criterion) => {
-        const ok = await CriterionApi.deleteCriterion(row);
+        const ok = await CriterionApi.delete(row);
         if (ok) removeItem(row);
     };
 
@@ -100,8 +103,9 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
         },
     ];
 
-    /*
     const endToolbarTemplate = () => {
+        if (!canImport) return undefined;
+
         const handleImport = async (event: any) => {
             try {
                 const file = event.files[0];
@@ -109,6 +113,8 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
 
                 const text = await file.text();
                 const json = JSON.parse(text);
+
+                // Expecting either array or { criteriaData: [...] }
                 let criteriaData;
                 if (Array.isArray(json)) {
                     criteriaData = json;
@@ -116,42 +122,45 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
                     criteriaData = json.criteriaData;
                 }
 
-                if (!Array.isArray(criteriaData)) {
-                    toast.current?.show({
-                        severity: 'error',
-                        summary: 'Import Error',
-                        detail: 'Invalid import data',
-                        life: 3000
-                    });
-                    return;
-                }
+                if (!Array.isArray(criteriaData)) return;
+
                 // Call API
                 if (evaluation?._id) {
-                    const result = await CriterionApi.importCriteriaBatch(evaluation._id, criteriaData);
+                    const result = await CriterionApi.importCriteriaBatch(
+                        evaluation._id,
+                        criteriaData
+                    );
+
+                    /*
                     toast.current?.show({
                         severity: 'success',
                         summary: 'Import Successful',
                         detail: `Imported ${result.length} criteria`,
                         life: 3000
                     });
+                    */
                 }
-                // Reload themes
+
+                // Reload criteria
                 await fetchCriteria();
             } catch (err) {
+                /*
                 toast.current?.show({
                     severity: 'error',
                     summary: 'Import Failed',
                     detail: '' + err,
                     life: 3000
                 });
+                */
             }
         };
+
         return (
             <div className="my-2">
                 <FileUpload
                     mode="basic"
                     accept="application/json"
-                    maxFileSize={1000000}
+                    maxFileSize={100000}
                     chooseLabel="Import"
                     className="mr-2 inline-block"
                     customUpload
@@ -160,7 +169,6 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
             </div>
         );
     };
-*/
     return (
         <>
             <CrudManager
@@ -175,6 +183,8 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
                 canCreate={canCreate}
                 canEdit={canEdit}
                 canDelete={canDelete}
+
+                toolbarEnd={endToolbarTemplate()}
 
                 onCreate={() => {
                     setCriterion({ ...emptyCriterion });

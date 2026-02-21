@@ -78,20 +78,18 @@ export class ThemeController {
             errorResponse(res, 400, err.message, err);
         }
     }
+
+
     import = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { thematicAreaId, themesData } = req.body;
             if (!thematicAreaId || !Array.isArray(themesData)) {
                 return errorResponse(res, 400, "thematic_areaId and themesData are required");
             }
-            if (!req.user) {
-                throw new Error("User not found!");
-            }
             const result = await this.service.importThemes(
                 thematicAreaId as any,
                 themesData
             );
-
             successResponse(
                 res,
                 201,

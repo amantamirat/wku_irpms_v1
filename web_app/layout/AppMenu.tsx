@@ -20,6 +20,25 @@ const AppMenu = () => {
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
         },
         {
+            label: 'Workspace',
+            visible: hasPermission([
+                PERMISSIONS.PROJECT.CREATE,
+            ]),
+            items: [
+                {
+                    label: 'Projects',
+                    icon: PrimeIcons.BRIEFCASE,
+                    to: '/projects',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.PROJECT.CREATE
+                        ]
+                    )
+                },
+
+            ]
+        },
+        {
             label: 'Directorate',
             visible: hasPermission([
                 PERMISSIONS.CALL.CREATE,
@@ -62,7 +81,6 @@ const AppMenu = () => {
             visible: hasPermission(
                 [
                     PERMISSIONS.CALENDAR.CREATE,
-                    PERMISSIONS.PROJECT.CREATE,
                     PERMISSIONS.GRANT.CREATE,
                 ]
             ),
@@ -91,18 +109,7 @@ const AppMenu = () => {
                             PERMISSIONS.GRANT.DELETE
                         ]
                     )
-                },
-
-                {
-                    label: 'Projects',
-                    icon: PrimeIcons.BRIEFCASE,
-                    to: '/projects/workspace',
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.PROJECT.CREATE
-                        ]
-                    )
-                },
+                }
 
             ]
         },

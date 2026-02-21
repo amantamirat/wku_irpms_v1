@@ -6,7 +6,7 @@ import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useCrudList } from "@/hooks/useCrudList";
 import MyBadge from "@/templates/MyBadge";
 import { PERMISSIONS } from "@/types/permissions";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ProjectApi } from "../api/project.api";
 import { Project, ProjectStatus } from "../models/project.model";
 import ProjectDetail from "./ProjectDetail";
@@ -18,7 +18,7 @@ import { Organization } from "../../organizations/models/organization.model";
 interface ProjectManagerProps {
     call?: Call;
     applicant?: Applicant;
-    workspace? :Organization;
+    workspace?: Organization;
 }
 
 const ProjectManager = ({ call, applicant, workspace }: ProjectManagerProps) => {
@@ -33,7 +33,7 @@ const ProjectManager = ({ call, applicant, workspace }: ProjectManagerProps) => 
     };
 
     // ✅ Permissions
-    const canCreate = hasPermission([PERMISSIONS.PROJECT.CREATE]);
+    const canCreate = applicant && hasPermission([PERMISSIONS.PROJECT.CREATE]);
     const canEdit = hasPermission([PERMISSIONS.PROJECT.UPDATE]);
     const canDelete = hasPermission([PERMISSIONS.PROJECT.DELETE]);
     // State permissions
@@ -98,77 +98,83 @@ const ProjectManager = ({ call, applicant, workspace }: ProjectManagerProps) => 
 
     const stateTransitionTemplate = (row: Project) => {
         const current = row.status;
-        let prev = undefined;
-        let next = undefined;
+
+        let prev: ProjectStatus | undefined = undefined;
+        let next: ProjectStatus | undefined = undefined;
+
         if (current === ProjectStatus.accepted) {
             if (canNegotiate) {
                 next = ProjectStatus.negotiation;
             }
-        }
-        else if (current === ProjectStatus.negotiation) {
+        } else if (current === ProjectStatus.negotiation) {
             if (canApprove) {
                 next = ProjectStatus.approved;
             }
             if (canNegotiate) {
                 prev = ProjectStatus.accepted;
             }
-        }
-        else if (current === ProjectStatus.approved) {
+        } else if (current === ProjectStatus.approved) {
             if (canGrant) {
                 next = ProjectStatus.granted;
             }
             if (canApprove) {
                 prev = ProjectStatus.negotiation;
             }
-        }
-        else if (current === ProjectStatus.granted) {
+        } else if (current === ProjectStatus.granted) {
             if (canComplete) {
                 next = ProjectStatus.completed;
             }
             if (canGrant) {
-                prev = ProjectStatus.approved
+                prev = ProjectStatus.approved;
             }
-        }
-        else if (current === ProjectStatus.completed) {
+        } else if (current === ProjectStatus.completed) {
             if (canComplete) {
-                prev = ProjectStatus.granted
+                prev = ProjectStatus.granted;
             }
         }
 
+        return (
+            <div className="flex gap-2">
+                {/* ✅ Next Button */}
+                {next && (() => {
+                    const nextStatus = next; // local constant for TS
+                    return (
+                        <Button
+                            tooltip={`Make ${nextStatus}`}
+                            icon="pi pi-check"
+                            severity="success"
+                            size="small"
+                            onClick={() => {
+                                confirm.ask({
+                                    operation: `Make to ${nextStatus}`,
+                                    onConfirmAsync: () => updateStatus(row, nextStatus),
+                                });
+                            }}
+                        />
+                    );
+                })()}
 
-        return (<div className="flex gap-2">
-            {(next)
-                &&
-                <Button
-                    tooltip={`Make ${next}`}
-                    icon="pi pi-check"
-                    severity="success"
-                    size="small"
-                    onClick={() => {
-                        confirm.ask({
-                            operation: `Make to ${next}`,
-                            onConfirmAsync: () => updateStatus(row, next)
-                        });
-                    }}
-                />
-            }
-            {(prev)
-                &&
-                <Button
-                    tooltip={`Back to ${prev}`}
-                    icon="pi pi-undo"
-                    severity="warning"
-                    size="small"
-                    onClick={() => {
-                        confirm.ask({
-                            operation: `back to ${prev}`,
-                            onConfirmAsync: () => updateStatus(row, prev)
-                        });
-                    }}
-                />
-            }
-        </div>);
-    }
+                {/* ✅ Prev Button */}
+                {prev && (() => {
+                    const prevStatus = prev; // local constant for TS
+                    return (
+                        <Button
+                            tooltip={`Back to ${prevStatus}`}
+                            icon="pi pi-undo"
+                            severity="warning"
+                            size="small"
+                            onClick={() => {
+                                confirm.ask({
+                                    operation: `Back to ${prevStatus}`,
+                                    onConfirmAsync: () => updateStatus(row, prevStatus),
+                                });
+                            }}
+                        />
+                    );
+                })()}
+            </div>
+        );
+    };
 
     const deleteProject = async (row: Project) => {
         const deleted = await ProjectApi.delete(row);
@@ -180,27 +186,89 @@ const ProjectManager = ({ call, applicant, workspace }: ProjectManagerProps) => 
         setShowSaveDialog(false);
     };
 
-    const columns = [
-        { header: "Call", field: "call.title", sortable: true },
-        { header: "Title", field: "title", sortable: true },
-        { header: "Lead PI", field: "applicant.name", sortable: true },
-        {
-            header: "Budget", field: "totalBudget",
+    const columns = useMemo(() => {
+        const cols: any[] = [];
+
+        // If workspace context → show more structural info
+        if (workspace) {
+            cols.push(
+                {
+                    header: "Calendar",
+                    field: "call.calendar.year",
+                    sortable: true
+                },
+                {
+                    header: "Directorate",
+                    field: "call.directorate.name",
+                    sortable: true
+                }
+            );
+        }
+
+        // Show Call column only if NOT inside a specific call
+        if (!call) {
+            cols.push({
+                header: "Call",
+                field: "call.title",
+                sortable: true
+            });
+        }
+
+        cols.push(
+            {
+                header: "Title",
+                field: "title",
+                sortable: true,
+                style: { width: '250px', maxWidth: '250px' },
+                body: (row: Project) => (
+                    <div
+                        className="truncate"
+                        style={{
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                        }}
+                        title={row.title}
+                    >
+                        {row.title}
+                    </div>
+                )
+            }
+        );
+
+        // Hide applicant column if already filtering by applicant
+        if (!applicant) {
+            cols.push({
+                header: "PI",
+                field: "applicant.name",
+                sortable: true
+            });
+        }
+
+        cols.push({
+            header: "Budget",
+            field: "totalBudget",
+            sortable: true,
             body: (row: Project) => {
                 const budget = row?.totalBudget;
                 return typeof budget === "number"
                     ? budget.toLocaleString()
                     : "-";
-            },
-            sortable: true
-        },
-        {
-            header: "Status", field: "status", sortable: true,
+            }
+        });
+
+        cols.push({
+            header: "Status",
+            field: "status",
+            sortable: true,
             body: (p: Project) =>
                 <MyBadge type="status" value={p.status ?? 'Unknown'} />
-        },
-        { body: stateTransitionTemplate }
-    ];
+        });
+
+        cols.push({ body: stateTransitionTemplate });
+
+        return cols;
+    }, [call, applicant, workspace]);
 
     return (
         <>

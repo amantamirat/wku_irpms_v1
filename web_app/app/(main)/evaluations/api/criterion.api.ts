@@ -5,7 +5,7 @@ const end_point = '/criteria';
 
 export const CriterionApi = {
 
-    async createCriterion(criterion: Partial<Criterion>): Promise<Criterion> {
+    async create(criterion: Partial<Criterion>): Promise<Criterion> {
         const sanitized = sanitizeCriterion(criterion);
         const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as Criterion;
@@ -22,14 +22,14 @@ export const CriterionApi = {
     },
 
     async importCriteriaBatch(evaluationId: string, criteriaData: any[]): Promise<any> {
-        const response = await ApiClient.post(`${end_point}/import-batch`, {
+        const response = await ApiClient.post(`${end_point}/import`, {
             evaluationId: evaluationId,
             criteriaData: criteriaData
         });
         return response;
     },
 
-    async updateCriterion(criterion: Partial<Criterion>): Promise<Criterion> {
+    async update(criterion: Partial<Criterion>): Promise<Criterion> {
         if (!criterion._id) {
             throw new Error("_id required.");
         }
@@ -39,7 +39,7 @@ export const CriterionApi = {
         return updatedData as Criterion;
     },
 
-    async deleteCriterion(criterion: Partial<Criterion>): Promise<boolean> {
+    async delete(criterion: Partial<Criterion>): Promise<boolean> {
         if (!criterion._id) {
             throw new Error("_id required.");
         }

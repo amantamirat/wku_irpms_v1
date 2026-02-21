@@ -1,12 +1,12 @@
-import { CreatePhaseDto } from "./phase/phase.dto";
 import { ProjectStatus } from "./project.status";
 
 export interface GetProjectsDTO {
     call?: string;
     applicant?: string;
-    workspace?: string;
     status?: ProjectStatus;
     populate?: boolean;
+    workspace?: string;
+    directorate?: string;
     //skip?: number;
     //limit?: number;
 }
@@ -26,7 +26,7 @@ export interface UpdateProjectDTO {
     data: Partial<{
         title: string;
         summary: string;
-        applicant: string;
+        //applicant: string;
         totalBudget: number;
         totalDuration: number;
         totalCollabs: number;
