@@ -13,7 +13,8 @@ import ResultManager from "../results/components/ResultManager";
 import { ReviewerApi } from "../api/reviewer.api";
 import { Reviewer, ReviewerStatus } from "../models/reviewer.model";
 import SaveReviewerDialog from "./SaveReviewerDialog";
-import { ProjectDoc, DocStatus } from "@/app/(main)/projects/documents/models/document.model";
+import { ProjectDoc } from "@/app/(main)/projects/documents/models/document.model";
+import { ProjectDocApi } from "@/app/(main)/projects/documents/api/project.doc.api";
 
 interface ReviewerManagerProps {
     projectDoc?: ProjectDoc;
@@ -35,8 +36,8 @@ const ReviewerManager = ({ projectDoc, applicant, updateProjectDoc }: ReviewerMa
         status: ReviewerStatus.pending
     };
 
-    const stageStatus = projectDoc?.status;
-    const creationStatus = [DocStatus.submitted, DocStatus.selected];
+    //const stageStatus = projectDoc?.status;
+    //const creationStatus = [DocStatus.submitted, DocStatus.selected];
 
     const canCreate = !!projectDoc && hasPermission([PERMISSIONS.REVIEWER.CREATE]) //&& stageStatus && creationStatus.includes(stageStatus);
     const canEdit = !!projectDoc && hasPermission([PERMISSIONS.REVIEWER.UPDATE]) //&& stageStatus && creationStatus.includes(stageStatus);
@@ -78,10 +79,11 @@ const ReviewerManager = ({ projectDoc, applicant, updateProjectDoc }: ReviewerMa
         fetchReviewers();
     }, [applicant, projectDoc]);
 
-    const updateDocument = (projectDoc: ProjectDoc) => {
+    const updateDocument = async (projectDoc: ProjectDoc) => {
         if (updateProjectDoc && projectDoc) {
+            const synced = await ProjectDocApi.getById(projectDoc._id ?? "");
             updateProjectDoc({
-                ...projectDoc,
+                ...synced,
                 project: projectDoc.project, stage: projectDoc.stage
             });
         }
@@ -105,6 +107,11 @@ const ReviewerManager = ({ projectDoc, applicant, updateProjectDoc }: ReviewerMa
             ...updated, applicant: row.applicant,
             projectStage: row.projectStage
         });
+
+        if (projectDoc) {
+            updateDocument(projectDoc);
+        }
+
     };
 
     const hideSaveDialog = () => {
@@ -142,6 +149,11 @@ const ReviewerManager = ({ projectDoc, applicant, updateProjectDoc }: ReviewerMa
             }
             if (canAccept) {
                 prev = ReviewerStatus.accepted;
+            }
+        }
+        if (current === ReviewerStatus.approved) {
+            if (canSubmit) {
+                prev = ReviewerStatus.submitted;
             }
         }
 

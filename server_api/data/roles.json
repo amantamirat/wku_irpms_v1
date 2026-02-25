@@ -45,12 +45,17 @@
             "option:*",
             "stage:*",
             "document:read",
+            "document:status.submitted",
+            "document:status.selected",
+            "document:status.accepted",
+            "document:status.rejected",
+            "applicant:read",
             "reviewer:*",
-            "applicant:read"
+            "result:read"
         ]
     },
     {
-        "name": "app",
+        "name": "a-applicant",
         "permissions": [
             "calendar:read",
             "stage:read",
@@ -58,9 +63,16 @@
         ]
     },
     {
-        "name": "reviewer",
+        "name": "r-reviewer",
         "permissions": [
-            "calendar:read"
+            "calendar:read",
+            "reviewer:read",
+            "reviewer:status.pending",
+            "reviewer:status.accepted",
+            "reviewer:status.submitted",
+            "criterion:read",
+            "option:read",
+            "result:*"
         ]
     }
 ]

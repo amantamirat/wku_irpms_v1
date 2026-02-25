@@ -30,3 +30,8 @@ export interface UpdateReviewerStatusDTO {
     applicantId: string;
 }
 
+export interface ExistsReviewersDTO {
+    applicant?: string;
+    document?: string;
+}
+

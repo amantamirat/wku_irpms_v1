@@ -90,6 +90,16 @@ export class ProjectDocController {
         }
     };
 
+    getById = async (req: Request, res: Response) => {
+        try {
+            const { id } = req.params;
+            const doc = await this.service.getById(id);
+            successResponse(res, 200, 'doc fetched', doc);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
     // ---------------------------------------------------
     // SUBMIT
     // ---------------------------------------------------

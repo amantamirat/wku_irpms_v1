@@ -24,7 +24,7 @@ export class DocumentSynchronizer {
 
     let newStatus: DocStatus = DocStatus.selected;
 
-    let totalScore: number | undefined = undefined;
+    let totalScore: number | undefined | null = undefined;
 
     if (reviewers.length > 0) {
       const allApproved = reviewers.every(r => r.status === ReviewerStatus.approved);
@@ -33,13 +33,12 @@ export class DocumentSynchronizer {
         const totalWeight = reviewers.reduce((sum, r) => sum + (r.weight ?? 1), 0);
         totalScore = reviewers.reduce((sum, r) => sum + (r.score ?? 0) * (r.weight ?? 1), 0) / totalWeight;
       } else {
-        newStatus = DocStatus.under_review;
+        totalScore = null;
       }
     }
 
     if (newStatus !== currentStatus && DocumentStateMachine.canTransition(currentStatus, newStatus)) {
       const updateData: any = { status: newStatus };
-      // only update totalScore if it exists
       if (totalScore !== undefined) {
         updateData.totalScore = totalScore;
       }

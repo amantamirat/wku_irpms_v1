@@ -6,10 +6,10 @@ import { DeleteDto } from "../../../util/delete.dto";
 import { ApplicantRepository } from "../../applicants/applicant.repository";
 import { CallRepository, ICallRepository } from "../../calls/call.repository";
 import { CallStatus } from "../../calls/call.status";
+import { ReviewerRepository } from "../../calls/stages/reviewers/reviewer.repository";
 import { IStageRepository } from "../../calls/stages/stage.repository";
 import { StageStatus } from "../../calls/stages/stage.status";
 import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
-import { ThemeRepository } from "../../thematics/themes/theme.repository";
 import { CollaboratorRepository } from "../collaborators/collaborator.repository";
 import { PhaseType } from "../phase/phase.enum";
 import { PhaseRepository } from "../phase/phase.repository";
@@ -30,10 +30,11 @@ export class DocumentService {
         private readonly stageRepository: IStageRepository,
         private readonly callRepository: ICallRepository = new CallRepository(),
         private readonly appRepository = new ApplicantRepository(),
-        private readonly themeRepository = new ThemeRepository(),
+        //private readonly themeRepository = new ThemeRepository(),
         private readonly projectThemeRepository = new ProjectThemeRepository(),
         private readonly collabRepository = new CollaboratorRepository(),
         private readonly phaseRepository = new PhaseRepository(),
+        private readonly reviewerRepository = new ReviewerRepository(),
 
         private readonly docSynchronizer = new DocSynchronizer(
             projectRepository,
@@ -58,8 +59,6 @@ export class DocumentService {
 
         private readonly validator: ConstraintValidator = new ConstraintValidator(
             projectRepository),
-
-
 
     ) { }
 
@@ -114,6 +113,12 @@ export class DocumentService {
         }
     }
 
+    async getById(id: string) {
+        const doc = await this.docRepository.findById(id);
+        if (!doc) throw new AppError(ERROR_CODES.DOC_NOT_FOUND);
+        return doc;
+    }
+
     async submit(dto: SubmitProjectDTO) {
         const { call, title, summary, applicant, collaborators, phases, themes, documentPath } = dto;
 
@@ -134,7 +139,7 @@ export class DocumentService {
             const appDoc = await this.appRepository.findById(app);
             if (!appDoc) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
             appDocs.push(appDoc);
-        }        
+        }
 
         await this.validator.validateProjectConstraints(String(callDoc.grant), dto);
 
@@ -192,8 +197,10 @@ export class DocumentService {
             if (!docDoc) throw new Error(ERROR_CODES.DOC_NOT_FOUND);
 
             const stageDoc = await this.stageRepository.findById(String(docDoc.stage));
-            if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-            if (stageDoc.status !== StageStatus.active) throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
+            if (!stageDoc)
+                throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+            if (stageDoc.status !== StageStatus.active)
+                throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
 
             const projectDoc = await this.projectRepository.findById(String(docDoc.project));
             if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
@@ -209,22 +216,26 @@ export class DocumentService {
             const current = docDoc.status;
             DocumentStateMachine.validateTransition(current, next);
 
-            //backwards
-            if (next === DocStatus.submitted || next === DocStatus.reviewed) {
-                if (projectStatus !== ProjectStatus.accepted && projectStatus !== ProjectStatus.rejected) {
-                    throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
+            if (current === DocStatus.selected) {
+                if (next === DocStatus.submitted) {
+                    if (await this.reviewerRepository.exist({ document: id })) {
+                        throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
+                    }
                 }
+            }
+
+            if (current === DocStatus.accepted || current === DocStatus.rejected) {
+
                 if (next === DocStatus.submitted && docDoc.totalScore) {
                     throw new AppError(ERROR_CODES.DOC_SCORE_ALREADY_EXISTS);
                 }
-                if (next === DocStatus.reviewed && !docDoc.totalScore) {
+                if (next === DocStatus.reviewed && (!docDoc.totalScore || docDoc.totalScore !== null)) {
                     throw new AppError(ERROR_CODES.DOC_SCORE_NOT_EXISTS);
                 }
                 const projectDocs = await this.docRepository.find({ project: String(docDoc.project) });
                 if (projectDocs.length > stageDoc.order) {
                     throw new AppError(ERROR_CODES.NEXT_DOC_ALREADY_EXISTS);
                 }
-
             }
             validDocs.push(docDoc);
         }

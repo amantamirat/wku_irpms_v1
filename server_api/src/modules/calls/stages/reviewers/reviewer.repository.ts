@@ -1,15 +1,13 @@
-// reviewer.repository.ts
 import mongoose from "mongoose";
 import { Reviewer, IReviewer } from "./reviewer.model";
-import { CreateReviewerDTO, GetReviewersDTO, UpdateReviewerDTO } from "./reviewer.dto";
+import { CreateReviewerDTO, ExistsReviewersDTO, GetReviewersDTO, UpdateReviewerDTO } from "./reviewer.dto";
 
 export interface IReviewerRepository {
     findById(id: string): Promise<IReviewer | null>;
     find(options: GetReviewersDTO): Promise<Partial<IReviewer>[]>;
-    //findByProjectStage(projectStageId: string): Promise<Partial<IReviewer>[]>;
-    //findByApplicant(applicantId: string): Promise<Partial<IReviewer>[]>;
     create(dto: CreateReviewerDTO): Promise<IReviewer>;
     update(id: string, data: UpdateReviewerDTO["data"]): Promise<IReviewer | null>;
+    exist(filters: ExistsReviewersDTO): Promise<boolean>;
     delete(id: string): Promise<IReviewer | null>;
 }
 
@@ -51,7 +49,7 @@ export class ReviewerRepository implements IReviewerRepository {
         return reviewerQuery.exec();
     }
 
-    
+
     async create(dto: CreateReviewerDTO) {
         const data: Partial<IReviewer> = {
             projectStage: new mongoose.Types.ObjectId(dto.projectStage),
@@ -76,7 +74,18 @@ export class ReviewerRepository implements IReviewerRepository {
             { $set: updateData },
             { new: true }
         ).exec();
-       // return updated;
+        // return updated;
+    }
+    async exist(filters: ExistsReviewersDTO): Promise<boolean> {
+        const query: any = {};
+        if (filters.applicant) {
+            query.applicant = new mongoose.Types.ObjectId(filters.applicant);
+        }
+        if (filters.document) {
+            query.projectStage = new mongoose.Types.ObjectId(filters.document);
+        }
+        const result = await Reviewer.exists(query).exec();
+        return result !== null;
     }
 
     async delete(id: string) {

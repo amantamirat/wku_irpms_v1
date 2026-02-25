@@ -45,10 +45,11 @@ export class ReviewerService {
 
         const projectStageDoc = await this.documentRepository.findById(projectStage);
         if (!projectStageDoc) throw new AppError(ERROR_CODES.DOC_NOT_FOUND);
-
-        if ([DocStatus.reviewed, DocStatus.accepted, DocStatus.rejected].includes(projectStageDoc.status))
+        const projectStageStatus = projectStageDoc.status;
+        if (projectStageStatus !== DocStatus.selected)
             throw new AppError(ERROR_CODES.INVALID_DOC_STATUS);
-
+        //if ([DocStatus.reviewed, DocStatus.accepted, DocStatus.rejected].includes(projectStageDoc.status))
+        //    throw new AppError(ERROR_CODES.INVALID_DOC_STATUS);
         const applicantDoc = await this.applicantRepository.findById(applicant);
         if (!applicantDoc) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
 
@@ -58,7 +59,6 @@ export class ReviewerService {
 
         if (String(projectDoc.applicant) === applicant)
             throw new Error(ERROR_CODES.INVALID_REVIEWER);
-
         const collaborators = await this.collaboratorRepository.find({ project });
         if (collaborators.find(c => String(c.applicant) === applicant)) {
             throw new AppError(ERROR_CODES.INVALID_REVIEWER);
@@ -163,7 +163,7 @@ export class ReviewerService {
         if (deleted) {
             await this.resultRepository.deleteByReviewer(id);
             await this.docSynchronizer.sync(reviewerDoc.projectStage.toString());
-        }        
+        }
         return deleted
     }
 }

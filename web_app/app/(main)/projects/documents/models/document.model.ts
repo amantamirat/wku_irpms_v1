@@ -16,7 +16,7 @@ export type ProjectDoc = {
     stage?: string | Stage;
     documentPath?: string;
     file?: File;
-    totalScore?: number;
+    totalScore?: number | null;
     status: DocStatus;
     createdAt?: Date;
     updatedAt?: Date;

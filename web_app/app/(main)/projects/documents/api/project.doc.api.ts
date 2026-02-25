@@ -27,6 +27,12 @@ export const ProjectDocApi = {
         return createdData;
     },
 
+    async getById(id: string): Promise<ProjectDoc> {
+        const url = `${end_point}/${id}`;
+        const data = await ApiClient.get(url);
+        return data as ProjectDoc;
+    },
+
     async submit(project: Partial<Project>): Promise<any> {
         if (!project.file)
             throw new Error("File required.");

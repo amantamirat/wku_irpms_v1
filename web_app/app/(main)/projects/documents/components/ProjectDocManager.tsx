@@ -53,7 +53,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
     const [selectedDocs, setSelectedDocs] = useState<ProjectDoc[]>([]);
 
     const [showSaveDialog, setShowSaveDialog] = useState(false);
-    const [showReviewers, setShowReviewers] = useState(false);
+    // const [showReviewers, setShowReviewers] = useState(false);
 
 
     // ✅ State + CRUD Hook
@@ -198,7 +198,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
             if (row.totalScore && canReview) {
                 prev = DocStatus.reviewed;
             }
-            if (!row.totalScore && canSubmit) {
+            if ((!row.totalScore || row.totalScore === null) && canSubmit) {
                 prev = DocStatus.submitted;
             }
         }
@@ -253,10 +253,10 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
             header: "Score",
             field: "totalScore",
             body: (row: ProjectDoc) => {
-                if ([DocStatus.reviewed, DocStatus.accepted, DocStatus.rejected].includes(row.status)) {
-                    return row.totalScore ?? "-";
-                }
-                return "-";
+                const score = row?.totalScore;
+                return typeof score === "number"
+                    ? score
+                    : "-";
             },
             sortable: true
         },
@@ -289,7 +289,15 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
 
                 canDeleteRow={(row: ProjectDoc) => row.status === DocStatus.submitted}
 
-                rowExpansionTemplate={(row) => <DocDetail doc={row as ProjectDoc} />}
+                rowExpansionTemplate={(row) => <DocDetail doc={row as ProjectDoc}
+                    updateProjectDoc={(updatedDoc: ProjectDoc) =>
+                        updateItem({
+                            ...updatedDoc,
+                            stage: row.stage,
+                            project: row.project
+                        })
+                    }
+                />}
 
                 enableSearch={!project}
                 enableSelection={enableMultiSelection}
