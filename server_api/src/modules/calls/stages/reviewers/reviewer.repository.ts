@@ -81,8 +81,8 @@ export class ReviewerRepository implements IReviewerRepository {
         if (filters.applicant) {
             query.applicant = new mongoose.Types.ObjectId(filters.applicant);
         }
-        if (filters.document) {
-            query.projectStage = new mongoose.Types.ObjectId(filters.document);
+        if (filters.projectStage) {
+            query.projectStage = new mongoose.Types.ObjectId(filters.projectStage);
         }
         const result = await Reviewer.exists(query).exec();
         return result !== null;

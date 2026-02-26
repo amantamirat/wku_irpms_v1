@@ -32,6 +32,6 @@ export interface UpdateReviewerStatusDTO {
 
 export interface ExistsReviewersDTO {
     applicant?: string;
-    document?: string;
+    projectStage?: string;
 }
 

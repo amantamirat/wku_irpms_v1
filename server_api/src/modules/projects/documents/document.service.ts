@@ -7,6 +7,7 @@ import { ApplicantRepository } from "../../applicants/applicant.repository";
 import { CallRepository, ICallRepository } from "../../calls/call.repository";
 import { CallStatus } from "../../calls/call.status";
 import { ReviewerRepository } from "../../calls/stages/reviewers/reviewer.repository";
+import { ReviewerStatus } from "../../calls/stages/reviewers/reviewer.status";
 import { IStageRepository } from "../../calls/stages/stage.repository";
 import { StageStatus } from "../../calls/stages/stage.status";
 import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
@@ -218,8 +219,17 @@ export class DocumentService {
 
             if (current === DocStatus.selected) {
                 if (next === DocStatus.submitted) {
-                    if (await this.reviewerRepository.exist({ document: id })) {
+                    if (await this.reviewerRepository.exist({ projectStage: id })) {
                         throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
+                    }
+                }
+            }
+            if (current === DocStatus.reviewed) {
+                if (next === DocStatus.selected) {
+                    const reviewers = await this.reviewerRepository.find({ projectStage: id });
+                    const allApproved = reviewers.every(r => r.status === ReviewerStatus.approved);
+                    if (allApproved) {
+                        throw new AppError(ERROR_CODES.APPROVED_REVIEWER_ALREADY_EXISTS);
                     }
                 }
             }
@@ -229,7 +239,7 @@ export class DocumentService {
                 if (next === DocStatus.submitted && docDoc.totalScore) {
                     throw new AppError(ERROR_CODES.DOC_SCORE_ALREADY_EXISTS);
                 }
-                if (next === DocStatus.reviewed && (!docDoc.totalScore || docDoc.totalScore !== null)) {
+                if (next === DocStatus.reviewed && docDoc.totalScore == null) {
                     throw new AppError(ERROR_CODES.DOC_SCORE_NOT_EXISTS);
                 }
                 const projectDocs = await this.docRepository.find({ project: String(docDoc.project) });

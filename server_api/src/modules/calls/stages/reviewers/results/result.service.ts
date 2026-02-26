@@ -45,7 +45,7 @@ export class ResultService {
             }
             const selectedOptionDoc = await this.optionRepository.findById(selectedOption);
             if (!selectedOptionDoc || String(selectedOptionDoc.criterion) !== String(criterionDoc._id)) {
-                throw new Error("Option not found");
+                throw new Error(ERROR_CODES.OPTION_NOT_FOUND);
             }
             dto.score = selectedOptionDoc.score;
         }
@@ -66,7 +66,7 @@ export class ResultService {
             throw new AppError(ERROR_CODES.USER_NOT_REVIEWER);
 
         await this.validateResult(dto.criterion, dto);
-        
+
         return this.repository.create(dto);
     }
 
@@ -93,9 +93,11 @@ export class ResultService {
     }
 
     async delete(dto: DeleteDto) {
+        throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
+        /*
         const { id, applicantId } = dto;
         const resultDoc = await this.repository.findById(id);
-        if (!resultDoc) throw new Error("Result not found");
+        if (!resultDoc) throw new Error(ERROR_CODES.RESULT_NOT_FOUND);
 
         const reviewerDoc = await this.reviewerRepo.findById(String(resultDoc.reviewer));
         if (!reviewerDoc) throw new AppError(ERROR_CODES.REVIEWER_NOT_FOUND);
@@ -107,5 +109,6 @@ export class ResultService {
             throw new AppError(ERROR_CODES.USER_NOT_REVIEWER);
 
         return this.repository.delete(id);
+        */
     }
 }

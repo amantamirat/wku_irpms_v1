@@ -23,7 +23,7 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
 
     const canCreate = isAccepted && hasPermission([PERMISSIONS.RESULT.CREATE]);
     const canEdit = isAccepted && hasPermission([PERMISSIONS.RESULT.UPDATE]);
-    const canDelete = isAccepted && hasPermission([PERMISSIONS.RESULT.DELETE]);
+    const canDelete = false //&& isAccepted && hasPermission([PERMISSIONS.RESULT.DELETE]);
 
     const {
         items: results,

@@ -152,7 +152,7 @@ const ReviewerManager = ({ projectDoc, applicant, updateProjectDoc }: ReviewerMa
             }
         }
         if (current === ReviewerStatus.approved) {
-            if (canSubmit) {
+            if (canSubmit && !isReviewer) {
                 prev = ReviewerStatus.submitted;
             }
         }

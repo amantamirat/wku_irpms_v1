@@ -49,6 +49,7 @@
             "document:status.selected",
             "document:status.accepted",
             "document:status.rejected",
+            "document:status.reviewed",
             "applicant:read",
             "reviewer:*",
             "result:read"
