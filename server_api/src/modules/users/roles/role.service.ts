@@ -57,7 +57,7 @@ export class RoleService {
             await this.repository.create({
                 name: role.name,
                 permissions: permissionIds,
-                isDefault: true
+                isDefault: !!role.isDefault
             });
             seeded = true;
         }

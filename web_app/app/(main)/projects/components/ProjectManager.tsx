@@ -238,11 +238,18 @@ const ProjectManager = ({ call, applicant, workspace }: ProjectManagerProps) => 
 
         // Hide applicant column if already filtering by applicant
         if (!applicant) {
-            cols.push({
-                header: "PI",
-                field: "applicant.name",
-                sortable: true
-            });
+
+            cols.push(
+                {
+                    header: "Workspace",
+                    field: "applicant.workspace.name",
+                    sortable: true
+                },
+                {
+                    header: "PI",
+                    field: "applicant.name",
+                    sortable: true
+                });
         }
 
         cols.push({
@@ -283,10 +290,11 @@ const ProjectManager = ({ call, applicant, workspace }: ProjectManagerProps) => 
                 canCreate={canCreate}
 
                 canEditRow={(row: Project) => row.status === ProjectStatus.pending || row.status === ProjectStatus.negotiation}
-                canDeleteRow={(row: Project) => row.status === ProjectStatus.pending || row.status === ProjectStatus.negotiation}
+                canDeleteRow={(row: Project) => row.status === ProjectStatus.pending}
 
                 canEdit={canEdit}
                 canDelete={canDelete}
+
 
                 onCreate={() => { setProject(emptyProject); setShowSaveDialog(true); }}
                 onEdit={(row) => { setProject(row); setShowSaveDialog(true); }}

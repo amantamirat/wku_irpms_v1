@@ -119,13 +119,15 @@ export class ProjectDocController {
                 title: project.title,
                 summary: project.summary,
                 applicant: req.user.applicantId,
-                collaborators: project.collaborators.map(
+                collaborators: (project.collaborators || []).map(
                     (c: any) => c.applicant
                 ),
-                themes: project.themes.map(
+
+                themes: (project.themes || []).map(
                     (t: any) => t.theme
                 ),
-                phases: project.phases.map((p: any) => ({
+
+                phases: (project.phases || []).map((p: any) => ({
                     type: p.type,
                     activity: p.activity,
                     duration: p.duration,

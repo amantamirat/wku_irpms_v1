@@ -241,10 +241,10 @@ export const PERMISSIONS = {
     DELETE: "phase:document:delete",
   },
   PROJECT_THEME: {
-    CREATE: "project:theme:create",
-    READ: "project:theme:read",
-    UPDATE: "project:theme:update",
-    DELETE: "project:theme:delete",
+    CREATE: "project_theme:create",
+    READ: "project_theme:read",
+    UPDATE: "project_theme:update",
+    DELETE: "project_theme:delete",
   },
   DOCUMENT: {
     CREATE: "document:create",

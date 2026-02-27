@@ -5,6 +5,8 @@ import { Card } from "primereact/card";
 import { Call } from "../calls/models/call.model";
 import { Stage } from "../calls/stages/models/stage.model";
 import ApplyWizard from "./apply/ApplyWizard";
+import { useAuth } from "@/contexts/auth-context";
+import { PERMISSIONS } from "@/types/permissions";
 
 interface StageCardProps {
     stage: Stage;
@@ -15,6 +17,8 @@ const StageCard = ({ stage }: StageCardProps) => {
     const [showViewDialog, setShowViewDialog] = useState(false);
     const [remainingTime, setRemainingTime] = useState("");
     const [isDeadlinePassed, setIsDeadlinePassed] = useState(false);
+    const { hasPermission } = useAuth();
+    const canApply = hasPermission([PERMISSIONS.DOCUMENT.SUBMIT]);
 
     const calculateRemainingTime = () => {
         if (!stage.deadline) return "";
@@ -55,26 +59,27 @@ const StageCard = ({ stage }: StageCardProps) => {
         <div className="flex justify-content-between align-items-center mt-3">
             {
                 /**
-                 * 
-                 * <Button
+                <Button
                 label="View"
                 icon="pi pi-eye"
                 severity="info"
                 rounded
                 outlined
-                onClick={() => setShowViewDialog(true)}
-            />
+                onClick={() => setShowViewDialog(true)}/>
                  */
             }
-            <Button
-                label="Apply"
-                icon="pi pi-check-circle"
-                severity="success"
-                rounded
-                outlined
-                disabled={isDeadlinePassed} // <-- disable if passed
-                onClick={() => setShowApplyDialog(true)}
-            />
+            {
+                canApply &&
+                <Button
+                    label="Apply"
+                    icon="pi pi-check-circle"
+                    severity="success"
+                    rounded
+                    outlined
+                    disabled={isDeadlinePassed} // <-- disable if passed
+                    onClick={() => setShowApplyDialog(true)}
+                />
+            }
         </div>
     );
 

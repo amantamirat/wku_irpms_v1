@@ -787,19 +787,19 @@
   },
   {
     "category": "Project Theme Management",
-    "name": "project:theme:create"
+    "name": "project_theme:create"
   },
   {
     "category": "Project Theme Management",
-    "name": "project:theme:read"
+    "name": "project_theme:read"
   },
   {
     "category": "Project Theme Management",
-    "name": "project:theme:update"
+    "name": "project_theme:update"
   },
   {
     "category": "Project Theme Management",
-    "name": "project:theme:delete"
+    "name": "project_theme:delete"
   },
   {
     "category": "Report Management",

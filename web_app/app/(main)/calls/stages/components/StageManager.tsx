@@ -231,6 +231,7 @@ const StageManager = ({ call }: StageManagerProps) => {
                         onConfirmAsync: () => deleteStage(row)
                     })
                 }
+                canDeleteRow={(row: Stage) => row.status === StageStatus.planned}
             />
 
             {/* Create / Edit Stage */}

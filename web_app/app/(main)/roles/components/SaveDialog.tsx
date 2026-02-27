@@ -185,6 +185,7 @@ const SaveDialog = (props: SaveDialogProps) => {
                 className="p-fluid"
                 footer={footer}
                 onHide={onHide}
+                maximizable
             >
                 {localRole._id &&
                     <>
@@ -194,9 +195,7 @@ const SaveDialog = (props: SaveDialogProps) => {
                                     <i className="pi pi-exclamation-triangle text-4xl text-500 mb-3" />
                                 </div>
                                 <p className="m-0">
-                                    <p className="m-0">
-                                        By modifying role&apos;s permissions, you might break the system permissions functionality.
-                                    </p>
+                                    By modifying role&apos;s permissions, you might break the system permissions functionality.
                                 </p>
                             </Card>
                         </div>

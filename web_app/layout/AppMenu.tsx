@@ -11,8 +11,13 @@ import { useAuth } from '@/contexts/auth-context';
 import { PERMISSIONS } from '@/types/permissions';
 
 const AppMenu = () => {
-    const { hasPermission } = useAuth();
+    const { hasPermission, getScopesByUnit } = useAuth();
     const { layoutConfig } = useContext(LayoutContext);
+    const dirScopes = getScopesByUnit(OrgnUnit.Directorate) ?? [];
+    const hasDirector = dirScopes.length > 0;
+    const depScopes = getScopesByUnit(OrgnUnit.Department) ?? [];
+    const extScopes = getScopesByUnit(OrgnUnit.External) ?? [];
+    const hasWorkspace = depScopes.length > 0 || extScopes.length > 0;
 
     const model: AppMenuItem[] = [
         {
@@ -21,7 +26,7 @@ const AppMenu = () => {
         },
         {
             label: 'Workspace',
-            visible: hasPermission([
+            visible: hasWorkspace && hasPermission([
                 PERMISSIONS.PROJECT.CREATE,
             ]),
             items: [
@@ -40,7 +45,7 @@ const AppMenu = () => {
         },
         {
             label: 'Directorate',
-            visible: hasPermission([
+            visible: hasDirector && hasPermission([
                 PERMISSIONS.CALL.CREATE,
                 PERMISSIONS.EVALUATION.CREATE,
                 PERMISSIONS.THEMATIC.CREATE,

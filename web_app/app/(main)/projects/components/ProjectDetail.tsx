@@ -30,7 +30,7 @@ export default function ProjectDetail({ project, updateProjectStatus }: ProjectD
         },
         {
             header: "Themes",
-            permission: PERMISSIONS.THEME.READ,
+            permission: PERMISSIONS.PROJECT_THEME.READ,
             content: <ProjectThemeManager project={project} />
         },
         {

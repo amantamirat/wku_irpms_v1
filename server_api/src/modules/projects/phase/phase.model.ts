@@ -11,6 +11,8 @@ export interface IPhase extends Document {
     duration: number;
     budget: number;
     description?: string;
+    startDate?: Date;
+    endDate?: Date;
     status: PhaseStatus;
     createdAt?: Date;
     updatedAt?: Date;

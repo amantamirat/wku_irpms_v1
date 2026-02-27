@@ -44,7 +44,17 @@ export class DocumentRepository implements IDocumentRepository {
 
         if (options.populate) {
             dbQuery
-                .populate("project")
+                .populate({
+                    path: "project",
+                    /*
+                    populate: {
+                        path: "applicant",
+                        populate: {
+                            path: "workspace"
+                        }
+                    }
+                        */
+                })
                 .populate("stage");
         }
 
