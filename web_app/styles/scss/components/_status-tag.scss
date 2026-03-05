@@ -18,12 +18,12 @@
     }
 
     &.status-linked,
-    &.status-verified,    
+    &.status-verified,
     &.status-accepted,
     &.status-active {
         background: #C8E6C9;
         color: #256029;
-    }    
+    }
 
     &.status-notlinked,
     &.status-deleted,
@@ -50,10 +50,10 @@
         background: #BBDEFB;
         color: #0D47A1;
     }
-    
+
     &.status-negotiation {
-        background: #ffe066;
-        color: #8a6d00;
+        background: #f1f3f5;
+        color: #495057;
     }
 
     &.status-reviewed {

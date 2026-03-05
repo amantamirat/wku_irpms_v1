@@ -15,20 +15,16 @@ import { Unit } from "../organization/organization.type";
 import { IOwnership } from "../applicants/applicant.model";
 import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
 import { SYSTEM } from "../../common/constants/system.constant";
+import { AppError } from "../../common/errors/app.error";
+import { ERROR_CODES } from "../../common/errors/error.codes";
 
 export class UserService {
 
-    private repository: IUserRepository;
-    private appRepository: IApplicantRepository;
-    private organizationRepository: IOrganizationRepository;
-
-    constructor(repository?: IUserRepository, appRepository?: IApplicantRepository,
-        organizationRepository?: IOrganizationRepository
-    ) {
-        this.repository = repository || new UserRepository();
-        this.appRepository = appRepository || new ApplicantRepository();
-        this.organizationRepository = organizationRepository || new OrganizationRepository();
-    }
+    constructor(
+        private readonly repository: IUserRepository = new UserRepository(),
+        private readonly appRepository: IApplicantRepository = new ApplicantRepository(),
+        private readonly organizationRepository: IOrganizationRepository = new OrganizationRepository()
+    ) { }
 
     static async prepareHash(password: string): Promise<string> {
         const salt = await bcrypt.genSalt(10);
@@ -40,21 +36,27 @@ export class UserService {
         return rest;
     }
 
-    async create(data: CreateUserDTO) {
-        const applicantDoc = await this.appRepository.findOne({ email: data.email });
+    async create(dto: CreateUserDTO) {
+        const { applicant, password } = dto;
+        const applicantDoc = await this.appRepository.findById(applicant);
         if (!applicantDoc) {
-            throw Error("Applicant Not Found!");
+            throw new AppError(ERROR_CODES.APPLICANT_NOT_FOUND);
         }
-        const hashed = await UserService.prepareHash(data.password);
-        const dto = {
-            ...data,
-            applicant: String(applicantDoc._id),
-            password: hashed,
-            status: UserStatus.pending
-        };
-        const created = await this.repository.create(dto);
-        const user = this.removePassword(created);
-        return { ...user, applicant: applicantDoc };
+        const hashed = await UserService.prepareHash(password);
+        try {
+            const created = await this.repository.create({
+                ...dto, email: applicantDoc.email, password: hashed, status: UserStatus.pending
+            });
+            const user = this.removePassword(created);
+            return { ...user, applicant: applicantDoc };
+        } catch (err: any) {
+            // 5. Handle unique index violations
+            if (err?.code === 11000) {
+                throw new AppError(ERROR_CODES.USER_ALREADY_EXISTS);
+            }
+            throw err;
+        }
+
     }
 
     async getUsers() {
@@ -65,20 +67,20 @@ export class UserService {
     async update(dto: UpdateUserDTO) {
         const { id, data, userId } = dto;
         const userDoc = await this.repository.findById(id);
-        if (!userDoc) throw new Error("User not found");
+        if (!userDoc) throw new Error(ERROR_CODES.USER_NOT_FOUND);
         if (data.password) {
             const hashed = await UserService.prepareHash(data.password);
             data.password = hashed;
         }
         const updated = await this.repository.update(id, data);
-        if (!updated) throw new Error("User not found.");
+        //if (!updated) throw new Error("User not found.");
         return this.removePassword(updated);
     }
 
     async updateStatus(dto: UpdateUserDTO) {
         const { id, data, userId } = dto;
         const userDoc = await this.repository.findById(id);
-        if (!userDoc) throw new Error("User not found");
+        if (!userDoc) throw new Error(ERROR_CODES.USER_NOT_FOUND);
 
         const nextState = data.status;
         if (!nextState) throw new Error("Status is required");

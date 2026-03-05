@@ -24,12 +24,12 @@ export class UserController {
     try {
       if (!req.user) throw new Error('User not authorized');
 
-      const { email, password } = req.body;
+      const { email, applicant, password } = req.body;
 
       const dto: CreateUserDTO = {
-        email,
-        password,
-        // createdBy: req.user._id
+        applicant,
+        //email,
+        password
       };
 
       const created = await this.service.create(dto);

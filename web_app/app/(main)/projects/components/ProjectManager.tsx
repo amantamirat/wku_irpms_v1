@@ -110,7 +110,7 @@ const ProjectManager = ({ call, applicant, workspace }: ProjectManagerProps) => 
             if (canApprove) {
                 next = ProjectStatus.approved;
             }
-            if (canNegotiate) {
+            if (canAccept) {
                 prev = ProjectStatus.accepted;
             }
         } else if (current === ProjectStatus.approved) {

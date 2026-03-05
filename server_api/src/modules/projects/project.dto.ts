@@ -42,3 +42,8 @@ export interface UpdateStatusDTO {
     };
 }
 
+export interface ExistsProjectDTO {
+    applicant?: string;
+    call?: string;
+}
+

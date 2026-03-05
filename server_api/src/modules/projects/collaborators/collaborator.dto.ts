@@ -32,3 +32,7 @@ export interface GetCollaboratorsOptions {
     populate?: boolean;
 }
 
+export interface ExistsCollabDTO {
+    applicant?: string;
+}
+

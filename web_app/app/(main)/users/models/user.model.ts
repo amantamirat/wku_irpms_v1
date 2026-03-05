@@ -9,7 +9,7 @@ export enum UserStatus {
 export type User = {
     _id?: string;
     applicant?: string | Applicant;
-    email: string;
+    email?: string;
     password?: string;
     currentPassword?: string;
     confirmedPassword?: string;
@@ -25,12 +25,17 @@ export type User = {
 
 
 export const validateUser = (user: User, currentPassword: boolean = false, regexPasswprd: boolean = true): { valid: boolean; message?: string } => {
+    /*
     if (!user.email || user.email.trim() === "") {
         return { valid: false, message: "Email is required." };
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(user.email)) {
         return { valid: false, message: "Email is not valid." };
+    }
+        */
+    if (!user.applicant) {
+        return { valid: false, message: "Applicant is required." };
     }
     if (currentPassword) {
         if (!user.currentPassword || user.currentPassword.trim() === "") {
@@ -66,6 +71,10 @@ export const validateUser = (user: User, currentPassword: boolean = false, regex
 export function sanitizeUser(user: Partial<User>): Partial<User> {
     return {
         ...user,
+        applicant:
+            typeof user.applicant === 'object' && user.applicant !== null
+                ? (user.applicant as any)._id
+                : user.applicant,
         /*
         roles: user.roles
             ?.map(role =>

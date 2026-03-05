@@ -3,16 +3,18 @@ import mongoose from "mongoose";
 import { Project, IProject } from "./project.model";
 import {
     CreateProjectDTO,
+    ExistsProjectDTO,
     GetProjectsDTO,
     UpdateProjectDTO
 } from "./project.dto";
-import Applicant from "../applicants/applicant.model";
+
 
 export interface IProjectRepository {
     findById(id: string): Promise<IProject | null>;
     find(filters: GetProjectsDTO): Promise<Partial<IProject>[]>;
     create(dto: CreateProjectDTO): Promise<IProject>;
     update(id: string, data: UpdateProjectDTO["data"]): Promise<IProject>;
+    exists(filters: ExistsProjectDTO): Promise<boolean>;
     delete(id: string): Promise<IProject | null>;
 }
 
@@ -101,6 +103,19 @@ export class ProjectRepository implements IProjectRepository {
 
         if (!updated) throw new Error("Project not found");
         return updated;
+    }
+
+    async exists(filters: ExistsProjectDTO): Promise<boolean> {
+        const query: any = {};
+        const { applicant, call } = filters;
+        if (applicant) {
+            query.applicant = new mongoose.Types.ObjectId(applicant);
+        }
+        if (call) {
+            query.call = new mongoose.Types.ObjectId(call);
+        }
+        const result = await Project.exists(query).exec();
+        return result !== null;
     }
 
     async delete(id: string) {

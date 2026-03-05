@@ -29,7 +29,6 @@ const SaveDialog = ({ visible, organization, parents, parentType, onHide, onComp
     }, [organization]);
 
     const isProgram = localOrganization.type === OrgnUnit.Program;
-    // const isSpecialization = localOrganization.type === OrgnUnit.Specialization;
     const isExternal = localOrganization.type === OrgnUnit.External;
 
 

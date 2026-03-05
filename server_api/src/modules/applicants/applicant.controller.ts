@@ -31,7 +31,7 @@ export class ApplicantController {
                 fin,
                 orcid,
                 email,
-                accessibility, 
+                accessibility,
                 specializations
             } = req.body;
 
@@ -157,10 +157,8 @@ export class ApplicantController {
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) throw new Error('User not authorized');
-
-            const { id } = req.query;
-
-            const deleted = await this.service.delete(id as string);
+            const { id } = req.params;
+            const deleted = await this.service.delete(id);
             successResponse(res, 200, 'Applicant deleted successfully', deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

@@ -1,6 +1,10 @@
+import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
+import { ReviewerRepository } from "../calls/stages/reviewers/reviewer.repository";
 import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
 import { Unit } from "../organization/organization.type";
+import { CollaboratorRepository, ICollaboratorRepository } from "../projects/collaborators/collaborator.repository";
+import { IProjectRepository, ProjectRepository } from "../projects/project.repository";
 import { IRoleRepository, RoleRepository } from "../users/roles/role.repository";
 import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO, UpdateRolesDTO, UpdateOwnershipsDTO } from "./applicant.dto";
 import { IApplicantRepository, ApplicantRepository } from "./applicant.repository";
@@ -10,8 +14,11 @@ export class ApplicantService {
     constructor(
         private repository: IApplicantRepository = new ApplicantRepository(),
         private orgnRepo: IOrganizationRepository = new OrganizationRepository(),
-        private roleRepository: IRoleRepository = new RoleRepository()
-    ) {}
+        private roleRepository: IRoleRepository = new RoleRepository(),
+        private projectRepo: IProjectRepository = new ProjectRepository(),
+        private collabRepo: ICollaboratorRepository = new CollaboratorRepository(),
+        private reviewerRepo = new ReviewerRepository()
+    ) { }
 
     async validateWorkspace(workspace: string) {
         const organDoc = await this.orgnRepo.findById(workspace);
@@ -87,6 +94,18 @@ export class ApplicantService {
     // DELETE
     // -------------------------
     async delete(id: string) {
+        const projectExists = await this.projectRepo.exists({ applicant: id });
+        if (projectExists) {
+            throw new Error(ERROR_CODES.APPLICANT_HAS_PROJECTS);
+        };
+        const collabExist = await this.collabRepo.exists({ applicant: id });
+        if (collabExist) {
+            throw new Error(ERROR_CODES.COLLABORATOR_ALREADY_EXISTS);
+        };
+        const revExist = await this.reviewerRepo.exist({ applicant: id });
+        if (revExist) {
+            throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
+        }
         const deleted = await this.repository.delete(id);
         if (!deleted) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
         return deleted;

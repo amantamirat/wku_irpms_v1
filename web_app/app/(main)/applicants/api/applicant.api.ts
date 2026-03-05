@@ -55,21 +55,12 @@ export const ApplicantApi = {
         return updatedApplicant as Applicant;
     },
 
-    async deleteApplicant(applicant: Partial<Applicant>): Promise<boolean> {
-        if (!applicant._id) throw new Error("_id required.");        
-        const url = `${end_point}${applicant._id}`;
+    async delete(applicant: Partial<Applicant>): Promise<boolean> {
+        if (!applicant._id) throw new Error("_id required.");
+        const url = `${end_point}/${applicant._id}`;
         const response = await ApiClient.delete(url);
         return response;
     },
 
-    /*
-    async linkApplicant(applicant: Partial<Applicant>): Promise<Applicant> {
-        if (!applicant._id) {
-            throw new Error("_id required.");
-        }
-        const url = `${end_point}${applicant._id}`;
-        const response = await ApiClient.patch(url);
-        return response as Applicant;
-    },
-    */
+
 };

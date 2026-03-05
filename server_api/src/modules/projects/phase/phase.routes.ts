@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PhaseController } from './phase.controller';
-import { checkPermission, checkStatusPermission, verifyActiveAccount } from '../../users/user.middleware';
+import { checkPermission, checkStatusPermission, checkTransitionPermission, verifyActiveAccount } from '../../users/user.middleware';
 import { PERMISSIONS } from '../../../common/constants/permissions';
 
 const controller = new PhaseController();
@@ -17,7 +17,7 @@ router.put('/', verifyActiveAccount,
     controller.update);
 router.patch(
     '/:id', verifyActiveAccount,
-    checkStatusPermission("phase"),
+    checkTransitionPermission("phase"),
     controller.updateStatus
 );
 router.delete('/:id', verifyActiveAccount,

@@ -30,6 +30,7 @@ export class RoleRepository implements IRoleRepository {
         const data: Partial<IRole> = {
             name: dto.name,
             permissions: dto.permissions?.map(id => new mongoose.Types.ObjectId(id)) ?? [],
+            isDefault: !!dto.isDefault
         };
         return Role.create(data);
     }

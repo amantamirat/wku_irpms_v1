@@ -7,6 +7,7 @@ import { PhaseType } from "./phase.enum";
 import { PhaseService } from "./phase.service";
 import { PhaseStatus } from "./phase.status";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
+import { TransitionRequestDto } from "../../../util/global.dto";
 
 export class PhaseController {
     private service: PhaseService;
@@ -95,12 +96,12 @@ export class PhaseController {
     updateStatus = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) throw new Error(ERROR_CODES.USER_NOT_FOUND);
-            
             const { id } = req.params;
-            const { status } = req.body;
-            const dto: UpdatePhaseStatusDto = {
+            const { current, next } = req.body;
+            const dto: TransitionRequestDto = {
                 id: String(id),
-                status: status as PhaseStatus,
+                current: current,
+                next: next,
                 applicantId: req.user.applicantId,
             };
             const updated = await this.service.updateStatus(dto);

@@ -9,6 +9,9 @@ import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 import { UserApi } from '../api/UserService';
 import { User, validateUser } from '../models/user.model';
+import { Applicant } from '../../applicants/models/applicant.model';
+import { ApplicantApi } from '../../applicants/api/applicant.api';
+import { Dropdown } from 'primereact/dropdown';
 
 
 interface SaveUserDialogProps {
@@ -24,13 +27,24 @@ const SaveUserDialog = ({ visible, user, enableCurrentPassword, onHide, onComple
     const [localUser, setLocalUser] = useState<User>({ ...user });
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
-
-    //const { hasPermission } = useAuth();
-    // const readOrganization = hasPermission([PERMISSIONS.ORGANIAZTION.READ]);
+    const [applicants, setApplicants] = useState<Applicant[]>([]);
 
     useEffect(() => {
         setLocalUser({ ...user });
     }, [user]);
+
+    useEffect(() => {
+        const fetchApplicants = async () => {
+            try {
+                const appData = await ApplicantApi.getApplicants({});
+                setApplicants(appData);
+            } catch (err) {
+                console.error('Failed to fetch applicant data:', err);
+            }
+        };
+        fetchApplicants();
+    }, []);
+
 
     const saveUser = async () => {
         try {
@@ -105,12 +119,37 @@ const SaveUserDialog = ({ visible, user, enableCurrentPassword, onHide, onComple
                 onHide={onHide}
             >
                 <div className="field">
+                    <label htmlFor="applicant">Applicant</label>
+                    <Dropdown
+                        id="applicant"
+                        value={localUser.applicant}
+                        options={applicants}
+                        optionLabel="name"
+                        dataKey="_id"
+                        filter                    // 👈 enables search
+                        filterBy="name,email"     // 👈 searchable fields
+                        showClear                 // 👈 optional clear button
+                        onChange={(e) => {
+                            const selectedApplicant = e.value as Applicant;
+                            setLocalUser({
+                                ...localUser,
+                                applicant: selectedApplicant,
+                                email: selectedApplicant?.email || ''  // 👈 auto fill email
+                            });
+                        }}
+                        placeholder="Select Applicant"
+                        disabled={isEdit}
+                        className={classNames({ 'p-invalid': submitted && !localUser.applicant })}
+                    />
+                    {submitted && !localUser.applicant && <small className="p-invalid">Applicant is required.</small>}
+                </div>
+                <div className="field">
                     <label htmlFor="email">Email</label>
                     <InputText
                         id="email"
                         type="email"
                         value={localUser.email}
-                        disabled={isEdit}
+                        disabled={true}
                         onChange={(e) => setLocalUser({ ...localUser, email: e.target.value })}
                         className={classNames({ 'p-invalid': submitted && !localUser.email })}
                     />

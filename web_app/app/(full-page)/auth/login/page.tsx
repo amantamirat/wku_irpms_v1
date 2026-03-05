@@ -1,28 +1,27 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
-import { useRouter } from 'next/navigation';
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Checkbox } from 'primereact/checkbox';
-import { Button } from 'primereact/button';
-import { Password } from 'primereact/password';
-import { LayoutContext } from '../../../../layout/context/layoutcontext';
-import { InputText } from 'primereact/inputtext';
-import { classNames } from 'primereact/utils';
-import { Messages } from "primereact/messages";
-import { useAuth } from '@/contexts/auth-context';
 import NoAuthGuard from '@/components/NoAuthGuard';
-import { User, validateUser } from '@/app/(main)/users/models/user.model';
-//import { LoginDto, validateLogin } from '../model/login.model';
+import { useAuth } from '@/contexts/auth-context';
+import { useRouter } from 'next/navigation';
+import { Button } from 'primereact/button';
+import { Checkbox } from 'primereact/checkbox';
+import { InputText } from 'primereact/inputtext';
+import { Messages } from "primereact/messages";
+import { Password } from 'primereact/password';
+import { classNames } from 'primereact/utils';
+import { useContext, useRef, useState } from 'react';
+import { LayoutContext } from '../../../../layout/context/layoutcontext';
+import { LoginDto, validateLogin } from './model';
 
 const LoginPage = () => {
 
 
-    let emptyLogin: User = {
+    let emptyLogin: LoginDto = {
         email: '',
         password: '',
     };
 
-    const [loginDto, setLoginDto] = useState<User>(emptyLogin);
+    const [loginDto, setLoginDto] = useState<LoginDto>(emptyLogin);
     const [checked, setChecked] = useState(false);
     const msgs = useRef<Messages>(null);
     const router = useRouter();
@@ -30,7 +29,7 @@ const LoginPage = () => {
 
     const handleLogin = async () => {
         try {
-            const result = validateUser(loginDto, false, false);
+            const result = validateLogin(loginDto);
             if (!result.valid) {
                 throw new Error(result.message || 'Login failed.');
             }

@@ -91,5 +91,51 @@ export const checkStatusPermission = (resource: string) => {
 }
 
 
+export const checkTransitionPermission = (resource: string) => {
+  return async (
+    req: AuthenticatedRequest,
+    res: Response,
+    nextMiddleware: NextFunction
+  ) => {
+    try {
+      if (!req.user) {
+        return errorResponse(res, 401, "Unauthorized");
+      }
+
+      const { current, next } = req.body;
+
+      if (!current || !next) {
+        return errorResponse(
+          res,
+          400,
+          "Transition requires 'current' and 'next' status"
+        );
+      }
+
+      const permission =
+        `${resource}:transition.${current}.${next}`;
+
+      const hasPermission =
+        await CacheService.hasPermissions(
+          req.user.userId,
+          [permission]
+        );
+
+      if (!hasPermission) {
+        return errorResponse(
+          res,
+          403,
+          `Forbidden. Missing permission: ${permission}`
+        );
+      }
+
+      nextMiddleware();
+    } catch (err) {
+      return errorResponse(res, 500, "Permission check failed");
+    }
+  };
+};
+
+
 
 

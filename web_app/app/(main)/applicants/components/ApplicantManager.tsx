@@ -83,7 +83,7 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
 
     /** DELETE */
     const deleteApplicant = async (row: Applicant) => {
-        const ok = await ApplicantApi.deleteApplicant(row);
+        const ok = await ApplicantApi.delete(row);
         if (ok) removeItem(row);
     };
 

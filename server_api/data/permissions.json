@@ -630,7 +630,8 @@
   },
   {
     "category": "Project Management",
-    "name": "project:status.accepted"
+    "name": "project:status.accepted",
+    "description": "used for undo operation on the negotiated projects"
   },
   {
     "category": "Project Management",
@@ -720,6 +721,46 @@
     "category": "Phase Management",
     "name": "phase:delete",
     "description": "Delete phase entries"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:transition.proposed.reviewed",
+    "description": "Move phase from proposed to reviewed"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:transition.reviewed.proposed",
+    "description": "Revert phase from reviewed to proposed"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:transition.reviewed.approved",
+    "description": "Move phase from reviewed to approved"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:transition.approved.reviewed",
+    "description": "Revert phase from approved to reviewed"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:transition.approved.active",
+    "description": "Move phase from approved to active"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:transition.active.approved",
+    "description": "Revert phase from active to approved"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:transition.active.completed",
+    "description": "Move phase from active to completed"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:transition.completed.active",
+    "description": "Revert phase from completed to active"
   },
   {
     "category": "Phase Document Management",

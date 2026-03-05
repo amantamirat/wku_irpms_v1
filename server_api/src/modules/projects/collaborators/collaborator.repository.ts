@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { Collaborator, ICollaborator } from "./collaborator.model";
 import {
     CreateCollaboratorDto,
+    ExistsCollabDTO,
     GetCollaboratorsOptions,
     UpdateCollaboratorDto,
 } from "./collaborator.dto";
@@ -14,6 +15,7 @@ export interface ICollaboratorRepository {
     create(dto: CreateCollaboratorDto): Promise<ICollaborator>;
     createMany(dtos: CreateCollaboratorDto[]): Promise<ICollaborator[]>;
     update(id: string, data: UpdateCollaboratorDto["data"]): Promise<ICollaborator | null>;
+    exists(filters: ExistsCollabDTO): Promise<boolean>;
     delete(id: string): Promise<ICollaborator | null>;
 }
 
@@ -84,6 +86,16 @@ export class CollaboratorRepository implements ICollaboratorRepository {
             { new: true, runValidators: true }
         ).exec();
 
+    }
+
+    async exists(filters: ExistsCollabDTO): Promise<boolean> {
+        const query: any = {};
+        const { applicant } = filters;
+        if (applicant) {
+            query.applicant = new mongoose.Types.ObjectId(applicant);
+        }
+        const result = await Collaborator.exists(query).exec();
+        return result !== null;
     }
 
     async delete(id: string) {

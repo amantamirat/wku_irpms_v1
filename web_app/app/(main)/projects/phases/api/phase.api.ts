@@ -1,5 +1,6 @@
 import { ApiClient } from "@/api/ApiClient";
 import { GetPhaseOptions, Phase, PhaseStatus, sanitizePhase } from "../models/phase.model";
+import { TransitionRequestDto } from "@/types/util";
 
 const end_point = '/project/phases';
 
@@ -30,11 +31,11 @@ export const PhaseApi = {
         return updatedPhase as Phase;
     },
 
-    async updateStatus(id: string, status: PhaseStatus): Promise<any> {
+    async updateStatus(id: string, dto: TransitionRequestDto): Promise<any> {
         const query = new URLSearchParams();
         query.append("id", id);
         const url = `${end_point}/${id}`;
-        const updated = await ApiClient.patch(url, { status });
+        const updated = await ApiClient.patch(url, dto);
         return updated;
     },
 

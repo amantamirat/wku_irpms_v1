@@ -102,9 +102,15 @@ export class RoleService {
             if (pattern.includes("*")) {
                 const prefix = pattern.replace("*", "");
 
-                const matched = allPermissions.filter(p =>
-                    p.name.startsWith(prefix)
-                );
+                const matched = allPermissions.filter(p => {
+                    if (!p.name.startsWith(prefix)) return false;
+
+                    // Remove prefix
+                    const remainder = p.name.substring(prefix.length);
+
+                    // Exclude nested like status.*
+                    return !remainder.includes(".");
+                });
 
                 matched.forEach(p =>
                     resolvedPermissions.set(p.name, p._id)

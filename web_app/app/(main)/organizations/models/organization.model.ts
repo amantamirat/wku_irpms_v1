@@ -5,10 +5,7 @@ export enum OrgnUnit {
     Program = 'Program',
     Directorate = 'Directorate',
     Center = 'Center',
-    //Supportive = 'Supportive',
-    //Sector = 'Sector',
-    External = 'External',
-    //Specialization = 'Specialization'
+    External = 'External'
 }
 
 // Enum for Academic Levels
@@ -71,8 +68,6 @@ export const getChildType = (current: OrgnUnit): OrgnUnit | undefined => {
             return OrgnUnit.Program;
         case OrgnUnit.Directorate:
             return OrgnUnit.Center;
-        //case OrgnUnit.Sector:
-        //    return OrgnUnit.External;
         default:
             return undefined; // No children
     }
@@ -86,8 +81,6 @@ export const getParentType = (current: OrgnUnit): OrgnUnit | undefined => {
             return OrgnUnit.Department;
         case OrgnUnit.Center:
             return OrgnUnit.Directorate;
-        // case OrgnUnit.External:
-        //     return OrgnUnit.Sector;
         default:
             return undefined; // Root-level types have no parent
     }
@@ -115,13 +108,6 @@ export const validateOrganization = (
             }
             break;
 
-        /*
-    case OrgnUnit.Specialization:
-        if (!organization.academic_level) {
-            return { valid: false, message: 'Academic level is required for Specialization.' };
-        }
-        break;
-*/
         case OrgnUnit.External:
             if (!organization.ownership) {
                 return { valid: false, message: 'Ownership is required for External.' };

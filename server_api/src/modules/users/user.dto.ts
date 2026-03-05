@@ -1,8 +1,8 @@
 import { UserStatus } from "./user.status";
 
 export interface CreateUserDTO {
-    applicant?: string;
-    email: string;
+    applicant: string;
+    email?: string;
     password: string;
     status?: UserStatus;
 }

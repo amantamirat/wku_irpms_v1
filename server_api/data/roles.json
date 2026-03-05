@@ -31,6 +31,7 @@
             "thematic:read",
             "stage:read",
             "project:read",
+            "project:status.granted",
             "document:read",
             "report:*"
         ]
@@ -49,9 +50,13 @@
             "stage:*",
             "project:read",
             "project:status.negotiation",
+            "project:status.accepted",
+            "project:status.approved",
             "collaborator:read",
             "project_theme:read",
             "phase:read",
+            "phase:transition.reviewed.approved",
+            "phase:document:read",
             "document:read",
             "document:status.submitted",
             "document:status.selected",
@@ -72,16 +77,18 @@
             "project:read",
             "applicant:read",
             "collaborator:*",
+            "collaborator:status.*",
             "thematic:read",
             "theme:read",
             "project_theme:*",
             "phase:*",
+            "phase:transition.proposed.reviewed",
             "document:read",
             "document:create",
             "document:submit",
             "document:delete"
         ],
-        "isDefault": "true"
+        "isDefault": true
     },
     {
         "name": "r-reviewer",
@@ -95,6 +102,6 @@
             "option:read",
             "result:*"
         ],
-        "isDefault": "true"
+        "isDefault": true
     }
 ]

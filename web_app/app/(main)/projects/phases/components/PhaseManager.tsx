@@ -9,13 +9,15 @@ import SavePhaseDialog from "./SavePhaseDialog";
 
 import { Project, ProjectStatus } from "../../models/project.model";
 import { PhaseApi } from "../api/phase.api";
-import { Phase, PhaseStatus, PhaseType } from "../models/phase.model";
+import { Phase, PHASE_STATUS_ORDER, PHASE_TRANSITIONS, PhaseStatus, PhaseType } from "../models/phase.model";
 
 import { useCrudList } from "@/hooks/useCrudList";
 import { PERMISSIONS } from "@/types/permissions";
 import MyBadge from "@/templates/MyBadge";
 import { Button } from "primereact/button";
 import PhaseDocManager from "../documents/components/PhaseDocManager";
+import { TransitionRequestDto } from "@/types/util";
+import { StateTransitionButtons } from "@/components/StateTransitionButtons";
 
 
 interface PhaseManagerProps {
@@ -135,20 +137,23 @@ export default function PhaseManager({ project, phaseType, flyMode = false, onSa
         setShowDialog(true);
     };
 
-    const updateStatus = async (row: Phase, next: PhaseStatus) => {
+    const updateStatus = async (row: Phase, dto: TransitionRequestDto) => {
         if (!row._id) {
             return;
         }
-        const updated = await PhaseApi.updateStatus(row._id, next);
+        const updated = await PhaseApi.updateStatus(row._id, dto);
         onSaveComplete({
             ...updated,
             project: row.project
         });
     };
 
+    /*
     const stateTransitionTemplate = (row: Phase) => {
         if (!row._id) return;
         const current = row.status;
+        if (!current) return;
+
         let prev: PhaseStatus | undefined;
         let next: PhaseStatus | undefined;
 
@@ -185,46 +190,48 @@ export default function PhaseManager({ project, phaseType, flyMode = false, onSa
 
         return (
             <div className="flex gap-2">
-                {/* ✅ Next Button */}
-                {next && (() => {
-                    const nextStatus = next; // local constant for TS
-                    return (
-                        <Button
-                            tooltip={`Make ${nextStatus}`}
-                            icon="pi pi-check"
-                            severity="success"
-                            size="small"
-                            onClick={() =>
-                                confirm.ask({
-                                    operation: `Make to ${nextStatus}`,
-                                    onConfirmAsync: () => updateStatus(row, nextStatus),
-                                })
-                            }
-                        />
-                    );
-                })()}
+                {next && (
+                    <Button
+                        tooltip={`Make ${next}`}
+                        icon="pi pi-check"
+                        severity="success"
+                        size="small"
+                        onClick={() =>
+                            confirm.ask({
+                                operation: `Make to ${next}`,
+                                onConfirmAsync: () =>
+                                    updateStatus(row, {
+                                        current,
+                                        next
+                                    }),
+                            })
+                        }
+                    />
+                )}
 
-                {/* ✅ Prev Button */}
-                {prev && (() => {
-                    const prevStatus = prev; // local constant for TS
-                    return (
-                        <Button
-                            tooltip={`Back to ${prevStatus}`}
-                            icon="pi pi-undo"
-                            severity="warning"
-                            size="small"
-                            onClick={() =>
-                                confirm.ask({
-                                    operation: `Back to ${prevStatus}`,
-                                    onConfirmAsync: () => updateStatus(row, prevStatus),
-                                })
-                            }
-                        />
-                    );
-                })()}
+               
+                {prev && (
+                    <Button
+                        tooltip={`Back to ${prev}`}
+                        icon="pi pi-undo"
+                        severity="warning"
+                        size="small"
+                        onClick={() =>
+                            confirm.ask({
+                                operation: `Back to ${prev}`,
+                                onConfirmAsync: () =>
+                                    updateStatus(row, {
+                                        current,
+                                        next: prev
+                                    }),
+                            })
+                        }
+                    />
+                )}
             </div>
         );
     };
+    */
 
     const calculateTotalBudget = () =>
         phases.reduce((sum, p) => sum + (p.budget ?? 0), 0);
@@ -248,7 +255,27 @@ export default function PhaseManager({ project, phaseType, flyMode = false, onSa
             body: (p: Phase) =>
                 <MyBadge type="status" value={p.status ?? 'Unknown'} />
         },
-        { body: stateTransitionTemplate }
+        {
+            header: "Actions",
+            body: (row: Phase) => (
+                <StateTransitionButtons
+                    id={row._id}
+                    current={row.status ?? PhaseStatus.proposed}
+                    transitions={PHASE_TRANSITIONS}
+                    permissionPrefix="phase"
+                    statusOrder={PHASE_STATUS_ORDER}
+                    hasPermission={hasPermission}
+                    onTransition={async (next) => confirm.ask({
+                        operation: `Change to ${next}`,
+                        onConfirmAsync: () => updateStatus(row, {
+                            current: row.status ?? "",
+                            next
+                        }),
+                    })
+                    }
+                />
+            )
+        }
     ];
 
     return (
