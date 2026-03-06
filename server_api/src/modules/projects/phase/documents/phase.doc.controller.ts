@@ -5,6 +5,7 @@ import { CreatePhaseDocDTO, GetPhaseDocDTO } from "./phase.doc.dto";
 import { PhaseDocService } from "./phase.doc.service";
 import { AppError } from "../../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../../common/errors/error.codes";
+import fs from "fs";
 
 export class PhaseDocController {
 
@@ -18,17 +19,22 @@ export class PhaseDocController {
         try {
             if (!req.user) throw new AppError(ERROR_CODES.USER_NOT_FOUND);
 
-            const { phase, type, documentPath } = req.body;
+            if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
+
+            const { phase, description } = req.body;
 
             const dto: CreatePhaseDocDTO = {
                 phase,
-                type,
-                documentPath,
+                description,
+                documentPath: `uploads/${req.file.filename}`,
             };
 
             const created = await this.service.create(dto);
             successResponse(res, 201, "Phase document created successfully", created);
         } catch (err: any) {
+            if (req.file) {
+                fs.unlink(`uploads/${req.file.filename}`, () => { });
+            }
             errorResponse(res, 400, err.message, err);
         }
     };
@@ -40,7 +46,6 @@ export class PhaseDocController {
 
             const filter: GetPhaseDocDTO = {
                 phase: phase as string,
-                //type: type as any
             };
 
             const docs = await this.service.get(filter);
@@ -57,6 +62,9 @@ export class PhaseDocController {
 
             const { id } = req.params;
             const deleted = await this.service.delete(id);
+            if (deleted) {
+                fs.unlink(deleted.documentPath, () => { });
+            }
             successResponse(res, 200, "Phase document deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

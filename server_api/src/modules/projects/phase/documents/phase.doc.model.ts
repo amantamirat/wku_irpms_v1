@@ -1,9 +1,7 @@
 import mongoose from "mongoose";
-import { PhaseDocType } from "./phase.doc.enum";
 import { COLLECTIONS } from "../../../../common/constants/collections.enum";
 
 export interface IPhaseDocument extends Document {
-    type: PhaseDocType;
     phase: mongoose.Types.ObjectId;
     description: string;
     documentPath: string;
@@ -12,19 +10,15 @@ export interface IPhaseDocument extends Document {
 }
 
 const PhaseDocSchema = new mongoose.Schema<IPhaseDocument>({
-    type: {
-        type: String,
-        enum: Object.values(PhaseDocType),
-        required: true,
-        immutable: true
-    },
     phase: {
         type: mongoose.Schema.Types.ObjectId,
         ref: COLLECTIONS.PHASE,
-        required: true
+        required: true,
+        immutable: true
     },
     description: {
-        type: String
+        type: String,
+        required: true,
     },
     documentPath: {
         type: String,

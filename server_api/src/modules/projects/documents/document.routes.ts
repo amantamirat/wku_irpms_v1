@@ -11,13 +11,7 @@ import { DocumentService } from "./document.service";
 const repository = new DocumentRepository();
 const projectRepository = new ProjectRepository();
 const stageRepository = new StageRepository();
-/*
-const synchronizer = new ProjectSynchronizer(
-    projectRepository,
-    repository,
-    new PhaseRepository()
-);
-*/
+
 const service = new DocumentService(repository, projectRepository, stageRepository);
 const controller = new ProjectDocController(service);
 const router = express.Router();

@@ -7,12 +7,14 @@ import { useEffect, useState } from "react";
 import { useCrudList } from "@/hooks/useCrudList";
 import { PERMISSIONS } from "@/types/permissions";
 import { Phase } from "../../models/phase.model";
-import { PhaseDocType, PhaseDocument } from "../model/phase.doc";
+
 import { PhaseDocApi } from "../api/phase.doc.api";
-import SavePhaseDocDialog from "./SavePhaseDocDialog";
+import SavePhaseDocDialog from "./SaveDialog";
+import { PhaseDocument } from "../model/phase.doc";
+import { BASE_URL } from "@/api/ApiClient";
 
 interface PhaseDocManagerProps {
-    phase: string;
+    phase: string | Phase;
 }
 
 export default function PhaseDocManager({
@@ -24,8 +26,7 @@ export default function PhaseDocManager({
 
 
     const emptyPhaseDoc: PhaseDocument = {
-        phase,
-        type: PhaseDocType.report
+        phase
     };
 
     // -------------------------------
@@ -114,10 +115,18 @@ export default function PhaseDocManager({
     // -------------------------------
     const columns = [
         {
-            field: "type",
-            header: "Type",
+            field: "description",
+            header: "Description",
             sortable: true
-        }
+        },
+        {
+            header: "Document",
+            body: (row: PhaseDocument) => {
+                if (!row.documentPath) return "No document";
+                const url = `${BASE_URL}/${row.documentPath.replace(/^\\/, "")}`;
+                return <button className="p-button p-button-text" onClick={() => window.open(url, "_blank")}>View</button>;
+            }
+        },
     ];
 
     return (
@@ -136,7 +145,6 @@ export default function PhaseDocManager({
                 //onEdit={handleEdit}
                 onDelete={(row) =>
                     confirm.ask({
-                        item: row.type,
                         onConfirmAsync: () => deletePhaseDoc(row)
                     })
                 }

@@ -1,13 +1,15 @@
 import { Router } from "express";
 import { PERMISSIONS } from "../../../../common/constants/permissions";
-import { verifyActiveAccount, checkPermission} from "../../../users/user.middleware";
+import { verifyActiveAccount, checkPermission } from "../../../users/user.middleware";
 import { PhaseDocController } from "./phase.doc.controller";
+import { upload } from "../../../../util/multer";
 
 const controller = new PhaseDocController();
 const router: Router = Router();
 
 router.post('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.PHASE_DOCUMENT.CREATE]),
+    upload.single("document"),
     controller.create);
 
 router.get('/', verifyActiveAccount,

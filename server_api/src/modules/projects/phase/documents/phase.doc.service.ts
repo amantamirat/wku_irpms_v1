@@ -16,7 +16,7 @@ export class PhaseDocService {
     }
 
     async create(data: CreatePhaseDocDTO) {
-        const { type, phase, documentPath } = data;
+        const { description, phase, documentPath } = data;
 
         const phaseDoc = await this.phaseRepository.findById(phase);
         if (!phaseDoc)
@@ -34,7 +34,8 @@ export class PhaseDocService {
     }
 
     async delete(id: string) {
-        const phaseDocDoc = await this.repository.findById(id);
+        const phaseDocDoc = await this.repository.delete(id);
         if (!phaseDocDoc) throw new AppError(ERROR_CODES.PHASE_DOCUMENT_NOT_FOUND);
+        return phaseDocDoc;
     }
 }

@@ -14,6 +14,7 @@ import { DocumentService } from "./document.service";
 import { DeleteDto } from "../../../util/delete.dto";
 import { DocStatus } from "./document.status";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
+import { AppError } from "../../../common/errors/app.error";
 
 export class ProjectDocController {
 
@@ -28,9 +29,9 @@ export class ProjectDocController {
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) {
-                throw new Error("User not found!");
+                throw new AppError(ERROR_CODES.USER_NOT_FOUND);
             }
-            if (!req.file) throw new Error("Document required");
+            if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
 
             const { project, stage } = req.body;
 
@@ -141,7 +142,9 @@ export class ProjectDocController {
             const submitted = await this.service.submit(dto);
             successResponse(res, 201, "Project submitted successfully", submitted);
         } catch (err: any) {
-            //safeDeleteFile(uploadedFilePath);
+            if (req.file) {
+                fs.unlink(`uploads/${req.file.filename}`, () => { });
+            }
             errorResponse(res, 400, err.message, err);
         }
     };

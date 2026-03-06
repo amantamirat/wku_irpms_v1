@@ -18,6 +18,7 @@ import { Button } from "primereact/button";
 import PhaseDocManager from "../documents/components/PhaseDocManager";
 import { TransitionRequestDto } from "@/types/util";
 import { StateTransitionButtons } from "@/components/StateTransitionButtons";
+import Detail from "./Detail";
 
 
 interface PhaseManagerProps {
@@ -300,7 +301,7 @@ export default function PhaseManager({ project, phaseType, flyMode = false, onSa
                     })
                 }
                 rowExpansionTemplate={project?.status === ProjectStatus.granted ? (row) => {
-                    return <PhaseDocManager phase={row._id || ''} />;
+                    return <Detail phase={row} />;
                 } : undefined}
             />
             <SavePhaseDialog
