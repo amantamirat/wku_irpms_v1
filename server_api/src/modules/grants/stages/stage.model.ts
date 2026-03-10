@@ -1,24 +1,22 @@
 import mongoose, { Schema, model } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
-import { StageStatus } from "./stage.status";
+
 
 
 export interface IStage extends Document {
     _id: string;
-    call: mongoose.Types.ObjectId;
+    grant: mongoose.Types.ObjectId;
     name: string;
     order: number;
     evaluation: mongoose.Types.ObjectId;
-    deadline: Date;
-    status: StageStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
 const StageSchema = new Schema<IStage>({
-    call: {
+    grant: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.CALL,
+        ref: COLLECTIONS.GRANT,
         required: true,
         immutable: true,
     },
@@ -37,19 +35,10 @@ const StageSchema = new Schema<IStage>({
         required: true,
         immutable: true,
     },
-    deadline: {
-        type: Date,
-        required: true
-    },
-    status: {
-        type: String,
-        enum: Object.values(StageStatus),
-        default: StageStatus.planned,
-        required: true
-    }
+
 }, { timestamps: true });
 
 
-StageSchema.index({ call: 1, order: 1 }, { unique: true });
+StageSchema.index({ grant: 1, order: 1 }, { unique: true });
 
-export const Stage = model<IStage>(COLLECTIONS.STAGE, StageSchema);
+export const Stage = model<IStage>(COLLECTIONS.GRANT_STAGE, StageSchema);

@@ -1,17 +1,14 @@
 'use client';
 
-import { DirectorateSelector } from '@/components/DirectorateSelector';
-import GrantManager from './components/GrantManager';
-import { useDirectorate } from '@/contexts/DirectorateContext';
+import GrantManager from "./components/GrantManager";
+
+
 
 
 const GrantPage = () => {
     //const { directorate } = useDirectorate();
     return (
-        <>
-            <GrantManager />
-        </>
-
+        <GrantManager />
     );
 };
 

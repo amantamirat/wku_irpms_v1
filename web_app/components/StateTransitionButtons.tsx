@@ -38,8 +38,6 @@ export function StateTransitionButtons<TStatus extends string>({
                 .map((target) => {
                     const targetIndex = statusOrder.indexOf(target);
                     const isForward = targetIndex > currentIndex;
-                    //const isForward = true; // optional: detect using order map if needed
-
                     return (
                         <Button
                             key={String(target)}

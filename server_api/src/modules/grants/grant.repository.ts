@@ -44,8 +44,10 @@ export class GrantRepository implements IGrantRepository {
             fundingSource: dto.fundingSource,
             organization: new mongoose.Types.ObjectId(dto.organization),
             title: dto.title,
+            amount: dto.amount,
+            thematic: new mongoose.Types.ObjectId(dto.thematic),
             description: dto.description,
-            amount: dto.amount
+
         };
 
         return Grant.create(data);

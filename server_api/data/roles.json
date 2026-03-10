@@ -27,6 +27,8 @@
             "grant:*",
             "constraint:*",
             "composition:*",
+            "grant_stage:*",
+            "evaluation:*",
             "call:*",
             "thematic:read",
             "stage:read",

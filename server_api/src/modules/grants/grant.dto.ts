@@ -10,6 +10,8 @@ export interface CreateGrantDTO {
     organization: string;
     title: string;
     amount: number;
+    thematic: string;
+    //stages: number;
     description?: string;
 }
 

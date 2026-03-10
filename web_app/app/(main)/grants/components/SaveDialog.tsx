@@ -1,36 +1,34 @@
 'use client';
-import { useAuth } from '@/contexts/auth-context';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
+import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
+import { OrganizationApi } from '../../organizations/api/organization.api';
 import { Organization, OrgnUnit } from '../../organizations/models/organization.model';
+import { ThematicApi } from '../../thematics/api/thematic.api';
+import { Thematic } from '../../thematics/models/thematic.model';
 import { GrantApi } from '../api/grant.api';
 import { FundingSource, Grant, validateGrant } from '../models/grant.model';
-import { OrganizationApi } from '../../organizations/api/organization.api';
-import { InputNumber } from 'primereact/inputnumber';
+import { EntitySaveDialogProps } from '@/components/createEntityManager';
 
-interface SaveDialogProps {
-    visible: boolean;
-    grant: Grant;
-    onComplete?: (savedGrant: Grant) => void;
-    onHide: () => void;
-}
 
-const SaveDialog = ({ visible, grant, onComplete, onHide }: SaveDialogProps) => {
+
+const SaveDialog = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<Grant>) => {
 
     const toast = useRef<Toast>(null);
     const [organizations, setOrganizations] = useState<Organization[]>([]);
-    const [localGrant, setLocalGrant] = useState<Grant>({ ...grant });
+    const [thematics, setThematics] = useState<Thematic[]>([]);
+    const [localGrant, setLocalGrant] = useState<Grant>({ ...item });
     const [submitted, setSubmitted] = useState(false);
 
     useEffect(() => {
-        setLocalGrant({ ...grant });
-    }, [grant]);
+        setLocalGrant({ ...item });
+    }, [item]);
 
     useEffect(() => {
         const loadOrganizations = async () => {
@@ -55,6 +53,20 @@ const SaveDialog = ({ visible, grant, onComplete, onHide }: SaveDialogProps) => 
         loadOrganizations();
     }, [localGrant.fundingSource]);
 
+    useEffect(
+        () => {
+            const loadThematics = async () => {
+                try {
+                    const data = await ThematicApi.getThematics({ directorate: localGrant.organization });
+                    setThematics(data);
+                } catch (err) {
+                    console.error('Failed to load themes:', err);
+                }
+            };
+            loadThematics();
+        }, [[localGrant.organization]]
+    );
+
 
     useEffect(() => {
         if (!visible) clearForm();
@@ -62,7 +74,7 @@ const SaveDialog = ({ visible, grant, onComplete, onHide }: SaveDialogProps) => 
 
     const clearForm = () => {
         setSubmitted(false);
-        setLocalGrant({ ...grant });
+        setLocalGrant({ ...item });
     };
 
     const saveGrant = async () => {
@@ -74,8 +86,8 @@ const SaveDialog = ({ visible, grant, onComplete, onHide }: SaveDialogProps) => 
             }
 
             let saved = localGrant._id
-                ? await GrantApi.updateGrant(localGrant)
-                : await GrantApi.createGrant(localGrant);
+                ? await GrantApi.update(localGrant)
+                : await GrantApi.create(localGrant);
             saved = {
                 ...saved,
                 organization: localGrant.organization
@@ -123,7 +135,7 @@ const SaveDialog = ({ visible, grant, onComplete, onHide }: SaveDialogProps) => 
                 onHide={hide}
             >
                 <div className="field">
-                    <label htmlFor="source">source</label>
+                    <label htmlFor="source">Source</label>
                     <Dropdown
                         id="source"
                         value={localGrant.fundingSource}
@@ -147,9 +159,9 @@ const SaveDialog = ({ visible, grant, onComplete, onHide }: SaveDialogProps) => 
                 </div>
 
                 <div className="field">
-                    <label htmlFor="directorate">Directorate</label>
+                    <label htmlFor="organization">Organization</label>
                     <Dropdown
-                        id="directorate"
+                        id="organization"
                         value={localGrant.organization}
                         options={organizations}
                         optionLabel="name"
@@ -178,6 +190,19 @@ const SaveDialog = ({ visible, grant, onComplete, onHide }: SaveDialogProps) => 
                         id="amount"
                         value={localGrant.amount}
                         onValueChange={(e) => setLocalGrant({ ...localGrant, amount: e.value ?? 0 })}
+                    />
+                </div>
+
+                <div className="field">
+                    <label htmlFor="thematics">Thematics</label>
+                    <Dropdown
+                        id="thematics"
+                        dataKey="_id"
+                        value={localGrant.thematic}
+                        options={thematics}
+                        optionLabel="title"
+                        onChange={(e) => setLocalGrant({ ...localGrant, thematic: e.value })}
+                        placeholder="Select Thematics"
                     />
                 </div>
 

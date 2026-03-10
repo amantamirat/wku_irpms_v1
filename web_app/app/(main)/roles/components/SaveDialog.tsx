@@ -1,4 +1,5 @@
 'use client';
+import { EntitySaveDialogProps } from '@/components/createEntityManager';
 import { useAuth } from '@/contexts/auth-context';
 import { PERMISSIONS } from '@/types/permissions';
 import { Button } from 'primereact/button';
@@ -16,12 +17,24 @@ import { Role, validateRole } from '../models/role.model';
 import { PermissionApi } from '../permission/api/permission.api';
 import { Permission } from '../permission/model/permission.model';
 
-interface SaveDialogProps {
-    visible: boolean;
-    role: Role;
-    onComplete: (role: Role) => void;
-    onHide: () => void;
-}
+
+
+const permissionNodeTemplate = (node: TreeNode) => {
+    return (
+        <span 
+            title={node.data?.description || node.label} 
+            style={{ cursor: 'help' }}
+        >
+            {node.label}
+            {node.data?.description && (
+                <i 
+                    className="pi pi-info-circle ml-2 text-xs text-400" 
+                    style={{ fontSize: '0.8rem' }}
+                />
+            )}
+        </span>
+    );
+};
 
 
 /* ---------------------------------------------
@@ -43,7 +56,7 @@ const buildPermissionTree = (permissions: Permission[]): TreeNode[] => {
         map.get(perm.category)!.children!.push({
             key: perm._id!, // ObjectId string
             label: perm.name,
-            data: perm,
+            data: perm
         });
     });
 
@@ -53,8 +66,8 @@ const buildPermissionTree = (permissions: Permission[]): TreeNode[] => {
 const isObjectId = (value: string) =>
     /^[a-fA-F0-9]{24}$/.test(value);
 
-const SaveDialog = (props: SaveDialogProps) => {
-    const { visible, role, onComplete, onHide } = props;
+const SaveDialog = (props: EntitySaveDialogProps<Role>) => {
+    const { visible, item, onComplete, onHide } = props;
 
     const { hasPermission } = useAuth();
     const readPermission = hasPermission([PERMISSIONS.PERMISSION.READ]);
@@ -63,10 +76,13 @@ const SaveDialog = (props: SaveDialogProps) => {
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
-    const [localRole, setLocalRole] = useState<Role>({ ...role });
-    //const [permissions, setPermissions] = useState<Permission[]>([]);
     const [permissionTree, setPermissionTree] = useState<TreeNode[]>([]);
     const [selectedKeys, setSelectedKeys] = useState<Record<string, any>>({});
+
+    const [localRole, setLocalRole] = useState<Role>({ ...item });
+    useEffect(() => {
+        setLocalRole({ ...item });
+    }, [item]);
 
 
     useEffect(() => {
@@ -85,9 +101,6 @@ const SaveDialog = (props: SaveDialogProps) => {
         fetchPermissions();
     }, [readPermission]);
 
-    useEffect(() => {
-        setLocalRole({ ...role });
-    }, [role]);
 
     useEffect(() => {
         if (!localRole.permissions) return;
@@ -228,6 +241,8 @@ const SaveDialog = (props: SaveDialogProps) => {
                         display="chip"
                         placeholder="Select Permissions"
                         metaKeySelection={false}
+                        nodeTemplate={permissionNodeTemplate}
+                        panelStyle={{ width: '300px' }} // Help with visibility
                         className={classNames({
                             'p-invalid': submitted && !localRole.permissions.length,
                         })}

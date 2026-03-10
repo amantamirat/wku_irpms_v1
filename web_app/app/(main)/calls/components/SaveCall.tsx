@@ -1,5 +1,5 @@
 'use client';
-import { useAuth } from '@/contexts/auth-context';
+
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
@@ -76,7 +76,7 @@ const SaveCall = ({ visible, call, calendarProvided, directorateProvided, onHide
     useEffect(() => {
         const loadGrants = async () => {
             try {
-                const data = await GrantApi.getGrants({ organization: localCall.directorate });
+                const data = await GrantApi.getAll();
                 setGrants(data);
             } catch (err) {
                 console.error('Failed to load grants:', err);

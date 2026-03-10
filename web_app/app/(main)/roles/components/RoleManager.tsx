@@ -119,7 +119,7 @@ const RoleManager = () => {
             {(role && showSaveDialog) && (
                 <SaveDialog
                     visible={showSaveDialog}
-                    role={role}
+                    item={role}
                     onComplete={onSaveComplete}
                     onHide={hideDialogs}
                 />

@@ -1,10 +1,10 @@
 'use client';
-import RoleManager from './components/RoleManager';
+import Manager from './components/Manager';
 
 const RolePage = () => {
 
     return (
-        <RoleManager />
+        <Manager />
     );
 };
 

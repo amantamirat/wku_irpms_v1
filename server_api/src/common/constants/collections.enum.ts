@@ -11,6 +11,7 @@ export enum COLLECTIONS {
   STUDNET = "students",
 
   GRANT = "grants",
+  GRANT_STAGE = "grantstages",
   CONSTRAINT = "constraints",
   COMPOSITION_NEW = "compositions",
 

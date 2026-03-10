@@ -7,6 +7,7 @@ import { Unit } from "../organization/organization.type";
 import { FundingSource } from "./grant.model";
 import { ConstraintRepository, IConstraintRepository } from "./constraints/constraint.repository";
 import { CallRepository, ICallRepository } from "../calls/call.repository";
+import { IThematicRepository, ThematicRepository } from "../thematics/thematic.repository";
 
 export class GrantService {
 
@@ -14,7 +15,8 @@ export class GrantService {
         private readonly grantRepository: IGrantRepository = new GrantRepository(),
         private readonly organizationRepository: IOrganizationRepository = new OrganizationRepository(),
         private readonly constraintRepo: IConstraintRepository = new ConstraintRepository(),
-        private readonly callRepo: ICallRepository = new CallRepository()
+        private readonly callRepo: ICallRepository = new CallRepository(),
+        private readonly thematicRepository: IThematicRepository = new ThematicRepository(),
     ) { }
 
     async create(dto: CreateGrantDTO) {
@@ -32,6 +34,8 @@ export class GrantService {
                 throw new AppError(ERROR_CODES.EXTERNAL_NOT_FOUND);
             }
 
+        const thematicsDoc = await this.thematicRepository.findById(dto.thematic);
+        if (!thematicsDoc) throw new AppError(ERROR_CODES.THEMATIC_NOT_FOUND);
         const created = await this.grantRepository.create(dto);
         return created;
     }
