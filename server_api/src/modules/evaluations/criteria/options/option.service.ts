@@ -1,6 +1,6 @@
 import { AppError } from "../../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../../common/errors/error.codes";
-import { DeleteDto } from "../../../../util/delete.dto";
+import { DeleteDto } from "../../../../common/dtos/delete.dto";
 import { IResultRepository, ResultRepository } from "../../../calls/stages/reviewers/results/result.repository";
 import { FormType } from "../criterion.enum";
 import { CriterionRepository, ICriterionRepository } from "../criterion.repository";

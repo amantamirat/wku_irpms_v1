@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { DeleteDto } from "../../../util/delete.dto";
+import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { errorResponse, successResponse } from "../../../common/helpers/response";
 import { AuthenticatedRequest } from "../../users/user.middleware";
 import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto, UpdatePhaseStatusDto } from "./phase.dto";
@@ -7,7 +7,7 @@ import { PhaseType } from "./phase.enum";
 import { PhaseService } from "./phase.service";
 import { PhaseStatus } from "./phase.status";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { TransitionRequestDto } from "../../../util/global.dto";
+import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 
 export class PhaseController {
     private service: PhaseService;

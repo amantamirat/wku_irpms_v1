@@ -1,8 +1,8 @@
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { DeleteDto } from "../../../util/delete.dto";
+import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { ApplicantRepository, IApplicantRepository } from "../../applicants/applicant.repository";
-import { PermissionRepository } from "../permissions/permission.repository";
+import { PermissionRepository } from "../../permissions/permission.repository";
 import { CreateRoleDto, UpdateRoleDto } from "./role.dto";
 import { RoleRepository } from "./role.repository";
 import fs from 'fs/promises';

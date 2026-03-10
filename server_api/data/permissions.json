@@ -5,6 +5,16 @@
     "description": "View permissions"
   },
   {
+    "category": "Setting Management",
+    "name": "setting:read",
+    "description": "View settings"
+  },
+  {
+    "category": "Setting Management",
+    "name": "setting:update",
+    "description": "Edit settings"
+  },
+  {
     "category": "Role Management",
     "name": "role:create",
     "description": "Create new roles"
@@ -369,6 +379,26 @@
     "category": "Grant Stage",
     "name": "grant_stage:delete",
     "description": "Delete grant stage entries"
+  },
+  {
+    "category": "Grant Management",
+    "name": "grant:transition.planned.active",
+    "description": "Move grant from planned to active"
+  },
+  {
+    "category": "Grant Management",
+    "name": "grant:transition.active.closed",
+    "description": "Move grant from active to closed"
+  },
+  {
+    "category": "Grant Management",
+    "name": "grant:transition.active.planned",
+    "description": "Revert grant from active to planned"
+  },
+  {
+    "category": "Grant Management",
+    "name": "grant:transition.closed.active",
+    "description": "Reopen grant from closed to active"
   },
   {
     "category": "Constraint Management",

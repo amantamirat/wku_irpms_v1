@@ -6,6 +6,18 @@ export const ERROR_CODES = {
     INVALID_STATE_TRANSITION: "INVALID_STATE_TRANSITION",
     FILE_NOT_FOUND: "FILE_NOT_FOUND",
     CURRENT_STATE_MISMATCH: "CURRENT_STATE_MISMATCH",
+    STATE_OUT_OF_SYNC: "STATE_OUT_OF_SYNC",
+    /*
+    STATE_OUT_OF_SYNC: {
+        code: "STATE_OUT_OF_SYNC",
+        message: "The resource state has changed. Please refresh and try again."
+    },
+    */
+
+    // ---------- SETTING ----------
+    SETTING_NOT_FOUND: "SETTING_NOT_FOUND",
+    SETTING_FILE_SIZE_OUT_OF_RANGE: "File size must be between 1 and 100MB.",
+
 
     USER_NOT_LEAD_PI: "USER_NOT_LEAD_PI",
     USER_NOT_REVIEWER: "USER_NOT_REVIEWER",
@@ -104,6 +116,7 @@ export const ERROR_CODES = {
 
     // ---------- GRANT ----------
     GRANT_NOT_FOUND: "GRANT_NOT_FOUND",
+
 
     // ---------- CONSTRAINT ----------    
     CONSTRAINT_NOT_FOUND: "CONSTRAINT_NOT_FOUND",

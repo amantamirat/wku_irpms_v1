@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { GrantController } from './grant.controller';
-import { verifyActiveAccount, checkPermission } from '../users/user.middleware';
+import { verifyActiveAccount, checkPermission, checkTransitionPermission } from '../users/user.middleware';
 import { PERMISSIONS } from '../../common/constants/permissions';
 import { GrantRepository } from './grant.repository';
 import { OrganizationRepository } from '../organization/organization.repository';
@@ -40,6 +40,12 @@ router.put(
   verifyActiveAccount,
   checkPermission([PERMISSIONS.GRANT.UPDATE]),
   controller.update
+);
+
+router.patch(
+  '/:id', verifyActiveAccount,
+  checkTransitionPermission("grant"),
+  controller.transitionState
 );
 
 router.delete(

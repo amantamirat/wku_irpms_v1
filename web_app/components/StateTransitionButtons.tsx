@@ -52,8 +52,3 @@ export function StateTransitionButtons<TStatus extends string>({
         </div>
     );
 }
-
-const getStatusIndex = <T extends string>(
-    order: T[],
-    status: T
-) => order.indexOf(status);

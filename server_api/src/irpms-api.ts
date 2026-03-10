@@ -39,9 +39,11 @@ import reviewerRoutes from './modules/calls/stages/reviewers/reviewer.routes';
 import resultRoutes from './modules/calls/stages/reviewers/results/result.routes';
 
 import userRoutes from './modules/users/user.routes';
-import roleRoutes from './modules/users/roles/role.routes';
-import permissionRoutes from './modules/users/permissions/permission.routes';
 import reportRoutes from './modules/reports/report.routes';
+//import by order
+import settingRoutes from './modules/settings/setting.routes';
+import permissionRoutes from './modules/permissions/permission.routes';
+import roleRoutes from './modules/permissions/roles/role.routes';
 
 import path from 'path';
 
@@ -51,9 +53,13 @@ const app: Application = express();
 app.use(cors());
 app.use(express.json());
 
+app.use("/api/settings", settingRoutes);
 app.use("/api/permissions", permissionRoutes);
-app.use("/api/users", userRoutes);
 app.use("/api/roles", roleRoutes);
+
+
+app.use("/api/users", userRoutes);
+
 
 app.use("/api/organizations", organizationRoutes);
 app.use("/api/applicants", applicantRoutes);

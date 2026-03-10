@@ -17,8 +17,7 @@ import { FundingSource, Grant, validateGrant } from '../models/grant.model';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
 
 
-
-const SaveDialog = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<Grant>) => {
+const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<Grant>) => {
 
     const toast = useRef<Toast>(null);
     const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -223,4 +222,4 @@ const SaveDialog = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps
     );
 };
 
-export default SaveDialog;
+export default SaveGrant;

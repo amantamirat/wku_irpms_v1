@@ -3,7 +3,7 @@ import { errorResponse, successResponse } from "../../../../../common/helpers/re
 import { ResultService } from "./result.service";
 import { CreateResultDTO, GetResultsDTO, UpdateResultDTO} from "./result.dto";
 import { AuthenticatedRequest } from "../../../../users/user.middleware";
-import { DeleteDto } from "../../../../../util/delete.dto";
+import { DeleteDto } from "../../../../../common/dtos/delete.dto";
 
 const resultService = new ResultService();
 

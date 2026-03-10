@@ -2,7 +2,7 @@ import mongoose, { Document, Schema, Model } from 'mongoose';
 import { UserStatus } from './user.status';
 import { COLLECTIONS } from '../../common/constants/collections.enum';
 
-//assumption it is auth just username and passowd
+
 export interface IUser extends Document {
   email: string;
   password: string;

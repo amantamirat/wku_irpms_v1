@@ -1,6 +1,6 @@
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { DeleteDto } from "../../../util/delete.dto";
+import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { CalendarRepository } from "../../calendar/calendar.repository";
 import { OrganizationRepository } from "../../organization/organization.repository";
 import { Unit } from "../../organization/organization.type";

@@ -1,0 +1,42 @@
+[
+    {
+        "key": "token_expiry_hours",
+        "value": 24,
+        "type": "number",
+        "description": "How long the Access token remains valid."
+    },
+    {
+        "key": "max_login_attempts",
+        "value": 5,
+        "type": "number",
+        "description": "Number of failed login attempts before account lockout."
+    },
+    {
+        "key": "account_lock_min",
+        "value": 15,
+        "type": "number",
+        "description": "Minutes to lock account after max failed login attempts"
+    },
+    {
+        "key": "max_file_upload_size_mb",
+        "value": 10,
+        "type": "number",
+        "description": "Maximum size of a single file upload in Megabytes."
+    },
+    {
+        "key": "allowed_file_types",
+        "value": [
+            "image/jpeg",
+            "image/png",
+            "application/pdf"
+        ],
+        "type": "json",
+        "description": "Array of MIME types permitted for uploads."
+    },
+    {
+        "key": "maintenance_mode",
+        "value": false,
+        "type": "boolean",
+        "description": "If true, the application will block non-admin access."
+    }
+]

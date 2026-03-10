@@ -66,7 +66,7 @@ const buildPermissionTree = (permissions: Permission[]): TreeNode[] => {
 const isObjectId = (value: string) =>
     /^[a-fA-F0-9]{24}$/.test(value);
 
-const SaveDialog = (props: EntitySaveDialogProps<Role>) => {
+const SaveRole = (props: EntitySaveDialogProps<Role>) => {
     const { visible, item, onComplete, onHide } = props;
 
     const { hasPermission } = useAuth();
@@ -141,9 +141,9 @@ const SaveDialog = (props: EntitySaveDialogProps<Role>) => {
             }
             let saved: Role;
             if (localRole._id) {
-                saved = await RoleApi.updateRole(localRole);
+                saved = await RoleApi.update(localRole);
             } else {
-                saved = await RoleApi.createRole(localRole);
+                saved = await RoleApi.create(localRole);
             }
             saved = {
                 ...saved,
@@ -270,4 +270,4 @@ const SaveDialog = (props: EntitySaveDialogProps<Role>) => {
     );
 }
 
-export default SaveDialog;
+export default SaveRole;

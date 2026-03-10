@@ -66,12 +66,14 @@ export class GrantRepository implements IGrantRepository {
         if (dtoData.amount !== undefined)
             updateData.amount = dtoData.amount;
 
+        if (dtoData.status !== undefined)
+            updateData.status = dtoData.status;
+
         return Grant.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },
             { new: true }
-        )
-            .exec();
+        ).exec();
     }
 
     async delete(id: string) {

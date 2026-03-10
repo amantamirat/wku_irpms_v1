@@ -11,7 +11,7 @@ import {
 
 import { AuthenticatedRequest } from "../../users/user.middleware";
 import { DocumentService } from "./document.service";
-import { DeleteDto } from "../../../util/delete.dto";
+import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { DocStatus } from "./document.status";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { AppError } from "../../../common/errors/app.error";

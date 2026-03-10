@@ -2,7 +2,7 @@
 import { SYSTEM } from "../../../common/constants/system.constant";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { DeleteDto } from "../../../util/delete.dto";
+import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { IApplicantRepository } from "../../applicants/applicant.repository";
 import { IProjectRepository } from "../project.repository";
 import { ProjectStatus } from "../project.status";

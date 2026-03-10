@@ -2,7 +2,8 @@ import { Request, Response } from 'express';
 import { RoleService } from './role.service';
 import { CreateRoleDto, UpdateRoleDto } from './role.dto';
 import { successResponse, errorResponse } from '../../../common/helpers/response';
-import { AuthenticatedRequest } from '../user.middleware';
+import { AuthenticatedRequest } from '../../users/user.middleware';
+
 
 export class RoleController {
 

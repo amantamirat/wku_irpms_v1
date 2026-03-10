@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { DeleteDto } from '../../../util/delete.dto';
+import { DeleteDto } from '../../../common/dtos/delete.dto';
 import { errorResponse, successResponse } from '../../../common/helpers/response';
 import { AuthenticatedRequest } from '../../users/user.middleware';
 import {

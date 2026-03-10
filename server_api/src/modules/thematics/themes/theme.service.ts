@@ -1,7 +1,7 @@
 import { IThemeRepository, ThemeRepository } from "./theme.repository";
 import { CreateThemeDTO, GetThemeDTO, UpdateThemeDTO } from "./theme.dto";
 import { IThematicRepository, ThematicRepository } from "../thematic.repository";
-import { DeleteDto } from "../../../util/delete.dto";
+import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { themeLevelIndex } from "../thematic.enum";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { IProjectThemeRepository, ProjectThemeRepository } from "../../projects/themes/project.theme.repository";

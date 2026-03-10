@@ -1,10 +1,10 @@
 import { createEntityManager } from "@/components/createEntityManager";
-import { createEmptyGrant, Grant } from "../models/grant.model";
-import SaveDialog from "./SaveDialog";
-import GrantDetail from "./GrantDetail";
 import { GrantApi } from "../api/grant.api";
-
-
+import { createEmptyGrant, Grant } from "../models/grant.model";
+import { GRANT_STATUS_ORDER, GRANT_TRANSITIONS } from "../models/grant.state-machine";
+import GrantDetail from "./GrantDetail";
+import SaveGrant from "./SaveGrant";
+import MyBadge from "@/templates/MyBadge";
 
 export default createEntityManager<Grant>({
     title: "Manage Grants",
@@ -23,10 +23,20 @@ export default createEntityManager<Grant>({
         },
         { header: "Title", field: "title" },
         { header: "Amount", field: "amount", sortable: true, body: (rowData: any) => rowData.amount.toLocaleString() },
+        {
+            field: "status", header: "Status", sortable: true,
+            body: (g: Grant) =>
+                <MyBadge type="status" value={g.status ?? 'Unknown'} />
+        },
     ],
     createNew: createEmptyGrant,
-    SaveDialog,
+    SaveDialog: SaveGrant,
     permissionPrefix: "grant",
+    workflow: {
+        statusField: "status",
+        transitions: GRANT_TRANSITIONS,
+        statusOrder: GRANT_STATUS_ORDER
+    },
     expandable: {
         template: (grant) => (
             <GrantDetail grant={grant} />

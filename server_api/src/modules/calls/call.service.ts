@@ -1,6 +1,6 @@
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
-import { DeleteDto } from "../../util/delete.dto";
+import { DeleteDto } from "../../common/dtos/delete.dto";
 import { ICalendarReadRepository } from "../calendar/calendar.repository";
 import { CalendarStatus } from "../calendar/calendar.status";
 import { IGrantRepository } from "../grants/grant.repository";

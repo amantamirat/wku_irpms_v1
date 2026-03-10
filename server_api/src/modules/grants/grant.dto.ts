@@ -1,4 +1,4 @@
-import { FundingSource } from "./grant.model";
+import { FundingSource, GrantStatus } from "./grant.model";
 
 export interface GetGrantsDTO {
     organization?: string;
@@ -11,7 +11,6 @@ export interface CreateGrantDTO {
     title: string;
     amount: number;
     thematic: string;
-    //stages: number;
     description?: string;
 }
 
@@ -21,7 +20,14 @@ export interface UpdateGrantDTO {
         title: string;
         description?: string;
         amount: number;
+        status: GrantStatus;
     }>;
+    userId: string;
+}
+
+export interface TransitionGrantDTO {
+    id: string;
+    to: GrantStatus;
     userId: string;
 }
 

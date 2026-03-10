@@ -1,8 +1,9 @@
 [
     {
-        "name": "a-admin",
+        "name": "admin",
         "permissions": [
             "permission:read",
+            "setting:*",
             "role:*",
             "user:*",
             "applicant:*",
@@ -14,7 +15,7 @@
             "external:*",
             "publication:*",
             "student:*",
-            "calendar:read",
+            "calendar:*",
             "experience:*",
             "position:*",
             "specialization:*"
@@ -25,6 +26,8 @@
         "permissions": [
             "calendar:*",
             "grant:*",
+            "grant:transition.planned.active",
+            "grant:transition.active.closed",
             "constraint:*",
             "composition:*",
             "grant_stage:*",

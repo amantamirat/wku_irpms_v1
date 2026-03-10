@@ -1,11 +1,13 @@
 export enum COLLECTIONS {
-  PERMISSION = "permissions",  
+  PERMISSION = "permissions",
   ROLE = "roles",
+  AUTH = "auths",
   USER = "users",
+
   ORGANIZATION = "organizations",
   APPLICANT = "applicants",
-  PUBLICATION = "publications",  
-  SPECIALIZATION = "specializations",  
+  PUBLICATION = "publications",
+  SPECIALIZATION = "specializations",
   POSITION = "positions",
   EXPERIENCE = "experiences",
   STUDNET = "students",
@@ -15,10 +17,9 @@ export enum COLLECTIONS {
   CONSTRAINT = "constraints",
   COMPOSITION_NEW = "compositions",
 
-  
+
   THEMATIC = "thematics",
   THEME = "themes",
-  ///THEME_NODE = "themenodes",
   EVALUATION = "evaluations",
   CRITERION = "criteria",
   OPTION = "options",
@@ -26,9 +27,9 @@ export enum COLLECTIONS {
   CALL = "calls",
   STAGE = "callstages",
   PROJECT_DOCUMENT = "projectdocuments",
-  
-  
-  
+
+
+
   PROJECT = "projects",
   COLLABORATOR = "collaborators",
   PHASE = "phases",

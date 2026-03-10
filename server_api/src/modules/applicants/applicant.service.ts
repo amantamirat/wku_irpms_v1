@@ -5,7 +5,7 @@ import { IOrganizationRepository, OrganizationRepository } from "../organization
 import { Unit } from "../organization/organization.type";
 import { CollaboratorRepository, ICollaboratorRepository } from "../projects/collaborators/collaborator.repository";
 import { IProjectRepository, ProjectRepository } from "../projects/project.repository";
-import { IRoleRepository, RoleRepository } from "../users/roles/role.repository";
+import { IRoleRepository, RoleRepository } from "../permissions/roles/role.repository";
 import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO, UpdateRolesDTO, UpdateOwnershipsDTO } from "./applicant.dto";
 import { IApplicantRepository, ApplicantRepository } from "./applicant.repository";
 

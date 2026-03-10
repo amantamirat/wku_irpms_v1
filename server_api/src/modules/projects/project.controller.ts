@@ -3,7 +3,7 @@ import { errorResponse, successResponse } from "../../common/helpers/response";
 import { AuthenticatedRequest } from "../users/user.middleware";
 import { ProjectService } from "./project.service";
 import { CreateProjectDTO, UpdateProjectDTO, UpdateStatusDTO } from "./project.dto";
-import { DeleteDto } from "../../util/delete.dto";
+import { DeleteDto } from "../../common/dtos/delete.dto";
 import { ProjectStatus } from "./project.status";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 

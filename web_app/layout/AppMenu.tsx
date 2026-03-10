@@ -241,7 +241,8 @@ const AppMenu = () => {
             visible: hasPermission([
                 PERMISSIONS.STUDENT.CREATE,
                 PERMISSIONS.SPECIALIZATION.CREATE,
-                PERMISSIONS.POSITION.CREATE
+                PERMISSIONS.POSITION.CREATE,
+                "setting:update"
             ]),
             items: [
                 {
@@ -273,6 +274,16 @@ const AppMenu = () => {
                         PERMISSIONS.POSITION.UPDATE,
                         PERMISSIONS.POSITION.DELETE
                     ])
+                },
+                {
+                    label: 'Settings',
+                    icon: PrimeIcons.COG,
+                    visible: hasPermission(
+                        [
+                            "setting:update"
+                        ]
+                    ),
+                    to: '/settings',
                 },
             ]
         },

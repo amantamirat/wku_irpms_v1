@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { RoleController } from './role.controller';
-import { checkPermission, verifyActiveAccount } from '../user.middleware';
+
 import { PERMISSIONS } from '../../../common/constants/permissions';
 import { RoleService } from './role.service';
 import { RoleRepository } from './role.repository';
+import { checkPermission, verifyActiveAccount } from '../../users/auth/auth.middleware';
 
 const repository = new RoleRepository();
 const service = new RoleService(repository);

@@ -35,7 +35,7 @@ const RoleDialog = ({ visible, applicant, onHide, onComplete }: RoleDialogProps)
         }
         const fetchRoles = async () => {
             try {
-                const rolesData = await RoleApi.getRoles();
+                const rolesData = await RoleApi.getAll();
                 setRoles(rolesData);
             } catch (err) {
                 console.error('Failed to fetch roles:', err);

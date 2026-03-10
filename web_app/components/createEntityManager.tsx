@@ -4,6 +4,7 @@ import { useConfirmDialog } from "@/contexts/ConfirmDialogContext"
 import { useCrudList } from "@/hooks/useCrudList"
 import { useState, useEffect } from "react"
 import { ItemManager, RowAction } from "./ItemManager"
+import { StateTransitionButtons } from "./StateTransitionButtons"
 
 export interface EntitySaveDialogProps<T> {
     visible: boolean
@@ -20,10 +21,15 @@ export function createEntityManager<
     itemName?: string
     api: EntityApi<T, TQuery>
     columns: any[]
-    createNew: () => T
+    createNew?: () => T
     SaveDialog: React.ComponentType<EntitySaveDialogProps<T>>
     permissionPrefix: string
     query?: () => TQuery
+    workflow?: {
+        statusField: keyof T
+        transitions: Record<string, string[]>
+        statusOrder: string[]
+    }
     expandable?: {
         template: (row: T) => React.ReactNode
         allow?: (row: T) => boolean
@@ -48,7 +54,7 @@ export function createEntityManager<
 
         const [item, setItem] = useState<T | null>(null)
         const [showDialog, setShowDialog] = useState(false)
-        const canCreate = hasPermission([`${config.permissionPrefix}:create`]);
+        const canCreate = config.createNew && hasPermission([`${config.permissionPrefix}:create`]);
 
         useEffect(() => {
             const fetchData = async () => {
@@ -68,9 +74,25 @@ export function createEntityManager<
         }, [])
 
         const handleCreate = () => {
-            setItem(config.createNew())
-            setShowDialog(true)
+            //setItem(config.createNew ? config.createNew() : null)
+            if (config.createNew) {
+                setItem(config.createNew());
+                setShowDialog(true)
+            }
         }
+
+        const transitionState = async (
+            row: T,
+            dto: { current: string; next: string }
+        ) => {
+
+            if (!row._id) return;
+
+            const updated = await config.api.transitionState?.(row._id, dto);
+            if (updated) {
+                updateItem({ ...row, [config.workflow!.statusField]: dto.next });
+            }
+        };
 
         const deleteItem = async (row: T) => {
             const ok = await config.api.delete(row)
@@ -102,13 +124,48 @@ export function createEntityManager<
 
         ]
 
+        let columns = [...config.columns];
+
+        if (config.workflow) {
+
+            columns.push({
+                header: "",
+                body: (row: T) => {
+
+                    const current = row[config.workflow!.statusField] as string;
+
+                    return (
+                        <StateTransitionButtons
+                            id={row._id}
+                            current={current}
+                            transitions={config.workflow!.transitions}
+                            statusOrder={config.workflow!.statusOrder}
+                            permissionPrefix={config.permissionPrefix}
+                            hasPermission={hasPermission}
+                            onTransition={async (next) =>
+                                confirm.ask({
+                                    operation: `Change to ${next}`,
+                                    onConfirmAsync: () =>
+                                        transitionState(row, {
+                                            current,
+                                            next
+                                        })
+                                })
+                            }
+                        />
+                    );
+                }
+            });
+
+        }
+
         return (
             <>
                 <ItemManager
                     headerTitle={config.title}
                     itemName={config.itemName}
                     items={items}
-                    columns={config.columns}
+                    columns={columns}
                     dataKey="_id"
                     loading={loading}
                     error={error}

@@ -1,5 +1,6 @@
 import { Organization } from "../../organizations/models/organization.model";
 import { Thematic } from "../../thematics/models/thematic.model";
+import { GrantStatus } from "./grant.state-machine";
 
 export enum FundingSource {
     INTERNAL = "internal",
@@ -14,6 +15,7 @@ export type Grant = {
     thematic?: string | Thematic;
     description?: string;
     amount: number;
+    status?: GrantStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
