@@ -1,5 +1,9 @@
 [
     {
+        "name": "root",
+        "permissions": "*"
+    },
+    {
         "name": "admin",
         "permissions": [
             "permission:read",
@@ -22,7 +26,7 @@
         ]
     },
     {
-        "name": "p-president",
+        "name": "president",
         "permissions": [
             "calendar:*",
             "grant:*",
@@ -42,7 +46,7 @@
         ]
     },
     {
-        "name": "d-director",
+        "name": "director",
         "permissions": [
             "calendar:read",
             "grant:read",
@@ -75,7 +79,7 @@
         ]
     },
     {
-        "name": "a-applicant",
+        "name": "applicant",
         "permissions": [
             "calendar:read",
             "call:read",
@@ -97,7 +101,7 @@
         "isDefault": true
     },
     {
-        "name": "r-reviewer",
+        "name": "reviewer",
         "permissions": [
             "calendar:read",
             "reviewer:read",

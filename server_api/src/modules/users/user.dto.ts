@@ -2,7 +2,7 @@ import { UserStatus } from "./user.status";
 
 export interface CreateUserDTO {
     applicant: string;
-    email?: string;
+    email: string;
     password: string;
     status?: UserStatus;
 }
@@ -12,6 +12,8 @@ export interface UpdateUserDTO {
     data: Partial<{
         password: string;
         lastLogin: Date;
+        failedLoginAttempts: number;
+        lockUntil: Date | null;
         resetCode: string;
         resetCodeExpires: Date;
         status: UserStatus;
@@ -28,10 +30,7 @@ export interface ChangePasswordDTO {
     userId?: string;
 }
 
-export interface LoginDto {
-    email: string;
-    password: string;
-}
+
 
 export interface VerfyUserDto {
     email: string;

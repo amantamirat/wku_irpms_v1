@@ -1,42 +1,16 @@
-import { Router } from 'express';
-import { AuthController } from './auth.controller';
-import { checkPermission, checkStatusPermission, verifyActiveAccount } from './auth.middleware';
-import { PERMISSIONS } from '../../../common/constants/permissions';
+import { Router } from "express";
+import { AuthController } from "./auth.controller";
+import { AuthService } from "./auth.service";
 
 
-const controller = new AuthController();
-const router: Router = Router();
-
-router.post('/', verifyActiveAccount,
-    checkPermission([PERMISSIONS.USER.CREATE]),
-    controller.create);
-router.get('/', verifyActiveAccount,
-    checkPermission([PERMISSIONS.USER.READ])
-    , controller.get);
-router.put('/', verifyActiveAccount,
-    checkPermission([PERMISSIONS.USER.UPDATE]),
-    controller.update);
-router.put('/:status', verifyActiveAccount,
-    checkStatusPermission("user"),
-    controller.updateStatus);
-router.delete('/', verifyActiveAccount,
-    checkPermission([PERMISSIONS.USER.DELETE]),
-    controller.delete);
-
-router.patch("/change-password", verifyActiveAccount,
-    controller.changePassword);
-
-///////////////////////////////////////
+const router = Router();
+const service = new AuthService();
+const controller = new AuthController(service);
 
 router.post("/login", controller.login);
-
-router.post("/send-verification-code",
-    controller.sendVerificationCode);
-
-router.post("/reset-password",
-    controller.resetAuth);
-
-router.post("/activate-user",
-    controller.activateAuth);
+router.post("/send-code", controller.sendVerificationCode);
+router.post("/reset-password", controller.resetPassword);
+router.post("/activate", controller.activateUser);
+router.post("/change-password", controller.changePassword);
 
 export default router;

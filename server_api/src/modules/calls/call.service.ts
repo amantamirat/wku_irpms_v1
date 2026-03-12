@@ -5,13 +5,13 @@ import { ICalendarReadRepository } from "../calendar/calendar.repository";
 import { CalendarStatus } from "../calendar/calendar.status";
 import { IGrantRepository } from "../grants/grant.repository";
 import { IOrganizationRepository } from "../organization/organization.repository";
-import { Unit } from "../organization/organization.type";
 import { IThematicRepository } from "../thematics/thematic.repository";
 import { CreateCallDTO, GetCallsOptions, UpdateCallDTO, UpdateCallStatusDTO } from "./call.dto";
 import { CallRepository } from "./call.repository";
 import { CallStateMachine } from "./call.state-machine";
 import { CallStatus } from "./call.status";
 import { IStageRepository } from "./stages/stage.repository";
+import { Unit } from "../../common/constants/enums";
 
 export class CallService {
 

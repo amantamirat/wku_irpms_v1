@@ -1,10 +1,9 @@
 import Applicant, { IApplicant, IOwnership } from "./applicant.model";
-import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO, FindApplicantDTO, UpdateRolesDTO, ExistsApplicantDTO } from "./applicant.dto";
+import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO, UpdateRolesDTO, ExistsApplicantDTO } from "./applicant.dto";
 import mongoose from "mongoose";
 
 export interface IApplicantRepository {
     findById(id: string): Promise<IApplicant | null>;
-    findOne(option: Partial<FindApplicantDTO>): Promise<IApplicant | null>;
     findAll(filter?: GetApplicantsDTO): Promise<IApplicant[]>;
     create(data: CreateApplicantDTO): Promise<IApplicant>;
     update(id: string, data: UpdateApplicantDTO["data"]): Promise<IApplicant | null>;
@@ -22,33 +21,25 @@ export class ApplicantRepository implements IApplicantRepository {
     // FIND BY ID
     // -------------------------
 
-    async findById(id: string): Promise<IApplicant | null> {
+    async findById(id: string, populate?: boolean): Promise<IApplicant | null> {
+        if (populate === true) {
+            return Applicant.findById(id).
+                populate("workspace").
+                populate({
+                    path: "roles",
+                    populate: {
+                        path: "permissions"
+                    }
+                }).
+                populate("ownerships").
+                lean<IApplicant>().
+                exec();
+        }
         return Applicant.findById(new mongoose.Types.ObjectId(id))
             .lean<IApplicant>()
             .exec();
     }
 
-    async findOne(option: Partial<FindApplicantDTO>): Promise<IApplicant | null> {
-        const query: any = {};
-
-        if (option.id) {
-            query._id = new mongoose.Types.ObjectId(option.id);
-        }
-        if (option.email) {
-            query.email = option.email;
-        }
-        return Applicant.findOne(query).
-            populate("workspace").
-            populate({
-                path: "roles",
-                populate: {
-                    path: "permissions"
-                }
-            }).
-            populate("ownerships").
-            lean<IApplicant>().
-            exec();
-    }
     // -------------------------
     // FIND ALL WITH OPTIONAL FILTER
     // -------------------------
@@ -76,7 +67,6 @@ export class ApplicantRepository implements IApplicantRepository {
             name: dto.name,
             birthDate: dto.birthDate,
             gender: dto.gender,
-            email: dto.email,
             fin: dto.fin,
             orcid: dto.orcid,
             roles: dto.roles?.map(role => new mongoose.Types.ObjectId(role)),
@@ -96,7 +86,6 @@ export class ApplicantRepository implements IApplicantRepository {
         if (dtoData.name) toUpdate.name = dtoData.name;
         if (dtoData.birthDate) toUpdate.birth_date = dtoData.birthDate;
         if (dtoData.gender) toUpdate.gender = dtoData.gender;
-        if (dtoData.email) toUpdate.email = dtoData.email;
         if (dtoData.fin) toUpdate.fin = dtoData.fin;
         if (dtoData.orcid) toUpdate.orcid = dtoData.orcid;
         if (dtoData.accessibility) toUpdate.accessibility = dtoData.accessibility;

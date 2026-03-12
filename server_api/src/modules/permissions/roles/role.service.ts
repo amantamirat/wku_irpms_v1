@@ -12,12 +12,8 @@ export class RoleService {
 
     constructor(
         private readonly repository: RoleRepository,
-        private readonly permissionRepository: PermissionRepository = new PermissionRepository(),
         private readonly appRepo: IApplicantRepository = new ApplicantRepository()
     ) {
-        (async () => {
-            await this.seedRoles();
-        })();
     }
 
     async create(dto: CreateRoleDto) {
@@ -29,41 +25,7 @@ export class RoleService {
         return await this.repository.findAll();
     }
 
-    async seedRoles() {
-        const filePath = path.join(process.cwd(), 'data', 'roles.json');
-        const rawData = await fs.readFile(filePath, 'utf-8');
-        const roles = JSON.parse(rawData);
-
-        /*
-        const dbRoles = await this.repository.findAll();
-        if (dbRoles.length > 0) {
-            return;
-        }
-        */
-
-        const allPermissions = await this.permissionRepository.findAll();
-
-        let seeded = false;
-
-        for (const role of roles) {
-            const exists = await this.repository.findByName(role.name);
-            if (exists) continue;
-
-            const permissionIds = await this.resolvePermissions(
-                role.permissions,
-                allPermissions
-            );
-
-            await this.repository.create({
-                name: role.name,
-                permissions: permissionIds,
-                isDefault: !!role.isDefault
-            });
-            seeded = true;
-        }
-        if (seeded) console.log("Roles seeded with wildcard support");
-
-    }
+    
 
 
     async update(dto: UpdateRoleDto) {
@@ -80,53 +42,6 @@ export class RoleService {
         const deleted = await this.repository.delete(id);
         if (!deleted) throw new Error(ERROR_CODES.ROLE_NOT_FOUND);
         return deleted;
-    }
-
-    private async resolvePermissions(
-        permissionPatterns: string[],
-        allPermissions: any[]
-    ) {
-        const resolvedPermissions = new Map<string, any>();
-
-        for (const pattern of permissionPatterns) {
-
-            // 1️⃣ Full wildcard -> *
-            if (pattern === "*") {
-                allPermissions.forEach(p =>
-                    resolvedPermissions.set(p.name, p._id)
-                );
-                continue;
-            }
-
-            // 2️⃣ Prefix wildcard -> project:* or document:status.*
-            if (pattern.includes("*")) {
-                const prefix = pattern.replace("*", "");
-
-                const matched = allPermissions.filter(p => {
-                    if (!p.name.startsWith(prefix)) return false;
-
-                    // Remove prefix
-                    const remainder = p.name.substring(prefix.length);
-
-                    // Exclude nested like status.*
-                    return !remainder.includes(".");
-                });
-
-                matched.forEach(p =>
-                    resolvedPermissions.set(p.name, p._id)
-                );
-
-                continue;
-            }
-
-            // 3️⃣ Exact permission
-            const exact = allPermissions.find(p => p.name === pattern);
-            if (exact) {
-                resolvedPermissions.set(exact.name, exact._id);
-            }
-        }
-
-        return Array.from(resolvedPermissions.values());
     }
 
 }

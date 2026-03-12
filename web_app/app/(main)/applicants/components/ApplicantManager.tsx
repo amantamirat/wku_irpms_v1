@@ -46,8 +46,7 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
         workspace: workspace ?? "",
         name: "",
         birthDate: new Date(),
-        gender: Gender.Male,
-        email: "",
+        gender: Gender.Male
     };
     const [selectedApplicant, setSelectedApplicant] = useState<Applicant>(emptyApplicant);
     const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -115,8 +114,7 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
             header: "Birth Date",
             body: (row: Applicant) =>
                 new Date(row.birthDate!).toLocaleDateString("en-CA")
-        },
-        { header: "Email", field: "email" }
+        }
     ];
 
 

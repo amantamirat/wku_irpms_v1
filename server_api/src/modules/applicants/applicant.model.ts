@@ -1,7 +1,8 @@
 import mongoose, { Document, Schema, model } from 'mongoose';
 import { Gender, Accessibility } from './applicant.enum';
 import { COLLECTIONS } from '../../common/constants/collections.enum';
-import { Unit } from '../organization/organization.type';
+import { Unit } from '../../common/constants/enums';
+
 
 export interface IOwnership {
     unitType: Unit;          // College | Department | Directorate | ...
@@ -13,7 +14,6 @@ export interface IApplicant extends Document {
     name: string;
     birthDate: Date;
     gender: Gender;
-    email: string;
     fin?: string;
     orcid?: string;
     accessibility?: Accessibility[];
@@ -43,7 +43,7 @@ const ApplicantSchema = new Schema<IApplicant>({
     workspace: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.ORGANIZATION,
-        required: true
+        //required: true
     },
     name: {
         type: String,
@@ -52,16 +52,6 @@ const ApplicantSchema = new Schema<IApplicant>({
     birthDate: {
         type: Date,
         required: true
-    },
-    email: {
-        type: String,
-        unique: true,
-        required: true,
-        //immutable: true,
-        match: [
-            /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-            'Please provide a valid email',
-        ]
     },
     gender: {
         type: String,

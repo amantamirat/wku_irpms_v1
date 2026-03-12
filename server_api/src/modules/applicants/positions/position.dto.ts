@@ -5,9 +5,9 @@ import { PositionType } from "./position.enum";
 ========================= */
 
 export interface CreatePositionDTO {
-    type:PositionType;
+    type: PositionType;
     name: string;
-     parent?: string; 
+    parent?: string;
 }
 
 /* =========================
@@ -17,8 +17,8 @@ export interface CreatePositionDTO {
 export interface UpdatePositionDTO {
     id: string;
     data: {
-        name?: string;
-        parent?: string; // only used if updating a Rank
+        name: string;
+        parent: string; // only used if updating a Rank
     };
 }
 

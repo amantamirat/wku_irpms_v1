@@ -1,7 +1,12 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
-import { UserStatus } from './user.status';
+
 import { COLLECTIONS } from '../../common/constants/collections.enum';
 
+export enum UserStatus {
+  pending = 'pending',
+  active = 'active',
+  suspended = 'suspended'
+}
 
 export interface IUser extends Document {
   email: string;
@@ -10,6 +15,8 @@ export interface IUser extends Document {
   resetCode?: String;
   resetCodeExpires?: Date;
   lastLogin?: Date,
+  failedLoginAttempts: number; // Moved from optional to required for schema consistency
+  lockUntil?: Date;
   status: UserStatus;
   createdAt?: Date;
   updatedAt?: Date;
@@ -30,6 +37,7 @@ const UserSchema = new Schema<IUser>(
     password: {
       type: String,
       required: true,
+      select: false,
     },
     applicant: {
       type: Schema.Types.ObjectId,
@@ -46,6 +54,14 @@ const UserSchema = new Schema<IUser>(
     lastLogin: {
       type: Date
     },
+    failedLoginAttempts: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    lockUntil: {
+      type: Date,
+    },
     status: {
       type: String,
       enum: Object.values(UserStatus),
@@ -55,4 +71,5 @@ const UserSchema = new Schema<IUser>(
   },
   { timestamps: true }
 );
+//UserSchema.index({ email: 1 });
 export const User: Model<IUser> = mongoose.model<IUser>(COLLECTIONS.USER, UserSchema);

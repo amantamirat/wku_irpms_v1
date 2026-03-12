@@ -1,5 +1,3 @@
-import fs from 'fs/promises';
-import path from 'path';
 import { ISettingRepository } from "./setting.repository";
 import { SettingKey, ISetting } from "./setting.model";
 import { UpdateSettingDto } from "./setting.dto";
@@ -11,10 +9,6 @@ export class SettingService {
 
     constructor(repository: ISettingRepository) {
         this.repository = repository;
-        // Self-triggering seed on initialization
-        (async () => {
-            await this.seedSettings();
-        })();
     }
 
     /**
@@ -45,37 +39,5 @@ export class SettingService {
             throw new AppError(ERROR_CODES.SETTING_NOT_FOUND);
         }
         return setting;
-    }
-
-
-    async seedSettings() {
-        try {
-            const filePath = path.join(process.cwd(), 'data', 'defaultSettings.json');
-            const rawData = await fs.readFile(filePath, 'utf-8');
-            const settings = JSON.parse(rawData);
-
-            let seeded = false;
-
-            for (const item of settings) {
-                if (!item.key) continue;
-
-                // Check existence using the Enum key
-                const exists = await this.repository.findByKey(item.key as SettingKey);
-
-                if (!exists) {
-                    await this.repository.create(
-                        item.key as SettingKey,
-                        item.value,
-                        item.type,
-                        item.description
-                    );
-                    seeded = true;
-                }
-            }
-
-            if (seeded) console.log('✅ System settings seeded from JSON');
-        } catch (error) {
-            console.error('❌ Error seeding settings:', error);
-        }
     }
 }

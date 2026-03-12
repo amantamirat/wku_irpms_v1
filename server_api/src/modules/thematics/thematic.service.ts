@@ -2,10 +2,10 @@ import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { DeleteDto } from "../../common/dtos/delete.dto";
 import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
-import { Unit } from "../organization/organization.type";
 import { CreateThematicDTO, GetThematicsDTO, UpdateThematicDTO } from "./thematic.dto";
 import { IThematicRepository, ThematicRepository } from "./thematic.repository";
 import { IThemeRepository, ThemeRepository } from "./themes/theme.repository";
+import { Unit } from "../../common/constants/enums";
 
 export class ThematicService {
 

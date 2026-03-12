@@ -1,7 +1,7 @@
+import { Unit } from "../../../common/constants/enums";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { IOrganizationRepository } from "../../organization/organization.repository";
-import { Unit } from "../../organization/organization.type";
 import { IApplicantRepository } from "../applicant.repository";
 import { PositionType } from "../positions/position.enum";
 import { IPositionRepository } from "../positions/position.repository";

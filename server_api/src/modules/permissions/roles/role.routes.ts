@@ -4,7 +4,8 @@ import { RoleController } from './role.controller';
 import { PERMISSIONS } from '../../../common/constants/permissions';
 import { RoleService } from './role.service';
 import { RoleRepository } from './role.repository';
-import { checkPermission, verifyActiveAccount } from '../../users/auth/auth.middleware';
+import { verifyActiveAccount, checkPermission } from '../../users/user.middleware';
+
 
 const repository = new RoleRepository();
 const service = new RoleService(repository);

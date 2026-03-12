@@ -1,7 +1,7 @@
 // organization.dto.ts
-import { AcademicLevel } from "../../common/constants/enums";
+import { AcademicLevel, Unit } from "../../common/constants/enums";
 import { Classification, Ownership } from "./organization.enum";
-import { Unit } from "./organization.type";
+
 
 export interface CreateOrganizationDTO {
     type: Unit;

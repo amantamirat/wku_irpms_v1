@@ -30,7 +30,6 @@ export class ApplicantController {
                 gender,
                 fin,
                 orcid,
-                email,
                 accessibility,
                 specializations
             } = req.body;
@@ -42,7 +41,6 @@ export class ApplicantController {
                 gender,
                 fin,
                 orcid,
-                email,
                 accessibility: accessibility || [],
                 specializations
             };
@@ -83,7 +81,6 @@ export class ApplicantController {
                 gender,
                 fin,
                 orcid,
-                email,
                 accessibility,
                 specializations,
             } = req.body;
@@ -98,7 +95,6 @@ export class ApplicantController {
                     gender,
                     fin,
                     orcid,
-                    email,
                     accessibility,
                     specializations,
                 },

@@ -12,20 +12,22 @@ router.post('/', verifyActiveAccount,
 router.get('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.USER.READ])
     , controller.get);
-router.put('/', verifyActiveAccount,
+router.put('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.USER.UPDATE]),
     controller.update);
 router.put('/:status', verifyActiveAccount,
     checkStatusPermission("user"),
     controller.updateStatus);
-router.delete('/', verifyActiveAccount,
+router.delete('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.USER.DELETE]),
     controller.delete);
 
-router.patch("/change-password", verifyActiveAccount,
-    controller.changePassword);
+
 
 ///////////////////////////////////////
+/*
+router.patch("/change-password", verifyActiveAccount,
+    controller.changePassword);
 
 router.post("/login", controller.login);
 
@@ -37,5 +39,5 @@ router.post("/reset-password",
 
 router.post("/activate-user",
     controller.activateUser);
-
+*/
 export default router;

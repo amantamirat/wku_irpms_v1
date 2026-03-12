@@ -8,8 +8,8 @@ import {
 } from "./organization.dto";
 import { OrganizationService } from "./organization.service";
 import { AuthenticatedRequest } from "../users/user.middleware";
-import { Unit } from "./organization.type";
 import { ERROR_CODES } from "../../common/errors/error.codes";
+import { Unit } from "../../common/constants/enums";
 
 export class OrganizationController {
 

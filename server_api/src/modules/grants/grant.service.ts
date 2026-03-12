@@ -3,7 +3,6 @@ import { ERROR_CODES } from "../../common/errors/error.codes";
 import { CreateGrantDTO, GetGrantsDTO, TransitionGrantDTO, UpdateGrantDTO } from "./grant.dto";
 import { GrantRepository, IGrantRepository } from "./grant.repository";
 import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
-import { Unit } from "../organization/organization.type";
 import { FundingSource, GrantStatus } from "./grant.model";
 import { ConstraintRepository, IConstraintRepository } from "./constraints/constraint.repository";
 import { CallRepository, ICallRepository } from "../calls/call.repository";
@@ -11,6 +10,7 @@ import { IThematicRepository, ThematicRepository } from "../thematics/thematic.r
 import { GRANT_TRANSITIONS } from "./grant.state-machine";
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
+import { Unit } from "../../common/constants/enums";
 
 export class GrantService {
 

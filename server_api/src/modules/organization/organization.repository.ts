@@ -17,7 +17,8 @@ import {
     GetOrganizationsDTO,
     UpdateOrganizationDTO
 } from "./organization.dto";
-import { Unit } from "./organization.type";
+import { Unit } from "../../common/constants/enums";
+
 
 export interface IOrganizationRepository {
     findById(id: string): Promise<any | null>;

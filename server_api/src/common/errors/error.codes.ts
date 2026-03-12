@@ -1,5 +1,4 @@
 export const ERROR_CODES = {
-
     //---------- GENERAL --------------
     UNAUTHORIZED: "UNAUTHORIZED",
     UNSUPPORTED_OPERTATION: "UNSUPPORTED_OPERTATION",
@@ -13,23 +12,30 @@ export const ERROR_CODES = {
         message: "The resource state has changed. Please refresh and try again."
     },
     */
+    USER_NOT_LEAD_PI: "USER_NOT_LEAD_PI",
+    USER_NOT_REVIEWER: "USER_NOT_REVIEWER",
+    USER_NOT_COLLABORATOR: "USER_NOT_COLLABORATOR",
 
     // ---------- SETTING ----------
     SETTING_NOT_FOUND: "SETTING_NOT_FOUND",
     SETTING_FILE_SIZE_OUT_OF_RANGE: "File size must be between 1 and 100MB.",
 
-
-    USER_NOT_LEAD_PI: "USER_NOT_LEAD_PI",
-    USER_NOT_REVIEWER: "USER_NOT_REVIEWER",
-    USER_NOT_COLLABORATOR: "USER_NOT_COLLABORATOR",
-
-    // ---------- USER ----------
-    USER_NOT_FOUND: "USER_NOT_FOUND",
-    USER_ALREADY_EXISTS: "USER_ALREADY_EXISTS",
-
     // ---------- ROLE ----------
     ROLE_NOT_FOUND: "ROLE_NOT_FOUND",
     ROLE_IN_USE: "ROLE_IN_USE",
+
+    // ---------- ACCOUNT ----------
+    ACCOUNT_NOT_FOUND: "ACCOUNT_NOT_FOUND",
+    ACCOUNT_SUSPENDED: "Account is suspended. Contact support.",
+    ACCOUNT_LOCKED: "Account temporarily locked due to too many failed login attempts.",
+    INVALID_CREDENTIALS: "Invalid credentials.",
+
+    // ---------- USER ----------
+    USER_NOT_FOUND: "USER_NOT_FOUND",
+
+    USER_ALREADY_EXISTS: "USER_ALREADY_EXISTS",
+
+
 
     // ---------- ORGANIZATION ----------
     ORGANIZATION_NOT_FOUND: "ORGANIZATION_NOT_FOUND",

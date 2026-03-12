@@ -3,10 +3,10 @@ import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { CalendarRepository } from "../../calendar/calendar.repository";
 import { OrganizationRepository } from "../../organization/organization.repository";
-import { Unit } from "../../organization/organization.type";
 import { ApplicantRepository } from "../applicant.repository";
 import { CreateStudentDTO, GetStudentsOptions, UpdateStudentDTO } from "./student.dto";
 import { StudentRepository } from "./student.repository";
+import { Unit } from "../../../common/constants/enums";
 
 export class StudentService {
 
@@ -22,7 +22,7 @@ export class StudentService {
         const calendarDoc = await this.calendarRepository.findById(calendar);
         if (!calendarDoc) throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
 
-        const applicantDoc = await this.applicantRepository.findOne({ id: applicant });
+        const applicantDoc = await this.applicantRepository.findById(applicant);
         if (!applicantDoc) throw new AppError(ERROR_CODES.APPLICANT_NOT_FOUND);
 
         const programDoc = await this.programRepository.findById(program);
@@ -66,7 +66,7 @@ export class StudentService {
 
         // 3. Validate applicant (if provided)
         if (data.applicant) {
-            const applicantDoc = await this.applicantRepository.findOne({ id: data.applicant });
+            const applicantDoc = await this.applicantRepository.findById(data.applicant);
             if (!applicantDoc) {
                 throw new AppError(ERROR_CODES.APPLICANT_NOT_FOUND);
             }

@@ -5,9 +5,9 @@ import { CreateUserDTO, UpdateUserDTO } from "./user.dto";
 export interface IUserRepository {
     findById(id: string): Promise<IUser | null>;
     findAll(): Promise<Partial<IUser>[]>;
-    findByEmail(eName: string): Promise<IUser | null>;
+    findByEmail(email: string): Promise<IUser | null>;
     create(data: CreateUserDTO): Promise<IUser>;
-    update(id: string, data: UpdateUserDTO["data"]): Promise<IUser>;
+    update(id: string, data: UpdateUserDTO["data"]): Promise<IUser | null>;
     delete(id: string): Promise<void>;
 }
 
@@ -42,8 +42,8 @@ export class UserRepository implements IUserRepository {
 
     async findByEmail(email: string): Promise<IUser | null> {
         return await User.findOne(
-            { email: email }
-        ).lean();
+            { email }
+        ).select('+password').lean();
     }
 
 
@@ -62,21 +62,24 @@ export class UserRepository implements IUserRepository {
         if (dtoData.lastLogin) {
             toUpdate.lastLogin = dtoData.lastLogin;
         }
+        if (dtoData.failedLoginAttempts) {
+            toUpdate.failedLoginAttempts = dtoData.failedLoginAttempts;
+        }
+
+        if (dtoData.lockUntil) {
+            toUpdate.lockUntil = dtoData.lockUntil;
+        }
 
         if (dtoData.status) {
             toUpdate.status = dtoData.status;
         }
 
-        const updated = await User.findByIdAndUpdate(
+        return await User.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: toUpdate },
             { new: true }
         ).lean<IUser>();
 
-        if (!updated) {
-            throw new Error("User not found.");
-        }
-        return updated;
     }
 
 

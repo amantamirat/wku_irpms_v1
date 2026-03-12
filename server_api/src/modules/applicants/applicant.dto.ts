@@ -2,15 +2,15 @@ import { Accessibility, Gender } from "./applicant.enum";
 import { IOwnership } from "./applicant.model";
 
 export interface CreateApplicantDTO {
-    workspace: string;
+    workspace?: string;
     name: string;
     birthDate: Date;
     gender: Gender;
-    email: string;
     fin?: string;
     orcid?: string;
     accessibility?: Accessibility[];
     roles?: string[];
+    //ownerships?: IOwnership[];
     specializations?: string[];
     userId?: string;
 }
@@ -22,7 +22,6 @@ export interface UpdateApplicantDTO {
         name: string;
         birthDate: Date;
         gender: Gender;
-        email: string;
         fin: string;
         orcid: string;
         accessibility: Accessibility[];
@@ -36,7 +35,7 @@ export interface UpdateApplicantDTO {
 export interface UpdateRolesDTO {
     id: string;       // target user
     roles: string[];      // array of role IDs to assign
-    applicantId: string;    // actor, for auditing
+    applicantId?: string;    // actor, for auditing
 }
 
 export interface UpdateOwnershipsDTO {
@@ -49,10 +48,6 @@ export interface GetApplicantsDTO {
     workspace: string;
 }
 
-export interface FindApplicantDTO {
-    id: string;
-    email: string;
-}
 
 export interface ExistsApplicantDTO {
     workspace?: string;

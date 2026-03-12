@@ -1,4 +1,4 @@
-import { Unit } from "../organization/organization.type";
+import { Unit } from "../../common/constants/enums";
 
 
 export enum Gender {

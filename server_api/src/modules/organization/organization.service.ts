@@ -5,10 +5,10 @@ import {
     GetOrganizationsDTO,
     UpdateOrganizationDTO
 } from "./organization.dto";
-import { Unit } from "./organization.type";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { ApplicantRepository, IApplicantRepository } from "../applicants/applicant.repository";
 import { IStudentRepository, StudentRepository } from "../applicants/students/student.repository";
+import { Unit } from "../../common/constants/enums";
 
 export class OrganizationService {
 

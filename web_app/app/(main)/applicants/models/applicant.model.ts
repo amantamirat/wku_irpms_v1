@@ -27,7 +27,6 @@ export type Applicant = {
     name: string;
     birthDate: Date;
     gender: Gender;
-    email?: string;
     fin?: string;
     orcid?: string;
     accessibility?: Accessibility[];
@@ -73,16 +72,6 @@ export const validateApplicant = (applicant: Applicant): { valid: boolean; messa
         return { valid: false, message: 'Gender is required.' };
     }
 
-    if (!applicant.email) {
-        return { valid: false, message: 'Email is required.' };
-    }
-
-    if (applicant.email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(applicant.email)) {
-            return { valid: false, message: "Email is not valid." };
-        }
-    }
     if (applicant.fin) {
         const finRegex = /^\d{12}$/;
         if (!finRegex.test(applicant.fin)) {

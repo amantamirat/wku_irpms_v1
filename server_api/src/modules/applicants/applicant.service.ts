@@ -2,12 +2,12 @@ import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { ReviewerRepository } from "../calls/stages/reviewers/reviewer.repository";
 import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
-import { Unit } from "../organization/organization.type";
 import { CollaboratorRepository, ICollaboratorRepository } from "../projects/collaborators/collaborator.repository";
 import { IProjectRepository, ProjectRepository } from "../projects/project.repository";
 import { IRoleRepository, RoleRepository } from "../permissions/roles/role.repository";
 import { CreateApplicantDTO, UpdateApplicantDTO, GetApplicantsDTO, UpdateRolesDTO, UpdateOwnershipsDTO } from "./applicant.dto";
 import { IApplicantRepository, ApplicantRepository } from "./applicant.repository";
+import { Unit } from "../../common/constants/enums";
 
 export class ApplicantService {
 
@@ -33,6 +33,8 @@ export class ApplicantService {
     // CREATE
     // -------------------------
     async create(dto: CreateApplicantDTO) {
+        if(!dto.workspace)
+            throw new AppError(ERROR_CODES.WORKSPACE_NOT_FOUND);
         await this.validateWorkspace(dto.workspace);
         const defaultRoles = await this.roleRepository.findDefaults();
         const roles = defaultRoles.map(role => String(role._id));

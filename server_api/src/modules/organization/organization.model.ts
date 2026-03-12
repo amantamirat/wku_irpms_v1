@@ -1,8 +1,8 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
 import { Classification, Ownership } from "./organization.enum";
-import { AcademicLevel } from "../../common/constants/enums";
-import { Unit } from "./organization.type";
+import { AcademicLevel, Unit } from "../../common/constants/enums";
+
 
 export interface IOrganization extends Document {
     type: Unit;

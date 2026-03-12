@@ -7,11 +7,7 @@ import { AuthenticatedRequest } from '../../users/user.middleware';
 
 export class RoleController {
 
-    private service: RoleService;
-
-    constructor(service: RoleService) {
-        this.service = service;
-    }
+    constructor(private readonly service: RoleService) {}
 
     create = async (req: Request, res: Response) => {
         try {
@@ -41,7 +37,7 @@ export class RoleController {
 
             const dto: UpdateRoleDto = {
                 id,
-                data: { name, permissions, isDefault},
+                data: { name, permissions, isDefault },
                 userId: req.user.userId,
             };
 

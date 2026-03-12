@@ -44,8 +44,10 @@ import reportRoutes from './modules/reports/report.routes';
 import settingRoutes from './modules/settings/setting.routes';
 import permissionRoutes from './modules/permissions/permission.routes';
 import roleRoutes from './modules/permissions/roles/role.routes';
+import authRoutes from './modules/users/auth/auth.routes';
 
 import path from 'path';
+import { SeedService } from './util/seed.service';
 
 dotenv.config();
 const app: Application = express();
@@ -60,6 +62,7 @@ app.use("/api/roles", roleRoutes);
 
 app.use("/api/users", userRoutes);
 
+app.use("/api/auth", authRoutes);
 
 app.use("/api/organizations", organizationRoutes);
 app.use("/api/applicants", applicantRoutes);
@@ -108,6 +111,8 @@ const PORT = process.env.SERVER_PORT || 5000;
     }
     await mongoose.connect(MONGO_URL);
     console.log('database connection established');
+    const seedService = new SeedService(/*...dependencies*/);
+    await seedService.runAllSeeds();
     app.listen(PORT, () => {
       console.log(`Server API is running at http://127.0.0.1:${PORT}`);
     });

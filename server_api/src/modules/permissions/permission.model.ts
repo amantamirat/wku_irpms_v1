@@ -8,7 +8,7 @@ export interface IPermission extends Document {
 }
 
 const PermissionSchema: Schema = new Schema<IPermission>({
-    name: { type: String, required: true, unique: true, immutable:true },
+    name: { type: String, required: true, unique: true, immutable: true },
     category: { type: String, required: true },
     description: { type: String }
 });

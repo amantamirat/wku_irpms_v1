@@ -1,5 +1,6 @@
 import { ApiClient } from "@/api/ApiClient";
-import { sanitizeUser, User, UserStatus } from "../models/user.model";
+import { User } from "@/app/(main)/users/models/user.model";
+
 
 const end_point = '/users';
 const login_end_point = '/auth/login';
@@ -10,63 +11,7 @@ const activate_user_end_point = '/auth/activate-user';
 const tokenStorage = 'authToken';
 const userStorage = 'authUser';
 
-export const UserApi = {
-
-    async create(user: Partial<User>): Promise<User> {
-        const sanitized = sanitizeUser(user);
-        const created = await ApiClient.post(end_point, sanitized);
-        return created as User;
-    },
-
-    async getUsers(showDeleted: boolean = false): Promise<User[]> {
-        const data = await ApiClient.get(end_point);
-        return data as User[];
-    },
-
-    async update(id: string, user: Partial<User>): Promise<User> {
-        const query = new URLSearchParams();
-        query.append("id", id);
-        const sanitized = sanitizeUser(user);
-        const updated = await ApiClient.put(`${end_point}?${query.toString()}`, sanitized);
-        return updated as User;
-    },
-
-    async updateStatus(id: string, status: UserStatus): Promise<User> {
-        const query = new URLSearchParams();
-        query.append("id", id);
-        const url = `${end_point}/${status}`;
-        const updated = await ApiClient.put(`${url}?${query.toString()}`);
-        return updated;
-    },
-
-    /*
-    async updateUser(user: Partial<User>, changeStatus = false): Promise<User> {
-        if (!user._id) {
-            throw new Error("_id required.");
-        }
-        const url = changeStatus
-            ? `${end_point}${user._id}/status`
-            : `${end_point}${user._id}`;
-        //const url = `${end_point}${user._id}`;
-        const sanitized = sanitizeUser(user);
-        const updatedUser = await ApiClient.put(url, sanitized);
-        return updatedUser as User;
-    },
-*/
-
-    async delete(id: string): Promise<User> {
-        const query = new URLSearchParams();
-        query.append("id", id);
-        const response = await ApiClient.delete(`${end_point}?${query.toString()}`);
-        return response;
-    },
-
-    async changePassword(password: Partial<User>): Promise<any> {
-        const result = await ApiClient.patch(change_password_end_point, password);
-        return result;
-    },
-
-    ////////////////////////////////////////
+export const AuthApi = {
 
     async loginUser(credentials: User): Promise<any> {
         const userIfo = await ApiClient.post(login_end_point, credentials);

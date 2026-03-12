@@ -238,20 +238,6 @@ const SaveApplicantDialog = ({ visible, applicant, onHide, onComplete }: SaveApp
                     </div>
 
                     <div className="field">
-                        <label htmlFor="email">Email</label>
-                        <InputText
-                            id="email"
-                            type="email"
-                            value={localApplicant.email}
-                            onChange={(e) => setLocalApplicant({ ...localApplicant, email: e.target.value })}
-                            className={classNames({ 'p-invalid': submitted && !localApplicant.email })}
-                        />
-                        {submitted && !localApplicant.email && (
-                            <small className="p-invalid">Email is required.</small>
-                        )}
-                    </div>
-
-                    <div className="field">
                         <label htmlFor="accessibility">Accessibility</label>
                         <MultiSelect
                             id="accessibility"
