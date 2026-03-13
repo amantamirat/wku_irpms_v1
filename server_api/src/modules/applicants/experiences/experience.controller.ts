@@ -27,7 +27,7 @@ export class ExperienceController {
             }
             const dto: CreateExperienceDTO = {
                 ...req.body,
-                userId: req.user.userId
+                userId: req.user.applicantId
             };
             const created = await this.service.create(dto);
             successResponse(res, 201, 'Experience created successfully', created);
@@ -72,7 +72,7 @@ export class ExperienceController {
                     isCurrent: req.body.isCurrent,
                     employmentType: req.body.employmentType
                 },
-                userId: req.user.userId
+                userId: req.user.applicantId
             };
 
             const updated = await this.service.update(dto);
@@ -93,7 +93,7 @@ export class ExperienceController {
 
             const dto: DeleteExperienceDTO = {
                 id,
-                userId: req.user.userId
+                userId: req.user.applicantId
             };
 
             const deleted = await this.service.delete(dto);

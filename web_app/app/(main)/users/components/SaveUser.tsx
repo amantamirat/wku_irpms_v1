@@ -1,5 +1,4 @@
 'use client';
-import { useAuth } from '@/contexts/auth-context';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
@@ -7,31 +6,30 @@ import { Password } from 'primereact/password';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
-import { UserApi } from '../api/UserService';
+import { UserApi } from '../api/user.api';
 import { User, validateUser } from '../models/user.model';
 import { Applicant } from '../../applicants/models/applicant.model';
 import { ApplicantApi } from '../../applicants/api/applicant.api';
 import { Dropdown } from 'primereact/dropdown';
 
-
-interface SaveUserDialogProps {
+// Using the requested generic props interface
+interface EntitySaveDialogProps<T> {
     visible: boolean;
-    user: User;
-    enableCurrentPassword: boolean,
+    item: T;
     onHide: () => void;
-    onComplete?: (savedUser: User) => void;
+    onComplete?: (savedItem: T) => void;
 }
 
-const SaveUserDialog = ({ visible, user, enableCurrentPassword, onHide, onComplete }: SaveUserDialogProps) => {
+const SaveUser = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<User>) => {
     const toast = useRef<Toast>(null);
-    const [localUser, setLocalUser] = useState<User>({ ...user });
+    const [localUser, setLocalUser] = useState<User>({ ...item });
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
     const [applicants, setApplicants] = useState<Applicant[]>([]);
 
     useEffect(() => {
-        setLocalUser({ ...user });
-    }, [user]);
+        setLocalUser({ ...item });
+    }, [item]);
 
     useEffect(() => {
         const fetchApplicants = async () => {
@@ -42,30 +40,29 @@ const SaveUserDialog = ({ visible, user, enableCurrentPassword, onHide, onComple
                 console.error('Failed to fetch applicant data:', err);
             }
         };
-        fetchApplicants();
-    }, []);
-
+        if (visible) fetchApplicants();
+    }, [visible]);
 
     const saveUser = async () => {
+        setSubmitted(true);
+        setErrorMessage(undefined);
+
         try {
-            setSubmitted(true);
-            const validation = validateUser(localUser, enableCurrentPassword);
+            // Validate without the currentPassword requirement
+            const validation = validateUser(localUser, false);
             if (!validation.valid) {
-                throw new Error(validation.message);
+                setErrorMessage(validation.message);
+                return;
             }
+
             let saved: User;
             if (localUser._id) {
-                if (enableCurrentPassword) {
-                    saved = await UserApi.changePassword(localUser);
-                }
-                else {
-                    saved = await UserApi.update(localUser._id, localUser);
-                }
-                saved = {
-                    ...saved,
-                    applicant: localUser.applicant,
-                };
+                // Update existing user
+                saved = await UserApi.update(localUser);
+                // Ensure the applicant object remains attached if the API returns only the ID
+                saved = { ...saved, applicant: localUser.applicant };
             } else {
+                // Create new user
                 saved = await UserApi.create(localUser);
             }
 
@@ -77,12 +74,12 @@ const SaveUserDialog = ({ visible, user, enableCurrentPassword, onHide, onComple
             });
 
             if (onComplete) setTimeout(() => onComplete(saved), 2000);
-        } catch (err) {
+        } catch (err: any) {
             toast.current?.show({
                 severity: 'error',
                 summary: 'Failed to save user',
-                detail: '' + err,
-                life: 2000,
+                detail: err.message || 'An unexpected error occurred',
+                life: 3000,
             });
         }
     };
@@ -94,13 +91,13 @@ const SaveUserDialog = ({ visible, user, enableCurrentPassword, onHide, onComple
     const clearForm = () => {
         setSubmitted(false);
         setErrorMessage(undefined);
-        setLocalUser({ ...user });
+        setLocalUser({ ...item });
     };
 
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
-            <Button label="Save" icon="pi pi-check" text onClick={saveUser} />
+            <Button label="Save" icon="pi pi-check" onClick={saveUser} />
         </>
     );
 
@@ -118,61 +115,40 @@ const SaveUserDialog = ({ visible, user, enableCurrentPassword, onHide, onComple
                 footer={footer}
                 onHide={onHide}
             >
+                {/* Applicant Selection */}
                 <div className="field">
-                    <label htmlFor="applicant">Applicant</label>
+                    <label htmlFor="applicant" className="font-bold">Applicant</label>
                     <Dropdown
                         id="applicant"
                         value={localUser.applicant}
                         options={applicants}
                         optionLabel="name"
                         dataKey="_id"
-                        filter                    // 👈 enables search
-                        filterBy="name,email"     // 👈 searchable fields
-                        showClear                 // 👈 optional clear button
-                        onChange={(e) => {
-                            const selectedApplicant = e.value as Applicant;
-                            setLocalUser({
-                                ...localUser,
-                                applicant: selectedApplicant,
-                                email: selectedApplicant?.email || ''  // 👈 auto fill email
-                            });
-                        }}
+                        filter
+                        filterBy="name,email"
+                        showClear
+                        onChange={(e) => setLocalUser({ ...localUser, applicant: e.value })}
                         placeholder="Select Applicant"
                         disabled={isEdit}
                         className={classNames({ 'p-invalid': submitted && !localUser.applicant })}
                     />
-                    {submitted && !localUser.applicant && <small className="p-invalid">Applicant is required.</small>}
+                    {submitted && !localUser.applicant && <small className="p-error">Applicant is required.</small>}
                 </div>
+
+                {/* Email Field */}
                 <div className="field">
-                    <label htmlFor="email">Email</label>
+                    <label htmlFor="email" className="font-bold">Email</label>
                     <InputText
                         id="email"
                         type="email"
-                        value={localUser.email}
-                        disabled={true}
+                        value={localUser.email || ''}
                         onChange={(e) => setLocalUser({ ...localUser, email: e.target.value })}
                         className={classNames({ 'p-invalid': submitted && !localUser.email })}
                     />
-                    {submitted && !localUser.email && (
-                        <small className="p-invalid">Email is required.</small>
-                    )}
+                    {submitted && !localUser.email && <small className="p-error">Email is required.</small>}
                 </div>
-                {enableCurrentPassword &&
-                    <div className="field">
-                        <label htmlFor="currentPassword">Current Password</label>
-                        <Password
-                            id="currentPassword"
-                            value={localUser.currentPassword || ''}
-                            onChange={(e) => setLocalUser({ ...localUser, currentPassword: e.target.value })}
-                            toggleMask
-                            className={classNames({ 'p-invalid': submitted && !localUser.currentPassword })}
-                        />
-                        {submitted && !localUser.currentPassword && (
-                            <small className="p-invalid">Current Password is required.</small>
-                        )}
-                    </div>
-                }
 
+                {/* Password Field */}
                 <div className="field">
                     <label htmlFor="password">Password</label>
                     <Password
@@ -182,10 +158,10 @@ const SaveUserDialog = ({ visible, user, enableCurrentPassword, onHide, onComple
                         toggleMask
                         className={classNames({ 'p-invalid': submitted && !localUser.password })}
                     />
-                    {submitted && !localUser.password && (
-                        <small className="p-invalid">Password is required.</small>
-                    )}
+                    {submitted && !localUser.password && <small className="p-error">Password is required.</small>}
                 </div>
+
+                {/* Confirm Password Field */}
                 <div className="field">
                     <label htmlFor="confirmPassword">Confirm Password</label>
                     <Password
@@ -193,17 +169,16 @@ const SaveUserDialog = ({ visible, user, enableCurrentPassword, onHide, onComple
                         value={localUser.confirmedPassword || ''}
                         onChange={(e) => setLocalUser({ ...localUser, confirmedPassword: e.target.value })}
                         toggleMask
+                        feedback={false}
                         className={classNames({ 'p-invalid': submitted && !localUser.confirmedPassword })}
                     />
-                    {submitted && !localUser.confirmedPassword && (
-                        <small className="p-invalid">Password confirmation is required.</small>
-                    )}
+                    {submitted && !localUser.confirmedPassword && <small className="p-error">Confirmation is required.</small>}
                 </div>
 
-                {errorMessage && <small className="p-error">{errorMessage}</small>}
+                {errorMessage && <div className="p-error mt-2 font-semibold text-center">{errorMessage}</div>}
             </Dialog>
         </>
     );
-}
+};
 
-export default SaveUserDialog;
+export default SaveUser;

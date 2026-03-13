@@ -1,9 +1,10 @@
 'use client';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { OrgnUnit } from '@/app/(main)/organizations/models/organization.model';
-import { UserApi } from '@/app/(main)/users/api/UserService';
+import { UserApi } from '@/app/(main)/users/api/user.api';
 import { User } from '@/app/(main)/users/models/user.model';
 import { IOwnership } from '@/app/(main)/applicants/models/applicant.model';
+import { AuthApi } from '@/app/(full-page)/auth/api/auth.service';
 
 interface AuthContextType {
     user: User | null;
@@ -26,7 +27,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const userInfo = UserApi.getLoggedInUser();
+        const userInfo = AuthApi.getLoggedInUser();
         setUser(userInfo ?? null);
         if (userInfo) {
             setPermissions(userInfo.permissions);
@@ -37,7 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const login = async (user: User) => {
         try {
-            const userInfo = await UserApi.loginUser(user);
+            const userInfo = await AuthApi.loginUser(user);
             setUser(userInfo);
             setPermissions(userInfo.permissions);
             setOwnerships(userInfo.ownerships);
@@ -49,7 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const logout = () => {
-        UserApi.logout();
+        AuthApi.logout();
         setUser(null);
     };
 

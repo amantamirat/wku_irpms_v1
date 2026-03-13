@@ -4,12 +4,15 @@ import bcrypt from "bcryptjs";
 import { ApplicantRepository } from "../modules/applicants/applicant.repository";
 import { Gender } from "../modules/applicants/applicant.enum";
 import { UserRepository } from "../modules/users/user.repository";
-import { UserStatus } from "../modules/users/user.status";
 import { PermissionRepository } from "../modules/permissions/permission.repository";
 import { RoleRepository } from '../modules/permissions/roles/role.repository';
 import { SettingRepository } from '../modules/settings/setting.repository';
 import { SettingKey } from '../modules/settings/setting.model';
 import { Unit } from '../common/constants/enums';
+import { UserStatus } from '../modules/users/user.state-machine';
+import { OrganizationRepository } from '../modules/organization/organization.repository';
+import { populate } from 'dotenv';
+import { Ownership } from '../modules/organization/organization.enum';
 
 export class SeedService {
     constructor(
@@ -17,7 +20,8 @@ export class SeedService {
         private permissionRepo: PermissionRepository = new PermissionRepository(),
         private roleRepo = new RoleRepository(),
         private userRepo = new UserRepository(),
-        private applicantRepo = new ApplicantRepository()
+        private applicantRepo = new ApplicantRepository(),
+        private organizationRepo = new OrganizationRepository()
     ) { }
 
     async runAllSeeds() {
@@ -32,6 +36,7 @@ export class SeedService {
         // 3. Bundle them (Roles)
         await this.seedRoles();
 
+        await this.seedOrganizations();
         // 4. Create the janitor (Admin User)
         await this.seedAdmin();
 
@@ -98,7 +103,7 @@ export class SeedService {
         let seeded = false;
 
         for (const role of roles) {
-            const exists = await this.roleRepo.findByName(role.name);
+            const exists = await this.roleRepo.findByName(role.name, true);
             if (exists) continue;
 
             const permissionIds = await this.resolvePermissions(
@@ -157,6 +162,18 @@ export class SeedService {
         return Array.from(resolvedPermissions.values());
     }
 
+    async seedOrganizations() {
+        // let seeded = false;
+        const exists = await this.organizationRepo.findByName("ICT");
+        if (exists) return;
+        await this.organizationRepo.create({
+            type: Unit.External,
+            name: "ICT",
+            ownership: Ownership.Internal
+        });
+        console.log("✅ External ICT created successfully.");
+    }
+
     async seedAdmin() {
         const adminEmail = process.env.EMAIL;
         if (!adminEmail) return;
@@ -166,29 +183,33 @@ export class SeedService {
 
         console.log("🚀 No admin found. Seeding initial admin...");
 
-        const ownerships: any[] = Object.values(Unit).map(
+        // 1. Prepare ownerships and fetch workspace/role dependencies
+        const ownerships: any = Object.values(Unit).map(
             (unit) => ({
                 unitType: unit,
                 scope: "*"
             })
         );
 
-        // 1. Create an Applicant record for the admin
+        const workspace = await this.organizationRepo.findByName("ICT");
+        const role = await this.roleRepo.findByName("root");
+
+        if (!workspace || !role) {
+            console.error("❌ Critical seed dependencies missing (Workspace or Root Role)");
+            return;
+        }
+
+        // 2. Create the Applicant with all required data at once
         const applicant = await this.applicantRepo.create({
             name: "System Administrator",
             birthDate: new Date(),
             gender: Gender.Female,
-            // Add roles/permissions as needed for your schema
+            workspace: String(workspace._id),
+            roles: [String(role._id)],
+            ownerships: ownerships
         });
 
-        const role = await this.roleRepo.findByName("root");
-        if (!role) return
-        const roleId = String(role._id);
-        const appId = String(applicant._id);
-        await this.applicantRepo.updateRoles(appId, { id: appId, roles: [roleId] });
-        await this.applicantRepo.updateOwnerships(appId, ownerships);
-
-        // 2. Create the User record
+        // 3. Create the User record linked to the new applicant
         const hashedPassword = await bcrypt.hash(process.env.PASSWORD || "Admin@123", 10);
 
         await this.userRepo.create({

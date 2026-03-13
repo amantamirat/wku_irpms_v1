@@ -1,25 +1,21 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { SYSTEM } from "../../../common/constants/system.constant";
+import { AppError } from "../../../common/errors/app.error";
+import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { CacheService } from "../../../util/cache/cache.service";
-import { IOwnership } from "../../applicants/applicant.model";
 import { ApplicantRepository } from "../../applicants/applicant.repository";
 import { MailService } from "../../mail/mail.service";
 import { OrganizationRepository } from "../../organization/organization.repository";
-import { PermissionRepository } from "../../permissions/permission.repository";
-import { LoginDto } from "./auth.dto";
-import { ChangePasswordDTO, VerfyUserDto } from "../user.dto";
-import { IUserRepository, UserRepository } from "../user.repository";
-import { UserStateMachine } from "../user.state-machine";
-import { UserStatus } from "../user.status";
-import { AppError } from "../../../common/errors/app.error";
-import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { SettingService } from "../../settings/setting.service";
-import { SettingRepository } from "../../settings/setting.repository";
 import { SettingKey } from "../../settings/setting.model";
+import { SettingRepository } from "../../settings/setting.repository";
+import { SettingService } from "../../settings/setting.service";
+import { ChangePasswordDTO, VerfyUserDto } from "../user.dto";
 import { IUser } from "../user.model";
-import { Unit } from "../../../common/constants/enums";
+import { IUserRepository, UserRepository } from "../user.repository";
+import { USER_TRANSITIONS, UserStatus } from "../user.state-machine";
+import { LoginDto } from "./auth.dto";
+import { TransitionHelper } from "../../../common/helpers/transition.helper";
 
 
 export class AuthService {
@@ -54,7 +50,7 @@ export class AuthService {
             throw new AppError(ERROR_CODES.INVALID_CREDENTIALS);
         }
 
-        const userId = String(userDoc._id);
+
         const applicantId = String(userDoc.applicant);
 
         const applicantDoc = await this.applicantRepository.findById(applicantId, true);
@@ -68,8 +64,8 @@ export class AuthService {
 
         const ownerships = applicantDoc.ownerships;
 
-        CacheService.setUserPermissions(userId, permissions);
-        CacheService.setUserOwnerships(userId, ownerships);
+        CacheService.setUserPermissions(applicantId, permissions);
+        CacheService.setUserOwnerships(applicantId, ownerships);
 
         const ownershipsDocs = await Promise.all(
             (ownerships || []).map(async (ownership: any) => {
@@ -89,14 +85,16 @@ export class AuthService {
         );
 
         const payload: JwtPayload = {
-            userId,
             applicantId,
             email,
             status: userDoc.status
         };
-
-        const token = jwt.sign(payload, process.env.KEY as string, { expiresIn: "2h" });
-
+        
+        const expiryHours = await this.settingService.getSettingValue(SettingKey.TOKEN_EXPIRY_HOURS, 2);
+        const token = jwt.sign(payload, process.env.KEY as string, {
+            expiresIn: `${expiryHours}h`
+        });
+        const userId = String(userDoc._id);
         await this.repository.update(userId, {
             lastLogin: new Date(),
             failedLoginAttempts: 0,
@@ -216,7 +214,11 @@ export class AuthService {
         const current = userDoc.status;
         const nextState = UserStatus.active;
 
-        UserStateMachine.validateTransition(current, nextState);
+        TransitionHelper.validateTransition(
+            current,
+            nextState,
+            USER_TRANSITIONS
+        );
 
         await this.repository.update(String(userDoc._id), {
             status: nextState,

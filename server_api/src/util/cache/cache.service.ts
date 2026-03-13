@@ -1,5 +1,12 @@
 import { IOwnership } from "../../modules/applicants/applicant.model";
-import { cache } from "./cache";
+
+import NodeCache from "node-cache";
+
+export const cache = new NodeCache({
+    stdTTL: 2 * 3600, // cache for 2 hour
+    checkperiod: 3 * 60, // clear expired items every 3 minutes
+});
+
 
 export class CacheService {
 

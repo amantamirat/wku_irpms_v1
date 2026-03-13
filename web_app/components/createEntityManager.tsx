@@ -22,7 +22,7 @@ export function createEntityManager<
     api: EntityApi<T, TQuery>
     columns: any[]
     createNew?: () => T
-    SaveDialog: React.ComponentType<EntitySaveDialogProps<T>>
+    SaveDialog?: React.ComponentType<EntitySaveDialogProps<T>>
     permissionPrefix: string
     query?: () => TQuery
     workflow?: {
@@ -176,7 +176,7 @@ export function createEntityManager<
                     expandable={config.expandable}
                 />
 
-                {item && showDialog && (
+                {item && showDialog && config.SaveDialog && (
                     <config.SaveDialog
                         visible={showDialog}
                         item={item}

@@ -19,7 +19,7 @@ export class GrantController {
             if (!req.user)
                 throw new Error(ERROR_CODES.USER_NOT_FOUND);
 
-            const userId = req.user.userId;
+            const userId = req.user.applicantId;
             const data: CreateGrantDTO = {
                 ...req.body,
                 userId
@@ -72,7 +72,7 @@ export class GrantController {
                 throw new Error("id not found!");
             }
 
-            const userId = req.user.userId;
+            const userId = req.user.applicantId;
 
             const dto: UpdateGrantDTO = {
                 id: String(id),

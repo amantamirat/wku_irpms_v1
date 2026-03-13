@@ -62,20 +62,25 @@ export class ApplicantRepository implements IApplicantRepository {
     // CREATE
     // -------------------------
     async create(dto: CreateApplicantDTO): Promise<IApplicant> {
-        const data: Partial<IApplicant> = {
-            workspace: dto.workspace ? new mongoose.Types.ObjectId(dto.workspace) : undefined,
-            name: dto.name,
-            birthDate: dto.birthDate,
-            gender: dto.gender,
-            fin: dto.fin,
-            orcid: dto.orcid,
-            roles: dto.roles?.map(role => new mongoose.Types.ObjectId(role)),
-            specializations: dto.specializations?.map(spec => new mongoose.Types.ObjectId(spec)),
-            accessibility: dto.accessibility ?? []
-        };
+    const data: Partial<IApplicant> = {
+        workspace: dto.workspace ? new mongoose.Types.ObjectId(dto.workspace) : undefined,
+        name: dto.name,
+        birthDate: dto.birthDate,
+        gender: dto.gender,
+        fin: dto.fin,
+        orcid: dto.orcid,
+        // Map roles to ObjectIds
+        roles: dto.roles?.map(role => new mongoose.Types.ObjectId(role)),
+        // Map specializations to ObjectIds
+        specializations: dto.specializations?.map(spec => new mongoose.Types.ObjectId(spec)),
+        // Ensure accessibility is at least an empty array
+        accessibility: dto.accessibility ?? [],
+        // Map the DTO "ownerships" to the Schema "ownership" field
+        ownerships: dto.ownerships ?? [] 
+    };
 
-        return Applicant.create(data);
-    }
+    return Applicant.create(data);
+}
     // -------------------------
     // UPDATE
     // -------------------------

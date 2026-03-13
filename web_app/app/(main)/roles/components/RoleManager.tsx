@@ -1,13 +1,8 @@
 import { createEntityManager } from "@/components/createEntityManager";
-import { Role } from "../models/role.model";
+import { createEmptyRole, Role } from "../models/role.model";
 import SaveRole from "./SaveRole";
 import { RoleApi } from "../api/role.api";
 
-export const createEmptyRole = (): Role => ({
-    name: "",
-    permissions: [],
-    isDefault: false
-})
 
 export default createEntityManager<Role>({
     title: "Manage Roles",

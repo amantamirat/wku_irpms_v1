@@ -1,11 +1,12 @@
 'use client';
-import { UserApi } from '@/app/(main)/users/api/UserService';
+import { UserApi } from '@/app/(main)/users/api/user.api';
 import RequireAuth from '@/components/RequireAuth';
 import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
 import { Button } from 'primereact/button';
 import { Messages } from 'primereact/messages';
 import { useRef, useState } from 'react';
+import { AuthApi } from '../api/auth.service';
 
 
 export default function RequestActivationPage() {
@@ -22,7 +23,7 @@ export default function RequestActivationPage() {
       if (!user || !user.email) {
         throw new Error('Activation failed.');
       }
-      const res = await UserApi.sendVerificationCode(user?.email ?? "");
+      const res = await AuthApi.sendVerificationCode(user?.email ?? "");
       if (res.success) {
         msgs.current?.clear();
         msgs.current?.show({ severity: 'success', summary: 'Almost There!', detail: 'Verfication code has been sent to your email.' });

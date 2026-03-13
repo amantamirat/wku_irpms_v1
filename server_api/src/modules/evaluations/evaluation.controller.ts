@@ -20,7 +20,7 @@ export class EvaluationController {
             const dto: CreateEvaluationDTO = {
                 directorate: req.body.directorate,
                 title: req.body.title,
-                userId: req.user.userId
+                userId: req.user.applicantId
             };
 
             const evaluation = await this.service.create(dto);
@@ -51,7 +51,7 @@ export class EvaluationController {
             const dto: UpdateEvaluationDTO = {
                 id: req.params.id,
                 data: { title: req.body.title },
-                userId: req.user.userId
+                userId: req.user.applicantId
             };
 
             const updated = await this.service.update(dto);
@@ -67,7 +67,7 @@ export class EvaluationController {
 
             const deleted = await this.service.delete({
                 id: req.params.id,
-                applicantId: req.user.userId
+                applicantId: req.user.applicantId
             });
 
             successResponse(res, 200, "Evaluation deleted successfully", deleted);

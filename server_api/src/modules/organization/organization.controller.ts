@@ -81,7 +81,7 @@ export class OrganizationController {
                     classification: req.body.classification,
                     ownership: req.body.ownership,
                 },
-                userId: req.user.userId,
+                userId: req.user.applicantId,
             };
 
             const updated = await this.service.update(dto);

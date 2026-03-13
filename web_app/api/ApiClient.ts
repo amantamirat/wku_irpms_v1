@@ -1,11 +1,12 @@
-import { UserApi } from "@/app/(main)/users/api/UserService";
+import { AuthApi } from "@/app/(full-page)/auth/api/auth.service";
+import { UserApi } from "@/app/(main)/users/api/user.api";
 
 
 export const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const getAuthToken = (): string | null => {
     if (typeof window !== "undefined") {
-        return UserApi.getToken();
+        return AuthApi.getToken();
     }
     return null;
 };

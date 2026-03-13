@@ -87,7 +87,7 @@ export class ApplicantController {
 
             const dto: UpdateApplicantDTO = {
                 id,
-                userId: req.user.userId,
+                userId: req.user.applicantId,
                 data: {
                     workspace,
                     name,

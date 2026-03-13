@@ -1,4 +1,5 @@
-import { UserStatus } from "./user.status";
+import { UserStatus } from "./user.state-machine";
+
 
 export interface CreateUserDTO {
     applicant: string;
@@ -38,11 +39,3 @@ export interface VerfyUserDto {
     resetCode: string;
 }
 
-export default interface JwtPayload {
-    userId: string;
-    applicantId: string;
-    email: string;
-    status: UserStatus;
-    iat?: number;
-    exp?: number;
-}

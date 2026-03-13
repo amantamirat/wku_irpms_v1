@@ -1,14 +1,14 @@
 import bcrypt from "bcryptjs";
 import { DeleteDto } from "../../common/dtos/delete.dto";
+import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
+import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { ApplicantRepository, IApplicantRepository } from "../applicants/applicant.repository";
-import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
 import { CreateUserDTO, UpdateUserDTO } from "./user.dto";
-import { IUser } from "./user.model";
 import { IUserRepository, UserRepository } from "./user.repository";
-import { UserStateMachine } from "./user.state-machine";
-import { UserStatus } from "./user.status";
+import { USER_TRANSITIONS, UserStatus } from "./user.state-machine";
+
 
 export class UserService {
 
@@ -22,11 +22,6 @@ export class UserService {
         return await bcrypt.hash(password, salt);
     };
 
-    removePassword(user: Partial<IUser>) {
-        const { password, ...rest } = user;
-        return rest;
-    }
-
     async create(dto: CreateUserDTO) {
         const { applicant, email, password } = dto;
         const applicantDoc = await this.appRepository.findById(applicant);
@@ -38,8 +33,7 @@ export class UserService {
             const created = await this.repository.create({
                 ...dto, email, password: hashed, status: UserStatus.pending
             });
-            const user = this.removePassword(created);
-            return { ...user, applicant: applicantDoc };
+            return { ...created, applicant: applicantDoc };
         } catch (err: any) {
             // 5. Handle unique index violations
             if (err?.code === 11000) {
@@ -47,12 +41,11 @@ export class UserService {
             }
             throw err;
         }
-
     }
 
     async getUsers() {
         const users = await this.repository.findAll();
-        return users.map((u) => this.removePassword(u));
+        return users;
     }
 
     async update(dto: UpdateUserDTO) {
@@ -63,24 +56,31 @@ export class UserService {
         }
         const updated = await this.repository.update(id, data);
         if (!updated) throw new Error(ERROR_CODES.USER_NOT_FOUND);
-        return this.removePassword(updated);
+        return updated;
     }
 
-    async updateStatus(dto: UpdateUserDTO) {
-        const { id, data, userId } = dto;
-        const userDoc = await this.repository.findById(id);
-        if (!userDoc) throw new Error(ERROR_CODES.USER_NOT_FOUND);
+    async transitionState(dto: TransitionRequestDto) {
+        const { id, current, next } = dto;
 
-        const nextState = data.status;
-        if (!nextState) throw new Error("Status is required");
-        const current = userDoc.status;
-        // --- State Machine Validation ---
-        UserStateMachine.validateTransition(current, nextState);
-        const updated = await this.repository.update(dto.id, dto.data);
-        if (!updated) {
-            throw new Error("User not found");
+        const user = await this.repository.findById(id);
+        if (!user) {
+            throw new AppError(ERROR_CODES.USER_NOT_FOUND);
         }
-        return this.removePassword(updated);
+        const from = user.status as UserStatus;
+        const to = next as UserStatus;
+        // optional UI consistency check
+        if (current && current !== from) {
+            throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
+        }
+
+        TransitionHelper.validateTransition(
+            from,
+            to,
+            USER_TRANSITIONS
+        );
+        return await this.repository.update(id, {
+            status: to
+        });
     }
 
     async delete(dto: DeleteDto) {
@@ -88,7 +88,7 @@ export class UserService {
         const userDoc = await this.repository.findById(id);
         if (!userDoc) throw new AppError(ERROR_CODES.USER_NOT_FOUND);
         if (userDoc.status === UserStatus.active) {
-            throw new Error("ACTIVE_USER_FOUND");
+            throw new Error(ERROR_CODES.ACCOUNT_IN_USE);
         }
         return await this.repository.delete(id);
     }

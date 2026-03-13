@@ -5,6 +5,7 @@ import { AcademicLevel, Unit } from "../../common/constants/enums";
 
 
 export interface IOrganization extends Document {
+    _id: mongoose.Types.ObjectId;
     type: Unit;
     name: string;
     createdAt?: Date;
@@ -14,7 +15,7 @@ export interface IOrganization extends Document {
 const OrganizationSchema = new Schema<IOrganization>(
     {
         type: { type: String, enum: Object.values(Unit), required: true },
-        name: { type: String, required: true }
+        name: { type: String, unique: true, required: true }
     },
     { timestamps: true, discriminatorKey: "type" } // discriminatorKey
 );

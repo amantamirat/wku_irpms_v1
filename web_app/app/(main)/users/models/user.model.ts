@@ -16,16 +16,12 @@ export type User = {
     resetCode?: string;
     resetCodeExpires?: Date;
     status?: UserStatus;
-    //other informations
-    //permissions?: string[];
-    //organizations?: any;
     iat?: number;
     exp?: number;
 };
 
 
 export const validateUser = (user: User, currentPassword: boolean = false, regexPasswprd: boolean = true): { valid: boolean; message?: string } => {
-    /*
     if (!user.email || user.email.trim() === "") {
         return { valid: false, message: "Email is required." };
     }
@@ -33,7 +29,6 @@ export const validateUser = (user: User, currentPassword: boolean = false, regex
     if (!emailRegex.test(user.email)) {
         return { valid: false, message: "Email is not valid." };
     }
-        */
     if (!user.applicant) {
         return { valid: false, message: "Applicant is required." };
     }
@@ -75,25 +70,13 @@ export function sanitizeUser(user: Partial<User>): Partial<User> {
             typeof user.applicant === 'object' && user.applicant !== null
                 ? (user.applicant as any)._id
                 : user.applicant,
-        /*
-        roles: user.roles
-            ?.map(role =>
-                typeof role === 'object' && role !== null
-                    ? (role as Role)._id
-                    : role
-            )
-            .filter((id): id is string => typeof id === 'string'),
-
-        organizations: user.organizations
-            ?.map(org =>
-                typeof org === 'object' && org !== null
-                    ? (org as Organization)._id
-                    : org
-            )
-            .filter((id): id is string => typeof id === 'string'),
-            */
     };
 }
+
+
+export const createEmptyUser = (): User => ({
+
+})
 
 
 

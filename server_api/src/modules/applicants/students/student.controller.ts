@@ -62,7 +62,7 @@ export class StudentController {
             const { id } = req.params;
             const deleted = await this.service.delete({
                 id,
-                applicantId: req.user.userId,
+                applicantId: req.user.applicantId,
             });
 
             successResponse(res, 200, 'Student deleted successfully', deleted);

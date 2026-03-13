@@ -8,7 +8,8 @@ import {
     Department,
     Center,
     Program,
-    External
+    External,
+    IOrganization
 } from "./organization.model";
 
 import {
@@ -26,6 +27,7 @@ export interface IOrganizationRepository {
     find(options: GetOrganizationsDTO): Promise<any[]>;
     create(data: CreateOrganizationDTO): Promise<any>;
     update(id: string, data: UpdateOrganizationDTO["data"]): Promise<any>;
+    findByName(orgName: string, populate?: boolean): Promise<IOrganization | null>;
     exists(filters: ExistsOrganizationDTO): Promise<boolean>;
     delete(id: string): Promise<void>;
 }
@@ -134,6 +136,14 @@ export class OrganizationRepository implements IOrganizationRepository {
         ).exec();
     }
 
+    async findByName(orgName: string, populate?: boolean): Promise<IOrganization | null> {
+        const query = Organization.findOne({ name: orgName });
+        if (populate) {
+            query.populate("parent");
+        }
+        return query.lean<IOrganization>();
+    }
+
     async exists(filters: ExistsOrganizationDTO): Promise<boolean> {
         const query: any = {};
         if (filters.parent) {
@@ -142,6 +152,8 @@ export class OrganizationRepository implements IOrganizationRepository {
         const result = await Organization.exists(query).exec();
         return result !== null;
     }
+
+
 
     // ------------------------------------
     // DELETE

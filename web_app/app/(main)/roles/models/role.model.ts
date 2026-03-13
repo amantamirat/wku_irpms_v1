@@ -30,3 +30,10 @@ export function sanitizeRole(role: Partial<Role>): Partial<Role> {
             .filter((id): id is string => typeof id === "string"),
     };
 }
+
+
+export const createEmptyRole = (): Role => ({
+    name: "",
+    permissions: [],
+    isDefault: false
+})

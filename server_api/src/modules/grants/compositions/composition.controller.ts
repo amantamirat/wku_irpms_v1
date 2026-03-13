@@ -20,7 +20,7 @@ export class CompositionController {
             if (!req.user)
                 throw new Error(ERROR_CODES.USER_NOT_FOUND);
 
-            const userId = req.user.userId;
+            const userId = req.user.applicantId;
 
             const data: CreateCompositionDTO = {
                 ...req.body,
@@ -61,7 +61,7 @@ export class CompositionController {
             }
             const { id } = req.params;
 
-            const userId = req.user.userId;
+            const userId = req.user.applicantId;
 
             const dto: UpdateCompositionDTO = {
                 id: String(id),

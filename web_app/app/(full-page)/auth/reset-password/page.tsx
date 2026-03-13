@@ -8,7 +8,8 @@ import { classNames } from 'primereact/utils';
 import { useContext, useState } from 'react';
 import { LayoutContext } from '../../../../layout/context/layoutcontext';
 import { User, validateUser } from '@/app/(main)/users/models/user.model';
-import { UserApi } from '@/app/(main)/users/api/UserService';
+import { UserApi } from '@/app/(main)/users/api/user.api';
+import { AuthApi } from '../api/auth.service';
 
 export default function ResetPassword() {
 
@@ -36,7 +37,7 @@ export default function ResetPassword() {
         throw new Error(result.message);
       }
 
-      const data = await UserApi.resetPassword(credential);
+      const data = await AuthApi.resetPassword(credential);
       if (data.success) {
         alert('Your password has been reset successfully.');
         setTimeout(() => router.push('/auth/login'), 3000);

@@ -1,6 +1,6 @@
 import ApplicantDetailDialog from "@/app/(main)/applicants/components/dialogs/ApplicantDetailDialog";
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
-import SaveDialog from "@/app/(main)/users/dialogs/SaveDialog";
+import SaveDialog from "@/app/(main)/users/components/SaveUser";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
@@ -91,7 +91,7 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
 
             {(user?._id && user.applicant) && <SaveDialog
                 visible={showPasswordDialog}
-                user={user}
+                item={user}
                 enableCurrentPassword={true}
                 onComplete={() => setShowPasswordDialog(false)}
                 onHide={() => setShowPasswordDialog(false)}

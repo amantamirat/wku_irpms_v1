@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { UserController } from './user.controller';
-import { checkPermission, checkStatusPermission, verifyActiveAccount } from './user.middleware';
+import { checkPermission, checkStatusPermission, checkTransitionPermission, verifyActiveAccount } from './user.middleware';
 import { PERMISSIONS } from '../../common/constants/permissions';
 
 const controller = new UserController();
@@ -15,29 +15,13 @@ router.get('/', verifyActiveAccount,
 router.put('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.USER.UPDATE]),
     controller.update);
-router.put('/:status', verifyActiveAccount,
-    checkStatusPermission("user"),
-    controller.updateStatus);
+router.patch(
+    '/:id', verifyActiveAccount,
+    checkTransitionPermission("user"),
+    controller.transitionState
+);
 router.delete('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.USER.DELETE]),
     controller.delete);
 
-
-
-///////////////////////////////////////
-/*
-router.patch("/change-password", verifyActiveAccount,
-    controller.changePassword);
-
-router.post("/login", controller.login);
-
-router.post("/send-verification-code",
-    controller.sendVerificationCode);
-
-router.post("/reset-password",
-    controller.resetUser);
-
-router.post("/activate-user",
-    controller.activateUser);
-*/
 export default router;

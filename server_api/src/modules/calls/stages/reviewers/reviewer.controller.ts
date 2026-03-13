@@ -82,7 +82,7 @@ export class ReviewerController {
             const dto: UpdateReviewerDTO = {
                 id: String(id),
                 data: { weight },
-                applicantId: req.user.userId
+                applicantId: req.user.applicantId
             };
 
             const updated = await this.service.update(dto);

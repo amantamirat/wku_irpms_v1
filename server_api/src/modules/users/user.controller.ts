@@ -9,8 +9,10 @@ import {
   VerfyUserDto,
 } from './user.dto';
 import { UserService } from './user.service';
-import { UserStatus } from './user.status';
+
 import { ERROR_CODES } from '../../common/errors/error.codes';
+import { UserStatus } from './user.state-machine';
+import { TransitionRequestDto } from '../../common/dtos/transition.dto';
 
 export class UserController {
 
@@ -47,7 +49,7 @@ export class UserController {
       const dto: UpdateUserDTO = {
         id: id as string,
         data: { password },
-        userId: req.user.userId,
+        userId: req.user.applicantId,
       };
       const updated = await this.service.update(dto);
       successResponse(res, 200, 'User updated successfully', updated);
@@ -56,21 +58,19 @@ export class UserController {
     }
   };
 
-  updateStatus = async (req: AuthenticatedRequest, res: Response) => {
+  transitionState = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      if (!req.user) throw new Error('User not authorized');
-
-      const { id } = req.query;
-      const { status } = req.params;
-
-      const dto: UpdateUserDTO = {
-        id: id as string,
-        data: { status: status as UserStatus },
-        userId: req.user.userId,
+      if (!req.user) throw new Error(ERROR_CODES.USER_NOT_FOUND);
+      const { id } = req.params;
+      const { current, next } = req.body;
+      const dto: TransitionRequestDto = {
+        id: String(id),
+        current: current,
+        next: next,
+        applicantId: req.user.applicantId,
       };
-
-      const updated = await this.service.updateStatus(dto);
-      successResponse(res, 200, 'User status updated successfully', updated);
+      const updated = await this.service.transitionState(dto);
+      successResponse(res, 200, "User status updated successfully", updated);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
@@ -82,7 +82,7 @@ export class UserController {
       const { id } = req.params;
       const dto: DeleteDto = {
         id: id,
-        applicantId: req.user.userId,
+        applicantId: req.user.applicantId,
       };
       const deleted = await this.service.delete(dto);
       successResponse(res, 200, 'User deleted successfully', deleted);

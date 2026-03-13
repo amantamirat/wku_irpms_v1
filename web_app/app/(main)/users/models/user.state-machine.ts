@@ -1,8 +1,10 @@
-export enum UserStatus {
-    pending = 'pending',
-    active = 'active',
-    suspended = 'suspended'
-}
+import { UserStatus } from "./user.model";
+
+export const USER_STATUS_ORDER: UserStatus[] = [
+    UserStatus.pending,
+    UserStatus.active,
+    UserStatus.suspended
+];
 
 export const USER_TRANSITIONS: Record<UserStatus, UserStatus[]> = {
     [UserStatus.pending]: [UserStatus.active],

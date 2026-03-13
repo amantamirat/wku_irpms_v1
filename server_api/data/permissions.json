@@ -51,11 +51,23 @@
   },
   {
     "category": "User Management",
-    "name": "user:status.active"
+    "name": "user:transition.pending.active",
+    "description": "Activate a user account by changing its status from pending to active"
   },
   {
     "category": "User Management",
-    "name": "user:status.suspended"
+    "name": "user:transition.active.suspended",
+    "description": "Suspend an active user account to temporarily disable access"
+  },
+  {
+    "category": "User Management",
+    "name": "user:transition.active.pending",
+    "description": "Revert an active user account back to pending status for further review"
+  },
+  {
+    "category": "User Management",
+    "name": "user:transition.suspended.active",
+    "description": "Re-activate a suspended user account and restore access"
   },
   {
     "category": "User Management",

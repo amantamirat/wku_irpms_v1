@@ -1,12 +1,8 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
 
 import { COLLECTIONS } from '../../common/constants/collections.enum';
+import { UserStatus } from './user.state-machine';
 
-export enum UserStatus {
-  pending = 'pending',
-  active = 'active',
-  suspended = 'suspended'
-}
 
 export interface IUser extends Document {
   email: string;

@@ -47,7 +47,7 @@ export class ThemeController {
                 throw new Error("User not found!");
             }
 
-            const userId = req.user.userId;
+            const userId = req.user.applicantId;
 
             const dto: UpdateThemeDTO = {
                 id,
@@ -70,7 +70,7 @@ export class ThemeController {
                 throw new Error("User not found!");
             }
 
-            const userId = req.user.userId;
+            const userId = req.user.applicantId;
 
             const deleted = await this.service.delete({ id, applicantId: userId });
             successResponse(res, 200, "Theme deleted successfully", deleted);

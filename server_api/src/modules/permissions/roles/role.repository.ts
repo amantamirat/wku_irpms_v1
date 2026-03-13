@@ -1,12 +1,13 @@
 import mongoose from "mongoose";
 import { Role, IRole } from "./role.model";
 import { CreateRoleDto, UpdateRoleDto } from "./role.dto";
+import { boolean } from "joi";
 
 export interface IRoleRepository {
     findById(id: string): Promise<IRole | null>;
     findAll(): Promise<Partial<IRole>[]>;
     findDefaults(): Promise<Partial<IRole>[]>;
-    findByName(roleName: string): Promise<IRole | null>;
+    findByName(roleName: string, populate?: boolean): Promise<IRole | null>;
     create(data: CreateRoleDto): Promise<IRole>;
     update(id: string, data: UpdateRoleDto["data"]): Promise<IRole | null>;
     delete(id: string): Promise<IRole | null>;
@@ -14,10 +15,12 @@ export interface IRoleRepository {
 
 export class RoleRepository implements IRoleRepository {
 
-    async findByName(roleName: string): Promise<IRole | null> {
-        //throw new Error("Method not implemented.");
-        return Role.findOne({ name: roleName }).populate("permissions")
-            .lean<IRole>();
+    async findByName(roleName: string, populate?: boolean): Promise<IRole | null> {
+        const query = Role.findOne({ name: roleName });
+        if (populate) {
+            query.populate("permissions");
+        }
+        return query.lean<IRole>();
     }
 
     async findById(id: string) {

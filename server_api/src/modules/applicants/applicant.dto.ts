@@ -10,7 +10,7 @@ export interface CreateApplicantDTO {
     orcid?: string;
     accessibility?: Accessibility[];
     roles?: string[];
-    //ownerships?: IOwnership[];
+    ownerships?: IOwnership[];
     specializations?: string[];
     userId?: string;
 }

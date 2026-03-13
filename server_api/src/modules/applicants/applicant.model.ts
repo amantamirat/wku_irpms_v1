@@ -43,7 +43,7 @@ const ApplicantSchema = new Schema<IApplicant>({
     workspace: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.ORGANIZATION,
-        //required: true
+        required: true
     },
     name: {
         type: String,

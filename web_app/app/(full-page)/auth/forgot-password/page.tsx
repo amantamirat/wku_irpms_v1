@@ -8,7 +8,8 @@ import { LayoutContext } from '../../../../layout/context/layoutcontext';
 import { useContext } from 'react';
 import { Messages } from 'primereact/messages';
 import NoAuthGuard from '@/components/NoAuthGuard';
-import { UserApi } from '@/app/(main)/users/api/UserService';
+import { UserApi } from '@/app/(main)/users/api/user.api';
+import { AuthApi } from '../api/auth.service';
 
 export default function ForgotPassword() {
 
@@ -36,7 +37,7 @@ export default function ForgotPassword() {
         msgs.current?.show({ severity: 'warn', summary: 'Validation', detail: 'Please enter a valid email address.' });
         return;
       }
-      const data = await UserApi.sendVerificationCode(email);
+      const data = await AuthApi.sendVerificationCode(email);
       if (data.success) {
         msgs.current?.clear();
         msgs.current?.show({ severity: 'success', summary: 'Almost There!', detail: 'Verification code sent. Check your inbox.' });

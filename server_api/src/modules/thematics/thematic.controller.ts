@@ -39,7 +39,7 @@ export class ThematicController {
             if (!req.user) {
                 throw new Error("User not found!");
             }
-            const userId = req.user.userId;
+            const userId = req.user.applicantId;
             const dto: UpdateThematicDTO = {
                 id,
                 data: { title, description },
@@ -58,7 +58,7 @@ export class ThematicController {
             if (!req.user) {
                 throw new Error("User not found!");
             }
-            const userId = req.user.userId;
+            const userId = req.user.applicantId;
             const deleted = await this.service.delete({ id: id, applicantId: userId });
             successResponse(res, 200, "Thematic deleted successfully", deleted);
         } catch (err: any) {

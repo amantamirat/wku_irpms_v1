@@ -27,7 +27,7 @@ export class AuthController {
       const { currentPassword, password } = req.body;
 
       const dto: ChangePasswordDTO = {
-        id: req.user.userId,
+        id: req.user.applicantId,
         data: { currentPassword, password }
       };
 

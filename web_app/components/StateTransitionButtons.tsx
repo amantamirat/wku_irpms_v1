@@ -1,4 +1,5 @@
 import { Button } from "primereact/button";
+import { STATUS_BUTTON_CONFIG } from "./status-button.config";
 
 interface StateTransitionButtonsProps<TStatus extends string> {
     id?: string;
@@ -38,12 +39,19 @@ export function StateTransitionButtons<TStatus extends string>({
                 .map((target) => {
                     const targetIndex = statusOrder.indexOf(target);
                     const isForward = targetIndex > currentIndex;
+
+                    const config = STATUS_BUTTON_CONFIG[target];
+
+                    const icon = config?.icon ?? (isForward ? "pi pi-check" : "pi pi-undo");
+                    const severity = config?.severity ?? (isForward ? "success" : "warning");
+                    const action = config?.action ?? `Change to ${target}`;
+
                     return (
                         <Button
                             key={String(target)}
-                            tooltip={`Change to ${target}`}
-                            icon={isForward ? "pi pi-check" : "pi pi-undo"}
-                            severity={isForward ? "success" : "warning"}
+                            tooltip={action}
+                            icon={icon}
+                            severity={severity}
                             size="small"
                             onClick={() => onTransition(target)}
                         />

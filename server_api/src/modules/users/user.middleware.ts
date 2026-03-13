@@ -3,8 +3,9 @@ import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { CacheService } from '../../util/cache/cache.service';
 import { errorResponse } from '../../common/helpers/response';
-import { UserStatus } from './user.status';
-import JwtPayload from './user.dto';
+
+import JwtPayload from './auth/auth.dto';
+import { UserStatus } from './user.state-machine';
 
 dotenv.config();
 
@@ -46,7 +47,7 @@ export const checkPermission = (requiredPermission: string[]) => {
       if (!req.user) {
         return errorResponse(res, 401, "Unauthorized. No user in request.");
       }
-      const userId = req.user.userId;
+      const userId = req.user.applicantId;
       const hasPermission = await CacheService.hasPermissions(userId, requiredPermission);
       if (!hasPermission) {
         return errorResponse(res, 403, `Forbidden. ${requiredPermission}, Permission missing.`);
@@ -78,7 +79,7 @@ export const checkStatusPermission = (resource: string) => {
         return errorResponse(res, 400, "Status not provided");
       }
       const permission = `${resource}:status.${status}`;
-      const hasPermission = await CacheService.hasPermissions(req.user.userId, [permission]);
+      const hasPermission = await CacheService.hasPermissions(req.user.applicantId, [permission]);
       if (!hasPermission) {
         return errorResponse(res, 403, `Forbidden. Missing permission: ${permission}`
         );
@@ -117,7 +118,7 @@ export const checkTransitionPermission = (resource: string) => {
 
       const hasPermission =
         await CacheService.hasPermissions(
-          req.user.userId,
+          req.user.applicantId,
           [permission]
         );
 
