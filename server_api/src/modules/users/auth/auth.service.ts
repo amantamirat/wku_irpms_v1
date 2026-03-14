@@ -3,19 +3,20 @@ import crypto from "crypto";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { CacheService } from "../../../util/cache/cache.service";
+import { CacheService } from "../../../util/cache.service";
 import { ApplicantRepository } from "../../applicants/applicant.repository";
 import { MailService } from "../../mail/mail.service";
 import { OrganizationRepository } from "../../organization/organization.repository";
 import { SettingKey } from "../../settings/setting.model";
 import { SettingRepository } from "../../settings/setting.repository";
 import { SettingService } from "../../settings/setting.service";
-import { ChangePasswordDTO, VerfyUserDto } from "../user.dto";
+
 import { IUser } from "../user.model";
 import { IUserRepository, UserRepository } from "../user.repository";
 import { USER_TRANSITIONS, UserStatus } from "../user.state-machine";
-import { LoginDto } from "./auth.dto";
+import { ChangePasswordDTO, LoginDto } from "./auth.dto";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
+import { VerfyUserDto } from "../user.dto";
 
 
 export class AuthService {
@@ -23,7 +24,6 @@ export class AuthService {
     constructor(
         private readonly repository: IUserRepository = new UserRepository(),
         private readonly applicantRepository = new ApplicantRepository(),
-        private readonly organizationRepository = new OrganizationRepository(),
         private readonly mailService = new MailService(),
         private readonly settingService: SettingService = new SettingService(new SettingRepository())
     ) { }
@@ -31,6 +31,7 @@ export class AuthService {
     async login(dto: LoginDto) {
 
         const { email, password } = dto;
+
         const userDoc = await this.repository.findByEmail(email);
         if (!userDoc)
             throw new AppError(ERROR_CODES.ACCOUNT_NOT_FOUND);
@@ -38,50 +39,43 @@ export class AuthService {
         if (userDoc.status === UserStatus.suspended)
             throw new AppError(ERROR_CODES.ACCOUNT_SUSPENDED);
 
-        // Check lock
-        if (userDoc.lockUntil && userDoc.lockUntil > new Date()) {
+        if (userDoc.lockUntil && userDoc.lockUntil > new Date())
             throw new AppError(ERROR_CODES.ACCOUNT_LOCKED);
-        }
 
         const isMatch = await bcrypt.compare(password, userDoc.password);
-
         if (!isMatch) {
             await this.handleFailedLogin(userDoc);
             throw new AppError(ERROR_CODES.INVALID_CREDENTIALS);
         }
 
+        const applicantDoc = await this.applicantRepository.findById(
+            String(userDoc.applicant),
+            true
+        );
 
-        const applicantId = String(userDoc.applicant);
-
-        const applicantDoc = await this.applicantRepository.findById(applicantId, true);
-
-        if (!applicantDoc) {
+        if (!applicantDoc)
             throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
-        }
 
-        const permissions = applicantDoc.roles?.flatMap((role: any) =>
-            role.permissions?.map((p: any) => p.name)) || [];
+        const permissions = [
+            ...new Set(
+                applicantDoc.roles?.flatMap((role: any) =>
+                    role.permissions?.map((p: any) => p.name)
+                ) || []
+            )
+        ];
 
-        const ownerships = applicantDoc.ownerships;
+        const ownerships = applicantDoc.ownerships || [];
+
+        const applicantId = String(applicantDoc._id);
+        CacheService.invalidateUser(applicantId);
 
         CacheService.setUserPermissions(applicantId, permissions);
-        CacheService.setUserOwnerships(applicantId, ownerships);
 
-        const ownershipsDocs = await Promise.all(
-            (ownerships || []).map(async (ownership: any) => {
-
-                if (ownership.scope === "*") return ownership;
-
-                const populatedScope = await this.organizationRepository.findByIds(
-                    ownership.scope
-                );
-
-                return {
-                    ...ownership,
-                    scope: populatedScope
-                };
-
-            })
+        CacheService.setUserOrganizations(
+            applicantId,
+            ownerships.flatMap((o: any) =>
+                o.scope === "*" ? ["*"] : o.scope.map((id: any) => String(id))
+            )
         );
 
         const payload: JwtPayload = {
@@ -89,11 +83,17 @@ export class AuthService {
             email,
             status: userDoc.status
         };
-        
-        const expiryHours = await this.settingService.getSettingValue(SettingKey.TOKEN_EXPIRY_HOURS, 2);
+
+        const expiryHours =
+            await this.settingService.getSettingValue(
+                SettingKey.TOKEN_EXPIRY_HOURS,
+                2
+            );
+
         const token = jwt.sign(payload, process.env.KEY as string, {
             expiresIn: `${expiryHours}h`
         });
+
         const userId = String(userDoc._id);
         await this.repository.update(userId, {
             lastLogin: new Date(),
@@ -106,7 +106,7 @@ export class AuthService {
             user: {
                 ...payload,
                 permissions,
-                ownerships: ownershipsDocs,
+                ownerships,
                 applicant: applicantDoc
             }
         };

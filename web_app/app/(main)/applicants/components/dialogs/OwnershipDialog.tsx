@@ -164,11 +164,6 @@ const OwnershipDialog = ({ visible, applicant, onHide, onComplete }: OwnershipDi
                     <InputText value={applicant.name} disabled />
                 </div>
 
-                <div className="field">
-                    <label>Email</label>
-                    <InputText value={applicant.email} disabled />
-                </div>
-
                 {/* Ownerships */}
                 <div className="field">
                     <label>Ownerships</label>

@@ -1,7 +1,7 @@
 export interface CreateRoleDto {
     name: string;
     permissions: string[];
-    isDefault: boolean;
+    isDefault?: boolean;
 }
 
 export interface UpdateRoleDto {

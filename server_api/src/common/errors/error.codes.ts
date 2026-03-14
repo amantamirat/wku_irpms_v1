@@ -1,17 +1,13 @@
 export const ERROR_CODES = {
     //---------- GENERAL --------------
+    ACCESS_DENIED: "ACCESS_DENIED",
     UNAUTHORIZED: "UNAUTHORIZED",
+    STATE_OUT_OF_SYNC: "The resource state has changed. Please refresh and try again.",
+    
     UNSUPPORTED_OPERTATION: "UNSUPPORTED_OPERTATION",
     INVALID_STATE_TRANSITION: "INVALID_STATE_TRANSITION",
     FILE_NOT_FOUND: "FILE_NOT_FOUND",
     CURRENT_STATE_MISMATCH: "CURRENT_STATE_MISMATCH",
-    STATE_OUT_OF_SYNC: "STATE_OUT_OF_SYNC",
-    /*
-    STATE_OUT_OF_SYNC: {
-        code: "STATE_OUT_OF_SYNC",
-        message: "The resource state has changed. Please refresh and try again."
-    },
-    */
     USER_NOT_LEAD_PI: "USER_NOT_LEAD_PI",
     USER_NOT_REVIEWER: "USER_NOT_REVIEWER",
     USER_NOT_COLLABORATOR: "USER_NOT_COLLABORATOR",

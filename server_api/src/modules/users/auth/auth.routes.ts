@@ -8,9 +8,10 @@ const service = new AuthService();
 const controller = new AuthController(service);
 
 router.post("/login", controller.login);
+router.post("/change-password", controller.changePassword);
 router.post("/send-code", controller.sendVerificationCode);
 router.post("/reset-password", controller.resetPassword);
 router.post("/activate", controller.activateUser);
-router.post("/change-password", controller.changePassword);
+
 
 export default router;

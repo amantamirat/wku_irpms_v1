@@ -22,14 +22,7 @@ export interface UpdateUserDTO {
     userId?: string;
 }
 
-export interface ChangePasswordDTO {
-    id: string;
-    data: {
-        currentPassword: string;
-        password: string;
-    };
-    userId?: string;
-}
+
 
 
 

@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { successResponse, errorResponse } from "../../../common/helpers/response";
-import { ChangePasswordDTO, VerfyUserDto } from "../user.dto";
+import { VerfyUserDto } from "../user.dto";
 import { AuthenticatedRequest } from "../user.middleware";
 import { AuthService } from "./auth.service";
-import { LoginDto } from "./auth.dto";
+import { ChangePasswordDTO, LoginDto } from "./auth.dto";
 
 export class AuthController {  
 

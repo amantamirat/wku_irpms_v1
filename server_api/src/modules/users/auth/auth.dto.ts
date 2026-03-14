@@ -5,10 +5,19 @@ export interface LoginDto {
     password: string;
 }
 
-export default interface JwtPayload {    
+export default interface JwtPayload {
     applicantId: string;
     email: string;
     status: UserStatus;
     iat?: number;
     exp?: number;
+}
+
+export interface ChangePasswordDTO {
+    id: string;
+    data: {
+        currentPassword: string;
+        password: string;
+    };
+    userId?: string;
 }

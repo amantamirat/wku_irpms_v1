@@ -116,16 +116,7 @@ const RoleDialog = ({ visible, applicant, onHide, onComplete }: RoleDialogProps)
                         value={localApplicant.name}
                         disabled
                     />
-                </div>
-
-                <div className="field">
-                    <label htmlFor="email">Email</label>
-                    <InputText
-                        id="email"
-                        value={localApplicant.email}
-                        disabled
-                    />
-                </div>
+                </div>              
 
                 {(canReadRoles && isEdit) && <>
                     <div className="field">

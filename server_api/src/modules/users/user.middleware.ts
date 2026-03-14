@@ -1,11 +1,12 @@
 import dotenv from 'dotenv';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { CacheService } from '../../util/cache/cache.service';
+import { CacheService } from '../../util/cache.service';
 import { errorResponse } from '../../common/helpers/response';
 
 import JwtPayload from './auth/auth.dto';
 import { UserStatus } from './user.state-machine';
+import { ERROR_CODES } from '../../common/errors/error.codes';
 
 dotenv.config();
 
@@ -41,21 +42,37 @@ export const verifyActiveAccount = (req: AuthenticatedRequest, res: Response, ne
 };
 
 
-export const checkPermission = (requiredPermission: string[]) => {
-  return async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const checkPermission = (requiredPermission: string | string[]) => {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
-        return errorResponse(res, 401, "Unauthorized. No user in request.");
+        return errorResponse(res, 401, ERROR_CODES.UNAUTHORIZED);
       }
       const userId = req.user.applicantId;
-      const hasPermission = await CacheService.hasPermissions(userId, requiredPermission);
+
+      // Normalize to array
+      const permissions = Array.isArray(requiredPermission)
+        ? requiredPermission
+        : [requiredPermission];
+
+      const hasPermission = CacheService.hasPermissions(userId, permissions);
+
       if (!hasPermission) {
-        return errorResponse(res, 403, `Forbidden. ${requiredPermission}, Permission missing.`);
+        return errorResponse(
+          res,
+          403,
+          `Forbidden. Missing permission: ${permissions.join(", ")}`
+        );
       }
+
       next();
     } catch (err) {
       console.error("Permission check failed:", err);
-      return errorResponse(res, 500, "Internal server error during permission check.");
+      return errorResponse(
+        res,
+        500,
+        "Internal server error during permission check."
+      );
     }
   };
 };

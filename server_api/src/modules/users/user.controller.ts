@@ -1,18 +1,15 @@
 import { Request, Response } from 'express';
 import { DeleteDto } from '../../common/dtos/delete.dto';
-import { successResponse, errorResponse } from '../../common/helpers/response';
-import { AuthenticatedRequest } from './user.middleware';
+import { errorResponse, successResponse } from '../../common/helpers/response';
 import {
-  ChangePasswordDTO,
   CreateUserDTO,
   UpdateUserDTO,
-  VerfyUserDto,
 } from './user.dto';
+import { AuthenticatedRequest } from './user.middleware';
 import { UserService } from './user.service';
 
-import { ERROR_CODES } from '../../common/errors/error.codes';
-import { UserStatus } from './user.state-machine';
 import { TransitionRequestDto } from '../../common/dtos/transition.dto';
+import { ERROR_CODES } from '../../common/errors/error.codes';
 
 export class UserController {
 

@@ -1,24 +1,18 @@
-import mongoose from "mongoose";
+import mongoose, { FilterQuery } from "mongoose";
 import { User, IUser } from "./user.model";
 import { CreateUserDTO, UpdateUserDTO } from "./user.dto";
 
 export interface IUserRepository {
-    findById(id: string): Promise<IUser | null>;
-    findAll(): Promise<Partial<IUser>[]>;
-    findByEmail(email: string): Promise<IUser | null>;
     create(data: CreateUserDTO): Promise<IUser>;
+    findById(id: string): Promise<IUser | null>;
+    findByEmail(email: string): Promise<IUser | null>;
+    findAll(): Promise<Partial<IUser>[]>;
     update(id: string, data: UpdateUserDTO["data"]): Promise<IUser | null>;
+    exists(filter: Partial<IUser>): Promise<boolean>;
     delete(id: string): Promise<void>;
 }
 
 export class UserRepository implements IUserRepository {
-
-
-    async findById(id: string) {
-        return User.findById(new mongoose.Types.ObjectId(id))
-            .lean<IUser>()
-            .exec();
-    }
 
     async create(dto: CreateUserDTO) {
         const data: Partial<IUser> = {
@@ -32,11 +26,10 @@ export class UserRepository implements IUserRepository {
         return created.toObject();
     }
 
-    async findAll() {
-        const filter: any = {};
-        return User.find(filter).populate("applicant")
-            //.populate("roles").populate("organizations")
-            .lean<IUser[]>()
+
+    async findById(id: string) {
+        return User.findById(new mongoose.Types.ObjectId(id))
+            .lean<IUser>()
             .exec();
     }
 
@@ -46,6 +39,13 @@ export class UserRepository implements IUserRepository {
         ).select('+password').lean();
     }
 
+    async findAll() {
+        const filter: any = {};
+        return User.find(filter).populate("applicant")
+            //.populate("roles").populate("organizations")
+            .lean<IUser[]>()
+            .exec();
+    }
 
     async update(id: string, dtoData: UpdateUserDTO["data"]) {
         const toUpdate: any = {};
@@ -82,6 +82,10 @@ export class UserRepository implements IUserRepository {
 
     }
 
+    async exists(filter: FilterQuery<IUser>): Promise<boolean> {
+        const result = await User.exists(filter);
+        return result !== null;
+    }
 
     async delete(id: string) {
         await User.findByIdAndDelete(new mongoose.Types.ObjectId(id)).exec();
