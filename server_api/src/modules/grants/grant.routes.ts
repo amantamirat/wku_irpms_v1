@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { GrantController } from './grant.controller';
-import { verifyActiveAccount, checkPermission, checkTransitionPermission } from '../users/user.middleware';
+import { verifyActiveAccount, checkPermission, checkTransitionPermission } from '../users/auth/auth.middleware';
 import { PERMISSIONS } from '../../common/constants/permissions';
 import { GrantRepository } from './grant.repository';
 import { OrganizationRepository } from '../organization/organization.repository';

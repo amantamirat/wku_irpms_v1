@@ -106,122 +106,122 @@
   },
   {
     "category": "Organization Management",
-    "name": "college:create",
+    "name": "organization:college:create",
     "description": "Create new colleges"
   },
   {
     "category": "Organization Management",
-    "name": "college:read",
+    "name": "organization:college:read",
     "description": "View colleges"
   },
   {
     "category": "Organization Management",
-    "name": "college:update",
+    "name": "organization:college:update",
     "description": "Edit colleges"
   },
   {
     "category": "Organization Management",
-    "name": "college:delete",
+    "name": "organization:college:delete",
     "description": "Delete colleges"
   },
   {
     "category": "Organization Management",
-    "name": "department:create",
+    "name": "organization:department:create",
     "description": "Create new departments"
   },
   {
     "category": "Organization Management",
-    "name": "department:read",
+    "name": "organization:department:read",
     "description": "View departments"
   },
   {
     "category": "Organization Management",
-    "name": "department:update",
+    "name": "organization:department:update",
     "description": "Edit departments"
   },
   {
     "category": "Organization Management",
-    "name": "department:delete",
+    "name": "organization:department:delete",
     "description": "Delete departments"
   },
   {
     "category": "Organization Management",
-    "name": "program:create",
+    "name": "organization:program:create",
     "description": "Create new programs"
   },
   {
     "category": "Organization Management",
-    "name": "program:read",
+    "name": "organization:program:read",
     "description": "View programs"
   },
   {
     "category": "Organization Management",
-    "name": "program:update",
+    "name": "organization:program:update",
     "description": "Edit programs"
   },
   {
     "category": "Organization Management",
-    "name": "program:delete",
+    "name": "organization:program:delete",
     "description": "Delete programs"
   },
   {
     "category": "Organization Management",
-    "name": "directorate:create",
+    "name": "organization:directorate:create",
     "description": "Create new directorates"
   },
   {
     "category": "Organization Management",
-    "name": "directorate:read",
+    "name": "organization:directorate:read",
     "description": "View directorates"
   },
   {
     "category": "Organization Management",
-    "name": "directorate:update",
+    "name": "organization:directorate:update",
     "description": "Edit directorates"
   },
   {
     "category": "Organization Management",
-    "name": "directorate:delete",
+    "name": "organization:directorate:delete",
     "description": "Delete directorates"
   },
   {
     "category": "Organization Management",
-    "name": "center:create",
+    "name": "organization:center:create",
     "description": "Create new centers"
   },
   {
     "category": "Organization Management",
-    "name": "center:read",
+    "name": "organization:center:read",
     "description": "View centers"
   },
   {
     "category": "Organization Management",
-    "name": "center:update",
+    "name": "organization:center:update",
     "description": "Edit centers"
   },
   {
     "category": "Organization Management",
-    "name": "center:delete",
+    "name": "organization:center:delete",
     "description": "Delete centers"
   },
   {
     "category": "Organization Management",
-    "name": "external:create",
+    "name": "organization:external:create",
     "description": "Create new external units"
   },
   {
     "category": "Organization Management",
-    "name": "external:read",
+    "name": "organization:external:read",
     "description": "View external units"
   },
   {
     "category": "Organization Management",
-    "name": "external:update",
+    "name": "organization:external:update",
     "description": "Edit external units"
   },
   {
     "category": "Organization Management",
-    "name": "external:delete",
+    "name": "organization:external:delete",
     "description": "Delete external units"
   },
   {
@@ -337,15 +337,23 @@
   },
   {
     "category": "Calendar Management",
-    "name": "calendar:status.planned"
+    "name": "calendar:transition.planned.active",
+    "description": "Activate a planned calendar by changing its status from planned to active"
   },
   {
     "category": "Calendar Management",
-    "name": "calendar:status.active"
+    "name": "calendar:transition.active.closed",
+    "description": "Close an active calendar to finalize its activities"
   },
   {
     "category": "Calendar Management",
-    "name": "calendar:status.closed"
+    "name": "calendar:transition.active.planned",
+    "description": "Revert an active calendar back to planned status for adjustments"
+  },
+  {
+    "category": "Calendar Management",
+    "name": "calendar:transition.closed.active",
+    "description": "Re-open a closed calendar and set it back to active"
   },
   {
     "category": "Calendar Management",

@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import { CreateOptionDTO, GetOptionsDTO, UpdateOptionDTO } from "./option.dto";
 import { OptionService } from "./option.service";
 import { successResponse, errorResponse } from '../../../../common/helpers/response';
-import { AuthenticatedRequest } from '../../../users/user.middleware';
+import { AuthenticatedRequest } from '../../../users/auth/auth.middleware';
 
 export class OptionController {
 

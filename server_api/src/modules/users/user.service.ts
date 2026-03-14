@@ -55,7 +55,7 @@ export class UserService {
             data.password = hashed;
         }
         const updated = await this.repository.update(id, data);
-        if (!updated) throw new Error(ERROR_CODES.USER_NOT_FOUND);
+        if (!updated) throw new Error(ERROR_CODES.UNAUTHORIZED);
         return updated;
     }
 
@@ -64,7 +64,7 @@ export class UserService {
 
         const user = await this.repository.findById(id);
         if (!user) {
-            throw new AppError(ERROR_CODES.USER_NOT_FOUND);
+            throw new AppError(ERROR_CODES.UNAUTHORIZED);
         }
         const from = user.status as UserStatus;
         const to = next as UserStatus;
@@ -86,13 +86,10 @@ export class UserService {
     async delete(dto: DeleteDto) {
         const { id } = dto;
         const userDoc = await this.repository.findById(id);
-        if (!userDoc) throw new AppError(ERROR_CODES.USER_NOT_FOUND);
+        if (!userDoc) throw new AppError(ERROR_CODES.UNAUTHORIZED);
         if (userDoc.status === UserStatus.active) {
             throw new Error(ERROR_CODES.ACCOUNT_IN_USE);
         }
         return await this.repository.delete(id);
     }
-
-
-
 }

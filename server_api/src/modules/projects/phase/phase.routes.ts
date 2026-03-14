@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PhaseController } from './phase.controller';
-import { checkPermission, checkStatusPermission, checkTransitionPermission, verifyActiveAccount } from '../../users/user.middleware';
+import { checkPermission, checkStatusPermission, checkTransitionPermission, verifyActiveAccount } from '../../users/auth/auth.middleware';
 import { PERMISSIONS } from '../../../common/constants/permissions';
 
 const controller = new PhaseController();

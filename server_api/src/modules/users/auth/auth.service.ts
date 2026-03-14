@@ -34,7 +34,7 @@ export class AuthService {
 
         const userDoc = await this.repository.findByEmail(email);
         if (!userDoc)
-            throw new AppError(ERROR_CODES.ACCOUNT_NOT_FOUND);
+            throw new AppError(ERROR_CODES.AUTH_NOT_FOUND);
 
         if (userDoc.status === UserStatus.suspended)
             throw new AppError(ERROR_CODES.ACCOUNT_SUSPENDED);

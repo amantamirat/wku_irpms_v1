@@ -89,10 +89,11 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
                 />
             )}*/}
 
+
             {(user?._id && user.applicant) && <SaveDialog
                 visible={showPasswordDialog}
                 item={user}
-                enableCurrentPassword={true}
+                //enableCurrentPassword={true}
                 onComplete={() => setShowPasswordDialog(false)}
                 onHide={() => setShowPasswordDialog(false)}
             />}

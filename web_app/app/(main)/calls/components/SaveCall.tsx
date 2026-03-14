@@ -46,7 +46,7 @@ const SaveCall = ({ visible, call, calendarProvided, directorateProvided, onHide
         }
         const loadCalendars = async () => {
             try {
-                const data = await CalendarApi.getCalendars({ status: CalendarStatus.active });
+                const data = await CalendarApi.getAll({ status: CalendarStatus.active });
                 setCalendars(data);
             } catch (err) {
                 console.error('Failed to load calendars:', err);
@@ -62,7 +62,7 @@ const SaveCall = ({ visible, call, calendarProvided, directorateProvided, onHide
         }
         const loadDirectorates = async () => {
             try {
-                const data = await OrganizationApi.getOrganizations({ type: OrgnUnit.Directorate });
+                const data = await OrganizationApi.getAll({ type: OrgnUnit.directorate });
                 setOrganizations(data);
             } catch (err) {
                 console.error('Failed to load directorates:', err);

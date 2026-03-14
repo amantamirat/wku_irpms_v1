@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { errorResponse, successResponse } from "../../../../common/helpers/response";
-import { AuthenticatedRequest } from "../../../users/user.middleware";
+import { AuthenticatedRequest } from "../../../users/auth/auth.middleware";
 import { CreatePhaseDocDTO, GetPhaseDocDTO } from "./phase.doc.dto";
 import { PhaseDocService } from "./phase.doc.service";
 import { AppError } from "../../../../common/errors/app.error";
@@ -17,7 +17,7 @@ export class PhaseDocController {
 
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new AppError(ERROR_CODES.USER_NOT_FOUND);
+            if (!req.user) throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
             if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
 
@@ -58,7 +58,7 @@ export class PhaseDocController {
 
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new AppError(ERROR_CODES.USER_NOT_FOUND);
+            if (!req.user) throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
             const { id } = req.params;
             const deleted = await this.service.delete(id);

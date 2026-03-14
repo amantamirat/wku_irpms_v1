@@ -4,7 +4,7 @@ import { PERMISSIONS } from '../../../common/constants/permissions';
 import { StudentService } from './student.service';
 import { StudentRepository } from './student.repository';
 import { CalendarRepository } from '../../calendar/calendar.repository';
-import { verifyActiveAccount, checkPermission } from '../../users/user.middleware';
+import { verifyActiveAccount, checkPermission } from '../../users/auth/auth.middleware';
 import { ApplicantRepository } from '../applicant.repository';
 import { OrganizationRepository } from '../../organization/organization.repository';
 

@@ -7,7 +7,7 @@ import {
     UpdateOrganizationDTO
 } from "./organization.dto";
 import { OrganizationService } from "./organization.service";
-import { AuthenticatedRequest } from "../users/user.middleware";
+import { AuthenticatedRequest } from "../users/auth/auth.middleware";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { Unit } from "../../common/constants/enums";
 
@@ -25,7 +25,7 @@ export class OrganizationController {
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user)
-                throw new Error(ERROR_CODES.USER_NOT_FOUND);
+                throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const dto: CreateOrganizationDTO = {
                 type: req.body.type,
@@ -66,7 +66,7 @@ export class OrganizationController {
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user)
-                throw new Error(ERROR_CODES.USER_NOT_FOUND);
+                throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const { id } = req.params;
             if (!id)

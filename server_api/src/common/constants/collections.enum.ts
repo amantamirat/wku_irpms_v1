@@ -1,7 +1,6 @@
 export enum COLLECTIONS {
   PERMISSION = "permissions",
   ROLE = "roles",
-  AUTH = "auths",
   USER = "users",
 
   ORGANIZATION = "organizations",

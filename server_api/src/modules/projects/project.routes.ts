@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { ProjectController } from './project.controller';
-import { checkPermission, checkStatusPermission, verifyActiveAccount } from '../users/user.middleware';
+import { checkPermission, checkStatusPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
 import { PERMISSIONS } from '../../common/constants/permissions';
 
 const controller = new ProjectController();

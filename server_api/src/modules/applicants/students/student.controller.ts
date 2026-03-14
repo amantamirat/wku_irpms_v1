@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { StudentService } from './student.service';
 import { CreateStudentDTO, UpdateStudentDTO } from './student.dto';
 import { successResponse, errorResponse } from '../../../common/helpers/response';
-import { AuthenticatedRequest } from '../../users/user.middleware';
+import { AuthenticatedRequest } from '../../users/auth/auth.middleware';
 import { AppError } from '../../../common/errors/app.error';
 import { ERROR_CODES } from '../../../common/errors/error.codes';
 
@@ -38,7 +38,7 @@ export class StudentController {
 
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new AppError(ERROR_CODES.USER_NOT_FOUND);
+            if (!req.user) throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
             const { id } = req.params;
             const { calendar, program, applicant } = req.body;

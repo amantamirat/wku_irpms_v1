@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { successResponse, errorResponse } from "../../common/helpers/response";
-import { AuthenticatedRequest } from "../users/user.middleware";
+import { AuthenticatedRequest } from "../users/auth/auth.middleware";
 import { CreateEvaluationDTO, GetEvaluationsDTO, UpdateEvaluationDTO } from "./evaluation.dto";
 import { EvaluationService } from "./evaluation.service";
 import { ERROR_CODES } from '../../common/errors/error.codes';
@@ -15,7 +15,7 @@ export class EvaluationController {
 
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.USER_NOT_FOUND);
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const dto: CreateEvaluationDTO = {
                 directorate: req.body.directorate,

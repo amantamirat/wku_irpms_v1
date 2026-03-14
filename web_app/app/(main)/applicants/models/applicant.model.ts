@@ -41,7 +41,7 @@ export interface GetApplicantsOptions {
     workspace?: string | Organization;
 }
 
-export const applicantUnits = [OrgnUnit.Department, OrgnUnit.External]
+export const applicantUnits = [OrgnUnit.department, OrgnUnit.external]
 
 export const accessibilityOptions = Object.values(Accessibility).map(a => ({
     label: a,

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { successResponse, errorResponse } from "../../../common/helpers/response";
 import { VerfyUserDto } from "../user.dto";
-import { AuthenticatedRequest } from "../user.middleware";
+import { AuthenticatedRequest } from "./auth.middleware";
 import { AuthService } from "./auth.service";
 import { ChangePasswordDTO, LoginDto } from "./auth.dto";
 

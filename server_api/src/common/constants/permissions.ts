@@ -293,5 +293,5 @@ export const PERMISSIONS = {
   }
 } as const;
 
-
+export type Action = "create" | "read" | "update" | "delete";
 export type PermissionAction = "CREATE" | "READ" | "UPDATE" | "DELETE";

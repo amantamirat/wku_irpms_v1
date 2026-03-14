@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ThematicController } from './thematic.controller';
 import { PERMISSIONS } from '../../common/constants/permissions';
-import { verifyActiveAccount, checkPermission } from '../users/user.middleware';
+import { verifyActiveAccount, checkPermission } from '../users/auth/auth.middleware';
 
 const controller = new ThematicController();
 

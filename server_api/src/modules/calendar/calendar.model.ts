@@ -1,7 +1,8 @@
 import { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import { COLLECTIONS } from '../../common/constants/collections.enum';
-import { CalendarStatus } from './calendar.status';
+import { CalendarStatus } from './calendar.state-machine';
+
 
 
 export interface ICalendar extends Document {

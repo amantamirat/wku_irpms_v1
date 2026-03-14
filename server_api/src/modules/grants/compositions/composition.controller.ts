@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { CompositionService } from './composition.service';
 import { ERROR_CODES } from '../../../common/errors/error.codes';
 import { successResponse, errorResponse } from '../../../common/helpers/response';
-import { AuthenticatedRequest } from '../../users/user.middleware';
+import { AuthenticatedRequest } from '../../users/auth/auth.middleware';
 import { CreateCompositionDTO, GetCompositionDTO, UpdateCompositionDTO } from './composition.dto';
 
 
@@ -18,7 +18,7 @@ export class CompositionController {
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user)
-                throw new Error(ERROR_CODES.USER_NOT_FOUND);
+                throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const userId = req.user.applicantId;
 
@@ -57,7 +57,7 @@ export class CompositionController {
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) {
-                throw new Error(ERROR_CODES.USER_NOT_FOUND);
+                throw new Error(ERROR_CODES.UNAUTHORIZED);
             }
             const { id } = req.params;
 

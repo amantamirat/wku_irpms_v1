@@ -1,16 +1,15 @@
 import { Request, Response } from 'express';
-import { CalendarService } from './calendar.service';
+import { TransitionRequestDto } from '../../common/dtos/transition.dto';
+import { ERROR_CODES } from '../../common/errors/error.codes';
+import { errorResponse, successResponse } from '../../common/helpers/response';
+import { AuthenticatedRequest } from '../users/auth/auth.middleware';
 import {
   CreateCalendarDTO,
   UpdateCalendarDTO,
-  UpdateCalendarStatusDTO
 } from './calendar.dto';
-import { successResponse, errorResponse } from '../../common/helpers/response';
-import { AuthenticatedRequest } from '../users/user.middleware';
-import { CalendarStatus } from './calendar.status';
-// import { AuthenticatedRequest } from '../users/user.middleware';
-// import { AppError } from '../../common/errors/app.error';
-// import { ERROR_CODES } from '../../common/errors/error.codes';
+import { CalendarService } from './calendar.service';
+import { CalendarStatus } from './calendar.state-machine';
+
 
 export class CalendarController {
 
@@ -73,20 +72,25 @@ export class CalendarController {
     }
   };
 
-  updateStatus = async (req: AuthenticatedRequest, res: Response) => {
+  transitionState = async (req: AuthenticatedRequest, res: Response) => {
     try {
+      if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
       const { id } = req.params;
-      const { status } = req.body;
-      const dto: UpdateCalendarStatusDTO = {
+      const { current, next } = req.body;
+      const dto: TransitionRequestDto = {
         id: String(id),
-        status
+        current: current,
+        next: next,
+        applicantId: req.user.applicantId,
       };
-      const updated = await this.service.updateStatus(dto);
-      successResponse(res, 200, `Calendar status changed to ${status}`, updated);
+      const updated = await this.service.transitionState(dto);
+      successResponse(res, 200, "Calendar status updated successfully", updated);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
   };
+
+  
 
   delete = async (req: Request, res: Response) => {
     try {

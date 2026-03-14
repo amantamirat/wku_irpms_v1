@@ -28,15 +28,15 @@ export class OrganizationService {
 
 
     async validateParent(type: Unit, parent: string) {
-        if (type === Unit.Department || type === Unit.Program || type === Unit.Center) {
+        if (type === Unit.department || type === Unit.program || type === Unit.center) {
             const organDoc = await this.repo.findById(parent);
             if (!organDoc) {
                 throw new Error(ERROR_CODES.ORGANIZATION_PARENT_NOT_FOUND);
             }
             const parentType = organDoc.type;
-            if ((type === Unit.Department && parentType !== Unit.College) ||
-                (type === Unit.Program && parentType !== Unit.Department) ||
-                (type === Unit.Center && parentType !== Unit.Directorate)
+            if ((type === Unit.department && parentType !== Unit.college) ||
+                (type === Unit.program && parentType !== Unit.department) ||
+                (type === Unit.center && parentType !== Unit.directorate)
             ) {
                 throw new Error(ERROR_CODES.INVALID_PARENT_TYPE);
             }
@@ -82,14 +82,14 @@ export class OrganizationService {
         if (childExist) {
             throw new Error(ERROR_CODES.ORGANIZATION_HAS_CHILDREN);
         }
-        if (orgType === Unit.External || orgType === Unit.Department) {
+        if (orgType === Unit.external || orgType === Unit.department) {
             this.appRepo.exists({ workspace: id }).then(exists => {
                 if (exists) {
                     throw new Error(ERROR_CODES.ORGANIZATION_IN_USE);
                 }
             });
         }
-        if (orgType === Unit.Program) {
+        if (orgType === Unit.program) {
             this.studentRepo.exists({ program: id }).then(exists => {
                 if (exists) {
                     throw new Error(ERROR_CODES.ORGANIZATION_IN_USE);

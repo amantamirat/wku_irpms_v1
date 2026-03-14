@@ -18,7 +18,7 @@ export class ThematicService {
 
     async create(dto: CreateThematicDTO) {
         const directorateDoc = await this.organizationRepo.findById(dto.directorate);
-        if (!directorateDoc || directorateDoc.type !== Unit.Directorate) {
+        if (!directorateDoc || directorateDoc.type !== Unit.directorate) {
             throw new Error(ERROR_CODES.DIRECTORATE_NOT_FOUND);
         }
         const createdThematic = await this.repository.create(dto);

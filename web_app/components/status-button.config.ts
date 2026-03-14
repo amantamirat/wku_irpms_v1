@@ -19,5 +19,10 @@ export const STATUS_BUTTON_CONFIG: Record<string, StatusButtonConfig> = {
         icon: "pi pi-ban",
         severity: "danger",
         action: "Suspend"
+    },
+    closed: {
+        icon: "pi pi-lock",
+        severity: "danger",
+        action: "Close"
     }
 };

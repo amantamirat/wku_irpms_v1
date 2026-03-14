@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { ThemeService } from "./theme.service";
 import { CreateThemeDTO, UpdateThemeDTO } from "./theme.dto";
 import { successResponse, errorResponse } from "../../../common/helpers/response";
-import { AuthenticatedRequest } from "../../users/user.middleware";
+import { AuthenticatedRequest } from "../../users/auth/auth.middleware";
 
 
 export class ThemeController {

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { AssignmentController } from './assignment.controller';
-import { verifyActiveAccount } from '../../../users/user.middleware';
+import { verifyActiveAccount } from '../../../users/auth/auth.middleware';
 
 
 const router: Router = Router();

@@ -38,8 +38,8 @@ const CollaboratorDialog = ({ collaborator, visible, onSave, onComplete, onHide 
         let isMounted = true;
         const fetchOrganizations = async () => {
             try {
-                const depData = await OrganizationApi.getOrganizations({ type: OrgnUnit.Department });
-                const extData = await OrganizationApi.getOrganizations({ type: OrgnUnit.External });
+                const depData = await OrganizationApi.getAll({ type: OrgnUnit.department });
+                const extData = await OrganizationApi.getAll({ type: OrgnUnit.external });
                 if (isMounted) setOrganizations([...depData, ...extData]);
             } catch (err) {
                 console.error("Failed to fetch organizations:", err);

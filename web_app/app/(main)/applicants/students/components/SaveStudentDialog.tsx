@@ -39,8 +39,8 @@ const SaveStudentDialog = ({ visible, student, applicant, onHide, onComplete }: 
         const fetchData = async () => {
             try {
                 const [calData, progData] = await Promise.all([
-                    CalendarApi.getCalendars({ status: CalendarStatus.active }),
-                    OrganizationApi.getOrganizations({ type: OrgnUnit.Program }),
+                    CalendarApi.getAll({ status: CalendarStatus.active }),
+                    OrganizationApi.getAll({ type: OrgnUnit.program }),
                 ]);
                 setCalendars(calData);
                 setPrograms(progData);

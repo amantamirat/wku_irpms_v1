@@ -6,7 +6,7 @@ export enum Gender {
   Female = 'Female'
 }
 
-export const applicantUnits = [Unit.Department, Unit.External]
+export const applicantUnits = [Unit.department, Unit.external]
 
 export enum Accessibility {
   Visual = 'Visual',

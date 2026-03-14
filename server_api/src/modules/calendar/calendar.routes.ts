@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { CalendarController } from './calendar.controller';
-import { verifyActiveAccount, checkPermission, checkStatusPermission } from '../users/user.middleware';
+import { verifyActiveAccount, checkPermission, checkTransitionPermission } from '../users/auth/auth.middleware';
 import { PERMISSIONS } from '../../common/constants/permissions';
 import { CalendarRepository } from './calendar.repository';
 import { CalendarService } from './calendar.service';
@@ -32,8 +32,8 @@ router.put('/:id', verifyActiveAccount,
 );
 
 router.patch('/:id', verifyActiveAccount,
-  checkStatusPermission("calendar"),
-  controller.updateStatus);
+  checkTransitionPermission("calendar"),
+  controller.transitionState);
 
 router.delete('/:id', verifyActiveAccount,
   checkPermission([PERMISSIONS.CALENDAR.DELETE]),

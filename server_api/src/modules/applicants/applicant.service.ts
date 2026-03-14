@@ -25,7 +25,7 @@ export class ApplicantService {
         if (!organDoc) {
             throw new Error(ERROR_CODES.WORKSPACE_NOT_FOUND);
         }
-        if (organDoc.type !== Unit.Department && organDoc.type !== Unit.External) {
+        if (organDoc.type !== Unit.department && organDoc.type !== Unit.external) {
             throw new Error(ERROR_CODES.INVALID_WORKSPACE);
         }
     }

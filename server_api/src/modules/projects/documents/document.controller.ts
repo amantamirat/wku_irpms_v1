@@ -9,7 +9,7 @@ import {
     UpdateStatusDTO
 } from "./document.dto";
 
-import { AuthenticatedRequest } from "../../users/user.middleware";
+import { AuthenticatedRequest } from "../../users/auth/auth.middleware";
 import { DocumentService } from "./document.service";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { DocStatus } from "./document.status";
@@ -29,7 +29,7 @@ export class ProjectDocController {
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) {
-                throw new AppError(ERROR_CODES.USER_NOT_FOUND);
+                throw new AppError(ERROR_CODES.UNAUTHORIZED);
             }
             if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
 
@@ -108,7 +108,7 @@ export class ProjectDocController {
     submit = async (req: AuthenticatedRequest, res: Response) => {
         let uploadedFilePath: string | undefined;
         try {
-            if (!req.user) throw new Error(ERROR_CODES.USER_NOT_FOUND);
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
             if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
 
             uploadedFilePath = req.file.path;

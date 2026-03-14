@@ -17,13 +17,13 @@ export const WorkspaceSelector = ({ value, onChange }: WorkspaceSelectorProps) =
     useEffect(() => {
         const fetchWorkspaces = async () => {
             try {
-                let departments = getScopesByUnit(OrgnUnit.Department);
+                let departments = getScopesByUnit(OrgnUnit.department);
                 if (departments === "*") {
-                    departments = await OrganizationApi.getOrganizations({ type: OrgnUnit.Department });
+                    departments = await OrganizationApi.getAll({ type: OrgnUnit.department });
                 }
-                let externals = getScopesByUnit(OrgnUnit.External);
+                let externals = getScopesByUnit(OrgnUnit.external);
                 if (externals === "*") {
-                    externals = await OrganizationApi.getOrganizations({ type: OrgnUnit.External });
+                    externals = await OrganizationApi.getAll({ type: OrgnUnit.external });
                 }
                 setWorkspaces([...departments, ...externals]);
             } catch (err: any) {

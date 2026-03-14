@@ -27,13 +27,13 @@ export const DirectorateProvider = ({ children }: { children: React.ReactNode })
 
     const fetchDirectorates = async () => {
         try {
-            let scopes = getScopesByUnit(OrgnUnit.Directorate);
+            let scopes = getScopesByUnit(OrgnUnit.directorate);
 
             let result: Organization[];
 
             if (scopes === '*') {
-                result = await OrganizationApi.getOrganizations({
-                    type: OrgnUnit.Directorate
+                result = await OrganizationApi.getAll({
+                    type: OrgnUnit.directorate
                 });
             } else {
                 result = scopes as Organization[];

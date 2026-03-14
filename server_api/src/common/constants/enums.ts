@@ -1,11 +1,11 @@
 // Enum for Organization Types
 export enum Unit {
-    College = 'College',//base
-    Department = 'Department',//child
-    Program = 'Program',//child
-    Directorate = 'Directorate',//base
-    Center = 'Center',//child
-    External = 'External',//base
+    college = 'college',//base
+    department = 'department',//child
+    program = 'program',//child
+    directorate = 'directorate',//base
+    center = 'center',//child
+    external = 'external',//base
 }
 
 export enum AcademicLevel {

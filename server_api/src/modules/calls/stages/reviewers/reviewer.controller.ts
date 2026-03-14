@@ -6,7 +6,7 @@ import {
     UpdateReviewerDTO,
     UpdateReviewerStatusDTO
 } from "./reviewer.dto";
-import { AuthenticatedRequest } from "../../../users/user.middleware";
+import { AuthenticatedRequest } from "../../../users/auth/auth.middleware";
 import { successResponse, errorResponse } from "../../../../common/helpers/response";
 import { ReviewerStatus } from "./reviewer.status";
 import { ERROR_CODES } from "../../../../common/errors/error.codes";
@@ -98,7 +98,7 @@ export class ReviewerController {
     updateStatus = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) {
-                throw new Error(ERROR_CODES.USER_NOT_FOUND);
+                throw new Error(ERROR_CODES.UNAUTHORIZED);
             }
             const { id } = req.params;
             const { status } = req.body;

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { ProjectThemeController } from './project.theme.controller';
-import { checkPermission, verifyActiveAccount } from '../../users/user.middleware';
+import { checkPermission, verifyActiveAccount } from '../../users/auth/auth.middleware';
 import { PERMISSIONS } from '../../../common/constants/permissions';
 import { ThemeRepository } from '../../thematics/themes/theme.repository';
 import { ProjectRepository } from '../project.repository';

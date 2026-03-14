@@ -38,10 +38,10 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
             try {
                 const unitType =
                     localGrant.fundingSource === FundingSource.INTERNAL
-                        ? OrgnUnit.Directorate
-                        : OrgnUnit.External;
+                        ? OrgnUnit.directorate
+                        : OrgnUnit.external;
 
-                const data = await OrganizationApi.getOrganizations({ type: unitType });
+                const data = await OrganizationApi.getAll({ type: unitType });
                 setOrganizations(data);
             } catch (err) {
                 console.error('Failed to load organizations:', err);

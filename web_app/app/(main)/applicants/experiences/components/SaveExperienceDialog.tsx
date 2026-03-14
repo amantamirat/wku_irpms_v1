@@ -48,8 +48,8 @@ const SaveExperienceDialog = ({
         const fetchOrganizations = async () => {
             try {
                 const [departments, externals] = await Promise.all([
-                    OrganizationApi.getOrganizations({ type: OrgnUnit.Department }),
-                    OrganizationApi.getOrganizations({ type: OrgnUnit.External })
+                    OrganizationApi.getAll({ type: OrgnUnit.department }),
+                    OrganizationApi.getAll({ type: OrgnUnit.external })
                 ]);
                 setOrganizations([...departments, ...externals]);
             } catch (err) {

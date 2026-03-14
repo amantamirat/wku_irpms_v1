@@ -1,12 +1,13 @@
 import dotenv from 'dotenv';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { CacheService } from '../../util/cache.service';
-import { errorResponse } from '../../common/helpers/response';
-
-import JwtPayload from './auth/auth.dto';
-import { UserStatus } from './user.state-machine';
-import { ERROR_CODES } from '../../common/errors/error.codes';
+import { CacheService } from '../../../util/cache.service';
+import { errorResponse } from '../../../common/helpers/response';
+import JwtPayload from './auth.dto';
+import { UserStatus } from '../user.state-machine';
+import { ERROR_CODES } from '../../../common/errors/error.codes';
+import { Action } from '../../../common/constants/permissions';
+import { Unit } from '../../../common/constants/enums';
 
 dotenv.config();
 
@@ -78,36 +79,21 @@ export const checkPermission = (requiredPermission: string | string[]) => {
 };
 
 
-export const checkStatusPermission = (resource: string) => {
-  return async (
-    req: AuthenticatedRequest,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
-      if (!req.user) {
-        return errorResponse(res, 401, "Unauthorized");
-      }
-      let status = req.params.status;
-      if (!status) {
-        status = req.body.status;
-      }
-      if (!status) {
-        return errorResponse(res, 400, "Status not provided");
-      }
-      const permission = `${resource}:status.${status}`;
-      const hasPermission = await CacheService.hasPermissions(req.user.applicantId, [permission]);
-      if (!hasPermission) {
-        return errorResponse(res, 403, `Forbidden. Missing permission: ${permission}`
-        );
-      }
-      next();
-    } catch (err) {
-      return errorResponse(res, 500, "Permission check failed");
+
+export function checkUnitPermission(action: Action) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    // Extract unit type from body or query
+    const unitInput = req.body.type || req.query.type || req.params.type;
+    const unit = unitInput as Unit;
+
+    // Validate unit type
+    if (!Object.values(Unit).includes(unit)) {
+      return errorResponse(res, 400, "Invalid or missing unit type");
     }
+    const permission = `organization:${unit}:${action}`;
+    return checkPermission(permission)(req, res, next);
   };
 }
-
 
 export const checkTransitionPermission = (resource: string) => {
   return async (
@@ -117,7 +103,7 @@ export const checkTransitionPermission = (resource: string) => {
   ) => {
     try {
       if (!req.user) {
-        return errorResponse(res, 401, "Unauthorized");
+        return errorResponse(res, 401, ERROR_CODES.UNAUTHORIZED);
       }
 
       const { current, next } = req.body;
@@ -153,6 +139,40 @@ export const checkTransitionPermission = (resource: string) => {
     }
   };
 };
+
+//////////////////////
+export const checkStatusPermission = (resource: string) => {
+  return async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      if (!req.user) {
+        return errorResponse(res, 401, "Unauthorized");
+      }
+      let status = req.params.status;
+      if (!status) {
+        status = req.body.status;
+      }
+      if (!status) {
+        return errorResponse(res, 400, "Status not provided");
+      }
+      const permission = `${resource}:status.${status}`;
+      const hasPermission = await CacheService.hasPermissions(req.user.applicantId, [permission]);
+      if (!hasPermission) {
+        return errorResponse(res, 403, `Forbidden. Missing permission: ${permission}`
+        );
+      }
+      next();
+    } catch (err) {
+      return errorResponse(res, 500, "Permission check failed");
+    }
+  };
+}
+
+
+
 
 
 

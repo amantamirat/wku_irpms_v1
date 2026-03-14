@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { ThematicService } from './thematic.service';
 import { CreateThematicDTO, UpdateThematicDTO } from './thematic.dto';
-import { AuthenticatedRequest } from '../users/user.middleware';
+import { AuthenticatedRequest } from '../users/auth/auth.middleware';
 import { successResponse, errorResponse } from '../../common/helpers/response';
 
 export class ThematicController {

@@ -23,18 +23,18 @@ const OrganizationSchema = new Schema<IOrganization>(
 export const Organization = model<IOrganization>(COLLECTIONS.ORGANIZATION, OrganizationSchema);
 
 interface ICollege extends IOrganization {
-    type: Unit.College;
+    type: Unit.college;
 }
-export const College = Organization.discriminator<ICollege>(Unit.College, new Schema({}));
+export const College = Organization.discriminator<ICollege>(Unit.college, new Schema({}));
 
 interface IDirectorate extends IOrganization {
-    type: Unit.Directorate;
+    type: Unit.directorate;
 }
 
-export const Directorate = Organization.discriminator<IDirectorate>(Unit.Directorate, new Schema({}));
+export const Directorate = Organization.discriminator<IDirectorate>(Unit.directorate, new Schema({}));
 
 interface IExternal extends IOrganization {
-    type: Unit.External;
+    type: Unit.external;
     ownership: Ownership;
 }
 
@@ -42,7 +42,7 @@ const ExternalSchema = new Schema<IExternal>({
     ownership: { type: String, enum: Object.values(Ownership), required: true }
 });
 
-export const External = Organization.discriminator<IExternal>(Unit.External, ExternalSchema);
+export const External = Organization.discriminator<IExternal>(Unit.external, ExternalSchema);
 
 
 interface SubOrganizationDocument extends IOrganization {
@@ -50,7 +50,7 @@ interface SubOrganizationDocument extends IOrganization {
 }
 
 interface DepartmentDocument extends SubOrganizationDocument {
-    type: Unit.Department;
+    type: Unit.department;
 }
 
 const DepartmentSchema = new Schema<DepartmentDocument>({
@@ -61,10 +61,10 @@ const DepartmentSchema = new Schema<DepartmentDocument>({
     }
 });
 
-export const Department = Organization.discriminator<DepartmentDocument>(Unit.Department, DepartmentSchema);
+export const Department = Organization.discriminator<DepartmentDocument>(Unit.department, DepartmentSchema);
 
 interface CenterDocument extends SubOrganizationDocument {
-    type: Unit.Center;
+    type: Unit.center;
 }
 
 const CenterSchema = new Schema<CenterDocument>({
@@ -75,10 +75,10 @@ const CenterSchema = new Schema<CenterDocument>({
     }
 });
 
-export const Center = Organization.discriminator<CenterDocument>(Unit.Center, CenterSchema);
+export const Center = Organization.discriminator<CenterDocument>(Unit.center, CenterSchema);
 
 interface ProgramDocument extends SubOrganizationDocument {
-    type: Unit.Program;
+    type: Unit.program;
     academicLevel: AcademicLevel;
     classification: Classification;
 }
@@ -101,6 +101,6 @@ const ProgramSchema = new Schema<ProgramDocument>({
     },
 });
 
-export const Program = Organization.discriminator<ProgramDocument>(Unit.Program, ProgramSchema);
+export const Program = Organization.discriminator<ProgramDocument>(Unit.program, ProgramSchema);
 
 

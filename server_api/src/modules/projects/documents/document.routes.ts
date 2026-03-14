@@ -1,7 +1,7 @@
 import express from "express";
 import { ProjectDocController } from "./document.controller";
 import { upload } from "../../../util/multer";
-import { checkPermission, checkStatusPermission, verifyActiveAccount } from "../../users/user.middleware";
+import { checkPermission, checkStatusPermission, verifyActiveAccount } from "../../users/auth/auth.middleware";
 import { PERMISSIONS } from "../../../common/constants/permissions";
 import { StageRepository } from "../../calls/stages/stage.repository";
 import { ProjectRepository } from "../project.repository";

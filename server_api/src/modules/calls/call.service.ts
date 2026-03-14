@@ -2,7 +2,6 @@ import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { DeleteDto } from "../../common/dtos/delete.dto";
 import { ICalendarReadRepository } from "../calendar/calendar.repository";
-import { CalendarStatus } from "../calendar/calendar.status";
 import { IGrantRepository } from "../grants/grant.repository";
 import { IOrganizationRepository } from "../organization/organization.repository";
 import { IThematicRepository } from "../thematics/thematic.repository";
@@ -12,6 +11,7 @@ import { CallStateMachine } from "./call.state-machine";
 import { CallStatus } from "./call.status";
 import { IStageRepository } from "./stages/stage.repository";
 import { Unit } from "../../common/constants/enums";
+import { CalendarStatus } from "../calendar/calendar.state-machine";
 
 export class CallService {
 
@@ -38,7 +38,7 @@ export class CallService {
         if (calendarDoc.status !== CalendarStatus.active) throw new AppError(ERROR_CODES.CALENDAR_NOT_ACTIVE);
 
         const directorateDoc = await this.organizationRepository.findById(dto.directorate);
-        if (!directorateDoc || directorateDoc.type !== Unit.Directorate) throw new AppError(ERROR_CODES.DIRECTORATE_NOT_FOUND);
+        if (!directorateDoc || directorateDoc.type !== Unit.directorate) throw new AppError(ERROR_CODES.DIRECTORATE_NOT_FOUND);
 
         const grantDoc = await this.grantRepository.findById(dto.grant);
         if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);

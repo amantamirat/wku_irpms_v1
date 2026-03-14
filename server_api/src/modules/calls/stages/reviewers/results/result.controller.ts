@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { errorResponse, successResponse } from "../../../../../common/helpers/response";
 import { ResultService } from "./result.service";
 import { CreateResultDTO, GetResultsDTO, UpdateResultDTO} from "./result.dto";
-import { AuthenticatedRequest } from "../../../../users/user.middleware";
+import { AuthenticatedRequest } from "../../../../users/auth/auth.middleware";
 import { DeleteDto } from "../../../../../common/dtos/delete.dto";
 
 const resultService = new ResultService();

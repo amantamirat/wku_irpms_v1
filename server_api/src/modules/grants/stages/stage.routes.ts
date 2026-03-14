@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { checkPermission, verifyActiveAccount } from '../../users/user.middleware';
+import { checkPermission, verifyActiveAccount } from '../../users/auth/auth.middleware';
 import { StageController } from './stage.controller';
 
 const controller = new StageController();

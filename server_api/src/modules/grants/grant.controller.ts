@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { GrantService } from './grant.service';
 import { CreateGrantDTO, GetGrantsDTO, UpdateGrantDTO } from './grant.dto';
-import { AuthenticatedRequest } from '../users/user.middleware';
+import { AuthenticatedRequest } from '../users/auth/auth.middleware';
 import { successResponse, errorResponse } from '../../common/helpers/response';
 import { ERROR_CODES } from '../../common/errors/error.codes';
 import { TransitionRequestDto } from '../../common/dtos/transition.dto';
@@ -17,7 +17,7 @@ export class GrantController {
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user)
-                throw new Error(ERROR_CODES.USER_NOT_FOUND);
+                throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const userId = req.user.applicantId;
             const data: CreateGrantDTO = {
@@ -89,7 +89,7 @@ export class GrantController {
 
     transitionState = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.USER_NOT_FOUND);
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
             const { current, next } = req.body;
             const dto: TransitionRequestDto = {

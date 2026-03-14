@@ -168,12 +168,12 @@ export class OrganizationRepository implements IOrganizationRepository {
     // ------------------------------------
     private getModelByType(type: Unit) {
         switch (type) {
-            case Unit.College: return College;
-            case Unit.Department: return Department;
-            case Unit.Program: return Program;
-            case Unit.Directorate: return Directorate;
-            case Unit.Center: return Center;
-            case Unit.External: return External;
+            case Unit.college: return College;
+            case Unit.department: return Department;
+            case Unit.program: return Program;
+            case Unit.directorate: return Directorate;
+            case Unit.center: return Center;
+            case Unit.external: return External;
             default:
                 throw new Error(`Unknown organization type: ${type}`);
         }

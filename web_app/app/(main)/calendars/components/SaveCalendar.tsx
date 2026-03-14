@@ -1,33 +1,26 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
-import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
-import { Calendar as PrimeCalendar } from 'primereact/calendar';
+import { Dialog } from 'primereact/dialog';
 import { InputNumber } from 'primereact/inputnumber';
-import { Dropdown } from 'primereact/dropdown';
+import { Calendar as PrimeCalendar } from 'primereact/calendar';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
+import { useEffect, useRef, useState } from 'react';
 
-import { Calendar, CalendarStatus, validateCalendar } from '../models/calendar.model';
+import { Calendar, validateCalendar } from '../models/calendar.model';
 import { CalendarApi } from '../api/calendar.api';
+import { EntitySaveDialogProps } from '@/components/createEntityManager';
 
-interface SaveCalendarDialogProps {
-    visible: boolean;
-    calendar: Calendar;
-    onHide: () => void;
-    onComplete?: (savedCalendar: Calendar) => void;
-}
+const SaveCalendar = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<Calendar>) => {
 
-const SaveCalendarDialog = ({ visible, calendar, onHide, onComplete }: SaveCalendarDialogProps) => {
     const toast = useRef<Toast>(null);
-    const [localCalendar, setLocalCalendar] = useState<Calendar>({ ...calendar });
+    const [localCalendar, setLocalCalendar] = useState<Calendar>({ ...item });
     const [submitted, setSubmitted] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
     useEffect(() => {
-        setLocalCalendar({ ...calendar });
-    }, [calendar]);
+        setLocalCalendar({ ...item });
+    }, [item]);
 
     useEffect(() => {
         if (!visible) clearForm();
@@ -35,22 +28,21 @@ const SaveCalendarDialog = ({ visible, calendar, onHide, onComplete }: SaveCalen
 
     const clearForm = () => {
         setSubmitted(false);
-        setErrorMessage(undefined);
-        setLocalCalendar({ ...calendar });
+        setLocalCalendar({ ...item });
     };
 
     const saveCalendar = async () => {
-        try {
-            setSubmitted(true);
-            const validation = validateCalendar(localCalendar);
-            if (!validation.valid) throw new Error(validation.message);
+        setSubmitted(true);
 
-            let saved: Calendar;
-            if (localCalendar._id) {
-                saved = await CalendarApi.update(localCalendar);
-            } else {
-                saved = await CalendarApi.create(localCalendar);
+        try {
+            const validation = validateCalendar(localCalendar);
+            if (!validation.valid) {
+                throw new Error(validation.message);
             }
+
+            const saved = localCalendar._id
+                ? await CalendarApi.update(localCalendar)
+                : await CalendarApi.create(localCalendar);
 
             toast.current?.show({
                 severity: 'success',
@@ -59,25 +51,29 @@ const SaveCalendarDialog = ({ visible, calendar, onHide, onComplete }: SaveCalen
                 life: 2000,
             });
 
-            if (onComplete) setTimeout(() => onComplete(saved), 2000);
+            if (onComplete) setTimeout(() => onComplete(saved), 1000);
+
         } catch (err: any) {
             toast.current?.show({
                 severity: 'error',
-                summary: 'Failed to save calendar',
-                detail: err.message || 'Error occurred',
-                life: 3000,
+                summary: 'Error',
+                detail: err.message || 'Failed to save Calendar',
+                life: 2500,
             });
         }
     };
 
+    const hide = () => {
+        clearForm();
+        onHide();
+    };
+
     const footer = (
         <>
-            <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
+            <Button label="Cancel" icon="pi pi-times" text onClick={hide} />
             <Button label="Save" icon="pi pi-check" text onClick={saveCalendar} />
         </>
     );
-
-    const isEdit = !!localCalendar._id;
 
     return (
         <>
@@ -85,23 +81,26 @@ const SaveCalendarDialog = ({ visible, calendar, onHide, onComplete }: SaveCalen
             <Dialog
                 visible={visible}
                 style={{ width: '500px' }}
-                header={isEdit ? 'Edit Academic Calendar' : 'New Academic Calendar'}
+                header={localCalendar._id ? 'Edit Academic Calendar' : 'New Academic Calendar'}
                 modal
                 className="p-fluid"
                 footer={footer}
-                onHide={onHide}
+                onHide={hide}
             >
+
                 <div className="field">
                     <label htmlFor="year">Year</label>
                     <InputNumber
                         id="year"
                         value={localCalendar.year}
-                        onChange={(e) => setLocalCalendar({ ...localCalendar, year: e.value ?? 0 })}
-                        mode="decimal"
+                        onValueChange={(e) =>
+                            setLocalCalendar({ ...localCalendar, year: e.value ?? 0 })
+                        }
                         useGrouping={false}
                         showButtons
-                        required
-                        className={classNames({ 'p-invalid': submitted && !localCalendar.year })}
+                        className={classNames({
+                            'p-invalid': submitted && !localCalendar.year
+                        })}
                     />
                 </div>
 
@@ -110,10 +109,14 @@ const SaveCalendarDialog = ({ visible, calendar, onHide, onComplete }: SaveCalen
                     <PrimeCalendar
                         id="startDate"
                         value={localCalendar.startDate ? new Date(localCalendar.startDate) : undefined}
-                        onChange={(e) => setLocalCalendar({ ...localCalendar, startDate: e.value || null })}
+                        onChange={(e) =>
+                            setLocalCalendar({ ...localCalendar, startDate: e.value ?? null })
+                        }
                         dateFormat="yy-mm-dd"
                         showIcon
-                        className={classNames({ 'p-invalid': submitted && !localCalendar.startDate })}
+                        className={classNames({
+                            'p-invalid': submitted && !localCalendar.startDate
+                        })}
                     />
                 </div>
 
@@ -122,17 +125,20 @@ const SaveCalendarDialog = ({ visible, calendar, onHide, onComplete }: SaveCalen
                     <PrimeCalendar
                         id="endDate"
                         value={localCalendar.endDate ? new Date(localCalendar.endDate) : undefined}
-                        onChange={(e) => setLocalCalendar({ ...localCalendar, endDate: e.value || null })}
+                        onChange={(e) =>
+                            setLocalCalendar({ ...localCalendar, endDate: e.value ?? null })
+                        }
                         dateFormat="yy-mm-dd"
                         showIcon
-                        className={classNames({ 'p-invalid': submitted && !localCalendar.endDate })}
+                        className={classNames({
+                            'p-invalid': submitted && !localCalendar.endDate
+                        })}
                     />
                 </div>
 
-                {errorMessage && <small className="p-error">{errorMessage}</small>}
             </Dialog>
         </>
     );
 };
 
-export default SaveCalendarDialog;
+export default SaveCalendar;

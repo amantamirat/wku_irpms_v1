@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { CollaboratorController } from './collaborator.controller';
-import { checkPermission, checkStatusPermission, verifyActiveAccount } from '../../users/user.middleware';
+import { checkPermission, checkStatusPermission, verifyActiveAccount } from '../../users/auth/auth.middleware';
 import { PERMISSIONS } from '../../../common/constants/permissions';
 import { CollaboratorRepository } from './collaborator.repository';
 import { CollaboratorService } from './collaborator.service';

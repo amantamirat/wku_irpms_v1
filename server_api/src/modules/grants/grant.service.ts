@@ -29,11 +29,11 @@ export class GrantService {
         if (!orgDoc) throw new AppError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
 
         if (fundingSource === FundingSource.INTERNAL)
-            if (orgDoc.type !== Unit.Directorate) {
+            if (orgDoc.type !== Unit.directorate) {
                 throw new AppError(ERROR_CODES.DIRECTORATE_NOT_FOUND);
             }
         if (fundingSource === FundingSource.EXTERNAL)
-            if (orgDoc.type !== Unit.External) {
+            if (orgDoc.type !== Unit.external) {
                 throw new AppError(ERROR_CODES.EXTERNAL_NOT_FOUND);
             }
 

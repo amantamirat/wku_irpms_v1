@@ -33,7 +33,7 @@ export class ExperienceService {
             if (!organDoc)
                 throw new AppError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
 
-            if (organDoc.type !== Unit.Department && organDoc.type !== Unit.External) {
+            if (organDoc.type !== Unit.department && organDoc.type !== Unit.external) {
                 throw new AppError(ERROR_CODES.INVALID_ORGANIZATION_TYPE);
             }
         }

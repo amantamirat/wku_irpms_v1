@@ -1,11 +1,11 @@
 // Enum for Organization Types
 export enum OrgnUnit {
-    College = 'College',
-    Department = 'Department',
-    Program = 'Program',
-    Directorate = 'Directorate',
-    Center = 'Center',
-    External = 'External'
+    college = 'college',
+    department = 'department',
+    program = 'program',
+    directorate = 'directorate',
+    center = 'center',
+    external = 'external'
 }
 
 // Enum for Academic Levels
@@ -49,8 +49,8 @@ export type Address = {
 
 export type Organization = {
     _id?: string;
-    name: string;
     type: OrgnUnit;
+    name?: string;
     academicLevel?: AcademicLevel;
     classification?: Classification;
     ownership?: Ownership;
@@ -60,14 +60,20 @@ export type Organization = {
     updatedAt?: string;
 };
 
+export interface GetOrganizationsOptions {
+    type: OrgnUnit;
+    parent?: Organization;
+}
+
+
 export const getChildType = (current: OrgnUnit): OrgnUnit | undefined => {
     switch (current) {
-        case OrgnUnit.College:
-            return OrgnUnit.Department;
-        case OrgnUnit.Department:
-            return OrgnUnit.Program;
-        case OrgnUnit.Directorate:
-            return OrgnUnit.Center;
+        case OrgnUnit.college:
+            return OrgnUnit.department;
+        case OrgnUnit.department:
+            return OrgnUnit.program;
+        case OrgnUnit.directorate:
+            return OrgnUnit.center;
         default:
             return undefined; // No children
     }
@@ -75,12 +81,12 @@ export const getChildType = (current: OrgnUnit): OrgnUnit | undefined => {
 
 export const getParentType = (current: OrgnUnit): OrgnUnit | undefined => {
     switch (current) {
-        case OrgnUnit.Department:
-            return OrgnUnit.College;
-        case OrgnUnit.Program:
-            return OrgnUnit.Department;
-        case OrgnUnit.Center:
-            return OrgnUnit.Directorate;
+        case OrgnUnit.department:
+            return OrgnUnit.college;
+        case OrgnUnit.program:
+            return OrgnUnit.department;
+        case OrgnUnit.center:
+            return OrgnUnit.directorate;
         default:
             return undefined; // Root-level types have no parent
     }
@@ -99,7 +105,7 @@ export const validateOrganization = (
     }
 
     switch (organization.type) {
-        case OrgnUnit.Program:
+        case OrgnUnit.program:
             if (!organization.academicLevel) {
                 return { valid: false, message: 'Academic level is required for Program.' };
             }
@@ -108,7 +114,7 @@ export const validateOrganization = (
             }
             break;
 
-        case OrgnUnit.External:
+        case OrgnUnit.external:
             if (!organization.ownership) {
                 return { valid: false, message: 'Ownership is required for External.' };
             }
@@ -122,7 +128,7 @@ export const validateOrganization = (
 };
 
 
-export function sanitizeOrganization(organization: Partial<Organization>): Partial<Organization> {
+export function sanitize(organization: Partial<Organization>): Partial<Organization> {
     return {
         ...organization,
         parent:
@@ -131,6 +137,11 @@ export function sanitizeOrganization(organization: Partial<Organization>): Parti
                 : organization.parent,
     };
 }
+
+export const createEmptyOrganization = (org: Organization): Organization => ({
+    type: org.type,
+    name: "",
+});
 
 
 

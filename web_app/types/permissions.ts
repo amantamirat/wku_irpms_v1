@@ -33,45 +33,45 @@ export const PERMISSIONS = {
 
   ORGANIAZTION: {
     COLLEGE: {
-      CREATE: "college:create",
-      READ: "college:read",
-      UPDATE: "college:update",
-      DELETE: "college:delete",
+      CREATE: "organization:college:create",
+      READ: "organization:college:read",
+      UPDATE: "organization:college:update",
+      DELETE: "organization:college:delete",
     },
 
     DEPARTMENT: {
-      CREATE: "department:create",
-      READ: "department:read",
-      UPDATE: "department:update",
-      DELETE: "department:delete",
+      CREATE: "organization:department:create",
+      READ: "organization:department:read",
+      UPDATE: "organization:department:update",
+      DELETE: "organization:department:delete",
     },
 
     PROGRAM: {
-      CREATE: "program:create",
-      READ: "program:read",
-      UPDATE: "program:update",
-      DELETE: "program:delete",
+      CREATE: "organization:program:create",
+      READ: "organization:program:read",
+      UPDATE: "organization:program:update",
+      DELETE: "organization:program:delete",
     },
 
     DIRECTORATE: {
-      CREATE: "directorate:create",
-      READ: "directorate:read",
-      UPDATE: "directorate:update",
-      DELETE: "directorate:delete",
+      CREATE: "organization:directorate:create",
+      READ: "organization:directorate:read",
+      UPDATE: "organization:directorate:update",
+      DELETE: "organization:directorate:delete",
     },
 
     CENTER: {
-      CREATE: "center:create",
-      READ: "center:read",
-      UPDATE: "center:update",
-      DELETE: "center:delete",
+      CREATE: "organization:center:create",
+      READ: "organization:center:read",
+      UPDATE: "organization:center:update",
+      DELETE: "organization:center:delete",
     },
 
     EXTERNAL: {
-      CREATE: "external:create",
-      READ: "external:read",
-      UPDATE: "external:update",
-      DELETE: "external:delete",
+      CREATE: "organization:external:create",
+      READ: "organization:external:read",
+      UPDATE: "organization:external:update",
+      DELETE: "organization:external:delete",
     },
   },
 

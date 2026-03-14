@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { errorResponse, successResponse } from "../../../common/helpers/response";
-import { AuthenticatedRequest } from "../../users/user.middleware";
+import { AuthenticatedRequest } from "../../users/auth/auth.middleware";
 import { CreateProjectThemeDTO, GetProjectThemeOptions } from "./project.theme.dto";
 import { ProjectThemeService } from "./project.theme.service";
 

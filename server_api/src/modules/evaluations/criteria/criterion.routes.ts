@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { PERMISSIONS } from "../../../common/constants/permissions";
-import { checkPermission, verifyActiveAccount } from "../../users/user.middleware";
+import { checkPermission, verifyActiveAccount } from "../../users/auth/auth.middleware";
 import { CriterionController } from "./criterion.controller";
 
 const controller = new CriterionController();

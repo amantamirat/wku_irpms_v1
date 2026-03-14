@@ -39,8 +39,8 @@ const SaveApplicantDialog = ({ visible, applicant, onHide, onComplete }: SaveApp
     useEffect(() => {
         const fetchOrganizations = async () => {
             try {
-                const depData = await OrganizationApi.getOrganizations({ type: OrgnUnit.Department });
-                const extData = await OrganizationApi.getOrganizations({ type: OrgnUnit.External });
+                const depData = await OrganizationApi.getAll({ type: OrgnUnit.department });
+                const extData = await OrganizationApi.getAll({ type: OrgnUnit.external });
                 setWorkspaces([...depData, ...extData]);
             } catch (err) {
                 console.error('Failed to fetch organizations:', err);

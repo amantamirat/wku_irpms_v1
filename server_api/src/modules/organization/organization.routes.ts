@@ -1,12 +1,10 @@
 import { Router } from 'express';
+import { checkUnitPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
 import { OrganizationController } from './organization.controller';
-import { checkPermission, verifyActiveAccount } from '../users/user.middleware';
-import { checkUnitPermission } from './organization.middleware';
+
 import { OrganizationRepository } from './organization.repository';
 import { OrganizationService } from './organization.service';
-import { PERMISSIONS } from '../../common/constants/permissions';
-// import { checkPermission } from '../users/user.middleware';
-// import { PERMISSIONS } from '../../common/constants/permissions';
+
 
 const router = Router();
 /**
@@ -22,8 +20,7 @@ const controller = new OrganizationController(service);
 router.post(
     '/',
     verifyActiveAccount,
-    checkUnitPermission('CREATE'),
-    // checkPermission([PERMISSIONS.ORGANIZATION.CREATE]),
+    checkUnitPermission('create'),
     controller.create
 );
 
@@ -36,16 +33,15 @@ router.get(
 router.put(
     '/:id',
     verifyActiveAccount,
-    checkUnitPermission('UPDATE'),
-    // checkPermission([PERMISSIONS.ORGANIZATION.UPDATE]),
+    checkUnitPermission('update'),
     controller.update
 );
 
 router.delete(
     '/:id',
     verifyActiveAccount,
-    checkUnitPermission('DELETE'),
-    //checkPermission([PERMISSIONS.ORGANIZATION.DELETE]),
+    checkUnitPermission('delete'),
+    
     controller.delete
 );
 

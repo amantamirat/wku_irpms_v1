@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { successResponse, errorResponse } from "../../../common/helpers/response";
-import { AuthenticatedRequest } from "../../users/user.middleware";
+import { AuthenticatedRequest } from "../../users/auth/auth.middleware";
 import { CreateCriterionDTO, GetCriteriaDTO, UpdateCriterionDTO, ImportCriteriaBatchDTO } from "./criterion.dto";
 import { CriterionService } from "./criterion.service";
 import mongoose from "mongoose";
@@ -16,7 +16,7 @@ export class CriterionController {
 
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.USER_NOT_FOUND);
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const { evaluation, title, formType, weight } = req.body;
 
@@ -51,7 +51,7 @@ export class CriterionController {
 
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.USER_NOT_FOUND);
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const { id } = req.params;
             const { title, formType, weight } = req.body;

@@ -1,4 +1,5 @@
-import { CalendarStatus } from "./calendar.status";
+import { CalendarStatus } from "./calendar.state-machine";
+
 
 export interface CreateCalendarDTO {
     year: number;
@@ -17,11 +18,6 @@ export interface UpdateCalendarDTO {
         status: CalendarStatus;
     }>;
     //userId: string;
-}
-
-export interface UpdateCalendarStatusDTO {
-    id: string;
-    status: CalendarStatus;
 }
 
 export interface GetCalendarDTO {

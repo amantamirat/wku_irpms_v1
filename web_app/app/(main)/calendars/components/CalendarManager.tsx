@@ -1,232 +1,45 @@
-'use client';
-
-import { CrudManager } from "@/components/CrudManager";
-import { useAuth } from "@/contexts/auth-context";
-import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-import { useCrudList } from "@/hooks/useCrudList";
-import MyBadge from "@/templates/MyBadge";
-import { PERMISSIONS } from "@/types/permissions";
-import { useRouter } from "next/navigation";
-import { Button } from "primereact/button";
-import { useEffect, useState } from "react";
+import { createEntityManager } from "@/components/createEntityManager";
 import { CalendarApi } from "../api/calendar.api";
-import { Calendar, CalendarStatus } from "../models/calendar.model";
-import SaveCalendarDialog from "./SaveCalendarDialog";
+import { Calendar, createEmptyCalendar } from "../models/calendar.model";
+import { CALENDAR_STATUS_ORDER, CALENDAR_TRANSITIONS } from "../models/calendar.state-machine";
+import SaveCalendar from "./SaveCalendar";
+import MyBadge from "@/templates/MyBadge";
 
-const CalendarManager = () => {
+export default createEntityManager<Calendar, undefined>({
+    title: "Manage Calendars",
+    itemName: "Calendar",
+    api: CalendarApi,
+    columns: [
+        { header: "Year", field: "year", sortable: true },
 
-    const emptyCalendar: Calendar = {
-        year: new Date().getFullYear(),
-        status: CalendarStatus.active,
-        startDate: new Date(),
-        endDate: new Date(),
-    };
-
-    const { hasPermission } = useAuth();
-    const confirm = useConfirmDialog();
-
-    const canCreate = hasPermission([PERMISSIONS.CALENDAR.CREATE]);
-    const canEdit = hasPermission([PERMISSIONS.CALENDAR.UPDATE]);
-    const canDelete = hasPermission([PERMISSIONS.CALENDAR.DELETE]);
-
-    const canPlan = hasPermission([PERMISSIONS.CALENDAR.STATUS.PLANNED]);
-    const canActivate = hasPermission([PERMISSIONS.CALENDAR.STATUS.ACTIVATE]);
-    const canClose = hasPermission([PERMISSIONS.CALENDAR.STATUS.CLOSE]);
-
-    const router = useRouter();
-
-
-    // CRUD hook
-    const {
-        items: calendars,
-        setAll,
-        updateItem,
-        removeItem,
-        loading,
-        setLoading,
-        error,
-        setError
-    } = useCrudList<Calendar>();
-
-    const [calendar, setCalendar] = useState<Calendar>(emptyCalendar);
-    const [showSaveDialog, setShowSaveDialog] = useState(false);
-
-    /** Fetch calendars */
-    useEffect(() => {
-        const fetchCalendars = async () => {
-            try {
-                setLoading(true);
-                const data = await CalendarApi.getCalendars({});
-                setAll(data);
-            } catch (err: any) {
-                setError("Failed to fetch calendars. " + (err?.message ?? ""));
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchCalendars();
-    }, []);
-
-    /** Save callback */
-    const onSaveComplete = (saved: Calendar) => {
-        updateItem(saved);
-        hideDialogs();
-    };
-
-    const updateStatus = async (row: Calendar, next: CalendarStatus) => {
-        if (!row._id) {
-            return;
-        }
-        const updated = await CalendarApi.updateStatus(row._id, next);
-        onSaveComplete({
-            ...updated,
-        });
-    };
-
-    const stateTransitionTemplate = (row: Calendar) => {
-        const current = row.status;
-        let prev: CalendarStatus | undefined = undefined;
-        let next: CalendarStatus | undefined = undefined;
-
-        if (current === CalendarStatus.planned) {
-            if (canActivate) {
-                next = CalendarStatus.active;
-            }
-        }
-        else if (current === CalendarStatus.active) {
-            if (canClose) {
-                next = CalendarStatus.closed;
-            }
-            if (canPlan) {
-                prev = CalendarStatus.planned;
-            }
-        }
-        else if (current === CalendarStatus.closed) {
-            if (canActivate) {
-                prev = CalendarStatus.active;
-            }
-        }
-
-        return (
-            <div className="flex gap-2">
-                {next && (() => {
-                    const nextStatus = next; // ✅ local constant fixes type
-                    return (
-                        <Button
-                            tooltip={`Make ${nextStatus}`}
-                            icon={nextStatus === CalendarStatus.closed ? "pi pi-lock" : "pi pi-check"}
-                            severity={nextStatus === CalendarStatus.closed ? "danger" : "success"}
-                            size="small"
-                            onClick={() => {
-                                confirm.ask({
-                                    operation: `Make to ${nextStatus}`,
-                                    onConfirmAsync: () => updateStatus(row, nextStatus),
-                                });
-                            }}
-                        />
-                    );
-                })()}
-
-                {prev && (() => {
-                    const prevStatus = prev; // ✅ local constant fixes type
-                    return (
-                        <Button
-                            tooltip={`Back to ${prevStatus}`}
-                            icon="pi pi-undo"
-                            severity="warning"
-                            size="small"
-                            onClick={() => {
-                                confirm.ask({
-                                    operation: `Back to ${prevStatus}`,
-                                    onConfirmAsync: () => updateStatus(row, prevStatus),
-                                });
-                            }}
-                        />
-                    );
-                })()}
-            </div>
-        );
-    };
-
-    /** Delete */
-    const deleteCalendar = async (row: Calendar) => {
-        const ok = await CalendarApi.delete(row);
-        if (ok) removeItem(row);
-    };
-
-    /** Hide dialogs */
-    const hideDialogs = () => {
-        setShowSaveDialog(false);
-    };
-
-    /** Columns shown in CRUD table */
-    const columns = [
-        { header: "Year", field: "year" },
-        { header: "Start Date", body: (r: Calendar) => new Date(r.startDate!).toLocaleDateString("en-CA") },
-        { header: "End Date", body: (r: Calendar) => new Date(r.endDate!).toLocaleDateString("en-CA") },
         {
-            header: "Status",
+            header: "Start Date",
+            field: "startDate",
+            body: (c: Calendar) =>
+                c.startDate ? new Date(c.startDate).toLocaleDateString() : "-"
+        },
+
+        {
+            header: "End Date",
+            field: "endDate",
+            body: (c: Calendar) =>
+                c.endDate ? new Date(c.endDate).toLocaleDateString() : "-"
+        },
+
+        {
             field: "status",
-            body: (u: Calendar) => <MyBadge type="status" value={u.status ?? "Unknown"} />
-        },
-        { body: stateTransitionTemplate },
-        {
-            body: (row: Calendar) => (
-                <Button
-                    icon="pi pi-arrow-right"
-                    size="small"
-                    onClick={() => router.push(`/calendars/${row._id}`)}
-                />
-            )
-        },
-    ];
-
-    return (
-        <>
-            <CrudManager
-                headerTitle="Manage Calendars"
-                itemName="Calendar"
-                items={calendars}
-                dataKey="_id"
-                columns={columns}
-                loading={loading}
-                error={error}
-
-                canCreate={canCreate}
-                canEdit={canEdit}
-                canDelete={canDelete}
-
-                onCreate={() => {
-                    setCalendar({ ...emptyCalendar });
-                    setShowSaveDialog(true);
-                }}
-
-                onEdit={(row) => {
-                    setCalendar({ ...row });
-                    setShowSaveDialog(true);
-                }}
-
-                onDelete={(row) =>
-                    confirm.ask({
-                        item: String(row.year),
-                        onConfirmAsync: () => deleteCalendar(row)
-                    })
-                }
-                enableSearch
-            //rowExpansionTemplate={(row) => <CallManager calendar={row} next="project" />}
-            />
-
-            {/* Save Dialog */}
-            {(calendar && showSaveDialog) && (
-                <SaveCalendarDialog
-                    visible={showSaveDialog}
-                    calendar={calendar}
-                    onComplete={onSaveComplete}
-                    onHide={hideDialogs}
-                />
-            )}
-        </>
-    );
-};
-
-export default CalendarManager;
+            header: "Status",
+            sortable: true,
+            body: (c: Calendar) =>
+                <MyBadge type="status" value={c.status ?? "Unknown"} />
+        }
+    ],
+    createNew: createEmptyCalendar,
+    SaveDialog: SaveCalendar,
+    permissionPrefix: "calendar",
+    workflow: {
+        statusField: "status",
+        transitions: CALENDAR_TRANSITIONS,
+        statusOrder: CALENDAR_STATUS_ORDER
+    }
+});

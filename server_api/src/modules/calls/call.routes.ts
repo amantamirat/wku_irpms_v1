@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
-import { checkPermission, checkStatusPermission, verifyActiveAccount } from '../users/user.middleware';
+import { checkPermission, checkStatusPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
 import { CallController } from './call.controller';
 import { CallRepository } from './call.repository';
 import { CallService } from './call.service';

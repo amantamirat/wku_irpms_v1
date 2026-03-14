@@ -1,10 +1,12 @@
+import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
+import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { CallRepository } from "../calls/call.repository";
-import { CreateCalendarDTO, GetCalendarDTO, UpdateCalendarDTO, UpdateCalendarStatusDTO } from "./calendar.dto";
+import { CreateCalendarDTO, GetCalendarDTO, UpdateCalendarDTO } from "./calendar.dto";
 import { CalendarRepository } from "./calendar.repository";
-import { CalendarStateMachine } from "./calendar.state-machine";
-import { CalendarStatus } from "./calendar.status";
+import { CALENDAR_TRANSITIONS, CalendarStatus } from "./calendar.state-machine";
+
 
 export class CalendarService {
 
@@ -49,18 +51,35 @@ export class CalendarService {
         }
     }
 
-    async updateStatus(dto: UpdateCalendarStatusDTO) {
-        const { id, status: next } = dto;
+    async transitionState(dto: TransitionRequestDto) {
+        const { id, current, next } = dto;
+
         const calendarDoc = await this.repository.findById(id);
-        if (!calendarDoc) throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
-        const current = calendarDoc.status;
-        CalendarStateMachine.validateTransition(current, next);
+        if (!calendarDoc) {
+            throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
+        }
+        const from = calendarDoc.status as CalendarStatus;
+        const to = next as CalendarStatus;
+        // optional UI consistency check
+        if (current && current !== from) {
+            throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
+        }
+
+        TransitionHelper.validateTransition(
+            from,
+            to,
+            CALENDAR_TRANSITIONS
+        );
+
         if (next === CalendarStatus.planned) {
             if (await this.callRepository.exists({ calendar: id })) {
                 throw new AppError(ERROR_CODES.CALL_ALREADY_EXISTS);
             }
         }
-        return await this.repository.updateStatus(id, dto);
+
+        return await this.repository.update(id, {
+            status: to
+        });
     }
 
     async delete(id: string) {

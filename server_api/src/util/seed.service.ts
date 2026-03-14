@@ -186,7 +186,7 @@ export class SeedService {
         let ict = await this.organizationRepo.findByName("ICT");
         if (!ict) {
             ict = await this.organizationRepo.create({
-                type: Unit.External,
+                type: Unit.external,
                 name: "ICT",
                 ownership: Ownership.Internal
             });

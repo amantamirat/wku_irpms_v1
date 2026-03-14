@@ -13,10 +13,10 @@ import { PERMISSIONS } from '@/types/permissions';
 const AppMenu = () => {
     const { hasPermission, getScopesByUnit } = useAuth();
     const { layoutConfig } = useContext(LayoutContext);
-    const dirScopes = getScopesByUnit(OrgnUnit.Directorate) ?? [];
+    const dirScopes = getScopesByUnit(OrgnUnit.directorate) ?? [];
     const hasDirector = dirScopes.length > 0;
-    const depScopes = getScopesByUnit(OrgnUnit.Department) ?? [];
-    const extScopes = getScopesByUnit(OrgnUnit.External) ?? [];
+    const depScopes = getScopesByUnit(OrgnUnit.department) ?? [];
+    const extScopes = getScopesByUnit(OrgnUnit.external) ?? [];
     const hasWorkspace = depScopes.length > 0 || extScopes.length > 0;
 
     const model: AppMenuItem[] = [
@@ -134,7 +134,7 @@ const AppMenu = () => {
                 {
                     label: 'Colleges',
                     icon: 'pi pi-fw pi-warehouse',
-                    to: `/organizations?type=${OrgnUnit.College}`,
+                    to: `/organizations?type=${OrgnUnit.college}`,
                     visible: hasPermission(
                         [
                             PERMISSIONS.ORGANIAZTION.COLLEGE.CREATE,
@@ -144,7 +144,7 @@ const AppMenu = () => {
                 {
                     label: 'Departments',
                     icon: 'pi pi-fw pi-star',
-                    to: `/organizations?type=${OrgnUnit.Department}`,
+                    to: `/organizations?type=${OrgnUnit.department}`,
                     visible: hasPermission(
                         [
                             PERMISSIONS.ORGANIAZTION.DEPARTMENT.CREATE,
@@ -154,7 +154,7 @@ const AppMenu = () => {
                 {
                     label: 'Programs',
                     icon: 'pi pi-fw pi-star-half',
-                    to: `/organizations?type=${OrgnUnit.Program}`,
+                    to: `/organizations?type=${OrgnUnit.program}`,
                     visible: hasPermission(
                         [
                             PERMISSIONS.ORGANIAZTION.PROGRAM.CREATE,
@@ -164,7 +164,7 @@ const AppMenu = () => {
                 {
                     label: 'Directorates',
                     icon: 'pi pi-fw pi-objects-column',
-                    to: `/organizations?type=${OrgnUnit.Directorate}`,
+                    to: `/organizations?type=${OrgnUnit.directorate}`,
                     visible: hasPermission(
                         [
                             PERMISSIONS.ORGANIAZTION.DIRECTORATE.CREATE,
@@ -174,7 +174,7 @@ const AppMenu = () => {
                 {
                     label: 'Centers',
                     icon: 'pi pi-fw pi-circle',
-                    to: `/organizations?type=${OrgnUnit.Center}`,
+                    to: `/organizations?type=${OrgnUnit.center}`,
                     visible: hasPermission(
                         [
                             PERMISSIONS.ORGANIAZTION.CENTER.CREATE,
@@ -184,7 +184,7 @@ const AppMenu = () => {
                 {
                     label: 'External',
                     icon: "pi pi-fw pi-mars",
-                    to: `/organizations?type=${OrgnUnit.External}`,
+                    to: `/organizations?type=${OrgnUnit.external}`,
                     visible: hasPermission(
                         [
                             PERMISSIONS.ORGANIAZTION.EXTERNAL.CREATE,

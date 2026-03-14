@@ -7,7 +7,7 @@ import {
     DeleteExperienceDTO
 } from './experience.dto';
 import { successResponse, errorResponse } from '../../../common/helpers/response';
-import { AuthenticatedRequest } from '../../users/user.middleware';
+import { AuthenticatedRequest } from '../../users/auth/auth.middleware';
 import { AppError } from '../../../common/errors/app.error';
 import { ERROR_CODES } from '../../../common/errors/error.codes';
 
@@ -23,7 +23,7 @@ export class ExperienceController {
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) {
-                throw new AppError(ERROR_CODES.USER_NOT_FOUND);
+                throw new AppError(ERROR_CODES.UNAUTHORIZED);
             }
             const dto: CreateExperienceDTO = {
                 ...req.body,
@@ -56,7 +56,7 @@ export class ExperienceController {
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) {
-                throw new AppError(ERROR_CODES.USER_NOT_FOUND);
+                throw new AppError(ERROR_CODES.UNAUTHORIZED);
             }
 
             const { id } = req.params;
@@ -86,7 +86,7 @@ export class ExperienceController {
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) {
-                throw new AppError(ERROR_CODES.USER_NOT_FOUND);
+                throw new AppError(ERROR_CODES.UNAUTHORIZED);
             }
 
             const { id } = req.params;

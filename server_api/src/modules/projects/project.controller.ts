@@ -1,6 +1,6 @@
 import { Response } from "express";
 import { errorResponse, successResponse } from "../../common/helpers/response";
-import { AuthenticatedRequest } from "../users/user.middleware";
+import { AuthenticatedRequest } from "../users/auth/auth.middleware";
 import { ProjectService } from "./project.service";
 import { CreateProjectDTO, UpdateProjectDTO, UpdateStatusDTO } from "./project.dto";
 import { DeleteDto } from "../../common/dtos/delete.dto";
@@ -61,7 +61,7 @@ export class ProjectController {
   // -----------------------
   update = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      if (!req.user) throw new Error(ERROR_CODES.USER_NOT_FOUND);
+      if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
       const { id } = req.query;
       const { title, summary } = req.body;

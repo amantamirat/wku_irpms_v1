@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { PERMISSIONS } from "../../../../common/constants/permissions";
-import { verifyActiveAccount, checkPermission } from "../../../users/user.middleware";
+import { verifyActiveAccount, checkPermission } from "../../../users/auth/auth.middleware";
 import { PhaseDocController } from "./phase.doc.controller";
 import { upload } from "../../../../util/multer";
 

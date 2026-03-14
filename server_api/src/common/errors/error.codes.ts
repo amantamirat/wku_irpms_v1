@@ -20,16 +20,14 @@ export const ERROR_CODES = {
     ROLE_NOT_FOUND: "ROLE_NOT_FOUND",
     ROLE_IN_USE: "ROLE_IN_USE",
 
-    // ---------- ACCOUNT ----------
-    ACCOUNT_NOT_FOUND: "ACCOUNT_NOT_FOUND",
+    // ---------- AUTH ----------
+    AUTH_NOT_FOUND: "ACCOUNT_DOES_NOT_EXIST",
     ACCOUNT_SUSPENDED: "Account is suspended. Contact support.",
     ACCOUNT_LOCKED: "Account temporarily locked due to too many failed login attempts.",
     INVALID_CREDENTIALS: "Invalid credentials.",
     ACCOUNT_IN_USE: "ACCOUNT_IN_USE",
 
     // ---------- USER ----------
-    USER_NOT_FOUND: "USER_NOT_FOUND",
-
     USER_ALREADY_EXISTS: "USER_ALREADY_EXISTS",
 
 

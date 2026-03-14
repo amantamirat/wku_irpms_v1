@@ -5,7 +5,7 @@ import {
   CreateUserDTO,
   UpdateUserDTO,
 } from './user.dto';
-import { AuthenticatedRequest } from './user.middleware';
+import { AuthenticatedRequest } from './auth/auth.middleware';
 import { UserService } from './user.service';
 
 import { TransitionRequestDto } from '../../common/dtos/transition.dto';
@@ -57,7 +57,7 @@ export class UserController {
 
   transitionState = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      if (!req.user) throw new Error(ERROR_CODES.USER_NOT_FOUND);
+      if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
       const { id } = req.params;
       const { current, next } = req.body;
       const dto: TransitionRequestDto = {

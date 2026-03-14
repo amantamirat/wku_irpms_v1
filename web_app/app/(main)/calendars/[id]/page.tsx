@@ -16,7 +16,7 @@ export default function CalendarDetailPage() {
     useEffect(() => {
         const fetchCalendar = async () => {
             try {
-                const data = await CalendarApi.getById(id);
+                const data = await CalendarApi.getById!(id);
                 setCalendar(data);
             } finally {
                 setLoading(false);

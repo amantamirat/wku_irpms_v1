@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { UserController } from './user.controller';
-import { checkPermission, checkStatusPermission, checkTransitionPermission, verifyActiveAccount } from './user.middleware';
+import { checkPermission, checkStatusPermission, checkTransitionPermission, verifyActiveAccount } from './auth/auth.middleware';
 import { PERMISSIONS } from '../../common/constants/permissions';
 
 const controller = new UserController();

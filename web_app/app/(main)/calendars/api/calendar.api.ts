@@ -1,16 +1,26 @@
+import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { Calendar, CalendarStatus } from "../models/calendar.model";
-const end_point = '/calendars';
+import { Calendar, GetCalendarOptions } from "../models/calendar.model";
+import { TransitionRequestDto } from "@/types/util";
 
-export interface GetCalendarOptions {
-    status?: CalendarStatus;
-}
+const end_point = "/calendars";
 
-export const CalendarApi = {
+export const CalendarApi: EntityApi<Calendar, GetCalendarOptions | undefined> = {
 
-    async create(calendar: Partial<Calendar>): Promise<Calendar> {
-        const createdData = await ApiClient.post(end_point, calendar);
-        return createdData as Calendar;
+    async getAll(options?: GetCalendarOptions) {
+        const query = new URLSearchParams();
+
+        if (options) {
+            if (options.status) {
+                query.append("status", options.status as string);
+            }
+        }
+
+        const url = query.toString()
+            ? `${end_point}?${query.toString()}`
+            : end_point;
+
+        return ApiClient.get(url);
     },
 
     async getById(id: string): Promise<Calendar> {
@@ -19,32 +29,28 @@ export const CalendarApi = {
         return data as Calendar;
     },
 
-    async getCalendars(options: GetCalendarOptions): Promise<Calendar[]> {
-        const query = new URLSearchParams();
-        if (options.status) query.append("status", options.status as string);
-        const data = await ApiClient.get(`${end_point}?${query.toString()}`);
-        return data as Calendar[];
+    async create(calendar) {
+        return ApiClient.post(end_point, calendar);
     },
 
-    async update(calendar: Partial<Calendar>): Promise<Calendar> {
-        if (!calendar._id) { throw new Error("_id required."); }
-        const url = `${end_point}/${calendar._id}`;
-        const updatedCalendar = await ApiClient.put(url, calendar);
-        return updatedCalendar as Calendar;
+    async update(calendar) {
+        if (!calendar._id) throw new Error("_id required");
+
+        return ApiClient.put(`${end_point}/${calendar._id}`, calendar);
     },
 
-    async updateStatus(id: string, status: CalendarStatus): Promise<any> {
+    async delete(calendar) {
+        if (!calendar._id) throw new Error("_id required");
+
+        return ApiClient.delete(`${end_point}/${calendar._id}`);
+    },
+
+    async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
         const query = new URLSearchParams();
         query.append("id", id);
         const url = `${end_point}/${id}`;
-        const updated = await ApiClient.patch(url, { status });
+        const updated = await ApiClient.patch(url, dto);
         return updated;
-    },
+    }
 
-    async delete(calendar: Partial<Calendar>): Promise<boolean> {
-        if (!calendar._id) { throw new Error("_id required."); }
-        const url = `${end_point}/${calendar._id}`;
-        const response = await ApiClient.delete(url);
-        return response;
-    },
 };

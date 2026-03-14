@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { errorResponse, successResponse } from "../../../common/helpers/response";
-import { AuthenticatedRequest } from "../../users/user.middleware";
+import { AuthenticatedRequest } from "../../users/auth/auth.middleware";
 import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto, UpdatePhaseStatusDto } from "./phase.dto";
 import { PhaseType } from "./phase.enum";
 import { PhaseService } from "./phase.service";
@@ -95,7 +95,7 @@ export class PhaseController {
     // ---------------------------------------------------
     updateStatus = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.USER_NOT_FOUND);
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
             const { current, next } = req.body;
             const dto: TransitionRequestDto = {

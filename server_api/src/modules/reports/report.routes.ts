@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { ReportController } from "./report.controller";
-import { checkPermission, verifyActiveAccount } from "../users/user.middleware";
+import { checkPermission, verifyActiveAccount } from "../users/auth/auth.middleware";
 import { PERMISSIONS } from "../../common/constants/permissions";
 
 const controller = new ReportController();

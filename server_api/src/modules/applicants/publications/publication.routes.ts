@@ -3,7 +3,7 @@ import { PublicationController } from './publication.controller';
 import { PERMISSIONS } from '../../../common/constants/permissions';
 import { PublicationService } from './publication.service';
 import { PublicationRepository } from './publication.repository';
-import { verifyActiveAccount, checkPermission } from '../../users/user.middleware';
+import { verifyActiveAccount, checkPermission } from '../../users/auth/auth.middleware';
 import { ApplicantRepository } from '../applicant.repository';
 
 const publicationRepository = new PublicationRepository();

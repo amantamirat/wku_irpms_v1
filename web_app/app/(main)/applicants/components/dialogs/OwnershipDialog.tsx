@@ -35,7 +35,7 @@ const OwnershipDialog = ({ visible, applicant, onHide, onComplete }: OwnershipDi
     const loadOrganizations = async (unitType: OrgnUnit) => {
         if (orgOptions[unitType]) return;
 
-        const data = await OrganizationApi.getOrganizations({ type: unitType });
+        const data = await OrganizationApi.getAll({ type: unitType });
         setOrgOptions(prev => ({
             ...prev,
             [unitType]: data

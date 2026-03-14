@@ -2,7 +2,7 @@ import { Router } from "express";
 import { CompositionService } from "./composition.service";
 import { CompositionController } from "./composition.controller";
 import { PERMISSIONS } from "../../../common/constants/permissions";
-import { verifyActiveAccount, checkPermission } from "../../users/user.middleware";
+import { verifyActiveAccount, checkPermission } from "../../users/auth/auth.middleware";
 
 const service = new CompositionService();
 const controller = new CompositionController(service);

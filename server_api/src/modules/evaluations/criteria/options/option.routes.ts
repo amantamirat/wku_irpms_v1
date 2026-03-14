@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { OptionController } from "./option.controller";
-import { verifyActiveAccount, checkPermission } from "../../../users/user.middleware";
+import { verifyActiveAccount, checkPermission } from "../../../users/auth/auth.middleware";
 import { PERMISSIONS } from "../../../../common/constants/permissions";
 
 const controller = new OptionController();
