@@ -10,7 +10,7 @@ export interface IThematicRepository {
     findById(id: string): Promise<IThematic | null>;
     find(filters: GetThematicsDTO): Promise<Partial<IThematic>[]>;
     create(dto: CreateThematicDTO): Promise<IThematic>;
-    update(id: string, data: UpdateThematicDTO["data"]): Promise<IThematic>;
+    update(id: string, data: UpdateThematicDTO["data"]): Promise<IThematic | null>;
     delete(id: string): Promise<IThematic | null>;
 }
 
@@ -30,8 +30,12 @@ export class ThematicRepository implements IThematicRepository {
             query.directorate = new mongoose.Types.ObjectId(filters.directorate);
         }
 
-        return Thematic.find(query)
-            .populate("directorate")
+        let dbQuery = Thematic.find(query);
+        if (filters.populate) {
+            dbQuery = dbQuery
+                .populate("directorate")
+        }
+        return dbQuery
             .lean<IThematic[]>()
             .exec();
     }
@@ -43,23 +47,21 @@ export class ThematicRepository implements IThematicRepository {
         });
     }
 
-    async update(id: string, dtoData: UpdateThematicDTO["data"]): Promise<IThematic> {
+    async update(id: string, dtoData: UpdateThematicDTO["data"]): Promise<IThematic | null> {
         const updateData: Partial<IThematic> = {};
 
         if (dtoData.title) updateData.title = dtoData.title;
         if (dtoData.description) updateData.description = dtoData.description;
+        if (dtoData.status) updateData.status = dtoData.status;
 
-        const updated = await Thematic.findByIdAndUpdate(
+        return Thematic.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },
             { new: true }
         ).exec();
-
-        if (!updated) throw new Error("Thematic not found");
-        return updated;
     }
 
     async delete(id: string) {
-        return await Thematic.findByIdAndDelete(id).exec();
+        return Thematic.findByIdAndDelete(id).exec();
     }
 }

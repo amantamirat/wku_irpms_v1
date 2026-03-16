@@ -1,3 +1,4 @@
+import { EvalStatus } from "./evaluation.state-machine";
 
 export interface CreateEvaluationDTO {
     organization: string;
@@ -11,6 +12,7 @@ export interface UpdateEvaluationDTO {
     data: Partial<{
         title: string;
         description:string;
+        status: EvalStatus;
     }>;
     userId?: string;
 }

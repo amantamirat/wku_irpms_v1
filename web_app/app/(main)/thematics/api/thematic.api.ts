@@ -1,40 +1,48 @@
+import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { GetThematicsOptions, Thematic, sanitizeThematic } from "../models/thematic.model";
+import { GetThematicsOptions, Thematic, sanitize } from "../models/thematic.model";
+import { TransitionRequestDto } from "@/types/util";
 
-const end_point = '/thematics';
+const end_point = "/thematics";
 
-export const ThematicApi = {
+export const ThematicApi: EntityApi<Thematic, GetThematicsOptions | undefined> = {
 
-    async createThematic(thematic: Partial<Thematic>): Promise<Thematic> {
-        const sanitized = sanitizeThematic(thematic);
-        const createdData = await ApiClient.post(end_point, sanitized);
-        return createdData as Thematic;
-    },
-
-    async getThematics(options: GetThematicsOptions): Promise<Thematic[]> {
+    async getAll(options) {
         const query = new URLSearchParams();
-        const sanitized = sanitizeThematic(options);
-        if (sanitized.directorate) query.append("directorate", sanitized.directorate as string);
-        const data = await ApiClient.get(`${end_point}?${query.toString()}`);
-        return data as Thematic[];
+        if (options) {
+            const sanitized = sanitize(options);
+            if (sanitized.directorate) {
+                query.append("directorate", sanitized.directorate as string);
+            }
+            if (options.populate !== undefined) {
+                query.append("populate", String(options.populate));
+            }
+        }
+        const qs = query.toString();
+        return ApiClient.get(`${end_point}${qs ? `?${qs}` : ""}`);
     },
 
-    async updateThematic(thematic: Partial<Thematic>): Promise<Thematic> {
-        if (!thematic._id) {
-            throw new Error("_id required.");
-        }
-        const url = `${end_point}/${thematic._id}`;
-        const sanitized = sanitizeThematic(thematic);
-        const updatedThematic = await ApiClient.put(url, sanitized);
-        return updatedThematic as Thematic;
+    async create(thematic) {
+        const sanitized = sanitize(thematic);
+        return ApiClient.post(end_point, sanitized);
     },
 
-    async deleteThematic(thematic: Partial<Thematic>): Promise<boolean> {
-        if (!thematic._id) {
-            throw new Error("_id required.");
-        }
-        const url = `${end_point}/${thematic._id}`;
-        const response = await ApiClient.delete(url);
-        return response;
+    async update(thematic) {
+        if (!thematic._id) throw new Error("_id required");
+        const sanitized = sanitize(thematic);
+        return ApiClient.put(`${end_point}/${thematic._id}`, sanitized);
     },
+
+    async delete(thematic) {
+        if (!thematic._id) throw new Error("_id required");
+        return ApiClient.delete(`${end_point}/${thematic._id}`);
+    },
+    
+    async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
+        const query = new URLSearchParams();
+        query.append("id", id);
+        const url = `${end_point}/${id}`;
+        const updated = await ApiClient.patch(url, dto);
+        return updated;
+    }
 };

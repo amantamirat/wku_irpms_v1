@@ -56,7 +56,7 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
         () => {
             const loadThematics = async () => {
                 try {
-                    const data = await ThematicApi.getThematics({ directorate: localGrant.organization });
+                    const data = await ThematicApi.getAll({ directorate: localGrant.organization });
                     setThematics(data);
                 } catch (err) {
                     console.error('Failed to load themes:', err);

@@ -85,7 +85,7 @@ const SaveCall = ({ visible, call, calendarProvided, directorateProvided, onHide
 
         const loadThematics = async () => {
             try {
-                const data = await ThematicApi.getThematics({ directorate: localCall.directorate });
+                const data = await ThematicApi.getAll({ directorate: localCall.directorate });
                 setThemes(data);
             } catch (err) {
                 console.error('Failed to load themes:', err);

@@ -1,10 +1,12 @@
 import { Organization } from "../../organizations/models/organization.model";
+import { EvaluationStatus } from "./evaluation.state-machine";
 
 export type Evaluation = {
     _id?: string;
     organization: string | Organization;
     title: string;
     description?: string;
+    status?: EvaluationStatus;
     createdAt?: Date;
     updatedAt?: Date;
 };

@@ -1,9 +1,12 @@
 import { Organization } from "../../organizations/models/organization.model";
+import { ThematicStatus } from "./thematic.state-machine";
 
+/*
 export enum ThemeType {
     theme = 'Theme',
     component = 'Component'
 }
+*/
 
 export enum ThemeLevel {
     broad = 'Broad',
@@ -26,23 +29,27 @@ export type Thematic = {
     _id?: string;
     directorate?: string | Organization;
     title: string;
-    type?: ThemeType;
+    //type?: ThemeType;
     level: ThemeLevel;
     description?: string;
+    status?: ThematicStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
 export interface GetThematicsOptions {
     directorate?: string | Organization;
+    populate?: boolean;
 }
 export const validateThematic = (thmc: Thematic): { valid: boolean; message?: string } => {
     if (!thmc.title || thmc.title.trim().length === 0) {
         return { valid: false, message: 'Title is required.' };
     }
+    /*
     if (!thmc.type) {
         return { valid: false, message: 'Type is required.' };
     }
+    */
     if (!thmc.level) {
         return { valid: false, message: 'Level is required.' };
     }
@@ -53,7 +60,7 @@ export const validateThematic = (thmc: Thematic): { valid: boolean; message?: st
 };
 
 
-export function sanitizeThematic(thmc: Partial<Thematic>): Partial<Thematic> {
+export function sanitize(thmc: Partial<Thematic>): Partial<Thematic> {
     return {
         ...thmc,
         directorate:
@@ -62,3 +69,9 @@ export function sanitizeThematic(thmc: Partial<Thematic>): Partial<Thematic> {
                 : thmc.directorate
     };
 }
+
+export const createEmptyThematic = (): Thematic => ({
+    directorate: "",
+    title: "",
+    level: ThemeLevel.broad
+})

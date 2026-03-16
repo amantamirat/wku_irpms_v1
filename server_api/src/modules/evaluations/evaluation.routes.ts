@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { EvaluationController } from "./evaluation.controller";
 import { PERMISSIONS } from "../../common/constants/permissions";
-import { verifyActiveAccount, checkPermission } from "../users/auth/auth.middleware";
+import { verifyActiveAccount, checkPermission, checkTransitionPermission } from "../users/auth/auth.middleware";
 import { EvaluationRepository } from "./evaluation.repository";
 import { EvaluationService } from "./evaluation.service";
 
@@ -45,6 +45,10 @@ router.put(
   checkPermission([PERMISSIONS.EVALUATION.UPDATE]),
   controller.update
 );
+
+router.patch('/:id', verifyActiveAccount,
+  checkTransitionPermission("evaluation"),
+  controller.transitionState);
 
 /**
  * @route DELETE /evaluations/:id

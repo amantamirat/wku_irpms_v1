@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ThematicController } from './thematic.controller';
 import { PERMISSIONS } from '../../common/constants/permissions';
-import { verifyActiveAccount, checkPermission } from '../users/auth/auth.middleware';
+import { verifyActiveAccount, checkPermission, checkTransitionPermission } from '../users/auth/auth.middleware';
 
 const controller = new ThematicController();
 
@@ -27,6 +27,10 @@ router.put(
     checkPermission([PERMISSIONS.THEMATIC.UPDATE]),
     controller.update
 );
+
+router.patch('/:id', verifyActiveAccount,
+  checkTransitionPermission("thematic"),
+  controller.transitionState);
 
 router.delete(
     '/:id',

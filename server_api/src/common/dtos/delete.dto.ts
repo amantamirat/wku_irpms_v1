@@ -1,4 +1,4 @@
 export interface DeleteDto {
     id: string;
-    applicantId: string;
+    applicantId?: string;
 }

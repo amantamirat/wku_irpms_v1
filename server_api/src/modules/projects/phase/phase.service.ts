@@ -80,7 +80,7 @@ export class PhaseService {
         if (!phaseDoc) throw new Error(ERROR_CODES.PHASE_NOT_FOUND);
         const project = String(phaseDoc.project);
 
-        await this.validate(String(phaseDoc.project), applicantId);
+        await this.validate(String(phaseDoc.project), applicantId??"");
 
         if (phaseDoc.status !== PhaseStatus.proposed)
             throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);

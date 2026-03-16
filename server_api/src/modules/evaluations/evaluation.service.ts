@@ -6,6 +6,9 @@ import { CriterionRepository, ICriterionRepository } from "./criteria/criterion.
 import { CreateEvaluationDTO, GetEvaluationsDTO, UpdateEvaluationDTO } from "./evaluation.dto";
 import { IEvaluationRepository } from "./evaluation.repository";
 import { Unit } from "../../common/constants/enums";
+import { TransitionRequestDto } from "../../common/dtos/transition.dto";
+import { EVAL_TRANSITIONS, EvalStatus } from "./evaluation.state-machine";
+import { TransitionHelper } from "../../common/helpers/transition.helper";
 
 export class EvaluationService {
 
@@ -40,6 +43,37 @@ export class EvaluationService {
         const evalDoc = await this.repository.update(id, data);
         if (!evalDoc) throw new Error(ERROR_CODES.EVALUATION_NOT_FOUND);
         return evalDoc;
+    }
+
+    async transitionState(dto: TransitionRequestDto) {
+        const { id, current, next } = dto;
+
+        const evalDoc = await this.repository.findById(id);
+        if (!evalDoc) {
+            throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
+        }
+        const from = evalDoc.status as EvalStatus;
+        const to = next as EvalStatus;
+        // optional UI consistency check
+        if (current && current !== from) {
+            throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
+        }
+
+        TransitionHelper.validateTransition(
+            from,
+            to,
+            EVAL_TRANSITIONS
+        );
+
+        if (next === EvalStatus.planned) {
+            //if (await this.callRepository.exists({ calendar: id })) {
+               // throw new AppError(ERROR_CODES.CALL_ALREADY_EXISTS);
+           // }
+        }
+
+        return await this.repository.update(id, {
+            status: to
+        });
     }
 
     async delete(dto: DeleteDto) {

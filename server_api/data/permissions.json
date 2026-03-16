@@ -506,6 +506,26 @@
   },
   {
     "category": "Thematic Management",
+    "name": "thematic:transition.planned.active",
+    "description": "Activate a planned thematic by changing its status from planned to active"
+  },
+  {
+    "category": "Thematic Management",
+    "name": "thematic:transition.active.closed",
+    "description": "Close an active thematic to finalize its activities"
+  },
+  {
+    "category": "Thematic Management",
+    "name": "thematic:transition.active.planned",
+    "description": "Revert an active thematic back to planned status for adjustments"
+  },
+  {
+    "category": "Thematic Management",
+    "name": "thematic:transition.closed.active",
+    "description": "Re-open a closed thematic and set it back to active"
+  },
+  {
+    "category": "Thematic Management",
     "name": "thematic:delete",
     "description": "Delete thematic entries"
   },
@@ -632,6 +652,26 @@
     "category": "Evaluation Management",
     "name": "evaluation:update",
     "description": "Update evaluation entries"
+  },
+  {
+    "category": "Evaluation Management",
+    "name": "evaluation:transition.planned.active",
+    "description": "Activate a planned evaluation by changing its status from planned to active"
+  },
+  {
+    "category": "Evaluation Management",
+    "name": "evaluation:transition.active.closed",
+    "description": "Close an active evaluation to finalize its activities"
+  },
+  {
+    "category": "Evaluation Management",
+    "name": "evaluation:transition.active.planned",
+    "description": "Revert an active evaluation back to planned status for adjustments"
+  },
+  {
+    "category": "Evaluation Management",
+    "name": "evaluation:transition.closed.active",
+    "description": "Re-open a closed evaluation and set it back to active"
   },
   {
     "category": "Evaluation Management",

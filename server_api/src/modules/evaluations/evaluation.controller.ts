@@ -4,6 +4,7 @@ import { AuthenticatedRequest } from "../users/auth/auth.middleware";
 import { CreateEvaluationDTO, GetEvaluationsDTO, UpdateEvaluationDTO } from "./evaluation.dto";
 import { EvaluationService } from "./evaluation.service";
 import { ERROR_CODES } from '../../common/errors/error.codes';
+import { TransitionRequestDto } from '../../common/dtos/transition.dto';
 
 export class EvaluationController {
 
@@ -61,9 +62,28 @@ export class EvaluationController {
         }
     }
 
+
+    transitionState = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            const { id } = req.params;
+            const { current, next } = req.body;
+            const dto: TransitionRequestDto = {
+                id: String(id),
+                current: current,
+                next: next,
+                applicantId: req.user.applicantId,
+            };
+            const updated = await this.service.transitionState(dto);
+            successResponse(res, 200, "Eval status updated successfully", updated);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-           if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const deleted = await this.service.delete({
                 id: req.params.id,

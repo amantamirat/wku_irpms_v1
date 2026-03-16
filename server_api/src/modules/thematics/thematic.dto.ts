@@ -1,9 +1,9 @@
-import { ThemeLevel, ThemeType } from "./thematic.enum";
+import { ThemeLevel } from "./thematic.enum";
+import { ThematicStatus } from "./thematic.state-machine";
 
 export interface CreateThematicDTO {
     directorate: string;
     title: string;
-    type: ThemeType;
     level: ThemeLevel;
     description?: string;
 }
@@ -13,10 +13,12 @@ export interface UpdateThematicDTO {
     data: Partial<{
         title: string;
         description: string;
+        status: ThematicStatus;
     }>;
-    userId: string;
+    userId?: string;
 }
 
 export interface GetThematicsDTO {
     directorate?: string;
+    populate?: boolean;
 }

@@ -1,158 +1,75 @@
 'use client';
-import { CrudManager } from "@/components/CrudManager";
-import { useAuth } from "@/contexts/auth-context";
-import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-import { useCrudList } from "@/hooks/useCrudList";
-import { PERMISSIONS } from "@/types/permissions";
-import { useEffect, useState } from "react";
-import { Organization } from "../../organizations/models/organization.model";
+
+import { createEntityManager } from "@/components/createEntityManager";
+import { Thematic, GetThematicsOptions, createEmptyThematic } from "../models/thematic.model";
 import { ThematicApi } from "../api/thematic.api";
-import { Thematic, ThemeLevel } from "../models/thematic.model";
-import SaveDialog from "./SaveDialog";
+import SaveThematic from "./SaveThematic";
+import { Organization } from "../../organizations/models/organization.model";
 import ThematicDetail from "./ThematicDetail";
+import { THEMATIC_STATUS_ORDER, THEMATIC_TRANSITIONS } from "../models/thematic.state-machine";
+import MyBadge from "@/templates/MyBadge";
+
 
 interface ThematicManagerProps {
     directorate?: Organization;
 }
 
 const ThematicManager = ({ directorate }: ThematicManagerProps) => {
+    const Manager = createEntityManager<Thematic, GetThematicsOptions | undefined>({
+        title: "Manage Thematics",
+        itemName: "Thematic",
+        api: ThematicApi,
 
-    const { hasPermission } = useAuth();
-    const confirm = useConfirmDialog();
-
-    const canCreate = hasPermission([PERMISSIONS.THEMATIC.CREATE]);
-    const canEdit = hasPermission([PERMISSIONS.THEMATIC.UPDATE]);
-    const canDelete = hasPermission([PERMISSIONS.THEMATIC.DELETE]);
-
-    const emptyThematic: Thematic = {
-        directorate: directorate ?? '',
-        title: '',
-        level: ThemeLevel.broad
-    };
-
-    // CRUD hook
-    const {
-        items: thematics,
-        setAll,
-        updateItem,
-        removeItem,
-        loading,
-        setLoading,
-        error,
-        setError
-    } = useCrudList<Thematic>();
-
-    const [thematic, setThematic] = useState<Thematic>(emptyThematic);
-    const [showSaveDialog, setShowSaveDialog] = useState(false);
-
-    /** Fetch thematics */
-    useEffect(() => {
-        if (!directorate) {
-            return
-        }
-        const fetchThematics = async () => {
-            try {
-                setLoading(true);
-                const data = await ThematicApi.getThematics({ directorate });
-                setAll(data);
-            } catch (err: any) {
-                setError("Failed to fetch thematics. " + (err?.message ?? ""));
-            } finally {
-                setLoading(false);
+        columns: [
+            {
+                header: "Directorate",
+                field: "directorate",
+                sortable: true,
+                body: (r: Thematic) =>
+                    typeof r.directorate === "object" ? r.directorate?.name : r.directorate
+            },
+            { header: "Title", field: "title", sortable: true },
+            {
+                header: "Level",
+                field: "level",
+                sortable: true,
+                style: { width: '150px' }
+            },
+            { header: "Description", field: "description" },
+            {
+                field: "status",
+                header: "Status",
+                sortable: true,
+                body: (t: Thematic) =>
+                    <MyBadge type="status" value={t.status ?? "Unknown"} />
             }
-        };
-        fetchThematics();
-    }, [directorate]);
-
-    /** Save callback */
-    const onSaveComplete = (saved: Thematic) => {
-        updateItem(saved);
-        hideDialogs();
-    };
-
-    /** Delete */
-    const deleteThematic = async (row: Thematic) => {
-        const ok = await ThematicApi.deleteThematic(row);
-        if (ok) removeItem(row);
-    };
-
-    /** Hide dialogs */
-    const hideDialogs = () => {
-        setShowSaveDialog(false);
-    };
-
-    /** Columns shown in CRUD table */
-    const columns = [
-        { field: "directorate.name", header: "Directorate", sortable: true },
-        { field: "title", header: "Title", sortable: true },
-        {
-            field: "type", header: "Type", sortable: true,
-            body: (r: Thematic) => (
-                <span className={`theme-level-badge ${r.type?.toLowerCase()}`}>
-                    {r.type}
-                </span>
+        ],
+        createNew: () => createEmptyThematic(),
+        SaveDialog: SaveThematic,
+        permissionPrefix: "thematic",
+        // Use this if your backend needs to join the Directorate object
+        query: () => ({
+            directorate: directorate ?? undefined,
+            populate: true
+        }),
+        expandable: {
+            template: (thematic) => (
+                <div className="p-3">
+                    <strong>Details for {thematic.title}:</strong>
+                    <p>{thematic.description || 'No description provided.'}</p>
+                    <ThematicDetail thematic={thematic} />
+                </div>
             )
         },
-        {
-            header: "Level",
-            field: "level",
-            sortable: true,
-            body: (r: Thematic) => (
-                <span className={`theme-level-badge theme-${r.level?.toLowerCase()}`}>
-                    {r.level}
-                </span>
-            )
+        workflow: {
+            statusField: "status",
+            transitions: THEMATIC_TRANSITIONS,
+            statusOrder: THEMATIC_STATUS_ORDER
         },
-        { field: "description", header: "Description" },
-    ];
 
-    return (
-        <>
-            <CrudManager
-                headerTitle="Manage Thematics"
-                itemName="Thematic"
-                items={thematics}
-                dataKey="_id"
-                columns={columns}
-                loading={loading}
-                error={error}
+    });
 
-                canCreate={canCreate}
-                canEdit={canEdit}
-                canDelete={canDelete}
-
-                onCreate={() => {
-                    setThematic({ ...emptyThematic });
-                    setShowSaveDialog(true);
-                }}
-
-                onEdit={(row) => {
-                    setThematic({ ...row });
-                    setShowSaveDialog(true);
-                }}
-
-                onDelete={(row) =>
-                    confirm.ask({
-                        item: String(row.title),
-                        onConfirmAsync: () => deleteThematic(row)
-                    })
-                }
-
-                rowExpansionTemplate={(row) => <ThematicDetail thematic={row as Thematic} />}
-                enableSearch
-            />
-
-            {/* Save Dialog */}
-            {(thematic && showSaveDialog) && (
-                <SaveDialog
-                    visible={showSaveDialog}
-                    thematic={thematic}
-                    onComplete={onSaveComplete}
-                    onHide={hideDialogs}
-                />
-            )}
-        </>
-    );
+    return <Manager />;
 };
 
 export default ThematicManager;

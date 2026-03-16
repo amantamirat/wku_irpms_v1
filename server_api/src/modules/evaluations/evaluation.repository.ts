@@ -51,6 +51,7 @@ export class EvaluationRepository implements IEvaluationRepository {
 
         if (dtoData.title) updateData.title = dtoData.title;
         if (dtoData.description) updateData.description = dtoData.description;
+        if (dtoData.status) updateData.status = dtoData.status;
 
         return Evaluation.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),

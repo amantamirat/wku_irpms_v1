@@ -3,6 +3,8 @@ import { ThematicService } from './thematic.service';
 import { CreateThematicDTO, UpdateThematicDTO } from './thematic.dto';
 import { AuthenticatedRequest } from '../users/auth/auth.middleware';
 import { successResponse, errorResponse } from '../../common/helpers/response';
+import { TransitionRequestDto } from '../../common/dtos/transition.dto';
+import { ERROR_CODES } from '../../common/errors/error.codes';
 
 export class ThematicController {
 
@@ -24,8 +26,11 @@ export class ThematicController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { directorate } = req.query;
-            const thematics = await this.service.getThematics({ directorate: directorate as string });
+            const { directorate, populate } = req.query;
+            const thematics = await this.service.getThematics({
+                directorate: directorate as string,
+                ...(populate !== undefined && { populate: populate === "true" })
+            });
             successResponse(res, 200, 'Thematics fetched successfully', thematics);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -36,30 +41,40 @@ export class ThematicController {
         try {
             const { id } = req.params;
             const { title, description } = req.body;
-            if (!req.user) {
-                throw new Error("User not found!");
-            }
-            const userId = req.user.applicantId;
             const dto: UpdateThematicDTO = {
                 id,
-                data: { title, description },
-                userId: userId,
+                data: { title, description }
             };
             const updated = await this.service.update(dto);
             successResponse(res, 200, "Thematic updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
+    };
+
+
+    transitionState = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            const { id } = req.params;
+            const { current, next } = req.body;
+            const dto: TransitionRequestDto = {
+                id: String(id),
+                current: current,
+                next: next,
+                applicantId: req.user.applicantId,
+            };
+            const updated = await this.service.transitionState(dto);
+            successResponse(res, 200, "Eval status updated successfully", updated);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
 
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.params;
-            if (!req.user) {
-                throw new Error("User not found!");
-            }
-            const userId = req.user.applicantId;
-            const deleted = await this.service.delete({ id: id, applicantId: userId });
+            const deleted = await this.service.delete({ id: id });
             successResponse(res, 200, "Thematic deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

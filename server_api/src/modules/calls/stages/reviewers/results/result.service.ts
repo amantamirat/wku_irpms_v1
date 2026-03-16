@@ -3,7 +3,7 @@ import { SYSTEM } from "../../../../../common/constants/system.constant";
 import { AppError } from "../../../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../../../common/errors/error.codes";
 import { DeleteDto } from "../../../../../common/dtos/delete.dto";
-import { FormType } from "../../../../evaluations/criteria/criterion.enum";
+import { FormType } from "../../../../evaluations/criteria/criterion.model";
 import { ICriterionRepository, CriterionRepository } from "../../../../evaluations/criteria/criterion.repository";
 import { IOptionRepository, OptionRepository } from "../../../../evaluations/criteria/options/option.repository";
 import { IReviewerRepository, ReviewerRepository } from "../reviewer.repository";

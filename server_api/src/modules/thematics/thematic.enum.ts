@@ -1,7 +1,9 @@
+/*
 export enum ThemeType {
     theme = 'Theme',
     component = 'Component'
 }
+*/
 
 export enum ThemeLevel {
     broad = 'Broad',
