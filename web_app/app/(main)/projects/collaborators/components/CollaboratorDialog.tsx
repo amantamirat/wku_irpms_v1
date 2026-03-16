@@ -55,7 +55,7 @@ const CollaboratorDialog = ({ collaborator, visible, onSave, onComplete, onHide 
         const fetchApplicants = async () => {
             if (!workspace) return;
             try {
-                const data = await ApplicantApi.getApplicants({ workspace: workspace});
+                const data = await ApplicantApi.getAll({ workspace: workspace});
                 if (isMounted) setApplicants(data);
             } catch (err) {
                 console.error("Failed to fetch applicants:", err);

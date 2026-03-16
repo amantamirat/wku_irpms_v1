@@ -28,7 +28,7 @@ export interface UpdateOrganizationDTO {
 export interface GetOrganizationsDTO {
     type: Unit;
     parent?: string;
-    //populate?: boolean;
+    populate?: boolean;
 }
 
 

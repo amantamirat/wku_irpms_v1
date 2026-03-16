@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { FormType } from "./criterion.enum";
+import { FormType } from "./criterion.model";
 
 export interface CreateCriterionDTO {
     evaluation: string;

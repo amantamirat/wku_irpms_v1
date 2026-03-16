@@ -1,8 +1,7 @@
 import { useAuth } from "@/contexts/auth-context";
-import { Evaluation } from "../models/evaluation.model";
-import { useMemo } from "react";
-import { PERMISSIONS } from "@/types/permissions";
 import { TabPanel, TabView } from "primereact/tabview";
+import { useMemo } from "react";
+import { Evaluation } from "../models/evaluation.model";
 import CriterionManager from "./CriterionManager";
 
 interface EvaluationDetailProps {
@@ -19,7 +18,7 @@ const EvaluationDetail = ({ evaluation }: EvaluationDetailProps) => {
     const tabs = useMemo(() => [
         {
             header: "Critera",
-            permission: PERMISSIONS.CRITERION.READ,
+            permission: "criterion:read",
             content: <CriterionManager evaluation={evaluation} />
         }
     ], [evaluation]);

@@ -63,7 +63,7 @@ const ApplicantManager = ({ workspace }: ApplicantManagerProps) => {
         */
         const fetchApplicants = async () => {
             try {
-                const data = await ApplicantApi.getApplicants({ workspace });
+                const data = await ApplicantApi.getAll({ workspace, populate: true });
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to load applicants: " + err?.message);

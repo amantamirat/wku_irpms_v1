@@ -1,45 +1,36 @@
+import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { GetOptionsFilter, Option, sanitizeOption } from "../models/option.model";
-import { Criterion } from "../models/criterion.model";
+import { GetOptionsFilter, Option, sanitize } from "../models/option.model";
 
 const end_point = '/options';
 
+export const OptionApi: EntityApi<Option, GetOptionsFilter> = {
 
-
-
-
-export const OptionApi = {
-
-    async createOption(option: Partial<Option>): Promise<Option> {
-        const sanitized = sanitizeOption(option);
-        const createdData = await ApiClient.post(end_point, sanitized);
-        return createdData as Option;
-    },
-
-    async getOptions(filter: GetOptionsFilter): Promise<Option[]> {
+    async getAll(options?: GetOptionsFilter) {
         const query = new URLSearchParams();
-        const sanitized = sanitizeOption(filter);
-        if (filter.criterion) query.append("criterion", sanitized.criterion as string);
-        const data = await ApiClient.get(`${end_point}?${query.toString()}`);
-        return data as Option[];
+
+        if (options) {
+            const sanitized = sanitize(options);
+            if (options.criterion) query.append("criterion", sanitized.criterion as string);
+        }
+
+        const url = query.toString() ? `${end_point}?${query.toString()}` : end_point;
+        return ApiClient.get(url);
     },
 
-    async updateOption(option: Partial<Option>): Promise<Option> {
-        if (!option._id) {
-            throw new Error("_id required.");
-        }
-        const url = `${end_point}/${option._id}`;
-        const sanitized = sanitizeOption(option);
-        const updatedData = await ApiClient.put(url, sanitized);
-        return updatedData as Option;
+    async create(option) {
+        const sanitized = sanitize(option);
+        return ApiClient.post(end_point, sanitized);
     },
 
-    async deleteOption(option: Partial<Option>): Promise<boolean> {
-        if (!option._id) {
-            throw new Error("_id required.");
-        }
-        const url = `${end_point}/${option._id}`;
-        const response = await ApiClient.delete(url);
-        return response;
+    async update(option) {
+        if (!option._id) throw new Error("_id required");
+        const sanitized = sanitize(option);
+        return ApiClient.put(`${end_point}/${option._id}`, sanitized);
+    },
+
+    async delete(option) {
+        if (!option._id) throw new Error("_id required");
+        return ApiClient.delete(`${end_point}/${option._id}`);
     },
 };

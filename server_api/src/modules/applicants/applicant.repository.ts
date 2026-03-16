@@ -45,16 +45,16 @@ export class ApplicantRepository implements IApplicantRepository {
     // -------------------------
     async findAll(filter: GetApplicantsDTO): Promise<IApplicant[]> {
         const query: any = {};
-
         if (filter.workspace) {
             query.workspace = new mongoose.Types.ObjectId(filter.workspace);
         }
-
-        return Applicant.find(query).
-            populate("workspace").
-            populate("specializations").
-            //populate("roles").
-            //populate("ownerships").
+        let dbQuery = Applicant.find(query);
+        if (filter.populate) {
+            dbQuery = dbQuery
+                .populate("workspace")
+            //.populate("specializations")
+        }
+        return dbQuery.
             lean<IApplicant[]>()
             .exec();
     }
@@ -62,25 +62,25 @@ export class ApplicantRepository implements IApplicantRepository {
     // CREATE
     // -------------------------
     async create(dto: CreateApplicantDTO): Promise<IApplicant> {
-    const data: Partial<IApplicant> = {
-        workspace: dto.workspace ? new mongoose.Types.ObjectId(dto.workspace) : undefined,
-        name: dto.name,
-        birthDate: dto.birthDate,
-        gender: dto.gender,
-        fin: dto.fin,
-        orcid: dto.orcid,
-        // Map roles to ObjectIds
-        roles: dto.roles?.map(role => new mongoose.Types.ObjectId(role)),
-        // Map specializations to ObjectIds
-        specializations: dto.specializations?.map(spec => new mongoose.Types.ObjectId(spec)),
-        // Ensure accessibility is at least an empty array
-        accessibility: dto.accessibility ?? [],
-        // Map the DTO "ownerships" to the Schema "ownership" field
-        ownerships: dto.ownerships ?? [] 
-    };
+        const data: Partial<IApplicant> = {
+            workspace: dto.workspace ? new mongoose.Types.ObjectId(dto.workspace) : undefined,
+            name: dto.name,
+            birthDate: dto.birthDate,
+            gender: dto.gender,
+            fin: dto.fin,
+            orcid: dto.orcid,
+            // Map roles to ObjectIds
+            roles: dto.roles?.map(role => new mongoose.Types.ObjectId(role)),
+            // Map specializations to ObjectIds
+            specializations: dto.specializations?.map(spec => new mongoose.Types.ObjectId(spec)),
+            // Ensure accessibility is at least an empty array
+            accessibility: dto.accessibility ?? [],
+            // Map the DTO "ownerships" to the Schema "ownership" field
+            ownerships: dto.ownerships ?? []
+        };
 
-    return Applicant.create(data);
-}
+        return Applicant.create(data);
+    }
     // -------------------------
     // UPDATE
     // -------------------------

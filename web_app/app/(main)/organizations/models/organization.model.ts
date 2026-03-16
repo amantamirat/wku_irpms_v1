@@ -63,6 +63,7 @@ export type Organization = {
 export interface GetOrganizationsOptions {
     type: OrgnUnit;
     parent?: Organization;
+    populate?: boolean;
 }
 
 

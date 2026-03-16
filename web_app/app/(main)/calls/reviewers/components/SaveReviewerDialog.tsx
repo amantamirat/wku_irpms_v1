@@ -54,7 +54,7 @@ export default function SaveReviewerDialog({ visible, reviewer, onCompelete, onH
         const fetchApplicants = async () => {
             try {
                 if (!workspace) return;
-                const data = await ApplicantApi.getApplicants({ workspace: workspace });
+                const data = await ApplicantApi.getAll({ workspace: workspace });
                 if (isMounted) {
                     setApplicants(data);
                 }

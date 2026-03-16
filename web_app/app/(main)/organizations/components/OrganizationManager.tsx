@@ -7,7 +7,8 @@ import {
     Organization,
     OrgnUnit,
     GetOrganizationsOptions,
-    createEmptyOrganization
+    createEmptyOrganization,
+    getParentType
 } from "../models/organization.model";
 import SaveOrganization from "./SaveOrganization";
 
@@ -28,29 +29,48 @@ const OrganizationManager = ({ type }: Props) => {
         const columns = [
             { header: "Name", field: "name", sortable: true },
 
-            ...(type === OrgnUnit.program ? [
-                {
-                    header: "Ac. Level",
-                    field: "academicLevel",
-                    sortable: true,
-                    body: (r: Organization) => renderBadge(r.academicLevel, 'academic')
-                },
-                {
-                    header: "Classification",
-                    field: "classification",
-                    sortable: true,
-                    body: (r: Organization) => renderBadge(r.classification, 'classification')
-                }
-            ] : []),
+            ...(getParentType(type) !== undefined
+                ? [
+                    {
+                        header: "Parent",
+                        field: "parent",
+                        sortable: true,
+                        body: (r: Organization) =>
+                            typeof r.parent === "object" ? r.parent?.name : r.parent
+                    }
+                ]
+                : []),
 
-            ...(type === OrgnUnit.external ? [
-                {
-                    header: "Ownership",
-                    field: "ownership",
-                    sortable: true,
-                    body: (r: Organization) => renderBadge(r.ownership, 'ownership')
-                }
-            ] : []),
+            ...(type === OrgnUnit.program
+                ? [
+                    {
+                        header: "Ac. Level",
+                        field: "academicLevel",
+                        sortable: true,
+                        body: (r: Organization) =>
+                            renderBadge(r.academicLevel, "academic")
+                    },
+                    {
+                        header: "Classification",
+                        field: "classification",
+                        sortable: true,
+                        body: (r: Organization) =>
+                            renderBadge(r.classification, "classification")
+                    }
+                ]
+                : []),
+
+            ...(type === OrgnUnit.external
+                ? [
+                    {
+                        header: "Ownership",
+                        field: "ownership",
+                        sortable: true,
+                        body: (r: Organization) =>
+                            renderBadge(r.ownership, "ownership")
+                    }
+                ]
+                : [])
         ];
 
         return createEntityManager<Organization, GetOrganizationsOptions | undefined>({
@@ -61,7 +81,7 @@ const OrganizationManager = ({ type }: Props) => {
             createNew: () => createEmptyOrganization({ type }),
             SaveDialog: SaveOrganization,
             permissionPrefix: `organization:${type}`,
-            query: () => ({ type })
+            query: () => ({ type, populate: true })
         });
     }, [type]);
 

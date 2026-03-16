@@ -30,7 +30,7 @@ export const validateOption = (
 };
 
 
-export function sanitizeOption(option: Partial<Option>): Partial<Option> {
+export function sanitize(option: Partial<Option>): Partial<Option> {
     return {
         ...option,
         criterion:
@@ -39,3 +39,9 @@ export function sanitizeOption(option: Partial<Option>): Partial<Option> {
                 : option.criterion
     };
 }
+
+export const createEmptyOption = (option?: Partial<Option>): Option => ({
+    criterion: option?.criterion ?? "",
+    title: "",
+    score: 0,
+});

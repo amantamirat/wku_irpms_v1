@@ -34,7 +34,7 @@ const SaveUser = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<U
     useEffect(() => {
         const fetchApplicants = async () => {
             try {
-                const appData = await ApplicantApi.getApplicants({});
+                const appData = await ApplicantApi.getAll({});
                 setApplicants(appData);
             } catch (err) {
                 console.error('Failed to fetch applicant data:', err);

@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/auth-context";
-import { Criterion } from "../models/criterion.model";
+import { Criterion, FormType } from "../models/criterion.model";
 import { useMemo } from "react";
 import { PERMISSIONS } from "@/types/permissions";
 import { TabPanel, TabView } from "primereact/tabview";
@@ -20,8 +20,8 @@ const CriterionDetail = ({ criterion }: CriterionDetailProps) => {
     const tabs = useMemo(() => [
         {
             header: "Options",
-            permission: PERMISSIONS.OPTION.READ,
-            content: <OptionManager criterion={criterion} />
+            permission: "option:read",
+            content: criterion.formType === FormType.closed ? <OptionManager criterion={criterion} /> : undefined
         }
     ], [criterion]);
 

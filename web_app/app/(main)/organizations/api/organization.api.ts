@@ -13,6 +13,9 @@ export const OrganizationApi: EntityApi<Organization, GetOrganizationsOptions | 
             const sanitized = sanitize(options);
             if (sanitized.type) query.append("type", sanitized.type as string);
             if (sanitized.parent) query.append("parent", sanitized.parent as string);
+            if (options.populate !== undefined) {
+                query.append("populate", String(options.populate));
+            }
         }
 
         const url = query.toString() ? `${end_point}?${query.toString()}` : end_point;

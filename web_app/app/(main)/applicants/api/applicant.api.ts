@@ -12,20 +12,23 @@ export const ApplicantApi = {
         return createdData as Applicant;
     },
 
-    async getApplicants(options: GetApplicantsOptions): Promise<Applicant[]> {
+    async getAll(options: GetApplicantsOptions): Promise<Applicant[]> {
         const query = new URLSearchParams();
         const sanitized = sanitizeApplicant(options);
+
         if (sanitized.workspace) {
             query.append("workspace", sanitized.workspace as string);
-            /*
-             if (Array.isArray(options.workspace)) {
-                 query.append("organization", options.workspace.join(',')); // comma-separated
-             } else {
-                 
-             }
-            */
         }
-        const data = await ApiClient.get(`${end_point}?${query.toString()}`);
+
+        if (options.populate !== undefined) {
+            query.append("populate", String(options.populate));
+        }
+
+        const url = query.toString()
+            ? `${end_point}?${query.toString()}`
+            : end_point;
+
+        const data = await ApiClient.get(url);
         return data as Applicant[];
     },
 

@@ -60,7 +60,7 @@ const SaveResultDialog = ({
 
         const fetchOptions = async () => {
             try {
-                const data = await OptionApi.getOptions({ criterion: criterion._id });
+                const data = await OptionApi.getAll({ criterion: criterion._id });
                 setOptions(data);
             } catch (err) {
                 console.error("Failed to fetch options:", err);

@@ -35,10 +35,12 @@ export type Applicant = {
     ownerships?: IOwnership[];
     createdAt?: Date;
     updatedAt?: Date;
+    //populate?: boolean;
 }
 
 export interface GetApplicantsOptions {
     workspace?: string | Organization;
+    populate?: boolean;
 }
 
 export const applicantUnits = [OrgnUnit.department, OrgnUnit.external]

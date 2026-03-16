@@ -31,7 +31,7 @@ router.get(
   "/",
   verifyActiveAccount,
   checkPermission([PERMISSIONS.EVALUATION.READ]),
-  controller.getEvaluations
+  controller.getAll
 );
 
 /**

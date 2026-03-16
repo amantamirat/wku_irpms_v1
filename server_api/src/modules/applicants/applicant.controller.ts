@@ -53,16 +53,19 @@ export class ApplicantController {
     };
 
     // GET /applicants
+    // GET /applicants
     get = async (req: Request, res: Response) => {
         try {
-            const { workspace } = req.query;
+            const { workspace, populate } = req.query;
 
             const filter: GetApplicantsDTO = {
                 workspace: workspace as string,
+                ...(populate !== undefined && { populate: populate === "true" })
             };
 
             const applicants = await this.service.getAll(filter);
-            successResponse(res, 200, 'Applicants fetched successfully', applicants);
+
+            successResponse(res, 200, "Applicants fetched successfully", applicants);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }

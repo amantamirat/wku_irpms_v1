@@ -58,7 +58,7 @@ const SaveStudentDialog = ({ visible, student, applicant, onHide, onComplete }: 
         }
         const fetchApplicants = async () => {
             try {
-                const appData = await ApplicantApi.getApplicants({});
+                const appData = await ApplicantApi.getAll({});
                 setApplicants(appData);
             } catch (err) {
                 console.error('Failed to fetch applicant data:', err);

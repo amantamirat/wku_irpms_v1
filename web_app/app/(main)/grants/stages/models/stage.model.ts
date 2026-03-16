@@ -1,7 +1,6 @@
 import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
 import { Grant } from "../../models/grant.model";
 
-
 export type Stage = {
     _id?: string;
     grant: string | Grant;

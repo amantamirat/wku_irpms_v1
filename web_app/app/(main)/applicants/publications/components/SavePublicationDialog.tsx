@@ -36,7 +36,7 @@ const SavePublicationDialog = ({ visible, publication, applicantProvided, onHide
         }
         const fetchApplicants = async () => {
             try {
-                const appData = await ApplicantApi.getApplicants({});
+                const appData = await ApplicantApi.getAll({});
                 setApplicants(appData);
             } catch (err) {
                 console.error('Failed to fetch applicant data:', err);

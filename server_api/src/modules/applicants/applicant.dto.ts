@@ -46,12 +46,13 @@ export interface UpdateOwnershipsDTO {
 
 export interface GetApplicantsDTO {
     workspace: string;
+    populate?: boolean;
 }
 
 
 export interface ExistsApplicantDTO {
     workspace?: string;
     specialization?: string;
-    role?:string;
+    role?: string;
 }
 

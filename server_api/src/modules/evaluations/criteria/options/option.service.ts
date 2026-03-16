@@ -2,7 +2,7 @@ import { AppError } from "../../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../../common/errors/error.codes";
 import { DeleteDto } from "../../../../common/dtos/delete.dto";
 import { IResultRepository, ResultRepository } from "../../../calls/stages/reviewers/results/result.repository";
-import { FormType } from "../criterion.enum";
+import { FormType } from "../criterion.model";
 import { CriterionRepository, ICriterionRepository } from "../criterion.repository";
 import {
     CreateOptionDTO,
@@ -23,17 +23,27 @@ export class OptionService {
      * Create a new option under a criterion.
      */
     async create(dto: CreateOptionDTO) {
-        const { criterion, title, score } = dto;
+        try {
 
-        const criterionDoc = await this.criterionRepo.findById(criterion);
-        if (!criterionDoc) throw new AppError(ERROR_CODES.CRITERION_NOT_FOUND);
-        if (criterionDoc.formType !== FormType.closed)
-            throw new AppError(ERROR_CODES.CRITERION_NOT_CLOSED);
+            const { criterion, title, score } = dto;
 
-        if (score > criterionDoc.weight)
-            throw new AppError(ERROR_CODES.INVALID_OPTION_WEIGHT);
+            const criterionDoc = await this.criterionRepo.findById(criterion);
+            if (!criterionDoc) throw new AppError(ERROR_CODES.CRITERION_NOT_FOUND);
+            if (criterionDoc.formType !== FormType.closed)
+                throw new AppError(ERROR_CODES.CRITERION_NOT_CLOSED);
 
-        return await this.repository.create(dto);
+            if (score > criterionDoc.weight)
+                throw new AppError(ERROR_CODES.INVALID_OPTION_WEIGHT);
+
+            return await this.repository.create(dto);
+        } catch (err: any) {
+
+            if (err?.code === 11000) {
+                throw new AppError(ERROR_CODES.OPTION_ALREADY_EXISTS);
+            }
+            throw err;
+        }
+
     }
 
     /**
@@ -47,18 +57,25 @@ export class OptionService {
      * Update an existing option.
      */
     async update(dto: UpdateOptionDTO) {
-        const { id, data } = dto;
+        try {
+            const { id, data } = dto;
+            const option = await this.repository.findById(id);
+            if (!option) throw new AppError(ERROR_CODES.OPTION_NOT_FOUND);
+            if (data.score) {
+                const criterion = await this.criterionRepo.findById(String(option.criterion));
+                if (!criterion) throw new AppError(ERROR_CODES.CRITERION_NOT_CLOSED);
+                if (data.score > criterion.weight)
+                    throw new AppError(ERROR_CODES.INVALID_OPTION_WEIGHT);
+            }
+            return this.repository.update(id, data);
+        } catch (err: any) {
 
-        const option = await this.repository.findById(id);
-        if (!option) throw new AppError(ERROR_CODES.OPTION_NOT_FOUND);
-
-        if (data.score) {
-            const criterion = await this.criterionRepo.findById(String(option.criterion));
-            if (!criterion) throw new AppError(ERROR_CODES.CRITERION_NOT_CLOSED);
-            if (data.score > criterion.weight)
-                throw new AppError(ERROR_CODES.INVALID_OPTION_WEIGHT);
+            if (err?.code === 11000) {
+                throw new AppError(ERROR_CODES.OPTION_ALREADY_EXISTS);
+            }
+            throw err;
         }
-        return this.repository.update(id, data);
+
     }
 
     /**

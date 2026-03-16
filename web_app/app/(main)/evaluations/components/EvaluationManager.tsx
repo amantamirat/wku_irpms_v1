@@ -1,145 +1,49 @@
 'use client';
-import { CrudManager } from "@/components/CrudManager";
-import { useAuth } from "@/contexts/auth-context";
-import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-import { useCrudList } from "@/hooks/useCrudList";
-import { PERMISSIONS } from "@/types/permissions";
-import { useEffect, useState } from "react";
-import { Organization } from "../../organizations/models/organization.model";
-import { EvaluationApi } from "../api/evaluation.api";
-import { Evaluation } from "../models/evaluation.model";
-import EvaluationDetail from "./EvaluationDetail";
-import SaveEvaluation from "./SaveEvaluation";
 
-interface EvalManagerProps {
-    directorate?: Organization;
+import { createEntityManager } from "@/components/createEntityManager";
+import { Evaluation, GetEvaluationsOptions } from "../models/evaluation.model";
+import { EvaluationApi } from "../api/evaluation.api";
+import SaveEvaluation from "./SaveEvaluation";
+import EvaluationDetail from "./EvaluationDetail";
+import { Organization } from "../../organizations/models/organization.model";
+
+interface EvaluationManagerProps {
+    organization?: Organization;
 }
 
-const EvaluationManager = ({ directorate }: EvalManagerProps) => {
+const EvaluationManager = ({ organization }: EvaluationManagerProps) => {
+    const Manager = createEntityManager<Evaluation, GetEvaluationsOptions | undefined>({
+        title: "Manage Evaluations",
+        itemName: "Evaluation",
+        api: EvaluationApi,
 
-    const confirm = useConfirmDialog();
-    const { hasPermission } = useAuth();
-
-    const canCreate = hasPermission([PERMISSIONS.EVALUATION.CREATE]);
-    const canEdit = hasPermission([PERMISSIONS.EVALUATION.UPDATE]);
-    const canDelete = hasPermission([PERMISSIONS.EVALUATION.DELETE]);
-
-    const emptyEvaluation: Evaluation = {
-        directorate: directorate ?? "",
-        title: ""
-    };
-
-    /** CRUD Hook */
-    const {
-        items: evaluations,
-        setAll,
-        updateItem,
-        removeItem,
-        loading,
-        setLoading,
-        error,
-        setError,
-    } = useCrudList<Evaluation>();
-
-    const [evaluation, setEvaluation] = useState<Evaluation>(emptyEvaluation);
-    const [showSaveDialog, setShowSaveDialog] = useState(false);
-
-    /** Fetch evaluations */
-    useEffect(() => {
-
-        const fetchEvaluations = async () => {
-            try {
-                setLoading(true);
-                const data = await EvaluationApi.getEvaluations({ directorate });
-                setAll(data);
-            } catch (err: any) {
-                setError("Failed to load evaluations. " + (err?.message ?? ""));
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchEvaluations();
-    }, [directorate]);
-
-    /** Save callback */
-    const onSaveComplete = (saved: Evaluation) => {
-        updateItem(saved);
-        hideDialogs();
-    };
-
-    /** Delete evaluation */
-    const deleteEvaluation = async (row: Evaluation) => {
-        const ok = await EvaluationApi.deleteEvaluation(row);
-        if (ok) removeItem(row);
-    };
-
-    /** Hide dialogs */
-    const hideDialogs = () => {
-        setShowSaveDialog(false);
-    };
-
-    /** Table columns */
-    const columns = [
-        //{ header: "Directorate", field: "directorate.name" },
-        { header: "Title", field: "title" },
-        { header: "Description", field: "description" },
-    ];
-
-
-    return (
-        <>
-            <CrudManager
-                headerTitle="Manage Evaluations"
-                //itemName="Evaluation"
-                items={evaluations}
-                dataKey="_id"
-                columns={columns}
-                loading={loading}
-                error={error}
-
-                /** Permissions */
-                canCreate={canCreate}
-                canEdit={canEdit}
-                canDelete={canDelete}
-
-                /** Handlers */
-                onCreate={() => {
-                    setEvaluation({ ...emptyEvaluation });
-                    setShowSaveDialog(true);
-                }}
-
-                onEdit={(row) => {
-                    setEvaluation({ ...row });
-                    setShowSaveDialog(true);
-                }}
-
-                onDelete={(row) =>
-                    confirm.ask({
-                        item: row.title,
-                        onConfirmAsync: () => deleteEvaluation(row),
-                    })
-                }
-
-                enableSearch
-                /** Expand row → show criteria manager */
-                rowExpansionTemplate={(row) => (
-                    <EvaluationDetail evaluation={row as Evaluation} />
-                )}
-            />
-
-            {/* Save Dialog */}
+        columns: [
             {
-                (evaluation && showSaveDialog) &&
-                <SaveEvaluation
-                    visible={showSaveDialog}
-                    evaluation={evaluation}
-                    onComplete={onSaveComplete}
-                    onHide={hideDialogs}
-                />
-            }
-        </>
-    );
+                header: "Organization",
+                field: "organization",
+                sortable: true,
+                body: (r: Evaluation) =>
+                    typeof r.organization === "object" ? r.organization?.name : r.organization
+            },
+            { header: "Title", field: "title", sortable: true },
+            { header: "Description", field: "description" }
+        ],
+
+        createNew: () => ({
+            organization: organization ?? "",
+            title: ""
+        }),
+        SaveDialog: SaveEvaluation,
+        permissionPrefix: "evaluation",
+        query: () => ({ populate: true }),
+        expandable: {
+            template: (evaluation) => (
+                <EvaluationDetail evaluation={evaluation} />
+            )
+        }
+    });
+
+    return <Manager />;
 };
 
 export default EvaluationManager;

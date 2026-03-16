@@ -1,48 +1,39 @@
+import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { Organization } from "../../organizations/models/organization.model";
-import { Evaluation, GetEvaluationsOptions, sanitizeEvaluation } from "../models/evaluation.model";
+import { Evaluation, GetEvaluationsOptions, sanitize } from "../models/evaluation.model";
 
-const end_point = '/evaluations';
+const end_point = "/evaluations";
 
-export const EvaluationApi = {
+export const EvaluationApi: EntityApi<Evaluation, GetEvaluationsOptions | undefined> = {
 
-    async createEvaluation(evaluation: Partial<Evaluation>): Promise<Evaluation> {
-        const sanitized = sanitizeEvaluation(evaluation);
-        const createdData = await ApiClient.post(end_point, sanitized);
-        return createdData as Evaluation;
-    },
-
-    async getEvaluations(options: GetEvaluationsOptions): Promise<Evaluation[]> {
+    async getAll(options) {
         const query = new URLSearchParams();
-        const sanitized = sanitizeEvaluation(options);
-        if (sanitized.directorate) query.append("directorate", sanitized.directorate as string);
-        const data = await ApiClient.get(`${end_point}?${query.toString()}`);
-        return data as Evaluation[];
-    },
-
-    /*
-    async getUserEvaluations(): Promise<Evaluation[]> {
-        const data = await ApiClient.get(`${end_point}/user`);
-        return data as Evaluation[];
-    },
-    */
-
-    async updateEvaluation(evaluation: Partial<Evaluation>): Promise<Evaluation> {
-        if (!evaluation._id) {
-            throw new Error("_id required.");
+        if (options) {
+            const sanitized = sanitize(options);
+            if (sanitized.organization) {
+                query.append("organization", sanitized.organization as string);
+            }
+            if (options.populate !== undefined) {
+                query.append("populate", String(options.populate));
+            }
         }
-        const url = `${end_point}/${evaluation._id}`;
-        const sanitized = sanitizeEvaluation(evaluation);
-        const updatedData = await ApiClient.put(url, sanitized);
-        return updatedData as Evaluation;
+        const qs = query.toString();
+        return ApiClient.get(`${end_point}${qs ? `?${qs}` : ""}`);
     },
 
-    async deleteEvaluation(evaluation: Partial<Evaluation>): Promise<boolean> {
-        if (!evaluation._id) {
-            throw new Error("_id required.");
-        }
-        const url = `${end_point}/${evaluation._id}`;
-        const response = await ApiClient.delete(url);
-        return response;
+    async create(evaluation) {
+        const sanitized = sanitize(evaluation);
+        return ApiClient.post(end_point, sanitized);
     },
+
+    async update(evaluation) {
+        if (!evaluation._id) throw new Error("_id required");
+        const sanitized = sanitize(evaluation);
+        return ApiClient.put(`${end_point}/${evaluation._id}`, sanitized);
+    },
+
+    async delete(evaluation) {
+        if (!evaluation._id) throw new Error("_id required");
+        return ApiClient.delete(`${end_point}/${evaluation._id}`);
+    }
 };

@@ -1,50 +1,46 @@
+import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { Criterion, GetCriteriaOptions, sanitizeCriterion } from "../models/criterion.model";
+import { Criterion, GetCriteriaOptions, sanitize } from "../models/criterion.model";
 
 const end_point = '/criteria';
 
-export const CriterionApi = {
+export const CriterionApi: EntityApi<Criterion, GetCriteriaOptions> & {
+    importCriteriaBatch: (evaluationId: string, criteriaData: any[]) => Promise<any>
+} = {
 
-    async create(criterion: Partial<Criterion>): Promise<Criterion> {
-        const sanitized = sanitizeCriterion(criterion);
-        const createdData = await ApiClient.post(end_point, sanitized);
-        return createdData as Criterion;
-    },
-
-    async getCriteria(options: GetCriteriaOptions): Promise<Criterion[]> {
+    async getAll(options?: GetCriteriaOptions) {
         const query = new URLSearchParams();
-        const sanitized = sanitizeCriterion(options);
-        if (options.evaluation) query.append("evaluation", sanitized.evaluation as string);
-        // if (options.stage) query.append("stage", options.stage);
-        // if (options.reviewer) query.append("reviewer", options.reviewer);
-        const data = await ApiClient.get(`${end_point}?${query.toString()}`);
-        return data as Criterion[];
+
+        if (options) {
+            const sanitized = sanitize(options);
+            if (options.evaluation) query.append("evaluation", sanitized.evaluation as string);
+        }
+
+        const url = query.toString() ? `${end_point}?${query.toString()}` : end_point;
+        return ApiClient.get(url);
     },
 
-    async importCriteriaBatch(evaluationId: string, criteriaData: any[]): Promise<any> {
-        const response = await ApiClient.post(`${end_point}/import`, {
-            evaluationId: evaluationId,
-            criteriaData: criteriaData
+    async create(criterion) {
+        const sanitized = sanitize(criterion);
+        return ApiClient.post(end_point, sanitized);
+    },
+
+    async update(criterion) {
+        if (!criterion._id) throw new Error("_id required");
+        const sanitized = sanitize(criterion);
+        return ApiClient.put(`${end_point}/${criterion._id}`, sanitized);
+    },
+
+    async delete(criterion) {
+        if (!criterion._id) throw new Error("_id required");
+        return ApiClient.delete(`${end_point}/${criterion._id}`);
+    },
+
+    // Custom method specific to Criterion
+    async importCriteriaBatch(evaluationId, criteriaData) {
+        return ApiClient.post(`${end_point}/import`, {
+            evaluationId,
+            criteriaData
         });
-        return response;
-    },
-
-    async update(criterion: Partial<Criterion>): Promise<Criterion> {
-        if (!criterion._id) {
-            throw new Error("_id required.");
-        }
-        const url = `${end_point}/${criterion._id}`;
-        const sanitized = sanitizeCriterion(criterion);
-        const updatedData = await ApiClient.put(url, sanitized);
-        return updatedData as Criterion;
-    },
-
-    async delete(criterion: Partial<Criterion>): Promise<boolean> {
-        if (!criterion._id) {
-            throw new Error("_id required.");
-        }
-        const url = `${end_point}/${criterion._id}`;
-        const response = await ApiClient.delete(url);
-        return response;
     },
 };

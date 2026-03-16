@@ -8,31 +8,20 @@ import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 import { OptionApi } from '../api/option.api';
 import { Option, validateOption } from '../models/option.model';
+import { EntitySaveDialogProps } from '@/components/createEntityManager';
 
-interface SaveOptionProps {
-    visible: boolean;
-    //criterion: Criterion;
-    option: Option;
-    onComplete?: (saved: Option) => void;
-    onHide: () => void;
-}
-
-const SaveOption = ({ visible, option, onComplete, onHide }: SaveOptionProps) => {
+const SaveOption = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<Option>) => {
     const toast = useRef<Toast>(null);
-    const [localOption, setLocalOption] = useState<Option>({ ...option });
+    const [localOption, setLocalOption] = useState<Option>({ ...item });
     const [submitted, setSubmitted] = useState(false);
 
     useEffect(() => {
-        setLocalOption({ ...option });
-    }, [option]);
-
-    useEffect(() => {
-        if (!visible) clearForm();
-    }, [visible]);
+        setLocalOption({ ...item });
+    }, [item]);
 
     const clearForm = () => {
         setSubmitted(false);
-        setLocalOption({ ...option });
+        setLocalOption({ ...item });
     };
 
     const saveOption = async () => {
@@ -42,9 +31,10 @@ const SaveOption = ({ visible, option, onComplete, onHide }: SaveOptionProps) =>
             if (!validation.valid) throw new Error(validation.message);
 
             let saved = localOption._id
-                ? await OptionApi.updateOption(localOption)
-                : await OptionApi.createOption(localOption);
+                ? await OptionApi.update(localOption)
+                : await OptionApi.create(localOption);
 
+            // Maintain the criterion reference for UI consistency
             saved = {
                 ...saved,
                 criterion: localOption.criterion
@@ -105,7 +95,7 @@ const SaveOption = ({ visible, option, onComplete, onHide }: SaveOptionProps) =>
                     />
                 </div>
 
-                {/* Option Value */}
+                {/* Option Value (Score) */}
                 <div className="field">
                     <label htmlFor="value">Value</label>
                     <InputNumber
@@ -115,7 +105,9 @@ const SaveOption = ({ visible, option, onComplete, onHide }: SaveOptionProps) =>
                         required
                         mode="decimal"
                         min={0}
-                        className={classNames({ 'p-invalid': submitted && (localOption.score === undefined || localOption.score < 0) })}
+                        className={classNames({ 
+                            'p-invalid': submitted && (localOption.score === undefined || localOption.score < 0) 
+                        })}
                     />
                 </div>
             </Dialog>

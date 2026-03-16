@@ -4,8 +4,12 @@
 
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
-import { FormType } from "./criterion.enum";
 import { Evaluation } from "../evaluation.model";
+
+export enum FormType {
+    open = 'Open',
+    closed = 'Closed'
+}
 
 export interface ICriterion extends Document {
     _id: mongoose.Types.ObjectId;

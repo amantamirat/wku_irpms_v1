@@ -19,7 +19,7 @@ router.get(
     "/",
     verifyActiveAccount,
     checkPermission([PERMISSIONS.CRITERION.READ]),
-    controller.getCriteria
+    controller.getAll
 );
 
 // Update a criterion

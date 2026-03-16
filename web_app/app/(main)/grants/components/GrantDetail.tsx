@@ -1,15 +1,12 @@
 import { useAuth } from "@/contexts/auth-context";
-import { Grant } from "../models/grant.model";
-import { useMemo } from "react";
 import { PERMISSIONS } from "@/types/permissions";
-import ConstraintManager from "../constraints/components/ConstraintManager";
-import CompositionManager from "../compositions/components/CompositionManager";
 import { TabPanel, TabView } from "primereact/tabview";
+import { useMemo } from "react";
 import CallManager from "../../calls/components/CallManager";
-import { StageApi } from "../stages/api/stage.api";
-import { createEmptyStage, GetStagesDTO, Stage } from "../stages/models/stage.model";
-import { createEntityManager } from "@/components/createEntityManager";
-import SaveStage from "../stages/components/SaveStage";
+import CompositionManager from "../compositions/components/CompositionManager";
+import ConstraintManager from "../constraints/components/ConstraintManager";
+import { Grant } from "../models/grant.model";
+import StageManager from "../stages/components/StageManager";
 
 
 interface GrantDetailProps {
@@ -19,34 +16,6 @@ interface GrantDetailProps {
 const GrantDetail = ({ grant }: GrantDetailProps) => {
 
     const { hasPermission } = useAuth();
-
-    const StageManager = useMemo(() =>
-        createEntityManager<Stage, GetStagesDTO>({
-            title: "Stages",
-            itemName: "Stage",
-            api: StageApi,
-            columns: [
-                { header: "Name", field: "name" },
-                { header: "Order", field: "order" },
-                {
-                    header: "Evaluation",
-                    body: (s: Stage) =>
-                        typeof s.evaluation === "object"
-                            ? s.evaluation?.title
-                            : s.evaluation
-                }
-            ],
-            createNew: () => createEmptyStage({ grant }),
-            SaveDialog: SaveStage,
-            permissionPrefix: "grant_stage",
-            query: () => ({
-                grant: grant
-            })
-        })
-        , [grant._id]);
-
-
-
     /**
      * Define tabs in a scalable configuration array
      */
@@ -64,7 +33,7 @@ const GrantDetail = ({ grant }: GrantDetailProps) => {
         {
             header: "Stages",
             permission: "grant_stage:read",
-            content: <StageManager />
+            content: <StageManager grant={grant} />
         },
         {
             header: "Calls",

@@ -26,13 +26,13 @@ export class EvaluationRepository implements IEvaluationRepository {
     async find(filters: GetEvaluationsDTO) {
         const query: any = {};
 
-        if (filters.directorate) {
-            query.directorate = new mongoose.Types.ObjectId(filters.directorate);
+        if (filters.organization) {
+            query.organization = new mongoose.Types.ObjectId(filters.organization);
         }
         let dbQuery = Evaluation.find(query);
 
         if (filters.populate) {
-            dbQuery = dbQuery.populate("directorate");
+            dbQuery = dbQuery.populate("organization");
         }
 
         return dbQuery.lean<IEvaluation[]>().exec();
@@ -40,7 +40,7 @@ export class EvaluationRepository implements IEvaluationRepository {
 
     async create(dto: CreateEvaluationDTO) {
         const data: Partial<IEvaluation> = {
-            directorate: new mongoose.Types.ObjectId(dto.directorate),
+            organization: new mongoose.Types.ObjectId(dto.organization),
             title: dto.title,
         };
         return Evaluation.create(data);
@@ -50,6 +50,7 @@ export class EvaluationRepository implements IEvaluationRepository {
         const updateData: Partial<IEvaluation> = {};
 
         if (dtoData.title) updateData.title = dtoData.title;
+        if (dtoData.description) updateData.description = dtoData.description;
 
         return Evaluation.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),

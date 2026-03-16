@@ -22,7 +22,7 @@ import { Unit } from "../../common/constants/enums";
 
 
 export interface IOrganizationRepository {
-    findById(id: string): Promise<any | null>;
+    findById(id: string): Promise<IOrganization | null>;
     findByIds(ids: string[]): Promise<any[]>;
     find(options: GetOrganizationsDTO): Promise<any[]>;
     create(data: CreateOrganizationDTO): Promise<any>;
@@ -38,7 +38,7 @@ export class OrganizationRepository implements IOrganizationRepository {
     // ------------------------------------
     async findById(id: string) {
         return Organization.findById(new mongoose.Types.ObjectId(id))
-            .lean()
+            .lean<IOrganization>()
             .exec();
     }
 
@@ -47,7 +47,6 @@ export class OrganizationRepository implements IOrganizationRepository {
     // ------------------------------------
     async find(filters: GetOrganizationsDTO) {
         const query: any = {};
-
         if (filters.type) {
             query.type = filters.type;
         }
@@ -55,7 +54,12 @@ export class OrganizationRepository implements IOrganizationRepository {
         if (filters.parent) {
             query.parent = new mongoose.Types.ObjectId(filters.parent);
         }
-        return Organization.find(query).populate("parent")
+        let dbQuery = Organization.find(query);
+        if (filters.populate) {
+            dbQuery = dbQuery
+                .populate("parent")
+        }
+        return dbQuery
             .lean()
             .exec();
     }
@@ -152,8 +156,6 @@ export class OrganizationRepository implements IOrganizationRepository {
         const result = await Organization.exists(query).exec();
         return result !== null;
     }
-
-
 
     // ------------------------------------
     // DELETE

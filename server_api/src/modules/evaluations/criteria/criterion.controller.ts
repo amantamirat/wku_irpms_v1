@@ -3,7 +3,7 @@ import { successResponse, errorResponse } from "../../../common/helpers/response
 import { AuthenticatedRequest } from "../../users/auth/auth.middleware";
 import { CreateCriterionDTO, GetCriteriaDTO, UpdateCriterionDTO, ImportCriteriaBatchDTO } from "./criterion.dto";
 import { CriterionService } from "./criterion.service";
-import mongoose from "mongoose";
+
 import { ERROR_CODES } from '../../../common/errors/error.codes';
 
 export class CriterionController {
@@ -16,17 +16,13 @@ export class CriterionController {
 
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
-
             const { evaluation, title, formType, weight } = req.body;
-
             const dto: CreateCriterionDTO = {
                 evaluation,
                 title,
                 formType,
                 weight
             };
-
             const criterion = await this.service.create(dto);
             successResponse(res, 201, "Criterion created successfully", criterion);
         } catch (err: any) {
@@ -34,7 +30,7 @@ export class CriterionController {
         }
     }
 
-    getCriteria = async (req: Request, res: Response) => {
+    getAll = async (req: Request, res: Response) => {
         try {
             const { evaluation } = req.query;
 
@@ -51,8 +47,6 @@ export class CriterionController {
 
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
-
             const { id } = req.params;
             const { title, formType, weight } = req.body;
 
@@ -68,8 +62,7 @@ export class CriterionController {
     }
 
     delete = async (req: AuthenticatedRequest, res: Response) => {
-        try {
-            if (!req.user) throw new Error("User not found");
+        try {          
 
             const { id } = req.params;
             const deleted = await this.service.delete(id);

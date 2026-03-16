@@ -17,8 +17,6 @@ export type Criterion = {
 
 export interface GetCriteriaOptions {
     evaluation?: string | Evaluation;
-    //stage?: string;
-    //reviewer?: string;
 }
 
 export const validateCriterion = (
@@ -35,7 +33,7 @@ export const validateCriterion = (
     return { valid: true };
 };
 
-export function sanitizeCriterion(criterion: Partial<Criterion>): Partial<Criterion> {
+export function sanitize(criterion: Partial<Criterion>): Partial<Criterion> {
     return {
         ...criterion,
         evaluation:
@@ -44,3 +42,12 @@ export function sanitizeCriterion(criterion: Partial<Criterion>): Partial<Criter
                 : criterion.evaluation
     };
 }
+
+export const createEmptyCriterion = (criterion?: Partial<Criterion>): Criterion => ({
+    evaluation: criterion?.evaluation ?? "",
+    title: criterion?.title ?? "",
+    weight: criterion?.weight ?? 0,
+    formType: criterion?.formType ?? FormType.open, // Replace with your actual default FormType
+});
+
+

@@ -1,25 +1,24 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
-import { Directorate } from "../organization/organization.model";
-
-
 
 export interface IEvaluation extends Document {
-    directorate: mongoose.Types.ObjectId;
+    organization: mongoose.Types.ObjectId;
     title: string;
+    description?: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
 const EvaluationSchema = new Schema<IEvaluation>(
     {
-        directorate: {
+        organization: {
             type: Schema.Types.ObjectId,
-            ref: Directorate.modelName,
+            ref: COLLECTIONS.ORGANIZATION,
             required: true,
             immutable: true,
         },
         title: { type: String, required: true },
+        description: { type: String }
     },
     { timestamps: true }
 );

@@ -1,74 +1,65 @@
 'use client';
-import { Button } from 'primereact/button';
-import { Dialog } from 'primereact/dialog';
-import { Dropdown } from 'primereact/dropdown';
-import { InputText } from 'primereact/inputtext';
-import { Toast } from 'primereact/toast';
-import { classNames } from 'primereact/utils';
-import { useEffect, useRef, useState } from 'react';
-import { Organization } from '../../organizations/models/organization.model';
-import { EvaluationApi } from '../api/evaluation.api';
-import { Evaluation, validateEvaluation } from '../models/evaluation.model';
-import { useDirectorate } from '@/contexts/DirectorateContext';
+import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
+import { Dropdown } from "primereact/dropdown";
+import { InputText } from "primereact/inputtext";
+import { InputTextarea } from "primereact/inputtextarea";
+import { Toast } from "primereact/toast";
+import { classNames } from "primereact/utils";
+import { useEffect, useRef, useState } from "react";
 
-interface SaveEvaluatioProps {
-    visible: boolean;
-    evaluation: Evaluation;
-    onComplete?: (savedEvaluation: Evaluation) => void;
-    onHide: () => void;
-}
+import { Evaluation, validateEvaluation } from "../models/evaluation.model";
+import { useDirectorate } from "@/contexts/DirectorateContext";
+import { EntitySaveDialogProps } from "@/components/createEntityManager";
+import { EvaluationApi } from "../api/evaluation.api";
 
-const SaveEvaluation = ({ visible, evaluation, onComplete, onHide }: SaveEvaluatioProps) => {
+const SaveEvaluation = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<Evaluation>) => {
 
     const toast = useRef<Toast>(null);
-
-    const [localEvaluation, setLocalEvaluation] = useState<Evaluation>({ ...evaluation });
-    const [submitted, setSubmitted] = useState(false);
     const { directorates } = useDirectorate();
 
-    useEffect(() => {
-        setLocalEvaluation({ ...evaluation });
-    }, [evaluation]);
+    const [localItem, setLocalItem] = useState<Evaluation>({ ...item });
+    const [submitted, setSubmitted] = useState(false);
 
+    // Reset form when item changes
+    useEffect(() => setLocalItem({ ...item }), [item]);
+
+    // Clear form when dialog hides
     useEffect(() => {
         if (!visible) clearForm();
     }, [visible]);
 
     const clearForm = () => {
         setSubmitted(false);
-        setLocalEvaluation({ ...evaluation });
+        setLocalItem({ ...item });
     };
 
     const saveEvaluation = async () => {
         setSubmitted(true);
         try {
-            const validation = validateEvaluation(localEvaluation);
-            if (!validation.valid) {
-                throw new Error(validation.message);
-            }
-
-            let saved = localEvaluation._id
-                ? await EvaluationApi.updateEvaluation(localEvaluation)
-                : await EvaluationApi.createEvaluation(localEvaluation);
-
+            const validation = validateEvaluation(localItem);
+            if (!validation.valid) throw new Error(validation.message);
+            // Normally, API call happens outside via createEntityManager
+            let saved = localItem._id
+                ? await EvaluationApi.update(localItem)
+                : await EvaluationApi.create(localItem);
             saved = {
                 ...saved,
-                directorate: localEvaluation.directorate
+                organization: localItem.organization
             };
-
             toast.current?.show({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Evaluation saved successfully',
+                severity: "success",
+                summary: "Success",
+                detail: "Evaluation saved successfully",
                 life: 2000,
             });
 
-            if (onComplete) setTimeout(() => onComplete(saved), 1000);
+            if (onComplete) setTimeout(() => onComplete(saved), 500);
         } catch (err: any) {
             toast.current?.show({
-                severity: 'error',
-                summary: 'Error',
-                detail: err.message || 'Failed to save Evaluation',
+                severity: "error",
+                summary: "Error",
+                detail: err.message || "Failed to save Evaluation",
                 life: 2500,
             });
         }
@@ -89,39 +80,64 @@ const SaveEvaluation = ({ visible, evaluation, onComplete, onHide }: SaveEvaluat
     return (
         <>
             <Toast ref={toast} />
+
             <Dialog
                 visible={visible}
-                style={{ width: '600px' }}
-                header={localEvaluation._id ? 'Edit Evaluation' : 'New Evaluation'}
+                style={{ width: "600px" }}
+                header={localItem._id ? "Edit Evaluation" : "New Evaluation"}
                 modal
                 className="p-fluid"
                 footer={footer}
                 onHide={hide}
             >
-                {/* Directorate Selector */}
+                {/* Directorate */}
                 <div className="field">
-                    <label htmlFor="directorate">Directorate</label>
+                    <label htmlFor="organization">Organization</label>
                     <Dropdown
-                        id="directorate"
-                        value={localEvaluation.directorate}
+                        id="organization"
+                        dataKey="_id"
+                        value={localItem.organization}
                         options={directorates}
                         optionLabel="name"
-                        onChange={(e) => setLocalEvaluation({ ...localEvaluation, directorate: e.value })}
-                        placeholder="Select Directorate"
-                        className={classNames({ 'p-invalid': submitted && !localEvaluation.directorate })}
+                        onChange={(e) =>
+                            setLocalItem({ ...localItem, organization: e.value })
+                        }
+                        placeholder="Select Organization"
+                        className={classNames({
+                            "p-invalid": submitted && !localItem.organization
+                        })}
                     />
                 </div>
 
-                {/* Title Field */}
+                {/* Title */}
                 <div className="field">
                     <label htmlFor="title">Title</label>
                     <InputText
                         id="title"
-                        value={localEvaluation.title}
-                        onChange={(e) => setLocalEvaluation({ ...localEvaluation, title: e.target.value })}
+                        value={localItem.title}
+                        onChange={(e) =>
+                            setLocalItem({ ...localItem, title: e.target.value })
+                        }
                         required
                         autoFocus
-                        className={classNames({ 'p-invalid': submitted && !localEvaluation.title })}
+                        className={classNames({
+                            "p-invalid": submitted && !localItem.title
+                        })}
+                    />
+                </div>
+
+
+                {/* Description */}
+                <div className="field">
+                    <label htmlFor="description">Description</label>
+                    <InputTextarea
+                        id="description"
+                        value={localItem.description ?? ""}
+                        onChange={(e) =>
+                            setLocalItem({ ...localItem, description: e.target.value })
+                        }
+                        rows={4}
+                        cols={30}
                     />
                 </div>
             </Dialog>

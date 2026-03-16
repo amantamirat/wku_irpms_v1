@@ -9,7 +9,7 @@ import {
     ImportCriteriaBatchDTO,
     UpdateCriterionDTO,
 } from "./criterion.dto";
-import { FormType } from "./criterion.enum";
+import { FormType } from "./criterion.model";
 import { Criterion } from "./criterion.model";
 import { CriterionRepository, ICriterionRepository } from "./criterion.repository";
 import { Option } from "./options/option.model";

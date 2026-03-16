@@ -40,7 +40,7 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
     useEffect(() => {
         const fetchEvaluations = async () => {
             try {
-                const data = await EvaluationApi.getEvaluations({ directorate: (localStage.grant as Grant).organization });
+                const data = await EvaluationApi.getAll({ organization: (localStage.grant as Grant).organization });
                 setEvaluations(data);
             } catch (err) {
                 console.error('Failed to fetch evaluations:', err);

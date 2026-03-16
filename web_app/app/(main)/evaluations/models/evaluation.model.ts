@@ -2,14 +2,16 @@ import { Organization } from "../../organizations/models/organization.model";
 
 export type Evaluation = {
     _id?: string;
-    directorate: string | Organization;
+    organization: string | Organization;
     title: string;
+    description?: string;
     createdAt?: Date;
     updatedAt?: Date;
 };
 
 export interface GetEvaluationsOptions {
-    directorate?: string | Organization;
+    organization?: string | Organization;
+    populate?: boolean;
 }
 
 export const validateEvaluation = (
@@ -18,19 +20,24 @@ export const validateEvaluation = (
     if (!evaluation.title || evaluation.title.trim().length === 0) {
         return { valid: false, message: "Title is required." };
     }
-    if (!evaluation.directorate) {
-        return { valid: false, message: "Directorate is required." };
+    if (!evaluation.organization) {
+        return { valid: false, message: "Organization is required." };
     }
     return { valid: true };
 };
 
 
-export function sanitizeEvaluation(evaluation: Partial<Evaluation>): Partial<Evaluation> {
+export function sanitize(evaluation: Partial<Evaluation>): Partial<Evaluation> {
     return {
         ...evaluation,
-        directorate:
-            typeof evaluation.directorate === 'object' && evaluation.directorate !== null
-                ? (evaluation.directorate as Organization)._id
-                : evaluation.directorate
+        organization:
+            typeof evaluation.organization === 'object' && evaluation.organization !== null
+                ? (evaluation.organization as Organization)._id
+                : evaluation.organization
     };
 }
+
+export const createEmptyEval = (): Evaluation => ({
+    organization: "",
+    title: "",
+})

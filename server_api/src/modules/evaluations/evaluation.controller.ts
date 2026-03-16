@@ -18,8 +18,9 @@ export class EvaluationController {
             if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const dto: CreateEvaluationDTO = {
-                directorate: req.body.directorate,
+                organization: req.body.organization,
                 title: req.body.title,
+                description: req.body.description,
                 userId: req.user.applicantId
             };
 
@@ -30,14 +31,14 @@ export class EvaluationController {
         }
     }
 
-    getEvaluations = async (req: Request, res: Response) => {
+    getAll = async (req: Request, res: Response) => {
         try {
-            const { directorate } = req.query;
+            const { organization, populate } = req.query;
             const filter: GetEvaluationsDTO = {
-                directorate: directorate as string
+                organization: organization as string,
+                ...(populate !== undefined && { populate: populate === "true" })
             };
-
-            const evaluations = await this.service.getEvaluations(filter);
+            const evaluations = await this.service.get(filter);
             successResponse(res, 200, "Evaluations fetched successfully", evaluations);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -46,14 +47,13 @@ export class EvaluationController {
 
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error("User not found");
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const dto: UpdateEvaluationDTO = {
                 id: req.params.id,
-                data: { title: req.body.title },
+                data: { title: req.body.title, description: req.body.description, },
                 userId: req.user.applicantId
             };
-
             const updated = await this.service.update(dto);
             successResponse(res, 200, "Evaluation updated successfully", updated);
         } catch (err: any) {
@@ -63,7 +63,7 @@ export class EvaluationController {
 
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error("User not found");
+           if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const deleted = await this.service.delete({
                 id: req.params.id,

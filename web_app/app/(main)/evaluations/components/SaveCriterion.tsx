@@ -10,18 +10,12 @@ import { useEffect, useRef, useState } from 'react';
 import { CriterionApi } from '../api/criterion.api';
 import { Criterion, FormType, validateCriterion } from '../models/criterion.model';
 import { Evaluation } from '../../evaluations/models/evaluation.model';
+import { EntitySaveDialogProps } from '@/components/createEntityManager';
 
-interface SaveCriterionProps {
-    visible: boolean;
-    criterion: Criterion;
-    onComplete?: (savedCriterion: Criterion) => void;
-    onHide: () => void;
-}
-
-const SaveCriterion = ({ visible, criterion, onComplete, onHide }: SaveCriterionProps) => {
+const SaveCriterion = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<Criterion>) => {
     const toast = useRef<Toast>(null);
 
-    const [localCriterion, setLocalCriterion] = useState<Criterion>({ ...criterion });
+    const [localCriterion, setLocalCriterion] = useState<Criterion>({ ...item });
     const [submitted, setSubmitted] = useState(false);
 
     const formTypeOptions = [
@@ -30,16 +24,12 @@ const SaveCriterion = ({ visible, criterion, onComplete, onHide }: SaveCriterion
     ];
 
     useEffect(() => {
-        setLocalCriterion({ ...criterion });
-    }, [criterion]);
-
-    useEffect(() => {
-        if (!visible) clearForm();
-    }, [visible]);
+        setLocalCriterion({ ...item });
+    }, [item]);
 
     const clearForm = () => {
         setSubmitted(false);
-        setLocalCriterion({ ...criterion });
+        setLocalCriterion({ ...item });
     };
 
     const saveCriterion = async () => {
@@ -54,7 +44,7 @@ const SaveCriterion = ({ visible, criterion, onComplete, onHide }: SaveCriterion
                 ? await CriterionApi.update(localCriterion)
                 : await CriterionApi.create(localCriterion);
 
-            // keep evaluation reference
+            // keep evaluation reference for UI consistency
             saved = {
                 ...saved,
                 evaluation: localCriterion.evaluation as Evaluation
@@ -102,7 +92,7 @@ const SaveCriterion = ({ visible, criterion, onComplete, onHide }: SaveCriterion
                 footer={footer}
                 onHide={hide}
             >
-                {/* Evaluation Info */}
+                {/* Evaluation Info (Read Only) */}
                 <div className="field">
                     <label htmlFor="evaluation">Evaluation</label>
                     <InputText

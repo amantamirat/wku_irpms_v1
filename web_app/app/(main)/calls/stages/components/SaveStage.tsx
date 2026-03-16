@@ -50,7 +50,7 @@ const SaveStage = ({ visible, stage, callProvided, onComplete, onHide }: SaveSta
     useEffect(() => {
         const fetchEvaluations = async () => {
             try {
-                const data = await EvaluationApi.getEvaluations({ directorate: (localStage.call as Call).directorate });
+                const data = await EvaluationApi.getAll({ organization: (localStage.call as Call).directorate });
                 setEvaluations(data);
             } catch (err) {
                 console.error('Failed to fetch evaluations:', err);

@@ -65,8 +65,8 @@ export class AuthService {
         ];
 
         const ownerships = applicantDoc.ownerships || [];
-
         const applicantId = String(applicantDoc._id);
+        
         CacheService.invalidateUser(applicantId);
 
         CacheService.setUserPermissions(applicantId, permissions);

@@ -1,19 +1,21 @@
 
 export interface CreateEvaluationDTO {
-    directorate: string;
+    organization: string;
     title: string;
-    userId: string;
+    description:string;
+    userId?: string;
 }
 
 export interface UpdateEvaluationDTO {
     id: string;
     data: Partial<{
         title: string;
+        description:string;
     }>;
-    userId: string;
+    userId?: string;
 }
 
 export interface GetEvaluationsDTO {
-    directorate?: string;
+    organization?: string;
     populate?: boolean;
 }

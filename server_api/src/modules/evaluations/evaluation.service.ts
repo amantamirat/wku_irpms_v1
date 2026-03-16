@@ -5,6 +5,7 @@ import { IOrganizationRepository, OrganizationRepository } from "../organization
 import { CriterionRepository, ICriterionRepository } from "./criteria/criterion.repository";
 import { CreateEvaluationDTO, GetEvaluationsDTO, UpdateEvaluationDTO } from "./evaluation.dto";
 import { IEvaluationRepository } from "./evaluation.repository";
+import { Unit } from "../../common/constants/enums";
 
 export class EvaluationService {
 
@@ -15,15 +16,21 @@ export class EvaluationService {
     }
 
     async create(dto: CreateEvaluationDTO) {
-        const directorateDoc = await this.organizationRepository.findById(dto.directorate);
-        if (!directorateDoc) {
-            throw new Error(ERROR_CODES.DIRECTORATE_NOT_FOUND);
+        const organizationDoc = await this.organizationRepository.findById(dto.organization);
+        if (!organizationDoc) throw new Error(ERROR_CODES.ORGANIZATION_NOT_FOUND);
+
+        const orgUnit = organizationDoc.type;
+
+        // Must be either directorate or external
+        if (orgUnit !== Unit.directorate && orgUnit !== Unit.external) {
+            throw new Error(ERROR_CODES.ORGANIZATION_NOT_FOUND);
         }
-        const createdEvaluation = await this.repository.create(dto);
-        return createdEvaluation;
+
+        const created = await this.repository.create(dto);
+        return created;
     }
 
-    async getEvaluations(options: GetEvaluationsDTO) {
+    async get(options: GetEvaluationsDTO) {
         return await this.repository.find(options);
     }
 

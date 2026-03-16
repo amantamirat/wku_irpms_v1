@@ -48,11 +48,12 @@ export class OrganizationController {
     // ----------------------------------------------------
     getAll = async (req: Request, res: Response) => {
         try {
+            const { type, parent, populate } = req.query;
             const filters: GetOrganizationsDTO = {
-                type: req.query.type as Unit,
-                parent: req.query.parent as string,
+                type: type as Unit,
+                parent: parent as string,
+                ...(populate !== undefined && { populate: populate === "true" })
             };
-
             const organizations = await this.service.getAll(filters);
             successResponse(res, 200, "Organizations fetched successfully", organizations);
         } catch (err: any) {
