@@ -33,7 +33,7 @@ export const validateGrant = (grant: Grant): { valid: boolean; message?: string 
     return { valid: true };
 };
 
-export function sanitizeGrant(grant: Partial<Grant>): Partial<Grant> {
+export function sanitize(grant: Partial<Grant>): Partial<Grant> {
     return {
         ...grant,
         organization:
@@ -52,3 +52,8 @@ export const createEmptyGrant = (): Grant => ({
     title: "",
     amount: 0
 })
+
+export interface GetGrantOptions {
+    status?: GrantStatus;
+    //populate?: boolean;
+}

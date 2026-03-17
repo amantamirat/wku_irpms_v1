@@ -1,3 +1,5 @@
+'use client';
+
 import { Divider } from "primereact/divider";
 import { TabView, TabPanel } from "primereact/tabview";
 import { useMemo } from "react";
@@ -10,7 +12,7 @@ import { PhaseType } from "../phases/models/phase.model";
 import ProjectDocManager from "../documents/components/ProjectDocManager";
 import { PERMISSIONS } from "@/types/permissions";
 import { useAuth } from "@/contexts/auth-context";
-
+import MyBadge from "@/templates/MyBadge";
 
 interface ProjectDetailProps {
     project: Project;
@@ -18,10 +20,14 @@ interface ProjectDetailProps {
 }
 
 export default function ProjectDetail({ project, updateProjectStatus }: ProjectDetailProps) {
-
     const { hasPermission } = useAuth();
 
-    // Define tabs in a scalable way
+    // Helper to extract display name from populated objects or IDs
+    const getDisplayName = (field: any, labelKey: string = 'name') => {
+        if (!field) return 'N/A';
+        return typeof field === 'object' ? field[labelKey] || field.title : field;
+    };
+
     const tabs = useMemo(() => [
         {
             header: "Collaborators",
@@ -45,31 +51,58 @@ export default function ProjectDetail({ project, updateProjectStatus }: ProjectD
         }
     ], [project, updateProjectStatus]);
 
-    // Filter tabs based on permissions
     const allowedTabs = tabs.filter(tab => hasPermission([tab.permission]));
 
     return (
-        <div className="project-detail">
-            <div className="header">
-                <h2>{project.title}</h2>
-                <p>Created At: {new Date(project.createdAt!).toLocaleDateString()}</p>
-                <p>Created By: {(project.applicant as any).name}</p>
-                <p>Status: <span className={`project-badge status-${project.status}`}>{project.status}</span></p>
+        <div className="project-detail p-3">
+            <div className="grid">
+                <div className="col-12 md:col-6">
+                    <h2 className="m-0 mb-2">{project.title}</h2>
+                    <div className="flex flex-column gap-2">
+                        <span>
+                            <strong>Grant:</strong> {getDisplayName(project.grant, 'title')}
+                        </span>
+                        {
+                            /**
+                             * <span>
+                            <strong>Workspace:</strong> {getDisplayName(project.workspace, 'name')}
+                        </span>
+                             */
+                        }
+
+                    </div>
+                </div>
+
+                <div className="col-12 md:col-6 md:text-right">
+                    <div className="flex flex-column gap-2">
+                        <span>
+                            <strong>Status:</strong> <MyBadge type="status" value={project.status ?? "Draft"} />
+                        </span>
+                        <span>
+                            <strong>Created By:</strong> {getDisplayName(project.applicant, 'name')}
+                        </span>
+                        <span className="text-sm text-500">
+                            <strong>Date:</strong> {project.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'N/A'}
+                        </span>
+                    </div>
+                </div>
             </div>
 
             <Divider />
 
             {project.summary && (
-                <div className="summary">
-                    <h4>Summary</h4>
-                    <p>{project.summary}</p>
+                <div className="summary mb-4">
+                    <h4 className="mt-0">Summary</h4>
+                    <p className="line-height-3 text-700">{project.summary}</p>
                 </div>
             )}
 
             <TabView>
                 {allowedTabs.map((tab, index) => (
                     <TabPanel key={index} header={tab.header}>
-                        {tab.content}
+                        <div className="pt-3">
+                            {tab.content}
+                        </div>
                     </TabPanel>
                 ))}
             </TabView>

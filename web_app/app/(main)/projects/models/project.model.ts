@@ -1,5 +1,5 @@
 import { Applicant } from "../../applicants/models/applicant.model";
-import { Call } from "../../calls/models/call.model";
+import { Grant } from "../../grants/models/grant.model";
 import { Organization } from "../../organizations/models/organization.model";
 import { Collaborator, sanitizeCollaborator } from "../collaborators/models/collaborator.model";
 import { Phase, sanitizePhase } from "../phases/models/phase.model";
@@ -18,7 +18,7 @@ export enum ProjectStatus {
 
 export type Project = {
     _id?: string;
-    call?: string | Call;
+    grant?: string | Grant;
     title: string;
     summary?: string;
     status?: ProjectStatus;
@@ -35,14 +35,14 @@ export type Project = {
 }
 
 export interface GetProjectsOptions {
-    call?: string | Call;
+    grant?: string | Grant;
     applicant?: string | Applicant;
     workspace?: string | Organization;
 }
 
 export const validateProject = (project: Project): { valid: boolean; message?: string } => {
-    if (!project.call) {
-        return { valid: false, message: 'Call is required.' };
+    if (!project.grant) {
+        return { valid: false, message: 'Grant is required.' };
     }
     if (!project.title || project.title.trim().length === 0) {
         return { valid: false, message: 'Title is required.' };
@@ -68,13 +68,13 @@ export const validateApplyProject = (project: Project): { valid: boolean; messag
 };
 
 
-export const sanitizeProject = (project: Partial<Project>): Partial<Project> => {
+export const sanitize = (project: Partial<Project>): Partial<Project> => {
     return {
         ...project,
-        call:
-            typeof project.call === 'object' && project.call !== null
-                ? (project.call as Call)._id
-                : project.call,
+        grant:
+            typeof project.grant === 'object' && project.grant !== null
+                ? (project.grant as any)._id
+                : project.grant,
         applicant:
             typeof project.applicant === 'object' && project.applicant !== null
                 ? (project.applicant as any)._id

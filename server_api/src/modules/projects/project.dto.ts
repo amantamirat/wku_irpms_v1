@@ -1,7 +1,7 @@
 import { ProjectStatus } from "./project.status";
 
 export interface GetProjectsDTO {
-    call?: string;
+    grant?: string;
     applicant?: string;
     status?: ProjectStatus;
     populate?: boolean;
@@ -13,11 +13,11 @@ export interface GetProjectsDTO {
 
 // CREATE Project
 export interface CreateProjectDTO {
-    call: string;
+    grant: string;
     title: string;
     summary?: string;
-    status?: ProjectStatus;
     applicant: string;
+    status?: ProjectStatus;
 }
 
 // UPDATE Project
@@ -44,6 +44,6 @@ export interface UpdateStatusDTO {
 
 export interface ExistsProjectDTO {
     applicant?: string;
-    call?: string;
+    grant?: string;
 }
 

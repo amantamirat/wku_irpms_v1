@@ -19,12 +19,12 @@ export class ProjectController {
   // -----------------------
   create = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      if (!req.user) throw new Error("User not found!");
+      if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
-      const { call, title, summary } = req.body;
+      const { grant, title, summary } = req.body;
 
       const dto: CreateProjectDTO = {
-        call,
+        grant: grant,
         title,
         summary,
         applicant: req.user.applicantId,
@@ -45,7 +45,7 @@ export class ProjectController {
       const { call, applicant, workspace } = req.query;
 
       const projects = await this.service.getProjects({
-        call: call ? call as string : undefined,
+        grant: call ? call as string : undefined,
         applicant: applicant ? applicant as string : undefined,
         workspace: workspace ? workspace as string : undefined,
       });

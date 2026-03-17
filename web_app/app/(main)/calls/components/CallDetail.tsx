@@ -27,7 +27,7 @@ const CallDetail = ({ call }: CallDetailProps) => {
         {
             header: "Projects",
             permission: PERMISSIONS.PROJECT.READ,
-            content: <ProjectManager call={call} />
+            content: <ProjectManager grant={call} />
         }
     ], [call]);
 

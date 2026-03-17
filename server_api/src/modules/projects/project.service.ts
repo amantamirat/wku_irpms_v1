@@ -20,11 +20,14 @@ import { IPhaseRepository, PhaseRepository } from "./phase/phase.repository";
 import { PhaseStatus } from "./phase/phase.status";
 import { ProjectStateMachine } from "./project.state-machine";
 import { ProjectStatus } from "./project.status";
+import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
+import { GrantStatus } from "../grants/grant.model";
 
 export class ProjectService {
 
     constructor(
         private repository: IProjectRepository = new ProjectRepository(),
+        private grantRepo: IGrantRepository = new GrantRepository(),
         private callRepository: ICallRepository = new CallRepository(),
         private appRepository: IApplicantRepository = new ApplicantRepository(),
         private collabRepository: ICollaboratorRepository = new CollaboratorRepository(),
@@ -41,11 +44,11 @@ export class ProjectService {
     ) { }
 
     async create(dto: CreateProjectDTO) {
-        const { call, applicant } = dto
+        const { grant, applicant } = dto
 
-        const callDoc = await this.callRepository.findById(call);
-        if (!callDoc) throw new Error(ERROR_CODES.CALL_NOT_FOUND);
-        if (callDoc.status !== CallStatus.active) throw new Error(ERROR_CODES.CALL_NOT_ACTIVE);
+        const grantDoc = await this.grantRepo.findById(grant);
+        if (!grantDoc) throw new Error(ERROR_CODES.CALL_NOT_FOUND);
+        if (grantDoc.status !== GrantStatus.active) throw new Error(ERROR_CODES.GRANT_NOT_ACTIVE);
 
         const appDoc = await this.appRepository.findById(applicant);
         if (!appDoc) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);

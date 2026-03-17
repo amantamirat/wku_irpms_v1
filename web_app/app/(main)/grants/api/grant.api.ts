@@ -1,22 +1,31 @@
 import { EntityApi } from "@/api/EntityApi"
-import { Grant, sanitizeGrant } from "../models/grant.model"
+import { GetGrantOptions, Grant, sanitize } from "../models/grant.model"
 import { ApiClient } from "@/api/ApiClient"
 import { TransitionRequestDto } from "@/types/util"
 
-export const GrantApi: EntityApi<Grant> = {
+const end_point = "/grants";
+export const GrantApi: EntityApi<Grant, GetGrantOptions | undefined> = {
 
-    async getAll() {
-        return ApiClient.get('/grants/')
+    async getAll(options) {
+        const query = new URLSearchParams();
+        if (options) {
+            const sanitized = sanitize(options);
+            if (options.status) {
+                query.append("status", sanitized.status as string);
+            }
+        }
+        const qs = query.toString();
+        return ApiClient.get(`${end_point}${qs ? `?${qs}` : ""}`);
     },
 
     async create(grant) {
-        const sanitized = sanitizeGrant(grant)
+        const sanitized = sanitize(grant)
         return ApiClient.post('/grants/', sanitized)
     },
 
     async update(grant) {
         if (!grant._id) throw new Error("_id required")
-        return ApiClient.put(`/grants/${grant._id}`, sanitizeGrant(grant))
+        return ApiClient.put(`/grants/${grant._id}`, sanitize(grant))
     },
 
     async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {

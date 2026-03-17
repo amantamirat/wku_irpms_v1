@@ -4,10 +4,10 @@ import { ProjectStatus } from "./project.status";
 
 export interface IProject extends Document {
     _id: mongoose.Types.ObjectId;
-    call: mongoose.Types.ObjectId;
+    grant: mongoose.Types.ObjectId;
     title: string;
-    summary?: string;
     applicant: mongoose.Types.ObjectId;//user
+    summary?: string;    
     totalBudget?: number;
     totalDuration?: number;
     totalCollabs?: number;
@@ -17,9 +17,9 @@ export interface IProject extends Document {
 }
 
 const ProjectSchema = new Schema<IProject>({
-    call: {
+    grant: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.CALL,
+        ref: COLLECTIONS.GRANT,
         required: true,
         immutable: true
     },
@@ -35,7 +35,6 @@ const ProjectSchema = new Schema<IProject>({
         ref: COLLECTIONS.APPLICANT,
         required: true
     },
-
     totalBudget: {
         type: Number,
         min: 0

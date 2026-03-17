@@ -25,30 +25,10 @@ const AppMenu = () => {
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
         },
         {
-            label: 'Workspace',
-            visible: hasWorkspace && hasPermission([
-                PERMISSIONS.PROJECT.CREATE,
-            ]),
-            items: [
-                {
-                    label: 'Projects',
-                    icon: PrimeIcons.BRIEFCASE,
-                    to: '/projects',
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.PROJECT.CREATE
-                        ]
-                    )
-                },
-
-            ]
-        },
-        {
             label: 'Directorate',
             visible: hasDirector && hasPermission([
                 PERMISSIONS.CALL.CREATE,
-                PERMISSIONS.EVALUATION.CREATE,
-                PERMISSIONS.THEMATIC.CREATE,
+
             ]),
             items: [
                 {
@@ -59,26 +39,7 @@ const AppMenu = () => {
                         PERMISSIONS.CALL.CREATE,
                     ])
                 },
-                {
-                    label: 'Evaluations',
-                    icon: 'pi pi-chart-bar',
-                    to: '/evaluations',
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.EVALUATION.CREATE,
-                        ]
-                    )
-                },
-                {
-                    label: 'Thematics',
-                    icon: 'pi pi-fw pi-tags',
-                    to: '/thematics',
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.THEMATIC.CREATE
-                        ]
-                    )
-                }
+
             ]
         },
         {
@@ -87,6 +48,9 @@ const AppMenu = () => {
                 [
                     PERMISSIONS.CALENDAR.CREATE,
                     PERMISSIONS.GRANT.CREATE,
+                    PERMISSIONS.PROJECT.CREATE,
+                    PERMISSIONS.EVALUATION.CREATE,
+                    PERMISSIONS.THEMATIC.CREATE,
                 ]
             ),
             items: [
@@ -114,6 +78,36 @@ const AppMenu = () => {
                             PERMISSIONS.GRANT.DELETE
                         ]
                     )
+                },
+                {
+                    label: 'Projects',
+                    icon: PrimeIcons.BRIEFCASE,
+                    to: '/projects',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.PROJECT.CREATE
+                        ]
+                    )
+                },
+                {
+                    label: 'Evaluations',
+                    icon: 'pi pi-chart-bar',
+                    to: '/evaluations',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.EVALUATION.CREATE,
+                        ]
+                    )
+                },
+                {
+                    label: 'Thematics',
+                    icon: 'pi pi-fw pi-tags',
+                    to: '/thematics',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.THEMATIC.CREATE
+                        ]
+                    )
                 }
 
             ]
@@ -134,7 +128,7 @@ const AppMenu = () => {
                 {
                     label: 'Colleges',
                     icon: 'pi pi-fw pi-warehouse',
-                    to: `/organizations?type=${OrgnUnit.college}`,
+                    to: `/organizations/${OrgnUnit.college}`,
                     visible: hasPermission(
                         [
                             PERMISSIONS.ORGANIAZTION.COLLEGE.CREATE,

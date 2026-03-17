@@ -1,6 +1,6 @@
 import { ApiClient } from "@/api/ApiClient";
 import { DocStatus, GetProjectStageOptions, ProjectDoc, sanitizeProjectDoc, sanitizeUpdateStatusDTO, UpdateStatusDTO } from "../models/document.model";
-import { Project, sanitizeProject } from "../../models/project.model";
+import { Project, sanitize } from "../../models/project.model";
 
 const end_point = '/project/documents';
 
@@ -36,7 +36,7 @@ export const ProjectDocApi = {
     async submit(project: Partial<Project>): Promise<any> {
         if (!project.file)
             throw new Error("File required.");
-        const sanitized = sanitizeProject(project);
+        const sanitized = sanitize(project);
         const url = `${end_point}/submit`;
         const formData = new FormData();
         formData.append("project", JSON.stringify(sanitized));

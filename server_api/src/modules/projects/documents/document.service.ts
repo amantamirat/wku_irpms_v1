@@ -81,7 +81,7 @@ export class DocumentService {
             if (hasNotAccepted)
                 throw new AppError(ERROR_CODES.DOC_NOT_ACCEPTED);
 
-            const call = String(projectDoc.call);
+            const call = String(projectDoc.grant);
             const nextOrder = projectDocs.length + 1;
             const nextStageDoc = await this.stageRepository.findOne({ call, order: nextOrder });
             if (!nextStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
@@ -144,7 +144,7 @@ export class DocumentService {
 
         await this.validator.validateProjectConstraints(String(callDoc.grant), dto);
 
-        const projectDoc = await this.projectRepository.create({ call, title, applicant, summary });
+        const projectDoc = await this.projectRepository.create({ grant: call, title, applicant, summary });
         const projectId = String(projectDoc._id);
         await this.collabRepository.createMany(
             collaborators.map(col => ({
