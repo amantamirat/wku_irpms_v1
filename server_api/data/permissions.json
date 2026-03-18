@@ -377,6 +377,26 @@
   },
   {
     "category": "Grant Management",
+    "name": "grant:transition.planned.active",
+    "description": "Move grant from planned to active"
+  },
+  {
+    "category": "Grant Management",
+    "name": "grant:transition.active.closed",
+    "description": "Move grant from active to closed"
+  },
+  {
+    "category": "Grant Management",
+    "name": "grant:transition.active.planned",
+    "description": "Revert grant from active to planned"
+  },
+  {
+    "category": "Grant Management",
+    "name": "grant:transition.closed.active",
+    "description": "Reopen grant from closed to active"
+  },
+  {
+    "category": "Grant Management",
     "name": "grant:delete",
     "description": "Delete grant entries"
   },
@@ -399,26 +419,6 @@
     "category": "Grant Stage",
     "name": "grant_stage:delete",
     "description": "Delete grant stage entries"
-  },
-  {
-    "category": "Grant Management",
-    "name": "grant:transition.planned.active",
-    "description": "Move grant from planned to active"
-  },
-  {
-    "category": "Grant Management",
-    "name": "grant:transition.active.closed",
-    "description": "Move grant from active to closed"
-  },
-  {
-    "category": "Grant Management",
-    "name": "grant:transition.active.planned",
-    "description": "Revert grant from active to planned"
-  },
-  {
-    "category": "Grant Management",
-    "name": "grant:transition.closed.active",
-    "description": "Reopen grant from closed to active"
   },
   {
     "category": "Constraint Management",
@@ -475,15 +475,23 @@
   },
   {
     "category": "Call Management",
-    "name": "call:status.planned"
+    "name": "call:transition.planned.active",
+    "description": "Activate a planned call by changing its status from planned to active"
   },
   {
     "category": "Call Management",
-    "name": "call:status.active"
+    "name": "call:transition.active.closed",
+    "description": "Close an active call to finalize its activities"
   },
   {
     "category": "Call Management",
-    "name": "call:status.closed"
+    "name": "call:transition.active.planned",
+    "description": "Revert an active call back to planned status for adjustments"
+  },
+  {
+    "category": "Call Management",
+    "name": "call:transition.closed.active",
+    "description": "Re-open a closed call and set it back to active"
   },
   {
     "category": "Call Management",
@@ -740,24 +748,73 @@
   },
   {
     "category": "Project Management",
-    "name": "project:status.accepted",
-    "description": "used for undo operation on the negotiated projects"
+    "name": "project:transition.draft.submitted",
+    "description": "Submit project from draft"
   },
   {
     "category": "Project Management",
-    "name": "project:status.negotiation"
+    "name": "project:transition.submitted.accepted",
+    "description": "Accept submitted project"
   },
   {
     "category": "Project Management",
-    "name": "project:status.approved"
+    "name": "project:transition.submitted.rejected",
+    "description": "Reject submitted project"
   },
   {
     "category": "Project Management",
-    "name": "project:status.granted"
+    "name": "project:transition.submitted.draft",
+    "description": "Revert submitted project to draft"
   },
   {
     "category": "Project Management",
-    "name": "project:status.completed"
+    "name": "project:transition.rejected.submitted",
+    "description": "Resubmit rejected project"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:transition.accepted.negotiation",
+    "description": "Move accepted project to negotiation"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:transition.accepted.submitted",
+    "description": "Revert accepted project to submitted"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:transition.negotiation.approved",
+    "description": "Approve negotiated project"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:transition.negotiation.accepted",
+    "description": "Revert negotiation back to accepted"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:transition.approved.granted",
+    "description": "Grant approved project"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:transition.approved.negotiation",
+    "description": "Revert approved project to negotiation"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:transition.granted.completed",
+    "description": "Mark granted project as completed"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:transition.granted.approved",
+    "description": "Revert granted project to approved"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:transition.completed.granted",
+    "description": "Reopen completed project to granted"
   },
   {
     "category": "Project Management",

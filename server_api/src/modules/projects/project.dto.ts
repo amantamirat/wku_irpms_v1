@@ -1,4 +1,4 @@
-import { ProjectStatus } from "./project.status";
+import { ProjectStatus } from "./project.state-machine";
 
 export interface GetProjectsDTO {
     grant?: string;

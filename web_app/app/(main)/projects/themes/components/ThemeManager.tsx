@@ -44,7 +44,7 @@ export default function ProjectThemeManager({
     // -------------------------------
     // Permissions
     // -------------------------------
-    const isValidStatus = project.status === ProjectStatus.pending ||
+    const isValidStatus = project.status === ProjectStatus.draft ||
         project.status === ProjectStatus.negotiation;
     const canCreate = isValidStatus && hasPermission([PERMISSIONS.PROJECT_THEME.CREATE]);
     const canEdit = isValidStatus && hasPermission([PERMISSIONS.PROJECT_THEME.UPDATE]);

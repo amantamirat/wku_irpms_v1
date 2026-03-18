@@ -2,11 +2,11 @@ import { CallStatus } from "./call.status";
 
 export interface CreateCallDTO {
     calendar: string;
-    directorate: string;
+    //directorate: string;
     grant: string;
     title: string;
     description?: string;
-    thematic: string;
+    //thematic: string;
     status?: CallStatus;
     userId?: string;
 }
@@ -17,7 +17,7 @@ export interface UpdateCallDTO {
     data: Partial<{
         title: string;
         description: string;
-        thematic: string;
+        //thematic: string;
         status: CallStatus;
     }>;
     userId?: string;
@@ -41,6 +41,6 @@ export interface GetCallsOptions {
 export interface ExistsCallDTO {
     grant?: string;
     calendar?: string;
-    directorate?: string;
-    thematic?: string;
+   // directorate?: string;
+   // thematic?: string;
 }

@@ -34,10 +34,11 @@ export class GrantController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { organization } = req.query;
+            const { organization, populate } = req.query;
 
             const options: GetGrantsDTO = {
-                organization: organization as string
+                organization: organization as string,
+                ...(populate !== undefined && { populate: populate === "true" })
             };
 
             const grants = await this.service.get(options);

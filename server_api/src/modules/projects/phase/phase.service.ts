@@ -4,7 +4,7 @@ import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { IProjectRepository, ProjectRepository } from "../project.repository";
-import { ProjectStatus } from "../project.status";
+import { ProjectStatus } from "../project.state-machine";
 import { PhaseSynchronizer, ProjectSynchronizer } from "../project.synchronizer";
 import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto, UpdatePhaseStatusDto } from "./phase.dto";
 import { IPhaseRepository, PhaseRepository } from "./phase.repository";
@@ -29,7 +29,7 @@ export class PhaseService {
         if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
             throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
 
-        if (projectDoc.status !== ProjectStatus.pending &&
+        if (projectDoc.status !== ProjectStatus.draft &&
             projectDoc.status !== ProjectStatus.negotiation) {
             throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
         }

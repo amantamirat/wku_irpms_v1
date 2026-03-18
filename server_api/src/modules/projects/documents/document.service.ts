@@ -15,7 +15,7 @@ import { CollaboratorRepository } from "../collaborators/collaborator.repository
 import { PhaseType } from "../phase/phase.enum";
 import { PhaseRepository } from "../phase/phase.repository";
 import { IProjectRepository } from "../project.repository";
-import { ProjectStatus } from "../project.status";
+import { ProjectStatus } from "../project.state-machine";
 import { CollabSynchronizer, DocSynchronizer, PhaseSynchronizer, ProjectSyncOrchestrator } from "../project.synchronizer";
 import { ProjectThemeRepository } from "../themes/project.theme.repository";
 import { CreateDocumentDTO, GetDocumentDTO, SubmitProjectDTO, UpdateStatusDTO } from "./document.dto";

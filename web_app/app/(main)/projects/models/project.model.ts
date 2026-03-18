@@ -6,7 +6,7 @@ import { Phase, sanitizePhase } from "../phases/models/phase.model";
 import { ProjectTheme, sanitizeProjectTheme } from "../themes/models/project.theme.model";
 
 export enum ProjectStatus {
-    pending = 'pending',
+    draft = 'draft',
     submitted = "submitted",
     rejected = "rejected",
     accepted = "accepted",
@@ -38,6 +38,7 @@ export interface GetProjectsOptions {
     grant?: string | Grant;
     applicant?: string | Applicant;
     workspace?: string | Organization;
+    populate?: boolean;
 }
 
 export const validateProject = (project: Project): { valid: boolean; message?: string } => {

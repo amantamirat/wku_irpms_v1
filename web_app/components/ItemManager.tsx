@@ -179,6 +179,7 @@ export function ItemManager<T extends { _id?: string }>({
                                 filters={filters}
                                 globalFilter={globalFilter}
                                 header={header}
+                                //style={{ tableLayout: 'fixed' }}
 
                                 expandedRows={expandedRows}
                                 onRowToggle={(e) => setExpandedRows(e.data)}

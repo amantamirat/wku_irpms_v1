@@ -34,7 +34,13 @@ export class GrantRepository implements IGrantRepository {
             query.fundingSource = filters.fundingSource;
         }
 
-        return Grant.find(query).populate("organization")
+        let dbQuery = Grant.find(query);
+        if (filters.populate) {
+            dbQuery
+                .populate("organization")
+                .populate("thematic")
+        }
+        return dbQuery
             .lean<IGrant[]>()
             .exec();
     }

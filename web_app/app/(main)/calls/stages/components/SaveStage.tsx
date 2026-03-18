@@ -38,7 +38,7 @@ const SaveStage = ({ visible, stage, callProvided, onComplete, onHide }: SaveSta
         }
         const loadCalls = async () => {
             try {
-                const data = await CallApi.getCalls({ status: CallStatus.active });
+                const data = await CallApi.getAll({ status: CallStatus.active });
                 setCalls(data);
             } catch (err) {
                 console.error('Failed to load calls:', err);

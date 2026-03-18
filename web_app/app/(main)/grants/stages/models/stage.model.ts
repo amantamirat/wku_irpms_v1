@@ -6,7 +6,7 @@ export type Stage = {
     grant: string | Grant;
     name: string;
     order?: number;
-    evaluation: string | Evaluation;
+    evaluation?: string | Evaluation;
     createdAt?: Date;
     updatedAt?: Date;
 };

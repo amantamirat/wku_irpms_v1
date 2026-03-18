@@ -23,6 +23,7 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
 
     const [grants, setGrants] = useState<Grant[] | undefined>(undefined);
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
+    const isGrantPredefined = !!item.grant;
 
     // Load active grants
     useEffect(() => {
@@ -122,22 +123,28 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                 footer={footer}
                 onHide={hide}
             >
-
-                {
-                    (!localStage._id) &&
+                {!localStage._id && (
                     <div className="field">
                         <label htmlFor="grant">Grant</label>
-                        <Dropdown
-                            id="grant"
-                            value={localStage.grant}
-                            options={grants}
-                            optionLabel="title"
-                            onChange={(e) => setLocalStage({ ...localStage, grant: e.value })}
-                            placeholder="Select Grant"
-                            className={classNames({ 'p-invalid': submitted && !localStage.grant })}
-                        />
+                        {isGrantPredefined ? (
+                            <InputText
+                                value={(localStage.grant as Grant)?.title}
+                                disabled
+                            />
+                        ) : (
+                            <Dropdown
+                                id="grant"
+                                value={localStage.grant}
+                                dataKey="_id"
+                                options={grants}
+                                optionLabel="title"
+                                onChange={(e) => setLocalStage({ ...localStage, grant: e.value })}
+                                placeholder="Select Grant"
+                                className={classNames({ 'p-invalid': submitted && !localStage.grant })}
+                            />
+                        )}
                     </div>
-                }
+                )}                
 
                 {/* Stage Name */}
                 <div className="field">

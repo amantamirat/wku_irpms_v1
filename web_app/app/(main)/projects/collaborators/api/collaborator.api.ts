@@ -6,7 +6,7 @@ const end_point = '/project/collaborators';
 
 export const CollaboratorApi = {
 
-    async getCollaborators(options: GetCollaboratorsOptions): Promise<Collaborator[]> {
+    async getAll(options: GetCollaboratorsOptions): Promise<Collaborator[]> {
         const query = new URLSearchParams();
         const sanitized = sanitizeCollaborator(options);
         if (sanitized.project) query.append("project", sanitized.project as string);
@@ -15,13 +15,13 @@ export const CollaboratorApi = {
         return data as Collaborator[];
     },
 
-    async createCollaborator(collaborator: Partial<Collaborator>): Promise<Collaborator> {
+    async create(collaborator: Partial<Collaborator>): Promise<Collaborator> {
         const createdData = await ApiClient.post(end_point, sanitizeCollaborator(collaborator));
         return createdData as Collaborator;
     },
 
 
-    async updateCollaborator(collaborator: Partial<Collaborator>): Promise<Collaborator> {
+    async update(collaborator: Partial<Collaborator>): Promise<Collaborator> {
         if (!collaborator._id) {
             throw new Error("_id required.");
         }
@@ -31,7 +31,7 @@ export const CollaboratorApi = {
         return updatedCollaborator as Collaborator;
     },
 
-    async updateStatus(id: string, status: CollaboratorStatus): Promise<any> {
+    async transitionState(id: string, status: CollaboratorStatus): Promise<any> {
         const query = new URLSearchParams();
         query.append("id", id);
         const url = `${end_point}/${id}`;

@@ -1,6 +1,6 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
-import { ProjectStatus } from "./project.status";
+import { ProjectStatus } from "./project.state-machine";
 
 export interface IProject extends Document {
     _id: mongoose.Types.ObjectId;
@@ -51,7 +51,7 @@ const ProjectSchema = new Schema<IProject>({
     status: {
         type: String,
         enum: Object.values(ProjectStatus),
-        default: ProjectStatus.pending,
+        default: ProjectStatus.draft,
         required: true
     }
 

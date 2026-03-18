@@ -11,7 +11,7 @@ export const ConstraintApi = {
         return createdData as Constraint;
     },
 
-    async getConstraints(options: GetConstraintsOptions): Promise<Constraint[]> {
+    async getAll(options: GetConstraintsOptions): Promise<Constraint[]> {
         const query = new URLSearchParams();
         const sanitized = sanitizeConstraint(options);
         if (options.grant) query.append("grant", sanitized.grant as string);

@@ -25,24 +25,6 @@ const AppMenu = () => {
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
         },
         {
-            label: 'Directorate',
-            visible: hasDirector && hasPermission([
-                PERMISSIONS.CALL.CREATE,
-
-            ]),
-            items: [
-                {
-                    label: 'Calls',
-                    icon: 'pi pi-fw pi-megaphone',
-                    to: '/calls',
-                    visible: hasPermission([
-                        PERMISSIONS.CALL.CREATE,
-                    ])
-                },
-
-            ]
-        },
-        {
             label: 'Manage',
             visible: hasPermission(
                 [
@@ -51,6 +33,7 @@ const AppMenu = () => {
                     PERMISSIONS.PROJECT.CREATE,
                     PERMISSIONS.EVALUATION.CREATE,
                     PERMISSIONS.THEMATIC.CREATE,
+                    PERMISSIONS.CALL.CREATE,
                 ]
             ),
             items: [
@@ -67,17 +50,14 @@ const AppMenu = () => {
                     )
                 },
 
+
                 {
-                    label: 'Grants',
-                    icon: 'pi pi-bitcoin',
-                    to: '/grants',
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.GRANT.CREATE,
-                            PERMISSIONS.GRANT.UPDATE,
-                            PERMISSIONS.GRANT.DELETE
-                        ]
-                    )
+                    label: 'Calls',
+                    icon: 'pi pi-fw pi-megaphone',
+                    to: '/calls',
+                    visible: hasPermission([
+                        PERMISSIONS.CALL.CREATE,
+                    ])
                 },
                 {
                     label: 'Projects',
@@ -108,8 +88,19 @@ const AppMenu = () => {
                             PERMISSIONS.THEMATIC.CREATE
                         ]
                     )
+                },
+                {
+                    label: 'Grants',
+                    icon: 'pi pi-bitcoin',
+                    to: '/grants',
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.GRANT.CREATE,
+                            PERMISSIONS.GRANT.UPDATE,
+                            PERMISSIONS.GRANT.DELETE
+                        ]
+                    )
                 }
-
             ]
         },
         {

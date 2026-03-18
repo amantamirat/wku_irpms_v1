@@ -13,6 +13,9 @@ export const GrantApi: EntityApi<Grant, GetGrantOptions | undefined> = {
             if (options.status) {
                 query.append("status", sanitized.status as string);
             }
+            if (options.populate !== undefined) {
+                query.append("populate", String(options.populate));
+            }
         }
         const qs = query.toString();
         return ApiClient.get(`${end_point}${qs ? `?${qs}` : ""}`);

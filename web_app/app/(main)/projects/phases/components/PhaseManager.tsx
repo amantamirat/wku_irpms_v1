@@ -50,7 +50,7 @@ export default function PhaseManager({ project, phaseType, flyMode = false, onSa
     // -------------------------------
     // Permissions
     // -------------------------------
-    const isValidStatus = project ? (project.status === ProjectStatus.pending ||
+    const isValidStatus = project ? (project.status === ProjectStatus.draft ||
         project.status === ProjectStatus.negotiation) : false;
 
     const canCreate = isValidStatus && hasPermission([PERMISSIONS.PHASE.CREATE]);

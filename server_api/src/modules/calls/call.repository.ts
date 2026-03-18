@@ -44,9 +44,9 @@ export class CallRepository implements ICallRepository {
         if (filters.populate) {
             dbQuery = dbQuery
                 .populate('calendar')
-                .populate('directorate')
+                //.populate('directorate')
                 .populate('grant')
-                .populate('thematic');
+            //.populate('thematic');
         }
 
         return dbQuery.lean<ICall[]>().exec();
@@ -56,10 +56,10 @@ export class CallRepository implements ICallRepository {
     async create(dto: CreateCallDTO) {
         return Call.create({
             ...dto,
-            directorate: new mongoose.Types.ObjectId(dto.directorate),
+            // directorate: new mongoose.Types.ObjectId(dto.directorate),
             calendar: new mongoose.Types.ObjectId(dto.calendar),
             grant: new mongoose.Types.ObjectId(dto.grant),
-            thematic: new mongoose.Types.ObjectId(dto.thematic),
+            // thematic: new mongoose.Types.ObjectId(dto.thematic),
         });
     }
 
@@ -79,19 +79,24 @@ export class CallRepository implements ICallRepository {
 
     async exists(filters: ExistsCallDTO): Promise<boolean> {
         const query: any = {};
-        const { grant, calendar, directorate, thematic } = filters;
+        const { grant, calendar, //directorate, thematic 
+
+        } = filters;
         if (grant) {
             query.grant = new mongoose.Types.ObjectId(grant);
         }
         if (calendar) {
             query.calendar = new mongoose.Types.ObjectId(calendar);
         }
+        /*
         if (directorate) {
             query.directorate = new mongoose.Types.ObjectId(directorate);
         }
-        if (thematic) {
+             if (thematic) {
             query.thematic = new mongoose.Types.ObjectId(thematic);
         }
+            */
+
         const result = await Call.exists(query).exec();
         return result !== null;
     }

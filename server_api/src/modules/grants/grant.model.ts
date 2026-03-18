@@ -18,7 +18,7 @@ export interface IGrant extends Document {
     organization: mongoose.Types.ObjectId; //Funder Organization
     title: string;
     amount: number;
-    thematic?: mongoose.Types.ObjectId;
+    thematic: mongoose.Types.ObjectId;
     description?: string;
     status: GrantStatus;
     createdAt?: Date;
@@ -51,7 +51,8 @@ const GrantSchema = new Schema<IGrant>({
     },
     thematic: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.THEMATIC
+        ref: COLLECTIONS.THEMATIC,
+        required: true,
     },
     description: {
         type: String,

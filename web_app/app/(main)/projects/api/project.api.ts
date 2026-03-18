@@ -15,6 +15,9 @@ export const ProjectApi: EntityApi<Project, GetProjectsOptions | undefined> = {
             if (sanitized.grant) query.append("grant", sanitized.grant as string);
             if (sanitized.applicant) query.append("applicant", sanitized.applicant as string);
             if (sanitized.workspace) query.append("workspace", sanitized.workspace as string);
+            if (options.populate !== undefined) {
+                query.append("populate", String(options.populate));
+            }
         }
 
         const url = query.toString()
@@ -39,7 +42,6 @@ export const ProjectApi: EntityApi<Project, GetProjectsOptions | undefined> = {
 
     async update(project: Partial<Project>): Promise<Project> {
         if (!project._id) throw new Error("_id required");
-
         const sanitized = sanitize(project);
         const updatedProject = await ApiClient.put(`${end_point}/${project._id}`, sanitized);
         return updatedProject as Project;

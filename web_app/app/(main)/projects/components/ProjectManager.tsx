@@ -9,6 +9,7 @@ import { Grant } from "../../grants/models/grant.model";
 import { Applicant } from "../../applicants/models/applicant.model";
 import { Organization } from "../../organizations/models/organization.model";
 import MyBadge from "@/templates/MyBadge";
+import { PROJECT_STATUS_ORDER, PROJECT_TRANSITIONS } from "../models/project.state-machine";
 
 interface ProjectManagerProps {
     grant?: Grant;
@@ -23,6 +24,24 @@ const ProjectManager = ({ grant, applicant, workspace }: ProjectManagerProps) =>
         api: ProjectApi,
 
         columns: [
+            {
+                header: "Grant",
+                field: "grant",
+                sortable: true,
+                style: { width: '150px', maxWidth: '150px' },
+                body: (r: Project) => (
+                    <div
+                        style={{
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                        }}
+                        title={r.summary}
+                    >
+                        {typeof r.grant === "object" ? r.grant?.title : r.grant}
+                    </div>
+                )
+            },
             {
                 header: "Title",
                 field: "title",
@@ -42,21 +61,15 @@ const ProjectManager = ({ grant, applicant, workspace }: ProjectManagerProps) =>
                     </div>
                 )
             },
-            {
-                header: "Grant",
-                field: "grant",
-                sortable: true,
-                body: (r: Project) =>
-                    typeof r.grant === "object" ? r.grant?.title : r.grant
-            },
+
             {
                 header: "Summary",
                 field: "summary",
                 body: (r: Project) => (
-                    <div 
-                        className="text-overflow-ellipsis" 
-                        style={{ 
-                            maxHeight: '3em', 
+                    <div
+                        className="text-overflow-ellipsis"
+                        style={{
+                            maxHeight: '3em',
                             overflow: 'hidden',
                             display: '-webkit-box',
                             WebkitLineClamp: 2,
@@ -92,7 +105,11 @@ const ProjectManager = ({ grant, applicant, workspace }: ProjectManagerProps) =>
             grant: grant?._id,
             workspace: workspace?._id
         }),
-
+        workflow: {
+            statusField: "status",
+            transitions: PROJECT_TRANSITIONS,
+            statusOrder: PROJECT_STATUS_ORDER
+        },
         expandable: {
             template: (project) => (
                 <ProjectDetail project={project} />

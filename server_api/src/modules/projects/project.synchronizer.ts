@@ -1,10 +1,11 @@
+import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { ICollaboratorRepository } from "./collaborators/collaborator.repository";
 import { IDocumentRepository } from "./documents/document.repository";
 import { DocStatus } from "./documents/document.status";
 import { IPhaseRepository } from "./phase/phase.repository";
 import { IProjectRepository } from "./project.repository";
-import { ProjectStateMachine } from "./project.state-machine";
-import { ProjectStatus } from "./project.status";
+import { PROJECT_TRANSITIONS, ProjectStatus } from "./project.state-machine";
+
 
 export abstract class ProjectSynchronizer {
     constructor(
@@ -31,7 +32,7 @@ export class DocSynchronizer extends ProjectSynchronizer {
 
         let newStatus = ProjectStatus.submitted;
         if (projectDocs.length === 0) {
-            newStatus = ProjectStatus.pending;
+            newStatus = ProjectStatus.draft;
         }
         else if (projectDocs.some(d => d.status === DocStatus.rejected)) {
             newStatus = ProjectStatus.rejected;
@@ -39,8 +40,12 @@ export class DocSynchronizer extends ProjectSynchronizer {
         else if (projectDocs.every(d => d.status === DocStatus.accepted)) {
             newStatus = ProjectStatus.accepted;
         }
-        if (newStatus !== currentStatus &&
-            ProjectStateMachine.canTransition(currentStatus, newStatus)) {
+        if (newStatus !== currentStatus) {
+            TransitionHelper.validateTransition(
+                projectDoc.status,
+                newStatus,
+                PROJECT_TRANSITIONS
+            );
             const updated = await this.repository.update(project, { status: newStatus })
             return updated;
         }

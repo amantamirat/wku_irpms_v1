@@ -45,7 +45,7 @@ const ConstraintManager = ({ grant }: ConstraintManagerProps) => {
         const fetchConstraints = async () => {
             try {
                 setLoading(true);
-                const data = await ConstraintApi.getConstraints({ grant: grant });
+                const data = await ConstraintApi.getAll({ grant: grant });
                 setAll(data);
             } catch (err: any) {
                 setError(`Failed to fetch constraints. ${err.message ?? err}`);

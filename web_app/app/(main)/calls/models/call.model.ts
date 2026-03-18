@@ -1,7 +1,5 @@
 import { Calendar } from "../../calendars/models/calendar.model";
 import { Grant } from "../../grants/models/grant.model";
-import { Organization } from "../../organizations/models/organization.model";
-import { Thematic } from "../../thematics/models/thematic.model";
 
 // -----------------------------
 // Enums
@@ -15,11 +13,11 @@ export enum CallStatus {
 export type Call = {
   _id?: string;
   calendar: string | Calendar;
-  directorate: string | Organization;
+  //directorate: string | Organization;
   grant: string | Grant;
   title: string;
   description?: string | null;
-  thematic?: string | Thematic;
+  //thematic?: string | Thematic;
   status: CallStatus;
   createdAt?: Date;
   updatedAt?: Date;
@@ -27,9 +25,10 @@ export type Call = {
 
 export interface GetCallsOptions {
   calendar?: string | Calendar;
-  directorate?: string | Organization;
+  //directorate?: string | Organization;
   grant?: string | Grant;
   status?: CallStatus;
+  populate?: boolean;
 }
 
 // -----------------------------
@@ -52,9 +51,11 @@ export const validateCall = (call: Call): { valid: boolean; message?: string } =
     return { valid: false, message: "Status is required." };
   }
 
+  /*
   if (!call.directorate) {
     return { valid: false, message: "Directorate is required." };
   }
+  */
 
   return { valid: true };
 };
@@ -67,10 +68,20 @@ export const sanitizeCall = (call: Partial<Call>): Partial<Call> => {
     ...call,
     calendar: typeof call.calendar === "object" ? (call.calendar as Calendar)._id : call.calendar,
     grant: typeof call.grant === "object" ? (call.grant as Grant)._id : call.grant,
-    thematic: typeof call.thematic === "object" ? (call.thematic as Thematic)._id : call.thematic,
-    directorate:
-      typeof call.directorate === "object"
-        ? (call.directorate as Organization)._id
-        : call.directorate
+    /*
+      thematic: typeof call.thematic === "object" ? (call.thematic as Thematic)._id : call.thematic,
+      directorate:
+        typeof call.directorate === "object"
+          ? (call.directorate as Organization)._id
+          : call.directorate*/
   };
 };
+
+
+export const createEmptyCall = (): Call => ({
+    title: "",
+    status: CallStatus.planned,
+    calendar: '',
+    grant: '',
+    description: ""
+});

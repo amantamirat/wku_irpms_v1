@@ -10,8 +10,11 @@ const CallPage = () => {
 
     return (
         <>
-            <DirectorateSelector />
-            <CallManager directorate={directorate} />
+            {
+                //<DirectorateSelector />
+            }
+
+            <CallManager />
         </>
 
     );

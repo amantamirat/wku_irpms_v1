@@ -34,7 +34,7 @@ const ProjectDocManager = ({ project, updateProjectStatus, stage }: ProjectDocMa
     };
 
     // Permissions (adjust if needed)
-    const isValidStatus = project ? (project.status === ProjectStatus.pending ||
+    const isValidStatus = project ? (project.status === ProjectStatus.draft ||
         project.status === ProjectStatus.accepted) : false;
 
     const canCreate = isValidStatus && hasPermission([PERMISSIONS.DOCUMENT.CREATE]);

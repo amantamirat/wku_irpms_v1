@@ -38,7 +38,7 @@ const ApplyWizard = ({ visible, stage, call, onCancel }: ApplyWizardProps) => {
         title: "",
         call: call,
         // applicant: applicant,
-        status: ProjectStatus.pending
+        status: ProjectStatus.draft
     });
     const toast = useRef<Toast>(null);
     const [loading, setLoading] = useState(false);

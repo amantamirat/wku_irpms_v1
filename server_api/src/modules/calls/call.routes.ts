@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
-import { checkPermission, checkStatusPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
+import { checkPermission, checkStatusPermission, checkTransitionPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
 import { CallController } from './call.controller';
 import { CallRepository } from './call.repository';
 import { CallService } from './call.service';
@@ -47,8 +47,8 @@ router.put(
 router.patch(
     '/:id',
     verifyActiveAccount,
-    checkStatusPermission("call"),
-    controller.updateStatus
+    checkTransitionPermission("call"),
+    controller.transitionState
 );
 
 // Delete cycle

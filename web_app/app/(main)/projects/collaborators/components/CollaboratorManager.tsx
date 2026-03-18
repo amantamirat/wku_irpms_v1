@@ -37,7 +37,7 @@ const CollaboratorManager = ({ project, applicant, flyMode = false, onSave, onRe
         status: CollaboratorStatus.pending
     };
 
-    const isValidStatus = project ? project.status === ProjectStatus.pending ||
+    const isValidStatus = project ? project.status === ProjectStatus.draft ||
         project.status === ProjectStatus.negotiation : false;
     // ✅ Permissions    
     const canCreate = isValidStatus && hasPermission([PERMISSIONS.COLLABORATOR.CREATE]);
@@ -66,7 +66,7 @@ const CollaboratorManager = ({ project, applicant, flyMode = false, onSave, onRe
         const fetchCollabs = async () => {
             try {
                 setLoading(true);
-                const data = await CollaboratorApi.getCollaborators({ project, applicant });
+                const data = await CollaboratorApi.getAll({ project, applicant });
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to fetch collaborators. " + (err.message ?? ""));
@@ -109,7 +109,7 @@ const CollaboratorManager = ({ project, applicant, flyMode = false, onSave, onRe
         if (!row._id) {
             return;
         }
-        const updated = await CollaboratorApi.updateStatus(row._id, next);
+        const updated = await CollaboratorApi.transitionState(row._id, next);
         updateItem({ ...updated, applicant: row.applicant, project: row.project });
     };
 

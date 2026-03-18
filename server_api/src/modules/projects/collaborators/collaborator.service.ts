@@ -5,7 +5,6 @@ import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { IApplicantRepository } from "../../applicants/applicant.repository";
 import { IProjectRepository } from "../project.repository";
-import { ProjectStatus } from "../project.status";
 import {
     CreateCollaboratorDto,
     GetCollaboratorsOptions,
@@ -14,6 +13,7 @@ import {
 import { ICollaboratorRepository } from "./collaborator.repository";
 import { CollaboratorStateMachine } from "./collaborator.state-machine";
 import { CollaboratorStatus } from "./collaborator.status";
+import { ProjectStatus } from "../project.state-machine";
 
 
 export class CollaboratorService {
@@ -33,7 +33,7 @@ export class CollaboratorService {
         if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
             throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
 
-        if (projectDoc.status !== ProjectStatus.pending &&
+        if (projectDoc.status !== ProjectStatus.draft &&
             projectDoc.status !== ProjectStatus.negotiation) {
             throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
         }
@@ -80,7 +80,7 @@ export class CollaboratorService {
             if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
             const projectStatus = projectDoc.status;
 
-            if (projectStatus !== ProjectStatus.pending &&
+            if (projectStatus !== ProjectStatus.draft &&
                 projectStatus !== ProjectStatus.submitted &&
                 projectStatus !== ProjectStatus.accepted &&
                 projectStatus !== ProjectStatus.negotiation
@@ -107,7 +107,7 @@ export class CollaboratorService {
         if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
             throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
 
-        if (projectDoc.status !== ProjectStatus.pending &&
+        if (projectDoc.status !== ProjectStatus.draft &&
             projectDoc.status !== ProjectStatus.negotiation) {
             throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
         }

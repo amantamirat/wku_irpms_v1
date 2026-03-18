@@ -76,7 +76,7 @@ const CollaboratorDialog = ({ collaborator, visible, onSave, onComplete, onHide 
                     saved = { ...localCollaborator }
                     // saved = await CollaboratorApi.updateCollaborator(localCollaborator);
                 } else {
-                    saved = await CollaboratorApi.createCollaborator(localCollaborator);
+                    saved = await CollaboratorApi.create(localCollaborator);
                 }
                 saved = {
                     ...saved,

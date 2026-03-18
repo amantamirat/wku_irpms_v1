@@ -153,7 +153,8 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                         className={classNames({
                             'p-invalid': submitted && !localGrant.fundingSource,
                         })}
-                        disabled={!!localGrant._id}
+                        //disabled={!!localGrant._id}
+                        disabled={!!localGrant.fundingSource}
                     />
                 </div>
 
@@ -164,7 +165,10 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                         value={localGrant.organization}
                         options={organizations}
                         optionLabel="name"
-                        onChange={(e) => setLocalGrant({ ...localGrant, organization: e.value })}
+                        onChange={(e) => setLocalGrant({
+                            ...localGrant, organization: e.value,
+                            thematic: undefined
+                        })}
                         placeholder="Select Funder"
                         className={classNames({ 'p-invalid': submitted && !localGrant.organization })}
                         disabled={!!localGrant._id}

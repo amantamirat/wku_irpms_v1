@@ -33,7 +33,6 @@
             "thematic:read",
             "stage:read",
             "project:read",
-            "project:status.granted",
             "document:read",
             "report:*"
         ]
@@ -43,7 +42,10 @@
         "permissions": [
             "calendar:read",
             "grant:read",
-            "call:*",
+            "call:create",
+            "call:read",
+            "call:update",
+            "call:delete",
             "thematic:create",
             "thematic:read",
             "thematic:update",

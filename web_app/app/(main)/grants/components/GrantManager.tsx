@@ -1,12 +1,12 @@
 import { createEntityManager } from "@/components/createEntityManager";
 import { GrantApi } from "../api/grant.api";
-import { createEmptyGrant, Grant } from "../models/grant.model";
+import { createEmptyGrant, GetGrantOptions, Grant } from "../models/grant.model";
 import { GRANT_STATUS_ORDER, GRANT_TRANSITIONS } from "../models/grant.state-machine";
 import GrantDetail from "./GrantDetail";
 import SaveGrant from "./SaveGrant";
 import MyBadge from "@/templates/MyBadge";
 
-export default createEntityManager<Grant>({
+export default createEntityManager<Grant, GetGrantOptions>({
     title: "Manage Grants",
     itemName: "Grant",
     api: GrantApi,
@@ -22,6 +22,15 @@ export default createEntityManager<Grant>({
             sortable: true
         },
         { header: "Title", field: "title" },
+        {
+            header: "Thematic",
+            field: "thematic.name",
+            body: (g: Grant) =>
+                typeof g.thematic === "object"
+                    ? g.thematic?.title
+                    : g.thematic,
+            sortable: true
+        },
         { header: "Amount", field: "amount", sortable: true, body: (rowData: any) => rowData.amount.toLocaleString() },
         {
             field: "status", header: "Status", sortable: true,
@@ -37,6 +46,9 @@ export default createEntityManager<Grant>({
         transitions: GRANT_TRANSITIONS,
         statusOrder: GRANT_STATUS_ORDER
     },
+    query: () => ({
+        populate: true,
+    }),
     expandable: {
         template: (grant) => (
             <GrantDetail grant={grant} />

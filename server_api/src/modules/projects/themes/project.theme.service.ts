@@ -4,7 +4,7 @@ import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { IThemeRepository } from "../../thematics/themes/theme.repository";
 import { IProjectRepository } from "../project.repository";
-import { ProjectStatus } from "../project.status";
+import { ProjectStatus } from "../project.state-machine";
 import { CreateProjectThemeDTO, GetProjectThemeOptions } from "./project.theme.dto";
 import { IProjectThemeRepository } from "./project.theme.repository";
 
@@ -28,7 +28,7 @@ export class ProjectThemeService {
         if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
             throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
 
-        if (projectDoc.status !== ProjectStatus.pending &&
+        if (projectDoc.status !== ProjectStatus.draft &&
             projectDoc.status !== ProjectStatus.negotiation) {
             throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
         }
@@ -61,7 +61,7 @@ export class ProjectThemeService {
         if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
             throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
 
-        if (projectDoc.status !== ProjectStatus.pending &&
+        if (projectDoc.status !== ProjectStatus.draft &&
             projectDoc.status !== ProjectStatus.negotiation) {
             throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
         }

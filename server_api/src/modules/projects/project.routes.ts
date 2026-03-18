@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { ProjectController } from './project.controller';
-import { checkPermission, checkStatusPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
+import { checkPermission, checkStatusPermission, checkTransitionPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
 import { PERMISSIONS } from '../../common/constants/permissions';
 
 const controller = new ProjectController();
@@ -21,11 +21,9 @@ router.put('/', verifyActiveAccount,
     controller.update);
 
 //update status
-router.put(
-    '/:status', verifyActiveAccount,
-    checkStatusPermission("project"),
-    controller.updateStatus
-);
+router.patch('/:id', verifyActiveAccount,
+    checkTransitionPermission("project"),
+    controller.transitionState);
 
 //delete
 router.delete('/:id', verifyActiveAccount,

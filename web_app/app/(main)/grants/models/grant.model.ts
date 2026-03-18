@@ -49,11 +49,12 @@ export interface GetGrantsOptions {
 }
 
 export const createEmptyGrant = (): Grant => ({
+    fundingSource:FundingSource.INTERNAL,
     title: "",
     amount: 0
 })
 
 export interface GetGrantOptions {
     status?: GrantStatus;
-    //populate?: boolean;
+    populate?: boolean;
 }

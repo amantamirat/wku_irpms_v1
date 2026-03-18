@@ -1,63 +1,77 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Call, CallStatus, GetCallsOptions, sanitizeCall } from "../models/call.model";
+import { EntityApi } from "@/api/EntityApi";
+import { TransitionRequestDto } from "@/types/util";
+import { Call, GetCallsOptions, sanitizeCall } from "../models/call.model";
 
-const ENDPOINT = "/calls";
+const end_point = "/calls";
 
-export const CallApi = {
-  // ---------------------------
-  // Create
-  // ---------------------------
-  async create(cycle: Partial<Call>): Promise<Call> {
-    const sanitized = sanitizeCall(cycle);
-    const created = await ApiClient.post(ENDPOINT, sanitized);
-    return created as Call;
-  },
+export const CallApi: EntityApi<Call, GetCallsOptions | undefined> = {
+    // ---------------------------
+    // Fetch / Query
+    // ---------------------------
+    async getAll(options) {
+        const query = new URLSearchParams();
 
-  async getById(id: string): Promise<Call> {
-    const url = `${ENDPOINT}/${id}`;
-    const data = await ApiClient.get(url);
-    return data as Call;
-  },
+        if (options) {
+            const sanitized = sanitizeCall(options);
 
-  // ---------------------------
-  // Fetch / Query
-  // ---------------------------
-  async getCalls(options: GetCallsOptions): Promise<Call[]> {
-    const query = new URLSearchParams();
-    const sanitized = sanitizeCall(options);
-    if (options.calendar) query.append("calendar", sanitized.calendar as string);
-    if (options.directorate) query.append("directorate", sanitized.directorate as string);
-    if (options.grant) query.append("grant", sanitized.grant as string);
-    if (options.status) query.append("status", options.status);
-    const data = await ApiClient.get(`${ENDPOINT}?${query.toString()}`);
-    return data as Call[];
-  },
+            if (options.calendar) {
+                query.append("calendar", sanitized.calendar as string);
+            }
 
-  // ---------------------------
-  // Update
-  // ---------------------------
-  async update(call: Partial<Call>): Promise<Call> {
-    if (!call._id) throw new Error("_id required.");
-    const query = new URLSearchParams();
-    query.append("id", call._id);
-    const sanitized = sanitizeCall(call);
-    const updated = await ApiClient.put(`${ENDPOINT}?${query.toString()}`, sanitized);
-    return updated as Call;
-  },
+            if (options.grant) {
+                query.append("grant", sanitized.grant as string);
+            }
 
-  async updateStatus(id: string, status: CallStatus): Promise<any> {
-    const query = new URLSearchParams();
-    query.append("id", id);
-    const url = `${ENDPOINT}/${id}`;
-    const updated = await ApiClient.patch(url, { status });
-    return updated;
-  },
-  // ---------------------------
-  // Delete
-  // ---------------------------
-  async delete(call: Partial<Call>): Promise<boolean> {
-    if (!call._id) throw new Error("_id required.");
-    const response = await ApiClient.delete(`${ENDPOINT}/${call._id}`, call);
-    return response;
-  }
+            if (options.status) {
+                query.append("status", sanitized.status as string);
+            }
+
+            if (options.populate !== undefined) {
+                query.append("populate", String(options.populate));
+            }
+        }
+
+        const qs = query.toString();
+        return ApiClient.get(`${end_point}${qs ? `?${qs}` : ""}`);
+    },
+
+    // ---------------------------
+    // Get By Id
+    // ---------------------------
+    async getById(id: string): Promise<Call> {
+        return ApiClient.get(`${end_point}/${id}`);
+    },
+
+    // ---------------------------
+    // Create
+    // ---------------------------
+    async create(call) {
+        const sanitized = sanitizeCall(call);
+        return ApiClient.post(`${end_point}/`, sanitized);
+    },
+
+    // ---------------------------
+    // Update
+    // ---------------------------
+    async update(call) {
+        if (!call._id) throw new Error("_id required");
+        return ApiClient.put(`${end_point}/${call._id}`, sanitizeCall(call));
+    },
+
+    // ---------------------------
+    // Transition State (replace updateStatus)
+    // ---------------------------
+    async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
+        const url = `${end_point}/${id}`;
+        return ApiClient.patch(url, dto);
+    },
+
+    // ---------------------------
+    // Delete
+    // ---------------------------
+    async delete(call) {
+        if (!call._id) throw new Error("_id required");
+        return ApiClient.delete(`${end_point}/${call._id}`);
+    }
 };

@@ -4,6 +4,8 @@ import { CreateCallDTO, UpdateCallDTO, UpdateCallStatusDTO } from './call.dto';
 import { AuthenticatedRequest } from '../users/auth/auth.middleware';
 import { successResponse, errorResponse } from '../../common/helpers/response';
 import { CallStatus } from './call.status';
+import { TransitionRequestDto } from '../../common/dtos/transition.dto';
+import { ERROR_CODES } from '../../common/errors/error.codes';
 
 export class CallController {
 
@@ -18,8 +20,9 @@ export class CallController {
             const { calendar, directorate, grant,
                 title, description, thematic } = req.body;
             const dto: CreateCallDTO = {
-                calendar, directorate, title,
-                description, grant, thematic
+                calendar, //directorate, 
+                title,
+                description, grant, //thematic
             };
             const call = await this.service.create(dto);
             successResponse(res, 201, "Call created successfully", call);
@@ -66,20 +69,23 @@ export class CallController {
         }
     }
 
-    updateStatus = async (req: AuthenticatedRequest, res: Response) => {
+    transitionState = async (req: AuthenticatedRequest, res: Response) => {
         try {
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
-            const { status } = req.body;
-            const dto: UpdateCallStatusDTO = {
+            const { current, next } = req.body;
+            const dto: TransitionRequestDto = {
                 id: String(id),
-                status
+                current: current,
+                next: next,
+                applicantId: req.user.applicantId,
             };
-            const updated = await this.service.updateStatus(dto);
+            const updated = await this.service.transitionState(dto);
             successResponse(res, 200, "Call status updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
+    };
 
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {

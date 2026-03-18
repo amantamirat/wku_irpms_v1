@@ -1,9 +1,9 @@
 'use client';
 import { createEntityManager } from "@/components/createEntityManager";
-import { createEmptyStage, GetStagesDTO, Stage } from "../models/stage.model";
-import { StageApi } from "../api/stage.api";
-import SaveStage from "./SaveStage";
 import { Grant } from "../../models/grant.model";
+import { StageApi } from "../api/stage.api";
+import { createEmptyStage, GetStagesDTO, Stage } from "../models/stage.model";
+import SaveStage from "./SaveStage";
 
 interface StageManagerProps {
     grant?: Grant;
@@ -14,7 +14,6 @@ const StageManager = ({ grant }: StageManagerProps) => {
         title: "Manage Stages",
         itemName: "Stage",
         api: StageApi,
-
         columns: [
             { header: "Name", field: "name" },
             { header: "Order", field: "order" },
@@ -26,10 +25,8 @@ const StageManager = ({ grant }: StageManagerProps) => {
             }
         ],
 
-        createNew: () => ({
-            ...createEmptyStage(),
-            grant: grant ?? ""
-        }),
+        createNew: () => 
+            createEmptyStage({grant}),
         SaveDialog: SaveStage,
         permissionPrefix: "grant_stage",
         query: () => ({ grant: grant ?? undefined })

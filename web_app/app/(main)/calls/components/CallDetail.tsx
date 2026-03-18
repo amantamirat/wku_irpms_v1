@@ -2,7 +2,6 @@ import { useAuth } from "@/contexts/auth-context";
 import { PERMISSIONS } from "@/types/permissions";
 import { TabPanel, TabView } from "primereact/tabview";
 import { useMemo } from "react";
-import ProjectManager from "../../projects/components/ProjectManager";
 import { Call } from "../models/call.model";
 import StageManager from "../stages/components/StageManager";
 
@@ -24,11 +23,12 @@ const CallDetail = ({ call }: CallDetailProps) => {
             permission: PERMISSIONS.STAGE.READ,
             content: <StageManager call={call} />
         },
+        /*
         {
             header: "Projects",
             permission: PERMISSIONS.PROJECT.READ,
             content: <ProjectManager grant={call} />
-        }
+        }*/
     ], [call]);
 
     /**
