@@ -19,7 +19,7 @@ const CalendarDetail = ({ calendar }: CalendarDetailProps) => {
     const tabs = useMemo(() => [
         {
             header: "Calls",
-            permission: PERMISSIONS.CALL.READ,
+            permission: "call:read",
             content: <CallManager calendar={calendar} />
         }
     ], [calendar]);

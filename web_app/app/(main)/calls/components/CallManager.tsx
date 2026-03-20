@@ -10,6 +10,7 @@ import MyBadge from "@/templates/MyBadge";
 import { Calendar } from "../../calendars/models/calendar.model";
 import { Grant } from "../../grants/models/grant.model";
 import { CALL_STATUS_ORDER, CALL_TRANSITIONS } from "../models/call.state-machine";
+import CallDetail from "./CallDetail";
 
 interface CallManagerProps {
     grant?: Grant;
@@ -67,6 +68,11 @@ const CallManager = ({ grant, calendar }: CallManagerProps) => {
             statusField: "status",
             transitions: CALL_TRANSITIONS,
             statusOrder: CALL_STATUS_ORDER
+        },
+        expandable: {
+            template: (call) => (
+                <CallDetail call={call} />
+            )
         }
     });
 

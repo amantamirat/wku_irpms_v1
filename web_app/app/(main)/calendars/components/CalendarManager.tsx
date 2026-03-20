@@ -4,6 +4,7 @@ import { Calendar, createEmptyCalendar } from "../models/calendar.model";
 import { CALENDAR_STATUS_ORDER, CALENDAR_TRANSITIONS } from "../models/calendar.state-machine";
 import SaveCalendar from "./SaveCalendar";
 import MyBadge from "@/templates/MyBadge";
+import CalendarDetail from "./CalendarDetail";
 
 export default createEntityManager<Calendar, undefined>({
     title: "Manage Calendars",
@@ -41,5 +42,10 @@ export default createEntityManager<Calendar, undefined>({
         statusField: "status",
         transitions: CALENDAR_TRANSITIONS,
         statusOrder: CALENDAR_STATUS_ORDER
+    },
+    expandable: {
+        template: (calendar) => (
+            <CalendarDetail calendar={calendar} />
+        )
     }
 });

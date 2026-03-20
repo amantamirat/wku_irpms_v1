@@ -1,12 +1,14 @@
 import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
 import { Grant } from "../../models/grant.model";
 
-export type Stage = {
+export type GrantStage = {
     _id?: string;
     grant: string | Grant;
     name: string;
     order?: number;
     evaluation?: string | Evaluation;
+    minReviewers?: number;
+    maxReviewers?: number;
     createdAt?: Date;
     updatedAt?: Date;
 };
@@ -20,7 +22,7 @@ export interface GetStagesDTO {
 /**
  * Validate stage fields before submission
  */
-export const validateStage = (stage: Stage): { valid: boolean; message?: string } => {
+export const validateGrantStage = (stage: GrantStage): { valid: boolean; message?: string } => {
 
     if (!stage.name || stage.name.trim().length === 0) {
         return { valid: false, message: "Stage name is required." };
@@ -40,7 +42,7 @@ export const validateStage = (stage: Stage): { valid: boolean; message?: string 
 /**
  * Prepare stage object for backend submission
  */
-export const sanitize = (stage: Partial<Stage>): Partial<Stage> => {
+export const sanitize = (stage: Partial<GrantStage>): Partial<GrantStage> => {
     return {
         ...stage,
         grant:
@@ -54,7 +56,7 @@ export const sanitize = (stage: Partial<Stage>): Partial<Stage> => {
     };
 };
 
-export const createEmptyStage = (stage?: Partial<Stage>): Stage => ({
+export const createEmptyGrantStage = (stage?: Partial<GrantStage>): GrantStage => ({
     grant: stage?.grant ?? "",
     name: "",
     evaluation: stage?.evaluation ?? "",

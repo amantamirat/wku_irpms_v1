@@ -1,10 +1,10 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { GetStagesDTO, Stage, sanitize } from "../models/stage.model";
+import { GetStagesDTO, GrantStage, sanitize } from "../models/grant.stage.model";
 
 const end_point = "/grants/stages";
 
-export const StageApi: EntityApi<Stage, GetStagesDTO> = {
+export const GrantStageApi: EntityApi<GrantStage, GetStagesDTO> = {
 
     async getAll(options?: GetStagesDTO) {
         const query = new URLSearchParams();

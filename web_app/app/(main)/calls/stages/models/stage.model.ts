@@ -1,11 +1,11 @@
 import { Call } from "@/app/(main)/calls/models/call.model";
 import { StageStatus } from "./stage.state-machine";
-import { Stage } from "@/app/(main)/grants/stages/models/stage.model";
+import { GrantStage } from "@/app/(main)/grants/stages/models/grant.stage.model";
 
 export type CallStage = {
     _id?: string;
     call: string | Call;
-    grantStage?: string | Stage;
+    grantStage?: string | GrantStage;
     deadline: Date;
     status: StageStatus;
     createdAt?: Date;
@@ -14,7 +14,7 @@ export type CallStage = {
 
 export interface GetCallStagesDTO {
     call?: string | Call;
-    grantStage?: string | Stage;
+    grantStage?: string | GrantStage;
     populate?: boolean;
 }
 
@@ -58,7 +58,7 @@ export const sanitizeCallStage = (
                 : stage.call,
         grantStage:
             typeof stage.grantStage === "object" && stage.grantStage !== null
-                ? (stage.grantStage as Stage)._id
+                ? (stage.grantStage as GrantStage)._id
                 : stage.grantStage,
     };
 };

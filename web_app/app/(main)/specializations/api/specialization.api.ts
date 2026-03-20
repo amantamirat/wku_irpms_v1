@@ -4,17 +4,17 @@ const end_point = '/specializations/';
 
 export const SpecializationApi = {
 
-    async createSpecialization(specialization: Partial<Specialization>): Promise<Specialization> {
+    async create(specialization: Partial<Specialization>): Promise<Specialization> {
         const createdData = await ApiClient.post(end_point, specialization);
         return createdData as Specialization;
     },
 
-    async getSpecializations(): Promise<Specialization[]> {
+    async getAll(): Promise<Specialization[]> {
         const data = await ApiClient.get(end_point);
         return data as Specialization[];
     },
 
-    async updateSpecialization(specialization: Partial<Specialization>): Promise<Specialization> {
+    async update(specialization: Partial<Specialization>): Promise<Specialization> {
         if (!specialization._id) {
             throw new Error("_id required.");
         }
@@ -23,7 +23,7 @@ export const SpecializationApi = {
         return updatedSpecialization as Specialization;
     },
 
-    async deleteSpecialization(specialization: Partial<Specialization>): Promise<boolean> {
+    async delete(specialization: Partial<Specialization>): Promise<boolean> {
         if (!specialization._id) {
             throw new Error("_id required.");
         }

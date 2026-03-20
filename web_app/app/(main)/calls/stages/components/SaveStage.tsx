@@ -13,8 +13,8 @@ import { CallStage, validateCallStage } from '../models/stage.model';
 
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
 
-import { Stage } from '@/app/(main)/grants/stages/models/stage.model';
-import { StageApi } from '@/app/(main)/grants/stages/api/stage.api';
+import { GrantStage } from '@/app/(main)/grants/stages/models/grant.stage.model';
+import { GrantStageApi } from '@/app/(main)/grants/stages/api/grant.stage.api';
 
 import { Call, CallStatus } from '../../models/call.model';
 import { CallApi } from '../../api/call.api';
@@ -31,10 +31,11 @@ const SaveCallStage = ({
     const [localStage, setLocalStage] = useState<CallStage>({ ...item });
     const [submitted, setSubmitted] = useState(false);
 
-    const [grantStages, setGrantStages] = useState<Stage[]>();
+    const [grantStages, setGrantStages] = useState<GrantStage[]>();
     const [calls, setCalls] = useState<Call[]>();
 
     const isCallPredefined = !!item.call;
+    const isStagePredefined = !!item.grantStage;
 
     // ---------------------------
     // Load Calls
@@ -61,6 +62,7 @@ const SaveCallStage = ({
     // Load Grant Stages (depends on selected call)
     // ---------------------------
     useEffect(() => {
+        if (isStagePredefined) return;
         const loadStages = async () => {
             try {
                 if (!localStage.call) return;
@@ -69,7 +71,7 @@ const SaveCallStage = ({
 
                 if (!call?.grant) return;
 
-                const data = await StageApi.getAll({
+                const data = await GrantStageApi.getAll({
                     grant: call.grant,
                 });
 
@@ -80,7 +82,7 @@ const SaveCallStage = ({
         };
 
         loadStages();
-    }, [localStage.call]);
+    }, [localStage.call, isStagePredefined]);
 
     // ---------------------------
     // Sync item
@@ -202,20 +204,28 @@ const SaveCallStage = ({
                 {/* Grant Stage */}
                 <div className="field">
                     <label htmlFor="grantStage">Grant Stage</label>
-                    <Dropdown
-                        id="grantStage"
-                        value={localStage.grantStage}
-                        options={grantStages}
-                        optionLabel="name"
-                        dataKey="_id"
-                        onChange={(e) =>
-                            setLocalStage({ ...localStage, grantStage: e.value })
-                        }
-                        placeholder="Select Stage"
-                        className={classNames({
-                            'p-invalid': submitted && !localStage.grantStage
-                        })}
-                    />
+                    {isStagePredefined ? (
+                        <input
+                            className="p-inputtext p-component"
+                            value={(localStage.grantStage as any)?.name || ''}
+                            disabled
+                        />
+                    ) : (
+                        <Dropdown
+                            id="grantStage"
+                            value={localStage.grantStage}
+                            options={grantStages}
+                            optionLabel="name"
+                            dataKey="_id"
+                            onChange={(e) =>
+                                setLocalStage({ ...localStage, grantStage: e.value })
+                            }
+                            placeholder="Select Stage"
+                            className={classNames({
+                                'p-invalid': submitted && !localStage.grantStage
+                            })}
+                        />
+                    )}
                 </div>
 
                 {/* Deadline */}

@@ -8,7 +8,7 @@ export type Specialization = {
     updatedAt?: Date;
 }
 
-export const validateSpecialization = (
+export const validate = (
     spec: Specialization
 ): { valid: boolean; message?: string } => {
 

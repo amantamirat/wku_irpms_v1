@@ -7,7 +7,7 @@ import { InputNumber } from 'primereact/inputnumber';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 
-import { Specialization, validateSpecialization } from '../models/specialization.model';
+import { Specialization, validate } from '../models/specialization.model';
 import { SpecializationApi } from '../api/specialization.api';
 import { InputText } from 'primereact/inputtext';
 import { AcademicLevel } from '../../organizations/models/organization.model';
@@ -20,7 +20,7 @@ interface SaveSpecializationDialogProps {
     onComplete?: (savedSpecialization: Specialization) => void;
 }
 
-const SaveSpecializationDialog = ({ visible, specialization, onHide, onComplete }: SaveSpecializationDialogProps) => {
+const SaveSpecialization = ({ visible, specialization, onHide, onComplete }: SaveSpecializationDialogProps) => {
     const toast = useRef<Toast>(null);
     const [localSpecialization, setLocalSpecialization] = useState<Specialization>({ ...specialization });
     const [submitted, setSubmitted] = useState(false);
@@ -43,13 +43,13 @@ const SaveSpecializationDialog = ({ visible, specialization, onHide, onComplete 
     const saveSpecialization = async () => {
         try {
             setSubmitted(true);
-            const validation = validateSpecialization(localSpecialization);
+            const validation = validate(localSpecialization);
             if (!validation.valid) throw new Error(validation.message);
             let saved: Specialization;
             if (localSpecialization._id) {
-                saved = await SpecializationApi.updateSpecialization(localSpecialization);
+                saved = await SpecializationApi.update(localSpecialization);
             } else {
-                saved = await SpecializationApi.createSpecialization(localSpecialization);
+                saved = await SpecializationApi.create(localSpecialization);
             }
             toast.current?.show({
                 severity: 'success',
@@ -120,4 +120,4 @@ const SaveSpecializationDialog = ({ visible, specialization, onHide, onComplete 
     );
 };
 
-export default SaveSpecializationDialog;
+export default SaveSpecialization;

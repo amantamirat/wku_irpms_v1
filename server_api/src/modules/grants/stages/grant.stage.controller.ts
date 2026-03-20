@@ -12,12 +12,14 @@ export class StageController {
 
     create = async (req: Request, res: Response) => {
         try {
-            const { grant, name, evaluation } = req.body;
+            const { grant, name, evaluation, minReviewers, maxReviewers } = req.body;
 
             const dto: CreateStageDTO = {
                 grant: grant as string,
                 name,
                 evaluation: evaluation as string,
+                minReviewers,
+                maxReviewers
             };
 
             const stage = await this.service.create(dto);
@@ -59,11 +61,13 @@ export class StageController {
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.params;
-            const { name } = req.body;
+            const { name, minReviewers, maxReviewers } = req.body;
             const dto: UpdateStageDTO = {
                 id: id,
                 data: {
                     name,
+                    minReviewers,
+                    maxReviewers
                 },
             };
             const updated = await this.service.update(dto);

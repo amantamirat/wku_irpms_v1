@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Stage } from "../models/stage.model";
-import { StageApi } from "../api/stage.api";
+import { CallStage } from "../models/stage.model";
+import { CallStageApi } from "../api/stage.api";
 import StageDetail from "../components/StageDetail";
 
 
@@ -11,20 +11,20 @@ export default function StageDetailPage() {
     const params = useParams();
     const id = params.id as string;
 
-    const [stage, setStage] = useState<Stage | null>(null);
+    const [stage, setStage] = useState<CallStage | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchCalendar = async () => {
+        const fetchStage = async () => {
             try {
-                const data = await StageApi.getById(id);
+                const data = await CallStageApi.getById!(id);
                 setStage(data);
             } finally {
                 setLoading(false);
             }
         };
 
-        if (id) fetchCalendar();
+        if (id) fetchStage();
     }, [id]);
 
     if (loading) return <p>Loading...</p>;
@@ -33,7 +33,7 @@ export default function StageDetailPage() {
     return (
         <div className="p-4">
             <h2 className="mb-3">
-                Stage {stage.name}
+                Stage {id}
             </h2>
             {
                 <StageDetail stage={stage} />

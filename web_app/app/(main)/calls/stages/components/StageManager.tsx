@@ -1,6 +1,6 @@
 'use client';
 
-import { Stage } from "@/app/(main)/grants/stages/models/stage.model";
+import { GrantStage } from "@/app/(main)/grants/stages/models/grant.stage.model";
 import { createEntityManager } from "@/components/createEntityManager";
 import MyBadge from "@/templates/MyBadge";
 import { Call } from "../../models/call.model";
@@ -26,7 +26,7 @@ const CallStageManager = ({ call }: CallStageManagerProps) => {
                 field: "grantStage",
                 body: (cs: CallStage) =>
                     typeof cs.grantStage === "object"
-                        ? (cs.grantStage as Stage)?.name
+                        ? (cs.grantStage as GrantStage)?.name
                         : cs.grantStage
             },
 

@@ -1,5 +1,4 @@
 import { useAuth } from "@/contexts/auth-context";
-import { PERMISSIONS } from "@/types/permissions";
 import { TabPanel, TabView } from "primereact/tabview";
 import { useMemo } from "react";
 import { Call } from "../models/call.model";
@@ -20,7 +19,7 @@ const CallDetail = ({ call }: CallDetailProps) => {
     const tabs = useMemo(() => [
         {
             header: "Stages",
-            permission: PERMISSIONS.STAGE.READ,
+            permission: "call.stage:read",
             content: <StageManager call={call} />
         },
         /*

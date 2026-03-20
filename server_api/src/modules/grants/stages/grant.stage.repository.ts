@@ -58,6 +58,12 @@ export class GrantStageRepository implements IGrantStageRepository {
         if (dtoData.name !== undefined) {
             updateData.name = dtoData.name;
         }
+        if (dtoData.minReviewers !== undefined) {
+            updateData.minReviewers = dtoData.minReviewers;
+        }
+        if (dtoData.maxReviewers !== undefined) {
+            updateData.maxReviewers = dtoData.maxReviewers;
+        }
         /*
         if (dtoData.evaluation !== undefined) {
             updateData.evaluation = new mongoose.Types.ObjectId(dtoData.evaluation);

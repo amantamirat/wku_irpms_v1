@@ -56,7 +56,7 @@ const SaveApplicantDialog = ({ visible, applicant, onHide, onComplete }: SaveApp
         }
         const fetchSpecs = async () => {
             try {
-                const specs = await SpecializationApi.getSpecializations();
+                const specs = await SpecializationApi.getAll();
                 setSpecializations(specs);
             } catch (err) {
                 console.error('Failed to fetch specializations:', err);

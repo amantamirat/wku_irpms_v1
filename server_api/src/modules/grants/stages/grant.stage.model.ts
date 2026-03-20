@@ -8,6 +8,8 @@ export interface IGrantStage extends Document {
     name: string;
     order: number;
     evaluation: mongoose.Types.ObjectId;
+    minReviewers: number;
+    maxReviewers: number;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -33,6 +35,18 @@ const GrantStageSchema = new Schema<IGrantStage>({
         ref: COLLECTIONS.EVALUATION,
         required: true,
         immutable: true,
+    },
+    minReviewers: {
+        type: Number,
+        required: true,
+        min: 0,
+        default: 1,
+    },
+    maxReviewers: {
+        type: Number,
+        required: true,
+        min: 0,
+        default: 3,
     },
 
 }, { timestamps: true });

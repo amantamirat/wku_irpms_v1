@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { PERMISSIONS } from "@/types/permissions";
 import { SpecializationApi } from "../api/specialization.api";
 import { Specialization } from "../models/specialization.model";
-import SaveSpecializationDialog from "../dialogs/SaveCalendarDialog";
+import SaveSpecialization from "./SaveSpecialization";
 import { Applicant } from "../../applicants/models/applicant.model";
 
 interface SpecManagerProps {
@@ -52,7 +52,7 @@ const SpecializationManager = ({ applicant }: SpecManagerProps) => {
         const fetchSpecializations = async () => {
             try {
                 setLoading(true);
-                const data = await SpecializationApi.getSpecializations();
+                const data = await SpecializationApi.getAll();
                 setAll(data);
             } catch (err: any) {
                 setError("Failed to fetch specializations. " + (err?.message ?? ""));
@@ -71,7 +71,7 @@ const SpecializationManager = ({ applicant }: SpecManagerProps) => {
 
     /** Delete */
     const deleteSpecialization = async (row: Specialization) => {
-        const ok = await SpecializationApi.deleteSpecialization(row);
+        const ok = await SpecializationApi.delete(row);
         if (ok) removeItem(row);
     };
 
@@ -132,7 +132,7 @@ const SpecializationManager = ({ applicant }: SpecManagerProps) => {
 
             {/* Save Dialog */}
             {(specialization && (canCreate || canEdit)) && (
-                <SaveSpecializationDialog
+                <SaveSpecialization
                     visible={showSaveDialog}
                     specialization={specialization}
                     onComplete={onSaveComplete}

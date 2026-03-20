@@ -3,13 +3,16 @@ export interface CreateStageDTO {
     name: string;
     order?: number;
     evaluation: string;
+    minReviewers: number;
+    maxReviewers: number;
 }
 
 export interface UpdateStageDTO {
     id: string;
     data: Partial<{
         name: string;
-        //evaluation: string;
+        minReviewers: number;
+        maxReviewers: number;
     }>;
 }
 
