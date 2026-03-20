@@ -1,4 +1,4 @@
-import { Permission } from "../permission/model/permission.model";
+import { Permission } from "../permissions/models/permission.model";
 
 export type Role = {
     _id?: string;

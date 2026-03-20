@@ -18,27 +18,23 @@ export class CallService {
 
     constructor(
         private readonly repository: CallRepository,
-        private readonly calendarRepository: ICalendarReadRepository,
+        private readonly calendarRepo: ICalendarReadRepository,
         private readonly stageRepository: IStageRepository,
         private readonly organizationRepository: IOrganizationRepository,
         private readonly grantRepository: IGrantRepository,
         private readonly thematicRepository: IThematicRepository,
     ) {
-        this.repository = repository;
-        this.calendarRepository = calendarRepository;
-        this.stageRepository = stageRepository;
-        this.organizationRepository = organizationRepository;
-        this.grantRepository = grantRepository;
-        this.thematicRepository = thematicRepository;
+
     }
 
     async create(dto: CreateCallDTO) {
-        const calendarDoc = await this.calendarRepository.findById(dto.calendar);
+        const calendarDoc = await this.calendarRepo.findById(dto.calendar);
         if (!calendarDoc) throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
         if (calendarDoc.status !== CalendarStatus.active) throw new AppError(ERROR_CODES.CALENDAR_NOT_ACTIVE);
 
         const grantDoc = await this.grantRepository.findById(dto.grant);
         if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+        if (grantDoc.status !== "active") throw new AppError(ERROR_CODES.GRANT_NOT_ACTIVE);
         /*
         const directorateDoc = await this.organizationRepository.findById(dto.directorate);
         if (!directorateDoc || directorateDoc.type !== Unit.directorate) throw new AppError(ERROR_CODES.DIRECTORATE_NOT_FOUND);
@@ -46,11 +42,7 @@ export class CallService {
         const thematicsDoc = await this.thematicRepository.findById(dto.thematic);
         if (!thematicsDoc) throw new AppError(ERROR_CODES.THEMATIC_NOT_FOUND);
         // }
-*/
-
-
-
-
+        */
         const created = await this.repository.create({ ...dto, status: CallStatus.planned });
         return created;
     }

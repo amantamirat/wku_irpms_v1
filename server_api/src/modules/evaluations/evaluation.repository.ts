@@ -26,13 +26,15 @@ export class EvaluationRepository implements IEvaluationRepository {
     async find(filters: GetEvaluationsDTO) {
         const query: any = {};
 
+        /*
         if (filters.organization) {
             query.organization = new mongoose.Types.ObjectId(filters.organization);
         }
+            */
         let dbQuery = Evaluation.find(query);
 
         if (filters.populate) {
-            dbQuery = dbQuery.populate("organization");
+            // dbQuery = dbQuery.populate("organization");
         }
 
         return dbQuery.lean<IEvaluation[]>().exec();
@@ -40,7 +42,7 @@ export class EvaluationRepository implements IEvaluationRepository {
 
     async create(dto: CreateEvaluationDTO) {
         const data: Partial<IEvaluation> = {
-            organization: new mongoose.Types.ObjectId(dto.organization),
+           // organization: new mongoose.Types.ObjectId(dto.organization),
             title: dto.title,
         };
         return Evaluation.create(data);

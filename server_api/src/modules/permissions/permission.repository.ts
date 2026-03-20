@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+import { UpdatePermissionDto } from "./permission.dto";
 import { IPermission, Permission } from "./permission.model";
 
 export interface IPermissionRepository {
@@ -5,6 +7,8 @@ export interface IPermissionRepository {
     findByName(name: string): Promise<IPermission | null>;
     findByNames(names: string[]): Promise<IPermission[]>;
     findAll(): Promise<Partial<IPermission>[]>;
+    update(id: string, data: UpdatePermissionDto["data"]): Promise<IPermission | null>;
+    delete(id: string): Promise<IPermission | null>;
 }
 
 export class PermissionRepository implements IPermissionRepository {
@@ -27,4 +31,21 @@ export class PermissionRepository implements IPermissionRepository {
             .lean<IPermission[]>()
             .exec();
     }
+
+    update(id: string, dtoData: UpdatePermissionDto["data"]): Promise<IPermission | null> {
+        const toUpdate: any = {};
+        if (dtoData.name) {
+            toUpdate.name = dtoData.name;
+        }
+        return Permission.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            { $set: toUpdate },
+            { new: true }
+        ).exec();
+    }
+
+    async delete(id: string) {
+        return Permission.findByIdAndDelete(id).exec();
+    }
+
 }

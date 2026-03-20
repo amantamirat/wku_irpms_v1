@@ -40,14 +40,14 @@ export class RoleRepository implements IRoleRepository {
 
     async findAll() {
         const filter: any = {};
-        return await Role.find(filter)
+        return Role.find(filter)
             //.populate("permissions")
             .lean<IRole[]>()
             .exec();
     }
 
     async findDefaults() {
-        return await Role.find({ isDefault: true })
+        return Role.find({ isDefault: true })
             .lean<IRole[]>()
             .exec();
     }
@@ -67,7 +67,7 @@ export class RoleRepository implements IRoleRepository {
             toUpdate.isDefault = dtoData.isDefault;
         }
 
-        return await Role.findByIdAndUpdate(
+        return Role.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: toUpdate },
             { new: true }
@@ -75,6 +75,6 @@ export class RoleRepository implements IRoleRepository {
     }
 
     async delete(id: string) {
-        return await Role.findByIdAndDelete(new mongoose.Types.ObjectId(id)).exec();
+        return Role.findByIdAndDelete(new mongoose.Types.ObjectId(id)).exec();
     }
 }

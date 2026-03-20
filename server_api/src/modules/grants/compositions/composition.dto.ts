@@ -72,3 +72,7 @@ export interface GetCompositionDTO {
     grant?: string;
     populate?: boolean;
 }
+
+export interface ExistsCompositionDTO {
+    grant?: string;
+}

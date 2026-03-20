@@ -2,8 +2,7 @@ import mongoose, { Schema, model } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
 
 
-
-export interface IStage extends Document {
+export interface IGrantStage extends Document {
     _id: string;
     grant: mongoose.Types.ObjectId;
     name: string;
@@ -13,7 +12,7 @@ export interface IStage extends Document {
     updatedAt?: Date;
 }
 
-const StageSchema = new Schema<IStage>({
+const GrantStageSchema = new Schema<IGrantStage>({
     grant: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.GRANT,
@@ -39,6 +38,6 @@ const StageSchema = new Schema<IStage>({
 }, { timestamps: true });
 
 
-StageSchema.index({ grant: 1, order: 1 }, { unique: true });
+GrantStageSchema.index({ grant: 1, order: 1 }, { unique: true });
 
-export const Stage = model<IStage>(COLLECTIONS.GRANT_STAGE, StageSchema);
+export const GrantStage = model<IGrantStage>(COLLECTIONS.GRANT_STAGE, GrantStageSchema);

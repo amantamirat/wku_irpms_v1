@@ -98,7 +98,7 @@ export class PhaseService {
         const phaseDoc = await this.repository.findById(id);
         if (!phaseDoc) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
         if (current !== phaseDoc.status)
-            throw new AppError(ERROR_CODES.CURRENT_STATE_MISMATCH);
+            throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
 
         const projectDoc = await this.projectRepository.findById(String(phaseDoc.project));
         if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);

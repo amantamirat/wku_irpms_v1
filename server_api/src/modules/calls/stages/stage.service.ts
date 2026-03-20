@@ -13,14 +13,11 @@ export class StageService {
 
     constructor(
         private readonly repository: IStageRepository,
-        private readonly callRepository: ICallRepository,
+        private readonly callRepo: ICallRepository,
         private readonly evalRepository: IEvaluationRepository,
         private readonly docRepository: IDocumentRepository,
     ) {
-        this.repository = repository;
-        this.callRepository = callRepository;
-        this.evalRepository = evalRepository;
-        this.docRepository = docRepository;
+
     }
     /**
      * Create a new stage
@@ -28,7 +25,7 @@ export class StageService {
     async create(dto: CreateStageDTO) {
         const { call, evaluation } = dto;
 
-        const callDoc = await this.callRepository.findById(call);
+        const callDoc = await this.callRepo.findById(call);
         if (!callDoc) throw new Error(ERROR_CODES.CALL_NOT_FOUND);
         if (callDoc.status !== CallStatus.active) throw new Error(ERROR_CODES.CALL_NOT_ACTIVE);
 
@@ -94,8 +91,9 @@ export class StageService {
         if (!stageDoc) throw new Error(ERROR_CODES.STAGE_NOT_FOUND);
         if (stageDoc.status !== StageStatus.planned) throw new Error(ERROR_CODES.STAGE_NOT_PLANNED);
 
-        const { call, order } = stageDoc;
+        const { call } = stageDoc;
         const deleted = await this.repository.delete(id);
+        /*
         // Re-arrange orders of remaining stages
         if (deleted) {
             await this.repository.updateMany(
@@ -108,6 +106,7 @@ export class StageService {
                 }
             );
         }
+            */
         return deleted
     }
 }

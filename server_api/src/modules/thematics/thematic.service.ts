@@ -14,16 +14,18 @@ export class ThematicService {
 
     constructor(
         private readonly repository: IThematicRepository = new ThematicRepository(),
-        private readonly themeRepository: IThemeRepository = new ThemeRepository(),
-        private readonly organizationRepo: IOrganizationRepository = new OrganizationRepository(),
+        private readonly themeRepo: IThemeRepository = new ThemeRepository(),
+        //private readonly organizationRepo: IOrganizationRepository = new OrganizationRepository(),
     ) { }
 
 
     async create(dto: CreateThematicDTO) {
+        /*
         const directorateDoc = await this.organizationRepo.findById(dto.directorate);
         if (!directorateDoc || directorateDoc.type !== Unit.directorate) {
             throw new Error(ERROR_CODES.DIRECTORATE_NOT_FOUND);
         }
+        */
         const createdThematic = await this.repository.create(dto);
         return createdThematic;
     }
@@ -57,7 +59,7 @@ export class ThematicService {
             THEMATIC_TRANSITIONS
         );
 
-        if (next === ThematicStatus.planned) {
+        if (next === ThematicStatus.draft) {
             //if (await this.callRepository.exists({ calendar: id })) {
             // throw new AppError(ERROR_CODES.CALL_ALREADY_EXISTS);
             // }
@@ -70,7 +72,7 @@ export class ThematicService {
 
     async delete(dto: DeleteDto) {
         const { id } = dto;
-        const themeExist = await this.themeRepository.exists({ thematicArea: id });
+        const themeExist = await this.themeRepo.exists({ thematicArea: id });
         if (themeExist) {
             throw new AppError(ERROR_CODES.THEME_ALREADY_EXISTS);
         }

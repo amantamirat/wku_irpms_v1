@@ -8,12 +8,12 @@ const router = Router();
 router.post(
     '/',
     verifyActiveAccount,
-    checkPermission(["grant_stage:create"]),
+    checkPermission(["grant.stage:create"]),
     controller.create
 );
 
 router.get('/:id', verifyActiveAccount,
-    checkPermission(["grant_stage:read"]),
+    checkPermission(["grant.stage:read"]),
     controller.getById
 );
 
@@ -21,15 +21,15 @@ router.get('/:id', verifyActiveAccount,
 router.get(
     '/',
     verifyActiveAccount,
-    checkPermission(["grant_stage:read"]),
+    checkPermission(["grant.stage:read"]),
     controller.get
 );
 
 // Update 
 router.put(
-    '/',
+    '/:id',
     verifyActiveAccount,
-    checkPermission(["grant_stage:update"]),
+    checkPermission(["grant.stage:update"]),
     controller.update
 );
 
@@ -37,7 +37,7 @@ router.put(
 router.delete(
     '/:id',
     verifyActiveAccount,
-    checkPermission(["grant_stage:delete"]),
+    checkPermission(["grant.stage:delete"]),
     controller.delete
 );
 

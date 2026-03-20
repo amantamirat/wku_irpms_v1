@@ -33,7 +33,7 @@ interface IDirectorate extends IOrganization {
 
 export const Directorate = Organization.discriminator<IDirectorate>(Unit.directorate, new Schema({}));
 
-interface IExternal extends IOrganization {
+export interface IExternal extends IOrganization {
     type: Unit.external;
     ownership: Ownership;
 }

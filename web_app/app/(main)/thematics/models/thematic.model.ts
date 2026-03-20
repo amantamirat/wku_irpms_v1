@@ -27,7 +27,7 @@ export const themeLevelIndex: Record<ThemeLevel, number> = {
 
 export type Thematic = {
     _id?: string;
-    directorate?: string | Organization;
+    // directorate?: string | Organization;
     title: string;
     //type?: ThemeType;
     level: ThemeLevel;
@@ -38,7 +38,7 @@ export type Thematic = {
 }
 
 export interface GetThematicsOptions {
-    directorate?: string | Organization;
+    //directorate?: string | Organization;
     populate?: boolean;
 }
 export const validateThematic = (thmc: Thematic): { valid: boolean; message?: string } => {
@@ -53,9 +53,11 @@ export const validateThematic = (thmc: Thematic): { valid: boolean; message?: st
     if (!thmc.level) {
         return { valid: false, message: 'Level is required.' };
     }
+    /*
     if (!thmc.directorate) {
         return { valid: false, message: 'Directorate is required.' };
     }
+    */
     return { valid: true };
 };
 
@@ -63,15 +65,16 @@ export const validateThematic = (thmc: Thematic): { valid: boolean; message?: st
 export function sanitize(thmc: Partial<Thematic>): Partial<Thematic> {
     return {
         ...thmc,
+        /*
         directorate:
             typeof thmc.directorate === 'object' && thmc.directorate !== null
                 ? (thmc.directorate as Organization)._id
-                : thmc.directorate
+                : thmc.directorate*/
     };
 }
 
 export const createEmptyThematic = (): Thematic => ({
-    directorate: "",
+    //directorate: "",
     title: "",
     level: ThemeLevel.broad
 })

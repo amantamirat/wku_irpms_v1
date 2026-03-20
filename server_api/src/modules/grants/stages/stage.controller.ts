@@ -29,14 +29,15 @@ export class StageController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { grant, order } = req.query;
+            const { grant, order, populate } = req.query;
 
             const dto: GetStageDTO = {
                 grant: grant as string,
                 order: order ? Number(order) : undefined,
+                ...(populate !== undefined && { populate: populate === "true" })
             };
 
-            const stages = await this.service.getStages(dto);
+            const stages = await this.service.get(dto);
             successResponse(res, 200, 'Stages fetched successfully', stages);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -56,10 +57,10 @@ export class StageController {
 
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const { id } = req.query;
-            const { name, deadline } = req.body;
+            const { id } = req.params;
+            const { name } = req.body;
             const dto: UpdateStageDTO = {
-                id: id as string,
+                id: id,
                 data: {
                     name,
                 },

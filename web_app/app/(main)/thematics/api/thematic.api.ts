@@ -10,10 +10,11 @@ export const ThematicApi: EntityApi<Thematic, GetThematicsOptions | undefined> =
     async getAll(options) {
         const query = new URLSearchParams();
         if (options) {
-            const sanitized = sanitize(options);
+            //const sanitized = sanitize(options);
+            /*
             if (sanitized.directorate) {
                 query.append("directorate", sanitized.directorate as string);
-            }
+            }*/
             if (options.populate !== undefined) {
                 query.append("populate", String(options.populate));
             }
@@ -37,7 +38,7 @@ export const ThematicApi: EntityApi<Thematic, GetThematicsOptions | undefined> =
         if (!thematic._id) throw new Error("_id required");
         return ApiClient.delete(`${end_point}/${thematic._id}`);
     },
-    
+
     async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
         const query = new URLSearchParams();
         query.append("id", id);

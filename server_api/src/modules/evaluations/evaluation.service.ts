@@ -19,6 +19,7 @@ export class EvaluationService {
     }
 
     async create(dto: CreateEvaluationDTO) {
+        /*
         const organizationDoc = await this.organizationRepository.findById(dto.organization);
         if (!organizationDoc) throw new Error(ERROR_CODES.ORGANIZATION_NOT_FOUND);
 
@@ -28,6 +29,7 @@ export class EvaluationService {
         if (orgUnit !== Unit.directorate && orgUnit !== Unit.external) {
             throw new Error(ERROR_CODES.ORGANIZATION_NOT_FOUND);
         }
+        */
 
         const created = await this.repository.create(dto);
         return created;

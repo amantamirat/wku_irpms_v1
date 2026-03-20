@@ -25,15 +25,17 @@ export class ThematicRepository implements IThematicRepository {
 
     async find(filters: GetThematicsDTO) {
         const query: any = {};
-
+        /*
         if (filters.directorate) {
             query.directorate = new mongoose.Types.ObjectId(filters.directorate);
         }
-
+        */
+        if (filters.status) {
+            query.status = filters.status;
+        }
         let dbQuery = Thematic.find(query);
         if (filters.populate) {
-            dbQuery = dbQuery
-                .populate("directorate")
+            // dbQuery = dbQuery.populate("directorate")
         }
         return dbQuery
             .lean<IThematic[]>()
@@ -43,7 +45,7 @@ export class ThematicRepository implements IThematicRepository {
     async create(dto: CreateThematicDTO) {
         return Thematic.create({
             ...dto,
-            directorate: new mongoose.Types.ObjectId(dto.directorate)
+            //directorate: new mongoose.Types.ObjectId(dto.directorate)
         });
     }
 

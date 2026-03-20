@@ -5,6 +5,7 @@ import { AuthenticatedRequest } from '../users/auth/auth.middleware';
 import { successResponse, errorResponse } from '../../common/helpers/response';
 import { ERROR_CODES } from '../../common/errors/error.codes';
 import { TransitionRequestDto } from '../../common/dtos/transition.dto';
+import { GrantStatus } from './grant.model';
 
 export class GrantController {
 
@@ -34,13 +35,12 @@ export class GrantController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { organization, populate } = req.query;
-
+            const { organization, status, populate } = req.query;
             const options: GetGrantsDTO = {
                 organization: organization as string,
+                status:status as GrantStatus,
                 ...(populate !== undefined && { populate: populate === "true" })
             };
-
             const grants = await this.service.get(options);
             successResponse(res, 200, "Grants fetched successfully", grants);
         } catch (err: any) {
@@ -64,29 +64,18 @@ export class GrantController {
 
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) {
-                throw new Error("User not found!");
-            }
-
-            const { id } = req.query;
-            if (!id) {
-                throw new Error("id not found!");
-            }
-
-            const userId = req.user.applicantId;
-
+            const { id } = req.params;
+            const { title, description, amount } = req.body;
             const dto: UpdateGrantDTO = {
                 id: String(id),
-                data: req.body,
-                userId
+                data: { title, description, amount }
             };
-
             const updated = await this.service.update(dto);
             successResponse(res, 200, "Grant updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
-    }
+    };
 
     transitionState = async (req: AuthenticatedRequest, res: Response) => {
         try {
@@ -100,7 +89,7 @@ export class GrantController {
                 applicantId: req.user.applicantId,
             };
             const updated = await this.service.transitionState(dto);
-            successResponse(res, 200, "Phase status updated successfully", updated);
+            successResponse(res, 200, "Grant status updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }

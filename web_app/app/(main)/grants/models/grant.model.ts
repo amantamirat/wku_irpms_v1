@@ -48,13 +48,20 @@ export interface GetGrantsOptions {
     organization?: string | Organization;
 }
 
-export const createEmptyGrant = (): Grant => ({
-    fundingSource:FundingSource.INTERNAL,
+export const createEmptyGrant = (data?: {
+    organization?: Organization;
+    thematic?: Thematic;
+}): Grant => ({
+    fundingSource: FundingSource.INTERNAL,
     title: "",
-    amount: 0
-})
+    amount: 0,
+    ...(data?.organization && { organization: data.organization }),
+    ...(data?.thematic && { thematic: data.thematic }),
+});
 
 export interface GetGrantOptions {
+    organization?: Organization | string;
+    thematic?: Thematic | string;
     status?: GrantStatus;
     populate?: boolean;
 }

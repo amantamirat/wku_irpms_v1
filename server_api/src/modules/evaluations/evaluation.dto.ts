@@ -1,7 +1,7 @@
 import { EvalStatus } from "./evaluation.state-machine";
 
 export interface CreateEvaluationDTO {
-    organization: string;
+    //organization: string;
     title: string;
     description:string;
     userId?: string;
@@ -18,6 +18,6 @@ export interface UpdateEvaluationDTO {
 }
 
 export interface GetEvaluationsDTO {
-    organization?: string;
+    //organization?: string;
     populate?: boolean;
 }

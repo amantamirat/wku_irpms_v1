@@ -4,23 +4,24 @@ import { createEntityManager } from "@/components/createEntityManager";
 import { Thematic, GetThematicsOptions, createEmptyThematic } from "../models/thematic.model";
 import { ThematicApi } from "../api/thematic.api";
 import SaveThematic from "./SaveThematic";
-import { Organization } from "../../organizations/models/organization.model";
 import ThematicDetail from "./ThematicDetail";
 import { THEMATIC_STATUS_ORDER, THEMATIC_TRANSITIONS } from "../models/thematic.state-machine";
 import MyBadge from "@/templates/MyBadge";
 
 
 interface ThematicManagerProps {
-    directorate?: Organization;
+    // directorate?: Organization;
+    populate?: boolean;
 }
 
-const ThematicManager = ({ directorate }: ThematicManagerProps) => {
+const ThematicManager = ({ populate }: ThematicManagerProps) => {
     const Manager = createEntityManager<Thematic, GetThematicsOptions | undefined>({
         title: "Manage Thematics",
         itemName: "Thematic",
         api: ThematicApi,
 
         columns: [
+            /*
             {
                 header: "Directorate",
                 field: "directorate",
@@ -28,6 +29,7 @@ const ThematicManager = ({ directorate }: ThematicManagerProps) => {
                 body: (r: Thematic) =>
                     typeof r.directorate === "object" ? r.directorate?.name : r.directorate
             },
+            */
             { header: "Title", field: "title", sortable: true },
             {
                 header: "Level",
@@ -49,16 +51,12 @@ const ThematicManager = ({ directorate }: ThematicManagerProps) => {
         permissionPrefix: "thematic",
         // Use this if your backend needs to join the Directorate object
         query: () => ({
-            directorate: directorate ?? undefined,
-            populate: true
+            //directorate: directorate ?? undefined,
+            populate: populate
         }),
         expandable: {
             template: (thematic) => (
-                <div className="p-3">
-                    <strong>Details for {thematic.title}:</strong>
-                    <p>{thematic.description || 'No description provided.'}</p>
-                    <ThematicDetail thematic={thematic} />
-                </div>
+                <ThematicDetail thematic={thematic} />
             )
         },
         workflow: {

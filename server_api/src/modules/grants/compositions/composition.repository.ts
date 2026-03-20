@@ -4,7 +4,8 @@ import {
     CreateCompositionDTO,
     UpdateCompositionDTO,
     RangeDTO,
-    GetCompositionDTO
+    GetCompositionDTO,
+    ExistsCompositionDTO
 } from "./composition.dto";
 
 export interface ICompositionRepository {
@@ -12,6 +13,7 @@ export interface ICompositionRepository {
     find(filters: GetCompositionDTO): Promise<Partial<IComposition>[]>;
     create(dto: CreateCompositionDTO): Promise<IComposition>;
     update(id: string, data: UpdateCompositionDTO["data"]): Promise<IComposition | null>;
+    exists(filters: ExistsCompositionDTO): Promise<boolean>;
     delete(id: string): Promise<IComposition | null>;
 }
 
@@ -87,6 +89,16 @@ export class CompositionRepository implements ICompositionRepository {
             { $set: updateData },
             { new: true }
         ).exec();
+    }
+
+    async exists(filters: ExistsCompositionDTO): Promise<boolean> {
+        const query: any = {};
+        const { grant } = filters;
+        if (grant) {
+            query.grant = new mongoose.Types.ObjectId(grant);
+        }
+        const result = await Composition.exists(query).exec();
+        return result !== null;
     }
 
     async delete(id: string): Promise<IComposition | null> {

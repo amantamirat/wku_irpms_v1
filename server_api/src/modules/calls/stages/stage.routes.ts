@@ -20,44 +20,43 @@ const router = Router();
 router.post(
     '/',
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.STAGE.CREATE]),
+    checkPermission("call.stage:create"),
     controller.create
 );
 
 router.get('/:id', verifyActiveAccount,
-    checkPermission([PERMISSIONS.STAGE.READ]),
+    checkPermission("call.stage:read"),
     controller.getById
 );
 
-// Get cycles
+
 router.get(
     '/',
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.STAGE.READ]),
+    checkPermission("call.stage:read"),
     controller.get
 );
 
-// Update cycle
+
 router.put(
-    '/',
+    '/:id',
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.STAGE.UPDATE]),
+    checkPermission("call.stage:update"),
     controller.update
 );
 
-//update status
+
 router.patch(
     '/:id',
     verifyActiveAccount,
-    checkStatusPermission("stage"),
+    checkStatusPermission("call.stage"),
     controller.updateStatus
 );
 
-// Delete cycle
 router.delete(
     '/:id',
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.STAGE.DELETE]),
+    checkPermission("call.stage:delete"),
     controller.delete
 );
 

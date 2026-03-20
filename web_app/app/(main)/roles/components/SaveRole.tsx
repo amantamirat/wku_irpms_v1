@@ -14,8 +14,8 @@ import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 import { RoleApi } from '../api/role.api';
 import { Role, validateRole } from '../models/role.model';
-import { PermissionApi } from '../permission/api/permission.api';
-import { Permission } from '../permission/model/permission.model';
+import { PermissionApi } from '../permissions/api/permission.api';
+import { Permission } from '../permissions/models/permission.model';
 
 
 
@@ -90,7 +90,7 @@ const SaveRole = (props: EntitySaveDialogProps<Role>) => {
 
         const fetchPermissions = async () => {
             try {
-                const data = await PermissionApi.getPermissions();
+                const data = await PermissionApi.getAll();
                 const tree = buildPermissionTree(data);
                 setPermissionTree(tree);
             } catch (err) {

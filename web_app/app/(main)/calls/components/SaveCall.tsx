@@ -19,6 +19,7 @@ import { CallApi } from '../api/call.api';
 import { Call, validateCall } from '../models/call.model';
 
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
+import { GrantStatus } from '../../grants/models/grant.state-machine';
 
 const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<Call>) => {
 
@@ -54,7 +55,7 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
     useEffect(() => {
         const loadGrants = async () => {
             try {
-                const data = await GrantApi.getAll();
+                const data = await GrantApi.getAll({ status: GrantStatus.active });
                 setGrants(data);
             } catch (err) {
                 console.error('Failed to load grants:', err);
@@ -152,7 +153,7 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
 
                         {isCalendarPredefined ? (
                             <InputText
-                                value={(localCall.calendar as Calendar)?.year+''}
+                                value={(localCall.calendar as Calendar)?.year + ''}
                                 disabled
                             />
                         ) : (
@@ -164,6 +165,31 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
                                 onChange={(e) => setLocalCall({ ...localCall, calendar: e.value })}
                                 placeholder="Select Calendar"
                                 className={classNames({ 'p-invalid': submitted && !localCall.calendar })}
+                            />
+                        )}
+                    </div>
+                )}
+
+                {/* Grant */}
+                {!localCall._id && (
+                    <div className="field">
+                        <label htmlFor="grant">Grant</label>
+
+                        {isGrantPredefined ? (
+                            <InputText
+                                value={(localCall.grant as Grant)?.title}
+                                disabled
+                            />
+                        ) : (
+                            <Dropdown
+                                id="grant"
+                                value={localCall.grant}
+                                dataKey="_id"
+                                options={grants}
+                                optionLabel="title"
+                                onChange={(e) => setLocalCall({ ...localCall, grant: e.value })}
+                                placeholder="Select Grant"
+                                className={classNames({ 'p-invalid': submitted && !localCall.grant })}
                             />
                         )}
                     </div>
@@ -193,30 +219,7 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
                     />
                 </div>
 
-                {/* Grant */}
-                {!localCall._id && (
-                    <div className="field">
-                        <label htmlFor="grant">Grant</label>
 
-                        {isGrantPredefined ? (
-                            <InputText
-                                value={(localCall.grant as Grant)?.title}
-                                disabled
-                            />
-                        ) : (
-                            <Dropdown
-                                id="grant"
-                                value={localCall.grant}
-                                dataKey="_id"
-                                options={grants}
-                                optionLabel="title"
-                                onChange={(e) => setLocalCall({ ...localCall, grant: e.value })}
-                                placeholder="Select Grant"
-                                className={classNames({ 'p-invalid': submitted && !localCall.grant })}
-                            />
-                        )}
-                    </div>
-                )}
 
             </Dialog>
         </>

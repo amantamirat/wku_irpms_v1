@@ -5,6 +5,7 @@ import { AuthenticatedRequest } from '../users/auth/auth.middleware';
 import { successResponse, errorResponse } from '../../common/helpers/response';
 import { TransitionRequestDto } from '../../common/dtos/transition.dto';
 import { ERROR_CODES } from '../../common/errors/error.codes';
+import { ThematicStatus } from './thematic.state-machine';
 
 export class ThematicController {
 
@@ -26,9 +27,10 @@ export class ThematicController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { directorate, populate } = req.query;
+            const { directorate, status, populate } = req.query;
             const thematics = await this.service.getThematics({
-                directorate: directorate as string,
+                //directorate: directorate as string,
+                status: status as ThematicStatus,
                 ...(populate !== undefined && { populate: populate === "true" })
             });
             successResponse(res, 200, 'Thematics fetched successfully', thematics);

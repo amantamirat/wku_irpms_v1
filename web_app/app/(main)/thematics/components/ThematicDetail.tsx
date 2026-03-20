@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { PERMISSIONS } from "@/types/permissions";
 import { TabPanel, TabView } from "primereact/tabview";
 import ThemeManager from "../themes/components/ThemeManager";
+import GrantManager from "../../grants/components/GrantManager";
 
 
 interface ThematicDetailProps {
@@ -22,6 +23,11 @@ const ThematicDetail = ({ thematic }: ThematicDetailProps) => {
             header: "Themes",
             permission: PERMISSIONS.THEME.READ,
             content: <ThemeManager thematicArea={thematic} />
+        },
+        {
+            header: "Grants",
+            permission: "grant:read",
+            content: <GrantManager thematic={thematic} />
         }
     ], [thematic]);
 

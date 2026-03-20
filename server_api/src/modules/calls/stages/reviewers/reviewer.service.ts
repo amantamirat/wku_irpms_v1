@@ -101,8 +101,8 @@ export class ReviewerService {
         const stage = String(projectStageDoc.stage);
         const stageDoc = await this.stageRepository.findById(stage);
         if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-        const evaluation = String(stageDoc.evaluation);
-
+        //const evaluation = String(stageDoc.evaluation);
+        const evaluation = "";
         if (next === ReviewerStatus.accepted) {
             const existingResults = await this.resultRepository.find({ reviewer: id });
             if (existingResults.length === 0) {

@@ -34,6 +34,10 @@ export class GrantRepository implements IGrantRepository {
             query.fundingSource = filters.fundingSource;
         }
 
+        if (filters.status) {
+            query.status = filters.status;
+        }
+
         let dbQuery = Grant.find(query);
         if (filters.populate) {
             dbQuery
@@ -52,8 +56,7 @@ export class GrantRepository implements IGrantRepository {
             title: dto.title,
             amount: dto.amount,
             thematic: new mongoose.Types.ObjectId(dto.thematic),
-            description: dto.description,
-
+            description: dto.description
         };
 
         return Grant.create(data);

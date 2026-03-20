@@ -3,6 +3,7 @@ import { FundingSource, GrantStatus } from "./grant.model";
 export interface GetGrantsDTO {
     organization?: string;
     fundingSource?: FundingSource;
+    status?: GrantStatus;
     populate?: boolean;
 }
 
@@ -23,7 +24,7 @@ export interface UpdateGrantDTO {
         amount: number;
         status: GrantStatus;
     }>;
-    userId: string;
+    userId?: string;
 }
 
 export interface TransitionGrantDTO {

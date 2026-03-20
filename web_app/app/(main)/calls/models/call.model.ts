@@ -78,10 +78,10 @@ export const sanitizeCall = (call: Partial<Call>): Partial<Call> => {
 };
 
 
-export const createEmptyCall = (): Call => ({
-    title: "",
-    status: CallStatus.planned,
-    calendar: '',
-    grant: '',
-    description: ""
+export const createEmptyCall = (call?: Partial<Call>): Call => ({
+  title: "",
+  status: CallStatus.planned,
+  calendar: call?.calendar ?? '',
+  grant: call?.grant ?? '',
+  description: ""
 });

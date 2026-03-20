@@ -28,7 +28,7 @@ const StageManager = ({ grant }: StageManagerProps) => {
         createNew: () => 
             createEmptyStage({grant}),
         SaveDialog: SaveStage,
-        permissionPrefix: "grant_stage",
+        permissionPrefix: "grant.stage",
         query: () => ({ grant: grant ?? undefined })
     });
 

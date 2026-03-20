@@ -32,7 +32,7 @@ const GrantDetail = ({ grant }: GrantDetailProps) => {
         },
         {
             header: "Stages",
-            permission: "grant_stage:read",
+            permission: "grant.stage:read",
             content: <StageManager grant={grant} />
         },
         {

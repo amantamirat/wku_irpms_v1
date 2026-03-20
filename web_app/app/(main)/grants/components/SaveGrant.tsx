@@ -1,4 +1,5 @@
 'use client';
+
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
@@ -8,33 +9,46 @@ import { InputTextarea } from 'primereact/inputtextarea';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
+
 import { OrganizationApi } from '../../organizations/api/organization.api';
 import { Organization, OrgnUnit } from '../../organizations/models/organization.model';
+
 import { ThematicApi } from '../../thematics/api/thematic.api';
 import { Thematic } from '../../thematics/models/thematic.model';
+
 import { GrantApi } from '../api/grant.api';
 import { FundingSource, Grant, validateGrant } from '../models/grant.model';
-import { EntitySaveDialogProps } from '@/components/createEntityManager';
 
+import { EntitySaveDialogProps } from '@/components/createEntityManager';
 
 const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<Grant>) => {
 
     const toast = useRef<Toast>(null);
+
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [thematics, setThematics] = useState<Thematic[]>([]);
     const [localGrant, setLocalGrant] = useState<Grant>({ ...item });
     const [submitted, setSubmitted] = useState(false);
 
+    const isOrganizationPredefined = !!item.organization;
+    const isThematicPredefined = !!item.thematic;
+
+    // ---------------------------
+    // Sync item
+    // ---------------------------
     useEffect(() => {
         setLocalGrant({ ...item });
     }, [item]);
 
+    // ---------------------------
+    // Load Organizations
+    // ---------------------------
     useEffect(() => {
         const loadOrganizations = async () => {
-            if (!localGrant.fundingSource) {
-                setOrganizations([]);
+            if (!localGrant.fundingSource || isOrganizationPredefined) {
                 return;
             }
+
             try {
                 const unitType =
                     localGrant.fundingSource === FundingSource.INTERNAL
@@ -50,23 +64,31 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
         };
 
         loadOrganizations();
-    }, [localGrant.fundingSource]);
+    }, [localGrant.fundingSource, isOrganizationPredefined]);
 
-    useEffect(
-        () => {
-            const loadThematics = async () => {
-                try {
-                    const data = await ThematicApi.getAll({ directorate: localGrant.organization });
-                    setThematics(data);
-                } catch (err) {
-                    console.error('Failed to load themes:', err);
-                }
-            };
-            loadThematics();
-        }, [[localGrant.organization]]
-    );
+    // ---------------------------
+    // Load Thematics
+    // ---------------------------
+    useEffect(() => {
+        const loadThematics = async () => {
+            if (isThematicPredefined) return;
 
+            try {
+                const data = await ThematicApi.getAll({
+                   // directorate: localGrant.organization
+                });
+                setThematics(data);
+            } catch (err) {
+                console.error('Failed to load thematics:', err);
+            }
+        };
 
+        loadThematics();
+    }, [isThematicPredefined]);
+
+    // ---------------------------
+    // Reset on close
+    // ---------------------------
     useEffect(() => {
         if (!visible) clearForm();
     }, [visible]);
@@ -76,21 +98,27 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
         setLocalGrant({ ...item });
     };
 
+    // ---------------------------
+    // Save
+    // ---------------------------
     const saveGrant = async () => {
-        setSubmitted(true);
         try {
-            const validation = validateGrant(localGrant);
-            if (!validation.valid) {
-                throw new Error(validation.message);
-            }
+            setSubmitted(true);
 
-            let saved = localGrant._id
-                ? await GrantApi.update(localGrant)
-                : await GrantApi.create(localGrant);
+            const validation = validateGrant(localGrant);
+            if (!validation.valid) throw new Error(validation.message);
+
+            let saved: Grant;
+
+            if (localGrant._id) saved = await GrantApi.update(localGrant);
+            else saved = await GrantApi.create(localGrant);
+
             saved = {
                 ...saved,
-                organization: localGrant.organization
+                organization: localGrant.organization,
+                thematic: localGrant.thematic
             };
+
             toast.current?.show({
                 severity: 'success',
                 summary: 'Success',
@@ -98,7 +126,8 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                 life: 2000,
             });
 
-            if (onComplete) setTimeout(() => onComplete(saved), 1000);
+            onComplete?.(saved);
+
         } catch (err: any) {
             toast.current?.show({
                 severity: 'error',
@@ -124,6 +153,7 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
     return (
         <>
             <Toast ref={toast} />
+
             <Dialog
                 visible={visible}
                 style={{ width: '600px' }}
@@ -133,6 +163,8 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                 footer={footer}
                 onHide={hide}
             >
+
+                {/* Funding Source */}
                 <div className="field">
                     <label htmlFor="source">Source</label>
                     <Dropdown
@@ -146,78 +178,123 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                             setLocalGrant({
                                 ...localGrant,
                                 fundingSource: e.value,
-                                organization: undefined, // 👈 reset
+                                organization: undefined,
+                                thematic: undefined
                             })
                         }
                         placeholder="Select Funding Source"
                         className={classNames({
                             'p-invalid': submitted && !localGrant.fundingSource,
                         })}
-                        //disabled={!!localGrant._id}
-                        disabled={!!localGrant.fundingSource}
+                        disabled={!!localGrant._id || isOrganizationPredefined ||true}
                     />
                 </div>
 
-                <div className="field">
-                    <label htmlFor="organization">Organization</label>
-                    <Dropdown
-                        id="organization"
-                        value={localGrant.organization}
-                        options={organizations}
-                        optionLabel="name"
-                        onChange={(e) => setLocalGrant({
-                            ...localGrant, organization: e.value,
-                            thematic: undefined
-                        })}
-                        placeholder="Select Funder"
-                        className={classNames({ 'p-invalid': submitted && !localGrant.organization })}
-                        disabled={!!localGrant._id}
-                    />
-                </div>
-                {/* Title Field */}
+                {/* Organization */}
+                {!localGrant._id && (
+                    <div className="field">
+                        <label htmlFor="organization">Organization</label>
+
+                        {isOrganizationPredefined ? (
+                            <InputText
+                                value={(localGrant.organization as Organization)?.name}
+                                disabled
+                            />
+                        ) : (
+                            <Dropdown
+                                id="organization"
+                                value={localGrant.organization}
+                                options={organizations}
+                                optionLabel="name"
+                                onChange={(e) =>
+                                    setLocalGrant({
+                                        ...localGrant,
+                                        organization: e.value,
+                                        thematic: undefined
+                                    })
+                                }
+                                placeholder="Select Organization (Funder)"
+                                className={classNames({
+                                    'p-invalid': submitted && !localGrant.organization
+                                })}
+                            />
+                        )}
+                    </div>
+                )}
+
+                {/* Title */}
                 <div className="field">
                     <label htmlFor="title">Title</label>
                     <InputText
                         id="title"
                         value={localGrant.title}
-                        onChange={(e) => setLocalGrant({ ...localGrant, title: e.target.value })}
+                        onChange={(e) =>
+                            setLocalGrant({ ...localGrant, title: e.target.value })
+                        }
                         required
                         autoFocus
-                        className={classNames({ 'p-invalid': submitted && !localGrant.title })}
+                        className={classNames({
+                            'p-invalid': submitted && !localGrant.title
+                        })}
                     />
                 </div>
 
+                {/* Amount */}
                 <div className="field">
                     <label htmlFor="amount">Amount (ETB)</label>
                     <InputNumber
                         id="amount"
                         value={localGrant.amount}
-                        onValueChange={(e) => setLocalGrant({ ...localGrant, amount: e.value ?? 0 })}
+                        onValueChange={(e) =>
+                            setLocalGrant({
+                                ...localGrant,
+                                amount: e.value ?? 0
+                            })
+                        }
                     />
                 </div>
 
-                <div className="field">
-                    <label htmlFor="thematics">Thematics</label>
-                    <Dropdown
-                        id="thematics"
-                        dataKey="_id"
-                        value={localGrant.thematic}
-                        options={thematics}
-                        optionLabel="title"
-                        onChange={(e) => setLocalGrant({ ...localGrant, thematic: e.value })}
-                        placeholder="Select Thematics"
-                    />
-                </div>
+                {/* Thematic */}
+                {!localGrant._id && (
+                    <div className="field">
+                        <label htmlFor="thematic">Thematic</label>
 
-                {/* Description Field */}
+                        {isThematicPredefined ? (
+                            <InputText
+                                value={(localGrant.thematic as Thematic)?.title}
+                                disabled
+                            />
+                        ) : (
+                            <Dropdown
+                                id="thematic"
+                                value={localGrant.thematic}
+                                options={thematics}
+                                optionLabel="title"
+                                onChange={(e) =>
+                                    setLocalGrant({
+                                        ...localGrant,
+                                        thematic: e.value
+                                    })
+                                }
+                                placeholder="Select Thematic"
+                            />
+                        )}
+                    </div>
+                )}
+
+                {/* Description */}
                 <div className="field">
                     <label htmlFor="description">Description</label>
                     <InputTextarea
                         id="description"
                         value={localGrant.description ?? ''}
-                        onChange={(e) => setLocalGrant({ ...localGrant, description: e.target.value })}
+                        onChange={(e) =>
+                            setLocalGrant({
+                                ...localGrant,
+                                description: e.target.value
+                            })
+                        }
                         rows={4}
-                        cols={30}
                     />
                 </div>
 

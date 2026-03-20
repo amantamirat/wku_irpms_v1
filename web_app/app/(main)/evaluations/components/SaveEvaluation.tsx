@@ -1,22 +1,19 @@
 'use client';
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
 import { useEffect, useRef, useState } from "react";
-
-import { Evaluation, validateEvaluation } from "../models/evaluation.model";
-import { useDirectorate } from "@/contexts/DirectorateContext";
 import { EntitySaveDialogProps } from "@/components/createEntityManager";
 import { EvaluationApi } from "../api/evaluation.api";
+import { Evaluation, validateEvaluation } from "../models/evaluation.model";
 
 const SaveEvaluation = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<Evaluation>) => {
 
     const toast = useRef<Toast>(null);
-    const { directorates } = useDirectorate();
+   // const { directorates } = useDirectorate();
 
     const [localItem, setLocalItem] = useState<Evaluation>({ ...item });
     const [submitted, setSubmitted] = useState(false);
@@ -45,7 +42,7 @@ const SaveEvaluation = ({ visible, item, onComplete, onHide }: EntitySaveDialogP
                 : await EvaluationApi.create(localItem);
             saved = {
                 ...saved,
-                organization: localItem.organization
+                // organization: localItem.organization
             };
             toast.current?.show({
                 severity: "success",
@@ -91,7 +88,10 @@ const SaveEvaluation = ({ visible, item, onComplete, onHide }: EntitySaveDialogP
                 onHide={hide}
             >
                 {/* Directorate */}
-                <div className="field">
+                {
+                    /**
+                     * 
+                     * <div className="field">
                     <label htmlFor="organization">Organization</label>
                     <Dropdown
                         id="organization"
@@ -108,6 +108,9 @@ const SaveEvaluation = ({ visible, item, onComplete, onHide }: EntitySaveDialogP
                         })}
                     />
                 </div>
+                     */
+                }
+
 
                 {/* Title */}
                 <div className="field">

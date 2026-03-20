@@ -6,8 +6,10 @@ import { Call, createEmptyCall, GetCallsOptions } from "../models/call.model";
 
 import SaveCall from "./SaveCall";
 
-import { Grant } from "../../grants/models/grant.model";
+import MyBadge from "@/templates/MyBadge";
 import { Calendar } from "../../calendars/models/calendar.model";
+import { Grant } from "../../grants/models/grant.model";
+import { CALL_STATUS_ORDER, CALL_TRANSITIONS } from "../models/call.state-machine";
 
 interface CallManagerProps {
     grant?: Grant;
@@ -42,17 +44,30 @@ const CallManager = ({ grant, calendar }: CallManagerProps) => {
                         : c.grant
             },
 
-            { header: "Status", field: "status" }
+            {
+                field: "status",
+                header: "Status",
+                sortable: true,
+                body: (c: Call) =>
+                    <MyBadge type="status" value={c.status ?? "Unknown"} />
+            }
         ],
-
-        createNew: createEmptyCall,
+        createNew: () => createEmptyCall({
+            calendar,
+            grant
+        }),
         SaveDialog: SaveCall,
         permissionPrefix: "call",
 
         query: () => ({
             grant: grant ?? undefined,
             calendar: calendar ?? undefined
-        })
+        }),
+        workflow: {
+            statusField: "status",
+            transitions: CALL_TRANSITIONS,
+            statusOrder: CALL_STATUS_ORDER
+        }
     });
 
     return <Manager />;

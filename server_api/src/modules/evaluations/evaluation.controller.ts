@@ -19,7 +19,7 @@ export class EvaluationController {
             if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const dto: CreateEvaluationDTO = {
-                organization: req.body.organization,
+               // organization: req.body.organization,
                 title: req.body.title,
                 description: req.body.description,
                 userId: req.user.applicantId
@@ -36,7 +36,7 @@ export class EvaluationController {
         try {
             const { organization, populate } = req.query;
             const filter: GetEvaluationsDTO = {
-                organization: organization as string,
+               // organization: organization as string,
                 ...(populate !== undefined && { populate: populate === "true" })
             };
             const evaluations = await this.service.get(filter);

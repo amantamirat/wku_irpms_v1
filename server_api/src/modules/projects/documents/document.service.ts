@@ -243,9 +243,11 @@ export class DocumentService {
                     throw new AppError(ERROR_CODES.DOC_SCORE_NOT_EXISTS);
                 }
                 const projectDocs = await this.docRepository.find({ project: String(docDoc.project) });
+                /*
                 if (projectDocs.length > stageDoc.order) {
                     throw new AppError(ERROR_CODES.NEXT_DOC_ALREADY_EXISTS);
                 }
+                    */
             }
             validDocs.push(docDoc);
         }

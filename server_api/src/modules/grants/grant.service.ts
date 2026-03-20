@@ -11,51 +11,63 @@ import { GRANT_TRANSITIONS } from "./grant.state-machine";
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { Unit } from "../../common/constants/enums";
+import { CompositionRepository, ICompositionRepository } from "./compositions/composition.repository";
+import { ThematicStatus } from "../thematics/thematic.state-machine";
+import { GrantStageRepository, IGrantStageRepository } from "./stages/stage.repository";
+import { IExternal } from "../organization/organization.model";
+import { Ownership } from "../organization/organization.enum";
 
 export class GrantService {
 
     constructor(
-        private readonly grantRepository: IGrantRepository = new GrantRepository(),
-        private readonly organizationRepository: IOrganizationRepository = new OrganizationRepository(),
-        private readonly constraintRepo: IConstraintRepository = new ConstraintRepository(),
-        private readonly callRepo: ICallRepository = new CallRepository(),
+        private readonly repository: IGrantRepository = new GrantRepository(),
+        private readonly organizationRepo: IOrganizationRepository = new OrganizationRepository(),
         private readonly thematicRepository: IThematicRepository = new ThematicRepository(),
+        private readonly constraintRepo: IConstraintRepository = new ConstraintRepository(),
+        private readonly compositionRepo: ICompositionRepository = new CompositionRepository(),
+        private readonly callRepo: ICallRepository = new CallRepository(),
+        private readonly stageRepo: IGrantStageRepository = new GrantStageRepository(),
     ) { }
 
     async create(dto: CreateGrantDTO) {
         const { fundingSource, organization } = dto;
 
-        const orgDoc = await this.organizationRepository.findById(organization);
+        const orgDoc = await this.organizationRepo.findById(organization);
         if (!orgDoc) throw new AppError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
 
         if (fundingSource === FundingSource.INTERNAL)
             if (orgDoc.type !== Unit.directorate) {
                 throw new AppError(ERROR_CODES.DIRECTORATE_NOT_FOUND);
             }
-        if (fundingSource === FundingSource.EXTERNAL)
+        if (fundingSource === FundingSource.EXTERNAL) {
             if (orgDoc.type !== Unit.external) {
                 throw new AppError(ERROR_CODES.EXTERNAL_NOT_FOUND);
             }
-
+            if ((orgDoc as IExternal).ownership === Ownership.Internal) {
+                throw new AppError(ERROR_CODES.EXTERNAL_NOT_FOUND);
+            }
+        }
         const thematicsDoc = await this.thematicRepository.findById(dto.thematic);
         if (!thematicsDoc) throw new AppError(ERROR_CODES.THEMATIC_NOT_FOUND);
-        const created = await this.grantRepository.create(dto);
+        if (thematicsDoc.status !== ThematicStatus.active) throw new AppError(ERROR_CODES.THEMATIC_NOT_ACTIVE);
+
+        const created = await this.repository.create(dto);
         return created;
     }
 
     async get(options: GetGrantsDTO) {
-        return await this.grantRepository.find(options);
+        return await this.repository.find(options);
     }
 
     async getById(id: string) {
-        const grant = await this.grantRepository.findById(id);
+        const grant = await this.repository.findById(id);
         if (!grant) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
         return grant;
     }
 
     async update(dto: UpdateGrantDTO) {
         const { id, data } = dto;
-        const grantDoc = await this.grantRepository.update(id, data);
+        const grantDoc = await this.repository.update(id, data);
         if (!grantDoc) {
             throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
         }
@@ -63,10 +75,9 @@ export class GrantService {
     }
 
     async transitionState(dto: TransitionRequestDto) {
-
         const { id, current, next } = dto;
 
-        const grant = await this.grantRepository.findById(id);
+        const grant = await this.repository.findById(id);
         if (!grant) {
             throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
         }
@@ -85,19 +96,37 @@ export class GrantService {
             GRANT_TRANSITIONS
         );
 
-        return await this.grantRepository.update(id, {
+        if (next === GrantStatus.planned) {
+            if (await this.callRepo.exists({ grant: id })) {
+                throw new AppError(ERROR_CODES.CALL_ALREADY_EXISTS);
+            }
+        }
+        if (next === GrantStatus.active) {
+            const stages = await this.stageRepo.find({ grant: id });
+            if (stages.length === 0) {
+                throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+            }
+        }
+        return await this.repository.update(id, {
             status: to
         });
     }
 
     async delete(id: string) {
+        const grantDoc = await this.repository.findById(id);
+        if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+        if (grantDoc.status !== GrantStatus.planned)
+            throw new AppError(ERROR_CODES.GRANT_NOT_PLANNED);
+        /*
         if (await this.callRepo.exists({ grant: id }))
             throw new AppError(ERROR_CODES.CALL_ALREADY_EXISTS);
-
+        */
         if (await this.constraintRepo.exists({ grant: id }))
             throw new AppError(ERROR_CODES.CONSTRAINT_ALREADY_EXISTS);
+        if (await this.compositionRepo.exists({ grant: id }))
+            throw new AppError(ERROR_CODES.COMPOSITION_ALREADY_EXISTS);
 
-        const deleted = await this.grantRepository.delete(id);
-        if (!deleted) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
+        return await this.repository.delete(id);
+        //if (!deleted) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
     }
 }

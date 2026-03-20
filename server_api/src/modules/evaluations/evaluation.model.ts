@@ -3,7 +3,7 @@ import { COLLECTIONS } from "../../common/constants/collections.enum";
 import { EvalStatus } from "./evaluation.state-machine";
 
 export interface IEvaluation extends Document {
-    organization: mongoose.Types.ObjectId;
+    //organization: mongoose.Types.ObjectId;
     title: string;
     description?: string;
     status: EvalStatus;
@@ -13,12 +13,13 @@ export interface IEvaluation extends Document {
 
 const EvaluationSchema = new Schema<IEvaluation>(
     {
+        /*
         organization: {
             type: Schema.Types.ObjectId,
             ref: COLLECTIONS.ORGANIZATION,
             required: true,
             immutable: true,
-        },
+        },*/
         title: { type: String, required: true },
         description: { type: String },
         status: {

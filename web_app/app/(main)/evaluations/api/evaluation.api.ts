@@ -10,10 +10,12 @@ export const EvaluationApi: EntityApi<Evaluation, GetEvaluationsOptions | undefi
     async getAll(options) {
         const query = new URLSearchParams();
         if (options) {
+            /*
             const sanitized = sanitize(options);
             if (sanitized.organization) {
                 query.append("organization", sanitized.organization as string);
             }
+            */
             if (options.populate !== undefined) {
                 query.append("populate", String(options.populate));
             }

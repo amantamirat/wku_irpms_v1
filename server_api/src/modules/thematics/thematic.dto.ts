@@ -2,7 +2,7 @@ import { ThemeLevel } from "./thematic.enum";
 import { ThematicStatus } from "./thematic.state-machine";
 
 export interface CreateThematicDTO {
-    directorate: string;
+    //directorate: string;
     title: string;
     level: ThemeLevel;
     description?: string;
@@ -19,6 +19,7 @@ export interface UpdateThematicDTO {
 }
 
 export interface GetThematicsDTO {
-    directorate?: string;
+    //directorate?: string;
+    status: ThematicStatus;
     populate?: boolean;
 }

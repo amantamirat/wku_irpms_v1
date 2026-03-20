@@ -5,7 +5,7 @@ import { ThemeLevel } from "./thematic.enum";
 import { ThematicStatus } from "./thematic.state-machine";
 
 export interface IThematic extends Document {
-    directorate: mongoose.Types.ObjectId;
+    //directorate: mongoose.Types.ObjectId;
     title: string;
     //type: ThemeType;
     level: ThemeLevel;
@@ -16,12 +16,14 @@ export interface IThematic extends Document {
 }
 
 const ThematicSchema = new Schema<IThematic>({
+    /*
     directorate: {
         type: Schema.Types.ObjectId,
         ref: Directorate.modelName,
         required: true,
         immutable: true
     },
+    */
     title: {
         type: String,
         required: true
@@ -46,7 +48,7 @@ const ThematicSchema = new Schema<IThematic>({
     status: {
         type: String,
         enum: Object.values(ThematicStatus),
-        default: ThematicStatus.planned,
+        default: ThematicStatus.draft,
         required: true
     },
 }, { timestamps: true });

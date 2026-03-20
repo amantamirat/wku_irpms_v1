@@ -17,7 +17,7 @@ export interface IProjectDocument extends Document {
 const ProjecDocumentSchema = new Schema<IProjectDocument>({
     stage: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.STAGE,
+        ref: COLLECTIONS.CALL_STAGE,
         immutable: true,
         required: true
     },

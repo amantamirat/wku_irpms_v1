@@ -16,7 +16,7 @@ import { ThematicApi } from "../api/thematic.api";
 
 const SaveThematic = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<Thematic>) => {
     const toast = useRef<Toast>(null);
-    const { directorates } = useDirectorate();
+    //const { directorates } = useDirectorate();
 
     const [localItem, setLocalItem] = useState<Thematic>({ ...item });
     const [submitted, setSubmitted] = useState(false);
@@ -47,7 +47,7 @@ const SaveThematic = ({ visible, item, onComplete, onHide }: EntitySaveDialogPro
             // Re-attach relation for UI consistency if API returns flat ID
             saved = {
                 ...saved,
-                directorate: localItem.directorate
+                // directorate: localItem.directorate
             };
 
             toast.current?.show({
@@ -94,7 +94,9 @@ const SaveThematic = ({ visible, item, onComplete, onHide }: EntitySaveDialogPro
                 onHide={hide}
             >
                 {/* Directorate Selector */}
-                <div className="field">
+                {
+                    /**
+                     * <div className="field">
                     <label htmlFor="directorate">Directorate</label>
                     <Dropdown
                         id="directorate"
@@ -109,6 +111,8 @@ const SaveThematic = ({ visible, item, onComplete, onHide }: EntitySaveDialogPro
                         })}
                     />
                 </div>
+                     */
+                }
 
                 {/* Title Field */}
                 <div className="field">
@@ -119,8 +123,8 @@ const SaveThematic = ({ visible, item, onComplete, onHide }: EntitySaveDialogPro
                         onChange={(e) => setLocalItem({ ...localItem, title: e.target.value })}
                         required
                         autoFocus
-                        className={classNames({ 
-                            'p-invalid': submitted && !localItem.title 
+                        className={classNames({
+                            'p-invalid': submitted && !localItem.title
                         })}
                     />
                 </div>

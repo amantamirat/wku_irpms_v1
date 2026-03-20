@@ -27,7 +27,7 @@ export const STATUS_BUTTON_CONFIG: Record<string, StatusButtonConfig> = {
     },
     // ===== Project إضافات (merged) =====
     draft: {
-        icon: "pi pi-pencil",
+        icon: "pi pi-undo",
         severity: "secondary",
         action: "Make it draft"
     },

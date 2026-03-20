@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { PERMISSIONS } from '../../common/constants/permissions';
+
 import { checkPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
 import { PermissionController } from './permission.controller';
 import { PermissionService } from './permission.service';
@@ -13,8 +13,20 @@ const controller = new PermissionController(service);
 router.get(
   '/',
   verifyActiveAccount,
-  checkPermission([PERMISSIONS.PERMISSION.READ]),
+  checkPermission("permission:read"),
   controller.getPermissions
+);
+
+router.put('/:id',
+  verifyActiveAccount,
+  checkPermission("permission:update"),
+  controller.update
+);
+
+router.delete('/:id',
+  verifyActiveAccount,
+  checkPermission("permission:delete"),
+  controller.delete
 );
 
 export default router;

@@ -5,6 +5,16 @@
     "description": "View permissions"
   },
   {
+    "category": "Permission Management",
+    "name": "permission:update",
+    "description": "Edit permissions"
+  },
+  {
+    "category": "Permission Management",
+    "name": "permission:delete",
+    "description": "Delete permissions"
+  },
+  {
     "category": "Setting Management",
     "name": "setting:read",
     "description": "View settings"
@@ -89,6 +99,8 @@
     "name": "applicant:update",
     "description": "Edit applicants"
   },
+
+
   {
     "category": "Applicant Management",
     "name": "applicant:role:update",
@@ -99,6 +111,8 @@
     "name": "applicant:ownership:update",
     "description": "Assign or modify organizational ownership scope for an applicant"
   },
+
+  
   {
     "category": "Applicant Management",
     "name": "applicant:delete",
@@ -225,102 +239,6 @@
     "description": "Delete external units"
   },
   {
-    "category": "Student Management",
-    "name": "student:create",
-    "description": "Create new students"
-  },
-  {
-    "category": "Student Management",
-    "name": "student:read",
-    "description": "View students"
-  },
-  {
-    "category": "Student Management",
-    "name": "student:update",
-    "description": "Edit student records"
-  },
-  {
-    "category": "Student Management",
-    "name": "student:delete",
-    "description": "Delete students"
-  },
-  {
-    "category": "Experience Management",
-    "name": "experience:create",
-    "description": "Create experience records"
-  },
-  {
-    "category": "Experience Management",
-    "name": "experience:read",
-    "description": "View experience records"
-  },
-  {
-    "category": "Experience Management",
-    "name": "experience:update",
-    "description": "Update experience records"
-  },
-  {
-    "category": "Experience Management",
-    "name": "experience:delete",
-    "description": "Delete experience records"
-  },
-  {
-    "category": "Publication Management",
-    "name": "publication:create",
-    "description": "Create new publications"
-  },
-  {
-    "category": "Publication Management",
-    "name": "publication:read",
-    "description": "View publications"
-  },
-  {
-    "category": "Publication Management",
-    "name": "publication:update",
-    "description": "Edit publication records"
-  },
-  {
-    "category": "Publication Management",
-    "name": "publication:delete",
-    "description": "Delete publications"
-  },
-  {
-    "category": "Specialization Management",
-    "name": "specialization:create",
-    "description": "Create specialization entries"
-  },
-  {
-    "category": "Specialization Management",
-    "name": "specialization:read",
-    "description": "Read specialization entries"
-  },
-  {
-    "category": "Specialization Management",
-    "name": "specialization:update",
-    "description": "Update specialization entries"
-  },
-  {
-    "category": "Specialization Management",
-    "name": "specialization:delete",
-    "description": "Delete specialization entries"
-  },
-  {
-    "category": "Position Management",
-    "name": "position:create"
-  },
-  {
-    "category": "Position Management",
-    "name": "position:read"
-  },
-  {
-    "category": "Position Management",
-    "name": "position:update"
-  },
-  {
-    "category": "Position Management",
-    "name": "position:delete"
-  },
-  {
     "category": "Calendar Management",
     "name": "calendar:create",
     "description": "Create calendar entries"
@@ -401,23 +319,23 @@
     "description": "Delete grant entries"
   },
   {
-    "category": "Grant Stage",
-    "name": "grant_stage:create",
+    "category": "Grant Management",
+    "name": "grant.stage:create",
     "description": "Create grant stage entries"
   },
   {
-    "category": "Grant Stage",
-    "name": "grant_stage:read",
+    "category": "Grant Management",
+    "name": "grant.stage:read",
     "description": "Read grant stage entries"
   },
   {
-    "category": "Grant Stage",
-    "name": "grant_stage:update",
+    "category": "Grant Management",
+    "name": "grant.stage:update",
     "description": "Update grant stage entries"
   },
   {
-    "category": "Grant Stage",
-    "name": "grant_stage:delete",
+    "category": "Grant Management",
+    "name": "grant.stage:delete",
     "description": "Delete grant stage entries"
   },
   {
@@ -498,6 +416,26 @@
     "name": "call:delete"
   },
   {
+    "category": "Call Management",
+    "name": "call.stage:create",
+    "description": "Create call stage entries"
+  },
+  {
+    "category": "Call Management",
+    "name": "call.stage:read",
+    "description": "Read stage entries"
+  },
+  {
+    "category": "Call Management",
+    "name": "call.stage:update",
+    "description": "Update stage entries"
+  },
+  {
+    "category": "Call Management",
+    "name": "call.stage:delete",
+    "description": "Delete stage entries"
+  },
+  {
     "category": "Thematic Management",
     "name": "thematic:create",
     "description": "Create thematic entries"
@@ -514,7 +452,7 @@
   },
   {
     "category": "Thematic Management",
-    "name": "thematic:transition.planned.active",
+    "name": "thematic:transition.draft.active",
     "description": "Activate a planned thematic by changing its status from planned to active"
   },
   {
@@ -524,7 +462,7 @@
   },
   {
     "category": "Thematic Management",
-    "name": "thematic:transition.active.planned",
+    "name": "thematic:transition.active.draft",
     "description": "Revert an active thematic back to planned status for adjustments"
   },
   {
@@ -561,38 +499,6 @@
     "category": "Theme Management",
     "name": "theme:delete",
     "description": "Delete theme entries"
-  },
-  {
-    "category": "Stage Management",
-    "name": "stage:create",
-    "description": "Create stage entries"
-  },
-  {
-    "category": "Stage Management",
-    "name": "stage:read",
-    "description": "Read stage entries"
-  },
-  {
-    "category": "Stage Management",
-    "name": "stage:update",
-    "description": "Update stage entries"
-  },
-  {
-    "category": "Stage Management",
-    "name": "stage:status.planned"
-  },
-  {
-    "category": "Stage Management",
-    "name": "stage:status.active"
-  },
-  {
-    "category": "Stage Management",
-    "name": "stage:status.closed"
-  },
-  {
-    "category": "Stage Management",
-    "name": "stage:delete",
-    "description": "Delete stage entries"
   },
   {
     "category": "Reviewer Management",
@@ -1012,5 +918,101 @@
   {
     "category": "Report Management",
     "name": "report:overview"
+  },
+  {
+    "category": "Student Management",
+    "name": "student:create",
+    "description": "Create new students"
+  },
+  {
+    "category": "Student Management",
+    "name": "student:read",
+    "description": "View students"
+  },
+  {
+    "category": "Student Management",
+    "name": "student:update",
+    "description": "Edit student records"
+  },
+  {
+    "category": "Student Management",
+    "name": "student:delete",
+    "description": "Delete students"
+  },
+  {
+    "category": "Experience Management",
+    "name": "experience:create",
+    "description": "Create experience records"
+  },
+  {
+    "category": "Experience Management",
+    "name": "experience:read",
+    "description": "View experience records"
+  },
+  {
+    "category": "Experience Management",
+    "name": "experience:update",
+    "description": "Update experience records"
+  },
+  {
+    "category": "Experience Management",
+    "name": "experience:delete",
+    "description": "Delete experience records"
+  },
+  {
+    "category": "Publication Management",
+    "name": "publication:create",
+    "description": "Create new publications"
+  },
+  {
+    "category": "Publication Management",
+    "name": "publication:read",
+    "description": "View publications"
+  },
+  {
+    "category": "Publication Management",
+    "name": "publication:update",
+    "description": "Edit publication records"
+  },
+  {
+    "category": "Publication Management",
+    "name": "publication:delete",
+    "description": "Delete publications"
+  },
+  {
+    "category": "Specialization Management",
+    "name": "specialization:create",
+    "description": "Create specialization entries"
+  },
+  {
+    "category": "Specialization Management",
+    "name": "specialization:read",
+    "description": "Read specialization entries"
+  },
+  {
+    "category": "Specialization Management",
+    "name": "specialization:update",
+    "description": "Update specialization entries"
+  },
+  {
+    "category": "Specialization Management",
+    "name": "specialization:delete",
+    "description": "Delete specialization entries"
+  },
+  {
+    "category": "Position Management",
+    "name": "position:create"
+  },
+  {
+    "category": "Position Management",
+    "name": "position:read"
+  },
+  {
+    "category": "Position Management",
+    "name": "position:update"
+  },
+  {
+    "category": "Position Management",
+    "name": "position:delete"
   }
 ]
