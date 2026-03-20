@@ -19,7 +19,7 @@ import criterionRoutes from './modules/evaluations/criteria/criterion.routes';
 import optionRoutes from './modules/evaluations/criteria/options/option.routes';
 
 import grantRoutes from './modules/grants/grant.routes';
-import grantStageRoutes from './modules/grants/stages/stage.routes';
+import grantStageRoutes from './modules/grants/stages/grant.stage.routes';
 import constraintRoutes from './modules/grants/constraints/constraint.routes';
 import compositionRoutes from './modules/grants/compositions/composition.routes';
 

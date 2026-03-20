@@ -1,18 +1,18 @@
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { EvaluationRepository, IEvaluationRepository } from "../../evaluations/evaluation.repository";
+import { IEvaluationRepository } from "../../evaluations/evaluation.repository";
 import { EvalStatus } from "../../evaluations/evaluation.state-machine";
 import { GrantStatus } from "../grant.model";
-import { GrantRepository, IGrantRepository } from "../grant.repository";
-import { CreateStageDTO, GetStageDTO, UpdateStageDTO } from "./stage.dto";
-import { IGrantStageRepository, GrantStageRepository } from "./stage.repository";
+import { IGrantRepository } from "../grant.repository";
+import { CreateStageDTO, GetStageDTO, UpdateStageDTO } from "./grant.stage.dto";
+import { IGrantStageRepository } from "./grant.stage.repository";
 
 export class StageService {
 
     constructor(
-        private readonly repository: IGrantStageRepository = new GrantStageRepository(),
-        private readonly grantRepository: IGrantRepository = new GrantRepository(),
-        private readonly evalRepository: IEvaluationRepository = new EvaluationRepository(),
+        private readonly repository: IGrantStageRepository,
+        private readonly grantRepository: IGrantRepository,
+        private readonly evalRepository: IEvaluationRepository
     ) {
 
     }

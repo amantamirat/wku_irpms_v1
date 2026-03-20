@@ -3,7 +3,7 @@ import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { IEvaluationRepository } from "../../evaluations/evaluation.repository";
-import { IGrantStageRepository } from "../../grants/stages/stage.repository";
+import { IGrantStageRepository } from "../../grants/stages/grant.stage.repository";
 import { IDocumentRepository } from "../../projects/documents/document.repository";
 import { ICallRepository } from "../call.repository";
 import { CALL_TRANSITIONS } from "../call.state-machine";

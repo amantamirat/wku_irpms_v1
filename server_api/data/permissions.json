@@ -99,8 +99,6 @@
     "name": "applicant:update",
     "description": "Edit applicants"
   },
-
-
   {
     "category": "Applicant Management",
     "name": "applicant:role:update",
@@ -111,8 +109,6 @@
     "name": "applicant:ownership:update",
     "description": "Assign or modify organizational ownership scope for an applicant"
   },
-
-  
   {
     "category": "Applicant Management",
     "name": "applicant:delete",
@@ -429,6 +425,26 @@
     "category": "Call Management",
     "name": "call.stage:update",
     "description": "Update stage entries"
+  },
+  {
+    "category": "Call Management",
+    "name": "call.stage:transition.planned.active",
+    "description": "Activate a planned call stage by changing its status from planned to active"
+  },
+  {
+    "category": "Call Management",
+    "name": "call.stage:transition.active.closed",
+    "description": "Close an active call stage to mark it as completed"
+  },
+  {
+    "category": "Call Management",
+    "name": "call.stage:transition.active.planned",
+    "description": "Revert an active call stage back to planned status for adjustments"
+  },
+  {
+    "category": "Call Management",
+    "name": "call.stage:transition.closed.active",
+    "description": "Re-open a closed call stage and set it back to active"
   },
   {
     "category": "Call Management",

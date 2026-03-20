@@ -13,7 +13,7 @@ import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { Unit } from "../../common/constants/enums";
 import { CompositionRepository, ICompositionRepository } from "./compositions/composition.repository";
 import { ThematicStatus } from "../thematics/thematic.state-machine";
-import { GrantStageRepository, IGrantStageRepository } from "./stages/stage.repository";
+import { GrantStageRepository, IGrantStageRepository } from "./stages/grant.stage.repository";
 import { IExternal } from "../organization/organization.model";
 import { Ownership } from "../organization/organization.enum";
 

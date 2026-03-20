@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import { CreateStageDTO, ExistsStageDTO, GetStageDTO, UpdateStageDTO } from "./stage.dto";
-import { IGrantStage, GrantStage } from "./stage.model";
+import { CreateStageDTO, ExistsStageDTO, GetStageDTO, UpdateStageDTO } from "./grant.stage.dto";
+import { IGrantStage, GrantStage } from "./grant.stage.model";
 
 export interface IGrantStageRepository {
     findById(id: string): Promise<IGrantStage | null>;

@@ -7,7 +7,7 @@ import { EvaluationRepository } from '../../evaluations/evaluation.repository';
 import { DocumentRepository } from '../../projects/documents/document.repository';
 import { CallRepository } from '../call.repository';
 import { StageRepository } from './stage.repository';
-import { GrantStageRepository } from '../../grants/stages/stage.repository';
+import { GrantStageRepository } from '../../grants/stages/grant.stage.repository';
 
 const repository = new StageRepository();
 const callRepository = new CallRepository();

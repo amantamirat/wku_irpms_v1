@@ -3,7 +3,7 @@ import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
-import { GrantStageRepository } from "../grants/stages/stage.repository";
+import { GrantStageRepository } from "../grants/stages/grant.stage.repository";
 import { CriterionRepository, ICriterionRepository } from "./criteria/criterion.repository";
 import { CreateEvaluationDTO, GetEvaluationsDTO, UpdateEvaluationDTO } from "./evaluation.dto";
 import { IEvaluationRepository } from "./evaluation.repository";
