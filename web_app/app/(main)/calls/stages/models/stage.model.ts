@@ -1,75 +1,76 @@
-import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
-import { Call } from "../../models/call.model";
+import { Call } from "@/app/(main)/calls/models/call.model";
+import { StageStatus } from "./stage.state-machine";
+import { Stage } from "@/app/(main)/grants/stages/models/stage.model";
 
-export enum StageStatus {
-    planned = "planned",
-    active = "active",
-    closed = "closed",
-}
-
-export type Stage = {
+export type CallStage = {
     _id?: string;
     call: string | Call;
-    name: string;
-    evaluation: string | Evaluation;
-    deadline?: Date;
-    order?: number;
+    grantStage?: string | Stage;
+    deadline: Date;
     status: StageStatus;
     createdAt?: Date;
     updatedAt?: Date;
 };
 
-export interface GetStagesDTO {
+export interface GetCallStagesDTO {
     call?: string | Call;
-    status?: StageStatus;
-    order?: number;
+    grantStage?: string | Stage;
+    populate?: boolean;
 }
 
 /**
- * Validate stage fields before submission
+ * Validate call stage fields before submission
  */
-export const validateStage = (stage: Stage): { valid: boolean; message?: string } => {
-
-    if (!stage.name || stage.name.trim().length === 0) {
-        return { valid: false, message: "Stage name is required." };
-    }
+export const validateCallStage = (
+    stage: CallStage
+): { valid: boolean; message?: string } => {
 
     if (!stage.call) {
         return { valid: false, message: "Call reference is required." };
     }
 
-    if (!stage.evaluation) {
-        return { valid: false, message: "Evaluation reference is required." };
+    if (!stage.grantStage) {
+        return { valid: false, message: "Grant stage reference is required." };
     }
 
     if (!stage.deadline) {
-        throw new Error("Deadline is required.");
+        return { valid: false, message: "Deadline is required." };
     }
 
-    const deadlineDate = new Date(stage.deadline);
-    if (isNaN(deadlineDate.getTime())) {
-        return { valid: false, message: "Deadline must be a valid date." };
-    }
-    if (deadlineDate <= new Date()) {
-        throw new Error("Deadline must be in the future.");
+    if (!stage.status) {
+        return { valid: false, message: "Status is required." };
     }
 
     return { valid: true };
 };
 
 /**
- * Prepare stage object for backend submission
+ * Prepare call stage object for backend submission
  */
-export const sanitizeStage = (stage: Partial<Stage>): Partial<Stage> => {
+export const sanitizeCallStage = (
+    stage: Partial<CallStage>
+): Partial<CallStage> => {
     return {
         ...stage,
         call:
             typeof stage.call === "object" && stage.call !== null
                 ? (stage.call as Call)._id
                 : stage.call,
-        evaluation:
-            typeof stage.evaluation === "object" && stage.evaluation !== null
-                ? (stage.evaluation as Evaluation)._id
-                : stage.evaluation,
+        grantStage:
+            typeof stage.grantStage === "object" && stage.grantStage !== null
+                ? (stage.grantStage as Stage)._id
+                : stage.grantStage,
     };
 };
+
+/**
+ * Create empty call stage
+ */
+export const createEmptyCallStage = (
+    stage?: Partial<CallStage>
+): CallStage => ({
+    call: stage?.call ?? "",
+    grantStage: stage?.grantStage ?? "",
+    deadline: stage?.deadline ?? new Date(),
+    status: stage?.status ?? StageStatus.planned,
+});

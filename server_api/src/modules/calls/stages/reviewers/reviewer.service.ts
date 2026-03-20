@@ -9,7 +9,7 @@ import { DocumentRepository, IDocumentRepository } from "../../../projects/docum
 import { DocStatus } from "../../../projects/documents/document.status";
 import { DocumentSynchronizer } from "../../../projects/documents/document.synchronizer";
 import { IProjectRepository, ProjectRepository } from "../../../projects/project.repository";
-import { IStageRepository, StageRepository } from "../stage.repository";
+import { ICallStageRepository, StageRepository } from "../stage.repository";
 import { IResultRepository, ResultRepository } from "./results/result.repository";
 import { CreateReviewerDTO, GetReviewersDTO, UpdateReviewerDTO, UpdateReviewerStatusDTO } from "./reviewer.dto";
 import { IReviewerRepository, ReviewerRepository } from "./reviewer.repository";
@@ -29,7 +29,7 @@ export class ReviewerService {
         private readonly collaboratorRepository: ICollaboratorRepository = new CollaboratorRepository(),
 
         private readonly resultRepository: IResultRepository = new ResultRepository(),
-        private readonly stageRepository: IStageRepository = new StageRepository(),
+        private readonly stageRepository: ICallStageRepository = new StageRepository(),
         private readonly criterionRepository: ICriterionRepository = new CriterionRepository(),
 
     ) {

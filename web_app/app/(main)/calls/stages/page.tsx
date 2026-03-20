@@ -1,11 +1,12 @@
 'use client';
 
-import StageManager from "./components/StageManager";
+import CallStageManager from "./components/StageManager";
+
 
 const StagePage = () => {
 
    return (
-        <StageManager />
+        <CallStageManager />
     );
 };
 

@@ -4,10 +4,9 @@ import ProjectManager from './components/ProjectManager';
 
 const ProjectPage = () => {
     return (
-        <div className="card">
-            <ProjectManager />
-        </div>
-    );
+
+        <ProjectManager />
+    )
 };
 
 export default ProjectPage;

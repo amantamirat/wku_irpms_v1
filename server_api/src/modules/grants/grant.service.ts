@@ -102,8 +102,7 @@ export class GrantService {
             }
         }
         if (next === GrantStatus.active) {
-            const stages = await this.stageRepo.find({ grant: id });
-            if (stages.length === 0) {
+            if (!await this.stageRepo.exists({ grant: id })) {
                 throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
             }
         }

@@ -39,5 +39,6 @@ const GrantStageSchema = new Schema<IGrantStage>({
 
 
 GrantStageSchema.index({ grant: 1, order: 1 }, { unique: true });
+GrantStageSchema.index({ grant: 1, name: 1 }, { unique: true });
 
 export const GrantStage = model<IGrantStage>(COLLECTIONS.GRANT_STAGE, GrantStageSchema);

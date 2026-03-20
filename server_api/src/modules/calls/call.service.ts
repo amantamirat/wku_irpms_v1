@@ -12,14 +12,14 @@ import { CreateCallDTO, GetCallsOptions, UpdateCallDTO } from "./call.dto";
 import { CallRepository } from "./call.repository";
 import { CALL_TRANSITIONS } from "./call.state-machine";
 import { CallStatus } from "./call.status";
-import { IStageRepository } from "./stages/stage.repository";
+import { ICallStageRepository } from "./stages/stage.repository";
 
 export class CallService {
 
     constructor(
         private readonly repository: CallRepository,
         private readonly calendarRepo: ICalendarReadRepository,
-        private readonly stageRepository: IStageRepository,
+        private readonly stageRepository: ICallStageRepository,
         private readonly organizationRepository: IOrganizationRepository,
         private readonly grantRepository: IGrantRepository,
         private readonly thematicRepository: IThematicRepository,

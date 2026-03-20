@@ -12,6 +12,10 @@ export const StageApi: EntityApi<Stage, GetStagesDTO> = {
         if (options) {
             const sanitized = sanitize(options);
             if (options.grant) query.append("grant", sanitized.grant as string);
+            if (options.evaluation) query.append("evaluation", sanitized.evaluation as string);
+            if (options.populate !== undefined) {
+                query.append("populate", String(options.populate));
+            }
         }
 
         const url = query.toString() ? `${end_point}?${query.toString()}` : end_point;

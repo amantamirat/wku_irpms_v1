@@ -5,6 +5,7 @@ import { CreateEvaluationDTO, GetEvaluationsDTO, UpdateEvaluationDTO } from "./e
 import { EvaluationService } from "./evaluation.service";
 import { ERROR_CODES } from '../../common/errors/error.codes';
 import { TransitionRequestDto } from '../../common/dtos/transition.dto';
+import { EvalStatus } from './evaluation.state-machine';
 
 export class EvaluationController {
 
@@ -19,7 +20,6 @@ export class EvaluationController {
             if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const dto: CreateEvaluationDTO = {
-               // organization: req.body.organization,
                 title: req.body.title,
                 description: req.body.description,
                 userId: req.user.applicantId
@@ -34,10 +34,9 @@ export class EvaluationController {
 
     getAll = async (req: Request, res: Response) => {
         try {
-            const { organization, populate } = req.query;
+            const { status } = req.query;
             const filter: GetEvaluationsDTO = {
-               // organization: organization as string,
-                ...(populate !== undefined && { populate: populate === "true" })
+                status: status as EvalStatus,
             };
             const evaluations = await this.service.get(filter);
             successResponse(res, 200, "Evaluations fetched successfully", evaluations);

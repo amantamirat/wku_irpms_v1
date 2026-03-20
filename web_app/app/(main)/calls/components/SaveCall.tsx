@@ -31,6 +31,7 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
     const [calendars, setCalendars] = useState<Calendar[] | undefined>(undefined);
     const [grants, setGrants] = useState<Grant[] | undefined>(undefined);
 
+
     const isGrantPredefined = !!item.grant;
     const isCalendarPredefined = !!item.calendar;
 
@@ -38,6 +39,7 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
     // Load Calendars
     // ---------------------------
     useEffect(() => {
+        if (isCalendarPredefined) return
         const loadCalendars = async () => {
             try {
                 const data = await CalendarApi.getAll({ status: CalendarStatus.active });
@@ -47,12 +49,13 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
             }
         };
         loadCalendars();
-    }, []);
+    }, [isCalendarPredefined]);
 
     // ---------------------------
     // Load Grants
     // ---------------------------
     useEffect(() => {
+        if (isGrantPredefined) return
         const loadGrants = async () => {
             try {
                 const data = await GrantApi.getAll({ status: GrantStatus.active });
@@ -62,7 +65,7 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
             }
         };
         loadGrants();
-    }, []);
+    }, [isGrantPredefined]);
 
     // ---------------------------
     // Sync item

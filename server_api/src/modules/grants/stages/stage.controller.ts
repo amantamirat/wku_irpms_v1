@@ -29,10 +29,11 @@ export class StageController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { grant, order, populate } = req.query;
+            const { grant, evaluation, order, populate } = req.query;
 
             const dto: GetStageDTO = {
                 grant: grant as string,
+                evaluation: evaluation as string,
                 order: order ? Number(order) : undefined,
                 ...(populate !== undefined && { populate: populate === "true" })
             };

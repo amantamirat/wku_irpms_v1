@@ -2,6 +2,7 @@ import { FundingSource, GrantStatus } from "./grant.model";
 
 export interface GetGrantsDTO {
     organization?: string;
+    thematic?: string;
     fundingSource?: FundingSource;
     status?: GrantStatus;
     populate?: boolean;
@@ -31,6 +32,11 @@ export interface TransitionGrantDTO {
     id: string;
     to: GrantStatus;
     userId: string;
+}
+
+export interface ExistsGrantDTO {
+    oraganization?: string;
+    thematic?: string;
 }
 
 

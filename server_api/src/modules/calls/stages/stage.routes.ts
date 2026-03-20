@@ -1,19 +1,19 @@
 import { Router } from 'express';
 import { StageController } from './stage.controller';
 import { PERMISSIONS } from '../../../common/constants/permissions';
-import { verifyActiveAccount, checkPermission, checkStatusPermission } from '../../users/auth/auth.middleware';
+import { verifyActiveAccount, checkPermission, checkStatusPermission, checkTransitionPermission } from '../../users/auth/auth.middleware';
 import { StageService } from './stage.service';
 import { EvaluationRepository } from '../../evaluations/evaluation.repository';
 import { DocumentRepository } from '../../projects/documents/document.repository';
 import { CallRepository } from '../call.repository';
 import { StageRepository } from './stage.repository';
+import { GrantStageRepository } from '../../grants/stages/stage.repository';
 
 const repository = new StageRepository();
 const callRepository = new CallRepository();
-const evalRepository = new EvaluationRepository();
-const docRepository = new DocumentRepository();
+const stageRepository = new GrantStageRepository();
 
-const service = new StageService(repository, callRepository, evalRepository, docRepository);
+const service = new StageService(repository, callRepository, stageRepository);
 const controller = new StageController(service);
 const router = Router();
 
@@ -49,8 +49,8 @@ router.put(
 router.patch(
     '/:id',
     verifyActiveAccount,
-    checkStatusPermission("call.stage"),
-    controller.updateStatus
+    checkTransitionPermission("call.stage"),
+    controller.transitionState
 );
 
 router.delete(

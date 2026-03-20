@@ -1,9 +1,7 @@
-import { Organization } from "../../organizations/models/organization.model";
 import { EvaluationStatus } from "./evaluation.state-machine";
 
 export type Evaluation = {
     _id?: string;
-    // organization: string | Organization;
     title: string;
     description?: string;
     status?: EvaluationStatus;
@@ -12,8 +10,7 @@ export type Evaluation = {
 };
 
 export interface GetEvaluationsOptions {
-    //organization?: string | Organization;
-    populate?: boolean;
+    status?: EvaluationStatus;
 }
 
 export const validateEvaluation = (
@@ -22,11 +19,6 @@ export const validateEvaluation = (
     if (!evaluation.title || evaluation.title.trim().length === 0) {
         return { valid: false, message: "Title is required." };
     }
-    /*
-    if (!evaluation.organization) {
-        return { valid: false, message: "Organization is required." };
-    }
-    */
     return { valid: true };
 };
 
@@ -43,6 +35,5 @@ export function sanitize(evaluation: Partial<Evaluation>): Partial<Evaluation> {
 }
 
 export const createEmptyEval = (): Evaluation => ({
-    //organization: "",
     title: "",
 })

@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { Grant, IGrant } from "./grant.model";
 import {
     CreateGrantDTO,
+    ExistsGrantDTO,
     GetGrantsDTO,
     UpdateGrantDTO
 } from "./grant.dto";
@@ -11,6 +12,7 @@ export interface IGrantRepository {
     find(filters: GetGrantsDTO): Promise<Partial<IGrant>[]>;
     create(dto: CreateGrantDTO): Promise<IGrant>;
     update(id: string, data: UpdateGrantDTO["data"]): Promise<IGrant | null>;
+    exists(filters: ExistsGrantDTO): Promise<boolean>;
     delete(id: string): Promise<IGrant | null>;
 }
 
@@ -28,6 +30,10 @@ export class GrantRepository implements IGrantRepository {
 
         if (filters.organization) {
             query.organization = new mongoose.Types.ObjectId(filters.organization);
+        }
+
+        if (filters.thematic) {
+            query.thematic = new mongoose.Types.ObjectId(filters.thematic);
         }
 
         if (filters.fundingSource) {
@@ -83,6 +89,19 @@ export class GrantRepository implements IGrantRepository {
             { $set: updateData },
             { new: true }
         ).exec();
+    }
+
+    async exists(filters: ExistsGrantDTO): Promise<boolean> {
+        const query: any = {};
+        const { oraganization, thematic } = filters;
+        if (oraganization) {
+            query.oraganization = new mongoose.Types.ObjectId(oraganization);
+        }
+        if (thematic) {
+            query.thematic = new mongoose.Types.ObjectId(thematic);
+        }
+        const result = await Grant.exists(query).exec();
+        return result !== null;
     }
 
     async delete(id: string) {

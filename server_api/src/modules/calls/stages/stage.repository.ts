@@ -1,20 +1,20 @@
 import mongoose from "mongoose";
-import { CreateStageDTO, FindStageDTO, GetStageDTO, UpdateStageDTO } from "./stage.dto";
+import { CreateStageDTO, ExistsStageDTO, FindStageDTO, GetStageDTO, UpdateStageDTO } from "./stage.dto";
 import { ICallStage, CallStage } from "./stage.model";
 
 
-export interface IStageRepository {
+export interface ICallStageRepository {
     findById(id: string): Promise<ICallStage | null>;
     find(filters: GetStageDTO): Promise<Partial<ICallStage>[]>;
     findOne(option: FindStageDTO): Promise<ICallStage | null>;
     create(dto: CreateStageDTO): Promise<ICallStage>;
     update(id: string, data: UpdateStageDTO["data"]): Promise<ICallStage | null>;
-    updateMany(filter: any, update: any): Promise<any>;
+    exists(filters: ExistsStageDTO): Promise<boolean>;
     delete(id: string): Promise<ICallStage | null>;
 }
 
 
-export class StageRepository implements IStageRepository {
+export class StageRepository implements ICallStageRepository {
 
     async findById(id: string) {
         return CallStage.findById(new mongoose.Types.ObjectId(id))
@@ -38,8 +38,8 @@ export class StageRepository implements IStageRepository {
             query.call = new mongoose.Types.ObjectId(filters.call);
         }
 
-        if (filters.order) {
-            query.order = filters.order;
+        if (filters.grantStage) {
+            query.grantStage = new mongoose.Types.ObjectId(filters.grantStage);
         }
 
         if (filters.status) {
@@ -51,7 +51,7 @@ export class StageRepository implements IStageRepository {
         if (filters.populate) {
             dbQuery = dbQuery
                 .populate('call')
-                .populate('evaluation');
+                .populate('grantStage');
         }
 
         return dbQuery.lean<ICallStage[]>().exec();
@@ -60,24 +60,17 @@ export class StageRepository implements IStageRepository {
     async create(dto: CreateStageDTO) {
         return CallStage.create({
             ...dto, call: new mongoose.Types.ObjectId(dto.call),
-            evaluation: new mongoose.Types.ObjectId(dto.evaluation)
+            grantStage: new mongoose.Types.ObjectId(dto.grantStage)
         });
     }
 
     async update(id: string, dtoData: UpdateStageDTO["data"]): Promise<ICallStage | null> {
         const updateData: Partial<ICallStage> = {};
-        
+
         if (dtoData.deadline !== undefined) {
             updateData.deadline = dtoData.deadline;
         }
-        /*
-        if (dtoData.name !== undefined) {
-            updateData.name = dtoData.name;
-        }
-        if (dtoData.evaluation !== undefined) {
-            updateData.evaluation = new mongoose.Types.ObjectId(dtoData.evaluation);
-        }
-            */
+
         if (dtoData.status !== undefined) {
             updateData.status = dtoData.status;
         }
@@ -88,11 +81,20 @@ export class StageRepository implements IStageRepository {
         ).exec();
     }
 
-    async updateMany(filter: any, update: any) {
-        return CallStage.updateMany(filter, update).exec();
+    async exists(filters: ExistsStageDTO): Promise<boolean> {
+        const query: any = {};
+        const { call, grantStage } = filters;
+        if (grantStage) {
+            query.grantStage = new mongoose.Types.ObjectId(grantStage);
+        }
+        if (call) {
+            query.call = new mongoose.Types.ObjectId(call);
+        }
+        const result = await CallStage.exists(query).exec();
+        return result !== null;
     }
 
     async delete(id: string) {
-        return await CallStage.findByIdAndDelete(id).exec();
+        return CallStage.findByIdAndDelete(id).exec();
     }
 }

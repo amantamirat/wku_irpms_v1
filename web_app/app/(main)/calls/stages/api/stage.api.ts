@@ -1,55 +1,65 @@
 import { ApiClient } from "@/api/ApiClient";
-import { GetStagesDTO, Stage, StageStatus, sanitizeStage } from "../models/stage.model";
+import { EntityApi } from "@/api/EntityApi";
+import { CallStage, GetCallStagesDTO, sanitizeCallStage } from "../models/stage.model";
 
 const end_point = "/call/stages";
 
-export const StageApi = {
+export const CallStageApi: EntityApi<CallStage, GetCallStagesDTO | undefined> = {
 
-    async create(stage: Partial<Stage>): Promise<Stage> {
-        const sanitized = sanitizeStage(stage);
-        const createdData = await ApiClient.post(end_point, sanitized);
-        return createdData as Stage;
-    },
-
-    async getById(id: string): Promise<Stage> {
-        const url = `${end_point}/${id}`;
-        const data = await ApiClient.get(url);
-        return data as Stage;
-    },
-
-    async getStages(options: GetStagesDTO): Promise<Stage[]> {
+    // ---------------------------
+    // Fetch / Query
+    // ---------------------------
+    async getAll(options) {
         const query = new URLSearchParams();
-        const sanitized = sanitizeStage(options);
-        if (options.call) query.append("call", sanitized.call as string);
-        if (options.status) query.append("status", options.status as string);
-        if (options.order) query.append("order", String(options.order));
-        const data = await ApiClient.get(`${end_point}?${query.toString()}`);
-        return data as Stage[];
-    },
 
-    async update(stage: Partial<Stage>): Promise<Stage> {
-        if (!stage._id) throw new Error("_id required.");
-        const query = new URLSearchParams();
-        query.append("id", stage._id);
-        const sanitized = sanitizeStage(stage);
-        const updated = await ApiClient.put(`${end_point}?${query.toString()}`, sanitized);
-        return updated as Stage;
-    },
+        if (options) {
+            const sanitized = sanitizeCallStage(options);
 
-    async updateStatus(id: string, status: StageStatus): Promise<any> {
-        const query = new URLSearchParams();
-        query.append("id", id);
-        const url = `${end_point}/${id}`;
-        const updated = await ApiClient.patch(url, { status });
-        return updated;
-    },
+            if (options.call) {
+                query.append("call", sanitized.call as string);
+            }
 
-    async delete(stage: Partial<Stage>): Promise<boolean> {
-        if (!stage._id) {
-            throw new Error("_id required.");
+            if (options.grantStage) {
+                query.append("grantStage", sanitized.grantStage as string);
+            }
+
+            if (options.populate !== undefined) {
+                query.append("populate", String(options.populate));
+            }
         }
-        const url = `${end_point}/${stage._id}`;
-        const response = await ApiClient.delete(url);
-        return response;
+
+        const qs = query.toString();
+        return ApiClient.get(`${end_point}${qs ? `?${qs}` : ""}`);
+    },
+
+    // ---------------------------
+    // Get By Id
+    // ---------------------------
+    async getById(id: string): Promise<CallStage> {
+        return ApiClient.get(`${end_point}/${id}`);
+    },
+
+    // ---------------------------
+    // Create
+    // ---------------------------
+    async create(stage) {
+        const sanitized = sanitizeCallStage(stage);
+        return ApiClient.post(`${end_point}`, sanitized);
+    },
+
+    // ---------------------------
+    // Update
+    // ---------------------------
+    async update(stage) {
+        if (!stage._id) throw new Error("_id required");
+        return ApiClient.put(`${end_point}/${stage._id}`, sanitizeCallStage(stage));
+    },
+
+    // ---------------------------
+    // Delete
+    // ---------------------------
+    async delete(stage) {
+        if (!stage._id) throw new Error("_id required");
+        return ApiClient.delete(`${end_point}/${stage._id}`);
     },
 };

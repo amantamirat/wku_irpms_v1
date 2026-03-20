@@ -2,12 +2,13 @@ import { useAuth } from "@/contexts/auth-context";
 import { useMemo } from "react";
 import { PERMISSIONS } from "@/types/permissions";
 import { TabPanel, TabView } from "primereact/tabview";
-import { Stage } from "../models/stage.model";
+
 import ProjectDocManager from "@/app/(main)/projects/documents/components/ProjectDocManager";
+import { CallStage } from "../models/stage.model";
 
 
 interface StageDetailProps {
-    stage: Stage;
+    stage: CallStage;
 }
 
 const StageDetail = ({ stage }: StageDetailProps) => {

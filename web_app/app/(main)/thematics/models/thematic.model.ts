@@ -39,7 +39,7 @@ export type Thematic = {
 
 export interface GetThematicsOptions {
     //directorate?: string | Organization;
-    populate?: boolean;
+    status?: ThematicStatus;
 }
 export const validateThematic = (thmc: Thematic): { valid: boolean; message?: string } => {
     if (!thmc.title || thmc.title.trim().length === 0) {

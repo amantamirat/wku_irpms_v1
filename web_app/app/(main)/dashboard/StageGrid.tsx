@@ -20,7 +20,7 @@ const StageGrid = () => {
 
         const fetchStages = async () => {
             try {
-                const data = await StageApi.getStages({
+                const data = await StageApi.getAll({
                     status: StageStatus.active,
                     order: 1
                 });

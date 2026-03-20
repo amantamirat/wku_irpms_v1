@@ -20,6 +20,7 @@ import { GrantApi } from '../api/grant.api';
 import { FundingSource, Grant, validateGrant } from '../models/grant.model';
 
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
+import { ThematicStatus } from '../../thematics/models/thematic.state-machine';
 
 const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<Grant>) => {
 
@@ -75,7 +76,7 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
 
             try {
                 const data = await ThematicApi.getAll({
-                   // directorate: localGrant.organization
+                    status: ThematicStatus.active
                 });
                 setThematics(data);
             } catch (err) {
@@ -186,7 +187,7 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                         className={classNames({
                             'p-invalid': submitted && !localGrant.fundingSource,
                         })}
-                        disabled={!!localGrant._id || isOrganizationPredefined ||true}
+                        disabled={!!localGrant._id || isOrganizationPredefined || true}
                     />
                 </div>
 
@@ -209,8 +210,7 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                                 onChange={(e) =>
                                     setLocalGrant({
                                         ...localGrant,
-                                        organization: e.value,
-                                        thematic: undefined
+                                        organization: e.value
                                     })
                                 }
                                 placeholder="Select Organization (Funder)"

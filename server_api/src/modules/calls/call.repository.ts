@@ -88,14 +88,7 @@ export class CallRepository implements ICallRepository {
         if (calendar) {
             query.calendar = new mongoose.Types.ObjectId(calendar);
         }
-        /*
-        if (directorate) {
-            query.directorate = new mongoose.Types.ObjectId(directorate);
-        }
-             if (thematic) {
-            query.thematic = new mongoose.Types.ObjectId(thematic);
-        }
-            */
+        
 
         const result = await Call.exists(query).exec();
         return result !== null;

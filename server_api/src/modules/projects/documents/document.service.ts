@@ -8,7 +8,7 @@ import { CallRepository, ICallRepository } from "../../calls/call.repository";
 import { CallStatus } from "../../calls/call.status";
 import { ReviewerRepository } from "../../calls/stages/reviewers/reviewer.repository";
 import { ReviewerStatus } from "../../calls/stages/reviewers/reviewer.status";
-import { IStageRepository } from "../../calls/stages/stage.repository";
+import { ICallStageRepository } from "../../calls/stages/stage.repository";
 import { StageStatus } from "../../calls/stages/stage.status";
 import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
 import { CollaboratorRepository } from "../collaborators/collaborator.repository";
@@ -28,7 +28,7 @@ export class DocumentService {
     constructor(
         private readonly docRepository: IDocumentRepository,
         private readonly projectRepository: IProjectRepository,
-        private readonly stageRepository: IStageRepository,
+        private readonly stageRepository: ICallStageRepository,
         private readonly callRepository: ICallRepository = new CallRepository(),
         private readonly appRepository = new ApplicantRepository(),
         //private readonly themeRepository = new ThemeRepository(),
@@ -84,6 +84,7 @@ export class DocumentService {
             const call = String(projectDoc.grant);
             const nextOrder = projectDocs.length + 1;
             const nextStageDoc = await this.stageRepository.findOne({ call, order: nextOrder });
+
             if (!nextStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
 
             if (nextStageDoc.status !== StageStatus.active) throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);

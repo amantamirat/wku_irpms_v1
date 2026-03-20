@@ -3,6 +3,7 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { useMemo } from "react";
 import { Evaluation } from "../models/evaluation.model";
 import CriterionManager from "./CriterionManager";
+import StageManager from "../../grants/stages/components/StageManager";
 
 interface EvaluationDetailProps {
     evaluation: Evaluation;
@@ -20,6 +21,11 @@ const EvaluationDetail = ({ evaluation }: EvaluationDetailProps) => {
             header: "Critera",
             permission: "criterion:read",
             content: <CriterionManager evaluation={evaluation} />
+        },
+        {
+            header: "Grant Stage",
+            permission: "grant.stage:read",
+            content: <StageManager evaluation={evaluation} />
         }
     ], [evaluation]);
 

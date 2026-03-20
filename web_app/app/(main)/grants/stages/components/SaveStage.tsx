@@ -13,6 +13,7 @@ import { Stage, validateStage } from '../models/stage.model';
 import { Grant } from '../../models/grant.model';
 import { GrantApi } from '../../api/grant.api';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
+import { EvaluationStatus } from '@/app/(main)/evaluations/models/evaluation.state-machine';
 
 
 const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<Stage>) => {
@@ -24,9 +25,11 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
     const [grants, setGrants] = useState<Grant[] | undefined>(undefined);
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
     const isGrantPredefined = !!item.grant;
+    const isEvaluationPredefined = !!item.evaluation;
 
     // Load active grants
     useEffect(() => {
+        if (isGrantPredefined) return
         const loadGrants = async () => {
             try {
                 const data = await GrantApi.getAll();
@@ -36,19 +39,20 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
             }
         };
         loadGrants();
-    }, []);
+    }, [isGrantPredefined]);
 
     useEffect(() => {
+        if (isEvaluationPredefined) return
         const fetchEvaluations = async () => {
             try {
-                const data = await EvaluationApi.getAll({ organization: (localStage.grant as Grant).organization });
+                const data = await EvaluationApi.getAll({ status: EvaluationStatus.active });
                 setEvaluations(data);
             } catch (err) {
                 console.error('Failed to fetch evaluations:', err);
             }
         };
         fetchEvaluations();
-    }, [localStage.grant]);
+    }, [isEvaluationPredefined]);
 
 
     useEffect(() => {
@@ -123,28 +127,28 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                 footer={footer}
                 onHide={hide}
             >
-                {!localStage._id && (
-                    <div className="field">
-                        <label htmlFor="grant">Grant</label>
-                        {isGrantPredefined ? (
-                            <InputText
-                                value={(localStage.grant as Grant)?.title}
-                                disabled
-                            />
-                        ) : (
-                            <Dropdown
-                                id="grant"
-                                value={localStage.grant}
-                                dataKey="_id"
-                                options={grants}
-                                optionLabel="title"
-                                onChange={(e) => setLocalStage({ ...localStage, grant: e.value })}
-                                placeholder="Select Grant"
-                                className={classNames({ 'p-invalid': submitted && !localStage.grant })}
-                            />
-                        )}
-                    </div>
-                )}                
+
+                <div className="field">
+                    <label htmlFor="grant">Grant</label>
+                    {isGrantPredefined ? (
+                        <InputText
+                            value={(localStage.grant as Grant)?.title}
+                            disabled
+                        />
+                    ) : (
+                        <Dropdown
+                            id="grant"
+                            value={localStage.grant}
+                            dataKey="_id"
+                            options={grants}
+                            optionLabel="title"
+                            onChange={(e) => setLocalStage({ ...localStage, grant: e.value })}
+                            placeholder="Select Grant"
+                            className={classNames({ 'p-invalid': submitted && !localStage.grant })}
+                        />
+                    )}
+                </div>
+
 
                 {/* Stage Name */}
                 <div className="field">
@@ -152,7 +156,7 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                     <InputText
                         id="name"
                         value={localStage.name}
-                        onChange={(e) => setLocalStage({ ...localStage, name: e.target.value, evaluation: '' })}
+                        onChange={(e) => setLocalStage({ ...localStage, name: e.target.value })}
                         required
                         autoFocus
                         className={classNames({ 'p-invalid': submitted && !localStage.name })}
@@ -160,20 +164,25 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                 </div>
 
                 {/* Evaluation Selector */}
-                {!localStage._id
-                    &&
+                {
                     <div className="field">
                         <label htmlFor="evaluation">Evaluation</label>
-                        <Dropdown
-                            id="evaluation"
-                            dataKey="_id"
-                            value={localStage.evaluation}
-                            options={evaluations}
-                            optionLabel="title"
-                            onChange={(e) => setLocalStage({ ...localStage, evaluation: e.value })}
-                            placeholder="Select Evaluation"
-                            className={classNames({ 'p-invalid': submitted && !localStage.evaluation })}
-                        />
+                        {isEvaluationPredefined ? (
+                            <InputText
+                                value={(localStage.evaluation as Evaluation)?.title}
+                                disabled
+                            />
+                        ) : (
+                            <Dropdown
+                                id="evaluation"
+                                dataKey="_id"
+                                value={localStage.evaluation}
+                                options={evaluations}
+                                optionLabel="title"
+                                onChange={(e) => setLocalStage({ ...localStage, evaluation: e.value })}
+                                placeholder="Select Evaluation"
+                                className={classNames({ 'p-invalid': submitted && !localStage.evaluation })}
+                            />)}
                     </div>
                 }
 

@@ -15,8 +15,14 @@ export interface UpdateStageDTO {
 
 export interface GetStageDTO {
     grant?: string;
+    evaluation?: string;
     order?: number;
     populate?: boolean;
+}
+
+export interface ExistsStageDTO {
+    grant?: string;
+    evaluation?: string;
 }
 
 

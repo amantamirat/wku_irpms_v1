@@ -1,10 +1,9 @@
-import { Unit } from "../../common/constants/enums";
 import { DeleteDto } from "../../common/dtos/delete.dto";
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
-import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
+import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
 import { CreateThematicDTO, GetThematicsDTO, UpdateThematicDTO } from "./thematic.dto";
 import { IThematicRepository, ThematicRepository } from "./thematic.repository";
 import { THEMATIC_TRANSITIONS, ThematicStatus } from "./thematic.state-machine";
@@ -15,19 +14,19 @@ export class ThematicService {
     constructor(
         private readonly repository: IThematicRepository = new ThematicRepository(),
         private readonly themeRepo: IThemeRepository = new ThemeRepository(),
-        //private readonly organizationRepo: IOrganizationRepository = new OrganizationRepository(),
+        private readonly grantRepo: IGrantRepository = new GrantRepository(),
     ) { }
 
 
     async create(dto: CreateThematicDTO) {
-        /*
-        const directorateDoc = await this.organizationRepo.findById(dto.directorate);
-        if (!directorateDoc || directorateDoc.type !== Unit.directorate) {
-            throw new Error(ERROR_CODES.DIRECTORATE_NOT_FOUND);
+        try {
+            return await this.repository.create(dto);
+        } catch (err: any) {
+            if (err?.code === 11000) {
+                throw new AppError(ERROR_CODES.THEMATIC_ALREADY_EXISTS);
+            }
+            throw err;
         }
-        */
-        const createdThematic = await this.repository.create(dto);
-        return createdThematic;
     }
 
     async getThematics(options: GetThematicsDTO) {
@@ -60,11 +59,10 @@ export class ThematicService {
         );
 
         if (next === ThematicStatus.draft) {
-            //if (await this.callRepository.exists({ calendar: id })) {
-            // throw new AppError(ERROR_CODES.CALL_ALREADY_EXISTS);
-            // }
+            if (await this.grantRepo.exists({ thematic: id })) {
+                throw new AppError(ERROR_CODES.GRANT_ALREADY_EXISTS);
+            }
         }
-
         return await this.repository.update(id, {
             status: to
         });
@@ -72,6 +70,10 @@ export class ThematicService {
 
     async delete(dto: DeleteDto) {
         const { id } = dto;
+        const thematicDoc = await this.repository.findById(id);
+        if (!thematicDoc) throw new AppError(ERROR_CODES.THEMATIC_NOT_FOUND);
+        if (thematicDoc.status !== ThematicStatus.draft) throw new AppError(ERROR_CODES.THEMATIC_NOT_DRAFT);
+        
         const themeExist = await this.themeRepo.exists({ thematicArea: id });
         if (themeExist) {
             throw new AppError(ERROR_CODES.THEME_ALREADY_EXISTS);

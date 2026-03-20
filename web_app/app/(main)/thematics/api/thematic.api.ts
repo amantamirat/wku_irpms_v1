@@ -10,13 +10,8 @@ export const ThematicApi: EntityApi<Thematic, GetThematicsOptions | undefined> =
     async getAll(options) {
         const query = new URLSearchParams();
         if (options) {
-            //const sanitized = sanitize(options);
-            /*
-            if (sanitized.directorate) {
-                query.append("directorate", sanitized.directorate as string);
-            }*/
-            if (options.populate !== undefined) {
-                query.append("populate", String(options.populate));
+            if (options.status) {
+                query.append("status", String(options.status));
             }
         }
         const qs = query.toString();

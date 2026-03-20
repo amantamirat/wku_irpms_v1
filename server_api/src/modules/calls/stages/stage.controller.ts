@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
 import { StageService } from './stage.service';
-import { CreateStageDTO, GetStageDTO, UpdateStageDTO, UpdateStageStatusDTO } from './stage.dto';
+import { CreateStageDTO, GetStageDTO, UpdateStageDTO } from './stage.dto';
 import { successResponse, errorResponse } from '../../../common/helpers/response';
 import { AuthenticatedRequest } from '../../users/auth/auth.middleware';
+import { TransitionRequestDto } from '../../../common/dtos/transition.dto';
+import { ERROR_CODES } from '../../../common/errors/error.codes';
 
 
 export class StageController {
@@ -15,12 +17,11 @@ export class StageController {
 
     create = async (req: Request, res: Response) => {
         try {
-            const { call, name, evaluation, deadline } = req.body;
+            const { call, grantStage, deadline } = req.body;
 
             const dto: CreateStageDTO = {
                 call: call as string,
-                name,
-                evaluation: evaluation as string,
+                grantStage: grantStage as string,
                 deadline,
             };
 
@@ -33,12 +34,13 @@ export class StageController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { call, status, order } = req.query;
+            const { call, grantStage, status, populate } = req.query;
 
             const dto: GetStageDTO = {
                 call: call as string,
+                grantStage: grantStage as string,
                 status: status as any,
-                order: order ? Number(order) : undefined,
+                ...(populate !== undefined && { populate: populate === "true" })
             };
 
             const stages = await this.service.getStages(dto);
@@ -66,8 +68,6 @@ export class StageController {
             const dto: UpdateStageDTO = {
                 id: id as string,
                 data: {
-                    name,
-                    //evaluation: evaluation ? (evaluation as string) : undefined,
                     deadline
                 },
             };
@@ -78,21 +78,40 @@ export class StageController {
         }
     };
 
-    updateStatus = async (req: AuthenticatedRequest, res: Response) => {
+    transitionState = async (req: AuthenticatedRequest, res: Response) => {
         try {
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
-            const { status } = req.body;
-            const dto: UpdateStageStatusDTO = {
+            const { current, next } = req.body;
+            const dto: TransitionRequestDto = {
                 id: String(id),
-                status
+                current: current,
+                next: next,
+                applicantId: req.user.applicantId,
             };
-            const updated = await this.service.updateStatus(dto);
+            const updated = await this.service.transitionState(dto);
             successResponse(res, 200, "Stage status updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     };
 
+    /*
+        updateStatus = async (req: AuthenticatedRequest, res: Response) => {
+            try {
+                const { id } = req.params;
+                const { status } = req.body;
+                const dto: UpdateStageStatusDTO = {
+                    id: String(id),
+                    status
+                };
+                const updated = await this.service.updateStatus(dto);
+                successResponse(res, 200, "Stage status updated successfully", updated);
+            } catch (err: any) {
+                errorResponse(res, 400, err.message, err);
+            }
+        };
+    */
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.params;

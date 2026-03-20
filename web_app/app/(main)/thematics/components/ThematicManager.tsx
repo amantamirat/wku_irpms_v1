@@ -21,15 +21,6 @@ const ThematicManager = ({ populate }: ThematicManagerProps) => {
         api: ThematicApi,
 
         columns: [
-            /*
-            {
-                header: "Directorate",
-                field: "directorate",
-                sortable: true,
-                body: (r: Thematic) =>
-                    typeof r.directorate === "object" ? r.directorate?.name : r.directorate
-            },
-            */
             { header: "Title", field: "title", sortable: true },
             {
                 header: "Level",
@@ -49,11 +40,6 @@ const ThematicManager = ({ populate }: ThematicManagerProps) => {
         createNew: () => createEmptyThematic(),
         SaveDialog: SaveThematic,
         permissionPrefix: "thematic",
-        // Use this if your backend needs to join the Directorate object
-        query: () => ({
-            //directorate: directorate ?? undefined,
-            populate: populate
-        }),
         expandable: {
             template: (thematic) => (
                 <ThematicDetail thematic={thematic} />

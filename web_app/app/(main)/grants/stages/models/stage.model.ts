@@ -13,6 +13,8 @@ export type Stage = {
 
 export interface GetStagesDTO {
     grant?: string | Grant;
+    evaluation?: string | Evaluation;
+    populate?:boolean;
 }
 
 /**

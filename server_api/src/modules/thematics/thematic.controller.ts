@@ -27,11 +27,9 @@ export class ThematicController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { directorate, status, populate } = req.query;
+            const { status } = req.query;
             const thematics = await this.service.getThematics({
-                //directorate: directorate as string,
                 status: status as ThematicStatus,
-                ...(populate !== undefined && { populate: populate === "true" })
             });
             successResponse(res, 200, 'Thematics fetched successfully', thematics);
         } catch (err: any) {

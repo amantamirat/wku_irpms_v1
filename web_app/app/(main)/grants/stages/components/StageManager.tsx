@@ -4,12 +4,14 @@ import { Grant } from "../../models/grant.model";
 import { StageApi } from "../api/stage.api";
 import { createEmptyStage, GetStagesDTO, Stage } from "../models/stage.model";
 import SaveStage from "./SaveStage";
+import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
 
 interface StageManagerProps {
     grant?: Grant;
+    evaluation?: Evaluation;
 }
 
-const StageManager = ({ grant }: StageManagerProps) => {
+const StageManager = ({ grant, evaluation }: StageManagerProps) => {
     const Manager = createEntityManager<Stage, GetStagesDTO | undefined>({
         title: "Manage Stages",
         itemName: "Stage",
@@ -24,12 +26,15 @@ const StageManager = ({ grant }: StageManagerProps) => {
                     typeof s.evaluation === "object" ? s.evaluation?.title : s.evaluation
             }
         ],
-
-        createNew: () => 
-            createEmptyStage({grant}),
+        createNew: () =>
+            createEmptyStage({ grant, evaluation }),
         SaveDialog: SaveStage,
         permissionPrefix: "grant.stage",
-        query: () => ({ grant: grant ?? undefined })
+        query: () => ({
+            grant: grant ?? undefined,
+            evaluation: evaluation ?? undefined,
+            populate: true
+        })
     });
 
     return <Manager />;

@@ -7,16 +7,14 @@ export interface FindStageDTO {
 
 export interface GetStageDTO {
     call?: string;
+    grantStage?: string;
     status?: StageStatus;
-    order?: number;
     populate?: boolean;
 }
 
 export interface CreateStageDTO {
     call: string;
-    name: string;
-    order?: number;
-    evaluation: string;
+    grantStage: string;
     deadline?: Date;
     status?: StageStatus.planned;
 }
@@ -24,17 +22,14 @@ export interface CreateStageDTO {
 export interface UpdateStageDTO {
     id: string;
     data: Partial<{
-        name: string;
-        evaluation: string;
         deadline: Date;
-        //isFinal: boolean;
         status: StageStatus;
     }>;
 }
 
-export interface UpdateStageStatusDTO {
-    id: string;
-    status: StageStatus;
+export interface ExistsStageDTO {
+    grantStage?: string;
+    call?: string;
 }
 
 

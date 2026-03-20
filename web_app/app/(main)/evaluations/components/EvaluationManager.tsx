@@ -34,10 +34,6 @@ const EvaluationManager = () => {
         SaveDialog: SaveEvaluation,
         permissionPrefix: "evaluation",
 
-        query: () => ({
-            populate: true
-        }),
-
         workflow: {
             statusField: "status",
             transitions: EVAL_TRANSITIONS,

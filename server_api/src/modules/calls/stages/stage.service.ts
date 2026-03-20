@@ -1,21 +1,24 @@
+import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
+import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { IEvaluationRepository } from "../../evaluations/evaluation.repository";
+import { IGrantStageRepository } from "../../grants/stages/stage.repository";
 import { IDocumentRepository } from "../../projects/documents/document.repository";
 import { ICallRepository } from "../call.repository";
+import { CALL_TRANSITIONS } from "../call.state-machine";
 import { CallStatus } from "../call.status";
-import { CreateStageDTO, GetStageDTO, UpdateStageDTO, UpdateStageStatusDTO } from "./stage.dto";
-import { IStageRepository } from "./stage.repository";
-import { StageStateMachine } from "./stage.state-machine";
+import { CreateStageDTO, GetStageDTO, UpdateStageDTO } from "./stage.dto";
+import { ICallStageRepository } from "./stage.repository";
+import { STAGE_TRANSITIONS } from "./stage.state-machine";
 import { StageStatus } from "./stage.status";
 
 export class StageService {
 
     constructor(
-        private readonly repository: IStageRepository,
+        private readonly repository: ICallStageRepository,
         private readonly callRepo: ICallRepository,
-        private readonly evalRepository: IEvaluationRepository,
-        private readonly docRepository: IDocumentRepository,
+        private readonly grantStageRepo: IGrantStageRepository,
     ) {
 
     }
@@ -23,19 +26,21 @@ export class StageService {
      * Create a new stage
      */
     async create(dto: CreateStageDTO) {
-        const { call, evaluation } = dto;
+        const { call, grantStage } = dto;
 
         const callDoc = await this.callRepo.findById(call);
         if (!callDoc) throw new Error(ERROR_CODES.CALL_NOT_FOUND);
-        if (callDoc.status !== CallStatus.active) throw new Error(ERROR_CODES.CALL_NOT_ACTIVE);
-
-        const evalDoc = await this.evalRepository.findById(evaluation);
-        if (!evalDoc) throw new Error(ERROR_CODES.EVALUATION_NOT_FOUND);
-
-        const stages = await this.repository.find({ call });
-        const nextOrder = stages.length + 1;
-        const stage = await this.repository.create({ ...dto, order: nextOrder, status: StageStatus.planned });
-        return stage;
+        //if (callDoc.status !== CallStatus.active) throw new Error(ERROR_CODES.CALL_NOT_ACTIVE);
+        const stageDoc = await this.grantStageRepo.findById(grantStage);
+        if (!stageDoc) throw new Error(ERROR_CODES.STAGE_NOT_FOUND);
+        try {
+            return await this.repository.create(dto);
+        } catch (err: any) {
+            if (err?.code === 11000) {
+                throw new AppError(ERROR_CODES.STAGE_ALREADY_EXISTS);
+            }
+            throw err;
+        }
     }
     /**
      * Get all stages or by call
@@ -57,13 +62,43 @@ export class StageService {
         const stage = await this.repository.findById(id);
         if (!stage) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
         if (stage.status === StageStatus.closed)
-            new AppError(ERROR_CODES.STUDENT_ALREADY_EXISTS);
+            new AppError(ERROR_CODES.STAGE_ALREADY_CLOSED);
 
         return await this.repository.update(id, data);
     }
+
+    async transitionState(dto: TransitionRequestDto) {
+        const { id, current, next } = dto;
+
+        const stageDoc = await this.repository.findById(id);
+        if (!stageDoc) {
+            throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
+        }
+        const from = stageDoc.status as StageStatus;
+        const to = next as StageStatus;
+        // optional UI consistency check
+        if (current && current !== from) {
+            throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
+        }
+        TransitionHelper.validateTransition(
+            from,
+            to,
+            STAGE_TRANSITIONS
+        );
+
+        if (next === CallStatus.planned) {
+            /*
+            if (await this.callRepository.exists({ calendar: id })) {
+                throw new AppError(ERROR_CODES.CALL_ALREADY_EXISTS);
+            }
+            */
+        }
+
+        return await this.repository.update(id, {
+            status: to
+        });
+    }
     /**
-    * Update Status
-    */
     async updateStatus(dto: UpdateStageStatusDTO) {
         const { id, status } = dto;
         const nextState = status;
@@ -83,6 +118,8 @@ export class StageService {
         const updated = await this.repository.update(dto.id, { status: nextState });
         return updated;
     }
+    */
+
     /**
      * Delete a stage
     */
@@ -91,22 +128,8 @@ export class StageService {
         if (!stageDoc) throw new Error(ERROR_CODES.STAGE_NOT_FOUND);
         if (stageDoc.status !== StageStatus.planned) throw new Error(ERROR_CODES.STAGE_NOT_PLANNED);
 
-        const { call } = stageDoc;
         const deleted = await this.repository.delete(id);
-        /*
-        // Re-arrange orders of remaining stages
-        if (deleted) {
-            await this.repository.updateMany(
-                {
-                    call,
-                    order: { $gt: order }
-                },
-                {
-                    $inc: { order: -1 }
-                }
-            );
-        }
-            */
+
         return deleted
     }
 }

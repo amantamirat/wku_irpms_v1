@@ -86,31 +86,7 @@ const SaveEvaluation = ({ visible, item, onComplete, onHide }: EntitySaveDialogP
                 className="p-fluid"
                 footer={footer}
                 onHide={hide}
-            >
-                {/* Directorate */}
-                {
-                    /**
-                     * 
-                     * <div className="field">
-                    <label htmlFor="organization">Organization</label>
-                    <Dropdown
-                        id="organization"
-                        dataKey="_id"
-                        value={localItem.organization}
-                        options={directorates}
-                        optionLabel="name"
-                        onChange={(e) =>
-                            setLocalItem({ ...localItem, organization: e.value })
-                        }
-                        placeholder="Select Organization"
-                        className={classNames({
-                            "p-invalid": submitted && !localItem.organization
-                        })}
-                    />
-                </div>
-                     */
-                }
-
+            >               
 
                 {/* Title */}
                 <div className="field">

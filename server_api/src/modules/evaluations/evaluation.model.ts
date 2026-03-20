@@ -13,14 +13,11 @@ export interface IEvaluation extends Document {
 
 const EvaluationSchema = new Schema<IEvaluation>(
     {
-        /*
-        organization: {
-            type: Schema.Types.ObjectId,
-            ref: COLLECTIONS.ORGANIZATION,
-            required: true,
-            immutable: true,
-        },*/
-        title: { type: String, required: true },
+        title: {
+            type: String,
+            unique: true,
+            required: true
+        },
         description: { type: String },
         status: {
             type: String,
