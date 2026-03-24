@@ -1,11 +1,11 @@
 export enum EvalStatus {
-    planned = 'planned',
-    active = 'active',
-    closed = 'closed'
+    draft = 'draft',
+    published = 'published',
+    archived = 'archived'
 }
 
 export const EVAL_TRANSITIONS: Record<EvalStatus, EvalStatus[]> = {
-    [EvalStatus.planned]: [EvalStatus.active],
-    [EvalStatus.active]: [EvalStatus.closed, EvalStatus.planned],
-    [EvalStatus.closed]: [EvalStatus.active]
+    [EvalStatus.draft]: [EvalStatus.published],
+    [EvalStatus.published]: [EvalStatus.archived, EvalStatus.draft],
+    [EvalStatus.archived]: [EvalStatus.published]
 };

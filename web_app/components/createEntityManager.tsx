@@ -34,6 +34,10 @@ export function createEntityManager<
         template: (row: T) => React.ReactNode
         allow?: (row: T) => boolean
     }
+    importConfig?: {
+        allow: boolean;
+        parentId?: string;
+    }
 }) {
 
     return function EntityManager() {
@@ -55,7 +59,7 @@ export function createEntityManager<
         const [item, setItem] = useState<T | null>(null)
         const [showDialog, setShowDialog] = useState(false)
         const canCreate = config.createNew && hasPermission([`${config.permissionPrefix}:create`]);
-
+        const canImport = config.importConfig?.allow && hasPermission([`${config.permissionPrefix}:import`]);
         useEffect(() => {
             const fetchData = async () => {
                 try {
@@ -74,12 +78,29 @@ export function createEntityManager<
         }, [])
 
         const handleCreate = () => {
-            //setItem(config.createNew ? config.createNew() : null)
             if (config.createNew) {
                 setItem(config.createNew());
                 setShowDialog(true)
             }
         }
+
+        const handleImport = async (rawData: any[]) => {
+            if (!config.api.import || !config.importConfig) return;
+
+            try {
+                setLoading(true);
+                await config.api.import(rawData, config.importConfig.parentId);
+                // Refresh the list
+                const query = config.query ? config.query() : undefined;
+                const freshData = await config.api.getAll(query);
+                setAll(freshData);
+                // Optional: Success Toast here
+            } catch (err: any) {
+                //setError("Import failed: " + err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
 
         const transitionState = async (
             row: T,
@@ -174,6 +195,7 @@ export function createEntityManager<
                     actions={actions}
                     onCreate={canCreate ? handleCreate : undefined}
                     expandable={config.expandable}
+                    onImport={canImport ? handleImport : undefined}
                 />
 
                 {item && showDialog && config.SaveDialog && (

@@ -29,7 +29,7 @@ export class OptionService {
 
             const criterionDoc = await this.criterionRepo.findById(criterion);
             if (!criterionDoc) throw new AppError(ERROR_CODES.CRITERION_NOT_FOUND);
-            if (criterionDoc.formType !== FormType.closed)
+            if (criterionDoc.formType !== FormType.NUMBER)
                 throw new AppError(ERROR_CODES.CRITERION_NOT_CLOSED);
 
             if (score > criterionDoc.weight)

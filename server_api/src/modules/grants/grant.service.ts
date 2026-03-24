@@ -26,7 +26,7 @@ export class GrantService {
         private readonly constraintRepo: IConstraintRepository = new ConstraintRepository(),
         private readonly compositionRepo: ICompositionRepository = new CompositionRepository(),
         private readonly callRepo: ICallRepository = new CallRepository(),
-        private readonly stageRepo: IGrantStageRepository = new GrantStageRepository(),
+        private readonly grantStageRepo: IGrantStageRepository = new GrantStageRepository(),
     ) { }
 
     async create(dto: CreateGrantDTO) {
@@ -102,7 +102,7 @@ export class GrantService {
             }
         }
         if (next === GrantStatus.active) {
-            if (!await this.stageRepo.exists({ grant: id })) {
+            if (!await this.grantStageRepo.exists({ grant: id })) {
                 throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
             }
         }
@@ -124,8 +124,9 @@ export class GrantService {
             throw new AppError(ERROR_CODES.CONSTRAINT_ALREADY_EXISTS);
         if (await this.compositionRepo.exists({ grant: id }))
             throw new AppError(ERROR_CODES.COMPOSITION_ALREADY_EXISTS);
-
+        if (await this.grantStageRepo.exists({ grant: id })) {
+            throw new AppError(ERROR_CODES.STAGE_ALREADY_EXISTS);
+        }
         return await this.repository.delete(id);
-        //if (!deleted) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
     }
 }

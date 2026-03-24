@@ -4,6 +4,7 @@ export type Evaluation = {
     _id?: string;
     title: string;
     description?: string;
+    weight: number;
     status?: EvaluationStatus;
     createdAt?: Date;
     updatedAt?: Date;
@@ -36,4 +37,5 @@ export function sanitize(evaluation: Partial<Evaluation>): Partial<Evaluation> {
 
 export const createEmptyEval = (): Evaluation => ({
     title: "",
+    weight:100
 })

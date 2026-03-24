@@ -32,14 +32,6 @@ export class EvaluationService {
         return await this.repository.find(options);
     }
 
-
-    async update(dto: UpdateEvaluationDTO) {
-        const { id, data, userId } = dto;
-        const evalDoc = await this.repository.update(id, data);
-        if (!evalDoc) throw new Error(ERROR_CODES.EVALUATION_NOT_FOUND);
-        return evalDoc;
-    }
-
     async transitionState(dto: TransitionRequestDto) {
         const { id, current, next } = dto;
 
@@ -60,7 +52,20 @@ export class EvaluationService {
             EVAL_TRANSITIONS
         );
 
-        if (next === EvalStatus.planned) {
+        // Inside transitionState logic
+        if (to === EvalStatus.published) {
+            const criteria = await this.criterionRepo.find({ evaluation: id });
+            const totalCriteriaWeight = criteria.reduce((sum, item) => sum + (item.weight || 0), 0);
+
+            if (Math.abs(totalCriteriaWeight - evalDoc.weight) > 0.001) {
+                throw new AppError(
+                    ERROR_CODES.EVALUATION_WEIGHT_MISMATCH,
+                    `Cannot publish: Criteria sum (${totalCriteriaWeight}) must match Evaluation weight (${evalDoc.weight})`
+                );
+            }
+        }
+
+        if (next === EvalStatus.draft) {
             if (await this.grantStageRepo.exists({ evaluation: id })) {
                 throw new AppError(ERROR_CODES.STAGE_ALREADY_EXISTS);
             }
@@ -71,16 +76,53 @@ export class EvaluationService {
         });
     }
 
+    async update(dto: UpdateEvaluationDTO) {
+        const { id, data } = dto;
+
+        // 1. Fetch current document to check status
+        const existingEval = await this.repository.findById(id);
+        if (!existingEval) {
+            throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
+        }
+
+        // 2. Restriction: Only allow weight updates if status is 'planned'
+        if (existingEval.status !== EvalStatus.draft) {
+            // If the weight is present in the DTO, remove it or throw error
+            if (data.weight !== undefined && data.weight !== existingEval.weight) {
+                // Option A: Silently ignore/remove it (common for UI/UX smoothness)
+                delete data.weight;
+                // Option B: Hard fail (recommended for API integrity)
+                // throw new AppError(ERROR_CODES.EVALUATION_WEIGHT_LOCKED);
+            }
+        }
+
+        // 3. Update the document with the (potentially sanitized) data
+        const evalDoc = await this.repository.update(id, data);
+        if (!evalDoc) throw new Error(ERROR_CODES.EVALUATION_NOT_FOUND);
+
+        return evalDoc;
+    }
+
     async delete(dto: DeleteDto) {
         const { id } = dto;
+
+        // 1. Verify the evaluation exists
         const evalDoc = await this.repository.findById(id);
-        if (!evalDoc) throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
-        if (evalDoc.status !== EvalStatus.planned) throw new AppError(ERROR_CODES.EVALUATION_NOT_PLANNED);
-        //delete many
-        const countCriteria = await this.criterionRepo.countDocuments(id);
-        if (countCriteria > 0) {
-            throw new Error(ERROR_CODES.CRITERION_ALREADY_EXISTS);
+        if (!evalDoc) {
+            throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
         }
+
+        // 2. Safety Check: Only allow deletion if still in 'planned' status
+        // This prevents deleting evaluations that are already active or closed (which have historical data)
+        if (evalDoc.status !== EvalStatus.draft) {
+            throw new AppError(ERROR_CODES.EVALUATION_NOT_DRAFT);
+        }
+
+        // 3. Cascade Delete: Remove all criteria associated with this evaluation
+        // We no longer throw an error if criteria exist; we just wipe them out.
+        await this.criterionRepo.deleteByEvaluation(id);
+
+        // 4. Finally, delete the evaluation itself
         return await this.repository.delete(id);
     }
 }

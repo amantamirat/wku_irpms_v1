@@ -3,18 +3,18 @@ import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
-import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
+import { IGrantRepository } from "../grants/grant.repository";
 import { CreateThematicDTO, GetThematicsDTO, UpdateThematicDTO } from "./thematic.dto";
-import { IThematicRepository, ThematicRepository } from "./thematic.repository";
+import { IThematicRepository } from "./thematic.repository";
 import { THEMATIC_TRANSITIONS, ThematicStatus } from "./thematic.state-machine";
-import { IThemeRepository, ThemeRepository } from "./themes/theme.repository";
+import { IThemeRepository } from "./themes/theme.repository";
 
 export class ThematicService {
 
     constructor(
-        private readonly repository: IThematicRepository = new ThematicRepository(),
-        private readonly themeRepo: IThemeRepository = new ThemeRepository(),
-        private readonly grantRepo: IGrantRepository = new GrantRepository(),
+        private readonly repository: IThematicRepository,
+        private readonly themeRepo: IThemeRepository,
+        private readonly grantRepo: IGrantRepository,
     ) { }
 
 
@@ -73,7 +73,7 @@ export class ThematicService {
         const thematicDoc = await this.repository.findById(id);
         if (!thematicDoc) throw new AppError(ERROR_CODES.THEMATIC_NOT_FOUND);
         if (thematicDoc.status !== ThematicStatus.draft) throw new AppError(ERROR_CODES.THEMATIC_NOT_DRAFT);
-        
+
         const themeExist = await this.themeRepo.exists({ thematicArea: id });
         if (themeExist) {
             throw new AppError(ERROR_CODES.THEME_ALREADY_EXISTS);

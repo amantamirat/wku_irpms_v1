@@ -21,7 +21,7 @@ const CriterionDetail = ({ criterion }: CriterionDetailProps) => {
         {
             header: "Options",
             permission: "option:read",
-            content: criterion.formType === FormType.closed ? <OptionManager criterion={criterion} /> : undefined
+            content: criterion.formType === FormType.NUMBER ? <OptionManager criterion={criterion} /> : undefined
         }
     ], [criterion]);
 

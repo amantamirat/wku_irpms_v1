@@ -1,17 +1,17 @@
 export enum EvaluationStatus {
-    planned = 'planned',
-    active = 'active',
-    closed = 'closed'
+    draft = 'draft',
+    published = 'published',
+    archived = 'archived'
 }
 
 export const EVAL_STATUS_ORDER: EvaluationStatus[] = [
-    EvaluationStatus.planned,
-    EvaluationStatus.active,
-    EvaluationStatus.closed
+    EvaluationStatus.draft,
+    EvaluationStatus.published,
+    EvaluationStatus.archived
 ];
 
 export const EVAL_TRANSITIONS: Record<EvaluationStatus, EvaluationStatus[]> = {
-    [EvaluationStatus.planned]: [EvaluationStatus.active],
-    [EvaluationStatus.active]: [EvaluationStatus.closed, EvaluationStatus.planned],
-    [EvaluationStatus.closed]: [EvaluationStatus.active]
+    [EvaluationStatus.draft]: [EvaluationStatus.published],
+    [EvaluationStatus.published]: [EvaluationStatus.archived, EvaluationStatus.draft],
+    [EvaluationStatus.archived]: [EvaluationStatus.published]
 };

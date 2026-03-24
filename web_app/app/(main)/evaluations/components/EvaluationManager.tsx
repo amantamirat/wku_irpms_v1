@@ -19,6 +19,17 @@ const EvaluationManager = () => {
             { header: "Title", field: "title", sortable: true },
             { header: "Description", field: "description" },
             {
+                header: "Weight",
+                field: "weight",
+                sortable: true,
+                body: (e: Evaluation) => (
+                    <span className="font-semibold">
+                        {e.weight ?? 0}%
+                    </span>
+                ),
+                style: { width: '10%' } // Optional: keeps the column compact
+            },
+            {
                 field: "status",
                 header: "Status",
                 sortable: true,
@@ -29,6 +40,7 @@ const EvaluationManager = () => {
 
         createNew: () => ({
             title: "",
+            weight: 100
         }),
 
         SaveDialog: SaveEvaluation,

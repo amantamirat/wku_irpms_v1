@@ -6,6 +6,7 @@ import { Toolbar } from "primereact/toolbar";
 import { useState } from "react";
 import ErrorCard from "./ErrorCard";
 import ListSkeleton from "./ListSkeleton";
+import { FileUpload } from "primereact/fileupload";
 
 export interface RowAction<T> {
     icon: string;
@@ -42,6 +43,8 @@ interface ItemManagerProps<T> {
         template: (row: T) => React.ReactNode;
         allow?: (row: T) => boolean;
     };
+
+    onImport?: (data: any[]) => Promise<void>;
 }
 
 export function ItemManager<T extends { _id?: string }>({
@@ -56,7 +59,8 @@ export function ItemManager<T extends { _id?: string }>({
     actions = [],
     hasPermission,
     onCreate,
-    expandable
+    expandable,
+    onImport
 }: ItemManagerProps<T>) {
 
     const [globalFilter, setGlobalFilter] = useState('');
@@ -146,20 +150,63 @@ export function ItemManager<T extends { _id?: string }>({
         return expandable.template(row);
     };
 
+    const handleFileSelect = async (event: any) => {
+        const file = event.files[0];
+        const reader = new FileReader();
+
+        reader.onload = async (e) => {
+            const content = e.target?.result as string;
+            let parsedData: any[] = [];
+
+            try {
+                if (file.type === "application/json" || file.name.endsWith(".json")) {
+                    parsedData = JSON.parse(content);
+                } else if (file.name.endsWith(".csv")) {
+                    // Simple CSV to JSON logic (you can use PapaParse here)
+                    const lines = content.split("\n");
+                    const headers = lines[0].split(",");
+                    parsedData = lines.slice(1).map(line => {
+                        const values = line.split(",");
+                        return headers.reduce((obj, h, i) => ({ ...obj, [h.trim()]: values[i]?.trim() }), {});
+                    });
+                }
+
+                if (onImport) await onImport(parsedData);
+            } catch (err) {
+                console.error("Parsing error", err);
+            }
+        };
+
+        reader.readAsText(file);
+    };
+
     return (
         <div className="card">
 
-            {onCreate && (
+            {(onCreate || onImport) && (
                 <Toolbar
                     className="mb-3"
                     start={
-                        <Button
+                        onCreate && <Button
                             label={`New ${itemName ?? ""}`}
                             icon="pi pi-plus"
                             severity="success"
                             onClick={onCreate}
                         />
                     }
+                    end={onImport && (
+                        <FileUpload
+                            mode="basic"
+                            name="file"
+                            accept=".json"
+                            maxFileSize={1000000} // This can be dynamic from your Setting API
+                            chooseLabel="Import"
+                            className="p-button-outlined p-button-secondary"
+                            customUpload
+                            auto
+                            uploadHandler={handleFileSelect}
+                        />
+                    )}
                 />
             )}
 

@@ -21,6 +21,7 @@
     &.status-linked,
     &.status-verified,
     &.status-accepted,
+    &.status-published,
     &.status-active {
         background: #C8E6C9;
         color: #256029;
@@ -37,6 +38,7 @@
 
     &.status-approved,
     &.status-closed,
+    &.status-archived,
     &.status-granted {
         background: #F3E5F5;
         color: #4A148C;

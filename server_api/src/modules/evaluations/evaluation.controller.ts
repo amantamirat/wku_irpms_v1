@@ -22,6 +22,7 @@ export class EvaluationController {
             const dto: CreateEvaluationDTO = {
                 title: req.body.title,
                 description: req.body.description,
+                weight: req.body.weight,
                 userId: req.user.applicantId
             };
 
@@ -51,7 +52,10 @@ export class EvaluationController {
 
             const dto: UpdateEvaluationDTO = {
                 id: req.params.id,
-                data: { title: req.body.title, description: req.body.description, },
+                data: {
+                    title: req.body.title, description: req.body.description,
+                    weight: req.body.weight
+                },
                 userId: req.user.applicantId
             };
             const updated = await this.service.update(dto);

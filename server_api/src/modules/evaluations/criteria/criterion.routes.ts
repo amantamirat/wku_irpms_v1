@@ -2,15 +2,28 @@ import { Router } from "express";
 import { PERMISSIONS } from "../../../common/constants/permissions";
 import { checkPermission, verifyActiveAccount } from "../../users/auth/auth.middleware";
 import { CriterionController } from "./criterion.controller";
+import { CriterionService } from "./criterion.service";
+import { CriterionRepository } from "./criterion.repository";
+import { ResultRepository } from "../../calls/stages/reviewers/results/result.repository";
+import { EvaluationRepository } from "../evaluation.repository";
+import { SettingService } from "../../settings/setting.service";
+import { SettingRepository } from "../../settings/setting.repository";
+import { upload } from "../../../util/multer";
 
-const controller = new CriterionController();
+const repository = new CriterionRepository();
+const resultRepo = new ResultRepository();
+const evalRepo = new EvaluationRepository();
+const service = new CriterionService(repository, resultRepo, evalRepo,
+    new SettingService(new SettingRepository())
+);
+const controller = new CriterionController(service);
 const router = Router();
 
 // Create a single criterion
 router.post(
     "/",
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.CRITERION.CREATE]),
+    checkPermission("criterion:create"),
     controller.create
 );
 
@@ -18,7 +31,7 @@ router.post(
 router.get(
     "/",
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.CRITERION.READ]),
+    checkPermission("criterion:read"),
     controller.getAll
 );
 
@@ -26,7 +39,7 @@ router.get(
 router.put(
     "/:id",
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.CRITERION.UPDATE]),
+    checkPermission("criterion:update"),
     controller.update
 );
 
@@ -34,15 +47,22 @@ router.put(
 router.delete(
     "/:id",
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.CRITERION.DELETE]),
+    checkPermission("criterion:delete"),
     controller.delete
 );
 
+
+// 'file' is the field name expected in the Multipart form-data
+router.post("/import-file",
+    //verifyActiveAccount,
+    //checkPermission("criterion:import"),
+    upload.single('file'), controller.importFile);
+
 // Batch import criteria with options
 router.post(
-    "/import",
+    "/import/:id",
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.CRITERION.IMPORT]),
+    checkPermission("criterion:import"),
     controller.import
 );
 

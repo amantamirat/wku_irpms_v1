@@ -79,5 +79,8 @@ export const FILE_TYPE_OPTIONS = [
     { name: 'CSV File (.csv)', value: 'text/csv' },
     { name: 'JPEG Image (.jpg)', value: 'image/jpeg' },
     { name: 'PNG Image (.png)', value: 'image/png' },
-    { name: 'ZIP Archive (.zip)', value: 'application/zip' }
+    { name: 'ZIP Archive (.zip)', value: 'application/zip' },
+    { name: 'XML File (.xml)', value: 'application/xml' },
+    { name: 'XML File (.xml)', value: 'text/xml' },
+    { name: 'JSON File (.json)', value: 'application/json' }
 ];

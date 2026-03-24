@@ -4,9 +4,7 @@ import { Criterion, GetCriteriaOptions, sanitize } from "../models/criterion.mod
 
 const end_point = '/criteria';
 
-export const CriterionApi: EntityApi<Criterion, GetCriteriaOptions> & {
-    importCriteriaBatch: (evaluationId: string, criteriaData: any[]) => Promise<any>
-} = {
+export const CriterionApi: EntityApi<Criterion, GetCriteriaOptions> = {
 
     async getAll(options?: GetCriteriaOptions) {
         const query = new URLSearchParams();
@@ -36,11 +34,11 @@ export const CriterionApi: EntityApi<Criterion, GetCriteriaOptions> & {
         return ApiClient.delete(`${end_point}/${criterion._id}`);
     },
 
-    // Custom method specific to Criterion
-    async importCriteriaBatch(evaluationId, criteriaData) {
-        return ApiClient.post(`${end_point}/import`, {
-            evaluationId,
-            criteriaData
-        });
+    // Custom method specific to Criterion impr
+    async import(criteriaData, evaluationId) {
+        if (!evaluationId) throw new Error("evaluation required");
+        return ApiClient.post(`${end_point}/import/${evaluationId}`,
+            {criteriaData:criteriaData}
+        );
     },
 };

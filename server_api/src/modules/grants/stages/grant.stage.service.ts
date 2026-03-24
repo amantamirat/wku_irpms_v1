@@ -28,7 +28,7 @@ export class StageService {
 
         const evalDoc = await this.evalRepository.findById(evaluation);
         if (!evalDoc) throw new Error(ERROR_CODES.EVALUATION_NOT_FOUND);
-        if (evalDoc.status !== EvalStatus.active) throw new AppError(ERROR_CODES.EVALUATION_NOT_ACTIVE);
+        if (evalDoc.status !== EvalStatus.published) throw new AppError(ERROR_CODES.EVALUATION_NOT_PUBLISHED);
         try {
             const stages = await this.repository.find({ grant });
             const nextOrder = stages.length + 1;

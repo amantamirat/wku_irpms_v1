@@ -9,10 +9,8 @@ import { ThematicStatus } from './thematic.state-machine';
 
 export class ThematicController {
 
-    private service: ThematicService;
+    constructor(private service: ThematicService) {
 
-    constructor(service?: ThematicService) {
-        this.service = service || new ThematicService();
     }
 
     create = async (req: Request, res: Response) => {

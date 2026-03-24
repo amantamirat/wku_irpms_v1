@@ -3,6 +3,7 @@ import { EvalStatus } from "./evaluation.state-machine";
 export interface CreateEvaluationDTO {
     title: string;
     description: string;
+    weight: number;
     userId?: string;
 }
 
@@ -11,6 +12,7 @@ export interface UpdateEvaluationDTO {
     data: Partial<{
         title: string;
         description: string;
+        weight: number;
         status: EvalStatus;
     }>;
     userId?: string;

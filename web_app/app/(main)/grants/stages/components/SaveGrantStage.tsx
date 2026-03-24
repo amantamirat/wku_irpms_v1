@@ -43,7 +43,7 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
         if (isEvaluationPredefined) return;
         const fetchEvaluations = async () => {
             try {
-                const data = await EvaluationApi.getAll({ status: EvaluationStatus.active });
+                const data = await EvaluationApi.getAll({ status: EvaluationStatus.published });
                 setEvaluations(data);
             } catch (err) {
                 console.error('Failed to fetch evaluations:', err);

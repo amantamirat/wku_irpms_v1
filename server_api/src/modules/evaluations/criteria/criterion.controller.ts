@@ -1,28 +1,34 @@
 import { Request, Response } from 'express';
-import { successResponse, errorResponse } from "../../../common/helpers/response";
+import fs from "fs";
+import { errorResponse, successResponse } from "../../../common/helpers/response";
 import { AuthenticatedRequest } from "../../users/auth/auth.middleware";
-import { CreateCriterionDTO, GetCriteriaDTO, UpdateCriterionDTO, ImportCriteriaBatchDTO } from "./criterion.dto";
+import {
+    CreateCriterionDTO,
+    GetCriteriaDTO,
+    ImportCriteriaBatchDTO,
+    UpdateCriterionDTO
+} from "./criterion.dto";
 import { CriterionService } from "./criterion.service";
-
-import { ERROR_CODES } from '../../../common/errors/error.codes';
 
 export class CriterionController {
 
-    private service: CriterionService;
-
-    constructor(service?: CriterionService) {
-        this.service = service || new CriterionService();
-    }
+    constructor(private readonly service: CriterionService) { }
 
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const { evaluation, title, formType, weight } = req.body;
+            // ✅ Extract options, order, and isRequired from body
+            const { evaluation, title, formType, weight, options, order, isRequired } = req.body;
+
             const dto: CreateCriterionDTO = {
                 evaluation,
                 title,
                 formType,
-                weight
+                weight,
+                options, // Merged options handled here
+                order,
+                isRequired
             };
+
             const criterion = await this.service.create(dto);
             successResponse(res, 201, "Criterion created successfully", criterion);
         } catch (err: any) {
@@ -32,10 +38,11 @@ export class CriterionController {
 
     getAll = async (req: Request, res: Response) => {
         try {
-            const { evaluation } = req.query;
+            const { evaluation, populate } = req.query;
 
             const dto: GetCriteriaDTO = {
-                evaluation: evaluation as string | undefined
+                evaluation: evaluation as string | undefined,
+                populate: populate === 'true'
             };
 
             const criteria = await this.service.get(dto);
@@ -48,12 +55,14 @@ export class CriterionController {
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.params;
-            const { title, formType, weight } = req.body;
+            // ✅ Allow updating the merged options array directly
+            const { title, formType, weight, options, order, isRequired } = req.body;
 
             const dto: UpdateCriterionDTO = {
                 id,
-                data: { title, formType, weight }
+                data: { title, formType, weight, options, order, isRequired }
             };
+
             const updated = await this.service.update(dto);
             successResponse(res, 200, "Criterion updated successfully", updated);
         } catch (err: any) {
@@ -62,42 +71,54 @@ export class CriterionController {
     }
 
     delete = async (req: AuthenticatedRequest, res: Response) => {
-        try {          
-
+        try {
             const { id } = req.params;
             const deleted = await this.service.delete(id);
-
             successResponse(res, 200, "Criterion deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     }
 
-    import = async (req: AuthenticatedRequest, res: Response) => {
-        try {
-            const { evaluationId, criteriaData } = req.body;
+    // criterion.controller.ts
 
-            // Validate input
-            if (!evaluationId || !Array.isArray(criteriaData)) {
-                return errorResponse(
-                    res,
-                    400,
-                    "evaluationId and criteriaData are required"
-                );
+    importFile = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            const { evaluationId } = req.body;
+            const file = req.file; // Populated by multer
+
+            if (!file) {
+                return errorResponse(res, 400, "No file uploaded");
             }
 
-            // Call service to import criteria
-            const result = await this.service.importCriteriaBatch(
-                evaluationId,
-                criteriaData
-            );
+            const result = await this.service.importFromFile(file, evaluationId);
 
-            return successResponse(
-                res,
-                201,
-                "Criteria imported successfully",
-                result
-            );
+            successResponse(res, 201, "File imported successfully", result);
+        } catch (err: any) {
+            // If error occurs, check if file exists and delete it
+            if (req.file) fs.unlinkSync(req.file.path);
+            errorResponse(res, 400, err.message, err);
+        }
+    }
+
+    import = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            const { id } = req.params;
+            const { criteriaData } = req.body;
+
+            if (!Array.isArray(criteriaData)) {
+                return errorResponse(res, 400, "criteriaData (array) are required");
+            }
+
+            // ✅ Pass as a single DTO object to match the Service signature
+            const dto: ImportCriteriaBatchDTO = {
+                evaluation: id,
+                criteriaData
+            };
+
+            const result = await this.service.import(dto);
+
+            return successResponse(res, 201, "Criteria batch imported successfully", result);
         } catch (err: any) {
             return errorResponse(res, 400, err.message, err);
         }

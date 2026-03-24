@@ -2,8 +2,16 @@ import { Router } from 'express';
 import { ThematicController } from './thematic.controller';
 import { PERMISSIONS } from '../../common/constants/permissions';
 import { verifyActiveAccount, checkPermission, checkTransitionPermission } from '../users/auth/auth.middleware';
+import { ThematicService } from './thematic.service';
+import { ThematicRepository } from './thematic.repository';
+import { ThemeRepository } from './themes/theme.repository';
+import { GrantRepository } from '../grants/grant.repository';
 
-const controller = new ThematicController();
+const service = new ThematicService(
+    new ThematicRepository(),
+    new ThemeRepository(),
+    new GrantRepository());
+const controller = new ThematicController(service);
 
 const router: Router = Router();
 
@@ -29,8 +37,8 @@ router.put(
 );
 
 router.patch('/:id', verifyActiveAccount,
-  checkTransitionPermission("thematic"),
-  controller.transitionState);
+    checkTransitionPermission("thematic"),
+    controller.transitionState);
 
 router.delete(
     '/:id',

@@ -83,7 +83,7 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
         const criterion = row.criterion as Criterion;
         if (!criterion) return "-";
 
-        if (criterion.formType === FormType.closed) {
+        if (criterion.formType === FormType.NUMBER) {
             const opt = row.selectedOption as any;
             return opt ? `${opt.title} (${opt.score})` : "-";
         }
@@ -103,7 +103,7 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
             if (!criterion) return sum;
 
             // closed form → option score
-            if (criterion.formType === FormType.closed) {
+            if (criterion.formType === FormType.NUMBER) {
                 const opt = row.selectedOption as any;
                 return sum + (typeof opt?.score === "number" ? opt.score : 0);
             }

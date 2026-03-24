@@ -585,23 +585,23 @@
   },
   {
     "category": "Evaluation Management",
-    "name": "evaluation:transition.planned.active",
-    "description": "Activate a planned evaluation by changing its status from planned to active"
+    "name": "evaluation:transition.draft.published",
+    "description": "Publish a draft evaluation once criteria preparation is complete, making it ready for work."
   },
   {
     "category": "Evaluation Management",
-    "name": "evaluation:transition.active.closed",
-    "description": "Close an active evaluation to finalize its activities"
+    "name": "evaluation:transition.published.archived",
+    "description": "Archive a published evaluation to prevent further use of this catalog."
   },
   {
     "category": "Evaluation Management",
-    "name": "evaluation:transition.active.planned",
-    "description": "Revert an active evaluation back to planned status for adjustments"
+    "name": "evaluation:transition.published.draft",
+    "description": "Revert a published evaluation to draft status to modify criteria or options."
   },
   {
     "category": "Evaluation Management",
-    "name": "evaluation:transition.closed.active",
-    "description": "Re-open a closed evaluation and set it back to active"
+    "name": "evaluation:transition.archived.published",
+    "description": "Restore an archived evaluation back to published status for active use."
   },
   {
     "category": "Evaluation Management",

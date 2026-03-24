@@ -44,6 +44,7 @@ export class EvaluationRepository implements IEvaluationRepository {
         const updateData: Partial<IEvaluation> = {};
 
         if (dtoData.title) updateData.title = dtoData.title;
+        if (dtoData.weight) updateData.weight = dtoData.weight;
         if (dtoData.description) updateData.description = dtoData.description;
         if (dtoData.status) updateData.status = dtoData.status;
 

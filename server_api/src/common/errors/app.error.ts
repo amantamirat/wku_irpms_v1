@@ -4,9 +4,12 @@ export class AppError extends Error {
     code: ErrorCode;
     statusCode: number;
 
-    constructor(code: ErrorCode, statusCode = 400) {
-        super(code);
+    constructor(code: ErrorCode, message?: string, statusCode = 400,) {
+        super(message || code);
+
         this.code = code;
         this.statusCode = statusCode;
+
+        Object.setPrototypeOf(this, AppError.prototype);
     }
 }

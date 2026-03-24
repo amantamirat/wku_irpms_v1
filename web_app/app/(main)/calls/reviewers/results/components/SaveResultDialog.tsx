@@ -56,7 +56,7 @@ const SaveResultDialog = ({
         if (!localResult) return;
 
         const criterion = localResult.criterion as Criterion;
-        if (criterion.formType !== FormType.closed) return;
+        if (criterion.formType !== FormType.NUMBER) return;
 
         const fetchOptions = async () => {
             try {
@@ -149,7 +149,7 @@ const SaveResultDialog = ({
                             {criterion.title}
                         </h3>
 
-                        {criterion.formType === FormType.closed && (
+                        {criterion.formType === FormType.NUMBER && (
                             <div className="field">
                                 <label>Score</label>
                                 <Dropdown
@@ -168,7 +168,7 @@ const SaveResultDialog = ({
                             </div>
                         )}
 
-                        {criterion.formType === FormType.open && (
+                        {criterion.formType === FormType.OPEN && (
                             <div className="field">
                                 <label>Score</label>
                                 <InputNumber

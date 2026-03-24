@@ -1,10 +1,10 @@
 'use client';
 import { createEntityManager } from "@/components/createEntityManager";
-import { Criterion, GetCriteriaOptions, createEmptyCriterion } from "../models/criterion.model";
-import { CriterionApi } from "../api/criterion.api";
-import SaveCriterion from "./SaveCriterion";
 import { Evaluation } from "../../evaluations/models/evaluation.model";
-import CriterionDetail from "./CriterionDetail";
+import { CriterionApi } from "../api/criterion.api";
+import { Criterion, GetCriteriaOptions, createEmptyCriterion, FormType } from "../models/criterion.model";
+import SaveCriterion from "./SaveCriterion";
+import { Tag } from 'primereact/tag';
 
 interface CriterionManagerProps {
     evaluation?: Evaluation;
@@ -12,38 +12,66 @@ interface CriterionManagerProps {
 
 const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
 
-    // Define the Manager using the factory
     const Manager = createEntityManager<Criterion, GetCriteriaOptions | undefined>({
-        title: "Manage Criteria",
+        title: "Manage Evaluation Criteria",
         itemName: "Criterion",
         api: CriterionApi,
-        permissionPrefix: "criterion", // Matches PERMISSIONS.CRITERION        
-        // Data fetching configuration
-        query: () => ({ evaluation: evaluation ?? undefined }),
-        // Initial state for new items
+        permissionPrefix: "criterion",
+        query: () => ({
+            evaluation: evaluation?._id ?? undefined,
+            populate: false // We only need the IDs here
+        }),
         createNew: () => ({
             ...createEmptyCriterion(),
             evaluation: evaluation ?? ""
         }),
 
         columns: [
-            { header: "Title", field: "title" },
-            { header: "Weight", field: "weight" },
+            // ✅ Show the execution order
             {
-                header: "Form Type",
-                field: "formType",
-                body: (row: Criterion) => (
-                    <span className={`form-badge form-type-${row.formType?.toLowerCase()}`}>
-                        {row.formType}
-                    </span>
+                header: "Order",
+                field: "order",
+                sortable: true,
+                style: { width: '3rem' }
+            },
+            {
+                header: "Title",
+                field: "title",
+                sortable: true
+            },
+            {
+                header: "Weight",
+                field: "weight",
+                sortable: true,
+                body: (rowData: Criterion) => (
+                    <span className="font-bold text-primary">{rowData.weight}%</span>
                 )
             },
+            {
+                header: "Type",
+                field: "formType",
+                body: (rowData: Criterion) => {
+                    const severity = rowData.formType === FormType.OPEN ? 'info' : 'success';
+                    return <Tag value={rowData.formType} severity={severity} />;
+                }
+            },
+            // ✅ Dynamic column to show how many options are attached
+            {
+                header: "Options",
+                body: (rowData: Criterion) => {
+                    const count = rowData.options?.length || 0;
+                    return count > 0 ? (
+                        <Tag value={`${count} Options`} icon="pi pi-list" severity="warning" />
+                    ) : (
+                        <span className="text-400 italic text-sm">N/A</span>
+                    );
+                }
+            }
         ],
         SaveDialog: SaveCriterion,
-        expandable: {
-            template: (criterion) => (
-                <CriterionDetail criterion={criterion} />
-            )
+        importConfig: {
+            allow: !!evaluation,
+            parentId: evaluation?._id
         }
     });
 

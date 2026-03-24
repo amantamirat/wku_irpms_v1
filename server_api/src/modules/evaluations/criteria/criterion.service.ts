@@ -1,35 +1,39 @@
+import fs from "fs";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { IResultRepository, ResultRepository } from "../../calls/stages/reviewers/results/result.repository";
-import { Evaluation } from "../evaluation.model";
-import { EvaluationRepository, IEvaluationRepository } from "../evaluation.repository";
+import { IResultRepository } from "../../calls/stages/reviewers/results/result.repository";
+import { SettingKey } from "../../settings/setting.model";
+import { SettingService } from "../../settings/setting.service";
+import { IEvaluationRepository } from "../evaluation.repository";
 import {
     CreateCriterionDTO,
     GetCriteriaDTO,
     ImportCriteriaBatchDTO,
-    UpdateCriterionDTO,
+    UpdateCriterionDTO
 } from "./criterion.dto";
-import { FormType } from "./criterion.model";
-import { Criterion } from "./criterion.model";
-import { CriterionRepository, ICriterionRepository } from "./criterion.repository";
-import { Option } from "./options/option.model";
-import { IOptionRepository, OptionRepository } from "./options/option.repository";
+import { ICriterionRepository } from "./criterion.repository";
 
 export class CriterionService {
 
     constructor(
-        private readonly repository: ICriterionRepository = new CriterionRepository(),
-        private readonly optionRepository: IOptionRepository = new OptionRepository(),
-        private readonly resultRepository: IResultRepository = new ResultRepository(),
-        private readonly evalRepository: IEvaluationRepository = new EvaluationRepository()
+        private readonly repository: ICriterionRepository,
+        private readonly resultRep: IResultRepository,
+        private readonly evalRepo: IEvaluationRepository,
+        private readonly settingService: SettingService,
     ) { }
 
     /**
      * Create a single criterion.
      */
     async create(dto: CreateCriterionDTO) {
-        const evalDoc = await this.evalRepository.findById(dto.evaluation);
+        const evalDoc = await this.evalRepo.findById(dto.evaluation);
         if (!evalDoc) throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
+
+        // Validation: Ensure no option score exceeds the criterion weight
+        if (dto.options) {
+            this.validateOptionScores(dto.options, dto.weight);
+        }
+
         return await this.repository.create(dto);
     }
 
@@ -42,109 +46,101 @@ export class CriterionService {
      */
     async update(dto: UpdateCriterionDTO) {
         const { id, data } = dto;
-        const { title, formType, weight } = data
 
         const criterion = await this.repository.findById(id);
-        if (!criterion) throw new Error(ERROR_CODES.CRITERION_NOT_FOUND);
+        if (!criterion) throw new AppError(ERROR_CODES.CRITERION_NOT_FOUND);
 
-        if (criterion.formType === FormType.closed) {
-            const options = await this.optionRepository.find({ criterion: id });
+        // Logic check: If updating options or weight, re-validate
+        const newWeight = data.weight ?? criterion.weight;
+        const newOptions = data.options ?? criterion.options;
 
-            if (formType) {
-                if (formType === FormType.open) {
-                    if (options.length > 0) {
-                        throw new AppError(
-                            ERROR_CODES.OPTION_ALREADY_EXISTS
-                        );
-                    }
-                }
-            }
-
-            if (weight) {
-                for (const opt of options) {
-                    if (opt.score !== undefined && opt.score > weight) {
-                        throw new AppError(
-                            ERROR_CODES.INVALID_CRITERION_WEIGHT
-                        );
-                    }
-                }
-            }
+        if (newOptions) {
+            this.validateOptionScores(newOptions, newWeight);
         }
 
         return this.repository.update(id, data);
     }
 
     /**
-    * Delete a criterion only if no options exist.
-    */
+     * Delete a criterion only if no results have been submitted yet.
+     */
     async delete(id: string) {
-        const options = await this.optionRepository.find({ criterion: id });
-        if (options.length > 0) {
-            throw new AppError(
-                ERROR_CODES.OPTION_ALREADY_EXISTS
-            );
-        }
-        const resExists = await this.resultRepository.exists({ criterion: id });
+        // We check Results because deleting a criterion would orphan those results.
+        const resExists = await this.resultRep.exists({ criterion: id });
         if (resExists) throw new AppError(ERROR_CODES.RESULT_ALREADY_EXISTS);
+
         return await this.repository.delete(id);
     }
 
 
-    /**
- * Batch import criteria (with optional options) under a given evaluation.
- * Accepts JSON like:
- * [
- *   { title, weight, formType, options? },
- *   ...
- * ]
- */
-    async importCriteriaBatch(
-        evaluationId: string,
-        criteriaData: Array<{
-            title: string;
-            weight: number;
-            formType: FormType;
-            options?: { title: string; score: number }[];
-        }>
-    ) {
-        // 1️⃣ Validate evaluation exists
-        const evaluation = await this.evalRepository.findById(evaluationId);
-        if (!evaluation) throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
+    async importFromFile(file: Express.Multer.File, evaluationId: string) {
+        // 1. Get Dynamic Settings
+        const maxSizeMB = await this.settingService.getSettingValue<number>(
+            SettingKey.MAX_FILE_UPLOAD_SIZE_MB,
+            5 // Default 5MB
+        );
 
-        const createdResults = [];
-
-        // 2️⃣ Create criteria and options using injected repositories
-        for (const criterion of criteriaData) {
-            // Create criterion
-            const criterionDoc = await this.repository.create({
-                evaluation: evaluationId,
-                title: criterion.title,
-                weight: criterion.weight,
-                formType: criterion.formType,
-            });
-
-            let createdOptions = [];
-
-            // If closed form, create options
-            if (criterion.formType === FormType.closed && Array.isArray(criterion.options)) {
-                for (const opt of criterion.options) {
-                    // Skip invalid option if score > criterion weight
-                    if (opt.score > criterion.weight) continue;
-
-                    const optionDoc = await this.optionRepository.create({
-                        criterion: String(criterionDoc._id),
-                        title: opt.title,
-                        score: opt.score,
-                    });
-
-                    createdOptions.push(optionDoc);
-                }
-            }
-
-            createdResults.push({ criterion: criterionDoc, options: createdOptions });
+        // 2. Validate Size (Multer gives size in bytes)
+        const fileSizeBytes = file.size;
+        if (fileSizeBytes > maxSizeMB * 1024 * 1024) {
+            throw new AppError(ERROR_CODES.FILE_TOO_LARGE);
         }
 
-        return createdResults;
+        // 3. Process File (Example for JSON)
+        const fileContent = fs.readFileSync(file.path, 'utf-8');
+        const criteriaData = JSON.parse(fileContent);
+
+        // 4. Use your existing batch import logic
+        const result = await this.import({ evaluation: evaluationId, criteriaData });
+
+        // 5. Clean up: Delete temp file after import
+        fs.unlinkSync(file.path);
+
+        return result;
     }
 
+
+    /**
+     * Batch import criteria with embedded options.
+     */
+    // criterion.service.ts
+
+    async import(dto: ImportCriteriaBatchDTO) {
+        const { evaluation: evaluationId, criteriaData } = dto;
+
+        // 1️⃣ Business Logic: Check if evaluation exists
+        const evaluation = await this.evalRepo.findById(evaluationId);
+        if (!evaluation) throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
+
+        // 2️⃣ Business Logic: Validate all data before sending to Repo
+        const dtosToCreate: CreateCriterionDTO[] = criteriaData.map((item, index) => {
+            if (item.options) {
+                this.validateOptionScores(item.options, item.weight);
+            }
+
+            return {
+                evaluation: evaluationId,
+                title: item.title,
+                weight: item.weight,
+                formType: item.formType,
+                options: item.options,
+                order: item.order ?? index
+            };
+        });
+
+        // 3️⃣ Abstract Call: Let the repo handle the DB heavy lifting
+        return await this.repository.createMany(dtosToCreate);
+    }
+
+    /**
+     * Helper to ensure data integrity
+     */
+    private validateOptionScores(options: any[], maxWeight: number) {
+        for (const opt of options) {
+            if (opt.score > maxWeight) {
+                throw new AppError(ERROR_CODES.INVALID_CRITERION_WEIGHT,
+                    `Weight of ${opt.title}, ${opt.score} execced ${maxWeight} `);
+            }
+        }
+    }
 }

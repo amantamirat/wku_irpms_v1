@@ -5,32 +5,26 @@ export interface StatusButtonConfig {
 }
 
 export const STATUS_BUTTON_CONFIG: Record<string, StatusButtonConfig> = {
-    pending: {
-        icon: "pi pi-clock",
-        severity: "warning",
-        action: "Send to Pending"
-    },
-    active: {
-        icon: "pi pi-check",
-        severity: "success",
-        action: "Activate"
-    },
-    suspended: {
-        icon: "pi pi-ban",
-        severity: "danger",
-        action: "Suspend"
-    },
-    closed: {
-        icon: "pi pi-lock",
-        severity: "danger",
-        action: "Close"
-    },
-    // ===== Project إضافات (merged) =====
+    // ... existing configs (pending, active, etc.)
+
+    // ===== Evaluation & Catalog Lifecycle =====
     draft: {
-        icon: "pi pi-undo",
+        icon: "pi pi-pencil", // Changed to pencil to represent 'preparation'
         severity: "secondary",
-        action: "Make it draft"
+        action: "Revert to Draft"
     },
+    published: {
+        icon: "pi pi-globe", // Globe or 'check-circle' represents 'live/published'
+        severity: "success",
+        action: "Publish Catalog"
+    },
+    archived: {
+        icon: "pi pi-box", // Box icon represents 'storage/retired'
+        severity: "secondary", 
+        action: "Archive Catalog"
+    },
+
+    // ===== Project & Grant flow =====
     submitted: {
         icon: "pi pi-send",
         severity: "info",
@@ -65,5 +59,16 @@ export const STATUS_BUTTON_CONFIG: Record<string, StatusButtonConfig> = {
         icon: "pi pi-check",
         severity: "success",
         action: "Complete"
-    }
+    },
+    // Keep your old ones if still needed for other models
+    suspended: {
+        icon: "pi pi-ban",
+        severity: "danger",
+        action: "Suspend"
+    },
+    closed: {
+        icon: "pi pi-lock",
+        severity: "danger",
+        action: "Close"
+    },
 };

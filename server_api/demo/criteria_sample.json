@@ -1,59 +1,71 @@
 [
   {
-    "title": "Relevance to Institutional Priorities",
+    "title": "Alignment with Strategic Goals",
     "weight": 20,
-    "formType": "Closed",
+    "formType": "Single",
     "options": [
-      { "title": "Highly Relevant", "score": 20 },
-      { "title": "Moderately Relevant", "score": 15 },
-      { "title": "Somewhat Relevant", "score": 10 },
-      { "title": "Not Relevant", "score": 5 }
+      {
+        "title": "Highly Aligned",
+        "score": 20
+      },
+      {
+        "title": "Moderately Aligned",
+        "score": 15
+      },
+      {
+        "title": "Poorly Aligned",
+        "score": 5
+      }
     ]
   },
   {
-    "title": "Research Quality and Innovation",
+    "title": "Methodological Rigor",
     "weight": 25,
-    "formType": "Closed",
+    "formType": "Single",
     "options": [
-      { "title": "Excellent – strong originality and sound methodology", "score": 25 },
-      { "title": "Good – some innovation, adequate methodology", "score": 20 },
-      { "title": "Fair – limited innovation, weak methodology", "score": 15 },
-      { "title": "Poor – lacks originality or clear research design", "score": 10 }
+      {
+        "title": "Excellent - Clear and Robust",
+        "score": 25
+      },
+      {
+        "title": "Good - Minor gaps",
+        "score": 18
+      },
+      {
+        "title": "Weak - Major flaws",
+        "score": 5
+      }
     ]
   },
   {
-    "title": "Team Capacity and Experience",
-    "weight": 15,
-    "formType": "Closed",
-    "options": [
-      { "title": "Highly Experienced – demonstrated track record", "score": 15 },
-      { "title": "Moderately Experienced", "score": 10 },
-      { "title": "Limited Experience", "score": 5 }
-    ]
-  },
-  {
-    "title": "Budget Justification and Feasibility",
-    "weight": 15,
-    "formType": "Closed",
-    "options": [
-      { "title": "Well-justified and realistic", "score": 15 },
-      { "title": "Partially justified", "score": 10 },
-      { "title": "Weak or unclear justification", "score": 5 }
-    ]
-  },
-  {
-    "title": "Expected Impact and Sustainability",
-    "weight": 15,
-    "formType": "Closed",
-    "options": [
-      { "title": "High – strong long-term benefit", "score": 15 },
-      { "title": "Moderate – some lasting benefits", "score": 10 },
-      { "title": "Low – limited or unclear benefit", "score": 5 }
-    ]
-  },
-  {
-    "title": "Comments and Recommendations",
+    "title": "Compliance Checklist",
     "weight": 10,
-    "formType": "Open"
+    "formType": "Multi",
+    "options": [
+      {
+        "title": "Ethics Clearance Provided",
+        "score": 5
+      },
+      {
+        "title": "Data Management Plan Included",
+        "score": 5
+      }
+    ]
+  },
+  {
+    "title": "Number of Peer-Reviewed Publications (Last 5 Years)",
+    "weight": 15,
+    "formType": "Number"
+  },
+  {
+    "title": "Proposed Budget Value ($)",
+    "weight": 15,
+    "formType": "Number"
+  },
+  {
+    "title": "Reviewer Recommendations",
+    "weight": 0,
+    "formType": "Open",
+    "isRequired": false
   }
 ]
