@@ -35,7 +35,7 @@ export class ThematicRepository implements IThematicRepository {
 
     async create(dto: CreateThematicDTO) {
         return Thematic.create({
-            ...dto
+            ...dto, 
         });
     }
 

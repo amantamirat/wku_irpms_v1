@@ -20,26 +20,29 @@ export class ThemeService {
     ) { }
 
     async create(dto: CreateThemeDTO) {
-        const { thematicArea, parent } = dto;
+        const { parent } = dto;
         dto.level = 0;
-        const thematicDoc = await this.thematicRepo.findById(thematicArea);
-
-        if (!thematicDoc) throw new Error(ERROR_CODES.THEMATIC_NOT_FOUND);
-        if (thematicDoc.status !== ThematicStatus.draft) throw new Error(ERROR_CODES.THEMATIC_NOT_DRAFT);
-
         if (parent) {
             const parentDoc = await this.repository.findById(parent);
             if (!parentDoc) throw new Error(ERROR_CODES.THEME_NOT_FOUND);
-            if (String(parentDoc.thematicArea) !== String(thematicArea)) {
-                throw new Error(ERROR_CODES.THEME_NOT_FOUND);
-            }
             dto.level = parentDoc.level + 1;
+            dto.thematicArea = String(parentDoc.thematicArea);
         }
+        const thematicDoc = await this.thematicRepo.findById(dto.thematicArea);
+        if (!thematicDoc) throw new Error(ERROR_CODES.THEMATIC_NOT_FOUND);
+        if (thematicDoc.status !== ThematicStatus.draft) throw new Error(ERROR_CODES.THEMATIC_NOT_DRAFT);
         const levelIndex = themeLevelIndex[thematicDoc.level];
         if (levelIndex < dto.level) {
             throw new Error(ERROR_CODES.INVALID_THEME_LEVEL);
         }
-        return await this.repository.create(dto);
+        try {
+            return await this.repository.create(dto);
+        } catch (err: any) {
+            if (err?.code === 11000) {
+                throw new AppError(ERROR_CODES.THEME_ALREADY_EXISTS);
+            }
+            throw err;
+        }
     }
 
     async getThemes(filters: GetThemeDTO) {
@@ -48,9 +51,16 @@ export class ThemeService {
 
     async update(dto: UpdateThemeDTO) {
         const { id, data } = dto;
-        const themeDoc = await this.repository.update(id, data);
-        if (!themeDoc) throw new Error(ERROR_CODES.THEME_NOT_FOUND);
-        return themeDoc;
+        try {
+            const themeDoc = await this.repository.update(id, data);
+            if (!themeDoc) throw new Error(ERROR_CODES.THEME_NOT_FOUND);
+            return themeDoc;
+        } catch (err: any) {
+            if (err?.code === 11000) {
+                throw new AppError(ERROR_CODES.THEME_ALREADY_EXISTS);
+            }
+            throw err;
+        }
     }
 
     async delete(dto: DeleteDto) {
@@ -154,14 +164,25 @@ export class ThemeService {
     ) {
         if (level > maxLevel) return;
 
-        // Pass the session as the second argument
-        const theme = await this.repository.create({
-            title: item.title,
-            priority: item.priority,
-            thematicArea: thematicAreaId,
-            parent,
-            level
-        }, session);
+        let theme;
+
+        try {
+            // Pass the session as the second argument
+            theme = await this.repository.create({
+                title: item.title,
+                priority: item.priority,
+                thematicArea: thematicAreaId,
+                parent,
+                level
+            }, session);
+        } catch (err: any) {
+            if (err?.code === 11000) {
+                throw new AppError(ERROR_CODES.THEME_ALREADY_EXISTS,
+                    `Theme "${item.title} - level ${level}" already exists in this thematic`
+                );
+            }
+            throw err;
+        }
 
         if (!item.children || !Array.isArray(item.children)) return;
 

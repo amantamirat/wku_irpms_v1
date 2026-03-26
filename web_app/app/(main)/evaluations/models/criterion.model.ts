@@ -57,10 +57,10 @@ export const validateCriterion = (
 
     // Logic for Choice-based types
     if ([FormType.SINGLE_CHOICE, FormType.MULTIPLE_CHOICE].includes(criterion.formType)) {
-        if (!criterion.options || criterion.options.length === 0) {
-            return { valid: false, message: "Choice-based criteria must have at least one option." };
+        if (!criterion.options || criterion.options.length < 2) {
+            return { valid: false, message: "Choice-based criteria must have at least two options." };
         }
-        
+
         // Ensure no option exceeds the total weight of the criterion
         const invalidOption = criterion.options.find(opt => opt.score > criterion.weight);
         if (invalidOption) {
@@ -82,7 +82,7 @@ export function sanitize(criterion: Partial<Criterion>): Partial<Criterion> {
                 ? (criterion.evaluation as Evaluation)._id
                 : criterion.evaluation,
         // Ensure options is always an array even if undefined
-        options: criterion.options || [] 
+        options: criterion.options || []
     };
 }
 

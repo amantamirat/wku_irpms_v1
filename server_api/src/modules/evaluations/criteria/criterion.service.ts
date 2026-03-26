@@ -5,6 +5,7 @@ import { IResultRepository } from "../../calls/stages/reviewers/results/result.r
 import { SettingKey } from "../../settings/setting.model";
 import { SettingService } from "../../settings/setting.service";
 import { IEvaluationRepository } from "../evaluation.repository";
+import { EvalStatus } from "../evaluation.state-machine";
 import {
     CreateCriterionDTO,
     GetCriteriaDTO,
@@ -12,14 +13,13 @@ import {
     UpdateCriterionDTO
 } from "./criterion.dto";
 import { ICriterionRepository } from "./criterion.repository";
-import { EvalStatus } from "../evaluation.state-machine";
 import { FormType } from "./criterion.model";
 
 export class CriterionService {
 
     constructor(
         private readonly repository: ICriterionRepository,
-        private readonly resultRep: IResultRepository,
+        //private readonly resultRep: IResultRepository,
         private readonly evalRepo: IEvaluationRepository,
         private readonly settingService: SettingService,
     ) { }
@@ -30,24 +30,17 @@ export class CriterionService {
     async create(dto: CreateCriterionDTO) {
         const evalDoc = await this.evalRepo.findById(dto.evaluation);
         if (!evalDoc) throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
-        if (evalDoc.status !== EvalStatus.draft) {
-            throw new AppError(ERROR_CODES.EVALUATION_NOT_DRAFT);
-        }
+        if (evalDoc.status !== EvalStatus.draft) throw new AppError(ERROR_CODES.EVALUATION_NOT_DRAFT);
 
-        /**
-         * 
-         * if (dto.formType === FormType.OPEN) {
-            dto.weight = 0;
-            dto.options = []
-        }
-         */
-        
-
-        // Validation: Ensure no option score exceeds the criterion weight
-        if (dto.options) {
+        if (
+            dto.formType === FormType.SINGLE_CHOICE ||
+            dto.formType === FormType.MULTIPLE_CHOICE
+        ) {
+            if (!dto.options || dto.options.length < 2) {
+                throw new AppError(ERROR_CODES.INVALID_CRITERION_OPTION, `At least two options are required for ${dto.formType}`);
+            }
             this.validateOptionScores(dto.options, dto.weight);
         }
-
         return await this.repository.create(dto);
     }
 
@@ -66,10 +59,7 @@ export class CriterionService {
 
         const evalDoc = await this.evalRepo.findById(String(criterion.evaluation));
         if (!evalDoc) throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
-        if (evalDoc.status !== EvalStatus.draft) {
-            throw new AppError(ERROR_CODES.EVALUATION_NOT_DRAFT);
-        }
-
+        if (evalDoc.status !== EvalStatus.draft) throw new AppError(ERROR_CODES.EVALUATION_NOT_DRAFT);
         // Logic check: If updating options or weight, re-validate
         const newWeight = data.weight ?? criterion.weight;
         const newOptions = data.options ?? criterion.options;
@@ -93,9 +83,11 @@ export class CriterionService {
         if (evalDoc.status !== EvalStatus.draft) {
             throw new AppError(ERROR_CODES.EVALUATION_NOT_DRAFT);
         }
+        /*
         // We check Results because deleting a criterion would orphan those results.
         const resExists = await this.resultRep.exists({ criterion: id });
         if (resExists) throw new AppError(ERROR_CODES.RESULT_ALREADY_EXISTS);
+        */
         return await this.repository.delete(id);
     }
 

@@ -11,9 +11,10 @@ import { SettingRepository } from "../../settings/setting.repository";
 import { upload } from "../../../util/multer";
 
 const repository = new CriterionRepository();
-const resultRepo = new ResultRepository();
+//const resultRepo = new ResultRepository();
 const evalRepo = new EvaluationRepository();
-const service = new CriterionService(repository, resultRepo, evalRepo,
+const service = new CriterionService(repository, //resultRepo, 
+    evalRepo,
     new SettingService(new SettingRepository())
 );
 const controller = new CriterionController(service);

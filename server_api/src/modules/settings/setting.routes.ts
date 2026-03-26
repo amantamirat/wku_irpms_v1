@@ -13,9 +13,10 @@ const controller = new SettingController(service);
 
 
 router.get("/", verifyActiveAccount,
-    checkPermission(["setting:read"]),
+    //checkPermission(["setting:read"]),
     (req, res) => controller.getAllSettings(req, res));
-router.patch("/:key", 
+
+router.patch("/:key",
     verifyActiveAccount,
     checkPermission(["setting:update"]),
     (req, res) => controller.update(req, res));

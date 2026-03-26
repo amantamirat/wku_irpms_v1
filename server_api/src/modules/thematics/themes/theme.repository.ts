@@ -4,7 +4,7 @@ import { CreateThemeDTO, ExistsThemeDTO, GetThemeDTO, UpdateThemeDTO } from "./t
 
 export interface IThemeRepository {
     findById(id: string): Promise<ITheme | null>;
-    find(filters: GetThemeDTO): Promise<Partial<ITheme>[]>;
+    find(filters: GetThemeDTO): Promise<ITheme[]>;
     create(dto: CreateThemeDTO, session?: mongoose.ClientSession): Promise<ITheme>;
     update(id: string, data: UpdateThemeDTO["data"]): Promise<ITheme | null>;
     exists(filters: ExistsThemeDTO): Promise<boolean>;

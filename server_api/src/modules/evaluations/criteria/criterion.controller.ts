@@ -1,15 +1,13 @@
 import { Request, Response } from 'express';
-import fs from "fs";
+import { ERROR_CODES } from '../../../common/errors/error.codes';
 import { errorResponse, successResponse } from "../../../common/helpers/response";
 import { AuthenticatedRequest } from "../../users/auth/auth.middleware";
 import {
     CreateCriterionDTO,
     GetCriteriaDTO,
-    ImportCriteriaBatchDTO,
     UpdateCriterionDTO
 } from "./criterion.dto";
 import { CriterionService } from "./criterion.service";
-import { ERROR_CODES } from '../../../common/errors/error.codes';
 
 export class CriterionController {
 

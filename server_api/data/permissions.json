@@ -16,11 +16,6 @@
   },
   {
     "category": "Setting Management",
-    "name": "setting:read",
-    "description": "View settings"
-  },
-  {
-    "category": "Setting Management",
     "name": "setting:update",
     "description": "Edit settings"
   },

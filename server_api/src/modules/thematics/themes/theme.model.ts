@@ -30,4 +30,5 @@ const ThemeSchema = new Schema<ITheme>(
   { timestamps: true }
 );
 
+ThemeSchema.index({ thematicArea: 1, title: 1, level: 1 }, { unique: true });
 export const Theme = model<ITheme>(COLLECTIONS.THEME, ThemeSchema);

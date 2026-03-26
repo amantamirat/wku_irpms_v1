@@ -10,9 +10,10 @@ import { Thematic } from "../../models/thematic.model";
 interface ThemeManagerProps {
     thematic?: Thematic;
     level?: number;
+    parent?: Theme;
 }
 
-const ThemeManager = ({ thematic, level }: ThemeManagerProps) => {
+const ThemeManager = ({ thematic, level, parent }: ThemeManagerProps) => {
 
     const Manager = createEntityManager<Theme, GetThemesOptions | undefined>({
         title: "Manage Themes",
@@ -36,18 +37,30 @@ const ThemeManager = ({ thematic, level }: ThemeManagerProps) => {
         ],
         query: () => ({
             thematicArea: thematic?._id ?? undefined,
-            level
+            level,
+            parent
         }),
         createNew: () => ({
             thematicArea: thematic ?? "",
-            title: ""
+            title: "",
+            parent
         }),
         SaveDialog: SaveTheme,
         importConfig: {
-            enable: true,
+            enable: !!thematic,
             importId: thematic?._id ?? undefined
         },
         permissionPrefix: "theme",
+        expandable: {
+            template: (row) => {
+                const level = row.level ?? 0;
+                // Stop expanding at level 3
+                if (level >= 3) return undefined;
+                return (
+                    <ThemeManager parent={row} level={level + 1} />
+                );
+            }
+        }
     });
 
     return <Manager />;

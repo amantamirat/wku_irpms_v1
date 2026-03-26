@@ -61,19 +61,53 @@ const ThemeHierarchyPreview = ({ thematic }: Props) => {
         return roots;
     };
 
+    /*
     const nodeTemplate = (node: TreeNode) => (
         <div className="flex align-items-center py-1">
             <span className="font-medium mr-2">{node.label}</span>
             <Badge value={`Level ${node.data.level}`} severity="success" />
         </div>
     );
+    */
+
+    const levelNames: Record<number, string> = {
+        0: "Theme",
+        1: "Sub-theme",
+        2: "Focus Area",
+        3: "Priority Area"
+    };
+
+    const levelSeverity: Record<number, "info" | "success" | "warning" | "danger"> = {
+        0: "info",
+        1: "success",
+        2: "warning",
+        3: "danger"
+    };
+
+    const nodeTemplate = (node: TreeNode) => {
+        const levelName = levelNames[node.data.level] || `Level ${node.data.level}`;
+        const severity = levelSeverity[node.data.level] || "info";
+
+        return (
+            <div className="flex align-items-center py-1">
+                {/* Bold level name */}
+                <span className="font-bold mr-2">{levelName}:</span>
+                <span className="font-medium mr-2">{node.label}</span>
+
+                {/* Show priority if available */}
+                {node.data.priority !== undefined && (
+                    <Badge value={`Priority: ${node.data.priority}`} severity={severity} />
+                )}
+            </div>
+        );
+    };
 
     if (loading) return <ProgressSpinner style={{ width: '40px' }} />;
 
     return (
         <div className="p-3">
             <div className="flex justify-content-between align-items-center mb-4">
-                <h4 className="m-0 text-900">Structure Preview</h4>
+                <h4 className="m-0 text-900">Structure Preview ({thematic.title})</h4>
                 <div className="flex gap-2">
                     <Badge value={`Required: Level ${requiredLevel}`} severity="info" />
                     <Badge
@@ -87,7 +121,7 @@ const ThemeHierarchyPreview = ({ thematic }: Props) => {
                 value={nodes}
                 nodeTemplate={nodeTemplate}
                 className="border-none p-0"
-                //emptyMessage="No themes defined for this area yet."
+            //emptyMessage="No themes defined for this area yet."
             />
 
             {maxLevelReached < requiredLevel && (

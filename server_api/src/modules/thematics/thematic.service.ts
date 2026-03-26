@@ -5,8 +5,10 @@ import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { IGrantRepository } from "../grants/grant.repository";
 import { CreateThematicDTO, GetThematicsDTO, UpdateThematicDTO } from "./thematic.dto";
+import { themeLevelIndex } from "./thematic.enum";
 import { IThematicRepository } from "./thematic.repository";
 import { THEMATIC_TRANSITIONS, ThematicStatus } from "./thematic.state-machine";
+import { ITheme } from "./themes/theme.model";
 import { IThemeRepository } from "./themes/theme.repository";
 
 export class ThematicService {
@@ -41,11 +43,11 @@ export class ThematicService {
     async transitionState(dto: TransitionRequestDto) {
         const { id, current, next } = dto;
 
-        const evalDoc = await this.repository.findById(id);
-        if (!evalDoc) {
-            throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
+        const thematicDoc = await this.repository.findById(id);
+        if (!thematicDoc) {
+            throw new AppError(ERROR_CODES.THEMATIC_NOT_FOUND);
         }
-        const from = evalDoc.status as ThematicStatus;
+        const from = thematicDoc.status as ThematicStatus;
         const to = next as ThematicStatus;
 
         if (current && current !== from) {
@@ -63,10 +65,61 @@ export class ThematicService {
             const themes = await this.themeRepo.find({ thematicArea: id });
 
             if (themes.length === 0) {
-                throw new AppError(ERROR_CODES.THEMATIC_EMPTY, "Cannot publish an empty thematic area.");
+                throw new AppError(
+                    ERROR_CODES.THEMATIC_EMPTY,
+                    "Cannot publish an empty thematic area."
+                );
+            }
+
+            const maxLevel = themeLevelIndex[thematicDoc.level];
+
+            // 2. Build parent → children map and _id → theme map for tracing
+            const childrenMap = new Map<string, ITheme[]>();
+            const themeMap = new Map<string, ITheme>();
+
+            for (const theme of themes) {
+                const parentId = theme.parent ? theme.parent.toString() : "root";
+
+                if (!childrenMap.has(parentId)) {
+                    childrenMap.set(parentId, []);
+                }
+                childrenMap.get(parentId)!.push(theme);
+
+                if (theme._id) {
+                    themeMap.set(theme._id.toString(), theme);
+                }
+            }
+
+            // 3. Validate (fail fast) with full path
+            for (const theme of themes) {
+                const isAtMaxDepth = theme.level === maxLevel;
+
+                // If NOT deepest → must have children
+                if (!isAtMaxDepth) {
+                    if (!theme._id) continue;
+
+                    const key = theme._id.toString();
+                    const children = childrenMap.get(key);
+
+                    if (!children || children.length === 0) {
+                        // Trace path from root to this theme
+                        const path: string[] = [];
+                        let current: ITheme | undefined = theme;
+
+                        while (current) {
+                            path.unshift(current.title); // prepend to path
+                            if (!current.parent) break;
+                            current = themeMap.get(current.parent.toString());
+                        }
+
+                        throw new AppError(
+                            ERROR_CODES.INVALID_THEME_STRUCTURE,
+                            `Theme hierarchy incomplete: ${path.join(" → ")}`
+                        );
+                    }
+                }
             }
         }
-
         // --- REVERT TO DRAFT CHECK ---
         if (to === ThematicStatus.draft) {
             const isInUse = await this.grantRepo.exists({ thematic: id });

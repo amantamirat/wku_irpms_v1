@@ -20,21 +20,22 @@ const ThematicDetail = ({ thematic }: ThematicDetailProps) => {
      * Define tabs in a scalable configuration array
      */
     const tabs = useMemo(() => [
-        {
-            header: "Hierarchy Preview", // New Preview Tab
-            permission: PERMISSIONS.THEME.READ,
-            content: <ThemeHierarchyPreview thematic={thematic} />
-        },
+
         {
             header: "Themes",
             permission: PERMISSIONS.THEME.READ,
             content: <ThemeManager thematic={thematic} level={0} />
         },
         {
+            header: "Hierarchy Preview", // New Preview Tab
+            permission: PERMISSIONS.THEME.READ,
+            content: <ThemeHierarchyPreview thematic={thematic} />
+        },
+        {
             header: "Grants",
             permission: "grant:read",
             content: <GrantManager thematic={thematic} />
-        }
+        },
     ], [thematic]);
 
     /**
