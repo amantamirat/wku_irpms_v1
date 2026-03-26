@@ -5,6 +5,7 @@ import { PERMISSIONS } from "@/types/permissions";
 import { TabPanel, TabView } from "primereact/tabview";
 import ThemeManager from "../themes/components/ThemeManager";
 import GrantManager from "../../grants/components/GrantManager";
+import ThemeHierarchyPreview from "./ThemeHierarchyPreview";
 
 
 interface ThematicDetailProps {
@@ -20,9 +21,14 @@ const ThematicDetail = ({ thematic }: ThematicDetailProps) => {
      */
     const tabs = useMemo(() => [
         {
+            header: "Hierarchy Preview", // New Preview Tab
+            permission: PERMISSIONS.THEME.READ,
+            content: <ThemeHierarchyPreview thematic={thematic} />
+        },
+        {
             header: "Themes",
             permission: PERMISSIONS.THEME.READ,
-            content: <ThemeManager thematicArea={thematic} />
+            content: <ThemeManager thematic={thematic} level={0} />
         },
         {
             header: "Grants",

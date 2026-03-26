@@ -2,9 +2,16 @@ import { Router } from 'express';
 import { PERMISSIONS } from '../../../common/constants/permissions';
 import { verifyActiveAccount, checkPermission } from '../../users/auth/auth.middleware';
 import { ThemeController } from './theme.controller';
+import { ThemeService } from './theme.service';
+import { ThemeRepository } from './theme.repository';
+import { ThematicRepository } from '../thematic.repository';
+import { SettingService } from '../../settings/setting.service';
+import { SettingRepository } from '../../settings/setting.repository';
+import { upload } from '../../../util/multer';
 
-
-const controller = new ThemeController();
+const controller = new ThemeController(new ThemeService(
+    new ThemeRepository(), new ThematicRepository(),
+    new SettingService(new SettingRepository())));
 
 const router: Router = Router();
 
@@ -15,12 +22,14 @@ router.post(
     controller.create
 );
 
+/*
 router.post(
     '/import',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.THEME.IMPORT]),
     controller.import
 );
+*/
 
 router.get(
     '/',
@@ -41,6 +50,14 @@ router.delete(
     verifyActiveAccount,
     checkPermission([PERMISSIONS.THEME.DELETE]),
     controller.delete
+);
+
+router.post(
+    "/import/:id",
+    verifyActiveAccount,
+    checkPermission("theme:import"),
+    upload.single('file'),
+    controller.import
 );
 
 export default router;

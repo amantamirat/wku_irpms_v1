@@ -1,10 +1,10 @@
 'use client';
 import { createEntityManager } from "@/components/createEntityManager";
+import { Tag } from 'primereact/tag';
 import { Evaluation } from "../../evaluations/models/evaluation.model";
 import { CriterionApi } from "../api/criterion.api";
-import { Criterion, GetCriteriaOptions, createEmptyCriterion, FormType } from "../models/criterion.model";
+import { createEmptyCriterion, Criterion, FormType, GetCriteriaOptions } from "../models/criterion.model";
 import SaveCriterion from "./SaveCriterion";
-import { Tag } from 'primereact/tag';
 
 interface CriterionManagerProps {
     evaluation?: Evaluation;
@@ -70,9 +70,9 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
         ],
         SaveDialog: SaveCriterion,
         importConfig: {
-            allow: !!evaluation,
-            parentId: evaluation?._id
-        }
+            enable: true,
+            importId: evaluation?._id ?? undefined
+        },
     });
 
     return <Manager />;

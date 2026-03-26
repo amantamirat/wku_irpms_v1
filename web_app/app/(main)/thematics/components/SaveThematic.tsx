@@ -8,7 +8,6 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
 import { useEffect, useRef, useState } from "react";
-
 import { Thematic, ThemeLevel, validateThematic } from "../models/thematic.model";
 import { useDirectorate } from "@/contexts/DirectorateContext";
 import { EntitySaveDialogProps } from "@/components/createEntityManager";
@@ -144,6 +143,7 @@ const SaveThematic = ({ visible, item, onComplete, onHide }: EntitySaveDialogPro
                         className={classNames({
                             'p-invalid': submitted && !localItem.level,
                         })}
+                        disabled={!!localItem._id}
                     />
                 </div>
 

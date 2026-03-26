@@ -12,16 +12,23 @@ export interface UpdateThemeDTO {
         title: string;
         priority: number;
     }>;
-    userId: string;
+    userId?: string;
 }
 
 export interface GetThemeDTO {
     parent?: string;
     thematicArea?: string;
     level?: number;
+    populate?: boolean;
 }
 
 export interface ExistsThemeDTO {
     parent?: string;
     thematicArea?: string;
+}
+
+export interface IThemeImportDTO {
+    title: string;
+    priority?: number;
+    children?: IThemeImportDTO[]; // Recursive definition
 }

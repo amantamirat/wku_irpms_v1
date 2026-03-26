@@ -5,6 +5,8 @@ import { useCrudList } from "@/hooks/useCrudList"
 import { useState, useEffect } from "react"
 import { ItemManager, RowAction } from "./ItemManager"
 import { StateTransitionButtons } from "./StateTransitionButtons"
+import { Button } from "primereact/button"
+import ImportDialog from "./ImportDialog"
 
 export interface EntitySaveDialogProps<T> {
     visible: boolean
@@ -34,10 +36,13 @@ export function createEntityManager<
         template: (row: T) => React.ReactNode
         allow?: (row: T) => boolean
     }
+
     importConfig?: {
-        allow: boolean;
-        parentId?: string;
+        enable: boolean;
+        importId?: string | undefined;
     }
+
+    toolbarEnd?: React.ReactNode;
 }) {
 
     return function EntityManager() {
@@ -56,26 +61,36 @@ export function createEntityManager<
             setError
         } = useCrudList<T>()
 
-        const [item, setItem] = useState<T | null>(null)
-        const [showDialog, setShowDialog] = useState(false)
+        const [item, setItem] = useState<T | null>(null);
+        const [showDialog, setShowDialog] = useState(false);
+        const [showImportDialog, setShowImportDialog] = useState(false);
         const canCreate = config.createNew && hasPermission([`${config.permissionPrefix}:create`]);
-        const canImport = config.importConfig?.allow && hasPermission([`${config.permissionPrefix}:import`]);
+        const canImport = config.importConfig?.enable &&
+            hasPermission([`${config.permissionPrefix}:import`]);
+
+        const refresh = async () => {
+            const query = config.query ? config.query() : undefined;
+            const data = await config.api.getAll(query);
+            setAll(data);
+        };
+
         useEffect(() => {
             const fetchData = async () => {
                 try {
-                    setLoading(true)
+                    setLoading(true);
+                    await refresh();
+                    /*
                     const query = config.query ? config.query() : undefined
                     const data = await config.api.getAll(query)
-                    setAll(data)
+                    setAll(data)*/
                 } catch (err: any) {
                     setError(err.message)
                 } finally {
                     setLoading(false)
                 }
             }
-
-            fetchData()
-        }, [])
+            fetchData();
+        }, []);
 
         const handleCreate = () => {
             if (config.createNew) {
@@ -83,24 +98,6 @@ export function createEntityManager<
                 setShowDialog(true)
             }
         }
-
-        const handleImport = async (rawData: any[]) => {
-            if (!config.api.import || !config.importConfig) return;
-
-            try {
-                setLoading(true);
-                await config.api.import(rawData, config.importConfig.parentId);
-                // Refresh the list
-                const query = config.query ? config.query() : undefined;
-                const freshData = await config.api.getAll(query);
-                setAll(freshData);
-                // Optional: Success Toast here
-            } catch (err: any) {
-                //setError("Import failed: " + err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
 
         const transitionState = async (
             row: T,
@@ -177,8 +174,25 @@ export function createEntityManager<
                     );
                 }
             });
-
         }
+
+        const toolbarEnd = (
+            <>
+                {/* existing toolbarEnd from entity */}
+                {config.toolbarEnd}
+
+                {/* your import button */}
+                {canImport && (
+                    <Button
+                        label="Import"
+                        icon="pi pi-upload"
+                        severity="secondary"
+                        outlined
+                        onClick={() => setShowImportDialog(true)}
+                    />
+                )}
+            </>
+        );
 
         return (
             <>
@@ -195,7 +209,7 @@ export function createEntityManager<
                     actions={actions}
                     onCreate={canCreate ? handleCreate : undefined}
                     expandable={config.expandable}
-                    onImport={canImport ? handleImport : undefined}
+                    toolbarEnd={toolbarEnd}
                 />
 
                 {item && showDialog && config.SaveDialog && (
@@ -207,6 +221,19 @@ export function createEntityManager<
                             setShowDialog(false)
                         }}
                         onHide={() => setShowDialog(false)}
+                    />
+                )}
+
+                {showImportDialog && (
+                    <ImportDialog
+                        api={config.api}
+                        parentId={config.importConfig?.importId}
+                        visible={showImportDialog}
+                        onComplete={async () => {
+                            await refresh();
+                            setShowImportDialog(false);
+                        }}
+                        onHide={() => setShowImportDialog(false)}
                     />
                 )}
             </>

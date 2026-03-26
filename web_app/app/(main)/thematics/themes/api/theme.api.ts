@@ -1,52 +1,47 @@
+import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
 import { GetThemesOptions, sanitizeTheme, Theme } from "../models/theme.model";
 
 const end_point = '/thematics/themes';
 
-export const ThemeApi = {
+export const ThemeApi: EntityApi<Theme, GetThemesOptions> = {
 
-    async createTheme(theme: Partial<Theme>): Promise<Theme> {
-        const sanitized = sanitizeTheme(theme);
-        const createdData = await ApiClient.post(end_point, sanitized);
-        return createdData as Theme;
-    },
-
-    async getThemes(options: GetThemesOptions): Promise<Theme[]> {
+    async getAll(options?: GetThemesOptions) {
         const query = new URLSearchParams();
-        const sanitized = sanitizeTheme(options);
-        if (options.parent) query.append("parent", sanitized.parent as string);
-        if (options.thematicArea) query.append("thematicArea", sanitized.thematicArea as string);
-        if (options.level !== undefined)
-            query.append("level", String(sanitized.level));
-        const data = await ApiClient.get(`${end_point}?${query.toString()}`);
-        return data as Theme[];
+
+        if (options) {
+            const sanitized = sanitizeTheme(options);
+            if (options.parent) query.append("parent", sanitized.parent as string);
+            if (options.thematicArea) query.append("thematicArea", sanitized.thematicArea as string);
+            if (options.level !== undefined)
+                query.append("level", String(sanitized.level));
+        }
+
+        const url = query.toString()
+            ? `${end_point}?${query.toString()}`
+            : end_point;
+
+        return ApiClient.get(url);
     },
 
-    async updateTheme(theme: Partial<Theme>): Promise<Theme> {
-        if (!theme._id) {
-            throw new Error("_id required.");
-        }
-        const url = `${end_point}/${theme._id}`;
+    async create(theme) {
         const sanitized = sanitizeTheme(theme);
-        const updatedTheme = await ApiClient.put(url, sanitized);
-        return updatedTheme as Theme;
+        return ApiClient.post(end_point, sanitized);
     },
 
-    async deleteTheme(theme: Partial<Theme>): Promise<boolean> {
-        if (!theme._id) {
-            throw new Error("_id required.");
-        }
-        const url = `${end_point}/${theme._id}`;
-        const response = await ApiClient.delete(url);
-        return response;
+    async update(theme) {
+        if (!theme._id) throw new Error("_id required");
+
+        const sanitized = sanitizeTheme(theme);
+        return ApiClient.put(`${end_point}/${theme._id}`, sanitized);
     },
 
-    async importThemes(thematicAreaId: string, themesData: any[]): Promise<any> {
-        const response = await ApiClient.post(`${end_point}/import`, {
-            thematicAreaId,
-            themesData
-        });
-        return response;
+    async delete(theme) {
+        //if (!theme._id) throw new Error("_id required");
+        return ApiClient.delete(`${end_point}/${theme._id}`);
     },
 
+    async import(formData: FormData, thematicId?: string) {
+        return ApiClient.post(`${end_point}/import/${thematicId}`, formData);
+    }
 };

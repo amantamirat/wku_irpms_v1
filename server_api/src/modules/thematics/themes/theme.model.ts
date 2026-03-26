@@ -27,7 +27,7 @@ const ThemeSchema = new Schema<ITheme>(
     priority: { type: Number },
     level: { type: Number, required: true, default: 0, min: 0, max: 4, immutable: true },
   },
-  { timestamps: true } 
+  { timestamps: true }
 );
 
 export const Theme = model<ITheme>(COLLECTIONS.THEME, ThemeSchema);

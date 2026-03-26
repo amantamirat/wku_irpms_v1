@@ -8,5 +8,5 @@ export interface EntityApi<T, Q = undefined> {
     transitionState?(id: string, dto: TransitionRequestDto): Promise<T>
     delete(item: T): Promise<boolean>
     //for bulk imports
-    import?: (data: any[], parentId?: string) => Promise<any>;
+    import?: (formData: FormData, id?: string) => Promise<any>;
 }

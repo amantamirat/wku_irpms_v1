@@ -4,6 +4,7 @@ import { ThemeLevel } from "./thematic.enum";
 import { ThematicStatus } from "./thematic.state-machine";
 
 export interface IThematic extends Document {
+    _id?: string;
     title: string;
     level: ThemeLevel;
     description?: string;

@@ -49,7 +49,7 @@ export class GrantService {
         }
         const thematicsDoc = await this.thematicRepository.findById(dto.thematic);
         if (!thematicsDoc) throw new AppError(ERROR_CODES.THEMATIC_NOT_FOUND);
-        if (thematicsDoc.status !== ThematicStatus.active) throw new AppError(ERROR_CODES.THEMATIC_NOT_ACTIVE);
+        if (thematicsDoc.status !== ThematicStatus.published) throw new AppError(ERROR_CODES.THEMATIC_NOT_PUBLISHED);
 
         const created = await this.repository.create(dto);
         return created;

@@ -30,9 +30,7 @@
             "composition:*",
             "evaluation:*",
             "call:*",
-            "thematic:read",
-            "thematic:transition.draft.active",
-            "thematic:transition.active.closed",
+            "thematic:*",
             "project:read",
             "document:read",
             "report:*"

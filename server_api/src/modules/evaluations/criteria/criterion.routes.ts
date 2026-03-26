@@ -51,18 +51,12 @@ router.delete(
     controller.delete
 );
 
-
-// 'file' is the field name expected in the Multipart form-data
-router.post("/import-file",
-    //verifyActiveAccount,
-    //checkPermission("criterion:import"),
-    upload.single('file'), controller.importFile);
-
 // Batch import criteria with options
 router.post(
     "/import/:id",
     verifyActiveAccount,
     checkPermission("criterion:import"),
+    upload.single('file'),
     controller.import
 );
 

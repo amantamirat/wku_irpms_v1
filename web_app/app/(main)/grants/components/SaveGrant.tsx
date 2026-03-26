@@ -76,7 +76,7 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
 
             try {
                 const data = await ThematicApi.getAll({
-                    status: ThematicStatus.active
+                    status: ThematicStatus.published
                 });
                 setThematics(data);
             } catch (err) {

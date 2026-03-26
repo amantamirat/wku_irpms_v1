@@ -12,6 +12,8 @@ import {
     UpdateCriterionDTO
 } from "./criterion.dto";
 import { ICriterionRepository } from "./criterion.repository";
+import { EvalStatus } from "../evaluation.state-machine";
+import { FormType } from "./criterion.model";
 
 export class CriterionService {
 
@@ -28,6 +30,18 @@ export class CriterionService {
     async create(dto: CreateCriterionDTO) {
         const evalDoc = await this.evalRepo.findById(dto.evaluation);
         if (!evalDoc) throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
+        if (evalDoc.status !== EvalStatus.draft) {
+            throw new AppError(ERROR_CODES.EVALUATION_NOT_DRAFT);
+        }
+
+        /**
+         * 
+         * if (dto.formType === FormType.OPEN) {
+            dto.weight = 0;
+            dto.options = []
+        }
+         */
+        
 
         // Validation: Ensure no option score exceeds the criterion weight
         if (dto.options) {
@@ -50,6 +64,12 @@ export class CriterionService {
         const criterion = await this.repository.findById(id);
         if (!criterion) throw new AppError(ERROR_CODES.CRITERION_NOT_FOUND);
 
+        const evalDoc = await this.evalRepo.findById(String(criterion.evaluation));
+        if (!evalDoc) throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
+        if (evalDoc.status !== EvalStatus.draft) {
+            throw new AppError(ERROR_CODES.EVALUATION_NOT_DRAFT);
+        }
+
         // Logic check: If updating options or weight, re-validate
         const newWeight = data.weight ?? criterion.weight;
         const newOptions = data.options ?? criterion.options;
@@ -65,10 +85,17 @@ export class CriterionService {
      * Delete a criterion only if no results have been submitted yet.
      */
     async delete(id: string) {
+        const criterionDoc = await this.repository.findById(id);
+        if (!criterionDoc) throw new AppError(ERROR_CODES.CRITERION_NOT_FOUND);
+
+        const evalDoc = await this.evalRepo.findById(String(criterionDoc.evaluation));
+        if (!evalDoc) throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
+        if (evalDoc.status !== EvalStatus.draft) {
+            throw new AppError(ERROR_CODES.EVALUATION_NOT_DRAFT);
+        }
         // We check Results because deleting a criterion would orphan those results.
         const resExists = await this.resultRep.exists({ criterion: id });
         if (resExists) throw new AppError(ERROR_CODES.RESULT_ALREADY_EXISTS);
-
         return await this.repository.delete(id);
     }
 
@@ -106,11 +133,12 @@ export class CriterionService {
     // criterion.service.ts
 
     async import(dto: ImportCriteriaBatchDTO) {
-        const { evaluation: evaluationId, criteriaData } = dto;
-
+        const { evaluation, criteriaData } = dto;
         // 1️⃣ Business Logic: Check if evaluation exists
-        const evaluation = await this.evalRepo.findById(evaluationId);
-        if (!evaluation) throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
+        const evalDoc = await this.evalRepo.findById(evaluation);
+        if (!evalDoc) throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
+        if (evalDoc.status !== EvalStatus.draft) throw new AppError(ERROR_CODES.EVALUATION_NOT_DRAFT);
+
 
         // 2️⃣ Business Logic: Validate all data before sending to Repo
         const dtosToCreate: CreateCriterionDTO[] = criteriaData.map((item, index) => {
@@ -119,7 +147,7 @@ export class CriterionService {
             }
 
             return {
-                evaluation: evaluationId,
+                evaluation: evaluation,
                 title: item.title,
                 weight: item.weight,
                 formType: item.formType,
@@ -135,6 +163,7 @@ export class CriterionService {
     /**
      * Helper to ensure data integrity
      */
+
     private validateOptionScores(options: any[], maxWeight: number) {
         for (const opt of options) {
             if (opt.score > maxWeight) {

@@ -12,6 +12,28 @@ sudo systemctl start mongod
 net start MongoDB
 ```
 
+## Mongo 4.4 Database Setup
+
+### 1. MongoDB Replica Set Setup (Manual)
+The system requires a Replica Set to handle Transactions. Since this setup uses the standalone binaries:
+
+1.  **Create Data Directory:**
+    ```powershell
+    mkdir C:\data\db
+    ```
+2.  **Start the Database:**
+    Navigate to your MongoDB `bin` folder and run:
+    ```powershell
+    mongod.exe --replSet "rs0" --dbpath "C:\data\db"
+    ```
+    *(Keep this terminal open while using the system)*
+
+3.  **Initialize (First time only):**
+    In a new terminal, run `mongo.exe` and execute:
+    ```javascript
+    rs.initiate()
+    ```
+
 ## How to clone
 Install git on your windows or linux machine, and then configure your account credintials of your git and PAN, you may use these commands
 ```bash

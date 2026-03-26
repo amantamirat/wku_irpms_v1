@@ -468,23 +468,23 @@
   },
   {
     "category": "Thematic Management",
-    "name": "thematic:transition.draft.active",
-    "description": "Activate a planned thematic by changing its status from planned to active"
+    "name": "thematic:transition.draft.published",
+    "description": "Publish the thematic catalog once all levels (Broad to Deep) are prepared and validated."
   },
   {
     "category": "Thematic Management",
-    "name": "thematic:transition.active.closed",
-    "description": "Close an active thematic to finalize its activities"
+    "name": "thematic:transition.published.archived",
+    "description": "Archive this thematic area to retire the catalog and prevent it from being selected for new grants."
   },
   {
     "category": "Thematic Management",
-    "name": "thematic:transition.active.draft",
-    "description": "Revert an active thematic back to planned status for adjustments"
+    "name": "thematic:transition.published.draft",
+    "description": "Revert the catalog to draft status to modify themes, levels, or parent-child relationships."
   },
   {
     "category": "Thematic Management",
-    "name": "thematic:transition.closed.active",
-    "description": "Re-open a closed thematic and set it back to active"
+    "name": "thematic:transition.archived.published",
+    "description": "Restore an archived thematic area back to published status for active use in the system."
   },
   {
     "category": "Thematic Management",

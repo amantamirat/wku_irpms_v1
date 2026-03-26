@@ -5,9 +5,10 @@ import { CreateThemeDTO, ExistsThemeDTO, GetThemeDTO, UpdateThemeDTO } from "./t
 export interface IThemeRepository {
     findById(id: string): Promise<ITheme | null>;
     find(filters: GetThemeDTO): Promise<Partial<ITheme>[]>;
-    create(dto: CreateThemeDTO): Promise<ITheme>;
+    create(dto: CreateThemeDTO, session?: mongoose.ClientSession): Promise<ITheme>;
     update(id: string, data: UpdateThemeDTO["data"]): Promise<ITheme | null>;
     exists(filters: ExistsThemeDTO): Promise<boolean>;
+    deleteMany(dto: { thematic?: string, theme?: string }): Promise<any>; // Added this
     delete(id: string): Promise<ITheme | null>;
 }
 
@@ -30,22 +31,33 @@ export class ThemeRepository implements IThemeRepository {
         if (filters.level !== undefined) {//explicitly for zero
             query.level = filters.level;
         }
-        return Theme.find(query)
-            .populate("parent")
-            .populate("thematicArea")
+        let dbQuery = Theme.find(query);
+        if (filters.populate) {
+            dbQuery
+                .populate("parent")
+                .populate("thematicArea")
+        }
+        return dbQuery
             .lean<ITheme[]>()
             .exec();
     }
 
-    async create(dto: CreateThemeDTO) {
-        const data: any = {
+    async create(dto: CreateThemeDTO, session?: mongoose.ClientSession) {
+        const data = {
             ...dto,
             thematicArea: new mongoose.Types.ObjectId(dto.thematicArea),
+            ...(dto.parent && { parent: new mongoose.Types.ObjectId(dto.parent) })
         };
-        if (dto.parent) {
-            data.parent = new mongoose.Types.ObjectId(dto.parent);
+
+        if (session) {
+            // When using a session, Mongoose expects an array
+            // It returns an array, so we take the first element [0]
+            const created = await Theme.create([data], { session });
+            return created[0];
         }
-        return Theme.create(data);
+
+        // Standard creation without session
+        return await Theme.create(data);
     }
 
     async update(id: string, dtoData: UpdateThemeDTO["data"]): Promise<ITheme | null> {
@@ -74,6 +86,17 @@ export class ThemeRepository implements IThemeRepository {
         const result = await Theme.exists(query).exec();
         return result !== null;
     }
+
+    async deleteMany(dto: { thematic: string; theme: string; }): Promise<any> {
+        return Theme.deleteMany({
+            ...(dto.thematic !== undefined &&
+                { thematicArea: new mongoose.Types.ObjectId(dto.thematic) }),
+            ...(dto.theme !== undefined &&
+                { theme: new mongoose.Types.ObjectId(dto.theme) })
+        }).exec();
+    }
+
+
 
     async delete(id: string) {
         return Theme.findByIdAndDelete(new mongoose.Types.ObjectId(id)).exec();

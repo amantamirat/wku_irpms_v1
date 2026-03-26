@@ -58,11 +58,23 @@ export class ThematicService {
             THEMATIC_TRANSITIONS
         );
 
-        if (next === ThematicStatus.draft) {
-            if (await this.grantRepo.exists({ thematic: id })) {
-                throw new AppError(ERROR_CODES.GRANT_ALREADY_EXISTS);
+        if (to === ThematicStatus.published) {
+            // 1. Get all themes for this area
+            const themes = await this.themeRepo.find({ thematicArea: id });
+
+            if (themes.length === 0) {
+                throw new AppError(ERROR_CODES.THEMATIC_EMPTY, "Cannot publish an empty thematic area.");
             }
         }
+
+        // --- REVERT TO DRAFT CHECK ---
+        if (to === ThematicStatus.draft) {
+            const isInUse = await this.grantRepo.exists({ thematic: id });
+            if (isInUse) {
+                throw new AppError(ERROR_CODES.THEMATIC_IN_USE, "Cannot revert to draft; this thematic area is already linked to a Grant.");
+            }
+        }
+
         return await this.repository.update(id, {
             status: to
         });
@@ -73,11 +85,9 @@ export class ThematicService {
         const thematicDoc = await this.repository.findById(id);
         if (!thematicDoc) throw new AppError(ERROR_CODES.THEMATIC_NOT_FOUND);
         if (thematicDoc.status !== ThematicStatus.draft) throw new AppError(ERROR_CODES.THEMATIC_NOT_DRAFT);
-
-        const themeExist = await this.themeRepo.exists({ thematicArea: id });
-        if (themeExist) {
-            throw new AppError(ERROR_CODES.THEME_ALREADY_EXISTS);
-        }
+        // 1. Delete all themes belonging to this area
+        await this.themeRepo.deleteMany({ thematic: id });
+        // 2. Delete the thematic area
         return await this.repository.delete(id);
     }
 }

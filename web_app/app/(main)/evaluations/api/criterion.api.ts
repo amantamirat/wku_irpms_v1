@@ -34,11 +34,7 @@ export const CriterionApi: EntityApi<Criterion, GetCriteriaOptions> = {
         return ApiClient.delete(`${end_point}/${criterion._id}`);
     },
 
-    // Custom method specific to Criterion impr
-    async import(criteriaData, evaluationId) {
-        if (!evaluationId) throw new Error("evaluation required");
-        return ApiClient.post(`${end_point}/import/${evaluationId}`,
-            {criteriaData:criteriaData}
-        );
-    },
+    async import(formData: FormData, evalId?: string) {
+        return ApiClient.post(`${end_point}/import/${evalId}`, formData);
+    }
 };

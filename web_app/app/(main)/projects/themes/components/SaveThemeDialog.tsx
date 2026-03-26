@@ -80,7 +80,7 @@ const SaveThemeDialog = ({
     // -------------------------------
     useEffect(() => {
         const fetchThemes = async () => {
-            const data = await ThemeApi.getThemes({
+            const data = await ThemeApi.getAll({
                 thematicArea: thematic
             });
             setThemes(data);

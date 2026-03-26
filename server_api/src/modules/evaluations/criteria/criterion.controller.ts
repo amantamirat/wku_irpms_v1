@@ -9,6 +9,7 @@ import {
     UpdateCriterionDTO
 } from "./criterion.dto";
 import { CriterionService } from "./criterion.service";
+import { ERROR_CODES } from '../../../common/errors/error.codes';
 
 export class CriterionController {
 
@@ -80,47 +81,15 @@ export class CriterionController {
         }
     }
 
-    // criterion.controller.ts
-
-    importFile = async (req: AuthenticatedRequest, res: Response) => {
+    import = async (req: Request, res: Response) => {
         try {
-            const { evaluationId } = req.body;
-            const file = req.file; // Populated by multer
-
-            if (!file) {
-                return errorResponse(res, 400, "No file uploaded");
-            }
-
-            const result = await this.service.importFromFile(file, evaluationId);
-
-            successResponse(res, 201, "File imported successfully", result);
+            const file = req.file;
+            if (!file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
+            const { id } = req.params;
+            const result = await this.service.importFromFile(file, id);
+            successResponse(res, 201, "Criteria imported", result);
         } catch (err: any) {
-            // If error occurs, check if file exists and delete it
-            if (req.file) fs.unlinkSync(req.file.path);
             errorResponse(res, 400, err.message, err);
         }
     }
-
-    import = async (req: AuthenticatedRequest, res: Response) => {
-        try {
-            const { id } = req.params;
-            const { criteriaData } = req.body;
-
-            if (!Array.isArray(criteriaData)) {
-                return errorResponse(res, 400, "criteriaData (array) are required");
-            }
-
-            // ✅ Pass as a single DTO object to match the Service signature
-            const dto: ImportCriteriaBatchDTO = {
-                evaluation: id,
-                criteriaData
-            };
-
-            const result = await this.service.import(dto);
-
-            return successResponse(res, 201, "Criteria batch imported successfully", result);
-        } catch (err: any) {
-            return errorResponse(res, 400, err.message, err);
-        }
-    };
 }

@@ -1,17 +1,17 @@
 export enum ThematicStatus {
     draft = 'draft',
-    active = 'active',
-    closed = 'closed'
+    published = 'published',
+    archived = 'archived'
 }
 
 export const THEMATIC_STATUS_ORDER: ThematicStatus[] = [
     ThematicStatus.draft,
-    ThematicStatus.active,
-    ThematicStatus.closed
+    ThematicStatus.published,
+    ThematicStatus.archived
 ];
 
 export const THEMATIC_TRANSITIONS: Record<ThematicStatus, ThematicStatus[]> = {
-    [ThematicStatus.draft]: [ThematicStatus.active],
-    [ThematicStatus.active]: [ThematicStatus.closed, ThematicStatus.draft],
-    [ThematicStatus.closed]: [ThematicStatus.active]
+    [ThematicStatus.draft]: [ThematicStatus.published],
+    [ThematicStatus.published]: [ThematicStatus.archived, ThematicStatus.draft],
+    [ThematicStatus.archived]: [ThematicStatus.published]
 };

@@ -115,13 +115,32 @@ const SaveCriterion = ({ visible, item, onComplete, onHide }: EntitySaveDialogPr
                     </div>
                     <div className="field col-3">
                         <label htmlFor="weight">Weight</label>
-                        <InputNumber id="weight" value={localCriterion.weight} onValueChange={(e) => setLocalCriterion({ ...localCriterion, weight: e.value ?? 0 })} min={0} max={100} />
+                        <InputNumber id="weight" value={localCriterion.weight}
+                            onValueChange=
+                            {(e) => setLocalCriterion({ ...localCriterion, weight: e.value ?? 0 })}
+                            min={0} max={100}
+                            disabled={localCriterion.formType === FormType.OPEN}
+                        />
                     </div>
                 </div>
 
                 <div className="field">
                     <label htmlFor="formType">Form Type</label>
-                    <Dropdown id="formType" value={localCriterion.formType} options={formTypeOptions} onChange={(e) => setLocalCriterion({ ...localCriterion, formType: e.value })} placeholder="Select Form Type" />
+                    <Dropdown
+                        id="formType"
+                        value={localCriterion.formType}
+                        options={formTypeOptions}
+                        onChange={(e) => {
+                            const selectedType = e.value;
+
+                            setLocalCriterion({
+                                ...localCriterion,
+                                formType: selectedType,
+                                weight: selectedType === FormType.OPEN ? 0 : localCriterion.weight
+                            });
+                        }}
+                        placeholder="Select Form Type"
+                    />
                 </div>
 
                 {/* Dynamic Options Section with Reordering */}

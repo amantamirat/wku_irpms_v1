@@ -10,7 +10,6 @@ import MyBadge from "@/templates/MyBadge";
 
 
 interface ThematicManagerProps {
-    // directorate?: Organization;
     populate?: boolean;
 }
 
