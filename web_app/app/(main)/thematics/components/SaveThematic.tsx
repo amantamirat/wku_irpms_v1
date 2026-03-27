@@ -75,7 +75,7 @@ const SaveThematic = ({ visible, item, onComplete, onHide }: EntitySaveDialogPro
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={hide} />
-            <Button label="Save" icon="pi pi-check" text onClick={saveThematic} />
+            <Button label="Save" icon="pi pi-check" onClick={saveThematic} />
         </>
     );
 

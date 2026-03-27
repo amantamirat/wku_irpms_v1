@@ -9,6 +9,7 @@ import { ERROR_CODES } from "../../common/errors/error.codes";
 import { ApplicantRepository, IApplicantRepository } from "../applicants/applicant.repository";
 import { IStudentRepository, StudentRepository } from "../applicants/students/student.repository";
 import { Unit } from "../../common/constants/enums";
+import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
 
 export class OrganizationService {
 
@@ -16,6 +17,7 @@ export class OrganizationService {
     constructor(private readonly repo: IOrganizationRepository,
         private appRepo: IApplicantRepository = new ApplicantRepository(),
         private studentRepo: IStudentRepository = new StudentRepository(),
+        private grantRepo: IGrantRepository = new GrantRepository(),
     ) {
     }
 
@@ -77,24 +79,34 @@ export class OrganizationService {
         if (!orgnDoc) {
             throw new Error(ERROR_CODES.ORGANIZATION_NOT_FOUND);
         }
+
         const orgType = orgnDoc.type;
+
         const childExist = await this.repo.exists({ parent: id });
         if (childExist) {
             throw new Error(ERROR_CODES.ORGANIZATION_HAS_CHILDREN);
         }
+
         if (orgType === Unit.external || orgType === Unit.department) {
-            this.appRepo.exists({ workspace: id }).then(exists => {
-                if (exists) {
-                    throw new Error(ERROR_CODES.ORGANIZATION_IN_USE);
-                }
-            });
+            const exists = await this.appRepo.exists({ workspace: id });
+            if (exists) {
+                throw new Error(ERROR_CODES.ORGANIZATION_IN_USE);
+            }
         }
+
+        
         if (orgType === Unit.program) {
-            this.studentRepo.exists({ program: id }).then(exists => {
-                if (exists) {
-                    throw new Error(ERROR_CODES.ORGANIZATION_IN_USE);
-                }
-            });
+            const exists = await this.studentRepo.exists({ program: id });
+            if (exists) {
+                throw new Error(ERROR_CODES.ORGANIZATION_IN_USE);
+            }
+        }
+
+        if (orgType === Unit.directorate || orgType === Unit.external) {
+            const exists = await this.grantRepo.exists({ organization: id });
+            if (exists) {
+                throw new Error(ERROR_CODES.ORGANIZATION_IN_USE);
+            }
         }
         return await this.repo.delete(id);
     }

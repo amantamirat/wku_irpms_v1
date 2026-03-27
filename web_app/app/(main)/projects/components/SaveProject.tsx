@@ -14,20 +14,30 @@ import { ProjectApi } from '../api/project.api';
 import { GrantApi } from '../../grants/api/grant.api';
 import { GrantStatus } from '../../grants/models/grant.state-machine';
 import { Grant } from '../../grants/models/grant.model';
+import { ApplicantApi } from '../../applicants/api/applicant.api'; // Assuming path
+import { Applicant } from '../../applicants/models/applicant.model'; // Assuming path
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
 
 const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<Project>) => {
     const toast = useRef<Toast>(null);
     const [localProject, setLocalProject] = useState<Project>({ ...item });
     const [submitted, setSubmitted] = useState(false);
+    
+    // Data states
     const [grants, setGrants] = useState<Grant[]>([]);
+    const [applicants, setApplicants] = useState<Applicant[]>([]);
+
+    // Logic for Predefined values (Checks if we are creating and already have the parent)
+    const isGrantPredefined = !!item.grant;
+    const isApplicantPredefined = !!item.applicant;
+    const isEditMode = !!item._id;
 
     // Sync local state with prop item
     useEffect(() => {
         setLocalProject({ ...item });
     }, [item]);
 
-    // Fetch active grants for the dropdown
+    // Fetch Grants if not predefined and dialog is visible
     useEffect(() => {
         const fetchGrants = async () => {
             try {
@@ -37,13 +47,27 @@ const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
                 console.error('Failed to fetch grants:', err);
             }
         };
-        if (visible) fetchGrants();
-    }, [visible]);
 
-    // Reset form when dialog closes
+        if (visible && !isGrantPredefined && !isEditMode) {
+            fetchGrants();
+        }
+    }, [visible, isGrantPredefined, isEditMode]);
+
+    // Fetch Applicants if not predefined and dialog is visible
     useEffect(() => {
-        if (!visible) clearForm();
-    }, [visible]);
+        const fetchApplicants = async () => {
+            try {
+                const data = await ApplicantApi.getAll({});
+                setApplicants(data);
+            } catch (err) {
+                console.error('Failed to fetch applicants:', err);
+            }
+        };
+
+        if (visible && !isApplicantPredefined && !isEditMode) {
+            fetchApplicants();
+        }
+    }, [visible, isApplicantPredefined, isEditMode]);
 
     const clearForm = () => {
         setSubmitted(false);
@@ -62,10 +86,11 @@ const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
                 ? await ProjectApi.update(localProject)
                 : await ProjectApi.create(localProject);
 
-            // Re-attach grant reference for the UI if necessary
+            // Re-attach references for UI consistency if they were stripped by the API
             saved = {
                 ...saved,
-                grant: localProject.grant
+                grant: localProject.grant,
+                applicant: localProject.applicant
             };
 
             toast.current?.show({
@@ -94,7 +119,7 @@ const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={hide} />
-            <Button label="Save" icon="pi pi-check" text onClick={saveProject} />
+            <Button label="Save" icon="pi pi-check" onClick={saveProject} />
         </>
     );
 
@@ -104,15 +129,15 @@ const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
             <Dialog
                 visible={visible}
                 style={{ width: '600px' }}
-                header={localProject._id ? 'Edit Project' : 'New Project'}
+                header={isEditMode ? 'Edit Project' : 'New Project'}
                 modal
                 maximizable
                 className="p-fluid"
                 footer={footer}
                 onHide={hide}
             >
-                {/* Grant Selection - usually only for new projects */}
-                {!localProject._id && (
+                {/* Grant Selection: Only show if not editing and not passed from parent */}
+                {!isEditMode && !isGrantPredefined && (
                     <div className="field">
                         <label htmlFor="grant">Grant</label>
                         <Dropdown
@@ -121,10 +146,26 @@ const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
                             options={grants}
                             value={localProject.grant}
                             onChange={(e) => setLocalProject({ ...localProject, grant: e.value })}
-                            required
                             optionLabel="title"
                             placeholder="Select a Grant"
                             className={classNames({ 'p-invalid': submitted && !localProject.grant })}
+                        />
+                    </div>
+                )}
+
+                {/* Applicant Selection: Only show if not editing and not passed from parent */}
+                {!isEditMode && !isApplicantPredefined && (
+                    <div className="field">
+                        <label htmlFor="applicant">Applicant</label>
+                        <Dropdown
+                            id="applicant"
+                            dataKey="_id"
+                            options={applicants}
+                            value={localProject.applicant}
+                            onChange={(e) => setLocalProject({ ...localProject, applicant: e.value })}
+                            optionLabel="name" // or whatever property displays the applicant name
+                            placeholder="Select an Applicant"
+                            className={classNames({ 'p-invalid': submitted && !localProject.applicant })}
                         />
                     </div>
                 )}
@@ -133,10 +174,9 @@ const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
                     <label htmlFor="title">Title</label>
                     <InputText
                         id="title"
-                        value={localProject.title}
+                        value={localProject.title || ''}
                         onChange={(e) => setLocalProject({ ...localProject, title: e.target.value })}
                         required
-                        autoFocus
                         className={classNames({ 'p-invalid': submitted && !localProject.title })}
                     />
                 </div>

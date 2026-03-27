@@ -35,7 +35,7 @@ export interface TransitionGrantDTO {
 }
 
 export interface ExistsGrantDTO {
-    oraganization?: string;
+    organization?: string;
     thematic?: string;
 }
 

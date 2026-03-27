@@ -17,7 +17,6 @@ export interface CreateProjectDTO {
     title: string;
     summary?: string;
     applicant: string;
-    status?: ProjectStatus;
 }
 
 // UPDATE Project

@@ -21,15 +21,15 @@ export class ProjectController {
     try {
       if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
-      const { grant, title, summary } = req.body;
+      const { grant, title, summary, applicant } = req.body;
 
       const dto: CreateProjectDTO = {
         grant: grant,
         title,
         summary,
-        applicant: req.user.applicantId,
+        //applicant:req.user.applicantId,
+        applicant: applicant,
       };
-
       const created = await this.service.create(dto);
       successResponse(res, 201, "Project created successfully", created);
     } catch (err: any) {

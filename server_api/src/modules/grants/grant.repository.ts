@@ -93,9 +93,9 @@ export class GrantRepository implements IGrantRepository {
 
     async exists(filters: ExistsGrantDTO): Promise<boolean> {
         const query: any = {};
-        const { oraganization, thematic } = filters;
-        if (oraganization) {
-            query.oraganization = new mongoose.Types.ObjectId(oraganization);
+        const { organization, thematic } = filters;
+        if (organization) {
+            query.organization = new mongoose.Types.ObjectId(organization);
         }
         if (thematic) {
             query.thematic = new mongoose.Types.ObjectId(thematic);

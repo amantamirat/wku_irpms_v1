@@ -6,11 +6,11 @@ export interface IProject extends Document {
     _id: mongoose.Types.ObjectId;
     grant: mongoose.Types.ObjectId;
     title: string;
-    applicant: mongoose.Types.ObjectId;//user
-    summary?: string;    
+    summary?: string;
     totalBudget?: number;
     totalDuration?: number;
     totalCollabs?: number;
+    applicant: mongoose.Types.ObjectId;//user
     status: ProjectStatus;
     createdAt?: Date;
     updatedAt?: Date;

@@ -79,12 +79,14 @@ export class ProjectRepository implements IProjectRepository {
         const result = await dbQuery
             .lean<IProject[]>()
             .exec();
+        return result;
 
-        // Remove unmatched populated docs
-        return result.filter(p =>
-            (!filters.directorate || p.grant) &&
-            (!filters.workspace || p.applicant)
-        );
+        /*
+    // Remove unmatched populated docs
+    return result.filter(p =>
+        (!filters.directorate || p.grant) &&
+        (!filters.workspace || p.applicant)
+    );*/
     }
 
     async create(dto: CreateProjectDTO) {

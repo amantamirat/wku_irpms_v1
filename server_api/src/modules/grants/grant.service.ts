@@ -124,6 +124,7 @@ export class GrantService {
             throw new AppError(ERROR_CODES.CONSTRAINT_ALREADY_EXISTS);
         if (await this.compositionRepo.exists({ grant: id }))
             throw new AppError(ERROR_CODES.COMPOSITION_ALREADY_EXISTS);
+        
         if (await this.grantStageRepo.exists({ grant: id })) {
             throw new AppError(ERROR_CODES.STAGE_ALREADY_EXISTS);
         }

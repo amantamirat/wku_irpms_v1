@@ -21,6 +21,11 @@ const GrantDetail = ({ grant }: GrantDetailProps) => {
      */
     const tabs = useMemo(() => [
         {
+            header: "Stages",
+            permission: "grant.stage:read",
+            content: <StageManager grant={grant} />
+        },
+        {
             header: "Constraints",
             permission: PERMISSIONS.CONSTRAINT.READ,
             content: <ConstraintManager grant={grant} />
@@ -30,11 +35,7 @@ const GrantDetail = ({ grant }: GrantDetailProps) => {
             permission: PERMISSIONS.CONSTRAINT.READ,
             content: <CompositionManager grant={grant} />
         },
-        {
-            header: "Stages",
-            permission: "grant.stage:read",
-            content: <StageManager grant={grant} />
-        },
+
         {
             header: "Calls",
             permission: PERMISSIONS.CALL.READ,

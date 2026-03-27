@@ -1,15 +1,28 @@
 import mongoose, { Schema, model } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
 
-
 export interface IGrantStage extends Document {
     _id: string;
     grant: mongoose.Types.ObjectId;
     name: string;
     order: number;
     evaluation: mongoose.Types.ObjectId;
+    //change to array of evaluations to support parallel evaluations
+    /**
+     * Stage (Concept Note)
+   ├── Technical Evaluation
+   ├── Financial Evaluation
+   └── Ethics Evaluation
+     */
     minReviewers: number;
     maxReviewers: number;
+    /**
+     * evaluationStrategy: {
+    type: String,
+    enum: ['single', 'average', 'weighted', 'all_must_pass'],
+    default: 'single'
+}
+     */
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -40,13 +53,15 @@ const GrantStageSchema = new Schema<IGrantStage>({
         type: Number,
         required: true,
         min: 0,
-        default: 1,
+        max: 10,
+        default: 1
     },
     maxReviewers: {
         type: Number,
         required: true,
         min: 0,
-        default: 3,
+        max: 10,
+        default: 3
     },
 
 }, { timestamps: true });

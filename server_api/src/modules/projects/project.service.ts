@@ -38,7 +38,7 @@ export class ProjectService {
         const { grant, applicant } = dto
 
         const grantDoc = await this.grantRepo.findById(grant);
-        if (!grantDoc) throw new Error(ERROR_CODES.CALL_NOT_FOUND);
+        if (!grantDoc) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
         if (grantDoc.status !== GrantStatus.active) throw new Error(ERROR_CODES.GRANT_NOT_ACTIVE);
 
         const appDoc = await this.appRepository.findById(applicant);
@@ -62,11 +62,12 @@ export class ProjectService {
         const projectDoc = await this.repository.findById(id);
         if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
 
+        /*
         if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
-            throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
+            throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);*/
 
         if (projectDoc.status !== ProjectStatus.draft)
-            throw new Error(ERROR_CODES.PROJECT_NOT_PENDING);
+            throw new Error(ERROR_CODES.PROJECT_NOT_DRAFT);
 
         return this.repository.update(dto.id, dto.data);
     }
@@ -142,7 +143,7 @@ export class ProjectService {
             throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
 
         if (projectDoc.status !== ProjectStatus.draft)
-            throw new Error(ERROR_CODES.PROJECT_NOT_PENDING);
+            throw new Error(ERROR_CODES.PROJECT_NOT_DRAFT);
 
         return this.repository.delete(dto.id);
     }

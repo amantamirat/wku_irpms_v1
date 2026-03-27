@@ -1,6 +1,5 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
-import { Directorate } from "../organization/organization.model";
 
 export enum FundingSource {
     INTERNAL = "internal",
@@ -34,13 +33,14 @@ const GrantSchema = new Schema<IGrant>({
     },
     organization: {
         type: Schema.Types.ObjectId,
-        ref: Directorate.modelName,
+        ref: COLLECTIONS.ORGANIZATION,
         required: true,
         immutable: true
     },
     title: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     amount:
     {

@@ -16,7 +16,7 @@ export type GrantStage = {
 export interface GetStagesDTO {
     grant?: string | Grant;
     evaluation?: string | Evaluation;
-    populate?:boolean;
+    populate?: boolean;
 }
 
 /**
@@ -60,5 +60,7 @@ export const createEmptyGrantStage = (stage?: Partial<GrantStage>): GrantStage =
     grant: stage?.grant ?? "",
     name: "",
     evaluation: stage?.evaluation ?? "",
-    order: 1
+    order: 1,
+    minReviewers: 1,
+    maxReviewers: 3
 });

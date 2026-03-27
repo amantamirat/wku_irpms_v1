@@ -108,7 +108,7 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={hide} />
-            <Button label="Save" icon="pi pi-check" text onClick={saveStage} />
+            <Button label="Save" icon="pi pi-check" onClick={saveStage} />
         </>
     );
 
