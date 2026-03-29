@@ -16,6 +16,7 @@ import { ThematicStatus } from "../thematics/thematic.state-machine";
 import { GrantStageRepository, IGrantStageRepository } from "./stages/grant.stage.repository";
 import { IExternal } from "../organization/organization.model";
 import { Ownership } from "../organization/organization.enum";
+import { IProjectRepository, ProjectRepository } from "../projects/project.repository";
 
 export class GrantService {
 
@@ -25,8 +26,9 @@ export class GrantService {
         private readonly thematicRepository: IThematicRepository = new ThematicRepository(),
         private readonly constraintRepo: IConstraintRepository = new ConstraintRepository(),
         private readonly compositionRepo: ICompositionRepository = new CompositionRepository(),
-        private readonly callRepo: ICallRepository = new CallRepository(),
         private readonly grantStageRepo: IGrantStageRepository = new GrantStageRepository(),
+        private readonly callRepo: ICallRepository = new CallRepository(),
+        private readonly projectRepo: IProjectRepository = new ProjectRepository(),
     ) { }
 
     async create(dto: CreateGrantDTO) {
@@ -100,6 +102,9 @@ export class GrantService {
             if (await this.callRepo.exists({ grant: id })) {
                 throw new AppError(ERROR_CODES.CALL_ALREADY_EXISTS);
             }
+            if (await this.projectRepo.exists({ grant: id })) {
+                throw new AppError(ERROR_CODES.PROJECT_ALREADY_EXISTS);
+            }
         }
         if (next === GrantStatus.active) {
             if (!await this.grantStageRepo.exists({ grant: id })) {
@@ -124,7 +129,7 @@ export class GrantService {
             throw new AppError(ERROR_CODES.CONSTRAINT_ALREADY_EXISTS);
         if (await this.compositionRepo.exists({ grant: id }))
             throw new AppError(ERROR_CODES.COMPOSITION_ALREADY_EXISTS);
-        
+
         if (await this.grantStageRepo.exists({ grant: id })) {
             throw new AppError(ERROR_CODES.STAGE_ALREADY_EXISTS);
         }

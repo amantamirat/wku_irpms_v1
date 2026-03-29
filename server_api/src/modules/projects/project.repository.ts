@@ -93,7 +93,8 @@ export class ProjectRepository implements IProjectRepository {
         return Project.create({
             ...dto,
             grant: new mongoose.Types.ObjectId(dto.grant),
-            applicant: new mongoose.Types.ObjectId(dto.applicant)
+            applicant: new mongoose.Types.ObjectId(dto.applicant),
+            themes: dto.themes.map(thm => new mongoose.Types.ObjectId(thm)),
         });
     }
 
@@ -104,6 +105,9 @@ export class ProjectRepository implements IProjectRepository {
         if (dtoData.summary) updateData.summary = dtoData.summary;
         if (dtoData.totalBudget) updateData.totalBudget = dtoData.totalBudget;
         if (dtoData.totalDuration) updateData.totalDuration = dtoData.totalDuration;
+        if (dtoData.themes) {
+            updateData.themes = dtoData.themes.map(id => new mongoose.Types.ObjectId(id))
+        }
         if (dtoData.status) updateData.status = dtoData.status;
 
         return Project.findByIdAndUpdate(
@@ -115,12 +119,12 @@ export class ProjectRepository implements IProjectRepository {
 
     async exists(filters: ExistsProjectDTO): Promise<boolean> {
         const query: any = {};
-        const { applicant, grant: call } = filters;
+        const { applicant, grant } = filters;
         if (applicant) {
             query.applicant = new mongoose.Types.ObjectId(applicant);
         }
-        if (call) {
-            query.call = new mongoose.Types.ObjectId(call);
+        if (grant) {
+            query.grant = new mongoose.Types.ObjectId(grant);
         }
         const result = await Project.exists(query).exec();
         return result !== null;

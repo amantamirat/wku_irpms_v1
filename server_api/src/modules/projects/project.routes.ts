@@ -16,7 +16,7 @@ router.get('/', verifyActiveAccount,
     controller.get);
 
 //update    
-router.put('/', verifyActiveAccount,
+router.put('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.PROJECT.UPDATE]),
     controller.update);
 

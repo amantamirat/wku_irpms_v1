@@ -145,7 +145,7 @@ export class DocumentService {
 
         await this.validator.validateProjectConstraints(String(callDoc.grant), dto);
 
-        const projectDoc = await this.projectRepository.create({ grant: call, title, applicant, summary });
+        const projectDoc = await this.projectRepository.create({ grant: call, title, applicant, summary, themes:[] });
         const projectId = String(projectDoc._id);
         await this.collabRepository.createMany(
             collaborators.map(col => ({

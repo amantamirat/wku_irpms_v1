@@ -1,6 +1,7 @@
 import { Applicant } from "../../applicants/models/applicant.model";
 import { Grant } from "../../grants/models/grant.model";
 import { Organization } from "../../organizations/models/organization.model";
+import { sanitizeTheme, Theme } from "../../thematics/themes/models/theme.model";
 import { Collaborator, sanitizeCollaborator } from "../collaborators/models/collaborator.model";
 import { Phase, sanitizePhase } from "../phases/models/phase.model";
 import { ProjectTheme, sanitizeProjectTheme } from "../themes/models/project.theme.model";
@@ -25,10 +26,11 @@ export type Project = {
     applicant?: string | Applicant;
     totalBudget?: number;
     totalDuration?: number;
+    themes?: Theme[] | string[];
     createdAt?: Date;
     updatedAt?: Date;
     collaborators?: Collaborator[];// | string[];
-    themes?: ProjectTheme[];// | string[];
+
     phases?: Phase[];
     file?: File;
     workspace?: string | Organization;
@@ -84,8 +86,15 @@ export const sanitize = (project: Partial<Project>): Partial<Project> => {
             typeof project.workspace === 'object' && project.workspace !== null
                 ? (project.workspace as any)._id
                 : project.workspace,
+        // --- Fix for Themes Array ---
+        themes: project.themes?.map(t => {
+            // If the theme is an object, take the _id, otherwise return the string/id as is
+            if (typeof t === 'object' && t !== null) {
+                return (t as any)._id;
+            }
+            return t;
+        }).filter(t => !!t),
         collaborators: project.collaborators?.map(c => sanitizeCollaborator(c)),
-        themes: project.themes?.map(t => sanitizeProjectTheme(t)),
         phases: project.phases?.map(p => sanitizePhase(p)),
     };
 }

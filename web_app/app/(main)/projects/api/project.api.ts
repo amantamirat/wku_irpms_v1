@@ -49,7 +49,6 @@ export const ProjectApi: EntityApi<Project, GetProjectsOptions | undefined> = {
 
     async delete(project: Partial<Project>): Promise<boolean> {
         if (!project._id) throw new Error("_id required");
-
         const url = `${end_point}/${project._id}`;
         return await ApiClient.delete(url);
     },

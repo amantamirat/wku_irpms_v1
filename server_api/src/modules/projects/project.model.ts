@@ -11,6 +11,7 @@ export interface IProject extends Document {
     totalDuration?: number;
     totalCollabs?: number;
     applicant: mongoose.Types.ObjectId;//user
+    themes: mongoose.Types.ObjectId[];
     status: ProjectStatus;
     createdAt?: Date;
     updatedAt?: Date;
@@ -30,11 +31,6 @@ const ProjectSchema = new Schema<IProject>({
     summary: {
         type: String,
     },
-    applicant: {
-        type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.APPLICANT,
-        required: true
-    },
     totalBudget: {
         type: Number,
         min: 0
@@ -47,7 +43,16 @@ const ProjectSchema = new Schema<IProject>({
         type: Number,
         min: 0
     },
-
+    applicant: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.APPLICANT,
+        required: true
+    },
+    themes: [{
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.THEME,
+        required: true
+    }],
     status: {
         type: String,
         enum: Object.values(ProjectStatus),

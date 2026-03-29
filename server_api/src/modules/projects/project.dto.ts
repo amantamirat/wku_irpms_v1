@@ -17,6 +17,7 @@ export interface CreateProjectDTO {
     title: string;
     summary?: string;
     applicant: string;
+    themes: string[];
 }
 
 // UPDATE Project
@@ -24,21 +25,15 @@ export interface UpdateProjectDTO {
     id: string;
     data: Partial<{
         title: string;
-        summary: string;
-        //applicant: string;
+        summary: string;        
         totalBudget: number;
         totalDuration: number;
         totalCollabs: number;
+        //applicant: string;
+        themes: string[];
         status: ProjectStatus;
     }>;
     applicantId: string;
-}
-
-export interface UpdateStatusDTO {
-    data: {
-        id: string;
-        status: ProjectStatus;
-    };
 }
 
 export interface ExistsProjectDTO {

@@ -3,35 +3,29 @@ import {
     CreateProjectDTO,
     GetProjectsDTO,
     UpdateProjectDTO,
-    UpdateStatusDTO
 } from "./project.dto";
 import { IProjectRepository, ProjectRepository } from "./project.repository";
 
-import { SYSTEM } from "../../common/constants/system.constant";
+import { DeleteDto } from "../../common/dtos/delete.dto";
+import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
-import { DeleteDto } from "../../common/dtos/delete.dto";
-import { ApplicantRepository, IApplicantRepository } from "../applicants/applicant.repository";
-import { CallRepository, ICallRepository } from "../calls/call.repository";
-import { CollaboratorRepository, ICollaboratorRepository } from "./collaborators/collaborator.repository";
-import { CollaboratorStatus } from "./collaborators/collaborator.status";
-import { IPhaseRepository, PhaseRepository } from "./phase/phase.repository";
-import { PhaseStatus } from "./phase/phase.status";
-import { PROJECT_TRANSITIONS, ProjectStatus } from "./project.state-machine";
-import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
-import { GrantStatus } from "../grants/grant.model";
-import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
+import { ApplicantRepository, IApplicantRepository } from "../applicants/applicant.repository";
+import { GrantStatus } from "../grants/grant.model";
+import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
+import { CollaboratorRepository, ICollaboratorRepository } from "./collaborators/collaborator.repository";
+import { PROJECT_TRANSITIONS, ProjectStatus } from "./project.state-machine";
 
 export class ProjectService {
 
     constructor(
         private repository: IProjectRepository = new ProjectRepository(),
         private grantRepo: IGrantRepository = new GrantRepository(),
-        private callRepository: ICallRepository = new CallRepository(),
-        private appRepository: IApplicantRepository = new ApplicantRepository(),
-        private collabRepository: ICollaboratorRepository = new CollaboratorRepository(),
-        private phaseRepository: IPhaseRepository = new PhaseRepository(),
+        //private callRepository: ICallRepository = new CallRepository(),
+        private appRepo: IApplicantRepository = new ApplicantRepository(),
+        private collabRepo: ICollaboratorRepository = new CollaboratorRepository(),
+        //private phaseRepository: IPhaseRepository = new PhaseRepository(),
     ) { }
 
     async create(dto: CreateProjectDTO) {
@@ -41,7 +35,7 @@ export class ProjectService {
         if (!grantDoc) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
         if (grantDoc.status !== GrantStatus.active) throw new Error(ERROR_CODES.GRANT_NOT_ACTIVE);
 
-        const appDoc = await this.appRepository.findById(applicant);
+        const appDoc = await this.appRepo.findById(applicant);
         if (!appDoc) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
 
         const created = await this.repository.create(dto);
@@ -57,11 +51,9 @@ export class ProjectService {
     // UPDATE
     // ---------------------------------------------------
     async update(dto: UpdateProjectDTO) {
-        const { id, data, applicantId } = dto;
-
+        const { id, data } = dto;
         const projectDoc = await this.repository.findById(id);
         if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
-
         /*
         if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
             throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);*/
@@ -69,7 +61,7 @@ export class ProjectService {
         if (projectDoc.status !== ProjectStatus.draft)
             throw new Error(ERROR_CODES.PROJECT_NOT_DRAFT);
 
-        return this.repository.update(dto.id, dto.data);
+        return this.repository.update(id, data);
     }
 
 
@@ -135,16 +127,18 @@ export class ProjectService {
     // DELETE
     // ---------------------------------------------------
     async delete(dto: DeleteDto) {
-        const { id, applicantId } = dto;
+        const { id } = dto;
         const projectDoc = await this.repository.findById(id);
         if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
-
-        if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
-            throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
-
         if (projectDoc.status !== ProjectStatus.draft)
             throw new Error(ERROR_CODES.PROJECT_NOT_DRAFT);
 
+        await this.collabRepo.deleteByProject(id);
+
+        /*
+        if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
+            throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
+*/
         return this.repository.delete(dto.id);
     }
 }

@@ -82,6 +82,17 @@ const ProjectManager = ({ grant, applicant, workspace }: ProjectManagerProps) =>
                 )
             },
             {
+                header: "Applicant",
+                field: "applicant.name",
+                sortable: true,
+
+                body: (p: Project) => (
+<>
+                    { typeof p.applicant === "object" ? p.applicant?.name : p.applicant }
+</>
+                )
+            },
+            {
                 field: "status",
                 header: "Status",
                 sortable: true,

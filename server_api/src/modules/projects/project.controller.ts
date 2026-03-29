@@ -2,7 +2,7 @@ import { Response } from "express";
 import { errorResponse, successResponse } from "../../common/helpers/response";
 import { AuthenticatedRequest } from "../users/auth/auth.middleware";
 import { ProjectService } from "./project.service";
-import { CreateProjectDTO, UpdateProjectDTO, UpdateStatusDTO } from "./project.dto";
+import { CreateProjectDTO, UpdateProjectDTO} from "./project.dto";
 import { DeleteDto } from "../../common/dtos/delete.dto";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
@@ -21,7 +21,7 @@ export class ProjectController {
     try {
       if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
-      const { grant, title, summary, applicant } = req.body;
+      const { grant, title, summary, applicant, themes } = req.body;
 
       const dto: CreateProjectDTO = {
         grant: grant,
@@ -29,6 +29,7 @@ export class ProjectController {
         summary,
         //applicant:req.user.applicantId,
         applicant: applicant,
+        themes: themes
       };
       const created = await this.service.create(dto);
       successResponse(res, 201, "Project created successfully", created);
@@ -64,12 +65,12 @@ export class ProjectController {
     try {
       if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
-      const { id } = req.query;
-      const { title, summary } = req.body;
+      const { id } = req.params;
+      const { title, summary, themes } = req.body;
 
       const dto: UpdateProjectDTO = {
         id: id as string,
-        data: { title, summary },
+        data: { title, summary, themes },
         applicantId: req.user.applicantId,
       };
 

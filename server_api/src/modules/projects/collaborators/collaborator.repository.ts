@@ -17,6 +17,7 @@ export interface ICollaboratorRepository {
     update(id: string, data: UpdateCollaboratorDto["data"]): Promise<ICollaborator | null>;
     exists(filters: ExistsCollabDTO): Promise<boolean>;
     delete(id: string): Promise<ICollaborator | null>;
+    deleteByProject(projectId: string): Promise<any>;
 }
 
 // MongoDB implementation
@@ -99,6 +100,12 @@ export class CollaboratorRepository implements ICollaboratorRepository {
     }
 
     async delete(id: string) {
-        return await Collaborator.findByIdAndDelete(new mongoose.Types.ObjectId(id)).exec();
+        return Collaborator.findByIdAndDelete(new mongoose.Types.ObjectId(id)).exec();
+    }
+    async deleteByProject(projectId: string) {
+        if (!mongoose.Types.ObjectId.isValid(projectId)) throw new Error("Invalid Project ID");
+        return Collaborator.deleteMany({
+            project: new mongoose.Types.ObjectId(projectId)
+        }).exec();
     }
 }
