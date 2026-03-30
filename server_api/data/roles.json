@@ -87,7 +87,6 @@
             "project:read",
             "applicant:read",
             "collaborator:*",
-            "collaborator:status.*",
             "thematic:read",
             "theme:read",
             "project_theme:*",

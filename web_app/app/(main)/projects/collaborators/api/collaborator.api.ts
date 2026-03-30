@@ -1,10 +1,10 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { 
-    Collaborator, 
-    CollaboratorStatus, 
-    GetCollaboratorsOptions, 
-    sanitizeCollaborator 
+import {
+    Collaborator,
+    CollaboratorStatus,
+    GetCollaboratorsOptions,
+    sanitizeCollaborator
 } from "../models/collaborator.model";
 import { TransitionRequestDto } from "@/types/util";
 
@@ -20,10 +20,12 @@ export const CollaboratorApi: EntityApi<Collaborator, GetCollaboratorsOptions | 
             if (sanitized.project) query.append("project", sanitized.project as string);
             if (sanitized.applicant) query.append("applicant", sanitized.applicant as string);
             if (sanitized.status) query.append("status", sanitized.status);
+            if (options.populate !== undefined) {
+                query.append("populate", String(options.populate));
+            }
         }
-
-        const url = query.toString() 
-            ? `${end_point}?${query.toString()}` 
+        const url = query.toString()
+            ? `${end_point}?${query.toString()}`
             : end_point;
 
         const data = await ApiClient.get(url);
@@ -45,7 +47,7 @@ export const CollaboratorApi: EntityApi<Collaborator, GetCollaboratorsOptions | 
     async update(collaborator: Partial<Collaborator>): Promise<Collaborator> {
         if (!collaborator._id) throw new Error("_id required");
         const sanitized = sanitizeCollaborator(collaborator);
-        
+
         // Using URL parameter pattern: PUT /project/collaborators/:id
         const url = `${end_point}/${collaborator._id}`;
         const updated = await ApiClient.put(url, sanitized);

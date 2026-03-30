@@ -125,7 +125,7 @@ const SaveSetting = (props: EntitySaveDialogProps<Setting>) => {
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
-            <Button label="Update" icon="pi pi-check" text onClick={saveSetting} />
+            <Button label="Update" icon="pi pi-check" onClick={saveSetting} />
         </>
     );
 

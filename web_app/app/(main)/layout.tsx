@@ -15,7 +15,7 @@ export const metadata: Metadata = {
         title: 'WKU-IRPMS',
         url: 'https://www.wku.edu.et/',
         description: 'Wolkite University Institutional Research and Project Managment System',
-        images: ['https://www.primefaces.org/static/social/sakai-react.png'],
+        images: ['/images/wku-irpms-banner.png'],
         ttl: 604800
     },
     icons: {

@@ -26,7 +26,7 @@ const CollaboratorPage = () => {
 
             <Divider align="left">
                 <span className="text-sm font-semibold text-primary">
-                    Active Collaborations
+                    My Collaborations
                 </span>
             </Divider>
             {applicant && <CollaboratorManager applicant={applicant} />}

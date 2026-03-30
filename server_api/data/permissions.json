@@ -755,11 +755,13 @@
   },
   {
     "category": "Collaborator Management",
-    "name": "collaborator:status.verified"
+    "name": "collaborator:transition.pending.verified",
+    "description": "Move collaborator status from pending to verified"
   },
   {
     "category": "Collaborator Management",
-    "name": "collaborator:status.pending"
+    "name": "collaborator:transition.verified.pending",
+    "description": "Revert collaborator status from verified to pending"
   },
   {
     "category": "Collaborator Management",

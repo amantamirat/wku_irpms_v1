@@ -6,6 +6,9 @@ import React, { forwardRef, useContext, useImperativeHandle, useRef, useState } 
 import { AppTopbarRef } from '@/types';
 import { LayoutContext } from './context/layoutcontext';
 import AppUserProfileSidebar from './AppUserprofile';
+import AppNotificationSidebar from './AppNotificationSidebar';
+import { useNotifications } from '@/hooks/useNotifications';
+import { Badge } from 'primereact/badge';
 
 const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     const { layoutConfig, layoutState, onMenuToggle, showProfileSidebar } = useContext(LayoutContext);
@@ -13,6 +16,9 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     const topbarmenuRef = useRef(null);
     const topbarmenubuttonRef = useRef(null);
     const [showUserProfileSidebar, setShowUserProfileSidebar] = useState(false);
+    const [showNotificationSidebar, setShowNotificationSidebar] = useState(false);
+
+    const { unreadCount, notifications, markAsRead, markAllRead } = useNotifications();
 
     useImperativeHandle(ref, () => ({
         menubutton: menubuttonRef.current,
@@ -38,8 +44,38 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
             </button>
 
             <div ref={topbarmenuRef} className={classNames('layout-topbar-menu', { 'layout-topbar-menu-mobile-active': layoutState.profileSidebarVisible })}>
-                <button type="button" className="p-link layout-topbar-button">
-                    <i className="pi pi-bell"></i>
+                <button
+                    type="button"
+                    className="p-link layout-topbar-button"
+                    onClick={() => setShowNotificationSidebar(true)}
+                    style={{ position: 'relative', overflow: 'visible' }}
+                >
+                    <i className="pi pi-bell" style={{ fontSize: '1.5rem' }}></i>
+
+                    {unreadCount > 0 && (
+                        <span
+                            className="p-badge p-badge-danger"
+                            style={{
+                                position: 'absolute',
+                                top: '0',
+                                right: '0',
+                                transform: 'translate(25%, -25%)', // Perfectly centers it on the corner
+                                minWidth: '1.25rem',
+                                height: '1.25rem',
+                                lineHeight: '1.25rem',
+                                borderRadius: '50%',
+                                fontSize: '0.7rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                zIndex: 10,
+                                color: '#ffffff',
+                                backgroundColor: '#ef4444' // Standard red
+                            }}
+                        >
+                            {unreadCount}
+                        </span>
+                    )}
                     <span>Notification</span>
                 </button>
                 <button type="button" className="p-link layout-topbar-button" onClick={() => setShowUserProfileSidebar(true)}>
@@ -56,10 +92,24 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
                 </Link>
                      */
                 }
-                <AppUserProfileSidebar
-                    visible={showUserProfileSidebar}
-                    setVisible={setShowUserProfileSidebar}
-                />
+                {/* Notification Sidebar Overlay */}
+                {showNotificationSidebar && (
+                    <AppNotificationSidebar
+                        visible={showNotificationSidebar}
+                        setVisible={setShowNotificationSidebar}
+                        notifications={notifications}
+                        onMarkAsRead={markAsRead}
+                        onMarkAllRead={markAllRead}
+                    />
+                )}
+
+                {/* Profile Sidebar Overlay */}
+                {showUserProfileSidebar && (
+                    <AppUserProfileSidebar
+                        visible={showUserProfileSidebar}
+                        setVisible={setShowUserProfileSidebar}
+                    />
+                )}
             </div>
         </div>
     );

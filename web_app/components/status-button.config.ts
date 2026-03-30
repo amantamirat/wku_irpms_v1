@@ -20,7 +20,7 @@ export const STATUS_BUTTON_CONFIG: Record<string, StatusButtonConfig> = {
     },
     archived: {
         icon: "pi pi-box", // Box icon represents 'storage/retired'
-        severity: "secondary", 
+        severity: "secondary",
         action: "Archive Catalog"
     },
 
@@ -70,5 +70,16 @@ export const STATUS_BUTTON_CONFIG: Record<string, StatusButtonConfig> = {
         icon: "pi pi-lock",
         severity: "danger",
         action: "Close"
+    },
+    //verification of collaborators
+    pending: {
+        icon: "pi pi-clock", // Represents waiting / in-progress state
+        severity: "warning",
+        action: "Mark as Pending"
+    },
+    verified: {
+        icon: "pi pi-check-circle", // Represents approval / verification
+        severity: "success",
+        action: "Verify Collaborator"
     },
 };

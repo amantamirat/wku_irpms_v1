@@ -40,16 +40,16 @@ export class CollaboratorRepository implements ICollaboratorRepository {
             query.applicant = new mongoose.Types.ObjectId(filters.applicant);
         }
 
-        let mongooseQuery = Collaborator.find(query);
+        let dbQuery = Collaborator.find(query);
 
         if (filters.populate) {
-            mongooseQuery = mongooseQuery.populate([
+            dbQuery = dbQuery.populate([
                 { path: 'applicant', populate: { path: 'workspace' } },
                 { path: 'project' }
             ]);
         }
 
-        return mongooseQuery
+        return dbQuery
             .lean<ICollaborator[]>()
             .exec();
     }
@@ -60,7 +60,8 @@ export class CollaboratorRepository implements ICollaboratorRepository {
             project: new mongoose.Types.ObjectId(dto.project),
             applicant: new mongoose.Types.ObjectId(dto.applicant),
             isLeadPI: dto.isLeadPI,
-            status: CollaboratorStatus.pending
+            status: dto.status
+            //  status: CollaboratorStatus.pending
         };
 
         return Collaborator.create(data);

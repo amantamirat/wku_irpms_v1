@@ -3,7 +3,7 @@ import { Project } from "../../models/project.model";
 
 export enum CollaboratorStatus {
     pending = 'pending',
-    verify = 'verified'
+    verified = 'verified'
 }
 
 export type Collaborator = {
@@ -19,6 +19,7 @@ export type Collaborator = {
 export interface GetCollaboratorsOptions {
     project?: string | Project;
     applicant?: string | Applicant;
+    populate?: boolean;
 }
 
 export const sanitizeCollaborator = (collaborator: Partial<Collaborator>): Collaborator => {

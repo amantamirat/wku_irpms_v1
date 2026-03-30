@@ -1,22 +1,18 @@
 import { Response } from 'express';
 import { DeleteDto } from '../../../common/dtos/delete.dto';
+import { TransitionRequestDto } from '../../../common/dtos/transition.dto';
+import { ERROR_CODES } from '../../../common/errors/error.codes';
 import { errorResponse, successResponse } from '../../../common/helpers/response';
 import { AuthenticatedRequest } from '../../users/auth/auth.middleware';
 import {
-    CreateCollaboratorDto,
-    GetCollaboratorsOptions,
-    UpdateCollaboratorDto,
-    UpdateCollabStatusDTO,
+    CreateCollaboratorDto
 } from './collaborator.dto';
 import { CollaboratorService } from './collaborator.service';
-import { CollaboratorStatus } from './collaborator.status';
-import { ERROR_CODES } from '../../../common/errors/error.codes';
 
 export class CollaboratorController {
-    private service: CollaboratorService;
+    
 
-    constructor(service: CollaboratorService) {
-        this.service = service;
+    constructor(private readonly service: CollaboratorService) {
     }
     // -----------------------
     // Create
@@ -30,7 +26,7 @@ export class CollaboratorController {
             const dto: CreateCollaboratorDto = {
                 applicant: applicant as string,
                 project: project as string,
-                isLeadPI: isLeadPI ? true : undefined,
+                //isLeadPI: isLeadPI ? true : undefined,
                 applicantId: req.user.applicantId,
             };
 
@@ -46,44 +42,20 @@ export class CollaboratorController {
     // -----------------------
     get = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const { project, applicant } = req.query;
+            const { project, applicant, populate } = req.query;
 
-            const filter: GetCollaboratorsOptions = {
+            const collaborators = await this.service.get({
                 project: project ? (project as string) : undefined,
                 applicant: applicant ? (applicant as string) : undefined,
-            };
-
-            const collaborators = await this.service.get(filter);
+                ...(populate !== undefined && { populate: populate === "true" })
+            });
             successResponse(res, 200, 'Collaborators fetched successfully', collaborators);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     };
 
-    // -----------------------
-    // Change Status
-    // -----------------------
-    updateStatus = async (req: AuthenticatedRequest, res: Response) => {
-        try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
-            const { id } = req.params;
-            const { status } = req.body;
-            
-            const dto: UpdateCollabStatusDTO = {
-                id: String(id),
-                status: status as CollaboratorStatus,
-                applicantId: req.user.applicantId,
-            };
 
-            const updated = await this.service.updateStatus(dto);
-            successResponse(res, 200,
-                `Collaborator status changed to ${status}`,
-                updated
-            );
-        } catch (err: any) {
-            errorResponse(res, 400, err.message, err);
-        }
-    };
 
     /**
      * update = async (req: AuthenticatedRequest, res: Response) => {
@@ -111,13 +83,31 @@ export class CollaboratorController {
      * 
      */
 
+    transitionState = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            const { id } = req.params;
+            const { current, next } = req.body;
+            const dto: TransitionRequestDto = {
+                id: String(id),
+                current: current,
+                next: next,
+                applicantId: req.user.applicantId,
+            };
+            const updated = await this.service.transitionState(dto);
+            successResponse(res, 200, "Collaborator status updated successfully", updated);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
 
     // -----------------------
     // Delete
     // -----------------------
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error('User not found!');
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const { id } = req.params;
 

@@ -1,33 +1,38 @@
 // collaborator.service.ts
 import { SYSTEM } from "../../../common/constants/system.constant";
+import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { IApplicantRepository } from "../../applicants/applicant.repository";
 import { IProjectRepository } from "../project.repository";
 import {
     CreateCollaboratorDto,
-    GetCollaboratorsOptions,
-    UpdateCollabStatusDTO,
+    GetCollaboratorsOptions
 } from "./collaborator.dto";
 import { ICollaboratorRepository } from "./collaborator.repository";
-import { CollaboratorStateMachine } from "./collaborator.state-machine";
-import { CollaboratorStatus } from "./collaborator.status";
+
+import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
+import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { ProjectStatus } from "../project.state-machine";
+import { COLLAB_TRANSITIONS } from "./collaborator.state-machine";
+import { CollaboratorStatus } from "./collaborator.status";
+import { NotificationService } from "../../users/notifications/notification.service";
 
 
 export class CollaboratorService {
 
     constructor(
         private readonly repository: ICollaboratorRepository,
-        private readonly projectRepository: IProjectRepository,
-        private readonly appRepository: IApplicantRepository) {
+        private readonly projectRepo: IProjectRepository,
+        private readonly applicantRepo: IApplicantRepository,
+        private readonly notificationService: NotificationService,
+    ) {
     }
 
     async create(dto: CreateCollaboratorDto) {
         const { applicant, project, applicantId } = dto;
 
-        const projectDoc = await this.projectRepository.findById(project);
+        const projectDoc = await this.projectRepo.findById(project);
         if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
 
         if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
@@ -38,11 +43,28 @@ export class CollaboratorService {
             throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
         }
 
-        const appDoc = await this.appRepository.findById(applicant);
+        const appDoc = await this.applicantRepo.findById(applicant);
         if (!appDoc) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
 
+        if (String(appDoc._id) === String(projectDoc.applicant)) {
+            dto.isLeadPI = true;
+            dto.status = CollaboratorStatus.verified;
+        }
         try {
-            return await this.repository.create(dto);
+            const created = await this.repository.create(dto);
+            // 2. Trigger Notification: "You have been added to a project"
+            // We don't notify the Lead PI of their own action
+            if (!dto.isLeadPI) {
+                await this.notificationService.notify({
+                    recipient: applicant, // The collaborator being added
+                    sender: applicantId,  // The Lead PI who added them
+                    title: "Project Invitation",
+                    message: `You have been added as a collaborator to the project: ${projectDoc.title}`,
+                    //type: NotificationType.INFO,
+                    link: `/projects/${project}`
+                });
+            }
+            return created;
         } catch (err: any) {
             if (err?.code === 11000) {
                 throw new AppError(ERROR_CODES.COLLABORATOR_ALREADY_EXISTS);
@@ -52,7 +74,7 @@ export class CollaboratorService {
     }
 
     async get(options: GetCollaboratorsOptions) {
-        const collaborators = await this.repository.find({ ...options, populate: true });
+        const collaborators = await this.repository.find(options);
         return collaborators;
     }
 
@@ -63,20 +85,29 @@ export class CollaboratorService {
     }
     */
 
-    async updateStatus(dto: UpdateCollabStatusDTO) {
-        const { id, status, applicantId } = dto;
-        const nextStatus = status;
+
+    async transitionState(dto: TransitionRequestDto) {
+        const { id, current, next } = dto;
 
         const collabDoc = await this.repository.findById(id);
-        if (!collabDoc) throw new AppError(ERROR_CODES.COLLABORATOR_NOT_FOUND);
-        if (String(collabDoc.applicant) !== applicantId) throw new AppError(ERROR_CODES.USER_NOT_COLLABORATOR);
+        if (!collabDoc) {
+            throw new AppError(ERROR_CODES.COLLABORATOR_NOT_FOUND);
+        }
+        const from = collabDoc.status as CollaboratorStatus;
+        const to = next as CollaboratorStatus;
 
-        const current = collabDoc.status;
-        // --- State Machine Validation ---
-        CollaboratorStateMachine.validateTransition(current, nextStatus);
-        if (nextStatus === CollaboratorStatus.pending) {
+        if (current && current !== from) {
+            throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
+        }
 
-            const projectDoc = await this.projectRepository.findById(String(collabDoc.project));
+        TransitionHelper.validateTransition(
+            from,
+            to,
+            COLLAB_TRANSITIONS
+        );
+
+        if (next === CollaboratorStatus.pending) {
+            const projectDoc = await this.projectRepo.findById(String(collabDoc.project));
             if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
             const projectStatus = projectDoc.status;
 
@@ -88,9 +119,13 @@ export class CollaboratorService {
                 throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
             }
         }
-        const updated = await this.repository.update(dto.id, { status: nextStatus });
-        return updated;
+
+        return await this.repository.update(id, {
+            status: to
+        });
     }
+
+
 
     async delete(dto: DeleteDto) {
         const { id, applicantId } = dto;
@@ -101,7 +136,7 @@ export class CollaboratorService {
         if (collaboratorDoc.status !== CollaboratorStatus.pending)
             throw new AppError(ERROR_CODES.COLLABORATOR_NOT_PENDING);
 
-        const projectDoc = await this.projectRepository.findById(String(collaboratorDoc.project));
+        const projectDoc = await this.projectRepo.findById(String(collaboratorDoc.project));
         if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
 
         if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)

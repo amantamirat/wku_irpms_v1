@@ -20,6 +20,9 @@ export const ERROR_CODES = {
     // ---------- PERMISSION ----------
     PERMISSION_NOT_FOUND: "PERMISSION_NOT_FOUND",
 
+    // ---------- NOTIFICATION ----------
+    NOTIFICATION_NOT_FOUND:"NOTIFICATION_NOT_FOUND",
+
     // ---------- ROLE ----------
     ROLE_NOT_FOUND: "ROLE_NOT_FOUND",
     ROLE_IN_USE: "ROLE_IN_USE",

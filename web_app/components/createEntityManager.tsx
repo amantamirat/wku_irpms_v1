@@ -43,6 +43,9 @@ export function createEntityManager<
     }
 
     toolbarEnd?: React.ReactNode;
+
+    disableEditRow?: (row: T) => boolean;
+    disableDeleteRow?: (row: T) => boolean;
 }) {
 
     return function EntityManager() {
@@ -117,22 +120,24 @@ export function createEntityManager<
             if (ok) removeItem(row)
         }
 
-        const actions: RowAction<T>[] = [
-
+        const defaultActions: RowAction<T>[] = [
             {
                 icon: "pi pi-pencil",
                 severity: "success",
                 permissions: [`${config.permissionPrefix}:update`],
+                disabled: config.disableEditRow,
+                //visible: config.disableEditRow,
                 onClick: (row: T) => {
                     setItem({ ...row })
                     setShowDialog(true)
                 }
             },
-
             {
                 icon: "pi pi-trash",
                 severity: "danger",
                 permissions: [`${config.permissionPrefix}:delete`],
+                disabled: config.disableDeleteRow,
+                //visible: !!!config.disableDeleteRow,
                 onClick: (row: T) =>
                     confirm.ask({
                         item: config.itemName,
@@ -206,7 +211,7 @@ export function createEntityManager<
                     error={error}
                     enableSearch
                     hasPermission={hasPermission}
-                    actions={actions}
+                    actions={defaultActions}
                     onCreate={canCreate ? handleCreate : undefined}
                     expandable={config.expandable}
                     toolbarEnd={toolbarEnd}

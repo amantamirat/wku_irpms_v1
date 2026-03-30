@@ -154,7 +154,6 @@ export function ItemManager<T extends { _id?: string }>({
     
     return (
         <div className="card">
-
             {(onCreate || toolbarEnd) && (
                 <Toolbar
                     className="mb-3"
@@ -187,7 +186,6 @@ export function ItemManager<T extends { _id?: string }>({
                                 globalFilter={globalFilter}
                                 header={header}
                                 //style={{ tableLayout: 'fixed' }}
-
                                 expandedRows={expandedRows}
                                 onRowToggle={(e) => setExpandedRows(e.data)}
                                 rowExpansionTemplate={rowExpansionTemplate}

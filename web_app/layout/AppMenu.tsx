@@ -324,7 +324,11 @@ const AppMenu = () => {
                 })}
 
                 <Link href="https://www.wku.edu.et" target="_blank" style={{ cursor: 'pointer' }}>
-                    <img alt="Wolkite University" className="w-full mt-3" src={`/images/wku-plan-${layoutConfig.colorScheme === 'light' ? '2' : '1'}.jpg`} />
+                    {
+                        // <img alt="Wolkite University" className="w-full mt-3" src={`/images/wku-plan-${layoutConfig.colorScheme === 'light' ? '2' : '1'}.jpg`} />
+                        <img alt="Wolkite University" className="w-full mt-3" src={`/images/wku-irpms-banner.png`} />
+
+                    }
                 </Link>
             </ul>
         </MenuProvider>

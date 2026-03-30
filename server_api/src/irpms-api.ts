@@ -45,6 +45,7 @@ import settingRoutes from './modules/settings/setting.routes';
 import permissionRoutes from './modules/permissions/permission.routes';
 import roleRoutes from './modules/permissions/roles/role.routes';
 import authRoutes from './modules/users/auth/auth.routes';
+import notificationRoutes from './modules/users/notifications/notification.routes';
 
 import path from 'path';
 import { SeedService } from './util/seed.service';
@@ -58,6 +59,7 @@ app.use(express.json());
 app.use("/api/settings", settingRoutes);
 app.use("/api/permissions", permissionRoutes);
 app.use("/api/roles", roleRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 
 app.use("/api/users", userRoutes);

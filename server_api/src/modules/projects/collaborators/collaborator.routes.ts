@@ -1,17 +1,26 @@
 import { Router } from 'express';
-import { CollaboratorController } from './collaborator.controller';
-import { checkPermission, checkStatusPermission, verifyActiveAccount } from '../../users/auth/auth.middleware';
 import { PERMISSIONS } from '../../../common/constants/permissions';
+import { ApplicantRepository } from '../../applicants/applicant.repository';
+import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../../users/auth/auth.middleware';
+import { ProjectRepository } from '../project.repository';
+import { CollaboratorController } from './collaborator.controller';
 import { CollaboratorRepository } from './collaborator.repository';
 import { CollaboratorService } from './collaborator.service';
-import { ProjectRepository } from '../project.repository';
-import { ApplicantRepository } from '../../applicants/applicant.repository';
+import { NotificationRepository } from '../../users/notifications/notification.repository';
+import { SettingService } from '../../settings/setting.service';
+import { NotificationService } from '../../users/notifications/notification.service';
+import { SettingRepository } from '../../settings/setting.repository';
 
 const repository = new CollaboratorRepository();
 const proRepository = new ProjectRepository();
 const appRepository = new ApplicantRepository();
-
-const service = new CollaboratorService(repository, proRepository, appRepository)
+const notificationService = new NotificationService(
+    new NotificationRepository(),
+    new SettingService(new SettingRepository())
+);
+const service = new CollaboratorService(
+    repository, proRepository, appRepository, notificationService
+)
 const controller = new CollaboratorController(service);
 const router: Router = Router();
 
@@ -27,8 +36,8 @@ router.put('/', verifyActiveAccount,
     controller.update);
 */
 router.patch('/:id', verifyActiveAccount,
-    checkStatusPermission("collaborator"),
-    controller.updateStatus);
+    checkTransitionPermission("collaborator"),
+    controller.transitionState);
 
 router.delete('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.COLLABORATOR.DELETE]),
