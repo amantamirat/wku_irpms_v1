@@ -13,7 +13,7 @@ router.post('/', verifyActiveAccount,
 router.get('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.PHASE.READ]),
     controller.get);
-router.put('/', verifyActiveAccount,
+router.put('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.PHASE.UPDATE]),
     controller.update);
 router.patch(

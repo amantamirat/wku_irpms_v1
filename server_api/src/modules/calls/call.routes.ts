@@ -7,19 +7,15 @@ import { CallService } from './call.service';
 import { CalendarRepository } from '../calendar/calendar.repository';
 import { OrganizationRepository } from '../organization/organization.repository';
 import { GrantRepository } from '../grants/grant.repository';
-import { StageRepository } from './stages/stage.repository';
+import { CallStageRepository } from './stages/call.stage.repository';
 import { ThematicRepository } from '../thematics/thematic.repository';
+import { GrantStageRepository } from '../grants/stages/grant.stage.repository';
 
 const repository = new CallRepository();
-const calendarRepository = new CalendarRepository();
-const stageRepository = new StageRepository();
-const organizationRepository = new OrganizationRepository();
-const grantRepository = new GrantRepository();
-const thematicRepository = new ThematicRepository();
-
-const service =
-    new CallService(repository, calendarRepository, stageRepository,
-        organizationRepository, grantRepository, thematicRepository);
+const calendarRepo = new CalendarRepository();
+const callStageRepo = new CallStageRepository();
+const grantStageRepo = new GrantStageRepository();
+const service = new CallService(repository, calendarRepo, callStageRepo, grantStageRepo);
 const controller = new CallController(service);
 const router = Router();
 

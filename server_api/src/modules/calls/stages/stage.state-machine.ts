@@ -1,7 +1,0 @@
-import { StageStatus } from "./stage.status";
-
-export const STAGE_TRANSITIONS: Record<StageStatus, StageStatus[]> = {
-    [StageStatus.planned]: [StageStatus.active],
-    [StageStatus.active]: [StageStatus.closed, StageStatus.planned],
-    [StageStatus.closed]: [StageStatus.active]
-};

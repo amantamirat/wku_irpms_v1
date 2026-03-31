@@ -8,10 +8,10 @@ import { IDocumentRepository } from "../../projects/documents/document.repositor
 import { ICallRepository } from "../call.repository";
 import { CALL_TRANSITIONS } from "../call.state-machine";
 import { CallStatus } from "../call.status";
-import { CreateStageDTO, GetStageDTO, UpdateStageDTO } from "./stage.dto";
-import { ICallStageRepository } from "./stage.repository";
-import { STAGE_TRANSITIONS } from "./stage.state-machine";
-import { StageStatus } from "./stage.status";
+import { CreateStageDTO, GetStageDTO, UpdateStageDTO } from "./call.stage.dto";
+import { ICallStageRepository } from "./call.stage.repository";
+import { STAGE_TRANSITIONS } from "./call.stage.state-machine";
+import { CallStageStatus } from "./call.stage.model";
 
 export class StageService {
 
@@ -30,7 +30,7 @@ export class StageService {
 
         const callDoc = await this.callRepo.findById(call);
         if (!callDoc) throw new Error(ERROR_CODES.CALL_NOT_FOUND);
-        //if (callDoc.status !== CallStatus.active) throw new Error(ERROR_CODES.CALL_NOT_ACTIVE);
+
         const stageDoc = await this.grantStageRepo.findById(grantStage);
         if (!stageDoc) throw new Error(ERROR_CODES.STAGE_NOT_FOUND);
         try {
@@ -61,9 +61,8 @@ export class StageService {
         const { id, data } = dto;
         const stage = await this.repository.findById(id);
         if (!stage) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-        if (stage.status === StageStatus.closed)
+        if (stage.status === CallStageStatus.closed)
             new AppError(ERROR_CODES.STAGE_ALREADY_CLOSED);
-
         return await this.repository.update(id, data);
     }
 
@@ -74,8 +73,8 @@ export class StageService {
         if (!stageDoc) {
             throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
         }
-        const from = stageDoc.status as StageStatus;
-        const to = next as StageStatus;
+        const from = stageDoc.status as CallStageStatus;
+        const to = next as CallStageStatus;
         // optional UI consistency check
         if (current && current !== from) {
             throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
@@ -87,11 +86,7 @@ export class StageService {
         );
 
         if (next === CallStatus.planned) {
-            /*
-            if (await this.callRepository.exists({ calendar: id })) {
-                throw new AppError(ERROR_CODES.CALL_ALREADY_EXISTS);
-            }
-            */
+
         }
 
         return await this.repository.update(id, {
@@ -124,12 +119,13 @@ export class StageService {
      * Delete a stage
     */
     async delete(id: string) {
+        throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
+        /*
         const stageDoc = await this.repository.findById(id);
         if (!stageDoc) throw new Error(ERROR_CODES.STAGE_NOT_FOUND);
-        if (stageDoc.status !== StageStatus.planned) throw new Error(ERROR_CODES.STAGE_NOT_PLANNED);
-
+        if (stageDoc.status !== CallStageStatus.planned) throw new Error(ERROR_CODES.STAGE_NOT_PLANNED);
         const deleted = await this.repository.delete(id);
-
         return deleted
+        */
     }
 }

@@ -62,7 +62,8 @@ const CallManager = ({ grant, calendar }: CallManagerProps) => {
 
         query: () => ({
             grant: grant ?? undefined,
-            calendar: calendar ?? undefined
+            calendar: calendar ?? undefined,
+            populate: true
         }),
         workflow: {
             statusField: "status",

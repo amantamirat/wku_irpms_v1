@@ -1,15 +1,14 @@
-import { SYSTEM } from "../../../common/constants/system.constant";
-import { AppError } from "../../../common/errors/app.error";
-import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
+import { AppError } from "../../../common/errors/app.error";
+import { ERROR_CODES } from "../../../common/errors/error.codes";
+import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { IProjectRepository, ProjectRepository } from "../project.repository";
 import { ProjectStatus } from "../project.state-machine";
-import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto, PhaseBreakdownDto } from "./phase.dto";
+import { CreatePhaseDto, GetPhasesOptions, PhaseBreakdownDto, UpdatePhaseDto } from "./phase.dto";
 import { IPhaseRepository, PhaseRepository } from "./phase.repository";
 import { PHASE_TRANSITIONS } from "./phase.state-machine";
 import { PhaseStatus } from "./phase.status";
-import { TransitionHelper } from "../../../common/helpers/transition.helper";
 
 export class PhaseService {
     constructor(
@@ -118,8 +117,8 @@ export class PhaseService {
             if (projectStatus !== ProjectStatus.negotiation)
                 throw new AppError(ERROR_CODES.PROJECT_NOT_IN_NEGOTIATION);
 
-            // Lead PI or Super User can move to reviewed
-            if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
+            // Lead PI
+            if (String(projectDoc.applicant) !== applicantId)
                 throw new AppError(ERROR_CODES.UNAUTHORIZED);
         }
 

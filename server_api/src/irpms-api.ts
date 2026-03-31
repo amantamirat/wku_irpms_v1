@@ -25,7 +25,7 @@ import compositionRoutes from './modules/grants/compositions/composition.routes'
 
 import calendarRoutes from './modules/calendar/calendar.routes';
 import callRoutes from './modules/calls/call.routes';
-import callStageRoutes from './modules/calls/stages/stage.routes';
+import callStageRoutes from './modules/calls/stages/call.stage.routes';
 
 import projectRoutes from './modules/projects/project.routes';
 import collaboratorRoutes from './modules/projects/collaborators/collaborator.routes';

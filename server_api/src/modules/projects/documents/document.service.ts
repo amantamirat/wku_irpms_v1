@@ -8,8 +8,7 @@ import { CallRepository, ICallRepository } from "../../calls/call.repository";
 import { CallStatus } from "../../calls/call.status";
 import { ReviewerRepository } from "../../calls/stages/reviewers/reviewer.repository";
 import { ReviewerStatus } from "../../calls/stages/reviewers/reviewer.status";
-import { ICallStageRepository } from "../../calls/stages/stage.repository";
-import { StageStatus } from "../../calls/stages/stage.status";
+import { ICallStageRepository } from "../../calls/stages/call.stage.repository";
 import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
 import { CollaboratorRepository } from "../collaborators/collaborator.repository";
 import { PhaseType } from "../phase/phase.enum";
@@ -22,6 +21,7 @@ import { CreateDocumentDTO, GetDocumentDTO, SubmitProjectDTO, UpdateStatusDTO } 
 import { IDocumentRepository } from "./document.repository";
 import { DocumentStateMachine } from "./document.state-machine";
 import { DocStatus } from "./document.status";
+import { CallStageStatus } from "../../calls/stages/call.stage.model";
 
 export class DocumentService {
 
@@ -83,12 +83,12 @@ export class DocumentService {
 
             const call = String(projectDoc.grant);
             const nextOrder = projectDocs.length + 1;
-            const nextStageDoc = await this.stageRepository.findOne({ call, order: nextOrder });
+            const stageDocs = await this.stageRepository.find({ call, order: 1 });
+            if (stageDocs.length < 1) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+            const nextStageDoc = stageDocs[0];
 
-            if (!nextStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-
-            if (nextStageDoc.status !== StageStatus.active) throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
-            if (nextStageDoc.deadline < new Date()) throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
+            if (nextStageDoc.status !== CallStageStatus.active) throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
+            if (!nextStageDoc.deadline || nextStageDoc.deadline < new Date()) throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
 
 
             if (nextOrder === 1) {
@@ -131,11 +131,22 @@ export class DocumentService {
         if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
         if (callDoc.status !== CallStatus.active) throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
 
-        const firstStageDoc = await this.stageRepository.findOne({ call, order: 1 });
-        if (!firstStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-        if (firstStageDoc.status !== StageStatus.active) throw new Error(ERROR_CODES.STAGE_NOT_ACTIVE);
-        if (firstStageDoc.deadline < new Date()) throw new Error(ERROR_CODES.STAGE_DEADLINE_PASSED);
+        const stageDocs = await this.stageRepository.find({ call, order: 1 });
+        if (stageDocs.length < 1) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
 
+        const firstStageDoc = stageDocs[0];
+
+        if (!firstStageDoc.deadline) {
+            throw new AppError("Stage deadline is missing");
+        }
+
+        if (firstStageDoc.status !== CallStageStatus.active) {
+            throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
+        }
+
+        if (firstStageDoc.deadline < new Date()) {
+            throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
+        }
         const appDocs = [];
         for (const app of collaborators) {
             const appDoc = await this.appRepository.findById(app);
@@ -145,7 +156,7 @@ export class DocumentService {
 
         await this.validator.validateProjectConstraints(String(callDoc.grant), dto);
 
-        const projectDoc = await this.projectRepository.create({ grant: call, title, applicant, summary, themes:[] });
+        const projectDoc = await this.projectRepository.create({ grant: call, title, applicant, summary, themes: [] });
         const projectId = String(projectDoc._id);
         await this.collabRepository.createMany(
             collaborators.map(col => ({
@@ -203,7 +214,7 @@ export class DocumentService {
             const stageDoc = await this.stageRepository.findById(String(docDoc.stage));
             if (!stageDoc)
                 throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-            if (stageDoc.status !== StageStatus.active)
+            if (stageDoc.status !== CallStageStatus.active)
                 throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
 
             const projectDoc = await this.projectRepository.findById(String(docDoc.project));

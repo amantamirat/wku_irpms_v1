@@ -1,20 +1,20 @@
 import mongoose from "mongoose";
-import { CreateStageDTO, ExistsStageDTO, FindStageDTO, GetStageDTO, UpdateStageDTO } from "./stage.dto";
-import { ICallStage, CallStage } from "./stage.model";
-
+import { CreateStageDTO, ExistsStageDTO, GetStageDTO, UpdateStageDTO } from "./call.stage.dto";
+import { ICallStage, CallStage } from "./call.stage.model";
 
 export interface ICallStageRepository {
     findById(id: string): Promise<ICallStage | null>;
     find(filters: GetStageDTO): Promise<Partial<ICallStage>[]>;
-    findOne(option: FindStageDTO): Promise<ICallStage | null>;
     create(dto: CreateStageDTO): Promise<ICallStage>;
+    createMany(dtos: CreateStageDTO[]): Promise<ICallStage[]>;
     update(id: string, data: UpdateStageDTO["data"]): Promise<ICallStage | null>;
     exists(filters: ExistsStageDTO): Promise<boolean>;
     delete(id: string): Promise<ICallStage | null>;
+    deleteByCall(callId: string): Promise<any>;
 }
 
 
-export class StageRepository implements ICallStageRepository {
+export class CallStageRepository implements ICallStageRepository {
 
     async findById(id: string) {
         return CallStage.findById(new mongoose.Types.ObjectId(id))
@@ -22,14 +22,6 @@ export class StageRepository implements ICallStageRepository {
             .exec();
     }
 
-    async findOne(option: FindStageDTO) {
-        return CallStage.findOne({
-            call: new mongoose.Types.ObjectId(option.call),
-            order: option.order
-        })
-            .lean<ICallStage>()
-            .exec();
-    }
 
     async find(filters: GetStageDTO) {
         const query: any = {};
@@ -40,6 +32,10 @@ export class StageRepository implements ICallStageRepository {
 
         if (filters.grantStage) {
             query.grantStage = new mongoose.Types.ObjectId(filters.grantStage);
+        }
+
+        if (filters.order) {
+            query.order = filters.order;
         }
 
         if (filters.status) {
@@ -62,6 +58,17 @@ export class StageRepository implements ICallStageRepository {
             ...dto, call: new mongoose.Types.ObjectId(dto.call),
             grantStage: new mongoose.Types.ObjectId(dto.grantStage)
         });
+    }
+
+    async createMany(dtos: CreateStageDTO[]): Promise<ICallStage[]> {
+        const payload = dtos.map(dto => ({
+            ...dto,
+            call: new mongoose.Types.ObjectId(dto.call),
+            grantStage: new mongoose.Types.ObjectId(dto.grantStage)
+        }));
+
+        const docs = await CallStage.insertMany(payload);
+        return docs as ICallStage[]; // 👈 key fix
     }
 
     async update(id: string, dtoData: UpdateStageDTO["data"]): Promise<ICallStage | null> {
@@ -96,5 +103,11 @@ export class StageRepository implements ICallStageRepository {
 
     async delete(id: string) {
         return CallStage.findByIdAndDelete(id).exec();
+    }
+
+    async deleteByCall(callId: string) {
+        return CallStage.deleteMany({
+            call: new mongoose.Types.ObjectId(callId)
+        }).exec();
     }
 }

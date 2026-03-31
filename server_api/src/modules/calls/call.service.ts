@@ -5,24 +5,20 @@ import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { ICalendarReadRepository } from "../calendar/calendar.repository";
 import { CalendarStatus } from "../calendar/calendar.state-machine";
-import { IGrantRepository } from "../grants/grant.repository";
-import { IOrganizationRepository } from "../organization/organization.repository";
-import { IThematicRepository } from "../thematics/thematic.repository";
+import { IGrantStageRepository } from "../grants/stages/grant.stage.repository";
 import { CreateCallDTO, GetCallsOptions, UpdateCallDTO } from "./call.dto";
 import { CallRepository } from "./call.repository";
 import { CALL_TRANSITIONS } from "./call.state-machine";
 import { CallStatus } from "./call.status";
-import { ICallStageRepository } from "./stages/stage.repository";
+import { ICallStageRepository } from "./stages/call.stage.repository";
 
 export class CallService {
 
     constructor(
         private readonly repository: CallRepository,
         private readonly calendarRepo: ICalendarReadRepository,
-        private readonly stageRepository: ICallStageRepository,
-        private readonly organizationRepository: IOrganizationRepository,
-        private readonly grantRepository: IGrantRepository,
-        private readonly thematicRepository: IThematicRepository,
+        private readonly callStageRepo: ICallStageRepository,
+        private readonly grantStageRepo: IGrantStageRepository,
     ) {
 
     }
@@ -32,23 +28,31 @@ export class CallService {
         if (!calendarDoc) throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
         if (calendarDoc.status !== CalendarStatus.active) throw new AppError(ERROR_CODES.CALENDAR_NOT_ACTIVE);
 
-        const grantDoc = await this.grantRepository.findById(dto.grant);
-        if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
-        if (grantDoc.status !== "active") throw new AppError(ERROR_CODES.GRANT_NOT_ACTIVE);
-        /*
-        const directorateDoc = await this.organizationRepository.findById(dto.directorate);
-        if (!directorateDoc || directorateDoc.type !== Unit.directorate) throw new AppError(ERROR_CODES.DIRECTORATE_NOT_FOUND);
-         // if (dto.thematic) {
-        const thematicsDoc = await this.thematicRepository.findById(dto.thematic);
-        if (!thematicsDoc) throw new AppError(ERROR_CODES.THEMATIC_NOT_FOUND);
-        // }
-        */
+        const grantStages = (await this.grantStageRepo.find({ grant: dto.grant }));
+        if (grantStages.length === 0)
+            throw new AppError(ERROR_CODES.GRANT_NOT_ACTIVE);
+
         const created = await this.repository.create({ ...dto, status: CallStatus.planned });
+
+        let currentDate = new Date();
+        const callStagesPayload = grantStages.map(gs => {
+            //currentDate.setDate(currentDate.getDate() + (gs.duration || 7));
+            currentDate.setDate(currentDate.getDate() + (gs.order * 7));
+            return {
+                call: String(created._id),
+                grantStage: gs._id,
+                order: gs.order,
+                deadline: new Date(currentDate)
+            };
+        });
+
+        await this.callStageRepo.createMany(callStagesPayload);
+
         return created;
     }
 
     async getCalls(options: GetCallsOptions) {
-        return await this.repository.find({ ...options, populate: true });
+        return await this.repository.find(options);
     }
 
     async update(dto: UpdateCallDTO) {
@@ -115,7 +119,9 @@ export class CallService {
         const { id, } = dto;
         const callDoc = await this.repository.findById(id);
         if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
-        if (callDoc.status !== CallStatus.planned) throw new AppError(ERROR_CODES.CALENDAR_NOT_PLANNED);
-        return await this.repository.delete(id);
+        if (callDoc.status !== CallStatus.planned) throw new AppError(ERROR_CODES.CALL_NOT_PLANNED);
+        const deleted = await this.repository.delete(id);
+        await this.callStageRepo.deleteByCall(id);
+        return deleted;
     }
 }

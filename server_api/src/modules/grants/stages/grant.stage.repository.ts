@@ -4,7 +4,7 @@ import { IGrantStage, GrantStage } from "./grant.stage.model";
 
 export interface IGrantStageRepository {
     findById(id: string): Promise<IGrantStage | null>;
-    find(filters: GetStageDTO): Promise<Partial<IGrantStage>[]>;
+    find(filters: GetStageDTO): Promise<IGrantStage[]>;
     create(dto: CreateStageDTO): Promise<IGrantStage>;
     update(id: string, data: UpdateStageDTO["data"]): Promise<IGrantStage | null>;
     updateMany(filter: any, update: any): Promise<any>;
@@ -35,7 +35,7 @@ export class GrantStageRepository implements IGrantStageRepository {
             query.order = filters.order;
         }
 
-        let dbQuery = GrantStage.find(query);
+        let dbQuery = GrantStage.find(query).sort({ order: 1 });
 
         if (filters.populate) {
             dbQuery = dbQuery

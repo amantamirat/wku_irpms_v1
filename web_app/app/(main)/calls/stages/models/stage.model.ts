@@ -6,6 +6,7 @@ export type CallStage = {
     _id?: string;
     call: string | Call;
     grantStage?: string | GrantStage;
+    order: number;
     deadline: Date;
     status: StageStatus;
     createdAt?: Date;
@@ -71,6 +72,7 @@ export const createEmptyCallStage = (
 ): CallStage => ({
     call: stage?.call ?? "",
     grantStage: stage?.grantStage ?? "",
+    order: 1,
     deadline: stage?.deadline ?? new Date(),
     status: stage?.status ?? StageStatus.planned,
 });

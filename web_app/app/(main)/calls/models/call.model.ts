@@ -25,7 +25,6 @@ export type Call = {
 
 export interface GetCallsOptions {
   calendar?: string | Calendar;
-  //directorate?: string | Organization;
   grant?: string | Grant;
   status?: CallStatus;
   populate?: boolean;

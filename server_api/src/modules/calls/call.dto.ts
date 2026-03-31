@@ -23,15 +23,10 @@ export interface UpdateCallDTO {
     userId?: string;
 }
 
-export interface UpdateCallStatusDTO {
-    id: string;
-    status: CallStatus;
-}
-
 // Options for querying calls
 export interface GetCallsOptions {
     calendar?: string;
-    directorate?: string;
+    //directorate?: string;
     grant?: string;
     status?: CallStatus;
     populate?: boolean;

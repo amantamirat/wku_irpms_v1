@@ -48,10 +48,12 @@ const CallStageManager = ({ call }: CallStageManagerProps) => {
             }
         ],
 
+        /*
         createNew: () => createEmptyCallStage({
             call
-        }),
+        }),*/
 
+        disableDeleteRow: (row: CallStage) => true,
         SaveDialog: SaveCallStage,
 
         permissionPrefix: "call.stage",

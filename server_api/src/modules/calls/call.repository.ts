@@ -31,9 +31,11 @@ export class CallRepository implements ICallRepository {
             query.grant = new mongoose.Types.ObjectId(filters.grant);
         }
 
+        /*
         if (filters.directorate) {
             query.directorate = new mongoose.Types.ObjectId(filters.directorate);
         }
+        */
 
         if (filters.status) {
             query.status = filters.status;
@@ -95,6 +97,6 @@ export class CallRepository implements ICallRepository {
     }
 
     async delete(id: string) {
-        return await Call.findByIdAndDelete(id).exec();
+        return Call.findByIdAndDelete(id).exec();
     }
 }

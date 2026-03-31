@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { CallService } from './call.service';
-import { CreateCallDTO, UpdateCallDTO, UpdateCallStatusDTO } from './call.dto';
+import { CreateCallDTO, UpdateCallDTO } from './call.dto';
 import { AuthenticatedRequest } from '../users/auth/auth.middleware';
 import { successResponse, errorResponse } from '../../common/helpers/response';
 import { CallStatus } from './call.status';
@@ -9,10 +9,7 @@ import { ERROR_CODES } from '../../common/errors/error.codes';
 
 export class CallController {
 
-    private service: CallService;
-
-    constructor(service: CallService) {
-        this.service = service;
+    constructor(private readonly service: CallService) {
     }
 
     create = async (req: Request, res: Response) => {
@@ -33,12 +30,13 @@ export class CallController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { directorate, calendar, grant, status } = req.query;
+            const { calendar, grant, status, populate } = req.query;
             const calls = await this.service.getCalls({
-                directorate: directorate as string,
+                //directorate: directorate as string,
                 calendar: calendar as string,
                 grant: grant as string,
                 status: status as CallStatus,
+                ...(populate !== undefined && { populate: populate === "true" })
             });
             successResponse(res, 200, 'Calls fetched successfully', calls);
         } catch (err: any) {
@@ -48,14 +46,9 @@ export class CallController {
 
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) {
-                throw new Error("User not found!");
-            }
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const userId = req.user.applicantId;
-            const { id } = req.query;
-            if (!id) {
-                throw new Error("id not found!");
-            }
+            const { id } = req.params;
             const { title, description } = req.body;
             const dto: UpdateCallDTO = {
                 id: String(id),
@@ -89,10 +82,8 @@ export class CallController {
 
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
-            if (!req.user) {
-                throw new Error("User not found!");
-            }
             const userId = req.user.applicantId;
             const deleted = await this.service.delete({ id: id, applicantId: userId });
             successResponse(res, 200, "Call deleted successfully", deleted);

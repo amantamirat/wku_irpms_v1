@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { StageService } from './stage.service';
-import { CreateStageDTO, GetStageDTO, UpdateStageDTO } from './stage.dto';
+import { StageService } from './call.stage.service';
+import { CreateStageDTO, GetStageDTO, UpdateStageDTO } from './call.stage.dto';
 import { successResponse, errorResponse } from '../../../common/helpers/response';
 import { AuthenticatedRequest } from '../../users/auth/auth.middleware';
 import { TransitionRequestDto } from '../../../common/dtos/transition.dto';
@@ -17,11 +17,12 @@ export class StageController {
 
     create = async (req: Request, res: Response) => {
         try {
-            const { call, grantStage, deadline } = req.body;
+            const { call, grantStage, order, deadline } = req.body;
 
             const dto: CreateStageDTO = {
                 call: call as string,
                 grantStage: grantStage as string,
+                order,
                 deadline,
             };
 
@@ -64,7 +65,7 @@ export class StageController {
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.query;
-            const { name, deadline } = req.body;
+            const { deadline } = req.body;
             const dto: UpdateStageDTO = {
                 id: id as string,
                 data: {

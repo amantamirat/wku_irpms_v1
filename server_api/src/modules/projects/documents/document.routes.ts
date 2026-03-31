@@ -3,14 +3,14 @@ import { ProjectDocController } from "./document.controller";
 import { upload } from "../../../util/multer";
 import { checkPermission, checkStatusPermission, verifyActiveAccount } from "../../users/auth/auth.middleware";
 import { PERMISSIONS } from "../../../common/constants/permissions";
-import { StageRepository } from "../../calls/stages/stage.repository";
+import { CallStageRepository } from "../../calls/stages/call.stage.repository";
 import { ProjectRepository } from "../project.repository";
 import { DocumentRepository } from "./document.repository";
 import { DocumentService } from "./document.service";
 
 const repository = new DocumentRepository();
 const projectRepository = new ProjectRepository();
-const stageRepository = new StageRepository();
+const stageRepository = new CallStageRepository();
 
 const service = new DocumentService(repository, projectRepository, stageRepository);
 const controller = new ProjectDocController(service);
