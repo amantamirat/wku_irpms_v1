@@ -154,16 +154,18 @@ export class DocumentService {
             }))
         );
 
+        /*
         await this.phaseRepository.createMany(
             phases.map(phase => ({
                 type: PhaseType.phase,
                 project: projectId,
-                activity: phase.activity,
+                //activity: phase.activity,
                 budget: phase.budget,
                 duration: phase.duration,
                 description: phase.description
             }))
         );
+        */
 
         await this.projectThemeRepository.createMany(
             themes.map(thm => ({

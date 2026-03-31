@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import { ProjectController } from './project.controller';
-import { checkPermission, checkStatusPermission, checkTransitionPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
 import { PERMISSIONS } from '../../common/constants/permissions';
+import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
+import { ProjectController } from './project.controller';
+import { ProjectService } from './project.service';
 
-const controller = new ProjectController();
+const controller = new ProjectController(new ProjectService());
 const router: Router = Router();
 
 //create

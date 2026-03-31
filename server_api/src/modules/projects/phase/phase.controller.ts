@@ -2,40 +2,37 @@ import { Request, Response } from "express";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { errorResponse, successResponse } from "../../../common/helpers/response";
 import { AuthenticatedRequest } from "../../users/auth/auth.middleware";
-import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto, UpdatePhaseStatusDto } from "./phase.dto";
-import { PhaseType } from "./phase.enum";
+import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto } from "./phase.dto";
 import { PhaseService } from "./phase.service";
-import { PhaseStatus } from "./phase.status";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 
 export class PhaseController {
-    private service: PhaseService;
+    constructor(private readonly service: PhaseService) { }
 
-    constructor(service?: PhaseService) {
-        this.service = service || new PhaseService();
-    }
     // -----------------------
     // Create
     // -----------------------
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error("User not found!");
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const {
-                activity,
+                order,       // Added: required for unique sequence
                 duration,
                 budget,
                 description,
                 project,
+                breakdown    // Fixed: removed illegal [] syntax
             } = req.body;
 
             const data: CreatePhaseDto = {
-                activity,
-                duration,
-                budget,
-                description: description ?? undefined,
+                order: Number(order),
+                duration: Number(duration),
+                budget: Number(budget),
+                description,
                 project: project as string,
+                breakdown,    // Passed to service for validation
                 applicantId: req.user.applicantId,
             };
 
@@ -51,10 +48,11 @@ export class PhaseController {
     // -----------------------
     get = async (req: Request, res: Response) => {
         try {
-            const { project } = req.query;
+            const { project, populate } = req.query;
 
             const filter: GetPhasesOptions = {
                 project: project as string,
+                populate: populate === 'true'
             };
 
             const phases = await this.service.getPhases(filter);
@@ -63,23 +61,27 @@ export class PhaseController {
             errorResponse(res, 400, err.message, err);
         }
     };
+
     // -----------------------
     // Update
     // -----------------------
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error("User not found!");
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
-            const { id } = req.query;
-            const { activity, duration, budget, description } = req.body;
+            // Usually IDs for specific resources should come from req.params
+            const { id } = req.params;
+            const { order, duration, budget, description, breakdown, status } = req.body;
 
             const dto: UpdatePhaseDto = {
                 id: id as string,
                 data: {
-                    activity: activity ?? undefined,
-                    duration: duration ?? undefined,
-                    budget: budget ?? undefined,
-                    description: description ?? undefined,
+                    order,
+                    duration,
+                    budget,
+                    description,
+                    breakdown,
+                    status
                 },
                 applicantId: req.user.applicantId,
             };
@@ -90,37 +92,43 @@ export class PhaseController {
             errorResponse(res, 400, err.message, err);
         }
     };
-    // ---------------------------------------------------
-    // Update Status
-    // ---------------------------------------------------
-    updateStatus = async (req: AuthenticatedRequest, res: Response) => {
+
+    // -----------------------
+    // Transition State
+    // -----------------------
+    transitionState = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
             const { current, next } = req.body;
+
             const dto: TransitionRequestDto = {
                 id: String(id),
                 current: current,
                 next: next,
                 applicantId: req.user.applicantId,
             };
-            const updated = await this.service.updateStatus(dto);
+
+            const updated = await this.service.transitionState(dto);
             successResponse(res, 200, "Phase status updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     };
+
     // -----------------------
     // Delete
     // -----------------------
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error("User not found!");
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
+
             const dto: DeleteDto = {
                 id,
                 applicantId: req.user.applicantId,
             };
+
             const deleted = await this.service.delete(dto);
             successResponse(res, 200, "Phase deleted successfully", deleted);
         } catch (err: any) {

@@ -1,50 +1,68 @@
+import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { GetPhaseOptions, Phase, PhaseStatus, sanitizePhase } from "../models/phase.model";
+import { GetPhaseOptions, Phase, sanitizePhase } from "../models/phase.model";
 import { TransitionRequestDto } from "@/types/util";
 
-const end_point = '/project/phases';
+const end_point = "/project/phases";
 
+export const PhaseApi: EntityApi<Phase, GetPhaseOptions | undefined> = {
 
-export const PhaseApi = {
-
-    async getPhases(options: GetPhaseOptions): Promise<Phase[]> {
+    async getAll(options?: GetPhaseOptions): Promise<Phase[]> {
         const query = new URLSearchParams();
-        const sanitized = sanitizePhase(options);
-        if (sanitized.project) query.append("project", sanitized.project as string);
-        if (sanitized.project) query.append("parent", sanitized.parent as string);
-        const data = await ApiClient.get(`${end_point}?${query.toString()}`);
+
+        if (options) {
+            const sanitized = sanitizePhase(options);
+            if (sanitized.project) {
+                query.append("project", sanitized.project as string);
+            }
+            // Add populate option if your GetPhaseOptions supports it
+            if ((options as any).populate !== undefined) {
+                query.append("populate", String((options as any).populate));
+            }
+        }
+
+        const url = query.toString()
+            ? `${end_point}?${query.toString()}`
+            : end_point;
+
+        const data = await ApiClient.get(url);
         return data as Phase[];
     },
 
+    async getById(id: string): Promise<Phase> {
+        const url = `${end_point}/${id}`;
+        const data = await ApiClient.get(url);
+        return data as Phase;
+    },
+
     async create(phase: Partial<Phase>): Promise<Phase> {
-        const createdData = await ApiClient.post(end_point, sanitizePhase(phase));
+        const sanitized = sanitizePhase(phase);
+        const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as Phase;
     },
 
     async update(phase: Partial<Phase>): Promise<Phase> {
-        if (!phase._id) throw new Error("_id required.");
-        const query = new URLSearchParams();
-        query.append("id", phase._id);
-        const url = `${end_point}?${query.toString()}`;
+        if (!phase._id) throw new Error("_id required");
+        
         const sanitized = sanitizePhase(phase);
+        // Matches the pattern: PUT /project/phases/:id
+        const url = `${end_point}/${phase._id}`;
+        
         const updatedPhase = await ApiClient.put(url, sanitized);
         return updatedPhase as Phase;
     },
 
-    async updateStatus(id: string, dto: TransitionRequestDto): Promise<any> {
-        const query = new URLSearchParams();
-        query.append("id", id);
-        const url = `${end_point}/${id}`;
-        const updated = await ApiClient.patch(url, dto);
-        return updated;
+    async delete(phase: Partial<Phase>): Promise<boolean> {
+        if (!phase._id) throw new Error("_id required");
+        
+        const url = `${end_point}/${phase._id}`;
+        return await ApiClient.delete(url);
     },
 
-    async delete(phase: Partial<Phase>): Promise<boolean> {
-        if (!phase._id) {
-            throw new Error("_id required.");
-        }
-        const url = `${end_point}/${phase._id}`;
-        const response = await ApiClient.delete(url);
-        return response;
-    },
+    async transitionState(id: string, dto: TransitionRequestDto): Promise<Phase> {
+        // Matches the pattern: PATCH /project/phases/:id
+        const url = `${end_point}/${id}`;
+        const updated = await ApiClient.patch(url, dto);
+        return updated as Phase;
+    }
 };

@@ -1,10 +1,5 @@
 import { Project } from "../../models/project.model";
 
-export enum PhaseType {
-    phase = 'phase',
-    breakdown = 'breakdown'
-}
-
 export enum PhaseStatus {
     proposed = 'proposed',
     reviewed = 'reviewed',
@@ -13,78 +8,73 @@ export enum PhaseStatus {
     completed = 'completed',
 }
 
-export type Phase = {
-    _id?: string;
-    type: PhaseType;
-    project?: string | Project;
-    parent?: string | Phase;
+// 1. Define the Breakdown type to match the backend sub-schema
+export type PhaseBreakdown = {
     activity: string;
     duration: number;
     budget: number;
+};
+
+export type Phase = {
+    _id?: string;
+    project: string | Project;
+    order: number;           // Required for sequencing
+    duration: number;        // Total duration
+    budget: number;          // Total budget
     description?: string;
+    breakdown: PhaseBreakdown[]; // The nested array we added
     status?: PhaseStatus;
     createdAt?: Date;
     updatedAt?: Date;
-    order?: number;
-}
-
-export const PHASE_STATUS_ORDER: PhaseStatus[] = [
-    PhaseStatus.proposed,
-    PhaseStatus.reviewed,
-    PhaseStatus.approved,
-    PhaseStatus.active,
-    PhaseStatus.completed
-];
-
-export const PHASE_TRANSITIONS: Record<PhaseStatus, PhaseStatus[]> = {
-    proposed: [PhaseStatus.reviewed],
-    reviewed: [PhaseStatus.approved, PhaseStatus.proposed],
-    approved: [PhaseStatus.active, PhaseStatus.reviewed],
-    active: [PhaseStatus.completed, PhaseStatus.approved],
-    completed: [PhaseStatus.active]
 };
-
 
 export interface GetPhaseOptions {
     project?: string | Project;
-    parent?: string | Phase;
 }
 
-export const validatePhase = (pt: Phase): { valid: boolean; message?: string } => {
-    if (!pt.type) {
-        return { valid: false, message: 'Type is required.' };
-    }
-    if (!pt.project) {
+// --- Validation Logic ---
+
+export const validatePhase = (phase: Phase): { valid: boolean; message?: string } => {
+    if (!phase.project) {
         return { valid: false, message: 'Project is required.' };
     }
-    if (!pt.activity || pt.activity.trim().length === 0) {
-        return { valid: false, message: 'Activity is required.' };
+    if (phase.order === undefined || phase.order < 0) {
+        return { valid: false, message: 'Phase order is required.' };
     }
-    if (!pt.duration) {
-        return { valid: false, message: 'Duration is required.' };
+    if (!phase.duration || phase.duration <= 0) {
+        return { valid: false, message: 'Valid duration is required.' };
     }
-    if (!pt.budget) {
-        return { valid: false, message: 'Budget is required.' };
+    if (!phase.budget || phase.budget <= 0) {
+        return { valid: false, message: 'Valid budget is required.' };
     }
-    if (pt.type === PhaseType.breakdown) {
-        if (!pt.parent) {
-            return { valid: false, message: 'Breakdownn Phase is required.' };
+
+    // Validate the breakdown array if it exists
+    if (phase.breakdown && phase.breakdown.length > 0) {
+        const totalDuration = phase.breakdown.reduce((sum, b) => sum + b.duration, 0);
+        const totalBudget = phase.breakdown.reduce((sum, b) => sum + b.budget, 0);
+
+        if (totalDuration !== phase.duration) {
+            return { valid: false, message: `Breakdown duration (${totalDuration}) must match total duration (${phase.duration}).` };
+        }
+        if (totalBudget !== phase.budget) {
+            return { valid: false, message: `Breakdown budget (${totalBudget}) must match total budget (${phase.budget}).` };
         }
     }
+
     return { valid: true };
 };
 
+// --- Sanitization Logic ---
 
 export const sanitizePhase = (phase: Partial<Phase>): Phase => {
     return {
         ...phase,
+        // Ensure project is just an ID string
         project:
             typeof phase.project === "object" && phase.project !== null
                 ? (phase.project as Project)._id
                 : phase.project,
-        parent:
-            typeof phase.parent === "object" && phase.parent !== null
-                ? (phase.parent as Phase)._id
-                : phase.parent,
+        // Ensure breakdown is at least an empty array to avoid undefined errors in UI
+        breakdown: phase.breakdown || []
     } as Phase;
-}
+};

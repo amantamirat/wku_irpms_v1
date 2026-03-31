@@ -30,13 +30,13 @@ export class CollaboratorService {
     }
 
     async create(dto: CreateCollaboratorDto) {
-        const { applicant, project, applicantId } = dto;
+        const { applicant, project, userId } = dto;
 
         const projectDoc = await this.projectRepo.findById(project);
         if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
 
-        if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
-            throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
+        if (String(projectDoc.applicant) !== userId)
+            throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
         if (projectDoc.status !== ProjectStatus.draft &&
             projectDoc.status !== ProjectStatus.negotiation) {
@@ -52,17 +52,12 @@ export class CollaboratorService {
         }
         try {
             const created = await this.repository.create(dto);
-            // 2. Trigger Notification: "You have been added to a project"
+            // Trigger Notification: "You have been added to a project"
             // We don't notify the Lead PI of their own action
             if (!dto.isLeadPI) {
-                await this.notificationService.notify({
-                    recipient: applicant, // The collaborator being added
-                    sender: applicantId,  // The Lead PI who added them
-                    title: "Project Invitation",
-                    message: `You have been added as a collaborator to the project: ${projectDoc.title}`,
-                    //type: NotificationType.INFO,
-                    link: `/projects/${project}`
-                });
+                await this.notificationService.notifyProjectInvitation(
+                    applicant, projectDoc.title
+                );
             }
             return created;
         } catch (err: any) {

@@ -782,32 +782,7 @@
     "category": "Phase Management",
     "name": "phase:update",
     "description": "Update phase entries"
-  },
-  {
-    "category": "Phase Management",
-    "name": "phase:status.proposed"
-  },
-  {
-    "category": "Phase Management",
-    "name": "phase:status.reviewed"
-  },
-  {
-    "category": "Phase Management",
-    "name": "phase:status.approved"
-  },
-  {
-    "category": "Phase Management",
-    "name": "phase:status.active"
-  },
-  {
-    "category": "Phase Management",
-    "name": "phase:status.completed"
-  },
-  {
-    "category": "Phase Management",
-    "name": "phase:delete",
-    "description": "Delete phase entries"
-  },
+  },  
   {
     "category": "Phase Management",
     "name": "phase:transition.proposed.reviewed",
@@ -848,6 +823,12 @@
     "name": "phase:transition.completed.active",
     "description": "Revert phase from completed to active"
   },
+  {
+    "category": "Phase Management",
+    "name": "phase:delete",
+    "description": "Delete phase entries"
+  },
+  
   {
     "category": "Phase Document Management",
     "name": "phase:document:create"

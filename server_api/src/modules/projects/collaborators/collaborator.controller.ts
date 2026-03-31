@@ -27,7 +27,7 @@ export class CollaboratorController {
                 applicant: applicant as string,
                 project: project as string,
                 //isLeadPI: isLeadPI ? true : undefined,
-                applicantId: req.user.applicantId,
+                userId: req.user.applicantId,
             };
 
             const created = await this.service.create(dto);

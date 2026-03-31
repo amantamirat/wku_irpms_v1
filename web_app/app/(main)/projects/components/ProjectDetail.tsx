@@ -3,11 +3,9 @@
 import { Divider } from "primereact/divider";
 import { TabView, TabPanel } from "primereact/tabview";
 import { useMemo } from "react";
-
 import { Project } from "../models/project.model";
 import CollaboratorManager from "../collaborators/components/CollaboratorManager";
 import PhaseManager from "../phases/components/PhaseManager";
-import { PhaseType } from "../phases/models/phase.model";
 import ProjectDocManager from "../documents/components/ProjectDocManager";
 import { PERMISSIONS } from "@/types/permissions";
 import { useAuth } from "@/contexts/auth-context";
@@ -43,7 +41,7 @@ export default function ProjectDetail({ project, updateProjectStatus }: ProjectD
         {
             header: "Phases",
             permission: PERMISSIONS.PHASE.READ,
-            content: <PhaseManager project={project} phaseType={PhaseType.phase} />
+            content: <PhaseManager project={project} />
         },
         {
             header: "Documents",

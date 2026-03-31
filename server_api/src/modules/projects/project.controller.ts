@@ -2,18 +2,15 @@ import { Response } from "express";
 import { errorResponse, successResponse } from "../../common/helpers/response";
 import { AuthenticatedRequest } from "../users/auth/auth.middleware";
 import { ProjectService } from "./project.service";
-import { CreateProjectDTO, UpdateProjectDTO} from "./project.dto";
+import { CreateProjectDTO, UpdateProjectDTO } from "./project.dto";
 import { DeleteDto } from "../../common/dtos/delete.dto";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 
 export class ProjectController {
 
-  private service: ProjectService;
 
-  constructor(service?: ProjectService) {
-    this.service = service || new ProjectService();
-  }
+  constructor(private readonly service: ProjectService) { }
   // -----------------------
   // Create
   // -----------------------
@@ -27,9 +24,9 @@ export class ProjectController {
         grant: grant,
         title,
         summary,
-        //applicant:req.user.applicantId,
         applicant: applicant,
-        themes: themes
+        themes: themes,
+        //applicant:req.user.applicantId,
       };
       const created = await this.service.create(dto);
       successResponse(res, 201, "Project created successfully", created);

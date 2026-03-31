@@ -5,30 +5,44 @@ import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { IProjectRepository, ProjectRepository } from "../project.repository";
 import { ProjectStatus } from "../project.state-machine";
-import { PhaseSynchronizer, ProjectSynchronizer } from "../project.synchronizer";
-import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto, UpdatePhaseStatusDto } from "./phase.dto";
+import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto, PhaseBreakdownDto } from "./phase.dto";
 import { IPhaseRepository, PhaseRepository } from "./phase.repository";
-import { PhaseStateMachine } from "./phase.state-machine";
+import { PHASE_TRANSITIONS } from "./phase.state-machine";
 import { PhaseStatus } from "./phase.status";
+import { TransitionHelper } from "../../../common/helpers/transition.helper";
 
 export class PhaseService {
-
-    private readonly projectSynchronizer: ProjectSynchronizer;
     constructor(
         private readonly repository: IPhaseRepository = new PhaseRepository(),
         private readonly projectRepository: IProjectRepository = new ProjectRepository()
-    ) {
-        this.projectSynchronizer = new PhaseSynchronizer(projectRepository, repository);
+    ) {}
+
+    /**
+     * Internal Helper: Validates that breakdown totals match the Phase totals.
+     */
+    private validateBreakdown(dto: { duration: number; budget: number; breakdown?: PhaseBreakdownDto[] }) {
+        if (!dto.breakdown || dto.breakdown.length === 0) return;
+
+        const totalDuration = dto.breakdown.reduce((sum, item) => sum + item.duration, 0);
+        const totalBudget = dto.breakdown.reduce((sum, item) => sum + item.budget, 0);
+
+        if (totalDuration !== dto.duration) {
+            throw new AppError(ERROR_CODES.INVALID_PHASE_DURATION_SUM);
+        }
+        if (totalBudget !== dto.budget) {
+            throw new AppError(ERROR_CODES.INVALID_PHASE_BUDGET_SUM);
+        }
     }
 
     async validate(project: string, applicantId: string) {
-
         const projectDoc = await this.projectRepository.findById(project);
-        if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
+        if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
 
-        if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
+        // Standard Ownership Check
+        if (String(projectDoc.applicant) !== applicantId)
             throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
 
+        // Phases can only be modified during Draft or Negotiation
         if (projectDoc.status !== ProjectStatus.draft &&
             projectDoc.status !== ProjectStatus.negotiation) {
             throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
@@ -37,11 +51,12 @@ export class PhaseService {
 
     async create(dto: CreatePhaseDto) {
         const { project, applicantId } = dto;
-        this.validate(project ?? "", applicantId ?? "");
+        
+        await this.validate(project, applicantId ?? "");
+        this.validateBreakdown(dto); // Ensure math adds up
+
         try {
-            const created = await this.repository.create(dto);
-            await this.projectSynchronizer.sync(project);
-            return created;
+            return await this.repository.create(dto);
         }
         catch (err: any) {
             if (err?.code === 11000) {
@@ -49,7 +64,6 @@ export class PhaseService {
             }
             throw err;
         }
-
     }
 
     async getPhases(options: GetPhasesOptions) {
@@ -61,71 +75,73 @@ export class PhaseService {
 
         const phaseDoc = await this.repository.findById(id);
         if (!phaseDoc) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
-        const project = String(phaseDoc.project);
+        
+        const projectId = String(phaseDoc.project);
+        await this.validate(projectId, applicantId);
 
-        await this.validate(project, applicantId);
-
+        // Logic check: Phases in progress shouldn't be edited easily
         if (phaseDoc.status !== PhaseStatus.proposed)
             throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
 
-        const updated = await this.repository.update(id, data);
-        await this.projectSynchronizer.sync(project);
-        return updated;
+        // If breakdown is being updated, we must re-validate the sums
+        if (data.breakdown || data.budget || data.duration) {
+            this.validateBreakdown({
+                duration: data.duration ?? phaseDoc.duration,
+                budget: data.budget ?? phaseDoc.budget,
+                breakdown: data.breakdown ?? phaseDoc.breakdown
+            });
+        }
+
+        return await this.repository.update(id, data);
+    }
+
+    async transitionState(dto: TransitionRequestDto) {
+        const { id, next, applicantId, current } = dto;
+
+        const phaseDoc = await this.repository.findById(id);
+        if (!phaseDoc) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
+
+        const from = phaseDoc.status as PhaseStatus;
+        const to = next as PhaseStatus;
+
+        if (current && current !== from) throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
+
+        TransitionHelper.validateTransition(from, to, PHASE_TRANSITIONS);
+
+        const projectDoc = await this.projectRepository.findById(String(phaseDoc.project));
+        if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
+        
+        const projectStatus = projectDoc.status;        
+
+        // Business Logic for specific transitions
+        if (to === PhaseStatus.reviewed) {
+            if (projectStatus !== ProjectStatus.negotiation)
+                throw new AppError(ERROR_CODES.PROJECT_NOT_IN_NEGOTIATION);
+
+            // Lead PI or Super User can move to reviewed
+            if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
+                throw new AppError(ERROR_CODES.UNAUTHORIZED);
+        }
+
+        if (to === PhaseStatus.active) {
+            if (projectStatus !== ProjectStatus.granted)
+                throw new AppError(ERROR_CODES.PROJECT_NOT_GRANTED);
+        }
+
+        return await this.repository.update(id, { status: to });
     }
 
     async delete(dto: DeleteDto) {
         const { id, applicantId } = dto;
 
         const phaseDoc = await this.repository.findById(id);
-        if (!phaseDoc) throw new Error(ERROR_CODES.PHASE_NOT_FOUND);
-        const project = String(phaseDoc.project);
+        if (!phaseDoc) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
 
-        await this.validate(String(phaseDoc.project), applicantId??"");
+        await this.validate(String(phaseDoc.project), applicantId ?? "");
 
         if (phaseDoc.status !== PhaseStatus.proposed)
             throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
 
-        const deleted = await this.repository.delete(id);
-        await this.projectSynchronizer.sync(project);
-        return deleted;
+        return await this.repository.delete(id);
     }
-    // ---------------------------------------------------
-    // UPDATE STATUS
-    // ---------------------------------------------------
-    async updateStatus(dto: TransitionRequestDto) {
-        const { id, current, next, applicantId } = dto;
-
-        const phaseDoc = await this.repository.findById(id);
-        if (!phaseDoc) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
-        if (current !== phaseDoc.status)
-            throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
-
-        const projectDoc = await this.projectRepository.findById(String(phaseDoc.project));
-        if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
-        const projectStatus = projectDoc.status;
-
-
-        // --- State Machine Validation ---
-        PhaseStateMachine.validateTransition(current, next as PhaseStatus);
-
-        if (next === PhaseStatus.reviewed) {
-            if (projectStatus !== ProjectStatus.negotiation)
-                throw new AppError(ERROR_CODES.PROJECT_NOT_IN_NEGOTIATION);
-
-            if (current === PhaseStatus.proposed) {
-                if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
-                    throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
-            }
-        }
-
-        if (next === PhaseStatus.active) {
-            if (projectStatus !== ProjectStatus.granted)
-                throw new AppError(ERROR_CODES.PROJECT_NOT_GRANTED);
-        }
-
-        const updated = await this.repository.update(id, { status: next as PhaseStatus });
-        return updated;
-    }
-
-
 }

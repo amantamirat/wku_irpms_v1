@@ -16,13 +16,13 @@ import { GrantStatus } from "../grants/grant.model";
 import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
 import { CollaboratorRepository, ICollaboratorRepository } from "./collaborators/collaborator.repository";
 import { PROJECT_TRANSITIONS, ProjectStatus } from "./project.state-machine";
+import { CollaboratorStatus } from "./collaborators/collaborator.status";
 
 export class ProjectService {
 
     constructor(
         private repository: IProjectRepository = new ProjectRepository(),
         private grantRepo: IGrantRepository = new GrantRepository(),
-        //private callRepository: ICallRepository = new CallRepository(),
         private appRepo: IApplicantRepository = new ApplicantRepository(),
         private collabRepo: ICollaboratorRepository = new CollaboratorRepository(),
         //private phaseRepository: IPhaseRepository = new PhaseRepository(),
@@ -39,6 +39,16 @@ export class ProjectService {
         if (!appDoc) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
 
         const created = await this.repository.create(dto);
+
+        if (created) {
+            await this.collabRepo.create({
+                project: String(created._id),
+                applicant: applicant,
+                isLeadPI: true,
+                status: CollaboratorStatus.verified
+            });
+        }
+
         return created;
     }
 
@@ -127,18 +137,19 @@ export class ProjectService {
     // DELETE
     // ---------------------------------------------------
     async delete(dto: DeleteDto) {
-        const { id } = dto;
+        const { id, applicantId } = dto;
         const projectDoc = await this.repository.findById(id);
         if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
+
+        if (String(projectDoc.applicant) !== applicantId)
+            throw new AppError(ERROR_CODES.UNAUTHORIZED);
+
         if (projectDoc.status !== ProjectStatus.draft)
             throw new Error(ERROR_CODES.PROJECT_NOT_DRAFT);
 
         await this.collabRepo.deleteByProject(id);
 
-        /*
-        if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
-            throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
-*/
+
         return this.repository.delete(dto.id);
     }
 }

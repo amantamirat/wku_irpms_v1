@@ -1,4 +1,3 @@
-// phase.repository.ts
 import mongoose from "mongoose";
 import { Phase, IPhase } from "./phase.model";
 import {
@@ -6,7 +5,6 @@ import {
     GetPhasesOptions,
     UpdatePhaseDto,
 } from "./phase.dto";
-
 
 export interface IPhaseRepository {
     findById(id: string): Promise<IPhase | null>;
@@ -17,7 +15,6 @@ export interface IPhaseRepository {
     delete(id: string): Promise<IPhase | null>;
 }
 
-// MongoDB implementation
 export class PhaseRepository implements IPhaseRepository {
 
     async findById(id: string) {
@@ -33,7 +30,7 @@ export class PhaseRepository implements IPhaseRepository {
             query.project = new mongoose.Types.ObjectId(filters.project);
         }
 
-        let phaseQuery = Phase.find(query);
+        let phaseQuery = Phase.find(query).sort({ order: 1 }); // Always sort by order
 
         if (filters.populate) {
             phaseQuery = phaseQuery.populate({ path: 'project' });
@@ -44,56 +41,33 @@ export class PhaseRepository implements IPhaseRepository {
             .exec();
     }
 
-
     async create(dto: CreatePhaseDto) {
-        const data: Partial<IPhase> = {
+        const data = {
+            ...dto,
             project: new mongoose.Types.ObjectId(dto.project),
-            activity: dto.activity,
-            duration: dto.duration,
-            budget: dto.budget,
-            description: dto.description
         };
         return Phase.create(data);
     }
 
-    // ✅ NEW: bulk insert
     async createMany(dtos: CreatePhaseDto[]) {
-        const data: Partial<IPhase>[] = dtos.map(dto => ({
+        const data = dtos.map(dto => ({
+            ...dto,
             project: new mongoose.Types.ObjectId(dto.project),
-            activity: dto.activity,
-            duration: dto.duration,
-            budget: dto.budget,
-            description: dto.description,
-            //type: dto.type
         }));
 
-        return Phase.insertMany(data, { ordered: true });
+        // cast as any to bypass strict internal hydration types if necessary, 
+        // but insertMany works fine with the mapped array
+        const results = await Phase.insertMany(data, { ordered: true });
+        return results as unknown as IPhase[];
     }
 
     async update(id: string, dtoData: UpdatePhaseDto["data"]): Promise<IPhase | null> {
-        const updateData: Partial<IPhase> = {};
-
-        if (dtoData.activity) {
-            updateData.activity = dtoData.activity;
-        }
-        if (dtoData.duration) {
-            updateData.duration = dtoData.duration;
-        }
-        if (dtoData.budget) {
-            updateData.budget = dtoData.budget;
-        }
-        if (dtoData.description) {
-            updateData.description = dtoData.description;
-        }
-        if (dtoData.status) {
-            updateData.status = dtoData.status;
-        }
+        // We use $set with the spread dtoData to handle breakdown, budget, etc.
         return Phase.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
-            { $set: updateData },
+            { $set: dtoData },
             { new: true, runValidators: true }
-        )
-            .exec();
+        ).exec();
     }
 
     async delete(id: string) {

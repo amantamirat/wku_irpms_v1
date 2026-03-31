@@ -6,7 +6,7 @@ export interface CreateCollaboratorDto {
     applicant: string;
     isLeadPI?: boolean;
     status?: CollaboratorStatus;
-    applicantId?: string;
+    userId?: string;
 }
 
 // Base fields for updating a collaborator

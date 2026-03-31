@@ -79,14 +79,14 @@ export class NotificationService {
      * Specific Business Helper: Notify a user they've been invited.
      * Keeps the CollaboratorService code clean.
      */
-    async notifyProjectInvitation(recipientId: string, senderId: string, projectTitle: string, projectId: string) {
+    async notifyProjectInvitation(recipientId: string, projectTitle: string, senderId?: string, projectId?: string) {
         return this.notify({
             recipient: recipientId,
             sender: senderId,
             title: "New Project Invitation",
             message: `You have been added as a collaborator to "${projectTitle}".`,
             type: NotificationType.INFO,
-            link: `/projects/${projectId}`
+            link: '/projects/collaborators/applicant'
         });
     }
 
