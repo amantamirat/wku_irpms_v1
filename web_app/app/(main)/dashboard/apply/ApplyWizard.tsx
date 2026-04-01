@@ -8,7 +8,7 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { Applicant } from "../../applicants/models/applicant.model";
 import { Call } from "../../calls/models/call.model";
-import { Stage } from "../../calls/stages/models/stage.model";
+import { Stage } from "../../calls/stages/models/call.stage.model";
 import CollaboratorManager from "../../projects/collaborators/components/CollaboratorManager";
 import { Collaborator } from "../../projects/collaborators/models/collaborator.model";
 import UploadForm from "../../projects/components/UploadForm";
@@ -16,8 +16,6 @@ import { ProjectDocApi } from "../../projects/documents/api/project.doc.api";
 import { Project, ProjectStatus, validateApplyProject } from "../../projects/models/project.model";
 import PhaseManager from "../../projects/phases/components/PhaseManager";
 import { Phase, PhaseType } from "../../projects/phases/models/phase.model";
-import ProjectThemeManager from "../../projects/themes/components/ThemeManager";
-import { ProjectTheme } from "../../projects/themes/models/project.theme.model";
 import { Theme } from "../../thematics/themes/models/theme.model";
 import Confirmation from "./Confirmation";
 import ProjectForm from "./ProjectForm";
@@ -98,6 +96,8 @@ const ApplyWizard = ({ visible, stage, call, onCancel }: ApplyWizardProps) => {
         setProject({ ...project, phases: updatedPhases });
     };
 
+    /*
+
     const addProjectTheme = (thm: ProjectTheme) => {
         const exists =
             project.themes?.some(
@@ -118,6 +118,9 @@ const ApplyWizard = ({ visible, stage, call, onCancel }: ApplyWizardProps) => {
         setProject({ ...project, themes: updated });
     };
 
+    */
+
+    
     const submit = async () => {
         try {
             setLoading(true);
@@ -205,8 +208,7 @@ const ApplyWizard = ({ visible, stage, call, onCancel }: ApplyWizardProps) => {
                 {activeStep === 0 && <UploadForm file={project.file} onUpload={updateFile} />}
                 {activeStep === 1 && <ProjectForm project={project} setProject={setProject} />}
                 {activeStep === 2 && <CollaboratorManager project={project} onSave={addCollaborator} onRemove={removeCollaborator} flyMode={true} />}
-                {activeStep === 3 && <ProjectThemeManager project={project} onSave={addProjectTheme} onRemove={removeProjectTheme} flyMode={true} />}
-                {activeStep === 4 && <PhaseManager project={project} phaseType={PhaseType.phase} flyMode={true} onSave={savePhase} onRemove={removePhase} />}
+                {activeStep === 3 && <PhaseManager project={project}  flyMode={true} onSave={savePhase} onRemove={removePhase} />}
                 {activeStep === items.length - 1 && <Confirmation project={project} call={project.call as Call} />}
             </Dialog>
         </>

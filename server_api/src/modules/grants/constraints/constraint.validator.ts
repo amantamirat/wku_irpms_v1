@@ -24,12 +24,13 @@ export class ConstraintValidator {
         dto: {
             collaborators: any[],
             phases: any[],
-            themes: string[]
+            themes?: string[]
         }) {
         const { collaborators, phases, themes } = dto;
         const constraints =
             await this.constraintRepository.find({ //type: ConstraintType.PROJECT,
-                 grant: grant });
+                grant: grant
+            });
 
         if (!constraints || constraints.length === 0) return;
 
@@ -37,7 +38,13 @@ export class ConstraintValidator {
         const numPhases = phases.length;
         const totalBudget = phases.reduce((sum, p) => sum + (p.budget ?? 0), 0);
         const totalDuration = phases.reduce((sum, p) => sum + (p.duration ?? 0), 0);
-        const { themeCount, subThemeCount, focusAreaCount, indicatorCount } = await this.countThemeLevels(themes);
+
+        let themeCount = 0, subThemeCount = 0, focusAreaCount = 0, indicatorCount = 0;
+
+        if (themes) {
+            ({ themeCount, subThemeCount, focusAreaCount, indicatorCount } =
+                await this.countThemeLevels(themes));
+        }
 
         for (const constraint of constraints) {
 

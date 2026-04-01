@@ -4,24 +4,25 @@ import ErrorCard from '@/components/ErrorCard';
 import ListSkeleton from '@/components/ListSkeleton';
 import { useAuth } from '@/contexts/auth-context';
 import { PERMISSIONS } from '@/types/permissions';
-import { StageApi } from '../calls/stages/api/stage.api';
-import { Stage, StageStatus } from '../calls/stages/models/stage.model';
+import { CallStageApi } from '../calls/stages/api/call.stage.api';
+import { CallStage } from '../calls/stages/models/call.stage.model';
+import { CallStageStatus } from '../calls/stages/models/call.stage.state-machine';
 
 const StageGrid = () => {
-    const [stages, setStages] = useState<Stage[]>([]);
+    const [stages, setStages] = useState<CallStage[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     const { hasPermission } = useAuth();
-    const canRead = hasPermission([PERMISSIONS.STAGE.READ]);
+    const canRead = hasPermission(["call.stage:read"]);
 
     useEffect(() => {
         if (!canRead) return; // ✅ condition inside hook
 
         const fetchStages = async () => {
             try {
-                const data = await StageApi.getAll({
-                    status: StageStatus.active,
+                const data = await CallStageApi.getAll({
+                    status: CallStageStatus.active,
                     order: 1
                 });
                 setStages(data);

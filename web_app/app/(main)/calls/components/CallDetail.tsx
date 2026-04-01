@@ -2,7 +2,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { TabPanel, TabView } from "primereact/tabview";
 import { useMemo } from "react";
 import { Call } from "../models/call.model";
-import StageManager from "../stages/components/StageManager";
+import StageManager from "../stages/components/CallStageManager";
 
 
 interface CallDetailProps {

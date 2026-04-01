@@ -27,6 +27,7 @@ export interface GetStageDTO {
 export interface ExistsStageDTO {
     grantStage?: string;
     call?: string;
+    status?: CallStageStatus;
 }
 
 

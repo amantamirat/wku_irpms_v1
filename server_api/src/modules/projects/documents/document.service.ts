@@ -16,7 +16,7 @@ import { PhaseRepository } from "../phase/phase.repository";
 import { IProjectRepository } from "../project.repository";
 import { ProjectStatus } from "../project.state-machine";
 import { CollabSynchronizer, DocSynchronizer, PhaseSynchronizer, ProjectSyncOrchestrator } from "../project.synchronizer";
-import { ProjectThemeRepository } from "../themes/project.theme.repository";
+//import { ProjectThemeRepository } from "../themes/project.theme.repository";
 import { CreateDocumentDTO, GetDocumentDTO, SubmitProjectDTO, UpdateStatusDTO } from "./document.dto";
 import { IDocumentRepository } from "./document.repository";
 import { DocumentStateMachine } from "./document.state-machine";
@@ -32,7 +32,7 @@ export class DocumentService {
         private readonly callRepository: ICallRepository = new CallRepository(),
         private readonly appRepository = new ApplicantRepository(),
         //private readonly themeRepository = new ThemeRepository(),
-        private readonly projectThemeRepository = new ProjectThemeRepository(),
+        // private readonly projectThemeRepository = new ProjectThemeRepository(),
         private readonly collabRepository = new CollaboratorRepository(),
         private readonly phaseRepository = new PhaseRepository(),
         private readonly reviewerRepository = new ReviewerRepository(),
@@ -97,10 +97,10 @@ export class DocumentService {
 
                 const collaborators = await this.collabRepository.find({ project });
                 const phases = await this.phaseRepository.find({ project });
-                const projectThemes = await this.projectThemeRepository.find({ project });
-                const themes: string[] = projectThemes.map(pt => String(pt.theme));
+                // const projectThemes = await this.projectThemeRepository.find({ project });
+                //const themes: string[] = projectThemes.map(pt => String(pt.theme));
                 await this.validator.validateProjectConstraints(String(callDoc.grant),
-                    { collaborators, phases, themes });
+                    { collaborators, phases });
             }
 
             const created = await this.docRepository.create({ ...dto, stage: String(nextStageDoc._id) });
@@ -176,7 +176,6 @@ export class DocumentService {
                 description: phase.description
             }))
         );
-        */
 
         await this.projectThemeRepository.createMany(
             themes.map(thm => ({
@@ -184,6 +183,9 @@ export class DocumentService {
                 theme: thm
             }))
         );
+        */
+
+
 
         await this.docRepository.create({
             project: projectId,

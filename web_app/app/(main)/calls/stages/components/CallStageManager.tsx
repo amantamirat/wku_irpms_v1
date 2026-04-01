@@ -4,10 +4,10 @@ import { GrantStage } from "@/app/(main)/grants/stages/models/grant.stage.model"
 import { createEntityManager } from "@/components/createEntityManager";
 import MyBadge from "@/templates/MyBadge";
 import { Call } from "../../models/call.model";
-import { CallStageApi } from "../api/stage.api";
-import { CallStage, GetCallStagesDTO, createEmptyCallStage } from "../models/stage.model";
-import { STAGE_STATUS_ORDER, STAGE_TRANSITIONS, StageStatus } from "../models/stage.state-machine";
-import SaveCallStage from "./SaveStage";
+import { CallStageApi } from "../api/call.stage.api";
+import { CallStage, GetCallStagesDTO, createEmptyCallStage } from "../models/call.stage.model";
+import { CALL_STAGE_STATUS_ORDER, CALL_STAGE_TRANSITIONS, CallStageStatus } from "../models/call.stage.state-machine";
+import SaveCallStage from "./SaveCallStage";
 
 interface CallStageManagerProps {
     call?: Call;
@@ -55,7 +55,6 @@ const CallStageManager = ({ call }: CallStageManagerProps) => {
 
         disableDeleteRow: (row: CallStage) => true,
         SaveDialog: SaveCallStage,
-
         permissionPrefix: "call.stage",
 
         query: () => ({
@@ -65,8 +64,8 @@ const CallStageManager = ({ call }: CallStageManagerProps) => {
 
         workflow: {
             statusField: "status",
-            transitions: STAGE_TRANSITIONS,
-            statusOrder: STAGE_STATUS_ORDER
+            transitions: CALL_STAGE_TRANSITIONS,
+            statusOrder: CALL_STAGE_STATUS_ORDER
         }
     });
 

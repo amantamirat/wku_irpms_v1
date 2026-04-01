@@ -10,3 +10,4 @@ export enum ProjectConstraintType {
     FOCUS_AREA = "FOCUS_AREA",
     INDICATOR = "INDICATOR"
 }
+//maxLength of title and summry: 200

@@ -1,6 +1,6 @@
 'use client';
 import { BASE_URL } from "@/api/ApiClient";
-import { Stage } from "@/app/(main)/calls/stages/models/stage.model";
+import { Stage } from "@/app/(main)/calls/stages/models/call.stage.model";
 import { CrudManager } from "@/components/CrudManager";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useAuth } from "@/contexts/auth-context";

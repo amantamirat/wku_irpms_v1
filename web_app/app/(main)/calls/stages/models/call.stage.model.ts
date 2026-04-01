@@ -1,5 +1,5 @@
 import { Call } from "@/app/(main)/calls/models/call.model";
-import { StageStatus } from "./stage.state-machine";
+import { CallStageStatus } from "./call.stage.state-machine";
 import { GrantStage } from "@/app/(main)/grants/stages/models/grant.stage.model";
 
 export type CallStage = {
@@ -8,7 +8,7 @@ export type CallStage = {
     grantStage?: string | GrantStage;
     order: number;
     deadline: Date;
-    status: StageStatus;
+    status: CallStageStatus;
     createdAt?: Date;
     updatedAt?: Date;
 };
@@ -16,6 +16,8 @@ export type CallStage = {
 export interface GetCallStagesDTO {
     call?: string | Call;
     grantStage?: string | GrantStage;
+    order?:number;
+    status?:CallStageStatus;
     populate?: boolean;
 }
 
@@ -74,5 +76,5 @@ export const createEmptyCallStage = (
     grantStage: stage?.grantStage ?? "",
     order: 1,
     deadline: stage?.deadline ?? new Date(),
-    status: stage?.status ?? StageStatus.planned,
+    status: stage?.status ?? CallStageStatus.planned,
 });

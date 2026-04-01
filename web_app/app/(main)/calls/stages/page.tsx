@@ -1,6 +1,6 @@
 'use client';
 
-import CallStageManager from "./components/StageManager";
+import CallStageManager from "./components/CallStageManager";
 
 
 const StagePage = () => {

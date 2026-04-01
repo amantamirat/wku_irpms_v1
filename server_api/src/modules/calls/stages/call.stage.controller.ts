@@ -35,12 +35,13 @@ export class StageController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { call, grantStage, status, populate } = req.query;
+            const { call, grantStage, status, populate, order } = req.query;
 
             const dto: GetStageDTO = {
-                call: call as string,
-                grantStage: grantStage as string,
-                status: status as any,
+                ...(call && { call: String(call) }),
+                ...(grantStage && { grantStage: String(grantStage) }),
+                ...(status && { status: status as any }),
+                ...(order !== undefined && { order: Number(order) }),
                 ...(populate !== undefined && { populate: populate === "true" })
             };
 
@@ -50,7 +51,6 @@ export class StageController {
             errorResponse(res, 400, err.message, err);
         }
     };
-
 
     getById = async (req: Request, res: Response) => {
         try {
@@ -97,22 +97,6 @@ export class StageController {
         }
     };
 
-    /*
-        updateStatus = async (req: AuthenticatedRequest, res: Response) => {
-            try {
-                const { id } = req.params;
-                const { status } = req.body;
-                const dto: UpdateStageStatusDTO = {
-                    id: String(id),
-                    status
-                };
-                const updated = await this.service.updateStatus(dto);
-                successResponse(res, 200, "Stage status updated successfully", updated);
-            } catch (err: any) {
-                errorResponse(res, 400, err.message, err);
-            }
-        };
-    */
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.params;

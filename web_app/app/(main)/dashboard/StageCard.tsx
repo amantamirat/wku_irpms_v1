@@ -3,13 +3,13 @@ import { useInterval } from "primereact/hooks";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { Call } from "../calls/models/call.model";
-import { Stage } from "../calls/stages/models/stage.model";
+import { CallStage } from "../calls/stages/models/call.stage.model";
 import ApplyWizard from "./apply/ApplyWizard";
 import { useAuth } from "@/contexts/auth-context";
 import { PERMISSIONS } from "@/types/permissions";
 
 interface StageCardProps {
-    stage: Stage;
+    stage: CallStage;
 }
 
 const StageCard = ({ stage }: StageCardProps) => {
@@ -89,7 +89,7 @@ const StageCard = ({ stage }: StageCardProps) => {
     return (
         <>
             <Card
-                title={<span className="font-semibold text-lg">{truncate(stage.name, 45)}</span>}
+                title={<span className="font-semibold text-lg">{truncate("", 45)}</span>}
                 subTitle={
                     <div className="flex flex-column gap-1 text-sm text-600">
                         <span>{(stage.call as Call).title}</span>

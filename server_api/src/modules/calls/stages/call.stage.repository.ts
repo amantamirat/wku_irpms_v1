@@ -90,12 +90,15 @@ export class CallStageRepository implements ICallStageRepository {
 
     async exists(filters: ExistsStageDTO): Promise<boolean> {
         const query: any = {};
-        const { call, grantStage } = filters;
+        const { call, grantStage, status } = filters;
         if (grantStage) {
             query.grantStage = new mongoose.Types.ObjectId(grantStage);
         }
         if (call) {
             query.call = new mongoose.Types.ObjectId(call);
+        }
+        if (status) {
+            query.status = status;
         }
         const result = await CallStage.exists(query).exec();
         return result !== null;

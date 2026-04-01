@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { CallStage } from "../models/stage.model";
-import { CallStageApi } from "../api/stage.api";
+import { CallStage } from "../models/call.stage.model";
+import { CallStageApi } from "../api/call.stage.api";
 import StageDetail from "../components/StageDetail";
 
 

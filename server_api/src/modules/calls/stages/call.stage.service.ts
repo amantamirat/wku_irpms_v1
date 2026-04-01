@@ -30,6 +30,7 @@ export class StageService {
 
         const callDoc = await this.callRepo.findById(call);
         if (!callDoc) throw new Error(ERROR_CODES.CALL_NOT_FOUND);
+        if (callDoc.status !== CallStatus.planned) throw new Error(ERROR_CODES.CALL_NOT_PLANNED);
 
         const stageDoc = await this.grantStageRepo.findById(grantStage);
         if (!stageDoc) throw new Error(ERROR_CODES.STAGE_NOT_FOUND);
@@ -46,7 +47,7 @@ export class StageService {
      * Get all stages or by call
      */
     async getStages(dto: GetStageDTO) {
-        return await this.repository.find({ ...dto, populate: true });
+        return await this.repository.find(dto);
     }
 
     async getById(id: string) {
@@ -69,13 +70,13 @@ export class StageService {
     async transitionState(dto: TransitionRequestDto) {
         const { id, current, next } = dto;
 
-        const stageDoc = await this.repository.findById(id);
-        if (!stageDoc) {
-            throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
+        const callStageDoc = await this.repository.findById(id);
+        if (!callStageDoc) {
+            throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
         }
-        const from = stageDoc.status as CallStageStatus;
+        const from = callStageDoc.status as CallStageStatus;
         const to = next as CallStageStatus;
-        // optional UI consistency check
+
         if (current && current !== from) {
             throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
         }
@@ -85,8 +86,11 @@ export class StageService {
             STAGE_TRANSITIONS
         );
 
-        if (next === CallStatus.planned) {
-
+        if (next === CallStatus.active) {
+            const callDoc = await this.callRepo.findById(String(callStageDoc.call));
+            if (!callDoc) throw new Error(ERROR_CODES.CALL_NOT_FOUND);
+            if (callDoc.status !== CallStatus.active)
+                throw new Error(ERROR_CODES.CALL_NOT_ACTIVE);
         }
 
         return await this.repository.update(id, {

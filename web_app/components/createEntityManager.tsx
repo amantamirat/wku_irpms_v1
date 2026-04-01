@@ -108,7 +108,9 @@ export function createEntityManager<
         ) => {
 
             if (!row._id) return;
-
+            
+            if (!config.api.transitionState) return;
+            
             const updated = await config.api.transitionState?.(row._id, dto);
             if (updated) {
                 updateItem({ ...row, [config.workflow!.statusField]: dto.next });

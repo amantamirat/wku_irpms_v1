@@ -8,8 +8,8 @@ import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 
-import { CallStageApi } from '../api/stage.api';
-import { CallStage, validateCallStage } from '../models/stage.model';
+import { CallStageApi } from '../api/call.stage.api';
+import { CallStage, validateCallStage } from '../models/call.stage.model';
 
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
 

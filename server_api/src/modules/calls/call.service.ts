@@ -10,6 +10,7 @@ import { CreateCallDTO, GetCallsOptions, UpdateCallDTO } from "./call.dto";
 import { CallRepository } from "./call.repository";
 import { CALL_TRANSITIONS } from "./call.state-machine";
 import { CallStatus } from "./call.status";
+import { CallStageStatus } from "./stages/call.stage.model";
 import { ICallStageRepository } from "./stages/call.stage.repository";
 
 export class CallService {
@@ -83,11 +84,10 @@ export class CallService {
         );
 
         if (next === CallStatus.planned) {
-            /*
-            if (await this.callRepository.exists({ calendar: id })) {
-                throw new AppError(ERROR_CODES.CALL_ALREADY_EXISTS);
+            const activeStageExsit = await this.callStageRepo.exists({ call: id, status: CallStageStatus.active });
+            if (activeStageExsit) {
+                throw new AppError(ERROR_CODES.ACTIVE_CALL_STAGE_EXIST);
             }
-            */
         }
 
         return await this.repository.update(id, {

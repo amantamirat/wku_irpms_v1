@@ -7,8 +7,8 @@ import { useEffect, useRef, useState } from "react";
 import UploadForm from "../../components/UploadForm";
 import { Project } from "../../models/project.model";
 import { ProjectDoc, validateProjectDoc } from "../models/document.model";
-import { StageApi } from "@/app/(main)/calls/stages/api/stage.api";
-import { Stage } from "@/app/(main)/calls/stages/models/stage.model";
+import { StageApi } from "@/app/(main)/calls/stages/api/call.stage.api";
+import { Stage } from "@/app/(main)/calls/stages/models/call.stage.model";
 import { ProjectDocApi } from "../api/project.doc.api";
 
 interface SaveProjectStageDialogProps {

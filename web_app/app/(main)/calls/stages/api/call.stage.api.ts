@@ -1,6 +1,7 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
-import { CallStage, GetCallStagesDTO, sanitizeCallStage } from "../models/stage.model";
+import { CallStage, GetCallStagesDTO, sanitizeCallStage } from "../models/call.stage.model";
+import { TransitionRequestDto } from "@/types/util";
 
 const end_point = "/call/stages";
 
@@ -21,6 +22,14 @@ export const CallStageApi: EntityApi<CallStage, GetCallStagesDTO | undefined> = 
 
             if (options.grantStage) {
                 query.append("grantStage", sanitized.grantStage as string);
+            }
+
+            if (sanitized.order !== undefined) {
+                query.append("order", String(sanitized.order));
+            }
+
+            if (options.status) {
+                query.append("status", sanitized.status as string);
             }
 
             if (options.populate !== undefined) {
@@ -55,6 +64,13 @@ export const CallStageApi: EntityApi<CallStage, GetCallStagesDTO | undefined> = 
         return ApiClient.put(`${end_point}/${stage._id}`, sanitizeCallStage(stage));
     },
 
+    // ---------------------------
+    // Transition State
+    // ---------------------------
+    async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
+        const url = `${end_point}/${id}`;
+        return ApiClient.patch(url, dto);
+    },
     // ---------------------------
     // Delete
     // ---------------------------
