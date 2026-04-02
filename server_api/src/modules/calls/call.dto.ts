@@ -1,12 +1,9 @@
 import { CallStatus } from "./call.status";
 
 export interface CreateCallDTO {
-    calendar: string;
-    //directorate: string;
-    grant: string;
+    grantAllocation: string;
     title: string;
     description?: string;
-    //thematic: string;
     status?: CallStatus;
     userId?: string;
 }
@@ -17,25 +14,19 @@ export interface UpdateCallDTO {
     data: Partial<{
         title: string;
         description: string;
-        //thematic: string;
-        status: CallStatus;
     }>;
     userId?: string;
 }
 
 // Options for querying calls
 export interface GetCallsOptions {
+    grantAllocation?: string;
     calendar?: string;
-    //directorate?: string;
     grant?: string;
     status?: CallStatus;
     populate?: boolean;
-   // userId?: string;
 }
 
 export interface ExistsCallDTO {
-    grant?: string;
-    calendar?: string;
-   // directorate?: string;
-   // thematic?: string;
+    grantAllocation?: string;
 }

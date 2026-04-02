@@ -22,6 +22,7 @@ import grantRoutes from './modules/grants/grant.routes';
 import grantStageRoutes from './modules/grants/stages/grant.stage.routes';
 import constraintRoutes from './modules/grants/constraints/constraint.routes';
 import compositionRoutes from './modules/grants/compositions/composition.routes';
+import grantAllocationsRoutes from './modules/grants/allocations/grant.allocation.routes';
 
 import calendarRoutes from './modules/calendar/calendar.routes';
 import callRoutes from './modules/calls/call.routes';
@@ -82,6 +83,7 @@ app.use("/api/grants", grantRoutes);
 app.use("/api/grants/stages", grantStageRoutes);
 app.use("/api/grants/constraints", constraintRoutes);
 app.use("/api/grants/compositions", compositionRoutes);
+app.use("/api/grants/allocations", grantAllocationsRoutes)
 
 app.use("/api/calendars", calendarRoutes);
 app.use("/api/calls", callRoutes);

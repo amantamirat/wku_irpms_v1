@@ -99,7 +99,7 @@ export class DocumentService {
                 const phases = await this.phaseRepository.find({ project });
                 // const projectThemes = await this.projectThemeRepository.find({ project });
                 //const themes: string[] = projectThemes.map(pt => String(pt.theme));
-                await this.validator.validateProjectConstraints(String(callDoc.grant),
+                await this.validator.validateProjectConstraints(String(callDoc.grantAllocation),
                     { collaborators, phases });
             }
 
@@ -154,7 +154,7 @@ export class DocumentService {
             appDocs.push(appDoc);
         }
 
-        await this.validator.validateProjectConstraints(String(callDoc.grant), dto);
+        await this.validator.validateProjectConstraints(String(callDoc.grantAllocation), dto);
 
         const projectDoc = await this.projectRepository.create({ grant: call, title, applicant, summary, themes: [] });
         const projectId = String(projectDoc._id);

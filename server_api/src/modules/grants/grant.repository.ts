@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Grant, IGrant } from "./grant.model";
+import { Grant, GrantStatus, IGrant } from "./grant.model";
 import {
     CreateGrantDTO,
     ExistsGrantDTO,
@@ -12,6 +12,7 @@ export interface IGrantRepository {
     find(filters: GetGrantsDTO): Promise<Partial<IGrant>[]>;
     create(dto: CreateGrantDTO): Promise<IGrant>;
     update(id: string, data: UpdateGrantDTO["data"]): Promise<IGrant | null>;
+    updateStatus(id: string, newStatus: GrantStatus): Promise<IGrant | null>;
     exists(filters: ExistsGrantDTO): Promise<boolean>;
     delete(id: string): Promise<IGrant | null>;
 }
@@ -81,12 +82,17 @@ export class GrantRepository implements IGrantRepository {
         if (dtoData.amount !== undefined)
             updateData.amount = dtoData.amount;
 
-        if (dtoData.status !== undefined)
-            updateData.status = dtoData.status;
-
         return Grant.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },
+            { new: true }
+        ).exec();
+    }
+
+    async updateStatus(id: string, newStatus: GrantStatus) {
+        return Grant.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            { $set: { status: newStatus } },
             { new: true }
         ).exec();
     }

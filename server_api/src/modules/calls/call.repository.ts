@@ -1,12 +1,15 @@
 import mongoose from "mongoose";
 import { CreateCallDTO, ExistsCallDTO, GetCallsOptions, UpdateCallDTO } from "./call.dto";
 import { Call, ICall } from "./call.model";
+import { CallStatus } from "./call.status";
+import { GrantAllocation } from "../grants/allocations/grant.allocation.model";
 
 export interface ICallRepository {
     findById(id: string): Promise<ICall | null>;
     find(filters: GetCallsOptions): Promise<Partial<ICall>[]>;
     create(dto: CreateCallDTO): Promise<ICall>;
     update(id: string, data: UpdateCallDTO["data"]): Promise<ICall | null>;
+    updateStatus(id: string, newStatus: CallStatus): Promise<ICall | null>;
     exists(filters: ExistsCallDTO): Promise<boolean>;
     delete(id: string): Promise<ICall | null>;
 }
@@ -23,45 +26,48 @@ export class CallRepository implements ICallRepository {
     async find(filters: GetCallsOptions) {
         const query: any = {};
 
-        if (filters.calendar) {
-            query.calendar = new mongoose.Types.ObjectId(filters.calendar);
-        }
-
-        if (filters.grant) {
-            query.grant = new mongoose.Types.ObjectId(filters.grant);
-        }
-
-        /*
-        if (filters.directorate) {
-            query.directorate = new mongoose.Types.ObjectId(filters.directorate);
-        }
-        */
-
+        // 1. Handle Status
         if (filters.status) {
             query.status = filters.status;
         }
 
+        // 2. Handle Filtering by GrantAllocation OR its children (Calendar/Grant)
+        if (filters.grantAllocation) {
+            // Direct match
+            query.grantAllocation = new mongoose.Types.ObjectId(filters.grantAllocation);
+        } else if (filters.calendar || filters.grant) {
+            // Find all Allocation IDs that match the calendar or grant
+            const allocationQuery: any = {};
+            if (filters.calendar) allocationQuery.calendar = filters.calendar;
+            if (filters.grant) allocationQuery.grant = filters.grant;
+
+            const matchingAllocations = await GrantAllocation.find(allocationQuery).select('_id').lean();
+            const allocationIds = matchingAllocations.map(a => a._id);
+
+            // Tell the Call query: "Find calls where grantAllocation is one of these IDs"
+            query.grantAllocation = { $in: allocationIds };
+        }
+
         let dbQuery = Call.find(query);
 
+        // 3. Deep Population (Same as your current logic)
         if (filters.populate) {
-            dbQuery = dbQuery
-                .populate('calendar')
-                //.populate('directorate')
-                .populate('grant')
-            //.populate('thematic');
+            dbQuery = dbQuery.populate({
+                path: 'grantAllocation',
+                populate: [
+                    { path: 'grant' },
+                    { path: 'calendar' }
+                ]
+            });
         }
 
         return dbQuery.lean<ICall[]>().exec();
     }
 
-
     async create(dto: CreateCallDTO) {
         return Call.create({
             ...dto,
-            // directorate: new mongoose.Types.ObjectId(dto.directorate),
-            calendar: new mongoose.Types.ObjectId(dto.calendar),
-            grant: new mongoose.Types.ObjectId(dto.grant),
-            // thematic: new mongoose.Types.ObjectId(dto.thematic),
+            grantAllocation: new mongoose.Types.ObjectId(dto.grantAllocation),
         });
     }
 
@@ -70,7 +76,6 @@ export class CallRepository implements ICallRepository {
 
         if (dtoData.title) updateData.title = dtoData.title;
         if (dtoData.description) updateData.description = dtoData.description;
-        if (dtoData.status) updateData.status = dtoData.status;
 
         return Call.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
@@ -79,19 +84,20 @@ export class CallRepository implements ICallRepository {
         ).exec();
     }
 
+    async updateStatus(id: string, newStatus: CallStatus) {
+        return Call.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            { $set: { status: newStatus } },
+            { new: true }
+        ).exec();
+    }
+
     async exists(filters: ExistsCallDTO): Promise<boolean> {
         const query: any = {};
-        const { grant, calendar, //directorate, thematic 
-
-        } = filters;
-        if (grant) {
-            query.grant = new mongoose.Types.ObjectId(grant);
+        const { grantAllocation } = filters;
+        if (grantAllocation) {
+            query.grantAllocation = new mongoose.Types.ObjectId(grantAllocation);
         }
-        if (calendar) {
-            query.calendar = new mongoose.Types.ObjectId(calendar);
-        }
-        
-
         const result = await Call.exists(query).exec();
         return result !== null;
     }

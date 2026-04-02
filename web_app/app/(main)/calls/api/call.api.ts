@@ -9,37 +9,32 @@ export const CallApi: EntityApi<Call, GetCallsOptions | undefined> = {
     // ---------------------------
     // Fetch / Query
     // ---------------------------
-    async getAll(options) {
+    async getAll(options: GetCallsOptions) {
         const query = new URLSearchParams();
 
         if (options) {
             const sanitized = sanitizeCall(options);
 
-            if (options.calendar) {
-                query.append("calendar", sanitized.calendar as string);
-            }
-
-            if (options.grant) {
-                query.append("grant", sanitized.grant as string);
-            }
-
-            if (options.status) {
-                query.append("status", sanitized.status as string);
-            }
-
-            if (options.populate !== undefined) {
-                query.append("populate", String(options.populate));
-            }
+            // Dynamically append all present keys
+            Object.entries(sanitized).forEach(([key, value]) => {
+                if (value !== undefined && value !== null) {
+                    query.append(key, String(value));
+                }
+            });
         }
 
         const qs = query.toString();
-        return ApiClient.get(`${end_point}${qs ? `?${qs}` : ""}`);
+        const url = `${end_point}${qs ? `?${qs}` : ""}`;
+
+        return ApiClient.get(url);
     },
 
     // ---------------------------
     // Get By Id
     // ---------------------------
     async getById(id: string): Promise<Call> {
+        // Usually, you'll want to ensure the backend populates 
+        // grantAllocation -> grant and grantAllocation -> calendar here
         return ApiClient.get(`${end_point}/${id}`);
     },
 
@@ -48,7 +43,7 @@ export const CallApi: EntityApi<Call, GetCallsOptions | undefined> = {
     // ---------------------------
     async create(call) {
         const sanitized = sanitizeCall(call);
-        return ApiClient.post(`${end_point}/`, sanitized);
+        return ApiClient.post(`${end_point}`, sanitized);
     },
 
     // ---------------------------
@@ -56,14 +51,16 @@ export const CallApi: EntityApi<Call, GetCallsOptions | undefined> = {
     // ---------------------------
     async update(call) {
         if (!call._id) throw new Error("_id required");
+        // We pass the ID and the sanitized body separately 
+        // to match common REST patterns
         return ApiClient.put(`${end_point}/${call._id}`, sanitizeCall(call));
     },
 
     // ---------------------------
-    // Transition State (replace updateStatus)
+    // Transition State
     // ---------------------------
     async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
-        const url = `${end_point}/${id}`;
+        const url = `${end_point}/${id}/transition`; // Often better to have a specific sub-route for transitions
         return ApiClient.patch(url, dto);
     },
 

@@ -370,6 +370,46 @@
     "description": "Delete composition entries"
   },
   {
+    "category": "Grant Allocation Management",
+    "name": "grant.allocation:create",
+    "description": "Create grant allocation entries"
+  },
+  {
+    "category": "Grant Allocation Management",
+    "name": "grant.allocation:read",
+    "description": "Read grant allocation entries"
+  },
+  {
+    "category": "Grant Allocation Management",
+    "name": "grant.allocation:update",
+    "description": "Update grant allocation entries"
+  },
+  {
+    "category": "Grant Allocation Management",
+    "name": "grant.allocation:transition.planned.active",
+    "description": "Move allocation from planned to active"
+  },
+  {
+    "category": "Grant Allocation Management",
+    "name": "grant.allocation:transition.active.closed",
+    "description": "Move allocation from active to closed"
+  },
+  {
+    "category": "Grant Allocation Management",
+    "name": "grant.allocation:transition.active.planned",
+    "description": "Revert allocation from active to planned"
+  },
+  {
+    "category": "Grant Allocation Management",
+    "name": "grant.allocation:transition.closed.active",
+    "description": "Reopen allocation from closed to active"
+  },
+  {
+    "category": "Grant Allocation Management",
+    "name": "grant.allocation:delete",
+    "description": "Delete grant allocation entries"
+  },
+  {
     "category": "Call Management",
     "name": "call:create",
     "description": "Create call entries"
@@ -782,7 +822,7 @@
     "category": "Phase Management",
     "name": "phase:update",
     "description": "Update phase entries"
-  },  
+  },
   {
     "category": "Phase Management",
     "name": "phase:transition.proposed.reviewed",
@@ -828,7 +868,6 @@
     "name": "phase:delete",
     "description": "Delete phase entries"
   },
-  
   {
     "category": "Phase Document Management",
     "name": "phase:document:create"

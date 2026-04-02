@@ -1,15 +1,27 @@
 import { Router } from 'express';
-import { GrantController } from './grant.controller';
-import { verifyActiveAccount, checkPermission, checkTransitionPermission } from '../users/auth/auth.middleware';
 import { PERMISSIONS } from '../../common/constants/permissions';
+import { IOrganizationRepository, OrganizationRepository } from '../organization/organization.repository';
+import { IThematicRepository, ThematicRepository } from '../thematics/thematic.repository';
+import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
+import { GrantAllocationRepository } from './allocations/grant.allocation.repository';
+import { CompositionRepository, ICompositionRepository } from './compositions/composition.repository';
+import { ConstraintRepository, IConstraintRepository } from './constraints/constraint.repository';
+import { GrantController } from './grant.controller';
 import { GrantRepository } from './grant.repository';
-import { OrganizationRepository } from '../organization/organization.repository';
 import { GrantService } from './grant.service';
+import { GrantStageRepository, IGrantStageRepository } from './stages/grant.stage.repository';
 
-const repository = new GrantRepository();
-const orgnRepository = new OrganizationRepository();
+const repository: GrantRepository = new GrantRepository();
+const organizationRepo: IOrganizationRepository = new OrganizationRepository();
+const thematicRepository: IThematicRepository = new ThematicRepository();
+const constraintRepo: IConstraintRepository = new ConstraintRepository();
+const compositionRepo: ICompositionRepository = new CompositionRepository();
+const grantStageRepo: IGrantStageRepository = new GrantStageRepository();
+const allocationRepo = new GrantAllocationRepository()
 
-const service = new GrantService(repository, orgnRepository);
+const service = new GrantService(repository, organizationRepo, thematicRepository, constraintRepo,
+  compositionRepo, grantStageRepo, allocationRepo
+);
 const controller = new GrantController(service);
 const router = Router();
 

@@ -1,48 +1,77 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
-import { PERMISSIONS } from "@/types/permissions";
-import QuickLinks from "./dashboard/QuickLinks";
+import Link from "next/link";
 import StageGrid from "./dashboard/StageGrid";
+import { PERMISSIONS } from "@/types/permissions";
 import { useAuth } from "@/contexts/auth-context";
-
-
+import QuickLinks from "./dashboard/QuickLinks";
+import { Button } from "primereact/button";
 
 const Dashboard = () => {
-
     const { hasPermission } = useAuth();
-    const canReadStages = hasPermission([PERMISSIONS.STAGE.READ]);
+
+    // Define roles based on permissions
+    const isAdmin = hasPermission([PERMISSIONS.PERMISSION.READ]);
+    const isReviewer = hasPermission([PERMISSIONS.REVIEWER.READ]);
+    const isResearcher = hasPermission([PERMISSIONS.PROJECT.READ]);
 
     return (
         <div className="grid">
-
+            {/* 🟢 TOP ROW: Stats (KPI Cards) */}
             <div className="col-12">
-                {/*<ProjectStats />*/}
+                {//<ProjectStatsView isAdmin={isAdmin} isResearcher={isResearcher} />
+                }
             </div>
 
+            {/* 🔵 LEFT COLUMN: Core Work (8/12 width) */}
+            <div className="col-12 lg:col-8">
+                {/* Researchers see what they can apply to */}
+                {isResearcher && (
+                    <div className="card border-none shadow-1 p-4 mb-4">
+                        <div className="flex align-items-center justify-content-between mb-4">
+                            <div>
+                                <h5 className="m-0 text-xl font-bold">Research Opportunities</h5>
+                                <p className="text-500 text-sm m-0">Open calls for grant applications and projects</p>
+                            </div>
+                            <Link href="/calls">
+                                <Button label="View All" icon="pi pi-arrow-right" iconPos="right" className="p-button-text p-button-sm" />
+                            </Link>
+                        </div>
 
-            {/* 🧾 Open Calls */}
-            {canReadStages &&
-                <div className="col-12">
+                        {/* This component now handles its own grid internally */}
+                        <StageGrid />
+                    </div>
+                )}
+
+                {/* Admins/Reviewers see submissions needing attention */}
+                {(isAdmin || isReviewer) && (
                     <div className="card">
-                        {
-                            <StageGrid />
+                        <h5>Pending Evaluations</h5>
+                        {//<PendingReviewsTable />
                         }
                     </div>
+                )}
+            </div>
+
+            {/* 🟠 RIGHT COLUMN: Utilities & Feed (4/12 width) */}
+            <div className="col-12 lg:col-4">
+                <div className="card mb-4">
+                    <h5>Action Center</h5>
+                    {
+                        //<Notifications />
+                    }
+
                 </div>
-            }
 
-            {/* 📈 Performance Chart */}
-            <div className="col-12 lg:col-6">
-                {/*<OverviewChart />*/}
+                <div className="card">
+                    <h5>Upcoming Deadlines</h5>
+                    {
+                        //<DeadlineCalendar />
+                    }
+                </div>
             </div>
 
-            {/* 🔔 Notifications */}
-            <div className="col-12 lg:col-6">
-                { /*<Notifications />*/}
-            </div>
-
-            {/* ⚡ Quick Access */}
-            <div className="col-12">                
+            {/* 🟣 BOTTOM ROW: Navigation */}
+            <div className="col-12">
                 <QuickLinks />
             </div>
         </div>

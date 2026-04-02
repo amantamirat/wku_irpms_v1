@@ -4,6 +4,7 @@ import { PERMISSIONS } from "@/types/permissions";
 import { TabPanel, TabView } from "primereact/tabview";
 import CallManager from "../../calls/components/CallManager";
 import { Calendar } from "../models/calendar.model";
+import AllocationManager from "../../grants/allocations/components/AllocationManager";
 
 
 interface CalendarDetailProps {
@@ -18,10 +19,16 @@ const CalendarDetail = ({ calendar }: CalendarDetailProps) => {
      */
     const tabs = useMemo(() => [
         {
+            header: "Grant Allocations",
+            permission: "grant.allocation:read",
+            content: <AllocationManager calendar={calendar} />
+        },
+        {
             header: "Calls",
             permission: "call:read",
             content: <CallManager calendar={calendar} />
-        }
+        },
+
     ], [calendar]);
 
     /**

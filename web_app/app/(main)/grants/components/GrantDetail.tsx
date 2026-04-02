@@ -7,6 +7,7 @@ import CompositionManager from "../compositions/components/CompositionManager";
 import ConstraintManager from "../constraints/components/ConstraintManager";
 import { Grant } from "../models/grant.model";
 import StageManager from "../stages/components/StageManager";
+import AllocationManager from "../allocations/components/AllocationManager";
 
 
 interface GrantDetailProps {
@@ -34,6 +35,12 @@ const GrantDetail = ({ grant }: GrantDetailProps) => {
             header: "Compositions",
             permission: PERMISSIONS.CONSTRAINT.READ,
             content: <CompositionManager grant={grant} />
+        },
+
+        {
+            header: "Allocations",
+            permission: "grant.allocation:read",
+            content: <AllocationManager grant={grant} />
         },
 
         {

@@ -21,9 +21,8 @@ export interface UpdateGrantDTO {
     id: string;
     data: Partial<{
         title: string;
-        description?: string;
+        description: string;
         amount: number;
-        status: GrantStatus;
     }>;
     userId?: string;
 }

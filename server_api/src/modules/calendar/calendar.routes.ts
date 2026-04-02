@@ -1,14 +1,14 @@
 import { Router } from 'express';
-import { CalendarController } from './calendar.controller';
-import { verifyActiveAccount, checkPermission, checkTransitionPermission } from '../users/auth/auth.middleware';
 import { PERMISSIONS } from '../../common/constants/permissions';
+import { GrantAllocationRepository } from '../grants/allocations/grant.allocation.repository';
+import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
+import { CalendarController } from './calendar.controller';
 import { CalendarRepository } from './calendar.repository';
 import { CalendarService } from './calendar.service';
-import { CallRepository } from '../calls/call.repository';
 
 const repository = new CalendarRepository();
-const callRepository = new CallRepository();
-const service = new CalendarService(repository, callRepository);
+const grantAllocRepository = new GrantAllocationRepository();
+const service = new CalendarService(repository, grantAllocRepository);
 const controller = new CalendarController(service);
 
 const router: Router = Router();

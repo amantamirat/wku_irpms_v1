@@ -17,18 +17,18 @@ import { GrantStageRepository, IGrantStageRepository } from "./stages/grant.stag
 import { IExternal } from "../organization/organization.model";
 import { Ownership } from "../organization/organization.enum";
 import { IProjectRepository, ProjectRepository } from "../projects/project.repository";
+import { GrantAllocationRepository, IGrantAllocationRepository } from "./allocations/grant.allocation.repository";
 
 export class GrantService {
 
     constructor(
-        private readonly repository: IGrantRepository = new GrantRepository(),
-        private readonly organizationRepo: IOrganizationRepository = new OrganizationRepository(),
-        private readonly thematicRepository: IThematicRepository = new ThematicRepository(),
-        private readonly constraintRepo: IConstraintRepository = new ConstraintRepository(),
-        private readonly compositionRepo: ICompositionRepository = new CompositionRepository(),
-        private readonly grantStageRepo: IGrantStageRepository = new GrantStageRepository(),
-        private readonly callRepo: ICallRepository = new CallRepository(),
-        private readonly projectRepo: IProjectRepository = new ProjectRepository(),
+        private readonly repository: IGrantRepository,
+        private readonly organizationRepo: IOrganizationRepository,
+        private readonly thematicRepository: IThematicRepository,
+        private readonly constraintRepo: IConstraintRepository,
+        private readonly compositionRepo: ICompositionRepository,
+        private readonly grantStageRepo: IGrantStageRepository,
+        private readonly allocationRepo: IGrantAllocationRepository
     ) { }
 
     async create(dto: CreateGrantDTO) {
@@ -69,11 +69,26 @@ export class GrantService {
 
     async update(dto: UpdateGrantDTO) {
         const { id, data } = dto;
-        const grantDoc = await this.repository.update(id, data);
-        if (!grantDoc) {
-            throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+        const grantDoc = await this.repository.findById(id);
+        if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+
+        if (grantDoc.status === GrantStatus.closed) throw new AppError(ERROR_CODES.GRANT_CLOSED);
+
+        // If the admin is trying to change the total amount
+        if (data.amount !== undefined && data.amount !== grantDoc.amount) {
+            // Find all allocations tied to this grant
+            const allocations = await this.allocationRepo.find({ grant: id });
+            const totalAllocated = allocations.reduce((sum, a) => sum + (a.totalBudget || 0), 0);
+
+            // 🔥 Protection: Prevent reducing grant below what is already allocated
+            if (data.amount < totalAllocated) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_GRANT_REDUCTION,
+                    `Cannot reduce grant to ${data.amount}. Total allocated is currently ${totalAllocated}.`
+                );
+            }
         }
-        return grantDoc;
+        return await this.repository.update(id, data);
     }
 
     async transitionState(dto: TransitionRequestDto) {
@@ -99,11 +114,8 @@ export class GrantService {
         );
 
         if (next === GrantStatus.planned) {
-            if (await this.callRepo.exists({ grant: id })) {
-                throw new AppError(ERROR_CODES.CALL_ALREADY_EXISTS);
-            }
-            if (await this.projectRepo.exists({ grant: id })) {
-                throw new AppError(ERROR_CODES.PROJECT_ALREADY_EXISTS);
+            if (await this.allocationRepo.exists({ grant: id })) {
+                throw new AppError(ERROR_CODES.ALLOCATION_ALREADY_EXISTS);
             }
         }
         if (next === GrantStatus.active) {
@@ -111,9 +123,7 @@ export class GrantService {
                 throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
             }
         }
-        return await this.repository.update(id, {
-            status: to
-        });
+        return await this.repository.updateStatus(id, to);
     }
 
     async delete(id: string) {
@@ -121,18 +131,17 @@ export class GrantService {
         if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
         if (grantDoc.status !== GrantStatus.planned)
             throw new AppError(ERROR_CODES.GRANT_NOT_PLANNED);
-        /*
-        if (await this.callRepo.exists({ grant: id }))
-            throw new AppError(ERROR_CODES.CALL_ALREADY_EXISTS);
-        */
+
+        if (await this.grantStageRepo.exists({ grant: id }))
+            throw new AppError(ERROR_CODES.STAGE_ALREADY_EXISTS);
+
         if (await this.constraintRepo.exists({ grant: id }))
             throw new AppError(ERROR_CODES.CONSTRAINT_ALREADY_EXISTS);
+
         if (await this.compositionRepo.exists({ grant: id }))
             throw new AppError(ERROR_CODES.COMPOSITION_ALREADY_EXISTS);
 
-        if (await this.grantStageRepo.exists({ grant: id })) {
-            throw new AppError(ERROR_CODES.STAGE_ALREADY_EXISTS);
-        }
+
         return await this.repository.delete(id);
     }
 }

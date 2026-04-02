@@ -1,21 +1,18 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
-import { checkPermission, checkStatusPermission, checkTransitionPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
+import { GrantAllocationRepository } from '../grants/allocations/grant.allocation.repository';
+import { GrantStageRepository } from '../grants/stages/grant.stage.repository';
+import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
 import { CallController } from './call.controller';
 import { CallRepository } from './call.repository';
 import { CallService } from './call.service';
-import { CalendarRepository } from '../calendar/calendar.repository';
-import { OrganizationRepository } from '../organization/organization.repository';
-import { GrantRepository } from '../grants/grant.repository';
 import { CallStageRepository } from './stages/call.stage.repository';
-import { ThematicRepository } from '../thematics/thematic.repository';
-import { GrantStageRepository } from '../grants/stages/grant.stage.repository';
 
 const repository = new CallRepository();
-const calendarRepo = new CalendarRepository();
-const callStageRepo = new CallStageRepository();
+const grantAllocRepo = new GrantAllocationRepository();
 const grantStageRepo = new GrantStageRepository();
-const service = new CallService(repository, calendarRepo, callStageRepo, grantStageRepo);
+const callStageRepo = new CallStageRepository();
+const service = new CallService(repository, grantAllocRepo, grantStageRepo, callStageRepo);
 const controller = new CallController(service);
 const router = Router();
 
@@ -41,7 +38,7 @@ router.put(
 );
 // Update status
 router.patch(
-    '/:id',
+    '/:id/transition', // Often better to have a specific sub-route for transitions
     verifyActiveAccount,
     checkTransitionPermission("call"),
     controller.transitionState

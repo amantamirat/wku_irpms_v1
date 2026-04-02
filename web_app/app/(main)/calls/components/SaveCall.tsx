@@ -8,101 +8,79 @@ import { InputTextarea } from 'primereact/inputtextarea';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
-
-import { CalendarApi } from '../../calendars/api/calendar.api';
-import { Calendar, CalendarStatus } from '../../calendars/models/calendar.model';
-
-import { GrantApi } from '../../grants/api/grant.api';
+import { CallApi } from '../api/call.api';
+import { Call, validateCall, sanitizeCall } from '../models/call.model';
+import { EntitySaveDialogProps } from '@/components/createEntityManager';
+import { GrantAllocation } from '../../grants/allocations/models/grant.allocation.model';
+import { GrantAllocationApi } from '../../grants/allocations/api/grant.allocation.api';
+import { AllocationStatus } from '../../grants/allocations/models/grant.allocation.state-machine';
+import { Calendar } from '../../calendars/models/calendar.model';
 import { Grant } from '../../grants/models/grant.model';
 
-import { CallApi } from '../api/call.api';
-import { Call, validateCall } from '../models/call.model';
+interface ExtendedCall extends Call {
+    _filterCalendar?: string;
+    _filterGrant?: string;
+}
 
-import { EntitySaveDialogProps } from '@/components/createEntityManager';
-import { GrantStatus } from '../../grants/models/grant.state-machine';
-
-const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<Call>) => {
-
+const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<ExtendedCall>) => {
     const toast = useRef<Toast>(null);
-
     const [localCall, setLocalCall] = useState<Call>({ ...item });
     const [submitted, setSubmitted] = useState(false);
+    const [allocations, setAllocations] = useState<GrantAllocation[]>([]);
 
-    const [calendars, setCalendars] = useState<Calendar[] | undefined>(undefined);
-    const [grants, setGrants] = useState<Grant[] | undefined>(undefined);
+    const isAllocationPredefined = !!item.grantAllocation;
 
-
-    const isGrantPredefined = !!item.grant;
-    const isCalendarPredefined = !!item.calendar;
-
-    // ---------------------------
-    // Load Calendars
-    // ---------------------------
+    // Load available allocations (Year + Grant combinations)
     useEffect(() => {
-        if (isCalendarPredefined) return
-        const loadCalendars = async () => {
+        if (isAllocationPredefined || !visible) return;
+        const loadAllocations = async () => {
             try {
-                const data = await CalendarApi.getAll({ status: CalendarStatus.active });
-                setCalendars(data);
+
+                // Construct query based on provided filters
+                const query: any = {
+                    status: AllocationStatus.active,
+                    populate: true
+                };
+
+                if (item._filterCalendar) query.calendar = item._filterCalendar;
+                if (item._filterGrant) query.grant = item._filterGrant;
+
+                const data = await GrantAllocationApi.getAll(query);
+                setAllocations(data);
+
+                // UX WIN: If there's only one possible choice, select it automatically
+                if (data.length === 1 && !localCall.grantAllocation) {
+                    setLocalCall(prev => ({ ...prev, grantAllocation: data[0] }));
+                }
             } catch (err) {
-                console.error('Failed to load calendars:', err);
+                console.error('Failed to load allocations:', err);
             }
         };
-        loadCalendars();
-    }, [isCalendarPredefined]);
+        loadAllocations();
+    }, [isAllocationPredefined, visible, item._filterCalendar, item._filterGrant]);
 
-    // ---------------------------
-    // Load Grants
-    // ---------------------------
     useEffect(() => {
-        if (isGrantPredefined) return
-        const loadGrants = async () => {
-            try {
-                const data = await GrantApi.getAll({ status: GrantStatus.active });
-                setGrants(data);
-            } catch (err) {
-                console.error('Failed to load grants:', err);
-            }
-        };
-        loadGrants();
-    }, [isGrantPredefined]);
-
-    // ---------------------------
-    // Sync item
-    // ---------------------------
-    useEffect(() => {
-        setLocalCall({ ...item });
+        setLocalAllocationSync();
     }, [item]);
 
-    useEffect(() => {
-        if (!visible) clearForm();
-    }, [visible]);
+    const setLocalAllocationSync = () => setLocalCall({ ...item });
 
     const clearForm = () => {
         setSubmitted(false);
         setLocalCall({ ...item });
     };
 
-    // ---------------------------
-    // Save
-    // ---------------------------
     const saveCall = async () => {
         try {
             setSubmitted(true);
-
             const validation = validateCall(localCall);
             if (!validation.valid) throw new Error(validation.message);
 
+            const payload = sanitizeCall(localCall);
             let saved: Call;
 
-            if (localCall._id) saved = await CallApi.update(localCall);
-            else saved = await CallApi.create(localCall);
-
-            saved = {
-                ...saved,
-                calendar: localCall.calendar,
-                grant: localCall.grant
-            };
+            if (localCall._id) saved = await CallApi.update(payload);
+            else saved = await CallApi.create(payload as Call);
 
             toast.current?.show({
                 severity: 'success',
@@ -111,14 +89,13 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
                 life: 2000,
             });
 
-            onComplete?.(saved);
-
+            onComplete?.({ ...saved, grantAllocation: localCall.grantAllocation });
         } catch (err: any) {
             toast.current?.show({
                 severity: 'error',
                 summary: 'Error',
                 detail: err.message || 'Failed to save Call',
-                life: 2000,
+                life: 3000,
             });
         }
     };
@@ -128,102 +105,101 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
         onHide();
     };
 
+    // Helper to display Allocation in Dropdown (e.g., "2026 - Global Research Fund")
+    const getAllocationLabel = (alloc: any): string => {
+        if (!alloc) return "";
+        const year = typeof alloc.calendar === 'object' ? alloc.calendar?.year : 'Year';
+        const title = typeof alloc.grant === 'object' ? alloc.grant?.title : 'Grant';
+        return `${year} - ${title}`;
+    };
+
+    /* 2. The Template for the Dropdown (how it looks inside the picker) */
+    const allocationOptionTemplate = (option: GrantAllocation) => {
+        return <span>{getAllocationLabel(option)}</span>;
+    };
+
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={hide} />
-            <Button label="Save" icon="pi pi-check" text onClick={saveCall} />
+            <Button label="Save" icon="pi pi-check" onClick={saveCall} severity="success" />
         </>
     );
 
     return (
         <>
             <Toast ref={toast} />
-
             <Dialog
                 visible={visible}
-                style={{ width: '600px' }}
-                header={localCall._id ? 'Edit Call' : 'New Call'}
+                style={{ width: '550px' }}
+                header={localCall._id ? 'Edit Call' : 'New Strategic Call'}
                 modal
                 className="p-fluid"
                 footer={footer}
                 onHide={hide}
             >
-
-                {/* Calendar */}
-                {!localCall._id && (
-                    <div className="field">
-                        <label htmlFor="calendar">Calendar</label>
-
-                        {isCalendarPredefined ? (
-                            <InputText
-                                value={(localCall.calendar as Calendar)?.year + ''}
-                                disabled
-                            />
-                        ) : (
-                            <Dropdown
-                                id="calendar"
-                                value={localCall.calendar}
-                                options={calendars}
-                                optionLabel="year"
-                                onChange={(e) => setLocalCall({ ...localCall, calendar: e.value })}
-                                placeholder="Select Calendar"
-                                className={classNames({ 'p-invalid': submitted && !localCall.calendar })}
-                            />
-                        )}
-                    </div>
-                )}
-
-                {/* Grant */}
-                {!localCall._id && (
-                    <div className="field">
-                        <label htmlFor="grant">Grant</label>
-
-                        {isGrantPredefined ? (
-                            <InputText
-                                value={(localCall.grant as Grant)?.title}
-                                disabled
-                            />
-                        ) : (
-                            <Dropdown
-                                id="grant"
-                                value={localCall.grant}
-                                dataKey="_id"
-                                options={grants}
-                                optionLabel="title"
-                                onChange={(e) => setLocalCall({ ...localCall, grant: e.value })}
-                                placeholder="Select Grant"
-                                className={classNames({ 'p-invalid': submitted && !localCall.grant })}
-                            />
-                        )}
-                    </div>
-                )}
-
-                {/* Title */}
+                {/* Allocation Selector */}
                 <div className="field">
-                    <label htmlFor="title">Title</label>
+                    <label htmlFor="grantAllocation" className="font-bold">Funding Allocation</label>
+
+                    {isAllocationPredefined ? (
+                        <InputText
+                            // CRITICAL: Ensure we only pass a STRING to value, never the object
+                            value={getAllocationLabel(localCall.grantAllocation)}
+                            disabled
+                        />
+                    ) : (
+                        <Dropdown
+                            id="grantAllocation"
+                            value={localCall.grantAllocation}
+                            options={allocations}
+                            // CRITICAL: optionLabel must point to a string field or be a string. 
+                            // Since we don't have a single string field, we use dataKey and templates.
+                            optionLabel="_id"
+                            dataKey="_id"
+                            onChange={(e) => setLocalCall({ ...localCall, grantAllocation: e.value })}
+                            // These ensure React only sees <span>text</span> and not {object}
+                            valueTemplate={(option, props) => option ? allocationOptionTemplate(option) : props.placeholder}
+                            itemTemplate={allocationOptionTemplate}
+                            placeholder="Select Year and Grant Source"
+                            className={classNames({ 'p-invalid': submitted && !localCall.grantAllocation })}
+                        />
+                    )}
+                </div>
+
+                <div className="field">
+                    <label htmlFor="title" className="font-bold">Call Title</label>
                     <InputText
                         id="title"
                         value={localCall.title}
                         onChange={(e) => setLocalCall({ ...localCall, title: e.target.value })}
-                        required
-                        autoFocus
                         className={classNames({ 'p-invalid': submitted && !localCall.title })}
                     />
                 </div>
 
-                {/* Description */}
+                {
+                    /**
+                     * 
+                     * <div className="field">
+                                    <label htmlFor="status" className="font-bold">Status</label>
+                                    <Dropdown
+                                        id="status"
+                                        value={localCall.status}
+                                        options={Object.values(CallStatus)}
+                                        onChange={(e) => setLocalCall({ ...localCall, status: e.value })}
+                                    />
+                                </div>
+                     */
+                }
+
                 <div className="field">
-                    <label htmlFor="description">Description</label>
+                    <label htmlFor="description" className="font-bold">Description / Instructions</label>
                     <InputTextarea
                         id="description"
                         value={localCall.description ?? ''}
                         onChange={(e) => setLocalCall({ ...localCall, description: e.target.value })}
-                        rows={5}
+                        rows={4}
                     />
                 </div>
-
-
-
             </Dialog>
         </>
     );

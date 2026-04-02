@@ -9,18 +9,12 @@ import { ERROR_CODES } from '../../common/errors/error.codes';
 
 export class CallController {
 
-    constructor(private readonly service: CallService) {
-    }
+    constructor(private readonly service: CallService) { }
 
     create = async (req: Request, res: Response) => {
         try {
-            const { calendar, directorate, grant,
-                title, description, thematic } = req.body;
-            const dto: CreateCallDTO = {
-                calendar, //directorate, 
-                title,
-                description, grant, //thematic
-            };
+            const { grantAllocation, title, description } = req.body;
+            const dto: CreateCallDTO = { grantAllocation, title, description };
             const call = await this.service.create(dto);
             successResponse(res, 201, "Call created successfully", call);
         } catch (err: any) {
@@ -30,9 +24,9 @@ export class CallController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { calendar, grant, status, populate } = req.query;
+            const { grantAllocation, calendar, grant, status, populate } = req.query;
             const calls = await this.service.getCalls({
-                //directorate: directorate as string,
+                grantAllocation: grantAllocation as string,
                 calendar: calendar as string,
                 grant: grant as string,
                 status: status as CallStatus,

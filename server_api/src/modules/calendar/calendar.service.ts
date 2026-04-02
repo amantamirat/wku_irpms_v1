@@ -2,7 +2,7 @@ import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
-import { CallRepository } from "../calls/call.repository";
+import { IGrantAllocationRepository } from "../grants/allocations/grant.allocation.repository";
 import { CreateCalendarDTO, GetCalendarDTO, UpdateCalendarDTO } from "./calendar.dto";
 import { CalendarRepository } from "./calendar.repository";
 import { CALENDAR_TRANSITIONS, CalendarStatus } from "./calendar.state-machine";
@@ -11,7 +11,7 @@ import { CALENDAR_TRANSITIONS, CalendarStatus } from "./calendar.state-machine";
 export class CalendarService {
 
     constructor(private readonly repository: CalendarRepository,
-        private readonly callRepository: CallRepository,
+        private readonly allocationRepo: IGrantAllocationRepository,
     ) {
     }
 
@@ -72,7 +72,7 @@ export class CalendarService {
         );
 
         if (next === CalendarStatus.planned) {
-            if (await this.callRepository.exists({ calendar: id })) {
+            if (await this.allocationRepo.exists({ calendar: id })) {
                 throw new AppError(ERROR_CODES.CALL_ALREADY_EXISTS);
             }
         }
