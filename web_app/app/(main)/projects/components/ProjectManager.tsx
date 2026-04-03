@@ -1,23 +1,23 @@
 'use client';
-
 import { createEntityManager } from "@/components/createEntityManager";
 import { Project, GetProjectsOptions } from "../models/project.model";
 import { ProjectApi } from "../api/project.api";
 import SaveProject from "./SaveProject";
 import ProjectDetail from "./ProjectDetail";
-import { Grant } from "../../grants/models/grant.model";
+import { GrantAllocation } from "../../grants/allocations/models/grant.allocation.model";
 import { Applicant } from "../../applicants/models/applicant.model";
 import { Organization } from "../../organizations/models/organization.model";
 import MyBadge from "@/templates/MyBadge";
 import { PROJECT_STATUS_ORDER, PROJECT_TRANSITIONS } from "../models/project.state-machine";
+import { getAllocationLabel } from "../../grants/allocations/components/AllocationTempletes";
 
 interface ProjectManagerProps {
-    grant?: Grant;
+    grantAllocation?: GrantAllocation;
     applicant?: Applicant;
     workspace?: Organization;
 }
 
-const ProjectManager = ({ grant, applicant, workspace }: ProjectManagerProps) => {
+const ProjectManager = ({ grantAllocation, applicant, workspace }: ProjectManagerProps) => {
     const Manager = createEntityManager<Project, GetProjectsOptions | undefined>({
         title: "Manage Projects",
         itemName: "Project",
@@ -25,20 +25,22 @@ const ProjectManager = ({ grant, applicant, workspace }: ProjectManagerProps) =>
 
         columns: [
             {
-                header: "Grant",
-                field: "grant",
+                header: "Allocation",
+                field: "grantAllocation",
                 sortable: true,
-                style: { width: '150px', maxWidth: '150px' },
+                style: { width: '200px', maxWidth: '200px' },
                 body: (r: Project) => (
                     <div
+                        className="truncate"
                         style={{
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             whiteSpace: 'nowrap'
                         }}
-                        title={r.summary}
+                        title={getAllocationLabel(r.grantAllocation)}
                     >
-                        {typeof r.grant === "object" ? r.grant?.title : r.grant}
+                        {/* Uses the shared helper to show Year + Grant Title */}
+                        {getAllocationLabel(r.grantAllocation)}
                     </div>
                 )
             },
@@ -61,7 +63,7 @@ const ProjectManager = ({ grant, applicant, workspace }: ProjectManagerProps) =>
                     </div>
                 )
             },
-
+            /*
             {
                 header: "Summary",
                 field: "summary",
@@ -81,15 +83,15 @@ const ProjectManager = ({ grant, applicant, workspace }: ProjectManagerProps) =>
                     </div>
                 )
             },
+            */
             {
                 header: "Applicant",
                 field: "applicant.name",
                 sortable: true,
-
                 body: (p: Project) => (
-<>
-                    { typeof p.applicant === "object" ? p.applicant?.name : p.applicant }
-</>
+                    <>
+                        {typeof p.applicant === "object" ? p.applicant?.name : p.applicant}
+                    </>
                 )
             },
             {
@@ -102,19 +104,21 @@ const ProjectManager = ({ grant, applicant, workspace }: ProjectManagerProps) =>
         ],
 
         createNew: () => ({
-            grant: grant ?? undefined,
+            grantAllocation: grantAllocation ?? undefined,
             applicant: applicant ?? undefined,
             workspace: workspace ?? undefined,
             title: "",
-            summary: ""
+            summary: "",
+            themes: []
         }),
 
         SaveDialog: SaveProject,
         permissionPrefix: "project",
         query: () => ({
             populate: true,
-            grant: grant?._id,
-            workspace: workspace?._id
+            grantAllocation: grantAllocation?._id,
+            workspace: workspace?._id,
+            applicant: applicant?._id
         }),
         workflow: {
             statusField: "status",

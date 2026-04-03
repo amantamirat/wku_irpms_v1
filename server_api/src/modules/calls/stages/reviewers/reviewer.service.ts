@@ -5,9 +5,9 @@ import { ERROR_CODES } from "../../../../common/errors/error.codes";
 import { ApplicantRepository, IApplicantRepository } from "../../../applicants/applicant.repository";
 import { ICriterionRepository, CriterionRepository } from "../../../evaluations/criteria/criterion.repository";
 import { CollaboratorRepository, ICollaboratorRepository } from "../../../projects/collaborators/collaborator.repository";
-import { DocumentRepository, IDocumentRepository } from "../../../projects/documents/document.repository";
-import { DocStatus } from "../../../projects/documents/document.status";
-import { DocumentSynchronizer } from "../../../projects/documents/document.synchronizer";
+import { ProjectStageRepository, IProjectStageRepository } from "../../../projects/stages/project.stage.repository";
+import { ProjectStageStatus } from "../../../projects/stages/project.stage.status";
+import { ProjectStageSynchronizer } from "../../../projects/stages/project.stage.synchronizer";
 import { IProjectRepository, ProjectRepository } from "../../../projects/project.repository";
 import { ICallStageRepository, CallStageRepository } from "../call.stage.repository";
 import { IResultRepository, ResultRepository } from "./results/result.repository";
@@ -18,11 +18,11 @@ import { ReviewerStatus } from "./reviewer.status";
 
 export class ReviewerService {
 
-    private docSynchronizer: DocumentSynchronizer;
+    private docSynchronizer: ProjectStageSynchronizer;
 
     constructor(
         private readonly repository: IReviewerRepository = new ReviewerRepository(),
-        private readonly documentRepository: IDocumentRepository = new DocumentRepository(),
+        private readonly documentRepository: IProjectStageRepository = new ProjectStageRepository(),
         private readonly applicantRepository: IApplicantRepository = new ApplicantRepository(),
 
         private readonly projectRepository: IProjectRepository = new ProjectRepository(),
@@ -34,7 +34,7 @@ export class ReviewerService {
 
     ) {
         this.docSynchronizer =
-            new DocumentSynchronizer(this.documentRepository, this.repository);
+            new ProjectStageSynchronizer(this.documentRepository, this.repository);
     }
 
     async create(dto: CreateReviewerDTO) {
@@ -44,9 +44,9 @@ export class ReviewerService {
             throw new Error(ERROR_CODES.INVALID_REVIEWER_WEIGHT);
 
         const projectStageDoc = await this.documentRepository.findById(projectStage);
-        if (!projectStageDoc) throw new AppError(ERROR_CODES.DOC_NOT_FOUND);
+        if (!projectStageDoc) throw new AppError(ERROR_CODES.PROJECT_STAGE_NOT_FOUND);
         const projectStageStatus = projectStageDoc.status;
-        if (projectStageStatus !== DocStatus.selected)
+        if (projectStageStatus !== ProjectStageStatus.selected)
             throw new AppError(ERROR_CODES.INVALID_DOC_STATUS);
         //if ([DocStatus.reviewed, DocStatus.accepted, DocStatus.rejected].includes(projectStageDoc.status))
         //    throw new AppError(ERROR_CODES.INVALID_DOC_STATUS);
@@ -90,15 +90,15 @@ export class ReviewerService {
         ReviewerStateMachine.validateTransition(current, next);
 
         const projectStageDoc = await this.documentRepository.findById(String(reviewerDoc.projectStage));
-        if (!projectStageDoc) throw new AppError(ERROR_CODES.DOC_NOT_FOUND);
+        if (!projectStageDoc) throw new AppError(ERROR_CODES.PROJECT_STAGE_NOT_FOUND);
 
-        if ([DocStatus.accepted, DocStatus.rejected].includes(projectStageDoc.status)) {
+        if ([ProjectStageStatus.accepted, ProjectStageStatus.rejected].includes(projectStageDoc.status)) {
             throw new AppError(ERROR_CODES.INVALID_DOC_STATUS);
         }
 
         let score: number | undefined = undefined;
 
-        const stage = String(projectStageDoc.stage);
+        const stage = String(projectStageDoc.grantStage);
         const stageDoc = await this.stageRepository.findById(stage);
         if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
         //const evaluation = String(stageDoc.evaluation);

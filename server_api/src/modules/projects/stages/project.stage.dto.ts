@@ -1,27 +1,28 @@
 // project-stage.dto.ts
 import { PhaseDto } from "../phase/phase.dto";
-import { DocStatus } from "./document.status";
+import { ProjectStageStatus } from "./project.stage.status";
 
-export interface GetDocumentDTO {
+export interface GetProjectStageDTO {
     project?: string;
-    stage?: string;
-    status?: DocStatus;
+    grantStage?: string;
+    callStage?: string;
+    status?: ProjectStageStatus;
     populate?: boolean;
     skip?: number;
     limit?: number;
 }
 
-export interface CreateDocumentDTO {
+export interface CreateProjectStageDTO {
     project: string;
-    stage: string;
+    grantStage: string;
     documentPath: string;
     applicantId: string;
 }
 
-export interface UpdateDocumentDTO {
+export interface UpdateStageDTO {
     id: string;
     data: Partial<{
-        status: DocStatus;
+        status: ProjectStageStatus;
         totalScore: number;
     }>;
     applicantId: string;
@@ -29,7 +30,7 @@ export interface UpdateDocumentDTO {
 
 export interface UpdateStatusDTO {
     documents: string[];
-    status: DocStatus;
+    status: ProjectStageStatus;
 }
 
 export interface SubmitProjectDTO {

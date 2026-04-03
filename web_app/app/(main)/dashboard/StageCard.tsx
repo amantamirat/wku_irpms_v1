@@ -6,13 +6,12 @@ import { Card } from "primereact/card";
 import { Tag } from "primereact/tag";
 import { Call } from "../calls/models/call.model";
 import { CallStage } from "../calls/stages/models/call.stage.model";
-import ApplyWizard from "./apply/ApplyWizard";
 import { useAuth } from "@/contexts/auth-context";
 import { PERMISSIONS } from "@/types/permissions";
 import { GrantStage } from "../grants/stages/models/grant.stage.model";
 
 const StageCard = ({ stage }: { stage: CallStage }) => {
-    const [showApplyDialog, setShowApplyDialog] = useState(false);
+    //const [showApplyDialog, setShowApplyDialog] = useState(false);
     const [seconds, setSeconds] = useState(0);
     const { hasPermission } = useAuth();
     const canApply = hasPermission([PERMISSIONS.DOCUMENT.SUBMIT]);
@@ -23,15 +22,15 @@ const StageCard = ({ stage }: { stage: CallStage }) => {
     const { remainingTime, isDeadlinePassed } = useMemo(() => {
         if (!stage.deadline) return { remainingTime: "", isDeadlinePassed: false };
         const diff = new Date(stage.deadline).getTime() - new Date().getTime();
-        
+
         if (diff <= 0) return { remainingTime: "Closed", isDeadlinePassed: true };
 
         const days = Math.floor(diff / 86400000);
         const hours = Math.floor((diff % 86400000) / 3600000);
         const mins = Math.floor((diff % 3600000) / 60000);
-        return { 
-            remainingTime: `${days}d ${hours}h ${mins}m`, 
-            isDeadlinePassed: false 
+        return {
+            remainingTime: `${days}d ${hours}h ${mins}m`,
+            isDeadlinePassed: false
         };
     }, [stage.deadline, seconds]);
 
@@ -43,8 +42,8 @@ const StageCard = ({ stage }: { stage: CallStage }) => {
                 className="w-full h-full object-cover"
             />
             <div className="absolute top-0 right-0 m-2">
-                <Tag 
-                    severity={isDeadlinePassed ? 'danger' : 'info'} 
+                <Tag
+                    severity={isDeadlinePassed ? 'danger' : 'info'}
                     value={isDeadlinePassed ? 'Closed' : remainingTime}
                     icon={isDeadlinePassed ? 'pi pi-lock' : 'pi pi-clock'}
                     className="shadow-2"
@@ -61,7 +60,7 @@ const StageCard = ({ stage }: { stage: CallStage }) => {
                 className="flex-grow-1 p-button-sm"
                 severity="success"
                 disabled={isDeadlinePassed}
-                //onClick={() => setShowApplyDialog(true)}
+            //onClick={() => setShowApplyDialog(true)}
             />
             <Button
                 icon="pi pi-info-circle"
@@ -91,14 +90,16 @@ const StageCard = ({ stage }: { stage: CallStage }) => {
                 </div>
             </Card>
 
-            {showApplyDialog && (
+            {                /*
+            showApplyDialog && (
                 <ApplyWizard
                     visible={showApplyDialog}
                     stage={stage}
                     call={stage.call as Call}
                     onCancel={() => setShowApplyDialog(false)}
                 />
-            )}
+            )*/
+            }
         </>
     );
 };

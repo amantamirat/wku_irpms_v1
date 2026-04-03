@@ -1,15 +1,15 @@
 // project-document.synchronizer.ts
-import { IDocumentRepository } from "./document.repository";
-import { DocStatus } from "./document.status";
-import { DocumentStateMachine } from "./document.state-machine";
-import { IProjectDocument } from "./document.model";
+import { IProjectStageRepository } from "./project.stage.repository";
+import { ProjectStageStatus } from "./project.stage.status";
+//import { DocumentStateMachine } from "./project.stage.state-machine";
+import { IProjectStage } from "./project.stage.model";
 import { IReviewerRepository } from "../../calls/stages/reviewers/reviewer.repository";
 import { ReviewerStatus } from "../../calls/stages/reviewers/reviewer.status";
 
-export class DocumentSynchronizer {
+export class ProjectStageSynchronizer {
 
   constructor(
-    private readonly documentRepository: IDocumentRepository,
+    private readonly documentRepository: IProjectStageRepository,
     private readonly reviewerRepository: IReviewerRepository
   ) {
 
@@ -22,14 +22,14 @@ export class DocumentSynchronizer {
     const currentStatus = proDoc.status;
     const reviewers = await this.reviewerRepository.find({ projectStage: docId });
 
-    let newStatus: DocStatus = DocStatus.selected;
+    let newStatus: ProjectStageStatus = ProjectStageStatus.selected;
 
     let totalScore: number | undefined | null = undefined;
 
     if (reviewers.length > 0) {
       const allApproved = reviewers.every(r => r.status === ReviewerStatus.approved);
       if (allApproved) {
-        newStatus = DocStatus.reviewed;
+        newStatus = ProjectStageStatus.reviewed;
         const totalWeight = reviewers.reduce((sum, r) => sum + (r.weight ?? 1), 0);
         totalScore = reviewers.reduce((sum, r) => sum + (r.score ?? 0) * (r.weight ?? 1), 0) / totalWeight;
       } else {
@@ -37,6 +37,7 @@ export class DocumentSynchronizer {
       }
     }
 
+    /*
     if (newStatus !== currentStatus && DocumentStateMachine.canTransition(currentStatus, newStatus)) {
       const updateData: any = { status: newStatus };
       if (totalScore !== undefined) {
@@ -44,7 +45,7 @@ export class DocumentSynchronizer {
       }
       const updated = await this.documentRepository.update(docId, updateData);
       return updated;
-    }
+    }*/
 
   }
 

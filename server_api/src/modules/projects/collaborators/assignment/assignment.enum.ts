@@ -9,6 +9,6 @@ export enum CollaboratorRole {
 }
 
 export enum AssignmentType {
-  THEME = COLLECTIONS.PROJECT_THEMEM,
+  //THEME = COLLECTIONS.PROJECT_THEMEM,
   PHASE = COLLECTIONS.PHASE
 }

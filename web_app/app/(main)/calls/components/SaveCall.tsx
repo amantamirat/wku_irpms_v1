@@ -16,6 +16,7 @@ import { GrantAllocationApi } from '../../grants/allocations/api/grant.allocatio
 import { AllocationStatus } from '../../grants/allocations/models/grant.allocation.state-machine';
 import { Calendar } from '../../calendars/models/calendar.model';
 import { Grant } from '../../grants/models/grant.model';
+import { allocationOptionTemplate, getAllocationLabel } from '../../grants/allocations/components/AllocationTempletes';
 
 interface ExtendedCall extends Call {
     _filterCalendar?: string;
@@ -105,19 +106,7 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<E
         onHide();
     };
 
-    // Helper to display Allocation in Dropdown (e.g., "2026 - Global Research Fund")
-    const getAllocationLabel = (alloc: any): string => {
-        if (!alloc) return "";
-        const year = typeof alloc.calendar === 'object' ? alloc.calendar?.year : 'Year';
-        const title = typeof alloc.grant === 'object' ? alloc.grant?.title : 'Grant';
-        return `${year} - ${title}`;
-    };
-
-    /* 2. The Template for the Dropdown (how it looks inside the picker) */
-    const allocationOptionTemplate = (option: GrantAllocation) => {
-        return <span>{getAllocationLabel(option)}</span>;
-    };
-
+    
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={hide} />

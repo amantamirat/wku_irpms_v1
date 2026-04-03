@@ -4,7 +4,7 @@ import { PERMISSIONS } from '../../../common/constants/permissions';
 import { verifyActiveAccount, checkPermission, checkStatusPermission, checkTransitionPermission } from '../../users/auth/auth.middleware';
 import { StageService } from './call.stage.service';
 import { EvaluationRepository } from '../../evaluations/evaluation.repository';
-import { DocumentRepository } from '../../projects/documents/document.repository';
+import { ProjectStageRepository } from '../../projects/stages/project.stage.repository';
 import { CallRepository } from '../call.repository';
 import { CallStageRepository } from './call.stage.repository';
 import { GrantStageRepository } from '../../grants/stages/grant.stage.repository';

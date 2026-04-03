@@ -3,25 +3,26 @@ import fs from "fs";
 import { successResponse, errorResponse } from "../../../common/helpers/response";
 
 import {
-    CreateDocumentDTO,
-    GetDocumentDTO,
+    CreateProjectStageDTO,
+    GetProjectStageDTO,
     SubmitProjectDTO,
     UpdateStatusDTO
-} from "./document.dto";
+} from "./project.stage.dto";
 
 import { AuthenticatedRequest } from "../../users/auth/auth.middleware";
-import { DocumentService } from "./document.service";
+import { ProjectStageOldService } from "./project.stage.service.old";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
-import { DocStatus } from "./document.status";
+import { ProjectStageStatus } from "./project.stage.status";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { AppError } from "../../../common/errors/app.error";
+import { ProjectStageService } from "./project.stage.service";
+import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 
-export class ProjectDocController {
+export class ProjectStageController {
 
-    private service: DocumentService;
 
-    constructor(service: DocumentService) {
-        this.service = service;
+
+    constructor(private readonly service: ProjectStageService) {
     }
     // ---------------------------------------------------
     // CREATE
@@ -35,9 +36,9 @@ export class ProjectDocController {
 
             const { project, stage } = req.body;
 
-            const dto: CreateDocumentDTO = {
+            const dto: CreateProjectStageDTO = {
                 project,
-                stage,
+                grantStage: stage,
                 documentPath: `uploads/${req.file.filename}`,
                 applicantId: req.user.applicantId
             };
@@ -53,17 +54,24 @@ export class ProjectDocController {
         }
     };
 
-    // ---------------------------------------------------
-    // Update Status
-    // ---------------------------------------------------
-    updateStatus = async (req: AuthenticatedRequest, res: Response) => {
+    // -----------------------
+    // Transition State
+    // -----------------------
+    transitionState = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const { status, documents } = req.body;
-            const dto: UpdateStatusDTO = {
-                documents, status: status as DocStatus,
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            const { id } = req.params;
+            const { current, next } = req.body;
+
+            const dto: TransitionRequestDto = {
+                id: String(id),
+                current: current,
+                next: next,
+                applicantId: req.user.applicantId,
             };
-            const updated = await this.service.updateStatus(dto);
-            successResponse(res, 200, "Stage status updated successfully", updated);
+
+            const updated = await this.service.transitionState(dto);
+            successResponse(res, 200, "Project Stage status updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
@@ -75,9 +83,9 @@ export class ProjectDocController {
         try {
             const { project, stage, status, skip, limit } = req.query;
 
-            const dto: GetDocumentDTO = {
+            const dto: GetProjectStageDTO = {
                 project: project as string,
-                stage: stage as string,
+                grantStage: stage as string,
                 status: status as any,
                 skip: skip ? Number(skip) : undefined,
                 limit: limit ? Number(limit) : undefined,
@@ -101,6 +109,7 @@ export class ProjectDocController {
         }
     };
 
+    /*
     // ---------------------------------------------------
     // SUBMIT
     // ---------------------------------------------------
@@ -148,15 +157,14 @@ export class ProjectDocController {
             errorResponse(res, 400, err.message, err);
         }
     };
+    */
     // ---------------------------------------------------
     // DELETE
     // ---------------------------------------------------
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error("User not found!");
-
+            if (!req.user) throw new AppError(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
-
             const dto: DeleteDto = {
                 id,
                 applicantId: req.user.applicantId,

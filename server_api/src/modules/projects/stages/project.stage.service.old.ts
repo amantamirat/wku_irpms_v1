@@ -1,32 +1,31 @@
 // project-document.service.ts
 import { SYSTEM } from "../../../common/constants/system.constant";
+import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { ApplicantRepository } from "../../applicants/applicant.repository";
 import { CallRepository, ICallRepository } from "../../calls/call.repository";
 import { CallStatus } from "../../calls/call.status";
+import { ICallStageRepository } from "../../calls/stages/call.stage.repository";
 import { ReviewerRepository } from "../../calls/stages/reviewers/reviewer.repository";
 import { ReviewerStatus } from "../../calls/stages/reviewers/reviewer.status";
-import { ICallStageRepository } from "../../calls/stages/call.stage.repository";
 import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
 import { CollaboratorRepository } from "../collaborators/collaborator.repository";
-import { PhaseType } from "../phase/phase.enum";
 import { PhaseRepository } from "../phase/phase.repository";
 import { IProjectRepository } from "../project.repository";
 import { ProjectStatus } from "../project.state-machine";
 import { CollabSynchronizer, DocSynchronizer, PhaseSynchronizer, ProjectSyncOrchestrator } from "../project.synchronizer";
 //import { ProjectThemeRepository } from "../themes/project.theme.repository";
-import { CreateDocumentDTO, GetDocumentDTO, SubmitProjectDTO, UpdateStatusDTO } from "./document.dto";
-import { IDocumentRepository } from "./document.repository";
-import { DocumentStateMachine } from "./document.state-machine";
-import { DocStatus } from "./document.status";
 import { CallStageStatus } from "../../calls/stages/call.stage.model";
+import { CreateProjectStageDTO, GetProjectStageDTO, SubmitProjectDTO, UpdateStatusDTO } from "./project.stage.dto";
+import { IProjectStageRepository } from "./project.stage.repository";
+import { DocumentStateMachine } from "./project.stage.state-machine";
+import { ProjectStageStatus } from "./project.stage.status";
 
-export class DocumentService {
+export class ProjectStageOldService {
 
     constructor(
-        private readonly docRepository: IDocumentRepository,
+        private readonly repository: IProjectStageRepository,
         private readonly projectRepository: IProjectRepository,
         private readonly stageRepository: ICallStageRepository,
         private readonly callRepository: ICallRepository = new CallRepository(),
@@ -39,7 +38,7 @@ export class DocumentService {
 
         private readonly docSynchronizer = new DocSynchronizer(
             projectRepository,
-            docRepository
+            repository
         ),
 
         private readonly phaseSynchronizer = new PhaseSynchronizer(
@@ -63,25 +62,25 @@ export class DocumentService {
 
     ) { }
 
-    async create(dto: CreateDocumentDTO) {
+    async create(dto: CreateProjectStageDTO) {
         try {
             const { project, applicantId } = dto;
 
             const projectDoc = await this.projectRepository.findById(project);
             if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
 
-            if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
-                throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
+            if (String(projectDoc.applicant) !== applicantId)
+                throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
             if (projectDoc.status === ProjectStatus.rejected)
                 throw new AppError(ERROR_CODES.PROJECT_REJECTED);
 
-            const projectDocs = await this.docRepository.find({ project });
-            const hasNotAccepted = projectDocs.some(doc => doc.status !== DocStatus.accepted);
+            const projectDocs = await this.repository.find({ project });
+            const hasNotAccepted = projectDocs.some(doc => doc.status !== ProjectStageStatus.accepted);
             if (hasNotAccepted)
                 throw new AppError(ERROR_CODES.DOC_NOT_ACCEPTED);
 
-            const call = String(projectDoc.grant);
+            const call = String(projectDoc.grantAllocation);
             const nextOrder = projectDocs.length + 1;
             const stageDocs = await this.stageRepository.find({ call, order: 1 });
             if (stageDocs.length < 1) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
@@ -103,7 +102,7 @@ export class DocumentService {
                     { collaborators, phases });
             }
 
-            const created = await this.docRepository.create({ ...dto, stage: String(nextStageDoc._id) });
+            const created = await this.repository.create({ ...dto, grantStage: String(nextStageDoc._id) });
             if (created) await this.docSynchronizer.sync(project);
             return created;
 
@@ -116,8 +115,8 @@ export class DocumentService {
     }
 
     async getById(id: string) {
-        const doc = await this.docRepository.findById(id);
-        if (!doc) throw new AppError(ERROR_CODES.DOC_NOT_FOUND);
+        const doc = await this.repository.findById(id);
+        if (!doc) throw new AppError(ERROR_CODES.PROJECT_STAGE_NOT_FOUND);
         return doc;
     }
 
@@ -156,7 +155,7 @@ export class DocumentService {
 
         await this.validator.validateProjectConstraints(String(callDoc.grantAllocation), dto);
 
-        const projectDoc = await this.projectRepository.create({ grant: call, title, applicant, summary, themes: [] });
+        const projectDoc = await this.projectRepository.create({ grantAllocation: call, title, applicant, summary, themes: [] });
         const projectId = String(projectDoc._id);
         await this.collabRepository.createMany(
             collaborators.map(col => ({
@@ -187,9 +186,9 @@ export class DocumentService {
 
 
 
-        await this.docRepository.create({
+        await this.repository.create({
             project: projectId,
-            stage: String(firstStageDoc._id),
+            grantStage: String(firstStageDoc._id),
             documentPath: documentPath,
             applicantId: applicant
         });
@@ -197,8 +196,8 @@ export class DocumentService {
         await this.orchestrator.sync(projectId);
     }
 
-    async get(options: GetDocumentDTO = {}) {
-        return await this.docRepository.find({ ...options, populate: true });
+    async get(options: GetProjectStageDTO = {}) {
+        return await this.repository.find({ ...options, populate: true });
     }
     /**
         * Update Status
@@ -206,14 +205,14 @@ export class DocumentService {
     async updateStatus(dto: UpdateStatusDTO) {
         const { documents, status: next } = dto;
         if (!documents || documents.length === 0) {
-            throw new Error(ERROR_CODES.DOC_NOT_FOUND);
+            throw new Error(ERROR_CODES.PROJECT_STAGE_NOT_FOUND);
         }
         const validDocs = [];
         for (const id of documents) {
-            const docDoc = await this.docRepository.findById(id);
-            if (!docDoc) throw new Error(ERROR_CODES.DOC_NOT_FOUND);
+            const docDoc = await this.repository.findById(id);
+            if (!docDoc) throw new Error(ERROR_CODES.PROJECT_STAGE_NOT_FOUND);
 
-            const stageDoc = await this.stageRepository.findById(String(docDoc.stage));
+            const stageDoc = await this.stageRepository.findById(String(docDoc.grantStage));
             if (!stageDoc)
                 throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
             if (stageDoc.status !== CallStageStatus.active)
@@ -233,15 +232,15 @@ export class DocumentService {
             const current = docDoc.status;
             DocumentStateMachine.validateTransition(current, next);
 
-            if (current === DocStatus.selected) {
-                if (next === DocStatus.submitted) {
+            if (current === ProjectStageStatus.selected) {
+                if (next === ProjectStageStatus.submitted) {
                     if (await this.reviewerRepository.exist({ projectStage: id })) {
                         throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
                     }
                 }
             }
-            if (current === DocStatus.reviewed) {
-                if (next === DocStatus.selected) {
+            if (current === ProjectStageStatus.reviewed) {
+                if (next === ProjectStageStatus.selected) {
                     const reviewers = await this.reviewerRepository.find({ projectStage: id });
                     const allApproved = reviewers.every(r => r.status === ReviewerStatus.approved);
                     if (allApproved) {
@@ -250,15 +249,15 @@ export class DocumentService {
                 }
             }
 
-            if (current === DocStatus.accepted || current === DocStatus.rejected) {
+            if (current === ProjectStageStatus.accepted || current === ProjectStageStatus.rejected) {
 
-                if (next === DocStatus.submitted && docDoc.totalScore) {
+                if (next === ProjectStageStatus.submitted && docDoc.totalScore) {
                     throw new AppError(ERROR_CODES.DOC_SCORE_ALREADY_EXISTS);
                 }
-                if (next === DocStatus.reviewed && docDoc.totalScore == null) {
+                if (next === ProjectStageStatus.reviewed && docDoc.totalScore == null) {
                     throw new AppError(ERROR_CODES.DOC_SCORE_NOT_EXISTS);
                 }
-                const projectDocs = await this.docRepository.find({ project: String(docDoc.project) });
+                const projectDocs = await this.repository.find({ project: String(docDoc.project) });
                 /*
                 if (projectDocs.length > stageDoc.order) {
                     throw new AppError(ERROR_CODES.NEXT_DOC_ALREADY_EXISTS);
@@ -270,7 +269,7 @@ export class DocumentService {
 
         const results = await Promise.all(
             validDocs.map(async (doc) => {
-                const updated = await this.docRepository.update(String(doc._id), {
+                const updated = await this.repository.update(String(doc._id), {
                     status: next
                 });
                 if (updated) {
@@ -286,9 +285,9 @@ export class DocumentService {
     async delete(dto: DeleteDto) {
         const { id, applicantId } = dto;
 
-        const projectDocument = await this.docRepository.findById(id);
-        if (!projectDocument) throw new AppError(ERROR_CODES.DOC_NOT_FOUND);
-        if (projectDocument.status !== DocStatus.submitted)
+        const projectDocument = await this.repository.findById(id);
+        if (!projectDocument) throw new AppError(ERROR_CODES.PROJECT_STAGE_NOT_FOUND);
+        if (projectDocument.status !== ProjectStageStatus.submitted)
             throw new AppError(ERROR_CODES.DOC_NOT_SUBMITTED);
 
         const project = String(projectDocument.project)
@@ -298,7 +297,7 @@ export class DocumentService {
         if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
             throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
 
-        const deleted = await this.docRepository.delete(id);
+        const deleted = await this.repository.delete(id);
         if (deleted) await this.docSynchronizer.sync(project);
         return deleted;
     }

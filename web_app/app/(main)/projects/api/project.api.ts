@@ -12,7 +12,7 @@ export const ProjectApi: EntityApi<Project, GetProjectsOptions | undefined> = {
 
         if (options) {
             const sanitized = sanitize(options);
-            if (sanitized.grant) query.append("grant", sanitized.grant as string);
+            if (sanitized.grantAllocation) query.append("grantAllocation", sanitized.grantAllocation as string);
             if (sanitized.applicant) query.append("applicant", sanitized.applicant as string);
             if (sanitized.workspace) query.append("workspace", sanitized.workspace as string);
             if (options.populate !== undefined) {

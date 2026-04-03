@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { PERMISSIONS } from "../../../common/constants/permissions";
+
 import { verifyActiveAccount, checkPermission, checkTransitionPermission } from "../../users/auth/auth.middleware";
 import { GrantAllocationService } from "./grant.allocation.service";
 import { GrantAllocationRepository } from "./grant.allocation.repository";
@@ -8,14 +8,16 @@ import { GrantRepository } from "../grant.repository";
 import { CalendarRepository } from "../../calendar/calendar.repository";
 import { GrantAllocationController } from "./grant.allocation.controller";
 import { CallRepository } from "../../calls/call.repository";
+import { ProjectRepository } from "../../projects/project.repository";
 
 
 const repo = new GrantAllocationRepository();
 const grantRepo = new GrantRepository();
 const calendarRepo = new CalendarRepository();
 const callRepo = new CallRepository();
+const projectRepo = new ProjectRepository();
 
-const service = new GrantAllocationService(repo, grantRepo, calendarRepo, callRepo);
+const service = new GrantAllocationService(repo, grantRepo, calendarRepo, callRepo, projectRepo);
 const controller = new GrantAllocationController(service);
 
 const router: Router = Router();

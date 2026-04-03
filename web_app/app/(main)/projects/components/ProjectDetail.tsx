@@ -1,15 +1,15 @@
 'use client';
 
-import { Divider } from "primereact/divider";
-import { TabView, TabPanel } from "primereact/tabview";
-import { useMemo } from "react";
-import { Project } from "../models/project.model";
-import CollaboratorManager from "../collaborators/components/CollaboratorManager";
-import PhaseManager from "../phases/components/PhaseManager";
-import ProjectDocManager from "../documents/components/ProjectDocManager";
-import { PERMISSIONS } from "@/types/permissions";
 import { useAuth } from "@/contexts/auth-context";
 import MyBadge from "@/templates/MyBadge";
+import { PERMISSIONS } from "@/types/permissions";
+import { Divider } from "primereact/divider";
+import { TabPanel, TabView } from "primereact/tabview";
+import { useMemo } from "react";
+import CollaboratorManager from "../collaborators/components/CollaboratorManager";
+import { Project } from "../models/project.model";
+import PhaseManager from "../phases/components/PhaseManager";
+import ProjectStageManager from "../stages/components/ProjectStageManager";
 
 interface ProjectDetailProps {
     project: Project;
@@ -44,9 +44,9 @@ export default function ProjectDetail({ project, updateProjectStatus }: ProjectD
             content: <PhaseManager project={project} />
         },
         {
-            header: "Documents",
-            permission: PERMISSIONS.DOCUMENT.READ,
-            content: <ProjectDocManager project={project} updateProjectStatus={updateProjectStatus} />
+            header: "Stages",
+            permission: "project.stage:read",
+            content: <ProjectStageManager project={project} />
         }
     ], [project, updateProjectStatus]);
 
@@ -63,12 +63,20 @@ export default function ProjectDetail({ project, updateProjectStatus }: ProjectD
                     </h3>
 
                     <div className="flex flex-wrap gap-3 text-sm text-600 mt-2">
+                        {/* Grant Title Section */}
                         <span className="flex align-items-center">
                             <i className="pi pi-ticket mr-1 text-primary text-sm"></i>
-                            {getDisplayName(project.grant, 'title')}
+                            {getDisplayName((project.grantAllocation as any).grant, 'title')}
                         </span>
 
-                        <span className="flex align-items-center">
+                        {/* Calendar/Year Section */}
+                        <span className="flex align-items-center ml-3">
+                            {/* pi-calendar is the standard PrimeIcon for dates/years */}
+                            <i className="pi pi-clock mr-1 text-primary text-sm"></i>
+                            {getDisplayName((project.grantAllocation as any).calendar, 'year')}
+                        </span>
+
+                        <span className="flex align-items-center ml-3">
                             <i className="pi pi-user mr-1 text-primary text-sm"></i>
                             {getDisplayName(project.applicant, 'name')}
                         </span>

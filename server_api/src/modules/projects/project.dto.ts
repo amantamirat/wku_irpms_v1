@@ -1,19 +1,21 @@
 import { ProjectStatus } from "./project.state-machine";
 
 export interface GetProjectsDTO {
-    grant?: string;
+    grantAllocation?: string;
     applicant?: string;
+    calendar?: string;
+    grant?: string;
+    workspace?: string;
     status?: ProjectStatus;
     populate?: boolean;
-    workspace?: string;
-    directorate?: string;
+    //directorate?: string;
     //skip?: number;
     //limit?: number;
 }
 
 // CREATE Project
 export interface CreateProjectDTO {
-    grant: string;
+    grantAllocation: string;
     title: string;
     summary?: string;
     applicant: string;
@@ -29,15 +31,13 @@ export interface UpdateProjectDTO {
         totalBudget: number;
         totalDuration: number;
         totalCollabs: number;
-        //applicant: string;
         themes: string[];
-        status: ProjectStatus;
     }>;
     applicantId: string;
 }
 
 export interface ExistsProjectDTO {
     applicant?: string;
-    grant?: string;
+    grantAllocation?: string;
 }
 

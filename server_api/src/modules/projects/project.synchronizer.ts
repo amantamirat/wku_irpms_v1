@@ -1,7 +1,7 @@
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { ICollaboratorRepository } from "./collaborators/collaborator.repository";
-import { IDocumentRepository } from "./documents/document.repository";
-import { DocStatus } from "./documents/document.status";
+import { IProjectStageRepository } from "./stages/project.stage.repository";
+import { ProjectStageStatus } from "./stages/project.stage.status";
 import { IPhaseRepository } from "./phase/phase.repository";
 import { IProjectRepository } from "./project.repository";
 import { PROJECT_TRANSITIONS, ProjectStatus } from "./project.state-machine";
@@ -18,7 +18,7 @@ export class DocSynchronizer extends ProjectSynchronizer {
 
     constructor(
         private readonly repository: IProjectRepository,
-        private readonly documentRepository: IDocumentRepository,
+        private readonly documentRepository: IProjectStageRepository,
     ) {
         super(repository);
     }
@@ -34,10 +34,10 @@ export class DocSynchronizer extends ProjectSynchronizer {
         if (projectDocs.length === 0) {
             newStatus = ProjectStatus.draft;
         }
-        else if (projectDocs.some(d => d.status === DocStatus.rejected)) {
+        else if (projectDocs.some(d => d.status === ProjectStageStatus.rejected)) {
             newStatus = ProjectStatus.rejected;
         }
-        else if (projectDocs.every(d => d.status === DocStatus.accepted)) {
+        else if (projectDocs.every(d => d.status === ProjectStageStatus.accepted)) {
             newStatus = ProjectStatus.accepted;
         }
         if (newStatus !== currentStatus) {

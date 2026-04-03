@@ -18,10 +18,10 @@ export class ProjectController {
     try {
       if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
-      const { grant, title, summary, applicant, themes } = req.body;
+      const { grantAllocation, title, summary, applicant, themes } = req.body;
 
       const dto: CreateProjectDTO = {
-        grant: grant,
+        grantAllocation: grantAllocation,
         title,
         summary,
         applicant: applicant,
@@ -40,10 +40,10 @@ export class ProjectController {
   // -----------------------
   get = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { call, applicant, workspace, populate } = req.query;
+      const { grantAllocation, applicant, workspace, populate } = req.query;
 
       const projects = await this.service.getProjects({
-        grant: call ? call as string : undefined,
+        grantAllocation: grantAllocation ? grantAllocation as string : undefined,
         applicant: applicant ? applicant as string : undefined,
         workspace: workspace ? workspace as string : undefined,
         ...(populate !== undefined && { populate: populate === "true" })

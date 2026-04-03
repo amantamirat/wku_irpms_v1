@@ -12,28 +12,30 @@ import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { ApplicantRepository, IApplicantRepository } from "../applicants/applicant.repository";
-import { GrantStatus } from "../grants/grant.model";
+import { GrantAllocationRepository, IGrantAllocationRepository } from "../grants/allocations/grant.allocation.repository";
+import { AllocationStatus } from "../grants/allocations/grant.allocation.state-machine";
 import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
 import { CollaboratorRepository, ICollaboratorRepository } from "./collaborators/collaborator.repository";
-import { PROJECT_TRANSITIONS, ProjectStatus } from "./project.state-machine";
 import { CollaboratorStatus } from "./collaborators/collaborator.status";
+import { PROJECT_TRANSITIONS, ProjectStatus } from "./project.state-machine";
 
 export class ProjectService {
 
     constructor(
         private repository: IProjectRepository = new ProjectRepository(),
         private grantRepo: IGrantRepository = new GrantRepository(),
+        private grantAllocRepo: IGrantAllocationRepository = new GrantAllocationRepository(),
         private appRepo: IApplicantRepository = new ApplicantRepository(),
         private collabRepo: ICollaboratorRepository = new CollaboratorRepository(),
         //private phaseRepository: IPhaseRepository = new PhaseRepository(),
     ) { }
 
     async create(dto: CreateProjectDTO) {
-        const { grant, applicant } = dto
+        const { grantAllocation, applicant } = dto
 
-        const grantDoc = await this.grantRepo.findById(grant);
-        if (!grantDoc) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
-        if (grantDoc.status !== GrantStatus.active) throw new Error(ERROR_CODES.GRANT_NOT_ACTIVE);
+        const grantAllocDoc = await this.grantAllocRepo.findById(grantAllocation);
+        if (!grantAllocDoc) throw new Error(ERROR_CODES.ALLOCATION_NOT_FOUND);
+        if (grantAllocDoc.status !== AllocationStatus.active) throw new Error(ERROR_CODES.ALLOCATION_NOT_ACTIVE);
 
         const appDoc = await this.appRepo.findById(applicant);
         if (!appDoc) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
@@ -101,9 +103,7 @@ export class ProjectService {
             // }
         }
 
-        return await this.repository.update(id, {
-            status: to
-        });
+        return await this.repository.updateStatus(id, to);
     }
 
     /*

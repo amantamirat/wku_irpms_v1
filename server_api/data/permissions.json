@@ -885,68 +885,54 @@
     "name": "phase:document:delete"
   },
   {
-    "category": "Document Management",
-    "name": "document:create",
-    "description": "Create document entries"
+    "category": "Project Stage Management",
+    "name": "project.stage:create",
+    "description": "Create project stage (submit document)"
   },
   {
-    "category": "Document Management",
-    "name": "document:read",
-    "description": "Read document entries"
+    "category": "Project Stage Management",
+    "name": "project.stage:read",
+    "description": "Read project stage entries"
   },
   {
-    "category": "Document Management",
-    "name": "document:update",
-    "description": "Update document entries"
+    "category": "Project Stage Management",
+    "name": "project.stage:update",
+    "description": "Update project stage (before review)"
   },
   {
-    "category": "Document Management",
-    "name": "document:status.submitted",
-    "description": "used for undo operation on the selected documents"
+    "category": "Project Stage Management",
+    "name": "project.stage:delete",
+    "description": "Delete project stage entries"
   },
   {
-    "category": "Document Management",
-    "name": "document:status.selected",
-    "description": "selected for reviewers to be assigned"
+    "category": "Project Stage Management",
+    "name": "project.stage:transition.submitted.under_review",
+    "description": "Move stage from submitted to under review"
   },
   {
-    "category": "Document Management",
-    "name": "document:status.accepted"
+    "category": "Project Stage Management",
+    "name": "project.stage:transition.under_review.submitted",
+    "description": "Revert stage from under review to submitted"
   },
   {
-    "category": "Document Management",
-    "name": "document:status.rejected"
+    "category": "Project Stage Management",
+    "name": "project.stage:transition.under_review.approved",
+    "description": "Approve project stage"
   },
   {
-    "category": "Document Management",
-    "name": "document:status.reviewed",
-    "description": "perform undo operation from rejected to reviewed or accepted to reviwed note that when this permission given to user user can modify other actions, if rejcted and accpted given for different roles."
+    "category": "Project Stage Management",
+    "name": "project.stage:transition.approved.under_review",
+    "description": "Revert approved stage back to under review"
   },
   {
-    "category": "Document Management",
-    "name": "document:submit",
-    "description": "apply for a call"
+    "category": "Project Stage Management",
+    "name": "project.stage:transition.under_review.rejected",
+    "description": "Reject project stage"
   },
   {
-    "category": "Document Management",
-    "name": "document:delete",
-    "description": "Delete document entries"
-  },
-  {
-    "category": "Project Theme Management",
-    "name": "project_theme:create"
-  },
-  {
-    "category": "Project Theme Management",
-    "name": "project_theme:read"
-  },
-  {
-    "category": "Project Theme Management",
-    "name": "project_theme:update"
-  },
-  {
-    "category": "Project Theme Management",
-    "name": "project_theme:delete"
+    "category": "Project Stage Management",
+    "name": "project.stage:transition.rejected.under_review",
+    "description": "Revert rejected stage back to under review"
   },
   {
     "category": "Report Management",

@@ -4,7 +4,7 @@ import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { IEvaluationRepository } from "../../evaluations/evaluation.repository";
 import { IGrantStageRepository } from "../../grants/stages/grant.stage.repository";
-import { IDocumentRepository } from "../../projects/documents/document.repository";
+import { IProjectStageRepository } from "../../projects/stages/project.stage.repository";
 import { ICallRepository } from "../call.repository";
 import { CALL_TRANSITIONS } from "../call.state-machine";
 import { CallStatus } from "../call.status";
@@ -93,9 +93,7 @@ export class StageService {
                 throw new Error(ERROR_CODES.CALL_NOT_ACTIVE);
         }
 
-        return await this.repository.update(id, {
-            status: to
-        });
+        return await this.repository.updateStatus(id, to);
     }
     /**
     async updateStatus(dto: UpdateStageStatusDTO) {

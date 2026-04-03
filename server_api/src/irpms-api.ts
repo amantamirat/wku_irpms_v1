@@ -34,13 +34,13 @@ import assignmentRoutes from './modules/projects/collaborators/assignment/assign
 import phaseRoutes from './modules/projects/phase/phase.routes';
 import phaseDocRoutes from './modules/projects/phase/documents/phase.doc.routes';
 
-import documentRoutes from './modules/projects/documents/document.routes';
+import projectStageRoutes from './modules/projects/stages/project.stage.routes';
 import reviewerRoutes from './modules/calls/stages/reviewers/reviewer.routes';
 import resultRoutes from './modules/calls/stages/reviewers/results/result.routes';
 
 import userRoutes from './modules/users/user.routes';
 import reportRoutes from './modules/reports/report.routes';
-//import by order
+
 import settingRoutes from './modules/settings/setting.routes';
 import permissionRoutes from './modules/permissions/permission.routes';
 import roleRoutes from './modules/permissions/roles/role.routes';
@@ -96,7 +96,7 @@ app.use("/api/project/phases", phaseRoutes);
 app.use("/api/project/phase/documents", phaseDocRoutes);
 app.use("/api/project/collaborators", collaboratorRoutes);
 app.use("/api/collaborator/assignments", assignmentRoutes);
-app.use("/api/project/documents", documentRoutes);
+app.use("/api/project/stages", projectStageRoutes);
 
 app.use("/api/reports", reportRoutes);
 

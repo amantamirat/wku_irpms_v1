@@ -1,11 +1,11 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
-import { CallStage, GetCallStagesDTO, sanitizeCallStage } from "../models/call.stage.model";
 import { TransitionRequestDto } from "@/types/util";
+import { GetProjectStageOptions, ProjectStage, sanitizeProjectStage } from "../models/project.stage.model";
 
-const end_point = "/call/stages";
+const end_point = "/project/stages";
 
-export const CallStageApi: EntityApi<CallStage, GetCallStagesDTO | undefined> = {
+export const ProjectStageApi: EntityApi<ProjectStage, GetProjectStageOptions | undefined> = {
 
     // ---------------------------
     // Fetch / Query
@@ -14,18 +14,14 @@ export const CallStageApi: EntityApi<CallStage, GetCallStagesDTO | undefined> = 
         const query = new URLSearchParams();
 
         if (options) {
-            const sanitized = sanitizeCallStage(options);
+            const sanitized = sanitizeProjectStage(options);
 
-            if (options.call) {
-                query.append("call", sanitized.call as string);
+            if (options.project) {
+                query.append("project", sanitized.project as string);
             }
 
             if (options.grantStage) {
                 query.append("grantStage", sanitized.grantStage as string);
-            }
-
-            if (sanitized.order !== undefined) {
-                query.append("order", String(sanitized.order));
             }
 
             if (options.status) {
@@ -44,7 +40,7 @@ export const CallStageApi: EntityApi<CallStage, GetCallStagesDTO | undefined> = 
     // ---------------------------
     // Get By Id
     // ---------------------------
-    async getById(id: string): Promise<CallStage> {
+    async getById(id: string): Promise<ProjectStage> {
         return ApiClient.get(`${end_point}/${id}`);
     },
 
@@ -52,7 +48,7 @@ export const CallStageApi: EntityApi<CallStage, GetCallStagesDTO | undefined> = 
     // Create
     // ---------------------------
     async create(stage) {
-        const sanitized = sanitizeCallStage(stage);
+        const sanitized = sanitizeProjectStage(stage);
         return ApiClient.post(`${end_point}`, sanitized);
     },
 
@@ -60,8 +56,8 @@ export const CallStageApi: EntityApi<CallStage, GetCallStagesDTO | undefined> = 
     // Update
     // ---------------------------
     async update(stage) {
-       // if (!stage._id) throw new Error("_id required");
-        return ApiClient.put(`${end_point}/${stage._id}`, sanitizeCallStage(stage));
+        // if (!stage._id) throw new Error("_id required");
+        return ApiClient.put(`${end_point}/${stage._id}`, sanitizeProjectStage(stage));
     },
 
     // ---------------------------

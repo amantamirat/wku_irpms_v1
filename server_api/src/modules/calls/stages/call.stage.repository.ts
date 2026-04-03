@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { CreateStageDTO, ExistsStageDTO, GetStageDTO, UpdateStageDTO } from "./call.stage.dto";
-import { ICallStage, CallStage } from "./call.stage.model";
+import { ICallStage, CallStage, CallStageStatus } from "./call.stage.model";
 
 export interface ICallStageRepository {
     findById(id: string): Promise<ICallStage | null>;
@@ -8,6 +8,7 @@ export interface ICallStageRepository {
     create(dto: CreateStageDTO): Promise<ICallStage>;
     createMany(dtos: CreateStageDTO[]): Promise<ICallStage[]>;
     update(id: string, data: UpdateStageDTO["data"]): Promise<ICallStage | null>;
+    updateStatus(id: string, newStatus: CallStageStatus): Promise<ICallStage | null>;
     exists(filters: ExistsStageDTO): Promise<boolean>;
     delete(id: string): Promise<ICallStage | null>;
     deleteByCall(callId: string): Promise<any>;
@@ -77,13 +78,17 @@ export class CallStageRepository implements ICallStageRepository {
         if (dtoData.deadline !== undefined) {
             updateData.deadline = dtoData.deadline;
         }
-
-        if (dtoData.status !== undefined) {
-            updateData.status = dtoData.status;
-        }
         return CallStage.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },
+            { new: true }
+        ).exec();
+    }
+
+    async updateStatus(id: string, newStatus: CallStageStatus) {
+        return CallStage.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            { $set: { status: newStatus } },
             { new: true }
         ).exec();
     }

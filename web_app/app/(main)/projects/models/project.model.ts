@@ -1,10 +1,10 @@
 import { Applicant } from "../../applicants/models/applicant.model";
+import { GrantAllocation } from "../../grants/allocations/models/grant.allocation.model";
 import { Grant } from "../../grants/models/grant.model";
 import { Organization } from "../../organizations/models/organization.model";
 import { sanitizeTheme, Theme } from "../../thematics/themes/models/theme.model";
 import { Collaborator, sanitizeCollaborator } from "../collaborators/models/collaborator.model";
 import { Phase, sanitizePhase } from "../phases/models/phase.model";
-import { ProjectTheme, sanitizeProjectTheme } from "../themes/models/project.theme.model";
 
 export enum ProjectStatus {
     draft = 'draft',
@@ -19,7 +19,7 @@ export enum ProjectStatus {
 
 export type Project = {
     _id?: string;
-    grant?: string | Grant;
+    grantAllocation?: string | GrantAllocation;
     title: string;
     summary?: string;
     status?: ProjectStatus;
@@ -37,14 +37,14 @@ export type Project = {
 }
 
 export interface GetProjectsOptions {
-    grant?: string | Grant;
+    grantAllocation?: string | GrantAllocation;
     applicant?: string | Applicant;
     workspace?: string | Organization;
     populate?: boolean;
 }
 
 export const validateProject = (project: Project): { valid: boolean; message?: string } => {
-    if (!project.grant) {
+    if (!project.grantAllocation) {
         return { valid: false, message: 'Grant is required.' };
     }
     if (!project.title || project.title.trim().length === 0) {
@@ -74,10 +74,10 @@ export const validateApplyProject = (project: Project): { valid: boolean; messag
 export const sanitize = (project: Partial<Project>): Partial<Project> => {
     return {
         ...project,
-        grant:
-            typeof project.grant === 'object' && project.grant !== null
-                ? (project.grant as any)._id
-                : project.grant,
+        grantAllocation:
+            typeof project.grantAllocation === 'object' && project.grantAllocation !== null
+                ? (project.grantAllocation as any)._id
+                : project.grantAllocation,
         applicant:
             typeof project.applicant === 'object' && project.applicant !== null
                 ? (project.applicant as any)._id

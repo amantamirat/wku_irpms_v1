@@ -18,6 +18,7 @@ import { GrantStageApi } from '@/app/(main)/grants/stages/api/grant.stage.api';
 
 import { Call, CallStatus } from '../../models/call.model';
 import { CallApi } from '../../api/call.api';
+import { GrantAllocation } from '@/app/(main)/grants/allocations/models/grant.allocation.model';
 
 const SaveCallStage = ({
     visible,
@@ -69,10 +70,12 @@ const SaveCallStage = ({
 
                 const call = localStage.call as Call;
 
-                if (!call?.grant) return;
+                const grantAlloc = call.grantAllocation as GrantAllocation;
+
+                if (!grantAlloc?.grant) return;
 
                 const data = await GrantStageApi.getAll({
-                    grant: call.grant,
+                    grant: grantAlloc.grant,
                 });
 
                 setGrantStages(data);

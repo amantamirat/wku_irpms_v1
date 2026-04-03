@@ -4,7 +4,7 @@ import { ProjectStatus } from "./project.state-machine";
 
 export interface IProject extends Document {
     _id: mongoose.Types.ObjectId;
-    grant: mongoose.Types.ObjectId;
+    grantAllocation: mongoose.Types.ObjectId;
     title: string;
     summary?: string;
     totalBudget?: number;
@@ -18,9 +18,9 @@ export interface IProject extends Document {
 }
 
 const ProjectSchema = new Schema<IProject>({
-    grant: {
+    grantAllocation: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.GRANT,
+        ref: COLLECTIONS.GRANT_ALLOCATION,
         required: true,
         immutable: true
     },

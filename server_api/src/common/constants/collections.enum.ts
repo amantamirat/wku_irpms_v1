@@ -15,7 +15,7 @@ export enum COLLECTIONS {
   GRANT_STAGE = "grantstages",
   CONSTRAINT = "constraints",
   COMPOSITION_NEW = "compositions",
-  GRANT_ALLOCATION="grantallocations",
+  GRANT_ALLOCATION = "grantallocations",
 
 
   THEMATIC = "thematics",
@@ -26,16 +26,14 @@ export enum COLLECTIONS {
   CALENDAR = "calendars",
   CALL = "calls",
   CALL_STAGE = "callstages",
-  PROJECT_DOCUMENT = "projectdocuments",
-
-
 
   PROJECT = "projects",
   COLLABORATOR = "collaborators",
   PHASE = "phases",
-  BREAKDOWN = "breakdowns",
+  PROJECT_STAGE = "projectstages",
+  //BREAKDOWN = "breakdowns",
   PHASE_DOCUMENT = "phasedocuments",
-  PROJECT_THEMEM = "prothemes",
+  //PROJECT_THEMEM = "prothemes",
   COLLABORATOR_ASSIGNMENT = "collaboratorassignments",
   REVIEWER = "reviewers",
   RESULT = "results",

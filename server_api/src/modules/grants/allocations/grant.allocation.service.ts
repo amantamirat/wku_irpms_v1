@@ -15,6 +15,7 @@ import { ALLOCATION_TRANSITIONS, AllocationStatus } from "./grant.allocation.sta
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { CalendarStatus } from "../../calendar/calendar.state-machine";
 import { ICallRepository } from "../../calls/call.repository";
+import { IProjectRepository } from "../../projects/project.repository";
 
 export class GrantAllocationService {
 
@@ -23,6 +24,7 @@ export class GrantAllocationService {
         private readonly grantRepo: IGrantRepository,
         private readonly calendarRepo: ICalendarRepository,
         private readonly callRepo: ICallRepository,
+        private readonly projecrRepo: IProjectRepository,
     ) { }
 
     /**
@@ -148,7 +150,10 @@ export class GrantAllocationService {
 
         if (next === AllocationStatus.planned) {
             if (await this.callRepo.exists({ grantAllocation: id })) {
-                throw new AppError(ERROR_CODES.ALLOCATION_IN_USE);
+                throw new AppError(ERROR_CODES.CALL_ALREADY_EXISTS);
+            }
+            if (await this.projecrRepo.exists({ grantAllocation: id })) {
+                throw new AppError(ERROR_CODES.PROJECT_ALREADY_EXISTS);
             }
         }
         if (next === GrantStatus.active) {

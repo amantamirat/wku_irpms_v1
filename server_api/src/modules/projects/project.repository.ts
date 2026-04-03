@@ -7,6 +7,8 @@ import {
     GetProjectsDTO,
     UpdateProjectDTO
 } from "./project.dto";
+import { GrantAllocation } from "../grants/allocations/grant.allocation.model";
+import { ProjectStatus } from "./project.state-machine";
 
 
 export interface IProjectRepository {
@@ -14,6 +16,7 @@ export interface IProjectRepository {
     find(filters: GetProjectsDTO): Promise<Partial<IProject>[]>;
     create(dto: CreateProjectDTO): Promise<IProject>;
     update(id: string, data: UpdateProjectDTO["data"]): Promise<IProject | null>;
+    updateStatus(id: string, newStatus: ProjectStatus): Promise<IProject | null>;
     exists(filters: ExistsProjectDTO): Promise<boolean>;
     delete(id: string): Promise<IProject | null>;
 }
@@ -30,69 +33,57 @@ export class ProjectRepository implements IProjectRepository {
     async find(filters: GetProjectsDTO) {
         const query: any = {};
 
-        if (filters.grant) {
-            query.call = new mongoose.Types.ObjectId(filters.grant);
+        // 1. Handle Status & Applicant
+        if (filters.status) {
+            query.status = filters.status;
         }
 
         if (filters.applicant) {
             query.applicant = new mongoose.Types.ObjectId(filters.applicant);
         }
 
-        if (filters.status) {
-            query.status = filters.status;
+        if (filters.workspace) {
+            query.workspace = new mongoose.Types.ObjectId(filters.workspace);
+        }
+
+        if (filters.grantAllocation) {
+            query.grantAllocation = new mongoose.Types.ObjectId(filters.grantAllocation);
+        } else if (filters.calendar || filters.grant) {
+            const allocationQuery: any = {};
+            if (filters.calendar) allocationQuery.calendar = filters.calendar;
+            if (filters.grant) allocationQuery.grant = filters.grant;
+            const matchingAllocations = await GrantAllocation.find(allocationQuery)
+                .select('_id')
+                .lean();
+            const allocationIds = matchingAllocations.map(a => a._id);
+            // Tell the Project query: "Find projects where grantAllocation is one of these IDs"
+            query.grantAllocation = { $in: allocationIds };
         }
 
         let dbQuery = Project.find(query);
 
-        /**
-         * 
-         * if (filters.populate) {
-            dbQuery = dbQuery.populate([
-                {
-                    path: 'grant',
-                    match: filters.directorate
-                        ? { directorate: new mongoose.Types.ObjectId(filters.directorate) }
-                        : undefined,
-                    populate: {
-                        path: 'directorate calendar'
-                    }
-                },
-                {
-                    path: 'applicant',
-                    match: filters.workspace
-                        ? { workspace: new mongoose.Types.ObjectId(filters.workspace) }
-                        : undefined,
-                    populate: {
-                        path: 'workspace'
-                    }
-                }
-            ]);
-        }
-         */
-
+        // 3. Deep Population
         if (filters.populate) {
-            dbQuery
-                .populate("grant")
+            dbQuery = dbQuery
                 .populate("applicant")
+                .populate({
+                    path: 'grantAllocation',
+                    populate: [
+                        { path: 'grant' },
+                        { path: 'calendar' }
+                    ]
+                })
+
+            //.populate("themes");
         }
 
-        const result = await dbQuery
-            .lean<IProject[]>()
-            .exec();
-        return result;
-
-        /*
-    // Remove unmatched populated docs
-    return result.filter(p =>
-        (!filters.directorate || p.grant) &&
-        (!filters.workspace || p.applicant)
-    );*/
+        return dbQuery.lean<IProject[]>().exec();
     }
 
     async create(dto: CreateProjectDTO) {
         return Project.create({
             ...dto,
-            grant: new mongoose.Types.ObjectId(dto.grant),
+            grantAllocation: new mongoose.Types.ObjectId(dto.grantAllocation),
             applicant: new mongoose.Types.ObjectId(dto.applicant),
             themes: dto.themes.map(thm => new mongoose.Types.ObjectId(thm)),
         });
@@ -108,7 +99,6 @@ export class ProjectRepository implements IProjectRepository {
         if (dtoData.themes) {
             updateData.themes = dtoData.themes.map(id => new mongoose.Types.ObjectId(id))
         }
-        if (dtoData.status) updateData.status = dtoData.status;
 
         return Project.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
@@ -117,14 +107,22 @@ export class ProjectRepository implements IProjectRepository {
         ).exec();
     }
 
+    async updateStatus(id: string, newStatus: ProjectStatus) {
+        return Project.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            { $set: { status: newStatus } },
+            { new: true }
+        ).exec();
+    }
+
     async exists(filters: ExistsProjectDTO): Promise<boolean> {
         const query: any = {};
-        const { applicant, grant } = filters;
+        const { applicant, grantAllocation } = filters;
         if (applicant) {
             query.applicant = new mongoose.Types.ObjectId(applicant);
         }
-        if (grant) {
-            query.grant = new mongoose.Types.ObjectId(grant);
+        if (grantAllocation) {
+            query.grantAllocation = new mongoose.Types.ObjectId(grantAllocation);
         }
         const result = await Project.exists(query).exec();
         return result !== null;

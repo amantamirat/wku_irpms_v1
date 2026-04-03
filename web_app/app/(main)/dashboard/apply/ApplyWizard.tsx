@@ -35,7 +35,7 @@ const ApplyWizard = ({ visible, stage, call, onCancel }: ApplyWizardProps) => {
     //const applicant = getApplicant();
     const initializeProject = (): Project => ({
         title: "",
-        call: call,
+        //call: call,
         // applicant: applicant,
         status: ProjectStatus.draft
     });
@@ -202,15 +202,27 @@ const ApplyWizard = ({ visible, stage, call, onCancel }: ApplyWizardProps) => {
                 onHide={onHide}
                 maximized
             >
-                <h3>{stage?.name} ({
+                {
+                    /**
+                     * <h3>{stage?.name} ({
                     call.title
-                })</h3>
+                })
+                </h3>
+                     */
+                }
+                
                 <Steps model={items} activeIndex={activeStep} readOnly className="mb-4" />
                 {activeStep === 0 && <UploadForm file={project.file} onUpload={updateFile} />}
                 {activeStep === 1 && <ProjectForm project={project} setProject={setProject} />}
-                {activeStep === 2 && <CollaboratorManager project={project} onSave={addCollaborator} onRemove={removeCollaborator} flyMode={true} />}
-                {activeStep === 3 && <PhaseManager project={project}  flyMode={true} onSave={savePhase} onRemove={removePhase} />}
-                {activeStep === items.length - 1 && <Confirmation project={project} call={project.call as Call} />}
+                {
+                //activeStep === 2 && <CollaboratorManager project={project} onSave={addCollaborator} onRemove={removeCollaborator} flyMode={true} />
+                }
+                {
+                //activeStep === 3 && <PhaseManager project={project}  flyMode={true} onSave={savePhase} onRemove={removePhase} />
+                }
+                {
+                //activeStep === items.length - 1 && <Confirmation project={project} call={project.call as Call} />
+                }
             </Dialog>
         </>
     );

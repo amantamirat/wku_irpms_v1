@@ -9,6 +9,7 @@ import { Call } from '../calls/models/call.model';
 import { CallStage } from '../calls/stages/models/call.stage.model';
 import { Constraint } from '../grants/constraints/models/constraint.model';
 import { Grant } from '../grants/models/grant.model';
+import { GrantAllocation } from '../grants/allocations/models/grant.allocation.model';
 
 
 interface CallDetailProps {
@@ -18,7 +19,8 @@ interface CallDetailProps {
 }
 
 export default function CallDetailView({ call, stages, constraints }: CallDetailProps) {
-    const grant = call.grant as Grant;
+    const grant = (call.grantAllocation as GrantAllocation).grant as Grant;
+
 
     // Format currency for the total amount
     const formatCurrency = (value: number) => {
@@ -41,8 +43,8 @@ export default function CallDetailView({ call, stages, constraints }: CallDetail
                     <Divider />
 
                     <h5 className="font-bold mb-4">Application Stages & Deadlines</h5>
-                    <Timeline 
-                        value={stages} 
+                    <Timeline
+                        value={stages}
                         align="left"
                         content={(item: CallStage) => (
                             <div className="ml-3 mb-5">
@@ -95,11 +97,11 @@ export default function CallDetailView({ call, stages, constraints }: CallDetail
                             </li>
                         ))}
                     </ul>
-                    
-                    <Button 
-                        label="Start Application" 
-                        icon="pi pi-external-link" 
-                        className="w-full mt-4 p-button-raised" 
+
+                    <Button
+                        label="Start Application"
+                        icon="pi pi-external-link"
+                        className="w-full mt-4 p-button-raised"
                         disabled={call.status !== 'active'}
                     />
                 </div>
@@ -123,5 +125,5 @@ function getConstraintIcon(type?: string) {
 function formatConstraintName(type?: string) {
     if (!type) return "Constraint";
     return type.replace("-", " ").replace("_", " ").toLowerCase()
-               .replace(/\b\w/g, s => s.toUpperCase());
+        .replace(/\b\w/g, s => s.toUpperCase());
 }

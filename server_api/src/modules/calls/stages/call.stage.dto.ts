@@ -12,7 +12,6 @@ export interface UpdateStageDTO {
     id: string;
     data: Partial<{
         deadline: Date;
-        status: CallStageStatus;
     }>;
 }
 
