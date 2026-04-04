@@ -35,10 +35,12 @@ export const validateProjectStage = (ps: Partial<ProjectStage>): { valid: boolea
     if (!ps.project) {
         return { valid: false, message: "Project is required." };
     }
+    /*
     if (!ps.grantStage) {
         return { valid: false, message: "Stage is required." };
     }
-    if (!ps.file && !ps._id) {
+    */
+    if (!ps.file) {
         return { valid: false, message: "Document (PDF) file is required." };
     }
     return { valid: true };

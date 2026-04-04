@@ -6,10 +6,10 @@ import {
     UpdateReviewerDTO,
     UpdateReviewerStatusDTO
 } from "./reviewer.dto";
-import { AuthenticatedRequest } from "../../../users/auth/auth.middleware";
-import { successResponse, errorResponse } from "../../../../common/helpers/response";
+import { AuthenticatedRequest } from "../users/auth/auth.middleware";
+import { successResponse, errorResponse } from "../../common/helpers/response";
 import { ReviewerStatus } from "./reviewer.status";
-import { ERROR_CODES } from "../../../../common/errors/error.codes";
+import { ERROR_CODES } from "../../common/errors/error.codes";
 
 export class ReviewerController {
 

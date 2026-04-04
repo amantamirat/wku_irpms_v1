@@ -49,7 +49,11 @@ export const ProjectStageApi: EntityApi<ProjectStage, GetProjectStageOptions | u
     // ---------------------------
     async create(stage) {
         const sanitized = sanitizeProjectStage(stage);
-        return ApiClient.post(`${end_point}`, sanitized);
+        const formData = new FormData();
+        formData.append("project", sanitized.project as string);
+        if (stage.file)
+            formData.append("document", stage.file);
+        return ApiClient.post(`${end_point}`, formData);
     },
 
     // ---------------------------

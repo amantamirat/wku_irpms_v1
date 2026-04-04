@@ -5,6 +5,7 @@ import { TabPanel, TabView } from "primereact/tabview";
 import CallManager from "../../calls/components/CallManager";
 import { Calendar } from "../models/calendar.model";
 import AllocationManager from "../../grants/allocations/components/AllocationManager";
+import ProjectManager from "../../projects/components/ProjectManager";
 
 
 interface CalendarDetailProps {
@@ -27,6 +28,11 @@ const CalendarDetail = ({ calendar }: CalendarDetailProps) => {
             header: "Calls",
             permission: "call:read",
             content: <CallManager calendar={calendar} />
+        },
+        {
+            header: "Projects",
+            permission: "project:read",
+            content: <ProjectManager calendar={calendar} />
         },
 
     ], [calendar]);

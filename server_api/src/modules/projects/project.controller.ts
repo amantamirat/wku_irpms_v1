@@ -40,11 +40,13 @@ export class ProjectController {
   // -----------------------
   get = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { grantAllocation, applicant, workspace, populate } = req.query;
+      const { grantAllocation, applicant, grant, calendar, workspace, populate } = req.query;
 
       const projects = await this.service.getProjects({
         grantAllocation: grantAllocation ? grantAllocation as string : undefined,
         applicant: applicant ? applicant as string : undefined,
+        grant: grant ? grant as string : undefined,
+        calendar: calendar ? calendar as string : undefined,
         workspace: workspace ? workspace as string : undefined,
         ...(populate !== undefined && { populate: populate === "true" })
       });

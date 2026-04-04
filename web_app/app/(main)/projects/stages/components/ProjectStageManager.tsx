@@ -8,6 +8,7 @@ import SaveProjectStage from "./SaveProjectStage";
 import { GrantStage } from "@/app/(main)/grants/stages/models/grant.stage.model";
 import { Project } from "../../models/project.model";
 import { PROJECT_STAGE_STATUS_ORDER, PROJECT_STAGE_TRANSITIONS } from "../models/project.stage.state-machine";
+import { BASE_URL } from "@/api/ApiClient";
 
 interface ProjectStageManagerProps {
     project?: string | Project;
@@ -29,30 +30,28 @@ const ProjectStageManager = ({ project }: ProjectStageManagerProps) => {
                         ? (ps.grantStage as GrantStage)?.name
                         : "Loading..."
             },
-            {
-                header: "Status",
-                field: "status",
-                sortable: true,
-                body: (ps: ProjectStage) => (
-                    <MyBadge type="status" value={ps.status ?? ProjectStageStatus.submitted} />
-                )
-            },
+
             {
                 header: "Score",
                 field: "totalScore",
                 sortable: true,
-                body: (ps: ProjectStage) => ps.totalScore !== null ? `${ps.totalScore}` : "-"
+                body: (ps: ProjectStage) => {
+                    const score = ps?.totalScore;
+                    return typeof score === "number"
+                        ? score
+                        : "-";
+                }
             },
             {
                 header: "Document",
                 body: (ps: ProjectStage) => ps.documentPath ? (
                     <a
-                        href={ps.documentPath}
+                        href={`${BASE_URL}/${ps.documentPath.replace(/^\\/, "")}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:underline"
                     >
-                        <i className="pi pi-file-pdf mr-1"></i> View PDF
+                        <i className="pi pi-file-pdf mr-1"></i> View Document
                     </a>
                 ) : <span className="text-gray-400">No File</span>
             },
@@ -60,9 +59,16 @@ const ProjectStageManager = ({ project }: ProjectStageManagerProps) => {
                 header: "Submitted At",
                 field: "createdAt",
                 body: (ps: ProjectStage) => ps.createdAt ? new Date(ps.createdAt).toLocaleDateString() : "-"
+            },
+            {
+                header: "Status",
+                field: "status",
+                sortable: true,
+                body: (ps: ProjectStage) => (
+                    <MyBadge type="status" value={ps.status ?? ProjectStageStatus.submitted} />
+                )
             }
         ],
-
 
         createNew: () => createEmptyProjectStage({
             project
@@ -85,7 +91,7 @@ const ProjectStageManager = ({ project }: ProjectStageManagerProps) => {
         },
 
         // Safety: usually project stages are audit-critical, so we disable direct deletion
-        disableDeleteRow: () => true
+        disableDeleteRow: (ps: ProjectStage) => ps.status !== ProjectStageStatus.submitted
     });
 
     return <Manager />;

@@ -14,11 +14,11 @@ export abstract class ProjectSynchronizer {
     abstract sync(project: string): Promise<any>;
 }
 
-export class DocSynchronizer extends ProjectSynchronizer {
+export class ProjectStageSynchronizer extends ProjectSynchronizer {
 
     constructor(
         private readonly repository: IProjectRepository,
-        private readonly documentRepository: IProjectStageRepository,
+        private readonly projectStageRepository: IProjectStageRepository,
     ) {
         super(repository);
     }
@@ -27,7 +27,7 @@ export class DocSynchronizer extends ProjectSynchronizer {
         const projectDoc = await this.repository.findById(project);
         if (!projectDoc) return;
 
-        const projectDocs = await this.documentRepository.find({ project });
+        const projectDocs = await this.projectStageRepository.find({ project });
         const currentStatus = projectDoc.status;
 
         let newStatus = ProjectStatus.submitted;
@@ -46,7 +46,7 @@ export class DocSynchronizer extends ProjectSynchronizer {
                 newStatus,
                 PROJECT_TRANSITIONS
             );
-            const updated = await this.repository.update(project, { status: newStatus })
+            const updated = await this.repository.updateStatus(project, newStatus)
             return updated;
         }
     }
@@ -96,7 +96,7 @@ export class CollabSynchronizer extends ProjectSynchronizer {
 export class ProjectSyncOrchestrator {
 
     constructor(
-        private readonly docSync: DocSynchronizer,
+        private readonly docSync: ProjectStageSynchronizer,
         private readonly phaseSync: PhaseSynchronizer,
         private readonly collabSync: CollabSynchronizer,
     ) { }

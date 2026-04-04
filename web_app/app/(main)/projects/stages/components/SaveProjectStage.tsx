@@ -100,19 +100,7 @@ const SaveProjectStage = ({ visible, item, onHide, onComplete }: EntitySaveDialo
                 footer={footer}
                 onHide={hide}
             >
-                {/* Status Selector */}
-                <div className="field mb-4">
-                    <label htmlFor="status" className="font-bold">Status</label>
-                    <Dropdown
-                        id="status"
-                        value={localStage.status}
-                        options={Object.values(ProjectStageStatus)}
-                        onChange={(e) => setLocalStage({ ...localStage, status: e.value })}
-                        placeholder="Select Status"
-                        className={classNames({ 'p-invalid': submitted && !localStage.status })}
-                    />
-                </div>
-
+                
                 {/* File Upload Section */}
                 <div className="field mb-4">
                     <label className="font-bold">Documentation (PDF)</label>

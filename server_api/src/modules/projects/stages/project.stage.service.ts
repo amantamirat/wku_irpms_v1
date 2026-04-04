@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
@@ -15,6 +17,9 @@ import {
     UpdateStageDTO
 } from "./project.stage.dto";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
+import { IGrantAllocationRepository } from "../../grants/allocations/grant.allocation.repository";
+import { AllocationStatus } from "../../grants/allocations/grant.allocation.state-machine";
+import { IProjectSynchronizer, ProjectStageSynchronizer } from "./project.stage.synchronizer";
 
 export class ProjectStageService {
 
@@ -22,7 +27,10 @@ export class ProjectStageService {
         private readonly repository: IProjectStageRepository,
         private readonly projectRepo: IProjectRepository,
         private readonly grantStageRepo: IGrantStageRepository,
-    ) { }
+        private readonly grantAllocRepo: IGrantAllocationRepository,
+        private readonly synchronizer: IProjectSynchronizer,
+    ) {
+    }
 
     /**
      * Create project stage (submission)
@@ -37,11 +45,21 @@ export class ProjectStageService {
         if (String(projectDoc.applicant) !== applicantId)
             throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
-        const stageDoc = await this.grantStageRepo.findById(grantStage);
-        if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        const grantAllocDoc = await this.grantAllocRepo.findById(String(projectDoc.grantAllocation));
+        if (!grantAllocDoc) throw new AppError(ERROR_CODES.ALLOCATION_NOT_FOUND);
+        if (grantAllocDoc.status !== AllocationStatus.active) throw new AppError(ERROR_CODES.ALLOCATION_NOT_ACTIVE);
 
+        const projectStages = await this.repository.find({ project });
+        const nextOrder = projectStages.length + 1;
+
+        const grantStages = await this.grantStageRepo.find({ grant: String(grantAllocDoc.grant), order: nextOrder });
+        if (grantStages.length == 0 || grantStages.length < 1) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        const nextGrantStageDoc = grantStages[0];
+        dto.grantStage = String(nextGrantStageDoc._id);
         try {
-            return await this.repository.create(dto);
+            const created = await this.repository.create(dto);
+            await this.synchronizer.sync(project);
+            return created;
         } catch (err: any) {
             if (err?.code === 11000) {
                 throw new AppError(ERROR_CODES.STAGE_ALREADY_EXISTS);
@@ -134,8 +152,21 @@ export class ProjectStageService {
         if (String(projectDoc.applicant) !== applicantId)
             throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
+        // ✅ DELETE FILE FIRST
+        if (projectStageDoc.documentPath) {
+            const filePath = path.resolve(projectStageDoc.documentPath);
+
+            fs.unlink(filePath, (err) => {
+                if (err) {
+                    console.error("File deletion failed:", err.message);
+                    // optional: don't throw, just log (avoid breaking delete flow)
+                }
+            });
+        }
+
+        // ✅ DELETE DB RECORD
         const deleted = await this.repository.delete(id);
-        //if (deleted) await this.docSynchronizer.sync(project);
+        await this.synchronizer.sync(project);
         return deleted;
     }
 }

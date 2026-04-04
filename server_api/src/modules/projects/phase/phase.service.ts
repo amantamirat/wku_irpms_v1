@@ -14,7 +14,7 @@ export class PhaseService {
     constructor(
         private readonly repository: IPhaseRepository = new PhaseRepository(),
         private readonly projectRepository: IProjectRepository = new ProjectRepository()
-    ) {}
+    ) { }
 
     /**
      * Internal Helper: Validates that breakdown totals match the Phase totals.
@@ -50,7 +50,7 @@ export class PhaseService {
 
     async create(dto: CreatePhaseDto) {
         const { project, applicantId } = dto;
-        
+
         await this.validate(project, applicantId ?? "");
         this.validateBreakdown(dto); // Ensure math adds up
 
@@ -74,7 +74,7 @@ export class PhaseService {
 
         const phaseDoc = await this.repository.findById(id);
         if (!phaseDoc) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
-        
+
         const projectId = String(phaseDoc.project);
         await this.validate(projectId, applicantId);
 
@@ -109,8 +109,8 @@ export class PhaseService {
 
         const projectDoc = await this.projectRepository.findById(String(phaseDoc.project));
         if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
-        
-        const projectStatus = projectDoc.status;        
+
+        const projectStatus = projectDoc.status;
 
         // Business Logic for specific transitions
         if (to === PhaseStatus.reviewed) {
@@ -135,7 +135,7 @@ export class PhaseService {
 
         const phaseDoc = await this.repository.findById(id);
         if (!phaseDoc) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
-
+        //include reoredring here 
         await this.validate(String(phaseDoc.project), applicantId ?? "");
 
         if (phaseDoc.status !== PhaseStatus.proposed)

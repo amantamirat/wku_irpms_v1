@@ -1,6 +1,6 @@
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
-import { ReviewerRepository } from "../calls/stages/reviewers/reviewer.repository";
+import { ReviewerRepository } from "../reviewers/reviewer.repository";
 import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
 import { CollaboratorRepository, ICollaboratorRepository } from "../projects/collaborators/collaborator.repository";
 import { IProjectRepository, ProjectRepository } from "../projects/project.repository";

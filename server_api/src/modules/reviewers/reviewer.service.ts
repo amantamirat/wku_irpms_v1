@@ -1,15 +1,15 @@
 // reviewer.service.ts
-import { SYSTEM } from "../../../../common/constants/system.constant";
-import { AppError } from "../../../../common/errors/app.error";
-import { ERROR_CODES } from "../../../../common/errors/error.codes";
-import { ApplicantRepository, IApplicantRepository } from "../../../applicants/applicant.repository";
-import { ICriterionRepository, CriterionRepository } from "../../../evaluations/criteria/criterion.repository";
-import { CollaboratorRepository, ICollaboratorRepository } from "../../../projects/collaborators/collaborator.repository";
-import { ProjectStageRepository, IProjectStageRepository } from "../../../projects/stages/project.stage.repository";
-import { ProjectStageStatus } from "../../../projects/stages/project.stage.status";
-import { ProjectStageSynchronizer } from "../../../projects/stages/project.stage.synchronizer";
-import { IProjectRepository, ProjectRepository } from "../../../projects/project.repository";
-import { ICallStageRepository, CallStageRepository } from "../call.stage.repository";
+import { SYSTEM } from "../../common/constants/system.constant";
+import { AppError } from "../../common/errors/app.error";
+import { ERROR_CODES } from "../../common/errors/error.codes";
+import { ApplicantRepository, IApplicantRepository } from "../applicants/applicant.repository";
+import { ICriterionRepository, CriterionRepository } from "../evaluations/criteria/criterion.repository";
+import { CollaboratorRepository, ICollaboratorRepository } from "../projects/collaborators/collaborator.repository";
+import { ProjectStageRepository, IProjectStageRepository } from "../projects/stages/project.stage.repository";
+import { ProjectStageStatus } from "../projects/stages/project.stage.status";
+import { ProjectStageSynchronizer } from "./project.stage.synchronizer";
+import { IProjectRepository, ProjectRepository } from "../projects/project.repository";
+import { ICallStageRepository, CallStageRepository } from "../calls/stages/call.stage.repository";
 import { IResultRepository, ResultRepository } from "./results/result.repository";
 import { CreateReviewerDTO, GetReviewersDTO, UpdateReviewerDTO, UpdateReviewerStatusDTO } from "./reviewer.dto";
 import { IReviewerRepository, ReviewerRepository } from "./reviewer.repository";

@@ -35,8 +35,8 @@ import phaseRoutes from './modules/projects/phase/phase.routes';
 import phaseDocRoutes from './modules/projects/phase/documents/phase.doc.routes';
 
 import projectStageRoutes from './modules/projects/stages/project.stage.routes';
-import reviewerRoutes from './modules/calls/stages/reviewers/reviewer.routes';
-import resultRoutes from './modules/calls/stages/reviewers/results/result.routes';
+import reviewerRoutes from './modules/reviewers/reviewer.routes';
+import resultRoutes from './modules/reviewers/results/result.routes';
 
 import userRoutes from './modules/users/user.routes';
 import reportRoutes from './modules/reports/report.routes';

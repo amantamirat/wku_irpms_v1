@@ -35,7 +35,7 @@ export class ProjectStageRepository implements IProjectStageRepository {
         }
 
         if (options.grantStage) {
-            query.stage = new mongoose.Types.ObjectId(options.grantStage);
+            query.grantStage = new mongoose.Types.ObjectId(options.grantStage);
         }
 
         if (options.status) {
@@ -46,37 +46,15 @@ export class ProjectStageRepository implements IProjectStageRepository {
 
         if (options.populate) {
             dbQuery
-                .populate({
-                    path: "project",
-                    /*
-                    populate: {
-                        path: "applicant",
-                        populate: {
-                            path: "workspace"
-                        }
-                    }
-                        */
-                })
-                .populate("stage");
+                .populate("project")
+                .populate("grantStage");
         }
-
         return dbQuery
             .lean<IProjectStage[]>()
             .exec();
     }
 
 
-    /*
-    async findByProject(stage: string) {
-        return ProjectDocument.find({ stage: new mongoose.Types.ObjectId(stage) })
-            .populate({
-                path: "project",
-                populate: { path: "applicant", populate: { path: "workspace" } }
-            })
-            .lean<IProjectDocument[]>()
-            .exec();
-    }
-            */
 
     async create(dto: CreateProjectStageDTO): Promise<HydratedDocument<IProjectStage>> {
         const data: Partial<IProjectStage> = {
@@ -115,6 +93,6 @@ export class ProjectStageRepository implements IProjectStageRepository {
     }
 
     async delete(id: string) {
-        return await ProjectStage.findByIdAndDelete(id).exec();
+        return ProjectStage.findByIdAndDelete(id).exec();
     }
 }

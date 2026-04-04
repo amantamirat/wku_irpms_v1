@@ -7,14 +7,14 @@ import { ApplicantRepository } from "../../applicants/applicant.repository";
 import { CallRepository, ICallRepository } from "../../calls/call.repository";
 import { CallStatus } from "../../calls/call.status";
 import { ICallStageRepository } from "../../calls/stages/call.stage.repository";
-import { ReviewerRepository } from "../../calls/stages/reviewers/reviewer.repository";
-import { ReviewerStatus } from "../../calls/stages/reviewers/reviewer.status";
+import { ReviewerRepository } from "../../reviewers/reviewer.repository";
+import { ReviewerStatus } from "../../reviewers/reviewer.status";
 import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
 import { CollaboratorRepository } from "../collaborators/collaborator.repository";
 import { PhaseRepository } from "../phase/phase.repository";
 import { IProjectRepository } from "../project.repository";
 import { ProjectStatus } from "../project.state-machine";
-import { CollabSynchronizer, DocSynchronizer, PhaseSynchronizer, ProjectSyncOrchestrator } from "../project.synchronizer";
+import { CollabSynchronizer, ProjectStageSynchronizer, PhaseSynchronizer, ProjectSyncOrchestrator } from "../project.synchronizer";
 //import { ProjectThemeRepository } from "../themes/project.theme.repository";
 import { CallStageStatus } from "../../calls/stages/call.stage.model";
 import { CreateProjectStageDTO, GetProjectStageDTO, SubmitProjectDTO, UpdateStatusDTO } from "./project.stage.dto";
@@ -36,7 +36,7 @@ export class ProjectStageOldService {
         private readonly phaseRepository = new PhaseRepository(),
         private readonly reviewerRepository = new ReviewerRepository(),
 
-        private readonly docSynchronizer = new DocSynchronizer(
+        private readonly docSynchronizer = new ProjectStageSynchronizer(
             projectRepository,
             repository
         ),

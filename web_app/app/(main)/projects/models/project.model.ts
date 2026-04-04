@@ -40,6 +40,8 @@ export interface GetProjectsOptions {
     grantAllocation?: string | GrantAllocation;
     applicant?: string | Applicant;
     workspace?: string | Organization;
+    calendar?: string;
+    grant?: string;
     populate?: boolean;
 }
 

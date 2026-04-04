@@ -6,12 +6,16 @@ import { ProjectRepository } from "../project.repository";
 import { ProjectStageController } from "./project.stage.controller";
 import { ProjectStageRepository } from "./project.stage.repository";
 import { ProjectStageService } from "./project.stage.service";
+import { GrantAllocationRepository } from "../../grants/allocations/grant.allocation.repository";
+import { ProjectStageSynchronizer } from "./project.stage.synchronizer";
 
-const repository = new ProjectStageRepository();
-const projectRepository = new ProjectRepository();
-const stageRepository = new GrantStageRepository();
+const projectStageRepo = new ProjectStageRepository();
+const projectRepo = new ProjectRepository();
+const grantStageRepo = new GrantStageRepository();
+const grantAllocationRepo = new GrantAllocationRepository();
+const synchronizer = new ProjectStageSynchronizer(projectRepo, projectStageRepo);
 
-const service = new ProjectStageService(repository, projectRepository, stageRepository);
+const service = new ProjectStageService(projectStageRepo, projectRepo, grantStageRepo, grantAllocationRepo, synchronizer);
 const controller = new ProjectStageController(service);
 const router = express.Router();
 

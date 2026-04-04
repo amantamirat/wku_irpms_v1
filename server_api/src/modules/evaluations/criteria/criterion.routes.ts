@@ -4,7 +4,7 @@ import { checkPermission, verifyActiveAccount } from "../../users/auth/auth.midd
 import { CriterionController } from "./criterion.controller";
 import { CriterionService } from "./criterion.service";
 import { CriterionRepository } from "./criterion.repository";
-import { ResultRepository } from "../../calls/stages/reviewers/results/result.repository";
+import { ResultRepository } from "../../reviewers/results/result.repository";
 import { EvaluationRepository } from "../evaluation.repository";
 import { SettingService } from "../../settings/setting.service";
 import { SettingRepository } from "../../settings/setting.repository";

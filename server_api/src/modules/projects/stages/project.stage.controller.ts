@@ -1,22 +1,18 @@
 import { Request, Response } from "express";
 import fs from "fs";
-import { successResponse, errorResponse } from "../../../common/helpers/response";
+import { errorResponse, successResponse } from "../../../common/helpers/response";
 
 import {
     CreateProjectStageDTO,
-    GetProjectStageDTO,
-    SubmitProjectDTO,
-    UpdateStatusDTO
+    GetProjectStageDTO
 } from "./project.stage.dto";
 
-import { AuthenticatedRequest } from "../../users/auth/auth.middleware";
-import { ProjectStageOldService } from "./project.stage.service.old";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
-import { ProjectStageStatus } from "./project.stage.status";
-import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { AppError } from "../../../common/errors/app.error";
-import { ProjectStageService } from "./project.stage.service";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
+import { AppError } from "../../../common/errors/app.error";
+import { ERROR_CODES } from "../../../common/errors/error.codes";
+import { AuthenticatedRequest } from "../../users/auth/auth.middleware";
+import { ProjectStageService } from "./project.stage.service";
 
 export class ProjectStageController {
 
@@ -34,11 +30,11 @@ export class ProjectStageController {
             }
             if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
 
-            const { project, stage } = req.body;
+            const { project } = req.body;
 
             const dto: CreateProjectStageDTO = {
                 project,
-                grantStage: stage,
+                //grantStage: stage,
                 documentPath: `uploads/${req.file.filename}`,
                 applicantId: req.user.applicantId
             };
@@ -81,12 +77,13 @@ export class ProjectStageController {
     // ---------------------------------------------------
     get = async (req: Request, res: Response) => {
         try {
-            const { project, stage, status, skip, limit } = req.query;
+            const { project, stage, status, populate, skip, limit } = req.query;
 
             const dto: GetProjectStageDTO = {
                 project: project as string,
                 grantStage: stage as string,
                 status: status as any,
+                ...(populate !== undefined && { populate: populate === "true" }),
                 skip: skip ? Number(skip) : undefined,
                 limit: limit ? Number(limit) : undefined,
             };

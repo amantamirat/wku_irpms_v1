@@ -13,6 +13,7 @@ export interface IPhaseRepository {
     createMany(dtos: CreatePhaseDto[]): Promise<IPhase[]>;
     update(id: string, data: UpdatePhaseDto["data"]): Promise<IPhase | null>;
     delete(id: string): Promise<IPhase | null>;
+    deleteByProject(projectId: string): Promise<any>;
 }
 
 export class PhaseRepository implements IPhaseRepository {
@@ -73,5 +74,11 @@ export class PhaseRepository implements IPhaseRepository {
     async delete(id: string) {
         return await Phase.findByIdAndDelete(new mongoose.Types.ObjectId(id))
             .exec();
+    }
+    async deleteByProject(projectId: string) {
+        if (!mongoose.Types.ObjectId.isValid(projectId)) throw new Error("Invalid Project ID");
+        return Phase.deleteMany({
+            project: new mongoose.Types.ObjectId(projectId)
+        }).exec();
     }
 }

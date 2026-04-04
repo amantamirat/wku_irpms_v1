@@ -906,33 +906,33 @@
   },
   {
     "category": "Project Stage Management",
-    "name": "project.stage:transition.submitted.under_review",
-    "description": "Move stage from submitted to under review"
+    "name": "project.stage:transition.submitted.selected",
+    "description": "Move stage from submitted selected to review"
   },
   {
     "category": "Project Stage Management",
-    "name": "project.stage:transition.under_review.submitted",
+    "name": "project.stage:transition.selected.submitted",
     "description": "Revert stage from under review to submitted"
   },
   {
     "category": "Project Stage Management",
-    "name": "project.stage:transition.under_review.approved",
+    "name": "project.stage:transition.selected.approved",
     "description": "Approve project stage"
   },
   {
     "category": "Project Stage Management",
-    "name": "project.stage:transition.approved.under_review",
-    "description": "Revert approved stage back to under review"
+    "name": "project.stage:transition.approved.selected",
+    "description": "Revert approved stage back to under review (selected)"
   },
   {
     "category": "Project Stage Management",
-    "name": "project.stage:transition.under_review.rejected",
+    "name": "project.stage:transition.selected.rejected",
     "description": "Reject project stage"
   },
   {
     "category": "Project Stage Management",
-    "name": "project.stage:transition.rejected.under_review",
-    "description": "Revert rejected stage back to under review"
+    "name": "project.stage:transition.rejected.selected",
+    "description": "Revert rejected stage back to under review (selected)"
   },
   {
     "category": "Report Management",

@@ -10,14 +10,18 @@ import { Organization } from "../../organizations/models/organization.model";
 import MyBadge from "@/templates/MyBadge";
 import { PROJECT_STATUS_ORDER, PROJECT_TRANSITIONS } from "../models/project.state-machine";
 import { getAllocationLabel } from "../../grants/allocations/components/AllocationTempletes";
+import { Calendar } from "../../calendars/models/calendar.model";
+import { Grant } from "../../grants/models/grant.model";
 
 interface ProjectManagerProps {
     grantAllocation?: GrantAllocation;
+    grant?: Grant;
+    calendar?: Calendar;
     applicant?: Applicant;
     workspace?: Organization;
 }
 
-const ProjectManager = ({ grantAllocation, applicant, workspace }: ProjectManagerProps) => {
+const ProjectManager = ({ grantAllocation, applicant, grant, calendar, workspace }: ProjectManagerProps) => {
     const Manager = createEntityManager<Project, GetProjectsOptions | undefined>({
         title: "Manage Projects",
         itemName: "Project",
@@ -118,7 +122,15 @@ const ProjectManager = ({ grantAllocation, applicant, workspace }: ProjectManage
             populate: true,
             grantAllocation: grantAllocation?._id,
             workspace: workspace?._id,
-            applicant: applicant?._id
+            applicant: applicant?._id,
+            calendar: typeof calendar === 'object'
+                ? (calendar as any)?._id
+                : calendar,
+
+            // Flatten Grant (handles string | Grant)
+            grant: typeof grant === 'object'
+                ? (grant as any)?._id
+                : grant,
         }),
         workflow: {
             statusField: "status",

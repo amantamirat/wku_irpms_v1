@@ -1,7 +1,7 @@
 import fs from "fs";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { IResultRepository } from "../../calls/stages/reviewers/results/result.repository";
+import { IResultRepository } from "../../reviewers/results/result.repository";
 import { SettingKey } from "../../settings/setting.model";
 import { SettingService } from "../../settings/setting.service";
 import { IEvaluationRepository } from "../evaluation.repository";

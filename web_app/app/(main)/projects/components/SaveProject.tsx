@@ -54,7 +54,12 @@ const buildTree = (themes: Theme[], parentId?: string): Node[] => {
         });
 };
 
-const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<Project>) => {
+interface ExtendedProject extends Project {
+    _filterCalendar?: string;
+    _filterGrant?: string;
+}
+
+const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<ExtendedProject>) => {
     const toast = useRef<Toast>(null);
 
     const [localProject, setLocalProject] = useState<Project>({
@@ -81,11 +86,11 @@ const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
             if (!visible) return;
             try {
                 const [aData, appData] = await Promise.all([
-                    (!isAllocationPredefined && !isEditMode) 
-                        ? GrantAllocationApi.getAll({ status: AllocationStatus.active, populate: true }) 
+                    (!isAllocationPredefined && !isEditMode)
+                        ? GrantAllocationApi.getAll({ status: AllocationStatus.active, populate: true })
                         : Promise.resolve([]),
-                    (!isApplicantPredefined && !isEditMode) 
-                        ? ApplicantApi.getAll({}) 
+                    (!isApplicantPredefined && !isEditMode)
+                        ? ApplicantApi.getAll({})
                         : Promise.resolve([])
                 ]);
 
@@ -190,7 +195,7 @@ const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
                                 optionLabel="_id"
                                 onChange={(e) =>
                                     setLocalProject({
-                                        ...localProject, 
+                                        ...localProject,
                                         grantAllocation: e.value,
                                         themes: [] // Reset themes when allocation changes
                                     })}

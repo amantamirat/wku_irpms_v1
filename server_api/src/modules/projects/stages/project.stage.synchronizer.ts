@@ -1,52 +1,46 @@
-// project-document.synchronizer.ts
+import { TransitionHelper } from "../../../common/helpers/transition.helper";
+import { IProjectRepository } from "../project.repository";
+import { ProjectStatus, PROJECT_TRANSITIONS } from "../project.state-machine";
 import { IProjectStageRepository } from "./project.stage.repository";
 import { ProjectStageStatus } from "./project.stage.status";
-//import { DocumentStateMachine } from "./project.stage.state-machine";
-import { IProjectStage } from "./project.stage.model";
-import { IReviewerRepository } from "../../calls/stages/reviewers/reviewer.repository";
-import { ReviewerStatus } from "../../calls/stages/reviewers/reviewer.status";
 
-export class ProjectStageSynchronizer {
+export interface IProjectSynchronizer {
+    sync(project: string): Promise<any>;
+}
 
-  constructor(
-    private readonly documentRepository: IProjectStageRepository,
-    private readonly reviewerRepository: IReviewerRepository
-  ) {
+export class ProjectStageSynchronizer implements IProjectSynchronizer {
 
-  }
-
-  async sync(docId: string) {
-    const proDoc = await this.documentRepository.findById(docId);
-    if (!proDoc || !proDoc.status) return;
-
-    const currentStatus = proDoc.status;
-    const reviewers = await this.reviewerRepository.find({ projectStage: docId });
-
-    let newStatus: ProjectStageStatus = ProjectStageStatus.selected;
-
-    let totalScore: number | undefined | null = undefined;
-
-    if (reviewers.length > 0) {
-      const allApproved = reviewers.every(r => r.status === ReviewerStatus.approved);
-      if (allApproved) {
-        newStatus = ProjectStageStatus.reviewed;
-        const totalWeight = reviewers.reduce((sum, r) => sum + (r.weight ?? 1), 0);
-        totalScore = reviewers.reduce((sum, r) => sum + (r.score ?? 0) * (r.weight ?? 1), 0) / totalWeight;
-      } else {
-        totalScore = null;
-      }
+    constructor(
+        private readonly projectRepo: IProjectRepository,
+        private readonly projectStageRepo: IProjectStageRepository,
+    ) {
     }
 
-    /*
-    if (newStatus !== currentStatus && DocumentStateMachine.canTransition(currentStatus, newStatus)) {
-      const updateData: any = { status: newStatus };
-      if (totalScore !== undefined) {
-        updateData.totalScore = totalScore;
-      }
-      const updated = await this.documentRepository.update(docId, updateData);
-      return updated;
-    }*/
+    async sync(project: string) {
+        const projectDoc = await this.projectRepo.findById(project);
+        if (!projectDoc) return;
 
-  }
+        const projectDocs = await this.projectStageRepo.find({ project });
+        const currentStatus = projectDoc.status;
 
+        let newStatus = ProjectStatus.submitted;
+        if (projectDocs.length === 0) {
+            newStatus = ProjectStatus.draft;
+        }
+        else if (projectDocs.some(d => d.status === ProjectStageStatus.rejected)) {
+            newStatus = ProjectStatus.rejected;
+        }
+        else if (projectDocs.every(d => d.status === ProjectStageStatus.accepted)) {
+            newStatus = ProjectStatus.accepted;
+        }
+        if (newStatus !== currentStatus) {
+            TransitionHelper.validateTransition(
+                projectDoc.status,
+                newStatus,
+                PROJECT_TRANSITIONS
+            );
+            const updated = await this.projectRepo.updateStatus(project, newStatus)
+            return updated;
+        }
+    }
 }
