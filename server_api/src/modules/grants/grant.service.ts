@@ -1,23 +1,21 @@
+import { Unit } from "../../common/constants/enums";
+import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
-import { CreateGrantDTO, GetGrantsDTO, TransitionGrantDTO, UpdateGrantDTO } from "./grant.dto";
-import { GrantRepository, IGrantRepository } from "./grant.repository";
-import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
-import { FundingSource, GrantStatus } from "./grant.model";
-import { ConstraintRepository, IConstraintRepository } from "./constraints/constraint.repository";
-import { CallRepository, ICallRepository } from "../calls/call.repository";
-import { IThematicRepository, ThematicRepository } from "../thematics/thematic.repository";
-import { GRANT_TRANSITIONS } from "./grant.state-machine";
-import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
-import { Unit } from "../../common/constants/enums";
-import { CompositionRepository, ICompositionRepository } from "./compositions/composition.repository";
-import { ThematicStatus } from "../thematics/thematic.state-machine";
-import { GrantStageRepository, IGrantStageRepository } from "./stages/grant.stage.repository";
-import { IExternal } from "../organization/organization.model";
 import { Ownership } from "../organization/organization.enum";
-import { IProjectRepository, ProjectRepository } from "../projects/project.repository";
-import { GrantAllocationRepository, IGrantAllocationRepository } from "./allocations/grant.allocation.repository";
+import { IExternal } from "../organization/organization.model";
+import { IOrganizationRepository } from "../organization/organization.repository";
+import { IThematicRepository } from "../thematics/thematic.repository";
+import { ThematicStatus } from "../thematics/thematic.state-machine";
+import { IGrantAllocationRepository } from "./allocations/grant.allocation.repository";
+import { ICompositionRepository } from "./compositions/composition.repository";
+import { IConstraintRepository } from "./constraints/constraint.repository";
+import { CreateGrantDTO, GetGrantsDTO, UpdateGrantDTO } from "./grant.dto";
+import { FundingSource, GrantStatus } from "./grant.model";
+import { IGrantRepository } from "./grant.repository";
+import { GRANT_TRANSITIONS } from "./grant.state-machine";
+import { IGrantStageRepository } from "./stages/grant.stage.repository";
 
 export class GrantService {
 

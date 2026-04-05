@@ -1,10 +1,9 @@
 'use client';
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { OrgnUnit } from '@/app/(main)/organizations/models/organization.model';
-import { UserApi } from '@/app/(main)/users/api/user.api';
-import { User } from '@/app/(main)/users/models/user.model';
-import { IOwnership } from '@/app/(main)/applicants/models/applicant.model';
 import { AuthApi } from '@/app/(full-page)/auth/api/auth.service';
+import { IOwnership } from '@/app/(main)/applicants/models/applicant.model';
+import { OrgnUnit } from '@/app/(main)/organizations/models/organization.model';
+import { User } from '@/app/(main)/users/models/user.model';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 interface AuthContextType {
     user: User | null;

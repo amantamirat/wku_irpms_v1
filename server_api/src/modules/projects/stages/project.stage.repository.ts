@@ -10,7 +10,7 @@ import { ProjectStageStatus } from "./project.stage.status";
 import { Project } from "../project.model";
 
 export interface IProjectStageRepository {
-    findById(id: string): Promise<IProjectStage | null>;
+    findById(id: string, populate?: boolean): Promise<IProjectStage | null>;
     find(filters: GetProjectStageDTO): Promise<Partial<IProjectStage>[]>;
     create(dto: CreateProjectStageDTO): Promise<IProjectStage>;
     update(id: string, status: UpdateStageDTO["data"]): Promise<IProjectStage | null>;
@@ -22,10 +22,15 @@ export interface IProjectStageRepository {
 // MongoDB implementation
 export class ProjectStageRepository implements IProjectStageRepository {
 
-    async findById(id: string) {
-        return ProjectStage.findById(new mongoose.Types.ObjectId(id))
-            .lean<IProjectStage>()
-            .exec();
+    async findById(id: string, populate?: boolean) {
+        const query = ProjectStage.findById(new mongoose.Types.ObjectId(id)).lean<IProjectStage>();
+
+        if (populate) {
+            query.populate("project")
+                .populate("grantStage")
+        }
+
+        return query.exec();
     }
 
     async find(options: GetProjectStageDTO) {

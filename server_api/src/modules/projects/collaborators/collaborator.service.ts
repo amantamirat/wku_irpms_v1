@@ -121,7 +121,6 @@ export class CollaboratorService {
     }
 
 
-
     async delete(dto: DeleteDto) {
         const { id, applicantId } = dto;
 

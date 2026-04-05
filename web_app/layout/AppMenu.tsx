@@ -59,6 +59,15 @@ const AppMenu = () => {
                         PERMISSIONS.CALL.CREATE,
                     ])
                 },
+
+                {
+                    label: 'Reviewers',
+                    icon: 'pi pi-fw pi-users',
+                    to: '/grants/evaluate',
+                    visible: hasPermission([
+                        PERMISSIONS.REVIEWER.CREATE,
+                    ])
+                },
                 {
                     label: 'Projects',
                     icon: PrimeIcons.BRIEFCASE,

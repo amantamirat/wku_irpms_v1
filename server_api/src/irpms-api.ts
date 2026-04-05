@@ -2,7 +2,7 @@ import express, { Application } from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
-
+import http from 'http'; // 1. Import the native http module
 import organizationRoutes from './modules/organization/organization.routes';
 
 import applicantRoutes from './modules/applicants/applicant.routes';
@@ -49,6 +49,7 @@ import notificationRoutes from './modules/users/notifications/notification.route
 
 import path from 'path';
 import { SeedService } from './util/seed.service';
+import { SocketService } from './modules/users/notifications/socket.service';
 
 dotenv.config();
 const app: Application = express();
@@ -106,18 +107,32 @@ app.use("/api/uploads", express.static(path.join(process.cwd(), "uploads")));
 const MONGO_URL = process.env.MONGO_URL;
 const PORT = process.env.SERVER_PORT || 5000;
 
+
+
 (async () => {
   try {
     if (!MONGO_URL) {
       throw new Error('mongo url is not set in environment variables.');
     }
+
     await mongoose.connect(MONGO_URL);
     console.log('database connection established');
-    const seedService = new SeedService(/*...dependencies*/);
+
+    const seedService = new SeedService();
     await seedService.runAllSeeds();
-    app.listen(PORT, () => {
+
+    // 2. Create the HTTP server explicitly using your Express app
+    const httpServer = http.createServer(app);
+
+    // 3. Use the httpServer to listen instead of app.listen
+    httpServer.listen(PORT, () => {
       console.log(`Server API is running at http://127.0.0.1:${PORT}`);
+
+      // 4. Initialize SocketService with the httpServer instance
+      SocketService.init(httpServer);
+      console.log('Socket.io initialized successfully');
     });
+
   } catch (err) {
     console.error(err);
     console.error('exiting...');

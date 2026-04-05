@@ -5,6 +5,8 @@ import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { SettingService } from "../../settings/setting.service";
 import { SettingKey } from "../../settings/setting.model";
+import { ProjectStageStatus } from "../../projects/stages/project.stage.status";
+import { SocketService } from "./socket.service";
 
 export class NotificationService {
     constructor(private readonly repository: INotificationRepository,
@@ -31,7 +33,10 @@ export class NotificationService {
             expiresAt: expiryDate
         } as any);
         // TODO: Integration point for Real-time updates
-        // this.socketService.emitToUser(dto.recipient, 'NOTIFICATION_RECEIVED', notification);
+        
+        //this.socketService.emitToUser(dto.recipient, 'NOTIFICATION_RECEIVED', notification);
+
+        SocketService.sendNotification(dto.recipient, notification);
 
         return notification;
     }
@@ -79,7 +84,7 @@ export class NotificationService {
      * Specific Business Helper: Notify a user they've been invited.
      * Keeps the CollaboratorService code clean.
      */
-    async notifyProjectInvitation(recipientId: string, projectTitle: string, senderId?: string, projectId?: string) {
+    async notifyProjectInvitation(recipientId: string, projectTitle: string, senderId?: string) {
         return this.notify({
             recipient: recipientId,
             sender: senderId,
@@ -91,9 +96,51 @@ export class NotificationService {
     }
 
     /**
+ * Specific Business Helper: Notify user about a project stage status change.
+ */
+    async notifyStatusChange(
+        recipientId: string,
+        projectTitle: string,
+        stageName: string,
+        newStatus: ProjectStageStatus
+    ) {
+        let statusAction: string;
+        let type: NotificationType = NotificationType.INFO;
+
+        // Map statuses to more natural, user-friendly verbs
+        switch (newStatus) {
+            case ProjectStageStatus.accepted:
+                statusAction = "has been approved";
+                type = NotificationType.SUCCESS;
+                break;
+            case ProjectStageStatus.rejected:
+                statusAction = "was not selected";
+                type = NotificationType.ERROR;
+                break;
+            case ProjectStageStatus.reviewed:
+                statusAction = "has been reviewed";
+                type = NotificationType.SUCCESS;
+                break;
+            case ProjectStageStatus.selected:
+                statusAction = "is now being processed";
+                type = NotificationType.INFO;
+                break;
+            default:
+                statusAction = `is now ${newStatus}`;
+        }
+
+        return this.notify({
+            recipient: recipientId,
+            title: "Project Update",
+            message: `Your "${projectTitle}" ${stageName} ${statusAction}.`,
+            type: type,
+            link: `/projects/my-submissions`
+        });
+    }
+
+    /**
      * Specific Business Helper: Notify Lead PI when someone joins.
-     */
-    async notifyCollaboratorJoined(leadPIId: string, collaboratorName: string, projectTitle: string) {
+     * async notifyCollaboratorJoined(leadPIId: string, collaboratorName: string, projectTitle: string) {
         return this.notify({
             recipient: leadPIId,
             title: "Collaborator Joined",
@@ -101,4 +148,6 @@ export class NotificationService {
             type: NotificationType.SUCCESS
         });
     }
+     */
+
 }

@@ -10,7 +10,7 @@ export interface IProject extends Document {
     totalBudget?: number;
     totalDuration?: number;
     totalCollabs?: number;
-    applicant: mongoose.Types.ObjectId;//user
+    applicant: mongoose.Types.ObjectId;//user//owner
     themes: mongoose.Types.ObjectId[];
     status: ProjectStatus;
     createdAt?: Date;

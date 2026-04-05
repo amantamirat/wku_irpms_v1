@@ -1,5 +1,4 @@
 import { AuthApi } from "@/app/(full-page)/auth/api/auth.service";
-import { UserApi } from "@/app/(main)/users/api/user.api";
 
 
 export const BASE_URL = process.env.NEXT_PUBLIC_API_URL;

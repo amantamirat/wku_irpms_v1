@@ -20,6 +20,8 @@ import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { IGrantAllocationRepository } from "../../grants/allocations/grant.allocation.repository";
 import { AllocationStatus } from "../../grants/allocations/grant.allocation.state-machine";
 import { IProjectSynchronizer, ProjectStageSynchronizer } from "./project.stage.synchronizer";
+import { IReviewerRepository } from "../../reviewers/reviewer.repository";
+import { NotificationService } from "../../users/notifications/notification.service";
 
 export class ProjectStageService {
 
@@ -28,7 +30,9 @@ export class ProjectStageService {
         private readonly projectRepo: IProjectRepository,
         private readonly grantStageRepo: IGrantStageRepository,
         private readonly grantAllocRepo: IGrantAllocationRepository,
+        private readonly reviewerRepo: IReviewerRepository,
         private readonly synchronizer: IProjectSynchronizer,
+        private readonly notificationService: NotificationService,
     ) {
     }
 
@@ -91,26 +95,10 @@ export class ProjectStageService {
     }
 
     /**
-     * Update stage (score or status)
+     * Update stage 
      */
     async update(dto: UpdateStageDTO) {
-        const { id, data, applicantId } = dto;
-
-        const stage = await this.repository.findById(id);
-        if (!stage) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-
-        const projectDoc = await this.projectRepo.findById(String(stage.project));
-        if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
-
-        // Only applicant can update BEFORE evaluation
-        if (String(projectDoc.applicant) !== applicantId)
-            throw new AppError(ERROR_CODES.UNAUTHORIZED);
-
-        if (stage.status !== ProjectStageStatus.submitted) {
-            // throw new AppError(ERROR_CODES.INVALID_STAGE_UPDATE);
-        }
-
-        return await this.repository.update(id, data);
+        throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
     }
 
     /**
@@ -119,7 +107,7 @@ export class ProjectStageService {
     async transitionState(dto: TransitionRequestDto) {
         const { id, current, next } = dto;
 
-        const stageDoc = await this.repository.findById(id);
+        const stageDoc = await this.repository.findById(id, true);
         if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
 
         const from = stageDoc.status as ProjectStageStatus;
@@ -137,7 +125,26 @@ export class ProjectStageService {
             PROJECT_STAGE_TRANSITIONS
         );
 
-        return await this.repository.updateStatus(id, to);
+        if (to === ProjectStageStatus.submitted) {
+            if (await this.reviewerRepo.exist({ projectStage: id })) {
+                throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
+            }
+        }
+
+        const updated = await this.repository.updateStatus(id, to);
+        // Trigger Notification using the populated data
+        const projectData = stageDoc.project as any;
+        const stageData = stageDoc.grantStage as any;
+
+        if (projectData?.applicant) {
+            this.notificationService.notifyStatusChange(
+                String(projectData.applicant),
+                projectData.title || "Project",
+                stageData?.name || "Stage",
+                to
+            ).catch(err => console.error("Notification failed", err));
+        }
+        return updated;
     }
 
     /**

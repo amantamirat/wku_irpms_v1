@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ApiClient } from "@/api/ApiClient";
+import { ApiClient, BASE_URL } from "@/api/ApiClient";
+import { io } from 'socket.io-client';
+import { useAuth } from '@/contexts/auth-context';
 
 export const useNotifications = () => {
     const [notifications, setNotifications] = useState<any[]>([]);
@@ -10,9 +12,8 @@ export const useNotifications = () => {
         setLoading(true);
         try {
             const notifications = await ApiClient.get('/notifications');
-            //const data = notifications;
             setNotifications(notifications);
-            //console.log("notifications", notifications);
+
             // Calculate unread count locally
             const unread = notifications.filter((n: any) => !n.isRead).length;
             //console.log("unread", unread);
@@ -50,6 +51,40 @@ export const useNotifications = () => {
     useEffect(() => {
         fetchNotifications();
     }, [fetchNotifications]);
+
+
+    const { getApplicant } = useAuth();
+    const SOCKET_URL = BASE_URL?.replace('/api', '');
+    useEffect(() => {
+        const applicantData = getApplicant();
+        // 1. Determine the ID: if getApplicant is an object, use _id, otherwise use it as a string
+        const applicantId = typeof applicantData === 'object' && applicantData !== null
+            ? (applicantData as any)._id
+            : applicantData;
+
+        // 2. Only connect if we actually have an ID
+        if (!applicantId) return;
+
+        const socket = io(SOCKET_URL, {
+            query: { applicantId }
+        });
+
+        const notificationSound = new Audio('/sounds/beep.mp3');
+        socket.on('new_notification', (newNotif) => {
+            setNotifications(prev => [newNotif, ...prev]);
+            setUnreadCount(prev => prev + 1);
+
+            notificationSound.play().catch(err => {
+                // Browsers often block audio until the user clicks something on the page
+                console.error("Audio playback failed:", err);
+            });
+        });
+
+        return () => {
+            socket.disconnect();
+        };
+        // Ensure the dependency matches the variable used to trigger the connection
+    }, [getApplicant]);
 
     return {
         notifications,

@@ -8,14 +8,26 @@ import { ProjectStageRepository } from "./project.stage.repository";
 import { ProjectStageService } from "./project.stage.service";
 import { GrantAllocationRepository } from "../../grants/allocations/grant.allocation.repository";
 import { ProjectStageSynchronizer } from "./project.stage.synchronizer";
+import { ReviewerRepository } from "../../reviewers/reviewer.repository";
+import { NotificationService } from "../../users/notifications/notification.service";
+import { SettingRepository } from "../../settings/setting.repository";
+import { SettingService } from "../../settings/setting.service";
+import { NotificationRepository } from "../../users/notifications/notification.repository";
 
 const projectStageRepo = new ProjectStageRepository();
 const projectRepo = new ProjectRepository();
 const grantStageRepo = new GrantStageRepository();
 const grantAllocationRepo = new GrantAllocationRepository();
+const reviewerRepoRepo = new ReviewerRepository();
 const synchronizer = new ProjectStageSynchronizer(projectRepo, projectStageRepo);
+const notificationService = new NotificationService(
+    new NotificationRepository(),
+    new SettingService(new SettingRepository())
+);
 
-const service = new ProjectStageService(projectStageRepo, projectRepo, grantStageRepo, grantAllocationRepo, synchronizer);
+const service = new ProjectStageService(projectStageRepo, projectRepo,
+    grantStageRepo, grantAllocationRepo,
+    reviewerRepoRepo, synchronizer, notificationService);
 const controller = new ProjectStageController(service);
 const router = express.Router();
 
