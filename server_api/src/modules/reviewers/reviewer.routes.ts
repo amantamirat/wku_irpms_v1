@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { ReviewerController } from './reviewer.controller';
-import { checkPermission, checkStatusPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
+import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
 import { PERMISSIONS } from '../../common/constants/permissions';
 
 const controller = new ReviewerController();
@@ -17,8 +17,8 @@ router.put('/:id', verifyActiveAccount,
     controller.update);
 
 router.patch('/:id', verifyActiveAccount,
-    checkStatusPermission("reviewer"),
-    controller.updateStatus);
+    checkTransitionPermission("reviewer"),
+    controller.transitionState);
 router.delete('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.REVIEWER.DELETE]),
     controller.delete);

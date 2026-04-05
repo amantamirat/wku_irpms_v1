@@ -51,9 +51,15 @@ export class ProjectStageService {
 
         const projectStages = await this.repository.find({ project });
         const nextOrder = projectStages.length + 1;
+        if (nextOrder > 1) {
+            const hasNotAccepted = projectStages.some(ps => ps.status !== ProjectStageStatus.accepted);
+            if (hasNotAccepted)
+                throw new AppError(ERROR_CODES.PROJECT_STAGE_NOT_ACCEPTED);
+        }
 
         const grantStages = await this.grantStageRepo.find({ grant: String(grantAllocDoc.grant), order: nextOrder });
-        if (grantStages.length == 0 || grantStages.length < 1) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        if (grantStages.length == 0) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        //|| grantStages.length < 1 ERROR
         const nextGrantStageDoc = grantStages[0];
         dto.grantStage = String(nextGrantStageDoc._id);
         try {

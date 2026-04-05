@@ -46,6 +46,10 @@ export function createEntityManager<
 
     disableEditRow?: (row: T) => boolean;
     disableDeleteRow?: (row: T) => boolean;
+    hideDefaultActions?: boolean; // Global toggle
+    hideEditAction?: boolean;    // Specific toggle
+    hideDeleteAction?: boolean;  // Specific toggle
+
 }) {
 
     return function EntityManager() {
@@ -108,9 +112,9 @@ export function createEntityManager<
         ) => {
 
             if (!row._id) return;
-            
+
             if (!config.api.transitionState) return;
-            
+
             const updated = await config.api.transitionState?.(row._id, dto);
             if (updated) {
                 updateItem({ ...row, [config.workflow!.statusField]: dto.next });
@@ -123,31 +127,31 @@ export function createEntityManager<
         }
 
         const defaultActions: RowAction<T>[] = [
-            {
+            // Pencil / Edit Action
+            ...(!config.hideEditAction && !config.hideDefaultActions ? [{
                 icon: "pi pi-pencil",
-                severity: "success",
+                severity: "success" as const,
                 permissions: [`${config.permissionPrefix}:update`],
                 disabled: config.disableEditRow,
-                //visible: config.disableEditRow,
                 onClick: (row: T) => {
-                    setItem({ ...row })
-                    setShowDialog(true)
+                    setItem({ ...row });
+                    setShowDialog(true);
                 }
-            },
-            {
+            }] : []),
+
+            // Trash / Delete Action
+            ...(!config.hideDeleteAction && !config.hideDefaultActions ? [{
                 icon: "pi pi-trash",
-                severity: "danger",
+                severity: "danger" as const,
                 permissions: [`${config.permissionPrefix}:delete`],
                 disabled: config.disableDeleteRow,
-                //visible: !!!config.disableDeleteRow,
                 onClick: (row: T) =>
                     confirm.ask({
                         item: config.itemName,
                         onConfirmAsync: () => deleteItem(row)
                     })
-            }
-
-        ]
+            }] : [])
+        ];
 
         let columns = [...config.columns];
 
@@ -183,23 +187,22 @@ export function createEntityManager<
             });
         }
 
-        const toolbarEnd = (
+        const hasToolbarContent = !!config.toolbarEnd || canImport;
+        const toolbarEnd = hasToolbarContent ? (
             <>
-                {/* existing toolbarEnd from entity */}
                 {config.toolbarEnd}
-
-                {/* your import button */}
                 {canImport && (
                     <Button
                         label="Import"
                         icon="pi pi-upload"
                         severity="secondary"
                         outlined
+                        className="ml-2" // Added margin if config.toolbarEnd exists
                         onClick={() => setShowImportDialog(true)}
                     />
                 )}
             </>
-        );
+        ) : undefined;
 
         return (
             <>

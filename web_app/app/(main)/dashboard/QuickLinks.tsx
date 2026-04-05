@@ -28,7 +28,7 @@ export default function QuickLinks() {
             color: 'bg-blue-100 text-blue-700'
         },
         {
-            href: '/calls/reviewers',
+            href: '/reviewers/applicants',
             label: 'Review Panel',
             description: 'Evaluate submitted proposals and scores',
             icon: 'pi pi-check-square',

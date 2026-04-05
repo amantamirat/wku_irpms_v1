@@ -1,5 +1,7 @@
+import { CallStage } from "@/app/(main)/calls/stages/models/call.stage.model";
 import { Project } from "../../models/project.model";
 import { GrantStage } from "@/app/(main)/grants/stages/models/grant.stage.model";
+import { GrantAllocation } from "@/app/(main)/grants/allocations/models/grant.allocation.model";
 
 export enum ProjectStageStatus {
     submitted = 'submitted',
@@ -14,6 +16,7 @@ export type ProjectStage = {
     _id?: string;
     project: string | Project;
     grantStage?: string | GrantStage;
+    callStage?: string | CallStage;
     documentPath?: string;
     file?: File;
     totalScore?: number | null;
@@ -27,6 +30,8 @@ export type ProjectStage = {
 export interface GetProjectStageOptions {
     project?: string | Project;
     grantStage?: string | GrantStage;
+    callStage?: string | CallStage;
+    grantAllocation?: string;
     status?: ProjectStageStatus;
     populate?: boolean;
 }

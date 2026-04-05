@@ -2,7 +2,7 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { useMemo } from "react";
 
 import CollaboratorManager from "../../projects/collaborators/components/CollaboratorManager";
-import ReviewerManager from "../../calls/reviewers/components/ReviewerManager";
+import ReviewerManager from "../../reviewers/components/ReviewerManager";
 import SpecializationManager from "../../specializations/components/SpecializationManager";
 import ExperienceManager from "../experiences/components/ExperienceManager";
 import StudentManager from "../students/components/StudentManager";

@@ -1,15 +1,14 @@
 import { useAuth } from "@/contexts/auth-context";
 import { TabPanel, TabView } from "primereact/tabview";
 import { useMemo } from "react";
-import { Evaluation } from "../models/evaluation.model";
-import CriterionManager from "./CriterionManager";
-import GrantStageManager from "../../grants/stages/components/GrantStageManager";
+import { ProjectStage } from "../models/project.stage.model";
+import ReviewerManager from "@/app/(main)/reviewers/components/ReviewerManager";
 
-interface EvaluationDetailProps {
-    evaluation: Evaluation;
+interface ProjectStageDetailProps {
+    projectStage: ProjectStage;
 }
 
-const EvaluationDetail = ({ evaluation }: EvaluationDetailProps) => {
+const ProjectStageDetail = ({ projectStage }: ProjectStageDetailProps) => {
 
     const { hasPermission } = useAuth();
 
@@ -18,16 +17,12 @@ const EvaluationDetail = ({ evaluation }: EvaluationDetailProps) => {
      */
     const tabs = useMemo(() => [
         {
-            header: "Critera",
-            permission: "criterion:read",
-            content: <CriterionManager evaluation={evaluation} />
+            header: "Reviewers",
+            permission: "reviewer:read",
+            content: <ReviewerManager projectStage={projectStage} />
         },
-        {
-            header: "Grant Stage",
-            permission: "grant.stage:read",
-            content: <GrantStageManager evaluation={evaluation} />
-        }
-    ], [evaluation]);
+
+    ], [projectStage]);
 
     /**
      * Filter tabs based on permissions
@@ -47,5 +42,5 @@ const EvaluationDetail = ({ evaluation }: EvaluationDetailProps) => {
     );
 };
 
-export default EvaluationDetail;
+export default ProjectStageDetail;
 

@@ -1,11 +1,11 @@
 'use client';
 
-import StageManager from "./components/StageManager";
+import GrantStageManager from "./components/GrantStageManager";
 
 const StagePage = () => {
 
    return (
-        <StageManager />
+        <GrantStageManager />
     );
 };
 

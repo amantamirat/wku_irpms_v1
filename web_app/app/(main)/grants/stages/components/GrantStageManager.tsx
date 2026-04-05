@@ -6,12 +6,12 @@ import { createEmptyGrantStage, GetStagesDTO, GrantStage } from "../models/grant
 import SaveStage from "./SaveGrantStage";
 import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
 
-interface StageManagerProps {
+interface GrantStageManagerProps {
     grant?: Grant;
     evaluation?: Evaluation;
 }
 
-const StageManager = ({ grant, evaluation }: StageManagerProps) => {
+const GrantStageManager = ({ grant, evaluation }: GrantStageManagerProps) => {
     const Manager = createEntityManager<GrantStage, GetStagesDTO | undefined>({
         title: "Manage Stages",
         itemName: "Stage",
@@ -52,4 +52,4 @@ const StageManager = ({ grant, evaluation }: StageManagerProps) => {
     return <Manager />;
 };
 
-export default StageManager;
+export default GrantStageManager;

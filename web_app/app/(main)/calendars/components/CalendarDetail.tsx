@@ -29,11 +29,13 @@ const CalendarDetail = ({ calendar }: CalendarDetailProps) => {
             permission: "call:read",
             content: <CallManager calendar={calendar} />
         },
+        /*
         {
             header: "Projects",
             permission: "project:read",
             content: <ProjectManager calendar={calendar} />
         },
+        */
 
     ], [calendar]);
 

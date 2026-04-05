@@ -1,12 +1,14 @@
 import mongoose from "mongoose";
 import { Reviewer, IReviewer } from "./reviewer.model";
 import { CreateReviewerDTO, ExistsReviewersDTO, GetReviewersDTO, UpdateReviewerDTO } from "./reviewer.dto";
+import { ReviewerStatus } from "./reviewer.status";
 
 export interface IReviewerRepository {
     findById(id: string): Promise<IReviewer | null>;
     find(options: GetReviewersDTO): Promise<Partial<IReviewer>[]>;
     create(dto: CreateReviewerDTO): Promise<IReviewer>;
     update(id: string, data: UpdateReviewerDTO["data"]): Promise<IReviewer | null>;
+    updateStatus(id: string, newStatus: ReviewerStatus): Promise<IReviewer | null>;
     exist(filters: ExistsReviewersDTO): Promise<boolean>;
     delete(id: string): Promise<IReviewer | null>;
 }
@@ -60,9 +62,6 @@ export class ReviewerRepository implements IReviewerRepository {
 
     async update(id: string, dtoData: UpdateReviewerDTO["data"]): Promise<IReviewer | null> {
         const updateData: Partial<IReviewer> = {};
-        if (dtoData.status !== undefined) {
-            updateData.status = dtoData.status;
-        }
         if (dtoData.score !== undefined) {
             updateData.score = dtoData.score;
         }
@@ -75,6 +74,14 @@ export class ReviewerRepository implements IReviewerRepository {
             { new: true }
         ).exec();
         // return updated;
+    }
+
+    async updateStatus(id: string, newStatus: ReviewerStatus) {
+        return Reviewer.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            { $set: { status: newStatus } },
+            { new: true }
+        ).exec();
     }
     async exist(filters: ExistsReviewersDTO): Promise<boolean> {
         const query: any = {};

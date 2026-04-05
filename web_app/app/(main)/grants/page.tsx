@@ -6,7 +6,7 @@ import GrantManager from "./components/GrantManager";
 
 
 const GrantPage = () => {
-    //const { directorate } = useDirectorate();
+   
     return (
         <GrantManager />
     );

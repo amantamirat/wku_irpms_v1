@@ -24,6 +24,14 @@ export const ProjectStageApi: EntityApi<ProjectStage, GetProjectStageOptions | u
                 query.append("grantStage", sanitized.grantStage as string);
             }
 
+            if (options.grantAllocation) {
+                query.append("grantAllocation", options.grantAllocation);
+            }
+
+            if (options.callStage) {
+                query.append("callStage", sanitized.callStage as string);
+            }
+
             if (options.status) {
                 query.append("status", sanitized.status as string);
             }
@@ -68,7 +76,7 @@ export const ProjectStageApi: EntityApi<ProjectStage, GetProjectStageOptions | u
     // Transition State
     // ---------------------------
     async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
-        const url = `${end_point}/${id}`;
+        const url = `${end_point}/${id}/transition`;
         return ApiClient.patch(url, dto);
     },
     // ---------------------------

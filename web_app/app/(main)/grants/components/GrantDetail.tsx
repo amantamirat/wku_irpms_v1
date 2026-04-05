@@ -6,7 +6,7 @@ import CallManager from "../../calls/components/CallManager";
 import CompositionManager from "../compositions/components/CompositionManager";
 import ConstraintManager from "../constraints/components/ConstraintManager";
 import { Grant } from "../models/grant.model";
-import StageManager from "../stages/components/StageManager";
+import GrantStageManager from "../stages/components/GrantStageManager";
 import AllocationManager from "../allocations/components/AllocationManager";
 
 
@@ -24,7 +24,7 @@ const GrantDetail = ({ grant }: GrantDetailProps) => {
         {
             header: "Stages",
             permission: "grant.stage:read",
-            content: <StageManager grant={grant} />
+            content: <GrantStageManager grant={grant} />
         },
         {
             header: "Constraints",

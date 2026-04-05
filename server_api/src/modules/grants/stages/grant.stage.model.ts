@@ -42,6 +42,8 @@ const GrantStageSchema = new Schema<IGrantStage>({
         type: Number,
         required: true,
         //immutable: true,
+        min: 1,
+        max: 5
     },
     evaluation: {
         type: Schema.Types.ObjectId,

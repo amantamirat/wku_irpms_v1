@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { useCrudList } from "@/hooks/useCrudList";
 import { PERMISSIONS } from "@/types/permissions";
 import { useEffect, useMemo, useState } from "react";
-import { Reviewer, ReviewerStatus } from "../../../reviewers/models/reviewer.model";
+import { Reviewer, ReviewerStatus } from "../../models/reviewer.model";
 import { ResultApi } from "../api/result.api";
 import { Result } from "../models/result.model";
 import SaveResultDialog from "./SaveResultDialog";

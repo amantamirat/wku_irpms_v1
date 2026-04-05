@@ -76,11 +76,10 @@ export class PhaseController {
                 id: id as string,
                 data: {
                     order,
-                    duration,
-                    budget,
+                    //duration,
+                    //budget,
                     description,
                     breakdown,
-                    status
                 },
                 applicantId: req.user.applicantId,
             };

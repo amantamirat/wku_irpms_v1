@@ -77,11 +77,13 @@ export class ProjectStageController {
     // ---------------------------------------------------
     get = async (req: Request, res: Response) => {
         try {
-            const { project, stage, status, populate, skip, limit } = req.query;
+            const { project, grantStage, grantAllocation, callStage, status, populate, skip, limit } = req.query;
 
             const dto: GetProjectStageDTO = {
                 project: project as string,
-                grantStage: stage as string,
+                grantStage: grantStage as string,
+                grantAllocation: grantAllocation as string,
+                callStage: callStage as string,
                 status: status as any,
                 ...(populate !== undefined && { populate: populate === "true" }),
                 skip: skip ? Number(skip) : undefined,

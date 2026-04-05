@@ -1,5 +1,5 @@
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
-import { ProjectDoc } from "@/app/(main)/projects/documents/models/document.model";
+import { ProjectStage } from "../../projects/stages/models/project.stage.model";
 
 export enum ReviewerStatus {
     pending = 'pending',
@@ -10,13 +10,20 @@ export enum ReviewerStatus {
 
 export type Reviewer = {
     _id?: string;
-    projectStage?: string | ProjectDoc;
+    projectStage?: string | ProjectStage;
     applicant?: string | Applicant;
     weight?: number;
     score?: number;
     status: ReviewerStatus;
     createdAt?: Date;
     updatedAt?: Date;
+}
+
+
+export interface GetReviewersOptions {
+    applicant?: string | Applicant;
+    projectStage?: string | ProjectStage;
+    populate?: boolean;
 }
 
 export const validateReviewer = (reviewer: Reviewer): { valid: boolean; message?: string } => {
@@ -34,7 +41,7 @@ export const sanitizeReviewer = (reviewer: Partial<Reviewer>): Reviewer => {
         ...reviewer,
         projectStage:
             typeof reviewer.projectStage === "object" && reviewer.projectStage !== null
-                ? (reviewer.projectStage as ProjectDoc)._id
+                ? (reviewer.projectStage as any)._id
                 : reviewer.projectStage,
         applicant:
             typeof reviewer.applicant === "object" && reviewer.applicant !== null
@@ -43,7 +50,4 @@ export const sanitizeReviewer = (reviewer: Partial<Reviewer>): Reviewer => {
     } as Reviewer;
 };
 
-export interface GetReviewersOptions {
-    applicant?: string | Applicant;
-    projectStage?: string | ProjectDoc;
-}
+

@@ -7,6 +7,7 @@ import {
     UpdateStageDTO
 } from "./project.stage.dto";
 import { ProjectStageStatus } from "./project.stage.status";
+import { Project } from "../project.model";
 
 export interface IProjectStageRepository {
     findById(id: string): Promise<IProjectStage | null>;
@@ -30,6 +31,7 @@ export class ProjectStageRepository implements IProjectStageRepository {
     async find(options: GetProjectStageDTO) {
         const query: any = {};
 
+        // 1. Direct Filters
         if (options.project) {
             query.project = new mongoose.Types.ObjectId(options.project);
         }
@@ -42,19 +44,38 @@ export class ProjectStageRepository implements IProjectStageRepository {
             query.status = options.status;
         }
 
+        // 2. Filter by Grant Allocation (Inside the Project)
+        if (options.grantAllocation) {
+            // We find all project IDs that belong to this allocation
+            const projectsInAllocation = await Project.find({
+                grantAllocation: new mongoose.Types.ObjectId(options.grantAllocation)
+            }).select("_id").lean();
+
+            const projectIds = projectsInAllocation.map(p => p._id);
+
+            // Only return stages linked to these projects
+            query.project = { $in: projectIds };
+        }
+
         const dbQuery = ProjectStage.find(query);
 
+        // 3. Populate
         if (options.populate) {
             dbQuery
                 .populate("project")
+                /*
+                    .populate({
+                        path: "project",
+                        // This fetches the allocation details inside the project
+                        populate: { path: "grantAllocation" }
+                    })*/
                 .populate("grantStage");
         }
+
         return dbQuery
             .lean<IProjectStage[]>()
             .exec();
     }
-
-
 
     async create(dto: CreateProjectStageDTO): Promise<HydratedDocument<IProjectStage>> {
         const data: Partial<IProjectStage> = {
@@ -71,10 +92,6 @@ export class ProjectStageRepository implements IProjectStageRepository {
 
         if (dtoData.totalScore !== undefined) {
             updateData.totalScore = dtoData.totalScore;
-        }
-
-        if (dtoData.status !== undefined) {
-            updateData.status = dtoData.status;
         }
         return ProjectStage.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),

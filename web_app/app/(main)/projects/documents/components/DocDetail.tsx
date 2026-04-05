@@ -1,4 +1,4 @@
-import ReviewerManager from "@/app/(main)/calls/reviewers/components/ReviewerManager";
+import ReviewerManager from "@/app/(main)/reviewers/components/ReviewerManager";
 import { useAuth } from "@/contexts/auth-context";
 import { PERMISSIONS } from "@/types/permissions";
 import { TabPanel, TabView } from "primereact/tabview";
@@ -21,7 +21,7 @@ const DocDetail = ({ doc, updateProjectDoc }: DocDetailProps) => {
         {
             header: "Reveiwers",
             permission: PERMISSIONS.REVIEWER.READ,
-            content: <ReviewerManager projectDoc={doc} updateProjectDoc={updateProjectDoc} />
+            content: <ReviewerManager projectStage={doc} updateProjectDoc={updateProjectDoc} />
         }
     ], [doc]);
 

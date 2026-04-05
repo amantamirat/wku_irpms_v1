@@ -31,7 +31,6 @@ export interface UpdatePhaseDto {
         duration: number;
         budget: number;
         description: string;
-        status: PhaseStatus;
         breakdown: PhaseBreakdownDto[]; // Allows updating the whole array
     }>;
 }

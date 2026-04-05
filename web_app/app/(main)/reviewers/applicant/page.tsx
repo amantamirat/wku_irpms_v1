@@ -1,8 +1,9 @@
 'use client';
 
 import { useAuth } from "@/contexts/auth-context";
-import ReviewerManager from "./components/ReviewerManager";
+
 import { Divider } from "primereact/divider";
+import ReviewerManager from "../components/ReviewerManager";
 
 const ReviewerPage = () => {
     const { getApplicant } = useAuth();

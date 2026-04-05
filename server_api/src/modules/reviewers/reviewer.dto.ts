@@ -10,7 +10,7 @@ export interface GetReviewersDTO {
 export interface CreateReviewerDTO {
     projectStage: string;
     applicant: string;
-    weight?: number;
+    weight: number;
     // userId: string;
 }
 
@@ -19,16 +19,11 @@ export interface UpdateReviewerDTO {
     data: Partial<{
         score: number;
         weight: number;
-        status: ReviewerStatus;
     }>;
     applicantId: string;
 }
 
-export interface UpdateReviewerStatusDTO {
-    id: string;
-    status: ReviewerStatus;
-    applicantId: string;
-}
+
 
 export interface ExistsReviewersDTO {
     applicant?: string;

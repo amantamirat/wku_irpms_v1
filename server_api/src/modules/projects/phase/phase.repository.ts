@@ -5,6 +5,7 @@ import {
     GetPhasesOptions,
     UpdatePhaseDto,
 } from "./phase.dto";
+import { PhaseStatus } from "./phase.status";
 
 export interface IPhaseRepository {
     findById(id: string): Promise<IPhase | null>;
@@ -12,6 +13,7 @@ export interface IPhaseRepository {
     create(dto: CreatePhaseDto): Promise<IPhase>;
     createMany(dtos: CreatePhaseDto[]): Promise<IPhase[]>;
     update(id: string, data: UpdatePhaseDto["data"]): Promise<IPhase | null>;
+    updateStatus(id: string, newStatus: PhaseStatus): Promise<IPhase | null>;
     delete(id: string): Promise<IPhase | null>;
     deleteByProject(projectId: string): Promise<any>;
 }
@@ -68,6 +70,14 @@ export class PhaseRepository implements IPhaseRepository {
             new mongoose.Types.ObjectId(id),
             { $set: dtoData },
             { new: true, runValidators: true }
+        ).exec();
+    }
+
+    async updateStatus(id: string, newStatus: PhaseStatus) {
+        return Phase.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            { $set: { status: newStatus } },
+            { new: true }
         ).exec();
     }
 

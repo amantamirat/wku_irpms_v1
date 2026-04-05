@@ -78,7 +78,7 @@ export class ProjectStageOldService {
             const projectDocs = await this.repository.find({ project });
             const hasNotAccepted = projectDocs.some(doc => doc.status !== ProjectStageStatus.accepted);
             if (hasNotAccepted)
-                throw new AppError(ERROR_CODES.DOC_NOT_ACCEPTED);
+                throw new AppError(ERROR_CODES.PROJECT_STAGE_NOT_ACCEPTED);
 
             const call = String(projectDoc.grantAllocation);
             const nextOrder = projectDocs.length + 1;
@@ -108,7 +108,7 @@ export class ProjectStageOldService {
 
         } catch (err: any) {
             if (err?.code === 11000) {
-                throw new AppError(ERROR_CODES.DOC_ALREADY_EXISTS);
+                throw new AppError(ERROR_CODES.PROJECT_STAGE_ALREADY_EXISTS);
             }
             throw err;
         }

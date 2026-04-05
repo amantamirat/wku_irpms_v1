@@ -13,7 +13,7 @@ import { Project, ProjectStatus } from "../../models/project.model";
 import { ProjectDocApi } from "../api/project.doc.api";
 import { DocStatus, ProjectDoc } from "../models/document.model";
 import SaveProjectStageDialog from "./SaveProjectStageDialog";
-import ReviewerManager from "@/app/(main)/calls/reviewers/components/ReviewerManager";
+import ReviewerManager from "@/app/(main)/reviewers/components/ReviewerManager";
 import { Dialog } from "primereact/dialog";
 import DocDetail from "./DocDetail";
 

@@ -33,32 +33,46 @@ export interface GetPhaseOptions {
 }
 
 // --- Validation Logic ---
-
 export const validatePhase = (phase: Phase): { valid: boolean; message?: string } => {
+    // 1. Basic Metadata
     if (!phase.project) {
         return { valid: false, message: 'Project is required.' };
     }
-    if (phase.order === undefined || phase.order < 0) {
-        return { valid: false, message: 'Phase order is required.' };
+
+    if (phase.order === undefined || phase.order < 1) {
+        return { valid: false, message: 'A valid phase order (1 or greater) is required.' };
     }
+
+    if (!phase.description || phase.description.trim() === '') {
+        return { valid: false, message: 'Phase description is required.' };
+    }
+
+    // 2. Breakdown Requirements
+    // Since Simple Mode is removed, we require at least one activity
+    if (!phase.breakdown || phase.breakdown.length === 0) {
+        return { valid: false, message: 'At least one activity is required in the breakdown.' };
+    }
+
+    // 3. Individual Activity Validation
+    for (const [index, item] of phase.breakdown.entries()) {
+        const activityNum = index + 1;
+
+        if (!item.activity || item.activity.trim() === '') {
+            return { valid: false, message: `Activity #${activityNum} is missing a description.` };
+        }
+
+        if (item.duration === undefined || item.duration <= 0) {
+            return { valid: false, message: `Activity #${activityNum} must have a duration greater than 0.` };
+        }
+
+        if (item.budget === undefined || item.budget < 0) {
+            return { valid: false, message: `Activity #${activityNum} cannot have a negative budget.` };
+        }
+    }
+
+    // 4. Final Totals Check (Safety check)
     if (!phase.duration || phase.duration <= 0) {
-        return { valid: false, message: 'Valid duration is required.' };
-    }
-    if (!phase.budget || phase.budget <= 0) {
-        return { valid: false, message: 'Valid budget is required.' };
-    }
-
-    // Validate the breakdown array if it exists
-    if (phase.breakdown && phase.breakdown.length > 0) {
-        const totalDuration = phase.breakdown.reduce((sum, b) => sum + b.duration, 0);
-        const totalBudget = phase.breakdown.reduce((sum, b) => sum + b.budget, 0);
-
-        if (totalDuration !== phase.duration) {
-            return { valid: false, message: `Breakdown duration (${totalDuration}) must match total duration (${phase.duration}).` };
-        }
-        if (totalBudget !== phase.budget) {
-            return { valid: false, message: `Breakdown budget (${totalBudget}) must match total budget (${phase.budget}).` };
-        }
+        return { valid: false, message: 'Total calculated duration must be greater than 0.' };
     }
 
     return { valid: true };

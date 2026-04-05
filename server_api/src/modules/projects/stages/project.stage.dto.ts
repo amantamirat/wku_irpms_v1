@@ -5,6 +5,7 @@ import { ProjectStageStatus } from "./project.stage.status";
 export interface GetProjectStageDTO {
     project?: string;
     grantStage?: string;
+    grantAllocation?: string;
     callStage?: string;
     status?: ProjectStageStatus;
     populate?: boolean;
@@ -22,7 +23,7 @@ export interface CreateProjectStageDTO {
 export interface UpdateStageDTO {
     id: string;
     data: Partial<{
-        status: ProjectStageStatus;
+        //status: ProjectStageStatus;
         totalScore: number;
     }>;
     applicantId: string;

@@ -32,7 +32,7 @@ const ReviewerSchema = new Schema<IReviewer>({
     },
     weight: {
         type: Number,
-        min: 0,
+        min: 1,
         default: 1
     },
     status: {
