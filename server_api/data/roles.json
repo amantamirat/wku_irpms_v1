@@ -56,7 +56,6 @@
             "evaluation:update",
             "evaluation:delete",
             "criterion:*",
-            "option:*",
             "call.stage:*",
             "project:read",
             "project:status.negotiation",
@@ -67,12 +66,6 @@
             "phase:transition.reviewed.approved",
             "phase:transition.approved.active",
             "phase:document:read",
-            "document:read",
-            "document:status.submitted",
-            "document:status.selected",
-            "document:status.accepted",
-            "document:status.rejected",
-            "document:status.reviewed",
             "applicant:read",
             "reviewer:*",
             "result:read"
@@ -92,10 +85,11 @@
             "project_theme:*",
             "phase:*",
             "phase:transition.proposed.reviewed",
-            "document:read",
-            "document:create",
-            "document:submit",
-            "document:delete"
+            "project.stage:read",
+            "project.stage:create",
+            "project.stage:submit",
+            "project.stage:delete",
+            "reviewer:read"
         ],
         "isDefault": true
     },
@@ -104,11 +98,9 @@
         "permissions": [
             "calendar:read",
             "reviewer:read",
-            "reviewer:status.pending",
-            "reviewer:status.accepted",
-            "reviewer:status.submitted",
+            "reviewer:transition.pending.accepted",
+            "reviewer:transition.accepted.sumitted",
             "criterion:read",
-            "option:read",
             "result:*"
         ],
         "isDefault": true

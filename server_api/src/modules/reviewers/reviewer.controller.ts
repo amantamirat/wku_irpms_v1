@@ -1,22 +1,19 @@
 import { Request, Response } from "express";
-import { ReviewerService } from "./reviewer.service";
+import { TransitionRequestDto } from "../../common/dtos/transition.dto";
+import { ERROR_CODES } from "../../common/errors/error.codes";
+import { errorResponse, successResponse } from "../../common/helpers/response";
+import { AuthenticatedRequest } from "../users/auth/auth.middleware";
 import {
     CreateReviewerDTO,
     GetReviewersDTO,
     UpdateReviewerDTO,
 } from "./reviewer.dto";
-import { AuthenticatedRequest } from "../users/auth/auth.middleware";
-import { successResponse, errorResponse } from "../../common/helpers/response";
-import { ReviewerStatus } from "./reviewer.status";
-import { ERROR_CODES } from "../../common/errors/error.codes";
-import { TransitionRequestDto } from "../../common/dtos/transition.dto";
+import { ReviewerService } from "./reviewer.service";
 
 export class ReviewerController {
 
-    private service: ReviewerService;
 
-    constructor(service?: ReviewerService) {
-        this.service = service || new ReviewerService();
+    constructor(private readonly service: ReviewerService) {
     }
 
     // -----------------------
@@ -24,9 +21,7 @@ export class ReviewerController {
     // -----------------------
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) {
-                throw new Error("User not found!");
-            }
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const { projectStage, applicant, weight } = req.body;
 
@@ -34,9 +29,8 @@ export class ReviewerController {
                 projectStage,
                 applicant,
                 weight,
-                // userId: req.user.userId
+                applicantId: req.user.applicantId
             };
-
             const created = await this.service.create(dto);
             successResponse(res, 201, "Reviewer created successfully", created);
         } catch (err: any) {
@@ -49,11 +43,12 @@ export class ReviewerController {
     // -----------------------
     get = async (req: Request, res: Response) => {
         try {
-            const { projectStage, applicant } = req.query;
+            const { projectStage, applicant, populate } = req.query;
 
             const filter: GetReviewersDTO = {
                 projectStage: projectStage ? String(projectStage) : undefined,
-                applicant: applicant ? String(applicant) : undefined
+                applicant: applicant ? String(applicant) : undefined,
+                ...(populate !== undefined && { populate: populate === "true" })
             };
 
             const reviewers = await this.service.getReviewers(filter);
@@ -68,23 +63,14 @@ export class ReviewerController {
     // -----------------------
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) {
-                throw new Error("User not found!");
-            }
-
-            const { id } = req.query;
-            if (!id) {
-                throw new Error("id not found!");
-            }
-
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            const { id } = req.params;
             const { weight } = req.body;
-
             const dto: UpdateReviewerDTO = {
                 id: String(id),
                 data: { weight },
                 applicantId: req.user.applicantId
             };
-
             const updated = await this.service.update(dto);
             successResponse(res, 200, "Reviewer updated successfully", updated);
         } catch (err: any) {
@@ -115,11 +101,8 @@ export class ReviewerController {
     // -----------------------
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) {
-                throw new Error("User not found!");
-            }
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
-
             const deleted = await this.service.delete(id);
             successResponse(res, 200, "Reviewer deleted successfully", deleted);
         } catch (err: any) {

@@ -11,38 +11,32 @@ import { Accordion, AccordionTab } from 'primereact/accordion';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 
-import { Composition } from '../models/composition.model';
+import { Composition, OperationMode } from '../models/composition.model';
 import { CompositionApi } from '../api/composition.api';
 import { validateComposition } from '../models/composition.model';
 import { genderOptions } from '@/app/(main)/applicants/models/applicant.model';
+import { EntitySaveDialogProps } from '@/components/createEntityManager';
 
-interface SaveDialogProps {
-    visible: boolean;
-    composition: Composition;
-    onComplete?: (saved: Composition) => void;
-    onHide: () => void;
-}
-
-const SaveDialog = ({
+const SaveComposition = ({
     visible,
-    composition,
+    item,
     onComplete,
     onHide
-}: SaveDialogProps) => {
+}: EntitySaveDialogProps<Composition>) => {
 
     const toast = useRef<Toast>(null);
     const [localComposition, setLocalComposition] =
-        useState<Composition>({ ...composition });
+        useState<Composition>({ ...item });
 
     const [submitted, setSubmitted] = useState(false);
 
     useEffect(() => {
-        setLocalComposition({ ...composition });
-    }, [composition]);
+        setLocalComposition({ ...item });
+    }, [item]);
 
     const clearForm = () => {
         setSubmitted(false);
-        setLocalComposition({ ...composition });
+        setLocalComposition({ ...item });
     };
 
     const save = async () => {
@@ -52,8 +46,8 @@ const SaveDialog = ({
             if (!validation.valid) throw new Error(validation.message);
 
             const saved = localComposition._id
-                ? await CompositionApi.updateComposition(localComposition)
-                : await CompositionApi.createComposition(localComposition);
+                ? await CompositionApi.update(localComposition)
+                : await CompositionApi.create(localComposition);
 
             toast.current?.show({
                 severity: 'success',
@@ -85,6 +79,11 @@ const SaveDialog = ({
             <Button label="Save" icon="pi pi-check" onClick={save} />
         </>
     );
+
+    const opModeOptions = Object.values(OperationMode).map(opm => ({
+        label: opm,
+        value: opm
+    }));
 
     return (
         <>
@@ -118,19 +117,33 @@ const SaveDialog = ({
                             />
                         </div>
 
-                        <div className="field">
-                            <label>Minimum Required Members</label>
-                            <InputNumber
-                                value={localComposition.minCount}
-                                onValueChange={(e) =>
-                                    setLocalComposition({
-                                        ...localComposition,
-                                        minCount: e.value ?? 1
-                                    })
-                                }
-                                disabled={localComposition.isPI}
-                            />
+                        <div className="formgrid grid">
+                            <div className="field col">
+                                <label htmlFor="mode">Mode</label>
+                                <Dropdown
+                                    id="opMode"
+                                    value={localComposition.opMode}
+                                    options={opModeOptions}
+                                    onChange={(e) => setLocalComposition({ ...localComposition, opMode: e.value })}
+                                    placeholder="Select Mode"
+                                    className={classNames({ 'p-invalid': submitted && !localComposition.opMode })}
+                                />
+                            </div>
+                            <div className="field col">
+                                <label>Minimum Required Members</label>
+                                <InputNumber
+                                    value={localComposition.minCount}
+                                    onValueChange={(e) =>
+                                        setLocalComposition({
+                                            ...localComposition,
+                                            minCount: e.value ?? 1
+                                        })
+                                    }
+                                    disabled={localComposition.isPI}
+                                />
+                            </div>
                         </div>
+
 
                     </AccordionTab>
 
@@ -142,7 +155,7 @@ const SaveDialog = ({
                             <Dropdown
                                 id="gender"
                                 value={localComposition.gender}
-                                options={genderOptions}
+                                options={opModeOptions}
                                 onChange={(e) =>
                                     setLocalComposition({
                                         ...localComposition,
@@ -314,4 +327,4 @@ const SaveDialog = ({
     );
 };
 
-export default SaveDialog;
+export default SaveComposition;

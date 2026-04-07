@@ -3,19 +3,64 @@ import { ResultController } from './result.controller';
 import { PERMISSIONS } from '../../../common/constants/permissions';
 import { verifyActiveAccount, checkPermission } from '../../users/auth/auth.middleware';
 
+import { ResultService } from './result.service';
+import { ResultRepository } from './result.repository';
+import { CriterionRepository } from '../../evaluations/criteria/criterion.repository';
+import { ReviewerRepository } from '../reviewer.repository';
+
+
 const router: Router = Router();
 
-router.post('/', verifyActiveAccount,
+// -----------------------
+// DEPENDENCIES
+// -----------------------
+const resultRepo = new ResultRepository();
+const reviewerRepo = new ReviewerRepository();
+const criterionRepo = new CriterionRepository();
+
+// -----------------------
+// SERVICE
+// -----------------------
+const service = new ResultService(
+    resultRepo,
+    reviewerRepo,
+    criterionRepo
+);
+
+// -----------------------
+// CONTROLLER
+// -----------------------
+const controller = new ResultController(service);
+
+// -----------------------
+// ROUTES
+// -----------------------
+router.post(
+    '/',
+    verifyActiveAccount,
     checkPermission([PERMISSIONS.RESULT.CREATE]),
-    ResultController.createResult);
-router.get('/', verifyActiveAccount,
+    controller.create
+);
+
+router.get(
+    '/',
+    verifyActiveAccount,
     checkPermission([PERMISSIONS.RESULT.READ]),
-    ResultController.getResults);
-router.put('/:id', verifyActiveAccount,
+    controller.get
+);
+
+router.put(
+    '/:id',
+    verifyActiveAccount,
     checkPermission([PERMISSIONS.RESULT.UPDATE]),
-    ResultController.updateResult);
-router.delete('/:id', verifyActiveAccount,
+    controller.update
+);
+
+router.delete(
+    '/:id',
+    verifyActiveAccount,
     checkPermission([PERMISSIONS.RESULT.DELETE]),
-    ResultController.deleteResult);
+    controller.delete
+);
 
 export default router;

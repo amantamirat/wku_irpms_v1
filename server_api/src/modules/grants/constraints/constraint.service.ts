@@ -8,8 +8,8 @@ import { CreateConstraintDTO, GetConstraintOptions, UpdateConstraintDTO } from "
 export class ConstraintService {
 
     constructor(
-        private readonly repository: IConstraintRepository = new ConstraintRepository(),
-        private readonly grantRepository: IGrantRepository = new GrantRepository()
+        private readonly repository: IConstraintRepository,
+        private readonly grantRepository: IGrantRepository
     ) { }
 
     async create(dto: CreateConstraintDTO) {

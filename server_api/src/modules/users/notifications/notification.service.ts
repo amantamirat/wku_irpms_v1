@@ -33,9 +33,6 @@ export class NotificationService {
             expiresAt: expiryDate
         } as any);
         // TODO: Integration point for Real-time updates
-        
-        //this.socketService.emitToUser(dto.recipient, 'NOTIFICATION_RECEIVED', notification);
-
         SocketService.sendNotification(dto.recipient, notification);
 
         return notification;
@@ -134,7 +131,24 @@ export class NotificationService {
             title: "Project Update",
             message: `Your "${projectTitle}" ${stageName} ${statusAction}.`,
             type: type,
-            link: `/projects/my-submissions`
+            link: `/projects/applicant`
+        });
+    }
+
+
+    async notifyReviewerAssigned(
+        recipientId: string,
+        projectTitle: string,
+        stageName: string,
+        senderId?: string
+    ) {
+        return this.notify({
+            recipient: recipientId,
+            sender: senderId,
+            title: "Reviewer Assignment",
+            message: `You have been assigned as a reviewer for "${projectTitle}" in the "${stageName}" stage.`,
+            type: NotificationType.INFO,
+            link: '/reviewers/applicant'
         });
     }
 

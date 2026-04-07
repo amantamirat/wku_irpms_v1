@@ -5,17 +5,15 @@ import { CreateConstraintDTO, UpdateConstraintDTO } from "./constraint.dto";
 
 export class ConstraintController {
 
-  private service: ConstraintService;
 
-  constructor(service: ConstraintService) {
-    this.service = service;
+  constructor(private readonly service: ConstraintService) {
   }
 
   //----------------------------------------
   // CREATE CONSTRAINT
   //----------------------------------------
   create = async (req: Request, res: Response) => {
-    try {      
+    try {
       const data: CreateConstraintDTO = {
         ...req.body,
       };
@@ -31,7 +29,7 @@ export class ConstraintController {
   //----------------------------------------
   get = async (req: Request, res: Response) => {
     try {
-      const { grant, type } = req.query;
+      const { grant } = req.query;
 
       const options = {
         grant: grant ? String(grant) : undefined,

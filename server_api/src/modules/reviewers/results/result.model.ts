@@ -6,8 +6,11 @@ import { COLLECTIONS } from "../../../common/constants/collections.enum";
 export interface IResult extends Document {
     reviewer: mongoose.Types.ObjectId;
     criterion: mongoose.Types.ObjectId;
+    // computed or manual
     score?: number | null;
-    selectedOption?: mongoose.Types.ObjectId;
+    // for SINGLE & MULTI
+    selectedOptions?: mongoose.Types.ObjectId[];
+    // for OPEN
     comment?: string;
     createdAt?: Date;
     updatedAt?: Date;
@@ -30,10 +33,9 @@ const ResultSchema = new Schema<IResult>({
         type: Number,
         min: 0
     },
-    selectedOption: {
+    selectedOptions: [{
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.OPTION
-    },
+    }],
     comment: {
         type: String,
         maxlength: 100 // optional but recommended

@@ -7,7 +7,7 @@ import { Grant } from "../../models/grant.model";
 
 export enum OperationMode {
   COUNT = "COUNT",
-  RATIO = "RATIO"
+  PERCENTAGE = "PERCENTAGE"
 }
 
 
@@ -45,6 +45,7 @@ export type Composition = {
 
   isPI?: boolean;
 
+  opMode?: OperationMode;
   minCount: number;
 
   createdAt?: Date;

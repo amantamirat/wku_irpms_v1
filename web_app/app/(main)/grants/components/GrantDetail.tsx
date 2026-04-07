@@ -33,7 +33,7 @@ const GrantDetail = ({ grant }: GrantDetailProps) => {
         },
         {
             header: "Compositions",
-            permission: PERMISSIONS.CONSTRAINT.READ,
+            permission: "constraint:read",
             content: <CompositionManager grant={grant} />
         },
 

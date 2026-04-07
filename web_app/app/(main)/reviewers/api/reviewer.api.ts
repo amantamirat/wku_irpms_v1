@@ -1,12 +1,11 @@
-import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
+import { EntityApi } from "@/api/EntityApi";
+import { TransitionRequestDto } from "@/types/util";
 import {
-    Reviewer,
-    ReviewerStatus,
     GetReviewersOptions,
+    Reviewer,
     sanitizeReviewer
 } from "../models/reviewer.model";
-import { TransitionRequestDto } from "@/types/util";
 
 const end_point = '/project/reviewers';
 
@@ -48,8 +47,7 @@ export const ReviewerApi: EntityApi<Reviewer, GetReviewersOptions | undefined> =
     },
 
     async update(reviewer: Partial<Reviewer>): Promise<Reviewer> {
-        if (!reviewer._id) throw new Error("_id required");
-
+        //if (!reviewer._id) throw new Error("_id required");
         const sanitized = sanitizeReviewer(reviewer);
         const url = `${end_point}/${reviewer._id}`;
         const updated = await ApiClient.put(url, sanitized);
@@ -58,8 +56,7 @@ export const ReviewerApi: EntityApi<Reviewer, GetReviewersOptions | undefined> =
     },
 
     async delete(reviewer: Partial<Reviewer>): Promise<boolean> {
-        if (!reviewer._id) throw new Error("_id required");
-
+        //if (!reviewer._id) throw new Error("_id required");
         const url = `${end_point}/${reviewer._id}`;
         return await ApiClient.delete(url);
     },

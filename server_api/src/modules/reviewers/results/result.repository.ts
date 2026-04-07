@@ -6,7 +6,7 @@ import { CreateResultDTO, ExistsResultsDTO, GetResultsDTO, UpdateResultDTO } fro
 export interface IResultRepository {
     findById(id: string): Promise<IResult | null>;
     find(options: GetResultsDTO): Promise<Partial<IResult>[]>;
-    create(data: CreateResultDTO): Promise<IResult>;
+    //create(data: CreateResultDTO): Promise<IResult>;
     insertMany(data: CreateResultDTO[]): Promise<IResult[]>;
     update(id: string, data: UpdateResultDTO["data"]): Promise<IResult | null>;
     exists(filters: ExistsResultsDTO): Promise<boolean>;
@@ -31,22 +31,24 @@ export class ResultRepository implements IResultRepository {
         let dbQuery = Result.find(query);
 
         if (options.populate) {
-            dbQuery = dbQuery.populate("criterion selectedOption");
+            dbQuery = dbQuery.populate("criterion selectedOptions");
         }
 
         return dbQuery.lean<IResult[]>().exec();
     }
 
+    /*
     async create(dto: CreateResultDTO) {
         const data: Partial<IResult> = {
             reviewer: new mongoose.Types.ObjectId(dto.reviewer),
             criterion: new mongoose.Types.ObjectId(dto.criterion),
-            selectedOption: dto.selectedOption ? new mongoose.Types.ObjectId(dto.selectedOption) : undefined,
+            selectedOptions: dto.selectedOptions ? new mongoose.Types.ObjectId(dto.selectedOptions) : undefined,
             score: dto.score ?? null,
             comment: dto.comment
         };
         return Result.create(data);
     }
+        */
 
     async insertMany(dtos: CreateResultDTO[]): Promise<IResult[]> {
         if (!dtos.length) return [];
@@ -54,7 +56,7 @@ export class ResultRepository implements IResultRepository {
         const docs = dtos.map(dto => ({
             reviewer: new mongoose.Types.ObjectId(dto.reviewer),
             criterion: new mongoose.Types.ObjectId(dto.criterion),
-            score: dto.score ?? null
+            //score: dto.score ?? null
         }));
 
         return Result.insertMany(docs, { ordered: false });
@@ -67,22 +69,22 @@ export class ResultRepository implements IResultRepository {
             updateData.score = dtoData.score;
         }
 
-        if (dtoData.selectedOption !== undefined) {
-            updateData.selectedOption = dtoData.selectedOption
-                ? new mongoose.Types.ObjectId(dtoData.selectedOption)
-                : undefined;
+        if (dtoData.selectedOptions !== undefined) {
+            updateData.selectedOptions = dtoData.selectedOptions.length > 0
+                ? dtoData.selectedOptions.map(id => new mongoose.Types.ObjectId(id))
+                : [];
         }
 
         if (dtoData.comment !== undefined) {
             updateData.comment = dtoData.comment;
         }
+
         return Result.findByIdAndUpdate(
             id,
             { $set: updateData },
             { new: true }
         ).exec();
     }
-
 
     async exists(filters: ExistsResultsDTO): Promise<boolean> {
         const query: any = {};
@@ -95,9 +97,11 @@ export class ResultRepository implements IResultRepository {
             query.criterion = new mongoose.Types.ObjectId(filters.criterion);
         }
 
+        /*
         if (filters.selectedOption) {
             query.selectedOption = new mongoose.Types.ObjectId(filters.selectedOption);
         }
+            */
 
         const result = await Result.exists(query).exec();
         return result !== null;

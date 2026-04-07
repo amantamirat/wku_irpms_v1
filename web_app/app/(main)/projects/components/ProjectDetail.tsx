@@ -58,9 +58,9 @@ export default function ProjectDetail({ project, updateProjectStatus }: ProjectD
             {/* 🔹 Compact Header */}
             <div className="grid align-items-center mb-3">
                 <div className="col-12 lg:col-8">
-                    <h3 className="text-2xl md:text-3xl font-semibold m-0 text-900">
+                    <h4 className="text-2xl md:text-3xl font-semibold m-0 text-900">
                         {project.title}
-                    </h3>
+                    </h4>
 
                     <div className="flex flex-wrap gap-3 text-sm text-600 mt-2">
                         {/* Grant Title Section */}
@@ -114,7 +114,13 @@ export default function ProjectDetail({ project, updateProjectStatus }: ProjectD
                         <span className="block text-500 text-xs mb-1">Duration</span>
                         <div className="text-900 font-semibold">
                             {project.totalDuration
-                                ? `${project.totalDuration} Months`
+                                ? (() => {
+                                    const months = Math.floor(project.totalDuration / 30);
+                                    const days = project.totalDuration % 30;
+
+                                    return `${months} Month${months !== 1 ? 's' : ''}${days ? ` ${days} Day${days !== 1 ? 's' : ''}` : ''
+                                        }`;
+                                })()
                                 : 'Not Specified'}
                         </div>
                     </div>

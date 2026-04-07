@@ -1,5 +1,5 @@
 'use client';
-import { ListBox } from 'primereact/listbox';
+import { Dropdown } from 'primereact/dropdown';
 import { TabPanel, TabView } from 'primereact/tabview';
 import { useEffect, useState } from "react";
 import ProjectStageManager from "../../projects/stages/components/ProjectStageManager";
@@ -36,46 +36,55 @@ const GrantEvaluationWorkspace = () => {
     }, [selectedAlloc]);
 
     return (
-        /* Use flex-column for mobile (stacking) and flex-row for desktop */
-        <div className="flex flex-column md:flex-row gap-4 p-2 md:p-4 surface-ground" style={{ minHeight: 'calc(100vh - 9rem)' }}>
+        <div className="p-3 md:p-4 surface-ground" style={{ minHeight: 'calc(100vh - 9rem)' }}>
 
-            {/* LEFT SIDEBAR: ListBox */}
-            <div className="w-full md:w-3 shadow-2 bg-white border-round p-3 flex-shrink-0">
-                <h4 className="mb-3 text-primary">Grant Allocations</h4>
-                <ListBox
-                    value={selectedAlloc}
-                    options={allocations}
-                    onChange={(e) => setSelectedAlloc(e.value)}
-                    itemTemplate={allocationOptionTemplate}
-                    optionLabel="grant.title"
-                    className="border-none w-full"
-                    listStyle={{ maxHeight: '400px' }} // Fixed height on mobile, calc on desktop
-                    emptyMessage="No Grant Allocations Found"
-                />
+            {/* TOP BAR */}
+            <div className="bg-white shadow-2 border-round p-3 mb-4 flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3">
+
+                <div>
+                    <h2 className="m-0 text-900 font-bold text-xl">Grant Evaluation Workspace</h2>
+                    <span className="text-600 text-sm">Manage evaluation stages and scoring</span>
+                </div>
+
+                <div className="w-full md:w-20rem">
+                    <Dropdown
+                        value={selectedAlloc}
+                        options={allocations}
+                        onChange={(e) => setSelectedAlloc(e.value)}
+                        itemTemplate={allocationOptionTemplate}
+                        optionLabel="grant.title"
+                        placeholder="Select Grant Allocation"
+                        className="w-full"
+                        showClear
+                    />
+                </div>
             </div>
 
-            {/* RIGHT DETAIL: Content */}
-            <div className="w-full md:w-9 bg-white shadow-2 border-round p-3 md:p-4 overflow-hidden flex flex-column">
+            {/* CONTENT */}
+            <div className="bg-white shadow-2 border-round p-3 md:p-4">
+
                 {selectedAlloc ? (
                     grantStages.length > 0 ? (
-                        <div className="flex flex-column h-full w-full">
+                        <div className="flex flex-column">
+
                             <div className="mb-4">
-                                <h2 className="m-0 font-bold text-900 text-xl md:text-2xl">
+                                <h4 className="m-0 font-semibold text-900">
                                     {getAllocationLabel(selectedAlloc)}
-                                </h2>
+                                </h4>
                             </div>
 
-                            {/* This container ensures the TabView/Tables can scroll horizontally if needed */}
-                            <div className="w-full overflow-x-auto">
+                            <div className="overflow-x-auto">
                                 <TabView
                                     activeIndex={activeIndex}
                                     onTabChange={(e) => setActiveIndex(e.index)}
                                     scrollable
-                                    className="w-full"
                                 >
                                     {grantStages.map((stage) => (
-                                        <TabPanel key={stage._id} header={stage.name} leftIcon="pi pi-step-forward mr-2">
-                                            {/* Ensure the manager is wrapped in a scrollable div for large tables */}
+                                        <TabPanel
+                                            key={stage._id}
+                                            header={stage.name}
+                                            leftIcon="pi pi-step-forward mr-2"
+                                        >
                                             <div className="overflow-x-auto">
                                                 <ProjectStageManager
                                                     grantStage={stage}
@@ -86,19 +95,21 @@ const GrantEvaluationWorkspace = () => {
                                     ))}
                                 </TabView>
                             </div>
+
                         </div>
                     ) : (
-                        <div className="flex flex-column align-items-center justify-content-center py-8 bg-gray-50 border-round-xl border-1 border-dashed border-300 h-full">
-                            <i className="pi pi-sitemap text-6xl text-300 mb-4" />
+                        <div className="flex flex-column align-items-center justify-content-center py-8 text-center">
+                            <i className="pi pi-sitemap text-5xl text-300 mb-3" />
                             <h3 className="text-900 m-0">No Evaluation Stages Defined</h3>
                         </div>
                     )
                 ) : (
-                    <div className="flex flex-column align-items-center justify-content-center h-full text-400 py-8">
-                        <i className="pi pi-arrow-left text-4xl mb-3" />
-                        <p className="font-medium text-center">Select a Grant Budget from the left to start evaluation.</p>
+                    <div className="flex flex-column align-items-center justify-content-center py-8 text-center text-500">
+                        <i className="pi pi-folder-open text-4xl mb-3" />
+                        <p>Select a Grant Allocation to start evaluation.</p>
                     </div>
                 )}
+
             </div>
         </div>
     );

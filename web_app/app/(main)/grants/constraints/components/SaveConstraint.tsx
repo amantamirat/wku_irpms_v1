@@ -12,23 +12,19 @@ import {
     validateConstraint
 } from '../models/constraint.model';
 import { ProjectConstraintType } from '../models/project-constraint-type';
+import { EntitySaveDialogProps } from '@/components/createEntityManager';
 
-interface SaveDialogProps {
-    visible: boolean;
-    constraint: Constraint;
-    onComplete?: (saved: Constraint) => void;
-    onHide: () => void;
-}
 
-const SaveDialog = ({ visible, constraint, onComplete, onHide }: SaveDialogProps) => {
-    const [localConstraint, setLocalConstraint] = useState<Constraint>({ ...constraint });
+
+const SaveConstraint = ({ visible, item: item, onComplete, onHide }: EntitySaveDialogProps<Constraint>) => {
+    const [localConstraint, setLocalConstraint] = useState<Constraint>({ ...item });
     const [submitted, setSubmitted] = useState(false);
     const toast = useRef<Toast>(null);
 
     // Sync incoming prop changes
     useEffect(() => {
-        setLocalConstraint({ ...constraint });
-    }, [constraint]);
+        setLocalConstraint({ ...item });
+    }, [item]);
 
 
     const saveConstraint = async () => {
@@ -73,7 +69,7 @@ const SaveDialog = ({ visible, constraint, onComplete, onHide }: SaveDialogProps
 
     const clearForm = () => {
         setSubmitted(false);
-        setLocalConstraint({ ...constraint });
+        setLocalConstraint({ ...item });
     };
 
     const hide = () => {
@@ -170,4 +166,4 @@ const SaveDialog = ({ visible, constraint, onComplete, onHide }: SaveDialogProps
     );
 };
 
-export default SaveDialog;
+export default SaveConstraint;

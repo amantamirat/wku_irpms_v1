@@ -568,19 +568,33 @@
   },
   {
     "category": "Reviewer Management",
-    "name": "reviewer:status.pending"
+    "name": "reviewer:transition.pending.accepted",
+    "description": "Move reviewer status from pending to accepted"
   },
   {
     "category": "Reviewer Management",
-    "name": "reviewer:status.accepted"
+    "name": "reviewer:transition.accepted.submitted",
+    "description": "Move reviewer status from accepted to submitted"
   },
   {
     "category": "Reviewer Management",
-    "name": "reviewer:status.submitted"
+    "name": "reviewer:transition.accepted.pending",
+    "description": "Revert reviewer status from accepted to pending"
   },
   {
     "category": "Reviewer Management",
-    "name": "reviewer:status.approved"
+    "name": "reviewer:transition.submitted.approved",
+    "description": "Move reviewer status from submitted to approved"
+  },
+  {
+    "category": "Reviewer Management",
+    "name": "reviewer:transition.submitted.accepted",
+    "description": "Revert reviewer status from submitted to accepted"
+  },
+  {
+    "category": "Reviewer Management",
+    "name": "reviewer:transition.approved.submitted",
+    "description": "Revert reviewer status from approved to submitted"
   },
   {
     "category": "Reviewer Management",
@@ -668,26 +682,7 @@
     "name": "criterion:import",
     "description": "Import criterion entries"
   },
-  {
-    "category": "Evaluation Management",
-    "name": "option:create",
-    "description": "Create option entries"
-  },
-  {
-    "category": "Evaluation Management",
-    "name": "option:read",
-    "description": "Read option entries"
-  },
-  {
-    "category": "Evaluation Management",
-    "name": "option:update",
-    "description": "Update option entries"
-  },
-  {
-    "category": "Evaluation Management",
-    "name": "option:delete",
-    "description": "Delete option entries"
-  },
+  
   {
     "category": "Project Management",
     "name": "project:create",

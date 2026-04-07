@@ -16,7 +16,7 @@ import thematicRoutes from './modules/thematics/thematic.routes';
 import themeRoutes from './modules/thematics/themes/theme.routes'
 import evaluationRoutes from './modules/evaluations/evaluation.routes';
 import criterionRoutes from './modules/evaluations/criteria/criterion.routes';
-import optionRoutes from './modules/evaluations/criteria/options/option.routes';
+
 
 import grantRoutes from './modules/grants/grant.routes';
 import grantStageRoutes from './modules/grants/stages/grant.stage.routes';
@@ -79,7 +79,6 @@ app.use("/api/thematics", thematicRoutes);
 app.use("/api/thematics/themes", themeRoutes);
 app.use("/api/evaluations", evaluationRoutes);
 app.use("/api/criteria", criterionRoutes);
-app.use("/api/options", optionRoutes);
 app.use("/api/grants", grantRoutes);
 app.use("/api/grants/stages", grantStageRoutes);
 app.use("/api/grants/constraints", constraintRoutes);

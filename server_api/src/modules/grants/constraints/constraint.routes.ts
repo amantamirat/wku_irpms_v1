@@ -1,10 +1,15 @@
 import { Router } from 'express';
-import { ConstraintController } from './constraint.controller';
-import { checkPermission, verifyActiveAccount } from '../../users/auth/auth.middleware';
 import { PERMISSIONS } from '../../../common/constants/permissions';
+import { checkPermission, verifyActiveAccount } from '../../users/auth/auth.middleware';
+import { GrantRepository, IGrantRepository } from '../grant.repository';
+import { ConstraintController } from './constraint.controller';
+import { ConstraintRepository } from './constraint.repository';
 import { ConstraintService } from './constraint.service';
 
-const service = new ConstraintService();
+
+const repository = new ConstraintRepository();
+const grantRepository: IGrantRepository = new GrantRepository();
+const service = new ConstraintService(repository, grantRepository);
 const controller = new ConstraintController(service);
 
 const router: Router = Router();
@@ -18,8 +23,8 @@ router.get('/', verifyActiveAccount, checkPermission([
 router.put('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.CONSTRAINT.UPDATE]),
     controller.update);
-router.delete('/:id', verifyActiveAccount, 
-    checkPermission([PERMISSIONS.CONSTRAINT.DELETE]), 
+router.delete('/:id', verifyActiveAccount,
+    checkPermission([PERMISSIONS.CONSTRAINT.DELETE]),
     controller.delete);
 
 export default router;

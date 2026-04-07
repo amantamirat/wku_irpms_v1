@@ -11,7 +11,7 @@ export interface CreateReviewerDTO {
     projectStage: string;
     applicant: string;
     weight: number;
-    // userId: string;
+    applicantId?: string;
 }
 
 export interface UpdateReviewerDTO {

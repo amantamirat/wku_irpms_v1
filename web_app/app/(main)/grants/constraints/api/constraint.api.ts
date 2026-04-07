@@ -1,9 +1,10 @@
 import { ApiClient } from "@/api/ApiClient";
 import { Constraint, GetConstraintsOptions, sanitizeConstraint } from "../models/constraint.model";
+import { EntityApi } from "@/api/EntityApi";
 
 const end_point = '/grants/constraints';
 
-export const ConstraintApi = {
+export const ConstraintApi: EntityApi<Constraint, GetConstraintsOptions | undefined> = {
 
     async create(constraint: Partial<Constraint>): Promise<Constraint> {
         const sanitized = sanitizeConstraint(constraint);

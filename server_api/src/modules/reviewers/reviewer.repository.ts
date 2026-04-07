@@ -35,15 +35,14 @@ export class ReviewerRepository implements IReviewerRepository {
 
         if (options.populate && options.projectStage) {
             reviewerQuery = reviewerQuery.populate({
-                path: 'applicant',
-                populate: { path: 'workspace' }
+                path: 'applicant'
             });
         }
         if (options.populate && options.applicant) {
             reviewerQuery = reviewerQuery.populate({
                 path: "projectStage",
                 populate: {
-                    path: "stage project",
+                    path: "grantStage project",
                 },
             });
         }

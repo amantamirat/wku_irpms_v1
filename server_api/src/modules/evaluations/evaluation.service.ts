@@ -66,9 +66,11 @@ export class EvaluationService {
         }
 
         if (next === EvalStatus.draft) {
+            /*
             if (await this.grantStageRepo.exists({ evaluation: id })) {
                 throw new AppError(ERROR_CODES.STAGE_ALREADY_EXISTS);
             }
+            */
         }
 
         return await this.repository.update(id, {

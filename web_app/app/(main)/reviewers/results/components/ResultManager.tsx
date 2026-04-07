@@ -1,172 +1,85 @@
-'use client';
-import { Criterion, FormType } from "@/app/(main)/evaluations/models/criterion.model";
-import { CrudManager } from "@/components/CrudManager";
-import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-import { useAuth } from "@/contexts/auth-context";
-import { useCrudList } from "@/hooks/useCrudList";
-import { PERMISSIONS } from "@/types/permissions";
-import { useEffect, useMemo, useState } from "react";
-import { Reviewer, ReviewerStatus } from "../../models/reviewer.model";
+import { createEntityManager } from "@/components/createEntityManager";
+import { Result, GetResultsOptions } from "../models/result.model";
 import { ResultApi } from "../api/result.api";
-import { Result } from "../models/result.model";
-import SaveResultDialog from "./SaveResultDialog";
+import { Reviewer } from "../../models/reviewer.model";
+import { Criterion, FormType } from "@/app/(main)/evaluations/models/criterion.model";
+import SaveResult from "./SaveResult";
 
 interface ResultManagerProps {
-    reviewer: Reviewer;
+    reviewer: string | Reviewer;
 }
 
 const ResultManager = ({ reviewer }: ResultManagerProps) => {
 
-    const confirm = useConfirmDialog();
-    const { hasPermission } = useAuth();
-    const isAccepted = reviewer.status === ReviewerStatus.accepted;
-
-    const canCreate = isAccepted && hasPermission([PERMISSIONS.RESULT.CREATE]);
-    const canEdit = isAccepted && hasPermission([PERMISSIONS.RESULT.UPDATE]);
-    const canDelete = false //&& isAccepted && hasPermission([PERMISSIONS.RESULT.DELETE]);
-
-    const {
-        items: results,
-        setAll,
-        updateItem,
-        removeItem,
-        loading,
-        setLoading,
-        error,
-        setError
-    } = useCrudList<Result>();
-
-    const [result, setResult] = useState<Result | undefined>(undefined);
-    const [showSaveDialog, setShowSaveDialog] = useState(false);
-
-    /* --------------------------------------------
-       Fetch results ONLY
-    --------------------------------------------- */
-    useEffect(() => {
-        const fetchResults = async () => {
-            try {
-                setLoading(true);
-                const data = await ResultApi.getResults({ reviewer });
-                setAll(data);
-            } catch (err: any) {
-                setError("Failed to load results. " + (err?.message ?? ""));
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchResults();
-    }, [reviewer]);
-
-    /* --------------------------------------------
-       Save / Update / Delete
-    --------------------------------------------- */
-    const onSaveComplete = (saved: Result) => {
-        updateItem(saved);
-        hideSaveDialog();
-    };
-
-    const deleteResult = async (row: Result) => {
-        const deleted = await ResultApi.deleteResult(row);
-        if (deleted) removeItem(row);
-    };
-
-    const hideSaveDialog = () => {
-        setResult(undefined);
-        setShowSaveDialog(false);
-    };
-
     /* --------------------------------------------
        Helpers
     --------------------------------------------- */
+    /**
+     *const totalWeight = useMemo(() => { return results.reduce((sum, r) => { const weight = (r.criterion as any)?.weight ?? 0; return sum + weight; }, 0); }, [results]); 
+     const totalScore = useMemo(() => { return results.reduce((sum, row) => { const criterion = row.criterion as Criterion; if (!criterion) return sum; // closed form → option score if (criterion.formType === FormType.NUMBER) { const opt = row.selectedOption as any; return sum + (typeof opt?.score === "number" ? opt.score : 0); } // open form → direct score return sum + (typeof row.score === "number" ? row.score : 0); }, 0); }, [results]);
+     */
+    const getSelectedOptions = (row: Result) => {
+        const criterion = row.criterion as Criterion;
+        if (!criterion || !row.selectedOptions) return [];
+
+        const ids = row.selectedOptions.map((opt: any) =>
+            typeof opt === "object" ? opt._id : opt
+        );
+
+        return criterion.options?.filter((opt) =>
+            ids.includes(opt._id)
+        ) || [];
+    };
+
     const scoreTemplate = (row: Result) => {
         const criterion = row.criterion as Criterion;
         if (!criterion) return "-";
 
-        if (criterion.formType === FormType.NUMBER) {
-            const opt = row.selectedOption as any;
-            return opt ? `${opt.title} (${opt.score})` : "-";
+        // OPEN → no score
+        if (criterion.formType === FormType.OPEN) {
+            return "-";
         }
-        return row.score ?? "-";
+
+        // NUMBER → direct score
+        if (criterion.formType === FormType.NUMBER) {
+            return row.score ?? "-";
+        }
+
+        // SINGLE / MULTIPLE → show selected options
+        const selected = getSelectedOptions(row);
+
+        if (selected.length === 0) return "-";
+
+        return selected
+            .map((opt) => `${opt.title} (${opt.score})`)
+            .join(", ");
     };
 
-    const totalWeight = useMemo(() => {
-        return results.reduce((sum, r) => {
-            const weight = (r.criterion as any)?.weight ?? 0;
-            return sum + weight;
-        }, 0);
-    }, [results]);
+    const Manager = createEntityManager<Result, GetResultsOptions | undefined>({
+        title: "Manage Results",
+        itemName: "Result",
+        api: ResultApi,
+        columns: [
+            { header: "Criterion", field: "criterion.title" },
+            {
+                header: "Weight",
+                field: "criterion.weight",
+            },
+            {
+                header: "Score",
+                field: "score",
+                body: (row: Result) => scoreTemplate(row),
+            },
+            { header: "Comment", field: "comment" }
+        ],
+        query: () => ({
+            reviewer: reviewer,
+        }),
+        SaveDialog: SaveResult,
+        permissionPrefix: "result"
+    });
 
-    const totalScore = useMemo(() => {
-        return results.reduce((sum, row) => {
-            const criterion = row.criterion as Criterion;
-            if (!criterion) return sum;
-
-            // closed form → option score
-            if (criterion.formType === FormType.NUMBER) {
-                const opt = row.selectedOption as any;
-                return sum + (typeof opt?.score === "number" ? opt.score : 0);
-            }
-
-            // open form → direct score
-            return sum + (typeof row.score === "number" ? row.score : 0);
-        }, 0);
-    }, [results]);
-
-    /* --------------------------------------------
-       Columns
-    --------------------------------------------- */
-    const columns = [
-        { header: "Criterion", field: "criterion.title" },
-        {
-            header: "Weight", field: "criterion.weight",
-            footer: <strong>Total: {totalWeight}</strong>
-        },
-        {
-            header: "Score",
-            field: "score",
-            body: (row: Result) => scoreTemplate(row),
-            footer: <strong>Total: {totalScore}</strong>
-        },
-        { header: "Comment", field: "comment" }
-    ];
-
-    return (
-        <>
-            <CrudManager
-                headerTitle="Results"
-                items={results}
-                dataKey="_id"
-                columns={columns}
-                loading={loading}
-                error={error}
-                canCreate={canCreate}
-                canEdit={canEdit}
-                canDelete={canDelete}
-                //toolbarEnd={endToolbarTemplate()}
-
-                onEdit={(row) => {
-                    setResult(row);
-                    setShowSaveDialog(true);
-                }}
-                onDelete={(row: any) =>
-                    confirm.ask({
-                        item: (row.criterion as Criterion)?.title ?? "result",
-                        onConfirmAsync: () => deleteResult(row)
-                    })
-                }
-            />
-
-            {showSaveDialog && (
-                <SaveResultDialog
-                    visible={showSaveDialog}
-                    result={result}
-                    onCompelete={onSaveComplete}
-                    onHide={hideSaveDialog}
-                />
-            )}
-        </>
-    );
+    return <Manager />;
 };
 
 export default ResultManager;
