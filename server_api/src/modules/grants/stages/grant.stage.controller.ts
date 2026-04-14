@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { StageService } from './grant.stage.service';
+import { GrantStageService } from './grant.stage.service';
 import { CreateStageDTO, GetStageDTO, UpdateStageDTO } from './grant.stage.dto';
 import { successResponse, errorResponse } from '../../../common/helpers/response';
 import { AuthenticatedRequest } from '../../users/auth/auth.middleware';
@@ -7,7 +7,7 @@ import { AuthenticatedRequest } from '../../users/auth/auth.middleware';
 
 export class StageController {
 
-    constructor(private readonly service: StageService) {
+    constructor(private readonly service: GrantStageService) {
     }
 
     create = async (req: Request, res: Response) => {

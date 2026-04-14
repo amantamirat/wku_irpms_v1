@@ -29,6 +29,11 @@ router.get(
     checkPermission([PERMISSIONS.CALL.READ]),
     controller.get
 );
+
+router.get('/:id', verifyActiveAccount,
+    checkPermission([PERMISSIONS.CALL.READ]),
+    controller.getById
+);
 // Update call
 router.put(
     '/',

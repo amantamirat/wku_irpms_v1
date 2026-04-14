@@ -5,7 +5,7 @@ import { CallStatus } from "./call.status";
 import { GrantAllocation } from "../grants/allocations/grant.allocation.model";
 
 export interface ICallRepository {
-    findById(id: string): Promise<ICall | null>;
+    findById(id: string, populate?: boolean): Promise<ICall | null>;
     find(filters: GetCallsOptions): Promise<Partial<ICall>[]>;
     create(dto: CreateCallDTO): Promise<ICall>;
     update(id: string, data: UpdateCallDTO["data"]): Promise<ICall | null>;
@@ -17,10 +17,19 @@ export interface ICallRepository {
 // MongoDB implementation
 export class CallRepository implements ICallRepository {
 
-    async findById(id: string) {
-        return Call.findById(new mongoose.Types.ObjectId(id))
-            .lean<ICall>()
-            .exec();
+    async findById(id: string, populate?: boolean) {
+        const query = Call.findById(new mongoose.Types.ObjectId(id)).lean<ICall>();
+        if (populate) {
+            query.populate({
+                path: 'grantAllocation',
+                populate: [
+                    { path: 'grant' },
+                    { path: 'calendar' }
+                ]
+            });
+        }
+
+        return query.exec();
     }
 
     async find(filters: GetCallsOptions) {

@@ -19,7 +19,7 @@ import {
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { IGrantAllocationRepository } from "../../grants/allocations/grant.allocation.repository";
 import { AllocationStatus } from "../../grants/allocations/grant.allocation.state-machine";
-import { IProjectSynchronizer, ProjectStageSynchronizer } from "./project.stage.synchronizer";
+import { IProjectSynchronizer } from "./project.stage.synchronizer";
 import { IReviewerRepository } from "../../reviewers/reviewer.repository";
 import { NotificationService } from "../../users/notifications/notification.service";
 

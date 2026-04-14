@@ -8,35 +8,28 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { Applicant } from "../../applicants/models/applicant.model";
 import { Call } from "../../calls/models/call.model";
-//import { Stage } from "../../calls/stages/models/call.stage.model";
-import CollaboratorManager from "../../projects/collaborators/components/CollaboratorManager";
 import { Collaborator } from "../../projects/collaborators/models/collaborator.model";
 import UploadForm from "../../projects/components/UploadForm";
 import { ProjectDocApi } from "../../projects/documents/api/project.doc.api";
 import { Project, ProjectStatus, validateApplyProject } from "../../projects/models/project.model";
-import PhaseManager from "../../projects/phases/components/PhaseManager";
 import { Phase } from "../../projects/phases/models/phase.model";
-import { Theme } from "../../thematics/themes/models/theme.model";
-import Confirmation from "./Confirmation";
 import ProjectForm from "./ProjectForm";
-import { CallStage } from "../../calls/stages/models/call.stage.model";
 
 interface ApplyWizardProps {
     visible: boolean;
-    stage?: CallStage;
     call: Call;
     onCancel: () => void;
 }
 
-const ApplyWizard = ({ visible, stage, call, onCancel }: ApplyWizardProps) => {
+const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
 
     const confirm = useConfirmDialog();
     const { getApplicant, hasPermission } = useAuth();
-    //const applicant = getApplicant();
+    const applicant = getApplicant();
     const initializeProject = (): Project => ({
         title: "",
-        //call: call,
-        // applicant: applicant,
+        call: call,
+        applicant: applicant,
         status: ProjectStatus.draft
     });
     const toast = useRef<Toast>(null);

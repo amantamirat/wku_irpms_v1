@@ -21,7 +21,7 @@ export class CallService {
         private readonly repository: CallRepository,
         private readonly grantAllocationRepo: IGrantAllocationRepository,
         private readonly grantStageRepo: IGrantStageRepository,
-        private readonly callStageRepo: ICallStageRepository,        
+        private readonly callStageRepo: ICallStageRepository,
     ) {
     }
 
@@ -56,6 +56,12 @@ export class CallService {
 
     async getCalls(options: GetCallsOptions) {
         return await this.repository.find(options);
+    }
+
+    async getById(id: string, populate?: boolean) {
+        const call = await this.repository.findById(id, populate);
+        if (!call) throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
+        return call;
     }
 
     async update(dto: UpdateCallDTO) {

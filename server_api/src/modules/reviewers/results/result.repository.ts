@@ -31,7 +31,8 @@ export class ResultRepository implements IResultRepository {
         let dbQuery = Result.find(query);
 
         if (options.populate) {
-            dbQuery = dbQuery.populate("criterion selectedOptions");
+            dbQuery = dbQuery.populate("criterion");
+            //dbQuery = dbQuery.populate("criterion selectedOptions");
         }
 
         return dbQuery.lean<IResult[]>().exec();

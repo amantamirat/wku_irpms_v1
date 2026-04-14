@@ -1,8 +1,32 @@
+export type Status =
+    | "draft"
+    | "published"
+    | "archived"
+    | "submitted"
+    | "accepted"
+    | "rejected"
+    | "negotiation"
+    | "approved"
+    | "granted"
+    | "completed"
+    | "suspended"
+    | "closed"
+    | "pending"
+    | "verified";
+
 export interface StatusButtonConfig {
     icon: string;
     severity: "success" | "warning" | "danger" | "info" | "secondary";
     action?: string;
+
+    reverse?: {
+        icon: string;
+        action: string;
+        severity?: "success" | "warning" | "danger" | "info" | "secondary";
+    };
 }
+
+
 
 export const STATUS_BUTTON_CONFIG: Record<string, StatusButtonConfig> = {
     // ... existing configs (pending, active, etc.)
@@ -33,7 +57,12 @@ export const STATUS_BUTTON_CONFIG: Record<string, StatusButtonConfig> = {
     accepted: {
         icon: "pi pi-check-circle",
         severity: "success",
-        action: "Accept"
+        action: "Accept",
+        reverse: {
+            icon: "pi pi-undo",
+            action: "Reject",
+            severity: "danger"
+        }
     },
     rejected: {
         icon: "pi pi-times-circle",

@@ -42,9 +42,9 @@ export function StateTransitionButtons<TStatus extends string>({
 
                     const config = STATUS_BUTTON_CONFIG[target];
 
-                    const icon = config?.icon ?? (isForward ? "pi pi-check" : "pi pi-undo");
-                    const severity = config?.severity ?? (isForward ? "success" : "warning");
-                    const action = config?.action ?? `Change to ${target}`;
+                    const icon = isForward ? config?.icon ?? "pi pi-check" : "pi pi-undo";
+                    const severity = isForward ? config?.severity ?? "success" : "warning";
+                    const action = isForward ? config?.action ?? `Change to ${target}` : `Back to ${target}`;
 
                     return (
                         <Button

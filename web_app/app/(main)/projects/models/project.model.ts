@@ -1,4 +1,5 @@
 import { Applicant } from "../../applicants/models/applicant.model";
+import { Call } from "../../calls/models/call.model";
 import { GrantAllocation } from "../../grants/allocations/models/grant.allocation.model";
 import { Grant } from "../../grants/models/grant.model";
 import { Organization } from "../../organizations/models/organization.model";
@@ -29,11 +30,12 @@ export type Project = {
     themes?: Theme[] | string[];
     createdAt?: Date;
     updatedAt?: Date;
-    collaborators?: Collaborator[];// | string[];
-
+    call?: string | Call;
+    //used for apply for call
+    collaborators?: any[];// | string[];
     phases?: Phase[];
     file?: File;
-    workspace?: string | Organization;
+    //workspace?: string | Organization;
 }
 
 export interface GetProjectsOptions {
@@ -84,10 +86,12 @@ export const sanitize = (project: Partial<Project>): Partial<Project> => {
             typeof project.applicant === 'object' && project.applicant !== null
                 ? (project.applicant as any)._id
                 : project.applicant,
-        workspace:
+        /*
+                workspace:
             typeof project.workspace === 'object' && project.workspace !== null
                 ? (project.workspace as any)._id
                 : project.workspace,
+                */
         // --- Fix for Themes Array ---
         themes: project.themes?.map(t => {
             // If the theme is an object, take the _id, otherwise return the string/id as is

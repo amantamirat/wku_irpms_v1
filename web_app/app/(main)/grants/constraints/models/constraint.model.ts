@@ -1,5 +1,4 @@
 import { Grant } from "../../models/grant.model";
-import { ProjectConstraintType } from "./project-constraint-type";
 
 export type Constraint = {
     _id?: string;
@@ -40,4 +39,19 @@ export function sanitizeConstraint(constraint: Partial<Constraint>): Partial<Con
 
 export interface GetConstraintsOptions {
     grant?: string | Grant;
+}
+export enum ProjectConstraintType {
+    PROJECT_TITLE = "PROJECT_TITLE",
+    PROJECT_SUMMARY = "PROJECT_SUMMARY",
+    PARTICIPANT = "PARTICIPANT",// Total participants
+    PHASE_COUNT = "PHASE-COUNT",// Logical project phases
+    BUDGET_TOTAL = "BUDGET-TOTAL",// Total project budget
+    TIME_TOTAL = "TIME-TOTAL",// Total project duration
+    BUDGET_PHASE = "BUDGET-PHASE",// Budget per phase    
+    TIME_PHASE = "TIME-PHASE",// Time per phase    
+    ACTIVITIES_PHASE = "ACTIVITIES-PHASE",//activities per phase
+    THEME = "THEME",
+    SUB_THEME = "SUB_THEME",
+    FOCUS_AREA = "FOCUS_AREA",
+    INDICATOR = "INDICATOR"
 }

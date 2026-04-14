@@ -32,10 +32,10 @@ export class ConstraintController {
       const { grant } = req.query;
 
       const options = {
-        grant: grant ? String(grant) : undefined,
+        grant: grant as string,
       };
 
-      const constraints = await this.service.getConstraints(options);
+      const constraints = await this.service.get(options);
       successResponse(res, 200, "Constraints fetched successfully", constraints);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);

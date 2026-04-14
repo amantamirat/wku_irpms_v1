@@ -36,7 +36,7 @@ const SaveCriterion = ({ visible, item, onComplete, onHide }: EntitySaveDialogPr
     }, [visible, isEvaluationPredefined]);
 
     const addOption = () => {
-        const newOption: CriterionOption = { title: '', score: 0 };
+        const newOption: CriterionOption = { _id: '', title: '', score: 0 };
         setLocalCriterion({ ...localCriterion, options: [...localCriterion.options, newOption] });
     };
 

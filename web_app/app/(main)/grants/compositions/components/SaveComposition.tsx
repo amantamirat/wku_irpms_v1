@@ -155,7 +155,7 @@ const SaveComposition = ({
                             <Dropdown
                                 id="gender"
                                 value={localComposition.gender}
-                                options={opModeOptions}
+                                options={genderOptions}
                                 onChange={(e) =>
                                     setLocalComposition({
                                         ...localComposition,

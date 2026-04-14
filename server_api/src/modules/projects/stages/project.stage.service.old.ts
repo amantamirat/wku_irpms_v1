@@ -8,7 +8,7 @@ import { CallRepository, ICallRepository } from "../../calls/call.repository";
 import { CallStatus } from "../../calls/call.status";
 import { ICallStageRepository } from "../../calls/stages/call.stage.repository";
 import { ReviewerRepository } from "../../reviewers/reviewer.repository";
-import { ReviewerStatus } from "../../reviewers/reviewer.status";
+import { ReviewerStatus } from "../../reviewers/reviewer.state-machine";
 import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
 import { CollaboratorRepository } from "../collaborators/collaborator.repository";
 import { PhaseRepository } from "../phase/phase.repository";

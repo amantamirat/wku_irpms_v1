@@ -64,7 +64,7 @@ export class StageController {
 
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const { id } = req.query;
+            const { id } = req.params;
             const { deadline } = req.body;
             const dto: UpdateStageDTO = {
                 id: id as string,

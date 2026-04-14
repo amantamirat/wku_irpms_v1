@@ -32,10 +32,9 @@ export const CallApi: EntityApi<Call, GetCallsOptions | undefined> = {
     // ---------------------------
     // Get By Id
     // ---------------------------
-    async getById(id: string): Promise<Call> {
-        // Usually, you'll want to ensure the backend populates 
-        // grantAllocation -> grant and grantAllocation -> calendar here
-        return ApiClient.get(`${end_point}/${id}`);
+    async getById(id: string, populate?: boolean): Promise<Call> {
+        const query = populate !== undefined ? `?populate=${populate}` : '';
+        return ApiClient.get(`${end_point}/${id}${query}`);
     },
 
     // ---------------------------

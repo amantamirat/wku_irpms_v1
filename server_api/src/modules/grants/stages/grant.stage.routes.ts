@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { checkPermission, verifyActiveAccount } from '../../users/auth/auth.middleware';
 import { StageController } from './grant.stage.controller';
-import { StageService } from './grant.stage.service';
+import { GrantStageService } from './grant.stage.service';
 import { GrantStageRepository } from './grant.stage.repository';
 import { GrantRepository } from '../grant.repository';
 import { EvaluationRepository } from '../../evaluations/evaluation.repository';
@@ -9,7 +9,7 @@ import { EvaluationRepository } from '../../evaluations/evaluation.repository';
 const grantStageRepo = new GrantStageRepository();
 const grantRepo = new GrantRepository();
 const evalRepo = new EvaluationRepository();
-const service = new StageService(grantStageRepo, grantRepo, evalRepo);
+const service = new GrantStageService(grantStageRepo, grantRepo, evalRepo);
 const controller = new StageController(service);
 const router = Router();
 

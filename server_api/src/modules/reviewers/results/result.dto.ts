@@ -8,7 +8,6 @@ export interface GetResultsDTO {
 export interface ExistsResultsDTO {
     reviewer?: string;
     criterion?: string;
-    //selectedOption?: string;
 }
 
 export interface CreateResultDTO {

@@ -28,17 +28,12 @@ const PhaseManager = ({ project }: PhaseManagerProps) => {
                 body: (r: Phase) => <strong>{r.order}</strong>
             },
             {
-                header: "Description",
-                field: "description",
-                style: { width: '300px' },
-                body: (r: Phase) => (
-                    <div className="truncate" title={r.description}>
-                        {r.description || "No description provided"}
-                    </div>
-                )
+                header: "Title",
+                field: "title",
+                sortable: true
             },
             {
-                header: "Duration (Days)",
+                header: "Duration",
                 field: "duration",
                 sortable: true,
                 style: { width: '150px' },
@@ -56,12 +51,13 @@ const PhaseManager = ({ project }: PhaseManagerProps) => {
                 )
             },
             {
-                header: "Activities",
-                field: "breakdown",
+                header: "Description",
+                field: "description",
+                style: { width: '300px' },
                 body: (r: Phase) => (
-                    <span className="text-sm text-gray-500">
-                        {r.breakdown?.length || 0} activities
-                    </span>
+                    <div className="truncate" title={r.description}>
+                        {r.description || "No description provided"}
+                    </div>
                 )
             },
             {

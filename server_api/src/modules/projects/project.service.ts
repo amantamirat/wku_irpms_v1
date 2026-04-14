@@ -100,7 +100,7 @@ export class ProjectService {
             throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
         }
         if (next === ProjectStatus.submitted) {
-            throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
+            //throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
         }
         return await this.repository.updateStatus(id, to);
     }

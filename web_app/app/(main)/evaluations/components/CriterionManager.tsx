@@ -27,6 +27,7 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
         }),
 
         columns: [
+            /*
             // ✅ Show the execution order
             {
                 header: "Order",
@@ -34,6 +35,7 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
                 sortable: true,
                 style: { width: '3rem' }
             },
+            */
             {
                 header: "Title",
                 field: "title",

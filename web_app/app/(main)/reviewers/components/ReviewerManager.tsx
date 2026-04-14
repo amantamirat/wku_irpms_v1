@@ -1,20 +1,18 @@
 'use client';
 
-import { createEntityManager } from "@/components/createEntityManager";
-import { ReviewerApi } from "../api/reviewer.api";
-import { GetReviewersOptions, Reviewer, ReviewerStatus } from "../models/reviewer.model";
-import SaveReviewerDialog from "./SaveReviewerDialog";
-import MyBadge from "@/templates/MyBadge";
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
-import { ProjectStage } from "../../projects/stages/models/project.stage.model";
-import { REVIEWER_STATUS_ORDER, REVIEWER_TRANSITIONS } from "../models/reviewer.state-machine";
-import ResultManager from "../results/components/ResultManager";
+import { createEntityManager } from "@/components/createEntityManager";
 import { useAuth } from "@/contexts/auth-context";
-import { ResultApi } from "../results/api/result.api";
-import { useState } from "react";
+import MyBadge from "@/templates/MyBadge";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
+import { useState } from "react";
+import { ProjectStage } from "../../projects/stages/models/project.stage.model";
+import { ReviewerApi } from "../api/reviewer.api";
+import { GetReviewersOptions, Reviewer, ReviewerStatus } from "../models/reviewer.model";
+import { REVIEWER_STATUS_ORDER, REVIEWER_TRANSITIONS } from "../models/reviewer.state-machine";
 import EvaluatorManager from "../results/components/evaluator/EvaluatorManager";
+import SaveReviewerDialog from "./SaveReviewerDialog";
 
 interface ReviewerManagerProps {
     projectStage?: ProjectStage;
@@ -25,29 +23,20 @@ const ReviewerManager = ({ projectStage, applicant }: ReviewerManagerProps) => {
 
     const [activeEvaluation, setActiveEvaluation] = useState<{
         reviewer: Reviewer;
-        results: any[];
-        criteria: any[];
+        canEvaluate: boolean;
     } | null>(null);
     const [loadingEval, setLoadingEval] = useState(false);
 
+    const { getApplicant } = useAuth();
+    const activeUser = getApplicant();
+
+
+
     // Function to launch the new Evaluator UI
-    const startEvaluation = async (reviewer: Reviewer) => {
+    const startEvaluation = async (reviewer: Reviewer, canEvaluate: boolean) => {
         try {
             setLoadingEval(true);
-            // Fetch populated results as you described
-            const res = await ResultApi.getAll({
-                reviewer: reviewer._id!,
-                populate: true
-            });
-
-            // Extract unique criteria from the populated results
-            const criteria = res.map((r: any) => r.criterion);
-
-            setActiveEvaluation({
-                reviewer,
-                results: res,
-                criteria
-            });
+            setActiveEvaluation({ reviewer, canEvaluate });
         } catch (err) {
             console.error("Failed to load evaluation", err);
         } finally {
@@ -55,10 +44,9 @@ const ReviewerManager = ({ projectStage, applicant }: ReviewerManagerProps) => {
         }
     };
 
-    const columns: any[] = [];
 
-    const { getApplicant } = useAuth();
-    const user = getApplicant();
+
+    const columns: any[] = [];
 
 
     // Column: Stage & Project (when filtering by applicant)
@@ -75,8 +63,20 @@ const ReviewerManager = ({ projectStage, applicant }: ReviewerManagerProps) => {
             header: "Project",
             field: "projectStage.project.title",
             sortable: true,
-            body: (r: Reviewer) =>
-                (r.projectStage as any)?.project?.title || "-"
+            style: { width: '250px', maxWidth: '250px' },
+            body: (row: Reviewer) => (
+                <div
+                    className="truncate"
+                    style={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                    }}
+                //title={row.title}
+                >
+                    {(row.projectStage as any)?.project?.title || "-"}
+                </div>
+            ),
         });
     }
 
@@ -114,14 +114,28 @@ const ReviewerManager = ({ projectStage, applicant }: ReviewerManagerProps) => {
     columns.push({
         header: "Actions",
         body: (row: Reviewer) => {
-            const canEvaluate = [ReviewerStatus.accepted, ReviewerStatus.pending].includes(row.status);
+
+            const reviewerAppId =
+                typeof row.applicant === "string"
+                    ? row.applicant
+                    : row.applicant?._id;
+            const canEvaluate = reviewerAppId === activeUser._id &&
+                row.status === ReviewerStatus.accepted;
+
             return (
                 <Button
                     icon="pi pi-pencil"
-                    label={row.status === ReviewerStatus.submitted ? "View" : "Evaluate"}
+                    label={
+                        canEvaluate
+                            ? "Evaluate"
+                            : "View"
+                    }
                     className="p-button-text p-button-sm"
-                    loading={loadingEval && activeEvaluation?.reviewer._id === row._id}
-                    onClick={() => startEvaluation(row)}
+                    loading={
+                        loadingEval &&
+                        activeEvaluation?.reviewer._id === row._id
+                    }
+                    onClick={() => startEvaluation(row, canEvaluate)}
                 />
             );
         }
@@ -154,11 +168,6 @@ const ReviewerManager = ({ projectStage, applicant }: ReviewerManagerProps) => {
             statusOrder: REVIEWER_STATUS_ORDER,
             transitions: REVIEWER_TRANSITIONS
         },
-        expandable: {
-            template: (reviewer) => (
-                <ResultManager reviewer={reviewer} />
-            )
-        },
         // Only allow delete if still pending
         disableDeleteRow: (row: Reviewer) =>
             row.status !== ReviewerStatus.pending,
@@ -182,8 +191,7 @@ const ReviewerManager = ({ projectStage, applicant }: ReviewerManagerProps) => {
                 {activeEvaluation && (
                     <EvaluatorManager
                         reviewer={activeEvaluation.reviewer}
-                        initialCriteria={activeEvaluation.criteria}
-                        initialResults={activeEvaluation.results}
+                        canEvaluate={activeEvaluation.canEvaluate}
                         onClose={() => setActiveEvaluation(null)} // Add a close callback
                     />
                 )}

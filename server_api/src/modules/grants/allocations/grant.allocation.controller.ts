@@ -50,6 +50,16 @@ export class GrantAllocationController {
         }
     };
 
+    getById = async (req: Request, res: Response) => {
+        try {
+            const { id } = req.params;
+            const grantAllocation = await this.service.getById(id);
+            successResponse(res, 200, 'Grant allocation fetched successfully', grantAllocation);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
     /**
      * Update a Grant Allocation
      */

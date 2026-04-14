@@ -82,4 +82,4 @@ const ResultManager = ({ reviewer }: ResultManagerProps) => {
     return <Manager />;
 };
 
-export default ResultManager;
+//export default ResultManager;

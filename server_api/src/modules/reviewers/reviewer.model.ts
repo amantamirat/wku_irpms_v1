@@ -1,6 +1,6 @@
 //reviewer.model.ts
 import mongoose, { model, Schema } from "mongoose";
-import { ReviewerStatus } from "./reviewer.status";
+import { ReviewerStatus } from "./reviewer.state-machine";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
 
 export interface IReviewer extends Document {

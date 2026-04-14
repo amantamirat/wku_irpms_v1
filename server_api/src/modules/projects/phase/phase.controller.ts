@@ -18,21 +18,23 @@ export class PhaseController {
             if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const {
+                title,
                 order,       // Added: required for unique sequence
                 duration,
                 budget,
                 description,
                 project,
-                breakdown    // Fixed: removed illegal [] syntax
+               // breakdown    // Fixed: removed illegal [] syntax
             } = req.body;
 
             const data: CreatePhaseDto = {
+                title,
                 order: Number(order),
                 duration: Number(duration),
                 budget: Number(budget),
                 description,
                 project: project as string,
-                breakdown,    // Passed to service for validation
+                //breakdown,    // Passed to service for validation
                 applicantId: req.user.applicantId,
             };
 
@@ -68,18 +70,18 @@ export class PhaseController {
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
-            
+
             const { id } = req.params;
-            const { order, duration, budget, description, breakdown, status } = req.body;
+            const { title, order, duration, budget, description, breakdown, status } = req.body;
 
             const dto: UpdatePhaseDto = {
                 id: id as string,
                 data: {
+                    title,
                     order,
-                    //duration,
-                    //budget,
-                    description,
-                    breakdown,
+                    duration,
+                    budget,
+                    description
                 },
                 applicantId: req.user.applicantId,
             };

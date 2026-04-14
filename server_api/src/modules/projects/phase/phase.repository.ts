@@ -86,7 +86,7 @@ export class PhaseRepository implements IPhaseRepository {
             .exec();
     }
     async deleteByProject(projectId: string) {
-        if (!mongoose.Types.ObjectId.isValid(projectId)) throw new Error("Invalid Project ID");
+      //  if (!mongoose.Types.ObjectId.isValid(projectId)) throw new Error("Invalid Project ID");
         return Phase.deleteMany({
             project: new mongoose.Types.ObjectId(projectId)
         }).exec();

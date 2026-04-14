@@ -24,7 +24,7 @@ export interface UpdateStageDTO {
     id: string;
     data: Partial<{
         //status: ProjectStageStatus;
-        totalScore: number;
+        totalScore: number | null;
     }>;
     applicantId: string;
 }

@@ -1,4 +1,4 @@
-import { ReviewerStatus } from "./reviewer.status";
+import { ReviewerStatus } from "./reviewer.state-machine";
 
 // reviewer.dto.ts
 export interface GetReviewersDTO {

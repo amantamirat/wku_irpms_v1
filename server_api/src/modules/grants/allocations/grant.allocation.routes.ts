@@ -42,6 +42,13 @@ router.get(
     controller.get
 );
 
+router.get(
+    "/:id",
+    verifyActiveAccount,
+    checkPermission("grant.allocation:read"),
+    controller.getById
+);
+
 //----------------------------------------
 // UPDATE ALLOCATION
 //----------------------------------------

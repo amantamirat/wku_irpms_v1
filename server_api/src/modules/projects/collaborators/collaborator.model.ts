@@ -5,7 +5,7 @@ import { CollaboratorStatus } from "./collaborator.status";
 
 export interface ICollaborator extends Document {
     project: mongoose.Types.ObjectId;
-    applicant: mongoose.Types.ObjectId;
+    applicant: mongoose.Types.ObjectId;//user
     isLeadPI?: boolean;
     status: CollaboratorStatus;
     createdAt?: Date;

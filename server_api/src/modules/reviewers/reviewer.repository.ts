@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { Reviewer, IReviewer } from "./reviewer.model";
 import { CreateReviewerDTO, ExistsReviewersDTO, GetReviewersDTO, UpdateReviewerDTO } from "./reviewer.dto";
-import { ReviewerStatus } from "./reviewer.status";
+import { ReviewerStatus } from "./reviewer.state-machine";
 
 export interface IReviewerRepository {
     findById(id: string): Promise<IReviewer | null>;
@@ -9,6 +9,7 @@ export interface IReviewerRepository {
     create(dto: CreateReviewerDTO): Promise<IReviewer>;
     update(id: string, data: UpdateReviewerDTO["data"]): Promise<IReviewer | null>;
     updateStatus(id: string, newStatus: ReviewerStatus): Promise<IReviewer | null>;
+    countByProjectStage(projectStageId: string): Promise<number>;
     exist(filters: ExistsReviewersDTO): Promise<boolean>;
     delete(id: string): Promise<IReviewer | null>;
 }
@@ -81,6 +82,12 @@ export class ReviewerRepository implements IReviewerRepository {
             { $set: { status: newStatus } },
             { new: true }
         ).exec();
+    }
+
+    async countByProjectStage(projectStageId: string) {
+        return Reviewer.countDocuments({
+            projectStage: new mongoose.Types.ObjectId(projectStageId)
+        });
     }
     async exist(filters: ExistsReviewersDTO): Promise<boolean> {
         const query: any = {};

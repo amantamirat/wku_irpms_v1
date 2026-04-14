@@ -21,38 +21,9 @@ import { GrantAllocation } from '../../grants/allocations/models/grant.allocatio
 import { GrantAllocationApi } from '../../grants/allocations/api/grant.allocation.api';
 import { AllocationStatus } from '../../grants/allocations/models/grant.allocation.state-machine';
 import { allocationOptionTemplate, getAllocationLabel } from '../../grants/allocations/components/AllocationTempletes';
+import { buildTree, ThemeNode } from '../../thematics/models/thematic.node';
 
-type Node = {
-    key?: string;
-    label: string;
-    data?: string;
-    children?: Node[];
-    selectable?: boolean;
-};
 
-const buildTree = (themes: Theme[], parentId?: string): Node[] => {
-    return themes
-        .filter(t => {
-            const pid = typeof t.parent === "object" ? t.parent?._id : t.parent;
-            return parentId ? pid === parentId : !pid;
-        })
-        .sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0))
-        .map(t => {
-            const children = buildTree(themes, t._id);
-            const node: Node = {
-                key: t._id,
-                label: t.title,
-                data: t._id,
-                selectable: children.length === 0,
-            };
-
-            if (children.length > 0) {
-                node.children = children;
-            }
-
-            return node;
-        });
-};
 
 interface ExtendedProject extends Project {
     _filterCalendar?: string;
@@ -70,7 +41,7 @@ const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
     const [submitted, setSubmitted] = useState(false);
     const [allocations, setAllocations] = useState<GrantAllocation[]>([]);
     const [applicants, setApplicants] = useState<Applicant[]>([]);
-    const [themeNodes, setThemeNodes] = useState<Node[]>([]);
+    const [themeNodes, setThemeNodes] = useState<ThemeNode[]>([]);
 
     const isAllocationPredefined = !!item.grantAllocation;
     const isApplicantPredefined = !!item.applicant;

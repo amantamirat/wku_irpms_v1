@@ -24,6 +24,10 @@ export const GrantAllocationApi: EntityApi<GrantAllocation, GetGrantAllocationsD
         return ApiClient.get(url);
     },
 
+    async getById(id: string) {
+        return ApiClient.get(`${end_point}/${id}`);
+    },
+    
     async create(allocation: GrantAllocation) {
         const sanitized = sanitizeGrantAllocation(allocation);
         return ApiClient.post(end_point, sanitized);

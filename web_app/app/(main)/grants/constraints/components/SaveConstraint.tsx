@@ -11,7 +11,7 @@ import {
     Constraint,
     validateConstraint
 } from '../models/constraint.model';
-import { ProjectConstraintType } from '../models/project-constraint-type';
+import { ProjectConstraintType } from "../models/constraint.model";
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
 
 

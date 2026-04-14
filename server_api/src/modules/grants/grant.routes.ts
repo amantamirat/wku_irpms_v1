@@ -41,11 +41,11 @@ router.get(
   controller.get
 );
 
-/*
+
 router.get('/:id', verifyActiveAccount,
   checkPermission([PERMISSIONS.GRANT.READ]),
   controller.getById);
-  */
+  
 
 router.put(
   '/:id',

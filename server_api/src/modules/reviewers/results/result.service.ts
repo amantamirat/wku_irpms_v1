@@ -5,7 +5,7 @@ import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { FormType } from "../../evaluations/criteria/criterion.model";
 import { ICriterionRepository } from "../../evaluations/criteria/criterion.repository";
 import { IReviewerRepository } from "../reviewer.repository";
-import { ReviewerStatus } from "../reviewer.status";
+import { ReviewerStatus } from "../reviewer.state-machine";
 import { CreateResultDTO, GetResultsDTO, UpdateResultDTO } from "./result.dto";
 import { IResultRepository } from "./result.repository";
 

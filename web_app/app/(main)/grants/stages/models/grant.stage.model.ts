@@ -35,7 +35,16 @@ export const validateGrantStage = (stage: GrantStage): { valid: boolean; message
     if (!stage.evaluation) {
         return { valid: false, message: "Evaluation reference is required." };
     }
-
+    if (
+        stage.minReviewers !== undefined &&
+        stage.maxReviewers !== undefined &&
+        stage.minReviewers > stage.maxReviewers
+    ) {
+        return {
+            valid: false,
+            message: "Minimum reviewers cannot be greater than maximum reviewers."
+        };
+    }
     return { valid: true };
 };
 

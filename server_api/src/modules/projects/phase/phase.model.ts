@@ -2,35 +2,39 @@ import mongoose, { model, Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
 import { PhaseStatus } from "./phase.status";
 
+/*
 // 1. Define the Breakdown Interface
 export interface IBreakdown {
     activity: string;
     duration: number;
     budget: number;
 }
+*/
 
 export interface IPhase extends Document {
     _id: mongoose.Types.ObjectId;
     project: mongoose.Types.ObjectId;
     order: number;
-    duration: number; 
+    title: String;
+    duration: number;
     startDate?: Date;
     endDate?: Date;
     budget: number;
     description?: string;
-    breakdown: IBreakdown[]; // The new array
+    // breakdown: IBreakdown[]; // The new array
     status: PhaseStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
+/*
 // 2. Define the Sub-schema
 const PhaseBreakdownSchema = new Schema<IBreakdown>({
     activity: { type: String, required: true, trim: true },
     duration: { type: Number, required: true, min: 0 },
     budget: { type: Number, required: true, min: 0 }
 }, { _id: false }); // Set _id: false if you don't need to reference specific activities
-
+*/
 const PhaseSchema = new Schema<IPhase>(
     {
         project: {
@@ -42,6 +46,10 @@ const PhaseSchema = new Schema<IPhase>(
         order: {
             type: Number,
             required: true,
+        },
+        title: {
+            type: String,
+            //required: true
         },
         duration: {
             type: Number,
@@ -65,7 +73,7 @@ const PhaseSchema = new Schema<IPhase>(
             type: String,
             trim: true
         },
-        breakdown: [PhaseBreakdownSchema], // Embedding the array
+        // breakdown: [PhaseBreakdownSchema], // Embedding the array
         status: {
             type: String,
             enum: Object.values(PhaseStatus),

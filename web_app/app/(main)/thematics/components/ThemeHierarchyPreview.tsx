@@ -6,6 +6,8 @@ import { Badge } from 'primereact/badge';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Thematic, themeLevelIndex } from '../models/thematic.model';
 import { ThemeApi } from '../themes/api/theme.api';
+import { buildTree, ThemeNode } from '../models/thematic.node';
+
 
 interface Props {
     thematic: Thematic;
@@ -22,53 +24,46 @@ const ThemeHierarchyPreview = ({ thematic }: Props) => {
         loadHierarchy();
     }, [thematic._id]);
 
+    // Convert your ThemeNode structure to PrimeReact TreeNode structure
+    const convertToTreeNodes = (themeNodes: ThemeNode[]): TreeNode[] => {
+        return themeNodes.map(node => {
+            const treeNode: TreeNode = {
+                key: node.key,
+                label: node.label,
+                data: node.data, // This will be the theme ID
+                children: node.children ? convertToTreeNodes(node.children) : undefined,
+                selectable: node.selectable,
+                expanded: true // Auto-expand for better visibility
+            };
+            return treeNode;
+        });
+    };
+
+    // You'll need to fetch the actual theme data for node rendering
+    // Since your buildTree only stores the ID in data, you need to map IDs to theme objects
+    const [themesMap, setThemesMap] = useState<Map<string, any>>(new Map());
+
     const loadHierarchy = async () => {
         try {
             setLoading(true);
-            // Fetch all themes for this specific thematic area
             const themes = await ThemeApi.getAll({ thematicArea: thematic._id });
 
             if (themes.length > 0) {
+                // Create a map for quick lookups
+                const map = new Map<string, any>();
+                themes.forEach((theme: any) => {
+                    map.set(theme._id, theme);
+                });
+                setThemesMap(map);
+
                 setMaxLevelReached(Math.max(...themes.map((t: any) => t.level)));
-                setNodes(buildTree(themes));
+                const themeNodes = buildTree(themes);
+                setNodes(convertToTreeNodes(themeNodes));
             }
         } finally {
             setLoading(false);
         }
     };
-
-    const buildTree = (themes: any[]): TreeNode[] => {
-        const map: Record<string, TreeNode> = {};
-        const roots: TreeNode[] = [];
-
-        themes.forEach(t => {
-            map[t._id] = {
-                key: t._id,
-                label: t.title,
-                data: t,
-                children: [],
-                expanded: true // Auto-expand for better visibility
-            };
-        });
-
-        themes.forEach(t => {
-            if (t.parent && map[t.parent]) {
-                map[t.parent].children?.push(map[t._id]);
-            } else if (t.level === 0) {
-                roots.push(map[t._id]);
-            }
-        });
-        return roots;
-    };
-
-    /*
-    const nodeTemplate = (node: TreeNode) => (
-        <div className="flex align-items-center py-1">
-            <span className="font-medium mr-2">{node.label}</span>
-            <Badge value={`Level ${node.data.level}`} severity="success" />
-        </div>
-    );
-    */
 
     const levelNames: Record<number, string> = {
         0: "Theme",
@@ -85,18 +80,19 @@ const ThemeHierarchyPreview = ({ thematic }: Props) => {
     };
 
     const nodeTemplate = (node: TreeNode) => {
-        const levelName = levelNames[node.data.level] || `Level ${node.data.level}`;
-        const severity = levelSeverity[node.data.level] || "info";
+        // Get the full theme object from the map using the ID stored in node.data
+        const themeData = themesMap.get(node.data as string);
+        if (!themeData) return <div>{node.label}</div>;
+
+        const levelName = levelNames[themeData.level] || `Level ${themeData.level}`;
+        const severity = levelSeverity[themeData.level] || "info";
 
         return (
             <div className="flex align-items-center py-1">
-                {/* Bold level name */}
                 <span className="font-bold mr-2">{levelName}:</span>
                 <span className="font-medium mr-2">{node.label}</span>
-
-                {/* Show priority if available */}
-                {node.data.priority !== undefined && (
-                    <Badge value={`Priority: ${node.data.priority}`} severity={severity} />
+                {themeData.priority !== undefined && (
+                    <Badge value={`Priority: ${themeData.priority}`} severity={severity} />
                 )}
             </div>
         );
@@ -121,15 +117,7 @@ const ThemeHierarchyPreview = ({ thematic }: Props) => {
                 value={nodes}
                 nodeTemplate={nodeTemplate}
                 className="border-none p-0"
-            //emptyMessage="No themes defined for this area yet."
             />
-
-            {maxLevelReached < requiredLevel && (
-                <div className="mt-4 p-3 border-round bg-yellow-50 text-yellow-700 border-1 border-yellow-200">
-                    <i className="pi pi-exclamation-circle mr-2"></i>
-                    Hierarchy incomplete. Please reach <strong>Level {requiredLevel}</strong> to enable publishing.
-                </div>
-            )}
         </div>
     );
 };

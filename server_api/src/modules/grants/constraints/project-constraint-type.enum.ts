@@ -1,4 +1,6 @@
 export enum ProjectConstraintType {
+    PROJECT_TITLE = "PROJECT_TITLE",//characters
+    PROJECT_SUMMARY = "PROJECT_SUMMARY",
     PARTICIPANT = "PARTICIPANT",          
     PHASE_COUNT = "PHASE-COUNT",          
     BUDGET_TOTAL = "BUDGET-TOTAL",        

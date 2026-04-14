@@ -17,6 +17,7 @@ export class ConstraintService {
         const grantDoc = await this.grantRepository.findById(grant);
         if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
         try {
+            //budget limitation mush be handled in here against grant
             return await this.repository.create(dto);
         } catch (err: any) {
             if (err?.code === 11000) {
@@ -29,7 +30,7 @@ export class ConstraintService {
     //----------------------------------------
     // GET
     //----------------------------------------
-    async getConstraints(options: GetConstraintOptions) {
+    async get(options: GetConstraintOptions) {
         return await this.repository.find(options);
     }
 

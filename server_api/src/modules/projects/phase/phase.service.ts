@@ -5,38 +5,16 @@ import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { IProjectRepository, ProjectRepository } from "../project.repository";
 import { ProjectStatus } from "../project.state-machine";
-import { CreatePhaseDto, GetPhasesOptions, PhaseBreakdownDto, UpdatePhaseDto } from "./phase.dto";
+import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto } from "./phase.dto";
 import { IPhaseRepository, PhaseRepository } from "./phase.repository";
 import { PHASE_TRANSITIONS } from "./phase.state-machine";
 import { PhaseStatus } from "./phase.status";
 
 export class PhaseService {
     constructor(
-        private readonly repository: IPhaseRepository = new PhaseRepository(),
-        private readonly projectRepository: IProjectRepository = new ProjectRepository()
+        private readonly repository: IPhaseRepository,
+        private readonly projectRepository: IProjectRepository
     ) { }
-
-    /**
-     * Internal Helper: Derives duration and budget from the breakdown.
-     * If no breakdown is provided, it defaults to the existing values or zero.
-     */
-    private calculateTotals(data: any, existingDoc?: any) {
-        const breakdown = data.breakdown || existingDoc?.breakdown || [];
-
-        // Ensure there is at least one activity if we are in detailed-only mode
-        if (breakdown.length === 0) {
-            throw new AppError(ERROR_CODES.INVALID_PHASE_BREAKDOWN); // Ensure this error code exists
-        }
-
-        const totalDuration = breakdown.reduce((sum: number, item: any) => sum + (item.duration || 0), 0);
-        const totalBudget = breakdown.reduce((sum: number, item: any) => sum + (item.budget || 0), 0);
-
-        return {
-            ...data,
-            duration: totalDuration,
-            budget: totalBudget
-        };
-    }
 
     async validate(project: string, applicantId: string) {
         const projectDoc = await this.projectRepository.findById(project);
@@ -56,11 +34,8 @@ export class PhaseService {
 
         await this.validate(project, applicantId ?? "");
 
-        // Calculate totals based on breakdown activities before saving
-        const dataToSave = this.calculateTotals(dto);
-
         try {
-            return await this.repository.create(dataToSave);
+            return await this.repository.create(dto);
         }
         catch (err: any) {
             if (err?.code === 11000) {
@@ -86,13 +61,7 @@ export class PhaseService {
         if (phaseDoc.status !== PhaseStatus.proposed)
             throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
 
-        // Recalculate totals if the breakdown is being updated
-        let updatedData = { ...data };
-        if (data.breakdown) {
-            updatedData = this.calculateTotals(data, phaseDoc);
-        }
-
-        return await this.repository.update(id, updatedData);
+        return await this.repository.update(id, data);
     }
 
     async transitionState(dto: TransitionRequestDto) {
@@ -136,7 +105,7 @@ export class PhaseService {
 
         const phaseDoc = await this.repository.findById(id);
         if (!phaseDoc) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
-        //include reoredring here 
+
         await this.validate(String(phaseDoc.project), applicantId ?? "");
 
         if (phaseDoc.status !== PhaseStatus.proposed)

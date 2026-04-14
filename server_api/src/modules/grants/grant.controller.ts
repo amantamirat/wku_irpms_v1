@@ -47,19 +47,18 @@ export class GrantController {
         }
     }
 
-    /*
+
 
     getById = async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
-            console.log("grant get by id", id);
             const grant = await this.service.getById(id);
             successResponse(res, 200, 'Grant fetched successfully', grant);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     };
-    */
+
 
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {

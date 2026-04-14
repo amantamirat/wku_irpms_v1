@@ -13,6 +13,7 @@ import { NotificationRepository } from '../users/notifications/notification.repo
 import { ReviewerService } from './reviewer.service';
 import { CriterionRepository } from '../evaluations/criteria/criterion.repository';
 import { ResultRepository } from './results/result.repository';
+import { ReviewerSynchronizer } from './reviewer.synchronizer';
 
 const repo = new ReviewerRepository();
 const psRepo = new ProjectStageRepository();
@@ -20,11 +21,13 @@ const appRepo = new ApplicantRepository();
 const collabRepo = new CollaboratorRepository();
 const resultRepo = new ResultRepository();
 const criterionRepo = new CriterionRepository();
+const synchronizer = new ReviewerSynchronizer(repo, psRepo);
 const notificationService = new NotificationService(
     new NotificationRepository(),
     new SettingService(new SettingRepository())
 );
-const service = new ReviewerService(repo, psRepo, appRepo, collabRepo, resultRepo, criterionRepo, notificationService);
+const service = new ReviewerService(
+    repo, psRepo, appRepo, collabRepo, resultRepo, criterionRepo, synchronizer, notificationService);
 const controller = new ReviewerController(service);
 const router: Router = Router();
 

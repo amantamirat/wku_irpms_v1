@@ -16,7 +16,7 @@ export const formTypeOptions = [
 ];
 
 export type CriterionOption = {
-    _id?: string;
+    _id: string;
     title: string;
     score: number;
 };
@@ -90,7 +90,7 @@ export const createEmptyCriterion = (criterion?: Partial<Criterion>): Criterion 
     evaluation: criterion?.evaluation ?? "",
     title: criterion?.title ?? "",
     weight: criterion?.weight ?? 0,
-    formType: criterion?.formType ?? FormType.SINGLE_CHOICE,
+    formType: criterion?.formType ?? FormType.NUMBER,
     options: criterion?.options ?? [], // ✅ Initialize as empty array
     order: criterion?.order ?? 0,
     isRequired: criterion?.isRequired ?? true,

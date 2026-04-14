@@ -79,11 +79,14 @@ app.use("/api/thematics", thematicRoutes);
 app.use("/api/thematics/themes", themeRoutes);
 app.use("/api/evaluations", evaluationRoutes);
 app.use("/api/criteria", criterionRoutes);
-app.use("/api/grants", grantRoutes);
+
 app.use("/api/grants/stages", grantStageRoutes);
 app.use("/api/grants/constraints", constraintRoutes);
 app.use("/api/grants/compositions", compositionRoutes);
-app.use("/api/grants/allocations", grantAllocationsRoutes)
+app.use("/api/grants/allocations", grantAllocationsRoutes);
+//"More specific routes must come first"
+// 🚨 KEEP THIS LAST
+app.use("/api/grants", grantRoutes);
 
 app.use("/api/calendars", calendarRoutes);
 app.use("/api/calls", callRoutes);

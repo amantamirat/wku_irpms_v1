@@ -7,7 +7,7 @@ import { IGrantRepository } from "../grant.repository";
 import { CreateStageDTO, GetStageDTO, UpdateStageDTO } from "./grant.stage.dto";
 import { IGrantStageRepository } from "./grant.stage.repository";
 
-export class StageService {
+export class GrantStageService {
 
     constructor(
         private readonly repository: IGrantStageRepository,
@@ -20,8 +20,10 @@ export class StageService {
      * Create a new stage
      */
     async create(dto: CreateStageDTO) {
-        const { grant, evaluation } = dto;
-
+        const { grant, evaluation, minReviewers, maxReviewers } = dto;
+        if (minReviewers > maxReviewers) {
+            return;
+        }
         const grantDoc = await this.grantRepository.findById(grant);
         if (!grantDoc) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
         if (grantDoc.status !== GrantStatus.planned) throw new AppError(ERROR_CODES.GRANT_NOT_PLANNED);

@@ -21,6 +21,11 @@ export const GrantApi: EntityApi<Grant, GetGrantOptions | undefined> = {
         return ApiClient.get(`${end_point}${qs ? `?${qs}` : ""}`);
     },
 
+    async getById(id: string) {
+        return ApiClient.get(`${end_point}/${id}`);
+    },
+
+
     async create(grant) {
         const sanitized = sanitize(grant)
         return ApiClient.post('/grants/', sanitized)
