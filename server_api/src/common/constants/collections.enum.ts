@@ -21,6 +21,7 @@ export enum COLLECTIONS {
   THEMATIC = "thematics",
   THEME = "themes",
   EVALUATION = "evaluations",
+  TEMPLATE = "templates",
   CRITERION = "criteria",
   OPTION = "options",
   CALENDAR = "calendars",

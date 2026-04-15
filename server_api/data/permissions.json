@@ -682,7 +682,36 @@
     "name": "criterion:import",
     "description": "Import criterion entries"
   },
-  
+  {
+    "category": "Template Management",
+    "name": "template:create",
+    "description": "Create new document templates such as proposal or concept note structures."
+  },
+  {
+    "category": "Template Management",
+    "name": "template:read",
+    "description": "View and list available templates."
+  },
+  {
+    "category": "Template Management",
+    "name": "template:update",
+    "description": "Update template structure including sections and fields."
+  },
+  {
+    "category": "Template Management",
+    "name": "template:delete",
+    "description": "Delete templates that are not published or in use."
+  },
+  {
+    "category": "Template Management",
+    "name": "template:transition.draft.published",
+    "description": "Publish a draft template, locking its structure for submissions."
+  },
+  {
+    "category": "Template Management",
+    "name": "template:transition.published.draft",
+    "description": "Revert a published template back to draft for editing."
+  },
   {
     "category": "Project Management",
     "name": "project:create",

@@ -4,9 +4,11 @@ import { PERMISSIONS } from "../../common/constants/permissions";
 import { verifyActiveAccount, checkPermission, checkTransitionPermission } from "../users/auth/auth.middleware";
 import { EvaluationRepository } from "./evaluation.repository";
 import { EvaluationService } from "./evaluation.service";
+import { CriterionRepository } from "./criteria/criterion.repository";
 
 const repository = new EvaluationRepository();
-const service = new EvaluationService(repository);
+const criterionRepo = new CriterionRepository();
+const service = new EvaluationService(repository, criterionRepo);
 const controller = new EvaluationController(service);
 const router = Router();
 
@@ -18,19 +20,19 @@ const router = Router();
 router.post(
   "/",
   verifyActiveAccount,
-  checkPermission([PERMISSIONS.EVALUATION.CREATE]),
+  checkPermission("evaluation:create"),
   controller.create
 );
 
 /**
  * @route GET /evaluations
- * @desc Get evaluations (optionally by directorateId)
+ * @desc Get evaluations
  * @access Protected
  */
 router.get(
   "/",
   verifyActiveAccount,
-  checkPermission([PERMISSIONS.EVALUATION.READ]),
+  checkPermission("evaluation:read"),
   controller.getAll
 );
 
@@ -42,7 +44,7 @@ router.get(
 router.put(
   "/:id",
   verifyActiveAccount,
-  checkPermission([PERMISSIONS.EVALUATION.UPDATE]),
+  checkPermission("evaluation:update"),
   controller.update
 );
 
@@ -58,7 +60,7 @@ router.patch('/:id', verifyActiveAccount,
 router.delete(
   "/:id",
   verifyActiveAccount,
-  checkPermission([PERMISSIONS.EVALUATION.DELETE]),
+  checkPermission("evaluation:delete"),
   controller.delete
 );
 

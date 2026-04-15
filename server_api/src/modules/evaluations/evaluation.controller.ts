@@ -9,10 +9,10 @@ import { EvalStatus } from './evaluation.state-machine';
 
 export class EvaluationController {
 
-    private service: EvaluationService;
+    
 
-    constructor(service: EvaluationService) {
-        this.service = service;
+    constructor(private readonly service: EvaluationService) {
+        
     }
 
     create = async (req: AuthenticatedRequest, res: Response) => {

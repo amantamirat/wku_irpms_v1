@@ -12,8 +12,7 @@ import { EVAL_TRANSITIONS, EvalStatus } from "./evaluation.state-machine";
 export class EvaluationService {
 
     constructor(private readonly repository: IEvaluationRepository,
-        private readonly criterionRepo: ICriterionRepository = new CriterionRepository(),
-        private readonly grantStageRepo = new GrantStageRepository(),
+        private readonly criterionRepo: ICriterionRepository,
     ) {
     }
 

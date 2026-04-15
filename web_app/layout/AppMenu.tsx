@@ -99,6 +99,17 @@ const AppMenu = () => {
                     )
                 },
                 {
+                    label: 'Templates',
+                    icon: 'pi pi-copy', // Professional icon for blueprints/templates
+                    to: '/templates',
+                    visible: hasPermission(
+                        [
+                            "template:create",
+                            // Depending on your logic, you might also include .READ or .VIEW
+                        ]
+                    )
+                },
+                {
                     label: 'Grants',
                     icon: 'pi pi-bitcoin',
                     to: '/grants',

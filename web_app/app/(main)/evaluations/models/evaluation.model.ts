@@ -26,16 +26,11 @@ export const validateEvaluation = (
 
 export function sanitize(evaluation: Partial<Evaluation>): Partial<Evaluation> {
     return {
-        ...evaluation,
-        /*
-        organization:
-            typeof evaluation.organization === 'object' && evaluation.organization !== null
-                ? (evaluation.organization as Organization)._id
-                : evaluation.organization*/
+        ...evaluation
     };
 }
 
 export const createEmptyEval = (): Evaluation => ({
     title: "",
-    weight:100
+    weight: 100
 })
