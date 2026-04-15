@@ -1,11 +1,9 @@
 'use client';
-import React, { useState } from 'react';
 import { Button } from 'primereact/button';
 import { FileUpload, FileUploadHandlerEvent } from 'primereact/fileupload';
 import { Message } from 'primereact/message';
-import { Divider } from 'primereact/divider';
+import { useState } from 'react';
 import { Project } from '../../models/project.model';
-import { ProjectApi } from '../../api/project.api';
 
 interface SubmissionStepProps {
     data: Partial<Project>;

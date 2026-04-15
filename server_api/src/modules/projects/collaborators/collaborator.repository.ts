@@ -15,6 +15,7 @@ export interface ICollaboratorRepository {
     create(dto: CreateCollaboratorDto): Promise<ICollaborator>;
     createMany(dtos: CreateCollaboratorDto[]): Promise<ICollaborator[]>;
     update(id: string, data: UpdateCollaboratorDto["data"]): Promise<ICollaborator | null>;
+    updateStatus(id: string, newStatus: CollaboratorStatus): Promise<ICollaborator | null>;
     exists(filters: ExistsCollabDTO): Promise<boolean>;
     delete(id: string): Promise<ICollaborator | null>;
     deleteByProject(projectId: string): Promise<any>;
@@ -80,7 +81,7 @@ export class CollaboratorRepository implements ICollaboratorRepository {
         const updateData: Partial<ICollaborator> = {};
 
         if (dtoData.isLeadPI !== undefined) updateData.isLeadPI = dtoData.isLeadPI;
-        if (dtoData.status !== undefined) updateData.status = dtoData.status;
+        if (dtoData.role !== undefined) updateData.role = dtoData.role;
 
         return Collaborator.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
@@ -88,6 +89,15 @@ export class CollaboratorRepository implements ICollaboratorRepository {
             { new: true, runValidators: true }
         ).exec();
 
+    }
+
+
+    async updateStatus(id: string, newStatus: CollaboratorStatus) {
+        return Collaborator.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            { $set: { status: newStatus } },
+            { new: true }
+        ).exec();
     }
 
     async exists(filters: ExistsCollabDTO): Promise<boolean> {

@@ -45,6 +45,7 @@ export class ProjectService {
             await this.collabRepo.create({
                 project: String(created._id),
                 applicant: applicant,
+                role:"Principal Investigator",
                 isLeadPI: true,
                 status: CollaboratorStatus.verified
             });

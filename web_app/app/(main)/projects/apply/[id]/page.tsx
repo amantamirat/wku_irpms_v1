@@ -1,31 +1,28 @@
 'use client';
-import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 // PrimeReact Components
 import { BreadCrumb } from 'primereact/breadcrumb';
 import { Button } from 'primereact/button';
+import { Message } from 'primereact/message';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Sidebar } from 'primereact/sidebar';
-import { Message } from 'primereact/message';
 
 // API and Models
 import { CallApi } from '@/app/(main)/calls/api/call.api';
 import { Call } from '@/app/(main)/calls/models/call.model';
-import { GrantAllocationApi } from '@/app/(main)/grants/allocations/api/grant.allocation.api';
 import { ConstraintApi } from '@/app/(main)/grants/constraints/api/constraint.api';
 import { Constraint } from '@/app/(main)/grants/constraints/models/constraint.model';
 
 // Local Components
-import { CallPreview } from '../CallPreview';
 import ApplyWizard from '../ApplyWizard';
-import { GrantAllocation } from '@/app/(main)/grants/allocations/models/grant.allocation.model';
+import { CallPreview } from '../CallPreview';
 
 const ProjectApplyPage = () => {
     const { id: callId } = useParams();
     const router = useRouter();
 
-    // State
     const [call, setCall] = useState<Call | null>(null);
     const [constraints, setConstraints] = useState<Constraint[]>([]);
     const [loading, setLoading] = useState(true);
@@ -40,7 +37,6 @@ const ProjectApplyPage = () => {
                 setLoading(true);
                 setError(null);
 
-                // 1. Fetch Call Details
                 const callData = await CallApi.getById!(callId as string, true);
                 setCall(callData);
 
@@ -60,7 +56,6 @@ const ProjectApplyPage = () => {
         initPage();
     }, [callId]);
 
-    // Navigation configuration
     const breadcrumbItems = [
         { label: 'Projects', command: () => router.push('/projects') },
         { label: 'Application', className: 'font-bold' }
@@ -69,25 +64,33 @@ const ProjectApplyPage = () => {
 
     if (loading) {
         return (
-            <div className="flex flex-column align-items-center justify-content-center h-screen">
+            <div className="flex flex-column align-items-center justify-content-center h-screen surface-ground">
                 <ProgressSpinner strokeWidth="3" />
-                <span className="mt-3 text-500 font-medium">Loading Application Environment...</span>
+                <span className="mt-3 text-color-secondary font-medium">
+                    Loading Application Environment...
+                </span>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="p-4">
+            <div className="p-4 surface-ground">
                 <Message severity="error" text={error} className="w-full" />
-                <Button label="Go Back" icon="pi pi-arrow-left" className="mt-3 p-button-text" onClick={() => router.back()} />
+                <Button
+                    label="Go Back"
+                    icon="pi pi-arrow-left"
+                    className="mt-3 p-button-text"
+                    onClick={() => router.back()}
+                />
             </div>
         );
     }
 
     return (
         <div className="p-2 md:p-4 min-h-screen surface-ground">
-            {/* 🟢 Mobile & Desktop Sidebar (Drawer Style) */}
+
+            {/* Sidebar */}
             <Sidebar
                 visible={showSidebar}
                 onHide={() => setShowSidebar(false)}
@@ -97,7 +100,9 @@ const ProjectApplyPage = () => {
                 header={
                     <div className="flex align-items-center gap-2">
                         <i className="pi pi-shield text-primary text-xl"></i>
-                        <span className="font-bold text-xl">Grant Requirements</span>
+                        <span className="font-bold text-xl text-color">
+                            Grant Requirements
+                        </span>
                     </div>
                 }
             >
@@ -106,11 +111,16 @@ const ProjectApplyPage = () => {
                 </div>
             </Sidebar>
 
-            {/* Breadcrumbs */}
-            <BreadCrumb model={breadcrumbItems} home={home} className="bg-transparent border-none mb-3 p-0" />
+            {/* Breadcrumb */}
+            <BreadCrumb
+                model={breadcrumbItems}
+                home={home}
+                className="bg-transparent border-none mb-3 p-0"
+            />
 
-            {/* Header Card */}
-            <div className="flex flex-column md:flex-row justify-content-between align-items-start md:align-items-center mb-4 card shadow-1 p-3 bg-white border-round-xl">
+            {/* Header */}
+            <div className="flex flex-column md:flex-row justify-content-between align-items-start md:align-items-center mb-4 card shadow-1 p-3 surface-card border-round-xl">
+                
                 <div className="flex align-items-center gap-3">
                     <Button
                         icon="pi pi-arrow-left"
@@ -118,11 +128,17 @@ const ProjectApplyPage = () => {
                         onClick={() => router.back()}
                         tooltip="Discard and Go Back"
                     />
+
                     <div>
-                        <h2 className="m-0 text-xl font-bold text-900">{call?.title}</h2>
+                        <h2 className="m-0 text-xl font-bold text-color">
+                            {call?.title}
+                        </h2>
+
                         <div className="flex align-items-center gap-2 mt-1">
-                            <i className="pi pi-file-edit text-500 text-xs"></i>
-                            <small className="text-500 uppercase font-bold tracking-wider">Project Submission</small>
+                            <i className="pi pi-file-edit text-color-secondary text-xs"></i>
+                            <small className="text-color-secondary uppercase font-bold tracking-wider">
+                                Project Submission
+                            </small>
                         </div>
                     </div>
                 </div>
@@ -139,15 +155,15 @@ const ProjectApplyPage = () => {
                 </div>
             </div>
 
-            {/* Main Content Area */}
+            {/* Main Content */}
             <div className="grid">
                 <div className={`col-12 ${showSidebar ? 'lg:col-8 xl:col-9' : 'lg:col-12'} transition-all transition-duration-300`}>
 
-                    <div className="card shadow-2 border-top-3 border-primary bg-white min-h-screen p-0 md:p-4">
+                    <div className="card shadow-2 border-top-3 border-primary surface-card min-h-screen p-0 md:p-4">
                         {call ? (
                             <ApplyWizard
                                 call={call}
-                                //constraints={constraints}
+                                constraints={constraints}
                                 onComplete={(data) => console.log('Final Data', data)}
                             />
                         ) : (
@@ -156,9 +172,8 @@ const ProjectApplyPage = () => {
                             </div>
                         )}
                     </div>
-                </div>
 
-                {/* The Desktop Sidebar remains here... */}
+                </div>
             </div>
         </div>
     );

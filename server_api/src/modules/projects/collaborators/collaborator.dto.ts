@@ -4,6 +4,7 @@ import { CollaboratorStatus } from "./collaborator.status";
 export interface CreateCollaboratorDto {
     project: string;
     applicant: string;
+    role: string;
     isLeadPI?: boolean;
     status?: CollaboratorStatus;
     userId?: string;
@@ -13,8 +14,8 @@ export interface CreateCollaboratorDto {
 export interface UpdateCollaboratorDto {
     id: string;
     data: Partial<{
+        role: string;
         isLeadPI: boolean;
-        status: CollaboratorStatus;
     }>;
     applicantId: string;
 }

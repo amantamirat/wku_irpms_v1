@@ -11,6 +11,7 @@ import { CallStageApi } from '../calls/stages/api/call.stage.api';
 import { CallStage } from '../calls/stages/models/call.stage.model';
 import { GrantAllocation } from '../grants/allocations/models/grant.allocation.model';
 import { Grant } from '../grants/models/grant.model';
+import { useRouter } from 'next/navigation';
 
 
 interface CallCardProps {
@@ -22,8 +23,6 @@ export const OpenCallCard = ({ call, onApply }: CallCardProps) => {
     const [stages, setStages] = useState<CallStage[]>([]);
     const [loading, setLoading] = useState(true);
 
-   // const [showPreview, setShowPreview] = useState(false);
-   // const [constraints, setConstraints] = useState<Constraint[]>([]);
 
     useEffect(() => {
         const fetchStages = async () => {
@@ -50,24 +49,17 @@ export const OpenCallCard = ({ call, onApply }: CallCardProps) => {
     const daysLeft = activeStage
         ? Math.ceil((new Date(activeStage.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
         : 0;
-    
+
     //driven
     const allocation = call.grantAllocation as GrantAllocation;
     const grant = allocation?.grant as Grant;
     const calendar = allocation?.calendar as Calendar;
 
-    /*
-    const handleApplyClick = async () => {
-        // 1. Fetch constraints for the grant associated with this call
-        const data = await ConstraintApi.getAll({ grant });
-        setConstraints(data);
-        // 2. Show the modal
-        setShowPreview(true);
-    };
-    */
 
+
+    const router = useRouter();
     const proceedToApply = () => {
-        window.location.href = `projects/apply/${call._id}`;
+        router.push(`/projects/apply/${call._id}`);
     };
 
     // --- Loading State Renderer ---
@@ -174,18 +166,6 @@ export const OpenCallCard = ({ call, onApply }: CallCardProps) => {
                     />
                 </div>
             </Card>
-            {
-                /**
-                 * <CallPreviewDialog
-                visible={showPreview}
-                call={call}
-                constraints={constraints}
-                onHide={() => setShowPreview(false)}
-                onConfirm={proceedToApply}
-            />
-                 */
-            }
-            
         </>
     );
 };

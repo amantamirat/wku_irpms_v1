@@ -32,7 +32,7 @@ export type Project = {
     updatedAt?: Date;
     call?: string | Call;
     //used for apply for call
-    collaborators?: any[];// | string[];
+    collaborators?: Collaborator[];// | string[];
     phases?: Phase[];
     file?: File;
     //workspace?: string | Organization;

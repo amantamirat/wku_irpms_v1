@@ -5,12 +5,13 @@ import { ERROR_CODES } from '../../../common/errors/error.codes';
 import { errorResponse, successResponse } from '../../../common/helpers/response';
 import { AuthenticatedRequest } from '../../users/auth/auth.middleware';
 import {
-    CreateCollaboratorDto
+    CreateCollaboratorDto,
+    UpdateCollaboratorDto
 } from './collaborator.dto';
 import { CollaboratorService } from './collaborator.service';
 
 export class CollaboratorController {
-    
+
 
     constructor(private readonly service: CollaboratorService) {
     }
@@ -21,12 +22,13 @@ export class CollaboratorController {
         try {
             if (!req.user) throw new Error('User not found!');
 
-            const { project, applicant, isLeadPI } = req.body;
+            const { project, applicant, role, isLeadPI } = req.body;
 
             const dto: CreateCollaboratorDto = {
                 applicant: applicant as string,
                 project: project as string,
                 //isLeadPI: isLeadPI ? true : undefined,
+                role,
                 userId: req.user.applicantId,
             };
 
@@ -57,31 +59,29 @@ export class CollaboratorController {
 
 
 
-    /**
-     * update = async (req: AuthenticatedRequest, res: Response) => {
+    update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error('User not found!');
+            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const { id } = req.params;
-            const { isLeadPI } = req.body;
+            const { role, isLeadPI } = req.body;
 
             const dto: UpdateCollaboratorDto = {
                 id,
                 data: {
-                    isLeadPI: isLeadPI ? true : undefined,
-                    // status can be added here if needed
+                    role,
+                    //isLeadPI: isLeadPI ? true : undefined,
                 },
-                applicantId: req.user._id,
+                applicantId: req.user.applicantId,
             };
 
-            const updated = await this.service.updateCollaborator(dto);
+            const updated = await this.service.update(dto);
             successResponse(res, 200, 'Collaborator updated successfully', updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     };
-     * 
-     */
+
 
     transitionState = async (req: AuthenticatedRequest, res: Response) => {
         try {

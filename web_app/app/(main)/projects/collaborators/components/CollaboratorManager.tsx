@@ -49,6 +49,18 @@ const CollaboratorManager = ({ project, applicant }: CollaboratorManagerProps) =
 
     columns.push(
         {
+            field: "role",
+            header: "Role",
+            sortable: true,
+            body: (c: Collaborator) => (
+                <span className="capitalize">
+                    {c.role || "No Role Assigned"}
+                </span>
+            )
+        }
+    );
+    columns.push(
+        {
             field: "status",
             header: "Status",
             sortable: true,

@@ -11,7 +11,8 @@ import { ApplicantApi } from "@/app/(main)/applicants/api/applicant.api";
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
 import { applicantTemplate } from "@/app/(main)/applicants/models/applicant.template";
 import { CollaboratorApi } from "../api/collaborator.api";
-import { Collaborator } from "../models/collaborator.model";
+// Assuming CollaboratorRole is exported from your model
+import { Collaborator, roleOptions } from "../models/collaborator.model";
 import { EntitySaveDialogProps } from "@/components/createEntityManager";
 
 const SaveCollaborator = ({
@@ -52,6 +53,9 @@ const SaveCollaborator = ({
         if (!localCollaborator.applicant) {
             return { valid: false, message: "Collaborator is required" };
         }
+        if (!localCollaborator.role) {
+            return { valid: false, message: "Role is required" };
+        }
         return { valid: true };
     };
 
@@ -70,7 +74,7 @@ const SaveCollaborator = ({
 
         try {
             const saved = localCollaborator._id
-                ? { ...localCollaborator } // or await CollaboratorApi.update(localCollaborator)
+                ? await CollaboratorApi.update(localCollaborator)
                 : await CollaboratorApi.create(localCollaborator);
 
             toast.current?.show({
@@ -83,7 +87,8 @@ const SaveCollaborator = ({
                 onComplete({
                     ...saved,
                     project: localCollaborator.project,
-                    applicant: localCollaborator.applicant
+                    applicant: localCollaborator.applicant,
+                    role: localCollaborator.role // Ensure role is passed back
                 });
             }
 
@@ -116,43 +121,45 @@ const SaveCollaborator = ({
                 footer={footer}
                 onHide={onHide}
             >
-                <div className="formgrid grid">
+                <div className="grid">
 
-                    {/* Collaborator Field */}
+                    {/* Collaborator Selection */}
                     <div className="field col-12">
-                        <label htmlFor="applicant" className="font-bold">
-                            Collaborator
-                        </label>
-
+                        <label htmlFor="applicant" className="font-bold">Collaborator</label>
                         <Dropdown
                             id="applicant"
                             value={localCollaborator.applicant}
                             options={applicants}
-                            onChange={(e) =>
-                                setLocalCollaborator({
-                                    ...localCollaborator,
-                                    applicant: e.value
-                                })
-                            }
+                            onChange={(e) => setLocalCollaborator({ ...localCollaborator, applicant: e.value })}
                             dataKey="_id"
                             optionLabel="first_name"
                             itemTemplate={applicantTemplate}
                             valueTemplate={(option) =>
-                                option
-                                    ? applicantTemplate(option)
-                                    : <span className="p-placeholder">Select a Collaborator</span>
+                                option ? applicantTemplate(option) : <span className="p-placeholder">Select a Person</span>
                             }
                             placeholder="Select a Collaborator"
                             filter
-                            className={classNames({
-                                'p-invalid': submitted && !localCollaborator.applicant
-                            })}
+                            className={classNames({ 'p-invalid': submitted && !localCollaborator.applicant })}
                         />
-
                         {submitted && !localCollaborator.applicant && (
-                            <small className="p-error">
-                                Collaborator is required.
-                            </small>
+                            <small className="p-error">Collaborator is required.</small>
+                        )}
+                    </div>
+
+                    {/* Role Selection - ADDED SECTION */}
+                    <div className="field col-12">
+                        <label htmlFor="role" className="font-bold">Role</label>
+                        <Dropdown
+                            id="role"
+                            value={localCollaborator.role}
+                            options={roleOptions}
+                            onChange={(e) => setLocalCollaborator({ ...localCollaborator, role: e.value })}
+                            placeholder="Select or Type Role"
+                            editable
+                            className={classNames("w-full", { 'p-invalid': submitted && !localCollaborator.role })}
+                        />
+                        {submitted && !localCollaborator.role && (
+                            <small className="p-error">Role is required.</small>
                         )}
                     </div>
 

@@ -30,11 +30,11 @@ router.post('/', verifyActiveAccount,
 router.get('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.COLLABORATOR.READ]),
     controller.get);
-/*    
-router.put('/', verifyActiveAccount, 
+
+router.put('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.COLLABORATOR.UPDATE]),
     controller.update);
-*/
+
 router.patch('/:id', verifyActiveAccount,
     checkTransitionPermission("collaborator"),
     controller.transitionState);

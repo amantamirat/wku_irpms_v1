@@ -10,6 +10,7 @@ export type Collaborator = {
     _id?: string;
     project?: string | Project;
     applicant?: string | Applicant;
+    role?: string;
     isLeadPI?: boolean;
     status?: CollaboratorStatus;
     createdAt?: Date;
@@ -36,4 +37,12 @@ export const sanitizeCollaborator = (collaborator: Partial<Collaborator>): Colla
     } as Collaborator;
 }
 
+
+export const roleOptions = [
+    //{ label: 'Principal Investigator', value: 'Principal Investigator' },
+    { label: 'Co-Investigator', value: 'Co-Investigator' },
+    { label: 'Researcher', value: 'Researcher' },
+    { label: 'Consultant', value: 'Consultant' },
+    { label: 'Project Manager', value: 'Project Manager' }
+];
 

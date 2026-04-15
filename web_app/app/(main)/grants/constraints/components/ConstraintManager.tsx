@@ -1,34 +1,64 @@
 import { createEntityManager } from "@/components/createEntityManager";
-import { Constraint, GetConstraintsOptions } from "../models/constraint.model";
-
+import { Constraint, GetConstraintsOptions, ProjectConstraintType } from "../models/constraint.model";
 import { ConstraintApi } from "../api/constraint.api";
 import { Grant } from "../../models/grant.model";
 import SaveConstraint from "./SaveConstraint";
+import { constraintUIMap } from "../models/constraint.config";
+
 
 interface ConstraintManagerProps {
     grant: string | Grant;
 }
+
 const ConstraintManager = ({ grant }: ConstraintManagerProps) => {
     const Manager = createEntityManager<Constraint, GetConstraintsOptions | undefined>({
-        title: "Manage Constraints",
+        title: "Project Constraints",
         itemName: "Constraint",
         api: ConstraintApi,
         columns: [
-            { field: 'constraint', header: 'Constraint', sortable: true },
-            { field: 'min', header: 'Min', sortable: true },
-            { field: 'max', header: 'Max', sortable: true },
-
+            { 
+                field: 'constraint', 
+                header: 'Type', 
+                sortable: true,
+                body: (rowData: Constraint) => {
+                    const config = constraintUIMap[rowData.constraint as ProjectConstraintType];
+                    return (
+                        <div className="flex align-items-center">
+                            <i className={`${config?.icon} mr-2 text-primary`} />
+                            <span className="font-medium">{config?.label || rowData.constraint}</span>
+                        </div>
+                    );
+                }
+            },
+            {
+                header: 'Range / Requirement',
+                body: (rowData: Constraint) => {
+                    const config = constraintUIMap[rowData.constraint as ProjectConstraintType];
+                    if (config?.format) {
+                        return config.format(rowData.min, rowData.max);
+                    }
+                    return <span className="text-500">Fixed Requirement</span>;
+                }
+            }
         ],
         createNew: () => ({
-            grant: grant
+            grant: typeof grant === 'string' ? grant : grant._id,
+            constraint: ProjectConstraintType.PARTICIPANT, // Default type
+            min: 0,
+            max: 0
         }),
         query: () => ({
-            grant: grant,
+            grant: typeof grant === 'string' ? grant : grant._id,
         }),
         SaveDialog: SaveConstraint,
         permissionPrefix: "constraint"
     });
-    return <Manager />;
+
+    return (
+        <div className="card border-none p-0">
+            <Manager />
+        </div>
+    );
 }
 
 export default ConstraintManager;

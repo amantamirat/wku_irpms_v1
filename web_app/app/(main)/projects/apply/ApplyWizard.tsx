@@ -7,14 +7,19 @@ import { BasicInfoStep } from './steps/BasicInfoStep ';
 import { PhasesStep } from './steps/PhasesStep';
 import { CollaboratorsStep } from './steps/CollaboratorsStep';
 import { SubmissionStep } from './steps/SubmissionStep';
+import { useAuth } from '@/contexts/auth-context';
+import { Constraint } from '../../grants/constraints/models/constraint.model';
 
 
 interface ApplyWizardProps {
     call: Call;
+    constraints: Constraint[];
     onComplete?: (data: any) => void;
 }
 
-const ApplyWizard = ({ call, onComplete }: ApplyWizardProps) => {
+const ApplyWizard = ({ call, constraints, onComplete }: ApplyWizardProps) => {
+    const { getApplicant } = useAuth();
+    const activeAppUser = getApplicant();
     const [activeIndex, setActiveIndex] = useState(0);
     const [formData, setFormData] = useState<Partial<Project>>({
         call: call._id,
@@ -24,6 +29,7 @@ const ApplyWizard = ({ call, onComplete }: ApplyWizardProps) => {
         title: '',
         summary: '',
         themes: [],
+        collaborators: [{ applicant: activeAppUser, role: "Principal Investigator", isLeadPI: true }],
         phases: [{ title: '', order: 1, budget: 0, duration: 0, description: '' }]
     });
 
@@ -57,6 +63,7 @@ const ApplyWizard = ({ call, onComplete }: ApplyWizardProps) => {
                     <BasicInfoStep
                         data={formData}
                         call={call}
+                        constraints={constraints}
                         onUpdate={updateFormData}
                         onNext={handleNext}
                     />
@@ -65,6 +72,7 @@ const ApplyWizard = ({ call, onComplete }: ApplyWizardProps) => {
                 return (
                     <PhasesStep
                         data={formData}
+                        constraints={constraints}
                         onUpdate={updateFormData}
                         onNext={handleNext}
                         onBack={handleBack}
@@ -75,6 +83,7 @@ const ApplyWizard = ({ call, onComplete }: ApplyWizardProps) => {
                 return (
                     <CollaboratorsStep
                         data={formData}
+                        constraints={constraints}
                         onUpdate={updateFormData}
                         onNext={handleNext}
                         onBack={handleBack}

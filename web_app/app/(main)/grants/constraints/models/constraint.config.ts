@@ -9,19 +9,6 @@ export type ConstraintUI = {
 };
 
 export const constraintUIMap: Record<ProjectConstraintType, ConstraintUI> = {
-    [ProjectConstraintType.PROJECT_TITLE]: {
-        label: "Project Title",
-        icon: "pi pi-bookmark",
-        format: (min?: number, max?: number) =>
-            `Length: ${min ?? 0} - ${max ?? "∞"} characters`
-    },
-
-    [ProjectConstraintType.PROJECT_SUMMARY]: {
-        label: "Project Summary",
-        icon: "pi pi-align-left",
-        format: (min?: number, max?: number) =>
-            `${min ?? 0} - ${max ?? "∞"} words`
-    },
     [ProjectConstraintType.PARTICIPANT]: {
         label: "Participants",
         icon: "pi pi-users",
@@ -47,7 +34,7 @@ export const constraintUIMap: Record<ProjectConstraintType, ConstraintUI> = {
         label: "Total Duration",
         icon: "pi pi-clock",
         format: (min?: number, max?: number) =>
-            `${min ?? 0} - ${max ?? "∞"} months`
+            `${min ?? 0} - ${max ?? "∞"} days`
     },
 
     [ProjectConstraintType.BUDGET_PHASE]: {
@@ -61,35 +48,55 @@ export const constraintUIMap: Record<ProjectConstraintType, ConstraintUI> = {
         label: "Time per Phase",
         icon: "pi pi-calendar",
         format: (min?: number, max?: number) =>
-            `${min ?? 0} - ${max ?? "∞"} months`
+            `${min ?? 0} - ${max ?? "∞"} days`
     },
-
-    [ProjectConstraintType.ACTIVITIES_PHASE]: {
-        label: "Activities per Phase",
-        icon: "pi pi-list",
-        format: (min?: number, max?: number) =>
-            `${min ?? 0} - ${max ?? "∞"} activities`
-    },
+    /*
+        [ProjectConstraintType.ACTIVITIES_PHASE]: {
+            label: "Activities per Phase",
+            icon: "pi pi-list",
+            format: (min?: number, max?: number) =>
+                `${min ?? 0} - ${max ?? "∞"} activities`
+        },*/
 
     [ProjectConstraintType.THEME]: {
         label: "Theme",
-        icon: "pi pi-tags"
+        icon: "pi pi-tags",
+        format: (min?: number, max?: number) =>
+            `${min ?? 0} - ${max ?? "∞"} themes`
     },
 
     [ProjectConstraintType.SUB_THEME]: {
         label: "Sub Theme",
-        icon: "pi pi-tag"
+        icon: "pi pi-tag",
+        format: (min?: number, max?: number) =>
+            `${min ?? 0} - ${max ?? "∞"} sub-themes`
     },
 
     [ProjectConstraintType.FOCUS_AREA]: {
         label: "Focus Area",
-        icon: "pi pi-compass"
+        icon: "pi pi-compass",
+        format: (min?: number, max?: number) =>
+            `${min ?? 0} - ${max ?? "∞"} focus-areas`
     },
 
     [ProjectConstraintType.INDICATOR]: {
         label: "Indicator",
-        icon: "pi pi-chart-line"
-    }
+        icon: "pi pi-chart-line",
+        format: (min?: number, max?: number) =>
+            `${min ?? 0} - ${max ?? "∞"} indicators`
+    },
+    [ProjectConstraintType.PROJECT_TITLE]: {
+        label: "Project Title",
+        icon: "pi pi-bookmark",
+        format: (min?: number, max?: number) =>
+            `${min ?? 0} - ${max ?? "∞"} words`
+    },
+    [ProjectConstraintType.PROJECT_SUMMARY]: {
+        label: "Project Summary",
+        icon: "pi pi-align-left",
+        format: (min?: number, max?: number) =>
+            `${min ?? 0} - ${max ?? "∞"} words`
+    },
 };
 
 // helper

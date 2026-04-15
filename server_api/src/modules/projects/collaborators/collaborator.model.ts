@@ -6,6 +6,7 @@ import { CollaboratorStatus } from "./collaborator.status";
 export interface ICollaborator extends Document {
     project: mongoose.Types.ObjectId;
     applicant: mongoose.Types.ObjectId;//user
+    role: string;
     isLeadPI?: boolean;
     status: CollaboratorStatus;
     createdAt?: Date;
@@ -24,6 +25,9 @@ const CollaboratorSchema = new Schema<ICollaborator>({
         ref: COLLECTIONS.APPLICANT,
         immutable: true,
         required: true
+    },
+    role: {
+        type: String,
     },
     isLeadPI: {
         type: Boolean,

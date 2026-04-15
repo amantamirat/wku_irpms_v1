@@ -47,7 +47,6 @@ export const CollaboratorApi: EntityApi<Collaborator, GetCollaboratorsOptions | 
     async update(collaborator: Partial<Collaborator>): Promise<Collaborator> {
         if (!collaborator._id) throw new Error("_id required");
         const sanitized = sanitizeCollaborator(collaborator);
-
         // Using URL parameter pattern: PUT /project/collaborators/:id
         const url = `${end_point}/${collaborator._id}`;
         const updated = await ApiClient.put(url, sanitized);

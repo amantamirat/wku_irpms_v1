@@ -7,7 +7,8 @@ import { IApplicantRepository } from "../../applicants/applicant.repository";
 import { IProjectRepository } from "../project.repository";
 import {
     CreateCollaboratorDto,
-    GetCollaboratorsOptions
+    GetCollaboratorsOptions,
+    UpdateCollaboratorDto
 } from "./collaborator.dto";
 import { ICollaboratorRepository } from "./collaborator.repository";
 
@@ -73,12 +74,17 @@ export class CollaboratorService {
         return collaborators;
     }
 
-    /*
-    async updateCollaborator(dto: UpdateCollaboratorDto) {
-        const updated = await this.repository.update(dto.id, dto.data);
-        return updated;
+
+    async update(dto: UpdateCollaboratorDto) {
+        const { id, data } = dto;
+        const collabDoc = await this.repository.findById(id);
+        if (!collabDoc) throw new Error(ERROR_CODES.COLLABORATOR_NOT_FOUND);
+        if (collabDoc.status !== CollaboratorStatus.pending)
+            throw new AppError(ERROR_CODES.COLLABORATOR_NOT_PENDING);
+
+        return await this.repository.update(id, data);
     }
-    */
+
 
 
     async transitionState(dto: TransitionRequestDto) {
@@ -115,9 +121,9 @@ export class CollaboratorService {
             }
         }
 
-        return await this.repository.update(id, {
-            status: to
-        });
+        return await this.repository.updateStatus(id,
+            to
+        );
     }
 
 
