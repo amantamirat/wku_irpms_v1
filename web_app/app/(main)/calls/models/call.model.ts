@@ -1,6 +1,7 @@
 import { Calendar } from "../../calendars/models/calendar.model";
 import { GrantAllocation } from "../../grants/allocations/models/grant.allocation.model";
 import { Grant } from "../../grants/models/grant.model";
+import { Organization } from "../../organizations/models/organization.model";
 
 export enum CallStatus {
     planned = "planned",
@@ -11,6 +12,7 @@ export enum CallStatus {
 export type Call = {
     _id?: string;
     grantAllocation: string | GrantAllocation; // The new single source of truth
+    organization?: string | Organization;
     title: string;
     description?: string | null;
     status: CallStatus;
@@ -21,7 +23,7 @@ export type Call = {
 export interface GetCallsOptions {
     grantAllocation?: string;
     status?: CallStatus;
-    calendar?: string ;
+    calendar?: string;
     grant?: string;
     populate?: boolean;
 }
@@ -42,9 +44,13 @@ export const validateCall = (call: Call): { valid: boolean; message?: string } =
 export const sanitizeCall = (call: Partial<Call>): Partial<Call> => {
     const sanitized: any = { ...call };
 
-    
+
     if (typeof sanitized.grantAllocation === "object" && sanitized.grantAllocation !== null) {
         sanitized.grantAllocation = sanitized.grantAllocation._id;
+    }
+
+    if (typeof sanitized.organization === "object" && sanitized.organization !== null) {
+        sanitized.organization = sanitized.organization._id;
     }
 
     // 3. Ensure optional fields are handled correctly

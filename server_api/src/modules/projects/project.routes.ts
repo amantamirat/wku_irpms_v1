@@ -8,14 +8,46 @@ import { GrantAllocationRepository } from '../grants/allocations/grant.allocatio
 import { ApplicantRepository } from '../applicants/applicant.repository';
 import { CollaboratorRepository } from './collaborators/collaborator.repository';
 import { PhaseRepository } from './phase/phase.repository';
+import { CallRepository } from '../calls/call.repository';
+import { upload } from '../../util/multer';
+import { CollaboratorService } from './collaborators/collaborator.service';
+import { NotificationService } from '../users/notifications/notification.service';
+import { NotificationRepository } from '../users/notifications/notification.repository';
+import { SettingService } from '../settings/setting.service';
+import { SettingRepository } from '../settings/setting.repository';
+import { ConstraintRepository } from '../grants/constraints/constraint.repository';
+import { ThemeRepository } from '../thematics/themes/theme.repository';
+import { ConstraintValidator } from '../grants/constraints/constraint.validator';
+import { ProjectStageRepository } from './stages/project.stage.repository';
+import { CallStageRepository } from '../calls/stages/call.stage.repository';
+import { ProjectStageSynchronizer } from './stages/project.stage.synchronizer';
+import { ProjectAuth } from './project.auth';
+
 
 const projectRepo = new ProjectRepository();
 const grantAllocRepo = new GrantAllocationRepository();
+const callRepo = new CallRepository();
+const callStageRepo = new CallStageRepository();
 const appRepo = new ApplicantRepository();
 const collabRepo = new CollaboratorRepository();
 const phaseRepo = new PhaseRepository();
+const projStageRepo = new ProjectStageRepository();
 
-const service = new ProjectService(projectRepo, grantAllocRepo, appRepo, collabRepo, phaseRepo);
+const projAuth = new ProjectAuth(projectRepo);
+const notificationService = new NotificationService(
+    new NotificationRepository(),
+    new SettingService(new SettingRepository())
+);
+
+const synchronizer = new ProjectStageSynchronizer(projectRepo, projStageRepo);
+
+
+const constValidator = new ConstraintValidator(new ConstraintRepository(), new ThemeRepository());
+const collabService = new CollaboratorService(collabRepo, projectRepo, projAuth, appRepo, constValidator, notificationService);
+
+const service = new ProjectService(projectRepo, projAuth, grantAllocRepo, callRepo, callStageRepo, collabRepo, phaseRepo, projStageRepo,
+    synchronizer,
+    collabService, constValidator);
 const controller = new ProjectController(service);
 const router: Router = Router();
 
@@ -23,6 +55,10 @@ const router: Router = Router();
 router.post('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.PROJECT.CREATE]),
     controller.create);
+
+router.post("/apply", verifyActiveAccount,
+    //checkPermission("project:apply"),
+    upload.single("file"), controller.apply);
 
 router.get('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.PROJECT.READ]),

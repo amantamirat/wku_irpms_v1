@@ -23,9 +23,6 @@ const ApplyWizard = ({ call, constraints, onComplete }: ApplyWizardProps) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const [formData, setFormData] = useState<Partial<Project>>({
         call: call._id,
-        grantAllocation: typeof call.grantAllocation === 'object'
-            ? (call.grantAllocation as any)._id
-            : call.grantAllocation,
         title: '',
         summary: '',
         themes: [],

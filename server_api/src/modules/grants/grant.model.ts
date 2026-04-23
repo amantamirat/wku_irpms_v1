@@ -13,6 +13,7 @@ export enum GrantStatus {
 }
 
 export interface IGrant extends Document {
+    _id: string;
     fundingSource: FundingSource;
     organization: mongoose.Types.ObjectId; //Funder Organization
     title: string;

@@ -5,9 +5,16 @@ import { PhaseController } from './phase.controller';
 import { PhaseService } from './phase.service';
 import { PhaseRepository } from './phase.repository';
 import { ProjectRepository } from '../project.repository';
-const repo= new PhaseRepository();
-const projectRepo= new ProjectRepository();
-const controller = new PhaseController(new PhaseService(repo, projectRepo));
+import { ConstraintRepository } from '../../grants/constraints/constraint.repository';
+import { ConstraintValidator } from '../../grants/constraints/constraint.validator';
+import { ThemeRepository } from '../../thematics/themes/theme.repository';
+import { ProjectAuth } from '../project.auth';
+const repo = new PhaseRepository();
+const projectRepo = new ProjectRepository();
+const projAuth = new ProjectAuth(projectRepo);
+const validator = new ConstraintValidator(new ConstraintRepository(), new ThemeRepository());
+const service = new PhaseService(repo, projectRepo, projAuth, validator);
+const controller = new PhaseController(service);
 const router: Router = Router();
 
 router.post('/', verifyActiveAccount,

@@ -1,11 +1,15 @@
 import { CollaboratorStatus } from "./collaborator.status";
 
-// Base fields for creating a collaborator
-export interface CreateCollaboratorDto {
-    project: string;
+export interface CollaboratorDto {
     applicant: string;
     role: string;
     isLeadPI?: boolean;
+}
+
+// Base fields for creating a collaborator
+export interface CreateCollaboratorDto extends CollaboratorDto {
+    project: string;
+    projectTitle?: string;
     status?: CollaboratorStatus;
     userId?: string;
 }
@@ -19,8 +23,6 @@ export interface UpdateCollaboratorDto {
     }>;
     applicantId: string;
 }
-
-
 
 // Options for querying collaborators
 export interface GetCollaboratorsOptions {

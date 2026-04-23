@@ -10,6 +10,7 @@ import { ApplicantRepository, IApplicantRepository } from "../applicants/applica
 import { IStudentRepository, StudentRepository } from "../applicants/students/student.repository";
 import { Unit } from "../../common/constants/enums";
 import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
+import { AppError } from "../../common/errors/app.error";
 
 export class OrganizationService {
 
@@ -57,6 +58,12 @@ export class OrganizationService {
         return this.repo.create(dto);
     }
 
+    async getById(id: string) {
+        const organDoc = await this.repo.findById(id);
+        if (!organDoc) throw new AppError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
+        return organDoc;
+    }
+
 
     // ----------------------------------------------------
     // UPDATE ORGANIZATION
@@ -94,7 +101,7 @@ export class OrganizationService {
             }
         }
 
-        
+
         if (orgType === Unit.program) {
             const exists = await this.studentRepo.exists({ program: id });
             if (exists) {

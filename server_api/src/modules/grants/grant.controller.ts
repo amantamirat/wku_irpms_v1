@@ -10,8 +10,7 @@ import { GrantStatus } from './grant.model';
 export class GrantController {
 
 
-    constructor(private readonly service: GrantService) {
-    }
+    constructor(private readonly service: GrantService) { }
 
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {

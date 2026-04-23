@@ -52,4 +52,11 @@ const ProjecStageSchema = new Schema<IProjectStage>({
 }, { timestamps: true });
 
 ProjecStageSchema.index({ project: 1, grantStage: 1 }, { unique: true });
+ProjecStageSchema.index(
+    { project: 1, callStage: 1 },
+    {
+        unique: true,
+        partialFilterExpression: { callStage: { $exists: true, $ne: null } }
+    }
+);
 export const ProjectStage = model<IProjectStage>(COLLECTIONS.PROJECT_STAGE, ProjecStageSchema);

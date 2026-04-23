@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { ClientSession } from "mongoose";
 import { Phase, IPhase } from "./phase.model";
 import {
     CreatePhaseDto,
@@ -11,7 +11,7 @@ export interface IPhaseRepository {
     findById(id: string): Promise<IPhase | null>;
     find(filters: GetPhasesOptions): Promise<IPhase[]>;
     create(dto: CreatePhaseDto): Promise<IPhase>;
-    createMany(dtos: CreatePhaseDto[]): Promise<IPhase[]>;
+    createMany(dtos: CreatePhaseDto[], session?: ClientSession): Promise<IPhase[]>;
     update(id: string, data: UpdatePhaseDto["data"]): Promise<IPhase | null>;
     updateStatus(id: string, newStatus: PhaseStatus): Promise<IPhase | null>;
     delete(id: string): Promise<IPhase | null>;
@@ -52,15 +52,17 @@ export class PhaseRepository implements IPhaseRepository {
         return Phase.create(data);
     }
 
-    async createMany(dtos: CreatePhaseDto[]) {
+    async createMany(dtos: CreatePhaseDto[], session?: ClientSession) {
         const data = dtos.map(dto => ({
             ...dto,
             project: new mongoose.Types.ObjectId(dto.project),
         }));
 
-        // cast as any to bypass strict internal hydration types if necessary, 
-        // but insertMany works fine with the mapped array
-        const results = await Phase.insertMany(data, { ordered: true });
+        const results = await Phase.insertMany(data, {
+            ordered: true,
+            session
+        });
+
         return results as unknown as IPhase[];
     }
 
@@ -86,7 +88,7 @@ export class PhaseRepository implements IPhaseRepository {
             .exec();
     }
     async deleteByProject(projectId: string) {
-      //  if (!mongoose.Types.ObjectId.isValid(projectId)) throw new Error("Invalid Project ID");
+        //  if (!mongoose.Types.ObjectId.isValid(projectId)) throw new Error("Invalid Project ID");
         return Phase.deleteMany({
             project: new mongoose.Types.ObjectId(projectId)
         }).exec();

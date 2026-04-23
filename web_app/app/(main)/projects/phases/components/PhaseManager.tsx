@@ -11,6 +11,7 @@ import SavePhase from "./SavePhase";
 
 interface PhaseManagerProps {
     project?: Project;
+    
 }
 
 const PhaseManager = ({ project }: PhaseManagerProps) => {
@@ -20,13 +21,6 @@ const PhaseManager = ({ project }: PhaseManagerProps) => {
         api: PhaseApi,
 
         columns: [
-            {
-                header: "#",
-                field: "order",
-                sortable: true,
-                style: { width: '60px' },
-                body: (r: Phase) => <strong>{r.order}</strong>
-            },
             {
                 header: "Title",
                 field: "title",
@@ -46,7 +40,7 @@ const PhaseManager = ({ project }: PhaseManagerProps) => {
                 style: { width: '150px' },
                 body: (r: Phase) => (
                     <span className="font-mono">
-                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(r.budget)}
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'ETB' }).format(r.budget)}
                     </span>
                 )
             },
@@ -71,11 +65,11 @@ const PhaseManager = ({ project }: PhaseManagerProps) => {
 
         createNew: () => ({
             project: (project?._id || project || "") as string | Project,
+            title:'',
             order: 1,
             duration: 0,
             budget: 0,
             description: "",
-            breakdown: [] // Initialize empty breakdown array
         }),
 
         SaveDialog: SavePhase,

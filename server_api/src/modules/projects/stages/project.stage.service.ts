@@ -22,6 +22,7 @@ import { AllocationStatus } from "../../grants/allocations/grant.allocation.stat
 import { IProjectSynchronizer } from "./project.stage.synchronizer";
 import { IReviewerRepository } from "../../reviewers/reviewer.repository";
 import { NotificationService } from "../../users/notifications/notification.service";
+import { IGrantAllocation } from "../../grants/allocations/grant.allocation.model";
 
 export class ProjectStageService {
 
@@ -36,22 +37,24 @@ export class ProjectStageService {
     ) {
     }
 
+    async authProject(project: string, applicant: string) {
+        const projectDoc = await this.projectRepo.findById(project, { populate: { grantAllocation: true } });
+        if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
+
+        if (String(projectDoc.applicant) !== applicant)
+            throw new AppError(ERROR_CODES.UNAUTHORIZED);
+
+        return projectDoc;
+    }
+
     /**
      * Create project stage (submission)
      */
     async create(dto: CreateProjectStageDTO) {
-        const { project, grantStage, applicantId } = dto;
+        const { project, applicantId } = dto;
 
-        const projectDoc = await this.projectRepo.findById(project);
-        if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
-
-        // Authorization: only applicant can submit
-        if (String(projectDoc.applicant) !== applicantId)
-            throw new AppError(ERROR_CODES.UNAUTHORIZED);
-
-        const grantAllocDoc = await this.grantAllocRepo.findById(String(projectDoc.grantAllocation));
-        if (!grantAllocDoc) throw new AppError(ERROR_CODES.ALLOCATION_NOT_FOUND);
-        if (grantAllocDoc.status !== AllocationStatus.active) throw new AppError(ERROR_CODES.ALLOCATION_NOT_ACTIVE);
+        const projectDoc = await this.authProject(project, applicantId);
+        const grantAllocDoc = projectDoc.grantAllocation as unknown as IGrantAllocation;
 
         const projectStages = await this.repository.find({ project });
         const nextOrder = projectStages.length + 1;
@@ -61,11 +64,10 @@ export class ProjectStageService {
                 throw new AppError(ERROR_CODES.PROJECT_STAGE_NOT_ACCEPTED);
         }
 
-        const grantStages = await this.grantStageRepo.find({ grant: String(grantAllocDoc.grant), order: nextOrder });
-        if (grantStages.length == 0) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-        //|| grantStages.length < 1 ERROR
-        const nextGrantStageDoc = grantStages[0];
-        dto.grantStage = String(nextGrantStageDoc._id);
+        const grantStage = await this.grantStageRepo.findOne(String(grantAllocDoc.grant), nextOrder);
+        if (!grantStage) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+
+        dto.grantStage = String(grantStage._id);
         try {
             const created = await this.repository.create(dto);
             await this.synchronizer.sync(project);

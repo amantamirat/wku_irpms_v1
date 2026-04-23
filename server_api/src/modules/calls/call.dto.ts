@@ -1,7 +1,14 @@
 import { CallStatus } from "./call.status";
 
+export interface FindByIdOptions {
+    populate?: {
+        grantAllocation?: boolean;
+    };
+}
+
 export interface CreateCallDTO {
     grantAllocation: string;
+    organization?: string;
     title: string;
     description?: string;
     status?: CallStatus;

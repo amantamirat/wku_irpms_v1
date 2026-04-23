@@ -12,6 +12,7 @@ import { PROJECT_STATUS_ORDER, PROJECT_TRANSITIONS } from "../models/project.sta
 import { getAllocationLabel } from "../../grants/allocations/components/AllocationTempletes";
 import { Calendar } from "../../calendars/models/calendar.model";
 import { Grant } from "../../grants/models/grant.model";
+import { useAuth } from "@/contexts/auth-context";
 
 interface ProjectManagerProps {
     grantAllocation?: GrantAllocation;
@@ -22,6 +23,8 @@ interface ProjectManagerProps {
 }
 
 const ProjectManager = ({ grantAllocation, applicant, grant, calendar, workspace }: ProjectManagerProps) => {
+    const { getApplicant, hasPermission } = useAuth();
+    const activeApp = getApplicant();
     const Manager = createEntityManager<Project, GetProjectsOptions | undefined>({
         title: "Manage Projects",
         itemName: "Project",
@@ -109,7 +112,7 @@ const ProjectManager = ({ grantAllocation, applicant, grant, calendar, workspace
 
         createNew: () => ({
             grantAllocation: grantAllocation ?? undefined,
-            applicant: applicant ?? undefined,
+            applicant: activeApp ?? undefined,
             workspace: workspace ?? undefined,
             title: "",
             summary: "",

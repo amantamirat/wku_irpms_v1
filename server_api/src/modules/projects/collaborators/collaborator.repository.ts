@@ -1,5 +1,5 @@
 // collaborator.repository.ts
-import mongoose from "mongoose";
+import mongoose, { ClientSession } from "mongoose";
 import { Collaborator, ICollaborator } from "./collaborator.model";
 import {
     CreateCollaboratorDto,
@@ -12,11 +12,12 @@ import { CollaboratorStatus } from "./collaborator.status";
 export interface ICollaboratorRepository {
     findById(id: string): Promise<ICollaborator | null>;
     find(filters: GetCollaboratorsOptions): Promise<ICollaborator[]>;
-    create(dto: CreateCollaboratorDto): Promise<ICollaborator>;
+    create(dto: CreateCollaboratorDto, session?: ClientSession): Promise<ICollaborator>;
     createMany(dtos: CreateCollaboratorDto[]): Promise<ICollaborator[]>;
     update(id: string, data: UpdateCollaboratorDto["data"]): Promise<ICollaborator | null>;
     updateStatus(id: string, newStatus: CollaboratorStatus): Promise<ICollaborator | null>;
     exists(filters: ExistsCollabDTO): Promise<boolean>;
+    countByProject(projectId: string, session?: ClientSession): Promise<number>;
     delete(id: string): Promise<ICollaborator | null>;
     deleteByProject(projectId: string): Promise<any>;
 }
@@ -56,16 +57,13 @@ export class CollaboratorRepository implements ICollaboratorRepository {
     }
 
 
-    async create(dto: CreateCollaboratorDto) {
+    async create(dto: CreateCollaboratorDto, session?: ClientSession) {
         const data: Partial<ICollaborator> = {
+            ...dto,
             project: new mongoose.Types.ObjectId(dto.project),
             applicant: new mongoose.Types.ObjectId(dto.applicant),
-            isLeadPI: dto.isLeadPI,
-            status: dto.status
-            //  status: CollaboratorStatus.pending
         };
-
-        return Collaborator.create(data);
+        return Collaborator.create([data], { session }).then(res => res[0]);
     }
 
     // ✅ NEW: bulk insert
@@ -108,6 +106,17 @@ export class CollaboratorRepository implements ICollaboratorRepository {
         }
         const result = await Collaborator.exists(query).exec();
         return result !== null;
+    }
+
+    async countByProject(projectId: string, session?: ClientSession) {
+        let query = Collaborator.countDocuments({
+            project: new mongoose.Types.ObjectId(projectId)
+        });
+
+        if (session) {
+            query = query.session(session);
+        }
+        return query.exec();
     }
 
     async delete(id: string) {

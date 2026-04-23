@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { ClientSession } from "mongoose";
 import { Notification, INotification } from "./notification.model";
 import {
     CreateNotificationDTO,
@@ -10,7 +10,7 @@ import {
 export interface INotificationRepository {
     findById(id: string): Promise<INotification | null>;
     find(filters: GetNotificationsDTO): Promise<INotification[]>;
-    create(dto: CreateNotificationDTO): Promise<INotification>;
+    create(dto: CreateNotificationDTO, session?: ClientSession): Promise<INotification>;
     update(id: string, data: UpdateNotificationDTO["data"]): Promise<INotification | null>;
     markAllAsRead(filters: MarkAllAsReadDTO): Promise<number>;
     delete(id: string): Promise<INotification | null>;
@@ -51,7 +51,7 @@ export class NotificationRepository implements INotificationRepository {
             .exec();
     }
 
-    async create(dto: CreateNotificationDTO) {
+    async create(dto: CreateNotificationDTO, session?: ClientSession) {
         const data: Partial<INotification> = {
             recipient: new mongoose.Types.ObjectId(dto.recipient),
             title: dto.title,
@@ -65,9 +65,8 @@ export class NotificationRepository implements INotificationRepository {
             data.sender = new mongoose.Types.ObjectId(dto.sender);
         }
 
-        return Notification.create(data);
+        return Notification.create([data], { session }).then(res => res[0]);
     }
-
     async update(id: string, dtoData: UpdateNotificationDTO["data"]): Promise<INotification | null> {
         const updateData: Partial<INotification> = {};
 

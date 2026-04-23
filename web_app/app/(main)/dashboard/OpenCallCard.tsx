@@ -12,6 +12,7 @@ import { CallStage } from '../calls/stages/models/call.stage.model';
 import { GrantAllocation } from '../grants/allocations/models/grant.allocation.model';
 import { Grant } from '../grants/models/grant.model';
 import { useRouter } from 'next/navigation';
+import { Organization } from '../organizations/models/organization.model';
 
 
 interface CallCardProps {
@@ -29,7 +30,6 @@ export const OpenCallCard = ({ call, onApply }: CallCardProps) => {
             if (!call._id) return;
             try {
                 setLoading(true);
-                // Replace with your actual API call to get stages by call ID
                 const data = await CallStageApi.getAll({ call });
                 setStages(data);
             } catch (error) {
@@ -52,9 +52,10 @@ export const OpenCallCard = ({ call, onApply }: CallCardProps) => {
 
     //driven
     const allocation = call.grantAllocation as GrantAllocation;
+    const organization = call.organization as Organization;
+    //better to use find by id
     const grant = allocation?.grant as Grant;
     const calendar = allocation?.calendar as Calendar;
-
 
 
     const router = useRouter();
@@ -81,21 +82,27 @@ export const OpenCallCard = ({ call, onApply }: CallCardProps) => {
         <>
             <Card className="h-full border-1 border-300 shadow-hover transition-all transition-duration-300 hover:border-primary">
                 <div className="flex justify-content-between align-items-start mb-2">
-                    {/* 🟢 Status & Calendar Year */}
-                    <div className="flex gap-2">
-                        {
-                            //<Tag severity="success" value={call.status} rounded />
-                        }
-                        {//Fiscal Year
-                        }
+                    {/* 🟢 Fiscal Year - Forced to a single line */}
+                    <div className="flex">
                         {calendar?.year && (
-                            <Tag severity="info" value={`FY ${calendar.year}`} rounded pt={{ root: { className: 'bg-bluegray-500' } }} />
+                            <Tag
+                                severity="info"
+                                value={`FY ${calendar.year}`}
+                                rounded
+                                // white-space-nowrap prevents the text from breaking into two lines
+                                className="white-space-nowrap"
+                                pt={{ root: { className: 'bg-bluegray-500' } }}
+                            />
                         )}
                     </div>
-                    <div className="text-right">
-                        <small className="block text-500 uppercase font-bold text-xs">Current Phase</small>
+
+                    {/* 🏢 Organization Info */}
+                    <div className="text-right ml-2">
+                        <small className="block text-500 uppercase font-bold text-xs">
+                            {organization?.name || 'Unknown'}
+                        </small>
                         <span className="text-sm font-semibold text-primary">
-                            {(activeStage?.grantStage as any)?.name || `Stage ${activeStage?.order || 1}`}
+                            {/* Additional info here if needed */}
                         </span>
                     </div>
                 </div>
@@ -103,7 +110,7 @@ export const OpenCallCard = ({ call, onApply }: CallCardProps) => {
                 {/* 🔵 Grant & Call Titles */}
                 <div className="mb-3">
                     <span className="text-xs font-bold text-500 uppercase tracking-wider">
-                        {grant?.title || "Research Grant"}
+                        {grant?.title || "Untitled Grant"}
                     </span>
                     <h4 className="text-xl font-bold m-0 line-height-3 text-900">
                         {call.title}
@@ -157,7 +164,7 @@ export const OpenCallCard = ({ call, onApply }: CallCardProps) => {
                         <span className="text-xs font-medium">{(grant?.fundingSource) || 'Internal Fund'}</span>
                     </div>
                     <Button
-                        label="Apply Now"
+                        label="Apply"
                         icon="pi pi-pencil"
                         size="small"
                         className="p-button-raised"

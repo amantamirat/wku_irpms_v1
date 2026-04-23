@@ -4,6 +4,7 @@ import { CallStatus } from "./call.status";
 
 export interface ICall extends Document {
     grantAllocation: mongoose.Types.ObjectId;
+    organization: mongoose.Types.ObjectId;
     title: string;
     description?: string;
     status: CallStatus;
@@ -14,6 +15,7 @@ export interface ICall extends Document {
 const CallSchema = new Schema<ICall>(
     {
         grantAllocation: { type: Schema.Types.ObjectId, ref: COLLECTIONS.GRANT_ALLOCATION, required: true },
+        organization: { type: Schema.Types.ObjectId, ref: COLLECTIONS.ORGANIZATION, required: true },
         title: { type: String, required: true },
         description: { type: String },
         status: { type: String, enum: Object.values(CallStatus), required: true },

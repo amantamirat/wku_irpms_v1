@@ -23,8 +23,6 @@ import { AllocationStatus } from '../../grants/allocations/models/grant.allocati
 import { allocationOptionTemplate, getAllocationLabel } from '../../grants/allocations/components/AllocationTempletes';
 import { buildTree, ThemeNode } from '../../thematics/models/thematic.node';
 
-
-
 interface ExtendedProject extends Project {
     _filterCalendar?: string;
     _filterGrant?: string;
@@ -40,11 +38,10 @@ const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
 
     const [submitted, setSubmitted] = useState(false);
     const [allocations, setAllocations] = useState<GrantAllocation[]>([]);
-    const [applicants, setApplicants] = useState<Applicant[]>([]);
+    //const [applicants, setApplicants] = useState<Applicant[]>([]);
     const [themeNodes, setThemeNodes] = useState<ThemeNode[]>([]);
-
     const isAllocationPredefined = !!item.grantAllocation;
-    const isApplicantPredefined = !!item.applicant;
+    //const isApplicantPredefined = !!item.applicant;
     const isEditMode = !!item._id;
 
     useEffect(() => {
@@ -56,17 +53,18 @@ const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
         const loadInitialData = async () => {
             if (!visible) return;
             try {
-                const [aData, appData] = await Promise.all([
+                const [aData] = await Promise.all([
                     (!isAllocationPredefined && !isEditMode)
                         ? GrantAllocationApi.getAll({ status: AllocationStatus.active, populate: true })
-                        : Promise.resolve([]),
-                    (!isApplicantPredefined && !isEditMode)
-                        ? ApplicantApi.getAll({})
                         : Promise.resolve([])
+                    /*
+                (!isApplicantPredefined && !isEditMode)
+                    ? ApplicantApi.getAll({})
+                    : Promise.resolve([])*/
                 ]);
 
                 if (aData.length) setAllocations(aData);
-                if (appData.length) setApplicants(appData);
+                //if (appData.length) setApplicants(appData);
             } catch (err) {
                 console.error('Initial data load error:', err);
             }
@@ -181,10 +179,10 @@ const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
                     {/* Applicant Field */}
                     <div className="field col-12 md:col-6">
                         <label className="font-bold">Applicant</label>
-                        {isApplicantPredefined ? (
-                            <InputText value={(localProject.applicant as any)?.name || 'Selected Applicant'} disabled className="surface-100" />
-                        ) : (
-                            <Dropdown
+                        <InputText value={(localProject.applicant as any)?.name || 'Selected Applicant'} disabled className="surface-100" />
+                        {
+                            /**
+                             * <Dropdown
                                 value={localProject.applicant}
                                 options={applicants}
                                 dataKey="_id"
@@ -193,7 +191,8 @@ const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
                                 placeholder="Select an Applicant"
                                 className={classNames({ 'p-invalid': submitted && !localProject.applicant })}
                             />
-                        )}
+                             */
+                        }
                     </div>
                 </div>
 

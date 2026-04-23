@@ -11,7 +11,7 @@ import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { AllocationStatus } from "./grant.allocation.state-machine";
 
 export interface IGrantAllocationRepository {
-    findById(id: string): Promise<IGrantAllocation | null>;
+    findById(id: string, populate?: boolean): Promise<IGrantAllocation | null>;
     find(filters: GetGrantAllocationsDTO): Promise<Partial<IGrantAllocation>[]>;
     create(dto: CreateGrantAllocationDTO): Promise<IGrantAllocation>;
     update(id: string, data: UpdateGrantAllocationDTO["data"]): Promise<IGrantAllocation | null>;
@@ -26,9 +26,10 @@ export interface IGrantAllocationRepository {
 
 export class GrantAllocationRepository implements IGrantAllocationRepository {
 
-    async findById(id: string) {
-        return GrantAllocation.findById(new mongoose.Types.ObjectId(id))
-            .lean<IGrantAllocation>()
+    async findById(id: string, populate?: boolean) {
+        let dbQuery = GrantAllocation.findById(new mongoose.Types.ObjectId(id));
+        if (populate) dbQuery.populate("grant").populate("calendar");
+        return dbQuery.lean<IGrantAllocation>()
             .exec();
     }
 

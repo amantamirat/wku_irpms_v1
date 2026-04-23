@@ -30,6 +30,9 @@ router.get(
     controller.getAll
 );
 
+router.get('/:id', verifyActiveAccount,
+    controller.getById);
+
 router.put(
     '/:id',
     verifyActiveAccount,
@@ -41,7 +44,7 @@ router.delete(
     '/:id',
     verifyActiveAccount,
     checkUnitPermission('delete'),
-    
+
     controller.delete
 );
 

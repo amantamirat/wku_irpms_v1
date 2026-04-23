@@ -1,5 +1,5 @@
 // project-stage.repository.ts
-import mongoose, { HydratedDocument } from "mongoose";
+import mongoose, { ClientSession, HydratedDocument } from "mongoose";
 import { ProjectStage, IProjectStage } from "./project.stage.model";
 import {
     CreateProjectStageDTO,
@@ -11,8 +11,12 @@ import { Project } from "../project.model";
 
 export interface IProjectStageRepository {
     findById(id: string, populate?: boolean): Promise<IProjectStage | null>;
-    find(filters: GetProjectStageDTO): Promise<Partial<IProjectStage>[]>;
-    create(dto: CreateProjectStageDTO): Promise<IProjectStage>;
+    find(filters: GetProjectStageDTO, session?: ClientSession): Promise<Partial<IProjectStage>[]>;
+    findOneByProjectAndStage(projectId: string,
+        grantStageId?: string,
+        callStageId?: string,
+    ): Promise<IProjectStage | null>;
+    create(dto: CreateProjectStageDTO, session?: ClientSession): Promise<IProjectStage>;
     update(id: string, status: UpdateStageDTO["data"]): Promise<IProjectStage | null>;
     updateStatus(id: string, newStatus: ProjectStageStatus): Promise<IProjectStage | null>;
     delete(id: string): Promise<IProjectStage | null>;
@@ -22,12 +26,23 @@ export interface IProjectStageRepository {
 // MongoDB implementation
 export class ProjectStageRepository implements IProjectStageRepository {
 
-    async findById(id: string, populate?: boolean) {
-        const query = ProjectStage.findById(new mongoose.Types.ObjectId(id)).lean<IProjectStage>();
+    async findById(
+        id: string,
+        populate?: boolean,
+        session?: ClientSession
+    ) {
+        let query = ProjectStage
+            .findById(new mongoose.Types.ObjectId(id))
+            .lean<IProjectStage>();
 
         if (populate) {
-            query.populate("project")
-                .populate("grantStage")
+            query = query
+                .populate("project")
+                .populate("grantStage");
+        }
+
+        if (session) {
+            query = query.session(session);
         }
 
         return query.exec();
@@ -82,14 +97,35 @@ export class ProjectStageRepository implements IProjectStageRepository {
             .exec();
     }
 
-    async create(dto: CreateProjectStageDTO): Promise<HydratedDocument<IProjectStage>> {
+    async findOneByProjectAndStage(
+        projectId: string,
+        grantStageId?: string,
+        callStageId?: string
+    ) {
+        const query: any = {
+            project: new mongoose.Types.ObjectId(projectId)
+        };
+
+        if (grantStageId) {
+            query.grantStage = new mongoose.Types.ObjectId(grantStageId);
+        }
+
+        if (callStageId) {
+            query.callStage = new mongoose.Types.ObjectId(callStageId);
+        }
+
+        return ProjectStage.findOne(query)
+            .lean<IProjectStage>()
+            .exec();
+    }
+
+    async create(dto: CreateProjectStageDTO, session?: ClientSession): Promise<HydratedDocument<IProjectStage>> {
         const data: Partial<IProjectStage> = {
             project: new mongoose.Types.ObjectId(dto.project),
             grantStage: new mongoose.Types.ObjectId(dto.grantStage),
             documentPath: dto.documentPath
         };
-
-        return ProjectStage.create(data);
+        return ProjectStage.create([data], { session }).then(res => res[0]);
     }
 
     async update(id: string, dtoData: UpdateStageDTO["data"]): Promise<IProjectStage | null> {

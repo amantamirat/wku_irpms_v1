@@ -61,7 +61,7 @@ export class CallRepository implements ICallRepository {
 
         // 3. Deep Population (Same as your current logic)
         if (filters.populate) {
-            dbQuery = dbQuery.populate({
+            dbQuery = dbQuery.populate("organization").populate({
                 path: 'grantAllocation',
                 populate: [
                     { path: 'grant' },
@@ -77,6 +77,7 @@ export class CallRepository implements ICallRepository {
         return Call.create({
             ...dto,
             grantAllocation: new mongoose.Types.ObjectId(dto.grantAllocation),
+            organization: new mongoose.Types.ObjectId(dto.organization),
         });
     }
 

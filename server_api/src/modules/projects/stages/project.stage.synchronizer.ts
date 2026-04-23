@@ -1,3 +1,4 @@
+import { ClientSession } from "mongoose";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { IProjectRepository } from "../project.repository";
 import { ProjectStatus, PROJECT_TRANSITIONS } from "../project.state-machine";
@@ -5,7 +6,7 @@ import { IProjectStageRepository } from "./project.stage.repository";
 import { ProjectStageStatus } from "./project.stage.status";
 
 export interface IProjectSynchronizer {
-    sync(project: string): Promise<any>;
+    sync(project: string, session?: ClientSession): Promise<any>;
 }
 
 export class ProjectStageSynchronizer implements IProjectSynchronizer {
@@ -16,11 +17,11 @@ export class ProjectStageSynchronizer implements IProjectSynchronizer {
     ) {
     }
 
-    async sync(project: string) {
-        const projectDoc = await this.projectRepo.findById(project);
+    async sync(project: string, session?: ClientSession) {
+        const projectDoc = await this.projectRepo.findById(project, undefined, session);
         if (!projectDoc) return;
 
-        const projectDocs = await this.projectStageRepo.find({ project });
+        const projectDocs = await this.projectStageRepo.find({ project }, session);
         const currentStatus = projectDoc.status;
 
         let newStatus = ProjectStatus.submitted;
@@ -39,7 +40,7 @@ export class ProjectStageSynchronizer implements IProjectSynchronizer {
                 newStatus,
                 PROJECT_TRANSITIONS
             );
-            const updated = await this.projectRepo.updateStatus(project, newStatus)
+            const updated = await this.projectRepo.updateStatus(project, newStatus, session)
             return updated;
         }
     }

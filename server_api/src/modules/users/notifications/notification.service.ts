@@ -7,6 +7,7 @@ import { SettingService } from "../../settings/setting.service";
 import { SettingKey } from "../../settings/setting.model";
 import { ProjectStageStatus } from "../../projects/stages/project.stage.status";
 import { SocketService } from "./socket.service";
+import { ClientSession } from "mongoose";
 
 export class NotificationService {
     constructor(private readonly repository: INotificationRepository,
@@ -19,7 +20,7 @@ export class NotificationService {
      */
     // notification.service.ts
 
-    async notify(dto: CreateNotificationDTO) {
+    async notify(dto: CreateNotificationDTO, session?: ClientSession) {
         // 1. Fetch the expiry setting (e.g., 720 hours = 30 days)
         const expiryHr = await this.settingService.getSettingValue(SettingKey.NOTIFICATION_EXPIRY_HOURS, 720);
 
@@ -31,7 +32,7 @@ export class NotificationService {
         const notification = await this.repository.create({
             ...dto,
             expiresAt: expiryDate
-        } as any);
+        } as any, session);
         // TODO: Integration point for Real-time updates
         SocketService.sendNotification(dto.recipient, notification);
 
@@ -81,14 +82,25 @@ export class NotificationService {
      * Specific Business Helper: Notify a user they've been invited.
      * Keeps the CollaboratorService code clean.
      */
-    async notifyProjectInvitation(recipientId: string, projectTitle: string, senderId?: string) {
+    async notifyProjectInvitation(recipientId: string, projectTitle: string, role?: string, senderId?: string, session?: ClientSession) {
         return this.notify({
             recipient: recipientId,
             sender: senderId,
             title: "New Project Invitation",
-            message: `You have been added as a collaborator to "${projectTitle}".`,
+            message: `You have been added as a ${role ?? 'collaborator'} to "${projectTitle}".`,
             type: NotificationType.INFO,
             link: '/projects/collaborators/applicant'
+        }, session);
+    }
+
+    async notifyProjectRemoval(recipientId: string, projectTitle: string, role?: string, senderId?: string) {
+        return this.notify({
+            recipient: recipientId,
+            sender: senderId,
+            title: "Removed from Project",
+            message: `You have been removed as a ${role ?? 'collaborator'} from "${projectTitle}".`,
+            type: NotificationType.ERROR,
+            //link: '/projects'
         });
     }
 

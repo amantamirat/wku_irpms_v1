@@ -5,6 +5,7 @@ import { ICallStage, CallStage, CallStageStatus } from "./call.stage.model";
 export interface ICallStageRepository {
     findById(id: string): Promise<ICallStage | null>;
     find(filters: GetStageDTO): Promise<Partial<ICallStage>[]>;
+    findOne(callId: string, order: number): Promise<ICallStage | null>;
     create(dto: CreateStageDTO): Promise<ICallStage>;
     createMany(dtos: CreateStageDTO[]): Promise<ICallStage[]>;
     update(id: string, data: UpdateStageDTO["data"]): Promise<ICallStage | null>;
@@ -52,6 +53,12 @@ export class CallStageRepository implements ICallStageRepository {
         }
 
         return dbQuery.lean<ICallStage[]>().exec();
+    }
+
+    async findOne(callId: string, order: number) {
+        return CallStage.findOne({ call: callId, order })
+            .lean<ICallStage>()
+            .exec();
     }
 
     async create(dto: CreateStageDTO) {

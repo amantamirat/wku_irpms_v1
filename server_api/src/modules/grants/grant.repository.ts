@@ -8,7 +8,7 @@ import {
 } from "./grant.dto";
 
 export interface IGrantRepository {
-    findById(id: string): Promise<IGrant | null>;
+    findById(id: string, populate?: boolean): Promise<IGrant | null>;
     find(filters: GetGrantsDTO): Promise<Partial<IGrant>[]>;
     create(dto: CreateGrantDTO): Promise<IGrant>;
     update(id: string, data: UpdateGrantDTO["data"]): Promise<IGrant | null>;
@@ -20,8 +20,14 @@ export interface IGrantRepository {
 // MongoDB implementation
 export class GrantRepository implements IGrantRepository {
 
-    async findById(id: string) {
-        return Grant.findById(new mongoose.Types.ObjectId(id))
+    async findById(id: string, populate?: boolean) {
+        let dbQuery = Grant.findById(new mongoose.Types.ObjectId(id));
+        if (populate === true) {
+            dbQuery
+                .populate("organization")
+                .populate("thematic")
+        }
+        return dbQuery
             .lean<IGrant>()
             .exec();
     }

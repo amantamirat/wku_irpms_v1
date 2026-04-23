@@ -1,12 +1,12 @@
 import { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
-import { ThemeLevel } from "./thematic.enum";
+import { ThematicLevel } from "./thematic.enum";
 import { ThematicStatus } from "./thematic.state-machine";
 
 export interface IThematic extends Document {
     _id?: string;
     title: string;
-    level: ThemeLevel;
+    level: ThematicLevel;
     description?: string;
     status: ThematicStatus;
     createdAt?: Date;
@@ -21,7 +21,7 @@ const ThematicSchema = new Schema<IThematic>({
     },
     level: {
         type: String,
-        enum: Object.values(ThemeLevel),
+        enum: Object.values(ThematicLevel),
         required: true,
         immutable: true
     },

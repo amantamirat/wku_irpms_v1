@@ -20,6 +20,7 @@ export interface IApplicant extends Document {
     specializations?: mongoose.Types.ObjectId[];
     roles: mongoose.Types.ObjectId[];
     ownerships: IOwnership[];
+    //clusterGroup:number;
     createdAt?: Date;
     updatedAt?: Date;
 }

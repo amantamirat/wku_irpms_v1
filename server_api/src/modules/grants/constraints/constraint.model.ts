@@ -1,10 +1,24 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
-import { ProjectConstraintType } from "./project-constraint-type.enum";
+
+export enum ConstraintType {
+    PARTICIPANT = "PARTICIPANT",
+    PHASE_COUNT = "PHASE-COUNT",
+    BUDGET_TOTAL = "BUDGET-TOTAL",
+    TIME_TOTAL = "TIME-TOTAL",
+    BUDGET_PHASE = "BUDGET-PHASE",
+    TIME_PHASE = "TIME-PHASE",
+    THEME = "THEME",
+    SUB_THEME = "SUB_THEME",
+    FOCUS_AREA = "FOCUS_AREA",
+    INDICATOR = "INDICATOR",
+    PROJECT_TITLE = "PROJECT_TITLE",
+    PROJECT_SUMMARY = "PROJECT_SUMMARY"
+}
 
 export interface IConstraint extends Document {
     grant: mongoose.Types.ObjectId;
-    constraint: ProjectConstraintType;
+    constraint: ConstraintType;
     max: number;
     min: number;
     createdAt?: Date;
@@ -20,7 +34,7 @@ const ConstraintSchema = new Schema<IConstraint>(
         },
         constraint: {
             type: String,
-            enum: Object.values(ProjectConstraintType),
+            enum: Object.values(ConstraintType),
             required: true,
             immutable: true,
         },
@@ -42,5 +56,6 @@ const ConstraintSchema = new Schema<IConstraint>(
 
 ConstraintSchema.index({ grant: 1, constraint: 1 }, { unique: true });
 export const Constraint = model<IConstraint>(COLLECTIONS.CONSTRAINT, ConstraintSchema);
+
 
 

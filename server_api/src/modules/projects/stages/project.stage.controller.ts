@@ -34,7 +34,7 @@ export class ProjectStageController {
 
             const dto: CreateProjectStageDTO = {
                 project,
-                //grantStage: stage,
+                grantStage: '',
                 documentPath: `uploads/${req.file.filename}`,
                 applicantId: req.user.applicantId
             };

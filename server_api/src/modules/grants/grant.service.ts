@@ -14,7 +14,6 @@ import { IConstraintRepository } from "./constraints/constraint.repository";
 import { CreateGrantDTO, GetGrantsDTO, UpdateGrantDTO } from "./grant.dto";
 import { FundingSource, GrantStatus } from "./grant.model";
 import { IGrantRepository } from "./grant.repository";
-import { GRANT_TRANSITIONS } from "./grant.state-machine";
 import { IGrantStageRepository } from "./stages/grant.stage.repository";
 
 export class GrantService {
@@ -143,3 +142,9 @@ export class GrantService {
         return await this.repository.delete(id);
     }
 }
+
+export const GRANT_TRANSITIONS: Record<GrantStatus, GrantStatus[]> = {
+    [GrantStatus.planned]: [GrantStatus.active],
+    [GrantStatus.active]: [GrantStatus.closed, GrantStatus.planned],
+    [GrantStatus.closed]: [GrantStatus.active]
+};

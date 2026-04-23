@@ -4,7 +4,6 @@ import { COLLECTIONS } from '../../common/constants/collections.enum';
 import { CalendarStatus } from './calendar.state-machine';
 
 
-
 export interface ICalendar extends Document {
   year: number;
   startDate: Date;
@@ -41,4 +40,3 @@ const CalendarSchema = new Schema<ICalendar>({
 });
 
 export const Calendar = mongoose.model<ICalendar>(COLLECTIONS.CALENDAR, CalendarSchema);
-

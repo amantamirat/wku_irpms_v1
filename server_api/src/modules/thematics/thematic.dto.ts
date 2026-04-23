@@ -1,9 +1,9 @@
-import { ThemeLevel } from "./thematic.enum";
+import { ThematicLevel } from "./thematic.enum";
 import { ThematicStatus } from "./thematic.state-machine";
 
 export interface CreateThematicDTO {
     title: string;
-    level: ThemeLevel;
+    level: ThematicLevel;
     description?: string;
 }
 

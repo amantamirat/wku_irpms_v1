@@ -1,9 +1,10 @@
 // project.repository.ts
-import mongoose from "mongoose";
+import mongoose, { ClientSession } from "mongoose";
 import { Project, IProject } from "./project.model";
 import {
     CreateProjectDTO,
     ExistsProjectDTO,
+    FindByIdOptions,
     GetProjectsDTO,
     UpdateProjectDTO
 } from "./project.dto";
@@ -12,11 +13,12 @@ import { ProjectStatus } from "./project.state-machine";
 
 
 export interface IProjectRepository {
-    findById(id: string): Promise<IProject | null>;
+    findById(id: string, options?: FindByIdOptions, session?: ClientSession): Promise<IProject | null>;
     find(filters: GetProjectsDTO): Promise<Partial<IProject>[]>;
-    create(dto: CreateProjectDTO): Promise<IProject>;
+    create(dto: CreateProjectDTO, session?: ClientSession): Promise<IProject>;
     update(id: string, data: UpdateProjectDTO["data"]): Promise<IProject | null>;
-    updateStatus(id: string, newStatus: ProjectStatus): Promise<IProject | null>;
+    updateStatus(id: string, newStatus: ProjectStatus, session?: ClientSession): Promise<IProject | null>;
+    incrementTotals(projectId: string, delta: { duration: number; budget: number }): Promise<IProject | null>;
     exists(filters: ExistsProjectDTO): Promise<boolean>;
     delete(id: string): Promise<IProject | null>;
 }
@@ -24,10 +26,29 @@ export interface IProjectRepository {
 // MongoDB implementation
 export class ProjectRepository implements IProjectRepository {
 
-    async findById(id: string) {
-        return Project.findById(new mongoose.Types.ObjectId(id))
-            .lean<IProject>()
-            .exec();
+    async findById(
+        id: string,
+        options?: FindByIdOptions,
+        session?: ClientSession
+    ) {
+        let dbQuery = Project.findById(new mongoose.Types.ObjectId(id));
+
+        const populate = options?.populate;
+
+        if (populate?.applicant) {
+            dbQuery = dbQuery.populate("applicant");
+        }
+
+        if (populate?.grantAllocation) {
+            dbQuery = dbQuery.populate("grantAllocation");
+        }
+
+        // ✅ attach session if provided
+        if (session) {
+            dbQuery = dbQuery.session(session);
+        }
+
+        return dbQuery.lean<IProject>().exec();
     }
 
     async find(filters: GetProjectsDTO) {
@@ -80,13 +101,18 @@ export class ProjectRepository implements IProjectRepository {
         return dbQuery.lean<IProject[]>().exec();
     }
 
-    async create(dto: CreateProjectDTO) {
-        return Project.create({
+    async create(dto: CreateProjectDTO, session?: ClientSession) {
+        const data = {
             ...dto,
+            call: dto.call ? new mongoose.Types.ObjectId(dto.call) : undefined,
             grantAllocation: new mongoose.Types.ObjectId(dto.grantAllocation),
             applicant: new mongoose.Types.ObjectId(dto.applicant),
-            themes: dto.themes.map(thm => new mongoose.Types.ObjectId(thm)),
-        });
+            themes: dto.themes?.map(thm => new mongoose.Types.ObjectId(thm)),
+        };
+
+        const created = await Project.create([data], { session });
+
+        return created[0];
     }
 
     async update(id: string, dtoData: UpdateProjectDTO["data"]): Promise<IProject | null> {
@@ -94,8 +120,8 @@ export class ProjectRepository implements IProjectRepository {
 
         if (dtoData.title) updateData.title = dtoData.title;
         if (dtoData.summary) updateData.summary = dtoData.summary;
-        if (dtoData.totalBudget) updateData.totalBudget = dtoData.totalBudget;
-        if (dtoData.totalDuration) updateData.totalDuration = dtoData.totalDuration;
+        //if (dtoData.totalBudget) updateData.totalBudget = dtoData.totalBudget;
+        //if (dtoData.totalDuration) updateData.totalDuration = dtoData.totalDuration;
         if (dtoData.themes) {
             updateData.themes = dtoData.themes.map(id => new mongoose.Types.ObjectId(id))
         }
@@ -107,11 +133,18 @@ export class ProjectRepository implements IProjectRepository {
         ).exec();
     }
 
-    async updateStatus(id: string, newStatus: ProjectStatus) {
+    async updateStatus(
+        id: string,
+        newStatus: ProjectStatus,
+        session?: ClientSession
+    ) {
         return Project.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: { status: newStatus } },
-            { new: true }
+            {
+                new: true,
+                session // attach session here
+            }
         ).exec();
     }
 
@@ -126,6 +159,15 @@ export class ProjectRepository implements IProjectRepository {
         }
         const result = await Project.exists(query).exec();
         return result !== null;
+    }
+
+    async incrementTotals(projectId: string, delta: { duration: number; budget: number }) {
+        return Project.findByIdAndUpdate(projectId, {
+            $inc: {
+                totalDuration: delta.duration,
+                totalBudget: delta.budget
+            }
+        });
     }
 
     async delete(id: string) {

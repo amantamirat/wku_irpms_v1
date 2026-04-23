@@ -1,8 +1,9 @@
+import fs from "fs";
 import { Response } from "express";
 import { errorResponse, successResponse } from "../../common/helpers/response";
 import { AuthenticatedRequest } from "../users/auth/auth.middleware";
 import { ProjectService } from "./project.service";
-import { CreateProjectDTO, UpdateProjectDTO } from "./project.dto";
+import { ApplyProjectDTO, CreateProjectDTO, UpdateProjectDTO } from "./project.dto";
 import { DeleteDto } from "../../common/dtos/delete.dto";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
@@ -18,19 +19,50 @@ export class ProjectController {
     try {
       if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
-      const { grantAllocation, title, summary, applicant, themes } = req.body;
+      const { grantAllocation, title, summary, themes } = req.body;
 
       const dto: CreateProjectDTO = {
         grantAllocation: grantAllocation,
         title,
         summary,
-        applicant: applicant,
-        themes: themes,
-        //applicant:req.user.applicantId,
+        applicant: req.user.applicantId,
+        themes: themes
       };
       const created = await this.service.create(dto);
       successResponse(res, 201, "Project created successfully", created);
     } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
+    }
+  };
+
+  apply = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+      if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
+
+      let project;
+      try {
+        project = JSON.parse(req.body.project);
+      } catch {
+        throw new Error("Invalid project format");
+      }
+
+      const dto: ApplyProjectDTO = {
+        call: project.call,
+        title: project.title,
+        summary: project.summary,
+        applicant: req.user.applicantId,
+        collaborators: project.collaborators || [],
+        themes: project.themes || [],
+        phases: project.phases || [],
+        docPath: `uploads/${req.file.filename}`,
+      };
+      const submitted = await this.service.apply(dto);
+      successResponse(res, 201, "Project submitted successfully", submitted);
+    } catch (err: any) {
+      if (req.file) {
+        fs.unlink(`uploads/${req.file.filename}`, () => { });
+      }
       errorResponse(res, 400, err.message, err);
     }
   };

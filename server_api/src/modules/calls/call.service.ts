@@ -7,6 +7,7 @@ import { ICalendarReadRepository } from "../calendar/calendar.repository";
 import { CalendarStatus } from "../calendar/calendar.state-machine";
 import { IGrantAllocationRepository } from "../grants/allocations/grant.allocation.repository";
 import { AllocationStatus } from "../grants/allocations/grant.allocation.state-machine";
+import { GrantStatus, IGrant } from "../grants/grant.model";
 import { IGrantStageRepository } from "../grants/stages/grant.stage.repository";
 import { CreateCallDTO, GetCallsOptions, UpdateCallDTO } from "./call.dto";
 import { CallRepository } from "./call.repository";
@@ -27,19 +28,24 @@ export class CallService {
 
     async create(dto: CreateCallDTO) {
         const { grantAllocation } = dto;
-        const grantAllocDoc = await this.grantAllocationRepo.findById(grantAllocation);
+        const grantAllocDoc = await this.grantAllocationRepo.findById(grantAllocation, true);
         if (!grantAllocDoc) throw new AppError(ERROR_CODES.ALLOCATION_NOT_FOUND);
         if (grantAllocDoc.status !== AllocationStatus.active) throw new AppError(ERROR_CODES.ALLOCATION_NOT_ACTIVE);
-
-        const grantStages = (await this.grantStageRepo.find({ grant: String(grantAllocDoc.grant) }));
+        const grantDoc = grantAllocDoc.grant as unknown as IGrant;
+        if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+        if (grantDoc.status !== GrantStatus.active) throw new AppError(ERROR_CODES.GRANT_NOT_ACTIVE);
+        const grantStages = (await this.grantStageRepo.find({ grant: String(grantDoc._id) }));
         if (grantStages.length === 0)
-            throw new AppError(ERROR_CODES.GRANT_NOT_ACTIVE);
+            throw new AppError(ERROR_CODES.EMPTY_GRANT_STAGES);
 
-        const created = await this.repository.create({ ...dto, status: CallStatus.planned });
+        const created = await this.repository.create({
+            ...dto,
+            organization: String(grantDoc.organization),
+            status: CallStatus.planned
+        });
 
         let currentDate = new Date();
         const callStagesPayload = grantStages.map(gs => {
-            //currentDate.setDate(currentDate.getDate() + (gs.duration || 7));
             currentDate.setDate(currentDate.getDate() + (gs.order * 7));
             return {
                 call: String(created._id),
@@ -60,7 +66,7 @@ export class CallService {
 
     async getById(id: string, populate?: boolean) {
         const call = await this.repository.findById(id, populate);
-        if (!call) throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
+        if (!call) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
         return call;
     }
 

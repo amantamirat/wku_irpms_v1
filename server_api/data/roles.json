@@ -77,6 +77,7 @@
             "calendar:read",
             "call:read",
             "call.stage:read",
+            "constraint:read",
             "project:read",
             "applicant:read",
             "collaborator:*",
