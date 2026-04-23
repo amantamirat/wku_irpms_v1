@@ -45,11 +45,11 @@ import settingRoutes from './modules/settings/setting.routes';
 import permissionRoutes from './modules/permissions/permission.routes';
 import roleRoutes from './modules/permissions/roles/role.routes';
 import authRoutes from './modules/users/auth/auth.routes';
-import notificationRoutes from './modules/users/notifications/notification.routes';
+import notificationRoutes from './modules/notifications/notification.routes';
 
 import path from 'path';
 import { SeedService } from './util/seed.service';
-import { SocketService } from './modules/users/notifications/socket.service';
+import { SocketService } from './modules/notifications/socket.service';
 
 dotenv.config();
 const app: Application = express();

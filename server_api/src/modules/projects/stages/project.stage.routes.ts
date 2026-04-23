@@ -9,10 +9,10 @@ import { ProjectStageService } from "./project.stage.service";
 import { GrantAllocationRepository } from "../../grants/allocations/grant.allocation.repository";
 import { ProjectStageSynchronizer } from "./project.stage.synchronizer";
 import { ReviewerRepository } from "../../reviewers/reviewer.repository";
-import { NotificationService } from "../../users/notifications/notification.service";
 import { SettingRepository } from "../../settings/setting.repository";
 import { SettingService } from "../../settings/setting.service";
-import { NotificationRepository } from "../../users/notifications/notification.repository";
+import { NotificationService } from "../../notifications/notification.service";
+import { NotificationRepository } from "../../notifications/notification.repository";
 
 const projectStageRepo = new ProjectStageRepository();
 const projectRepo = new ProjectRepository();

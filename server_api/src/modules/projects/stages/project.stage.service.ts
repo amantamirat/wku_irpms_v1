@@ -21,7 +21,7 @@ import { IGrantAllocationRepository } from "../../grants/allocations/grant.alloc
 import { AllocationStatus } from "../../grants/allocations/grant.allocation.state-machine";
 import { IProjectSynchronizer } from "./project.stage.synchronizer";
 import { IReviewerRepository } from "../../reviewers/reviewer.repository";
-import { NotificationService } from "../../users/notifications/notification.service";
+import { NotificationService } from "../../notifications/notification.service";
 import { IGrantAllocation } from "../../grants/allocations/grant.allocation.model";
 
 export class ProjectStageService {

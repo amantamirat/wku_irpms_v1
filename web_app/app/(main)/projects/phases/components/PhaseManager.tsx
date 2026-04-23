@@ -30,14 +30,14 @@ const PhaseManager = ({ project }: PhaseManagerProps) => {
                 header: "Duration",
                 field: "duration",
                 sortable: true,
-                style: { width: '150px' },
+                //style: { width: '150px' },
                 body: (r: Phase) => `${r.duration} days`
             },
             {
                 header: "Budget",
                 field: "budget",
                 sortable: true,
-                style: { width: '150px' },
+                //style: { width: '150px' },
                 body: (r: Phase) => (
                     <span className="font-mono">
                         {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'ETB' }).format(r.budget)}
@@ -47,7 +47,7 @@ const PhaseManager = ({ project }: PhaseManagerProps) => {
             {
                 header: "Description",
                 field: "description",
-                style: { width: '300px' },
+                //style: { width: '300px' },
                 body: (r: Phase) => (
                     <div className="truncate" title={r.description}>
                         {r.description || "No description provided"}

@@ -12,13 +12,13 @@ import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { REVIEWER_TRANSITIONS } from "./reviewer.state-machine";
 import { ReviewerStatus } from "./reviewer.state-machine";
-import { NotificationService } from "../users/notifications/notification.service";
 import { IResultRepository } from "./results/result.repository";
 import { ICriterionRepository } from "../evaluations/criteria/criterion.repository";
 import { FormType } from "../evaluations/criteria/criterion.model";
 import { IGrantStage } from "../grants/stages/grant.stage.model";
 import { IProject } from "../projects/project.model";
 import { IProjectStageSynchronizer } from "./reviewer.synchronizer";
+import { NotificationService } from "../notifications/notification.service";
 
 export class ReviewerService {
 

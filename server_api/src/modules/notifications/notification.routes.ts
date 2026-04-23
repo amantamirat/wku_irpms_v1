@@ -1,10 +1,11 @@
 import { Router } from 'express';
-import { verifyActiveAccount } from '../../users/auth/auth.middleware';
 import { NotificationController } from './notification.controller';
 import { NotificationRepository } from './notification.repository';
 import { NotificationService } from './notification.service';
-import { SettingService } from '../../settings/setting.service';
-import { SettingRepository } from '../../settings/setting.repository';
+import { SettingService } from '../settings/setting.service';
+import { SettingRepository } from '../settings/setting.repository';
+import { verifyActiveAccount } from '../users/auth/auth.middleware';
+
 
 const repository = new NotificationRepository();
 const settingService = new SettingService(new SettingRepository());

@@ -15,12 +15,12 @@ import { ICollaboratorRepository } from "./collaborator.repository";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
-import { NotificationService } from "../../users/notifications/notification.service";
 import { ProjectStatus } from "../project.state-machine";
 import { COLLAB_TRANSITIONS } from "./collaborator.state-machine";
 import { CollaboratorStatus } from "./collaborator.status";
 import { ClientSession } from "mongoose";
 import { ProjectAuth } from "../project.auth";
+import { NotificationService } from "../../notifications/notification.service";
 
 
 export class CollaboratorService {

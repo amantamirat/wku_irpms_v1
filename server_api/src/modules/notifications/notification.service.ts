@@ -1,13 +1,13 @@
 import { INotificationRepository } from "./notification.repository";
 import { CreateNotificationDTO, GetNotificationsDTO } from "./notification.dto";
 import { NotificationType } from "./notification.model";
-import { AppError } from "../../../common/errors/app.error";
-import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { SettingService } from "../../settings/setting.service";
-import { SettingKey } from "../../settings/setting.model";
-import { ProjectStageStatus } from "../../projects/stages/project.stage.status";
 import { SocketService } from "./socket.service";
 import { ClientSession } from "mongoose";
+import { AppError } from "../../common/errors/app.error";
+import { ERROR_CODES } from "../../common/errors/error.codes";
+import { ProjectStageStatus } from "../projects/stages/project.stage.status";
+import { SettingKey } from "../settings/setting.model";
+import { SettingService } from "../settings/setting.service";
 
 export class NotificationService {
     constructor(private readonly repository: INotificationRepository,

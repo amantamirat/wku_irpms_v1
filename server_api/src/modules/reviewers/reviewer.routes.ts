@@ -6,14 +6,14 @@ import { ReviewerRepository } from './reviewer.repository';
 import { ApplicantRepository } from '../applicants/applicant.repository';
 import { CollaboratorRepository } from '../projects/collaborators/collaborator.repository';
 import { ProjectStageRepository } from '../projects/stages/project.stage.repository';
-import { NotificationService } from '../users/notifications/notification.service';
 import { SettingRepository } from '../settings/setting.repository';
 import { SettingService } from '../settings/setting.service';
-import { NotificationRepository } from '../users/notifications/notification.repository';
 import { ReviewerService } from './reviewer.service';
 import { CriterionRepository } from '../evaluations/criteria/criterion.repository';
 import { ResultRepository } from './results/result.repository';
 import { ReviewerSynchronizer } from './reviewer.synchronizer';
+import { NotificationService } from '../notifications/notification.service';
+import { NotificationRepository } from '../notifications/notification.repository';
 
 const repo = new ReviewerRepository();
 const psRepo = new ProjectStageRepository();
