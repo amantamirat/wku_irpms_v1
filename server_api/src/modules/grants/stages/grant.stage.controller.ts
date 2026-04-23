@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { GrantStageService } from './grant.stage.service';
 import { CreateStageDTO, GetStageDTO, UpdateStageDTO } from './grant.stage.dto';
 import { successResponse, errorResponse } from '../../../common/helpers/response';
-import { AuthenticatedRequest } from '../../users/auth/auth.middleware';
+import { AuthenticatedRequest } from '../../auth/auth.middleware';
 
 
 export class StageController {

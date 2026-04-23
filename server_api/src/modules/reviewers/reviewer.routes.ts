@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { ReviewerController } from './reviewer.controller';
-import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
+import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../auth/auth.middleware';
 import { PERMISSIONS } from '../../common/constants/permissions';
 import { ReviewerRepository } from './reviewer.repository';
 import { ApplicantRepository } from '../applicants/applicant.repository';

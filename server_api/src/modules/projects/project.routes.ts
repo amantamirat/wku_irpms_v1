@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
-import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
+import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../auth/auth.middleware';
 import { ProjectController } from './project.controller';
 import { ProjectService } from './project.service';
 import { ProjectRepository } from './project.repository';

@@ -6,8 +6,8 @@ import { Password } from 'primereact/password';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
-import { UserApi } from '../api/user.api';
-import { User, validateUser } from '../models/user.model';
+import { AccountApi } from '../api/account.api';
+import { Account, validateAccount } from '../models/account.model';
 import { Applicant } from '../../applicants/models/applicant.model';
 import { ApplicantApi } from '../../applicants/api/applicant.api';
 import { Dropdown } from 'primereact/dropdown';
@@ -20,9 +20,9 @@ interface EntitySaveDialogProps<T> {
     onComplete?: (savedItem: T) => void;
 }
 
-const SaveUser = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<User>) => {
+const SaveAccount = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<Account>) => {
     const toast = useRef<Toast>(null);
-    const [localUser, setLocalUser] = useState<User>({ ...item });
+    const [localUser, setLocalUser] = useState<Account>({ ...item });
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
     const [applicants, setApplicants] = useState<Applicant[]>([]);
@@ -49,21 +49,21 @@ const SaveUser = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<U
 
         try {
             // Validate without the currentPassword requirement
-            const validation = validateUser(localUser, false);
+            const validation = validateAccount(localUser, false);
             if (!validation.valid) {
                 setErrorMessage(validation.message);
                 return;
             }
 
-            let saved: User;
+            let saved: Account;
             if (localUser._id) {
                 // Update existing user
-                saved = await UserApi.update(localUser);
+                saved = await AccountApi.update(localUser);
                 // Ensure the applicant object remains attached if the API returns only the ID
                 saved = { ...saved, applicant: localUser.applicant };
             } else {
                 // Create new user
-                saved = await UserApi.create(localUser);
+                saved = await AccountApi.create(localUser);
             }
 
             toast.current?.show({
@@ -181,4 +181,4 @@ const SaveUser = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<U
     );
 };
 
-export default SaveUser;
+export default SaveAccount;

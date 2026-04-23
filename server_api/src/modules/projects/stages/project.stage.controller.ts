@@ -11,7 +11,7 @@ import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { AuthenticatedRequest } from "../../users/auth/auth.middleware";
+import { AuthenticatedRequest } from "../../auth/auth.middleware";
 import { ProjectStageService } from "./project.stage.service";
 
 export class ProjectStageController {

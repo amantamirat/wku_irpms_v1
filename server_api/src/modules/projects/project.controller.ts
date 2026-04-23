@@ -1,7 +1,7 @@
 import fs from "fs";
 import { Response } from "express";
 import { errorResponse, successResponse } from "../../common/helpers/response";
-import { AuthenticatedRequest } from "../users/auth/auth.middleware";
+import { AuthenticatedRequest } from "../auth/auth.middleware";
 import { ProjectService } from "./project.service";
 import { ApplyProjectDTO, CreateProjectDTO, UpdateProjectDTO } from "./project.dto";
 import { DeleteDto } from "../../common/dtos/delete.dto";

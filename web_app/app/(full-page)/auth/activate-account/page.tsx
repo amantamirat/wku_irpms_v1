@@ -7,7 +7,7 @@ import { classNames } from 'primereact/utils';
 import { useContext, useRef, useState } from 'react';
 import { LayoutContext } from '../../../../layout/context/layoutcontext';
 import { useAuth } from '@/contexts/auth-context';
-import { UserApi } from '@/app/(main)/users/api/user.api';
+import { AccountApi } from '@/app/(main)/accounts/api/account.api';
 import { AuthApi } from '../api/auth.service';
 
 export default function ActivateAccountPage() {

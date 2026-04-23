@@ -7,7 +7,7 @@ import {
   verifyActiveAccount,
   checkPermission,
   checkTransitionPermission
-} from "../users/auth/auth.middleware";
+} from "../auth/auth.middleware";
 
 const repository = new TemplateRepository();
 const service = new TemplateService(repository);

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { errorResponse, successResponse } from "../../../common/helpers/response";
 import { ResultService } from "./result.service";
 import { CreateResultDTO, GetResultsDTO, UpdateResultDTO } from "./result.dto";
-import { AuthenticatedRequest } from "../../users/auth/auth.middleware";
+import { AuthenticatedRequest } from "../../auth/auth.middleware";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 

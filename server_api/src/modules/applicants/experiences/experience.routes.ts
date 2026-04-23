@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { ExperienceController } from './experience.controller';
 import { ExperienceService } from './experience.service';
 import { PERMISSIONS } from '../../../common/constants/permissions';
-import { verifyActiveAccount, checkPermission } from '../../users/auth/auth.middleware';
+import { verifyActiveAccount, checkPermission } from '../../auth/auth.middleware';
 import { ExperienceRepository } from './experience.repository';
 import { ApplicantRepository } from '../applicant.repository';
 import { OrganizationRepository } from '../../organization/organization.repository';

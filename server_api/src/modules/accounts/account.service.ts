@@ -4,17 +4,23 @@ import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
-import { ApplicantRepository, IApplicantRepository } from "../applicants/applicant.repository";
-import { CreateUserDTO, UpdateUserDTO } from "./user.dto";
-import { IUserRepository, UserRepository } from "./user.repository";
-import { USER_TRANSITIONS, UserStatus } from "./user.state-machine";
+import { IApplicantRepository, ApplicantRepository } from "../applicants/applicant.repository";
+import { CreateAccountDTO, UpdateAccountDTO } from "./account.dto";
+import { AccountStatus } from "./account.model";
+import { IAccountRepository, AccountRepository } from "./account.repository";
 
 
-export class UserService {
+export const Account_TRANSITIONS: Record<AccountStatus, AccountStatus[]> = {
+    [AccountStatus.pending]: [AccountStatus.active],
+    [AccountStatus.active]: [AccountStatus.suspended, AccountStatus.pending],
+    [AccountStatus.suspended]: [AccountStatus.active]
+};
+
+export class AccountService {
 
     constructor(
-        private readonly repository: IUserRepository = new UserRepository(),
-        private readonly appRepository: IApplicantRepository = new ApplicantRepository(),
+        private readonly repository: IAccountRepository = new AccountRepository(),
+        private readonly appRepository: IApplicantRepository = new ApplicantRepository()
     ) { }
 
     static async prepareHash(password: string): Promise<string> {
@@ -22,16 +28,16 @@ export class UserService {
         return await bcrypt.hash(password, salt);
     };
 
-    async create(dto: CreateUserDTO) {
+    async create(dto: CreateAccountDTO) {
         const { applicant, email, password } = dto;
         const applicantDoc = await this.appRepository.findById(applicant);
         if (!applicantDoc) {
             throw new AppError(ERROR_CODES.APPLICANT_NOT_FOUND);
         }
-        const hashed = await UserService.prepareHash(password);
+        const hashed = await AccountService.prepareHash(password);
         try {
             const created = await this.repository.create({
-                ...dto, email, password: hashed, status: UserStatus.pending
+                ...dto, email, password: hashed, status: AccountStatus.pending
             });
             return { ...created, applicant: applicantDoc };
         } catch (err: any) {
@@ -43,15 +49,15 @@ export class UserService {
         }
     }
 
-    async getUsers() {
+    async getAll() {
         const users = await this.repository.findAll();
         return users;
     }
 
-    async update(dto: UpdateUserDTO) {
+    async update(dto: UpdateAccountDTO) {
         const { id, data, userId } = dto;
         if (data.password) {
-            const hashed = await UserService.prepareHash(data.password);
+            const hashed = await AccountService.prepareHash(data.password);
             data.password = hashed;
         }
         const updated = await this.repository.update(id, data);
@@ -66,8 +72,8 @@ export class UserService {
         if (!user) {
             throw new AppError(ERROR_CODES.UNAUTHORIZED);
         }
-        const from = user.status as UserStatus;
-        const to = next as UserStatus;
+        const from = user.status as AccountStatus;
+        const to = next as AccountStatus;
         // optional UI consistency check
         if (current && current !== from) {
             throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
@@ -76,7 +82,7 @@ export class UserService {
         TransitionHelper.validateTransition(
             from,
             to,
-            USER_TRANSITIONS
+            Account_TRANSITIONS
         );
         return await this.repository.update(id, {
             status: to
@@ -87,7 +93,7 @@ export class UserService {
         const { id } = dto;
         const userDoc = await this.repository.findById(id);
         if (!userDoc) throw new AppError(ERROR_CODES.UNAUTHORIZED);
-        if (userDoc.status === UserStatus.active) {
+        if (userDoc.status === AccountStatus.active) {
             throw new Error(ERROR_CODES.ACCOUNT_IN_USE);
         }
         return await this.repository.delete(id);

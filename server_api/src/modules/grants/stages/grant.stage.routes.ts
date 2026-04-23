@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { checkPermission, verifyActiveAccount } from '../../users/auth/auth.middleware';
+import { checkPermission, verifyActiveAccount } from '../../auth/auth.middleware';
 import { StageController } from './grant.stage.controller';
 import { GrantStageService } from './grant.stage.service';
 import { GrantStageRepository } from './grant.stage.repository';

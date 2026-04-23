@@ -7,8 +7,8 @@ import { Password } from 'primereact/password';
 import { classNames } from 'primereact/utils';
 import { useContext, useState } from 'react';
 import { LayoutContext } from '../../../../layout/context/layoutcontext';
-import { User, validateUser } from '@/app/(main)/users/models/user.model';
-import { UserApi } from '@/app/(main)/users/api/user.api';
+import { Account, validateAccount } from '@/app/(main)/accounts/models/account.model';
+import { AccountApi } from '@/app/(main)/accounts/api/account.api';
 import { AuthApi } from '../api/auth.service';
 
 export default function ResetPassword() {
@@ -16,7 +16,7 @@ export default function ResetPassword() {
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
 
-  let emptyVerification: User = {
+  let emptyVerification: Account = {
     email: email,
     password: "",
     confirmedPassword:"",
@@ -25,14 +25,14 @@ export default function ResetPassword() {
 
   const router = useRouter();
   const [progressing, setProgressing] = useState(false);
-  const [credential, setCredential] = useState<User>(emptyVerification);
+  const [credential, setCredential] = useState<Account>(emptyVerification);
 
 
 
   const resetPassword = async () => {
     try {
       setProgressing(true);
-      const result = validateUser(credential, false, true);
+      const result = validateAccount(credential, false, true);
       if (!result.valid) {
         throw new Error(result.message);
       }

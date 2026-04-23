@@ -40,44 +40,44 @@
     "description": "Delete roles"
   },
   {
-    "category": "User Management",
-    "name": "user:create",
-    "description": "Create new users"
+    "category": "Account Management",
+    "name": "account:create",
+    "description": "Create new accounts"
   },
   {
-    "category": "User Management",
-    "name": "user:read",
-    "description": "View user list and details"
+    "category": "Account Management",
+    "name": "account:read",
+    "description": "View account list and details"
   },
   {
-    "category": "User Management",
-    "name": "user:update",
-    "description": "Edit user details, or reset passwords"
+    "category": "Account Management",
+    "name": "account:update",
+    "description": "Edit account details, or reset passwords"
   },
   {
-    "category": "User Management",
-    "name": "user:transition.pending.active",
-    "description": "Activate a user account by changing its status from pending to active"
+    "category": "Account Management",
+    "name": "account:transition.pending.active",
+    "description": "Activate a account account by changing its status from pending to active"
   },
   {
-    "category": "User Management",
-    "name": "user:transition.active.suspended",
-    "description": "Suspend an active user account to temporarily disable access"
+    "category": "Account Management",
+    "name": "account:transition.active.suspended",
+    "description": "Suspend an active account account to temporarily disable access"
   },
   {
-    "category": "User Management",
-    "name": "user:transition.active.pending",
-    "description": "Revert an active user account back to pending status for further review"
+    "category": "Account Management",
+    "name": "account:transition.active.pending",
+    "description": "Revert an active account account back to pending status for further review"
   },
   {
-    "category": "User Management",
-    "name": "user:transition.suspended.active",
-    "description": "Re-activate a suspended user account and restore access"
+    "category": "Account Management",
+    "name": "account:transition.suspended.active",
+    "description": "Re-activate a suspended account account and restore access"
   },
   {
-    "category": "User Management",
-    "name": "user:delete",
-    "description": "Delete user accounts"
+    "category": "Account Management",
+    "name": "account:delete",
+    "description": "Delete account accounts"
   },
   {
     "category": "Applicant Management",

@@ -3,7 +3,7 @@ import { PERMISSIONS } from '../../../common/constants/permissions';
 import { ApplicantRepository } from '../../applicants/applicant.repository';
 import { SettingRepository } from '../../settings/setting.repository';
 import { SettingService } from '../../settings/setting.service';
-import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../../users/auth/auth.middleware';
+import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../../auth/auth.middleware';
 import { NotificationRepository } from '../../notifications/notification.repository';
 import { NotificationService } from '../../notifications/notification.service';
 import { ProjectRepository } from '../project.repository';

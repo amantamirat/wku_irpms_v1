@@ -3,7 +3,7 @@ import { GrantAllocationService } from "./grant.allocation.service";
 import { CreateGrantAllocationDTO, GetGrantAllocationsDTO, UpdateGrantAllocationDTO } from "./grant.allocation.dto";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { successResponse, errorResponse } from "../../../common/helpers/response";
-import { AuthenticatedRequest } from "../../users/auth/auth.middleware";
+import { AuthenticatedRequest } from "../../auth/auth.middleware";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 
 

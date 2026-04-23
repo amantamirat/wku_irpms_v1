@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { StageService } from './call.stage.service';
 import { CreateStageDTO, GetStageDTO, UpdateStageDTO } from './call.stage.dto';
 import { successResponse, errorResponse } from '../../../common/helpers/response';
-import { AuthenticatedRequest } from '../../users/auth/auth.middleware';
+import { AuthenticatedRequest } from '../../auth/auth.middleware';
 import { TransitionRequestDto } from '../../../common/dtos/transition.dto';
 import { ERROR_CODES } from '../../../common/errors/error.codes';
 

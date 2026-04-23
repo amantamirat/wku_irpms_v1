@@ -1,5 +1,5 @@
 'use client';
-import { UserApi } from '@/app/(main)/users/api/user.api';
+import { AccountApi } from '@/app/(main)/accounts/api/account.api';
 import RequireAuth from '@/components/RequireAuth';
 import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { PERMISSIONS } from "../../../common/constants/permissions";
-import { checkPermission, verifyActiveAccount } from "../../users/auth/auth.middleware";
+import { checkPermission, verifyActiveAccount } from "../../auth/auth.middleware";
 import { CriterionController } from "./criterion.controller";
 import { CriterionService } from "./criterion.service";
 import { CriterionRepository } from "./criterion.repository";

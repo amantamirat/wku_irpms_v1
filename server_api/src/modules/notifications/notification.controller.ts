@@ -3,7 +3,7 @@ import { NotificationService } from './notification.service';
 import { AppError } from '../../common/errors/app.error';
 import { ERROR_CODES } from '../../common/errors/error.codes';
 import { successResponse, errorResponse } from '../../common/helpers/response';
-import { AuthenticatedRequest } from '../users/auth/auth.middleware';
+import { AuthenticatedRequest } from '../auth/auth.middleware';
 
 export class NotificationController {
     constructor(private readonly service: NotificationService) { }

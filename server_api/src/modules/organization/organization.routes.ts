@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { checkUnitPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
+import { checkUnitPermission, verifyActiveAccount } from '../auth/auth.middleware';
 import { OrganizationController } from './organization.controller';
 
 import { OrganizationRepository } from './organization.repository';

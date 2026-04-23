@@ -7,7 +7,7 @@ import {
     UpdateOrganizationDTO
 } from "./organization.dto";
 import { OrganizationService } from "./organization.service";
-import { AuthenticatedRequest } from "../users/auth/auth.middleware";
+import { AuthenticatedRequest } from "../auth/auth.middleware";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { Unit } from "../../common/constants/enums";
 

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../../common/constants/permissions';
-import { checkPermission, verifyActiveAccount } from '../../users/auth/auth.middleware';
+import { checkPermission, verifyActiveAccount } from '../../auth/auth.middleware';
 import { GrantRepository, IGrantRepository } from '../grant.repository';
 import { ConstraintController } from './constraint.controller';
 import { ConstraintRepository } from './constraint.repository';

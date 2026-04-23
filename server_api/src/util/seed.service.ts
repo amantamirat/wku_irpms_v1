@@ -10,15 +10,15 @@ import { PermissionRepository } from "../modules/permissions/permission.reposito
 import { RoleRepository } from '../modules/permissions/roles/role.repository';
 import { SettingKey } from '../modules/settings/setting.model';
 import { SettingRepository } from '../modules/settings/setting.repository';
-import { UserRepository } from "../modules/users/user.repository";
-import { UserStatus } from '../modules/users/user.state-machine';
+import { AccountRepository } from "../modules/accounts/account.repository";
+import { AccountStatus } from '../modules/accounts/account.model';
 
 export class SeedService {
     constructor(
         private settingRepo = new SettingRepository(),
         private permissionRepo: PermissionRepository = new PermissionRepository(),
         private roleRepo = new RoleRepository(),
-        private userRepo = new UserRepository(),
+        private userRepo = new AccountRepository(),
         private applicantRepo = new ApplicantRepository(),
         private organizationRepo = new OrganizationRepository()
     ) { }
@@ -215,7 +215,7 @@ export class SeedService {
             email: adminEmail,
             password: hashedPassword,
             applicant: String(applicant._id),
-            status: UserStatus.active
+            status: AccountStatus.active
         });
         console.log("✅ Initial admin created successfully.");
     }

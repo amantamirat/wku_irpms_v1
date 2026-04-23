@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ThematicController } from './thematic.controller';
 import { PERMISSIONS } from '../../common/constants/permissions';
-import { verifyActiveAccount, checkPermission, checkTransitionPermission } from '../users/auth/auth.middleware';
+import { verifyActiveAccount, checkPermission, checkTransitionPermission } from '../auth/auth.middleware';
 import { ThematicService } from './thematic.service';
 import { ThematicRepository } from './thematic.repository';
 import { ThemeRepository } from './themes/theme.repository';

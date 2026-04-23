@@ -4,7 +4,7 @@ import { NotificationRepository } from './notification.repository';
 import { NotificationService } from './notification.service';
 import { SettingService } from '../settings/setting.service';
 import { SettingRepository } from '../settings/setting.repository';
-import { verifyActiveAccount } from '../users/auth/auth.middleware';
+import { verifyActiveAccount } from '../auth/auth.middleware';
 
 
 const repository = new NotificationRepository();

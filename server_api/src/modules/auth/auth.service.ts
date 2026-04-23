@@ -1,28 +1,29 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { AppError } from "../../../common/errors/app.error";
-import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { CacheService } from "../../../util/cache.service";
-import { ApplicantRepository } from "../../applicants/applicant.repository";
-import { MailService } from "../../mail/mail.service";
-import { OrganizationRepository } from "../../organization/organization.repository";
-import { SettingKey } from "../../settings/setting.model";
-import { SettingRepository } from "../../settings/setting.repository";
-import { SettingService } from "../../settings/setting.service";
+import { AppError } from "../../common/errors/app.error";
+import { ERROR_CODES } from "../../common/errors/error.codes";
+import { CacheService } from "../../util/cache.service";
+import { ApplicantRepository } from "../applicants/applicant.repository";
+import { MailService } from "../mail/mail.service";
+import { OrganizationRepository } from "../organization/organization.repository";
+import { SettingKey } from "../settings/setting.model";
+import { SettingRepository } from "../settings/setting.repository";
+import { SettingService } from "../settings/setting.service";
 
-import { IUser } from "../user.model";
-import { IUserRepository, UserRepository } from "../user.repository";
-import { USER_TRANSITIONS, UserStatus } from "../user.state-machine";
+import { IAccount } from '../accounts/account.model';
+import { IAccountRepository, AccountRepository } from "../accounts/account.repository";
+import { Account_TRANSITIONS } from "../accounts/account.service";
+import { AccountStatus } from '../accounts/account.model';
 import { ChangePasswordDTO, LoginDto } from "./auth.dto";
-import { TransitionHelper } from "../../../common/helpers/transition.helper";
-import { VerfyUserDto } from "../user.dto";
+import { TransitionHelper } from "../../common/helpers/transition.helper";
+import { VerfyAccountDto } from '../accounts/account.dto';
 
 
 export class AuthService {
 
     constructor(
-        private readonly repository: IUserRepository = new UserRepository(),
+        private readonly repository: IAccountRepository = new AccountRepository(),
         private readonly applicantRepository = new ApplicantRepository(),
         private readonly mailService = new MailService(),
         private readonly settingService: SettingService = new SettingService(new SettingRepository())
@@ -36,7 +37,7 @@ export class AuthService {
         if (!userDoc)
             throw new AppError(ERROR_CODES.AUTH_NOT_FOUND);
 
-        if (userDoc.status === UserStatus.suspended)
+        if (userDoc.status === AccountStatus.suspended)
             throw new AppError(ERROR_CODES.ACCOUNT_SUSPENDED);
 
         if (userDoc.lockUntil && userDoc.lockUntil > new Date())
@@ -112,7 +113,7 @@ export class AuthService {
         };
     }
 
-    private async handleFailedLogin(user: IUser) {
+    private async handleFailedLogin(user: IAccount) {
         const maxAttempts = await this.settingService.getSettingValue(SettingKey.MAX_LOGIN_ATTEMPTS, 5);
         const lockDurationMinutes = await this.settingService.getSettingValue(SettingKey.ACCOUNT_LOCK_MIN, 15);
 
@@ -148,7 +149,7 @@ export class AuthService {
 
         const userDoc = await this.repository.findByEmail(email);
 
-        if (!userDoc || userDoc.status === UserStatus.suspended) {
+        if (!userDoc || userDoc.status === AccountStatus.suspended) {
             throw new Error("User does not exist.");
         }
 
@@ -174,7 +175,7 @@ export class AuthService {
         });
     }
 
-    async resetPassword(data: VerfyUserDto) {
+    async resetPassword(data: VerfyAccountDto) {
 
         const { email, resetCode, password } = data;
 
@@ -199,7 +200,7 @@ export class AuthService {
         });
     }
 
-    async activateUser(data: VerfyUserDto) {
+    async activateUser(data: VerfyAccountDto) {
 
         const { email, resetCode } = data;
 
@@ -212,12 +213,12 @@ export class AuthService {
         }
 
         const current = userDoc.status;
-        const nextState = UserStatus.active;
+        const nextState = AccountStatus.active;
 
         TransitionHelper.validateTransition(
             current,
             nextState,
-            USER_TRANSITIONS
+            Account_TRANSITIONS
         );
 
         await this.repository.update(String(userDoc._id), {

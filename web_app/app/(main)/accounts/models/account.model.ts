@@ -1,12 +1,12 @@
 import { Applicant } from "../../applicants/models/applicant.model";
 
-export enum UserStatus {
+export enum AccountStatus {
     pending = 'pending',
     active = 'active',
     suspended = 'suspended'
 }
 
-export type User = {
+export type Account = {
     _id?: string;
     applicant?: string | Applicant;
     email?: string;
@@ -15,13 +15,13 @@ export type User = {
     confirmedPassword?: string;
     resetCode?: string;
     resetCodeExpires?: Date;
-    status?: UserStatus;
+    status?: AccountStatus;
     iat?: number;
     exp?: number;
 };
 
 
-export const validateUser = (user: User, currentPassword: boolean = false, regexPasswprd: boolean = true): { valid: boolean; message?: string } => {
+export const validateAccount = (user: Account, currentPassword: boolean = false, regexPasswprd: boolean = true): { valid: boolean; message?: string } => {
     if (!user.email || user.email.trim() === "") {
         return { valid: false, message: "Email is required." };
     }
@@ -63,7 +63,7 @@ export const validateUser = (user: User, currentPassword: boolean = false, regex
 
 
 
-export function sanitizeUser(user: Partial<User>): Partial<User> {
+export function sanitizeAccount(user: Partial<Account>): Partial<Account> {
     return {
         ...user,
         applicant:
@@ -74,7 +74,7 @@ export function sanitizeUser(user: Partial<User>): Partial<User> {
 }
 
 
-export const createEmptyUser = (): User => ({
+export const createEmptyAccount = (): Account => ({
 
 })
 

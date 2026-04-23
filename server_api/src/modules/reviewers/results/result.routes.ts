@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ResultController } from './result.controller';
 import { PERMISSIONS } from '../../../common/constants/permissions';
-import { verifyActiveAccount, checkPermission } from '../../users/auth/auth.middleware';
+import { verifyActiveAccount, checkPermission } from '../../auth/auth.middleware';
 
 import { ResultService } from './result.service';
 import { ResultRepository } from './result.repository';

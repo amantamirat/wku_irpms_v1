@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { successResponse, errorResponse } from '../../common/helpers/response';
-import { AuthenticatedRequest } from '../users/auth/auth.middleware';
+import { AuthenticatedRequest } from '../auth/auth.middleware';
 import { ApplicantService } from './applicant.service';
 import {
     CreateApplicantDTO,

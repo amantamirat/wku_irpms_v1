@@ -3,7 +3,7 @@ import { DeleteDto } from '../../../common/dtos/delete.dto';
 import { TransitionRequestDto } from '../../../common/dtos/transition.dto';
 import { ERROR_CODES } from '../../../common/errors/error.codes';
 import { errorResponse, successResponse } from '../../../common/helpers/response';
-import { AuthenticatedRequest } from '../../users/auth/auth.middleware';
+import { AuthenticatedRequest } from '../../auth/auth.middleware';
 import {
     CreateCollaboratorDto,
     UpdateCollaboratorDto

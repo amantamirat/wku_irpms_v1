@@ -1,5 +1,5 @@
 import { ApiClient } from "@/api/ApiClient";
-import { User } from "@/app/(main)/users/models/user.model";
+import { Account } from "@/app/(main)/accounts/models/account.model";
 
 
 const end_point = '/users';
@@ -13,7 +13,7 @@ const userStorage = 'authUser';
 
 export const AuthApi = {
 
-    async loginUser(credentials: User): Promise<any> {
+    async loginUser(credentials: Account): Promise<any> {
         const userIfo = await ApiClient.post(login_end_point, credentials);
         const { token, user } = userIfo;
         localStorage.setItem(tokenStorage, token);
@@ -49,7 +49,7 @@ export const AuthApi = {
         return response;
     },
 
-    async resetPassword(credential: Partial<User>): Promise<any> {
+    async resetPassword(credential: Partial<Account>): Promise<any> {
         if (!credential.resetCode) {
             throw new Error("verification code required.");
         }
@@ -57,7 +57,7 @@ export const AuthApi = {
         return response;
     },
 
-    async activateUser(credential: Partial<User>): Promise<any> {
+    async activateUser(credential: Partial<Account>): Promise<any> {
         if (!credential.resetCode) {
             throw new Error("verification code required.");
         }

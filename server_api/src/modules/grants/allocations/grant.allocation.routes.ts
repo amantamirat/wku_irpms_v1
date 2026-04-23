@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 
-import { verifyActiveAccount, checkPermission, checkTransitionPermission } from "../../users/auth/auth.middleware";
+import { verifyActiveAccount, checkPermission, checkTransitionPermission } from "../../auth/auth.middleware";
 import { GrantAllocationService } from "./grant.allocation.service";
 import { GrantAllocationRepository } from "./grant.allocation.repository";
 import { GrantRepository } from "../grant.repository";

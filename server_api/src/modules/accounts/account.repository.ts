@@ -1,53 +1,54 @@
 import mongoose, { FilterQuery } from "mongoose";
-import { User, IUser } from "./user.model";
-import { CreateUserDTO, UpdateUserDTO } from "./user.dto";
+import { CreateAccountDTO, UpdateAccountDTO } from './account.dto';
+import { IAccount, Account } from "./account.model";
 
-export interface IUserRepository {
-    create(data: CreateUserDTO): Promise<IUser>;
-    findById(id: string): Promise<IUser | null>;
-    findByEmail(email: string): Promise<IUser | null>;
-    findAll(): Promise<Partial<IUser>[]>;
-    update(id: string, data: UpdateUserDTO["data"]): Promise<IUser | null>;
-    exists(filter: Partial<IUser>): Promise<boolean>;
+
+export interface IAccountRepository {
+    create(data: CreateAccountDTO): Promise<IAccount>;
+    findById(id: string): Promise<IAccount | null>;
+    findByEmail(email: string): Promise<IAccount | null>;
+    findAll(): Promise<Partial<IAccount>[]>;
+    update(id: string, data: UpdateAccountDTO["data"]): Promise<IAccount | null>;
+    exists(filter: Partial<IAccount>): Promise<boolean>;
     delete(id: string): Promise<void>;
 }
 
-export class UserRepository implements IUserRepository {
+export class AccountRepository implements IAccountRepository {
 
-    async create(dto: CreateUserDTO) {
-        const data: Partial<IUser> = {
+    async create(dto: CreateAccountDTO) {
+        const data: Partial<IAccount> = {
             applicant: new mongoose.Types.ObjectId(dto.applicant),
             password: dto.password,
             email: dto.email,
             status: dto.status,
             //createdBy: new mongoose.Types.ObjectId(dto.createdBy)
         };
-        const created = await User.create(data);
+        const created = await Account.create(data);
         return created.toObject();
     }
 
 
     async findById(id: string) {
-        return User.findById(new mongoose.Types.ObjectId(id))
-            .lean<IUser>()
+        return Account.findById(new mongoose.Types.ObjectId(id))
+            .lean<IAccount>()
             .exec();
     }
 
-    async findByEmail(email: string): Promise<IUser | null> {
-        return await User.findOne(
+    async findByEmail(email: string): Promise<IAccount | null> {
+        return await Account.findOne(
             { email }
         ).select('+password').lean();
     }
 
     async findAll() {
         const filter: any = {};
-        return User.find(filter).populate("applicant")
+        return Account.find(filter).populate("applicant")
             //.populate("roles").populate("organizations")
-            .lean<IUser[]>()
+            .lean<IAccount[]>()
             .exec();
     }
 
-    async update(id: string, dtoData: UpdateUserDTO["data"]) {
+    async update(id: string, dtoData: UpdateAccountDTO["data"]) {
         const toUpdate: any = {};
 
         if (dtoData.password) {
@@ -74,20 +75,20 @@ export class UserRepository implements IUserRepository {
             toUpdate.status = dtoData.status;
         }
 
-        return await User.findByIdAndUpdate(
+        return await Account.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: toUpdate },
             { new: true }
-        ).lean<IUser>();
+        ).lean<IAccount>();
 
     }
 
-    async exists(filter: FilterQuery<IUser>): Promise<boolean> {
-        const result = await User.exists(filter);
+    async exists(filter: FilterQuery<IAccount>): Promise<boolean> {
+        const result = await Account.exists(filter);
         return result !== null;
     }
 
     async delete(id: string) {
-        await User.findByIdAndDelete(new mongoose.Types.ObjectId(id)).exec();
+        await Account.findByIdAndDelete(new mongoose.Types.ObjectId(id)).exec();
     }
 }

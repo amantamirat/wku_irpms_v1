@@ -1,7 +1,7 @@
 import express from "express";
 import { upload } from "../../../util/multer";
 import { GrantStageRepository } from "../../grants/stages/grant.stage.repository";
-import { checkPermission, checkTransitionPermission, verifyActiveAccount } from "../../users/auth/auth.middleware";
+import { checkPermission, checkTransitionPermission, verifyActiveAccount } from "../../auth/auth.middleware";
 import { ProjectRepository } from "../project.repository";
 import { ProjectStageController } from "./project.stage.controller";
 import { ProjectStageRepository } from "./project.stage.repository";

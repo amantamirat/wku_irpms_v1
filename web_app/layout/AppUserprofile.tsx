@@ -1,6 +1,6 @@
 import ApplicantDetailDialog from "@/app/(main)/applicants/components/dialogs/ApplicantDetailDialog";
 import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
-import SaveDialog from "@/app/(main)/users/components/SaveUser";
+import SaveDialog from "@/app/(main)/accounts/components/SaveAccount";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";

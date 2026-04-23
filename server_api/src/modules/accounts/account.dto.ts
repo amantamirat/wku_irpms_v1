@@ -1,14 +1,14 @@
-import { UserStatus } from "./user.state-machine";
+import { AccountStatus } from './account.model';
 
 
-export interface CreateUserDTO {
+export interface CreateAccountDTO {
     applicant: string;
     email: string;
     password: string;
-    status?: UserStatus;
+    status?: AccountStatus;
 }
 
-export interface UpdateUserDTO {
+export interface UpdateAccountDTO {
     id: string;
     data: Partial<{
         password: string;
@@ -17,18 +17,14 @@ export interface UpdateUserDTO {
         lockUntil: Date | null;
         resetCode: string;
         resetCodeExpires: Date;
-        status: UserStatus;
+        status: AccountStatus;
     }>;
     userId?: string;
 }
 
 
-
-
-
-export interface VerfyUserDto {
+export interface VerfyAccountDto {
     email: string;
     password?: string;
     resetCode: string;
 }
-

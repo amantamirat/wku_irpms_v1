@@ -8,7 +8,7 @@ import { LayoutContext } from '../../../../layout/context/layoutcontext';
 import { useContext } from 'react';
 import { Messages } from 'primereact/messages';
 import NoAuthGuard from '@/components/NoAuthGuard';
-import { UserApi } from '@/app/(main)/users/api/user.api';
+import { AccountApi } from '@/app/(main)/accounts/api/account.api';
 import { AuthApi } from '../api/auth.service';
 
 export default function ForgotPassword() {

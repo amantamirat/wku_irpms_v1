@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { StageController } from './call.stage.controller';
 import { PERMISSIONS } from '../../../common/constants/permissions';
-import { verifyActiveAccount, checkPermission, checkStatusPermission, checkTransitionPermission } from '../../users/auth/auth.middleware';
+import { verifyActiveAccount, checkPermission, checkStatusPermission, checkTransitionPermission } from '../../auth/auth.middleware';
 import { StageService } from './call.stage.service';
 import { EvaluationRepository } from '../../evaluations/evaluation.repository';
 import { ProjectStageRepository } from '../../projects/stages/project.stage.repository';

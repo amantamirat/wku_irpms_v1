@@ -5,7 +5,7 @@ import {
     UpdatePublicationDTO
 } from './publication.dto';
 import { successResponse, errorResponse } from '../../../common/helpers/response';
-import { AuthenticatedRequest } from '../../users/auth/auth.middleware';
+import { AuthenticatedRequest } from '../../auth/auth.middleware';
 import { AppError } from '../../../common/errors/app.error';
 import { ERROR_CODES } from '../../../common/errors/error.codes';
 

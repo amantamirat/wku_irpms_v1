@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { successResponse, errorResponse } from "../../../common/helpers/response";
-import { VerfyUserDto } from "../user.dto";
+import { successResponse, errorResponse } from "../../common/helpers/response";
+import { VerfyAccountDto } from '../accounts/account.dto';
 import { AuthenticatedRequest } from "./auth.middleware";
 import { AuthService } from "./auth.service";
 import { ChangePasswordDTO, LoginDto } from "./auth.dto";
 
-export class AuthController {  
+export class AuthController {
 
   constructor(private readonly service: AuthService) { }
 
@@ -57,7 +57,7 @@ export class AuthController {
   resetPassword = async (req: Request, res: Response) => {
     try {
 
-      const data: VerfyUserDto = req.body;
+      const data: VerfyAccountDto = req.body;
 
       await this.service.resetPassword(data);
 
@@ -71,7 +71,7 @@ export class AuthController {
   activateUser = async (req: Request, res: Response) => {
     try {
 
-      const data: VerfyUserDto = req.body;
+      const data: VerfyAccountDto = req.body;
 
       await this.service.activateUser(data);
 

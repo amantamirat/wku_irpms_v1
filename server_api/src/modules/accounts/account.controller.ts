@@ -1,27 +1,24 @@
-import { Request, Response } from 'express';
+import { Response, Request } from 'express';
 import { DeleteDto } from '../../common/dtos/delete.dto';
-import { errorResponse, successResponse } from '../../common/helpers/response';
-import {
-  CreateUserDTO,
-  UpdateUserDTO,
-} from './user.dto';
-import { AuthenticatedRequest } from './auth/auth.middleware';
-import { UserService } from './user.service';
-
 import { TransitionRequestDto } from '../../common/dtos/transition.dto';
 import { ERROR_CODES } from '../../common/errors/error.codes';
+import { successResponse, errorResponse } from '../../common/helpers/response';
+import { AuthenticatedRequest } from '../auth/auth.middleware';
+import { CreateAccountDTO, UpdateAccountDTO } from './account.dto';
+import { AccountService } from './account.service';
 
-export class UserController {
 
-  private service: UserService;
+export class AccountController {
 
-  constructor(service?: UserService) {
-    this.service = service || new UserService();
+  private service: AccountService;
+
+  constructor(service?: AccountService) {
+    this.service = service || new AccountService();
   }
 
   create = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const dto: CreateUserDTO = req.body;
+      const dto: CreateAccountDTO = req.body;
       const created = await this.service.create(dto);
       successResponse(res, 201, 'User created successfully', created);
     } catch (err: any) {
@@ -31,7 +28,7 @@ export class UserController {
 
   get = async (req: Request, res: Response) => {
     try {
-      const users = await this.service.getUsers();
+      const users = await this.service.getAll();
       successResponse(res, 200, 'Users fetched successfully', users);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
@@ -43,7 +40,7 @@ export class UserController {
       if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
       const { id } = req.query;
       const { password } = req.body;
-      const dto: UpdateUserDTO = {
+      const dto: UpdateAccountDTO = {
         id: id as string,
         data: { password },
         userId: req.user.applicantId,

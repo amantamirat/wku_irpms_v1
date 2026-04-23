@@ -2,7 +2,7 @@ import { Router } from "express";
 import { SettingController } from "./setting.controller";
 import { SettingService } from "./setting.service";
 import { SettingRepository } from "./setting.repository";
-import { checkPermission, verifyActiveAccount } from "../users/auth/auth.middleware";
+import { checkPermission, verifyActiveAccount } from "../auth/auth.middleware";
 
 const router = Router();
 

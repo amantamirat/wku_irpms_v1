@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { successResponse, errorResponse } from "../../common/helpers/response";
-import { AuthenticatedRequest } from "../users/auth/auth.middleware";
+import { AuthenticatedRequest } from "../auth/auth.middleware";
 import { CreateEvaluationDTO, GetEvaluationsDTO, UpdateEvaluationDTO } from "./evaluation.dto";
 import { EvaluationService } from "./evaluation.service";
 import { ERROR_CODES } from '../../common/errors/error.codes';

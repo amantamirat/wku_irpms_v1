@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { CallService } from './call.service';
 import { CreateCallDTO, UpdateCallDTO } from './call.dto';
-import { AuthenticatedRequest } from '../users/auth/auth.middleware';
+import { AuthenticatedRequest } from '../auth/auth.middleware';
 import { successResponse, errorResponse } from '../../common/helpers/response';
 import { CallStatus } from './call.status';
 import { TransitionRequestDto } from '../../common/dtos/transition.dto';

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
 import { GrantAllocationRepository } from '../grants/allocations/grant.allocation.repository';
 import { GrantStageRepository } from '../grants/stages/grant.stage.repository';
-import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
+import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../auth/auth.middleware';
 import { CallController } from './call.controller';
 import { CallRepository } from './call.repository';
 import { CallService } from './call.service';

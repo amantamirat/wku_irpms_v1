@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { GrantService } from './grant.service';
 import { CreateGrantDTO, GetGrantsDTO, UpdateGrantDTO } from './grant.dto';
-import { AuthenticatedRequest } from '../users/auth/auth.middleware';
+import { AuthenticatedRequest } from '../auth/auth.middleware';
 import { successResponse, errorResponse } from '../../common/helpers/response';
 import { ERROR_CODES } from '../../common/errors/error.codes';
 import { TransitionRequestDto } from '../../common/dtos/transition.dto';

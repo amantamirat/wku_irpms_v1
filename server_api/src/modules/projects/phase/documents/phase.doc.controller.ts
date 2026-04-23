@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { errorResponse, successResponse } from "../../../../common/helpers/response";
-import { AuthenticatedRequest } from "../../../users/auth/auth.middleware";
+import { AuthenticatedRequest } from "../../../auth/auth.middleware";
 import { CreatePhaseDocDTO, GetPhaseDocDTO } from "./phase.doc.dto";
 import { PhaseDocService } from "./phase.doc.service";
 import { AppError } from "../../../../common/errors/app.error";

@@ -1,4 +1,4 @@
-import { UserStatus } from "../user.state-machine";
+import { AccountStatus } from '../accounts/account.model';
 
 export interface LoginDto {
     email: string;
@@ -8,7 +8,7 @@ export interface LoginDto {
 export default interface JwtPayload {
     applicantId: string;
     email: string;
-    status: UserStatus;
+    status: AccountStatus;
     iat?: number;
     exp?: number;
 }

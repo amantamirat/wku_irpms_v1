@@ -1,13 +1,13 @@
 import dotenv from 'dotenv';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { CacheService } from '../../../util/cache.service';
-import { errorResponse } from '../../../common/helpers/response';
+import { CacheService } from '../../util/cache.service';
+import { errorResponse } from '../../common/helpers/response';
 import JwtPayload from './auth.dto';
-import { UserStatus } from '../user.state-machine';
-import { ERROR_CODES } from '../../../common/errors/error.codes';
-import { Action } from '../../../common/constants/permissions';
-import { Unit } from '../../../common/constants/enums';
+import { AccountStatus } from '../accounts/account.model';
+import { ERROR_CODES } from '../../common/errors/error.codes';
+import { Action } from '../../common/constants/permissions';
+import { Unit } from '../../common/constants/enums';
 
 dotenv.config();
 
@@ -26,7 +26,7 @@ export const verifyActiveAccount = (req: AuthenticatedRequest, res: Response, ne
 
     const decoded = jwt.verify(token, process.env.KEY as string) as JwtPayload;
 
-    if (decoded.status !== UserStatus.active) {
+    if (decoded.status !== AccountStatus.active) {
       return errorResponse(res, 403, "Account is not active. Please activate or contact admin.");
     }
 

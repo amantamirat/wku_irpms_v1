@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { ThematicService } from './thematic.service';
 import { CreateThematicDTO, UpdateThematicDTO } from './thematic.dto';
-import { AuthenticatedRequest } from '../users/auth/auth.middleware';
+import { AuthenticatedRequest } from '../auth/auth.middleware';
 import { successResponse, errorResponse } from '../../common/helpers/response';
 import { TransitionRequestDto } from '../../common/dtos/transition.dto';
 import { ERROR_CODES } from '../../common/errors/error.codes';

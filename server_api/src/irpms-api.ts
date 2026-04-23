@@ -38,13 +38,13 @@ import projectStageRoutes from './modules/projects/stages/project.stage.routes';
 import reviewerRoutes from './modules/reviewers/reviewer.routes';
 import resultRoutes from './modules/reviewers/results/result.routes';
 
-import userRoutes from './modules/users/user.routes';
+import accountRoutes from './modules/accounts/account.routes';
 import reportRoutes from './modules/reports/report.routes';
 
 import settingRoutes from './modules/settings/setting.routes';
 import permissionRoutes from './modules/permissions/permission.routes';
 import roleRoutes from './modules/permissions/roles/role.routes';
-import authRoutes from './modules/users/auth/auth.routes';
+import authRoutes from './modules/auth/auth.routes';
 import notificationRoutes from './modules/notifications/notification.routes';
 
 import path from 'path';
@@ -64,7 +64,7 @@ app.use("/api/notifications", notificationRoutes);
 
 
 
-app.use("/api/users", userRoutes);
+app.use("/api/accounts", accountRoutes);
 
 app.use("/api/auth", authRoutes);
 

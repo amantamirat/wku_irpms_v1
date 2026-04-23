@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
 import { GrantAllocationRepository } from '../grants/allocations/grant.allocation.repository';
-import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
+import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../auth/auth.middleware';
 import { CalendarController } from './calendar.controller';
 import { CalendarRepository } from './calendar.repository';
 import { CalendarService } from './calendar.service';

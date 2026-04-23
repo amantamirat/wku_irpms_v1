@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { errorResponse, successResponse } from "../../../common/helpers/response";
-import { AuthenticatedRequest } from "../../users/auth/auth.middleware";
+import { AuthenticatedRequest } from "../../auth/auth.middleware";
 import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto } from "./phase.dto";
 import { PhaseService } from "./phase.service";
 import { ERROR_CODES } from "../../../common/errors/error.codes";

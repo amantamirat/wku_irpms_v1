@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
 import { IOrganizationRepository, OrganizationRepository } from '../organization/organization.repository';
 import { IThematicRepository, ThematicRepository } from '../thematics/thematic.repository';
-import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../users/auth/auth.middleware';
+import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../auth/auth.middleware';
 import { GrantAllocationRepository } from './allocations/grant.allocation.repository';
 import { CompositionRepository, ICompositionRepository } from './compositions/composition.repository';
 import { ConstraintRepository, IConstraintRepository } from './constraints/constraint.repository';
