@@ -14,7 +14,7 @@ import { classNames } from 'primereact/utils';
 import { Composition, OperationMode } from '../models/composition.model';
 import { CompositionApi } from '../api/composition.api';
 import { validateComposition } from '../models/composition.model';
-import { genderOptions } from '@/app/(main)/applicants/models/applicant.model';
+import { genderOptions } from '@/app/(main)/users/models/user.model';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
 
 const SaveComposition = ({

@@ -1,6 +1,6 @@
 'use client';
 
-import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
+import { User } from "@/app/(main)/users/models/user.model";
 import { createEntityManager } from "@/components/createEntityManager";
 import { useAuth } from "@/contexts/auth-context";
 import MyBadge from "@/templates/MyBadge";
@@ -16,7 +16,7 @@ import SaveReviewerDialog from "./SaveReviewerDialog";
 
 interface ReviewerManagerProps {
     projectStage?: ProjectStage;
-    applicant?: Applicant;
+    applicant?: User;
 }
 
 const ReviewerManager = ({ projectStage, applicant }: ReviewerManagerProps) => {

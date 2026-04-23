@@ -1,6 +1,6 @@
-import { Gender, Accessibility } from "@/app/(main)/applicants/models/applicant.model";
-import { Position } from "@/app/(main)/applicants/positions/models/position.model";
-import { PublicationType } from "@/app/(main)/applicants/publications/models/publication.model";
+import { Gender, Accessibility } from "@/app/(main)/users/models/user.model";
+import { Position } from "@/app/(main)/users/positions/models/position.model";
+import { PublicationType } from "@/app/(main)/users/publications/models/publication.model";
 import { AcademicLevel } from "@/app/(main)/organizations/models/organization.model";
 import { Specialization } from "@/app/(main)/specializations/models/specialization.model";
 import { Grant } from "../../models/grant.model";

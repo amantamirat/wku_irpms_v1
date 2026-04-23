@@ -1,8 +1,8 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
-import { Accessibility, Gender } from "../../applicants/applicant.enum";
+import { Accessibility, Gender } from "../../users/user.model";
 import { AcademicLevel } from "../../../common/constants/enums";
-import { PublicationType } from "../../applicants/publications/publication.model";
+import { PublicationType } from "../../users/publications/publication.model";
 import { IRange, RangeSchema } from "./range.model";
 
 export enum OperationMode {

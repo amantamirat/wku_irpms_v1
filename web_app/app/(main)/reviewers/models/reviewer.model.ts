@@ -1,4 +1,4 @@
-import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
+import { User } from "@/app/(main)/users/models/user.model";
 import { ProjectStage } from "../../projects/stages/models/project.stage.model";
 
 export enum ReviewerStatus {
@@ -11,7 +11,7 @@ export enum ReviewerStatus {
 export type Reviewer = {
     _id?: string;
     projectStage?: string | ProjectStage;
-    applicant?: string | Applicant;
+    applicant?: string | User;
     weight?: number;
     score?: number;
     status: ReviewerStatus;
@@ -21,7 +21,7 @@ export type Reviewer = {
 
 
 export interface GetReviewersOptions {
-    applicant?: string | Applicant;
+    applicant?: string | User;
     projectStage?: string | ProjectStage;
     populate?: boolean;
 }
@@ -45,7 +45,7 @@ export const sanitizeReviewer = (reviewer: Partial<Reviewer>): Reviewer => {
                 : reviewer.projectStage,
         applicant:
             typeof reviewer.applicant === "object" && reviewer.applicant !== null
-                ? (reviewer.applicant as Applicant)._id
+                ? (reviewer.applicant as User)._id
                 : reviewer.applicant,
     } as Reviewer;
 };

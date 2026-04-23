@@ -1,4 +1,4 @@
-import { Applicant } from "../../applicants/models/applicant.model";
+import { User } from "../../users/models/user.model";
 import { Call } from "../../calls/models/call.model";
 import { GrantAllocation } from "../../grants/allocations/models/grant.allocation.model";
 import { Grant } from "../../grants/models/grant.model";
@@ -24,7 +24,7 @@ export type Project = {
     title: string;
     summary?: string;
     status?: ProjectStatus;
-    applicant?: string | Applicant;
+    applicant?: string | User;
     totalBudget?: number;
     totalDuration?: number;
     themes?: Theme[] | string[];
@@ -40,7 +40,7 @@ export type Project = {
 
 export interface GetProjectsOptions {
     grantAllocation?: string | GrantAllocation;
-    applicant?: string | Applicant;
+    applicant?: string | User;
     workspace?: string | Organization;
     calendar?: string;
     grant?: string;

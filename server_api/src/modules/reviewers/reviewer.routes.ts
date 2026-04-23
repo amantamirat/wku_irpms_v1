@@ -3,7 +3,7 @@ import { ReviewerController } from './reviewer.controller';
 import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../auth/auth.middleware';
 import { PERMISSIONS } from '../../common/constants/permissions';
 import { ReviewerRepository } from './reviewer.repository';
-import { ApplicantRepository } from '../applicants/applicant.repository';
+import { UserRepository } from '../users/user.repository';
 import { CollaboratorRepository } from '../projects/collaborators/collaborator.repository';
 import { ProjectStageRepository } from '../projects/stages/project.stage.repository';
 import { SettingRepository } from '../settings/setting.repository';
@@ -17,7 +17,7 @@ import { NotificationRepository } from '../notifications/notification.repository
 
 const repo = new ReviewerRepository();
 const psRepo = new ProjectStageRepository();
-const appRepo = new ApplicantRepository();
+const appRepo = new UserRepository();
 const collabRepo = new CollaboratorRepository();
 const resultRepo = new ResultRepository();
 const criterionRepo = new CriterionRepository();

@@ -43,6 +43,7 @@ export function createEntityManager<
     }
 
     toolbarEnd?: React.ReactNode;
+    extraActions?: RowAction<T>[];
 
     disableEditRow?: (row: T) => boolean;
     disableDeleteRow?: (row: T) => boolean;
@@ -126,8 +127,8 @@ export function createEntityManager<
             if (ok) removeItem(row)
         }
 
-        const defaultActions: RowAction<T>[] = [
-            // Pencil / Edit Action
+        const builtInActions: RowAction<T>[] = [
+            // Edit
             ...(!config.hideEditAction && !config.hideDefaultActions ? [{
                 icon: "pi pi-pencil",
                 severity: "success" as const,
@@ -139,7 +140,7 @@ export function createEntityManager<
                 }
             }] : []),
 
-            // Trash / Delete Action
+            // Delete
             ...(!config.hideDeleteAction && !config.hideDefaultActions ? [{
                 icon: "pi pi-trash",
                 severity: "danger" as const,
@@ -151,6 +152,11 @@ export function createEntityManager<
                         onConfirmAsync: () => deleteItem(row)
                     })
             }] : [])
+        ];
+
+        const actions: RowAction<T>[] = [
+            ...(config.extraActions ?? []),
+            ...builtInActions
         ];
 
         let columns = [...config.columns];
@@ -216,7 +222,7 @@ export function createEntityManager<
                     error={error}
                     enableSearch
                     hasPermission={hasPermission}
-                    actions={defaultActions}
+                    actions={actions}
                     onCreate={canCreate ? handleCreate : undefined}
                     expandable={config.expandable}
                     toolbarEnd={toolbarEnd}

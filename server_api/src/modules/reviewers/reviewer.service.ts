@@ -1,7 +1,7 @@
 // reviewer.service.ts
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
-import { IApplicantRepository } from "../applicants/applicant.repository";
+import { IUserRepository } from "../users/user.repository";
 import { ICollaboratorRepository } from "../projects/collaborators/collaborator.repository";
 import { IProjectStageRepository } from "../projects/stages/project.stage.repository";
 import { ProjectStageStatus } from "../projects/stages/project.stage.status";
@@ -25,7 +25,7 @@ export class ReviewerService {
     constructor(
         private readonly repository: IReviewerRepository,
         private readonly projectStageRepo: IProjectStageRepository,
-        private readonly applicantRepo: IApplicantRepository,
+        private readonly applicantRepo: IUserRepository,
         private readonly collaboratorRepo: ICollaboratorRepository,
         private readonly resultRepo: IResultRepository,
         private readonly criterionRepo: ICriterionRepository,

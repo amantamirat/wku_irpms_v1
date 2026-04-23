@@ -1,6 +1,6 @@
-import { Accessibility, Gender } from "../../applicants/applicant.enum";
+import { Accessibility, Gender } from "../../users/user.model";
 import { AcademicLevel } from "../../../common/constants/enums";
-import { PublicationType } from "../../applicants/publications/publication.model";
+import { PublicationType } from "../../users/publications/publication.model";
 
 // Sub-DTO for ranges
 export interface RangeDTO {

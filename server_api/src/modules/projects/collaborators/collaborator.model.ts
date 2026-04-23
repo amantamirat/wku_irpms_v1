@@ -29,7 +29,7 @@ const CollaboratorSchema = new Schema<ICollaborator>({
     },
     applicant: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.APPLICANT,
+        ref: COLLECTIONS.USER,
         immutable: true,
         required: true
     },

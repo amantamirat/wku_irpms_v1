@@ -4,7 +4,7 @@ export enum COLLECTIONS {
   ACCOUNT = "accounts",
 
   ORGANIZATION = "organizations",
-  APPLICANT = "applicants",
+  USER = "users",
   PUBLICATION = "publications",
   SPECIALIZATION = "specializations",
   POSITION = "positions",

@@ -3,7 +3,7 @@ import { SYSTEM } from "../../../common/constants/system.constant";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { ApplicantRepository } from "../../applicants/applicant.repository";
+import { UserRepository } from "../../users/user.repository";
 import { CallRepository, ICallRepository } from "../../calls/call.repository";
 import { CallStatus } from "../../calls/call.status";
 import { ICallStageRepository } from "../../calls/stages/call.stage.repository";
@@ -29,7 +29,7 @@ export class ProjectStageOldService {
         private readonly projectRepository: IProjectRepository,
         private readonly stageRepository: ICallStageRepository,
         private readonly callRepository: ICallRepository = new CallRepository(),
-        private readonly appRepository = new ApplicantRepository(),
+        private readonly appRepository = new UserRepository(),
         //private readonly themeRepository = new ThemeRepository(),
         // private readonly projectThemeRepository = new ProjectThemeRepository(),
         private readonly collabRepository = new CollaboratorRepository(),

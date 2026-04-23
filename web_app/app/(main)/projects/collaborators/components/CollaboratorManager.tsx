@@ -7,11 +7,11 @@ import { Badge } from "primereact/badge";
 import { Project } from "../../models/project.model";
 import { COLLAB_STATUS_ORDER, COLLAB_TRANSITIONS } from "../models/collaborator.state-machine";
 import SaveCollaborator from "./SaveCollaborator";
-import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
+import { User } from "@/app/(main)/users/models/user.model";
 
 interface CollaboratorManagerProps {
     project?: Project;
-    applicant?: Applicant;
+    applicant?: User;
 }
 
 const CollaboratorManager = ({ project, applicant }: CollaboratorManagerProps) => {

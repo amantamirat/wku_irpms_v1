@@ -12,8 +12,8 @@ import { classNames } from 'primereact/utils';
 
 import { Project, validateProject } from '../models/project.model';
 import { ProjectApi } from '../api/project.api';
-import { ApplicantApi } from '../../applicants/api/applicant.api';
-import { Applicant } from '../../applicants/models/applicant.model';
+import { UserApi } from '../../users/api/user.api';
+import { User } from '../../users/models/user.model';
 import { ThemeApi } from '@/app/(main)/thematics/themes/api/theme.api';
 import { Theme } from '@/app/(main)/thematics/themes/models/theme.model';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';

@@ -2,8 +2,8 @@ import bcrypt from "bcryptjs";
 import fs from 'fs/promises';
 import path from 'path';
 import { Unit } from '../common/constants/enums';
-import { Gender } from "../modules/applicants/applicant.enum";
-import { ApplicantRepository } from "../modules/applicants/applicant.repository";
+import { Gender } from "../modules/users/user.model";
+import { UserRepository } from "../modules/users/user.repository";
 import { Ownership } from '../modules/organization/organization.enum';
 import { OrganizationRepository } from '../modules/organization/organization.repository';
 import { PermissionRepository } from "../modules/permissions/permission.repository";
@@ -19,7 +19,7 @@ export class SeedService {
         private permissionRepo: PermissionRepository = new PermissionRepository(),
         private roleRepo = new RoleRepository(),
         private userRepo = new AccountRepository(),
-        private applicantRepo = new ApplicantRepository(),
+        private applicantRepo = new UserRepository(),
         private organizationRepo = new OrganizationRepository()
     ) { }
 

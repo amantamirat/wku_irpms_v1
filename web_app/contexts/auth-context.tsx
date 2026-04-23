@@ -1,6 +1,6 @@
 'use client';
 import { AuthApi } from '@/app/(full-page)/auth/api/auth.service';
-import { IOwnership } from '@/app/(main)/applicants/models/applicant.model';
+import { IOwnership } from '@/app/(main)/users/models/user.model';
 import { OrgnUnit } from '@/app/(main)/organizations/models/organization.model';
 import { Account } from '@/app/(main)/accounts/models/account.model';
 import React, { createContext, useContext, useEffect, useState } from 'react';

@@ -51,7 +51,7 @@ const ProjectSchema = new Schema<IProject>({
     },
     applicant: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.APPLICANT,
+        ref: COLLECTIONS.USER,
         required: true
     },
     themes: [{

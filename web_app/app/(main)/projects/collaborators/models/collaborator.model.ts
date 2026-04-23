@@ -1,4 +1,4 @@
-import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
+import { User } from "@/app/(main)/users/models/user.model";
 import { Project } from "../../models/project.model";
 
 export enum CollaboratorStatus {
@@ -9,7 +9,7 @@ export enum CollaboratorStatus {
 export type Collaborator = {
     _id?: string;
     project?: string | Project;
-    applicant?: string | Applicant;
+    applicant?: string | User;
     role?: string;
     isLeadPI?: boolean;
     status?: CollaboratorStatus;
@@ -19,7 +19,7 @@ export type Collaborator = {
 
 export interface GetCollaboratorsOptions {
     project?: string | Project;
-    applicant?: string | Applicant;
+    applicant?: string | User;
     populate?: boolean;
 }
 
@@ -32,7 +32,7 @@ export const sanitizeCollaborator = (collaborator: Partial<Collaborator>): Colla
                 : collaborator.project,
         applicant:
             typeof collaborator.applicant === "object" && collaborator.applicant !== null
-                ? (collaborator.applicant as Applicant)._id
+                ? (collaborator.applicant as User)._id
                 : collaborator.applicant,
     } as Collaborator;
 }

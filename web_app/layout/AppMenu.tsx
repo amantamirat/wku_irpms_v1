@@ -200,24 +200,24 @@ const AppMenu = () => {
             ]
         },
         {
-            label: 'Account',
+            label: 'User Accounts',
             visible: hasPermission(
                 [
                     "account:create",
                     PERMISSIONS.ROLE.CREATE,
-                    PERMISSIONS.APPLICANT.CREATE
+                    "user:create"
                 ]
             ),
             items: [
                 {
-                    label: 'Applicants',
+                    label: 'Users',
                     icon: PrimeIcons.USERS,
                     visible: hasPermission(
                         [
-                            PERMISSIONS.APPLICANT.CREATE,
+                            "user:create",
                         ]
                     ),
-                    to: '/applicants',
+                    to: '/users',
                 },
                 {
                     label: 'Accounts',

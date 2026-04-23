@@ -1,4 +1,4 @@
-import { IOwnership } from "../modules/applicants/applicant.model";
+import { IOwnership } from "../modules/users/user.model";
 
 import NodeCache from "node-cache";
 

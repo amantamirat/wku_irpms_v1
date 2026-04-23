@@ -8,8 +8,8 @@ import { Checkbox } from 'primereact/checkbox';
 import { Message } from 'primereact/message';
 import { classNames } from 'primereact/utils';
 import { Project } from '../../models/project.model';
-import { Applicant } from '@/app/(main)/applicants/models/applicant.model';
-import { ApplicantApi } from '@/app/(main)/applicants/api/applicant.api';
+import { User } from '@/app/(main)/users/models/user.model';
+import { UserApi } from '@/app/(main)/users/api/user.api';
 import { roleOptions } from '../../collaborators/models/collaborator.model';
 import { Constraint, ProjectConstraintType } from '@/app/(main)/grants/constraints/models/constraint.model';
 
@@ -22,7 +22,7 @@ interface CollaboratorsStepProps {
 }
 
 export const CollaboratorsStep = ({ data, constraints, onUpdate, onNext, onBack }: CollaboratorsStepProps) => {
-    const [applicants, setApplicants] = useState<Applicant[]>([]);
+    const [applicants, setApplicants] = useState<User[]>([]);
     const [loading, setLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
 
@@ -30,7 +30,7 @@ export const CollaboratorsStep = ({ data, constraints, onUpdate, onNext, onBack 
         const fetchApplicants = async () => {
             setLoading(true);
             try {
-                const res = await ApplicantApi.getAll({});
+                const res = await UserApi.getAll({});
                 setApplicants(res);
             } catch (err) {
                 console.error("Failed to fetch applicants", err);

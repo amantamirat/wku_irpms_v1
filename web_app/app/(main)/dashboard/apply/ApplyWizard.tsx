@@ -6,7 +6,7 @@ import { Dialog } from "primereact/dialog";
 import { Steps } from "primereact/steps";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
-import { Applicant } from "../../applicants/models/applicant.model";
+import { User } from "../../users/models/user.model";
 import { Call } from "../../calls/models/call.model";
 import { Collaborator } from "../../projects/collaborators/models/collaborator.model";
 import UploadForm from "../../projects/components/UploadForm";
@@ -48,13 +48,13 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
     }
 
     const addCollaborator = (collaborator: Collaborator) => {
-        const applicant = collaborator.applicant as Applicant;
+        const applicant = collaborator.applicant as User;
         if (!applicant || !applicant._id) {
             throw new Error("Please select a valid collaborator.");
         }
         const exists =
             project.collaborators?.some(
-                (c) => (c.applicant as Applicant)._id === applicant._id
+                (c) => (c.applicant as User)._id === applicant._id
             ) ?? false;
 
         if (exists) {
@@ -66,7 +66,7 @@ const ApplyWizard = ({ visible, call, onCancel }: ApplyWizardProps) => {
 
     const removeCollaborator = (collaborator: Collaborator) => {
         const updatedCollaborators = project.collaborators?.filter(
-            (c) => (c.applicant as Applicant)._id !== (collaborator.applicant as Applicant)._id
+            (c) => (c.applicant as User)._id !== (collaborator.applicant as User)._id
         ) || [];
         setProject({ ...project, collaborators: updatedCollaborators });
     };

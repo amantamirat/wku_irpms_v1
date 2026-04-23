@@ -8,9 +8,9 @@ import { Toast } from "primereact/toast";
 import { InputNumber } from "primereact/inputnumber";
 import { classNames } from "primereact/utils";
 
-import { ApplicantApi } from "@/app/(main)/applicants/api/applicant.api";
-import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
-import { applicantTemplate } from "@/app/(main)/applicants/models/applicant.template";
+import { UserApi } from "@/app/(main)/users/api/user.api";
+import { User } from "@/app/(main)/users/models/user.model";
+import { userTemplate } from "@/app/(main)/users/models/user.template";
 import { ReviewerApi } from "../api/reviewer.api";
 import { Reviewer, validateReviewer } from "../models/reviewer.model";
 import { EntitySaveDialogProps } from "@/components/createEntityManager";
@@ -25,7 +25,7 @@ const SaveReviewerDialog = ({
     const toast = useRef<Toast>(null);
 
     const [localReviewer, setLocalReviewer] = useState<Reviewer>({ ...item });
-    const [applicants, setApplicants] = useState<Applicant[]>([]);
+    const [applicants, setApplicants] = useState<User[]>([]);
     const [submitted, setSubmitted] = useState(false);
 
     const isEditMode = !!item?._id;
@@ -40,7 +40,7 @@ const SaveReviewerDialog = ({
             try {
                 if (visible) {
                     // Fetching all applicants directly as requested (no workspace filter)
-                    const data = await ApplicantApi.getAll({});
+                    const data = await UserApi.getAll({});
                     setApplicants(data);
                 }
             } catch (err) {
@@ -132,9 +132,9 @@ const SaveReviewerDialog = ({
                                 onChange={(e) => setLocalReviewer({ ...localReviewer, applicant: e.value })}
                                 dataKey="_id"
                                 optionLabel="first_name"
-                                itemTemplate={applicantTemplate}
+                                itemTemplate={userTemplate}
                                 valueTemplate={(option) =>
-                                    option ? applicantTemplate(option) : <span className="p-placeholder">Select a Reviewer</span>
+                                    option ? userTemplate(option) : <span className="p-placeholder">Select a Reviewer</span>
                                 }
                                 placeholder="Select an Applicant"
                                 filter

@@ -1,7 +1,7 @@
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
-import { ApplicantRepository, IApplicantRepository } from "../../applicants/applicant.repository";
+import { UserRepository, IUserRepository } from "../../users/user.repository";
 import { PermissionRepository } from "../../permissions/permission.repository";
 import { CreateRoleDto, UpdateRoleDto } from "./role.dto";
 import { RoleRepository } from "./role.repository";
@@ -12,7 +12,7 @@ export class RoleService {
 
     constructor(
         private readonly repository: RoleRepository,
-        private readonly appRepo: IApplicantRepository = new ApplicantRepository()
+        private readonly appRepo: IUserRepository = new UserRepository()
     ) {
     }
 

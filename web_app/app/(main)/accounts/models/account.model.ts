@@ -1,4 +1,4 @@
-import { Applicant } from "../../applicants/models/applicant.model";
+import { User } from "../../users/models/user.model";
 
 export enum AccountStatus {
     pending = 'pending',
@@ -8,7 +8,7 @@ export enum AccountStatus {
 
 export type Account = {
     _id?: string;
-    applicant?: string | Applicant;
+    applicant?: string | User;
     email?: string;
     password?: string;
     currentPassword?: string;
@@ -75,7 +75,6 @@ export function sanitizeAccount(user: Partial<Account>): Partial<Account> {
 
 
 export const createEmptyAccount = (): Account => ({
-
 })
 
 

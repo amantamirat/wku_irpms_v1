@@ -1,0 +1,119 @@
+import { AppError } from "../../common/errors/app.error";
+import { ERROR_CODES } from "../../common/errors/error.codes";
+import { ReviewerRepository } from "../reviewers/reviewer.repository";
+import { IOrganizationRepository, OrganizationRepository } from "../organization/organization.repository";
+import { CollaboratorRepository, ICollaboratorRepository } from "../projects/collaborators/collaborator.repository";
+import { IProjectRepository, ProjectRepository } from "../projects/project.repository";
+import { IRoleRepository, RoleRepository } from "../permissions/roles/role.repository";
+import { CreateUserDTO, UpdateUserDTO, GetUsersDTO, UpdateRolesDTO, UpdateOwnershipsDTO } from "./user.dto";
+import { IUserRepository, UserRepository } from "./user.repository";
+import { Unit } from "../../common/constants/enums";
+
+export class UserService {
+
+    constructor(
+        private repository: IUserRepository = new UserRepository(),
+        private orgnRepo: IOrganizationRepository = new OrganizationRepository(),
+        private roleRepository: IRoleRepository = new RoleRepository(),
+        private projectRepo: IProjectRepository = new ProjectRepository(),
+        private collabRepo: ICollaboratorRepository = new CollaboratorRepository(),
+        private reviewerRepo = new ReviewerRepository()
+    ) { }
+
+    async validateWorkspace(workspace: string) {
+        const organDoc = await this.orgnRepo.findById(workspace);
+        if (!organDoc) {
+            throw new Error(ERROR_CODES.WORKSPACE_NOT_FOUND);
+        }
+        if (organDoc.type !== Unit.department && organDoc.type !== Unit.external) {
+            throw new Error(ERROR_CODES.INVALID_WORKSPACE);
+        }
+    }
+    // -------------------------
+    // CREATE
+    // -------------------------
+    async create(dto: CreateUserDTO) {
+        if (!dto.workspace)
+            throw new AppError(ERROR_CODES.WORKSPACE_NOT_FOUND);
+        await this.validateWorkspace(dto.workspace);
+        const defaultRoles = await this.roleRepository.findDefaults();
+        const roles = defaultRoles.map(role => String(role._id));
+        const created = await this.repository.create({ ...dto, roles });
+        return created;
+    }
+    // -------------------------
+    // GET ALL (with optional filter)
+    // -------------------------
+    async getAll(filter: GetUsersDTO) {
+        return await this.repository.findAll(filter);
+    }
+    // -------------------------
+    // UPDATE
+    // -------------------------
+    async update(dto: UpdateUserDTO) {
+        const { id, data } = dto;
+        if (data.workspace) {
+            await this.validateWorkspace(data.workspace);
+        }
+        //check permission for roles and ownerships !!!!!!danger
+        const updated = await this.repository.update(id, data);
+        if (!updated) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
+        return updated;
+    }
+    // -------------------------
+    // UPDATE_ROLES
+    // -------------------------
+    async updateRoles(dto: UpdateRolesDTO) {
+        const updated = await this.repository.updateRoles(dto.id, dto);
+        if (!updated) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
+        return updated;
+        //if (!updated) throw new Error("User not found");
+        // Optional: audit log
+        // await AuditLog.create({ actor: dto.updatedBy, action: "user:role:update", target: userId, payload: dto.roles });
+        //return updated;
+    }
+    // -------------------------
+    // UPDATE_OWNERSHIP
+    // -------------------------
+    async updateOwnerships(dto: UpdateOwnershipsDTO) {
+        const { id, ownerships } = dto;
+        if (!ownerships || ownerships.length === 0) {
+            dto.ownerships = []
+        }
+        const unitTypes = ownerships.map(o => o.unitType);
+        if (new Set(unitTypes).size !== unitTypes.length) {
+            throw new Error("Duplicate unitType in ownerships");
+        }
+        for (const o of ownerships) {
+            if (!Object.values(Unit).includes(o.unitType)) {
+                throw new Error(`Invalid unitType: ${o.unitType}`);
+            }
+            if (o.scope !== "*" && !Array.isArray(o.scope)) {
+                throw new Error(`Invalid scope for unitType ${o.unitType}`);
+            }
+        }
+        const updated = await this.repository.updateOwnerships(id, ownerships);
+        if (!updated) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
+        return updated;
+    }
+    // -------------------------
+    // DELETE
+    // -------------------------
+    async delete(id: string) {
+        const projectExists = await this.projectRepo.exists({ applicant: id });
+        if (projectExists) {
+            throw new Error(ERROR_CODES.APPLICANT_HAS_PROJECTS);
+        };
+        const collabExist = await this.collabRepo.exists({ applicant: id });
+        if (collabExist) {
+            throw new Error(ERROR_CODES.COLLABORATOR_ALREADY_EXISTS);
+        };
+        const revExist = await this.reviewerRepo.exist({ applicant: id });
+        if (revExist) {
+            throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
+        }
+        const deleted = await this.repository.delete(id);
+        if (!deleted) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
+        return deleted;
+    }
+}

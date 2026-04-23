@@ -39,7 +39,7 @@ const AccountSchema = new Schema<IAccount>(
     },
     applicant: {
       type: Schema.Types.ObjectId,
-      ref: COLLECTIONS.APPLICANT,
+      ref: COLLECTIONS.USER,
       immutable: true,
       unique: true
     },

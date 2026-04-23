@@ -26,13 +26,13 @@ const NotificationSchema: Schema = new Schema(
     {
         recipient: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: COLLECTIONS.APPLICANT,
+            ref: COLLECTIONS.USER,
             required: true,
             index: true // Optimized for querying a specific user's alerts
         },
         sender: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: COLLECTIONS.APPLICANT,
+            ref: COLLECTIONS.USER,
         },
         title: { type: String, required: true },
         message: { type: String, required: true },

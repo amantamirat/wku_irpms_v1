@@ -3,7 +3,7 @@ import { SYSTEM } from "../../../common/constants/system.constant";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { IApplicantRepository } from "../../applicants/applicant.repository";
+import { IUserRepository } from "../../users/user.repository";
 import { IProjectRepository } from "../project.repository";
 import {
     CreateCollaboratorDto,
@@ -29,7 +29,7 @@ export class CollaboratorService {
         private readonly collabRepo: ICollaboratorRepository,
         private readonly projectRepo: IProjectRepository,
         private readonly projAuth: ProjectAuth,
-        private readonly applicantRepo: IApplicantRepository,
+        private readonly applicantRepo: IUserRepository,
         private readonly validator: ConstraintValidator,
         private readonly notificationService: NotificationService,
     ) {

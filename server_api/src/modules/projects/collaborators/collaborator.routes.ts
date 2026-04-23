@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../../common/constants/permissions';
-import { ApplicantRepository } from '../../applicants/applicant.repository';
+import { UserRepository } from '../../users/user.repository';
 import { SettingRepository } from '../../settings/setting.repository';
 import { SettingService } from '../../settings/setting.service';
 import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../../auth/auth.middleware';
@@ -18,7 +18,7 @@ import { ProjectAuth } from '../project.auth';
 const repository = new CollaboratorRepository();
 const projectRepo = new ProjectRepository();
 const projAuth = new ProjectAuth(projectRepo);
-const appRepository = new ApplicantRepository();
+const appRepository = new UserRepository();
 const notificationService = new NotificationService(
     new NotificationRepository(),
     new SettingService(new SettingRepository())

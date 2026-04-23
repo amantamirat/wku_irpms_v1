@@ -5,7 +5,7 @@ import { ProjectApi } from "../api/project.api";
 import SaveProject from "./SaveProject";
 import ProjectDetail from "./ProjectDetail";
 import { GrantAllocation } from "../../grants/allocations/models/grant.allocation.model";
-import { Applicant } from "../../applicants/models/applicant.model";
+import { User } from "../../users/models/user.model";
 import { Organization } from "../../organizations/models/organization.model";
 import MyBadge from "@/templates/MyBadge";
 import { PROJECT_STATUS_ORDER, PROJECT_TRANSITIONS } from "../models/project.state-machine";
@@ -18,7 +18,7 @@ interface ProjectManagerProps {
     grantAllocation?: GrantAllocation;
     grant?: Grant;
     calendar?: Calendar;
-    applicant?: Applicant;
+    applicant?: User;
     workspace?: Organization;
 }
 

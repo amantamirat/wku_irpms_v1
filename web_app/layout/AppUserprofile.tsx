@@ -1,5 +1,5 @@
-import ApplicantDetailDialog from "@/app/(main)/applicants/components/dialogs/ApplicantDetailDialog";
-import { Applicant } from "@/app/(main)/applicants/models/applicant.model";
+import ApplicantDetailDialog from "@/app/(main)/users/components/dialogs/ApplicantDetailDialog";
+import { User } from "@/app/(main)/users/models/user.model";
 import SaveDialog from "@/app/(main)/accounts/components/SaveAccount";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "primereact/button";
@@ -27,7 +27,7 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
     return (
         <>
             <Sidebar visible={props.visible} position="right" onHide={() => props.setVisible(false)}>
-                <h2>Welcome, {(user?.applicant) ? (user?.applicant as Applicant).name : 'User'}</h2>
+                <h2>Welcome, {(user?.applicant) ? (user?.applicant as User).name : 'User'}</h2>
                 <p>
                     You are signed in. Use the buttons below to access your account features.
                 </p>
@@ -71,7 +71,7 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
             {user?.applicant && (
                 <ApplicantDetailDialog
                     visible={showApplicantDetailDialog}
-                    applicant={user.applicant as Applicant}
+                    applicant={user.applicant as User}
                     onHide={() => setShowApplicantDetailDialog(false)}
                 />
             )}

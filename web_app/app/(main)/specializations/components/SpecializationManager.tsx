@@ -9,10 +9,10 @@ import { PERMISSIONS } from "@/types/permissions";
 import { SpecializationApi } from "../api/specialization.api";
 import { Specialization } from "../models/specialization.model";
 import SaveSpecialization from "./SaveSpecialization";
-import { Applicant } from "../../applicants/models/applicant.model";
+import { User } from "../../users/models/user.model";
 
 interface SpecManagerProps {
-    applicant?: Applicant;
+    applicant?: User;
 }
 
 const SpecializationManager = ({ applicant }: SpecManagerProps) => {

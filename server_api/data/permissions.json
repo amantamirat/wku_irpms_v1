@@ -80,34 +80,34 @@
     "description": "Delete account accounts"
   },
   {
-    "category": "Applicant Management",
-    "name": "applicant:create",
-    "description": "Create new applicants"
+    "category": "User Management",
+    "name": "user:create",
+    "description": "Create new users"
   },
   {
-    "category": "Applicant Management",
-    "name": "applicant:read",
-    "description": "View applicants"
+    "category": "User Management",
+    "name": "user:read",
+    "description": "View users"
   },
   {
-    "category": "Applicant Management",
-    "name": "applicant:update",
-    "description": "Edit applicants"
+    "category": "User Management",
+    "name": "user:update",
+    "description": "Edit users"
   },
   {
-    "category": "Applicant Management",
-    "name": "applicant:role:update",
-    "description": "Assign or remove roles from a applicant"
+    "category": "User Management",
+    "name": "user:role:update",
+    "description": "Assign or remove roles from a user"
   },
   {
-    "category": "Applicant Management",
-    "name": "applicant:ownership:update",
-    "description": "Assign or modify organizational ownership scope for an applicant"
+    "category": "User Management",
+    "name": "user:ownership:update",
+    "description": "Assign or modify organizational ownership scope for an user"
   },
   {
-    "category": "Applicant Management",
-    "name": "applicant:delete",
-    "description": "Delete applicants"
+    "category": "User Management",
+    "name": "user:delete",
+    "description": "Delete users"
   },
   {
     "category": "Organization Management",

@@ -6,8 +6,8 @@ import {
     UpdateOrganizationDTO
 } from "./organization.dto";
 import { ERROR_CODES } from "../../common/errors/error.codes";
-import { ApplicantRepository, IApplicantRepository } from "../applicants/applicant.repository";
-import { IStudentRepository, StudentRepository } from "../applicants/students/student.repository";
+import { UserRepository, IUserRepository } from "../users/user.repository";
+import { IStudentRepository, StudentRepository } from "../users/students/student.repository";
 import { Unit } from "../../common/constants/enums";
 import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
 import { AppError } from "../../common/errors/app.error";
@@ -16,7 +16,7 @@ export class OrganizationService {
 
 
     constructor(private readonly repo: IOrganizationRepository,
-        private appRepo: IApplicantRepository = new ApplicantRepository(),
+        private appRepo: IUserRepository = new UserRepository(),
         private studentRepo: IStudentRepository = new StudentRepository(),
         private grantRepo: IGrantRepository = new GrantRepository(),
     ) {

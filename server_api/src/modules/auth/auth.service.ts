@@ -4,7 +4,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { CacheService } from "../../util/cache.service";
-import { ApplicantRepository } from "../applicants/applicant.repository";
+import { UserRepository } from "../users/user.repository";
 import { MailService } from "../mail/mail.service";
 import { OrganizationRepository } from "../organization/organization.repository";
 import { SettingKey } from "../settings/setting.model";
@@ -24,7 +24,7 @@ export class AuthService {
 
     constructor(
         private readonly repository: IAccountRepository = new AccountRepository(),
-        private readonly applicantRepository = new ApplicantRepository(),
+        private readonly applicantRepository = new UserRepository(),
         private readonly mailService = new MailService(),
         private readonly settingService: SettingService = new SettingService(new SettingRepository())
     ) { }

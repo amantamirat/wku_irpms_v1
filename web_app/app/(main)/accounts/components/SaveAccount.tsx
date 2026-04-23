@@ -8,8 +8,8 @@ import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 import { AccountApi } from '../api/account.api';
 import { Account, validateAccount } from '../models/account.model';
-import { Applicant } from '../../applicants/models/applicant.model';
-import { ApplicantApi } from '../../applicants/api/applicant.api';
+import { User } from '../../users/models/user.model';
+import { UserApi } from '../../users/api/user.api';
 import { Dropdown } from 'primereact/dropdown';
 
 // Using the requested generic props interface
@@ -25,7 +25,7 @@ const SaveAccount = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
     const [localUser, setLocalUser] = useState<Account>({ ...item });
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
-    const [applicants, setApplicants] = useState<Applicant[]>([]);
+    const [applicants, setApplicants] = useState<User[]>([]);
 
     useEffect(() => {
         setLocalUser({ ...item });
@@ -34,7 +34,7 @@ const SaveAccount = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
     useEffect(() => {
         const fetchApplicants = async () => {
             try {
-                const appData = await ApplicantApi.getAll({});
+                const appData = await UserApi.getAll({});
                 setApplicants(appData);
             } catch (err) {
                 console.error('Failed to fetch applicant data:', err);

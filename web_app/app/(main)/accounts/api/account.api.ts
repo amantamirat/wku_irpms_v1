@@ -37,10 +37,4 @@ export const AccountApi: EntityApi<Account> = {
         if (!account._id) throw new Error("_id required")
         return ApiClient.delete(`${end_point}/${account._id}`)
     }
-
-
-
-
-
-
 };
