@@ -6,8 +6,8 @@ import {
     GetPositionsDTO,
     UpdatePositionDTO
 } from "./position.dto";
-import { PositionType } from "./position.enum";
-import { successResponse, errorResponse } from "../../../common/helpers/response";
+import { PositionType } from "./position.model";
+import { successResponse, errorResponse } from "../../common/helpers/response";
 
 export class PositionController {
 

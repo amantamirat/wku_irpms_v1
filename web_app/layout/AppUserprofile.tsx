@@ -1,4 +1,4 @@
-import ApplicantDetailDialog from "@/app/(main)/users/components/dialogs/ApplicantDetailDialog";
+import UserDetailDialog from "@/app/(main)/users/components/dialogs/UserDetailDialog";
 import { User } from "@/app/(main)/users/models/user.model";
 import SaveDialog from "@/app/(main)/accounts/components/SaveAccount";
 import { useAuth } from "@/contexts/auth-context";
@@ -69,9 +69,9 @@ function AppUserProfileSidebar(props: UserProfileSidebarProps) {
             </Sidebar>
 
             {user?.applicant && (
-                <ApplicantDetailDialog
+                <UserDetailDialog
                     visible={showApplicantDetailDialog}
-                    applicant={user.applicant as User}
+                    user={user.applicant as User}
                     onHide={() => setShowApplicantDetailDialog(false)}
                 />
             )}

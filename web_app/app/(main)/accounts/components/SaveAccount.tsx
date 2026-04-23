@@ -1,18 +1,19 @@
 'use client';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Password } from 'primereact/password';
 import { Toast } from 'primereact/toast';
+import { Dropdown } from 'primereact/dropdown';
 import { classNames } from 'primereact/utils';
-import { useEffect, useRef, useState } from 'react';
+import { Message } from 'primereact/message';
+
 import { AccountApi } from '../api/account.api';
 import { Account, validateAccount } from '../models/account.model';
-import { User } from '../../users/models/user.model';
 import { UserApi } from '../../users/api/user.api';
-import { Dropdown } from 'primereact/dropdown';
+import { User } from '../../users/models/user.model';
 
-// Using the requested generic props interface
 interface EntitySaveDialogProps<T> {
     visible: boolean;
     item: T;
@@ -22,160 +23,153 @@ interface EntitySaveDialogProps<T> {
 
 const SaveAccount = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<Account>) => {
     const toast = useRef<Toast>(null);
-    const [localUser, setLocalUser] = useState<Account>({ ...item });
-    const [submitted, setSubmitted] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | undefined>();
+    const [localUser, setLocalUser] = useState<Partial<Account>>({});
     const [applicants, setApplicants] = useState<User[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+    const isEdit = !!item._id;
+
+    // Reset and sync state when dialog opens
     useEffect(() => {
-        setLocalUser({ ...item });
-    }, [item]);
+        if (visible) {
+            setLocalUser({ ...item });
+            fetchApplicants();
+        } else {
+            setSubmitted(false);
+            setErrorMessage(null);
+        }
+    }, [visible, item]);
 
-    useEffect(() => {
-        const fetchApplicants = async () => {
-            try {
-                const appData = await UserApi.getAll({});
-                setApplicants(appData);
-            } catch (err) {
-                console.error('Failed to fetch applicant data:', err);
-            }
-        };
-        if (visible) fetchApplicants();
-    }, [visible]);
-
-    const saveUser = async () => {
-        setSubmitted(true);
-        setErrorMessage(undefined);
-
+    const fetchApplicants = async () => {
         try {
-            // Validate without the currentPassword requirement
-            const validation = validateAccount(localUser, false);
-            if (!validation.valid) {
-                setErrorMessage(validation.message);
-                return;
-            }
-
-            let saved: Account;
-            if (localUser._id) {
-                // Update existing user
-                saved = await AccountApi.update(localUser);
-                // Ensure the applicant object remains attached if the API returns only the ID
-                saved = { ...saved, applicant: localUser.applicant };
-            } else {
-                // Create new user
-                saved = await AccountApi.create(localUser);
-            }
-
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'User saved successfully',
-                life: 2000,
-            });
-
-            if (onComplete) setTimeout(() => onComplete(saved), 2000);
-        } catch (err: any) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Failed to save user',
-                detail: err.message || 'An unexpected error occurred',
-                life: 3000,
-            });
+            const data = await UserApi.getAll({});
+            setApplicants(data);
+        } catch (err) {
+            console.error('Failed to fetch applicants');
         }
     };
 
-    useEffect(() => {
-        if (!visible) clearForm();
-    }, [visible]);
+    const handleSave = async () => {
+        setSubmitted(true);
+        setErrorMessage(null);
 
-    const clearForm = () => {
-        setSubmitted(false);
-        setErrorMessage(undefined);
-        setLocalUser({ ...item });
+        // Professional Validation: Only require passwords if NEW account 
+        // or if the user started typing in the password field
+        const needsPassword = !isEdit || !!localUser.password;
+        const validation = validateAccount(localUser as Account, !needsPassword);
+
+        if (!validation.valid) {
+            setErrorMessage(validation.message ?? "");
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const saved = isEdit
+                ? await AccountApi.update(localUser as Account)
+                : await AccountApi.create(localUser as Account);
+
+            toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Account credentials saved' });
+
+            // Short delay for the toast to be seen before closing
+            setTimeout(() => {
+                onComplete?.({ ...saved, applicant: localUser.applicant });
+                onHide();
+            }, 600);
+        } catch (err: any) {
+            setErrorMessage(err.message || 'Operation failed');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const footer = (
-        <>
-            <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
-            <Button label="Save" icon="pi pi-check" onClick={saveUser} />
-        </>
+        <div className="flex justify-content-end gap-2">
+            <Button label="Cancel" icon="pi pi-times" text onClick={onHide} disabled={loading} />
+            <Button label={isEdit ? "Update Account" : "Create Account"}
+                icon="pi pi-check"
+                onClick={handleSave}
+                loading={loading} />
+        </div>
     );
-
-    const isEdit = !!localUser._id;
 
     return (
         <>
             <Toast ref={toast} />
             <Dialog
                 visible={visible}
-                style={{ width: '500px' }}
-                header={isEdit ? 'Edit Credential' : 'New Credential'}
+                style={{ width: '450px' }}
+                header={
+                    <div className="flex align-items-center gap-2">
+                        <i className={`pi ${isEdit ? 'pi-pencil' : 'pi-user-plus'} text-primary`}></i>
+                        <span>{isEdit ? 'Update Credentials' : 'Create New Account'}</span>
+                    </div>
+                }
                 modal
                 className="p-fluid"
                 footer={footer}
                 onHide={onHide}
             >
-                {/* Applicant Selection */}
+                {errorMessage && (
+                    <Message severity="error" text={errorMessage} className="w-full mb-3" />
+                )}
+
                 <div className="field">
-                    <label htmlFor="applicant" className="font-bold">Applicant</label>
+                    <label className="font-bold small mb-2 block">Link to Applicant</label>
                     <Dropdown
-                        id="applicant"
                         value={localUser.applicant}
                         options={applicants}
                         optionLabel="name"
                         dataKey="_id"
                         filter
-                        filterBy="name,email"
-                        showClear
+                        placeholder="Select an applicant profile"
+                        disabled={isEdit} // Prevent changing the owner of credentials
                         onChange={(e) => setLocalUser({ ...localUser, applicant: e.value })}
-                        placeholder="Select Applicant"
-                        disabled={isEdit}
                         className={classNames({ 'p-invalid': submitted && !localUser.applicant })}
                     />
-                    {submitted && !localUser.applicant && <small className="p-error">Applicant is required.</small>}
                 </div>
 
-                {/* Email Field */}
                 <div className="field">
-                    <label htmlFor="email" className="font-bold">Email</label>
-                    <InputText
-                        id="email"
-                        type="email"
-                        value={localUser.email || ''}
-                        onChange={(e) => setLocalUser({ ...localUser, email: e.target.value })}
-                        className={classNames({ 'p-invalid': submitted && !localUser.email })}
-                    />
-                    {submitted && !localUser.email && <small className="p-error">Email is required.</small>}
+                    <label className="font-bold small mb-2 block">System Email</label>
+                    <div className="p-inputgroup">
+                        <span className="p-inputgroup-addon"><i className="pi pi-envelope"></i></span>
+                        <InputText
+                            value={localUser.email || ''}
+                            onChange={(e) => setLocalUser({ ...localUser, email: e.target.value })}
+                            placeholder="email@company.com"
+                            className={classNames({ 'p-invalid': submitted && !localUser.email })}
+                        />
+                    </div>
                 </div>
 
-                {/* Password Field */}
-                <div className="field">
-                    <label htmlFor="password">Password</label>
-                    <Password
-                        id="password"
-                        value={localUser.password || ''}
-                        onChange={(e) => setLocalUser({ ...localUser, password: e.target.value })}
-                        toggleMask
-                        className={classNames({ 'p-invalid': submitted && !localUser.password })}
-                    />
-                    {submitted && !localUser.password && <small className="p-error">Password is required.</small>}
-                </div>
+                <div className="grid">
+                    <div className="col-12 field mt-2">
+                        <label className="font-bold small mb-2 block">
+                            {isEdit ? 'Change Password (leave blank to keep current)' : 'Account Password'}
+                        </label>
+                        <Password
+                            value={localUser.password || ''}
+                            onChange={(e) => setLocalUser({ ...localUser, password: e.target.value })}
+                            toggleMask
+                            placeholder="••••••••"
+                            className={classNames({ 'p-invalid': submitted && !isEdit && !localUser.password })}
+                        />
+                    </div>
 
-                {/* Confirm Password Field */}
-                <div className="field">
-                    <label htmlFor="confirmPassword">Confirm Password</label>
-                    <Password
-                        id="confirmPassword"
-                        value={localUser.confirmedPassword || ''}
-                        onChange={(e) => setLocalUser({ ...localUser, confirmedPassword: e.target.value })}
-                        toggleMask
-                        feedback={false}
-                        className={classNames({ 'p-invalid': submitted && !localUser.confirmedPassword })}
-                    />
-                    {submitted && !localUser.confirmedPassword && <small className="p-error">Confirmation is required.</small>}
+                    <div className="col-12 field">
+                        <label className="font-bold small mb-2 block">Confirm Password</label>
+                        <Password
+                            value={localUser.confirmedPassword || ''}
+                            onChange={(e) => setLocalUser({ ...localUser, confirmedPassword: e.target.value })}
+                            toggleMask
+                            feedback={false}
+                            placeholder="Re-type password"
+                            className={classNames({ 'p-invalid': submitted && localUser.password !== localUser.confirmedPassword })}
+                        />
+                    </div>
                 </div>
-
-                {errorMessage && <div className="p-error mt-2 font-semibold text-center">{errorMessage}</div>}
             </Dialog>
         </>
     );

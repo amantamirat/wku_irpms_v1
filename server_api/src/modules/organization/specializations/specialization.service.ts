@@ -1,13 +1,14 @@
+
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { UserRepository, IUserRepository } from "../user.repository";
+import { IUserRepository, UserRepository } from "../../users/user.repository";
 import { CreateSpecializationDTO, UpdateSpecializationDTO } from "./specialization.dto";
 import { ISpecializationRepository, SpecializationRepository } from "./specialization.repository";
 
 export class SpecializationService {
 
     constructor(private readonly repository: ISpecializationRepository = new SpecializationRepository(),
-        private readonly appRepo: IUserRepository = new UserRepository()
+        private readonly userRepo: IUserRepository = new UserRepository()
     ) { }
 
     async create(dto: CreateSpecializationDTO) {
@@ -29,7 +30,7 @@ export class SpecializationService {
     }
 
     async delete(id: string) {
-        const exist = await this.appRepo.exists({ specialization: id });
+        const exist = await this.userRepo.exists({ specialization: id });
         if (exist) {
             throw new AppError(ERROR_CODES.SPECIALIZATION_IN_USE);
         }

@@ -1,8 +1,9 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Specialization} from "../models/specialization.model";
+import { Specialization } from "../models/specialization.model";
+import { EntityApi } from "@/api/EntityApi";
 const end_point = '/specializations/';
 
-export const SpecializationApi = {
+export const SpecializationApi: EntityApi<Specialization> = {
 
     async create(specialization: Partial<Specialization>): Promise<Specialization> {
         const createdData = await ApiClient.post(end_point, specialization);

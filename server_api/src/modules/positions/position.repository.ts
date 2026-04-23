@@ -6,7 +6,7 @@ import {
     GetPositionsDTO,
     UpdatePositionDTO
 } from "./position.dto";
-import { PositionType } from "./position.enum";
+import { PositionType } from "./position.model";
 
 export interface IPositionRepository {
     findById(id: string): Promise<BasePositionDocument | null>;

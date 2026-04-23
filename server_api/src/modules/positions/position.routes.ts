@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { PositionController } from "./position.controller";
-import { verifyActiveAccount, checkPermission } from "../../auth/auth.middleware";
-import { PERMISSIONS } from "../../../common/constants/permissions";
+import { verifyActiveAccount, checkPermission } from "../auth/auth.middleware";
+import { PERMISSIONS } from "../../common/constants/permissions";
 import { PositionService } from "./position.service";
 
 const router = Router();

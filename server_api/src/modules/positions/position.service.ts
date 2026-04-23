@@ -1,12 +1,12 @@
-import { AppError } from "../../../common/errors/app.error";
-import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { ExperienceRepository, IExperienceRepository } from "../experiences/experience.repository";
+import { AppError } from "../../common/errors/app.error";
+import { ERROR_CODES } from "../../common/errors/error.codes";
+import { ExperienceRepository, IExperienceRepository } from "../users/experiences/experience.repository";
 import {
     CreatePositionDTO,
     GetPositionsDTO,
     UpdatePositionDTO
 } from "./position.dto";
-import { PositionType } from "./position.enum";
+import { PositionType } from "./position.model";
 import { IPositionRepository, PositionRepository } from "./position.repository";
 
 export class PositionService {

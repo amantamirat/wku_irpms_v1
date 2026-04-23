@@ -12,23 +12,18 @@ import { SpecializationApi } from '../api/specialization.api';
 import { InputText } from 'primereact/inputtext';
 import { AcademicLevel } from '../../organizations/models/organization.model';
 import { Dropdown } from 'primereact/dropdown';
+import { EntitySaveDialogProps } from '@/components/createEntityManager';
 
-interface SaveSpecializationDialogProps {
-    visible: boolean;
-    specialization: Specialization;
-    onHide: () => void;
-    onComplete?: (savedSpecialization: Specialization) => void;
-}
 
-const SaveSpecialization = ({ visible, specialization, onHide, onComplete }: SaveSpecializationDialogProps) => {
+const SaveSpecialization = ({ visible, item: item, onHide, onComplete }: EntitySaveDialogProps<Specialization>) => {
     const toast = useRef<Toast>(null);
-    const [localSpecialization, setLocalSpecialization] = useState<Specialization>({ ...specialization });
+    const [localSpecialization, setLocalSpecialization] = useState<Specialization>({ ...item });
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
     useEffect(() => {
-        setLocalSpecialization({ ...specialization });
-    }, [specialization]);
+        setLocalSpecialization({ ...item });
+    }, [item]);
 
     useEffect(() => {
         if (!visible) clearForm();
@@ -37,7 +32,7 @@ const SaveSpecialization = ({ visible, specialization, onHide, onComplete }: Sav
     const clearForm = () => {
         setSubmitted(false);
         setErrorMessage(undefined);
-        setLocalSpecialization({ ...specialization });
+        setLocalSpecialization({ ...item });
     };
 
     const saveSpecialization = async () => {

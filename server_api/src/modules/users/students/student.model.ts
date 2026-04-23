@@ -5,7 +5,7 @@ import { Program } from '../../organization/organization.model';
 export interface IStudent extends Document {
   calendar: mongoose.Types.ObjectId;
   program: mongoose.Types.ObjectId;
-  applicant: mongoose.Types.ObjectId;
+  user: mongoose.Types.ObjectId;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -22,7 +22,7 @@ const StudentSchema = new Schema<IStudent>({
     ref: Program.modelName,
     required: true
   },
-  applicant: {
+  user: {
     type: Schema.Types.ObjectId,
     ref: COLLECTIONS.USER,
     required: true

@@ -26,9 +26,9 @@ export class StudentController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { applicant } = req.query;
+            const { user } = req.query;
             const students = await this.service.get({
-                applicant: applicant ? applicant as string : undefined
+                user: user ? user as string : undefined
             });
             successResponse(res, 200, 'Students fetched successfully', students);
         } catch (err: any) {
@@ -45,7 +45,7 @@ export class StudentController {
 
             const dto: UpdateStudentDTO = {
                 id,
-                data: { calendar, program, applicant },
+                data: { calendar, program, user: applicant },
             };
 
             const updated = await this.service.update(dto);

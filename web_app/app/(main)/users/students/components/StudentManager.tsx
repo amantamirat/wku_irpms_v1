@@ -1,147 +1,74 @@
 'use client';
 
-import { CrudManager } from "@/components/CrudManager";
-import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-import { useCrudList } from "@/hooks/useCrudList";
-import { useEffect, useState } from "react";
+import React from 'react';
+import { createEntityManager } from "@/components/createEntityManager";
 import { StudentApi } from "../api/student.api";
-import { Student } from "../models/student.model";
-import { useAuth } from "@/contexts/auth-context";
-import { PERMISSIONS } from "@/types/permissions";
-import SaveStudentDialog from "./SaveStudentDialog";
+import { GetStudentsOptions, Student } from "../models/student.model";
 import { User } from "../../models/user.model";
+import SaveStudentDialog from "./SaveStudent";
+import { Organization } from "@/app/(main)/organizations/models/organization.model";
 
 interface StudentManagerProps {
     applicant?: User;
 }
 
 const StudentManager = ({ applicant }: StudentManagerProps) => {
+    /**
+     * Create the manager instance.
+     * We pass User as the Context type to handle the optional applicant filtering.
+     */
+    const Manager = createEntityManager<Student, GetStudentsOptions | undefined>({
+        title: applicant ? `Enrollments for ${applicant.name}` : "Manage All Enrollments",
+        itemName: "Student Enrollment",
+        api: StudentApi,
 
-    const { hasPermission } = useAuth();
-    const confirm = useConfirmDialog();
-
-    const canCreate = hasPermission([PERMISSIONS.STUDENT.CREATE]);
-    const canEdit = hasPermission([PERMISSIONS.STUDENT.UPDATE]);
-    const canDelete = hasPermission([PERMISSIONS.STUDENT.DELETE]);
-
-    // CRUD hook
-    const {
-        items: students,
-        setAll,
-        updateItem,
-        removeItem,
-        loading,
-        setLoading,
-        error,
-        setError
-    } = useCrudList<Student>();
-
-    const emptyStudent: Student = {
-        applicant: applicant,
-    };
-
-
-    const [student, setStudent] = useState<Student>({});
-    const [showSaveDialog, setShowSaveDialog] = useState(false);
-
-    /** Fetch students */
-    useEffect(() => {
-        const fetchStudents = async () => {
-            try {
-                setLoading(true);
-                const data = await StudentApi.getStudents({ applicant });
-                setAll(data);
-            } catch (err: any) {
-                setError("Failed to fetch students. " + (err?.message ?? ""));
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchStudents();
-    }, [applicant]);
-
-    /** Save callback */
-    const onSaveComplete = (saved: Student) => {
-        updateItem(saved);
-        hideDialogs();
-    };
-
-    /** Delete function */
-    const deleteStudent = async (row: Student) => {
-        const ok = await StudentApi.delete(row);
-        if (ok) removeItem(row);
-    };
-
-    /** Hide dialogs */
-    const hideDialogs = () => {
-        // setStudent({});
-        setShowSaveDialog(false);
-    };
-
-    /** Columns */
-    const columns = [
-        { header: "Calendar", field: "calendar.year" },
-        { header: "Program", field: "program.name" },
-       // { header: "Ac. Level", field: "program.academicLevel" },
-        {
-            header: "Ac. Level",
-            field: "academicLevel",
-            sortable: true,
-            body: (s: Student) => (
-                <span className={`academic-badge level-${(s.program as any).academicLevel.toLowerCase()}`}>
-                    {(s.program as any).academicLevel}
-                </span>
-            )
-        },
-        !applicant && { header: "Student", field: "applicant.name" },
-    ].filter(Boolean);
-
-    return (
-        <>
-            <CrudManager
-                headerTitle="Manage Enrollments"
-                //itemName="Student"
-                items={students}
-                dataKey="_id"
-                columns={columns}
-                loading={loading}
-                error={error}
-                canCreate={canCreate}
-                canEdit={canEdit}
-                canDelete={canDelete}
-                onCreate={() => {
-                    setStudent(emptyStudent);
-                    setShowSaveDialog(true);
-                }}
-
-                onEdit={(row) => {
-                    setStudent({ ...row });
-                    setShowSaveDialog(true);
-                }}
-
-                onDelete={(row) =>
-                    confirm.ask({
-                        item: row._id,
-                        onConfirmAsync: () => deleteStudent(row)
-                    })
+        /** Columns configuration */
+        columns: [
+            {
+                header: "Calendar",
+                field: "calendar.year",
+                sortable: true
+            },
+            {
+                header: "Program",
+                field: "program.name",
+                sortable: true
+            },
+            {
+                header: "Ac. Level",
+                field: "program.academicLevel",
+                sortable: true,
+                body: (s: Student) => {
+                    const level = (s.program as Organization)?.academicLevel;
+                    return level ? (
+                        <span className={`academic-badge level-${level.toLowerCase()}`}>
+                            {level}
+                        </span>
+                    ) : null;
                 }
+            },
+            // Only show the Student name column if we aren't already filtered by applicant
+            ...(!applicant ? [{
+                header: "Student",
+                field: "user.name",
+                sortable: true
+            }] : []),
+        ],
 
-                enableSearch
-            />
+        /** Factory for new records */
+        createNew: () => ({
+            user: applicant, // Pre-link the student to the applicant context
+            calendar: undefined,
+            program: undefined
+        }),
 
-            {/*  */}
+        /** Dialog and Permissions */
+        SaveDialog: SaveStudentDialog,
+        permissionPrefix: "student",
+    });
 
-            {(student && showSaveDialog) && (
-                <SaveStudentDialog
-                    visible={showSaveDialog}
-                    student={student}
-                    applicant={applicant}
-                    onComplete={onSaveComplete}
-                    onHide={hideDialogs}
-                />
-            )}
-        </>
-    );
+    // We pass the applicant prop as the 'context' to the Manager
+    return <Manager />;
 };
 
 export default StudentManager;

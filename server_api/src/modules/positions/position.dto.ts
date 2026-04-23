@@ -1,4 +1,4 @@
-import { PositionType } from "./position.enum";
+import { PositionType } from "./position.model";
 
 /* =========================
    Create DTOs
@@ -31,7 +31,6 @@ export interface GetPositionsDTO {
     parent?: string;      // filter ranks by parent
     populate?: boolean;
 }
-
 
 export interface ExistsPositionDTO {
     parent?: string;     // optional, check ranks under parent

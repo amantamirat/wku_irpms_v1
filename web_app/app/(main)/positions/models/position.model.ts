@@ -2,15 +2,14 @@
 
 
 export enum PositionType {
-    position = "Position",
-    rank = "Rank",
+    position = "position",
+    rank = "rank",
 }
 
 export type Position = {
     _id?: string;
     name: string;
     type: PositionType;
-    //category?: string ; // for position only
     parent?: string | Position; // for rank only
     createdAt?: Date;
     updatedAt?: Date;
@@ -26,13 +25,6 @@ export const validatePosition = (pos: Position): { valid: boolean; message?: str
     if (!pos.name || pos.name.trim().length === 0) {
         return { valid: false, message: "Name is required." };
     }
-
-    /*
-
-    if (pos.type === PositionType.position && !pos.category) {
-        return { valid: false, message: "Category is required for Position." };
-    }
-        */
 
     if (pos.type === PositionType.rank && !pos.parent) {
         return { valid: false, message: "Parent Position is required for Rank." };
@@ -50,6 +42,15 @@ export const sanitizePosition = (pos: Partial<Position>): Position => {
                 : pos.parent,
     } as Position;
 };
+
+export const createEmptyPosition = (
+    type: PositionType,
+    parent?: string
+): Position => ({
+    type,
+    name: "",
+    parent,
+});
 
 export interface GetPositionOptions {
     type?: PositionType;

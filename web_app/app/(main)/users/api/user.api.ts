@@ -1,6 +1,6 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
-import { GetUsersOptions, User, sanitizeUser } from "../models/user.model";
+import { GetUsersOptions, IOwnership, User, sanitizeUser } from "../models/user.model";
 
 const end_point = "/users";
 
@@ -8,6 +8,7 @@ const end_point = "/users";
 export const UserApi: EntityApi<User, GetUsersOptions | undefined> & {
 
     updateRoles: (userId: string, roles: string[]) => Promise<User>;
+    updateOwnerships: (userId: string, ownerships: IOwnership[]) => Promise<User>;
     // Add other custom function signatures here
 } = {
 
@@ -52,6 +53,24 @@ export const UserApi: EntityApi<User, GetUsersOptions | undefined> & {
             return response as User;
         } catch (error: any) {
             console.error(`[UserApi] Failed to update roles for user ${userId}:`, error);
+            throw error;
+        }
+    },
+
+    /**
+ * Updates the ownerships assigned to a specific user.
+ * @param userId - The unique identifier of the user.
+ * @param ownerships - An array of ownership objects to assign.
+ */
+    async updateOwnerships(userId: string, ownerships: IOwnership[]): Promise<User> {
+        if (!userId) throw new Error("User ID is required for updating ownerships.");
+
+        try {
+            const url = `${end_point}/${userId}/ownerships`;
+            const response = await ApiClient.put(url, { ownerships });
+            return response as User;
+        } catch (error: any) {
+            console.error(`[UserApi] Failed to update ownerships for user ${userId}:`, error);
             throw error;
         }
     },

@@ -6,6 +6,7 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { MultiSelect } from 'primereact/multiselect';
 import { Toast } from 'primereact/toast';
+import { Skeleton } from 'primereact/skeleton';
 import { RoleApi } from '@/app/(main)/roles/api/role.api';
 import { Role } from '@/app/(main)/roles/models/role.model';
 import { UserApi } from '../../api/user.api';
@@ -13,74 +14,75 @@ import { User } from '../../models/user.model';
 import { useAuth } from '@/contexts/auth-context';
 import { PERMISSIONS } from '@/types/permissions';
 
-interface EntitySaveDialogProps<T> {
+interface EntitySaveDialogProps {
     visible: boolean;
-    item: T;
+    item: User;
     onHide: () => void;
-    onComplete?: (savedItem: T) => void;
+    onComplete?: (savedItem: User) => void;
 }
 
-const RoleDialog = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<User>) => {
+const RoleDialog = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps) => {
     const { hasPermission } = useAuth();
     const toast = useRef<Toast>(null);
+    
     // State
-    const [localUser, setLocalUser] = useState<User>({ ...item });
+    const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
     const [roles, setRoles] = useState<Role[]>([]);
     const [loading, setLoading] = useState(false);
+    const [fetchingRoles, setFetchingRoles] = useState(false);
 
     const canReadRoles = hasPermission([PERMISSIONS.ROLE.READ]);
 
-    // Fetch roles on mount if permitted
+    // 1. Initial Sync: Extract IDs from the User object
     useEffect(() => {
-        if (!canReadRoles && visible) {
-            return;
+        if (visible && item.roles) {
+            // Normalize roles to an array of IDs
+            const ids = item.roles.map((r: any) => (typeof r === 'object' ? r._id : r));
+            setSelectedRoleIds(ids);
         }
-        const fetchRoles = async () => {
-            try {
-                const rolesData = await RoleApi.getAll();
-                setRoles(rolesData);
-            } catch (err) {
-                console.error('Failed to fetch roles:', err);
-            }
-        };
-        fetchRoles();
-    }, [canReadRoles, visible]);
+    }, [item, visible]);
 
-    // Sync local state when user prop or visibility changes
+    // 2. Fetch available roles
     useEffect(() => {
-        setLocalUser({ ...item });
-    }, [item]);
-
+        if (visible && canReadRoles && roles.length === 0) {
+            const fetchRoles = async () => {
+                setFetchingRoles(true);
+                try {
+                    const rolesData = await RoleApi.getAll();
+                    setRoles(rolesData);
+                } catch (err) {
+                    toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Could not load roles' });
+                } finally {
+                    setFetchingRoles(false);
+                }
+            };
+            fetchRoles();
+        }
+    }, [visible, canReadRoles]);
 
     const handleSaveRoles = async () => {
-        if (!localUser._id) return;
+        if (!item._id) return;
+        setLoading(true);
         try {
-            setLoading(true);
-            const currentRoles = localUser.roles || [];
-
-            // Extract only role IDs if they are objects, or send as is if IDs
-            const roleIds = currentRoles.map((r: any) =>
-                (r && typeof r === 'object') ? r._id : r
-            );
-
-            const savedUser = await UserApi.updateRoles(localUser._id, roleIds);
-            setTimeout(() => toast.current?.show({
+            const savedUser = await UserApi.updateRoles(item._id, selectedRoleIds);
+            
+            toast.current?.show({
                 severity: 'success',
                 summary: 'Success',
                 detail: 'User roles updated successfully',
                 life: 2000,
-            }), 2000);
-
+            });
 
             if (onComplete) {
-                // Ensure workspace is preserved for the UI return if needed
-                onComplete({ ...savedUser, workspace: localUser.workspace });
+                // Return the updated user but ensure we keep the context (like workspace)
+                onComplete({ ...savedUser, workspace: item.workspace });
             }
+            onHide();
         } catch (err: any) {
             toast.current?.show({
                 severity: 'error',
                 summary: 'Update Failed',
-                detail: err.message || 'An error occurred while updating roles',
+                detail: err.message || 'An error occurred',
                 life: 3000,
             });
         } finally {
@@ -91,7 +93,13 @@ const RoleDialog = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps
     const footer = (
         <div className="flex justify-content-end gap-2">
             <Button label="Cancel" icon="pi pi-times" text onClick={onHide} disabled={loading} />
-            <Button label="Update Roles" icon="pi pi-shield" onClick={handleSaveRoles} loading={loading} />
+            <Button 
+                label="Save Changes" 
+                icon="pi pi-shield" 
+                onClick={handleSaveRoles} 
+                loading={loading} 
+                disabled={!canReadRoles}
+            />
         </div>
     );
 
@@ -101,32 +109,49 @@ const RoleDialog = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps
             <Dialog
                 visible={visible}
                 style={{ width: '450px' }}
-                header="Manage User Roles"
+                header={
+                    <div className="flex align-items-center gap-2">
+                        <i className="pi pi-lock text-primary"></i>
+                        <span>Security Roles</span>
+                    </div>
+                }
                 modal
                 className="p-fluid"
                 footer={footer}
                 onHide={onHide}
             >
                 <div className="field mb-4">
-                    <label htmlFor="name" className="font-bold">User</label>
-                    <InputText id="name" value={localUser.name} disabled className="opacity-80" />
+                    <label className="font-bold text-sm block mb-2">User</label>
+                    <div className="p-inputgroup">
+                        <span className="p-inputgroup-addon"><i className="pi pi-user"></i></span>
+                        <InputText value={item.name} disabled className="opacity-80" />
+                    </div>
                 </div>
 
                 <div className="field">
-                    <label htmlFor="roles" className="font-bold">Assigned Roles</label>
-                    <MultiSelect
-                        id="roles"
-                        //dataKey="_id"
-                        optionLabel="name"
-                        optionValue="_id"
-                        value={localUser.roles}
-                        options={roles}
-                        onChange={(e) => setLocalUser({ ...localUser, roles: e.value })}
-                        placeholder="select roles"
-                        display="chip"
-                    />
+                    <label htmlFor="roles" className="font-bold text-sm block mb-2">Assigned Roles</label>
+                    {fetchingRoles ? (
+                        <Skeleton width="100%" height="3rem" />
+                    ) : (
+                        <MultiSelect
+                            id="roles"
+                            value={selectedRoleIds}
+                            options={roles}
+                            onChange={(e) => setSelectedRoleIds(e.value)}
+                            optionLabel="name"
+                            optionValue="_id" // This matches your dataKey and state
+                            placeholder="Select security roles"
+                            display="chip"
+                            filter // Added filtering for better UI
+                            disabled={!canReadRoles}
+                            className={!canReadRoles ? 'p-invalid' : ''}
+                        />
+                    )}
                     {!canReadRoles && (
-                        <small className="p-error">You do not have permission to modify roles.</small>
+                        <small className="p-error block mt-1">
+                            <i className="pi pi-exclamation-triangle mr-1 text-xs"></i>
+                            Insufficient permissions to modify roles.
+                        </small>
                     )}
                 </div>
             </Dialog>

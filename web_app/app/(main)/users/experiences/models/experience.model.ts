@@ -1,6 +1,6 @@
 import { User } from "@/app/(main)/users/models/user.model";
 import { Organization } from "@/app/(main)/organizations/models/organization.model";
-import { Position } from "../../positions/models/position.model";
+import { Position } from "../../../positions/models/position.model";
 
 export enum EmploymentType {
     FullTime = "Full-Time",

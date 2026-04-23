@@ -1,5 +1,6 @@
 import { AcademicLevel } from "../../../common/constants/enums";
 
+
 export interface CreateSpecializationDTO {
     name: string;
     academicLevel: AcademicLevel;

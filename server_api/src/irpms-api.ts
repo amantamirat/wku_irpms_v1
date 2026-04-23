@@ -6,11 +6,11 @@ import http from 'http'; // 1. Import the native http module
 import organizationRoutes from './modules/organization/organization.routes';
 
 import userRoutes from './modules/users/user.routes';
-import positionRoutes from './modules/users/positions/position.routes';
+import positionRoutes from './modules/positions/position.routes';
 import studentRoutes from './modules/users/students/student.routes';
 import experienceRoutes from './modules/users/experiences/experience.routes';
 import publicationRoutes from './modules/users/publications/publication.routes';
-import specializationRoutes from './modules/users/specializations/specialization.routes';
+import specializationRoutes from './modules/organization/specializations/specialization.routes';
 
 import thematicRoutes from './modules/thematics/thematic.routes';
 import themeRoutes from './modules/thematics/themes/theme.routes'

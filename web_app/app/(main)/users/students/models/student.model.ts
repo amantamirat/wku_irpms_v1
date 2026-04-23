@@ -6,7 +6,7 @@ export type Student = {
     _id?: string;
     calendar?: string | Calendar;
     program?: string | Organization;
-    applicant?: string | User;
+    user?: string | User;
     createdAt?: Date;
     updatedAt?: Date;
 };
@@ -20,8 +20,8 @@ export const validateStudent = (student: Student): { valid: boolean; message?: s
         return { valid: false, message: 'Program is required.' };
     }
 
-    if (!student.applicant) {
-        return { valid: false, message: 'Applicant is required.' };
+    if (!student.user) {
+        return { valid: false, message: 'User is required.' };
     }
 
     return { valid: true };
@@ -38,14 +38,14 @@ export const sanitizeStudent = (student: Partial<Student>): Partial<Student> => 
             typeof student.program === 'object' && student.program !== null
                 ? (student.program as any)._id
                 : student.program,
-        applicant:
-            typeof student.applicant === 'object' && student.applicant !== null
-                ? (student.applicant as any)._id
-                : student.applicant,
+        user:
+            typeof student.user === 'object' && student.user !== null
+                ? (student.user as any)._id
+                : student.user,
     };
 };
 
 
 export interface GetStudentsOptions {
-    applicant?: string | User;
+    user?: string | User;
 }

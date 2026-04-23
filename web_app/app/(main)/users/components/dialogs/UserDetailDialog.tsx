@@ -2,13 +2,13 @@ import { Dialog } from "primereact/dialog";
 import { User } from "../../models/user.model";
 import UserDetail from "../UserDetail";
 
-interface ApplicantDetailProps {
+interface UserDetailProps {
     visible: boolean;
-    applicant: User;
+    user: User;
     onHide: () => void;
 }
 
-const ApplicantDetailDialog = ({ applicant, visible, onHide }: ApplicantDetailProps) => {
+const UserDetailDialog = ({ user, visible, onHide }: UserDetailProps) => {
     return (
         <Dialog
             visible={visible}
@@ -16,10 +16,10 @@ const ApplicantDetailDialog = ({ applicant, visible, onHide }: ApplicantDetailPr
             //maximizable
             maximized    
         >
-            <h3>Applicant Detail: {applicant.name}</h3>
-            <UserDetail user={applicant} />
+            <h3>User Detail: {user.name}</h3>
+            <UserDetail user={user} />
         </Dialog>
     );
 }
 
-export default ApplicantDetailDialog;
+export default UserDetailDialog;

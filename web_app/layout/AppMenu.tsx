@@ -149,7 +149,7 @@ const AppMenu = () => {
                 {
                     label: 'Departments',
                     icon: 'pi pi-fw pi-star',
-                    to: `/organizations?type=${OrgnUnit.department}`,
+                    to: `/organizations/${OrgnUnit.department}`,
                     visible: hasPermission(
                         [
                             PERMISSIONS.ORGANIAZTION.DEPARTMENT.CREATE,
@@ -258,7 +258,7 @@ const AppMenu = () => {
                             PERMISSIONS.STUDENT.READ,
                         ]
                     ),
-                    to: '/applicants/students',
+                    to: '/users/students',
                 },
                 {
                     label: 'Specializations',
@@ -273,7 +273,7 @@ const AppMenu = () => {
                 {
                     label: 'Positions',
                     icon: 'pi pi-fw pi-flag',
-                    to: '/applicants/positions',
+                    to: '/positions',
                     visible: hasPermission([
                         PERMISSIONS.POSITION.CREATE,
                         PERMISSIONS.POSITION.UPDATE,

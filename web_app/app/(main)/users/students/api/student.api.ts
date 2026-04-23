@@ -1,14 +1,17 @@
 import { ApiClient } from "@/api/ApiClient";
 import { GetStudentsOptions, Student, sanitizeStudent } from "../models/student.model";
+import { EntityApi } from "@/api/EntityApi";
 
 const endPoint = '/students';
 
-export const StudentApi = {
+export const StudentApi: EntityApi<Student, GetStudentsOptions | undefined> = {
 
-    async getStudents(options: GetStudentsOptions): Promise<Student[]> {
-        const sanitized = sanitizeStudent(options);
+    async getAll(options?: GetStudentsOptions): Promise<Student[]> {
         const query = new URLSearchParams();
-        if (sanitized.applicant) query.append("applicant", sanitized.applicant as string);
+        if (options) {
+            const sanitized = sanitizeStudent(options);
+            if (sanitized.user) query.append("user", sanitized.user as string);
+        }
         const data = await ApiClient.get(`${endPoint}?${query.toString()}`);
         return data as Student[];
     },

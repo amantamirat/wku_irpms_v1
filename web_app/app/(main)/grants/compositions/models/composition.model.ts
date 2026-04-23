@@ -1,5 +1,5 @@
 import { Gender, Accessibility } from "@/app/(main)/users/models/user.model";
-import { Position } from "@/app/(main)/users/positions/models/position.model";
+import { Position } from "@/app/(main)/positions/models/position.model";
 import { PublicationType } from "@/app/(main)/users/publications/models/publication.model";
 import { AcademicLevel } from "@/app/(main)/organizations/models/organization.model";
 import { Specialization } from "@/app/(main)/specializations/models/specialization.model";

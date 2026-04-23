@@ -6,7 +6,7 @@ import { verifyActiveAccount, checkPermission } from '../../auth/auth.middleware
 import { ExperienceRepository } from './experience.repository';
 import { UserRepository } from '../user.repository';
 import { OrganizationRepository } from '../../organization/organization.repository';
-import { PositionRepository } from '../positions/position.repository';
+import { PositionRepository } from '../../positions/position.repository';
 
 const router: Router = Router();
 

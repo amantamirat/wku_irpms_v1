@@ -14,15 +14,15 @@ export class StudentService {
         private readonly repository: StudentRepository,
         private readonly calendarRepository: CalendarRepository,
         private readonly programRepository: OrganizationRepository,
-        private readonly applicantRepository: UserRepository
+        private readonly userRepository: UserRepository
     ) { }
 
     async create(dto: CreateStudentDTO) {
-        const { calendar, applicant, program } = dto;
+        const { calendar, user: applicant, program } = dto;
         const calendarDoc = await this.calendarRepository.findById(calendar);
         if (!calendarDoc) throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
 
-        const applicantDoc = await this.applicantRepository.findById(applicant);
+        const applicantDoc = await this.userRepository.findById(applicant);
         if (!applicantDoc) throw new AppError(ERROR_CODES.APPLICANT_NOT_FOUND);
 
         const programDoc = await this.programRepository.findById(program);
@@ -41,8 +41,8 @@ export class StudentService {
     }
 
     async get(options: GetStudentsOptions) {
-        if (options.applicant) {
-            return await this.repository.findByApplicant(options.applicant);
+        if (options.user) {
+            return await this.repository.findByUser(options.user);
         }
         return await this.repository.findAll();
     }
@@ -65,8 +65,8 @@ export class StudentService {
         }
 
         // 3. Validate applicant (if provided)
-        if (data.applicant) {
-            const applicantDoc = await this.applicantRepository.findById(data.applicant);
+        if (data.user) {
+            const applicantDoc = await this.userRepository.findById(data.user);
             if (!applicantDoc) {
                 throw new AppError(ERROR_CODES.APPLICANT_NOT_FOUND);
             }

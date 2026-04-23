@@ -5,7 +5,7 @@ import Student, { IStudent } from "./student.model";
 export interface IStudentRepository {
     findById(id: string): Promise<IStudent | null>;
     findAll(): Promise<Partial<IStudent>[]>;
-    findByApplicant(applicantId: string): Promise<IStudent[]>;
+    findByUser(userId: string): Promise<IStudent[]>;
     findByProgram(programId: string): Promise<IStudent[]>;
     create(data: CreateStudentDTO): Promise<IStudent>;
     update(id: string, data: UpdateStudentDTO["data"]): Promise<IStudent | null>;
@@ -24,14 +24,14 @@ export class StudentRepository implements IStudentRepository {
 
     async findAll(): Promise<Partial<IStudent>[]> {
         return Student.find({})
-            .populate("calendar").populate("program").populate("applicant")
+            .populate("calendar").populate("program").populate("user")
             .lean<IStudent[]>()
             .exec();
     }
 
-    async findByApplicant(applicantId: string): Promise<IStudent[]> {
+    async findByUser(applicantId: string): Promise<IStudent[]> {
         return Student.find({
-            applicant: new mongoose.Types.ObjectId(applicantId)
+            user: new mongoose.Types.ObjectId(applicantId)
         }).populate("calendar").populate("program")
             .lean<IStudent[]>()
             .exec();
@@ -49,7 +49,7 @@ export class StudentRepository implements IStudentRepository {
         const data: Partial<IStudent> = {
             calendar: new mongoose.Types.ObjectId(dto.calendar),
             program: new mongoose.Types.ObjectId(dto.program),
-            applicant: new mongoose.Types.ObjectId(dto.applicant),
+            user: new mongoose.Types.ObjectId(dto.user),
         };
 
         return Student.create(data);
@@ -67,8 +67,8 @@ export class StudentRepository implements IStudentRepository {
             toUpdate.program = new mongoose.Types.ObjectId(dtoData.program);
         }
 
-        if (dtoData.applicant) {
-            toUpdate.applicant = new mongoose.Types.ObjectId(dtoData.applicant);
+        if (dtoData.user) {
+            toUpdate.user = new mongoose.Types.ObjectId(dtoData.user);
         }
 
         return Student.findByIdAndUpdate(
@@ -85,8 +85,8 @@ export class StudentRepository implements IStudentRepository {
             query.calendar = new mongoose.Types.ObjectId(filters.calendar);
         }
 
-        if (filters.applicant) {
-            query.applicant = new mongoose.Types.ObjectId(filters.applicant);
+        if (filters.user) {
+            query.applicant = new mongoose.Types.ObjectId(filters.user);
         }
 
         if (filters.program) {

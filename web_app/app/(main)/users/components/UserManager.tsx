@@ -7,10 +7,12 @@ import RoleDialog from "./dialogs/RoleDialog"; // The component we refactored
 import MyBadge from "@/templates/MyBadge";
 import SaveUser from "./SaveUser";
 import { Badge } from "primereact/badge";
+import OwnershipDialog from "./dialogs/OwnershipDialog";
 
 // We need a small wrapper to handle the local state of the Role Dialog
 const ManageUsers = () => {
     const [roleDialogVisible, setRoleDialogVisible] = useState(false);
+    const [ownerhipDialogVisible, setOwnershipDialogVisible] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
     const EntityManager = createEntityManager<User, GetUsersOptions>({
@@ -77,6 +79,16 @@ const ManageUsers = () => {
                     setSelectedUser(row);
                     setRoleDialogVisible(true);
                 }
+            },
+            {
+                icon: "pi pi-sitemap",
+                severity: "warning", // orange-ish tone for ownership/structure
+                tooltip: "Manage Ownerships",
+                permissions: ["user:ownership:update"],
+                onClick: (row: User) => {
+                    setSelectedUser(row);
+                    setOwnershipDialogVisible(true);
+                }
             }
         ]
     });
@@ -97,6 +109,20 @@ const ManageUsers = () => {
                     onComplete={(updatedUser) => {
                         setRoleDialogVisible(false);
                         //window.location.reload();
+                    }}
+                />
+            )}
+
+            {(selectedUser && ownerhipDialogVisible) && (
+                <OwnershipDialog
+                    visible={ownerhipDialogVisible}
+                    item={selectedUser}
+                    onHide={() => {
+                        setOwnershipDialogVisible(false);
+                        setSelectedUser(null);
+                    }}
+                    onComplete={(updatedUser) => {
+                        setOwnershipDialogVisible(false);
                     }}
                 />
             )}

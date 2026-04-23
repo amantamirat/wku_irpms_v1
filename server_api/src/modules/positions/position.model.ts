@@ -1,7 +1,10 @@
 import mongoose, { Schema, model, Document } from "mongoose";
-import { COLLECTIONS } from "../../../common/constants/collections.enum";
-import { PositionType } from "./position.enum";
+import { COLLECTIONS } from "../../common/constants/collections.enum";
 
+export enum PositionType {
+    position = 'position',
+    rank = 'rank'
+}
 /* =========================
    Base Model
 ========================= */
@@ -71,3 +74,4 @@ export const Rank = BasePosition.discriminator<RankDocument>(
     PositionType.rank,
     RankSchema
 );
+

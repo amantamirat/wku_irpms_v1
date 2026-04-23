@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import { SpecializationService } from './specialization.service';
 import { CreateSpecializationDTO, UpdateSpecializationDTO } from './specialization.dto';
-import { errorResponse, successResponse } from '../../../common/helpers/response';
+import { successResponse, errorResponse } from '../../../common/helpers/response';
+
 
 export class SpecializationController {
 

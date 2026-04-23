@@ -3,8 +3,8 @@ import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { IOrganizationRepository } from "../../organization/organization.repository";
 import { IUserRepository } from "../user.repository";
-import { PositionType } from "../positions/position.enum";
-import { IPositionRepository } from "../positions/position.repository";
+import { PositionType } from "../../positions/position.model";
+import { IPositionRepository } from "../../positions/position.repository";
 import {
     CreateExperienceDTO,
     DeleteExperienceDTO,

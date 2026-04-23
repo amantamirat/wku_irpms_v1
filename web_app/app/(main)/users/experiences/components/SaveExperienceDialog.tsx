@@ -14,8 +14,8 @@ import { Organization, OrgnUnit } from '@/app/(main)/organizations/models/organi
 import { EmploymentType, Experience, validateExperience } from '../models/experience.model';
 
 import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
-import { PositionApi } from '../../positions/api/position.api';
-import { Position, PositionType } from '../../positions/models/position.model';
+import { PositionApi } from '../../../positions/api/position.api';
+import { Position, PositionType } from '../../../positions/models/position.model';
 import { ExperienceApi } from '../api/experience.api';
 
 interface SaveExperienceDialogProps {
@@ -62,7 +62,7 @@ const SaveExperienceDialog = ({
     useEffect(() => {
         const fetchPositions = async () => {
             try {
-                const positions = await PositionApi.getPositions({ type: PositionType.position });
+                const positions = await PositionApi.getAll({ type: PositionType.position });
                 setPositions(positions);
             } catch (err) {
                 console.error('Failed to fetch positions', err);
@@ -86,7 +86,7 @@ const SaveExperienceDialog = ({
             }
 
             try {
-                const ranks = await PositionApi.getPositions({
+                const ranks = await PositionApi.getAll({
                     parent: typeof localExperience.position === "string"
                         ? localExperience.position
                         : localExperience.position._id

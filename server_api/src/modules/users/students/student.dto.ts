@@ -1,7 +1,7 @@
 export interface CreateStudentDTO {
     calendar: string;
     program: string;
-    applicant: string;
+    user: string;
 }
 
 export interface UpdateStudentDTO {
@@ -9,16 +9,16 @@ export interface UpdateStudentDTO {
     data: {
         calendar?: string;
         program?: string;
-        applicant?: string;
+        user?: string;
     };
 }
 
 export interface GetStudentsOptions {
-    applicant?: string;
+    user?: string;
 }
 
 export interface ExistsStudentDTO {
     calendar?:string;
-    applicant?: string;
+    user?: string;
     program?: string;
 }

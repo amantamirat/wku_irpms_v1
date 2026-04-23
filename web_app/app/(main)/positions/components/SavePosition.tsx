@@ -1,36 +1,27 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { EntitySaveDialogProps } from '@/components/createEntityManager';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
-import { Dropdown } from 'primereact/dropdown';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
-import { Position, validatePosition, PositionType } from '../models/position.model';
+import { useEffect, useRef, useState } from 'react';
 import { PositionApi } from '../api/position.api';
-import { userUnits } from '../../models/user.model';
-//import { scopeOptions } from '../../models/applicant.model';
+import { Position, validatePosition } from '../models/position.model';
 
 
-interface SavePositionDialogProps {
-    visible: boolean;
-    position: Position;
-    onComplete: (pos: Position) => void;
-    onHide: () => void;
-}
-
-const SavePositionDialog = (props: SavePositionDialogProps) => {
-    const { visible, position, onComplete, onHide } = props;
+const SavePositionDialog = (props: EntitySaveDialogProps<Position>) => {
+    const { visible, item: item, onComplete, onHide } = props;
     const toast = useRef<Toast>(null);
 
-    const [localPosition, setLocalPosition] = useState<Position>({ ...position });
+    const [localPosition, setLocalPosition] = useState<Position>({ ...item });
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
     useEffect(() => {
-        setLocalPosition({ ...position });
-    }, [position]);
+        setLocalPosition({ ...item });
+    }, [item]);
 
     const savePosition = async () => {
         try {
@@ -48,7 +39,7 @@ const SavePositionDialog = (props: SavePositionDialogProps) => {
             toast.current?.show({
                 severity: 'success',
                 summary: 'Success',
-                detail: `${position.type} saved successfully`,
+                detail: `${item.type} saved successfully`,
                 life: 2000,
             });
 
@@ -56,7 +47,7 @@ const SavePositionDialog = (props: SavePositionDialogProps) => {
         } catch (err: any) {
             toast.current?.show({
                 severity: 'error',
-                summary: `Failed to save ${position.type}`,
+                summary: `Failed to save ${item.type}`,
                 detail: err.message || String(err),
                 life: 2000,
             });
@@ -77,10 +68,8 @@ const SavePositionDialog = (props: SavePositionDialogProps) => {
     const clearForm = () => {
         setSubmitted(false);
         setErrorMessage(undefined);
-        setLocalPosition({ ...position });
+        setLocalPosition({ ...item });
     };
-
-
 
 
     return (

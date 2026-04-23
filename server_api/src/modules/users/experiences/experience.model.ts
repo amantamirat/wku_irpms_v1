@@ -1,7 +1,7 @@
 //experience.model.ts
 import mongoose, { model, Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
-import { Position, Rank } from "../positions/position.model";
+import { Position, Rank } from "../../positions/position.model";
 
 export enum EmploymentType {
     FullTime = "Full-Time",
