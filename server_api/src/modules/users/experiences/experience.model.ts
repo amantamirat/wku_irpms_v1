@@ -1,7 +1,7 @@
 //experience.model.ts
 import mongoose, { model, Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
-import { Position, Rank } from "../../positions/position.model";
+
 
 export enum EmploymentType {
     FullTime = "Full-Time",
@@ -13,7 +13,7 @@ export enum EmploymentType {
 
 // Mongo model interface
 export interface IExperience extends Document {
-    applicant: mongoose.Types.ObjectId;
+    user: mongoose.Types.ObjectId;
     organization: mongoose.Types.ObjectId;
     position: mongoose.Types.ObjectId;
     rank: mongoose.Types.ObjectId;
@@ -27,7 +27,7 @@ export interface IExperience extends Document {
 
 // Mongoose Schema
 const ExperienceSchema = new Schema<IExperience>({
-    applicant: {
+    user: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.USER,
         required: true,
@@ -40,14 +40,10 @@ const ExperienceSchema = new Schema<IExperience>({
     },
     position: {
         type: Schema.Types.ObjectId,
-        ref: Position.modelName,
+        ref: COLLECTIONS.POSITION,
         required: true,
     },
-    rank: {
-        type: Schema.Types.ObjectId,
-        ref: Rank.modelName,
-        required: true
-    },
+    
     startDate: {
         type: Date,
         required: true

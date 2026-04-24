@@ -3,10 +3,9 @@ import { EmploymentType } from "./experience.model";
 
 
 export interface CreateExperienceDTO {
-    applicant: string;
+    user: string;
     organization: string;
     position: string;
-    rank: string;
     startDate: Date;
     endDate?: Date | null;
     isCurrent: boolean;
@@ -19,7 +18,6 @@ export interface UpdateExperienceDTO {
     data: Partial<{
         organization: string;
         position: string;
-        rank: string;
         startDate: Date;
         endDate: Date | null;
         isCurrent: boolean;
@@ -34,13 +32,13 @@ export interface DeleteExperienceDTO {
 }
 
 export interface GetExperiencesDTO {
-    applicant?: string;
+    user?: string;
     organization?: string;
     populate?: boolean;
 }
 
 export interface ExistExperienceDTO {
-    applicant?: string;
-    rank?: string;
+    user?: string;
+    position?: string;
     organization?: string;
 }

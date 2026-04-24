@@ -1,131 +1,77 @@
 'use client';
 
-import { CrudManager } from "@/components/CrudManager";
-import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-import { useCrudList } from "@/hooks/useCrudList";
-import { useEffect, useState } from "react";
+import React from 'react';
+import { createEntityManager } from "@/components/createEntityManager";
 import { PublicationApi } from "../api/publication.api";
-import { Publication } from "../models/publication.model";
-import { useAuth } from "@/contexts/auth-context";
-import { PERMISSIONS } from "@/types/permissions";
-import SavePublicationDialog from "./SavePublicationDialog";
+import { GetPublicationsOptions, Publication } from "../models/publication.model";
 import { User } from "../../models/user.model";
+import SavePublicationDialog from "./SavePublication";
 
 interface PublicationManagerProps {
-    applicant?: User;
+    author?: User;
 }
 
-const PublicationManager = ({ applicant }: PublicationManagerProps) => {
+const PublicationManager = ({ author }: PublicationManagerProps) => {
+    /**
+     * Initialize the Entity Manager for Publications.
+     * The manager handles the CRUD lifecycle, permissions, and dialog state.
+     */
+    const Manager = createEntityManager<Publication, GetPublicationsOptions | undefined>({
+        title: author ? `Publications for ${author.name}` : "Manage Publications",
+        itemName: "Publication",
+        api: PublicationApi,
 
-    const { hasPermission } = useAuth();
-    const confirm = useConfirmDialog();
+        /** Table Columns configuration */
+        columns: [
+            {
+                header: "Title",
+                field: "title",
+                sortable: true
+            },
+            {
+                header: "Type",
+                field: "type",
+                sortable: true,
+                body: (p: Publication) => (
+                    <span>
+                        {p.type?.toUpperCase()}
+                    </span>
+                )
+            },
+            {
+                header: "Publisher",
+                field: "publisher",
+                sortable: true
+            },
+            // Dynamic column: Hide Author name if we are viewing a specific applicant's list
+            ...(!author ? [{
+                header: "Author",
+                field: "user.name",
+                sortable: true
+            }] : []),
+        ],
 
-    const canCreate = hasPermission([PERMISSIONS.PUBLICATION.CREATE]);
-    const canEdit = hasPermission([PERMISSIONS.PUBLICATION.UPDATE]);
-    const canDelete = hasPermission([PERMISSIONS.PUBLICATION.DELETE]);
+        /** Default values for new records */
+        createNew: () => ({
+            author: author, // Automatically link the publication to the current applicant
+            title: "",
+            type: undefined,
+            abstract: "",
+        }),
 
-    // CRUD hook
-    const {
-        items: publications,
-        setAll,
-        updateItem,
-        removeItem,
-        loading,
-        setLoading,
-        error,
-        setError
-    } = useCrudList<Publication>();
+        /** Integration with the Save Dialog and Permission system */
+        SaveDialog: SavePublicationDialog,
+        permissionPrefix: "publication",
+        query() {
+            author
+        },
+    });
 
-    const emptyPublication: Publication = {
-        applicant: applicant,
-    };
-    const [publication, setPublication] = useState<Publication>({});
-    const [showSaveDialog, setShowSaveDialog] = useState(false);
-
-    /** Fetch publications */
-    useEffect(() => {
-        const fetchPublications = async () => {
-            try {
-                setLoading(true);
-                const data = await PublicationApi.getPublications({ applicant });
-                setAll(data);
-            } catch (err: any) {
-                setError("Failed to fetch publications. " + (err?.message ?? ""));
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchPublications();
-    }, [applicant]);
-
-    /** Save callback */
-    const onSaveComplete = (saved: Publication) => {
-        updateItem(saved);
-        hideDialogs();
-    };
-
-    /** Delete function */
-    const deletePublication = async (row: Publication) => {
-        const ok = await PublicationApi.delete(row);
-        if (ok) removeItem(row);
-    };
-
-    /** Hide dialogs */
-    const hideDialogs = () => {
-        setShowSaveDialog(false);
-    };
-
-    /** Columns */
-    const columns = [
-        { header: "Title", field: "title" },
-        { header: "Type", field: "type" },
-        { header: "Published Date", field: "publishedDate" },
-        !applicant && { header: "Applicant", field: "applicant.name" },
-    ].filter(Boolean);
-
-    return (
-        <>
-            <CrudManager
-                headerTitle="Manage Publications"
-                items={publications}
-                dataKey="_id"
-                columns={columns}
-                loading={loading}
-                error={error}
-                canCreate={canCreate}
-                canEdit={canEdit}
-                canDelete={canDelete}
-                onCreate={() => {
-                    setPublication(emptyPublication);
-                    setShowSaveDialog(true);
-                }}
-
-                onEdit={(row) => {
-                    setPublication({ ...row });
-                    setShowSaveDialog(true);
-                }}
-
-                onDelete={(row) =>
-                    confirm.ask({
-                        item: row._id,
-                        onConfirmAsync: () => deletePublication(row)
-                    })
-                }
-
-                enableSearch
-            />
-
-            {(publication && showSaveDialog) && (
-                <SavePublicationDialog
-                    visible={showSaveDialog}
-                    publication={publication}
-                    applicantProvided={!!applicant}
-                    onComplete={onSaveComplete}
-                    onHide={hideDialogs}
-                />
-            )}
-        </>
-    );
+    /**
+     * Return the Manager component, passing the applicant as context 
+     * to trigger the internal filtering and creation logic.
+     */
+    return <Manager />;
 };
 
 export default PublicationManager;

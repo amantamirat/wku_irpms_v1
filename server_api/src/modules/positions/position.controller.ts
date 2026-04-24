@@ -6,7 +6,6 @@ import {
     GetPositionsDTO,
     UpdatePositionDTO
 } from "./position.dto";
-import { PositionType } from "./position.model";
 import { successResponse, errorResponse } from "../../common/helpers/response";
 
 export class PositionController {
@@ -22,9 +21,7 @@ export class PositionController {
         try {
 
             const data: CreatePositionDTO = {
-                type: req.body.type,
                 name: req.body.name,
-                parent: req.body.parent,
             };
 
             const created = await this.service.create(data);
@@ -37,11 +34,9 @@ export class PositionController {
     // 🟡 GET / FIND
     get = async (req: Request, res: Response) => {
         try {
-            const { type, parent, populate } = req.query;
+            const {populate } = req.query;
 
             const options: GetPositionsDTO = {
-                type: type ? (type as PositionType) : undefined,
-                parent: parent ? String(parent) : undefined,
                 populate: populate === "true" // query param is string
             };
 
@@ -60,7 +55,6 @@ export class PositionController {
 
             const dtoData: UpdatePositionDTO["data"] = {
                 name: name ?? undefined,
-                parent: parent ?? undefined
             };
 
             const updated = await this.service.update({ id, data: dtoData });

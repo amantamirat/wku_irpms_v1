@@ -18,7 +18,7 @@ export enum PublicationType {
 }
 
 export interface IPublication extends Document {
-    applicant: mongoose.Types.ObjectId;
+    author: mongoose.Types.ObjectId; //better to be authors many
     title: string;
     type: PublicationType;
     abstract?: string;
@@ -37,7 +37,7 @@ export interface IPublication extends Document {
 
 const PublicationSchema = new Schema<IPublication>(
     {
-        applicant: {
+        author: {
             type: Schema.Types.ObjectId,
             ref: COLLECTIONS.USER,
             required: true,

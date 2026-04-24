@@ -10,24 +10,36 @@ import { useEffect, useRef, useState } from 'react';
 import { PositionApi } from '../api/position.api';
 import { Position, validatePosition } from '../models/position.model';
 
-
 const SavePositionDialog = (props: EntitySaveDialogProps<Position>) => {
-    const { visible, item: item, onComplete, onHide } = props;
+    const { visible, item, onComplete, onHide } = props;
+
     const toast = useRef<Toast>(null);
 
     const [localPosition, setLocalPosition] = useState<Position>({ ...item });
     const [submitted, setSubmitted] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | undefined>();
+    const [loading, setLoading] = useState(false);
 
+    /* =========================
+       Sync item → local state
+    ========================= */
     useEffect(() => {
         setLocalPosition({ ...item });
-    }, [item]);
+        setSubmitted(false);
+    }, [item, visible]);
 
+    /* =========================
+       Save handler
+    ========================= */
     const savePosition = async () => {
         try {
             setSubmitted(true);
+
             const validation = validatePosition(localPosition);
-            if (!validation.valid) throw new Error(validation.message);
+            if (!validation.valid) {
+                throw new Error(validation.message);
+            }
+
+            setLoading(true);
 
             let saved: Position;
             if (localPosition._id) {
@@ -39,69 +51,83 @@ const SavePositionDialog = (props: EntitySaveDialogProps<Position>) => {
             toast.current?.show({
                 severity: 'success',
                 summary: 'Success',
-                detail: `${item.type} saved successfully`,
+                detail: `Position ${localPosition._id ? 'updated' : 'created'} successfully`,
                 life: 2000,
             });
 
-            if (onComplete) setTimeout(() => onComplete(saved), 2000);
+            onComplete?.(saved);
+
         } catch (err: any) {
             toast.current?.show({
                 severity: 'error',
-                summary: `Failed to save ${item.type}`,
-                detail: err.message || String(err),
-                life: 2000,
+                summary: 'Error',
+                detail: err.message || 'Failed to save position',
+                life: 3000,
             });
+        } finally {
+            setLoading(false);
         }
     };
 
+    /* =========================
+       Footer
+    ========================= */
     const footer = (
         <>
-            <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
-            <Button label="Save" icon="pi pi-check" text onClick={savePosition} />
+            <Button
+                label="Cancel"
+                icon="pi pi-times"
+                text
+                onClick={onHide}
+                disabled={loading}
+            />
+            <Button
+                label="Save"
+                icon="pi pi-check"
+                onClick={savePosition}
+                loading={loading}
+            />
         </>
     );
-
-    useEffect(() => {
-        if (!visible) clearForm();
-    }, [visible]);
-
-    const clearForm = () => {
-        setSubmitted(false);
-        setErrorMessage(undefined);
-        setLocalPosition({ ...item });
-    };
-
 
     return (
         <>
             <Toast ref={toast} />
+
             <Dialog
                 visible={visible}
-                style={{ width: '500px' }}
-                header={localPosition._id ?
-                    `Edit ${localPosition.type}` :
-                    `New ${localPosition.type}`}
+                style={{ width: '450px' }}
+                header={localPosition._id ? 'Edit Position' : 'New Position'}
                 modal
                 className="p-fluid"
                 footer={footer}
                 onHide={onHide}
             >
-                {/* Name */}
+                {/* Name Field */}
                 <div className="field">
-                    <label htmlFor="name">Name</label>
+                    <label htmlFor="name" className="font-medium">
+                        Name
+                    </label>
                     <InputText
                         id="name"
                         value={localPosition.name}
-                        onChange={(e) => setLocalPosition({ ...localPosition, name: e.target.value })}
-                        required
-                        className={classNames({ 'p-invalid': submitted && !localPosition.name })}
+                        onChange={(e) =>
+                            setLocalPosition({
+                                ...localPosition,
+                                name: e.target.value,
+                            })
+                        }
+                        autoFocus
+                        className={classNames({
+                            'p-invalid': submitted && !localPosition.name,
+                        })}
                     />
                     {submitted && !localPosition.name && (
-                        <small className="p-invalid">Name is required.</small>
+                        <small className="p-error">
+                            Name is required.
+                        </small>
                     )}
                 </div>
-
-                {errorMessage && <small className="p-error">{errorMessage}</small>}
             </Dialog>
         </>
     );

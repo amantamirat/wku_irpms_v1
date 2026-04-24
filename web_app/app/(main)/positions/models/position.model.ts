@@ -1,59 +1,49 @@
-//import { Scope } from "../../models/applicant.model";
-
-
-export enum PositionType {
-    position = "position",
-    rank = "rank",
-}
-
+// Simple Position type
 export type Position = {
     _id?: string;
     name: string;
-    type: PositionType;
-    parent?: string | Position; // for rank only
     createdAt?: Date;
     updatedAt?: Date;
 };
 
-const posTypeOptions = Object.values(PositionType).map(t => ({ label: t, value: t }));
+/* =========================
+   Validation
+========================= */
 
+export const validatePosition = (
+    pos: Position
+): { valid: boolean; message?: string } => {
 
-export const validatePosition = (pos: Position): { valid: boolean; message?: string } => {
-    if (!pos.type) {
-        return { valid: false, message: "Type is required." };
-    }
     if (!pos.name || pos.name.trim().length === 0) {
         return { valid: false, message: "Name is required." };
-    }
-
-    if (pos.type === PositionType.rank && !pos.parent) {
-        return { valid: false, message: "Parent Position is required for Rank." };
     }
 
     return { valid: true };
 };
 
+/* =========================
+   Sanitize
+========================= */
+
 export const sanitizePosition = (pos: Partial<Position>): Position => {
     return {
         ...pos,
-        parent:
-            typeof pos.parent === "object" && pos.parent !== null
-                ? (pos.parent as Position)._id
-                : pos.parent,
+        name: pos.name?.trim() || ""
     } as Position;
 };
 
-export const createEmptyPosition = (
-    type: PositionType,
-    parent?: string
-): Position => ({
-    type,
-    name: "",
-    parent,
+/* =========================
+   Empty Factory
+========================= */
+
+export const createEmptyPosition = (): Position => ({
+    name: ""
 });
 
-export interface GetPositionOptions {
-    type?: PositionType;
-    parent?: string | Position;
-}
+/* =========================
+   Query Options
+========================= */
 
+export interface GetPositionOptions {
+    search?: string;
+}

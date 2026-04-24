@@ -29,10 +29,10 @@ export class PublicationController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { applicant, type } = req.query;
+            const { author, type } = req.query;
 
             const publications = await this.service.get({
-                applicant: applicant ? applicant as string : undefined,
+                author: author ? author as string : undefined,
                 type: type ? type as any : undefined,
             });
 

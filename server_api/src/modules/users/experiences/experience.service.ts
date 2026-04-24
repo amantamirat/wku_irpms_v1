@@ -3,7 +3,6 @@ import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { IOrganizationRepository } from "../../organization/organization.repository";
 import { IUserRepository } from "../user.repository";
-import { PositionType } from "../../positions/position.model";
 import { IPositionRepository } from "../../positions/position.repository";
 import {
     CreateExperienceDTO,
@@ -27,7 +26,7 @@ export class ExperienceService {
     }
 
     async validate(dto: { organization?: string, position?: string, rank?: string }) {
-        const { organization, position, rank } = dto;
+        const { organization, position } = dto;
         if (organization) {
             const organDoc = await this.organizationRepository.findById(organization);
             if (!organDoc)
@@ -37,26 +36,19 @@ export class ExperienceService {
                 throw new AppError(ERROR_CODES.INVALID_ORGANIZATION_TYPE);
             }
         }
-        if (position) {
+
+        if(position){
             const posDoc = await this.posRepository.findById(position);
-            if (!posDoc)
-                throw new AppError(ERROR_CODES.POSITION_NOT_FOUND);
-
-            if (posDoc.type !== PositionType.position)
-                throw new AppError(ERROR_CODES.POSITION_NOT_FOUND);
-
+        if (!posDoc)
+            throw new AppError(ERROR_CODES.POSITION_NOT_FOUND);
         }
-        if (rank) {
-            const rankDoc = await this.posRepository.findById(rank);
-            if (!rankDoc)
-                throw new AppError(ERROR_CODES.RANK_NOT_FOUND);
-            if (rankDoc.type !== PositionType.rank)
-                throw new AppError(ERROR_CODES.RANK_NOT_FOUND); 
-        }
+        
+
+
     }
 
     async create(dto: CreateExperienceDTO) {
-        const { applicant, organization, position, rank } = dto;
+        const { user: applicant, organization, position } = dto;
 
         const applicantDoc = await this.applicantRepository.findById(applicant);
         if (!applicantDoc)

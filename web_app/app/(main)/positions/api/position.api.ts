@@ -9,16 +9,8 @@ export const PositionApi: EntityApi<Position, GetPositionOptions | undefined> = 
     async getAll(options) {
         const query = new URLSearchParams();
 
-        if (options) {
-            const sanitized = sanitizePosition(options);
-
-            if (options.type) {
-                query.append("type", sanitized.type as string);
-            }
-
-            if (options.parent) {
-                query.append("parent", sanitized.parent as string);
-            }
+        if (options?.search) {
+            query.append("search", options.search);
         }
 
         const qs = query.toString();
@@ -36,7 +28,10 @@ export const PositionApi: EntityApi<Position, GetPositionOptions | undefined> = 
 
     async update(position) {
         if (!position._id) throw new Error("_id required");
-        return ApiClient.put(`${end_point}/${position._id}`, sanitizePosition(position));
+        return ApiClient.put(
+            `${end_point}/${position._id}`,
+            sanitizePosition(position)
+        );
     },
 
     async delete(position) {

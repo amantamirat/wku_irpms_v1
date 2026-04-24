@@ -13,14 +13,14 @@ export class PublicationService {
 
     constructor(
         private readonly repository: PublicationRepository,
-        private readonly applicantRepository: UserRepository
+        private readonly usrRepo: UserRepository
     ) { }
 
     async create(dto: CreatePublicationDTO) {
-        const { applicant } = dto;
+        const { author } = dto;
 
         // 1. Validate applicant
-        const applicantDoc = await this.applicantRepository.findById(applicant);
+        const applicantDoc = await this.usrRepo.findById(author);
         if (!applicantDoc) {
             throw new AppError(ERROR_CODES.APPLICANT_NOT_FOUND);
         }

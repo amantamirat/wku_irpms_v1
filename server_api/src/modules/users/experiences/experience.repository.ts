@@ -22,8 +22,8 @@ export class ExperienceRepository implements IExperienceRepository {
     async find(filters: GetExperiencesDTO) {
         const query: any = {};
 
-        if (filters.applicant) {
-            query.applicant = new mongoose.Types.ObjectId(filters.applicant);
+        if (filters.user) {
+            query.applicant = new mongoose.Types.ObjectId(filters.user);
         }
 
         if (filters.organization) {
@@ -33,7 +33,7 @@ export class ExperienceRepository implements IExperienceRepository {
         let dbQuery = Experience.find(query);
 
         if (filters.populate) {
-            dbQuery = dbQuery.populate("applicant organization position rank");
+            dbQuery = dbQuery.populate("user organization position");
         }
 
         return dbQuery.lean<IExperience[]>().exec();
@@ -41,10 +41,9 @@ export class ExperienceRepository implements IExperienceRepository {
 
     async create(dto: CreateExperienceDTO) {
         const data: Partial<IExperience> = {
-            applicant: new mongoose.Types.ObjectId(dto.applicant),
+            user: new mongoose.Types.ObjectId(dto.user),
             position: new mongoose.Types.ObjectId(dto.position),
             organization: new mongoose.Types.ObjectId(dto.organization),
-            rank: new mongoose.Types.ObjectId(dto.rank),
             startDate: dto.startDate,
             endDate: dto.endDate ?? null,
             isCurrent: dto.isCurrent,
@@ -79,8 +78,8 @@ export class ExperienceRepository implements IExperienceRepository {
         if (dtoData.organization !== undefined)
             updateData.organization = new mongoose.Types.ObjectId(dtoData.organization);
 
-        if (dtoData.rank !== undefined)
-            updateData.rank = new mongoose.Types.ObjectId(dtoData.rank);
+        if (dtoData.position !== undefined)
+            updateData.position = new mongoose.Types.ObjectId(dtoData.position);
 
         return Experience.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
@@ -91,14 +90,14 @@ export class ExperienceRepository implements IExperienceRepository {
 
     async exists(filters: ExistExperienceDTO): Promise<boolean> {
         const query: any = {};
-        if (filters.applicant) {
-            query.applicant = new mongoose.Types.ObjectId(filters.applicant);
+        if (filters.user) {
+            query.user = new mongoose.Types.ObjectId(filters.user);
         }
         if (filters.organization) {
             query.organization = new mongoose.Types.ObjectId(filters.organization);
         }
-        if (filters.rank) {
-            query.rank = new mongoose.Types.ObjectId(filters.rank);
+        if (filters.position) {
+            query.position = new mongoose.Types.ObjectId(filters.position);
         }
         const result = await Experience.exists(query).exec();
         return result !== null;

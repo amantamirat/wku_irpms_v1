@@ -24,7 +24,7 @@ export enum PublicationType {
 ======================= */
 export type Publication = {
     _id?: string;
-    applicant?: string | User;
+    author?: string | User;
     title?: string;
     type?: PublicationType;
     abstract?: string;
@@ -45,8 +45,8 @@ export const validatePublication = (
     publication: Publication
 ): { valid: boolean; message?: string } => {
 
-    if (!publication.applicant) {
-        return { valid: false, message: 'Applicant is required.' };
+    if (!publication.author) {
+        return { valid: false, message: 'Author is required.' };
     }
 
     if (!publication.title) {
@@ -68,10 +68,10 @@ export const sanitizePublication = (
 ): Partial<Publication> => {
     return {
         ...publication,
-        applicant:
-            typeof publication.applicant === 'object' && publication.applicant !== null
-                ? (publication.applicant as any)._id
-                : publication.applicant,
+        author:
+            typeof publication.author === 'object' && publication.author !== null
+                ? (publication.author as any)._id
+                : publication.author,
     };
 };
 
@@ -79,6 +79,6 @@ export const sanitizePublication = (
    Query Options
 ======================= */
 export interface GetPublicationsOptions {
-    applicant?: string | User;
+    author?: string | User;
     type?: PublicationType;
 }

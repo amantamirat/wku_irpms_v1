@@ -42,7 +42,7 @@ const UserDetail = ({ user: user }: UserDetailProps) => {
         {
             header: "Publications",
             permission: PERMISSIONS.PUBLICATION.READ,
-            content: <PublicationManager applicant={user} />
+            content: <PublicationManager author={user} />
         },
         {
             header: "Enrollments",

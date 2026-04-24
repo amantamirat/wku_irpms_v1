@@ -1,7 +1,7 @@
 import { PublicationType } from "./publication.model";
 
 export interface CreatePublicationDTO {
-    applicant: string;
+    author: string;
     title: string;
     type: PublicationType;
     abstract?: string;
@@ -28,7 +28,7 @@ export interface UpdatePublicationDTO {
 }
 
 export interface GetPublicationsOptions {
-    applicant?: string;
+    author?: string;
     type?: PublicationType;
     publisher?: string;
     fromDate?: string; // filter by publishedDate

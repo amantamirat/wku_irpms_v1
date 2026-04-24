@@ -251,8 +251,18 @@ const AppMenu = () => {
             ]),
             items: [
                 {
-                    label: 'Students',
-                    icon: PrimeIcons.BOOK,
+                    label: 'Publications',
+                    icon: PrimeIcons.BOOK, // or PrimeIcons.COPYRIGHT for a formal look
+                    visible: hasPermission(
+                        [
+                            PERMISSIONS.PUBLICATION.READ,
+                        ]
+                    ),
+                    to: '/users/publications',
+                },
+                {
+                    label: 'Enrollments',
+                    icon: PrimeIcons.ID_CARD,
                     visible: hasPermission(
                         [
                             PERMISSIONS.STUDENT.READ,

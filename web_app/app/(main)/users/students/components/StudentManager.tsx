@@ -19,7 +19,7 @@ const StudentManager = ({ applicant }: StudentManagerProps) => {
      */
     const Manager = createEntityManager<Student, GetStudentsOptions | undefined>({
         title: applicant ? `Enrollments for ${applicant.name}` : "Manage All Enrollments",
-        itemName: "Student Enrollment",
+        itemName: "Enrollments",
         api: StudentApi,
 
         /** Columns configuration */

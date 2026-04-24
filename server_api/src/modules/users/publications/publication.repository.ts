@@ -27,8 +27,8 @@ export class PublicationRepository implements IPublicationRepository {
         const query: any = {};
 
         // Filter by applicant if provided
-        if (filters.applicant) {
-            query.applicant = new mongoose.Types.ObjectId(filters.applicant);
+        if (filters.author) {
+            query.applicant = new mongoose.Types.ObjectId(filters.author);
         }
 
         // Filter by type if provided
@@ -51,17 +51,11 @@ export class PublicationRepository implements IPublicationRepository {
 
     async create(dto: CreatePublicationDTO): Promise<IPublication> {
         const data: Partial<IPublication> = {
-            applicant: new mongoose.Types.ObjectId(dto.applicant),
-            title: dto.title,
-            type: dto.type,
-            abstract: dto.abstract,
+            ...dto,
+            author: new mongoose.Types.ObjectId(dto.author),            
             publishedDate: dto.publishedDate
                 ? new Date(dto.publishedDate)
-                : undefined,
-            doi: dto.doi,
-            url: dto.url,
-            publisher: dto.publisher,
-            publicationId: dto.publicationId,
+                : undefined,            
         };
 
         return Publication.create(data);

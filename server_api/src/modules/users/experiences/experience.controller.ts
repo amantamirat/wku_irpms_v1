@@ -39,10 +39,10 @@ export class ExperienceController {
     // --- Get Experiences ---
     get = async (req: Request, res: Response) => {
         try {
-            const { applicant } = req.query;
+            const { user } = req.query;
 
             const filter: GetExperiencesDTO = {
-                applicant: applicant ? applicant as string : undefined
+                user: user ? user as string : undefined
             };
 
             const experiences = await this.service.getExperiences(filter);
@@ -66,7 +66,6 @@ export class ExperienceController {
                 data: {
                     position: req.body.position,
                     organization: req.body.organization,
-                    rank: req.body.rank,
                     startDate: req.body.startDate,
                     endDate: req.body.endDate,
                     isCurrent: req.body.isCurrent,

@@ -1,13 +1,9 @@
-import { PositionType } from "./position.model";
-
 /* =========================
-   Create DTOs
+   Create DTO
 ========================= */
 
 export interface CreatePositionDTO {
-    type: PositionType;
     name: string;
-    parent?: string;
 }
 
 /* =========================
@@ -18,7 +14,6 @@ export interface UpdatePositionDTO {
     id: string;
     data: {
         name: string;
-        parent: string; // only used if updating a Rank
     };
 }
 
@@ -27,11 +22,10 @@ export interface UpdatePositionDTO {
 ========================= */
 
 export interface GetPositionsDTO {
-    type?: PositionType;  // filter by position or rank
-    parent?: string;      // filter ranks by parent
-    populate?: boolean;
+    search?: string;     // optional: for name search
+    populate?: boolean;  // keep if you actually use it
 }
 
 export interface ExistsPositionDTO {
-    parent?: string;     // optional, check ranks under parent
+    name: string;
 }
