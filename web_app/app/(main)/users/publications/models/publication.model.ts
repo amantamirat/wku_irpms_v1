@@ -81,4 +81,5 @@ export const sanitizePublication = (
 export interface GetPublicationsOptions {
     author?: string | User;
     type?: PublicationType;
+    populate?:boolean;
 }

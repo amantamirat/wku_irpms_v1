@@ -6,7 +6,7 @@ import { Divider } from "primereact/divider";
 import CollaboratorManager from "../components/CollaboratorManager";
 
 const CollaboratorPage = () => {
-    const { getApplicant } = useAuth();
+    const { getUser: getApplicant } = useAuth();
     const applicant = getApplicant();
 
     return (

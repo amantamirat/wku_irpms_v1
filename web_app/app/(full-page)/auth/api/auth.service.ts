@@ -1,19 +1,20 @@
 import { ApiClient } from "@/api/ApiClient";
 import { Account } from "@/app/(main)/accounts/models/account.model";
+import { ChangePasswordDTO, LoginDto } from "../dto/auth.dto";
 
 
-const end_point = '/users';
+
 const login_end_point = '/auth/login';
 const change_password_end_point = '/auth/change-password';
 const send_verification_code_end_point = '/auth/send-verification-code';
-const reset_password_end_point = '/users/reset-password';
+const reset_password_end_point = '/auth/reset-password';
 const activate_user_end_point = '/auth/activate-user';
 const tokenStorage = 'authToken';
 const userStorage = 'authUser';
 
 export const AuthApi = {
 
-    async loginUser(credentials: Account): Promise<any> {
+    async loginUser(credentials: LoginDto): Promise<any> {
         const userIfo = await ApiClient.post(login_end_point, credentials);
         const { token, user } = userIfo;
         localStorage.setItem(tokenStorage, token);
@@ -43,6 +44,10 @@ export const AuthApi = {
         //router.push('/auth/login');
     },
 
+    async changePassword(dto: ChangePasswordDTO): Promise<any> {
+        const response = await ApiClient.post(change_password_end_point, dto);
+        return response;
+    },
 
     async sendVerificationCode(email: string): Promise<any> {
         const response = await ApiClient.post(send_verification_code_end_point, { email: email });

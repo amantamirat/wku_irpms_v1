@@ -66,7 +66,7 @@
             "phase:transition.reviewed.approved",
             "phase:transition.approved.active",
             "phase:document:read",
-            "applicant:read",
+            "user:read",
             "reviewer:*",
             "result:read"
         ]
@@ -79,7 +79,7 @@
             "call.stage:read",
             "constraint:read",
             "project:read",
-            "applicant:read",
+            "user:read",
             "collaborator:*",
             "thematic:read",
             "theme:read",

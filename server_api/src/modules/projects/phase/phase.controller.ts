@@ -15,7 +15,7 @@ export class PhaseController {
     // -----------------------
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const {
                 title,
@@ -35,7 +35,7 @@ export class PhaseController {
                 description,
                 project: project as string,
                 //breakdown,    // Passed to service for validation
-                applicantId: req.user.applicantId,
+                applicantId: req.auth.userId,
             };
 
             const created = await this.service.create(data);
@@ -69,7 +69,7 @@ export class PhaseController {
     // -----------------------
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const { id } = req.params;
             const { title, order, duration, budget, description, breakdown, status } = req.body;
@@ -83,7 +83,7 @@ export class PhaseController {
                     budget,
                     description
                 },
-                applicantId: req.user.applicantId,
+                applicantId: req.auth.userId,
             };
 
             const updated = await this.service.update(dto);
@@ -98,7 +98,7 @@ export class PhaseController {
     // -----------------------
     transitionState = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
             const { current, next } = req.body;
 
@@ -106,7 +106,7 @@ export class PhaseController {
                 id: String(id),
                 current: current,
                 next: next,
-                applicantId: req.user.applicantId,
+                applicantId: req.auth.userId,
             };
 
             const updated = await this.service.transitionState(dto);
@@ -121,12 +121,12 @@ export class PhaseController {
     // -----------------------
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
 
             const dto: DeleteDto = {
                 id,
-                applicantId: req.user.applicantId,
+                applicantId: req.auth.userId,
             };
 
             const deleted = await this.service.delete(dto);

@@ -6,14 +6,14 @@ import { Account } from '@/app/(main)/accounts/models/account.model';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 interface AuthContextType {
-    user: Account | null;
+    account: Account | null;
     loading: boolean;
     loggedIn: boolean;
-    login: (user: Account) => Promise<boolean>;
+    login: (account: Account) => Promise<boolean>;
     logout: () => void;
     hasPermission: (perms: string[]) => boolean;
     getScopesByUnit: (unit: OrgnUnit) => any[] | "*";
-    getApplicant: () => any | null;
+    getUser: () => any | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -62,19 +62,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const ownership = ownerships?.find(o => o.unitType === unit);
         if (!ownership) return [];
         return ownership.scope;
-        //return ownership.scope === '*' ? '*' : ownership.scope;
     };
 
-    const getApplicant = (): any | null => {
+    const getUser = (): any | null => {
         if (!user || !user.applicant) return null;
         return user.applicant;
     }
 
     return (
         <AuthContext.Provider value={{
-            user, loading, loggedIn: !!user, login, logout, hasPermission, //hasOrganizationType, 
+            account: user, loading, loggedIn: !!user, login, logout, hasPermission, //hasOrganizationType, 
             getScopesByUnit,
-            getApplicant
+            getUser: getUser
         }}>
             {children}
         </AuthContext.Provider>

@@ -8,6 +8,7 @@ import MyBadge from "@/templates/MyBadge";
 import SaveUser from "./SaveUser";
 import { Badge } from "primereact/badge";
 import OwnershipDialog from "./dialogs/OwnershipDialog";
+import UserDetail from "./UserDetail";
 
 // We need a small wrapper to handle the local state of the Role Dialog
 const ManageUsers = () => {
@@ -22,10 +23,6 @@ const ManageUsers = () => {
         columns: [
             { header: "Full Name", field: "name", sortable: true },
             { header: "Workspace", field: "workspace.name" },
-            /*{
-                header: "FIN",
-                field: "fin"
-            },*/
             {
                 header: "Birth Date",
                 field: "birthDate",
@@ -67,6 +64,12 @@ const ManageUsers = () => {
         createNew: createEmptyUser,
         SaveDialog: SaveUser,
         permissionPrefix: "user",
+
+        expandable: {
+            template: (user) => (
+                <UserDetail user={user} />
+            )
+        },
 
         // ADD THE EXTRA ACTION HERE
         extraActions: [

@@ -26,21 +26,19 @@ const SavePublicationDialog = ({
 
     // State
     const [localPublication, setLocalPublication] = useState<Publication>({ ...item });
-    const [applicants, setApplicants] = useState<User[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
 
     // Check if the user/applicant is already passed from a parent context
-    const isAuthorPredefined = !!item.author;
-
-    /**
+    const isAuthorPredefined = !!item.author;    /**
      * Fetch Applicants only if not predefined
      */
     useEffect(() => {
         if (!visible || isAuthorPredefined) return;
 
         UserApi.getAll({})
-            .then(setApplicants)
+            .then(setUsers)
             .catch((err) => console.error('Failed to fetch applicant data:', err));
     }, [visible, isAuthorPredefined]);
 
@@ -136,7 +134,7 @@ const SavePublicationDialog = ({
                             <Dropdown
                                 id="applicant"
                                 value={localPublication.author}
-                                options={applicants}
+                                options={users}
                                 optionLabel="name"
                                 dataKey="_id"
                                 placeholder="Select Author"

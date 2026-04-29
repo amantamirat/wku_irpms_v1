@@ -17,7 +17,7 @@ export class PhaseDocController {
 
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new AppError(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
             if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
 
@@ -58,7 +58,7 @@ export class PhaseDocController {
 
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new AppError(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
             const { id } = req.params;
             const deleted = await this.service.delete(id);

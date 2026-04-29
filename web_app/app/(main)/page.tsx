@@ -11,7 +11,7 @@ import { Call, CallStatus } from "./calls/models/call.model";
 import CallOpportunityGrid from "./dashboard/CallOpportunityGrid";
 
 const Dashboard = () => {
-    const { hasPermission, getApplicant } = useAuth();
+    const { hasPermission, getUser: getApplicant } = useAuth();
     const [calls, setCalls] = useState<Call[]>([]);
     const [loading, setLoading] = useState(true);
 

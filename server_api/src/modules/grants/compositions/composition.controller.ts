@@ -17,10 +17,10 @@ export class CompositionController {
     // ✅ Create Composition
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user)
+            if (!req.auth)
                 throw new Error(ERROR_CODES.UNAUTHORIZED);
 
-            const userId = req.user.applicantId;
+            const userId = req.auth.userId;
 
             const data: CreateCompositionDTO = {
                 ...req.body,
@@ -56,12 +56,12 @@ export class CompositionController {
     // ✅ Update Composition
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) {
+            if (!req.auth) {
                 throw new Error(ERROR_CODES.UNAUTHORIZED);
             }
             const { id } = req.params;
 
-            const userId = req.user.applicantId;
+            const userId = req.auth.userId;
 
             const dto: UpdateCompositionDTO = {
                 id: String(id),

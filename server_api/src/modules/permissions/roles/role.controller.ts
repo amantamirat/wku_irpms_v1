@@ -30,7 +30,7 @@ export class RoleController {
 
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error('User not authorized');
+            if (!req.auth) throw new Error('User not authorized');
 
             const { id } = req.params;
             const { name, permissions, isDefault } = req.body;
@@ -38,7 +38,7 @@ export class RoleController {
             const dto: UpdateRoleDto = {
                 id,
                 data: { name, permissions, isDefault },
-                userId: req.user.applicantId,
+                userId: req.auth.userId,
             };
 
             const updated = await this.service.update(dto);
@@ -50,12 +50,12 @@ export class RoleController {
 
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error('User not authorized');
+            if (!req.auth) throw new Error('User not authorized');
 
             const { id } = req.params;
             const deleted = await this.service.delete({
                 id,
-                applicantId: req.user.applicantId,
+                applicantId: req.auth.userId,
             });
 
             successResponse(res, 200, 'Role deleted successfully', deleted);

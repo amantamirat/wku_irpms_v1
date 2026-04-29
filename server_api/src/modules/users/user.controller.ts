@@ -18,7 +18,7 @@ export class UserController {
     // POST /applicants
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error('User not authorized');
+            if (!req.auth) throw new Error('User not authorized');
 
             const {
                 workspace,
@@ -70,7 +70,7 @@ export class UserController {
     // PUT /applicants?id=xxx
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error('User not authorized');
+            if (!req.auth) throw new Error('User not authorized');
 
             const { id } = req.params;
             const {
@@ -86,7 +86,7 @@ export class UserController {
 
             const dto: UpdateUserDTO = {
                 id,
-                userId: req.user.applicantId,
+                userId: req.auth.userId,
                 data: {
                     workspace,
                     name,
@@ -109,7 +109,7 @@ export class UserController {
     // PATCH /applicants/roles?id=xxx
     updateRoles = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error('User not authorized');
+            if (!req.auth) throw new Error('User not authorized');
 
             const { id } = req.params;
             const { roles } = req.body;
@@ -117,7 +117,7 @@ export class UserController {
             const dto: UpdateRolesDTO = {
                 id,
                 roles,
-                applicantId: req.user.applicantId,
+                applicantId: req.auth.userId,
             };
 
             const updated = await this.service.updateRoles(dto);
@@ -130,7 +130,7 @@ export class UserController {
     // PATCH /applicants/ownerships?id=xxx
     updateOwnerships = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error('User not authorized');
+            if (!req.auth) throw new Error('User not authorized');
 
             const { id } = req.params;
             const { ownerships } = req.body;
@@ -138,7 +138,7 @@ export class UserController {
             const dto: UpdateOwnershipsDTO = {
                 id,
                 ownerships,
-                applicantId: req.user.applicantId,
+                applicantId: req.auth.userId,
             };
 
             const updated = await this.service.updateOwnerships(dto);
@@ -151,7 +151,7 @@ export class UserController {
     // DELETE /applicants?id=xxx
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error('User not authorized');
+            if (!req.auth) throw new Error('User not authorized');
             const { id } = req.params;
             const deleted = await this.service.delete(id);
             successResponse(res, 200, 'Applicant deleted successfully', deleted);

@@ -46,7 +46,7 @@ const PublicationManager = ({ author }: PublicationManagerProps) => {
             // Dynamic column: Hide Author name if we are viewing a specific applicant's list
             ...(!author ? [{
                 header: "Author",
-                field: "user.name",
+                field: "author.name",
                 sortable: true
             }] : []),
         ],
@@ -62,9 +62,10 @@ const PublicationManager = ({ author }: PublicationManagerProps) => {
         /** Integration with the Save Dialog and Permission system */
         SaveDialog: SavePublicationDialog,
         permissionPrefix: "publication",
-        query() {
-            author
-        },
+        query: () => ({
+            author: author,
+            populate: author ? false : true
+        }),
     });
 
     /**

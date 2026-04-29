@@ -1,27 +1,24 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
-import { TreeSelect } from 'primereact/treeselect';
 import { Toast } from 'primereact/toast';
+import { TreeSelect } from 'primereact/treeselect';
 import { classNames } from 'primereact/utils';
+import { useEffect, useRef, useState } from 'react';
 
-import { Project, validateProject } from '../models/project.model';
-import { ProjectApi } from '../api/project.api';
-import { UserApi } from '../../users/api/user.api';
-import { User } from '../../users/models/user.model';
 import { ThemeApi } from '@/app/(main)/thematics/themes/api/theme.api';
-import { Theme } from '@/app/(main)/thematics/themes/models/theme.model';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
-import { GrantAllocation } from '../../grants/allocations/models/grant.allocation.model';
 import { GrantAllocationApi } from '../../grants/allocations/api/grant.allocation.api';
-import { AllocationStatus } from '../../grants/allocations/models/grant.allocation.state-machine';
 import { allocationOptionTemplate, getAllocationLabel } from '../../grants/allocations/components/AllocationTempletes';
+import { GrantAllocation } from '../../grants/allocations/models/grant.allocation.model';
+import { AllocationStatus } from '../../grants/allocations/models/grant.allocation.state-machine';
 import { buildTree, ThemeNode } from '../../thematics/models/thematic.node';
+import { ProjectApi } from '../api/project.api';
+import { Project, validateProject } from '../models/project.model';
 
 interface ExtendedProject extends Project {
     _filterCalendar?: string;

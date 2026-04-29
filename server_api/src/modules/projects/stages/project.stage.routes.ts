@@ -13,20 +13,20 @@ import { SettingRepository } from "../../settings/setting.repository";
 import { SettingService } from "../../settings/setting.service";
 import { NotificationService } from "../../notifications/notification.service";
 import { NotificationRepository } from "../../notifications/notification.repository";
+import { ProjectAuth } from "../project.auth";
 
 const projectStageRepo = new ProjectStageRepository();
 const projectRepo = new ProjectRepository();
+const projAuth = new ProjectAuth(projectRepo);
 const grantStageRepo = new GrantStageRepository();
-const grantAllocationRepo = new GrantAllocationRepository();
 const reviewerRepoRepo = new ReviewerRepository();
 const synchronizer = new ProjectStageSynchronizer(projectRepo, projectStageRepo);
 const notificationService = new NotificationService(
     new NotificationRepository(),
     new SettingService(new SettingRepository())
 );
-
-const service = new ProjectStageService(projectStageRepo, projectRepo,
-    grantStageRepo, grantAllocationRepo,
+const service = new ProjectStageService(projectStageRepo, projectRepo, projAuth,
+    grantStageRepo,
     reviewerRepoRepo, synchronizer, notificationService);
 const controller = new ProjectStageController(service);
 const router = express.Router();
@@ -45,10 +45,6 @@ router.get('/:id', verifyActiveAccount,
 );
 
 /*
-router.post("/submit", verifyActiveAccount,
-    checkPermission([PERMISSIONS.DOCUMENT.SUBMIT]),
-    upload.single("document"), controller.submit);
-
 router.patch("/", verifyActiveAccount,
     checkStatusPermission("document"),
     controller.updateStatus);

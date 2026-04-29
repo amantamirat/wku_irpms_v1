@@ -4,27 +4,25 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { CacheService } from "../../util/cache.service";
-import { UserRepository } from "../users/user.repository";
 import { MailService } from "../mail/mail.service";
-import { OrganizationRepository } from "../organization/organization.repository";
 import { SettingKey } from "../settings/setting.model";
 import { SettingRepository } from "../settings/setting.repository";
 import { SettingService } from "../settings/setting.service";
+import { UserRepository } from "../users/user.repository";
 
-import { IAccount } from '../accounts/account.model';
-import { IAccountRepository, AccountRepository } from "../accounts/account.repository";
-import { Account_TRANSITIONS } from "../accounts/account.service";
-import { AccountStatus } from '../accounts/account.model';
-import { ChangePasswordDTO, LoginDto } from "./auth.dto";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { VerfyAccountDto } from '../accounts/account.dto';
+import { AccountStatus, IAccount } from '../accounts/account.model';
+import { AccountRepository, IAccountRepository } from "../accounts/account.repository";
+import { Account_TRANSITIONS } from "../accounts/account.service";
+import { ChangePasswordDTO, LoginDto } from "./auth.dto";
 
 
 export class AuthService {
 
     constructor(
         private readonly repository: IAccountRepository = new AccountRepository(),
-        private readonly applicantRepository = new UserRepository(),
+        private readonly userRepository = new UserRepository(),
         private readonly mailService = new MailService(),
         private readonly settingService: SettingService = new SettingService(new SettingRepository())
     ) { }
@@ -33,56 +31,60 @@ export class AuthService {
 
         const { email, password } = dto;
 
-        const userDoc = await this.repository.findByEmail(email);
-        if (!userDoc)
-            throw new AppError(ERROR_CODES.AUTH_NOT_FOUND);
+        const accountDoc = await this.repository.findByEmail(email);
+        if (!accountDoc)
+            throw new AppError(ERROR_CODES.ACCOUNT_NOT_FOUND);
 
-        if (userDoc.status === AccountStatus.suspended)
+        if (accountDoc.status === AccountStatus.suspended)
             throw new AppError(ERROR_CODES.ACCOUNT_SUSPENDED);
 
-        if (userDoc.lockUntil && userDoc.lockUntil > new Date())
+        if (accountDoc.lockUntil && accountDoc.lockUntil > new Date())
             throw new AppError(ERROR_CODES.ACCOUNT_LOCKED);
 
-        const isMatch = await bcrypt.compare(password, userDoc.password);
+        const isMatch = await bcrypt.compare(password, accountDoc.password);
         if (!isMatch) {
-            await this.handleFailedLogin(userDoc);
+            await this.handleFailedLogin(accountDoc);
             throw new AppError(ERROR_CODES.INVALID_CREDENTIALS);
         }
 
-        const applicantDoc = await this.applicantRepository.findById(
-            String(userDoc.applicant),
+        const accountId = String(accountDoc._id);
+
+        const userDoc = await this.userRepository.findById(
+            String(accountDoc.applicant),
             true
         );
 
-        if (!applicantDoc)
-            throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
+        if (!userDoc)
+            throw new Error(ERROR_CODES.USER_NOT_FOUND);
 
         const permissions = [
             ...new Set(
-                applicantDoc.roles?.flatMap((role: any) =>
+                userDoc.roles?.flatMap((role: any) =>
                     role.permissions?.map((p: any) => p.name)
                 ) || []
             )
         ];
 
-        const ownerships = applicantDoc.ownerships || [];
-        const applicantId = String(applicantDoc._id);
-        
-        CacheService.invalidateUser(applicantId);
+        const ownerships = userDoc.ownerships || [];
+        const userId = String(userDoc._id);
 
-        CacheService.setUserPermissions(applicantId, permissions);
+
+        CacheService.invalidateUser(userId);
+
+        CacheService.setUserPermissions(userId, permissions);
 
         CacheService.setUserOrganizations(
-            applicantId,
+            userId,
             ownerships.flatMap((o: any) =>
                 o.scope === "*" ? ["*"] : o.scope.map((id: any) => String(id))
             )
         );
 
         const payload: JwtPayload = {
-            applicantId,
+            accountId,
+            userId: userId,
             email,
-            status: userDoc.status
+            status: accountDoc.status
         };
 
         const expiryHours =
@@ -95,8 +97,8 @@ export class AuthService {
             expiresIn: `${expiryHours}h`
         });
 
-        const userId = String(userDoc._id);
-        await this.repository.update(userId, {
+
+        await this.repository.update(accountId, {
             lastLogin: new Date(),
             failedLoginAttempts: 0,
             lockUntil: null
@@ -108,7 +110,7 @@ export class AuthService {
                 ...payload,
                 permissions,
                 ownerships,
-                applicant: applicantDoc
+                applicant: userDoc
             }
         };
     }
@@ -128,20 +130,16 @@ export class AuthService {
     }
 
     async changePassword(dto: ChangePasswordDTO) {
-
-        const { id, data } = dto;
+        const { id, data } = dto;        
         const { currentPassword, password: newPassword } = data;
+        
+        const accountDoc = await this.repository.findById(id);
+        if (!accountDoc) throw new AppError(ERROR_CODES.ACCOUNT_NOT_FOUND);
 
-        const user = await this.repository.findById(id);
-
-        if (!user) throw new Error("User not found");
-
-        const isMatch = await bcrypt.compare(currentPassword, user.password);
-
+        const isMatch = await bcrypt.compare(currentPassword, accountDoc.password);
         if (!isMatch) throw new Error("Current password is incorrect");
 
         const hashed = await bcrypt.hash(newPassword, 10);
-
         await this.repository.update(id, { password: hashed });
     }
 

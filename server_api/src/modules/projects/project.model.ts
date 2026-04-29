@@ -1,6 +1,16 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
-import { ProjectStatus } from "./project.state-machine";
+
+export enum ProjectStatus {
+    draft = 'draft',
+    submitted = "submitted",
+    rejected = "rejected",
+    accepted = "accepted",
+    negotiation = "negotiation",
+    approved = 'approved',
+    granted = 'granted',
+    completed = 'completed'
+}
 
 export interface IProject extends Document {
     _id: mongoose.Types.ObjectId;
@@ -27,7 +37,7 @@ const ProjectSchema = new Schema<IProject>({
     },
     call: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.CALL,        
+        ref: COLLECTIONS.CALL,
         //immutable: true
     },
     title: {
@@ -70,3 +80,4 @@ const ProjectSchema = new Schema<IProject>({
 
 
 export const Project = model<IProject>(COLLECTIONS.PROJECT, ProjectSchema);
+

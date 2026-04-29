@@ -4,6 +4,8 @@ import { VerfyAccountDto } from '../accounts/account.dto';
 import { AuthenticatedRequest } from "./auth.middleware";
 import { AuthService } from "./auth.service";
 import { ChangePasswordDTO, LoginDto } from "./auth.dto";
+import { AppError } from "../../common/errors/app.error";
+import { ERROR_CODES } from "../../common/errors/error.codes";
 
 export class AuthController {
 
@@ -21,24 +23,20 @@ export class AuthController {
 
   changePassword = async (req: AuthenticatedRequest, res: Response) => {
     try {
-
-      if (!req.user) throw new Error("User not authorized");
-
+      if (!req.auth) throw new AppError(ERROR_CODES.UNAUTHORIZED);
       const { currentPassword, password } = req.body;
-
       const dto: ChangePasswordDTO = {
-        id: req.user.applicantId,
+        id: req.auth.accountId ?? "",
         data: { currentPassword, password }
       };
-
       await this.service.changePassword(dto);
-
       successResponse(res, 200, "Password changed successfully", { success: true });
-
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
   };
+
+  
 
   sendVerificationCode = async (req: Request, res: Response) => {
     try {

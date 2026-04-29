@@ -18,7 +18,7 @@ interface ApplyWizardProps {
 }
 
 const ApplyWizard = ({ call, constraints, onComplete }: ApplyWizardProps) => {
-    const { getApplicant } = useAuth();
+    const { getUser: getApplicant } = useAuth();
     const activeAppUser = getApplicant();
     const [activeIndex, setActiveIndex] = useState(0);
     const [formData, setFormData] = useState<Partial<Project>>({

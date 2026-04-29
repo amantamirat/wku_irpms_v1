@@ -20,13 +20,15 @@ import { ConstraintValidator } from "../grants/constraints/constraint.validator"
 import { ICollaboratorRepository } from "./collaborators/collaborator.repository";
 import { CollaboratorService } from "./collaborators/collaborator.service";
 import { IPhaseRepository } from "./phase/phase.repository";
-import { PROJECT_TRANSITIONS, ProjectStatus } from "./project.state-machine";
+import { PROJECT_TRANSITIONS } from "./project.state-machine";
+import { ProjectStatus } from "./project.model";
 import mongoose, { ClientSession } from "mongoose";
 import { IProjectStageRepository } from "./stages/project.stage.repository";
 import { ICallStageRepository } from "../calls/stages/call.stage.repository";
 import { CallStageStatus } from "../calls/stages/call.stage.model";
 import { IProjectSynchronizer } from "./stages/project.stage.synchronizer";
 import { ProjectAuth } from "./project.auth";
+import { ProjectStageStatus } from "./stages/project.stage.status";
 
 
 export class ProjectService {
@@ -102,17 +104,16 @@ export class ProjectService {
 
         const totalBudget = phases.reduce((sum, p) => sum + (p.budget ?? 0), 0);
         const totalDuration = phases.reduce((sum, p) => sum + (p.duration ?? 0), 0);
-        
+
         const grantId = String(grantAllocDoc.grant);
         await this.validator.validateAll(grantId, {
             collaborators, phases, themes, title, summary
         });
-       
+
         //Start a Mongo Database Session
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
-
             const createdProj = await this.create(
                 { call, grantAllocation, title, summary, applicant, themes, totalBudget, totalDuration },
                 { skipValidation: true }, session);
@@ -126,6 +127,7 @@ export class ProjectService {
                 await this.collabService.create({
                     project: projectId,
                     applicant: collab.applicant,
+                    projectTitle: title,
                     role: collab.role,
                     userId: applicant
                 }, { skipValidation: true }, session);
@@ -201,7 +203,20 @@ export class ProjectService {
             throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
         }
         if (next === ProjectStatus.submitted) {
-            //throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
+            const projectStages = await this.projectStageRepo.find({ project: id });
+
+            if (projectStages.length === 0) {
+                throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+            }
+            // (Optional) enforce only one stage if that's your rule
+            if (projectStages.length > 1) {
+                throw new AppError(ERROR_CODES.MULTIPLE_STAGES_FOUND);
+            }
+            const projectStageDoc = projectStages[0];
+
+            if (projectStageDoc.status !== ProjectStageStatus.submitted) {
+                throw new AppError(ERROR_CODES.INVALID_STAGE_STATUS);
+            }
         }
         return await this.projRepo.updateStatus(id, to);
     }

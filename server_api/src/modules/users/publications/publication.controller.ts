@@ -29,11 +29,12 @@ export class PublicationController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { author, type } = req.query;
+            const { author, type, populate } = req.query;
 
             const publications = await this.service.get({
                 author: author ? author as string : undefined,
                 type: type ? type as any : undefined,
+                ...(populate !== undefined && { populate: populate === "true" })
             });
 
             successResponse(res, 200, 'Publications fetched successfully', publications);
@@ -44,7 +45,7 @@ export class PublicationController {
 
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) {
+            if (!req.auth) {
                 throw new AppError(ERROR_CODES.UNAUTHORIZED);
             }
 
@@ -81,7 +82,7 @@ export class PublicationController {
 
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) {
+            if (!req.auth) {
                 throw new Error('User not authorized');
             }
 
@@ -89,7 +90,7 @@ export class PublicationController {
 
             const deleted = await this.service.delete({
                 id,
-                applicantId: req.user.applicantId,
+                applicantId: req.auth.userId,
             });
 
             successResponse(res, 200, 'Publication deleted successfully', deleted);

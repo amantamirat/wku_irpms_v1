@@ -13,10 +13,10 @@ export class NotificationController {
     // -----------------------
     getInbox = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new AppError(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
             const { limit } = req.query;
-            const userId = req.user.applicantId;
+            const userId = req.auth.userId;
 
             const notifications = await this.service.getMyNotifications(
                 userId,
@@ -34,10 +34,10 @@ export class NotificationController {
     // -----------------------
     markAsRead = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new AppError(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
             const { id } = req.params; // Notification ID
-            const userId = req.user.applicantId;
+            const userId = req.auth.userId;
 
             const updated = await this.service.markAsRead(id, userId);
 
@@ -52,9 +52,9 @@ export class NotificationController {
     // -----------------------
     markAllRead = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new AppError(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
-            const userId = req.user.applicantId;
+            const userId = req.auth.userId;
             const modifiedCount = await this.service.markAllAsRead(userId);
 
             successResponse(res, 200, 'All notifications marked as read', { modifiedCount });

@@ -6,7 +6,8 @@ export interface LoginDto {
 }
 
 export default interface JwtPayload {
-    applicantId: string;
+    accountId?: string;
+    userId: string;
     email: string;
     status: AccountStatus;
     iat?: number;

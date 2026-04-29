@@ -22,7 +22,7 @@ export class PublicationService {
         // 1. Validate applicant
         const applicantDoc = await this.usrRepo.findById(author);
         if (!applicantDoc) {
-            throw new AppError(ERROR_CODES.APPLICANT_NOT_FOUND);
+            throw new AppError(ERROR_CODES.USER_NOT_FOUND);
         }
 
         try {

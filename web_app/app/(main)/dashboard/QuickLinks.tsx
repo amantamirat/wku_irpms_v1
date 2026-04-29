@@ -20,8 +20,8 @@ export default function QuickLinks() {
 
     const links: QuickLinkItem[] = useMemo(() => [
         {
-            href: '/projects/applicant',
-            label: 'My Projects',
+            href: '/projects/applications',
+            label: 'My Applications',
             description: 'Manage active research and deliverables',
             icon: 'pi pi-briefcase',
             permission: PERMISSIONS.PROJECT.READ,

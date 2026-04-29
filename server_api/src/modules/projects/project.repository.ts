@@ -9,7 +9,7 @@ import {
     UpdateProjectDTO
 } from "./project.dto";
 import { GrantAllocation } from "../grants/allocations/grant.allocation.model";
-import { ProjectStatus } from "./project.state-machine";
+import { ProjectStatus } from "./project.model";
 
 
 export interface IProjectRepository {
@@ -18,7 +18,7 @@ export interface IProjectRepository {
     create(dto: CreateProjectDTO, session?: ClientSession): Promise<IProject>;
     update(id: string, data: UpdateProjectDTO["data"]): Promise<IProject | null>;
     updateStatus(id: string, newStatus: ProjectStatus, session?: ClientSession): Promise<IProject | null>;
-    incrementTotals(projectId: string, delta: { duration: number; budget: number }): Promise<IProject | null>;
+    incrementTotals(projectId: string, delta: { duration: number; budget: number }, session?: ClientSession): Promise<IProject | null>;
     exists(filters: ExistsProjectDTO): Promise<boolean>;
     delete(id: string): Promise<IProject | null>;
 }
@@ -161,13 +161,24 @@ export class ProjectRepository implements IProjectRepository {
         return result !== null;
     }
 
-    async incrementTotals(projectId: string, delta: { duration: number; budget: number }) {
-        return Project.findByIdAndUpdate(projectId, {
-            $inc: {
-                totalDuration: delta.duration,
-                totalBudget: delta.budget
+    async incrementTotals(
+        projectId: string,
+        delta: { duration: number; budget: number },
+        session?: ClientSession
+    ) {
+        return Project.findByIdAndUpdate(
+            projectId,
+            {
+                $inc: {
+                    totalDuration: delta.duration,
+                    totalBudget: delta.budget
+                }
+            },
+            {
+                session,          // <-- attach session here
+                new: true         // optional: return updated document
             }
-        });
+        );
     }
 
     async delete(id: string) {

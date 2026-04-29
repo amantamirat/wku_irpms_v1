@@ -20,7 +20,7 @@ export class TemplateController {
     // ---------------- CREATE ----------------
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const dto: CreateTemplateDTO = {
                 name: req.body.name,
@@ -74,7 +74,7 @@ export class TemplateController {
     // ---------------- UPDATE ----------------
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const dto: UpdateTemplateDTO = {
                 id: req.params.id,
@@ -97,7 +97,7 @@ export class TemplateController {
     // ---------------- TRANSITION ----------------
     transitionState = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const { id } = req.params;
             const { current, next } = req.body;
@@ -106,7 +106,7 @@ export class TemplateController {
                 id: String(id),
                 current: current,
                 next: next,
-                applicantId: req.user.applicantId
+                applicantId: req.auth.userId
             };
 
             const updated = await this.service.transitionState(dto);
@@ -121,11 +121,11 @@ export class TemplateController {
     // ---------------- DELETE ----------------
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const deleted = await this.service.delete({
                 id: req.params.id,
-                applicantId: req.user.applicantId
+                applicantId: req.auth.userId
             });
 
             successResponse(res, 200, "Template deleted successfully", deleted);

@@ -51,7 +51,7 @@ export class ReviewerService {
             throw new AppError(ERROR_CODES.REVIEWER_LIMIT_REACHED, `Reviewer limit reached. Maximum allowed is ${maxReviewers}.`);
         }
         const applicantDoc = await this.applicantRepo.findById(applicant);
-        if (!applicantDoc) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
+        if (!applicantDoc) throw new Error(ERROR_CODES.USER_NOT_FOUND);
 
         const projectDoc = projectStageDoc.project as unknown as IProject;
         const collaborators = await this.collaboratorRepo.find({ project: String(projectDoc._id) });

@@ -1,9 +1,15 @@
+
 export interface LoginDto {
     email: string;
     password: string;
 }
 
-export const validateLogin = (dto: LoginDto): { valid: boolean; message?: string } => {
+export interface ChangePasswordDTO {
+    currentPassword: string;
+    password: string;
+}
+
+export const validateLogin = (dto: LoginDto): { valid: boolean; message?: string; } => {
 
     if (!dto.email || dto.email.trim() === "") {
         return { valid: false, message: "Email is required." };
@@ -18,3 +24,4 @@ export const validateLogin = (dto: LoginDto): { valid: boolean; message?: string
     }
     return { valid: true };
 };
+

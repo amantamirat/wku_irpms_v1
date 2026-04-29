@@ -1,7 +1,8 @@
 import { ClientSession } from "mongoose";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { IProjectRepository } from "../project.repository";
-import { ProjectStatus, PROJECT_TRANSITIONS } from "../project.state-machine";
+import { PROJECT_TRANSITIONS } from "../project.state-machine";
+import { ProjectStatus } from "../project.model";
 import { IProjectStageRepository } from "./project.stage.repository";
 import { ProjectStageStatus } from "./project.stage.status";
 

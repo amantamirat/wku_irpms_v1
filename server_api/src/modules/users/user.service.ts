@@ -57,7 +57,7 @@ export class UserService {
         }
         //check permission for roles and ownerships !!!!!!danger
         const updated = await this.repository.update(id, data);
-        if (!updated) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
+        if (!updated) throw new Error(ERROR_CODES.USER_NOT_FOUND);
         return updated;
     }
     // -------------------------
@@ -65,7 +65,7 @@ export class UserService {
     // -------------------------
     async updateRoles(dto: UpdateRolesDTO) {
         const updated = await this.repository.updateRoles(dto.id, dto);
-        if (!updated) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
+        if (!updated) throw new Error(ERROR_CODES.USER_NOT_FOUND);
         return updated;
         //if (!updated) throw new Error("User not found");
         // Optional: audit log
@@ -93,7 +93,7 @@ export class UserService {
             }
         }
         const updated = await this.repository.updateOwnerships(id, ownerships);
-        if (!updated) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
+        if (!updated) throw new Error(ERROR_CODES.USER_NOT_FOUND);
         return updated;
     }
     // -------------------------
@@ -113,7 +113,7 @@ export class UserService {
             throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
         }
         const deleted = await this.repository.delete(id);
-        if (!deleted) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
+        if (!deleted) throw new Error(ERROR_CODES.USER_NOT_FOUND);
         return deleted;
     }
 }

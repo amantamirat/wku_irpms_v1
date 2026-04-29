@@ -24,7 +24,7 @@ export class OrganizationController {
     // ----------------------------------------------------
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user)
+            if (!req.auth)
                 throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const dto: CreateOrganizationDTO = {
@@ -77,7 +77,7 @@ export class OrganizationController {
     // ----------------------------------------------------
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user)
+            if (!req.auth)
                 throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const { id } = req.params;
@@ -93,7 +93,7 @@ export class OrganizationController {
                     classification: req.body.classification,
                     ownership: req.body.ownership,
                 },
-                userId: req.user.applicantId,
+                userId: req.auth.userId,
             };
 
             const updated = await this.service.update(dto);

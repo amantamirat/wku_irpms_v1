@@ -27,8 +27,8 @@ export const ERROR_CODES = {
     ROLE_NOT_FOUND: "ROLE_NOT_FOUND",
     ROLE_IN_USE: "ROLE_IN_USE",
 
-    // ---------- AUTH ----------
-    AUTH_NOT_FOUND: "ACCOUNT_DOES_NOT_EXIST",
+    // ---------- ACCOUNT ----------
+    ACCOUNT_NOT_FOUND: "ACCOUNT_DOES_NOT_EXIST",
     ACCOUNT_SUSPENDED: "Account is suspended. Contact support.",
     ACCOUNT_LOCKED: "Account temporarily locked due to too many failed login attempts.",
     INVALID_CREDENTIALS: "Invalid credentials.",
@@ -54,8 +54,8 @@ export const ERROR_CODES = {
     SPECIALIZATION_NOT_FOUND: "SPECIALIZATION_NOT_FOUND",
     SPECIALIZATION_IN_USE: "SPECIALIZATION_IN_USE",
 
-    // ---------- APPLICANT ----------
-    APPLICANT_NOT_FOUND: "APPLICANT_NOT_FOUND",
+    // ---------- USER ----------
+    USER_NOT_FOUND: "USER_NOT_FOUND",
     APPLICANT_HAS_PROJECTS: "APPLICANT_HAS_PROJECTS",
 
     // ---------- POSITION ----------
@@ -116,6 +116,8 @@ export const ERROR_CODES = {
     STAGE_DEADLINE_PASSED: "STAGE_DEADLINE_PASSED",
     STAGE_DOCUMENT_ALREADY_EXISTS: "STAGE_DOCUMENT_ALREADY_EXISTS",
     ACTIVE_CALL_STAGE_EXIST: "ACTIVE_CALL_STAGE_EXIST",
+    MULTIPLE_STAGES_FOUND:"MULTIPLE_STAGES_FOUND",
+    INVALID_STAGE_STATUS:"INVALID_STAGE_STATUS",
 
     // ---------- THEMATIC ----------
     THEMATIC_NOT_FOUND: "THEMATIC_NOT_FOUND",

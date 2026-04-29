@@ -8,14 +8,14 @@ import { classNames } from 'primereact/utils';
 import { Dropdown } from 'primereact/dropdown';
 import { Toast } from 'primereact/toast';
 
-import { 
-    AcademicLevel, 
-    Classification, 
-    getParentType, 
-    Organization, 
-    OrgnUnit, 
-    Ownership, 
-    validateOrganization 
+import {
+    AcademicLevel,
+    Classification,
+    getParentType,
+    Organization,
+    OrgnUnit,
+    Ownership,
+    validateOrganization
 } from '../models/organization.model';
 import { OrganizationApi } from '../api/organization.api';
 import { useAuth } from '@/contexts/auth-context';
@@ -24,7 +24,7 @@ import { EntitySaveDialogProps } from '@/components/createEntityManager';
 const SaveOrganization = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<Organization>) => {
     const toast = useRef<Toast>(null);
     const { getScopesByUnit } = useAuth();
-    
+
     const [localOrg, setLocalOrg] = useState<Organization>({ ...item });
     const [parents, setParents] = useState<Organization[]>([]);
     const [submitted, setSubmitted] = useState(false);
@@ -79,8 +79,8 @@ const SaveOrganization = ({ visible, item, onHide, onComplete }: EntitySaveDialo
                 throw new Error(validation.message || "Validation failed");
             }
 
-            const saved = localOrg._id 
-                ? await OrganizationApi.update(localOrg) 
+            const saved = localOrg._id
+                ? await OrganizationApi.update(localOrg)
                 : await OrganizationApi.create(localOrg);
 
             toast.current?.show({
@@ -92,7 +92,7 @@ const SaveOrganization = ({ visible, item, onHide, onComplete }: EntitySaveDialo
 
             // Brief delay to allow toast to be seen before closing/refreshing
             if (onComplete) {
-                setTimeout(() => onComplete(saved), 500);
+                setTimeout(() => onComplete({ ...saved, parent: localOrg.parent }), 500);
             }
         } catch (err: any) {
             toast.current?.show({

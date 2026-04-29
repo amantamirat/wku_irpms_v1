@@ -40,7 +40,7 @@ export class PublicationRepository implements IPublicationRepository {
 
         // Populate applicant only if requested
         if (filters.populate) {
-            dbQuery = dbQuery.populate("applicant");
+            dbQuery = dbQuery.populate("author");
         }
 
         return dbQuery

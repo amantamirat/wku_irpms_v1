@@ -25,7 +25,7 @@ export class ProjectStageController {
     // ---------------------------------------------------
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) {
+            if (!req.auth) {
                 throw new AppError(ERROR_CODES.UNAUTHORIZED);
             }
             if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
@@ -36,7 +36,7 @@ export class ProjectStageController {
                 project,
                 grantStage: '',
                 documentPath: `uploads/${req.file.filename}`,
-                applicantId: req.user.applicantId
+                applicantId: req.auth.userId
             };
 
             const created = await this.service.create(dto);
@@ -55,7 +55,7 @@ export class ProjectStageController {
     // -----------------------
     transitionState = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
             const { current, next } = req.body;
 
@@ -63,7 +63,7 @@ export class ProjectStageController {
                 id: String(id),
                 current: current,
                 next: next,
-                applicantId: req.user.applicantId,
+                applicantId: req.auth.userId,
             };
 
             const updated = await this.service.transitionState(dto);
@@ -162,11 +162,11 @@ export class ProjectStageController {
     // ---------------------------------------------------
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new AppError(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new AppError(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
             const dto: DeleteDto = {
                 id,
-                applicantId: req.user.applicantId,
+                applicantId: req.auth.userId,
             };
 
             const deletedDoc = await this.service.delete(dto);

@@ -12,17 +12,13 @@ export enum EmploymentType {
 
 export type Experience = {
     _id?: string;
-
-    applicant?: string | User;
+    user?: string | User;
     organization?: string | Organization;
     position?: string | Position;
-    rank?: string | Position;
     startDate?: Date;
     endDate?: Date | null;
     isCurrent?: boolean;
-
     employmentType?: EmploymentType;
-
     createdAt?: Date;
     updatedAt?: Date;
 };
@@ -32,8 +28,8 @@ export const validateExperience = (
     exp: Experience
 ): { valid: boolean; message?: string } => {
 
-    if (!exp.applicant) {
-        return { valid: false, message: "Applicant is required." };
+    if (!exp.user) {
+        return { valid: false, message: "User is required." };
     }
 
     if (!exp.organization) {
@@ -42,10 +38,6 @@ export const validateExperience = (
 
     if (!exp.position) {
         return { valid: false, message: "Position is required." };
-    }
-
-    if (!exp.rank) {
-        return { valid: false, message: "Rank is required." };
     }
 
     if (!exp.startDate) {
@@ -94,10 +86,10 @@ export const sanitizeExperience = (exp: Partial<Experience>): Experience => {
     return {
         ...exp,
 
-        applicant:
-            typeof exp.applicant === "object" && exp.applicant !== null
-                ? (exp.applicant as User)._id
-                : exp.applicant,
+        user:
+            typeof exp.user === "object" && exp.user !== null
+                ? (exp.user as User)._id
+                : exp.user,
 
         organization:
             typeof exp.organization === "object" && exp.organization !== null
@@ -108,15 +100,11 @@ export const sanitizeExperience = (exp: Partial<Experience>): Experience => {
             typeof exp.position === "object" && exp.position !== null
                 ? (exp.position as any)._id
                 : exp.position,
-        rank:
-            typeof exp.rank === "object" && exp.rank !== null
-                ? (exp.rank as any)._id
-                : exp.rank,
     } as Experience;
 };
 
 export interface GetExperiencesOptions {
-    applicant?: string | User;
+    user?: string | User;
 }
 
 

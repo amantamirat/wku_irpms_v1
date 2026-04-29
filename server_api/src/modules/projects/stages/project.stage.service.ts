@@ -10,7 +10,6 @@ import { IGrantStageRepository } from "../../grants/stages/grant.stage.repositor
 import { IProjectRepository } from "../project.repository";
 
 import { ProjectStageStatus } from "./project.stage.status";
-import { PROJECT_STAGE_TRANSITIONS } from "./project.stage.state-machine";
 import {
     CreateProjectStageDTO,
     GetProjectStageDTO,
@@ -23,29 +22,20 @@ import { IProjectSynchronizer } from "./project.stage.synchronizer";
 import { IReviewerRepository } from "../../reviewers/reviewer.repository";
 import { NotificationService } from "../../notifications/notification.service";
 import { IGrantAllocation } from "../../grants/allocations/grant.allocation.model";
+import { ProjectAuth } from "../project.auth";
 
 export class ProjectStageService {
 
     constructor(
         private readonly repository: IProjectStageRepository,
         private readonly projectRepo: IProjectRepository,
+        private readonly projAuth: ProjectAuth,
         private readonly grantStageRepo: IGrantStageRepository,
-        private readonly grantAllocRepo: IGrantAllocationRepository,
         private readonly reviewerRepo: IReviewerRepository,
         private readonly synchronizer: IProjectSynchronizer,
         private readonly notificationService: NotificationService,
     ) {
-    }
-
-    async authProject(project: string, applicant: string) {
-        const projectDoc = await this.projectRepo.findById(project, { populate: { grantAllocation: true } });
-        if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
-
-        if (String(projectDoc.applicant) !== applicant)
-            throw new AppError(ERROR_CODES.UNAUTHORIZED);
-
-        return projectDoc;
-    }
+    }    
 
     /**
      * Create project stage (submission)
@@ -53,7 +43,7 @@ export class ProjectStageService {
     async create(dto: CreateProjectStageDTO) {
         const { project, applicantId } = dto;
 
-        const projectDoc = await this.authProject(project, applicantId);
+        const projectDoc = await this.projAuth.authProject(project, applicantId);
         const grantAllocDoc = projectDoc.grantAllocation as unknown as IGrantAllocation;
 
         const projectStages = await this.repository.find({ project });
@@ -185,3 +175,11 @@ export class ProjectStageService {
         return deleted;
     }
 }
+
+export const PROJECT_STAGE_TRANSITIONS: Record<ProjectStageStatus, ProjectStageStatus[]> = {
+    [ProjectStageStatus.submitted]: [ProjectStageStatus.selected, ProjectStageStatus.accepted, ProjectStageStatus.rejected],
+    [ProjectStageStatus.selected]: [ProjectStageStatus.reviewed, ProjectStageStatus.submitted],
+    [ProjectStageStatus.reviewed]: [ProjectStageStatus.accepted, ProjectStageStatus.rejected, ProjectStageStatus.selected],
+    [ProjectStageStatus.accepted]: [ProjectStageStatus.reviewed, ProjectStageStatus.submitted],
+    [ProjectStageStatus.rejected]: [ProjectStageStatus.reviewed, ProjectStageStatus.submitted]
+};

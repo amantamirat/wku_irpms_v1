@@ -37,13 +37,13 @@ export class AccountController {
 
   update = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+      if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
       const { id } = req.query;
       const { password } = req.body;
       const dto: UpdateAccountDTO = {
         id: id as string,
         data: { password },
-        userId: req.user.applicantId,
+        userId: req.auth.userId,
       };
       const updated = await this.service.update(dto);
       successResponse(res, 200, 'User updated successfully', updated);
@@ -54,14 +54,14 @@ export class AccountController {
 
   transitionState = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+      if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
       const { id } = req.params;
       const { current, next } = req.body;
       const dto: TransitionRequestDto = {
         id: String(id),
         current: current,
         next: next,
-        applicantId: req.user.applicantId,
+        applicantId: req.auth.userId,
       };
       const updated = await this.service.transitionState(dto);
       successResponse(res, 200, "User status updated successfully", updated);
@@ -72,11 +72,11 @@ export class AccountController {
 
   delete = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+      if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
       const { id } = req.params;
       const dto: DeleteDto = {
         id: id,
-        applicantId: req.user.applicantId,
+        applicantId: req.auth.userId,
       };
       const deleted = await this.service.delete(dto);
       successResponse(res, 200, 'User deleted successfully', deleted);

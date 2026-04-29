@@ -15,7 +15,7 @@ export class ResultController {
     // -----------------------
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const { reviewer, criterion, score, selectedOptions, comment } = req.body;
 
@@ -25,7 +25,7 @@ export class ResultController {
                 score,
                 selectedOptions,
                 comment,
-                applicantId: req.user.applicantId,
+                applicantId: req.auth.userId,
             };
 
             const created = await this.service.create(dto);
@@ -58,7 +58,7 @@ export class ResultController {
     // -----------------------
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const { id } = req.params;
             const { score, selectedOptions, comment } = req.body;
@@ -70,7 +70,7 @@ export class ResultController {
                     ...(selectedOptions !== undefined && { selectedOptions }),
                     ...(comment !== undefined && { comment })
                 },
-                applicantId: req.user.applicantId
+                applicantId: req.auth.userId
             };
 
             const updated = await this.service.update(dto);
@@ -85,13 +85,13 @@ export class ResultController {
     // -----------------------
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const { id } = req.params;
 
             const dto: DeleteDto = {
                 id: String(id),
-                applicantId: req.user.applicantId
+                applicantId: req.auth.userId
             };
 
             const deleted = await this.service.delete(dto);

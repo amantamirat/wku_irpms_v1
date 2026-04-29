@@ -10,7 +10,7 @@ import { PhaseStatus } from "./phase.status";
 export interface IPhaseRepository {
     findById(id: string): Promise<IPhase | null>;
     find(filters: GetPhasesOptions): Promise<IPhase[]>;
-    create(dto: CreatePhaseDto): Promise<IPhase>;
+    create(dto: CreatePhaseDto, session?: ClientSession): Promise<IPhase>;
     createMany(dtos: CreatePhaseDto[], session?: ClientSession): Promise<IPhase[]>;
     update(id: string, data: UpdatePhaseDto["data"]): Promise<IPhase | null>;
     updateStatus(id: string, newStatus: PhaseStatus): Promise<IPhase | null>;
@@ -44,12 +44,13 @@ export class PhaseRepository implements IPhaseRepository {
             .exec();
     }
 
-    async create(dto: CreatePhaseDto) {
+    async create(dto: CreatePhaseDto, session?: ClientSession) {
         const data = {
             ...dto,
             project: new mongoose.Types.ObjectId(dto.project),
         };
-        return Phase.create(data);
+        const created = await Phase.create([data], { session });
+        return created[0];
     }
 
     async createMany(dtos: CreatePhaseDto[], session?: ClientSession) {

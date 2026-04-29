@@ -21,7 +21,7 @@ export class ReviewerController {
     // -----------------------
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const { projectStage, applicant, weight } = req.body;
 
@@ -29,7 +29,7 @@ export class ReviewerController {
                 projectStage,
                 applicant,
                 weight,
-                applicantId: req.user.applicantId
+                applicantId: req.auth.userId
             };
             const created = await this.service.create(dto);
             successResponse(res, 201, "Reviewer created successfully", created);
@@ -63,13 +63,13 @@ export class ReviewerController {
     // -----------------------
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
             const { weight } = req.body;
             const dto: UpdateReviewerDTO = {
                 id: String(id),
                 data: { weight },
-                applicantId: req.user.applicantId
+                applicantId: req.auth.userId
             };
             const updated = await this.service.update(dto);
             successResponse(res, 200, "Reviewer updated successfully", updated);
@@ -80,14 +80,14 @@ export class ReviewerController {
 
     transitionState = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
             const { current, next } = req.body;
             const dto: TransitionRequestDto = {
                 id: String(id),
                 current: current,
                 next: next,
-                applicantId: req.user.applicantId,
+                applicantId: req.auth.userId,
             };
             const updated = await this.service.transitionState(dto);
             successResponse(res, 200, "Reviewer status updated successfully", updated);
@@ -101,7 +101,7 @@ export class ReviewerController {
     // -----------------------
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
             const deleted = await this.service.delete(id);
             successResponse(res, 200, "Reviewer deleted successfully", deleted);

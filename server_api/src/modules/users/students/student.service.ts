@@ -23,7 +23,7 @@ export class StudentService {
         if (!calendarDoc) throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
 
         const applicantDoc = await this.userRepository.findById(applicant);
-        if (!applicantDoc) throw new AppError(ERROR_CODES.APPLICANT_NOT_FOUND);
+        if (!applicantDoc) throw new AppError(ERROR_CODES.USER_NOT_FOUND);
 
         const programDoc = await this.programRepository.findById(program);
         if (!programDoc) throw new AppError(ERROR_CODES.PROGRAM_NOT_FOUND);
@@ -68,7 +68,7 @@ export class StudentService {
         if (data.user) {
             const applicantDoc = await this.userRepository.findById(data.user);
             if (!applicantDoc) {
-                throw new AppError(ERROR_CODES.APPLICANT_NOT_FOUND);
+                throw new AppError(ERROR_CODES.USER_NOT_FOUND);
             }
         }
 

@@ -6,7 +6,7 @@ import { Divider } from "primereact/divider";
 import ReviewerManager from "../components/ReviewerManager";
 
 const ReviewerPage = () => {
-    const { getApplicant } = useAuth();
+    const { getUser: getApplicant } = useAuth();
     const applicant = getApplicant();
 
     return (

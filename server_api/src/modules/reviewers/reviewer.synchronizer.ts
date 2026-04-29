@@ -4,7 +4,7 @@ import { ProjectStageStatus } from "../projects/stages/project.stage.status";
 //import { DocumentStateMachine } from "./project.stage.state-machine";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { IGrantStage } from "../grants/stages/grant.stage.model";
-import { PROJECT_STAGE_TRANSITIONS } from "../projects/stages/project.stage.state-machine";
+import { PROJECT_STAGE_TRANSITIONS } from "../projects/stages/project.stage.service";
 import { IReviewerRepository } from "./reviewer.repository";
 import { ReviewerStatus } from "./reviewer.state-machine";
 

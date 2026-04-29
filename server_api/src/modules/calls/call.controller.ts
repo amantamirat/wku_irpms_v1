@@ -53,8 +53,8 @@ export class CallController {
 
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
-            const userId = req.user.applicantId;
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            const userId = req.auth.userId;
             const { id } = req.params;
             const { title, description } = req.body;
             const dto: UpdateCallDTO = {
@@ -71,14 +71,14 @@ export class CallController {
 
     transitionState = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
             const { current, next } = req.body;
             const dto: TransitionRequestDto = {
                 id: String(id),
                 current: current,
                 next: next,
-                applicantId: req.user.applicantId,
+                applicantId: req.auth.userId,
             };
             const updated = await this.service.transitionState(dto);
             successResponse(res, 200, "Call status updated successfully", updated);
@@ -89,9 +89,9 @@ export class CallController {
 
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
-            const userId = req.user.applicantId;
+            const userId = req.auth.userId;
             const deleted = await this.service.delete({ id: id, applicantId: userId });
             successResponse(res, 200, "Call deleted successfully", deleted);
         } catch (err: any) {

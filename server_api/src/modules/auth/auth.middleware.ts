@@ -12,7 +12,7 @@ import { Unit } from '../../common/constants/enums';
 dotenv.config();
 
 export interface AuthenticatedRequest extends Request {
-  user?: JwtPayload;
+  auth?: JwtPayload;
 }
 
 export const verifyActiveAccount = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
@@ -30,7 +30,7 @@ export const verifyActiveAccount = (req: AuthenticatedRequest, res: Response, ne
       return errorResponse(res, 403, "Account is not active. Please activate or contact admin.");
     }
 
-    req.user = decoded;
+    req.auth = decoded;
     next();
   } catch (error: any) {
     if (error.name === 'TokenExpiredError') {
@@ -46,10 +46,10 @@ export const verifyActiveAccount = (req: AuthenticatedRequest, res: Response, ne
 export const checkPermission = (requiredPermission: string | string[]) => {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      if (!req.user) {
+      if (!req.auth) {
         return errorResponse(res, 401, ERROR_CODES.UNAUTHORIZED);
       }
-      const userId = req.user.applicantId;
+      const userId = req.auth.userId;
 
       // Normalize to array
       const permissions = Array.isArray(requiredPermission)
@@ -102,7 +102,7 @@ export const checkTransitionPermission = (resource: string) => {
     nextMiddleware: NextFunction
   ) => {
     try {
-      if (!req.user) {
+      if (!req.auth) {
         return errorResponse(res, 401, ERROR_CODES.UNAUTHORIZED);
       }
 
@@ -121,7 +121,7 @@ export const checkTransitionPermission = (resource: string) => {
 
       const hasPermission =
         await CacheService.hasPermissions(
-          req.user.applicantId,
+          req.auth.userId,
           [permission]
         );
 
@@ -148,7 +148,7 @@ export const checkStatusPermission = (resource: string) => {
     next: NextFunction
   ) => {
     try {
-      if (!req.user) {
+      if (!req.auth) {
         return errorResponse(res, 401, "Unauthorized");
       }
       let status = req.params.status;
@@ -159,7 +159,7 @@ export const checkStatusPermission = (resource: string) => {
         return errorResponse(res, 400, "Status not provided");
       }
       const permission = `${resource}:status.${status}`;
-      const hasPermission = await CacheService.hasPermissions(req.user.applicantId, [permission]);
+      const hasPermission = await CacheService.hasPermissions(req.auth.userId, [permission]);
       if (!hasPermission) {
         return errorResponse(res, 403, `Forbidden. Missing permission: ${permission}`
         );

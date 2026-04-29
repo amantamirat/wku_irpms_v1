@@ -18,6 +18,7 @@ export interface StatusButtonConfig {
     icon: string;
     severity: "success" | "warning" | "danger" | "info" | "secondary";
     action?: string;
+    color?: string;
 
     reverse?: {
         icon: string;
@@ -35,7 +36,8 @@ export const STATUS_BUTTON_CONFIG: Record<string, StatusButtonConfig> = {
     draft: {
         icon: "pi pi-pencil", // Changed to pencil to represent 'preparation'
         severity: "secondary",
-        action: "Revert to Draft"
+        action: "Revert to Draft",
+        color: 'bg-green-100 text-green-700'
     },
     published: {
         icon: "pi pi-globe", // Globe or 'check-circle' represents 'live/published'
@@ -62,32 +64,38 @@ export const STATUS_BUTTON_CONFIG: Record<string, StatusButtonConfig> = {
             icon: "pi pi-undo",
             action: "Reject",
             severity: "danger"
-        }
+        },
+        color: 'bg-green-100 text-green-700'
     },
     rejected: {
         icon: "pi pi-times-circle",
         severity: "danger",
-        action: "Reject"
+        action: "Reject",
+        color: 'bg-red-100 text-red-700'
     },
     negotiation: {
         icon: "pi pi-comments",
         severity: "warning",
-        action: "Negotiate"
+        action: "Negotiate",
+        color: 'bg-orange-100 text-orange-700'
     },
     approved: {
         icon: "pi pi-verified",
         severity: "success",
-        action: "Approve"
+        action: "Approve",
+        color: 'bg-teal-100 text-teal-700'
     },
     granted: {
         icon: "pi pi-briefcase",
         severity: "info",
-        action: "Grant"
+        action: "Grant",
+        color: 'bg-indigo-100 text-indigo-700'
     },
     completed: {
         icon: "pi pi-check",
         severity: "success",
-        action: "Complete"
+        action: "Complete",
+        color: 'bg-green-100 text-green-700'
     },
     // Keep your old ones if still needed for other models
     suspended: {

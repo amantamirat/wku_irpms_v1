@@ -1,3 +1,4 @@
+import { ClientSession } from "mongoose";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
@@ -6,7 +7,7 @@ import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
 import { ProjectAuth } from "../project.auth";
 import { IProjectRepository } from "../project.repository";
-import { ProjectStatus } from "../project.state-machine";
+import { ProjectStatus } from "../project.model";
 import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto } from "./phase.dto";
 import { IPhaseRepository } from "./phase.repository";
 import { PHASE_TRANSITIONS } from "./phase.state-machine";
@@ -21,12 +22,7 @@ export class PhaseService {
     ) { }
 
     async validateProject(project: string, applicant: string) {
-        const projectDoc = await this.projRepo.findById(project, { populate: { grantAllocation: true } });
-        if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
-
-        if (String(projectDoc.applicant) !== applicant)
-            throw new AppError(ERROR_CODES.UNAUTHORIZED);
-
+        const projectDoc = await this.projAuth.authProject(project, applicant);
         if (
             projectDoc.status !== ProjectStatus.draft &&
             projectDoc.status !== ProjectStatus.negotiation
@@ -39,7 +35,7 @@ export class PhaseService {
     // ---------------------------------------------------
     // CREATE
     // ---------------------------------------------------
-    async create(dto: CreatePhaseDto) {
+    async create(dto: CreatePhaseDto, options?: { skipValidation?: boolean }, session?: ClientSession) {
         const { project, applicantId } = dto;
 
         const projectDoc = await this.validateProject(project, applicantId ?? "");

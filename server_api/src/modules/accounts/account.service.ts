@@ -32,7 +32,7 @@ export class AccountService {
         const { applicant, email, password } = dto;
         const applicantDoc = await this.appRepository.findById(applicant);
         if (!applicantDoc) {
-            throw new AppError(ERROR_CODES.APPLICANT_NOT_FOUND);
+            throw new AppError(ERROR_CODES.USER_NOT_FOUND);
         }
         const hashed = await AccountService.prepareHash(password);
         try {

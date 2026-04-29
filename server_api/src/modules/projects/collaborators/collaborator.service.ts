@@ -15,7 +15,7 @@ import { ICollaboratorRepository } from "./collaborator.repository";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
-import { ProjectStatus } from "../project.state-machine";
+import { ProjectStatus } from "../project.model";
 import { COLLAB_TRANSITIONS } from "./collaborator.state-machine";
 import { CollaboratorStatus } from "./collaborator.status";
 import { ClientSession } from "mongoose";
@@ -54,7 +54,7 @@ export class CollaboratorService {
             const grantId = (projectDoc.grantAllocation as any).grant;
 
             const appDoc = await this.applicantRepo.findById(applicant);
-            if (!appDoc) throw new Error(ERROR_CODES.APPLICANT_NOT_FOUND);
+            if (!appDoc) throw new Error(ERROR_CODES.USER_NOT_FOUND);
             const countCollabs = await this.collabRepo.countByProject(project, session);
 
             await this.validator.validateParticipants(grantId, countCollabs + 1, {

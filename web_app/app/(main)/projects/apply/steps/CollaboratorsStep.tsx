@@ -12,6 +12,7 @@ import { User } from '@/app/(main)/users/models/user.model';
 import { UserApi } from '@/app/(main)/users/api/user.api';
 import { roleOptions } from '../../collaborators/models/collaborator.model';
 import { Constraint, ProjectConstraintType } from '@/app/(main)/grants/constraints/models/constraint.model';
+import { useAuth } from '@/contexts/auth-context';
 
 interface CollaboratorsStepProps {
     data: Partial<Project>;
@@ -22,32 +23,37 @@ interface CollaboratorsStepProps {
 }
 
 export const CollaboratorsStep = ({ data, constraints, onUpdate, onNext, onBack }: CollaboratorsStepProps) => {
+    const { hasPermission } = useAuth();
+    const canReadUsers = hasPermission(["user:read"]);
+
     const [applicants, setApplicants] = useState<User[]>([]);
     const [loading, setLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
 
     useEffect(() => {
-        const fetchApplicants = async () => {
-            setLoading(true);
-            try {
-                const res = await UserApi.getAll({});
-                setApplicants(res);
-            } catch (err) {
-                console.error("Failed to fetch applicants", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchApplicants();
-    }, []);
+        if (canReadUsers) {
+            const fetchApplicants = async () => {
+                setLoading(true);
+                try {
+                    const res = await UserApi.getAll({});
+                    setApplicants(res);
+                } catch (err) {
+                    console.error("Failed to fetch applicants", err);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchApplicants();
+        }
+    }, [canReadUsers]);
 
     // --- Validation Logic ---
     const validation = useMemo(() => {
         const collabLimit = constraints.find(c => c.constraint === ProjectConstraintType.PARTICIPANT);
         const collabs = data.collaborators || [];
-        
+
         const isCountValid = !collabLimit || (
-            collabs.length >= (collabLimit.min ?? 0) && 
+            collabs.length >= (collabLimit.min ?? 0) &&
             collabs.length <= (collabLimit.max ?? Infinity)
         );
 
@@ -115,10 +121,10 @@ export const CollaboratorsStep = ({ data, constraints, onUpdate, onNext, onBack 
             </div>
 
             {submitted && !validation.isCountValid && (
-                <Message 
-                    severity="error" 
-                    text={`Team size must be between ${validation.collabLimit?.min} and ${validation.collabLimit?.max} members.`} 
-                    className="w-full mb-3" 
+                <Message
+                    severity="error"
+                    text={`Team size must be between ${validation.collabLimit?.min} and ${validation.collabLimit?.max} members.`}
+                    className="w-full mb-3"
                 />
             )}
 
@@ -129,7 +135,7 @@ export const CollaboratorsStep = ({ data, constraints, onUpdate, onNext, onBack 
                 responsiveLayout="stack"
             >
                 <Column header="Collaborator" style={{ width: '40%' }} body={(rowData, options) => {
-                    const selectedIds = data.collaborators?.map(c => 
+                    const selectedIds = data.collaborators?.map(c =>
                         typeof c.applicant === 'object' ? c.applicant?._id : c.applicant
                     ).filter(id => id) || [];
 
@@ -139,17 +145,26 @@ export const CollaboratorsStep = ({ data, constraints, onUpdate, onNext, onBack 
                     });
 
                     return (
-                        <Dropdown
-                            value={typeof rowData.applicant === 'object' ? rowData.applicant?._id : rowData.applicant}
-                            options={availableApplicants}
-                            optionLabel="name"
-                            optionValue="_id"
-                            onChange={(e) => updateCollaborator(options.rowIndex, 'applicant', e.value)}
-                            placeholder="Select Applicant"
-                            filter
-                            className={classNames("w-full", { 'p-invalid': submitted && !rowData.applicant })}
-                            disabled={rowData.isLeadPI}
-                        />
+                        <>
+
+                            <Dropdown
+                                value={typeof rowData.applicant === 'object' ? rowData.applicant?._id : rowData.applicant}
+                                options={availableApplicants}
+                                optionLabel="name"
+                                optionValue="_id"
+                                onChange={(e) => updateCollaborator(options.rowIndex, 'applicant', e.value)}
+                                placeholder="Select Applicant"
+                                filter
+                                className={classNames("w-full", { 'p-invalid': submitted && !rowData.applicant })}
+                                disabled={rowData.isLeadPI}
+                            />
+                            {!canReadUsers && (
+                                <small className="p-error block mt-1">
+                                    <i className="pi pi-exclamation-triangle mr-1 text-xs"></i>
+                                    Insufficient permissions to modify collaborators.
+                                </small>
+                            )}
+                        </>
                     );
                 }} />
 
@@ -182,12 +197,12 @@ export const CollaboratorsStep = ({ data, constraints, onUpdate, onNext, onBack 
             {/* Navigation */}
             <div className="flex justify-content-between mt-6 pt-4 border-top-1 surface-border">
                 <Button label="Back to Phases" icon="pi pi-chevron-left" onClick={onBack} className="p-button-text p-button-secondary" />
-                <Button 
-                    label="Next: Submission" 
-                    icon="pi pi-chevron-right" 
-                    iconPos="right" 
-                    onClick={validateAndNext} 
-                    className={classNames("px-5", { 'p-shake': submitted && !validation.isValid })} 
+                <Button
+                    label="Next: Submission"
+                    icon="pi pi-chevron-right"
+                    iconPos="right"
+                    onClick={validateAndNext}
+                    className={classNames("px-5", { 'p-shake': submitted && !validation.isValid })}
                 />
             </div>
         </div>

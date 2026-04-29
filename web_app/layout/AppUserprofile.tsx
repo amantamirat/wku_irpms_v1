@@ -1,108 +1,113 @@
-import UserDetailDialog from "@/app/(main)/users/components/dialogs/UserDetailDialog";
-import { User } from "@/app/(main)/users/models/user.model";
-import SaveDialog from "@/app/(main)/accounts/components/SaveAccount";
-import { useAuth } from "@/contexts/auth-context";
+import React, { useState } from "react";
+import { Sidebar } from "primereact/sidebar";
 import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
-import { Sidebar } from "primereact/sidebar";
-import { useState } from "react";
+
+import { useAuth } from "@/contexts/auth-context";
+import { User } from "@/app/(main)/users/models/user.model";
+import UserDetailDialog from "@/app/(main)/users/components/dialogs/UserDetailDialog";
+import SaveDialog from "@/app/(main)/accounts/components/SaveAccount";
+import ChangePasswordDialog from "@/components/ChangePasswordDialog";
 
 interface UserProfileSidebarProps {
     visible: boolean;
     setVisible: (visible: boolean) => void;
 }
 
-function AppUserProfileSidebar(props: UserProfileSidebarProps) {
+const AppUserProfileSidebar: React.FC<UserProfileSidebarProps> = ({ visible, setVisible }) => {
+    const { logout, getUser } = useAuth();
 
-    const { user, logout } = useAuth();
+    // UI State
     const [showApplicantDetailDialog, setShowApplicantDetailDialog] = useState(false);
-    const [showProfileDialog, setShowProfileDialog] = useState(false);
     const [showPasswordDialog, setShowPasswordDialog] = useState(false);
 
+    // Context Data
+    const user = getUser() as User | null;
+
     const handleLogout = () => {
-        //props.setVisible(false);
+        setVisible(false);
         logout();
     };
 
     return (
         <>
-            <Sidebar visible={props.visible} position="right" onHide={() => props.setVisible(false)}>
-                <h2>Welcome, {(user?.applicant) ? (user?.applicant as User).name : 'User'}</h2>
-                <p>
-                    You are signed in. Use the buttons below to access your account features.
-                </p>
-                <Divider />
-                {user?.applicant &&
-                    <>
-                        <p>
-                            <Button
-                                label="My Profile"
-                                severity="help"
-                                icon="pi pi-list"
-                                className="w-full"
-                                onClick={() => setShowApplicantDetailDialog(true)}
-                            />
+            <Sidebar
+                visible={visible}
+                position="right"
+                onHide={() => setVisible(false)}
+                className="w-full md:w-25rem"
+            >
+                <div className="flex flex-column h-full">
+                    {/* Header Section */}
+                    <section className="mb-2">
+                        <h2 className="m-0 text-2xl font-semibold">
+                            Welcome, {user?.name ?? 'User'}
+                        </h2>
+                        <p className="text-color-secondary mt-2 line-height-3">
+                            Manage your account settings and profile information below.
                         </p>
+                    </section>
 
-                        <p>
-                            <Button
-                                label="Change Password"
-                                severity="warning"
-                                icon="pi pi-key"
-                                className="w-full"
-                                onClick={() => setShowPasswordDialog(true)}
-                            />
-                        </p>
-                    </>
-                }
+                    <Divider />
 
-                <p>
-                    <Button
-                        label="Sign Out"
-                        severity="danger"
-                        icon="pi pi-sign-out"
-                        className="w-full"
-                        onClick={handleLogout}
-                    />
-                </p>
+                    {/* Navigation Actions */}
+                    <div className="flex flex-column gap-3">
+                        {user && (
+                            <>
+                                <Button
+                                    label="My Profile"
+                                    icon="pi pi-user"
+                                    severity="help"
+                                    outlined
+                                    className="w-full justify-content-start"
+                                    onClick={() => setShowApplicantDetailDialog(true)}
+                                />
 
+                                <Button
+                                    label="Change Password"
+                                    icon="pi pi-key"
+                                    severity="warning"
+                                    outlined
+                                    className="w-full justify-content-start"
+                                    onClick={() => setShowPasswordDialog(true)}
+                                />
+                            </>
+                        )}
+                    </div>
+
+                    {/* Footer Section */}
+                    <div className="mt-auto">
+                        <Divider />
+                        <Button
+                            label="Sign Out"
+                            icon="pi pi-sign-out"
+                            severity="danger"
+                            text
+                            className="w-full"
+                            onClick={handleLogout}
+                        />
+                    </div>
+                </div>
             </Sidebar>
 
-            {user?.applicant && (
-                <UserDetailDialog
-                    visible={showApplicantDetailDialog}
-                    user={user.applicant as User}
-                    onHide={() => setShowApplicantDetailDialog(false)}
-                />
+            {/* Account Dialogs */}
+            {user && (
+                <>
+                    <UserDetailDialog
+                        visible={showApplicantDetailDialog}
+                        user={user}
+                        onHide={() => setShowApplicantDetailDialog(false)}
+                    />
+
+                    <ChangePasswordDialog
+                        visible={showPasswordDialog}
+                        onHide={() => setShowPasswordDialog(false)}
+                    //toast={toast} // Optional: for success messages
+                    />
+                </>
             )}
-            {
-                /** 
-                 *  {user?.linkedApplicant && (
-                <SaveDialog
-                    visible={showProfileDialog}
-                    applicant={user.linkedApplicant as Applicant}
-                    onComplete={(savedApplicant: Applicant) => {
-                        user.linkedApplicant = savedApplicant;
-                        setShowProfileDialog(false)
-                    }}
-                    onHide={() => setShowProfileDialog(false)}
-                />
-            )}*/}
-
-
-            {(user?._id && user.applicant) && <SaveDialog
-                visible={showPasswordDialog}
-                item={user}
-                //enableCurrentPassword={true}
-                onComplete={() => setShowPasswordDialog(false)}
-                onHide={() => setShowPasswordDialog(false)}
-            />}
-
-
-
-
         </>
-
     );
-}
+};
+
 export default AppUserProfileSidebar;

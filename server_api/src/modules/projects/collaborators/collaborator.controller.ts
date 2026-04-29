@@ -20,7 +20,7 @@ export class CollaboratorController {
     // -----------------------
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error('User not found!');
+            if (!req.auth) throw new Error('User not found!');
 
             const { project, applicant, role, isLeadPI } = req.body;
 
@@ -29,7 +29,7 @@ export class CollaboratorController {
                 project: project as string,
                 //isLeadPI: isLeadPI ? true : undefined,
                 role,
-                userId: req.user.applicantId,
+                userId: req.auth.userId,
             };
 
             const created = await this.service.create(dto);
@@ -61,7 +61,7 @@ export class CollaboratorController {
 
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const { id } = req.params;
             const { role, isLeadPI } = req.body;
@@ -72,7 +72,7 @@ export class CollaboratorController {
                     role,
                     //isLeadPI: isLeadPI ? true : undefined,
                 },
-                applicantId: req.user.applicantId,
+                applicantId: req.auth.userId,
             };
 
             const updated = await this.service.update(dto);
@@ -85,14 +85,14 @@ export class CollaboratorController {
 
     transitionState = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
             const { current, next } = req.body;
             const dto: TransitionRequestDto = {
                 id: String(id),
                 current: current,
                 next: next,
-                applicantId: req.user.applicantId,
+                applicantId: req.auth.userId,
             };
             const updated = await this.service.transitionState(dto);
             successResponse(res, 200, "Collaborator status updated successfully", updated);
@@ -107,13 +107,13 @@ export class CollaboratorController {
     // -----------------------
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const { id } = req.params;
 
             const dto: DeleteDto = {
                 id,
-                applicantId: req.user.applicantId,
+                applicantId: req.auth.userId,
             };
 
             const deleted = await this.service.delete(dto);

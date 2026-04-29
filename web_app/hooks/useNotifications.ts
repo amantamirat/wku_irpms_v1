@@ -53,7 +53,7 @@ export const useNotifications = () => {
     }, [fetchNotifications]);
 
 
-    const { getApplicant } = useAuth();
+    const { getUser: getApplicant } = useAuth();
     const SOCKET_URL = BASE_URL?.replace('/api', '');
     useEffect(() => {
         const applicantData = getApplicant();

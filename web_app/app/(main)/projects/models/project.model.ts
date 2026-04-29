@@ -21,6 +21,7 @@ export enum ProjectStatus {
 export type Project = {
     _id?: string;
     grantAllocation?: string | GrantAllocation;
+    call?: string | Call;
     title: string;
     summary?: string;
     status?: ProjectStatus;
@@ -30,7 +31,7 @@ export type Project = {
     themes?: Theme[] | string[];
     createdAt?: Date;
     updatedAt?: Date;
-    call?: string | Call;
+    
     //used for apply for call
     collaborators?: Collaborator[];// | string[];
     phases?: Phase[];

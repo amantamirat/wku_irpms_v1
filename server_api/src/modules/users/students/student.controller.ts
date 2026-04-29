@@ -38,7 +38,7 @@ export class StudentController {
 
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new AppError(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
             const { id } = req.params;
             const { calendar, program, applicant } = req.body;
@@ -57,12 +57,12 @@ export class StudentController {
 
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error('User not authorized');
+            if (!req.auth) throw new Error('User not authorized');
 
             const { id } = req.params;
             const deleted = await this.service.delete({
                 id,
-                applicantId: req.user.applicantId,
+                applicantId: req.auth.userId,
             });
 
             successResponse(res, 200, 'Student deleted successfully', deleted);

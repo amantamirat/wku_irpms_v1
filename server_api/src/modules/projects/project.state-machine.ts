@@ -1,14 +1,4 @@
-
-export enum ProjectStatus {
-    draft = 'draft',
-    submitted = "submitted",
-    rejected = "rejected",
-    accepted = "accepted",
-    negotiation = "negotiation",
-    approved = 'approved',
-    granted = 'granted',
-    completed = 'completed'
-}
+import { ProjectStatus } from "./project.model";
 
 export const PROJECT_TRANSITIONS: Record<ProjectStatus, ProjectStatus[]> = {
     [ProjectStatus.draft]: [ProjectStatus.submitted],

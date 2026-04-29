@@ -120,7 +120,6 @@ export const BasicInfoStep = ({ data, call, constraints, onUpdate, onNext }: Bas
     };
 
 
-
     useEffect(() => {
         const loadThemes = async () => {
             try {
@@ -136,9 +135,6 @@ export const BasicInfoStep = ({ data, call, constraints, onUpdate, onNext }: Bas
         };
         loadThemes();
     }, [call]);
-
-
-
 
 
     const getThemeSelectionKeys = () => {

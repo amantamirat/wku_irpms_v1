@@ -57,10 +57,10 @@ export class ThemeController {
 
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) {
+            if (!req.auth) {
                 throw new AppError(ERROR_CODES.UNAUTHORIZED);
             }
-            const userId = req.user.applicantId;
+            const userId = req.auth.userId;
             const { id } = req.params;
             const deleted = await this.service.delete({ id, applicantId: userId });
             successResponse(res, 200, "Theme deleted successfully", deleted);

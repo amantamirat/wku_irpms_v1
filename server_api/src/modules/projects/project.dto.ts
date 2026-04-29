@@ -1,6 +1,6 @@
 import { CollaboratorDto } from "./collaborators/collaborator.dto";
 import { PhaseDto } from "./phase/phase.dto";
-import { ProjectStatus } from "./project.state-machine";
+import { ProjectStatus } from "./project.model";
 
 export interface FindByIdOptions {
     populate?: {

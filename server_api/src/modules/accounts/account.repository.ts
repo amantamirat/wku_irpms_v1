@@ -30,6 +30,7 @@ export class AccountRepository implements IAccountRepository {
 
     async findById(id: string) {
         return Account.findById(new mongoose.Types.ObjectId(id))
+            .select('+password')
             .lean<IAccount>()
             .exec();
     }

@@ -1,15 +1,17 @@
 import { ApiClient } from "@/api/ApiClient";
 import { Experience, GetExperiencesOptions, sanitizeExperience } from "../models/experience.model";
+import { EntityApi } from "@/api/EntityApi";
 
-const end_point = '/experiences/';
+const end_point = '/experiences';
 
+export const ExperienceApi: EntityApi<Experience, GetExperiencesOptions | undefined> = {
 
-export const ExperienceApi = {
-
-    async getExperiences(options: GetExperiencesOptions): Promise<Experience[]> {
+    async getAll(options?: GetExperiencesOptions): Promise<Experience[]> {
         const query = new URLSearchParams();
-        const applicant = typeof options.applicant === "object" ? (options.applicant as any)._id : options.applicant
-        if (applicant) query.append("applicant", applicant);
+        if (options) {
+            const sanitized = sanitizeExperience(options);
+            if (sanitized.user) query.append("user", sanitized.user as string);
+        }
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Experience[];
     },
@@ -25,7 +27,7 @@ export const ExperienceApi = {
             throw new Error("_id required.");
         }
         const sanitized = sanitizeExperience(exp);
-        const url = `${end_point}${exp._id}`;
+        const url = `${end_point}/${exp._id}`;
         const updatedData = await ApiClient.put(url, sanitized);
         return updatedData as Experience;
     },
@@ -34,7 +36,7 @@ export const ExperienceApi = {
         if (!exp._id) {
             throw new Error("_id required.");
         }
-        const url = `${end_point}${exp._id}`;
+        const url = `${end_point}/${exp._id}`;
         const response = await ApiClient.delete(url);
         return response;
     },

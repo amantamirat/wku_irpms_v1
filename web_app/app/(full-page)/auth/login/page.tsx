@@ -11,7 +11,8 @@ import { Password } from 'primereact/password';
 import { classNames } from 'primereact/utils';
 import { useContext, useRef, useState } from 'react';
 import { LayoutContext } from '../../../../layout/context/layoutcontext';
-import { LoginDto, validateLogin } from './model';
+import { validateLogin } from "../dto/auth.dto";
+import { LoginDto } from "../dto/auth.dto";
 
 const LoginPage = () => {
 

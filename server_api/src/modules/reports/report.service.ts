@@ -1,6 +1,6 @@
 import { ReportRepository } from "./report.repository";
 import { OverviewFilterDTO, InstitutionalOverviewDTO } from "./report.dto";
-import { ProjectStatus } from "../projects/project.state-machine";
+import { ProjectStatus } from "../projects/project.model";
 
 export class ReportService {
     constructor(private readonly reportRepo = new ReportRepository()) {}

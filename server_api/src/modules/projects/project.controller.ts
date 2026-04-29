@@ -17,7 +17,7 @@ export class ProjectController {
   // -----------------------
   create = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+      if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
       const { grantAllocation, title, summary, themes } = req.body;
 
@@ -25,7 +25,7 @@ export class ProjectController {
         grantAllocation: grantAllocation,
         title,
         summary,
-        applicant: req.user.applicantId,
+        applicant: req.auth.userId,
         themes: themes
       };
       const created = await this.service.create(dto);
@@ -37,7 +37,7 @@ export class ProjectController {
 
   apply = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+      if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
       if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
 
       let project;
@@ -51,7 +51,7 @@ export class ProjectController {
         call: project.call,
         title: project.title,
         summary: project.summary,
-        applicant: req.user.applicantId,
+        applicant: req.auth.userId,
         collaborators: project.collaborators || [],
         themes: project.themes || [],
         phases: project.phases || [],
@@ -94,7 +94,7 @@ export class ProjectController {
   // -----------------------
   update = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+      if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
       const { id } = req.params;
       const { title, summary, themes } = req.body;
@@ -102,7 +102,7 @@ export class ProjectController {
       const dto: UpdateProjectDTO = {
         id: id as string,
         data: { title, summary, themes },
-        applicantId: req.user.applicantId,
+        applicantId: req.auth.userId,
       };
 
       const updated = await this.service.update(dto);
@@ -114,14 +114,14 @@ export class ProjectController {
 
   transitionState = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+      if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
       const { id } = req.params;
       const { current, next } = req.body;
       const dto: TransitionRequestDto = {
         id: String(id),
         current: current,
         next: next,
-        applicantId: req.user.applicantId,
+        applicantId: req.auth.userId,
       };
       const updated = await this.service.transitionState(dto);
       successResponse(res, 200, "Project status updated successfully", updated);
@@ -135,13 +135,13 @@ export class ProjectController {
   // -----------------------
   delete = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      if (!req.user) throw new Error("User not found!");
+      if (!req.auth) throw new Error("User not found!");
 
       const { id } = req.params;
 
       const dto: DeleteDto = {
         id,
-        applicantId: req.user.applicantId,
+        applicantId: req.auth.userId,
       };
       const deleted = await this.service.delete(dto);
       successResponse(res, 200, "Project deleted successfully", deleted);

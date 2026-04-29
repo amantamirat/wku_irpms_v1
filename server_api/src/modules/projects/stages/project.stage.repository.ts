@@ -11,7 +11,7 @@ import { Project } from "../project.model";
 
 export interface IProjectStageRepository {
     findById(id: string, populate?: boolean): Promise<IProjectStage | null>;
-    find(filters: GetProjectStageDTO, session?: ClientSession): Promise<Partial<IProjectStage>[]>;
+    find(filters: GetProjectStageDTO, session?: ClientSession): Promise<IProjectStage[]>;
     findOneByProjectAndStage(projectId: string,
         grantStageId?: string,
         callStageId?: string,
@@ -48,7 +48,7 @@ export class ProjectStageRepository implements IProjectStageRepository {
         return query.exec();
     }
 
-    async find(options: GetProjectStageDTO) {
+    async find(options: GetProjectStageDTO, session?: ClientSession) {
         const query: any = {};
 
         // 1. Direct Filters
@@ -66,29 +66,32 @@ export class ProjectStageRepository implements IProjectStageRepository {
 
         // 2. Filter by Grant Allocation (Inside the Project)
         if (options.grantAllocation) {
-            // We find all project IDs that belong to this allocation
-            const projectsInAllocation = await Project.find({
+            const projectQuery = Project.find({
                 grantAllocation: new mongoose.Types.ObjectId(options.grantAllocation)
             }).select("_id").lean();
 
+            if (session) {
+                projectQuery.session(session);
+            }
+
+            const projectsInAllocation = await projectQuery;
+
             const projectIds = projectsInAllocation.map(p => p._id);
 
-            // Only return stages linked to these projects
             query.project = { $in: projectIds };
         }
 
+        // Main query
         const dbQuery = ProjectStage.find(query);
+
+        if (session) {
+            dbQuery.session(session);
+        }
 
         // 3. Populate
         if (options.populate) {
             dbQuery
                 .populate("project")
-                /*
-                    .populate({
-                        path: "project",
-                        // This fetches the allocation details inside the project
-                        populate: { path: "grantAllocation" }
-                    })*/
                 .populate("grantStage");
         }
 

@@ -14,9 +14,12 @@ export const PublicationApi: EntityApi<Publication, GetPublicationsOptions | und
         const query = new URLSearchParams();
         if (options) {
             const sanitized = sanitizePublication(options);
-            if (sanitized.author) query.append("user", sanitized.author as string);
+            if (sanitized.author) query.append("author", sanitized.author as string);
             if (sanitized.type) {
                 query.append("type", sanitized.type as string);
+            }
+            if (options.populate !== undefined) {
+                query.append("populate", String(options.populate));
             }
         }
         const data = await ApiClient.get(`${endPoint}?${query.toString()}`);

@@ -22,12 +22,12 @@ export class ExperienceController {
     // --- Create Experience ---
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) {
+            if (!req.auth) {
                 throw new AppError(ERROR_CODES.UNAUTHORIZED);
             }
             const dto: CreateExperienceDTO = {
                 ...req.body,
-                userId: req.user.applicantId
+                userId: req.auth.userId
             };
             const created = await this.service.create(dto);
             successResponse(res, 201, 'Experience created successfully', created);
@@ -55,7 +55,7 @@ export class ExperienceController {
     // --- Update Experience ---
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) {
+            if (!req.auth) {
                 throw new AppError(ERROR_CODES.UNAUTHORIZED);
             }
 
@@ -71,7 +71,7 @@ export class ExperienceController {
                     isCurrent: req.body.isCurrent,
                     employmentType: req.body.employmentType
                 },
-                userId: req.user.applicantId
+                userId: req.auth.userId
             };
 
             const updated = await this.service.update(dto);
@@ -84,7 +84,7 @@ export class ExperienceController {
     // --- Delete Experience ---
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) {
+            if (!req.auth) {
                 throw new AppError(ERROR_CODES.UNAUTHORIZED);
             }
 
@@ -92,7 +92,7 @@ export class ExperienceController {
 
             const dto: DeleteExperienceDTO = {
                 id,
-                userId: req.user.applicantId
+                userId: req.auth.userId
             };
 
             const deleted = await this.service.delete(dto);

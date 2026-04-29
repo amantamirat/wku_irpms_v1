@@ -17,13 +17,13 @@ export class EvaluationController {
 
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const dto: CreateEvaluationDTO = {
                 title: req.body.title,
                 description: req.body.description,
                 weight: req.body.weight,
-                userId: req.user.applicantId
+                userId: req.auth.userId
             };
 
             const evaluation = await this.service.create(dto);
@@ -48,7 +48,7 @@ export class EvaluationController {
 
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const dto: UpdateEvaluationDTO = {
                 id: req.params.id,
@@ -56,7 +56,7 @@ export class EvaluationController {
                     title: req.body.title, description: req.body.description,
                     weight: req.body.weight
                 },
-                userId: req.user.applicantId
+                userId: req.auth.userId
             };
             const updated = await this.service.update(dto);
             successResponse(res, 200, "Evaluation updated successfully", updated);
@@ -68,14 +68,14 @@ export class EvaluationController {
 
     transitionState = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
             const { current, next } = req.body;
             const dto: TransitionRequestDto = {
                 id: String(id),
                 current: current,
                 next: next,
-                applicantId: req.user.applicantId,
+                applicantId: req.auth.userId,
             };
             const updated = await this.service.transitionState(dto);
             successResponse(res, 200, "Eval status updated successfully", updated);
@@ -86,11 +86,11 @@ export class EvaluationController {
 
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const deleted = await this.service.delete({
                 id: req.params.id,
-                applicantId: req.user.applicantId
+                applicantId: req.auth.userId
             });
 
             successResponse(res, 200, "Evaluation deleted successfully", deleted);

@@ -27,7 +27,7 @@ const ReviewerManager = ({ projectStage, applicant }: ReviewerManagerProps) => {
     } | null>(null);
     const [loadingEval, setLoadingEval] = useState(false);
 
-    const { getApplicant } = useAuth();
+    const { getUser: getApplicant } = useAuth();
     const activeUser = getApplicant();
 
 

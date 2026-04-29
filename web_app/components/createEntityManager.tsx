@@ -2,7 +2,7 @@ import { EntityApi } from "@/api/EntityApi"
 import { useAuth } from "@/contexts/auth-context"
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext"
 import { useCrudList } from "@/hooks/useCrudList"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { ItemManager, RowAction } from "./ItemManager"
 import { StateTransitionButtons } from "./StateTransitionButtons"
 import { Button } from "primereact/button"
@@ -27,6 +27,7 @@ export function createEntityManager<
     SaveDialog?: React.ComponentType<EntitySaveDialogProps<T>>
     permissionPrefix: string
     query?: () => TQuery
+    onItemsChange?: (items: T[]) => void;
     workflow?: {
         statusField: keyof T
         transitions: Record<string, string[]>
@@ -99,6 +100,16 @@ export function createEntityManager<
             }
             fetchData();
         }, []);
+
+        const onItemsChangeRef = useRef(config.onItemsChange);
+
+        useEffect(() => {
+            onItemsChangeRef.current = config.onItemsChange;
+        }, [config.onItemsChange]);
+
+        useEffect(() => {
+            onItemsChangeRef.current?.(items);
+        }, [items]);
 
         const handleCreate = () => {
             if (config.createNew) {
