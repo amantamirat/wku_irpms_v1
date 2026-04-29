@@ -141,7 +141,7 @@ export class ProjectController {
 
       const dto: DeleteDto = {
         id,
-        applicantId: req.auth.userId,
+        userId: req.auth.userId,
       };
       const deleted = await this.service.delete(dto);
       successResponse(res, 200, "Project deleted successfully", deleted);

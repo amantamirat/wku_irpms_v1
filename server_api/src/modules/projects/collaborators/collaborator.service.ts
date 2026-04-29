@@ -140,7 +140,7 @@ export class CollaboratorService {
 
 
     async delete(dto: DeleteDto) {
-        const { id, applicantId } = dto;
+        const { id, userId: applicantId } = dto;
 
         const collabDoc = await this.collabRepo.findById(id);
         if (!collabDoc) throw new Error(ERROR_CODES.COLLABORATOR_NOT_FOUND);

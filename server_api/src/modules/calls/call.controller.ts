@@ -92,7 +92,7 @@ export class CallController {
             if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
             const userId = req.auth.userId;
-            const deleted = await this.service.delete({ id: id, applicantId: userId });
+            const deleted = await this.service.delete({ id: id, userId: userId });
             successResponse(res, 200, "Call deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

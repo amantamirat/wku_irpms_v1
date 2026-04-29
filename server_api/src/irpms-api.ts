@@ -7,7 +7,7 @@ import organizationRoutes from './modules/organization/organization.routes';
 
 import userRoutes from './modules/users/user.routes';
 import positionRoutes from './modules/positions/position.routes';
-import studentRoutes from './modules/users/students/student.routes';
+import enrollmentRoutes from './modules/users/enrollments/enrollment.routes';
 import experienceRoutes from './modules/users/experiences/experience.routes';
 import publicationRoutes from './modules/users/publications/publication.routes';
 import specializationRoutes from './modules/organization/specializations/specialization.routes';
@@ -70,7 +70,7 @@ app.use("/api/auth", authRoutes);
 
 app.use("/api/organizations", organizationRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/students", studentRoutes);
+app.use("/api/enrollments", enrollmentRoutes);
 app.use("/api/publications", publicationRoutes);
 app.use("/api/specializations", specializationRoutes);
 app.use("/api/positions", positionRoutes);

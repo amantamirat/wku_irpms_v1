@@ -5,19 +5,11 @@ import { AppMenuItem } from '@/types';
 import { PERMISSIONS } from '@/types/permissions';
 import Link from 'next/link';
 import { PrimeIcons } from 'primereact/api';
-import { useContext } from 'react';
 import AppMenuitem from './AppMenuitem';
-import { LayoutContext } from './context/layoutcontext';
 import { MenuProvider } from './context/menucontext';
 
 const AppMenu = () => {
-    const { hasPermission, getScopesByUnit } = useAuth();
-    const { layoutConfig } = useContext(LayoutContext);
-    const dirScopes = getScopesByUnit(OrgnUnit.directorate) ?? [];
-    const hasDirector = dirScopes.length > 0;
-    const depScopes = getScopesByUnit(OrgnUnit.department) ?? [];
-    const extScopes = getScopesByUnit(OrgnUnit.external) ?? [];
-    const hasWorkspace = depScopes.length > 0 || extScopes.length > 0;
+    const { hasPermission } = useAuth();
 
     const model: AppMenuItem[] = [
         {
@@ -28,8 +20,8 @@ const AppMenu = () => {
             label: 'Manage',
             visible: hasPermission(
                 [
-                    PERMISSIONS.PROJECT.CREATE,
-                    PERMISSIONS.CALL.CREATE,
+                    "call:create",
+                    "project:create",
                 ]
             ),
             items: [
@@ -37,29 +29,13 @@ const AppMenu = () => {
                     label: 'Calls',
                     icon: 'pi pi-fw pi-megaphone',
                     to: '/calls',
-                    visible: hasPermission([
-                        PERMISSIONS.CALL.CREATE,
-                    ])
+                    visible: hasPermission("call:create")
                 },
-
-                /*
-                {
-                    label: 'Reviewers',
-                    icon: 'pi pi-fw pi-users',
-                    to: '/grants/evaluate',
-                    visible: hasPermission([
-                        PERMISSIONS.REVIEWER.CREATE,
-                    ])
-                },*/
                 {
                     label: 'Projects',
                     icon: "pi pi-folder-open",
                     to: '/projects',
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.PROJECT.CREATE
-                        ]
-                    )
+                    visible: hasPermission("project:create")
                 },
             ]
         },
@@ -68,10 +44,10 @@ const AppMenu = () => {
             label: 'Grants & Allocations',
             visible: hasPermission(
                 [
-                    PERMISSIONS.CALENDAR.CREATE,
-                    PERMISSIONS.GRANT.CREATE,
-                    PERMISSIONS.EVALUATION.CREATE,
-                    PERMISSIONS.THEMATIC.CREATE,
+                    "calendar:create",
+                    "grant:create",
+                    "evaluation:create",
+                    "thematic:create",
                 ]
             ),
             items: [
@@ -79,45 +55,25 @@ const AppMenu = () => {
                     label: 'Calendars',
                     icon: PrimeIcons.CALENDAR,
                     to: '/calendars',
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.CALENDAR.CREATE,
-                            PERMISSIONS.CALENDAR.UPDATE,
-                            PERMISSIONS.CALENDAR.DELETE
-                        ]
-                    )
+                    visible: hasPermission("calendar:create")
                 },
                 {
                     label: 'Grants',
                     icon: 'pi pi-bitcoin',
                     to: '/grants',
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.GRANT.CREATE,
-                            PERMISSIONS.GRANT.UPDATE,
-                            PERMISSIONS.GRANT.DELETE
-                        ]
-                    )
+                    visible: hasPermission("grant:create")
                 },
                 {
                     label: 'Evaluations',
                     icon: 'pi pi-chart-bar',
                     to: '/evaluations',
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.EVALUATION.CREATE,
-                        ]
-                    )
+                    visible: hasPermission("evaluation:create")
                 },
                 {
                     label: 'Thematics',
                     icon: 'pi pi-fw pi-tags',
                     to: '/thematics',
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.THEMATIC.CREATE
-                        ]
-                    )
+                    visible: hasPermission("thematic:create")
                 },
 
             ]
@@ -125,8 +81,7 @@ const AppMenu = () => {
         {
             label: 'Users & Profiles',
             visible: hasPermission([
-                "user:create",
-                PERMISSIONS.STUDENT.CREATE,
+                "user:create"
             ]),
             items: [
                 {
@@ -142,32 +97,20 @@ const AppMenu = () => {
                 {
                     label: 'Publications',
                     icon: PrimeIcons.BOOK, // or PrimeIcons.COPYRIGHT for a formal look
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.PUBLICATION.READ,
-                        ]
-                    ),
+                    visible: hasPermission("publication:create"),
                     to: '/users/publications',
                 },
                 {
                     label: 'Experiences',
-                    icon: PrimeIcons.BRIEFCASE, // Clean, professional standard
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.EXPERIENCE.READ,
-                        ]
-                    ),
+                    icon: PrimeIcons.BRIEFCASE,
+                    visible: hasPermission("experience:create"),
                     to: '/users/experiences',
                 },
                 {
                     label: 'Enrollments',
                     icon: PrimeIcons.ID_CARD,
-                    visible: hasPermission(
-                        [
-                            PERMISSIONS.STUDENT.READ,
-                        ]
-                    ),
-                    to: '/users/students',
+                    visible: hasPermission("enrollment:create"),
+                    to: '/users/enrollments',
                 },
             ]
         },
@@ -176,7 +119,7 @@ const AppMenu = () => {
             visible: hasPermission(
                 [
                     "account:create",
-                    PERMISSIONS.ROLE.CREATE,
+                    "role:create",
                 ]
             ),
             items: [
@@ -197,7 +140,7 @@ const AppMenu = () => {
                     to: '/roles',
                     visible: hasPermission(
                         [
-                            PERMISSIONS.ROLE.CREATE,
+                            "role:create",
                         ]
                     )
                 }
@@ -304,21 +247,13 @@ const AppMenu = () => {
                     label: 'Specializations',
                     icon: 'pi pi-fw pi-filter-fill',
                     to: '/specializations',
-                    visible: hasPermission([
-                        PERMISSIONS.SPECIALIZATION.CREATE,
-                        PERMISSIONS.SPECIALIZATION.UPDATE,
-                        PERMISSIONS.SPECIALIZATION.DELETE
-                    ])
+                    visible: hasPermission("specialization:create")
                 },
                 {
                     label: 'Positions',
                     icon: 'pi pi-fw pi-flag',
                     to: '/positions',
-                    visible: hasPermission([
-                        PERMISSIONS.POSITION.CREATE,
-                        PERMISSIONS.POSITION.UPDATE,
-                        PERMISSIONS.POSITION.DELETE
-                    ])
+                    visible: hasPermission("position:create")
                 },
                 {
                     label: 'Settings',

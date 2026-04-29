@@ -25,8 +25,8 @@ export type User = {
     _id?: string;
     workspace?: string | Organization;
     name: string;
-    birthDate: Date;
-    gender: Gender;
+    birthDate?: Date;
+    gender?: Gender;
     fin?: string;
     orcid?: string;
     accessibility?: Accessibility[];

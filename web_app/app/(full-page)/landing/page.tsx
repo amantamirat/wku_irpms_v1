@@ -17,7 +17,7 @@ const LandingPage = () => {
     const [isHidden, setIsHidden] = useState(false);
     const { layoutConfig } = useContext(LayoutContext);
     const menuRef = useRef<HTMLElement | null>(null);
-    const { account: user, loading } = useAuth();
+    const { session: user, loading } = useAuth();
 
     if (loading) return <div className="flex justify-content-center mt-5"><ProgressSpinner /></div>;
 

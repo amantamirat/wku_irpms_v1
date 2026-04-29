@@ -1,24 +1,24 @@
 import { Request, Response } from 'express';
-import { StudentService } from './student.service';
-import { CreateStudentDTO, UpdateStudentDTO } from './student.dto';
+import { EnrollmentService } from './enrollment.service';
+import { CreateEnrollmentDTO, UpdateEnrollmentDTO } from './enrollment.dto';
 import { successResponse, errorResponse } from '../../../common/helpers/response';
 import { AuthenticatedRequest } from '../../auth/auth.middleware';
 import { AppError } from '../../../common/errors/app.error';
 import { ERROR_CODES } from '../../../common/errors/error.codes';
 
-export class StudentController {
+export class EnrollmentController {
 
-    private service: StudentService;
+    private service: EnrollmentService;
 
-    constructor(service: StudentService) {
+    constructor(service: EnrollmentService) {
         this.service = service;
     }
 
     create = async (req: Request, res: Response) => {
         try {
-            const dto: CreateStudentDTO = req.body;
+            const dto: CreateEnrollmentDTO = req.body;
             const student = await this.service.create(dto);
-            successResponse(res, 201, 'Student created successfully', student);
+            successResponse(res, 201, 'Enrollment created successfully', student);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
@@ -28,9 +28,9 @@ export class StudentController {
         try {
             const { user } = req.query;
             const students = await this.service.get({
-                user: user ? user as string : undefined
+                student: user ? user as string : undefined
             });
-            successResponse(res, 200, 'Students fetched successfully', students);
+            successResponse(res, 200, 'Enrollments fetched successfully', students);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
@@ -43,13 +43,13 @@ export class StudentController {
             const { id } = req.params;
             const { calendar, program, applicant } = req.body;
 
-            const dto: UpdateStudentDTO = {
+            const dto: UpdateEnrollmentDTO = {
                 id,
-                data: { calendar, program, user: applicant },
+                data: { calendar, program, student: applicant },
             };
 
             const updated = await this.service.update(dto);
-            successResponse(res, 200, 'Student updated successfully', updated);
+            successResponse(res, 200, 'Enrollment updated successfully', updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
@@ -57,12 +57,12 @@ export class StudentController {
 
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.auth) throw new Error('User not authorized');
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const { id } = req.params;
             const deleted = await this.service.delete({
                 id,
-                applicantId: req.auth.userId,
+                userId: req.auth.userId,
             });
 
             successResponse(res, 200, 'Student deleted successfully', deleted);

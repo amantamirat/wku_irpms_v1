@@ -1,10 +1,10 @@
 'use client';
 
-import StudentManager from "./components/StudentManager";
+import EnrollmentManager from "./components/EnrollmentManager";
 
 const StudentPage = () => {
     return (
-        <StudentManager />
+        <EnrollmentManager />
     );
 };
 

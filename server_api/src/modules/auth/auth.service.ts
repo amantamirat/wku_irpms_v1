@@ -87,6 +87,12 @@ export class AuthService {
             status: accountDoc.status
         };
 
+        const safeUser = {
+            _id: userDoc._id,
+            name: userDoc.name,
+            email: accountDoc.email,
+        };
+
         const expiryHours =
             await this.settingService.getSettingValue(
                 SettingKey.TOKEN_EXPIRY_HOURS,
@@ -107,11 +113,15 @@ export class AuthService {
         return {
             token,
             user: {
-                ...payload,
-                permissions,
-                ownerships,
-                applicant: userDoc
-            }
+                _id: userDoc._id,
+                name: userDoc.name,
+                email: accountDoc.email,
+                //birthDate: userDoc.birthDate,
+                //gender: userDoc.gender,
+            },
+            permissions,
+            ownerships,
+            status: accountDoc.status
         };
     }
 
@@ -130,9 +140,9 @@ export class AuthService {
     }
 
     async changePassword(dto: ChangePasswordDTO) {
-        const { id, data } = dto;        
+        const { id, data } = dto;
         const { currentPassword, password: newPassword } = data;
-        
+
         const accountDoc = await this.repository.findById(id);
         if (!accountDoc) throw new AppError(ERROR_CODES.ACCOUNT_NOT_FOUND);
 

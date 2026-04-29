@@ -4,21 +4,21 @@ import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { CalendarRepository } from "../../calendar/calendar.repository";
 import { OrganizationRepository } from "../../organization/organization.repository";
 import { UserRepository } from "../user.repository";
-import { CreateStudentDTO, GetStudentsOptions, UpdateStudentDTO } from "./student.dto";
-import { StudentRepository } from "./student.repository";
+import { CreateEnrollmentDTO, GetEnrollmentsOptions, UpdateEnrollmentDTO } from "./enrollment.dto";
+import { EnrollmentRepository } from "./enrollment.repository";
 import { Unit } from "../../../common/constants/enums";
 
-export class StudentService {
+export class EnrollmentService {
 
     constructor(
-        private readonly repository: StudentRepository,
+        private readonly repository: EnrollmentRepository,
         private readonly calendarRepository: CalendarRepository,
         private readonly programRepository: OrganizationRepository,
         private readonly userRepository: UserRepository
     ) { }
 
-    async create(dto: CreateStudentDTO) {
-        const { calendar, user: applicant, program } = dto;
+    async create(dto: CreateEnrollmentDTO) {
+        const { calendar, student: applicant, program } = dto;
         const calendarDoc = await this.calendarRepository.findById(calendar);
         if (!calendarDoc) throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
 
@@ -34,26 +34,26 @@ export class StudentService {
         } catch (err: any) {
             // 5. Handle unique index violations
             if (err?.code === 11000) {
-                throw new AppError(ERROR_CODES.STUDENT_ALREADY_EXISTS);
+                throw new AppError(ERROR_CODES.ENROLLMENT_ALREADY_EXISTS);
             }
             throw err;
         }
     }
 
-    async get(options: GetStudentsOptions) {
-        if (options.user) {
-            return await this.repository.findByUser(options.user);
+    async get(options: GetEnrollmentsOptions) {
+        if (options.student) {
+            return await this.repository.findByStudent(options.student);
         }
         return await this.repository.findAll();
     }
 
-    async update(dto: UpdateStudentDTO) {
+    async update(dto: UpdateEnrollmentDTO) {
         const { id, data } = dto;
 
         // 1. Ensure student exists
         const existing = await this.repository.findById(id);
         if (!existing) {
-            throw new AppError(ERROR_CODES.STUDENT_NOT_FOUND);
+            throw new AppError(ERROR_CODES.ENROLLMENT_NOT_FOUND);
         }
 
         // 2. Validate calendar (if provided)
@@ -65,9 +65,9 @@ export class StudentService {
         }
 
         // 3. Validate applicant (if provided)
-        if (data.user) {
-            const applicantDoc = await this.userRepository.findById(data.user);
-            if (!applicantDoc) {
+        if (data.student) {
+            const userDoc = await this.userRepository.findById(data.student);
+            if (!userDoc) {
                 throw new AppError(ERROR_CODES.USER_NOT_FOUND);
             }
         }
@@ -85,13 +85,13 @@ export class StudentService {
             const updated = await this.repository.update(id, data);
             if (!updated) {
                 // Defensive: should not happen due to step 1
-                throw new AppError(ERROR_CODES.STUDENT_NOT_FOUND);
+                throw new AppError(ERROR_CODES.ENROLLMENT_NOT_FOUND);
             }
             return updated;
         } catch (err: any) {
             // 6. Handle unique index violations
             if (err?.code === 11000) {
-                throw new AppError(ERROR_CODES.STUDENT_ALREADY_EXISTS);
+                throw new AppError(ERROR_CODES.ENROLLMENT_ALREADY_EXISTS);
             }
             throw err;
         }
@@ -101,7 +101,7 @@ export class StudentService {
     async delete(dto: DeleteDto) {
         const { id } = dto;
         const deleted = await this.repository.delete(id);
-        if (!deleted) throw new AppError(ERROR_CODES.STUDENT_NOT_FOUND);
+        if (!deleted) throw new AppError(ERROR_CODES.ENROLLMENT_NOT_FOUND);
         return deleted;
     }
 }

@@ -90,7 +90,7 @@ export class PublicationController {
 
             const deleted = await this.service.delete({
                 id,
-                applicantId: req.auth.userId,
+                userId: req.auth.userId,
             });
 
             successResponse(res, 200, 'Publication deleted successfully', deleted);

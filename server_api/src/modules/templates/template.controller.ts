@@ -125,7 +125,7 @@ export class TemplateController {
 
             const deleted = await this.service.delete({
                 id: req.params.id,
-                applicantId: req.auth.userId
+                userId: req.auth.userId
             });
 
             successResponse(res, 200, "Template deleted successfully", deleted);

@@ -166,7 +166,7 @@ export class ProjectStageController {
             const { id } = req.params;
             const dto: DeleteDto = {
                 id,
-                applicantId: req.auth.userId,
+                userId: req.auth.userId,
             };
 
             const deletedDoc = await this.service.delete(dto);

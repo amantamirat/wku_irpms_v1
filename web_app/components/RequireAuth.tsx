@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function RequireAuth({ children }: { children: React.ReactNode }) {
-    const { account: user, loading } = useAuth();
+    const { session, loading } = useAuth();
     const router = useRouter();
 
     const pathname = usePathname();
@@ -13,14 +13,14 @@ export default function RequireAuth({ children }: { children: React.ReactNode })
 
     useEffect(() => {
         if (loading) return;
-        if (!user) {
+        if (!session) {
             router.push('/auth/login');
-        } else if (user.status !== AccountStatus.active && !isRequestActivationPage) {
+        } else if (session.status !== AccountStatus.active && !isRequestActivationPage) {
             router.push('/auth/request-activation');
         }
-    }, [loading, user, router, isRequestActivationPage]);
+    }, [loading, session, router, isRequestActivationPage]);
 
-    if (loading || !user || (user.status !== AccountStatus.active && !isRequestActivationPage)) {
+    if (loading || !session || (session.status !== AccountStatus.active && !isRequestActivationPage)) {
         return <div>Loading...</div>;
     }
 

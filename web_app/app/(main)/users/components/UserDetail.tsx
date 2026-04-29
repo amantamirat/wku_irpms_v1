@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { PERMISSIONS } from "@/types/permissions";
 import { User } from "../models/user.model";
 import CollaboratorManager from "../../projects/collaborators/components/CollaboratorManager";
-import StudentManager from "../students/components/StudentManager";
+import EnrollmentManager from "../enrollments/components/EnrollmentManager";
 import PublicationManager from "../publications/components/PublicationManager";
 import ExperienceManager from "../experiences/components/ExperienceManager";
 import ReviewerManager from "../../reviewers/components/ReviewerManager";
@@ -43,8 +43,8 @@ const UserDetail: React.FC<UserDetailProps> = ({ user }) => {
         {
 
             header: "Enrollments",
-            permission: PERMISSIONS.STUDENT.READ,
-            content: <StudentManager applicant={user} />
+            permission: "enrollment:read",
+            content: <EnrollmentManager student={user} />
         },
         /*
         {

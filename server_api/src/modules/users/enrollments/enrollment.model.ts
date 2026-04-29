@@ -2,16 +2,16 @@ import mongoose, { Document, Schema } from 'mongoose';
 import { COLLECTIONS } from '../../../common/constants/collections.enum';
 import { Program } from '../../organization/organization.model';
 
-export interface IStudent extends Document {
+export interface IEnrollment extends Document {
   calendar: mongoose.Types.ObjectId;
   program: mongoose.Types.ObjectId;
-  user: mongoose.Types.ObjectId;
+  student: mongoose.Types.ObjectId;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 
-const StudentSchema = new Schema<IStudent>({
+const EnrollmentSchema = new Schema<IEnrollment>({
   calendar: {
     type: Schema.Types.ObjectId,
     ref: COLLECTIONS.CALENDAR,
@@ -22,7 +22,7 @@ const StudentSchema = new Schema<IStudent>({
     ref: Program.modelName,
     required: true
   },
-  user: {
+  student: {
     type: Schema.Types.ObjectId,
     ref: COLLECTIONS.USER,
     required: true
@@ -31,10 +31,10 @@ const StudentSchema = new Schema<IStudent>({
   timestamps: true
 });
 
-StudentSchema.index({ applicant: 1, calendar: 1 }, { unique: true });
+EnrollmentSchema.index({ student: 1, calendar: 1 }, { unique: true });
 
-StudentSchema.index({ applicant: 1, program: 1 }, { unique: true });
+EnrollmentSchema.index({ student: 1, program: 1 }, { unique: true });
 
-const Student = mongoose.model<IStudent>(COLLECTIONS.STUDNET, StudentSchema);
+const Enrollment = mongoose.model<IEnrollment>(COLLECTIONS.ENROLLMENT, EnrollmentSchema);
 
-export default Student;
+export default Enrollment;

@@ -963,24 +963,37 @@
     "name": "report:overview"
   },
   {
-    "category": "Student Management",
-    "name": "student:create",
-    "description": "Create new students"
+    "category": "Enrollment Management",
+    "name": "enrollment:create",
+    "description": "Enroll a user as a student in a specified calendar and program",
+    "requires": [
+      "user:read",
+      "calendar:read",
+      "program:read"
+    ]
   },
   {
-    "category": "Student Management",
-    "name": "student:read",
-    "description": "View students"
+    "category": "Enrollment Management",
+    "name": "enrollment:read",
+    "description": "View enrollment records, including associated user, calendar, and program"
   },
   {
-    "category": "Student Management",
-    "name": "student:update",
-    "description": "Edit student records"
+    "category": "Enrollment Management",
+    "name": "enrollment:update",
+    "description": "Update enrollment details such as assigned program or calendar",
+    "requires": [
+      "user:read",
+      "calendar:read",
+      "program:read"
+    ]
   },
   {
-    "category": "Student Management",
-    "name": "student:delete",
-    "description": "Delete students"
+    "category": "Enrollment Management",
+    "name": "enrollment:delete",
+    "description": "Remove or cancel an existing enrollment record",
+    "requires": [
+      "enrollment:read"
+    ]
   },
   {
     "category": "Experience Management",

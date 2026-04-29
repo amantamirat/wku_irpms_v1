@@ -157,7 +157,7 @@ export class PhaseService {
     // DELETE
     // ---------------------------------------------------
     async delete(dto: DeleteDto) {
-        const { id, applicantId } = dto;
+        const { id, userId: applicantId } = dto;
         const phaseDoc = await this.phaseRepo.findById(id);
         if (!phaseDoc) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
 

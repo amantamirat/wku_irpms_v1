@@ -10,7 +10,7 @@ import { AuthApi } from '../api/auth.service';
 
 
 export default function RequestActivationPage() {
-  const { account: user, logout } = useAuth();
+  const { session: user, logout } = useAuth();
   const router = useRouter();
   const msgs = useRef<Messages>(null);
   const [processing, setProcessing] = useState(false);

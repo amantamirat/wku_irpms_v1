@@ -5,20 +5,19 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function NoAuthGuard({ children }: { children: React.ReactNode }) {
-    const { account: user, loading } = useAuth();
+    const { session, loading } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
         if (loading) return;
-
-        if (user?.status === AccountStatus.active) {
+        if (session?.status === AccountStatus.active) {
             router.push('/');
-        } else if (user?.status === AccountStatus.pending) {
+        } else if (session?.status === AccountStatus.pending) {
             router.push('/auth/request-activation');
         }
-    }, [loading, user, router]);
+    }, [loading, session, router]);
 
-    if (loading || user?.status === AccountStatus.active || user?.status === AccountStatus.pending) {
+    if (loading || session?.status === AccountStatus.active || session?.status === AccountStatus.pending) {
         return <div>Loading...</div>;
     }
 

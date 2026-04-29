@@ -2,25 +2,25 @@
 
 import React from 'react';
 import { createEntityManager } from "@/components/createEntityManager";
-import { StudentApi } from "../api/student.api";
-import { GetStudentsOptions, Student } from "../models/student.model";
+import { EnrollmentApi } from "../api/enrollment.api";
+import { GetEnrollmentsOptions, Enrollment } from "../models/enrollment.model";
 import { User } from "../../models/user.model";
-import SaveStudentDialog from "./SaveStudent";
+import SaveEnrollmentDialog from "./SaveEnrollment";
 import { Organization } from "@/app/(main)/organizations/models/organization.model";
 
-interface StudentManagerProps {
-    applicant?: User;
+interface EnrollmentManagerProps {
+    student?: User;
 }
 
-const StudentManager = ({ applicant }: StudentManagerProps) => {
+const EnrollmentManager = ({ student: student }: EnrollmentManagerProps) => {
     /**
      * Create the manager instance.
      * We pass User as the Context type to handle the optional applicant filtering.
      */
-    const Manager = createEntityManager<Student, GetStudentsOptions | undefined>({
-        title: applicant ? `Enrollments for ${applicant.name}` : "Manage All Enrollments",
+    const Manager = createEntityManager<Enrollment, GetEnrollmentsOptions | undefined>({
+        title: student ? `Enrollments for ${student.name}` : "Manage All Enrollments",
         itemName: "Enrollments",
-        api: StudentApi,
+        api: EnrollmentApi,
 
         /** Columns configuration */
         columns: [
@@ -38,7 +38,7 @@ const StudentManager = ({ applicant }: StudentManagerProps) => {
                 header: "Ac. Level",
                 field: "program.academicLevel",
                 sortable: true,
-                body: (s: Student) => {
+                body: (s: Enrollment) => {
                     const level = (s.program as Organization)?.academicLevel;
                     return level ? (
                         <span className={`academic-badge level-${level.toLowerCase()}`}>
@@ -48,27 +48,27 @@ const StudentManager = ({ applicant }: StudentManagerProps) => {
                 }
             },
             // Only show the Student name column if we aren't already filtered by applicant
-            ...(!applicant ? [{
+            ...(!student ? [{
                 header: "Student",
-                field: "user.name",
+                field: "student.name",
                 sortable: true
             }] : []),
         ],
 
         /** Factory for new records */
         createNew: () => ({
-            user: applicant, // Pre-link the student to the applicant context
+            student: student, // Pre-link the student to the applicant context
             calendar: undefined,
             program: undefined
         }),
 
         /** Dialog and Permissions */
-        SaveDialog: SaveStudentDialog,
-        permissionPrefix: "student",
+        SaveDialog: SaveEnrollmentDialog,
+        permissionPrefix: "enrollment",
     });
 
     // We pass the applicant prop as the 'context' to the Manager
     return <Manager />;
 };
 
-export default StudentManager;
+export default EnrollmentManager;

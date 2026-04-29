@@ -143,7 +143,7 @@ export class ProjectStageService {
      * Delete 
      */
     async delete(dto: DeleteDto) {
-        const { id, applicantId } = dto;
+        const { id, userId: applicantId } = dto;
 
         const projectStageDoc = await this.repository.findById(id);
         if (!projectStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);

@@ -10,8 +10,8 @@ import { classNames } from 'primereact/utils';
 
 // Types & APIs
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
-import { Student, validateStudent } from '../models/student.model';
-import { StudentApi } from '../api/student.api';
+import { Enrollment, validateEnrollment } from '../models/enrollment.model';
+import { EnrollmentApi } from '../api/enrollment.api';
 import { User } from '../../models/user.model';
 import { UserApi } from '../../api/user.api';
 import { Calendar, CalendarStatus } from '@/app/(main)/calendars/models/calendar.model';
@@ -19,16 +19,16 @@ import { CalendarApi } from '@/app/(main)/calendars/api/calendar.api';
 import { Organization, OrgnUnit } from '@/app/(main)/organizations/models/organization.model';
 import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
 
-const SaveStudentDialog = ({ 
-    visible, 
-    item, 
-    onComplete, 
-    onHide 
-}: EntitySaveDialogProps<Student>) => {
+const SaveEnrollmentDialog = ({
+    visible,
+    item,
+    onComplete,
+    onHide
+}: EntitySaveDialogProps<Enrollment>) => {
     const toast = useRef<Toast>(null);
-    
+
     // State
-    const [localStudent, setLocalStudent] = useState<Student>({ ...item });
+    const [localEnrollment, setLocalEnrollment] = useState<Enrollment>({ ...item });
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -38,7 +38,7 @@ const SaveStudentDialog = ({
     const [applicants, setApplicants] = useState<User[]>([]);
 
     // Predefined Logic
-    const isUserPredefined = !!item.user;
+    const isStudPredefined = !!item.student;
     const isCalendarPredefined = !!item.calendar;
     const isProgramPredefined = !!item.program;
 
@@ -52,14 +52,14 @@ const SaveStudentDialog = ({
         const fetchData = async () => {
             try {
                 const requests: Promise<any>[] = [];
-                
-                if (!isCalendarPredefined) 
+
+                if (!isCalendarPredefined)
                     requests.push(CalendarApi.getAll({ status: CalendarStatus.active }).then(setCalendars));
-                
-                if (!isProgramPredefined) 
+
+                if (!isProgramPredefined)
                     requests.push(OrganizationApi.getAll({ type: OrgnUnit.program }).then(setPrograms));
-                
-                if (!isUserPredefined) 
+
+                if (!isStudPredefined)
                     requests.push(UserApi.getAll({}).then(setApplicants));
 
                 await Promise.all(requests);
@@ -69,13 +69,13 @@ const SaveStudentDialog = ({
         };
 
         fetchData();
-    }, [visible, isUserPredefined, isCalendarPredefined, isProgramPredefined]);
+    }, [visible, isStudPredefined, isCalendarPredefined, isProgramPredefined]);
 
     /**
      * Sync local state with prop updates
      */
     useEffect(() => {
-        setLocalStudent({ ...item });
+        setLocalEnrollment({ ...item });
     }, [item]);
 
     const handleHide = () => {
@@ -85,8 +85,8 @@ const SaveStudentDialog = ({
 
     const saveStudent = async () => {
         setSubmitted(true);
-        
-        const validation = validateStudent(localStudent);
+
+        const validation = validateEnrollment(localEnrollment);
         if (!validation.valid) {
             toast.current?.show({
                 severity: 'warn',
@@ -99,11 +99,11 @@ const SaveStudentDialog = ({
 
         setLoading(true);
         try {
-            let saved: Student;
-            if (localStudent._id) {
-                saved = await StudentApi.update(localStudent);
+            let saved: Enrollment;
+            if (localEnrollment._id) {
+                saved = await EnrollmentApi.update(localEnrollment);
             } else {
-                saved = await StudentApi.create(localStudent);
+                saved = await EnrollmentApi.create(localEnrollment);
             }
 
             toast.current?.show({
@@ -113,9 +113,9 @@ const SaveStudentDialog = ({
                 life: 2000,
             });
 
-            onComplete?.({ 
-                ...localStudent, 
-                ...saved 
+            onComplete?.({
+                ...localEnrollment,
+                _id: saved._id
             });
         } catch (err: any) {
             toast.current?.show({
@@ -142,7 +142,7 @@ const SaveStudentDialog = ({
             <Dialog
                 visible={visible}
                 style={{ width: '500px' }}
-                header={localStudent._id ? 'Edit Student Profile' : 'New Student Registration'}
+                header={localEnrollment._id ? 'Edit Student Profile' : 'New Student Registration'}
                 modal
                 className="p-fluid"
                 footer={footer}
@@ -151,22 +151,22 @@ const SaveStudentDialog = ({
                 {/* Applicant Selection */}
                 <div className="field">
                     <label htmlFor="applicant" className="font-bold text-sm">Applicant</label>
-                    {isUserPredefined ? (
-                        <InputText 
-                            value={(localStudent.user as User)?.name || 'Linked User'} 
-                            disabled 
+                    {isStudPredefined ? (
+                        <InputText
+                            value={(localEnrollment.student as User)?.name || 'Linked User'}
+                            disabled
                             className="bg-gray-100"
                         />
                     ) : (
                         <Dropdown
                             id="applicant"
-                            value={localStudent.user}
+                            value={localEnrollment.student}
                             options={applicants}
                             optionLabel="name"
                             dataKey="_id"
                             placeholder="Select an Applicant"
-                            onChange={(e) => setLocalStudent({ ...localStudent, user: e.value })}
-                            className={classNames({ 'p-invalid': submitted && !localStudent.user })}
+                            onChange={(e) => setLocalEnrollment({ ...localEnrollment, student: e.value })}
+                            className={classNames({ 'p-invalid': submitted && !localEnrollment.student })}
                         />
                     )}
                 </div>
@@ -175,21 +175,21 @@ const SaveStudentDialog = ({
                 <div className="field">
                     <label htmlFor="calendar" className="font-bold text-sm">Academic Calendar</label>
                     {isCalendarPredefined ? (
-                        <InputText 
-                            value={(localStudent.calendar as Calendar)?.year?.toString() || 'Assigned Year'} 
-                            disabled 
+                        <InputText
+                            value={(localEnrollment.calendar as Calendar)?.year?.toString() || 'Assigned Year'}
+                            disabled
                             className="bg-gray-100"
                         />
                     ) : (
                         <Dropdown
                             id="calendar"
-                            value={localStudent.calendar}
+                            value={localEnrollment.calendar}
                             options={calendars}
                             optionLabel="year"
                             dataKey="_id"
                             placeholder="Select Year"
-                            onChange={(e) => setLocalStudent({ ...localStudent, calendar: e.value })}
-                            className={classNames({ 'p-invalid': submitted && !localStudent.calendar })}
+                            onChange={(e) => setLocalEnrollment({ ...localEnrollment, calendar: e.value })}
+                            className={classNames({ 'p-invalid': submitted && !localEnrollment.calendar })}
                         />
                     )}
                 </div>
@@ -198,21 +198,21 @@ const SaveStudentDialog = ({
                 <div className="field">
                     <label htmlFor="program" className="font-bold text-sm">Program</label>
                     {isProgramPredefined ? (
-                        <InputText 
-                            value={(localStudent.program as Organization)?.name || 'Assigned Program'} 
-                            disabled 
+                        <InputText
+                            value={(localEnrollment.program as Organization)?.name || 'Assigned Program'}
+                            disabled
                             className="bg-gray-100"
                         />
                     ) : (
                         <Dropdown
                             id="program"
-                            value={localStudent.program}
+                            value={localEnrollment.program}
                             options={programs}
                             optionLabel="name"
                             dataKey="_id"
                             placeholder="Select Program"
-                            onChange={(e) => setLocalStudent({ ...localStudent, program: e.value })}
-                            className={classNames({ 'p-invalid': submitted && !localStudent.program })}
+                            onChange={(e) => setLocalEnrollment({ ...localEnrollment, program: e.value })}
+                            className={classNames({ 'p-invalid': submitted && !localEnrollment.program })}
                         />
                     )}
                 </div>
@@ -221,4 +221,4 @@ const SaveStudentDialog = ({
     );
 };
 
-export default SaveStudentDialog;
+export default SaveEnrollmentDialog;

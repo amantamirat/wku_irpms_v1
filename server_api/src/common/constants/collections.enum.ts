@@ -9,7 +9,7 @@ export enum COLLECTIONS {
   SPECIALIZATION = "specializations",
   POSITION = "positions",
   EXPERIENCE = "experiences",
-  STUDNET = "students",
+  ENROLLMENT = "enrollments",
 
   GRANT = "grants",
   GRANT_STAGE = "grantstages",

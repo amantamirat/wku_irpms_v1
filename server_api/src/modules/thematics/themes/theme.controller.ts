@@ -62,7 +62,7 @@ export class ThemeController {
             }
             const userId = req.auth.userId;
             const { id } = req.params;
-            const deleted = await this.service.delete({ id, applicantId: userId });
+            const deleted = await this.service.delete({ id, userId: userId });
             successResponse(res, 200, "Theme deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

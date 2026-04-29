@@ -252,7 +252,7 @@ export class ProjectService {
     // DELETE
     // ---------------------------------------------------
     async delete(dto: DeleteDto) {
-        const { id, applicantId } = dto;
+        const { id, userId: applicantId } = dto;
         const projectDoc = await this.validateProject(id, applicantId ?? '');
         await this.collabRepo.deleteByProject(id);
         await this.phaseRepo.deleteByProject(id);

@@ -76,7 +76,7 @@ export class AccountController {
       const { id } = req.params;
       const dto: DeleteDto = {
         id: id,
-        applicantId: req.auth.userId,
+        userId: req.auth.userId,
       };
       const deleted = await this.service.delete(dto);
       successResponse(res, 200, 'User deleted successfully', deleted);

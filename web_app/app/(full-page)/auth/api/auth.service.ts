@@ -2,28 +2,40 @@ import { ApiClient } from "@/api/ApiClient";
 import { Account } from "@/app/(main)/accounts/models/account.model";
 import { ChangePasswordDTO, LoginDto } from "../dto/auth.dto";
 
-
-
 const login_end_point = '/auth/login';
 const change_password_end_point = '/auth/change-password';
 const send_verification_code_end_point = '/auth/send-verification-code';
 const reset_password_end_point = '/auth/reset-password';
 const activate_user_end_point = '/auth/activate-user';
+
 const tokenStorage = 'authToken';
-const userStorage = 'authUser';
+const sessionStorage = 'authSession';
 
 export const AuthApi = {
 
     async loginUser(credentials: LoginDto): Promise<any> {
-        const userIfo = await ApiClient.post(login_end_point, credentials);
-        const { token, user } = userIfo;
+        const response = await ApiClient.post(login_end_point, credentials);
+
+        const { token, user, permissions, ownerships, status } = response;
+
+        // store token
         localStorage.setItem(tokenStorage, token);
-        localStorage.setItem(userStorage, JSON.stringify(user));
-        return user;
+
+        // store user session info
+        const session = {
+            user,
+            permissions,
+            ownerships,
+            status
+        };
+
+        localStorage.setItem(sessionStorage, JSON.stringify(session));
+
+        return session;
     },
 
     getLoggedInUser(): any | null {
-        const userInfo = localStorage.getItem(userStorage);
+        const userInfo = localStorage.getItem(sessionStorage);
         if (userInfo) {
             return JSON.parse(userInfo);
         }
@@ -31,43 +43,33 @@ export const AuthApi = {
     },
 
     getToken(): string | null {
-        const tokenInfo = localStorage.getItem(tokenStorage);
-        if (tokenInfo) {
-            return tokenInfo
-        }
-        return null;
+        return localStorage.getItem(tokenStorage);
     },
 
     logout() {
         localStorage.removeItem(tokenStorage);
-        localStorage.removeItem(userStorage);
-        //router.push('/auth/login');
+        localStorage.removeItem(sessionStorage);
     },
 
     async changePassword(dto: ChangePasswordDTO): Promise<any> {
-        const response = await ApiClient.post(change_password_end_point, dto);
-        return response;
+        return ApiClient.post(change_password_end_point, dto);
     },
 
     async sendVerificationCode(email: string): Promise<any> {
-        const response = await ApiClient.post(send_verification_code_end_point, { email: email });
-        return response;
+        return ApiClient.post(send_verification_code_end_point, { email });
     },
 
     async resetPassword(credential: Partial<Account>): Promise<any> {
         if (!credential.resetCode) {
             throw new Error("verification code required.");
         }
-        const response = await ApiClient.post(reset_password_end_point, credential);
-        return response;
+        return ApiClient.post(reset_password_end_point, credential);
     },
 
     async activateUser(credential: Partial<Account>): Promise<any> {
         if (!credential.resetCode) {
             throw new Error("verification code required.");
         }
-        const response = await ApiClient.post(activate_user_end_point, credential);
-        return response;
+        return ApiClient.post(activate_user_end_point, credential);
     },
-
 };

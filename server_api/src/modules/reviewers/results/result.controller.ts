@@ -91,7 +91,7 @@ export class ResultController {
 
             const dto: DeleteDto = {
                 id: String(id),
-                applicantId: req.auth.userId
+                userId: req.auth.userId
             };
 
             const deleted = await this.service.delete(dto);
