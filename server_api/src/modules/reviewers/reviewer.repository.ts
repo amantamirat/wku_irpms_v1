@@ -28,18 +28,27 @@ export class ReviewerRepository implements IReviewerRepository {
             query.projectStage = new mongoose.Types.ObjectId(options.projectStage);
         }
 
-        if (options.applicant) {
-            query.applicant = new mongoose.Types.ObjectId(options.applicant);
+        if (options.reviewer) {
+            query.reviewer = new mongoose.Types.ObjectId(options.reviewer);
+        }
+
+        // New Status Filtering Logic
+        if (options.status) {
+            if (Array.isArray(options.status)) {
+                // Matches any status present in the array
+                query.status = { $in: options.status };
+            } else {
+                // Matches a single status string
+                query.status = options.status;
+            }
         }
 
         let reviewerQuery = Reviewer.find(query);
 
-        if (options.populate && options.projectStage) {
+        if (options.populate) {
             reviewerQuery = reviewerQuery.populate({
-                path: 'applicant'
+                path: 'reviewer'
             });
-        }
-        if (options.populate && options.applicant) {
             reviewerQuery = reviewerQuery.populate({
                 path: "projectStage",
                 populate: {
@@ -55,7 +64,7 @@ export class ReviewerRepository implements IReviewerRepository {
     async create(dto: CreateReviewerDTO) {
         const data: Partial<IReviewer> = {
             projectStage: new mongoose.Types.ObjectId(dto.projectStage),
-            applicant: new mongoose.Types.ObjectId(dto.applicant),
+            reviewer: new mongoose.Types.ObjectId(dto.reviewer),
         };
         return Reviewer.create(data);
     }
@@ -91,8 +100,8 @@ export class ReviewerRepository implements IReviewerRepository {
     }
     async exist(filters: ExistsReviewersDTO): Promise<boolean> {
         const query: any = {};
-        if (filters.applicant) {
-            query.applicant = new mongoose.Types.ObjectId(filters.applicant);
+        if (filters.reviewer) {
+            query.applicant = new mongoose.Types.ObjectId(filters.reviewer);
         }
         if (filters.projectStage) {
             query.projectStage = new mongoose.Types.ObjectId(filters.projectStage);

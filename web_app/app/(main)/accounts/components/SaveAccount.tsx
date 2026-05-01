@@ -124,6 +124,9 @@ const SaveAccount = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
                         optionLabel="name"
                         dataKey="_id"
                         filter
+                        filterMatchMode="contains"
+                        filterLocale="en"
+                        filterBy="name"
                         placeholder="Select an applicant profile"
                         disabled={isEdit} // Prevent changing the owner of credentials
                         onChange={(e) => setLocalUser({ ...localUser, applicant: e.value })}

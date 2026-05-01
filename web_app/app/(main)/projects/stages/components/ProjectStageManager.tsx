@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from "react";
 import { BASE_URL } from "@/api/ApiClient";
 import { CallStage } from "@/app/(main)/calls/stages/models/call.stage.model";
 import { GrantAllocation } from "@/app/(main)/grants/allocations/models/grant.allocation.model";
@@ -22,162 +23,114 @@ interface ProjectStageManagerProps {
 
 const ProjectStageManager = ({ project, grantStage, grantAllocation, callStage }: ProjectStageManagerProps) => {
 
-    /*
-    const [selectedStage, setSelectedStage] = useState<ProjectStage | null>(null);
-    const [sidebarVisible, setSidebarVisible] = useState(false);
+    // ✅ Columns memoized
+    const columns = useMemo(() => {
+        const cols: any[] = [];
 
-    const openReviewers = (ps: ProjectStage) => {
-        setSelectedStage(ps);
-        setSidebarVisible(true);
-    };
-    */
-
-    // --- Dynamic Column Logic ---
-    const columns = [];
-
-    // 1. Only show "Project" if we aren't already filtered by a specific project
-    if (!project) {
+        // 1. Project Title + Stage Name combined (One line approach)
         if (!project) {
-            columns.push({
+            cols.push({
                 header: "Project",
                 field: "project.title",
                 sortable: true,
-                style: { width: '25%' }, // Give it a fixed relative width
                 body: (ps: ProjectStage) => {
                     const title = typeof ps.project === "object" ? ps.project.title : "Unknown Project";
                     return (
-                        <span
-                            className="block white-space-nowrap overflow-hidden text-overflow-ellipsis"
-                            title={title} // Standard HTML tooltip
-                            style={{ maxWidth: '250px' }} // Adjust based on your layout
-                        >
-                            {title}
-                        </span>
+                        <div className="truncate text-sm" style={{ maxWidth: '300px' }} title={title}>
+                            <span className="mr-1">{title}</span>
+                        </div>
+                    );
+                }
+            });
+
+            cols.push({
+                header: "Applicant",
+                field: "project.applicant.name",
+                sortable: true,
+                body: (ps: ProjectStage) => {
+                    const name = (ps.project as any).applicant.name ?? "Loading ...";
+                    return (
+                        <>{ name }</>
                     );
                 }
             });
         }
-    }
 
-    // 2. Only show "Stage Name" if we aren't already inside a specific stage tab
-    if (!grantStage && !callStage) {
-        columns.push({
-            header: "Stage",
-            field: "grantStage",
-            body: (ps: ProjectStage) =>
-                typeof ps.grantStage === "object"
-                    ? (ps.grantStage as GrantStage)?.name
-                    : "Loading..."
-        });
-    }
-
-    // 3. Always show these columns
-    columns.push(
-        {
-            header: "Document",
-            body: (ps: ProjectStage) => ps.documentPath ? (
-                <a
-                    href={`${BASE_URL}/${ps.documentPath.replace(/^\\/, "")}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
-                >
-                    <i className="pi pi-file-pdf mr-1"></i> View
-                </a>
-            ) : <span className="text-gray-400">No File</span>
-        },
-        {
-            header: "Score",
-            field: "totalScore",
-            sortable: true,
-            body: (ps: ProjectStage) => typeof ps?.totalScore === "number" ? ps.totalScore : "N/A"
-        },
-        /*
-        {
-            header: "Review Progress",
-            body: (ps: ProjectStage) => (
-                <div className="flex align-items-center gap-2">
-                    <span className="text-sm text-secondary">3/5</span>
-                    <div className="surface-200 border-round overflow-hidden w-4rem h-full" style={{ height: '8px' }}>
-                        <div className="bg-primary h-full" style={{ width: '60%' }}></div>
-                    </div>
-                    <Button
-                        icon="pi pi-users"
-                        text
-                        rounded
-                        tooltip="Manage Reviewers"
-                        onClick={() => openReviewers(ps)}
-                    />
-                </div>
-            )
-        },
-        */
-        {
-            header: "Status",
-            field: "status",
-            sortable: true,
-            body: (ps: ProjectStage) => <MyBadge type="status" value={ps.status ?? ProjectStageStatus.submitted} />
+        // 2. Fallback Stage Column (Only if not already shown in the title logic or if project context exists)
+        if (project && !grantStage && !callStage) {
+            cols.push({
+                header: "Stage",
+                field: "grantStage.name",
+                body: (ps: ProjectStage) =>
+                    typeof ps.grantStage === "object"
+                        ? (ps.grantStage as GrantStage)?.name
+                        : "N/A"
+            });
         }
-    );
 
-    const Manager = createEntityManager<ProjectStage, GetProjectStageOptions | undefined>({
-        title: "Project Submissions",
-        itemName: "Project Stage",
-        api: ProjectStageApi,
-        columns: columns, // Pass the dynamic array here
-        createNew: project ? () => createEmptyProjectStage({ project }) : undefined,
-        SaveDialog: project ? SaveProjectStage : undefined,
-        permissionPrefix: "project.stage",
-        query: () => ({
-            project: typeof project === "object" ? project._id : project,
-            grantStage: typeof grantStage === "object" ? grantStage._id : grantStage,
-            grantAllocation: typeof grantAllocation === "object" ? grantAllocation._id : grantAllocation,
-            populate: true
-        }),
-        workflow: {
-            statusField: "status",
-            statusOrder: PROJECT_STAGE_STATUS_ORDER,
-            transitions: PROJECT_STAGE_TRANSITIONS
-        },
-        expandable: grantStage ? {
-            template: (ps) => (
-                <ProjectStageDetail projectStage={ps} />
-            )
-        } : undefined,
-        hideEditAction: true,
-        disableDeleteRow: (ps: ProjectStage) => ps.status !== ProjectStageStatus.submitted
-    });
-
-    return (
-        <>
-            <Manager />
+        // 3. Standard Columns
+        cols.push(
             {
-                /** 
-                 * <Sidebar
-                            visible={sidebarVisible}
-                            position="right"
-                            onHide={() => setSidebarVisible(false)}
-                            style={{ width: '50vw' }}
-                            header={
-                                <div>
-                                    <h3 className="m-0">Reviewers Management</h3>
-                                    <small className="text-secondary">
-                                        {typeof selectedStage?.project === 'object' ? selectedStage.project.title : 'Project Details'}
-                                    </small>
-                                </div>
-                            }
-                        >
-                            {(selectedStage && sidebarVisible) && (
-                                <div className="mt-4">
-                                    <ReviewerManager projectStage={selectedStage} />
-                                </div>
-                            )}
-                        </Sidebar>
-                */
+                header: "Document",
+                body: (ps: ProjectStage) => ps.documentPath ? (
+                    <a
+                        href={`${BASE_URL}/${ps.documentPath.replace(/^\\/, "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline flex align-items-center"
+                    >
+                        <i className="pi pi-file-pdf mr-1"></i> View
+                    </a>
+                ) : <span className="text-gray-400">No File</span>
+            },
+            {
+                header: "Score",
+                field: "totalScore",
+                sortable: true,
+                body: (ps: ProjectStage) => typeof ps?.totalScore === "number" ? ps.totalScore : "N/A"
+            },
+            {
+                header: "Status",
+                field: "status",
+                sortable: true,
+                body: (ps: ProjectStage) => <MyBadge type="status" value={ps.status ?? ProjectStageStatus.submitted} />
             }
+        );
 
-        </>
+        return cols;
+    }, [project, grantStage, callStage]);
+
+    // ✅ Manager memoized
+    const Manager = useMemo(() =>
+        createEntityManager<ProjectStage, GetProjectStageOptions | undefined>({
+            title: "Project Submissions",
+            itemName: "Project Stage",
+            api: ProjectStageApi,
+            columns: columns,
+            createNew: project ? () => createEmptyProjectStage({ project }) : undefined,
+            SaveDialog: project ? SaveProjectStage : undefined,
+            permissionPrefix: "project.stage",
+            query: () => ({
+                project: typeof project === "object" ? project._id : project,
+                grantStage: typeof grantStage === "object" ? grantStage._id : grantStage,
+                grantAllocation: typeof grantAllocation === "object" ? grantAllocation._id : grantAllocation,
+                populate: true
+            }),
+            workflow: {
+                statusField: "status",
+                statusOrder: PROJECT_STAGE_STATUS_ORDER,
+                transitions: PROJECT_STAGE_TRANSITIONS
+            },
+            expandable: grantStage ? {
+                template: (ps) => <ProjectStageDetail projectStage={ps} />
+            } : undefined,
+            hideEditAction: true,
+            disableDeleteRow: (ps: ProjectStage) => ps.status !== ProjectStageStatus.submitted
+        }),
+        [columns, project, grantStage, grantAllocation]
     );
+
+    return <Manager />;
 };
 
 export default ProjectStageManager;

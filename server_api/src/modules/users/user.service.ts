@@ -108,7 +108,7 @@ export class UserService {
         if (collabExist) {
             throw new Error(ERROR_CODES.COLLABORATOR_ALREADY_EXISTS);
         };
-        const revExist = await this.reviewerRepo.exist({ applicant: id });
+        const revExist = await this.reviewerRepo.exist({ reviewer: id });
         if (revExist) {
             throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
         }

@@ -4,7 +4,7 @@ import { ERROR_CODES } from "../../common/errors/error.codes";
 import { IUserRepository } from "../users/user.repository";
 import { ICollaboratorRepository } from "../projects/collaborators/collaborator.repository";
 import { IProjectStageRepository } from "../projects/stages/project.stage.repository";
-import { ProjectStageStatus } from "../projects/stages/project.stage.status";
+import { ProjectStageStatus } from "../projects/stages/project.stage.model";
 import { CreateReviewerDTO, GetReviewersDTO, UpdateReviewerDTO } from "./reviewer.dto";
 import { IReviewerRepository } from "./reviewer.repository";
 
@@ -25,7 +25,7 @@ export class ReviewerService {
     constructor(
         private readonly repository: IReviewerRepository,
         private readonly projectStageRepo: IProjectStageRepository,
-        private readonly applicantRepo: IUserRepository,
+        private readonly userRepo: IUserRepository,
         private readonly collaboratorRepo: ICollaboratorRepository,
         private readonly resultRepo: IResultRepository,
         private readonly criterionRepo: ICriterionRepository,
@@ -35,13 +35,13 @@ export class ReviewerService {
     }
 
     async create(dto: CreateReviewerDTO) {
-        const { projectStage, applicant, weight } = dto;
+        const { projectStage, reviewer, weight } = dto;
 
         const projectStageDoc = await this.projectStageRepo.findById(projectStage, true);
         if (!projectStageDoc) throw new AppError(ERROR_CODES.PROJECT_STAGE_NOT_FOUND);
 
         const projectStageStatus = projectStageDoc.status;
-        if (projectStageStatus !== ProjectStageStatus.selected)
+        if (projectStageStatus !== ProjectStageStatus.shortlisted)
             throw new AppError(ERROR_CODES.INVALID_DOC_STATUS);
 
         const grantStageDoc = projectStageDoc.grantStage as unknown as IGrantStage;
@@ -50,20 +50,20 @@ export class ReviewerService {
         if (maxReviewers !== undefined && countReviewers >= maxReviewers) {
             throw new AppError(ERROR_CODES.REVIEWER_LIMIT_REACHED, `Reviewer limit reached. Maximum allowed is ${maxReviewers}.`);
         }
-        const applicantDoc = await this.applicantRepo.findById(applicant);
+        const applicantDoc = await this.userRepo.findById(reviewer);
         if (!applicantDoc) throw new Error(ERROR_CODES.USER_NOT_FOUND);
 
         const projectDoc = projectStageDoc.project as unknown as IProject;
         const collaborators = await this.collaboratorRepo.find({ project: String(projectDoc._id) });
-        if (collaborators.find(c => String(c.applicant) === applicant)) {
-            throw new AppError(ERROR_CODES.INVALID_REVIEWER);
+        if (collaborators.find(c => String(c.applicant) === reviewer)) {
+            throw new AppError(ERROR_CODES.INVALID_REVIEWER, `Reviewr ${applicantDoc.name} is already a collaborator in the project.`);
         }
         try {
             const created = await this.repository.create(dto);
             await this.notificationService.notifyReviewerAssigned(
-                applicant, projectDoc.title, grantStageDoc.name
+                reviewer, projectDoc.title, grantStageDoc.name
             );
-            await this.synchronizer.sync(projectStage);
+            //await this.synchronizer.sync(projectStage);
             return created;
         } catch (err: any) {
             if (err?.code === 11000) {
@@ -79,7 +79,7 @@ export class ReviewerService {
 
     // --- Update reviewer data (weight) ---
     async update(dto: UpdateReviewerDTO) {
-        const { id, data, applicantId } = dto;
+        const { id, data, userId: applicantId } = dto;
         const { weight } = data;
         const reviewerDoc = await this.repository.findById(id);
         if (!reviewerDoc) throw new Error(ERROR_CODES.REVIEWER_NOT_FOUND);
@@ -116,7 +116,7 @@ export class ReviewerService {
 
 
         if (from === ReviewerStatus.accepted && to === ReviewerStatus.submitted) {
-            if (String(reviewerDoc.applicant) !== applicantId)
+            if (String(reviewerDoc.reviewer) !== applicantId)
                 throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
             const results = await this.resultRepo.find({ reviewer: id, populate: true });
@@ -135,7 +135,7 @@ export class ReviewerService {
         const projectStageId = String(reviewerDoc.projectStage);
 
         if (to === ReviewerStatus.accepted) {
-            if (String(reviewerDoc.applicant) !== applicantId)
+            if (String(reviewerDoc.reviewer) !== applicantId)
                 throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
             const existingResults = await this.resultRepo.find({ reviewer: id });
@@ -167,9 +167,9 @@ export class ReviewerService {
         if (reviewerDoc.status !== ReviewerStatus.pending)
             throw new AppError(ERROR_CODES.REVIEWER_NOT_PENDING);
         const deleted = await this.repository.delete(id);
-        
+
         await this.resultRepo.deleteByReviewer(id);
-        
+
         await this.synchronizer.sync(String(reviewerDoc.projectStage));
         return deleted
     }

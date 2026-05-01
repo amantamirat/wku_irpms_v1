@@ -28,7 +28,8 @@ export default function QuickLinks() {
             color: 'bg-blue-100 text-blue-700'
         },
         {
-            href: '/reviewers/applicant',
+            // Update: Changed from /reviewers/my-evaluations to your actual path
+            href: '/reviewers/my-evaluations', 
             label: 'Review Panel',
             description: 'Evaluate submitted proposals and scores',
             icon: 'pi pi-check-square',
@@ -36,8 +37,9 @@ export default function QuickLinks() {
             color: 'bg-orange-100 text-orange-700'
         },
         {
+            // Update: Ensure this matches your CollaboratorPage route
             href: '/projects/collaborators/my-memberships',
-            label: 'Memberships',
+            label: 'My Memberships',
             description: 'View teams and joint project efforts',
             icon: 'pi pi-users',
             permission: PERMISSIONS.COLLABORATOR.READ,
@@ -56,7 +58,7 @@ export default function QuickLinks() {
             label: 'Grant Tracking',
             description: 'Monitor budget spend and funding',
             icon: 'pi pi-money-bill',
-            permission: PERMISSIONS.PERMISSION.READ, // Admin or PI only
+            permission: PERMISSIONS.PERMISSION.READ,
             color: 'bg-green-100 text-green-700'
         }
     ], []);

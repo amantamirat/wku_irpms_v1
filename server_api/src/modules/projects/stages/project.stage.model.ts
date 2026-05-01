@@ -1,7 +1,15 @@
 //project-stage.ts
 import mongoose, { model, Schema } from "mongoose";
-import { ProjectStageStatus } from "./project.stage.status";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
+
+export enum ProjectStageStatus {
+    submitted = 'submitted',
+    shortlisted = 'shortlisted',
+    refused = 'refused',
+    reviewed = 'reviewed',
+    accepted = 'accepted',
+    rejected = 'rejected'
+}
 
 export interface IProjectStage extends Document {
     _id: mongoose.Types.ObjectId;
@@ -60,3 +68,4 @@ ProjecStageSchema.index(
     }
 );
 export const ProjectStage = model<IProjectStage>(COLLECTIONS.PROJECT_STAGE, ProjecStageSchema);
+

@@ -84,7 +84,7 @@ const SaveReviewerDialog = ({
                 onComplete({
                     ...saved,
                     projectStage: localReviewer.projectStage,
-                    applicant: localReviewer.applicant
+                    reviewer: localReviewer.reviewer
                 });
             }
 
@@ -127,9 +127,9 @@ const SaveReviewerDialog = ({
                             </label>
                             <Dropdown
                                 id="applicant"
-                                value={localReviewer.applicant}
+                                value={localReviewer.reviewer}
                                 options={applicants}
-                                onChange={(e) => setLocalReviewer({ ...localReviewer, applicant: e.value })}
+                                onChange={(e) => setLocalReviewer({ ...localReviewer, reviewer: e.value })}
                                 dataKey="_id"
                                 optionLabel="first_name"
                                 itemTemplate={userTemplate}
@@ -139,10 +139,10 @@ const SaveReviewerDialog = ({
                                 placeholder="Select an Applicant"
                                 filter
                                 className={classNames({
-                                    'p-invalid': submitted && !localReviewer.applicant
+                                    'p-invalid': submitted && !localReviewer.reviewer
                                 })}
                             />
-                            {submitted && !localReviewer.applicant && (
+                            {submitted && !localReviewer.reviewer && (
                                 <small className="p-error">Reviewer is required.</small>
                             )}
                         </div>

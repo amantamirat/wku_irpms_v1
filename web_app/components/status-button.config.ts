@@ -3,6 +3,8 @@ export type Status =
     | "published"
     | "archived"
     | "submitted"
+    | "shortlisted"
+    | "refused"
     | "accepted"
     | "rejected"
     | "negotiation"
@@ -55,6 +57,18 @@ export const STATUS_BUTTON_CONFIG: Record<string, StatusButtonConfig> = {
         icon: "pi pi-send",
         severity: "info",
         action: "Submit"
+    },
+    shortlisted: {
+        icon: "pi pi-list-check", // Represents being picked from a list for review
+        severity: "info",        // Distinct from success (published) or secondary (draft)
+        action: "Shortlist Project",
+        color: 'bg-blue-100 text-blue-700' // Blue is standard for intermediate 'info' states
+    },
+    refused: {
+        icon: "pi pi-times-circle",
+        severity: "danger",
+        action: "Refuse",
+        color: 'bg-red-100 text-red-700'
     },
     accepted: {
         icon: "pi pi-check-circle",

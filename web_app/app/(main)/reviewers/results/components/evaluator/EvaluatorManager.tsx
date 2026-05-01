@@ -183,7 +183,7 @@ const EvaluatorManager = ({ reviewer, canEvaluate }: EvaluatorManagerProps) => {
 
                 {/* Top Progress & Info Header */}
                 <EvaluatorHeader
-                    name={(reviewer.applicant as any)?.name || "Project Review"}
+                    name={(reviewer.reviewer as any)?.name || "Project Review"}
                     role="Proposal Evaluation"
                     progress={stats.progress}
                     currentScore={stats.currentScore}

@@ -31,6 +31,7 @@
     &.status-deleted,
     &.status-suspended,
     &.status-rejected,
+    &.status-refused,
     &.status-locked {
         background: #FFCDD2;
         color: #d80517;
@@ -49,7 +50,7 @@
         color: #374151; // dark gray text
     }
 
-    &.status-selected {
+    &.status-shortlisted {
         background: #BBDEFB;
         color: #0D47A1;
     }

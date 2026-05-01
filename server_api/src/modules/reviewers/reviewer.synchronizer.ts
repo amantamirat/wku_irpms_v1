@@ -1,6 +1,6 @@
 // project-document.synchronizer.ts
 import { IProjectStageRepository } from "../projects/stages/project.stage.repository";
-import { ProjectStageStatus } from "../projects/stages/project.stage.status";
+import { ProjectStageStatus } from "../projects/stages/project.stage.model";
 //import { DocumentStateMachine } from "./project.stage.state-machine";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { IGrantStage } from "../grants/stages/grant.stage.model";
@@ -32,7 +32,7 @@ export class ReviewerSynchronizer implements IProjectStageSynchronizer {
       r => r.status === ReviewerStatus.approved
     );
     let newScore: number | null = null;
-    let newStatus: ProjectStageStatus = ProjectStageStatus.selected;
+    let newStatus: ProjectStageStatus = ProjectStageStatus.shortlisted;
     if (approvedReviewers.length >= minReviewers) {
       const totalWeight = approvedReviewers.reduce((sum, r) => sum + (r.weight ?? 1), 0);
       newScore = approvedReviewers.reduce(

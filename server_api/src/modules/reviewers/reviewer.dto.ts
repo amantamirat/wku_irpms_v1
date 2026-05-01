@@ -1,17 +1,17 @@
-import { ReviewerStatus } from "./reviewer.state-machine";
 
 // reviewer.dto.ts
 export interface GetReviewersDTO {
     projectStage?: string;
-    applicant?: string;
+    reviewer?: string;
     populate?: boolean;
+    status?: string | string[]; // Add this
 }
 
 export interface CreateReviewerDTO {
     projectStage: string;
-    applicant: string;
+    reviewer: string;
     weight: number;
-    applicantId?: string;
+    userId?: string;
 }
 
 export interface UpdateReviewerDTO {
@@ -20,13 +20,13 @@ export interface UpdateReviewerDTO {
         score: number;
         weight: number;
     }>;
-    applicantId: string;
+    userId: string;
 }
 
 
 
 export interface ExistsReviewersDTO {
-    applicant?: string;
+    reviewer?: string;
     projectStage?: string;
 }
 

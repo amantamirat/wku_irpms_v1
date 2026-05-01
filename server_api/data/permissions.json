@@ -930,33 +930,53 @@
   },
   {
     "category": "Project Stage Management",
-    "name": "project.stage:transition.submitted.selected",
-    "description": "Move stage from submitted selected to review"
+    "name": "project.stage:transition.submitted.shortlisted",
+    "description": "Move stage from submitted to shortlisted for review"
   },
   {
     "category": "Project Stage Management",
-    "name": "project.stage:transition.selected.submitted",
-    "description": "Revert stage from under review to submitted"
+    "name": "project.stage:transition.shortlisted.submitted",
+    "description": "Revert stage from shortlisted to submitted"
   },
   {
     "category": "Project Stage Management",
-    "name": "project.stage:transition.selected.approved",
-    "description": "Approve project stage"
+    "name": "project.stage:transition.submitted.refused",
+    "description": "Refuse a submission during initial screening"
   },
   {
     "category": "Project Stage Management",
-    "name": "project.stage:transition.approved.selected",
-    "description": "Revert approved stage back to under review (selected)"
+    "name": "project.stage:transition.shortlisted.reviewed",
+    "description": "Mark a shortlisted project as reviewed"
   },
   {
     "category": "Project Stage Management",
-    "name": "project.stage:transition.selected.rejected",
-    "description": "Reject project stage"
+    "name": "project.stage:transition.reviewed.accepted",
+    "description": "Formally accept a project after review"
   },
   {
     "category": "Project Stage Management",
-    "name": "project.stage:transition.rejected.selected",
-    "description": "Revert rejected stage back to under review (selected)"
+    "name": "project.stage:transition.reviewed.rejected",
+    "description": "Reject a project after it has been reviewed"
+  },
+  {
+    "category": "Project Stage Management",
+    "name": "project.stage:transition.reviewed.shortlisted",
+    "description": "Revert a reviewed project back to the shortlist"
+  },
+  {
+    "category": "Project Stage Management",
+    "name": "project.stage:transition.accepted.reviewed",
+    "description": "Revert an accepted project back to reviewed status"
+  },
+  {
+    "category": "Project Stage Management",
+    "name": "project.stage:transition.rejected.reviewed",
+    "description": "Revert a rejected project back to reviewed status"
+  },
+  {
+    "category": "Project Stage Management",
+    "name": "project.stage:transition.refused.submitted",
+    "description": "Revert a refused submission back to submitted for correction"
   },
   {
     "category": "Report Management",

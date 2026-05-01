@@ -4,7 +4,7 @@ import { IProjectRepository } from "../project.repository";
 import { PROJECT_TRANSITIONS } from "../project.state-machine";
 import { ProjectStatus } from "../project.model";
 import { IProjectStageRepository } from "./project.stage.repository";
-import { ProjectStageStatus } from "./project.stage.status";
+import { ProjectStageStatus } from "./project.stage.model";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 

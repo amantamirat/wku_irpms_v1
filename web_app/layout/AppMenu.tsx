@@ -17,7 +17,7 @@ const AppMenu = () => {
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
         },
         {
-            label: 'Project & Applications',
+            label: 'Projects & Applications',
             visible: hasPermission(
                 [
                     "call:create",
@@ -42,6 +42,13 @@ const AppMenu = () => {
                     to: '/projects/collaborators/all',
                     icon: 'pi pi-share-alt',
                     visible: hasPermission("collaborator:read")
+                },
+
+                {
+                    label: 'Reviewers',
+                    to: '/reviewers/all',
+                    icon: 'pi pi-check-square',
+                    visible: hasPermission("reviewer:read")
                 },
 
             ]

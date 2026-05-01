@@ -5,7 +5,7 @@ import { SocketService } from "./socket.service";
 import { ClientSession } from "mongoose";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
-import { ProjectStageStatus } from "../projects/stages/project.stage.status";
+import { ProjectStageStatus } from "../projects/stages/project.stage.model";
 import { SettingKey } from "../settings/setting.model";
 import { SettingService } from "../settings/setting.service";
 
@@ -105,8 +105,7 @@ export class NotificationService {
     }
 
     /**
- * Specific Business Helper: Notify user about a project stage status change.
- */
+ * Specific Business Helper: Notify user about a project stage status change.*/
     async notifyStatusChange(
         recipientId: string,
         projectTitle: string,
@@ -114,40 +113,49 @@ export class NotificationService {
         newStatus: ProjectStageStatus,
         session?: ClientSession
     ) {
-        let statusAction: string;
+        let message: string;
         let type: NotificationType = NotificationType.INFO;
 
-        // Map statuses to more natural, user-friendly verbs
         switch (newStatus) {
             case ProjectStageStatus.submitted:
-                statusAction = "has been submitted successfully";
+                message = `Your application "${projectTitle}" for ${stageName} has been submitted successfully.`;
                 type = NotificationType.SUCCESS;
                 break;
+
             case ProjectStageStatus.accepted:
-                statusAction = "has been approved";
+                message = `Congratulations! Your application "${projectTitle}" for ${stageName} has been accepted.`;
                 type = NotificationType.SUCCESS;
                 break;
+
             case ProjectStageStatus.rejected:
-                statusAction = "was not selected";
+                message = `We regret to inform you that your application "${projectTitle}" for ${stageName} was not selected. We appreciate your effort and encourage you to apply again in the future.`;
                 type = NotificationType.ERROR;
                 break;
+
+            case ProjectStageStatus.refused:
+                message = `We sincerely apologize, but your application "${projectTitle}" for ${stageName} could not be selected at this stage.`;
+                type = NotificationType.ERROR;
+                break;
+
             case ProjectStageStatus.reviewed:
-                statusAction = "has been reviewed";
+                message = `Your application "${projectTitle}" for ${stageName} has been reviewed successfully.`;
                 type = NotificationType.SUCCESS;
                 break;
-            case ProjectStageStatus.selected:
-                statusAction = "is now being processed";
+
+            case ProjectStageStatus.shortlisted:
+                message = `Good news! Your application "${projectTitle}" for ${stageName} has been shortlisted and is moving to the next stage.`;
                 type = NotificationType.INFO;
                 break;
+
             default:
-                statusAction = `is now ${newStatus}`;
+                message = `Your application "${projectTitle}" for ${stageName} is now marked as ${newStatus}.`;
         }
 
         return this.notify({
             recipient: recipientId,
             title: "Project Update",
-            message: `Your "${projectTitle}" ${stageName} ${statusAction}.`,
-            type: type,
+            message,
+            type,
             link: `/projects/my-applications`
         }, session);
     }

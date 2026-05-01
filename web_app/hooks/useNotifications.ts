@@ -3,6 +3,23 @@ import { ApiClient, BASE_URL } from "@/api/ApiClient";
 import { io } from 'socket.io-client';
 import { useAuth } from '@/contexts/auth-context';
 
+export enum NotificationType {
+    INFO = 'info',
+    SUCCESS = 'success',
+    WARNING = 'warning',
+    ERROR = 'error'
+}
+
+export interface NotificationDTO {
+    recipient: string;
+    sender?: string;
+    title: string;
+    message: string;
+    type?: NotificationType;
+    link?: string;
+    expiresAt?: Date;
+}
+
 export const useNotifications = () => {
     const [notifications, setNotifications] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);

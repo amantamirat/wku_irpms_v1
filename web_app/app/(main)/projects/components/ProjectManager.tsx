@@ -22,21 +22,12 @@ interface ProjectManagerProps {
     calendar?: Calendar;
     applicant?: User;
     workspace?: Organization;
+    onItemsChange?: (items: Project[]) => void;
 }
 
-const ProjectManager = ({ grantAllocation, applicant, grant, calendar, workspace }: ProjectManagerProps) => {
+const ProjectManager = ({ grantAllocation, applicant, grant, calendar, workspace, onItemsChange }: ProjectManagerProps) => {
     const { getUser } = useAuth();
     const activeUser = getUser();
-    const [projects, setProjects] = useState<Project[]>([]);
-
-    // Aggregate counts for the top cards
-    const statusCounts = useMemo(() => {
-        return projects.reduce((acc, project) => {
-            const status = project.status || "Draft";
-            acc[status] = (acc[status] || 0) + 1;
-            return acc;
-        }, {} as Record<string, number>);
-    }, [projects]);
 
     const columns = useMemo(() => {
         const cols: any[] = [
@@ -60,7 +51,7 @@ const ProjectManager = ({ grantAllocation, applicant, grant, calendar, workspace
                 sortable: true,
                 body: (row: Project) => (
                     <div
-                        className="text-700 truncate"
+                        className="text-700 truncate text-sm"
                         style={{ maxWidth: '250px' }}
                         title={row.title}
                     >
@@ -104,7 +95,7 @@ const ProjectManager = ({ grantAllocation, applicant, grant, calendar, workspace
             title: "Manage Projects",
             itemName: "Project",
             api: ProjectApi,
-            onItemsChange: setProjects,
+            onItemsChange: onItemsChange,
             columns: columns,
             createNew: () => ({
                 grantAllocation: grantAllocation ?? undefined,
@@ -136,57 +127,7 @@ const ProjectManager = ({ grantAllocation, applicant, grant, calendar, workspace
 
 
     return (
-        <div className="card">
-            <div className="grid">
-                {/* 1. Summary Cards Section */}
-                {projects.length > 0 && (
-                    <div className="col-12 grid mb-3">
-                        {PROJECT_STATUS_ORDER.map((status) => {
-                            const count = statusCounts[status] || 0;
-                            // Match the case of your config keys
-                            const config = STATUS_BUTTON_CONFIG[status.toLowerCase()] || STATUS_BUTTON_CONFIG.draft;
-
-                            if (count === 0 && status.toLowerCase() !== 'draft') return null;
-
-                            return (
-                                <div key={status} className="col-12 md:col-6 lg:col-3">
-                                    <div
-                                        className="p-3 shadow-1 border-round surface-card h-full border-left-3 transition-all transition-duration-200 hover:shadow-3"
-                                        style={{ borderLeftColor: `var(--${config.severity === 'secondary' ? 'gray' : config.severity}-500)` }}
-                                    >
-                                        <div className="flex align-items-center">
-                                            {/* Icon Box with Dynamic Color */}
-                                            <div className={`w-3rem h-3rem flex align-items-center justify-content-center border-round ${config.color || 'bg-gray-100 text-gray-700'}`}>
-                                                <i className={`${config.icon} text-2xl`}></i>
-                                            </div>
-
-                                            <div className="ml-3 flex-grow-1">
-                                                <div className="flex align-items-center justify-content-between mb-1">
-                                                    <span className="text-600 font-medium text-sm uppercase tracking-wider">
-                                                        {status}
-                                                    </span>
-                                                    {/* Optional Mini Badge */}
-                                                </div>
-                                                <div className="text-900 font-bold text-2xl">
-                                                    {count}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
-
-                {/* 2. Main DataTable Manager */}
-                <div className="col-12">
-                    <div className="surface-card shadow-1 border-round">
-                        <Manager />
-                    </div>
-                </div>
-            </div>
-        </div>
+        <Manager />
     );
 };
 

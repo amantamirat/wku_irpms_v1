@@ -19,7 +19,7 @@ import {
     GetProjectStageDTO,
     UpdateStageDTO
 } from "./project.stage.dto";
-import { ProjectStageStatus } from "./project.stage.status";
+import { ProjectStageStatus } from "./project.stage.model";
 import { IProjectSynchronizer } from "./project.stage.synchronizer";
 import { ClientSession } from "mongoose";
 import { ProjectStatus } from "../project.model";
@@ -88,7 +88,6 @@ export class ProjectStageService {
             dto.callStage = String(callStageDoc._id)
         }
 
-
         try {
             const created = await this.repository.create(dto, session);
             await this.synchronizer.sync(project, session);
@@ -137,10 +136,10 @@ export class ProjectStageService {
     async transitionState(dto: TransitionRequestDto) {
         const { id, current, next } = dto;
 
-        const stageDoc = await this.repository.findById(id, true);
-        if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        const projStageDoc = await this.repository.findById(id, true);
+        if (!projStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
 
-        const from = stageDoc.status as ProjectStageStatus;
+        const from = projStageDoc.status as ProjectStageStatus;
         const to = next as ProjectStageStatus;
 
         // Prevent race condition
@@ -161,10 +160,14 @@ export class ProjectStageService {
             }
         }
 
+        if (to === ProjectStageStatus.reviewed) {
+            throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
+        }
+
         const updated = await this.repository.updateStatus(id, to);
         // Trigger Notification using the populated data
-        const projectData = stageDoc.project as any;
-        const stageData = stageDoc.grantStage as any;
+        const projectData = projStageDoc.project as any;
+        const stageData = projStageDoc.grantStage as any;
 
         if (projectData?.applicant) {
             this.notificationService.notifyStatusChange(
@@ -215,9 +218,10 @@ export class ProjectStageService {
 }
 
 export const PROJECT_STAGE_TRANSITIONS: Record<ProjectStageStatus, ProjectStageStatus[]> = {
-    [ProjectStageStatus.submitted]: [ProjectStageStatus.selected, ProjectStageStatus.accepted, ProjectStageStatus.rejected],
-    [ProjectStageStatus.selected]: [ProjectStageStatus.reviewed, ProjectStageStatus.submitted],
-    [ProjectStageStatus.reviewed]: [ProjectStageStatus.accepted, ProjectStageStatus.rejected, ProjectStageStatus.selected],
-    [ProjectStageStatus.accepted]: [ProjectStageStatus.reviewed, ProjectStageStatus.submitted],
-    [ProjectStageStatus.rejected]: [ProjectStageStatus.reviewed, ProjectStageStatus.submitted]
+    [ProjectStageStatus.submitted]: [ProjectStageStatus.shortlisted, ProjectStageStatus.refused],
+    [ProjectStageStatus.shortlisted]: [ProjectStageStatus.reviewed, ProjectStageStatus.submitted],
+    [ProjectStageStatus.refused]: [ProjectStageStatus.submitted],
+    [ProjectStageStatus.reviewed]: [ProjectStageStatus.accepted, ProjectStageStatus.rejected, ProjectStageStatus.shortlisted],
+    [ProjectStageStatus.accepted]: [ProjectStageStatus.reviewed],
+    [ProjectStageStatus.rejected]: [ProjectStageStatus.reviewed]
 };

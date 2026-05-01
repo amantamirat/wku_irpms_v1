@@ -9,9 +9,13 @@ import { useState, useEffect } from "react";
 import { CallApi } from "./calls/api/call.api";
 import { Call, CallStatus } from "./calls/models/call.model";
 import CallOpportunityGrid from "./dashboard/CallOpportunityGrid";
+import ReviewerManager from "./reviewers/components/ReviewerManager";
+import { ReviewerStatus } from "./reviewers/models/reviewer.model";
+import PendingEvaluations from "./reviewers/my-evaluations/PendingEvaluation";
 
 const Dashboard = () => {
-    const { hasPermission, getUser: getApplicant } = useAuth();
+    const { hasPermission, getUser } = useAuth();
+    const currentUser = getUser();
     const [calls, setCalls] = useState<Call[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -26,7 +30,7 @@ const Dashboard = () => {
             if (isResearcher) {
                 try {
                     // Only fetch calls that are actually 'open' or 'active'
-                    const data = await CallApi.getAll({ status: CallStatus.active, populate:true });
+                    const data = await CallApi.getAll({ status: CallStatus.active, populate: true });
                     setCalls(data);
                 } catch (err) {
                     console.error("Error loading calls:", err);
@@ -67,13 +71,9 @@ const Dashboard = () => {
                     </div>
                 )}
 
-                {/* Admins/Reviewers see submissions needing attention */}
-                {(isAdmin || isReviewer) && (
-                    <div className="card">
-                        <h5>Pending Evaluations</h5>
-                        {//<PendingReviewsTable />
-                        }
-                    </div>
+                {/* Reviewers see evaluations needing attention */}
+                {(isReviewer && currentUser) && (
+                    <PendingEvaluations user={currentUser} />
                 )}
             </div>
 

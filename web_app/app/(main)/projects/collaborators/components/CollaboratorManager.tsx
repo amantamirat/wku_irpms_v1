@@ -18,20 +18,6 @@ const CollaboratorManager = ({ project, applicant }: CollaboratorManagerProps) =
     // Define columns dynamically based on whether props are provided
     const columns = [];
 
-    if (!project) {
-        columns.push({
-            header: "Project",
-            field: "project.title",
-            sortable: true,
-            body: (c: Collaborator) => (
-                <div className="text-700 truncate" style={{ maxWidth: '250px' }}>
-                    {typeof c.project === "object" ? c.project?.title : "No Project"}
-                </div>
-
-            )
-        });
-    }
-
     if (!applicant) {
         columns.push({
             header: "Member",
@@ -39,7 +25,9 @@ const CollaboratorManager = ({ project, applicant }: CollaboratorManagerProps) =
             sortable: true,
             body: (c: Collaborator) => (
                 <div className="flex align-items-center gap-2">
-                    <i className="pi pi-user text-primary"></i>
+                   {
+                    // <i className="pi pi-user text-primary"></i>
+                   }
                     <span>{typeof c.applicant === "object" ? c.applicant?.name : "Unknown Member"}</span>
                     {c.isLeadPI && (
                         <Badge value="Lead PI" severity="info" />
@@ -48,6 +36,23 @@ const CollaboratorManager = ({ project, applicant }: CollaboratorManagerProps) =
             )
         });
     }
+
+    if (!project) {
+        columns.push({
+            header: "Project",
+            field: "project.title",
+            sortable: true,
+            body: (c: Collaborator) => (
+                <div className="truncate text-sm" style={{ maxWidth: '250px' }}>
+                    {typeof c.project === "object" ?
+                        c.project?.title
+                        : "Loading ..."}
+                </div>
+            )
+        });
+    }
+
+
 
 
     columns.push(

@@ -12,7 +12,7 @@ export enum CollaboratorRole {
 
 export interface ICollaborator extends Document {
     project: mongoose.Types.ObjectId;
-    applicant: mongoose.Types.ObjectId;//user
+    applicant: mongoose.Types.ObjectId;//member
     role: string;
     isLeadPI?: boolean;
     status: CollaboratorStatus;

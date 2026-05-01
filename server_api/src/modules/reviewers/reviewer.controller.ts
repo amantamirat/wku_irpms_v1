@@ -23,13 +23,13 @@ export class ReviewerController {
         try {
             if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
-            const { projectStage, applicant, weight } = req.body;
+            const { projectStage, reviewer, weight } = req.body;
 
             const dto: CreateReviewerDTO = {
                 projectStage,
-                applicant,
+                reviewer,
                 weight,
-                applicantId: req.auth.userId
+                userId: req.auth.userId
             };
             const created = await this.service.create(dto);
             successResponse(res, 201, "Reviewer created successfully", created);
@@ -43,12 +43,15 @@ export class ReviewerController {
     // -----------------------
     get = async (req: Request, res: Response) => {
         try {
-            const { projectStage, applicant, populate } = req.query;
+            const { projectStage, reviewer, populate, status } = req.query;
 
             const filter: GetReviewersDTO = {
                 projectStage: projectStage ? String(projectStage) : undefined,
-                applicant: applicant ? String(applicant) : undefined,
-                ...(populate !== undefined && { populate: populate === "true" })
+                reviewer: reviewer ? String(reviewer) : undefined,
+                ...(populate !== undefined && { populate: populate === "true" }),
+
+                // Handle status: if it's an array, keep it; if it's a string, use it; else undefined
+                status: status ? (Array.isArray(status) ? status.map(String) : String(status)) : undefined
             };
 
             const reviewers = await this.service.getReviewers(filter);
@@ -69,7 +72,7 @@ export class ReviewerController {
             const dto: UpdateReviewerDTO = {
                 id: String(id),
                 data: { weight },
-                applicantId: req.auth.userId
+                userId: req.auth.userId
             };
             const updated = await this.service.update(dto);
             successResponse(res, 200, "Reviewer updated successfully", updated);

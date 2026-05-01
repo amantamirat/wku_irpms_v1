@@ -27,7 +27,10 @@ export function createEntityManager<
     SaveDialog?: React.ComponentType<EntitySaveDialogProps<T>>
     permissionPrefix: string
     query?: () => TQuery
+
+    items?: T[];
     onItemsChange?: (items: T[]) => void;
+
     workflow?: {
         statusField: keyof T
         transitions: Record<string, string[]>
@@ -51,6 +54,7 @@ export function createEntityManager<
     hideDefaultActions?: boolean; // Global toggle
     hideEditAction?: boolean;    // Specific toggle
     hideDeleteAction?: boolean;  // Specific toggle
+    hideSearch?: boolean;
 
 }) {
 
@@ -78,6 +82,10 @@ export function createEntityManager<
             hasPermission([`${config.permissionPrefix}:import`]);
 
         const refresh = async () => {
+            if (config.items) {
+                setAll(config.items);
+                return;
+            }
             const query = config.query ? config.query() : undefined;
             const data = await config.api.getAll(query);
             setAll(data);
@@ -88,10 +96,7 @@ export function createEntityManager<
                 try {
                     setLoading(true);
                     await refresh();
-                    /*
-                    const query = config.query ? config.query() : undefined
-                    const data = await config.api.getAll(query)
-                    setAll(data)*/
+
                 } catch (err: any) {
                     setError(err.message)
                 } finally {
@@ -231,7 +236,7 @@ export function createEntityManager<
                     dataKey="_id"
                     loading={loading}
                     error={error}
-                    enableSearch
+                    enableSearch={!config.hideSearch}
                     hasPermission={hasPermission}
                     actions={actions}
                     onCreate={canCreate ? handleCreate : undefined}

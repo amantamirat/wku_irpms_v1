@@ -6,7 +6,7 @@ import {
     GetProjectStageDTO,
     UpdateStageDTO
 } from "./project.stage.dto";
-import { ProjectStageStatus } from "./project.stage.status";
+import { ProjectStageStatus } from "./project.stage.model";
 import { Project } from "../project.model";
 
 export interface IProjectStageRepository {
@@ -92,7 +92,12 @@ export class ProjectStageRepository implements IProjectStageRepository {
         // 3. Populate
         if (options.populate) {
             dbQuery
-                .populate("project")
+                .populate({
+                    path: "project",
+                    populate: {
+                        path: "applicant",
+                    }
+                })
                 .populate("grantStage");
         }
 

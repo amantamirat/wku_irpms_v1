@@ -1,6 +1,6 @@
 // project-stage.dto.ts
 import { PhaseDto } from "../phase/phase.dto";
-import { ProjectStageStatus } from "./project.stage.status";
+import { ProjectStageStatus } from "./project.stage.model";
 
 export interface GetProjectStageDTO {
     project?: string;

@@ -47,7 +47,7 @@ const AllocationManager = ({ grant, calendar }: AllocationManagerProps) => {
                 field: "usedBudget",
                 body: (a: GrantAllocation) => (
                     <span className={((a.usedBudget || 0) > a.totalBudget) ? "text-red-500 font-bold" : ""}>
-                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(a.usedBudget || 0)}
+                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'ETB' }).format(a.usedBudget || 0)}                       
                     </span>
                 )
             },
@@ -56,8 +56,8 @@ const AllocationManager = ({ grant, calendar }: AllocationManagerProps) => {
                 body: (a: GrantAllocation) => {
                     const remaining = a.totalBudget - (a.usedBudget || 0);
                     return (
-                        <span style={{ color: remaining < 0 ? 'var(--red-500)' : 'var(--green-500)' }}>
-                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(remaining)}
+                        <span style={{ color: remaining < 1000 ? 'var(--red-500)' : 'var(--green-500)' }}>
+                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'ETB' }).format(remaining)}
                         </span>
                     );
                 }

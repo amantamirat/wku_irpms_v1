@@ -157,7 +157,7 @@ const SaveAllocation = ({ visible, item, onComplete, onHide }: EntitySaveDialogP
                         value={localAllocation.totalBudget}
                         onValueChange={(e) => setLocalAllocation({ ...localAllocation, totalBudget: e.value || 0 })}
                         mode="currency"
-                        currency="USD" // Change to your project's currency
+                        currency="ETB" 
                         locale="en-US"
                         min={0}
                         className={classNames({ 'p-invalid': submitted && localAllocation.totalBudget <= 0 })}

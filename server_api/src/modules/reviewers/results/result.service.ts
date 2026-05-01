@@ -120,7 +120,7 @@ export class ResultService {
         const reviewerDoc = await this.reviewerRepo.findById(String(resultDoc.reviewer));
         if (!reviewerDoc) throw new AppError(ERROR_CODES.REVIEWER_NOT_FOUND);
 
-        if (String(reviewerDoc.applicant) !== applicantId)
+        if (String(reviewerDoc.reviewer) !== applicantId)
             throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
         if (reviewerDoc.status !== ReviewerStatus.accepted)

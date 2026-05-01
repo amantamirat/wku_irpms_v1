@@ -11,7 +11,7 @@ export enum ReviewerStatus {
 export type Reviewer = {
     _id?: string;
     projectStage?: string | ProjectStage;
-    applicant?: string | User;
+    reviewer?: string | User;
     weight?: number;
     score?: number;
     status: ReviewerStatus;
@@ -21,8 +21,9 @@ export type Reviewer = {
 
 
 export interface GetReviewersOptions {
-    applicant?: string | User;
+    reviewer?: string | User;
     projectStage?: string | ProjectStage;
+    status?: ReviewerStatus | ReviewerStatus[];
     populate?: boolean;
 }
 
@@ -30,23 +31,23 @@ export const validateReviewer = (reviewer: Reviewer): { valid: boolean; message?
     if (!reviewer.projectStage) {
         return { valid: false, message: 'Project stage is required.' };
     }
-    if (!reviewer.applicant) {
-        return { valid: false, message: 'Applicant is required.' };
+    if (!reviewer.reviewer) {
+        return { valid: false, message: 'Reviewer is required.' };
     }
     return { valid: true };
 };
 
-export const sanitizeReviewer = (reviewer: Partial<Reviewer>): Reviewer => {
+export const sanitizeReviewer = (reviewer: Partial<Reviewer | GetReviewersOptions>): Reviewer => {
     return {
         ...reviewer,
         projectStage:
             typeof reviewer.projectStage === "object" && reviewer.projectStage !== null
                 ? (reviewer.projectStage as any)._id
                 : reviewer.projectStage,
-        applicant:
-            typeof reviewer.applicant === "object" && reviewer.applicant !== null
-                ? (reviewer.applicant as User)._id
-                : reviewer.applicant,
+        reviewer:
+            typeof reviewer.reviewer === "object" && reviewer.reviewer !== null
+                ? (reviewer.reviewer as User)._id
+                : reviewer.reviewer
     } as Reviewer;
 };
 

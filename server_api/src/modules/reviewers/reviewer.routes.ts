@@ -37,6 +37,7 @@ router.post('/', verifyActiveAccount,
 router.get('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.REVIEWER.READ]),
     controller.get);
+
 router.put('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.REVIEWER.UPDATE]),
     controller.update);

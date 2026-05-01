@@ -28,7 +28,7 @@ import { ICallStageRepository } from "../calls/stages/call.stage.repository";
 import { CallStageStatus } from "../calls/stages/call.stage.model";
 import { IProjectSynchronizer } from "./stages/project.stage.synchronizer";
 import { ProjectAuth } from "./project.auth";
-import { ProjectStageStatus } from "./stages/project.stage.status";
+import { ProjectStageStatus } from "./stages/project.stage.model";
 import { PhaseService } from "./phase/phase.service";
 import { ProjectStageService } from "./stages/project.stage.service";
 

@@ -1,12 +1,11 @@
 import { CallStage } from "@/app/(main)/calls/stages/models/call.stage.model";
-import { Project } from "../../models/project.model";
 import { GrantStage } from "@/app/(main)/grants/stages/models/grant.stage.model";
-import { GrantAllocation } from "@/app/(main)/grants/allocations/models/grant.allocation.model";
+import { Project } from "../../models/project.model";
 
 export enum ProjectStageStatus {
     submitted = 'submitted',
-    selected = 'selected',
-    //under_review = 'under_review',
+    shortlisted = 'shortlisted',
+    refused = 'refused',
     reviewed = 'reviewed',
     accepted = 'accepted',
     rejected = 'rejected'
