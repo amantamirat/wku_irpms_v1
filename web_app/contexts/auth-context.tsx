@@ -8,7 +8,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 
 type AuthSession = {
     user: {
-        id: string;
+        _id: string;
         name: string;
         email: string;
     };

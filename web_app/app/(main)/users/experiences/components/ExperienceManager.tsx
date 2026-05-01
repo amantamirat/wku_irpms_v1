@@ -34,7 +34,7 @@ const ExperienceManager = ({ user: user }: ExperienceManagerProps) => {
 
         /** Default values for new records */
         createNew: () => ({
-
+            user
         }),
 
         /** Integration with the Save Dialog and Permission system */

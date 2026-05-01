@@ -1,11 +1,11 @@
-import mongoose from "mongoose";
+import mongoose, { ClientSession } from "mongoose";
 import { CreateStageDTO, ExistsStageDTO, GetStageDTO, UpdateStageDTO } from "./call.stage.dto";
 import { ICallStage, CallStage, CallStageStatus } from "./call.stage.model";
 
 export interface ICallStageRepository {
     findById(id: string): Promise<ICallStage | null>;
     find(filters: GetStageDTO): Promise<Partial<ICallStage>[]>;
-    findOne(callId: string, order: number): Promise<ICallStage | null>;
+    findOne(callId: string, order: number, session?: ClientSession): Promise<ICallStage | null>;
     create(dto: CreateStageDTO): Promise<ICallStage>;
     createMany(dtos: CreateStageDTO[]): Promise<ICallStage[]>;
     update(id: string, data: UpdateStageDTO["data"]): Promise<ICallStage | null>;
@@ -55,11 +55,20 @@ export class CallStageRepository implements ICallStageRepository {
         return dbQuery.lean<ICallStage[]>().exec();
     }
 
-    async findOne(callId: string, order: number) {
-        return CallStage.findOne({ call: callId, order })
+
+
+    async findOne(callId: string, order: number, session?: ClientSession) {
+        const query = CallStage.findOne({ call: callId, order });
+
+        if (session) {
+            query.session(session);
+        }
+
+        return query
             .lean<ICallStage>()
             .exec();
     }
+
 
     async create(dto: CreateStageDTO) {
         return CallStage.create({

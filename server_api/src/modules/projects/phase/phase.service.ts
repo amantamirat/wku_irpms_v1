@@ -21,8 +21,8 @@ export class PhaseService {
         private readonly validator: ConstraintValidator,
     ) { }
 
-    async validateProject(project: string, applicant: string) {
-        const projectDoc = await this.projAuth.authProject(project, applicant);
+    async validateProject(project: string, applicant: string, session?: ClientSession) {
+        const projectDoc = await this.projAuth.authProject(project, applicant, session);
         if (
             projectDoc.status !== ProjectStatus.draft &&
             projectDoc.status !== ProjectStatus.negotiation
@@ -37,26 +37,25 @@ export class PhaseService {
     // ---------------------------------------------------
     async create(dto: CreatePhaseDto, options?: { skipValidation?: boolean }, session?: ClientSession) {
         const { project, applicantId } = dto;
-
-        const projectDoc = await this.validateProject(project, applicantId ?? "");
-        const grantId = String((projectDoc.grantAllocation as any).grant);
-
-        // 1. Get existing phases + new phase to check totals
-        const existingPhases = await this.phaseRepo.find({ project });
-        const proposedPhases = [...existingPhases, dto];
-
-        // 2. Validate against Grant constraints
-        await this.validator.validatePhases(grantId, proposedPhases);
-
+        if (!options?.skipValidation) {
+            const projectDoc = await this.validateProject(project, applicantId ?? "", session);
+            const grantId = String((projectDoc.grantAllocation as any).grant);
+            // 1. Get existing phases + new phase to check totals
+            const existingPhases = await this.phaseRepo.find({ project }, session);
+            const proposedPhases = [...existingPhases, dto];
+            // 2. Validate against Grant constraints
+            await this.validator.validatePhases(grantId, proposedPhases);
+        }
 
         try {
-            const created = await this.phaseRepo.create(dto);
-
+            const count = await this.phaseRepo.countByProject(project, session);
+            const order = count + 1;
+            const created = await this.phaseRepo.create({...dto, order}, session);
             // ✅ Increment totals
             await this.projRepo.incrementTotals(project, {
                 duration: created.duration ?? 0,
                 budget: created.budget ?? 0
-            });
+            }, session);
 
             return created;
         } catch (err: any) {

@@ -9,11 +9,12 @@ import { PhaseStatus } from "./phase.status";
 
 export interface IPhaseRepository {
     findById(id: string): Promise<IPhase | null>;
-    find(filters: GetPhasesOptions): Promise<IPhase[]>;
+    find(filters: GetPhasesOptions, session?: ClientSession): Promise<IPhase[]>;
     create(dto: CreatePhaseDto, session?: ClientSession): Promise<IPhase>;
     createMany(dtos: CreatePhaseDto[], session?: ClientSession): Promise<IPhase[]>;
     update(id: string, data: UpdatePhaseDto["data"]): Promise<IPhase | null>;
     updateStatus(id: string, newStatus: PhaseStatus): Promise<IPhase | null>;
+    countByProject(projectId: string, session?: ClientSession): Promise<number>;
     delete(id: string): Promise<IPhase | null>;
     deleteByProject(projectId: string): Promise<any>;
 }
@@ -26,14 +27,19 @@ export class PhaseRepository implements IPhaseRepository {
             .exec();
     }
 
-    async find(filters: GetPhasesOptions): Promise<IPhase[]> {
+    async find(
+        filters: GetPhasesOptions,
+        session?: ClientSession
+    ): Promise<IPhase[]> {
         const query: Record<string, unknown> = {};
 
         if (filters.project) {
             query.project = new mongoose.Types.ObjectId(filters.project);
         }
 
-        let phaseQuery = Phase.find(query).sort({ order: 1 }); // Always sort by order
+        let phaseQuery = Phase.find(query)
+            .sort({ order: 1 }) // Always sort by order
+            .session(session ?? null); // 👈 attach session safely
 
         if (filters.populate) {
             phaseQuery = phaseQuery.populate({ path: 'project' });
@@ -82,6 +88,17 @@ export class PhaseRepository implements IPhaseRepository {
             { $set: { status: newStatus } },
             { new: true }
         ).exec();
+    }
+
+    async countByProject(projectId: string, session?: ClientSession) {
+        let query = Phase.countDocuments({
+            project: new mongoose.Types.ObjectId(projectId)
+        });
+
+        if (session) {
+            query = query.session(session);
+        }
+        return query.exec();
     }
 
     async delete(id: string) {

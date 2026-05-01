@@ -5,6 +5,8 @@ import { PROJECT_TRANSITIONS } from "../project.state-machine";
 import { ProjectStatus } from "../project.model";
 import { IProjectStageRepository } from "./project.stage.repository";
 import { ProjectStageStatus } from "./project.stage.status";
+import { AppError } from "../../../common/errors/app.error";
+import { ERROR_CODES } from "../../../common/errors/error.codes";
 
 export interface IProjectSynchronizer {
     sync(project: string, session?: ClientSession): Promise<any>;
@@ -20,7 +22,7 @@ export class ProjectStageSynchronizer implements IProjectSynchronizer {
 
     async sync(project: string, session?: ClientSession) {
         const projectDoc = await this.projectRepo.findById(project, undefined, session);
-        if (!projectDoc) return;
+        if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
 
         const projectDocs = await this.projectStageRepo.find({ project }, session);
         const currentStatus = projectDoc.status;

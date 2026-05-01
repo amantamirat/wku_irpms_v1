@@ -25,8 +25,8 @@ interface ProjectManagerProps {
 }
 
 const ProjectManager = ({ grantAllocation, applicant, grant, calendar, workspace }: ProjectManagerProps) => {
-    const { getUser: getApplicant } = useAuth();
-    const activeUser = getApplicant();
+    const { getUser } = useAuth();
+    const activeUser = getUser();
     const [projects, setProjects] = useState<Project[]>([]);
 
     // Aggregate counts for the top cards
@@ -38,50 +38,74 @@ const ProjectManager = ({ grantAllocation, applicant, grant, calendar, workspace
         }, {} as Record<string, number>);
     }, [projects]);
 
+    const columns = useMemo(() => {
+        const cols: any[] = [
+            {
+                header: "Allocation",
+                field: "grantAllocation",
+                sortable: true,
+                body: (r: Project) => (
+                    <div
+                        className="text-900 font-medium truncate"
+                        style={{ maxWidth: '200px' }}
+                        title={getAllocationLabel(r.grantAllocation)}
+                    >
+                        {getAllocationLabel(r.grantAllocation)}
+                    </div>
+                )
+            },
+            {
+                header: "Title",
+                field: "title",
+                sortable: true,
+                body: (row: Project) => (
+                    <div
+                        className="text-700 truncate"
+                        style={{ maxWidth: '250px' }}
+                        title={row.title}
+                    >
+                        {row.title}
+                    </div>
+                )
+            }
+        ];
+
+        // ✅ Add Applicant column ONLY if not provided
+        if (!applicant) {
+            cols.push({
+                header: "Applicant",
+                field: "applicant.name",
+                sortable: true,
+                body: (p: Project) => (
+                    <span className="text-600">
+                        {typeof p.applicant === "object"
+                            ? p.applicant?.name
+                            : p.applicant}
+                    </span>
+                )
+            });
+        }
+
+        // Always include status
+        cols.push({
+            field: "status",
+            header: "Status",
+            sortable: true,
+            body: (p: Project) => (
+                <MyBadge type="status" value={p.status ?? "Draft"} />
+            )
+        });
+
+        return cols;
+    }, [applicant]);
+
     const Manager = useMemo(() =>
         createEntityManager<Project, GetProjectsOptions | undefined>({
             title: "Manage Projects",
             itemName: "Project",
             api: ProjectApi,
             onItemsChange: setProjects,
-            columns: [
-                {
-                    header: "Allocation",
-                    field: "grantAllocation",
-                    sortable: true,
-                    body: (r: Project) => (
-                        <div className="text-900 font-medium truncate" style={{ maxWidth: '200px' }} title={getAllocationLabel(r.grantAllocation)}>
-                            {getAllocationLabel(r.grantAllocation)}
-                        </div>
-                    )
-                },
-                {
-                    header: "Title",
-                    field: "title",
-                    sortable: true,
-                    body: (row: Project) => (
-                        <div className="text-700 truncate" style={{ maxWidth: '250px' }} title={row.title}>
-                            {row.title}
-                        </div>
-                    )
-                },
-                {
-                    header: "Applicant",
-                    field: "applicant.name",
-                    sortable: true,
-                    body: (p: Project) => (
-                        <span className="text-600">
-                            {typeof p.applicant === "object" ? p.applicant?.name : p.applicant}
-                        </span>
-                    )
-                },
-                {
-                    field: "status",
-                    header: "Status",
-                    sortable: true,
-                    body: (p: Project) => <MyBadge type="status" value={p.status ?? "Draft"} />
-                }
-            ],
+            columns: columns,
             createNew: () => ({
                 grantAllocation: grantAllocation ?? undefined,
                 applicant: activeUser ?? undefined,

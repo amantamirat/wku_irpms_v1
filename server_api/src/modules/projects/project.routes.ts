@@ -22,9 +22,14 @@ import { ProjectStageRepository } from './stages/project.stage.repository';
 import { CallStageRepository } from '../calls/stages/call.stage.repository';
 import { ProjectStageSynchronizer } from './stages/project.stage.synchronizer';
 import { ProjectAuth } from './project.auth';
+import { PhaseService } from './phase/phase.service';
+import { ProjectStageService } from './stages/project.stage.service';
+import { GrantStageRepository } from '../grants/stages/grant.stage.repository';
+import { ReviewerRepository } from '../reviewers/reviewer.repository';
 
 
 const projectRepo = new ProjectRepository();
+const projAuth = new ProjectAuth(projectRepo);
 const grantAllocRepo = new GrantAllocationRepository();
 const callRepo = new CallRepository();
 const callStageRepo = new CallStageRepository();
@@ -33,7 +38,7 @@ const collabRepo = new CollaboratorRepository();
 const phaseRepo = new PhaseRepository();
 const projStageRepo = new ProjectStageRepository();
 
-const projAuth = new ProjectAuth(projectRepo);
+
 const notificationService = new NotificationService(
     new NotificationRepository(),
     new SettingService(new SettingRepository())
@@ -44,10 +49,20 @@ const synchronizer = new ProjectStageSynchronizer(projectRepo, projStageRepo);
 
 const constValidator = new ConstraintValidator(new ConstraintRepository(), new ThemeRepository());
 const collabService = new CollaboratorService(collabRepo, projectRepo, projAuth, appRepo, constValidator, notificationService);
+const phaseService = new PhaseService(phaseRepo, projectRepo, projAuth, constValidator);
+const projectStageService = new ProjectStageService(
+    projStageRepo, projectRepo, projAuth, new GrantStageRepository(),
+    callStageRepo, new ReviewerRepository(), synchronizer, notificationService
+);
 
-const service = new ProjectService(projectRepo, projAuth, grantAllocRepo, callRepo, callStageRepo, collabRepo, phaseRepo, projStageRepo,
-    synchronizer,
-    collabService, constValidator);
+
+
+const service = new ProjectService(projectRepo, projAuth, grantAllocRepo, callRepo, callStageRepo,
+    collabRepo, collabService,
+    phaseRepo, phaseService,
+    projStageRepo, projectStageService,
+    synchronizer
+    , constValidator);
 const controller = new ProjectController(service);
 const router: Router = Router();
 

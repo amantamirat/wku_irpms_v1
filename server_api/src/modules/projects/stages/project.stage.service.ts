@@ -1,28 +1,30 @@
 import fs from "fs";
 import path from "path";
+import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
-import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 
-import { IProjectStageRepository } from "./project.stage.repository";
 import { IGrantStageRepository } from "../../grants/stages/grant.stage.repository";
 import { IProjectRepository } from "../project.repository";
+import { IProjectStageRepository } from "./project.stage.repository";
 
-import { ProjectStageStatus } from "./project.stage.status";
+import { DeleteDto } from "../../../common/dtos/delete.dto";
+import { IGrantAllocation } from "../../grants/allocations/grant.allocation.model";
+import { NotificationService } from "../../notifications/notification.service";
+import { IReviewerRepository } from "../../reviewers/reviewer.repository";
+import { ProjectAuth } from "../project.auth";
 import {
     CreateProjectStageDTO,
     GetProjectStageDTO,
     UpdateStageDTO
 } from "./project.stage.dto";
-import { DeleteDto } from "../../../common/dtos/delete.dto";
-import { IGrantAllocationRepository } from "../../grants/allocations/grant.allocation.repository";
-import { AllocationStatus } from "../../grants/allocations/grant.allocation.state-machine";
+import { ProjectStageStatus } from "./project.stage.status";
 import { IProjectSynchronizer } from "./project.stage.synchronizer";
-import { IReviewerRepository } from "../../reviewers/reviewer.repository";
-import { NotificationService } from "../../notifications/notification.service";
-import { IGrantAllocation } from "../../grants/allocations/grant.allocation.model";
-import { ProjectAuth } from "../project.auth";
+import { ClientSession } from "mongoose";
+import { ProjectStatus } from "../project.model";
+import { ICallStageRepository } from "../../calls/stages/call.stage.repository";
+import { CallStageStatus } from "../../calls/stages/call.stage.model";
 
 export class ProjectStageService {
 
@@ -31,36 +33,72 @@ export class ProjectStageService {
         private readonly projectRepo: IProjectRepository,
         private readonly projAuth: ProjectAuth,
         private readonly grantStageRepo: IGrantStageRepository,
+        private readonly callStageRepo: ICallStageRepository,
         private readonly reviewerRepo: IReviewerRepository,
         private readonly synchronizer: IProjectSynchronizer,
         private readonly notificationService: NotificationService,
     ) {
-    }    
+    }
+
+    async validateProject(project: string, applicant: string, session?: ClientSession) {
+        const projectDoc = await this.projAuth.authProject(project, applicant, session);
+        if (
+            projectDoc.status !== ProjectStatus.draft &&
+            projectDoc.status !== ProjectStatus.accepted
+        ) {
+            throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
+        }
+        return projectDoc;
+    }
+
 
     /**
      * Create project stage (submission)
      */
-    async create(dto: CreateProjectStageDTO) {
+    async create(dto: CreateProjectStageDTO, session?: ClientSession) {
         const { project, applicantId } = dto;
 
-        const projectDoc = await this.projAuth.authProject(project, applicantId);
+        const projectDoc = await this.validateProject(project, applicantId, session);
         const grantAllocDoc = projectDoc.grantAllocation as unknown as IGrantAllocation;
 
-        const projectStages = await this.repository.find({ project });
-        const nextOrder = projectStages.length + 1;
-        if (nextOrder > 1) {
-            const hasNotAccepted = projectStages.some(ps => ps.status !== ProjectStageStatus.accepted);
-            if (hasNotAccepted)
-                throw new AppError(ERROR_CODES.PROJECT_STAGE_NOT_ACCEPTED);
+        const count = await this.repository.countByProject(project, session);
+        const nextOrder = count + 1;
+
+        const grantStage = await this.grantStageRepo.findOne(String(grantAllocDoc.grant), nextOrder, session);
+        if (!grantStage) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        dto.grantStage = String(grantStage._id);
+
+        if (projectDoc.call) {
+            const callStageDoc = await this.callStageRepo.findOne(
+                String(projectDoc.call),
+                nextOrder,
+                session
+            );
+
+            if (!callStageDoc) {
+                throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+            }
+
+            if (callStageDoc.status !== CallStageStatus.active) {
+                throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
+            }
+            if (callStageDoc.deadline < new Date())
+                throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
+
+            dto.callStage = String(callStageDoc._id)
         }
 
-        const grantStage = await this.grantStageRepo.findOne(String(grantAllocDoc.grant), nextOrder);
-        if (!grantStage) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
 
-        dto.grantStage = String(grantStage._id);
         try {
-            const created = await this.repository.create(dto);
-            await this.synchronizer.sync(project);
+            const created = await this.repository.create(dto, session);
+            await this.synchronizer.sync(project, session);
+            await this.notificationService.notifyStatusChange(
+                String(projectDoc.applicant),
+                projectDoc.title || "Project",
+                grantStage?.name || "Stage",
+                ProjectStageStatus.submitted,
+                session
+            ).catch(err => console.error("Notification failed", err));
             return created;
         } catch (err: any) {
             if (err?.code === 11000) {

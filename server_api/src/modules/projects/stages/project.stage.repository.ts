@@ -19,6 +19,7 @@ export interface IProjectStageRepository {
     create(dto: CreateProjectStageDTO, session?: ClientSession): Promise<IProjectStage>;
     update(id: string, status: UpdateStageDTO["data"]): Promise<IProjectStage | null>;
     updateStatus(id: string, newStatus: ProjectStageStatus): Promise<IProjectStage | null>;
+    countByProject(projectId: string, session?: ClientSession): Promise<number>;
     delete(id: string): Promise<IProjectStage | null>;
 }
 
@@ -151,6 +152,17 @@ export class ProjectStageRepository implements IProjectStageRepository {
             { $set: { status: newStatus } },
             { new: true }
         ).exec();
+    }
+
+    async countByProject(projectId: string, session?: ClientSession) {
+        let query = ProjectStage.countDocuments({
+            project: new mongoose.Types.ObjectId(projectId)
+        });
+
+        if (session) {
+            query = query.session(session);
+        }
+        return query.exec();
     }
 
     async delete(id: string) {

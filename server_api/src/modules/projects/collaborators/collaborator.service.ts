@@ -29,7 +29,7 @@ export class CollaboratorService {
         private readonly collabRepo: ICollaboratorRepository,
         private readonly projectRepo: IProjectRepository,
         private readonly projAuth: ProjectAuth,
-        private readonly applicantRepo: IUserRepository,
+        private readonly userRepo: IUserRepository,
         private readonly validator: ConstraintValidator,
         private readonly notificationService: NotificationService,
     ) {
@@ -53,7 +53,7 @@ export class CollaboratorService {
             const projectDoc = await this.validateProject(project, applicant, session);
             const grantId = (projectDoc.grantAllocation as any).grant;
 
-            const appDoc = await this.applicantRepo.findById(applicant);
+            const appDoc = await this.userRepo.findById(applicant);
             if (!appDoc) throw new Error(ERROR_CODES.USER_NOT_FOUND);
             const countCollabs = await this.collabRepo.countByProject(project, session);
 

@@ -29,6 +29,8 @@ import { CallStageStatus } from "../calls/stages/call.stage.model";
 import { IProjectSynchronizer } from "./stages/project.stage.synchronizer";
 import { ProjectAuth } from "./project.auth";
 import { ProjectStageStatus } from "./stages/project.stage.status";
+import { PhaseService } from "./phase/phase.service";
+import { ProjectStageService } from "./stages/project.stage.service";
 
 
 export class ProjectService {
@@ -40,10 +42,12 @@ export class ProjectService {
         private readonly callRepo: ICallRepository,
         private readonly callStageRepo: ICallStageRepository,
         private readonly collabRepo: ICollaboratorRepository,
-        private readonly phaseRepo: IPhaseRepository,
-        private readonly projectStageRepo: IProjectStageRepository,
-        private readonly synchronizer: IProjectSynchronizer,
         private readonly collabService: CollaboratorService,
+        private readonly phaseRepo: IPhaseRepository,
+        private readonly phaseService: PhaseService,
+        private readonly projectStageRepo: IProjectStageRepository,
+        private readonly projectStageService: ProjectStageService,
+        private readonly synchronizer: IProjectSynchronizer,
         private readonly validator: ConstraintValidator,
     ) { }
 
@@ -83,7 +87,7 @@ export class ProjectService {
 
 
     async apply(dto: ApplyProjectDTO) {
-        const { call, title, summary, applicant, collaborators, phases, themes } = dto;
+        const { call, title, summary, applicant, collaborators, phases, themes, docPath } = dto;
         const lead = collaborators.find(c => c.isLeadPI);
         if (!lead) throw new AppError(ERROR_CODES.LEAD_PI_REQUIRED);
         if (lead.applicant !== applicant) throw new AppError(ERROR_CODES.UNAUTHORIZED);
@@ -92,18 +96,16 @@ export class ProjectService {
         if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
         if (callDoc.status !== CallStatus.active) throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
 
+        /*
         const callStageDoc = await this.callStageRepo.findOne(call, 1);
         if (!callStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
         if (callStageDoc.status !== CallStageStatus.active) throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
         if (callStageDoc.deadline < new Date()) throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
-
+*/
         const grantAllocation = String(callDoc.grantAllocation);
         const grantAllocDoc = await this.allocRepo.findById(grantAllocation);
         if (!grantAllocDoc) throw new Error(ERROR_CODES.ALLOCATION_NOT_FOUND);
         if (grantAllocDoc.status !== AllocationStatus.active) throw new Error(ERROR_CODES.ALLOCATION_NOT_ACTIVE);
-
-        const totalBudget = phases.reduce((sum, p) => sum + (p.budget ?? 0), 0);
-        const totalDuration = phases.reduce((sum, p) => sum + (p.duration ?? 0), 0);
 
         const grantId = String(grantAllocDoc.grant);
         await this.validator.validateAll(grantId, {
@@ -115,7 +117,7 @@ export class ProjectService {
         session.startTransaction();
         try {
             const createdProj = await this.create(
-                { call, grantAllocation, title, summary, applicant, themes, totalBudget, totalDuration },
+                { call, grantAllocation, title, summary, applicant, themes },
                 { skipValidation: true }, session);
 
             const projectId = String(createdProj._id);
@@ -133,27 +135,27 @@ export class ProjectService {
                 }, { skipValidation: true }, session);
             }
 
-            await this.phaseRepo.createMany(
-                phases.map(phase => ({
-                    project: projectId,
-                    order: phase.order,
-                    title: phase.title,
-                    budget: phase.budget,
-                    duration: phase.duration,
-                    description: phase.description,
-                    applicantId: applicant
-                }), session)
+            const orderedPhases = [...phases].sort((a, b) => a.order - b.order);
+
+            for (const phase of orderedPhases) {
+                await this.phaseService.create(
+                    {
+                        project: projectId,
+                        order: phase.order,
+                        title: phase.title,
+                        budget: phase.budget,
+                        duration: phase.duration,
+                        description: phase.description,
+                        applicantId: applicant
+                    }, { skipValidation: true },
+                    session
+                );
+            }
+
+            await this.projectStageService.create(
+                { project: projectId, documentPath: docPath, applicantId: applicant },
+                session
             );
-
-            await this.projectStageRepo.create({
-                project: projectId,
-                grantStage: String(callStageDoc.grantStage),
-                callStage: String(callStageDoc._id),
-                documentPath: dto.docPath,
-                applicantId: applicant
-            }, session);
-
-            await this.synchronizer.sync(projectId, session)
             await session.commitTransaction();
             return createdProj;
         } catch (error) {

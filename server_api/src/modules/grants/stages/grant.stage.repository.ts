@@ -1,11 +1,11 @@
-import mongoose from "mongoose";
+import mongoose, { ClientSession } from "mongoose";
 import { CreateStageDTO, ExistsStageDTO, GetStageDTO, UpdateStageDTO } from "./grant.stage.dto";
 import { IGrantStage, GrantStage } from "./grant.stage.model";
 
 export interface IGrantStageRepository {
     findById(id: string): Promise<IGrantStage | null>;
     find(filters: GetStageDTO): Promise<IGrantStage[]>;
-    findOne(grantId: string, order: number): Promise<IGrantStage | null>;
+    findOne(grantId: string, order: number, session?: ClientSession): Promise<IGrantStage | null>;
     create(dto: CreateStageDTO): Promise<IGrantStage>;
     update(id: string, data: UpdateStageDTO["data"]): Promise<IGrantStage | null>;
     updateMany(filter: any, update: any): Promise<any>;
@@ -47,8 +47,14 @@ export class GrantStageRepository implements IGrantStageRepository {
         return dbQuery.lean<IGrantStage[]>().exec();
     }
 
-    async findOne(grantId: string, order: number) {
-        return GrantStage.findOne({ grant: grantId, order })
+    async findOne(grantId: string, order: number, session?: ClientSession) {
+        const query = GrantStage.findOne({ grant: grantId, order });
+
+        if (session) {
+            query.session(session);
+        }
+
+        return query
             .lean<IGrantStage>()
             .exec();
     }

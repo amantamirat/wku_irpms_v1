@@ -15,8 +15,10 @@ export interface GetProjectStageDTO {
 
 export interface CreateProjectStageDTO {
     project: string;
-    grantStage: string;
-    callStage?:string;
+    grantStage?: string;
+    callStage?: string;
+    grant?: string;
+    call?: string;
     documentPath: string;
     applicantId: string;
 }

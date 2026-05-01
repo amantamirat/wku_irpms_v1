@@ -14,11 +14,13 @@ import { SettingService } from "../../settings/setting.service";
 import { NotificationService } from "../../notifications/notification.service";
 import { NotificationRepository } from "../../notifications/notification.repository";
 import { ProjectAuth } from "../project.auth";
+import { CallStageRepository } from "../../calls/stages/call.stage.repository";
 
 const projectStageRepo = new ProjectStageRepository();
 const projectRepo = new ProjectRepository();
 const projAuth = new ProjectAuth(projectRepo);
 const grantStageRepo = new GrantStageRepository();
+const callStageRepo = new CallStageRepository();
 const reviewerRepoRepo = new ReviewerRepository();
 const synchronizer = new ProjectStageSynchronizer(projectRepo, projectStageRepo);
 const notificationService = new NotificationService(
@@ -26,7 +28,7 @@ const notificationService = new NotificationService(
     new SettingService(new SettingRepository())
 );
 const service = new ProjectStageService(projectStageRepo, projectRepo, projAuth,
-    grantStageRepo,
+    grantStageRepo, callStageRepo,
     reviewerRepoRepo, synchronizer, notificationService);
 const controller = new ProjectStageController(service);
 const router = express.Router();

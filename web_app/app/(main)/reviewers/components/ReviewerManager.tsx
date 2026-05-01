@@ -27,8 +27,8 @@ const ReviewerManager = ({ projectStage, applicant }: ReviewerManagerProps) => {
     } | null>(null);
     const [loadingEval, setLoadingEval] = useState(false);
 
-    const { getUser: getApplicant } = useAuth();
-    const activeUser = getApplicant();
+    const { getUser } = useAuth();
+    const activeUser = getUser();
 
 
 
@@ -119,7 +119,7 @@ const ReviewerManager = ({ projectStage, applicant }: ReviewerManagerProps) => {
                 typeof row.applicant === "string"
                     ? row.applicant
                     : row.applicant?._id;
-            const canEvaluate = reviewerAppId === activeUser._id &&
+            const canEvaluate = reviewerAppId === activeUser?._id &&
                 row.status === ReviewerStatus.accepted;
 
             return (

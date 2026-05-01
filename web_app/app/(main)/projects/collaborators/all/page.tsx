@@ -1,5 +1,5 @@
 'use client';
-import CollaboratorManager from "./components/CollaboratorManager";
+import CollaboratorManager from "../components/CollaboratorManager";
 import { Divider } from "primereact/divider";
 
 const CollaboratorPage = () => {

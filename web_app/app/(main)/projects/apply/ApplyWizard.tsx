@@ -18,15 +18,15 @@ interface ApplyWizardProps {
 }
 
 const ApplyWizard = ({ call, constraints, onComplete }: ApplyWizardProps) => {
-    const { getUser: getApplicant } = useAuth();
-    const activeAppUser = getApplicant();
+    const { getUser: getUser } = useAuth();
+    const activeAppUser = getUser();
     const [activeIndex, setActiveIndex] = useState(0);
     const [formData, setFormData] = useState<Partial<Project>>({
         call: call._id,
         title: '',
         summary: '',
         themes: [],
-        collaborators: [{ applicant: activeAppUser, role: "Principal Investigator", isLeadPI: true }],
+        collaborators: [{ applicant: activeAppUser as any, role: "Principal Investigator", isLeadPI: true }],
         phases: [{ title: '', order: 1, budget: 0, duration: 0, description: '' }]
     });
 

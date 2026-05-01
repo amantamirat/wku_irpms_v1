@@ -1,6 +1,6 @@
 'use client';
 
-import ProjectManager from './components/ProjectManager';
+import ProjectManager from '../components/ProjectManager';
 
 const ProjectPage = () => {
     return (

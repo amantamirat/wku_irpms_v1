@@ -111,13 +111,18 @@ export class NotificationService {
         recipientId: string,
         projectTitle: string,
         stageName: string,
-        newStatus: ProjectStageStatus
+        newStatus: ProjectStageStatus,
+        session?: ClientSession
     ) {
         let statusAction: string;
         let type: NotificationType = NotificationType.INFO;
 
         // Map statuses to more natural, user-friendly verbs
         switch (newStatus) {
+            case ProjectStageStatus.submitted:
+                statusAction = "has been submitted successfully";
+                type = NotificationType.SUCCESS;
+                break;
             case ProjectStageStatus.accepted:
                 statusAction = "has been approved";
                 type = NotificationType.SUCCESS;
@@ -143,8 +148,8 @@ export class NotificationService {
             title: "Project Update",
             message: `Your "${projectTitle}" ${stageName} ${statusAction}.`,
             type: type,
-            link: `/projects/applicant`
-        });
+            link: `/projects/my-applications`
+        }, session);
     }
 
 

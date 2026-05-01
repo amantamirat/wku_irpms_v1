@@ -24,7 +24,10 @@ const CollaboratorManager = ({ project, applicant }: CollaboratorManagerProps) =
             field: "project.title",
             sortable: true,
             body: (c: Collaborator) => (
-                <span>{typeof c.project === "object" ? c.project?.title : "No Project"}</span>
+                <div className="text-700 truncate" style={{ maxWidth: '250px' }}>
+                    {typeof c.project === "object" ? c.project?.title : "No Project"}
+                </div>
+
             )
         });
     }
@@ -70,7 +73,7 @@ const CollaboratorManager = ({ project, applicant }: CollaboratorManagerProps) =
     );
 
     const Manager = createEntityManager<Collaborator, GetCollaboratorsOptions | undefined>({
-        title: project ? `Team: ${project.title}` : "Manage Collaborators",
+        title: project ? 'Teams' : "Collaborators",
         itemName: "Collaborator",
         api: CollaboratorApi,
         columns,
@@ -95,6 +98,7 @@ const CollaboratorManager = ({ project, applicant }: CollaboratorManagerProps) =
             statusOrder: COLLAB_STATUS_ORDER
         } : undefined,
 
+        hideDefaultActions: !project,
         disableDeleteRow: (row) => row.status === CollaboratorStatus.verified
 
     });
