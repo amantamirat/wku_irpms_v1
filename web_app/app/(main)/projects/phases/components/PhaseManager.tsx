@@ -4,17 +4,22 @@ import { createEntityManager } from "@/components/createEntityManager";
 import { Phase, GetPhaseOptions } from "../models/phase.model";
 import { PhaseApi } from "../api/phase.api";
 import MyBadge from "@/templates/MyBadge";
-import { Project } from "../../models/project.model";
+import { Project, ProjectStatus } from "../../models/project.model";
 import { PHASE_TRANSITIONS, PHASE_STATUS_ORDER } from "../models/phase.state-machine";
 import SavePhase from "./SavePhase";
 
-
 interface PhaseManagerProps {
     project?: Project;
-    
 }
 
 const PhaseManager = ({ project }: PhaseManagerProps) => {
+    
+    // Logic: Only allow modifications during Draft or Finalization (Negotiation)
+    const canEditPhases = project && (
+        project.status === ProjectStatus.draft || 
+        project.status === ProjectStatus.finalization
+    );
+
     const Manager = createEntityManager<Phase, GetPhaseOptions | undefined>({
         title: "Project Phases",
         itemName: "Phase",
@@ -24,32 +29,34 @@ const PhaseManager = ({ project }: PhaseManagerProps) => {
             {
                 header: "Title",
                 field: "title",
-                sortable: true
+                sortable: true,
+                body: (r: Phase) => <span className="font-semibold">{r.title}</span>
             },
             {
                 header: "Duration",
                 field: "duration",
                 sortable: true,
-                //style: { width: '150px' },
                 body: (r: Phase) => `${r.duration} days`
             },
             {
                 header: "Budget",
                 field: "budget",
                 sortable: true,
-                //style: { width: '150px' },
                 body: (r: Phase) => (
-                    <span className="font-mono">
-                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'ETB' }).format(r.budget)}
+                    <span className="font-mono text-green-700">
+                        {new Intl.NumberFormat('en-US', { 
+                            style: 'currency', 
+                            currency: 'ETB',
+                            maximumFractionDigits: 0 
+                        }).format(r.budget)}
                     </span>
                 )
             },
             {
                 header: "Description",
                 field: "description",
-                //style: { width: '300px' },
                 body: (r: Phase) => (
-                    <div className="truncate" title={r.description}>
+                    <div className="truncate text-sm text-500" style={{ maxWidth: '250px' }} title={r.description}>
                         {r.description || "No description provided"}
                     </div>
                 )
@@ -63,27 +70,36 @@ const PhaseManager = ({ project }: PhaseManagerProps) => {
             }
         ],
 
-        createNew: () => ({
-            project: (project?._id || project || "") as string | Project,
-            title:'',
-            order: 1,
-            duration: 0,
-            budget: 0,
-            description: "",
-        }),
+        // Only enable "Create" if the project status allows it
+        createNew: canEditPhases
+            ? () => ({
+                project: project,
+                title: '',
+                order: 1,
+                duration: 0,
+                budget: 0,
+                description: "",
+            })
+            : undefined,
 
-        SaveDialog: SavePhase,
+        // Hide the Save Dialog (Edit/Create UI) if not in editable status
+        SaveDialog: canEditPhases ? SavePhase : undefined,
+        
         permissionPrefix: "phase",
 
         query: () => ({
-            project: project?._id,
+            project: project?._id || project,
         }),
 
         workflow: {
             statusField: "status",
             transitions: PHASE_TRANSITIONS,
             statusOrder: PHASE_STATUS_ORDER
-        }
+        },
+
+        // Professional UI: Hide action buttons (Edit/Delete) when project is locked
+        hideDefaultActions: !canEditPhases,
+        hideSearch: !!project
     });
 
     return <Manager />;

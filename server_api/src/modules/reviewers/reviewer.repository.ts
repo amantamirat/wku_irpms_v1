@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { Reviewer, IReviewer } from "./reviewer.model";
 import { CreateReviewerDTO, ExistsReviewersDTO, GetReviewersDTO, UpdateReviewerDTO } from "./reviewer.dto";
 import { ReviewerStatus } from "./reviewer.state-machine";
+import { ProjectStageStatus } from "../projects/stages/project.stage.model";
 
 export interface IReviewerRepository {
     findById(id: string): Promise<IReviewer | null>;
@@ -9,7 +10,7 @@ export interface IReviewerRepository {
     create(dto: CreateReviewerDTO): Promise<IReviewer>;
     update(id: string, data: UpdateReviewerDTO["data"]): Promise<IReviewer | null>;
     updateStatus(id: string, newStatus: ReviewerStatus): Promise<IReviewer | null>;
-    countByProjectStage(projectStageId: string): Promise<number>;
+    countByProjectStage(projectStageId: string, status?: ReviewerStatus): Promise<number>;
     exist(filters: ExistsReviewersDTO): Promise<boolean>;
     delete(id: string): Promise<IReviewer | null>;
 }
@@ -93,9 +94,13 @@ export class ReviewerRepository implements IReviewerRepository {
         ).exec();
     }
 
-    async countByProjectStage(projectStageId: string) {
+    async countByProjectStage(
+        projectStageId: string,
+        status?: ReviewerStatus
+    ) {
         return Reviewer.countDocuments({
-            projectStage: new mongoose.Types.ObjectId(projectStageId)
+            projectStage: new mongoose.Types.ObjectId(projectStageId),
+            ...(status !== undefined && { status }),
         });
     }
     async exist(filters: ExistsReviewersDTO): Promise<boolean> {

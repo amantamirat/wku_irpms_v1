@@ -72,6 +72,31 @@ export class ProjectStageController {
             errorResponse(res, 400, err.message, err);
         }
     };
+
+
+    // ---------------------------------------------------
+    // CALCULATE TOTAL SCORE
+    // ---------------------------------------------------
+    calculateTotalScore = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            if (!req.auth) {
+                throw new AppError(ERROR_CODES.UNAUTHORIZED);
+            }
+            const { id } = req.params;
+
+            const score = await this.service.calculateTotalScore(String(id));
+
+            successResponse(
+                res,
+                200,
+                "Total score calculated successfully",
+                { totalScore: score }
+            );
+
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
     // ---------------------------------------------------
     // GET
     // ---------------------------------------------------
@@ -108,55 +133,7 @@ export class ProjectStageController {
         }
     };
 
-    /*
-    // ---------------------------------------------------
-    // SUBMIT
-    // ---------------------------------------------------
 
-    submit = async (req: AuthenticatedRequest, res: Response) => {
-        let uploadedFilePath: string | undefined;
-        try {
-            if (!req.user) throw new Error(ERROR_CODES.UNAUTHORIZED);
-            if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
-
-            uploadedFilePath = req.file.path;
-
-            const project = JSON.parse(req.body.project);
-
-            const dto: SubmitProjectDTO = {
-                call: project.call,
-                title: project.title,
-                summary: project.summary,
-                applicant: req.user.applicantId,
-                collaborators: (project.collaborators || []).map(
-                    (c: any) => c.applicant
-                ),
-
-                themes: (project.themes || []).map(
-                    (t: any) => t.theme
-                ),
-
-                phases: (project.phases || []).map((p: any) => ({
-                    type: p.type,
-                    activity: p.activity,
-                    duration: p.duration,
-                    budget: p.budget,
-                    description: p.description,
-                    status: p.status,
-                    order: p.order
-                })),
-                documentPath: `uploads/${req.file.filename}`
-            };
-            const submitted = await this.service.submit(dto);
-            successResponse(res, 201, "Project submitted successfully", submitted);
-        } catch (err: any) {
-            if (req.file) {
-                fs.unlink(`uploads/${req.file.filename}`, () => { });
-            }
-            errorResponse(res, 400, err.message, err);
-        }
-    };
-    */
     // ---------------------------------------------------
     // DELETE
     // ---------------------------------------------------

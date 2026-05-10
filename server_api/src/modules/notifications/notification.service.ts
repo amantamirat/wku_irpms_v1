@@ -89,7 +89,7 @@ export class NotificationService {
             title: "New Project Invitation",
             message: `You have been added as a ${role ?? 'collaborator'} to "${projectTitle}".`,
             type: NotificationType.INFO,
-            link: '/projects/collaborators/applicant'
+            link: '/projects/collaborators/my-memberships'
         }, session);
     }
 
@@ -108,11 +108,13 @@ export class NotificationService {
  * Specific Business Helper: Notify user about a project stage status change.*/
     async notifyStatusChange(
         recipientId: string,
-        projectTitle: string,
+        projectDoc: any, // Pass the whole project for context
         stageName: string,
         newStatus: ProjectStageStatus,
+        nextStageInfo?: { name: string, deadline?: Date }, // New optional param
         session?: ClientSession
     ) {
+        const projectTitle = projectDoc.title || "Project";
         let message: string;
         let type: NotificationType = NotificationType.INFO;
 
@@ -124,29 +126,20 @@ export class NotificationService {
 
             case ProjectStageStatus.accepted:
                 message = `Congratulations! Your application "${projectTitle}" for ${stageName} has been accepted.`;
+                // Add "Next Step" info if available
+                if (nextStageInfo) {
+                    const deadlineStr = nextStageInfo.deadline
+                        ? ` by ${nextStageInfo.deadline.toLocaleDateString()}`
+                        : "";
+                    message += ` Please prepare for the next stage: "${nextStageInfo.name}"${deadlineStr}.`;
+                }
                 type = NotificationType.SUCCESS;
                 break;
 
             case ProjectStageStatus.rejected:
-                message = `We regret to inform you that your application "${projectTitle}" for ${stageName} was not selected. We appreciate your effort and encourage you to apply again in the future.`;
+                message = `We regret to inform you that your application "${projectTitle}" for ${stageName} was not selected.`;
                 type = NotificationType.ERROR;
                 break;
-
-            case ProjectStageStatus.refused:
-                message = `We sincerely apologize, but your application "${projectTitle}" for ${stageName} could not be selected at this stage.`;
-                type = NotificationType.ERROR;
-                break;
-
-            case ProjectStageStatus.reviewed:
-                message = `Your application "${projectTitle}" for ${stageName} has been reviewed successfully.`;
-                type = NotificationType.SUCCESS;
-                break;
-
-            case ProjectStageStatus.shortlisted:
-                message = `Good news! Your application "${projectTitle}" for ${stageName} has been shortlisted and is moving to the next stage.`;
-                type = NotificationType.INFO;
-                break;
-
             default:
                 message = `Your application "${projectTitle}" for ${stageName} is now marked as ${newStatus}.`;
         }
@@ -156,7 +149,7 @@ export class NotificationService {
             title: "Project Update",
             message,
             type,
-            link: `/projects/my-applications`
+            link: `/projects/my-projects`
         }, session);
     }
 
@@ -173,20 +166,10 @@ export class NotificationService {
             title: "Reviewer Assignment",
             message: `You have been assigned as a reviewer for "${projectTitle}" in the "${stageName}" stage.`,
             type: NotificationType.INFO,
-            link: '/reviewers/applicant'
+            link: '/reviewers/my-evaluations'
         });
     }
 
-    /**
-     * Specific Business Helper: Notify Lead PI when someone joins.
-     * async notifyCollaboratorJoined(leadPIId: string, collaboratorName: string, projectTitle: string) {
-        return this.notify({
-            recipient: leadPIId,
-            title: "Collaborator Joined",
-            message: `${collaboratorName} has verified their status in "${projectTitle}".`,
-            type: NotificationType.SUCCESS
-        });
-    }
-     */
+
 
 }

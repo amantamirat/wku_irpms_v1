@@ -66,6 +66,7 @@
             "phase:transition.reviewed.approved",
             "phase:transition.approved.active",
             "phase:document:read",
+            "project.stage:calculateTotalscore",
             "user:read",
             "reviewer:*",
             "result:read"
@@ -88,7 +89,6 @@
             "phase:transition.proposed.reviewed",
             "project.stage:read",
             "project.stage:create",
-            "project.stage:submit",
             "project.stage:delete",
             "reviewer:read"
         ],

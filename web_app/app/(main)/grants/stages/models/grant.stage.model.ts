@@ -1,18 +1,28 @@
 import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
 import { Grant } from "../../models/grant.model";
 
+export enum DecisionMode {
+    MANUAL = "MANUAL",
+    AUTOMATIC = "AUTOMATIC",
+}
+
 export type GrantStage = {
     _id?: string;
     grant: string | Grant;
     name: string;
     order?: number;
     evaluation?: string | Evaluation;
+
     minReviewers?: number;
     maxReviewers?: number;
+
+    // NEW FIELDS
+    decisionMode?: DecisionMode;
+    minAcceptanceScore: number;
+
     createdAt?: Date;
     updatedAt?: Date;
 };
-
 export interface GetStagesDTO {
     grant?: string | Grant;
     evaluation?: string | Evaluation;
@@ -22,8 +32,9 @@ export interface GetStagesDTO {
 /**
  * Validate stage fields before submission
  */
-export const validateGrantStage = (stage: GrantStage): { valid: boolean; message?: string } => {
-
+export const validateGrantStage = (
+    stage: GrantStage
+): { valid: boolean; message?: string } => {
     if (!stage.name || stage.name.trim().length === 0) {
         return { valid: false, message: "Stage name is required." };
     }
@@ -35,6 +46,7 @@ export const validateGrantStage = (stage: GrantStage): { valid: boolean; message
     if (!stage.evaluation) {
         return { valid: false, message: "Evaluation reference is required." };
     }
+
     if (
         stage.minReviewers !== undefined &&
         stage.maxReviewers !== undefined &&
@@ -42,9 +54,23 @@ export const validateGrantStage = (stage: GrantStage): { valid: boolean; message
     ) {
         return {
             valid: false,
-            message: "Minimum reviewers cannot be greater than maximum reviewers."
+            message: "Minimum reviewers cannot be greater than maximum reviewers.",
         };
     }
+
+    // NEW VALIDATION RULE
+    if (stage.decisionMode === DecisionMode.AUTOMATIC) {
+        if (
+            stage.minAcceptanceScore === undefined ||
+            stage.minAcceptanceScore === null
+        ) {
+            return {
+                valid: false,
+                message: "Min acceptance score is required for automatic decision mode.",
+            };
+        }
+    }
+
     return { valid: true };
 };
 
@@ -71,5 +97,7 @@ export const createEmptyGrantStage = (stage?: Partial<GrantStage>): GrantStage =
     evaluation: stage?.evaluation ?? "",
     order: 1,
     minReviewers: 1,
-    maxReviewers: 3
+    maxReviewers: 3,
+    decisionMode: DecisionMode.MANUAL,
+    minAcceptanceScore: 50,
 });

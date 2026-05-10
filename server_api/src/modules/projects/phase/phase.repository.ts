@@ -5,7 +5,7 @@ import {
     GetPhasesOptions,
     UpdatePhaseDto,
 } from "./phase.dto";
-import { PhaseStatus } from "./phase.status";
+import { PhaseStatus } from "./phase.model";
 
 export interface IPhaseRepository {
     findById(id: string): Promise<IPhase | null>;

@@ -11,7 +11,6 @@ import { UserApi } from "@/app/(main)/users/api/user.api";
 import { User } from "@/app/(main)/users/models/user.model";
 import { userTemplate } from "@/app/(main)/users/models/user.template";
 import { CollaboratorApi } from "../api/collaborator.api";
-// Assuming CollaboratorRole is exported from your model
 import { Collaborator, roleOptions } from "../models/collaborator.model";
 import { EntitySaveDialogProps } from "@/components/createEntityManager";
 
@@ -23,52 +22,51 @@ const SaveCollaborator = ({
 }: EntitySaveDialogProps<Collaborator>) => {
 
     const toast = useRef<Toast>(null);
-
     const [localCollaborator, setLocalCollaborator] = useState<Collaborator>({ ...item });
     const [applicants, setApplicants] = useState<User[]>([]);
     const [submitted, setSubmitted] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const isEditMode = !!item?._id;
 
+    // Reset local state when item or visibility changes
     useEffect(() => {
-        setLocalCollaborator({ ...item });
-        setSubmitted(false);
+        if (visible) {
+            setLocalCollaborator({ ...item });
+            setSubmitted(false);
+        }
     }, [item, visible]);
 
+    // Professional Fetching: Only load users if we are ADDING a new collaborator
     useEffect(() => {
         const fetchApplicants = async () => {
-            try {
-                if (visible) {
+            if (visible && !isEditMode) {
+                setLoading(true);
+                try {
                     const data = await UserApi.getAll({});
                     setApplicants(data);
+                } catch (err) {
+                    console.error("Failed to fetch applicants:", err);
+                } finally {
+                    setLoading(false);
                 }
-            } catch (err) {
-                console.error("Failed to fetch applicants:", err);
             }
         };
         fetchApplicants();
-    }, [visible]);
+    }, [visible, isEditMode]);
 
     const validate = () => {
-        if (!localCollaborator.applicant) {
-            return { valid: false, message: "Collaborator is required" };
-        }
-        if (!localCollaborator.role) {
-            return { valid: false, message: "Role is required" };
-        }
+        if (!localCollaborator.applicant) return { valid: false, message: "Collaborator is required" };
+        if (!localCollaborator.role) return { valid: false, message: "Role is required" };
         return { valid: true };
     };
 
     const saveCollaborator = async () => {
         setSubmitted(true);
-
         const validation = validate();
+        
         if (!validation.valid) {
-            toast.current?.show({
-                severity: 'warn',
-                summary: 'Validation',
-                detail: validation.message
-            });
+            toast.current?.show({ severity: 'warn', summary: 'Validation', detail: validation.message });
             return;
         }
 
@@ -77,35 +75,25 @@ const SaveCollaborator = ({
                 ? await CollaboratorApi.update(localCollaborator)
                 : await CollaboratorApi.create(localCollaborator);
 
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Collaborator saved'
-            });
+            toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Collaborator saved' });
 
             if (onComplete) {
+                // Pass back the saved object merged with the selected applicant for UI immediate update
                 onComplete({
                     ...saved,
-                    project: localCollaborator.project,
                     applicant: localCollaborator.applicant,
-                    role: localCollaborator.role // Ensure role is passed back
                 });
             }
-
         } catch (err: any) {
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Error',
-                detail: err.message || 'Failed to save collaborator'
-            });
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: err.message || 'Failed to save' });
         }
     };
 
     const footer = (
-        <>
-            <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
-            <Button label="Save Collaborator" icon="pi pi-check" onClick={saveCollaborator} />
-        </>
+        <div className="flex justify-content-end gap-2">
+            <Button label="Cancel" icon="pi pi-times" text onClick={onHide} className="p-button-secondary" />
+            <Button label={isEditMode ? "Update Member" : "Add Member"} icon="pi pi-check" onClick={saveCollaborator} />
+        </div>
     );
 
     return (
@@ -114,22 +102,22 @@ const SaveCollaborator = ({
 
             <Dialog
                 visible={visible}
-                style={{ width: '500px' }}
-                header={isEditMode ? 'Edit Collaborator' : 'Add Collaborator'}
+                style={{ width: '450px' }}
+                header={isEditMode ? 'Edit Team Member' : 'Add Team Member'}
                 modal
                 className="p-fluid"
                 footer={footer}
                 onHide={onHide}
             >
                 <div className="grid">
-
                     {/* Collaborator Selection */}
-                    <div className="field col-12">
+                    <div className="field col-12 mt-2">
                         <label htmlFor="applicant" className="font-bold">Collaborator</label>
                         <Dropdown
                             id="applicant"
                             value={localCollaborator.applicant}
-                            options={applicants}
+                            // In edit mode, we just use the current applicant as the only option
+                            options={isEditMode ? [localCollaborator.applicant as User] : applicants}
                             onChange={(e) => setLocalCollaborator({ ...localCollaborator, applicant: e.value })}
                             dataKey="_id"
                             optionLabel="first_name"
@@ -137,32 +125,33 @@ const SaveCollaborator = ({
                             valueTemplate={(option) =>
                                 option ? userTemplate(option) : <span className="p-placeholder">Select a Person</span>
                             }
-                            placeholder="Select a Collaborator"
+                            disabled={isEditMode}
+                            //loading={loading}
+                            placeholder="Search by name..."
                             filter
                             className={classNames({ 'p-invalid': submitted && !localCollaborator.applicant })}
                         />
                         {submitted && !localCollaborator.applicant && (
-                            <small className="p-error">Collaborator is required.</small>
+                            <small className="p-error">Please select a team member.</small>
                         )}
                     </div>
 
-                    {/* Role Selection - ADDED SECTION */}
+                    {/* Role Selection */}
                     <div className="field col-12">
-                        <label htmlFor="role" className="font-bold">Role</label>
+                        <label htmlFor="role" className="font-bold">Project Role</label>
                         <Dropdown
                             id="role"
                             value={localCollaborator.role}
                             options={roleOptions}
                             onChange={(e) => setLocalCollaborator({ ...localCollaborator, role: e.value })}
-                            placeholder="Select or Type Role"
+                            placeholder="Select or type a role"
                             editable
-                            className={classNames("w-full", { 'p-invalid': submitted && !localCollaborator.role })}
+                            className={classNames({ 'p-invalid': submitted && !localCollaborator.role })}
                         />
                         {submitted && !localCollaborator.role && (
                             <small className="p-error">Role is required.</small>
                         )}
                     </div>
-
                 </div>
             </Dialog>
         </>

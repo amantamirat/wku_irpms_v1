@@ -1,4 +1,4 @@
-import { CollaboratorStatus } from "./collaborator.status";
+import { CollaboratorStatus } from "./collaborator.model";
 
 export interface CollaboratorDto {
     applicant: string;

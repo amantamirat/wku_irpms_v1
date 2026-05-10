@@ -11,7 +11,6 @@ import {
 import { GrantAllocation } from "../grants/allocations/grant.allocation.model";
 import { ProjectStatus } from "./project.model";
 
-
 export interface IProjectRepository {
     findById(id: string, options?: FindByIdOptions, session?: ClientSession): Promise<IProject | null>;
     find(filters: GetProjectsDTO): Promise<Partial<IProject>[]>;
@@ -19,6 +18,15 @@ export interface IProjectRepository {
     update(id: string, data: UpdateProjectDTO["data"]): Promise<IProject | null>;
     updateStatus(id: string, newStatus: ProjectStatus, session?: ClientSession): Promise<IProject | null>;
     incrementTotals(projectId: string, delta: { duration: number; budget: number }, session?: ClientSession): Promise<IProject | null>;
+    updateCurrentStage(
+        id: string,
+        currentStage: string,
+        session?: ClientSession
+    ): Promise<IProject | null>;
+    clearCurrentStage(
+        project: string,
+        session?: ClientSession
+    ): Promise<IProject | null>;
     exists(filters: ExistsProjectDTO): Promise<boolean>;
     delete(id: string): Promise<IProject | null>;
 }
@@ -41,6 +49,10 @@ export class ProjectRepository implements IProjectRepository {
 
         if (populate?.grantAllocation) {
             dbQuery = dbQuery.populate("grantAllocation");
+        }
+
+        if (populate?.currentStage) {
+            dbQuery = dbQuery.populate("currentStage");
         }
 
         // ✅ attach session if provided
@@ -133,34 +145,6 @@ export class ProjectRepository implements IProjectRepository {
         ).exec();
     }
 
-    async updateStatus(
-        id: string,
-        newStatus: ProjectStatus,
-        session?: ClientSession
-    ) {
-        return Project.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(id),
-            { $set: { status: newStatus } },
-            {
-                new: true,
-                session // attach session here
-            }
-        ).exec();
-    }
-
-    async exists(filters: ExistsProjectDTO): Promise<boolean> {
-        const query: any = {};
-        const { applicant, grantAllocation } = filters;
-        if (applicant) {
-            query.applicant = new mongoose.Types.ObjectId(applicant);
-        }
-        if (grantAllocation) {
-            query.grantAllocation = new mongoose.Types.ObjectId(grantAllocation);
-        }
-        const result = await Project.exists(query).exec();
-        return result !== null;
-    }
-
     async incrementTotals(
         projectId: string,
         delta: { duration: number; budget: number },
@@ -180,6 +164,85 @@ export class ProjectRepository implements IProjectRepository {
             }
         );
     }
+
+
+
+    async updateStatus(
+        id: string,
+        newStatus: ProjectStatus,
+        session?: ClientSession
+    ) {
+        return Project.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            { $set: { status: newStatus } },
+            {
+                new: true,
+                session // attach session here
+            }
+        ).exec();
+    }
+
+    // ✅ add inside ProjectRepository
+
+    async updateCurrentStage(
+        id: string,
+        currentStage: string,
+        session?: ClientSession
+    ) {
+        const update =
+
+        {
+            $set: {
+                currentStage: new mongoose.Types.ObjectId(currentStage)
+            }
+        }
+
+
+        return Project.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            update,
+            {
+                new: true,
+                session
+            }
+        ).exec();
+    }
+
+    async clearCurrentStage(
+        project: string,
+        session?: ClientSession
+    ) {
+        let dbQuery = Project.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(project),
+            {
+                $unset: {
+                    currentStage: 1
+                }
+            },
+            { new: true }
+        );
+
+        if (session) {
+            dbQuery = dbQuery.session(session);
+        }
+
+        return dbQuery.exec();
+    }
+
+    async exists(filters: ExistsProjectDTO): Promise<boolean> {
+        const query: any = {};
+        const { applicant, grantAllocation } = filters;
+        if (applicant) {
+            query.applicant = new mongoose.Types.ObjectId(applicant);
+        }
+        if (grantAllocation) {
+            query.grantAllocation = new mongoose.Types.ObjectId(grantAllocation);
+        }
+        const result = await Project.exists(query).exec();
+        return result !== null;
+    }
+
+
 
     async delete(id: string) {
         return Project.findByIdAndDelete(id).exec();

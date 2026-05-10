@@ -17,6 +17,7 @@ interface ProjectDetailProps {
 }
 
 export default function ProjectDetail({ project, updateProjectStatus }: ProjectDetailProps) {
+    
     const { hasPermission } = useAuth();
 
     // Helper to extract display name
@@ -46,7 +47,7 @@ export default function ProjectDetail({ project, updateProjectStatus }: ProjectD
         {
             header: "Stages",
             permission: "project.stage:read",
-            content: <ProjectStageManager project={project} />
+            content: <ProjectStageManager project={project} hideReviewer={true} />
         }
     ], [project, updateProjectStatus]);
 

@@ -12,8 +12,9 @@ import { GrantStageRepository } from '../../grants/stages/grant.stage.repository
 const repository = new CallStageRepository();
 const callRepository = new CallRepository();
 const stageRepository = new GrantStageRepository();
+const projStageRepository = new ProjectStageRepository();
 
-const service = new StageService(repository, callRepository, stageRepository);
+const service = new StageService(repository, callRepository, stageRepository, projStageRepository);
 const controller = new StageController(service);
 const router = Router();
 

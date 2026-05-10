@@ -7,7 +7,7 @@ import {
     GetCollaboratorsOptions,
     UpdateCollaboratorDto,
 } from "./collaborator.dto";
-import { CollaboratorStatus } from "./collaborator.status";
+import { CollaboratorStatus } from "./collaborator.model";
 
 export interface ICollaboratorRepository {
     findById(id: string): Promise<ICollaborator | null>;
@@ -47,7 +47,7 @@ export class CollaboratorRepository implements ICollaboratorRepository {
         if (filters.populate) {
             dbQuery = dbQuery.populate([
                 { path: 'applicant', populate: { path: 'workspace' } },
-                { path: 'project' }
+                { path: 'project', populate: { path: 'applicant' } }
             ]);
         }
 

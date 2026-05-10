@@ -5,6 +5,7 @@ import { EvalStatus } from "../../evaluations/evaluation.state-machine";
 import { GrantStatus } from "../grant.model";
 import { IGrantRepository } from "../grant.repository";
 import { CreateStageDTO, GetStageDTO, UpdateStageDTO } from "./grant.stage.dto";
+import { DecisionMode } from "./grant.stage.model";
 import { IGrantStageRepository } from "./grant.stage.repository";
 
 export class GrantStageService {
@@ -20,24 +21,50 @@ export class GrantStageService {
      * Create a new stage
      */
     async create(dto: CreateStageDTO) {
-        const { grant, evaluation, minReviewers, maxReviewers } = dto;
+        const {
+            grant,
+            evaluation,
+            minReviewers,
+            maxReviewers,
+            decisionMode,
+            minAcceptanceScore
+        } = dto;
+
+        // 1. Reviewer validation
         if (minReviewers > maxReviewers) {
-            return;
+            throw new AppError(ERROR_CODES.INVALID_REVIEWER_RANGE);
         }
+
+        // 2. Grant validation
         const grantDoc = await this.grantRepository.findById(grant);
         if (!grantDoc) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
-        if (grantDoc.status !== GrantStatus.planned) throw new AppError(ERROR_CODES.GRANT_NOT_PLANNED);
+        if (grantDoc.status !== GrantStatus.planned) {
+            throw new AppError(ERROR_CODES.GRANT_NOT_PLANNED);
+        }
 
+        // 3. Evaluation validation
         const evalDoc = await this.evalRepository.findById(evaluation);
         if (!evalDoc) throw new Error(ERROR_CODES.EVALUATION_NOT_FOUND);
         if (evalDoc.status !== EvalStatus.published) throw new AppError(ERROR_CODES.EVALUATION_NOT_PUBLISHED);
+
+        const totalWeight = evalDoc.weight;
+
+        // 4. NEW: MinAcceptance logic validation
+
+        if (minAcceptanceScore > totalWeight) {
+            throw new AppError(ERROR_CODES.MIN_SCORE_EXCEEDS_EVALUATION_WEIGHT);
+        }
         try {
             const stages = await this.repository.find({ grant });
             const nextOrder = stages.length + 1;
-            const stage = await this.repository.create({ ...dto, order: nextOrder });
+
+            const stage = await this.repository.create({
+                ...dto,
+                order: nextOrder
+            });
+
             return stage;
         } catch (err: any) {
-            // 5. Handle unique index violations
             if (err?.code === 11000) {
                 throw new AppError(ERROR_CODES.STAGE_ALREADY_CLOSED);
             }

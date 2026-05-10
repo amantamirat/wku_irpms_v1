@@ -22,7 +22,7 @@ const projAuth = new ProjectAuth(projectRepo);
 const grantStageRepo = new GrantStageRepository();
 const callStageRepo = new CallStageRepository();
 const reviewerRepoRepo = new ReviewerRepository();
-const synchronizer = new ProjectStageSynchronizer(projectRepo, projectStageRepo);
+const synchronizer = new ProjectStageSynchronizer(projectRepo, projectStageRepo, grantStageRepo);
 const notificationService = new NotificationService(
     new NotificationRepository(),
     new SettingService(new SettingRepository())
@@ -44,6 +44,13 @@ router.get("/", verifyActiveAccount,
 router.get('/:id', verifyActiveAccount,
     checkPermission("project.stage:read"),
     controller.getById
+);
+
+router.post(
+    "/:id/calculate-score",
+    verifyActiveAccount,
+    checkPermission("project.stage:calculateTotalScore"),
+    controller.calculateTotalScore
 );
 
 /*

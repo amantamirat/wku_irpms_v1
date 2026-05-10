@@ -4,7 +4,7 @@ export const PROJECT_STATUS_ORDER: ProjectStatus[] = [
     ProjectStatus.draft,
     ProjectStatus.submitted,
     ProjectStatus.accepted,
-    ProjectStatus.negotiation,
+    ProjectStatus.finalization,
     ProjectStatus.approved,
     ProjectStatus.granted,
     ProjectStatus.completed,
@@ -13,14 +13,11 @@ export const PROJECT_STATUS_ORDER: ProjectStatus[] = [
 
 export const PROJECT_TRANSITIONS: Record<ProjectStatus, ProjectStatus[]> = {
     [ProjectStatus.draft]: [ProjectStatus.submitted],
-    //[ProjectStatus.submitted]: [ProjectStatus.rejected, ProjectStatus.accepted, ProjectStatus.draft],
-    [ProjectStatus.submitted]: [ProjectStatus.draft],    
-    //[ProjectStatus.rejected]: [ProjectStatus.submitted],
-    [ProjectStatus.rejected]: [],
-    //[ProjectStatus.accepted]: [ProjectStatus.negotiation, ProjectStatus.submitted],
-    [ProjectStatus.accepted]: [ProjectStatus.negotiation],
-    [ProjectStatus.negotiation]: [ProjectStatus.approved, ProjectStatus.accepted],
-    [ProjectStatus.approved]: [ProjectStatus.granted, ProjectStatus.negotiation],
+    [ProjectStatus.submitted]: [ProjectStatus.accepted, ProjectStatus.rejected, ProjectStatus.draft],
+    [ProjectStatus.rejected]: [ProjectStatus.submitted],
+    [ProjectStatus.accepted]: [ProjectStatus.finalization, ProjectStatus.submitted],
+    [ProjectStatus.finalization]: [ProjectStatus.approved, ProjectStatus.accepted],
+    [ProjectStatus.approved]: [ProjectStatus.granted, ProjectStatus.finalization],
     [ProjectStatus.granted]: [ProjectStatus.completed, ProjectStatus.approved],
     [ProjectStatus.completed]: [ProjectStatus.granted]
 };

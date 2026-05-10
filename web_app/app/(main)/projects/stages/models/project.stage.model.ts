@@ -4,9 +4,9 @@ import { Project } from "../../models/project.model";
 
 export enum ProjectStageStatus {
     submitted = 'submitted',
-    shortlisted = 'shortlisted',
-    refused = 'refused',
-    reviewed = 'reviewed',
+    //shortlisted = 'shortlisted',
+    //refused = 'refused',
+    //reviewed = 'reviewed',
     accepted = 'accepted',
     rejected = 'rejected'
 }

@@ -17,7 +17,7 @@ const AppMenu = () => {
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
         },
         {
-            label: 'Projects & Applications',
+            label: 'Applications',
             visible: hasPermission(
                 [
                     "call:create",

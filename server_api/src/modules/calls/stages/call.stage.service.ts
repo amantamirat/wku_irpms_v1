@@ -19,6 +19,7 @@ export class StageService {
         private readonly repository: ICallStageRepository,
         private readonly callRepo: ICallRepository,
         private readonly grantStageRepo: IGrantStageRepository,
+        private readonly projectStageRepo: IProjectStageRepository
     ) {
 
     }
@@ -85,6 +86,13 @@ export class StageService {
             to,
             STAGE_TRANSITIONS
         );
+
+        if (next === CallStatus.planned) {
+            const projStageExsit = await this.projectStageRepo.exists({ callStage: id });
+            if (projStageExsit) {
+                throw new AppError(ERROR_CODES.STAGE_ALREADY_EXISTS, "Projects already has been Sumitted!");
+            }
+        }
 
         if (next === CallStatus.active) {
             const callDoc = await this.callRepo.findById(String(callStageDoc.call));

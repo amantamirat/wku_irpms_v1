@@ -6,9 +6,10 @@ import ReviewerManager from "@/app/(main)/reviewers/components/ReviewerManager";
 
 interface ProjectStageDetailProps {
     projectStage: ProjectStage;
+    hideReviewer?: boolean;
 }
 
-const ProjectStageDetail = ({ projectStage }: ProjectStageDetailProps) => {
+const ProjectStageDetail = ({ projectStage, hideReviewer }: ProjectStageDetailProps) => {
 
     const { hasPermission } = useAuth();
 
@@ -19,7 +20,7 @@ const ProjectStageDetail = ({ projectStage }: ProjectStageDetailProps) => {
         {
             header: "Reviewers",
             permission: "reviewer:read",
-            content: <ReviewerManager projectStage={projectStage} />
+            content: <ReviewerManager projectStage={projectStage} hideReviewer={hideReviewer} />
         },
 
     ], [projectStage]);

@@ -6,6 +6,7 @@ export interface FindByIdOptions {
     populate?: {
         applicant?: boolean;
         grantAllocation?: boolean;
+        currentStage?: boolean;
     };
 }
 

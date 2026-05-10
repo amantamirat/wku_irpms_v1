@@ -17,7 +17,7 @@ import { ICriterionRepository } from "../evaluations/criteria/criterion.reposito
 import { FormType } from "../evaluations/criteria/criterion.model";
 import { IGrantStage } from "../grants/stages/grant.stage.model";
 import { IProject } from "../projects/project.model";
-import { IProjectStageSynchronizer } from "./reviewer.synchronizer";
+//import { IProjectStageSynchronizer } from "./reviewer.synchronizer";
 import { NotificationService } from "../notifications/notification.service";
 
 export class ReviewerService {
@@ -29,7 +29,7 @@ export class ReviewerService {
         private readonly collaboratorRepo: ICollaboratorRepository,
         private readonly resultRepo: IResultRepository,
         private readonly criterionRepo: ICriterionRepository,
-        private readonly synchronizer: IProjectStageSynchronizer,
+        //private readonly synchronizer: IProjectStageSynchronizer,
         private readonly notificationService: NotificationService,
     ) {
     }
@@ -37,11 +37,16 @@ export class ReviewerService {
     async create(dto: CreateReviewerDTO) {
         const { projectStage, reviewer, weight } = dto;
 
-        const projectStageDoc = await this.projectStageRepo.findById(projectStage, true);
+        const projectStageDoc = await this.projectStageRepo.findById(projectStage, {
+            populate: {
+                grantStage: true,
+                project: true
+            }
+        });
         if (!projectStageDoc) throw new AppError(ERROR_CODES.PROJECT_STAGE_NOT_FOUND);
 
         const projectStageStatus = projectStageDoc.status;
-        if (projectStageStatus !== ProjectStageStatus.shortlisted)
+        if (projectStageStatus !== ProjectStageStatus.submitted)
             throw new AppError(ERROR_CODES.INVALID_DOC_STATUS);
 
         const grantStageDoc = projectStageDoc.grantStage as unknown as IGrantStage;
@@ -79,7 +84,7 @@ export class ReviewerService {
 
     // --- Update reviewer data (weight) ---
     async update(dto: UpdateReviewerDTO) {
-        const { id, data, userId: applicantId } = dto;
+        const { id, data, userId } = dto;
         const { weight } = data;
         const reviewerDoc = await this.repository.findById(id);
         if (!reviewerDoc) throw new Error(ERROR_CODES.REVIEWER_NOT_FOUND);
@@ -96,11 +101,25 @@ export class ReviewerService {
     async transitionState(dto: TransitionRequestDto) {
         const { id, current, next, applicantId } = dto;
         if (!applicantId) return;
-
+        //chek projectstage status
         const reviewerDoc = await this.repository.findById(id);
         if (!reviewerDoc) {
             throw new AppError(ERROR_CODES.REVIEWER_NOT_FOUND);
         }
+
+
+        const projectStageDoc = await this.projectStageRepo.findById(String(reviewerDoc.projectStage), {
+            populate: {
+                grantStage: true
+            }
+        });
+        if (!projectStageDoc) throw new AppError(ERROR_CODES.PROJECT_STAGE_NOT_FOUND);
+
+        if (projectStageDoc.status !== ProjectStageStatus.submitted
+        ) {
+            throw new AppError(ERROR_CODES.INVALID_STAGE_STATUS);
+        }
+
         const from = reviewerDoc.status as ReviewerStatus;
         const to = next as ReviewerStatus;
 
@@ -113,6 +132,29 @@ export class ReviewerService {
             to,
             REVIEWER_TRANSITIONS
         );
+
+
+
+        if (from === ReviewerStatus.pending && to === ReviewerStatus.accepted) {
+            if (String(reviewerDoc.reviewer) !== applicantId)
+                throw new AppError(ERROR_CODES.UNAUTHORIZED);
+
+            const existingResults = await this.resultRepo.find({ reviewer: id });
+            if (existingResults.length === 0) {
+
+                const grantStageDoc = projectStageDoc.grantStage as any;
+
+                const criteria = await this.criterionRepo.find({ evaluation: String(grantStageDoc.evaluation) });
+                await this.resultRepo.insertMany(
+                    criteria.map(c => ({
+                        reviewer: id,
+                        criterion: String(c._id),
+                        score: null,
+                        //isrequired
+                    }))
+                );
+            }
+        }
 
 
         if (from === ReviewerStatus.accepted && to === ReviewerStatus.submitted) {
@@ -132,32 +174,15 @@ export class ReviewerService {
             await this.repository.update(id, { score });
         }
 
-        const projectStageId = String(reviewerDoc.projectStage);
+        if (to === ReviewerStatus.approved) {
+            //await this.synchronizer.sync(projectStageId);
+        }
 
-        if (to === ReviewerStatus.accepted) {
-            if (String(reviewerDoc.reviewer) !== applicantId)
-                throw new AppError(ERROR_CODES.UNAUTHORIZED);
+        if (from === ReviewerStatus.approved && to === ReviewerStatus.submitted) {
 
-            const existingResults = await this.resultRepo.find({ reviewer: id });
-            if (existingResults.length === 0) {
-
-                const projectStageDoc = await this.projectStageRepo.findById(projectStageId, true);
-                if (!projectStageDoc) throw new AppError(ERROR_CODES.PROJECT_STAGE_NOT_FOUND);
-                const grantStageDoc = projectStageDoc.grantStage as any;
-
-                const criteria = await this.criterionRepo.find({ evaluation: String(grantStageDoc.evaluation) });
-                await this.resultRepo.insertMany(
-                    criteria.map(c => ({
-                        reviewer: id,
-                        criterion: String(c._id),
-                        score: null
-                    }))
-                );
-            }
         }
 
         const updated = await this.repository.updateStatus(id, to);
-        await this.synchronizer.sync(projectStageId);
         return updated;
     }
 
@@ -170,7 +195,7 @@ export class ReviewerService {
 
         await this.resultRepo.deleteByReviewer(id);
 
-        await this.synchronizer.sync(String(reviewerDoc.projectStage));
+        //await this.synchronizer.sync(String(reviewerDoc.projectStage));
         return deleted
     }
 }

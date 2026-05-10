@@ -37,31 +37,30 @@ const appRepo = new UserRepository();
 const collabRepo = new CollaboratorRepository();
 const phaseRepo = new PhaseRepository();
 const projStageRepo = new ProjectStageRepository();
-
+const grantStageRepo = new GrantStageRepository();
 
 const notificationService = new NotificationService(
     new NotificationRepository(),
     new SettingService(new SettingRepository())
 );
 
-const synchronizer = new ProjectStageSynchronizer(projectRepo, projStageRepo);
+const synchronizer = new ProjectStageSynchronizer(projectRepo, projStageRepo, grantStageRepo);
 
 
 const constValidator = new ConstraintValidator(new ConstraintRepository(), new ThemeRepository());
 const collabService = new CollaboratorService(collabRepo, projectRepo, projAuth, appRepo, constValidator, notificationService);
 const phaseService = new PhaseService(phaseRepo, projectRepo, projAuth, constValidator);
 const projectStageService = new ProjectStageService(
-    projStageRepo, projectRepo, projAuth, new GrantStageRepository(),
+    projStageRepo, projectRepo, projAuth, grantStageRepo,
     callStageRepo, new ReviewerRepository(), synchronizer, notificationService
 );
 
 
 
-const service = new ProjectService(projectRepo, projAuth, grantAllocRepo, callRepo, callStageRepo,
+const service = new ProjectService(projectRepo, projAuth, grantAllocRepo, callRepo,
     collabRepo, collabService,
     phaseRepo, phaseService,
-    projStageRepo, projectStageService,
-    synchronizer
+    projStageRepo, projectStageService
     , constValidator);
 const controller = new ProjectController(service);
 const router: Router = Router();

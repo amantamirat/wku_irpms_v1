@@ -729,73 +729,43 @@
   },
   {
     "category": "Project Management",
-    "name": "project:transition.draft.submitted",
-    "description": "Submit project from draft"
+    "name": "project:transition.accepted.finalization",
+    "description": "Move accepted project to budget and collaboration finalization"
   },
   {
     "category": "Project Management",
-    "name": "project:transition.submitted.accepted",
-    "description": "Accept submitted project"
+    "name": "project:transition.finalization.accepted",
+    "description": "Return project from finalization to accepted status"
   },
   {
     "category": "Project Management",
-    "name": "project:transition.submitted.rejected",
-    "description": "Reject submitted project"
+    "name": "project:transition.finalization.approved",
+    "description": "Approve finalized project for funding"
   },
   {
     "category": "Project Management",
-    "name": "project:transition.submitted.draft",
-    "description": "Revert submitted project to draft"
-  },
-  {
-    "category": "Project Management",
-    "name": "project:transition.rejected.submitted",
-    "description": "Resubmit rejected project"
-  },
-  {
-    "category": "Project Management",
-    "name": "project:transition.accepted.negotiation",
-    "description": "Move accepted project to negotiation"
-  },
-  {
-    "category": "Project Management",
-    "name": "project:transition.accepted.submitted",
-    "description": "Revert accepted project to submitted"
-  },
-  {
-    "category": "Project Management",
-    "name": "project:transition.negotiation.approved",
-    "description": "Approve negotiated project"
-  },
-  {
-    "category": "Project Management",
-    "name": "project:transition.negotiation.accepted",
-    "description": "Revert negotiation back to accepted"
+    "name": "project:transition.approved.finalization",
+    "description": "Return approved project for further finalization"
   },
   {
     "category": "Project Management",
     "name": "project:transition.approved.granted",
-    "description": "Grant approved project"
-  },
-  {
-    "category": "Project Management",
-    "name": "project:transition.approved.negotiation",
-    "description": "Revert approved project to negotiation"
-  },
-  {
-    "category": "Project Management",
-    "name": "project:transition.granted.completed",
-    "description": "Mark granted project as completed"
+    "description": "Release or allocate funding to approved project"
   },
   {
     "category": "Project Management",
     "name": "project:transition.granted.approved",
-    "description": "Revert granted project to approved"
+    "description": "Return funded project to approved status"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:transition.granted.completed",
+    "description": "Mark funded project as completed"
   },
   {
     "category": "Project Management",
     "name": "project:transition.completed.granted",
-    "description": "Reopen completed project to granted"
+    "description": "Reopen completed project for further grant activities"
   },
   {
     "category": "Project Management",
@@ -925,58 +895,33 @@
   },
   {
     "category": "Project Stage Management",
+    "name": "project.stage:calculateTotalScore",
+    "description": "Calculate and store total score for a project stage based on approved reviewer evaluations"
+  },
+  {
+    "category": "Project Stage Management",
     "name": "project.stage:delete",
     "description": "Delete project stage entries"
   },
   {
     "category": "Project Stage Management",
-    "name": "project.stage:transition.submitted.shortlisted",
-    "description": "Move stage from submitted to shortlisted for review"
+    "name": "project.stage:transition.submitted.accepted",
+    "description": "Accept a submitted project"
   },
   {
     "category": "Project Stage Management",
-    "name": "project.stage:transition.shortlisted.submitted",
-    "description": "Revert stage from shortlisted to submitted"
+    "name": "project.stage:transition.submitted.rejected",
+    "description": "Reject a submitted project"
   },
   {
     "category": "Project Stage Management",
-    "name": "project.stage:transition.submitted.refused",
-    "description": "Refuse a submission during initial screening"
+    "name": "project.stage:transition.accepted.submitted",
+    "description": "Revert an accepted project back to submitted"
   },
   {
     "category": "Project Stage Management",
-    "name": "project.stage:transition.shortlisted.reviewed",
-    "description": "Mark a shortlisted project as reviewed"
-  },
-  {
-    "category": "Project Stage Management",
-    "name": "project.stage:transition.reviewed.accepted",
-    "description": "Formally accept a project after review"
-  },
-  {
-    "category": "Project Stage Management",
-    "name": "project.stage:transition.reviewed.rejected",
-    "description": "Reject a project after it has been reviewed"
-  },
-  {
-    "category": "Project Stage Management",
-    "name": "project.stage:transition.reviewed.shortlisted",
-    "description": "Revert a reviewed project back to the shortlist"
-  },
-  {
-    "category": "Project Stage Management",
-    "name": "project.stage:transition.accepted.reviewed",
-    "description": "Revert an accepted project back to reviewed status"
-  },
-  {
-    "category": "Project Stage Management",
-    "name": "project.stage:transition.rejected.reviewed",
-    "description": "Revert a rejected project back to reviewed status"
-  },
-  {
-    "category": "Project Stage Management",
-    "name": "project.stage:transition.refused.submitted",
-    "description": "Revert a refused submission back to submitted for correction"
+    "name": "project.stage:transition.rejected.submitted",
+    "description": "Reopen a rejected project and move it back to submitted"
   },
   {
     "category": "Report Management",

@@ -3,12 +3,13 @@ import { CreateStageDTO, ExistsStageDTO, GetStageDTO, UpdateStageDTO } from "./g
 import { IGrantStage, GrantStage } from "./grant.stage.model";
 
 export interface IGrantStageRepository {
-    findById(id: string): Promise<IGrantStage | null>;
+    findById(id: string, session?: ClientSession): Promise<IGrantStage | null>;
     find(filters: GetStageDTO): Promise<IGrantStage[]>;
     findOne(grantId: string, order: number, session?: ClientSession): Promise<IGrantStage | null>;
     create(dto: CreateStageDTO): Promise<IGrantStage>;
     update(id: string, data: UpdateStageDTO["data"]): Promise<IGrantStage | null>;
     updateMany(filter: any, update: any): Promise<any>;
+    countStages(grantId: string, session?: ClientSession): Promise<number>;
     exists(filters: ExistsStageDTO): Promise<boolean>;
     delete(id: string): Promise<IGrantStage | null>;
 }
@@ -16,8 +17,19 @@ export interface IGrantStageRepository {
 
 export class GrantStageRepository implements IGrantStageRepository {
 
-    async findById(id: string) {
-        return GrantStage.findById(new mongoose.Types.ObjectId(id))
+    async findById(
+        id: string,
+        session?: ClientSession
+    ) {
+        let dbQuery = GrantStage.findById(
+            new mongoose.Types.ObjectId(id)
+        );
+
+        if (session) {
+            dbQuery = dbQuery.session(session);
+        }
+
+        return dbQuery
             .lean<IGrantStage>()
             .exec();
     }
@@ -66,22 +78,44 @@ export class GrantStageRepository implements IGrantStageRepository {
         });
     }
 
-    async update(id: string, dtoData: UpdateStageDTO["data"]): Promise<IGrantStage | null> {
+    async update(
+        id: string,
+        dtoData: UpdateStageDTO["data"]
+    ): Promise<IGrantStage | null> {
         const updateData: Partial<IGrantStage> = {};
+
         if (dtoData.name !== undefined) {
             updateData.name = dtoData.name;
         }
+
+        if (dtoData.order !== undefined) {
+            updateData.order = dtoData.order;
+        }
+
         if (dtoData.minReviewers !== undefined) {
             updateData.minReviewers = dtoData.minReviewers;
         }
+
         if (dtoData.maxReviewers !== undefined) {
             updateData.maxReviewers = dtoData.maxReviewers;
         }
+
+        // NEW: decision mode
+        if (dtoData.decisionMode !== undefined) {
+            updateData.decisionMode = dtoData.decisionMode;
+        }
+
+        // NEW: acceptance threshold
+        if (dtoData.minAcceptanceScore !== undefined) {
+            updateData.minAcceptanceScore = dtoData.minAcceptanceScore;
+        }
+
         /*
         if (dtoData.evaluation !== undefined) {
             updateData.evaluation = new mongoose.Types.ObjectId(dtoData.evaluation);
         }
         */
+
         return GrantStage.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },
@@ -93,19 +127,40 @@ export class GrantStageRepository implements IGrantStageRepository {
         return GrantStage.updateMany(filter, update).exec();
     }
 
+    async countStages(
+        grantId: string,
+        session?: ClientSession
+    ) {
+        let dbQuery = GrantStage.countDocuments({
+            grant: new mongoose.Types.ObjectId(grantId)
+        });
+
+        if (session) {
+            dbQuery = dbQuery.session(session);
+        }
+        return dbQuery.exec();
+    }
+
     async exists(filters: ExistsStageDTO): Promise<boolean> {
         const query: any = {};
-        const { grant, evaluation } = filters;
+
+        const { grant, evaluation, order } = filters;
+
         if (grant) {
             query.grant = new mongoose.Types.ObjectId(grant);
         }
+
         if (evaluation) {
             query.evaluation = new mongoose.Types.ObjectId(evaluation);
         }
+
+        if (order !== undefined) {
+            query.order = order;
+        }
+
         const result = await GrantStage.exists(query).exec();
         return result !== null;
     }
-
     async delete(id: string) {
         return await GrantStage.findByIdAndDelete(id).exec();
     }

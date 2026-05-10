@@ -5,7 +5,10 @@ import { GetProjectStageOptions, ProjectStage, sanitizeProjectStage } from "../m
 
 const end_point = "/project/stages";
 
-export const ProjectStageApi: EntityApi<ProjectStage, GetProjectStageOptions | undefined> = {
+export const ProjectStageApi: EntityApi<ProjectStage, GetProjectStageOptions | undefined>
+    & {
+        calculateTotalScore: (id: string) => Promise<number>;
+    } = {
 
     // ---------------------------
     // Fetch / Query
@@ -78,6 +81,11 @@ export const ProjectStageApi: EntityApi<ProjectStage, GetProjectStageOptions | u
     async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
         const url = `${end_point}/${id}/transition`;
         return ApiClient.patch(url, dto);
+    },
+
+    async calculateTotalScore(id: string): Promise<number> {
+        const res = await ApiClient.post(`${end_point}/${id}/calculate-score`, {});
+        return res.totalScore;
     },
     // ---------------------------
     // Delete

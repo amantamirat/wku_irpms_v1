@@ -1,20 +1,19 @@
 'use client';
-import { useMemo, useState } from "react";
 import { createEntityManager } from "@/components/createEntityManager";
-import { Project, GetProjectsOptions } from "../models/project.model";
-import { ProjectApi } from "../api/project.api";
-import SaveProject from "./SaveProject";
-import ProjectDetail from "./ProjectDetail";
-import { GrantAllocation } from "../../grants/allocations/models/grant.allocation.model";
-import { User } from "../../users/models/user.model";
-import { Organization } from "../../organizations/models/organization.model";
-import MyBadge from "@/templates/MyBadge";
-import { PROJECT_STATUS_ORDER, PROJECT_TRANSITIONS } from "../models/project.state-machine";
-import { getAllocationLabel } from "../../grants/allocations/components/AllocationTempletes";
-import { Calendar } from "../../calendars/models/calendar.model";
-import { Grant } from "../../grants/models/grant.model";
 import { useAuth } from "@/contexts/auth-context";
-import { STATUS_BUTTON_CONFIG } from "@/components/status-button.config";
+import MyBadge from "@/templates/MyBadge";
+import { useMemo } from "react";
+import { Calendar } from "../../calendars/models/calendar.model";
+import { getAllocationLabel } from "../../grants/allocations/components/AllocationTempletes";
+import { GrantAllocation } from "../../grants/allocations/models/grant.allocation.model";
+import { Grant } from "../../grants/models/grant.model";
+import { Organization } from "../../organizations/models/organization.model";
+import { User } from "../../users/models/user.model";
+import { ProjectApi } from "../api/project.api";
+import { GetProjectsOptions, Project, ProjectStatus } from "../models/project.model";
+import { PROJECT_STATUS_ORDER, PROJECT_TRANSITIONS } from "../models/project.state-machine";
+import ProjectDetail from "./ProjectDetail";
+import SaveProject from "./SaveProject";
 
 interface ProjectManagerProps {
     grantAllocation?: GrantAllocation;
@@ -33,7 +32,7 @@ const ProjectManager = ({ grantAllocation, applicant, grant, calendar, workspace
         const cols: any[] = [
             {
                 header: "Allocation",
-                field: "grantAllocation",
+                field: "grantAllocation.grant.title",
                 sortable: true,
                 body: (r: Project) => (
                     <div
@@ -120,6 +119,8 @@ const ProjectManager = ({ grantAllocation, applicant, grant, calendar, workspace
                 transitions: PROJECT_TRANSITIONS,
                 statusOrder: PROJECT_STATUS_ORDER
             },
+            hideDefaultActions: !applicant,
+            disableDeleteRow: (row) => row.status !== ProjectStatus.draft,
             expandable: {
                 template: (project) => <ProjectDetail project={project} />
             }

@@ -1,16 +1,17 @@
 'use client';
+
 import { EvaluationApi } from '@/app/(main)/evaluations/api/evaluation.api';
 import { Evaluation } from '@/app/(main)/evaluations/models/evaluation.model';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
-import { InputNumber } from 'primereact/inputnumber'; // New Import
+import { InputNumber } from 'primereact/inputnumber';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { GrantStageApi } from '../api/grant.stage.api';
-import { GrantStage, validateGrantStage } from '../models/grant.stage.model';
+import { GrantStage, DecisionMode, validateGrantStage } from '../models/grant.stage.model';
 import { Grant } from '../../models/grant.model';
 import { GrantApi } from '../../api/grant.api';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
@@ -18,42 +19,46 @@ import { EvaluationStatus } from '@/app/(main)/evaluations/models/evaluation.sta
 
 const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<GrantStage>) => {
     const toast = useRef<Toast>(null);
-    const [localStage, setLocalStage] = useState<GrantStage>({ ...item });
-    const [submitted, setSubmitted] = useState(false);
 
+    const [localStage, setLocalStage] = useState<GrantStage>({
+        ...item,
+        decisionMode: item.decisionMode ?? DecisionMode.MANUAL,
+        minAcceptanceScore: item.minAcceptanceScore ?? 0,
+    });
+
+    const [submitted, setSubmitted] = useState(false);
     const [grants, setGrants] = useState<Grant[] | undefined>(undefined);
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
+
     const isGrantPredefined = !!item.grant;
     const isEvaluationPredefined = !!item.evaluation;
 
+    // Helper to get max possible score from the selected evaluation
+    const maxPossibleScore = useMemo(() => {
+        const evalObj = localStage.evaluation as Evaluation;
+        return evalObj?.weight ?? 100; // Fallback to 100 if weight isn't defined
+    }, [localStage.evaluation]);
+
     useEffect(() => {
-        if (isGrantPredefined) return;
-        const loadGrants = async () => {
-            try {
-                const data = await GrantApi.getAll();
-                setGrants(data);
-            } catch (err) {
-                console.error('Failed to load grants:', err);
-            }
-        };
-        loadGrants();
+        if (!isGrantPredefined) {
+            GrantApi.getAll().then(setGrants).catch(console.error);
+        }
     }, [isGrantPredefined]);
 
     useEffect(() => {
-        if (isEvaluationPredefined) return;
-        const fetchEvaluations = async () => {
-            try {
-                const data = await EvaluationApi.getAll({ status: EvaluationStatus.published });
-                setEvaluations(data);
-            } catch (err) {
-                console.error('Failed to fetch evaluations:', err);
-            }
-        };
-        fetchEvaluations();
+        if (!isEvaluationPredefined) {
+            EvaluationApi.getAll({ status: EvaluationStatus.published })
+                .then(setEvaluations)
+                .catch(console.error);
+        }
     }, [isEvaluationPredefined]);
 
     useEffect(() => {
-        setLocalStage({ ...item });
+        setLocalStage({
+            ...item,
+            decisionMode: item.decisionMode ?? DecisionMode.MANUAL,
+            minAcceptanceScore: item.minAcceptanceScore ?? 0,
+        });
     }, [item]);
 
     useEffect(() => {
@@ -62,25 +67,31 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
 
     const clearForm = () => {
         setSubmitted(false);
-        setLocalStage({ ...item });
+        setLocalStage({
+            ...item,
+            decisionMode: DecisionMode.MANUAL,
+            minAcceptanceScore: 0,
+        });
     };
 
     const saveStage = async () => {
         try {
             setSubmitted(true);
+
+            // 1. Custom Weight Validation
+            if (localStage.minAcceptanceScore > maxPossibleScore) {
+                throw new Error(`Min Acceptance Score cannot exceed the Evaluation weight (${maxPossibleScore})`);
+            }
+
             const validation = validateGrantStage(localStage);
             if (!validation.valid) throw new Error(validation.message);
 
             let saved: GrantStage;
-
-            if (localStage._id) saved = await GrantStageApi.update(localStage);
-            else saved = await GrantStageApi.create(localStage);
-
-            saved = {
-                ...saved,
-                grant: localStage.grant,
-                evaluation: localStage.evaluation
-            };
+            if (localStage._id) {
+                saved = await GrantStageApi.update(localStage);
+            } else {
+                saved = await GrantStageApi.create(localStage);
+            }
 
             toast.current?.show({
                 severity: 'success',
@@ -89,25 +100,20 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                 life: 2000,
             });
 
-            onComplete?.(saved);
+            onComplete?.({ ...saved, evaluation: localStage.evaluation });
         } catch (err: any) {
             toast.current?.show({
                 severity: 'error',
                 summary: 'Error',
                 detail: err.message || 'Failed to save Stage',
-                life: 2000,
+                life: 3000,
             });
         }
     };
 
-    const hide = () => {
-        clearForm();
-        onHide();
-    };
-
     const footer = (
         <>
-            <Button label="Cancel" icon="pi pi-times" text onClick={hide} />
+            <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
             <Button label="Save" icon="pi pi-check" onClick={saveStage} />
         </>
     );
@@ -115,6 +121,7 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
     return (
         <>
             <Toast ref={toast} />
+
             <Dialog
                 visible={visible}
                 style={{ width: '600px' }}
@@ -122,83 +129,110 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                 modal
                 className="p-fluid"
                 footer={footer}
-                onHide={hide}
+                onHide={onHide}
             >
-                {/* Grant Selector */}
+                {/* Grant */}
                 <div className="field">
-                    <label htmlFor="grant">Grant</label>
+                    <label className="font-bold">Grant</label>
                     {isGrantPredefined ? (
                         <InputText value={(localStage.grant as Grant)?.title} disabled />
                     ) : (
                         <Dropdown
-                            id="grant"
                             value={localStage.grant}
                             dataKey="_id"
                             options={grants}
                             optionLabel="title"
-                            onChange={(e) => setLocalStage({ ...localStage, grant: e.value })}
-                            placeholder="Select Grant"
-                            className={classNames({ 'p-invalid': submitted && !localStage.grant })}
+                            placeholder="Select a Grant"
+                            onChange={(e) => setLocalStage((p) => ({ ...p, grant: e.value }))}
                         />
                     )}
                 </div>
 
-                {/* Stage Name */}
+                {/* Name */}
                 <div className="field">
-                    <label htmlFor="name">Stage Name</label>
+                    <label className="font-bold">Stage Name</label>
                     <InputText
-                        id="name"
                         value={localStage.name}
-                        onChange={(e) => setLocalStage({ ...localStage, name: e.target.value })}
-                        required
-                        autoFocus
+                        onChange={(e) => setLocalStage((p) => ({ ...p, name: e.target.value }))}
                         className={classNames({ 'p-invalid': submitted && !localStage.name })}
                     />
                 </div>
 
-                {/* Evaluation Selector */}
+                {/* Evaluation */}
                 <div className="field">
-                    <label htmlFor="evaluation">Evaluation</label>
+                    <label className="font-bold">Evaluation</label>
                     {isEvaluationPredefined ? (
                         <InputText value={(localStage.evaluation as Evaluation)?.title} disabled />
                     ) : (
                         <Dropdown
-                            id="evaluation"
-                            dataKey="_id"
                             value={localStage.evaluation}
+                            dataKey="_id"
                             options={evaluations}
                             optionLabel="title"
-                            onChange={(e) => setLocalStage({ ...localStage, evaluation: e.value })}
-                            placeholder="Select Evaluation"
-                            className={classNames({ 'p-invalid': submitted && !localStage.evaluation })}
+                            placeholder="Select an Evaluation"
+                            onChange={(e) => {
+                                setLocalStage((p) => ({ 
+                                    ...p, 
+                                    evaluation: e.value,
+                                    // Reset score if it exceeds new evaluation weight
+                                    minAcceptanceScore: p.minAcceptanceScore > (e.value?.weight || 100) ? 0 : p.minAcceptanceScore
+                                }));
+                            }}
                         />
                     )}
                 </div>
 
-                {/* Reviewer Limits */}
+                {/* Reviewers */}
                 <div className="formgrid grid">
                     <div className="field col">
-                        <label htmlFor="minReviewers">Min Reviewers</label>
+                        <label className="font-bold">Min Reviewers</label>
                         <InputNumber
-                            id="minReviewers"
                             value={localStage.minReviewers}
-                            onValueChange={(e) => setLocalStage({ ...localStage, minReviewers: e.value ?? undefined })}
-                            min={0}
-                            showButtons
-                            buttonLayout="stacked"
+                            onValueChange={(e) => setLocalStage((p) => ({ ...p, minReviewers: e.value ?? undefined }))}
                         />
                     </div>
                     <div className="field col">
-                        <label htmlFor="maxReviewers">Max Reviewers</label>
+                        <label className="font-bold">Max Reviewers</label>
                         <InputNumber
-                            id="maxReviewers"
                             value={localStage.maxReviewers}
-                            onValueChange={(e) => setLocalStage({ ...localStage, maxReviewers: e.value ?? undefined })}
-                            min={0}
-                            showButtons
-                            buttonLayout="stacked"
+                            onValueChange={(e) => setLocalStage((p) => ({ ...p, maxReviewers: e.value ?? undefined }))}
                         />
                     </div>
+                </div>
+
+                {/* Decision Mode */}
+                <div className="field">
+                    <label className="font-bold">Decision Mode</label>
+                    <Dropdown
+                        value={localStage.decisionMode}
+                        options={[
+                            { label: 'Manual', value: DecisionMode.MANUAL },
+                            { label: 'Automatic', value: DecisionMode.AUTOMATIC },
+                        ]}
+                        onChange={(e) => setLocalStage((p) => ({ ...p, decisionMode: e.value }))}
+                    />
+                </div>
+
+                {/* Min Acceptance Score - Now visible in both modes */}
+                <div className="field">
+                    <label className="font-bold">
+                        Min Acceptance Score {localStage.evaluation && `(Max: ${maxPossibleScore})`}
+                    </label>
+                    <InputNumber
+                        value={localStage.minAcceptanceScore}
+                        min={0}
+                        max={maxPossibleScore}
+                        onValueChange={(e) =>
+                            setLocalStage((p) => ({
+                                ...p,
+                                minAcceptanceScore: e.value ?? 0,
+                            }))
+                        }
+                        className={classNames({ 'p-invalid': submitted && localStage.minAcceptanceScore > maxPossibleScore })}
+                    />
+                    {submitted && localStage.minAcceptanceScore > maxPossibleScore && (
+                        <small className="p-error">Score cannot exceed {maxPossibleScore}</small>
+                    )}
                 </div>
             </Dialog>
         </>

@@ -12,7 +12,7 @@ export enum ProjectStatus {
     submitted = "submitted",
     rejected = "rejected",
     accepted = "accepted",
-    negotiation = "negotiation",
+    finalization = "finalization",
     approved = "approved",
     granted = "granted",
     completed = 'completed'

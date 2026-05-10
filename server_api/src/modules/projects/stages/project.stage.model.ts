@@ -4,9 +4,9 @@ import { COLLECTIONS } from "../../../common/constants/collections.enum";
 
 export enum ProjectStageStatus {
     submitted = 'submitted',
-    shortlisted = 'shortlisted',
-    refused = 'refused',
-    reviewed = 'reviewed',
+    //shortlisted = 'shortlisted',
+    //refused = 'refused',
+    //reviewed = 'reviewed',
     accepted = 'accepted',
     rejected = 'rejected'
 }

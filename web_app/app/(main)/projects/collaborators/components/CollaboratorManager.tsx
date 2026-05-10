@@ -4,7 +4,7 @@ import { CollaboratorApi } from "../api/collaborator.api";
 import { Collaborator, CollaboratorStatus, GetCollaboratorsOptions } from "../models/collaborator.model";
 import MyBadge from "@/templates/MyBadge";
 import { Badge } from "primereact/badge";
-import { Project } from "../../models/project.model";
+import { Project, ProjectStatus } from "../../models/project.model"; // Ensure ProjectStatus is imported
 import { COLLAB_STATUS_ORDER, COLLAB_TRANSITIONS } from "../models/collaborator.state-machine";
 import SaveCollaborator from "./SaveCollaborator";
 import { User } from "@/app/(main)/users/models/user.model";
@@ -15,7 +15,14 @@ interface CollaboratorManagerProps {
 }
 
 const CollaboratorManager = ({ project, applicant }: CollaboratorManagerProps) => {
-    // Define columns dynamically based on whether props are provided
+
+    // 1. Logic: Determine if adding collaborators is allowed based on Project Status
+    // We allow adding if the project is in 'draft' or 'finalization' (formerly negotiation)
+    const canManageTeam = project && (
+        project.status === ProjectStatus.draft ||
+        project.status === ProjectStatus.finalization
+    );
+
     const columns = [];
 
     if (!applicant) {
@@ -25,10 +32,9 @@ const CollaboratorManager = ({ project, applicant }: CollaboratorManagerProps) =
             sortable: true,
             body: (c: Collaborator) => (
                 <div className="flex align-items-center gap-2">
-                   {
-                    // <i className="pi pi-user text-primary"></i>
-                   }
-                    <span>{typeof c.applicant === "object" ? c.applicant?.name : "Unknown Member"}</span>
+                    <span className="font-medium">
+                        {typeof c.applicant === "object" ? c.applicant?.name : "Unknown Member"}
+                    </span>
                     {c.isLeadPI && (
                         <Badge value="Lead PI" severity="info" />
                     )}
@@ -44,16 +50,33 @@ const CollaboratorManager = ({ project, applicant }: CollaboratorManagerProps) =
             sortable: true,
             body: (c: Collaborator) => (
                 <div className="truncate text-sm" style={{ maxWidth: '250px' }}>
-                    {typeof c.project === "object" ?
-                        c.project?.title
-                        : "Loading ..."}
+                    {typeof c.project === "object" ? c.project?.title : "Loading ..."}
                 </div>
             )
         });
+
+        columns.push({
+            header: "Lead PI",
+            field: "project.applicant.name",
+            sortable: true,
+            body: (c: Collaborator) => {
+                const applicant =
+                    typeof c.project === "object" &&
+                        c.project &&
+                        typeof c.project.applicant === "object"
+                        ? c.project.applicant
+                        : null;
+                return (
+                    <div
+                        className="truncate text-sm"
+                        style={{ maxWidth: "250px" }}
+                    >
+                        {applicant?.name ?? "Loading..."}
+                    </div>
+                );
+            }
+        });
     }
-
-
-
 
     columns.push(
         {
@@ -65,9 +88,7 @@ const CollaboratorManager = ({ project, applicant }: CollaboratorManagerProps) =
                     {c.role || "No Role Assigned"}
                 </span>
             )
-        }
-    );
-    columns.push(
+        },
         {
             field: "status",
             header: "Status",
@@ -78,11 +99,13 @@ const CollaboratorManager = ({ project, applicant }: CollaboratorManagerProps) =
     );
 
     const Manager = createEntityManager<Collaborator, GetCollaboratorsOptions | undefined>({
-        title: project ? 'Teams' : "Collaborators",
+        title: project ? 'Project Team' : "Collaborators",
         itemName: "Collaborator",
         api: CollaboratorApi,
         columns,
-        createNew: project
+
+        // 2. Conditional Action: Only provide 'createNew' if project status allows it
+        createNew: canManageTeam
             ? () => ({
                 project: project,
                 applicant: applicant ?? undefined,
@@ -90,7 +113,10 @@ const CollaboratorManager = ({ project, applicant }: CollaboratorManagerProps) =
                 status: CollaboratorStatus.pending
             })
             : undefined,
-        SaveDialog: project ? SaveCollaborator : undefined,
+
+        // 3. Conditional UI: Hide Dialog if the project is locked (not in submitted/finalization)
+        SaveDialog: canManageTeam ? SaveCollaborator : undefined,
+
         permissionPrefix: "collaborator",
         query: () => ({
             project,
@@ -103,9 +129,10 @@ const CollaboratorManager = ({ project, applicant }: CollaboratorManagerProps) =
             statusOrder: COLLAB_STATUS_ORDER
         } : undefined,
 
-        hideDefaultActions: !project,
-        disableDeleteRow: (row) => row.status === CollaboratorStatus.verified
-
+        // If we can't manage the team, we should hide default actions (Edit/Delete)
+        hideDefaultActions: !canManageTeam,
+        disableDeleteRow: (row) => row.status === CollaboratorStatus.verified,
+        hideSearch: !!project
     });
 
     return <Manager />;

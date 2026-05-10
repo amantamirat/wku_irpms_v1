@@ -1,4 +1,4 @@
-import { PhaseStatus } from "./phase.status";
+import { PhaseStatus } from "./phase.model";
 
 export const PHASE_TRANSITIONS: Record<PhaseStatus, PhaseStatus[]> = {
     [PhaseStatus.proposed]: [PhaseStatus.reviewed],

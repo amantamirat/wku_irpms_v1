@@ -45,17 +45,11 @@
         color: #4A148C;
     }
 
-    &.status-under_review {
-        background: #e5e7eb; // light gray
-        color: #374151; // dark gray text
-    }
+    
 
-    &.status-shortlisted {
-        background: #BBDEFB;
-        color: #0D47A1;
-    }
+    
 
-    &.status-negotiation {
+    &.status-finalization {
         background: #f1f3f5;
         color: #495057;
     }

@@ -1,8 +1,14 @@
 'use client';
+
 import { createEntityManager } from "@/components/createEntityManager";
 import { Grant } from "../../models/grant.model";
 import { GrantStageApi } from "../api/grant.stage.api";
-import { createEmptyGrantStage, GetStagesDTO, GrantStage } from "../models/grant.stage.model";
+import {
+    createEmptyGrantStage,
+    GetStagesDTO,
+    GrantStage,
+    DecisionMode,
+} from "../models/grant.stage.model";
 import SaveStage from "./SaveGrantStage";
 import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
 
@@ -16,37 +22,75 @@ const GrantStageManager = ({ grant, evaluation }: GrantStageManagerProps) => {
         title: "Manage Stages",
         itemName: "Stage",
         api: GrantStageApi,
+
         columns: [
             { header: "Name", field: "name" },
             { header: "Order", field: "order" },
+
             {
                 header: "Evaluation",
                 field: "evaluation",
                 body: (s: GrantStage) =>
-                    typeof s.evaluation === "object" ? s.evaluation?.title : s.evaluation
+                    typeof s.evaluation === "object"
+                        ? s.evaluation?.title
+                        : s.evaluation,
             },
+
             {
-                field: 'minReviewers',
-                header: 'Min. Reviewers',
-                style: { width: '10rem' },
-                body: (rowData: GrantStage) => rowData.minReviewers ?? '-'
+                header: "Min Reviewers",
+                field: "minReviewers",
+                style: { width: "10rem" },
+                body: (row: GrantStage) => row.minReviewers ?? "-",
             },
+
             {
-                field: 'maxReviewers',
-                header: 'Max. Reviewers',
-                style: { width: '10rem' },
-                body: (rowData: GrantStage) => rowData.maxReviewers ?? '-'
+                header: "Max Reviewers",
+                field: "maxReviewers",
+                style: { width: "10rem" },
+                body: (row: GrantStage) => row.maxReviewers ?? "-",
+            },
+
+            // NEW: Decision Mode
+            {
+                header: "Decision",
+                field: "decisionMode",
+                body: (row: GrantStage) =>
+                    row.decisionMode === DecisionMode.AUTOMATIC ? (
+                        <span className="text-green-600 font-semibold">
+                            Auto
+                        </span>
+                    ) : (
+                        <span className="text-orange-500 font-semibold">
+                            Manual
+                        </span>
+                    ),
+            },
+
+            // NEW: Acceptance Score
+            {
+                header: "Min Score",
+                field: "minAcceptanceScore",
+                style: { width: "10rem" },
+                body: (row: GrantStage) =>
+                    `${row.minAcceptanceScore ?? 0}%`
             },
         ],
+
         createNew: () =>
-            createEmptyGrantStage({ grant, evaluation }),
+            createEmptyGrantStage({
+                grant,
+                evaluation,
+            }),
+
         SaveDialog: SaveStage,
+
         permissionPrefix: "grant.stage",
+
         query: () => ({
             grant: grant ?? undefined,
             evaluation: evaluation ?? undefined,
-            populate: true
-        })
+            populate: true,
+        }),
     });
 
     return <Manager />;

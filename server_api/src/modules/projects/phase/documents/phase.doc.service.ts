@@ -1,7 +1,7 @@
 import { AppError } from "../../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../../common/errors/error.codes";
 import { IPhaseRepository, PhaseRepository } from "../phase.repository";
-import { PhaseStatus } from "../phase.status";
+import { PhaseStatus } from "../phase.model";
 import { CreatePhaseDocDTO, GetPhaseDocDTO } from "./phase.doc.dto";
 import { IPhaseDocumentRepository, PhaseDocumentRepository } from "./phase.doc.repository";
 

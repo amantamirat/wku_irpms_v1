@@ -120,6 +120,8 @@ const Page = () => {
                                             <ProjectStageManager
                                                 grantStage={stage}
                                                 grantAllocation={selectedAlloc}
+                                                hideReviewer={false}
+                                                //hideDeleteAction={true}
                                             />
                                         </div>
                                     </TabPanel>

@@ -12,14 +12,16 @@ export class StageController {
 
     create = async (req: Request, res: Response) => {
         try {
-            const { grant, name, evaluation, minReviewers, maxReviewers } = req.body;
+            const { grant, name, evaluation, minReviewers, maxReviewers, decisionMode, minAcceptanceScore } = req.body;
 
             const dto: CreateStageDTO = {
                 grant: grant as string,
                 name,
                 evaluation: evaluation as string,
                 minReviewers,
-                maxReviewers
+                maxReviewers,
+                decisionMode,
+                minAcceptanceScore
             };
 
             const stage = await this.service.create(dto);
@@ -61,17 +63,29 @@ export class StageController {
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.params;
-            const { name, minReviewers, maxReviewers } = req.body;
+            const {
+                name,
+                order,
+                minReviewers,
+                maxReviewers,
+                decisionMode,
+                minAcceptanceScore,
+            } = req.body;
+
             const dto: UpdateStageDTO = {
-                id: id,
+                id,
                 data: {
-                    name,
-                    minReviewers,
-                    maxReviewers
+                    ...(name !== undefined && { name }),
+                    ...(order !== undefined && { order }),
+                    ...(minReviewers !== undefined && { minReviewers }),
+                    ...(maxReviewers !== undefined && { maxReviewers }),
+                    ...(decisionMode !== undefined && { decisionMode }),
+                    ...(minAcceptanceScore !== undefined && { minAcceptanceScore }),
                 },
             };
+
             const updated = await this.service.update(dto);
-            successResponse(res, 200, 'Stage updated successfully', updated);
+            successResponse(res, 200, "Stage updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }

@@ -8,10 +8,10 @@ import { ConstraintValidator } from "../../grants/constraints/constraint.validat
 import { ProjectAuth } from "../project.auth";
 import { IProjectRepository } from "../project.repository";
 import { ProjectStatus } from "../project.model";
-import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto } from "./phase.dto";
+import { CreatePhaseDto, GetPhasesOptions, PhaseDto, UpdatePhaseDto } from "./phase.dto";
 import { IPhaseRepository } from "./phase.repository";
 import { PHASE_TRANSITIONS } from "./phase.state-machine";
-import { PhaseStatus } from "./phase.status";
+import { PhaseStatus } from "./phase.model";
 
 export class PhaseService {
     constructor(
@@ -25,7 +25,7 @@ export class PhaseService {
         const projectDoc = await this.projAuth.authProject(project, applicant, session);
         if (
             projectDoc.status !== ProjectStatus.draft &&
-            projectDoc.status !== ProjectStatus.negotiation
+            projectDoc.status !== ProjectStatus.finalization
         ) {
             throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
         }
@@ -40,17 +40,15 @@ export class PhaseService {
         if (!options?.skipValidation) {
             const projectDoc = await this.validateProject(project, applicantId ?? "", session);
             const grantId = String((projectDoc.grantAllocation as any).grant);
-            // 1. Get existing phases + new phase to check totals
             const existingPhases = await this.phaseRepo.find({ project }, session);
             const proposedPhases = [...existingPhases, dto];
-            // 2. Validate against Grant constraints
             await this.validator.validatePhases(grantId, proposedPhases);
         }
 
         try {
             const count = await this.phaseRepo.countByProject(project, session);
             const order = count + 1;
-            const created = await this.phaseRepo.create({...dto, order}, session);
+            const created = await this.phaseRepo.create({ ...dto, order }, session);
             // ✅ Increment totals
             await this.projRepo.incrementTotals(project, {
                 duration: created.duration ?? 0,
@@ -81,30 +79,24 @@ export class PhaseService {
 
         const phaseDoc = await this.phaseRepo.findById(id);
         if (!phaseDoc) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
+        if (phaseDoc.status !== PhaseStatus.proposed)
+            throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
 
         const projectId = String(phaseDoc.project);
         const projectDoc = await this.validateProject(projectId, applicantId);
         const grantId = String((projectDoc.grantAllocation as any).grant);
 
-        if (phaseDoc.status !== PhaseStatus.proposed)
-            throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
-
         const allPhases = await this.phaseRepo.find({ project: projectId });
-        const proposedPhases = allPhases.map(p =>
-            String(p._id) === id ? { ...p.toObject(), ...data } : p
-        );
-
-        // 2. Validate
+        const proposedPhases = allPhases.map(p => String(p._id) === id
+            ? { ...p, ...data } : p);
         await this.validator.validatePhases(grantId, proposedPhases);
 
         const oldDuration = phaseDoc.duration ?? 0;
         const oldBudget = phaseDoc.budget ?? 0;
-
         const updated = await this.phaseRepo.update(id, data);
 
         const newDuration = updated?.duration ?? 0;
         const newBudget = updated?.budget ?? 0;
-
         // ✅ Adjust totals (delta)
         await this.projRepo.incrementTotals(projectId, {
             duration: newDuration - oldDuration,
@@ -118,7 +110,7 @@ export class PhaseService {
     // TRANSITION
     // ---------------------------------------------------
     async transitionState(dto: TransitionRequestDto) {
-        const { id, next, applicantId, current } = dto;
+        const { id, next, current } = dto;
 
         const phaseDoc = await this.phaseRepo.findById(id);
         if (!phaseDoc) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
@@ -133,15 +125,13 @@ export class PhaseService {
 
         const projectDoc = await this.projRepo.findById(String(phaseDoc.project));
         if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
-
         const projectStatus = projectDoc.status;
 
-        if (to === PhaseStatus.reviewed) {
-            if (projectStatus !== ProjectStatus.negotiation)
-                throw new AppError(ERROR_CODES.PROJECT_NOT_IN_NEGOTIATION);
-
-            if (String(projectDoc.applicant) !== applicantId)
-                throw new AppError(ERROR_CODES.UNAUTHORIZED);
+        if (to === PhaseStatus.approved || to === PhaseStatus.reviewed
+            || to === PhaseStatus.proposed
+        ) {
+            if (projectStatus !== ProjectStatus.finalization)
+                throw new AppError(ERROR_CODES.PROJECT_NOT_IN_FINALIZATION);
         }
 
         if (to === PhaseStatus.active) {
@@ -159,22 +149,16 @@ export class PhaseService {
         const { id, userId: applicantId } = dto;
         const phaseDoc = await this.phaseRepo.findById(id);
         if (!phaseDoc) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
-
-        const projectId = String(phaseDoc.project);
-
-        const projectDoc = await this.validateProject(projectId, applicantId ?? "");
-        const grantId = String((projectDoc.grantAllocation as any).grant);
-
         if (phaseDoc.status !== PhaseStatus.proposed)
             throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
 
-        // 1. Simulate list after deletion
+        const projectId = String(phaseDoc.project);
+        const projectDoc = await this.validateProject(projectId, applicantId ?? "");
+        const grantId = String((projectDoc.grantAllocation as any).grant);
+
         const allPhases = await this.phaseRepo.find({ project: projectId });
         const proposedPhases = allPhases.filter(p => String(p._id) !== id);
-
-        // 2. Validate (e.g., checks if we fell below min phase count)
         await this.validator.validatePhases(grantId, proposedPhases);
-
         // ✅ Decrement totals BEFORE delete
         await this.projRepo.incrementTotals(projectId, {
             duration: -(phaseDoc.duration ?? 0),

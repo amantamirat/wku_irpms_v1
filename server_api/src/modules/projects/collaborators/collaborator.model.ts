@@ -1,6 +1,5 @@
 import mongoose, { model, Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
-import { CollaboratorStatus } from "./collaborator.status";
 
 export enum CollaboratorRole {
     CO_I = "CO_I",
@@ -8,6 +7,11 @@ export enum CollaboratorRole {
     //INVESTIGATOR = "INVESTIGATOR",
     //ADVISOR = "ADVISOR",
     //COMMUNITY_PARTNER = "COMMUNITY_PARTNER",
+}
+
+export enum CollaboratorStatus {
+    pending = 'pending',
+    verified = 'verified'
 }
 
 export interface ICollaborator extends Document {
@@ -50,3 +54,4 @@ const CollaboratorSchema = new Schema<ICollaborator>({
 
 CollaboratorSchema.index({ project: 1, applicant: 1 }, { unique: true });
 export const Collaborator = model<ICollaborator>(COLLECTIONS.COLLABORATOR, CollaboratorSchema);
+

@@ -7,6 +7,7 @@ import {
 } from "./project.dto";
 import { IProjectRepository } from "./project.repository";
 
+import mongoose, { ClientSession } from "mongoose";
 import { DeleteDto } from "../../common/dtos/delete.dto";
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
@@ -14,23 +15,22 @@ import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { ICallRepository } from "../calls/call.repository";
 import { CallStatus } from "../calls/call.status";
+import { ICallStageRepository } from "../calls/stages/call.stage.repository";
 import { IGrantAllocationRepository } from "../grants/allocations/grant.allocation.repository";
 import { AllocationStatus } from "../grants/allocations/grant.allocation.state-machine";
 import { ConstraintValidator } from "../grants/constraints/constraint.validator";
 import { ICollaboratorRepository } from "./collaborators/collaborator.repository";
 import { CollaboratorService } from "./collaborators/collaborator.service";
 import { IPhaseRepository } from "./phase/phase.repository";
-import { PROJECT_TRANSITIONS } from "./project.state-machine";
-import { ProjectStatus } from "./project.model";
-import mongoose, { ClientSession } from "mongoose";
-import { IProjectStageRepository } from "./stages/project.stage.repository";
-import { ICallStageRepository } from "../calls/stages/call.stage.repository";
-import { CallStageStatus } from "../calls/stages/call.stage.model";
-import { IProjectSynchronizer } from "./stages/project.stage.synchronizer";
-import { ProjectAuth } from "./project.auth";
-import { ProjectStageStatus } from "./stages/project.stage.model";
 import { PhaseService } from "./phase/phase.service";
+import { ProjectAuth } from "./project.auth";
+import { ProjectStatus } from "./project.model";
+import { PROJECT_TRANSITIONS } from "./project.state-machine";
+import { IProjectStageRepository } from "./stages/project.stage.repository";
 import { ProjectStageService } from "./stages/project.stage.service";
+import { IProjectSynchronizer } from "./stages/project.stage.synchronizer";
+import { PhaseStatus } from "./phase/phase.model";
+import { CollaboratorStatus } from "./collaborators/collaborator.model";
 
 
 export class ProjectService {
@@ -40,14 +40,12 @@ export class ProjectService {
         private readonly projAuth: ProjectAuth,
         private readonly allocRepo: IGrantAllocationRepository,
         private readonly callRepo: ICallRepository,
-        private readonly callStageRepo: ICallStageRepository,
         private readonly collabRepo: ICollaboratorRepository,
         private readonly collabService: CollaboratorService,
         private readonly phaseRepo: IPhaseRepository,
         private readonly phaseService: PhaseService,
         private readonly projectStageRepo: IProjectStageRepository,
-        private readonly projectStageService: ProjectStageService,
-        private readonly synchronizer: IProjectSynchronizer,
+        private readonly projectStageService: ProjectStageService,        
         private readonly validator: ConstraintValidator,
     ) { }
 
@@ -96,12 +94,6 @@ export class ProjectService {
         if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
         if (callDoc.status !== CallStatus.active) throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
 
-        /*
-        const callStageDoc = await this.callStageRepo.findOne(call, 1);
-        if (!callStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-        if (callStageDoc.status !== CallStageStatus.active) throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
-        if (callStageDoc.deadline < new Date()) throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
-*/
         const grantAllocation = String(callDoc.grantAllocation);
         const grantAllocDoc = await this.allocRepo.findById(grantAllocation);
         if (!grantAllocDoc) throw new Error(ERROR_CODES.ALLOCATION_NOT_FOUND);
@@ -176,7 +168,7 @@ export class ProjectService {
     // ---------------------------------------------------
     async update(dto: UpdateProjectDTO) {
         const { id, data, applicantId } = dto;
-        const projectDoc = await this.validateProject(id, applicantId);
+        await this.validateProject(id, applicantId);
         return this.projRepo.update(id, data);
     }
 
@@ -184,11 +176,11 @@ export class ProjectService {
     async transitionState(dto: TransitionRequestDto) {
         const { id, current, next } = dto;
 
-        const proDoc = await this.projRepo.findById(id);
-        if (!proDoc) {
+        const projectDoc = await this.projRepo.findById(id);
+        if (!projectDoc) {
             throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
         }
-        const from = proDoc.status as ProjectStatus;
+        const from = projectDoc.status as ProjectStatus;
         const to = next as ProjectStatus;
 
         if (current && current !== from) {
@@ -201,61 +193,38 @@ export class ProjectService {
             PROJECT_TRANSITIONS
         );
 
-        if (next === ProjectStatus.draft) {
+        if (next === ProjectStatus.draft || next === ProjectStatus.submitted
+            || next === ProjectStatus.rejected ||
+            (from !== ProjectStatus.finalization && next === ProjectStatus.accepted)
+        ) {
             throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
         }
-        if (next === ProjectStatus.submitted) {
-            const projectStages = await this.projectStageRepo.find({ project: id });
 
-            if (projectStages.length === 0) {
-                throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-            }
-            // (Optional) enforce only one stage if that's your rule
-            if (projectStages.length > 1) {
-                throw new AppError(ERROR_CODES.MULTIPLE_STAGES_FOUND);
-            }
-            const projectStageDoc = projectStages[0];
-
-            if (projectStageDoc.status !== ProjectStageStatus.submitted) {
-                throw new AppError(ERROR_CODES.INVALID_STAGE_STATUS);
-            }
+        if (next === ProjectStatus.finalization) {
+            //to send notification to update the phase and collabs and to make approve
         }
+        if (next === ProjectStatus.approved) {
+
+            const phases = await this.phaseRepo.find({ project: id });
+            if (!phases.every(p => p.status === PhaseStatus.approved))
+                throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_APPROVED);
+
+            const collabs = await this.collabRepo.find({ project: id });
+            if (!collabs.every(c => c.status === CollaboratorStatus.verified))
+                throw new AppError(ERROR_CODES.COLLABORATORS_NOT_FULLY_VERIFIED);
+
+        }
+
         return await this.projRepo.updateStatus(id, to);
     }
 
-    /*
-        async transitionState(dto: UpdateStatusDTO) {
-            const { id, status } = dto.data;
-            const next = status;
-    
-            const projectDoc = await this.repository.findById(id);
-            if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
-    
-            const current = projectDoc.status;
-            ProjectStateMachine.validateTransition(current, next);
-    
-            if (next === ProjectStatus.approved) {
-                const phases = await this.phaseRepository.find({ project: id });
-                //validate against grant in here
-                if (!phases.every(p => p.status === PhaseStatus.approved))
-                    throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_APPROVED);
-    
-                const collabs = await this.collabRepository.find({ project: id });
-                if (!collabs.every(c => c.status === CollaboratorStatus.verified))
-                    throw new AppError(ERROR_CODES.COLLABORATORS_NOT_FULLY_VERIFIED);
-            }
-    
-            const updated = await this.repository.update(id, { status: next });
-            return updated;
-    
-        }
-            */
+
     // ---------------------------------------------------
     // DELETE
     // ---------------------------------------------------
     async delete(dto: DeleteDto) {
         const { id, userId: applicantId } = dto;
-        const projectDoc = await this.validateProject(id, applicantId ?? '');
+        await this.validateProject(id, applicantId ?? '');
         await this.collabRepo.deleteByProject(id);
         await this.phaseRepo.deleteByProject(id);
         return this.projRepo.delete(id);

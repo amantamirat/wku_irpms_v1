@@ -64,13 +64,12 @@ export class CollaboratorController {
             if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const { id } = req.params;
-            const { role, isLeadPI } = req.body;
+            const { role } = req.body;
 
             const dto: UpdateCollaboratorDto = {
                 id,
                 data: {
-                    role,
-                    //isLeadPI: isLeadPI ? true : undefined,
+                    role
                 },
                 applicantId: req.auth.userId,
             };

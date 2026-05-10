@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import ReviewerManager from '../components/ReviewerManager';
 import { Button } from 'primereact/button';
 import Link from 'next/link';
@@ -15,29 +15,39 @@ const PendingEvaluations = ({ user }: PendingEvaluationsProps) => {
     const [reviews, setReviews] = useState<Reviewer[] | null>(null);
     const [loading, setLoading] = useState(true);
 
-    const PENDING_STATUSES = useMemo(() => [ReviewerStatus.pending, ReviewerStatus.accepted], []);
+    // 1. Define the fetch logic
+    const fetchPending = useCallback(async (showSilent = false) => {
+        if (!user?._id) return;
+        
+        // Only show the big spinner on initial load, not on refreshes
+        if (!showSilent) setLoading(true); 
+        
+        try {
+            const data = await ReviewerApi.getAll({
+                reviewer: user._id,
+                status: [ReviewerStatus.pending, ReviewerStatus.accepted],
+                populate: true
+            });
+            setReviews(data);
+        } catch (error) {
+            console.error("Failed to fetch evaluations:", error);
+            setReviews([]);
+        } finally {
+            setLoading(false);
+        }
+    }, [user?._id]);
 
+    // 2. Trigger initial fetch on mount (This was missing!)
     useEffect(() => {
-        const fetchPending = async () => {
-            if (!user?._id) return;
-            try {
-                const data = await ReviewerApi.getAll({
-                    reviewer: user._id,
-                    status: PENDING_STATUSES,
-                    populate: true
-                });
-                setReviews(data);
-            } catch (error) {
-                setReviews([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchPending();
-    }, [user?._id, PENDING_STATUSES]);
+    }, [fetchPending]);
 
-    // Only hide the component entirely if we are NOT loading AND we have no items
+    // 3. Callback for the child component
+    const handleRefresh = useCallback(() => {
+        fetchPending(true); // "Silent" update so the whole card doesn't flicker
+    }, [fetchPending]);
+
+    // Only hide if loading is done and there's nothing to show
     if (!loading && (!reviews || reviews.length === 0)) {
         return null;
     }
@@ -63,6 +73,7 @@ const PendingEvaluations = ({ user }: PendingEvaluationsProps) => {
                 <ReviewerManager
                     reviewer={user}
                     reviewers={reviews || []}
+                    onItemsChange={handleRefresh} // Pass the memoized callback
                     hideSearch
                 />
             )}

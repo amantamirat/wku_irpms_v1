@@ -16,8 +16,7 @@ import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
 import { ProjectStatus } from "../project.model";
-import { COLLAB_TRANSITIONS } from "./collaborator.state-machine";
-import { CollaboratorStatus } from "./collaborator.status";
+import { CollaboratorStatus } from "./collaborator.model";
 import { ClientSession } from "mongoose";
 import { ProjectAuth } from "../project.auth";
 import { NotificationService } from "../../notifications/notification.service";
@@ -39,7 +38,7 @@ export class CollaboratorService {
         const projectDoc = await this.projAuth.authProject(project, applicant, session);
         if (
             projectDoc.status !== ProjectStatus.draft &&
-            projectDoc.status !== ProjectStatus.negotiation
+            projectDoc.status !== ProjectStatus.finalization
         ) {
             throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
         }
@@ -48,7 +47,7 @@ export class CollaboratorService {
 
     async create(dto: CreateCollaboratorDto, options?: { skipValidation?: boolean }, session?: ClientSession) {
         const { applicant, project, projectTitle, userId } = dto;
-        // ✅ Skip entire validation if requested
+
         if (!options?.skipValidation) {
             const projectDoc = await this.validateProject(project, applicant, session);
             const grantId = (projectDoc.grantAllocation as any).grant;
@@ -103,9 +102,9 @@ export class CollaboratorService {
         const { id, current, next } = dto;
 
         const collabDoc = await this.collabRepo.findById(id);
-        if (!collabDoc) {
-            throw new AppError(ERROR_CODES.COLLABORATOR_NOT_FOUND);
-        }
+        if (!collabDoc) throw new AppError(ERROR_CODES.COLLABORATOR_NOT_FOUND);
+        if (collabDoc.isLeadPI === true) throw new AppError(ERROR_CODES.USER_LEAD_PI);
+
         const from = collabDoc.status as CollaboratorStatus;
         const to = next as CollaboratorStatus;
 
@@ -123,11 +122,10 @@ export class CollaboratorService {
             const projectDoc = await this.projectRepo.findById(String(collabDoc.project));
             if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
             const projectStatus = projectDoc.status;
-
             if (projectStatus !== ProjectStatus.draft &&
                 projectStatus !== ProjectStatus.submitted &&
                 projectStatus !== ProjectStatus.accepted &&
-                projectStatus !== ProjectStatus.negotiation
+                projectStatus !== ProjectStatus.finalization
             ) {
                 throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
             }
@@ -144,21 +142,14 @@ export class CollaboratorService {
 
         const collabDoc = await this.collabRepo.findById(id);
         if (!collabDoc) throw new Error(ERROR_CODES.COLLABORATOR_NOT_FOUND);
-
-        if (collabDoc.status !== CollaboratorStatus.pending)
-            throw new AppError(ERROR_CODES.COLLABORATOR_NOT_PENDING);
+        if (collabDoc.status !== CollaboratorStatus.pending) throw new AppError(ERROR_CODES.COLLABORATOR_NOT_PENDING);
 
         const project = String(collabDoc.project);
         const projectDoc = await this.validateProject(project, applicantId ?? "");
-        if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
 
-        if (String(projectDoc.applicant) !== applicantId && SYSTEM.SU_USER !== applicantId)
-            throw new AppError(ERROR_CODES.USER_NOT_LEAD_PI);
-
-        if (projectDoc.status !== ProjectStatus.draft &&
-            projectDoc.status !== ProjectStatus.negotiation) {
-            throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
-        }
+        const grantId = (projectDoc.grantAllocation as any).grant;
+        const countCollabs = await this.collabRepo.countByProject(project);
+        await this.validator.validateParticipants(grantId, countCollabs - 1);
 
         const deleted = this.collabRepo.delete(id);
         if (!collabDoc.isLeadPI) {
@@ -169,3 +160,9 @@ export class CollaboratorService {
         return deleted;
     }
 }
+
+
+export const COLLAB_TRANSITIONS: Record<CollaboratorStatus, CollaboratorStatus[]> = {
+    [CollaboratorStatus.pending]: [CollaboratorStatus.verified],
+    [CollaboratorStatus.verified]: [CollaboratorStatus.pending]
+};

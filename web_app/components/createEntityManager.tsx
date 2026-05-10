@@ -193,9 +193,9 @@ export function createEntityManager<
                             statusOrder={config.workflow!.statusOrder}
                             permissionPrefix={config.permissionPrefix}
                             hasPermission={hasPermission}
-                            onTransition={async (next) =>
+                            onTransition={async (next, action) =>
                                 confirm.ask({
-                                    operation: `Change to ${next}`,
+                                    operation: action,
                                     onConfirmAsync: () =>
                                         transitionState(row, {
                                             current,

@@ -13,7 +13,7 @@ const MyProjectsPage = () => {
 
     // Subtle navigation for a professional feel
     const breadcrumbItems = [
-        { label: 'My Applications' }
+        { label: 'My Projects' }
     ];
     const home = { icon: 'pi pi-home', url: '/' };
 

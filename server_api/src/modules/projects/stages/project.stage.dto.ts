@@ -37,6 +37,12 @@ export interface UpdateStatusDTO {
     status: ProjectStageStatus;
 }
 
+export interface ExistsStageDTO {
+    grantStage?: string;
+    callStage?: string;
+    project?:string;
+}
+
 export interface SubmitProjectDTO {
     call: string;
     title: string;
@@ -46,5 +52,12 @@ export interface SubmitProjectDTO {
     phases: PhaseDto[];
     themes: string[];
     documentPath: string;
+}
+
+export interface FindByIdOptions {
+    populate?: {
+        project?: boolean;
+        grantStage?: boolean;
+    };
 }
 

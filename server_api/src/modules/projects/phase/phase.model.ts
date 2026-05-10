@@ -1,6 +1,5 @@
 import mongoose, { model, Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
-import { PhaseStatus } from "./phase.status";
 
 /*
 // 1. Define the Breakdown Interface
@@ -10,6 +9,15 @@ export interface IBreakdown {
     budget: number;
 }
 */
+
+export enum PhaseStatus {
+    proposed = 'proposed',
+    reviewed = 'reviewed',
+    approved = 'approved',
+    active = 'active',
+    completed = 'completed'
+}
+
 
 export interface IPhase extends Document {
     _id: mongoose.Types.ObjectId;

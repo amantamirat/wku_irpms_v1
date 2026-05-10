@@ -19,19 +19,20 @@ interface ReviewerManagerProps {
     projectStage?: ProjectStage;
     reviewer?: User;
     status?: ReviewerStatus | ReviewerStatus[];
+    reviewers?: Reviewer[];
     onItemsChange?: (items: Reviewer[]) => void;
     hideSearch?: boolean;
-    // --- ADDED THIS ---
-    reviewers?: Reviewer[];
+    hideReviewer?: boolean;
 }
 
 const ReviewerManager = ({
     projectStage,
     reviewer,
     status,
+    reviewers,
     onItemsChange,
     hideSearch,
-    reviewers // 👈 Destructured here
+    hideReviewer,
 }: ReviewerManagerProps) => {
 
     const { getUser } = useAuth();
@@ -60,8 +61,13 @@ const ReviewerManager = ({
             cols.push({
                 header: "Reviewer",
                 field: "reviewer.name",
-                body: (r: Reviewer) =>
-                    (r.reviewer as any)?.name || "N/A"
+                body: (r: Reviewer, options: any) => {
+                    if (hideReviewer) {
+                        return `Reviewer ${options.rowIndex + 1}`;
+                    }
+
+                    return (r.reviewer as any)?.name || "N/A";
+                }
             });
         }
 
@@ -116,7 +122,7 @@ const ReviewerManager = ({
 
     const Manager = useMemo(() =>
         createEntityManager<Reviewer, GetReviewersOptions>({
-            title: projectStage ? "Reviewers" : "Evaluations",
+            title: "Evaluations",
             itemName: "Reviewer",
             api: ReviewerApi,
             columns,
@@ -168,7 +174,7 @@ const ReviewerManager = ({
             hideSearch
         }),
         // Added reviewers to the dependency array
-        [columns, projectStage?._id, reviewer?._id, status, query, onItemsChange, reviewers]
+        [columns, projectStage?._id, reviewer?._id, status, query]
     );
 
     return (

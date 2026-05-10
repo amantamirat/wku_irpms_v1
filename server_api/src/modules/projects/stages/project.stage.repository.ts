@@ -3,6 +3,8 @@ import mongoose, { ClientSession, HydratedDocument } from "mongoose";
 import { ProjectStage, IProjectStage } from "./project.stage.model";
 import {
     CreateProjectStageDTO,
+    ExistsStageDTO,
+    FindByIdOptions,
     GetProjectStageDTO,
     UpdateStageDTO
 } from "./project.stage.dto";
@@ -10,16 +12,18 @@ import { ProjectStageStatus } from "./project.stage.model";
 import { Project } from "../project.model";
 
 export interface IProjectStageRepository {
-    findById(id: string, populate?: boolean): Promise<IProjectStage | null>;
+    findById(id: string, options?: FindByIdOptions, session?: ClientSession): Promise<IProjectStage | null>;
     find(filters: GetProjectStageDTO, session?: ClientSession): Promise<IProjectStage[]>;
     findOneByProjectAndStage(projectId: string,
         grantStageId?: string,
         callStageId?: string,
     ): Promise<IProjectStage | null>;
+    findLatestByProject(projectId: string, session?: ClientSession): Promise<IProjectStage | null>;
     create(dto: CreateProjectStageDTO, session?: ClientSession): Promise<IProjectStage>;
     update(id: string, status: UpdateStageDTO["data"]): Promise<IProjectStage | null>;
     updateStatus(id: string, newStatus: ProjectStageStatus): Promise<IProjectStage | null>;
     countByProject(projectId: string, session?: ClientSession): Promise<number>;
+    exists(filters: ExistsStageDTO): Promise<boolean>;
     delete(id: string): Promise<IProjectStage | null>;
 }
 
@@ -29,24 +33,29 @@ export class ProjectStageRepository implements IProjectStageRepository {
 
     async findById(
         id: string,
-        populate?: boolean,
+        options?: FindByIdOptions,
         session?: ClientSession
     ) {
-        let query = ProjectStage
-            .findById(new mongoose.Types.ObjectId(id))
-            .lean<IProjectStage>();
+        let dbQuery = ProjectStage.findById(
+            new mongoose.Types.ObjectId(id)
+        );
 
-        if (populate) {
-            query = query
-                .populate("project")
-                .populate("grantStage");
+        const populate = options?.populate;
+
+        if (populate?.project) {
+            dbQuery = dbQuery.populate("project");
         }
 
+        if (populate?.grantStage) {
+            dbQuery = dbQuery.populate("grantStage");
+        }
+
+        // ✅ attach session if provided
         if (session) {
-            query = query.session(session);
+            dbQuery = dbQuery.session(session);
         }
 
-        return query.exec();
+        return dbQuery.lean<IProjectStage>().exec();
     }
 
     async find(options: GetProjectStageDTO, session?: ClientSession) {
@@ -132,6 +141,7 @@ export class ProjectStageRepository implements IProjectStageRepository {
         const data: Partial<IProjectStage> = {
             project: new mongoose.Types.ObjectId(dto.project),
             grantStage: new mongoose.Types.ObjectId(dto.grantStage),
+            callStage: new mongoose.Types.ObjectId(dto.callStage),
             documentPath: dto.documentPath
         };
         return ProjectStage.create([data], { session }).then(res => res[0]);
@@ -168,6 +178,43 @@ export class ProjectStageRepository implements IProjectStageRepository {
             query = query.session(session);
         }
         return query.exec();
+    }
+
+    async findLatestByProject(
+        project: string,
+        session?: ClientSession
+    ) {
+        let dbQuery = ProjectStage.findOne({
+            project: new mongoose.Types.ObjectId(project)
+        })
+            .sort({ createdAt: -1 });
+
+        if (session) {
+            dbQuery = dbQuery.session(session);
+        }
+
+        return dbQuery
+            .lean<IProjectStage>()
+            .exec();
+    }
+
+    async exists(filters: ExistsStageDTO): Promise<boolean> {
+        const query: any = {};
+
+        const { grantStage, callStage, project } = filters;
+
+        if (grantStage) {
+            query.grantStage = new mongoose.Types.ObjectId(grantStage);
+        }
+
+        if (callStage) {
+            query.callStage = new mongoose.Types.ObjectId(callStage);
+        }
+        if (project) {
+            query.project = new mongoose.Types.ObjectId(project);
+        }
+        const result = await ProjectStage.exists(query).exec();
+        return result !== null;
     }
 
     async delete(id: string) {

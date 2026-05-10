@@ -1,4 +1,4 @@
-import { PhaseStatus } from "./phase.status";
+import { PhaseStatus } from "./phase.model";
 
 /*
 // 1. New Breakdown DTO for the array items

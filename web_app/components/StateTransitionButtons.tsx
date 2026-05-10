@@ -8,7 +8,7 @@ interface StateTransitionButtonsProps<TStatus extends string> {
     statusOrder: TStatus[];
     permissionPrefix: string;
     hasPermission: (permissions: string[]) => boolean;
-    onTransition: (next: TStatus) => Promise<void>;
+    onTransition: (next: TStatus, action: string) => Promise<void>;
 }
 
 export function StateTransitionButtons<TStatus extends string>({
@@ -53,7 +53,7 @@ export function StateTransitionButtons<TStatus extends string>({
                             icon={icon}
                             severity={severity}
                             size="small"
-                            onClick={() => onTransition(target)}
+                            onClick={() => onTransition(target, action)}
                         />
                     );
                 })}
