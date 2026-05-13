@@ -13,6 +13,9 @@ export const GrantStageApi: EntityApi<GrantStage, GetStagesDTO> = {
             const sanitized = sanitize(options);
             if (options.grant) query.append("grant", sanitized.grant as string);
             if (options.evaluation) query.append("evaluation", sanitized.evaluation as string);
+            if (sanitized.order !== undefined) {
+                query.append("order", String(sanitized.order));
+            }
             if (options.populate !== undefined) {
                 query.append("populate", String(options.populate));
             }

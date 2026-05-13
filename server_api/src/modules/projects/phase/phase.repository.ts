@@ -10,11 +10,13 @@ import { PhaseStatus } from "./phase.model";
 export interface IPhaseRepository {
     findById(id: string): Promise<IPhase | null>;
     find(filters: GetPhasesOptions, session?: ClientSession): Promise<IPhase[]>;
+    findOne(projectId: string, order: number, session?: ClientSession): Promise<IPhase | null>;
     create(dto: CreatePhaseDto, session?: ClientSession): Promise<IPhase>;
     createMany(dtos: CreatePhaseDto[], session?: ClientSession): Promise<IPhase[]>;
     update(id: string, data: UpdatePhaseDto["data"]): Promise<IPhase | null>;
     updateStatus(id: string, newStatus: PhaseStatus): Promise<IPhase | null>;
     countByProject(projectId: string, session?: ClientSession): Promise<number>;
+    updateMany(filter: any, update: any): Promise<any>;
     delete(id: string): Promise<IPhase | null>;
     deleteByProject(projectId: string): Promise<any>;
 }
@@ -47,6 +49,17 @@ export class PhaseRepository implements IPhaseRepository {
 
         return phaseQuery
             .lean<IPhase[]>()
+            .exec();
+    }
+
+
+    async findOne(projectId: string, order: number, session?: ClientSession) {
+        const query = Phase.findOne({ project: new mongoose.Types.ObjectId(projectId), order });
+        if (session) {
+            query.session(session);
+        }
+        return query
+            .lean<IPhase>()
             .exec();
     }
 
@@ -88,6 +101,10 @@ export class PhaseRepository implements IPhaseRepository {
             { $set: { status: newStatus } },
             { new: true }
         ).exec();
+    }
+
+    async updateMany(filter: any, update: any) {
+        return Phase.updateMany(filter, update).exec();
     }
 
     async countByProject(projectId: string, session?: ClientSession) {

@@ -8,6 +8,7 @@ export type GrantAllocation = {
     grant: string | Grant;
     calendar: string | Calendar;
     totalBudget: number;
+    reservedBudget?:number;
     usedBudget?: number;
     status?: AllocationStatus;
     createdAt?: Date;

@@ -1,4 +1,4 @@
-import { DecisionMode } from "./grant.stage.model";
+//import { DecisionMode } from "./grant.stage.model";
 
 
 export interface CreateStageDTO {
@@ -9,7 +9,7 @@ export interface CreateStageDTO {
     minReviewers: number;
     maxReviewers: number;
     // NEW
-    decisionMode: DecisionMode;
+    //decisionMode: DecisionMode;
     minAcceptanceScore: number;
 }
 
@@ -23,7 +23,7 @@ export interface UpdateStageDTO {
         maxReviewers: number;
 
         // NEW
-        decisionMode: DecisionMode;
+        //decisionMode: DecisionMode;
         minAcceptanceScore: number;
     }>;
 }
@@ -35,7 +35,7 @@ export interface GetStageDTO {
     populate?: boolean;
 
     // optional filtering (useful later)
-    decisionMode?: DecisionMode;
+  //  decisionMode?: DecisionMode;
 }
 
 export interface ExistsStageDTO {

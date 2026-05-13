@@ -6,8 +6,7 @@ import { GrantStageApi } from "../api/grant.stage.api";
 import {
     createEmptyGrantStage,
     GetStagesDTO,
-    GrantStage,
-    DecisionMode,
+    GrantStage
 } from "../models/grant.stage.model";
 import SaveStage from "./SaveGrantStage";
 import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
@@ -52,19 +51,24 @@ const GrantStageManager = ({ grant, evaluation }: GrantStageManagerProps) => {
 
             // NEW: Decision Mode
             {
-                header: "Decision",
-                field: "decisionMode",
-                body: (row: GrantStage) =>
-                    row.decisionMode === DecisionMode.AUTOMATIC ? (
-                        <span className="text-green-600 font-semibold">
-                            Auto
-                        </span>
-                    ) : (
-                        <span className="text-orange-500 font-semibold">
-                            Manual
-                        </span>
-                    ),
+                /**
+                 * {
+                                header: "Decision",
+                                field: "decisionMode",
+                                body: (row: GrantStage) =>
+                                    row.decisionMode === DecisionMode.AUTOMATIC ? (
+                                        <span className="text-green-600 font-semibold">
+                                            Auto
+                                        </span>
+                                    ) : (
+                                        <span className="text-orange-500 font-semibold">
+                                            Manual
+                                        </span>
+                                    ),
+                            },
+                 */
             },
+
 
             // NEW: Acceptance Score
             {

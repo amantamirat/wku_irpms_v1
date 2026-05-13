@@ -274,7 +274,6 @@ export class ProjectStageService {
 
         const updated = await this.repository.updateStatus(id, to);
         // Trigger Notification using the populated data
-
         await this.synchronizer.sync(projectData._id);
 
         if (projectData?.applicant) {
@@ -324,6 +323,10 @@ export class ProjectStageService {
 
         const project = String(projectStageDoc.project);
         await this.validateProject(project, applicantId ?? "");
+
+        if (await this.reviewerRepo.exist({ projectStage: id })) {
+            throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
+        }
 
         // ✅ DELETE FILE FIRST
         if (projectStageDoc.documentPath) {

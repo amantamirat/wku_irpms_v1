@@ -28,6 +28,7 @@ export interface UpdateCollaboratorDto {
 export interface GetCollaboratorsOptions {
     project?: string;
     applicant?: string;
+    status?: CollaboratorStatus,
     populate?: boolean;
 }
 

@@ -32,12 +32,18 @@ router.get('/:id', verifyActiveAccount,
 
 
 router.get(
+    '/first-stage/:callId',
+    verifyActiveAccount,
+    checkPermission("call.stage:read"),
+    controller.getFirstStageByCall
+);
+
+router.get(
     '/',
     verifyActiveAccount,
     checkPermission("call.stage:read"),
     controller.get
 );
-
 
 router.put(
     '/:id',
@@ -45,7 +51,6 @@ router.put(
     checkPermission("call.stage:update"),
     controller.update
 );
-
 
 router.patch(
     '/:id',

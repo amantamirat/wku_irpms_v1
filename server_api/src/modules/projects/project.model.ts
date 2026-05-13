@@ -9,6 +9,7 @@ export enum ProjectStatus {
     finalization = "finalization",
     approved = 'approved',
     granted = 'granted',
+    active = 'active',
     completed = 'completed'
 }
 

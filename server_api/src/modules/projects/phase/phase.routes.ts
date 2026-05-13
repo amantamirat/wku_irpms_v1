@@ -9,11 +9,15 @@ import { ConstraintRepository } from '../../grants/constraints/constraint.reposi
 import { ConstraintValidator } from '../../grants/constraints/constraint.validator';
 import { ThemeRepository } from '../../thematics/themes/theme.repository';
 import { ProjectAuth } from '../project.auth';
+import { GrantAllocationRepository } from '../../grants/allocations/grant.allocation.repository';
+import { PhaseSynchronizer } from './phase.synchronizer';
 const repo = new PhaseRepository();
 const projectRepo = new ProjectRepository();
+const allocRepo = new GrantAllocationRepository();
 const projAuth = new ProjectAuth(projectRepo);
+const synch = new PhaseSynchronizer(projectRepo, repo);
 const validator = new ConstraintValidator(new ConstraintRepository(), new ThemeRepository());
-const service = new PhaseService(repo, projectRepo, projAuth, validator);
+const service = new PhaseService(repo, projectRepo, allocRepo, projAuth, validator, synch);
 const controller = new PhaseController(service);
 const router: Router = Router();
 

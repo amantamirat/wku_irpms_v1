@@ -5,7 +5,7 @@ import { EvalStatus } from "../../evaluations/evaluation.state-machine";
 import { GrantStatus } from "../grant.model";
 import { IGrantRepository } from "../grant.repository";
 import { CreateStageDTO, GetStageDTO, UpdateStageDTO } from "./grant.stage.dto";
-import { DecisionMode } from "./grant.stage.model";
+//import { DecisionMode } from "./grant.stage.model";
 import { IGrantStageRepository } from "./grant.stage.repository";
 
 export class GrantStageService {
@@ -26,7 +26,7 @@ export class GrantStageService {
             evaluation,
             minReviewers,
             maxReviewers,
-            decisionMode,
+           // decisionMode,
             minAcceptanceScore
         } = dto;
 

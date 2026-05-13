@@ -201,7 +201,9 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                 </div>
 
                 {/* Decision Mode */}
-                <div className="field">
+                {
+                    /**
+                     * <div className="field">
                     <label className="font-bold">Decision Mode</label>
                     <Dropdown
                         value={localStage.decisionMode}
@@ -212,6 +214,9 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                         onChange={(e) => setLocalStage((p) => ({ ...p, decisionMode: e.value }))}
                     />
                 </div>
+                     */
+                }
+                
 
                 {/* Min Acceptance Score - Now visible in both modes */}
                 <div className="field">

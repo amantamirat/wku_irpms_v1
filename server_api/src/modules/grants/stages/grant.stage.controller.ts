@@ -20,7 +20,7 @@ export class StageController {
                 evaluation: evaluation as string,
                 minReviewers,
                 maxReviewers,
-                decisionMode,
+               // decisionMode,
                 minAcceptanceScore
             };
 

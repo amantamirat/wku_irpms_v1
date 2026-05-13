@@ -1,10 +1,10 @@
 import mongoose, { Schema, model } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
-
+/*
 export enum DecisionMode {
     MANUAL = "MANUAL",
     AUTOMATIC = "AUTOMATIC",
-}
+}*/
 
 export interface IGrantStage extends Document {
     _id: string;
@@ -16,7 +16,7 @@ export interface IGrantStage extends Document {
     minReviewers: number;
     maxReviewers: number;
 
-    decisionMode: DecisionMode;
+    //decisionMode: DecisionMode;
     minAcceptanceScore: number;
 
     createdAt?: Date;
@@ -62,12 +62,13 @@ const GrantStageSchema = new Schema<IGrantStage>(
             default: 3,
         },
 
-        // NEW: decision handling mode
+        /*
         decisionMode: {
             type: String,
             enum: Object.values(DecisionMode),
             default: DecisionMode.MANUAL,
         },
+        */
 
         minAcceptanceScore: {
             type: Number,

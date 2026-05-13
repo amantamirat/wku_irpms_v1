@@ -2,68 +2,69 @@
 import { Button } from 'primereact/button';
 import { Card } from 'primereact/card';
 import { Divider } from 'primereact/divider';
-import { Skeleton } from 'primereact/skeleton'; // For a smoother loading state
+import { Skeleton } from 'primereact/skeleton';
 import { Tag } from 'primereact/tag';
 import { useEffect, useState } from 'react';
-import { Calendar } from '../calendars/models/calendar.model';
+import { useRouter } from 'next/navigation';
+
+// Date Utilities
+import { format, differenceInCalendarDays, isPast } from 'date-fns';
+
+// Types & APIs
 import { Call } from '../calls/models/call.model';
 import { CallStageApi } from '../calls/stages/api/call.stage.api';
 import { CallStage } from '../calls/stages/models/call.stage.model';
 import { GrantAllocation } from '../grants/allocations/models/grant.allocation.model';
 import { Grant } from '../grants/models/grant.model';
-import { useRouter } from 'next/navigation';
+import { Calendar } from '../calendars/models/calendar.model';
 import { Organization } from '../organizations/models/organization.model';
-
 
 interface CallCardProps {
     call: Call;
-    onApply: (callId: string) => void;
+    onApply?: (callId: string) => void;
 }
 
-export const OpenCallCard = ({ call, onApply }: CallCardProps) => {
-    const [stages, setStages] = useState<CallStage[]>([]);
+export const OpenCallCard = ({ call }: CallCardProps) => {
+    const [firstStage, setFirstStage] = useState<CallStage>();
     const [loading, setLoading] = useState(true);
-
+    const router = useRouter();
 
     useEffect(() => {
-        const fetchStages = async () => {
+        const fetchFirstStage = async () => {
             if (!call._id) return;
             try {
                 setLoading(true);
-                const data = await CallStageApi.getAll({ call });
-                setStages(data);
+                const data = await CallStageApi.getFirstStage(call._id);
+                setFirstStage(data);
             } catch (error) {
-                console.error("Failed to fetch stages", error);
+                console.error("Failed to fetch first stage", error);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchStages();
+        fetchFirstStage();
     }, [call._id]);
 
-    // Derived Logic
-    const sortedStages = [...stages].sort((a, b) => a.order - b.order);
-    const activeStage = sortedStages.find(s => new Date(s.deadline) > new Date()) || sortedStages[sortedStages.length - 1];
+    // --- Date Logic via date-fns ---
+    const deadline = firstStage?.deadline ? new Date(firstStage.deadline) : null;
+    const today = new Date();
 
-    const daysLeft = activeStage
-        ? Math.ceil((new Date(activeStage.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
-        : 0;
+    // Calculate actual days remaining
+    const daysLeft = deadline ? differenceInCalendarDays(deadline, today) : 0;
+    const isClosed = deadline ? isPast(deadline) && daysLeft < 0 : false;
+    const isUrgent = daysLeft >= 0 && daysLeft < 5;
 
-    //driven
+    // Data Mapping
     const allocation = call.grantAllocation as GrantAllocation;
     const organization = call.organization as Organization;
-    //better to use find by id
     const grant = allocation?.grant as Grant;
     const calendar = allocation?.calendar as Calendar;
 
-
-    const router = useRouter();
     const proceedToApply = () => {
         router.push(`/projects/apply/${call._id}`);
     };
 
-    // --- Loading State Renderer ---
     if (loading) {
         return (
             <Card className="h-full border-1 border-300">
@@ -79,100 +80,91 @@ export const OpenCallCard = ({ call, onApply }: CallCardProps) => {
     }
 
     return (
-        <>
-            <Card className="h-full border-1 border-300 shadow-hover transition-all transition-duration-300 hover:border-primary">
-                <div className="flex justify-content-between align-items-start mb-2">
-                    {/* 🟢 Fiscal Year - Forced to a single line */}
-                    <div className="flex">
-                        {calendar?.year && (
-                            <Tag
-                                severity="info"
-                                value={`FY ${calendar.year}`}
-                                rounded
-                                // white-space-nowrap prevents the text from breaking into two lines
-                                className="white-space-nowrap"
-                                pt={{ root: { className: 'bg-bluegray-500' } }}
-                            />
-                        )}
+        <Card className="h-full border-1 border-300 shadow-hover transition-all transition-duration-300 hover:border-primary flex flex-column">
+            {/* TOP SECTION: Metadata */}
+            <div className="flex justify-content-between align-items-start mb-2">
+                <div className="flex">
+                    {calendar?.year && (
+                        <Tag
+                            severity="info"
+                            value={`FY ${calendar.year}`}
+                            rounded
+                            className="white-space-nowrap bg-bluegray-500"
+                        />
+                    )}
+                </div>
+
+                <div className="text-right ml-2">
+                    <small className="block text-500 uppercase font-bold text-xs">
+                        {organization?.name || 'Unknown'}
+                    </small>
+                </div>
+            </div>
+
+            {/* MIDDLE SECTION: Titles */}
+            <div className="mb-3">
+                <span className="text-xs font-bold text-500 uppercase tracking-wider">
+                    {grant?.title || "Untitled Grant"}
+                </span>
+                <h4 className="text-xl font-bold m-0 line-height-3 text-900">
+                    {call.title}
+                </h4>
+            </div>
+
+            <p className="text-600 text-sm mb-4 line-height-3 line-clamp-2">
+                {call.description}
+            </p>
+
+            {/* HIGHLIGHT SECTION: Financials & Timeline */}
+            <div className={`p-3 border-round mb-4 ${isUrgent ? 'bg-orange-50' : 'bg-blue-50'}`}>
+                <div className="flex flex-column gap-2">
+                    {/* Budget */}
+                    <div className="flex align-items-center gap-2">
+                        <i className={`pi pi-wallet text-sm ${isUrgent ? 'text-orange-600' : 'text-blue-600'}`}></i>
+                        <span className={`text-xs font-bold ${isUrgent ? 'text-orange-800' : 'text-blue-800'}`}>
+                            Budget: {new Intl.NumberFormat('en-ET', {
+                                style: 'currency',
+                                currency: 'ETB',
+                                maximumFractionDigits: 0
+                            }).format(allocation?.totalBudget || 0)}
+                        </span>
                     </div>
 
-                    {/* 🏢 Organization Info */}
-                    <div className="text-right ml-2">
-                        <small className="block text-500 uppercase font-bold text-xs">
-                            {organization?.name || 'Unknown'}
-                        </small>
-                        <span className="text-sm font-semibold text-primary">
-                            {/* Additional info here if needed */}
+                    {/* Deadline Date */}
+                    <div className="flex align-items-center gap-2">
+                        <i className={`pi pi-calendar text-sm ${isUrgent ? 'text-orange-600' : 'text-blue-600'}`}></i>
+                        <span className="text-xs font-medium text-800">
+                            Ends: {deadline ? format(deadline, 'MMM dd, yyyy') : 'N/A'}
                         </span>
                     </div>
                 </div>
 
-                {/* 🔵 Grant & Call Titles */}
-                <div className="mb-3">
-                    <span className="text-xs font-bold text-500 uppercase tracking-wider">
-                        {grant?.title || "Untitled Grant"}
+                {/* Status/Countdown */}
+                <div className={`flex align-items-center gap-2 border-top-1 pt-2 mt-2 ${isUrgent ? 'border-orange-100' : 'border-blue-100'}`}>
+                    <i className={`pi pi-clock ${isUrgent ? 'text-orange-500' : 'text-blue-500'}`}></i>
+                    <span className={`text-xs font-bold ${isUrgent ? 'text-orange-700' : 'text-blue-700'}`}>
+                        {isClosed ? 'Application Closed' : `${daysLeft} days remaining to apply`}
                     </span>
-                    <h4 className="text-xl font-bold m-0 line-height-3 text-900">
-                        {call.title}
-                    </h4>
                 </div>
+            </div>
 
-                <p className="text-600 text-sm mb-4 line-height-3 line-clamp-2">
-                    {call.description}
-                </p>
+            <Divider className="my-3 mt-auto" />
 
-                {/* 🟠 Financial & Timeline Context */}
-                <div className={`p-3 border-round mb-4 ${daysLeft < 5 ? 'bg-red-50' : 'bg-blue-50'}`}>
-                    {/* Container now stacks children vertically with a gap of 2 */}
-                    <div className="flex flex-column gap-2">
-
-                        {/* Budget Row */}
-                        <div className="flex align-items-center gap-2">
-                            <i className="pi pi-wallet text-sm text-blue-600"></i>
-                            <span className="text-xs font-bold text-blue-800">
-                                Budget: {new Intl.NumberFormat('en-ET', {
-                                    style: 'currency',
-                                    currency: 'ETB',
-                                    maximumFractionDigits: 0
-                                }).format(allocation?.totalBudget || 0)}
-                            </span>
-                        </div>
-
-                        {/* Deadline Row */}
-                        <div className="flex align-items-center gap-2">
-                            <i className="pi pi-calendar text-sm text-blue-600"></i>
-                            <span className="text-xs font-medium text-blue-800">
-                                Ends: {activeStage ? new Date(activeStage.deadline).toLocaleDateString() : 'N/A'}
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Deadline Countdown */}
-                    <div className="flex align-items-center gap-2 border-top-1 border-blue-100 pt-2 mt-2">
-                        <i className={`pi pi-clock ${daysLeft < 5 ? 'text-red-500' : 'text-blue-500'}`}></i>
-                        <span className={`text-xs font-bold ${daysLeft < 5 ? 'text-red-600' : 'text-blue-700'}`}>
-                            {daysLeft > 0 ? `${daysLeft} days remaining to apply` : 'Stage Closed'}
-                        </span>
-                    </div>
+            {/* FOOTER: Actions */}
+            <div className="flex align-items-center justify-content-between">
+                <div className="flex flex-column">
+                    <small className="text-500 text-xs">Funding Source</small>
+                    <span className="text-xs font-medium">{(grant?.fundingSource) || 'Internal Fund'}</span>
                 </div>
-
-                <Divider className="my-3" />
-
-                <div className="flex align-items-center justify-content-between mt-auto">
-                    <div className="flex flex-column">
-                        <small className="text-500 text-xs">Funding Source</small>
-                        <span className="text-xs font-medium">{(grant?.fundingSource) || 'Internal Fund'}</span>
-                    </div>
-                    <Button
-                        label="Apply"
-                        icon="pi pi-pencil"
-                        size="small"
-                        className="p-button-raised"
-                        disabled={daysLeft <= 0}
-                        onClick={proceedToApply}
-                    />
-                </div>
-            </Card>
-        </>
+                <Button
+                    label={isClosed ? "Closed" : "Apply"}
+                    icon={isClosed ? "pi pi-lock" : "pi pi-pencil"}
+                    size="small"
+                    className={`p-button-raised ${isUrgent ? 'p-button-warning' : ''}`}
+                    disabled={isClosed}
+                    onClick={proceedToApply}
+                />
+            </div>
+        </Card>
     );
 };

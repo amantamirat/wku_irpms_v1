@@ -15,6 +15,7 @@ export enum ProjectStatus {
     finalization = "finalization",
     approved = "approved",
     granted = "granted",
+    active = "active",
     completed = 'completed'
 }
 
@@ -29,9 +30,10 @@ export type Project = {
     totalBudget?: number;
     totalDuration?: number;
     themes?: Theme[] | string[];
+    currentStage?: string;
     createdAt?: Date;
     updatedAt?: Date;
-    
+
     //used for apply for call
     collaborators?: Collaborator[];// | string[];
     phases?: Phase[];

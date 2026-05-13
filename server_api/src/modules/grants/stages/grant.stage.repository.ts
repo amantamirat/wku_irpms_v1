@@ -100,10 +100,10 @@ export class GrantStageRepository implements IGrantStageRepository {
             updateData.maxReviewers = dtoData.maxReviewers;
         }
 
-        // NEW: decision mode
+        /*
         if (dtoData.decisionMode !== undefined) {
             updateData.decisionMode = dtoData.decisionMode;
-        }
+        }*/
 
         // NEW: acceptance threshold
         if (dtoData.minAcceptanceScore !== undefined) {

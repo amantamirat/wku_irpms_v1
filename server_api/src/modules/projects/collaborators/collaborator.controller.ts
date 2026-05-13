@@ -9,6 +9,7 @@ import {
     UpdateCollaboratorDto
 } from './collaborator.dto';
 import { CollaboratorService } from './collaborator.service';
+import { CollaboratorStatus } from './collaborator.model';
 
 export class CollaboratorController {
 
@@ -44,11 +45,11 @@ export class CollaboratorController {
     // -----------------------
     get = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const { project, applicant, populate } = req.query;
-
+            const { project, applicant, status, populate } = req.query;
             const collaborators = await this.service.get({
                 project: project ? (project as string) : undefined,
                 applicant: applicant ? (applicant as string) : undefined,
+                status: status ? (status as CollaboratorStatus) : undefined,
                 ...(populate !== undefined && { populate: populate === "true" })
             });
             successResponse(res, 200, 'Collaborators fetched successfully', collaborators);

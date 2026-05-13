@@ -86,6 +86,71 @@ export class ConstraintValidator {
         }
     }
 
+
+    // =====================================================
+    // GROUPED VALIDATION FUNCTIONS
+    // =====================================================
+
+    /**
+     * Validates individual phase limits.
+     * Use in: PhaseService.create, PhaseService.update
+     */
+    async validateIndividualPhases(grant: string, phases: any[]) {
+        const constraints = await this.getConstraints(grant, [
+            ConstraintType.BUDGET_PHASE,
+            ConstraintType.TIME_PHASE
+        ]);
+
+        for (const c of constraints) {
+            if (c.constraint === ConstraintType.BUDGET_PHASE) {
+                this.validatePerPhase(phases, "budget", c, "Phase budget");
+            }
+            if (c.constraint === ConstraintType.TIME_PHASE) {
+                this.validatePerPhase(phases, "duration", c, "Phase duration");
+            }
+        }
+    }
+
+    async validatePhaseCount(grant: string, phases: any[]) {
+        const constraints = await this.getConstraints(grant, [
+            ConstraintType.PHASE_COUNT
+        ]);
+        for (const c of constraints) {
+            switch (c.constraint) {
+                case ConstraintType.PHASE_COUNT:
+                    this.validateRange(phases.length, c, "Phase count");
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Validates the project's cumulative totals and counts.
+     * Use in: Final submission or ProjectService.apply
+     */
+    async validateProjectTotals(grant: string, phases: any[]) {
+        const constraints = await this.getConstraints(grant, [
+            ConstraintType.BUDGET_TOTAL,
+            ConstraintType.TIME_TOTAL,
+        ]);
+
+        const totalBudget = phases.reduce((sum, p) => sum + (p.budget ?? 0), 0);
+        const totalDuration = phases.reduce((sum, p) => sum + (p.duration ?? 0), 0);
+
+        for (const c of constraints) {
+            switch (c.constraint) {
+                case ConstraintType.BUDGET_TOTAL:
+                    this.validateRange(totalBudget, c, "Total project budget");
+                    break;
+                case ConstraintType.TIME_TOTAL:
+                    this.validateRange(totalDuration, c, "Total project duration");
+                    break;
+            }
+        }
+    }
+
+
+
     /**
      * Validates everything related to phases: Count, Total Budget/Time, and Individual Phase limits.
      * Use in: PhaseService.create, PhaseService.update, PhaseService.delete

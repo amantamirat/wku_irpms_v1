@@ -84,10 +84,13 @@ export const BasicInfoStep = ({ data, call, constraints, onUpdate, onNext }: Bas
         const titleWords = getWordCount(data.title);
         const summaryWords = getWordCount(data.summary);
 
-        const checkRange = (val: number, limit?: Constraint) => !limit || (val >= (limit.min ?? 0) && val <= (limit.max ?? Infinity));
+        const checkRange = (val: number, limit?: Constraint) => {
+            if (!limit) return true;
+            return val >= (limit.min ?? 0) && val <= (limit.max ?? Infinity);
+        };
 
-        const isTitleValid = !!data.title?.trim() && checkRange(titleWords, titleLimit);
-        const isSummaryValid = !!data.summary?.trim() && checkRange(summaryWords, summaryLimit);
+        const isTitleValid = !titleLimit || (!!data.title?.trim() && checkRange(titleWords, titleLimit));
+        const isSummaryValid = !summaryLimit || (!!data.summary?.trim() && checkRange(summaryWords, summaryLimit));
 
         const isHierarchyValid =
             checkRange(themeStats.themeCount, themeLimit) &&
@@ -157,9 +160,12 @@ export const BasicInfoStep = ({ data, call, constraints, onUpdate, onNext }: Bas
             <div className="field col-12">
                 <div className="flex justify-content-between align-items-end mb-1">
                     <label htmlFor="title" className="font-bold">Project Title</label>
-                    <small className={classNames('text-500', { 'text-red-500': validation.titleLimit?.max && validation.titleWords > validation.titleLimit.max })}>
-                        {validation.titleWords} / {validation.titleLimit?.max || '∞'} words
-                    </small>
+                    {/* Only show word count if there is a max limit */}
+                    {validation.titleLimit?.max && (
+                        <small className={classNames('text-500', { 'text-red-500': validation.titleWords > validation.titleLimit.max })}>
+                            {validation.titleWords} / {validation.titleLimit.max} words
+                        </small>
+                    )}
                 </div>
                 <InputText
                     id="title"
@@ -171,9 +177,11 @@ export const BasicInfoStep = ({ data, call, constraints, onUpdate, onNext }: Bas
                 {validation.titleLimit?.max && (
                     <ProgressBar value={getProgressValue(validation.titleWords, validation.titleLimit.max)} showValue={false} style={{ height: '4px' }} />
                 )}
-                {submitted && !validation.isTitleValid && (
+                {/* Only show error message if a limit exists and validation failed */}
+                {submitted && !validation.isTitleValid && validation.titleLimit && (
                     <small className="p-error block mt-1">
-                        Title must be between {validation.titleLimit?.min || 0} and {validation.titleLimit?.max || '∞'} words.
+                        Title must be {validation.titleLimit.min ? `between ${validation.titleLimit.min} and ` : 'under '}
+                        {validation.titleLimit.max || '∞'} words.
                     </small>
                 )}
             </div>
@@ -213,9 +221,12 @@ export const BasicInfoStep = ({ data, call, constraints, onUpdate, onNext }: Bas
             <div className="field col-12">
                 <div className="flex justify-content-between align-items-end mb-1">
                     <label htmlFor="summary" className="font-bold">Executive Summary</label>
-                    <small className={classNames('text-500', { 'text-red-500': validation.summaryLimit?.max && validation.summaryWords > validation.summaryLimit.max })}>
-                        {validation.summaryWords} / {validation.summaryLimit?.max || '∞'} words
-                    </small>
+                    {/* Only show word count if there is a max limit */}
+                    {validation.summaryLimit?.max && (
+                        <small className={classNames('text-500', { 'text-red-500': validation.summaryWords > validation.summaryLimit.max })}>
+                            {validation.summaryWords} / {validation.summaryLimit.max} words
+                        </small>
+                    )}
                 </div>
                 <InputTextarea
                     id="summary"
@@ -228,9 +239,10 @@ export const BasicInfoStep = ({ data, call, constraints, onUpdate, onNext }: Bas
                 {validation.summaryLimit?.max && (
                     <ProgressBar value={getProgressValue(validation.summaryWords, validation.summaryLimit.max)} showValue={false} style={{ height: '4px' }} />
                 )}
-                {submitted && !validation.isSummaryValid && (
+                {submitted && !validation.isSummaryValid && validation.summaryLimit && (
                     <small className="p-error block mt-1">
-                        Summary must be between {validation.summaryLimit?.min || 0} and {validation.summaryLimit?.max || '∞'} words.
+                        Summary must be {validation.summaryLimit.min ? `between ${validation.summaryLimit.min} and ` : 'under '}
+                        {validation.summaryLimit.max || '∞'} words.
                     </small>
                 )}
             </div>

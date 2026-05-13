@@ -42,6 +42,10 @@ export class CollaboratorRepository implements ICollaboratorRepository {
             query.applicant = new mongoose.Types.ObjectId(filters.applicant);
         }
 
+        if (filters.status) {
+            query.status = filters.status;
+        }
+
         let dbQuery = Collaborator.find(query);
 
         if (filters.populate) {

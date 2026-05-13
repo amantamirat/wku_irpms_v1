@@ -1,14 +1,6 @@
 import mongoose, { model, Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
 
-/*
-// 1. Define the Breakdown Interface
-export interface IBreakdown {
-    activity: string;
-    duration: number;
-    budget: number;
-}
-*/
 
 export enum PhaseStatus {
     proposed = 'proposed',
@@ -29,20 +21,12 @@ export interface IPhase extends Document {
     endDate?: Date;
     budget: number;
     description?: string;
-    // breakdown: IBreakdown[]; // The new array
     status: PhaseStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
-/*
-// 2. Define the Sub-schema
-const PhaseBreakdownSchema = new Schema<IBreakdown>({
-    activity: { type: String, required: true, trim: true },
-    duration: { type: Number, required: true, min: 0 },
-    budget: { type: Number, required: true, min: 0 }
-}, { _id: false }); // Set _id: false if you don't need to reference specific activities
-*/
+
 const PhaseSchema = new Schema<IPhase>(
     {
         project: {

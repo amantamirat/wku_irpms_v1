@@ -28,7 +28,7 @@ export interface CreatePhaseDto extends PhaseDto {
 // ---------- UPDATE DTO ----------
 export interface UpdatePhaseDto {
     id: string;              // The Phase ID
-    applicantId: string;
+    userId: string;
     data: Partial<{
         title:string;
         order: number;

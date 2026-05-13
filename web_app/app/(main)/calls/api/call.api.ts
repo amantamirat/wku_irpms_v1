@@ -5,7 +5,8 @@ import { Call, GetCallsOptions, sanitizeCall } from "../models/call.model";
 
 const end_point = "/calls";
 
-export const CallApi: EntityApi<Call, GetCallsOptions | undefined> = {
+export const CallApi: EntityApi<Call, GetCallsOptions | undefined>
+= {
     // ---------------------------
     // Fetch / Query
     // ---------------------------
@@ -36,6 +37,7 @@ export const CallApi: EntityApi<Call, GetCallsOptions | undefined> = {
         const query = populate !== undefined ? `?populate=${populate}` : '';
         return ApiClient.get(`${end_point}/${id}${query}`);
     },
+   
 
     // ---------------------------
     // Create

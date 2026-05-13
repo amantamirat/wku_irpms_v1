@@ -37,7 +37,12 @@ export function createEntityManager<
         statusOrder: string[]
     }
     expandable?: {
-        template: (row: T) => React.ReactNode
+        template: (
+            row: T,
+            actions: {
+                updateItem: (item: T) => void
+            }
+        ) => React.ReactNode,
         allow?: (row: T) => boolean
     }
 
@@ -55,7 +60,10 @@ export function createEntityManager<
     hideEditAction?: boolean;    // Specific toggle
     hideDeleteAction?: boolean;  // Specific toggle
     hideSearch?: boolean;
-
+    onCreateComplete?: (item: T) => void;
+    onEditComplete?: (item: T) => void;
+    onDeleteComplete?: (item: T) => void;
+    onTransitComplete?: (item: T) => void;
 }) {
 
     return function EntityManager() {
@@ -135,12 +143,13 @@ export function createEntityManager<
             const updated = await config.api.transitionState?.(row._id, dto);
             if (updated) {
                 updateItem({ ...row, [config.workflow!.statusField]: dto.next });
+                config?.onTransitComplete?.(updated);
             }
         };
 
         const deleteItem = async (row: T) => {
             const ok = await config.api.delete(row)
-            if (ok) removeItem(row)
+            if (ok) { removeItem(row); config.onDeleteComplete?.(row); }
         }
 
         const builtInActions: RowAction<T>[] = [
@@ -152,6 +161,7 @@ export function createEntityManager<
                 disabled: config.disableEditRow,
                 onClick: (row: T) => {
                     setItem({ ...row });
+                    config.onEditComplete?.(row);
                     setShowDialog(true);
                 }
             }] : []),
@@ -165,7 +175,8 @@ export function createEntityManager<
                 onClick: (row: T) =>
                     confirm.ask({
                         item: config.itemName,
-                        onConfirmAsync: () => deleteItem(row)
+                        onConfirmAsync: () => deleteItem(row),
+
                     })
             }] : [])
         ];
@@ -240,7 +251,13 @@ export function createEntityManager<
                     hasPermission={hasPermission}
                     actions={actions}
                     onCreate={canCreate ? handleCreate : undefined}
-                    expandable={config.expandable}
+                    expandable={config.expandable && {
+                        ...config.expandable,
+                        template: (row: T) =>
+                            config.expandable!.template(row, {
+                                updateItem
+                            })
+                    }}
                     toolbarEnd={toolbarEnd}
                 />
 
@@ -249,7 +266,8 @@ export function createEntityManager<
                         visible={showDialog}
                         item={item}
                         onComplete={(saved: T) => {
-                            updateItem(saved)
+                            updateItem(saved);
+                            config.onCreateComplete?.(saved);
                             setShowDialog(false)
                         }}
                         onHide={() => setShowDialog(false)}

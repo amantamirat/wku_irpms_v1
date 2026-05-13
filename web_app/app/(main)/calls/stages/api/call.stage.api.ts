@@ -5,7 +5,11 @@ import { TransitionRequestDto } from "@/types/util";
 
 const end_point = "/call/stages";
 
-export const CallStageApi: EntityApi<CallStage, GetCallStagesDTO | undefined> = {
+export const CallStageApi: EntityApi<CallStage, GetCallStagesDTO | undefined>
+    & {
+        getFirstStage: (callId: string) => Promise<CallStage>;
+    }
+    = {
 
     // ---------------------------
     // Fetch / Query
@@ -48,6 +52,11 @@ export const CallStageApi: EntityApi<CallStage, GetCallStagesDTO | undefined> = 
         return ApiClient.get(`${end_point}/${id}`);
     },
 
+
+    async getFirstStage(callId: string): Promise<CallStage> {
+        return ApiClient.get(`${end_point}/first-stage/${callId}`);
+    },
+
     // ---------------------------
     // Create
     // ---------------------------
@@ -60,7 +69,7 @@ export const CallStageApi: EntityApi<CallStage, GetCallStagesDTO | undefined> = 
     // Update
     // ---------------------------
     async update(stage) {
-       // if (!stage._id) throw new Error("_id required");
+        // if (!stage._id) throw new Error("_id required");
         return ApiClient.put(`${end_point}/${stage._id}`, sanitizeCallStage(stage));
     },
 

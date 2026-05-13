@@ -1,10 +1,11 @@
 import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
 import { Grant } from "../../models/grant.model";
 
+/*
 export enum DecisionMode {
     MANUAL = "MANUAL",
     AUTOMATIC = "AUTOMATIC",
-}
+}*/
 
 export type GrantStage = {
     _id?: string;
@@ -17,7 +18,7 @@ export type GrantStage = {
     maxReviewers?: number;
 
     // NEW FIELDS
-    decisionMode?: DecisionMode;
+    //decisionMode?: DecisionMode;
     minAcceptanceScore: number;
 
     createdAt?: Date;
@@ -26,6 +27,7 @@ export type GrantStage = {
 export interface GetStagesDTO {
     grant?: string | Grant;
     evaluation?: string | Evaluation;
+    order?: number;
     populate?: boolean;
 }
 
@@ -58,7 +60,7 @@ export const validateGrantStage = (
         };
     }
 
-    // NEW VALIDATION RULE
+    /*
     if (stage.decisionMode === DecisionMode.AUTOMATIC) {
         if (
             stage.minAcceptanceScore === undefined ||
@@ -69,7 +71,7 @@ export const validateGrantStage = (
                 message: "Min acceptance score is required for automatic decision mode.",
             };
         }
-    }
+    }*/
 
     return { valid: true };
 };
@@ -98,6 +100,6 @@ export const createEmptyGrantStage = (stage?: Partial<GrantStage>): GrantStage =
     order: 1,
     minReviewers: 1,
     maxReviewers: 3,
-    decisionMode: DecisionMode.MANUAL,
+    //decisionMode: DecisionMode.MANUAL,
     minAcceptanceScore: 50,
 });

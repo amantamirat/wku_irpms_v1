@@ -49,7 +49,7 @@ export class CollaboratorService {
         const { applicant, project, projectTitle, userId } = dto;
 
         if (!options?.skipValidation) {
-            const projectDoc = await this.validateProject(project, applicant, session);
+            const projectDoc = await this.validateProject(project, userId ?? "", session);
             const grantId = (projectDoc.grantAllocation as any).grant;
 
             const appDoc = await this.userRepo.findById(applicant);

@@ -51,9 +51,16 @@ export class StageService {
         return await this.repository.find(dto);
     }
 
+
+    async getFirstStage(callId: string) {
+        const stage = await this.repository.findOne(callId, 1);
+        if (!stage) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        return stage;
+    }
+
     async getById(id: string) {
         const stage = await this.repository.findById(id);
-        if (!stage) throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
+        if (!stage) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
         return stage;
     }
     /**

@@ -20,6 +20,7 @@ export type Collaborator = {
 export interface GetCollaboratorsOptions {
     project?: string | Project;
     applicant?: string | User;
+    status?: CollaboratorStatus;
     populate?: boolean;
 }
 

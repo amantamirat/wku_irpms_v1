@@ -62,6 +62,17 @@ export class StageController {
         }
     };
 
+
+    getFirstStageByCall = async (req: Request, res: Response) => {
+        try {
+            const { callId } = req.params;
+            const stage = await this.service.getFirstStage(callId);
+            successResponse(res, 200, 'stage fetched', stage);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.params;

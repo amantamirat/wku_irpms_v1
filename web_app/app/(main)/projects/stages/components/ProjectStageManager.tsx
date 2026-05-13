@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BASE_URL } from "@/api/ApiClient";
 import { CallStage } from "@/app/(main)/calls/stages/models/call.stage.model";
 import { GrantAllocation } from "@/app/(main)/grants/allocations/models/grant.allocation.model";
@@ -14,6 +14,7 @@ import { PROJECT_STAGE_STATUS_ORDER, PROJECT_STAGE_TRANSITIONS } from "../models
 import ProjectStageDetail from "./ProjectStageDetail";
 import SaveProjectStage from "./SaveProjectStage";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import { GrantStageApi } from "@/app/(main)/grants/stages/api/grant.stage.api";
 
 interface ProjectStageManagerProps {
     project?: Project;
@@ -21,12 +22,56 @@ interface ProjectStageManagerProps {
     grantAllocation?: string | GrantAllocation;
     callStage?: string | CallStage;
     hideReviewer?: boolean;
-    //hideDeleteAction?: boolean;
+
 }
 
 const ProjectStageManager = ({ project, grantStage, grantAllocation, callStage, hideReviewer }: ProjectStageManagerProps) => {
 
+
     const confirm = useConfirmDialog();
+
+    /*
+        const [stages, setStages] = useState<ProjectStage[] | null>(null);
+        const [nextStage, setNextStage] = useState<GrantStage>();
+    
+        useEffect(() => {
+            const stageCount = stages?.length || 0;
+            const nextOrder = stageCount + 1;
+            const fetctNextStage = async () => {
+                try {
+                    const stages = await GrantStageApi.getAll({
+                        grant
+                    });
+                    setCurrentStage(data);
+                } catch (error) {
+                    console.error("Failed to fetch first stage", error);
+                } finally {
+                }
+            };
+            fetctNextStage();
+        }, [stages]);
+    
+    
+    
+        const [currentStage, setCurrentStage] = useState<ProjectStage>();
+    
+        useEffect(() => {
+            const fetchCurrentStage = async () => {
+                if (!project?.currentStage) return;
+                try {
+                    const data = await ProjectStageApi.getById!(project.currentStage);
+                    setCurrentStage(data);
+                } catch (error) {
+                    console.error("Failed to fetch first stage", error);
+                } finally {
+                }
+            };
+            fetchCurrentStage();
+        }, [project?.currentStage]);
+    
+        */
+
+
 
     // 1. Determine if the project is in a state that allows new submissions/stages
 
@@ -116,15 +161,15 @@ const ProjectStageManager = ({ project, grantStage, grantAllocation, callStage, 
             itemName: "Application Stage",
             api: ProjectStageApi,
             columns: columns,
-            
+
             // 2. Gate creation: Only if project is in Draft/Submitted
-            createNew: canCreateStage 
-                ? () => createEmptyProjectStage({ project: typeof project === 'object' ? project._id : project }) 
+            createNew: canCreateStage
+                ? () => createEmptyProjectStage({ project: typeof project === 'object' ? project._id : project })
                 : undefined,
-            
+
             // 3. Gate the Dialog: Prevent pop-up if the project is locked
             SaveDialog: canCreateStage ? SaveProjectStage : undefined,
-            
+
             permissionPrefix: "project.stage",
             query: () => ({
                 project: typeof project === "object" ? project._id : project,
@@ -140,6 +185,7 @@ const ProjectStageManager = ({ project, grantStage, grantAllocation, callStage, 
             expandable: {
                 template: (ps) => <ProjectStageDetail projectStage={ps} hideReviewer={hideReviewer} />
             },
+            //onItemsChange: setStages,
             extraActions: [
                 {
                     icon: "pi pi-calculator",
@@ -156,11 +202,11 @@ const ProjectStageManager = ({ project, grantStage, grantAllocation, callStage, 
                         });
                     }
                 }
-            ],            
+            ],
             hideEditAction: true, // Stages are usually fixed once submitted; updates happen via workflow
             hideDeleteAction: !project,
             disableDeleteRow: (ps: ProjectStage) => ps.status !== ProjectStageStatus.submitted
-            
+
         }),
         [columns, project, grantStage, grantAllocation, canCreateStage, hideReviewer]
     );

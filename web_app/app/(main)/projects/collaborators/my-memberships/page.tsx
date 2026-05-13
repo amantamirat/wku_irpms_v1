@@ -1,8 +1,6 @@
 'use client';
 
 import { useAuth } from "@/contexts/auth-context";
-
-import { Divider } from "primereact/divider";
 import CollaboratorManager from "../components/CollaboratorManager";
 import { Fieldset } from "primereact/fieldset";
 

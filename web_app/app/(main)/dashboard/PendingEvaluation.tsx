@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import ReviewerManager from '../components/ReviewerManager';
+import ReviewerManager from '../reviewers/components/ReviewerManager';
 import { Button } from 'primereact/button';
 import Link from 'next/link';
-import { Reviewer, ReviewerStatus } from '../models/reviewer.model';
-import { ReviewerApi } from '../api/reviewer.api';
+import { Reviewer, ReviewerStatus } from '../reviewers/models/reviewer.model';
+import { ReviewerApi } from '../reviewers/api/reviewer.api';
 
 interface PendingEvaluationsProps {
     user: any;
@@ -73,7 +73,7 @@ const PendingEvaluations = ({ user }: PendingEvaluationsProps) => {
                 <ReviewerManager
                     reviewer={user}
                     reviewers={reviews || []}
-                    onItemsChange={handleRefresh} // Pass the memoized callback
+                    //onItemsChange={handleRefresh} // Pass the memoized callback
                     hideSearch
                 />
             )}

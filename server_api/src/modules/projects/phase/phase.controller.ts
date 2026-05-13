@@ -83,7 +83,7 @@ export class PhaseController {
                     budget,
                     description
                 },
-                applicantId: req.auth.userId,
+                userId: req.auth.userId,
             };
 
             const updated = await this.service.update(dto);

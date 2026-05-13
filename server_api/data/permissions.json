@@ -759,13 +759,13 @@
   },
   {
     "category": "Project Management",
-    "name": "project:transition.granted.completed",
-    "description": "Mark funded project as completed"
+    "name": "project:transition.granted.active",
+    "description": "Start execution of a granted project phase"
   },
   {
     "category": "Project Management",
-    "name": "project:transition.completed.granted",
-    "description": "Reopen completed project for further grant activities"
+    "name": "project:transition.active.granted",
+    "description": "Pause or revert an active project phase back to granted state"
   },
   {
     "category": "Project Management",

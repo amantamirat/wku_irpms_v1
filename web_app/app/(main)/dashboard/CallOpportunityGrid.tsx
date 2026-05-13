@@ -1,8 +1,28 @@
 'use client';
-import { Call } from '../calls/models/call.model';
+import { useEffect, useState } from 'react';
+import { Call, CallStatus } from '../calls/models/call.model';
 import { OpenCallCard } from './OpenCallCard';
+import { CallApi } from '../calls/api/call.api';
 
-const CallOpportunityGrid = ({ calls, loading }: { calls: Call[], loading: boolean }) => {
+const CallOpportunityGrid = () => {
+
+    const [calls, setCalls] = useState<Call[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const loadCalls = async () => {
+            try {
+                const data = await CallApi.getAll({ status: CallStatus.active, populate: true });
+                setCalls(data);
+            } catch (err) {
+                console.error("Error loading calls:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadCalls();
+    }, []);
+
     if (loading) {
         return (
             <div className="grid mt-2">

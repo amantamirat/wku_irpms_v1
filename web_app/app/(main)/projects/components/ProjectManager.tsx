@@ -122,7 +122,11 @@ const ProjectManager = ({ grantAllocation, applicant, grant, calendar, workspace
             hideDefaultActions: !applicant,
             disableDeleteRow: (row) => row.status !== ProjectStatus.draft,
             expandable: {
-                template: (project) => <ProjectDetail project={project} />
+                template: (project, actions) => <ProjectDetail project={project}
+                    updateProject={(updated: Project) => {
+                        actions.updateItem(updated);
+                    }}
+                />
             }
         }), [grantAllocation?._id, workspace?._id, applicant?._id, activeUser?._id]);
 

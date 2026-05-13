@@ -49,7 +49,6 @@ export class ProjectStageSynchronizer
             projectDoc.currentStage = undefined as any;
         }
         else {
-
             const currentStageId = projectDoc.currentStage ? String(projectDoc.currentStage._id) : undefined;
             const latestStageId = String(latestStageDoc._id);
 

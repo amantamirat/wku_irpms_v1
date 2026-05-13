@@ -15,12 +15,13 @@ import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { ICallRepository } from "../calls/call.repository";
 import { CallStatus } from "../calls/call.status";
-import { ICallStageRepository } from "../calls/stages/call.stage.repository";
 import { IGrantAllocationRepository } from "../grants/allocations/grant.allocation.repository";
 import { AllocationStatus } from "../grants/allocations/grant.allocation.state-machine";
 import { ConstraintValidator } from "../grants/constraints/constraint.validator";
+import { CollaboratorStatus } from "./collaborators/collaborator.model";
 import { ICollaboratorRepository } from "./collaborators/collaborator.repository";
 import { CollaboratorService } from "./collaborators/collaborator.service";
+import { PhaseStatus } from "./phase/phase.model";
 import { IPhaseRepository } from "./phase/phase.repository";
 import { PhaseService } from "./phase/phase.service";
 import { ProjectAuth } from "./project.auth";
@@ -28,9 +29,6 @@ import { ProjectStatus } from "./project.model";
 import { PROJECT_TRANSITIONS } from "./project.state-machine";
 import { IProjectStageRepository } from "./stages/project.stage.repository";
 import { ProjectStageService } from "./stages/project.stage.service";
-import { IProjectSynchronizer } from "./stages/project.stage.synchronizer";
-import { PhaseStatus } from "./phase/phase.model";
-import { CollaboratorStatus } from "./collaborators/collaborator.model";
 
 
 export class ProjectService {
@@ -45,7 +43,7 @@ export class ProjectService {
         private readonly phaseRepo: IPhaseRepository,
         private readonly phaseService: PhaseService,
         private readonly projectStageRepo: IProjectStageRepository,
-        private readonly projectStageService: ProjectStageService,        
+        private readonly projectStageService: ProjectStageService,
         private readonly validator: ConstraintValidator,
     ) { }
 
@@ -193,18 +191,18 @@ export class ProjectService {
             PROJECT_TRANSITIONS
         );
 
-        if (next === ProjectStatus.draft || next === ProjectStatus.submitted
-            || next === ProjectStatus.rejected ||
-            (from !== ProjectStatus.finalization && next === ProjectStatus.accepted)
+        if (to === ProjectStatus.draft || to === ProjectStatus.submitted
+            || to === ProjectStatus.rejected ||
+            (from !== ProjectStatus.finalization && to === ProjectStatus.accepted)
         ) {
             throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
         }
 
-        if (next === ProjectStatus.finalization) {
+        if (to === ProjectStatus.finalization) {
             //to send notification to update the phase and collabs and to make approve
         }
-        if (next === ProjectStatus.approved) {
 
+        if (from === ProjectStatus.finalization && to === ProjectStatus.approved) {
             const phases = await this.phaseRepo.find({ project: id });
             if (!phases.every(p => p.status === PhaseStatus.approved))
                 throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_APPROVED);
@@ -213,6 +211,25 @@ export class ProjectService {
             if (!collabs.every(c => c.status === CollaboratorStatus.verified))
                 throw new AppError(ERROR_CODES.COLLABORATORS_NOT_FULLY_VERIFIED);
 
+        }
+
+        if (from === ProjectStatus.active && to === ProjectStatus.granted) {
+            const phases = await this.phaseRepo.find({ project: id });
+            if (!phases.every(p => p.status === PhaseStatus.approved))
+                throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_APPROVED);
+        }
+
+        if (from === ProjectStatus.approved && to === ProjectStatus.granted) {
+            await this.allocRepo.reserveBudget(
+                projectDoc.grantAllocation.toString(),
+                projectDoc.totalBudget || 0
+            );
+        }
+        if (from === ProjectStatus.granted && to === ProjectStatus.approved) {
+            await this.allocRepo.releaseReservedBudget(
+                projectDoc.grantAllocation.toString(),
+                projectDoc.totalBudget || 0
+            );
         }
 
         return await this.projRepo.updateStatus(id, to);

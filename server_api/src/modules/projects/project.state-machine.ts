@@ -7,6 +7,7 @@ export const PROJECT_TRANSITIONS: Record<ProjectStatus, ProjectStatus[]> = {
     [ProjectStatus.accepted]: [ProjectStatus.finalization, ProjectStatus.submitted],
     [ProjectStatus.finalization]: [ProjectStatus.approved, ProjectStatus.accepted],
     [ProjectStatus.approved]: [ProjectStatus.granted, ProjectStatus.finalization],
-    [ProjectStatus.granted]: [ProjectStatus.completed, ProjectStatus.approved],
-    [ProjectStatus.completed]: [ProjectStatus.granted]
+    [ProjectStatus.granted]: [ProjectStatus.active, ProjectStatus.approved],
+    [ProjectStatus.active]: [ProjectStatus.completed, ProjectStatus.granted],
+    [ProjectStatus.completed]: [ProjectStatus.active]
 };
