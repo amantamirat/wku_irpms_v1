@@ -16,7 +16,7 @@ import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { ICallRepository } from "../calls/call.repository";
 import { CallStatus } from "../calls/call.status";
 import { IGrantAllocationRepository } from "../grants/allocations/grant.allocation.repository";
-import { AllocationStatus } from "../grants/allocations/grant.allocation.state-machine";
+import { AllocationStatus } from "../grants/allocations/grant.allocation.model";
 import { ConstraintValidator } from "../grants/constraints/constraint.validator";
 import { CollaboratorStatus } from "./collaborators/collaborator.model";
 import { ICollaboratorRepository } from "./collaborators/collaborator.repository";
@@ -29,6 +29,7 @@ import { ProjectStatus } from "./project.model";
 import { PROJECT_TRANSITIONS } from "./project.state-machine";
 import { IProjectStageRepository } from "./stages/project.stage.repository";
 import { ProjectStageService } from "./stages/project.stage.service";
+import { NotificationService } from "../notifications/notification.service";
 
 
 export class ProjectService {
@@ -45,6 +46,7 @@ export class ProjectService {
         private readonly projectStageRepo: IProjectStageRepository,
         private readonly projectStageService: ProjectStageService,
         private readonly validator: ConstraintValidator,
+        private readonly notificationService: NotificationService
     ) { }
 
 
@@ -161,6 +163,12 @@ export class ProjectService {
         return this.projRepo.find(options);
     }
 
+    async getById(id: string) {
+        const proj = await this.projRepo.findById(id);
+        if (!proj) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
+        return proj;
+    }
+
     // ---------------------------------------------------
     // UPDATE
     // ---------------------------------------------------
@@ -191,15 +199,20 @@ export class ProjectService {
             PROJECT_TRANSITIONS
         );
 
-        if (to === ProjectStatus.draft || to === ProjectStatus.submitted
-            || to === ProjectStatus.rejected ||
+        if (to === ProjectStatus.draft ||
+            to === ProjectStatus.submitted ||
+            to === ProjectStatus.rejected ||
             (from !== ProjectStatus.finalization && to === ProjectStatus.accepted)
         ) {
             throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
         }
 
         if (to === ProjectStatus.finalization) {
-            //to send notification to update the phase and collabs and to make approve
+            await this.notificationService.notifyProjectFinalization(
+                String(projectDoc.applicant),
+                projectDoc,
+                undefined // senderId if available
+            )
         }
 
         if (from === ProjectStatus.finalization && to === ProjectStatus.approved) {

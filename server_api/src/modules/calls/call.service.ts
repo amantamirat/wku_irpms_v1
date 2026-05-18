@@ -6,7 +6,7 @@ import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { ICalendarReadRepository } from "../calendar/calendar.repository";
 import { CalendarStatus } from "../calendar/calendar.state-machine";
 import { IGrantAllocationRepository } from "../grants/allocations/grant.allocation.repository";
-import { AllocationStatus } from "../grants/allocations/grant.allocation.state-machine";
+import { AllocationStatus } from "../grants/allocations/grant.allocation.model";
 import { GrantStatus, IGrant } from "../grants/grant.model";
 import { IGrantStageRepository } from "../grants/stages/grant.stage.repository";
 import { CreateCallDTO, GetCallsOptions, UpdateCallDTO } from "./call.dto";

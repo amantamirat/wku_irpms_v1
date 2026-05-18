@@ -1,5 +1,7 @@
 //import { DecisionMode } from "./grant.stage.model";
 
+import { StageCategory } from "./grant.stage.model";
+
 
 export interface CreateStageDTO {
     grant: string;
@@ -9,7 +11,7 @@ export interface CreateStageDTO {
     minReviewers: number;
     maxReviewers: number;
     // NEW
-    //decisionMode: DecisionMode;
+    category: StageCategory;
     minAcceptanceScore: number;
 }
 

@@ -89,6 +89,16 @@ export class ProjectController {
     }
   };
 
+  getById = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      const grant = await this.service.getById(id);
+      successResponse(res, 200, 'Project fetched successfully', grant);
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
+    }
+  };
+
   // -----------------------
   // Update
   // -----------------------

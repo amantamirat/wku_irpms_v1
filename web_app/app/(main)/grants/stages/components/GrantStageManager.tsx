@@ -6,7 +6,8 @@ import { GrantStageApi } from "../api/grant.stage.api";
 import {
     createEmptyGrantStage,
     GetStagesDTO,
-    GrantStage
+    GrantStage,
+    StageCategory
 } from "../models/grant.stage.model";
 import SaveStage from "./SaveGrantStage";
 import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
@@ -49,25 +50,21 @@ const GrantStageManager = ({ grant, evaluation }: GrantStageManagerProps) => {
                 body: (row: GrantStage) => row.maxReviewers ?? "-",
             },
 
-            // NEW: Decision Mode
             {
-                /**
-                 * {
-                                header: "Decision",
-                                field: "decisionMode",
-                                body: (row: GrantStage) =>
-                                    row.decisionMode === DecisionMode.AUTOMATIC ? (
-                                        <span className="text-green-600 font-semibold">
-                                            Auto
-                                        </span>
-                                    ) : (
-                                        <span className="text-orange-500 font-semibold">
-                                            Manual
-                                        </span>
-                                    ),
-                            },
-                 */
+                header: "Category",
+                field: "category",
+                body: (row: GrantStage) =>
+                    row.category === StageCategory.selection ? (
+                        <span className="text-green-600 font-semibold">
+                            Selection
+                        </span>
+                    ) : (
+                        <span className="text-orange-500 font-semibold">
+                            Verification
+                        </span>
+                    ),
             },
+
 
 
             // NEW: Acceptance Score

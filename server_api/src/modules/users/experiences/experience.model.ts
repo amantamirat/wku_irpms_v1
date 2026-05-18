@@ -2,7 +2,6 @@
 import mongoose, { model, Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
 
-
 export enum EmploymentType {
     FullTime = "Full-Time",
     PartTime = "Part-Time",
@@ -43,7 +42,7 @@ const ExperienceSchema = new Schema<IExperience>({
         ref: COLLECTIONS.POSITION,
         required: true,
     },
-    
+
     startDate: {
         type: Date,
         required: true

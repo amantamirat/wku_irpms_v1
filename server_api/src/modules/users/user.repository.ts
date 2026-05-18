@@ -89,7 +89,7 @@ export class UserRepository implements IUserRepository {
 
         if (dtoData.workspace) toUpdate.workspace = new mongoose.Types.ObjectId(dtoData.workspace);
         if (dtoData.name) toUpdate.name = dtoData.name;
-        if (dtoData.birthDate) toUpdate.birth_date = dtoData.birthDate;
+        if (dtoData.birthDate) toUpdate.birthDate = dtoData.birthDate;
         if (dtoData.gender) toUpdate.gender = dtoData.gender;
         if (dtoData.fin) toUpdate.fin = dtoData.fin;
         if (dtoData.orcid) toUpdate.orcid = dtoData.orcid;

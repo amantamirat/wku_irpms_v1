@@ -42,9 +42,10 @@ export class GrantService {
             if (orgDoc.type !== Unit.external) {
                 throw new AppError(ERROR_CODES.EXTERNAL_NOT_FOUND);
             }
+            /*
             if ((orgDoc as IExternal).ownership === Ownership.Internal) {
                 throw new AppError(ERROR_CODES.EXTERNAL_NOT_FOUND);
-            }
+            }*/
         }
         const thematicsDoc = await this.thematicRepository.findById(dto.thematic);
         if (!thematicsDoc) throw new AppError(ERROR_CODES.THEMATIC_NOT_FOUND);

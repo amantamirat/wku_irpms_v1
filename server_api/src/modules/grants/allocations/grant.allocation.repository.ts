@@ -8,7 +8,7 @@ import {
 } from "./grant.allocation.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { AllocationStatus } from "./grant.allocation.state-machine";
+import { AllocationStatus } from "./grant.allocation.model";
 
 export interface IGrantAllocationRepository {
     findById(id: string, populate?: boolean): Promise<IGrantAllocation | null>;

@@ -11,7 +11,7 @@ export interface ICallStage extends Document {
     _id: string;
     call: mongoose.Types.ObjectId;
     grantStage: mongoose.Types.ObjectId;
-    order: number;
+    order: number;//grantStage.order
     deadline: Date;
     status: CallStageStatus;
     createdAt?: Date;

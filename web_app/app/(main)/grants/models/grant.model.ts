@@ -25,7 +25,7 @@ export const validateGrant = (grant: Grant): { valid: boolean; message?: string 
         return { valid: false, message: 'Title is required.' };
     }
     if (!grant.organization) {
-        return { valid: false, message: 'Directorate is required.' };
+        return { valid: false, message: 'Organization is required.' };
     }
     if (!grant.thematic) {
         return { valid: false, message: "Thematic is required." };

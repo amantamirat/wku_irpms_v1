@@ -72,6 +72,7 @@ export const createEmptyProjectStage = (
     stage?: Partial<ProjectStage>
 ): ProjectStage => ({
     project: stage?.project ?? "",
+    grantStage: stage?.grantStage ?? "",
     status: stage?.status ?? ProjectStageStatus.submitted,
 });
 

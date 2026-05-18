@@ -1,7 +1,11 @@
 import mongoose, { Schema, model, Document } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
-import { AllocationStatus } from "./grant.allocation.state-machine";
 
+export enum AllocationStatus {
+    planned = 'planned',
+    active = 'active',
+    closed = "closed"
+}
 
 export interface IGrantAllocation extends Document {
     _id: string;
@@ -58,3 +62,4 @@ export const GrantAllocation = model<IGrantAllocation>(
     COLLECTIONS.GRANT_ALLOCATION,
     GrantAllocationSchema
 );
+

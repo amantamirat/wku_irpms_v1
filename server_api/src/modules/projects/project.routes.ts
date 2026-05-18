@@ -61,7 +61,7 @@ const service = new ProjectService(projectRepo, projAuth, grantAllocRepo, callRe
     collabRepo, collabService,
     phaseRepo, phaseService,
     projStageRepo, projectStageService
-    , constValidator);
+    , constValidator, notificationService);
 const controller = new ProjectController(service);
 const router: Router = Router();
 
@@ -77,6 +77,10 @@ router.post("/apply", verifyActiveAccount,
 router.get('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.PROJECT.READ]),
     controller.get);
+
+router.get('/:id', verifyActiveAccount,
+    checkPermission([PERMISSIONS.PROJECT.READ]),
+    controller.getById);
 
 //update    
 router.put('/:id', verifyActiveAccount,

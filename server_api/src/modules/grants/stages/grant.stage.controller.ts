@@ -12,7 +12,7 @@ export class StageController {
 
     create = async (req: Request, res: Response) => {
         try {
-            const { grant, name, evaluation, minReviewers, maxReviewers, decisionMode, minAcceptanceScore } = req.body;
+            const { grant, name, evaluation, minReviewers, maxReviewers, category, minAcceptanceScore } = req.body;
 
             const dto: CreateStageDTO = {
                 grant: grant as string,
@@ -20,7 +20,7 @@ export class StageController {
                 evaluation: evaluation as string,
                 minReviewers,
                 maxReviewers,
-               // decisionMode,
+                category,
                 minAcceptanceScore
             };
 

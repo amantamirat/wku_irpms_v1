@@ -5,6 +5,7 @@ import { EvalStatus } from "../../evaluations/evaluation.state-machine";
 import { GrantStatus } from "../grant.model";
 import { IGrantRepository } from "../grant.repository";
 import { CreateStageDTO, GetStageDTO, UpdateStageDTO } from "./grant.stage.dto";
+import { StageCategory } from "./grant.stage.model";
 //import { DecisionMode } from "./grant.stage.model";
 import { IGrantStageRepository } from "./grant.stage.repository";
 
@@ -26,7 +27,7 @@ export class GrantStageService {
             evaluation,
             minReviewers,
             maxReviewers,
-           // decisionMode,
+            category,
             minAcceptanceScore
         } = dto;
 
@@ -55,9 +56,11 @@ export class GrantStageService {
             throw new AppError(ERROR_CODES.MIN_SCORE_EXCEEDS_EVALUATION_WEIGHT);
         }
         try {
-            const stages = await this.repository.find({ grant });
-            const nextOrder = stages.length + 1;
-
+            let nextOrder = 0;
+            if (category === StageCategory.selection) {
+                const stages = await this.repository.countSelectionStages(grant);
+                nextOrder = stages + 1;
+            }
             const stage = await this.repository.create({
                 ...dto,
                 order: nextOrder

@@ -45,8 +45,9 @@ export class ProjectStageService {
     async validateProject(project: string, applicant: string, session?: ClientSession) {
         const projectDoc = await this.projAuth.authProject(project, applicant, session);
         if (
-            projectDoc.status !== ProjectStatus.draft &&
-            projectDoc.status !== ProjectStatus.submitted
+            projectDoc.status !== ProjectStatus.draft
+            && projectDoc.status !== ProjectStatus.submitted
+           // && projectDoc.status !== ProjectStatus.completed
         ) {
             throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
         }
@@ -61,22 +62,27 @@ export class ProjectStageService {
 
         let nextOrder = 1;
         if (projectDoc.currentStage) {
-            const currentStageDoc = await this.repository
-                .findById(String(projectDoc.currentStage), {
-                    populate: {
-                        grantStage: true
-                    }
-                }, session);
-
-            if (!currentStageDoc) {
-                throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+            if (projectDoc.status === ProjectStatus.completed) {
+                nextOrder = 0;//verification
             }
+            else {
+                const currentStageDoc = await this.repository
+                    .findById(String(projectDoc.currentStage), {
+                        populate: {
+                            grantStage: true
+                        }
+                    }, session);
 
-            if (currentStageDoc.status !== ProjectStageStatus.accepted) {
-                throw new AppError(ERROR_CODES.CURRENT_STAGE_NOT_ACCEPTED);
+                if (!currentStageDoc) {
+                    throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+                }
+
+                if (currentStageDoc.status !== ProjectStageStatus.accepted) {
+                    throw new AppError(ERROR_CODES.CURRENT_STAGE_NOT_ACCEPTED);
+                }
+                nextOrder = (currentStageDoc.grantStage as unknown as IGrantStage).order + 1;
+
             }
-
-            nextOrder = (currentStageDoc.grantStage as unknown as IGrantStage).order + 1;
         }
 
         const grantAllocDoc = projectDoc.grantAllocation as unknown as IGrantAllocation;

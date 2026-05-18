@@ -104,6 +104,25 @@ export class NotificationService {
         });
     }
 
+
+    async notifyProjectFinalization(
+        recipientId: string,
+        projectDoc: any,
+        senderId?: string,
+        session?: ClientSession
+    ) {
+        return this.notify({
+            recipient: recipientId,
+            sender: senderId,
+            title: "Project Requires Finalization",
+            message:
+                `The project "${projectDoc.title}" requires final phase review and updates. ` +
+                `Please review phase timelines, budgets, and mark phases as reviewed.`,
+            type: NotificationType.INFO,
+            link: `/projects/${projectDoc._id}`
+        }, session);
+    }
+
     /**
  * Specific Business Helper: Notify user about a project stage status change.*/
     async notifyStatusChange(

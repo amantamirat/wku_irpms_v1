@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { AllocationStatus } from "./grant.allocation.state-machine";
+import { AllocationStatus } from "./grant.allocation.model";
 
 export interface GetGrantAllocationsDTO {
     grant?: string;

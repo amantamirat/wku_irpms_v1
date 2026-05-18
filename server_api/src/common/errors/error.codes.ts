@@ -58,6 +58,7 @@ export const ERROR_CODES = {
 
     // ---------- USER ----------
     USER_NOT_FOUND: "USER_NOT_FOUND",
+    USER_IN_USE:"USER_IN_USE",
     APPLICANT_HAS_PROJECTS: "APPLICANT_HAS_PROJECTS",
 
     // ---------- POSITION ----------

@@ -130,18 +130,19 @@ const AllocationManager = ({
             /**
              * AVAILABLE
              */
+            /**
+ * AVAILABLE: totalBudget - (reservedBudget + usedBudget)
+ */
             {
                 header: "Available",
 
                 body: (a: GrantAllocation) => {
-
                     const total = a.totalBudget || 0;
+                    const reserved = a.reservedBudget || 0;
+                    const used = a.usedBudget || 0;
 
-                    const reserved =
-                        a.reservedBudget || 0;
-
-                    const available =
-                        total - reserved;
+                    // Available is what's left after both commitments and spending
+                    const available = total - (reserved + used);
 
                     return (
                         <span
@@ -158,23 +159,21 @@ const AllocationManager = ({
                     );
                 }
             },
-
             /**
-             * UTILIZATION %
-             */
+             * * UTILIZATION %: (Used + Reserved) / Total*/
             {
                 header: "Utilization",
 
                 body: (a: GrantAllocation) => {
-
                     const total = a.totalBudget || 0;
-
                     const used = a.usedBudget || 0;
+                    const reserved = a.reservedBudget || 0;
 
-                    const percent =
-                        total > 0
-                            ? ((used / total) * 100)
-                            : 0;
+                    const totalCommitted = used + reserved;
+
+                    const percent = total > 0
+                        ? ((totalCommitted / total) * 100)
+                        : 0;
 
                     return (
                         <span
@@ -191,7 +190,6 @@ const AllocationManager = ({
                     );
                 }
             },
-
             /**
              * STATUS
              */

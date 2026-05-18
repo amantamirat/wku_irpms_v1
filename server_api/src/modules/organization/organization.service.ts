@@ -11,14 +11,16 @@ import { IEnrollmentRepository, EnrollmentRepository } from "../users/enrollment
 import { Unit } from "../../common/constants/enums";
 import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
 import { AppError } from "../../common/errors/app.error";
+import { ExperienceRepository } from "../users/experiences/experience.repository";
 
 export class OrganizationService {
 
 
     constructor(private readonly repo: IOrganizationRepository,
-        private appRepo: IUserRepository = new UserRepository(),
+        private userRepo: IUserRepository = new UserRepository(),
         private studentRepo: IEnrollmentRepository = new EnrollmentRepository(),
         private grantRepo: IGrantRepository = new GrantRepository(),
+        private exprienceRepo = new ExperienceRepository(),
     ) {
     }
 
@@ -83,6 +85,7 @@ export class OrganizationService {
     // ----------------------------------------------------
     async delete(id: string) {
         const orgnDoc = await this.repo.findById(id);
+
         if (!orgnDoc) {
             throw new Error(ERROR_CODES.ORGANIZATION_NOT_FOUND);
         }
@@ -90,29 +93,51 @@ export class OrganizationService {
         const orgType = orgnDoc.type;
 
         const childExist = await this.repo.exists({ parent: id });
+
         if (childExist) {
-            throw new Error(ERROR_CODES.ORGANIZATION_HAS_CHILDREN);
+            throw new AppError(
+                ERROR_CODES.ORGANIZATION_IN_USE,
+                `Cannot delete "${orgnDoc.name}" because it contains child organizations.`
+            );
         }
 
         if (orgType === Unit.external || orgType === Unit.department) {
-            const exists = await this.appRepo.exists({ workspace: id });
-            if (exists) {
-                throw new Error(ERROR_CODES.ORGANIZATION_IN_USE);
+            const userExists = await this.userRepo.exists({ workspace: id });
+
+            if (userExists) {
+                throw new AppError(
+                    ERROR_CODES.ORGANIZATION_IN_USE,
+                    `Cannot delete "${orgnDoc.name}" because users are assigned to it.`
+                );
+            }
+
+            const expExists = await this.exprienceRepo.exists({ organization: id });
+
+            if (expExists) {
+                throw new AppError(
+                    ERROR_CODES.ORGANIZATION_IN_USE,
+                    `Cannot delete "${orgnDoc.name}" because experiences are linked to it.`
+                );
             }
         }
-
 
         if (orgType === Unit.program) {
             const exists = await this.studentRepo.exists({ program: id });
             if (exists) {
-                throw new Error(ERROR_CODES.ORGANIZATION_IN_USE);
+                throw new AppError(
+                    ERROR_CODES.ORGANIZATION_IN_USE,
+                    `Cannot delete "${orgnDoc.name}" because students are assigned to it.`
+                );
             }
         }
 
         if (orgType === Unit.directorate || orgType === Unit.external) {
             const exists = await this.grantRepo.exists({ organization: id });
             if (exists) {
-                throw new Error(ERROR_CODES.ORGANIZATION_IN_USE);
+                throw new AppError(
+                    ERROR_CODES.ORGANIZATION_IN_USE,
+                    `Cannot delete "${orgnDoc.name}" because grants are linked to it.`
+                );
             }
         }
         return await this.repo.delete(id);

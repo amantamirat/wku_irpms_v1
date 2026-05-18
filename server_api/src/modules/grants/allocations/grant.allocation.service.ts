@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { IGrantAllocationRepository } from "./grant.allocation.repository";
@@ -11,7 +10,7 @@ import {
 } from "./grant.allocation.dto";
 import { GrantStatus } from "../grant.model";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
-import { ALLOCATION_TRANSITIONS, AllocationStatus } from "./grant.allocation.state-machine";
+import { AllocationStatus } from "./grant.allocation.model";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { CalendarStatus } from "../../calendar/calendar.state-machine";
 import { ICallRepository } from "../../calls/call.repository";
@@ -192,3 +191,9 @@ export class GrantAllocationService {
     }
 
 }
+
+export const ALLOCATION_TRANSITIONS: Record<AllocationStatus, AllocationStatus[]> = {
+    [AllocationStatus.planned]: [AllocationStatus.active],
+    [AllocationStatus.active]: [AllocationStatus.closed, AllocationStatus.planned],
+    [AllocationStatus.closed]: [AllocationStatus.active]
+};

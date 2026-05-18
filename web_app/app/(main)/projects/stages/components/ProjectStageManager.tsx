@@ -7,7 +7,7 @@ import { GrantAllocation } from "@/app/(main)/grants/allocations/models/grant.al
 import { GrantStage } from "@/app/(main)/grants/stages/models/grant.stage.model";
 import { createEntityManager } from "@/components/createEntityManager";
 import MyBadge from "@/templates/MyBadge";
-import { Project, ProjectStatus } from "../../models/project.model"; // Added ProjectStatus
+import { Project, ProjectStatus } from "../../models/project.model";
 import { ProjectStageApi } from "../api/project.stage.api";
 import { GetProjectStageOptions, ProjectStage, ProjectStageStatus, createEmptyProjectStage } from "../models/project.stage.model";
 import { PROJECT_STAGE_STATUS_ORDER, PROJECT_STAGE_TRANSITIONS } from "../models/project.stage.state-machine";
@@ -22,157 +22,143 @@ interface ProjectStageManagerProps {
     grantAllocation?: string | GrantAllocation;
     callStage?: string | CallStage;
     hideReviewer?: boolean;
-
 }
 
 const ProjectStageManager = ({ project, grantStage, grantAllocation, callStage, hideReviewer }: ProjectStageManagerProps) => {
-
-
     const confirm = useConfirmDialog();
 
-    /*
-        const [stages, setStages] = useState<ProjectStage[] | null>(null);
-        const [nextStage, setNextStage] = useState<GrantStage>();
-    
-        useEffect(() => {
-            const stageCount = stages?.length || 0;
-            const nextOrder = stageCount + 1;
-            const fetctNextStage = async () => {
-                try {
-                    const stages = await GrantStageApi.getAll({
-                        grant
-                    });
-                    setCurrentStage(data);
-                } catch (error) {
-                    console.error("Failed to fetch first stage", error);
-                } finally {
+    const [grantStages, setGrantStages] = useState<GrantStage[] | null>(null);
+    const [currentProjectStage, setCurrentProjectStage] = useState<ProjectStage | undefined>(undefined);
+
+    // 1. Fetch all GrantStages for the project's grant
+    useEffect(() => {
+        let grantId: string | undefined;
+        if (project?.grantAllocation && typeof project.grantAllocation !== "string") {
+            const grantValue = project.grantAllocation.grant;
+            grantId = typeof grantValue === "string" ? grantValue : grantValue?._id;
+        }
+
+        if (!grantId) return;
+
+        GrantStageApi.getAll({ grant: grantId })
+            .then(setGrantStages)
+            .catch(err => console.error("Failed to fetch grant stages", err));
+    }, [project?.grantAllocation]);
+
+    // 2. Load the full current ProjectStage object if it's currently just an ID
+    useEffect(() => {
+        const loadCurrentStage = async () => {
+            try {
+                if (!project?.currentStage) {
+                    setCurrentProjectStage(undefined);
+                    return;
                 }
-            };
-            fetctNextStage();
-        }, [stages]);
-    
-    
-    
-        const [currentStage, setCurrentStage] = useState<ProjectStage>();
-    
-        useEffect(() => {
-            const fetchCurrentStage = async () => {
-                if (!project?.currentStage) return;
-                try {
-                    const data = await ProjectStageApi.getById!(project.currentStage);
-                    setCurrentStage(data);
-                } catch (error) {
-                    console.error("Failed to fetch first stage", error);
-                } finally {
+
+                if (typeof project.currentStage !== "string") {
+                    setCurrentProjectStage(project.currentStage);
+                } else {
+                    const stage = await ProjectStageApi.getById!(project.currentStage);
+                    setCurrentProjectStage(stage);
                 }
-            };
-            fetchCurrentStage();
-        }, [project?.currentStage]);
-    
-        */
+            } catch (error) {
+                console.error("Failed to load current project stage", error);
+            }
+        };
 
+        loadCurrentStage();
+    }, [project?.currentStage]);
 
+    // 3. Logic to find the NEXT GrantStage
+    const nextStage = useMemo(() => {
+        if (!grantStages?.length) return undefined;
 
-    // 1. Determine if the project is in a state that allows new submissions/stages
+        // Special Case: If project is completed, the "next" stage is the verification stage (order 0)
+        if (project?.status === ProjectStatus.completed) {
+            return grantStages.find(gs => gs.order === 0);
+        }
+
+        let currentOrder = 0;
+
+        // If we have the full loaded currentProjectStage, find its grantStage order
+        if (currentProjectStage) {
+            const currentGrantStageId = typeof currentProjectStage.grantStage === 'object'
+                ? currentProjectStage.grantStage?._id
+                : currentProjectStage.grantStage;
+
+            const currentGSObj = grantStages.find(gs => gs._id === currentGrantStageId);
+            if (currentGSObj) {
+                currentOrder = currentGSObj.order || 0;
+            }
+        }
+
+        // Standard progression: find the stage with the next incremented order
+        // Note: We usually filter out order 0 here if it's reserved strictly for verification
+        return grantStages.find(gs => gs.order === currentOrder + 1);
+    }, [grantStages, currentProjectStage, project?.status]);
 
     const canCreateStage = project && (
         project.status === ProjectStatus.draft ||
-        project.status === ProjectStatus.submitted
+        project.status === ProjectStatus.submitted ||
+        project.status === ProjectStatus.completed // This allows the verification stage to be created
     );
 
     const columns = useMemo(() => {
         const cols: any[] = [];
-
         if (!project) {
             cols.push({
                 header: "Project",
                 field: "project.title",
-                sortable: true,
                 body: (ps: ProjectStage) => {
                     const title = typeof ps.project === "object" ? ps.project.title : "Unknown Project";
-                    return (
-                        <div className="truncate text-sm font-medium" style={{ maxWidth: '300px' }} title={title}>
-                            {title}
-                        </div>
-                    );
-                }
-            });
-
-            cols.push({
-                header: "Applicant",
-                field: "project.applicant.name",
-                sortable: true,
-                body: (ps: ProjectStage) => {
-                    const name = (ps.project as any)?.applicant?.name ?? "N/A";
-                    return <span className="text-sm">{name}</span>;
+                    return <div className="truncate text-sm font-medium" style={{ maxWidth: '300px' }} title={title}>{title}</div>;
                 }
             });
         }
-
         if (project && !grantStage && !callStage) {
             cols.push({
-                header: "Grant Stage",
-                field: "grantStage.name",
-                body: (ps: ProjectStage) =>
-                    typeof ps.grantStage === "object"
-                        ? (ps.grantStage as GrantStage)?.name
-                        : "General"
+                header: "Stage Name",
+                body: (ps: ProjectStage) => typeof ps.grantStage === "object" ? (ps.grantStage as GrantStage)?.name : "General"
             });
         }
-
         cols.push(
             {
                 header: "Document",
                 body: (ps: ProjectStage) => ps.documentPath ? (
-                    <a
-                        href={`${BASE_URL}/${ps.documentPath.replace(/^\\/, "")}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline flex align-items-center"
-                    >
+                    <a href={`${BASE_URL}/${ps.documentPath.replace(/^\\/, "")}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center">
                         <i className="pi pi-file-pdf mr-1 text-red-500"></i> View PDF
                     </a>
                 ) : <span className="text-gray-400 italic">No document</span>
             },
             {
                 header: "Score",
-                field: "totalScore",
-                sortable: true,
-                body: (ps: ProjectStage) => (
-                    <span className="font-bold text-lg">
-                        {typeof ps?.totalScore === "number" ? ps.totalScore : "—"}
-                    </span>
-                )
+                body: (ps: ProjectStage) => <span className="font-bold text-lg">{typeof ps?.totalScore === "number" ? ps.totalScore : "—"}</span>
             },
             {
                 header: "Status",
-                field: "status",
-                sortable: true,
                 body: (ps: ProjectStage) => <MyBadge type="status" value={ps.status ?? ProjectStageStatus.submitted} />
             }
         );
-
         return cols;
     }, [project, grantStage, callStage]);
 
     const Manager = useMemo(() =>
         createEntityManager<ProjectStage, GetProjectStageOptions | undefined>({
-            title: "Project Submissions",
-            itemName: "Application Stage",
+            title: nextStage ? `Submit ${nextStage.name}` : "Project Submissions",
+            itemName: nextStage ? nextStage.name : "Application Stage",
             api: ProjectStageApi,
             columns: columns,
 
-            // 2. Gate creation: Only if project is in Draft/Submitted
-            createNew: canCreateStage
-                ? () => createEmptyProjectStage({ project: typeof project === 'object' ? project._id : project })
+            createNew: (canCreateStage && nextStage)
+                ? () => createEmptyProjectStage({
+                    project: project,
+                    grantStage: nextStage
+                })
                 : undefined,
 
-            // 3. Gate the Dialog: Prevent pop-up if the project is locked
             SaveDialog: canCreateStage ? SaveProjectStage : undefined,
-
             permissionPrefix: "project.stage",
             query: () => ({
-                project: typeof project === "object" ? project._id : project,
+                project: project,
                 grantStage: typeof grantStage === "object" ? grantStage._id : grantStage,
                 grantAllocation: typeof grantAllocation === "object" ? grantAllocation._id : grantAllocation,
                 populate: true
@@ -185,7 +171,6 @@ const ProjectStageManager = ({ project, grantStage, grantAllocation, callStage, 
             expandable: {
                 template: (ps) => <ProjectStageDetail projectStage={ps} hideReviewer={hideReviewer} />
             },
-            //onItemsChange: setStages,
             extraActions: [
                 {
                     icon: "pi pi-calculator",
@@ -203,12 +188,11 @@ const ProjectStageManager = ({ project, grantStage, grantAllocation, callStage, 
                     }
                 }
             ],
-            hideEditAction: true, // Stages are usually fixed once submitted; updates happen via workflow
+            hideEditAction: true,
             hideDeleteAction: !project,
             disableDeleteRow: (ps: ProjectStage) => ps.status !== ProjectStageStatus.submitted
-
         }),
-        [columns, project, grantStage, grantAllocation, canCreateStage, hideReviewer]
+        [columns, project, grantStage, grantAllocation, canCreateStage, nextStage]
     );
 
     return <Manager />;

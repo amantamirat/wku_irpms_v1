@@ -4,7 +4,7 @@ import { CallStatus } from "./call.status";
 
 export interface ICall extends Document {
     grantAllocation: mongoose.Types.ObjectId;
-    organization: mongoose.Types.ObjectId;
+    organization: mongoose.Types.ObjectId;//grant.organization
     title: string;
     description?: string;
     status: CallStatus;

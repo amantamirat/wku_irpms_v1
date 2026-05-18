@@ -35,3 +35,7 @@ export interface GetPublicationsOptions {
     toDate?: string;
     populate?: boolean;
 }
+
+export interface ExistsPublicationDTO {
+    author?: string;
+}

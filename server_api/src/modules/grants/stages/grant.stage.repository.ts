@@ -1,6 +1,6 @@
 import mongoose, { ClientSession } from "mongoose";
 import { CreateStageDTO, ExistsStageDTO, GetStageDTO, UpdateStageDTO } from "./grant.stage.dto";
-import { IGrantStage, GrantStage } from "./grant.stage.model";
+import { IGrantStage, GrantStage, StageCategory } from "./grant.stage.model";
 
 export interface IGrantStageRepository {
     findById(id: string, session?: ClientSession): Promise<IGrantStage | null>;
@@ -9,7 +9,7 @@ export interface IGrantStageRepository {
     create(dto: CreateStageDTO): Promise<IGrantStage>;
     update(id: string, data: UpdateStageDTO["data"]): Promise<IGrantStage | null>;
     updateMany(filter: any, update: any): Promise<any>;
-    countStages(grantId: string, session?: ClientSession): Promise<number>;
+    countSelectionStages(grantId: string, session?: ClientSession): Promise<number>;
     exists(filters: ExistsStageDTO): Promise<boolean>;
     delete(id: string): Promise<IGrantStage | null>;
 }
@@ -127,12 +127,13 @@ export class GrantStageRepository implements IGrantStageRepository {
         return GrantStage.updateMany(filter, update).exec();
     }
 
-    async countStages(
+    async countSelectionStages(
         grantId: string,
         session?: ClientSession
     ) {
         let dbQuery = GrantStage.countDocuments({
-            grant: new mongoose.Types.ObjectId(grantId)
+            grant: new mongoose.Types.ObjectId(grantId),
+            category: StageCategory.selection
         });
 
         if (session) {

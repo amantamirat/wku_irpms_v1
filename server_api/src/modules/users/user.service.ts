@@ -8,16 +8,22 @@ import { IRoleRepository, RoleRepository } from "../permissions/roles/role.repos
 import { CreateUserDTO, UpdateUserDTO, GetUsersDTO, UpdateRolesDTO, UpdateOwnershipsDTO } from "./user.dto";
 import { IUserRepository, UserRepository } from "./user.repository";
 import { Unit } from "../../common/constants/enums";
+import { EnrollmentRepository } from "./enrollments/enrollment.repository";
+import { ExperienceRepository } from "./experiences/experience.repository";
+import { PublicationRepository } from "./publications/publication.repository";
 
 export class UserService {
 
     constructor(
-        private repository: IUserRepository = new UserRepository(),
+        private repo: IUserRepository = new UserRepository(),
         private orgnRepo: IOrganizationRepository = new OrganizationRepository(),
         private roleRepository: IRoleRepository = new RoleRepository(),
         private projectRepo: IProjectRepository = new ProjectRepository(),
         private collabRepo: ICollaboratorRepository = new CollaboratorRepository(),
-        private reviewerRepo = new ReviewerRepository()
+        private reviewerRepo = new ReviewerRepository(),
+        private exprienceRepo = new ExperienceRepository(),
+        private enrollmentRepo = new EnrollmentRepository(),
+        private publicationRepo = new PublicationRepository(),
     ) { }
 
     async validateWorkspace(workspace: string) {
@@ -33,19 +39,19 @@ export class UserService {
     // CREATE
     // -------------------------
     async create(dto: CreateUserDTO) {
-        if (!dto.workspace)
-            throw new AppError(ERROR_CODES.WORKSPACE_NOT_FOUND);
-        await this.validateWorkspace(dto.workspace);
+        if (dto.workspace)
+            await this.validateWorkspace(dto.workspace);
+        //throw new AppError(ERROR_CODES.WORKSPACE_NOT_FOUND);       
         const defaultRoles = await this.roleRepository.findDefaults();
         const roles = defaultRoles.map(role => String(role._id));
-        const created = await this.repository.create({ ...dto, roles });
+        const created = await this.repo.create({ ...dto, roles });
         return created;
     }
     // -------------------------
     // GET ALL (with optional filter)
     // -------------------------
     async getAll(filter: GetUsersDTO) {
-        return await this.repository.findAll(filter);
+        return await this.repo.findAll(filter);
     }
     // -------------------------
     // UPDATE
@@ -56,7 +62,7 @@ export class UserService {
             await this.validateWorkspace(data.workspace);
         }
         //check permission for roles and ownerships !!!!!!danger
-        const updated = await this.repository.update(id, data);
+        const updated = await this.repo.update(id, data);
         if (!updated) throw new Error(ERROR_CODES.USER_NOT_FOUND);
         return updated;
     }
@@ -64,7 +70,7 @@ export class UserService {
     // UPDATE_ROLES
     // -------------------------
     async updateRoles(dto: UpdateRolesDTO) {
-        const updated = await this.repository.updateRoles(dto.id, dto);
+        const updated = await this.repo.updateRoles(dto.id, dto);
         if (!updated) throw new Error(ERROR_CODES.USER_NOT_FOUND);
         return updated;
         //if (!updated) throw new Error("User not found");
@@ -92,7 +98,7 @@ export class UserService {
                 throw new Error(`Invalid scope for unitType ${o.unitType}`);
             }
         }
-        const updated = await this.repository.updateOwnerships(id, ownerships);
+        const updated = await this.repo.updateOwnerships(id, ownerships);
         if (!updated) throw new Error(ERROR_CODES.USER_NOT_FOUND);
         return updated;
     }
@@ -100,19 +106,65 @@ export class UserService {
     // DELETE
     // -------------------------
     async delete(id: string) {
+        const userDoc = await this.repo.findById(id);
+        if (!userDoc) {
+            throw new AppError(ERROR_CODES.USER_NOT_FOUND, "The requested user could not be found.");
+        }
+        // 1. Check for professional experience records
+        const experienceExist = await this.exprienceRepo.exists({ user: id });
+        if (experienceExist) {
+            throw new AppError(
+                ERROR_CODES.USER_IN_USE,
+                `Cannot delete "${userDoc.name}" because they have employment or professional experience records linked to their profile. Please remove these experience logs first.`
+            );
+        }
+
+        // 2. Check for student academic enrollment ties
+        const enrollmentExist = await this.enrollmentRepo.exists({ student: id }); // or { user: id } depending on your schema field
+        if (enrollmentExist) {
+            throw new AppError(
+                ERROR_CODES.USER_IN_USE,
+                `Cannot delete "${userDoc.name}" because they have active academic program enrollments. Please unenroll or graduate the student first.`
+            );
+        }
+
+        // 3. Check for research publication history
+        const publicationExist = await this.publicationRepo.exists({ author: id }); // adjusted field to match typical publication schemas
+        if (publicationExist) {
+            throw new AppError(
+                ERROR_CODES.USER_IN_USE,
+                `Cannot delete "${userDoc.name}" because they are listed as an author on active research publications. Please reassign authorship or archive the publication records first.`
+            );
+        }
+
+        // 1. Check for Project Applications
         const projectExists = await this.projectRepo.exists({ applicant: id });
         if (projectExists) {
-            throw new Error(ERROR_CODES.APPLICANT_HAS_PROJECTS);
-        };
+            throw new AppError(
+                ERROR_CODES.USER_IN_USE,
+                "Cannot delete this user because they are the primary applicant on existing research projects. Please transfer or archive those projects first."
+            );
+        }
+
+        // 2. Check for Project Collaborations
         const collabExist = await this.collabRepo.exists({ applicant: id });
         if (collabExist) {
-            throw new Error(ERROR_CODES.COLLABORATOR_ALREADY_EXISTS);
-        };
+            throw new AppError(
+                ERROR_CODES.USER_IN_USE,
+                "Cannot delete this user because they are assigned as a collaborator on active projects. Please remove them from those project teams first."
+            );
+        }
+
+        // 3. Check for Reviewer Assignments
         const revExist = await this.reviewerRepo.exist({ reviewer: id });
         if (revExist) {
-            throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
+            throw new AppError(
+                ERROR_CODES.USER_IN_USE,
+                "Cannot delete this user because they are registered as an active reviewer for project proposals. Please reassign or remove their reviewer assignments first."
+            );
         }
-        const deleted = await this.repository.delete(id);
+
+        const deleted = await this.repo.delete(id);
         if (!deleted) throw new Error(ERROR_CODES.USER_NOT_FOUND);
         return deleted;
     }

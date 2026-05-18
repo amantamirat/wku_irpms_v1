@@ -84,7 +84,7 @@ export class ProjectStageSynchronizer
                 if (!grantStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
 
                 const totalStages = await this.grantStageRepo.
-                    countStages(String(grantStageDoc.grant), session);
+                    countSelectionStages(String(grantStageDoc.grant), session);
 
                 if (grantStageDoc.order >= totalStages) {
                     newStatus = ProjectStatus.accepted; // last stage accepted

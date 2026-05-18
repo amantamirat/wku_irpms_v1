@@ -6,11 +6,17 @@ export enum DecisionMode {
     AUTOMATIC = "AUTOMATIC",
 }*/
 
+export enum StageCategory {
+    selection = 'selection',    // Before the project starts
+    verification = 'verification' // After the project is completed
+}
+
 export interface IGrantStage extends Document {
     _id: string;
     grant: mongoose.Types.ObjectId;
     name: string;
     order: number;
+    category: StageCategory; // NEW: Distinguishes pre-vs-post evaluation
     evaluation: mongoose.Types.ObjectId;
 
     minReviewers: number;
@@ -38,8 +44,14 @@ const GrantStageSchema = new Schema<IGrantStage>(
         order: {
             type: Number,
             required: true,
-            min: 1,
+            min: 0, //verification
             max: 5,
+        },
+        category: {
+            type: String,
+            enum: Object.values(StageCategory),
+            default: StageCategory.selection,
+            immutable:true
         },
         evaluation: {
             type: Schema.Types.ObjectId,
@@ -61,7 +73,6 @@ const GrantStageSchema = new Schema<IGrantStage>(
             max: 10,
             default: 3,
         },
-
         /*
         decisionMode: {
             type: String,
@@ -69,7 +80,6 @@ const GrantStageSchema = new Schema<IGrantStage>(
             default: DecisionMode.MANUAL,
         },
         */
-
         minAcceptanceScore: {
             type: Number,
             min: 0,

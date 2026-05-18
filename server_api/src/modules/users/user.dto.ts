@@ -4,8 +4,8 @@ import { IOwnership } from "./user.model";
 export interface CreateUserDTO {
     workspace?: string;
     name: string;
-    birthDate: Date;
-    gender: Gender;
+    birthDate?: Date;
+    gender?: Gender;
     fin?: string;
     orcid?: string;
     accessibility?: Accessibility[];

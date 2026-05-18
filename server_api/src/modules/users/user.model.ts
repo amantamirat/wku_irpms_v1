@@ -26,8 +26,8 @@ export interface IOwnership {
 export interface IUser extends Document {
     workspace?: mongoose.Types.ObjectId;
     name: string;
-    birthDate: Date;
-    gender: Gender;
+    birthDate?: Date;
+    gender?: Gender;
     fin?: string;
     orcid?: string;
     accessibility?: Accessibility[];
@@ -65,12 +65,13 @@ const UserSchema = new Schema<IUser>({
     },
     birthDate: {
         type: Date,
-        required: true
+        //required: true
     },
     gender: {
         type: String,
         enum: Object.values(Gender),
-        required: true
+        //required: true,
+        default: Gender.Female
     },
     fin: {
         type: String,

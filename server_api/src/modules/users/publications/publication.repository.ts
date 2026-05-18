@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 import {
     CreatePublicationDTO,
     UpdatePublicationDTO,
-    GetPublicationsOptions
+    GetPublicationsOptions,
+    ExistsPublicationDTO
 } from "./publication.dto";
 import { IPublication, Publication } from "./publication.model";
 
@@ -52,10 +53,10 @@ export class PublicationRepository implements IPublicationRepository {
     async create(dto: CreatePublicationDTO): Promise<IPublication> {
         const data: Partial<IPublication> = {
             ...dto,
-            author: new mongoose.Types.ObjectId(dto.author),            
+            author: new mongoose.Types.ObjectId(dto.author),
             publishedDate: dto.publishedDate
                 ? new Date(dto.publishedDate)
-                : undefined,            
+                : undefined,
         };
 
         return Publication.create(data);
@@ -83,6 +84,17 @@ export class PublicationRepository implements IPublicationRepository {
             { new: true }
         )
             .lean<IPublication>();
+    }
+
+    async exists(filters: ExistsPublicationDTO): Promise<boolean> {
+        const query: any = {};
+
+        if (filters.author) {
+            query.author = new mongoose.Types.ObjectId(filters.author);
+        }
+
+        const result = await Publication.exists(query).exec();
+        return result !== null;
     }
 
     async delete(id: string): Promise<IPublication | null> {

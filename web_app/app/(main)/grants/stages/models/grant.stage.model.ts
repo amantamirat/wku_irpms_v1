@@ -7,13 +7,18 @@ export enum DecisionMode {
     AUTOMATIC = "AUTOMATIC",
 }*/
 
+export enum StageCategory {
+    selection = 'selection',    // Before the project starts
+    verification = 'verification' // After the project is completed
+}
+
 export type GrantStage = {
     _id?: string;
     grant: string | Grant;
     name: string;
     order?: number;
     evaluation?: string | Evaluation;
-
+    category?: StageCategory;
     minReviewers?: number;
     maxReviewers?: number;
 
@@ -100,6 +105,6 @@ export const createEmptyGrantStage = (stage?: Partial<GrantStage>): GrantStage =
     order: 1,
     minReviewers: 1,
     maxReviewers: 3,
-    //decisionMode: DecisionMode.MANUAL,
+    category: StageCategory.selection,
     minAcceptanceScore: 50,
 });

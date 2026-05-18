@@ -11,7 +11,7 @@ import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { GrantStageApi } from '../api/grant.stage.api';
-import { GrantStage, DecisionMode, validateGrantStage } from '../models/grant.stage.model';
+import { GrantStage, validateGrantStage, StageCategory } from '../models/grant.stage.model';
 import { Grant } from '../../models/grant.model';
 import { GrantApi } from '../../api/grant.api';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
@@ -22,7 +22,7 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
 
     const [localStage, setLocalStage] = useState<GrantStage>({
         ...item,
-        decisionMode: item.decisionMode ?? DecisionMode.MANUAL,
+        category: item.category ?? StageCategory.selection,
         minAcceptanceScore: item.minAcceptanceScore ?? 0,
     });
 
@@ -56,7 +56,7 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
     useEffect(() => {
         setLocalStage({
             ...item,
-            decisionMode: item.decisionMode ?? DecisionMode.MANUAL,
+            category: item.category ?? StageCategory.selection,
             minAcceptanceScore: item.minAcceptanceScore ?? 0,
         });
     }, [item]);
@@ -69,7 +69,7 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
         setSubmitted(false);
         setLocalStage({
             ...item,
-            decisionMode: DecisionMode.MANUAL,
+            category: StageCategory.selection,
             minAcceptanceScore: 0,
         });
     };
@@ -171,8 +171,8 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                             optionLabel="title"
                             placeholder="Select an Evaluation"
                             onChange={(e) => {
-                                setLocalStage((p) => ({ 
-                                    ...p, 
+                                setLocalStage((p) => ({
+                                    ...p,
                                     evaluation: e.value,
                                     // Reset score if it exceeds new evaluation weight
                                     minAcceptanceScore: p.minAcceptanceScore > (e.value?.weight || 100) ? 0 : p.minAcceptanceScore
@@ -200,23 +200,22 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                     </div>
                 </div>
 
-                {/* Decision Mode */}
+                {/* Category Mode */}
                 {
-                    /**
-                     * <div className="field">
-                    <label className="font-bold">Decision Mode</label>
-                    <Dropdown
-                        value={localStage.decisionMode}
-                        options={[
-                            { label: 'Manual', value: DecisionMode.MANUAL },
-                            { label: 'Automatic', value: DecisionMode.AUTOMATIC },
-                        ]}
-                        onChange={(e) => setLocalStage((p) => ({ ...p, decisionMode: e.value }))}
-                    />
-                </div>
-                     */
+                    <div className="field">
+                        <label className="font-bold">Category</label>
+                        <Dropdown
+                            value={localStage.category}
+                            options={[
+                                { label: 'Selection', value: StageCategory.selection },
+                                { label: 'Verification', value: StageCategory.verification },
+                            ]}
+                            onChange={(e) => setLocalStage((p) => ({ ...p, category: e.value }))}
+                        />
+                    </div>
+
                 }
-                
+
 
                 {/* Min Acceptance Score - Now visible in both modes */}
                 <div className="field">

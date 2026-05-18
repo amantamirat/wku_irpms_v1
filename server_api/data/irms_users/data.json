@@ -1,0 +1,5937 @@
+[
+  {
+    "name": "College of Engineering and Technology",
+    "departments": [
+      {
+        "name": "Hydraulic and Water Resources Engineering",
+        "pis": [
+          {
+            "user_id": "06e0911a-0401-ed11-911b-425bff47fdcf",
+            "name": "Andwelam Leta Assefa",
+            "gender": "Male"
+          },
+          {
+            "user_id": "59e84c13-8b5a-ed11-918b-425bff47fdcf",
+            "name": "Mezen Desse Agza",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4f7a65dc-884b-ec11-b325-9e87ee2bf542",
+            "name": "Moges Tariku Tegenu",
+            "gender": "Male"
+          },
+          {
+            "user_id": "e5629476-8b5a-ed11-918b-425bff47fdcf",
+            "name": "Bedassa Desalegn X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4a7a65dc-884b-ec11-b325-9e87ee2bf542",
+            "name": "Girma Bekele X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bbdfec76-0401-ed11-911b-425bff47fdcf",
+            "name": "Eyasu Tafese Mekuria",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d50cdb2c-0a4d-ec11-b337-9e87ee2bf542",
+            "name": "Alemayehu Kassa Ewentie",
+            "gender": "Male"
+          },
+          {
+            "user_id": "457a65dc-884b-ec11-b325-9e87ee2bf542",
+            "name": "Alemu Beyene X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "467a65dc-884b-ec11-b325-9e87ee2bf542",
+            "name": "Biruktawit G/Meskel X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "477a65dc-884b-ec11-b325-9e87ee2bf542",
+            "name": "Chimdesa Regasa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "487a65dc-884b-ec11-b325-9e87ee2bf542",
+            "name": "Dawit Girma X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "fc58857e-6795-ec11-b453-9e87ee2bf542",
+            "name": "Ejara Garedew X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "497a65dc-884b-ec11-b325-9e87ee2bf542",
+            "name": "Ephrata Tewhibo X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "2619077a-9a8f-ef11-a42a-7e43ff4f35bf",
+            "name": "Gemechu Shuniye xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "1de2f945-9a8f-ef11-a42a-7e43ff4f35bf",
+            "name": "Gutema Debelo xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4b7a65dc-884b-ec11-b325-9e87ee2bf542",
+            "name": "Helen Seyfe X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "4c7a65dc-884b-ec11-b325-9e87ee2bf542",
+            "name": "Kenenisa Bulti X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4e7a65dc-884b-ec11-b325-9e87ee2bf542",
+            "name": "Mahlet Abreham X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "4d7a65dc-884b-ec11-b325-9e87ee2bf542",
+            "name": "Melka Lemma X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "507a65dc-884b-ec11-b325-9e87ee2bf542",
+            "name": "Nedi Leta X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "517a65dc-884b-ec11-b325-9e87ee2bf542",
+            "name": "Ramazil Fedlu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5380fc8a-034d-ec11-b337-9e87ee2bf542",
+            "name": "Seifedin Bedru Nasir",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ab356516-0a4d-ec11-b337-9e87ee2bf542",
+            "name": "Temesgen Zelalem X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "527a65dc-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tesfaye Abdeta X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4bbdbfcb-8b5a-ed11-918b-425bff47fdcf",
+            "name": "Teshale Fita Ijigu",
+            "gender": "Male"
+          },
+          {
+            "user_id": "537a65dc-884b-ec11-b325-9e87ee2bf542",
+            "name": "Wabi Egeze X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f68ef62e-9a8f-ef11-a42a-7e43ff4f35bf",
+            "name": "Wondimu Zebire xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4c246059-9a8f-ef11-a42a-7e43ff4f35bf",
+            "name": "Yohanns Wondimu xxx",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Food Process Engineering",
+        "pis": [
+          {
+            "user_id": "d52a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Worku Abera X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c72a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Derese Wodajo X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d62a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Yared Tesfaye Getahun",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d22a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Molla Abeje Desta",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c32a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Asres Mengistu x",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d32a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Solomon Dugma X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c12a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Abiyot Negu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c22a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Alemu Girma T",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c42a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Belay Dereje X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c52a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Daneil Mamo X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c62a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Demisew Bekele X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "785e7651-a16e-ec11-b3d4-9e87ee2bf542",
+            "name": "Dr. Bahiru Tsegaye X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c82a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Erkihun Masresha X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ca2a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Gashaw Abebaw X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "cb2a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Haileyesus Hailegebriel X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "cc2a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Haylemikael Alemayehu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c92a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Helen W/Michael X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "cd2a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Kenenisa Dekeba X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ce2a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Menure Heiru Abdella",
+            "gender": "Male"
+          },
+          {
+            "user_id": "cf2a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Meseret Leta X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "d02a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Meseret Zerihun X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d12a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Moges Yilma X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "7d035e52-878c-ef11-a424-7e43ff4f35bf",
+            "name": "Sefinesh Musema zxzx",
+            "gender": "Female"
+          },
+          {
+            "user_id": "a25acc05-e26a-ec11-b3be-9e87ee2bf542",
+            "name": "Teklu Chalchisa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d72a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Yemane Hailemariyam Kahsu",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d82a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Yohannes Tolessa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d92a10d7-894b-ec11-b325-9e87ee2bf542",
+            "name": "Yoseph Abebaw X",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Construction Technology and Management",
+        "pis": [
+          {
+            "user_id": "c11261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Zeina Sisay X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a41261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Amsalu Gelaw Y",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4d3549e7-8d6c-ec11-b3c5-9e87ee2bf542",
+            "name": "Anduamlak Yilma Gizaw",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a51261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Ashenafi G/Meskel X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a61261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Belete Yismachew X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a71261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Beshir Mudesir X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a81261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Bikila Meko X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a91261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Birhanu Goshu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "aa1261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Birhanu Mebratu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ab1261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Bizuayehu Mekonnen X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ac1261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Cherinet Sharew X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ad1261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Dagninet Cherinet X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ae1261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Gebeyehu Teka X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "af1261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Hamdu Nesru X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a5bbee43-8e6c-ec11-b3c5-9e87ee2bf542",
+            "name": "Hamera Nuo X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "b01261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Joseph Dejene X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "cb277c5d-e56a-ec11-b3be-9e87ee2bf542",
+            "name": "Kalkiyas Alemu X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "b21261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Kamil Akmel X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b31261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Kassahun Abrham X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9bf89bf4-2f95-f011-a54e-7e43ff4f35bf",
+            "name": "Kelkiyas Alemu Hailu",
+            "gender": "Female"
+          },
+          {
+            "user_id": "b41261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Kidanemariam Lakew X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b51261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Matiyos Sahle X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b61261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Melkamu Aga X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b71261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Mulugeta Debele X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b81261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Samson Tesfaye X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b91261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Selamawit Kibru X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "ba1261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Simachew Birile X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bb1261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Simretab G/Medhin X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bc1261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tariku Desu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bd1261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tilkusew Degu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "be1261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Weredekal Birhanu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bf1261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Yared Beyene X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c01261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Yetnayet Bihon X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c21261c9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Zemenu Mersha X",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Textile Engineering",
+        "pis": [
+          {
+            "user_id": "f83db1da-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Belayihun Missaw Menesha",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bf63213e-635f-ed11-9195-425bff47fdcf",
+            "name": "Chirato Godana X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "033eb1da-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Worku Tegegn X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3b9b41f0-bd8d-ee11-a330-7e43ff4f35bf",
+            "name": "Abay Mulusew xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "003eb1da-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Ademe Morke X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ff3db1da-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Ayano Koryita X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f93db1da-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Beyene Dumecha Gebisa",
+            "gender": "Male"
+          },
+          {
+            "user_id": "81613b27-6995-ec11-b453-9e87ee2bf542",
+            "name": "Bontu Dinsa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "62b85fdb-6895-ec11-b453-9e87ee2bf542",
+            "name": "Dehenenet Flatie X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "ac8bfe6b-1a74-ec11-b3e4-9e87ee2bf542",
+            "name": "Fekade Dejene Masresha",
+            "gender": "Male"
+          },
+          {
+            "user_id": "fa3db1da-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Gezu Ketema Janka",
+            "gender": "Male"
+          },
+          {
+            "user_id": "17584d6a-6995-ec11-b453-9e87ee2bf542",
+            "name": "Girmaye Kumsa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b3cc3072-e36a-ec11-b3be-9e87ee2bf542",
+            "name": "Gulma Soresa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "fb3db1da-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Guluma Sorsa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "78fce405-9678-ee11-a31b-7e43ff4f35bf",
+            "name": "Hana Girma xxx",
+            "gender": "Female"
+          },
+          {
+            "user_id": "f9a2a68f-3a03-ed11-9129-425bff47fdcf",
+            "name": "MIHRET ZEGAN DENDR",
+            "gender": "Female"
+          },
+          {
+            "user_id": "91ab8ad8-fb73-ee11-a30f-7e43ff4f35bf",
+            "name": "Mihret Zegan xxx",
+            "gender": "Female"
+          },
+          {
+            "user_id": "da2d0c87-0301-ed11-911b-425bff47fdcf",
+            "name": "MIKAEL JIMA ATLAW",
+            "gender": "Male"
+          },
+          {
+            "user_id": "023eb1da-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Mulatu Yitina X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "fc3db1da-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Negasi G/Medhin X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "013eb1da-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Nuradis Temam X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a2dd99b4-0401-ed11-911b-425bff47fdcf",
+            "name": "Sisay Tagesse Misebo",
+            "gender": "Male"
+          },
+          {
+            "user_id": "29317678-fa73-ee11-a30f-7e43ff4f35bf",
+            "name": "Sisay Tagesse xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "fd3db1da-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Temesgen Feleke X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "993fce88-fb73-ee11-a30f-7e43ff4f35bf",
+            "name": "Temesgen Getachew Atilaw",
+            "gender": "Male"
+          },
+          {
+            "user_id": "fe3db1da-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Yirdaw Zeleke X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f121493c-fa73-ee11-a30f-7e43ff4f35bf",
+            "name": "Zinabie Degu xxx",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Fashion Design",
+        "pis": [
+          {
+            "user_id": "0a8960c6-894b-ec11-b325-9e87ee2bf542",
+            "name": "Kidan Aberu Woldekidan",
+            "gender": "Male"
+          },
+          {
+            "user_id": "078960c6-894b-ec11-b325-9e87ee2bf542",
+            "name": "Abebe Adgo",
+            "gender": "Male"
+          },
+          {
+            "user_id": "529e2c26-0301-ed11-911b-425bff47fdcf",
+            "name": "Biniyam Abera Gelashet",
+            "gender": "Male"
+          },
+          {
+            "user_id": "65536aef-6595-ec11-b453-9e87ee2bf542",
+            "name": "Firaol Tadese Gonfa",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b5d7153f-fb00-ed11-911b-425bff47fdcf",
+            "name": "Adune Dessalu Alemu",
+            "gender": "Female"
+          },
+          {
+            "user_id": "bf5c1b70-024d-ec11-b337-9e87ee2bf542",
+            "name": "Adbaru Esubalew Abate",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0f8960c6-894b-ec11-b325-9e87ee2bf542",
+            "name": "Fasika Haile X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "088960c6-894b-ec11-b325-9e87ee2bf542",
+            "name": "Hirut Wudu X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "098960c6-894b-ec11-b325-9e87ee2bf542",
+            "name": "Kalkidan Akale X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "35cb83ba-939f-f011-a572-7e43ff4f35bf",
+            "name": "Mesay Megersa xxxxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0b05a3c4-2f95-f011-a54e-7e43ff4f35bf",
+            "name": "Mezgebu Tesfaye Negani",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0b8960c6-894b-ec11-b325-9e87ee2bf542",
+            "name": "Mintesnot Tesfaye Jemberie",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0c8960c6-894b-ec11-b325-9e87ee2bf542",
+            "name": "Rahel Girma X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "6af2a860-6695-ec11-b453-9e87ee2bf542",
+            "name": "Redeat Eshete Zeleke",
+            "gender": "Female"
+          },
+          {
+            "user_id": "0d8960c6-894b-ec11-b325-9e87ee2bf542",
+            "name": "Sentayehu Tesfaye X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0e8960c6-894b-ec11-b325-9e87ee2bf542",
+            "name": "Yohannes Girmay Takelle",
+            "gender": "Male"
+          },
+          {
+            "user_id": "17eb10a0-d5d3-ef11-a442-7e43ff4f35bf",
+            "name": "Zedu Zeleke Kochare",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Garment Engineering",
+        "pis": [
+          {
+            "user_id": "5d65b1e5-894b-ec11-b325-9e87ee2bf542",
+            "name": "Zerihun Kebede X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5965b1e5-894b-ec11-b325-9e87ee2bf542",
+            "name": "Melkamu Worke X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5665b1e5-894b-ec11-b325-9e87ee2bf542",
+            "name": "Gebeyaw Mosie X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "fe911ad3-6995-ec11-b453-9e87ee2bf542",
+            "name": "Abdulwehab Munir Ebrahim",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bae96fe8-fc00-ed11-911b-425bff47fdcf",
+            "name": "Alemayehu Tsegaye X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d5b56356-625f-ed11-9195-425bff47fdcf",
+            "name": "Anduamlak Kifle X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5b65b1e5-894b-ec11-b325-9e87ee2bf542",
+            "name": "Beza K/Mariam X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "c0826e82-625f-ed11-9195-425bff47fdcf",
+            "name": "Eyob Nigusie X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5465b1e5-894b-ec11-b325-9e87ee2bf542",
+            "name": "Jemal Assres X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5a65b1e5-894b-ec11-b325-9e87ee2bf542",
+            "name": "Kalkidan Shewalem X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "5765b1e5-894b-ec11-b325-9e87ee2bf542",
+            "name": "Leul Mekonen X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "11d44305-888c-ef11-a424-7e43ff4f35bf",
+            "name": "Million Kasa xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5565b1e5-894b-ec11-b325-9e87ee2bf542",
+            "name": "Mustefa Abas X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5c65b1e5-894b-ec11-b325-9e87ee2bf542",
+            "name": "Nguse Semagn X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5535438d-f973-ee11-a30f-7e43ff4f35bf",
+            "name": "Nigusie Semagn Mekete",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2c40a583-fa00-ed11-911b-425bff47fdcf",
+            "name": "Rahmet Omer X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "bd550a5a-4d04-ed11-912b-425bff47fdcf",
+            "name": "Semira Kalid Surur",
+            "gender": "Female"
+          },
+          {
+            "user_id": "5865b1e5-894b-ec11-b325-9e87ee2bf542",
+            "name": "Tewodros Tolosa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8ecfb260-4e04-ed11-912b-425bff47fdcf",
+            "name": "Thitina Merid X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "e6553fca-6594-f011-a54d-7e43ff4f35bf",
+            "name": "Zenebe Demisew Zewdie",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Mechanical Engineering",
+        "pis": [
+          {
+            "user_id": "0f84cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Nahom Mekiso Maltano",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f8e2adcc-6b98-ec11-b464-9e87ee2bf542",
+            "name": "Abera Endasha Bekele",
+            "gender": "Male"
+          },
+          {
+            "user_id": "dc7bc3db-0001-ed11-911b-425bff47fdcf",
+            "name": "Obsinan Birri Neda",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0784cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Dejene Kebede Kedida",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ff83cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Abebawu Fentie X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0084cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Abraham Ayele X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0184cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Adissu Fulli X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0284cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Ahemed Mohammed X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "233852da-064d-ec11-b337-9e87ee2bf542",
+            "name": "Ahmed Mohammed Desie",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0384cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Amanuel Abebe Tsergo",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a1c4ab80-5c03-ed11-9129-425bff47fdcf",
+            "name": "Bereket Lemma Beneberu",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0484cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Betelhem Teklehaymanot X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "8c3c3820-064d-ec11-b337-9e87ee2bf542",
+            "name": "BIniyam Ayele Abebe",
+            "gender": "Male"
+          },
+          {
+            "user_id": "e12a9670-6895-ec11-b453-9e87ee2bf542",
+            "name": "Bonsa Reta X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0584cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Cheru Zeleke X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4c8542b4-df83-f011-a529-7e43ff4f35bf",
+            "name": "Chrotaw Abate xxxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0684cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Dabi Beyenejiru X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c9af586b-0001-ed11-911b-425bff47fdcf",
+            "name": "Daniel Hambissa Datti",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0884cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Destaw Tilahun X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "67cc018f-df83-f011-a529-7e43ff4f35bf",
+            "name": "Dr. Tomas Gebre Lemma",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0984cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Gadisa Desa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "864f599b-f673-ee11-a30f-7e43ff4f35bf",
+            "name": "Garbe Chukulu Jarso",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0a84cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Genaye Mulugeta X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0b84cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Haile Simachew Walie",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0c84cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Kasahun Diriba X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0f43ce57-f673-ee11-a30f-7e43ff4f35bf",
+            "name": "Kelemu Walelign Basazinew",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0d84cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Merga Deraro Shuka X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0e84cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Mesfin Demise X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "1084cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Samuel Kefyalew X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "1184cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Tesfaye Tarekegne X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "1284cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Thomas Gabre X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "1384cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Tigist Alemayehu X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "1684cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Yisfalign Demisie X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "1584cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Yohannis Kefale X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "1484cf99-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Yonatan Taddesse X",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Civil Engineering",
+        "pis": [
+          {
+            "user_id": "2d91da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Biruk Mulu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "1f91da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Abay Asefa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2091da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Abdeta Dendena X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2191da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Abdi Bonsa Gurara X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2291da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Alemu Melese X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2391da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Aliyu Nursefa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2491da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Amdegebreale Girma X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2591da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Asqual Girma Ayele",
+            "gender": "Female"
+          },
+          {
+            "user_id": "2691da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Aster Bekele X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "2791da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Ayantu Dandesa X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "2891da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Befrdu Tsegaye X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2991da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Bereket Kebede X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2a91da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Bethlehem Asmare X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "2b91da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Bilal Kedir X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2c91da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Birhanu Seyoum X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2e91da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Bulo Lemma X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2f91da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Damiso Abire X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3091da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Debissa Getachew X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3191da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Desalegn Gamini X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "200b0524-024d-ec11-b337-9e87ee2bf542",
+            "name": "Desta Moshe Asena",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3291da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Feyissa Tesema X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "33f604e6-6695-ec11-b453-9e87ee2bf542",
+            "name": "Gashaw Haile Fikadu",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3391da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Getahun Mekonen X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3491da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Gizachew Aderaw X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3591da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Hamid Kemal X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3691da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Kedru Shemsu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3791da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Kibret G/Medhin X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3891da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Kitata Adugna X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3991da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Lamesgin Desalegn X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3a91da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Misgana Birhanu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3b91da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Mustefa Teha X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3c91da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Safi Kaso Haji X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3d91da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Samuel Abera X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "647c2541-8c9f-f011-a571-7e43ff4f35bf",
+            "name": "Selamawit Kiftaga xxxxx",
+            "gender": "Female"
+          },
+          {
+            "user_id": "3e91da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Tibebu Tesfaye X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3f91da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Wondimu Tefari X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4091da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Yohannis Negash X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4191da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Yosef Gemessa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4291da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Zenebe Amare X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4391da32-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Zerihun G/Mariam X",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Chemical Engineering",
+        "pis": [
+          {
+            "user_id": "9bd77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Gebre Egnet X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9dd77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Getu Woyya X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9ed77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Lamesign Desta X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "319d0d4b-7172-ee11-93c2-425bff47fdcf",
+            "name": "Abel Akelilu Ayele",
+            "gender": "Male"
+          },
+          {
+            "user_id": "605cfefc-fb00-ed11-911b-425bff47fdcf",
+            "name": "Abnet Mengesha Dube",
+            "gender": "Male"
+          },
+          {
+            "user_id": "91d77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Abowork Wagank X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "efe77a0f-034d-ec11-b337-9e87ee2bf542",
+            "name": "Amsalu Demilash Nigisi",
+            "gender": "Male"
+          },
+          {
+            "user_id": "92d77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Banchamlak Akenaw X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "93d77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Berhe Tekle X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "94d77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Betrework Worku Geda",
+            "gender": "Male"
+          },
+          {
+            "user_id": "95d77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Blen Tadese X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "96d77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Demeke Fantaw Tegegne",
+            "gender": "Male"
+          },
+          {
+            "user_id": "97d77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Fekade Teketel X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "98d77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Fentahun Tarekegn X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "99d77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Frehiwot T/Mariam X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "9ad77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Fseha Gebremichael Gebrihet",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9cd77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Getachew Abrha X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bea11538-d201-ed11-9123-425bff47fdcf",
+            "name": "Jemal Beshir Belay",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ca127966-fc00-ed11-911b-425bff47fdcf",
+            "name": "Masresha Temeselew Letike",
+            "gender": "Female"
+          },
+          {
+            "user_id": "9fd77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Meareg Alem X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ace1b6cd-fd00-ed11-911b-425bff47fdcf",
+            "name": "Mitiku Tadele X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a0d77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Mitiku Gashu Hailu",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a1d77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Negesso Wakushie X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a2d77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Nesriya Jemal X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "a3d77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Remedan Ahmed X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a4d77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Rezika Tofike X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "5f392a14-a274-ee11-a313-7e43ff4f35bf",
+            "name": "Temechachew Tigabu Gedamu",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a5d77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Teshager Legese X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "02d68267-ae84-ef11-a41f-7e43ff4f35bf",
+            "name": "Tinsae Abera xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a6d77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Tsegay G/Jewergs X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b18a608e-9a8f-ef11-a42a-7e43ff4f35bf",
+            "name": "Tsegaye Gebregiorgis xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a7d77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Wondmagegn Wonago X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a8d77119-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Zeynu Shamil Awol",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Electrical and Computer Engineering",
+        "pis": [
+          {
+            "user_id": "827a786c-b16e-ec11-b3d4-9e87ee2bf542",
+            "name": "Dinkissa Aga X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "136fdf1d-575b-ed11-918d-425bff47fdcf",
+            "name": "Abdulkerim Sherefa Hussen",
+            "gender": "Male"
+          },
+          {
+            "user_id": "65676151-0a6e-ec11-b3d1-9e87ee2bf542",
+            "name": "Abebaw Zewudu Gedamu",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5ed21d7b-4695-f011-a54e-7e43ff4f35bf",
+            "name": "Abebe Birhanu Nigatu",
+            "gender": "Male"
+          },
+          {
+            "user_id": "289e9425-fe00-ed11-911b-425bff47fdcf",
+            "name": "ABU TEREFA TUFA",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8a6f2562-ff00-ed11-911b-425bff47fdcf",
+            "name": "Amare Ambaw X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3d3950d8-d06d-ec11-b3cd-9e87ee2bf542",
+            "name": "Bekalu Lake X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "df52c400-664e-ec11-b33c-9e87ee2bf542",
+            "name": "Getinet Garom Gurmesa",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d28b7651-486d-ec11-b3c8-9e87ee2bf542",
+            "name": "Girma Kassa Alitasb",
+            "gender": "Male"
+          },
+          {
+            "user_id": "1266f982-575b-ed11-918d-425bff47fdcf",
+            "name": "Kibru Mesfin Germamo",
+            "gender": "Male"
+          },
+          {
+            "user_id": "dceb2de9-fe00-ed11-911b-425bff47fdcf",
+            "name": "Misker Shumeye X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "aafdc511-0a6e-ec11-b3d1-9e87ee2bf542",
+            "name": "Turegn Fikrie Gashaw",
+            "gender": "Male"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "College of Computing and Informatics",
+    "departments": [
+      {
+        "name": "Information Technology",
+        "pis": [
+          {
+            "user_id": "bf9241f8-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Abreham Asefa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "cd9241f8-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Asfaw Kiros Desalegn",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c29241f8-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Amanuel Tamrat Getachew",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c19241f8-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Abdo Ababor X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "e14a6865-ed76-ee11-a315-7e43ff4f35bf",
+            "name": "Abreham Gebremedin Delel",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c39241f8-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Adisalem Hadush X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5134872e-8ab3-ed11-921f-425bff47fdcf",
+            "name": "Barmura Yibgeta Sifir",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c59241f8-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Bereket Simone Balcha",
+            "gender": "Male"
+          },
+          {
+            "user_id": "94b26592-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Bisrat Getinet C",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ca9241f8-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Fuad Yimer Yesuf",
+            "gender": "Male"
+          },
+          {
+            "user_id": "66baa915-a473-ec11-b3e4-9e87ee2bf542",
+            "name": "Jemal Ahmed Andeta",
+            "gender": "Male"
+          },
+          {
+            "user_id": "be9241f8-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Korabza Shewarega X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c69241f8-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Mimi Adimassu X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "14ca2de5-7406-ed11-912b-425bff47fdcf",
+            "name": "Minichil Aboye X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c49241f8-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Molalign Chekle X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "cb9241f8-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Moti Bacha X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "cc9241f8-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Muluken Wondosen X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c89241f8-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Nigus Asres X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c99241f8-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Nigus Umer X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "65446093-7903-ed11-9129-425bff47fdcf",
+            "name": "Senait Desalegn X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "c09241f8-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Teshome Yihune X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "7d6a8a15-d8bb-f011-a58b-7e43ff4f35bf",
+            "name": "Tewodros Gizaw X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b212ff5b-b602-ed11-9129-425bff47fdcf",
+            "name": "Tsegaye Yibgeta X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c79241f8-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Zelalem Tiruneh X",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Computer Science",
+        "pis": [
+          {
+            "user_id": "4467e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Habtamu Alemayehu Dema",
+            "gender": "Male"
+          },
+          {
+            "user_id": "03d11272-5b5f-ed11-9195-425bff47fdcf",
+            "name": "Getinet Misganaw Abi",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3a67e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Adem Mekonin X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3b67e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Adugna Woldegiorgis X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bbdf14e5-9b84-ef11-a41f-7e43ff4f35bf",
+            "name": "Andamlak Kebede Agza",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3c67e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Ayele Gobezie X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3d67e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Berihun Getnet X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3e67e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Betelihem Mesifin X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "3f67e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Ergoye Destaw X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "4067e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Ermias Nigatu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4167e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Feidu Akmel X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4267e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Firehiwot Tekalign X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "4367e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Getnet Kornsa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4667e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Kebede Nimani X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4767e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Kemal Sultan X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4867e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Kolana Korigne Kalalite",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4967e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Melaku Kore X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4a67e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Seifu Birhanu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4b67e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Sisay Kebede X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "622fd76c-3e4c-ec11-b32b-9e87ee2bf542",
+            "name": "Sisay Tigistu Shikuteta",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4c67e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Tesfa Kebede X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4d67e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Tesfahun Nure X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4e67e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Yetmwork Tesfaye X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "4f67e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Zerihun Ebabu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5067e782-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Zerihun Mulugeta Debela",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Information Systems",
+        "pis": [
+          {
+            "user_id": "6c48fad8-f673-ee11-a30f-7e43ff4f35bf",
+            "name": "Abdu Amde xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "efd9a2ec-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Abduselam Amade X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0cfabaeb-e777-ee11-a31b-7e43ff4f35bf",
+            "name": "Abunu Tesfaw xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f2d9a2ec-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Aregash Adugna X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "ebd9a2ec-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Asebe Teka X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "fbd9a2ec-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Ayantu Tesfaye X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f6d9a2ec-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Badimaw Terefe X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "619b877b-5e69-ec11-b3b8-9e87ee2bf542",
+            "name": "Daniel Teklu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "eed9a2ec-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Dawit Hassen X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f4d9a2ec-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Fasil Yero X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a8e2e155-b26e-ec11-b3d4-9e87ee2bf542",
+            "name": "Hana Hayrish X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "fcd9a2ec-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Hana Moti X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "f7d9a2ec-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Henok Kindie X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "edd9a2ec-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Isayas Wakgari X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f9d9a2ec-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Kabtamu Degfie Belay",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f8d9a2ec-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Mayet Gizachew X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f5d9a2ec-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Musa Ahmed X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f1d9a2ec-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Wendosen Zina X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "000a0470-536d-ec11-b3c8-9e87ee2bf542",
+            "name": "Worku Muluye Wubet",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f3d9a2ec-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Yidnekachew Kibru X",
+            "gender": "Male"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "College of Medicine and Health Science",
+    "departments": [
+      {
+        "name": "Nursing",
+        "pis": [
+          {
+            "user_id": "cc3e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Ambaw Abebaw Emrie",
+            "gender": "Male"
+          },
+          {
+            "user_id": null,
+            "name": "Fantahun Walle X",
+            "gender": null
+          },
+          {
+            "user_id": "b13e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Zebene Mekonnen Assefa",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0f111400-0b4d-ec11-b337-9e87ee2bf542",
+            "name": "Tadesse Sahle Adeba",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c53e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Agerie Ayinalem X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "ecf14a96-1790-ed11-91e3-425bff47fdcf",
+            "name": "Alemayehu Sayih Belay",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bf3e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tolosa Gemeda X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ae3e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Bisrat Zeleke Shiferaw",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bc3e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Wubishet Tesfaye Tafese",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b93e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Bitew Tefera Zewudie",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bd3e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Eskedar Demissie Beketie",
+            "gender": "Female"
+          },
+          {
+            "user_id": "ba3e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Haimanot Abebe Geletie",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b73e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Bethelihem Tadese X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "c43e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Bogale Chekole Temere",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c93e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Ahmed Nuru X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c03e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Ayana Benti Terefe",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b53e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Baye Tsegaye X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c83e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Bethelihem Silesh X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "c63e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Birkinesh Banbeta X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "af3e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Derebachew H/Maryam Wazema",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b23e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Fantahun Wale X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c33e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Fisha Alebel GebreEyesus",
+            "gender": "Male"
+          },
+          {
+            "user_id": "be3e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Girma Teferi Mengistu",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b43e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Haile Workye Agazhu",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b83e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Kidist Desalegn X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "cd3e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Legese Fekede X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "cb3e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Maereg Assefa X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "b63e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Mamo Solomon Emeria",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c23e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Masino Tesu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ca3e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Muhaba Ahmedin X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "c73e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Omega Tolosa X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "bb3e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Shegaw Tesfa Mengist",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b33e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tadese Tsehay Tarekegn",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bc447b83-ca6a-ec11-b3be-9e87ee2bf542",
+            "name": "Tadesse Tsehay Tarekegn",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c13e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tamene Fetene X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b03e7c87-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tariku Gebre Haile",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Medical Laboratory",
+        "pis": [
+          {
+            "user_id": "3902a6a9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Habtamu Belay Temesgen",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3702a6a9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Rebi Kedir X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4102a6a9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Abate Atimut X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3102a6a9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Absra Solomon X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "3502a6a9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Admasu Hayle X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "1f933ce4-798f-ef11-a42a-7e43ff4f35bf",
+            "name": "Asnake Simieneh xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4002a6a9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Birku Gashaw X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3b02a6a9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Bisrat Fikadu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3302a6a9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Daniel Kehase Gebrelibanos",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3d02a6a9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Dereje Abebe X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3e02a6a9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Derso Wale X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a2f57384-3948-ec11-a3e3-00155d010503",
+            "name": "Fitsum Bekele Tolossa",
+            "gender": "Male"
+          },
+          {
+            "user_id": "03646e5b-1690-ed11-91e3-425bff47fdcf",
+            "name": "Gizachew Ayele Manaye",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3602a6a9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Kassahun Haile Tassow",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5b4ed0f1-9774-ee11-a313-7e43ff4f35bf",
+            "name": "Lemma Workineh xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2f02a6a9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Mihret Alemayehu X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "3802a6a9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Seid Abrar X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3002a6a9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Teha Shumbej X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3402a6a9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Temesgen Abera Bafa",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3f02a6a9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Yazal Abaye X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3c02a6a9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Yemisrach Moshago X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "3a02a6a9-884b-ec11-b325-9e87ee2bf542",
+            "name": "Zubir Hajikelif X",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Midwifery",
+        "pis": [
+          {
+            "user_id": "9a786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Keyredin Nuriye Metebo",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a5786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Seid Jemal X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a3786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Yibeltal Mesfin X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bd786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Fantaye Chemir X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a6786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Ayenew Mose Abawa",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b6786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Aberash Beyene Derribow",
+            "gender": "Female"
+          },
+          {
+            "user_id": "b0786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Shegaw Geze Tenaw",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4924e07e-054d-ec11-b337-9e87ee2bf542",
+            "name": "Haregwa Asnake Weldekidan",
+            "gender": "Female"
+          },
+          {
+            "user_id": "ae786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Seboka Abebe Sori",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bb786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Abdulaziz Assefa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "760acffb-0f64-ed11-91a3-425bff47fdcf",
+            "name": "Abera Nesru X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9b786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Alex Yeshanehh X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bc786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Ayele Sahile Abdo",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b8786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Aynalem Belay Abate",
+            "gender": "Male"
+          },
+          {
+            "user_id": "33e4ccef-6694-f011-a54d-7e43ff4f35bf",
+            "name": "Betelhem Mulugeta Meshesha",
+            "gender": "Female"
+          },
+          {
+            "user_id": "9e786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Daniel Adane X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ab786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Daniel Tsega Tefera",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9f786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Eskinder Demissie X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b7786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "F/Mariam Endeshaw X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ad786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Fentahun Tamane Zeleke",
+            "gender": "Male"
+          },
+          {
+            "user_id": "213b997a-5a82-ef11-a41e-7e43ff4f35bf",
+            "name": "Fikremariam Endeshaw xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9c786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Genet Asfaw X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "a9786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Gudeta Beriso X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ac786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Haragaw Asnake X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "a7786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Helina Birhanu X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "b4786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Hilina Mesfin X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "af786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Hirut Dinku Jiru",
+            "gender": "Female"
+          },
+          {
+            "user_id": "313f9bc0-d393-ec11-b44f-9e87ee2bf542",
+            "name": "Keredin Nurie X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b5786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Lake Geremew X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ba786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Mangistu Abera Merdasa",
+            "gender": "Male"
+          },
+          {
+            "user_id": "aa786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Mebratu Demissie X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "be786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Megertu Obsa X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "b3786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Melikte Shiferaw X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a8786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Mesfin Difer Tetema",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a2786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Muchie Argaw X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b9786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Mulugeta Animaw Khali",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b2786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Murawork Endale X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "a0786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Natnael Eshetu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b1786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Shikuria Areb X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9d786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Solomon Shitu Ayen",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a4786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Yirgalem Yosef X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a1786ab4-884b-ec11-b325-9e87ee2bf542",
+            "name": "Yohannes Fikadu Geda",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Public Health",
+        "pis": [
+          {
+            "user_id": "aec1dfdf-5c72-ee11-93c0-425bff47fdcf",
+            "name": "Berhanu Semra Mulat",
+            "gender": "Male"
+          },
+          {
+            "user_id": "50bc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Fedila Yasin X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "4fbc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Kebebush Zepere X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "43bc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Agize Asfaw Alanche",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3cbc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Abebaw Wasie Kasahun",
+            "gender": "Male"
+          },
+          {
+            "user_id": "58bc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Amare Zewdie Eshete",
+            "gender": "Male"
+          },
+          {
+            "user_id": "47bc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Jemal Bedewi X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4dbc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Samuel Dessu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4ebc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tamirat X X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "44bc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tigist G/Maryam X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "4cbc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Girma Alemayehu Beyene",
+            "gender": "Male"
+          },
+          {
+            "user_id": "53bc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "A/Rezak Kemal X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "12bb92e2-9b06-ed11-912b-425bff47fdcf",
+            "name": "Abate Lette Wodera",
+            "gender": "Male"
+          },
+          {
+            "user_id": "42bc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Abdu Umer X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "44f83d78-cb6a-ec11-b3be-9e87ee2bf542",
+            "name": "Abdurezak Kemal Jemal",
+            "gender": "Male"
+          },
+          {
+            "user_id": "34e462fd-7206-ed11-912b-425bff47fdcf",
+            "name": "Adane Habtie Worku",
+            "gender": "Male"
+          },
+          {
+            "user_id": "54bc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Adisu Tesfaye X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "83453e34-6794-f011-a54d-7e43ff4f35bf",
+            "name": "Andamlak Dendir xxxxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3ebc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Anduamlak Dender X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "56bc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Anteneh Kassa Yalew",
+            "gender": "Male"
+          },
+          {
+            "user_id": "49bc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Asegedech Wondimu X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "3fbc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Dereja Mesfin X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "40bc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Ebrahim Muktar X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "51bc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Ermiyas Belay X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "46bc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Hamid Zubere X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4abc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Haymanot Abebe Adane",
+            "gender": "Female"
+          },
+          {
+            "user_id": "07898611-ab84-ef11-a41f-7e43ff4f35bf",
+            "name": "Hilina Ashenafi xxx",
+            "gender": "Female"
+          },
+          {
+            "user_id": "52bc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Kenzudin Asfa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "41bc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Kifle Lantero X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "45bc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Mehary Gebru X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "48bc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Mihretu Tagesse X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4bbc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Mina Edo X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "55bc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Mola Gashu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "714e74e5-8884-ef11-a41f-7e43ff4f35bf",
+            "name": "Rihana Seid Mohammed",
+            "gender": "Female"
+          },
+          {
+            "user_id": "92b89f5d-ab84-ef11-a41f-7e43ff4f35bf",
+            "name": "Sara Teklewold xxx",
+            "gender": "Female"
+          },
+          {
+            "user_id": "3dbc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tadele Girum X",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Medicine",
+        "pis": [
+          {
+            "user_id": "48d4583d-5682-ef11-a41e-7e43ff4f35bf",
+            "name": "Shimelis Getu Wolde",
+            "gender": "Male"
+          },
+          {
+            "user_id": "aec2a119-2d73-ee11-a30d-7e43ff4f35bf",
+            "name": "Dr. Meskele Bireda xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "edb95289-d093-ec11-b44e-9e87ee2bf542",
+            "name": "Aziza Muhamed X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2fd0354f-cb6a-ec11-b3be-9e87ee2bf542",
+            "name": "Abdrehim Bedru X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "57bc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Adane Habte dr",
+            "gender": "Male"
+          },
+          {
+            "user_id": "89ea88fb-ad6e-ec11-b3d4-9e87ee2bf542",
+            "name": "Dr. Abdulsemed Worku X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "40145e15-f06f-ed11-91b8-425bff47fdcf",
+            "name": "Dr. Behailu Degu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "7d6783e7-cf93-ec11-b44e-9e87ee2bf542",
+            "name": "Dr. Feleke Habte X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c2a3c832-b66e-ec11-b3d4-9e87ee2bf542",
+            "name": "Dr. Kumel Nur X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a76efa46-cf93-ec11-b44e-9e87ee2bf542",
+            "name": "Dr. Mekete Wondwosen X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "917deafc-9474-ee11-a313-7e43ff4f35bf",
+            "name": "Dr. Michael Hawlet xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "7501dfde-0204-ed11-9129-425bff47fdcf",
+            "name": "Dr. Rebi Ali X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d4e3b304-cf93-ec11-b44e-9e87ee2bf542",
+            "name": "Dr. Tilahun Koyas X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "71afb672-7106-ed11-912b-425bff47fdcf",
+            "name": "Dr. Tilahun Temesgen Sima",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bb85634c-d093-ec11-b44e-9e87ee2bf542",
+            "name": "Dr. Tizita Shifera X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "410436f1-4a74-ec11-b3e8-9e87ee2bf542",
+            "name": "Dr. Tsion Yehualshet X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "65276bcb-cf93-ec11-b44e-9e87ee2bf542",
+            "name": "Dr.Temesgen Tantu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "72db22f8-ca6a-ec11-b3be-9e87ee2bf542",
+            "name": "Emebet Asefa W/tsadik",
+            "gender": "Female"
+          },
+          {
+            "user_id": "d477f3e0-5395-f011-a54f-7e43ff4f35bf",
+            "name": "Endale Kibatu xxxxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "52e8f8c2-4774-ec11-b3e8-9e87ee2bf542",
+            "name": "Fekadu Regassa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bfed5f0e-cb9e-f011-a56f-7e43ff4f35bf",
+            "name": "Gizachew Gebrie xxxxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "78687526-8884-ef11-a41f-7e43ff4f35bf",
+            "name": "Henok Ababu xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2ce459e3-b48e-ee11-a332-7e43ff4f35bf",
+            "name": "Melaku Yitbarek xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2868a8d3-4190-ef11-a42a-7e43ff4f35bf",
+            "name": "Menewor Abdulhadi xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c898e55d-b66e-ec11-b3d4-9e87ee2bf542",
+            "name": "Mukerem Abdulwuha X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0f18628c-876c-ec11-b3c5-9e87ee2bf542",
+            "name": "Puturosputuros Retta Mekonnen",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c6012537-ac6e-ec11-b3d4-9e87ee2bf542",
+            "name": "Riyad Ibrahim X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "abaec404-f9b5-ef11-a43b-7e43ff4f35bf",
+            "name": "Sewalem Anagaw xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "60a8fa3f-ba8d-ee11-a330-7e43ff4f35bf",
+            "name": "Shimelis Gizaw Yadeta",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9ea30ae9-558c-ef11-a424-7e43ff4f35bf",
+            "name": "Temesgen Wolde xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "df6df0a2-8884-ef11-a41f-7e43ff4f35bf",
+            "name": "Tesfaye Petros xxx",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Anesthesia",
+        "pis": [
+          {
+            "user_id": "2fffee40-0b4d-ec11-b337-9e87ee2bf542",
+            "name": "Shamill Eanga Helill",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8ad8f887-347a-ee11-a31f-7e43ff4f35bf",
+            "name": "Dereje Zewudu xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "20caff64-2d73-ee11-a30d-7e43ff4f35bf",
+            "name": "Kinfe Ayele xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "265c8917-748f-ef11-a428-7e43ff4f35bf",
+            "name": "Muhiddin Tadesse xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "fbc4f053-f200-ed11-911b-425bff47fdcf",
+            "name": "Tamiru Tilahun Ayele",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Pharmacy",
+        "pis": [
+          {
+            "user_id": "95a42972-884b-ec11-b325-9e87ee2bf542",
+            "name": "Bereket Zeleke Hailemariam",
+            "gender": "Male"
+          },
+          {
+            "user_id": "96a42972-884b-ec11-b325-9e87ee2bf542",
+            "name": "Abdulewhab Jemal X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "1a154732-0374-ee11-a30f-7e43ff4f35bf",
+            "name": "FEKI NEKIR DEREJA",
+            "gender": "Male"
+          },
+          {
+            "user_id": "97a42972-884b-ec11-b325-9e87ee2bf542",
+            "name": "Getachew Asefaw X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8c344de2-0274-ee11-a30f-7e43ff4f35bf",
+            "name": "GETU HABTE xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "794cad1c-9606-ed11-912b-425bff47fdcf",
+            "name": "Habtamu Solomon Mengistu",
+            "gender": "Male"
+          },
+          {
+            "user_id": "83bcb27f-756e-ee11-93a1-425bff47fdcf",
+            "name": "Mubarik Fetu Semman",
+            "gender": "Male"
+          },
+          {
+            "user_id": "58f7fd5e-766e-ee11-93a1-425bff47fdcf",
+            "name": "Nardos Lema Wondimu",
+            "gender": "Female"
+          },
+          {
+            "user_id": "b71ce60d-0374-ee11-a30f-7e43ff4f35bf",
+            "name": "ZEWDE GEBRE xxx",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Biomedical",
+        "pis": [
+          {
+            "user_id": "c7fe1914-494c-ec11-b32d-9e87ee2bf542",
+            "name": "Zufan Tesema Beyene",
+            "gender": "Female"
+          },
+          {
+            "user_id": "d2fe1914-494c-ec11-b32d-9e87ee2bf542",
+            "name": "Mitiku Mamo X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4d178099-594c-ec11-b32d-9e87ee2bf542",
+            "name": "Abdi A X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "cefe1914-494c-ec11-b32d-9e87ee2bf542",
+            "name": "Abebe Timerga Bereda",
+            "gender": "Male"
+          },
+          {
+            "user_id": "cffe1914-494c-ec11-b32d-9e87ee2bf542",
+            "name": "Abera Nesru Abegaz",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3d6c1fb8-5581-ef11-a41c-7e43ff4f35bf",
+            "name": "Alazar Gebremeskel Zepre",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d7fe1914-494c-ec11-b32d-9e87ee2bf542",
+            "name": "Alemayehu Wondie X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d0fe1914-494c-ec11-b32d-9e87ee2bf542",
+            "name": "Aregay Tadesse X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d6fe1914-494c-ec11-b32d-9e87ee2bf542",
+            "name": "Atsede Getawey X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "d5fe1914-494c-ec11-b32d-9e87ee2bf542",
+            "name": "Bedilu Sahilu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5e387dba-f84c-ec11-b336-9e87ee2bf542",
+            "name": "Bekele Bassa Vandamo",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d8fe1914-494c-ec11-b32d-9e87ee2bf542",
+            "name": "Betemariam Girma X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "cbfe1914-494c-ec11-b32d-9e87ee2bf542",
+            "name": "Desalegn Dengo X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d9fe1914-494c-ec11-b32d-9e87ee2bf542",
+            "name": "Dureti Godanna X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "d1fe1914-494c-ec11-b32d-9e87ee2bf542",
+            "name": "Edris Ahmed X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "cdfe1914-494c-ec11-b32d-9e87ee2bf542",
+            "name": "Fentahun Adane X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c8fe1914-494c-ec11-b32d-9e87ee2bf542",
+            "name": "Gashaw Garedew X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d4fe1914-494c-ec11-b32d-9e87ee2bf542",
+            "name": "Melaku Ayanew X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "cafe1914-494c-ec11-b32d-9e87ee2bf542",
+            "name": "Mulualem Belachew X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c9fe1914-494c-ec11-b32d-9e87ee2bf542",
+            "name": "Seblework Abeje X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "ccfe1914-494c-ec11-b32d-9e87ee2bf542",
+            "name": "Teshome Gensa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4c931d04-776e-ee11-93a1-425bff47fdcf",
+            "name": "Tseganesh Girma Degefu",
+            "gender": "Female"
+          },
+          {
+            "user_id": "dafe1914-494c-ec11-b32d-9e87ee2bf542",
+            "name": "Wondimu Dagne X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d3fe1914-494c-ec11-b32d-9e87ee2bf542",
+            "name": "Zelealem Mekuria X",
+            "gender": "Male"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "College of Natural and Computational Science",
+    "departments": [
+      {
+        "name": "Statistics",
+        "pis": [
+          {
+            "user_id": "8deb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Mohammed Derese Biru",
+            "gender": "Male"
+          },
+          {
+            "user_id": "83eb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Abebe Yabeker Beza",
+            "gender": "Male"
+          },
+          {
+            "user_id": "79946539-f600-ed11-911b-425bff47fdcf",
+            "name": "Tena Assefa Begna",
+            "gender": "Male"
+          },
+          {
+            "user_id": "91eb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Abebe Debu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "85eb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Abu Tuna X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "89eb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Ashenafi Hailu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8beb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Ayele Gebeyehu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "86eb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Belete Adelo Wobse",
+            "gender": "Male"
+          },
+          {
+            "user_id": "87eb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Berhan Abera X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "88eb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Berhanu Bekele Debelu",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8aeb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Diribsa Tsegaye X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8eeb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Getu Boja X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "82eb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Kassahun Trueha X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8ceb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Kebadu Tadesse X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "95eb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Maru Worku X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "96eb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Mulugeta Geremew X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8c2ffd88-d96a-ec11-b3be-9e87ee2bf542",
+            "name": "Netsanet Mamo X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "eab9ec3c-4795-f011-a54e-7e43ff4f35bf",
+            "name": "Rahel Kedir xxxx",
+            "gender": "Female"
+          },
+          {
+            "user_id": "81eb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Sebsib Muanenda X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3bbc7a97-884b-ec11-b325-9e87ee2bf542",
+            "name": "Teklemichael Gebru X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "93eb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tesfaledet Tsegay X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "90eb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tezera Abebe X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "6e220947-e763-ed11-91a3-425bff47fdcf",
+            "name": "Tizazu Bayiko X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8feb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Worku Shanko X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "94eb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Yewulishet Mengistu X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "84eb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Yohannes Haile Menuta",
+            "gender": "Male"
+          },
+          {
+            "user_id": "92eb504c-884b-ec11-b325-9e87ee2bf542",
+            "name": "Zeleke Baheda Marie",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Sport Science",
+        "pis": [
+          {
+            "user_id": "c413ce1d-7a6e-ee11-93a2-425bff47fdcf",
+            "name": "Belaynesh H/mariyame xxx",
+            "gender": "Female"
+          },
+          {
+            "user_id": "7b65d377-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Abdulaziz Mussema X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "7a65d377-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Abdurhaman Mussa X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "8565d377-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Abay Yismaw X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "8465d377-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Abebe Chekol X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "7965d377-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Abinet Tafese X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "7e65d377-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Alemayehu Turga X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "7c65d377-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Betelhem Melke X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "7d65d377-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Bizuneh Shamebo Shebo",
+            "gender": "Male"
+          },
+          {
+            "user_id": "7f65d377-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Fasil Mulugeta X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "8065d377-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Henok Fikadu X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "6fadf983-4795-f011-a54e-7e43ff4f35bf",
+            "name": "Mekdes Mamo xxxx",
+            "gender": "Female"
+          },
+          {
+            "user_id": "ad2d75f6-48bd-ef11-a440-7e43ff4f35bf",
+            "name": "Mekdes Worku xxxx",
+            "gender": "Female"
+          },
+          {
+            "user_id": "8365d377-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Muluken Bireda X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "8165d377-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Mussa Abirar X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "8665d377-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Samson Terefe X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "8265d377-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Sintayehu Belihu X",
+            "gender": "Female"
+          }
+        ]
+      },
+      {
+        "name": "Chemistry",
+        "pis": [
+          {
+            "user_id": "07a389cc-9606-ed11-912b-425bff47fdcf",
+            "name": "Genet Bekele Sime",
+            "gender": "Female"
+          },
+          {
+            "user_id": "a68aea77-7c6e-ee11-93a3-425bff47fdcf",
+            "name": "Nigussie Alebachew Ayalew",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9c51e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Habtamu Gedion Aynalem",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9551e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Nafikot Birhanu Bonka",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9a51e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Abdulhakim Toha Mohammed",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b0a3f8fa-af93-f011-a54b-7e43ff4f35bf",
+            "name": "Adane Mirga xxxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8751e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Allula Yohannes X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8a51e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Ashenafi Emiru Teka X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8e51e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Dejene Ayele X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9751e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Desalegn Yilma Kibret",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3e0c1c2e-e563-ed11-91a3-425bff47fdcf",
+            "name": "Dr. Kebede Woudma X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "535dccf6-1296-ec11-b459-9e87ee2bf542",
+            "name": "Dr. Megersa Feyissa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9e51e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Elimineh Tsegahun X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8851e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Eyasu Gebrie X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9651e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Fikraddis Alemenw X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "9f51e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Genne Hayire Esnien",
+            "gender": "Female"
+          },
+          {
+            "user_id": "9d51e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Hailegnaw Gizaw X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "fd01dfae-f800-ed11-911b-425bff47fdcf",
+            "name": "Israel Leka Lera",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9451e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Kindinew Demissie X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8b51e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Medihanit Tefera X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "a051e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Mekonnen Hailu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8c51e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Melaku Belay X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9151e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Meseret Melaku Ayane",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8d51e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tamene Beshaw Tirfie",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8951e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tassew Belete X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9351e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Teketel Girma X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9251e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Temesgen Nurlign X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8f51e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tesfalem F/Selassie X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a8493981-8c84-ef11-a41f-7e43ff4f35bf",
+            "name": "Teshale Assefa Biru",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9851e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Teshale Ayano Begano",
+            "gender": "Male"
+          },
+          {
+            "user_id": "42316fd1-af93-f011-a54b-7e43ff4f35bf",
+            "name": "Tsegaye Atnaf xxxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9b51e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Wollela Bahija X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9051e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Yordanos Seife X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "9951e821-884b-ec11-b325-9e87ee2bf542",
+            "name": "Zinabua Hailu Tadesse",
+            "gender": "Female"
+          }
+        ]
+      },
+      {
+        "name": "Mathematics",
+        "pis": [
+          {
+            "user_id": "df31c10d-7b6e-ee11-93a2-425bff47fdcf",
+            "name": "Habtamu Tsegaye Teferi",
+            "gender": "Male"
+          },
+          {
+            "user_id": "dad0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Addis Eshetu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "7216a373-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Alemu Woldie Ababya",
+            "gender": "Male"
+          },
+          {
+            "user_id": "edd0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Amanuel Mogiso X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "e4d0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Asfawosen Dessalegn Shirkefa",
+            "gender": "Male"
+          },
+          {
+            "user_id": "e1d0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Ayele Bekele X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "dbd0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Ayele Hailu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "dfd0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Bizuneh Girma X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d8d0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Degsew Demissie X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "1f30cf6c-ea77-ee11-a31b-7e43ff4f35bf",
+            "name": "Demessie Ergabus Birmechu",
+            "gender": "Male"
+          },
+          {
+            "user_id": "eed0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Desta Sodano Shahiso",
+            "gender": "Male"
+          },
+          {
+            "user_id": "91864245-a286-ed11-91da-425bff47fdcf",
+            "name": "Dr. Eyasu Bikila X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "e2d0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Endegena Tamiru X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "e0d0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Eshetu Demisse X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d9d0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Eyasu Gemechu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f1d0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Gashaw Merga X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "e6d0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Habtamu Hailu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "e7d0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Haftu Adhena X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "e5d0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Jemal Amano X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "dcd0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Kassahun Tesfaye Agzew",
+            "gender": "Male"
+          },
+          {
+            "user_id": "e8d0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Lami Moges X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "efd0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Mekashaw Ali Mohye",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c1daa5a6-ea77-ee11-a31b-7e43ff4f35bf",
+            "name": "Nurilign Shibabaw Kelemu",
+            "gender": "Male"
+          },
+          {
+            "user_id": "e9d0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Solomon Amsalu Denekew",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f2d0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Solomon Zerfu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f0d0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tamirat Aklilu Shamago",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ddd0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tariku G/Medhin X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ead0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tesfaye Megerssa Oljira",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ecd0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Waltanigus Dagne X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ebd0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Wolyu Salo Temam",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4342629f-7a6e-ee11-93a2-425bff47fdcf",
+            "name": "Yetneberk Kuma Feyissa",
+            "gender": "Male"
+          },
+          {
+            "user_id": "dbd1c2f7-0849-ec11-a3e8-00155d010503",
+            "name": "Yohannes Gebru Aemro",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ded0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Yusuf Hussien X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "e3d0710d-884b-ec11-b325-9e87ee2bf542",
+            "name": "Zenebe Nigusei X",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Physics",
+        "pis": [
+          {
+            "user_id": "08406177-1396-ec11-b459-9e87ee2bf542",
+            "name": "Fikiru Abiko X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "65fb543f-884b-ec11-b325-9e87ee2bf542",
+            "name": "Abel Belay X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "253acfc2-9693-f011-a54a-7e43ff4f35bf",
+            "name": "Aliyi Adem xxxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5bfb543f-884b-ec11-b325-9e87ee2bf542",
+            "name": "Berhanu Aragie X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "63fb543f-884b-ec11-b325-9e87ee2bf542",
+            "name": "Deresse Ahmed X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bc5eabe5-1496-ec11-b459-9e87ee2bf542",
+            "name": "Dr. Messaye Geletu X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "760af3c0-7b8d-ec11-b437-9e87ee2bf542",
+            "name": "Filagot Mengistu AAU",
+            "gender": "Female"
+          },
+          {
+            "user_id": "6dfb543f-884b-ec11-b325-9e87ee2bf542",
+            "name": "Gebru Tesfaye X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "088341a9-9793-f011-a54a-7e43ff4f35bf",
+            "name": "Getu Endale xxxxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5afb543f-884b-ec11-b325-9e87ee2bf542",
+            "name": "Habte Dulla X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "6cfb543f-884b-ec11-b325-9e87ee2bf542",
+            "name": "Haimanot Sebsibe X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "67fb543f-884b-ec11-b325-9e87ee2bf542",
+            "name": "Halid Abdu Mohammed",
+            "gender": "Male"
+          },
+          {
+            "user_id": "62fb543f-884b-ec11-b325-9e87ee2bf542",
+            "name": "Jima Asefa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "69fb543f-884b-ec11-b325-9e87ee2bf542",
+            "name": "Kindinew Ashagrie X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "6afb543f-884b-ec11-b325-9e87ee2bf542",
+            "name": "Mengistu Besir X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "66fb543f-884b-ec11-b325-9e87ee2bf542",
+            "name": "Meron Bekabil X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "5cfb543f-884b-ec11-b325-9e87ee2bf542",
+            "name": "Minisha Alemu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "61fb543f-884b-ec11-b325-9e87ee2bf542",
+            "name": "Rukiya Aliyi X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "5ffb543f-884b-ec11-b325-9e87ee2bf542",
+            "name": "Shambel Sahlu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "481ea4fd-9693-f011-a54a-7e43ff4f35bf",
+            "name": "Shewa Getachew xxxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "59fb543f-884b-ec11-b325-9e87ee2bf542",
+            "name": "Sisay Shewamare X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "68fb543f-884b-ec11-b325-9e87ee2bf542",
+            "name": "Temesgen Kassaw Derso",
+            "gender": "Male"
+          },
+          {
+            "user_id": "47224e84-1496-ec11-b459-9e87ee2bf542",
+            "name": "Tesfaye Assefa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "6bfb543f-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tsegaye Menberu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "64fb543f-884b-ec11-b325-9e87ee2bf542",
+            "name": "Wondimagegnehu Ergano X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "60fb543f-884b-ec11-b325-9e87ee2bf542",
+            "name": "Yigermal Bassie X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5efb543f-884b-ec11-b325-9e87ee2bf542",
+            "name": "Yohannes Getachew Ejigu",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5dfb543f-884b-ec11-b325-9e87ee2bf542",
+            "name": "Yonatan Mulushoa Sileshi",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Biology",
+        "pis": [
+          {
+            "user_id": "41d56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Yirga Enawgaw Anteneh",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3dd56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Aliyu Jemal X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "33d56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Almaz Teka X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "37d56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Anwar Kemal X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2cd56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Ashenafi Teklemariam Tegegn",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3cd56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Behailu Bizuayehu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3ed56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Belachew Garedew Atamre",
+            "gender": "Male"
+          },
+          {
+            "user_id": "31d56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Berhanu Dereja Gebremichael",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b890673c-7c6e-ee11-93a3-425bff47fdcf",
+            "name": "Birhanu Degaga Duguma",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3fd56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Dagne Abebe woldegebriel",
+            "gender": "Male"
+          },
+          {
+            "user_id": "35d56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Daniel Bogale X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2fd56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Demeke Tegode X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2ed56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Demelash Sime X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "40d56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Eyerus Mekuriaw Belachew",
+            "gender": "Female"
+          },
+          {
+            "user_id": "30d56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Hirpasa Teressa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "32d56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Hunduma Tola X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9583bb6f-e663-ed11-91a3-425bff47fdcf",
+            "name": "Kebeta Legese X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "43d56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Mahlet Lemma X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "3ad56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Mekiya Tesfaye X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "36d56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Melaku Mekonen Tedila",
+            "gender": "Male"
+          },
+          {
+            "user_id": "6cbb97f4-a386-ed11-91da-425bff47fdcf",
+            "name": "Mesfin Belete X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5eb5a675-606e-ee11-939f-425bff47fdcf",
+            "name": "Seyoum Kiros Meles",
+            "gender": "Male"
+          },
+          {
+            "user_id": "38d56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Shiferaw Alemu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "44d56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Solomon Wagaw X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "42d56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Workia Ahmed X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "34d56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Yasin Oljira X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3bd56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Zelalem Tefera X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2dd56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Zemedkun Siraj X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0e90acba-e563-ed11-91a3-425bff47fdcf",
+            "name": "Zerihun Asrat Alemu",
+            "gender": "Male"
+          },
+          {
+            "user_id": "39d56564-884b-ec11-b325-9e87ee2bf542",
+            "name": "Zerihun Jida X",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Biotechnology",
+        "pis": [
+          {
+            "user_id": "ac41b332-884b-ec11-b325-9e87ee2bf542",
+            "name": "Beakal Mindaye X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "b541b332-884b-ec11-b325-9e87ee2bf542",
+            "name": "Dejene Zinabu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bc41b332-884b-ec11-b325-9e87ee2bf542",
+            "name": "Admas Berhanu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5b4c6344-b684-ef11-a41f-7e43ff4f35bf",
+            "name": "Aklilu Banjaw Leza",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bd41b332-884b-ec11-b325-9e87ee2bf542",
+            "name": "Andualem Arimo X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b341b332-884b-ec11-b325-9e87ee2bf542",
+            "name": "Degisew Yinur X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bb41b332-884b-ec11-b325-9e87ee2bf542",
+            "name": "Emebet Teshoma X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "b841b332-884b-ec11-b325-9e87ee2bf542",
+            "name": "Filagot Molla X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "b241b332-884b-ec11-b325-9e87ee2bf542",
+            "name": "Getaw Abera X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b041b332-884b-ec11-b325-9e87ee2bf542",
+            "name": "Getu Hailu X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "4f407916-b684-ef11-a41f-7e43ff4f35bf",
+            "name": "Henok Tadesse xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b741b332-884b-ec11-b325-9e87ee2bf542",
+            "name": "Meskerem Mamo X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "b441b332-884b-ec11-b325-9e87ee2bf542",
+            "name": "Mulugeta Belay X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8f43fada-7b6e-ee11-93a3-425bff47fdcf",
+            "name": "Oumer Abdie xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b941b332-884b-ec11-b325-9e87ee2bf542",
+            "name": "Selam Melese X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "af41b332-884b-ec11-b325-9e87ee2bf542",
+            "name": "Temesgen Oljira X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "ba41b332-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tilahun Rabuma X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ae41b332-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tolossa Duguma X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ad41b332-884b-ec11-b325-9e87ee2bf542",
+            "name": "Wubishet Mengistu X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "b641b332-884b-ec11-b325-9e87ee2bf542",
+            "name": "Yidnekachew Wolde X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "b141b332-884b-ec11-b325-9e87ee2bf542",
+            "name": "Yirgashewa Asferi X",
+            "gender": "Male"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "College of Agriculture and Natural Resource",
+    "departments": [
+      {
+        "name": "Agricultural Economics",
+        "pis": [
+          {
+            "user_id": "25230e21-3a48-ec11-a3e3-00155d010503",
+            "name": "Tsegamariam Dula Sherka",
+            "gender": "Male"
+          },
+          {
+            "user_id": "11a04d38-264a-ec11-b31e-9e87ee2bf542",
+            "name": "Tiru Abebe Nida",
+            "gender": "Female"
+          },
+          {
+            "user_id": "0ea04d38-264a-ec11-b31e-9e87ee2bf542",
+            "name": "Tadele Alemayhu Temesgen",
+            "gender": "Male"
+          },
+          {
+            "user_id": "eb1e2ae2-7403-ed11-9129-425bff47fdcf",
+            "name": "Moti Debell X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "03a04d38-264a-ec11-b31e-9e87ee2bf542",
+            "name": "Biru Gelgo X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "04a04d38-264a-ec11-b31e-9e87ee2bf542",
+            "name": "Dawit Moges X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "05a04d38-264a-ec11-b31e-9e87ee2bf542",
+            "name": "Desalegn Gachena X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "06a04d38-264a-ec11-b31e-9e87ee2bf542",
+            "name": "Feven Yohannes X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "0f53334b-c474-ee11-a313-7e43ff4f35bf",
+            "name": "Gizachew Argaw xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "07a04d38-264a-ec11-b31e-9e87ee2bf542",
+            "name": "Haymanot Guda Taye",
+            "gender": "Female"
+          },
+          {
+            "user_id": "14efb2b3-1b6a-ec11-b3ba-9e87ee2bf542",
+            "name": "Kalikidan Terfe X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "08a04d38-264a-ec11-b31e-9e87ee2bf542",
+            "name": "Mebrat Taye Taye",
+            "gender": "Female"
+          },
+          {
+            "user_id": "09a04d38-264a-ec11-b31e-9e87ee2bf542",
+            "name": "Mekdes Dessie X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "80f28311-f100-ed11-911b-425bff47fdcf",
+            "name": "Mesfin Agza Kerga",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0aa04d38-264a-ec11-b31e-9e87ee2bf542",
+            "name": "Mesfin Melese X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0ba04d38-264a-ec11-b31e-9e87ee2bf542",
+            "name": "Mufti Jelan X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0ca04d38-264a-ec11-b31e-9e87ee2bf542",
+            "name": "Seble Tadesse Mokennen",
+            "gender": "Female"
+          },
+          {
+            "user_id": "0da04d38-264a-ec11-b31e-9e87ee2bf542",
+            "name": "Seid Sani X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "10a04d38-264a-ec11-b31e-9e87ee2bf542",
+            "name": "Temesgen Hirko X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "76f7ab84-2ac9-f011-a597-7e43ff4f35bf",
+            "name": "Tiringo Solomon xxxxx",
+            "gender": "Female"
+          },
+          {
+            "user_id": "33d68408-7503-ed11-9129-425bff47fdcf",
+            "name": "Tsion Ermias X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "259a6927-c593-ec11-b44e-9e87ee2bf542",
+            "name": "Wasihun Sisay X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "29335652-186a-ec11-b3ba-9e87ee2bf542",
+            "name": "Wassie Shitie Ayalew",
+            "gender": "Male"
+          },
+          {
+            "user_id": "13a04d38-264a-ec11-b31e-9e87ee2bf542",
+            "name": "Zoma kefyalew X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "14a04d38-264a-ec11-b31e-9e87ee2bf542",
+            "name": "Zuber Oumer X",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Natural Resources Management",
+        "pis": [
+          {
+            "user_id": "4571bfdc-b447-ec11-a3e1-00155d010503",
+            "name": "Teshome Yitbarek Baye",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d6ebea25-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Mihiretu Erjabo X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "dcebea25-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Terefe Hanchiso X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d2ebea25-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Dereje Dejene X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "bf35b758-126a-ec11-b3b9-9e87ee2bf542",
+            "name": "Dr. Aberham Berta X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ceebea25-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Abderahman Shafi X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "cfebea25-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Abdeta Jembere Ebsa",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d0ebea25-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Asrat Fikre X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "dae3b39f-6c87-ed11-91da-425bff47fdcf",
+            "name": "Belay Zerga X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "dfebea25-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Bire Jemberu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "1c3ed800-7403-ed11-9129-425bff47fdcf",
+            "name": "Birhane Tsegaye X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "d1ebea25-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Degemu Abza X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "029254d9-1d95-f011-a54d-7e43ff4f35bf",
+            "name": "Fitsum Tesfay Kayo",
+            "gender": "Female"
+          },
+          {
+            "user_id": "2e018185-1e95-f011-a54d-7e43ff4f35bf",
+            "name": "Habtamu Kerebeh Kumlachew",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d4ebea25-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Maruf Dino X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d5ebea25-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Mesfin Sahle X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d7ebea25-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Musema Shewaga X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d8ebea25-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Nigatu Gebremedhin X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "da5bd4b9-2095-f011-a54d-7e43ff4f35bf",
+            "name": "Saba Achenef Wassie",
+            "gender": "Female"
+          },
+          {
+            "user_id": "2d25f473-f100-ed11-911b-425bff47fdcf",
+            "name": "Selamawit Fikadu X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "e0ebea25-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Setegn Abi X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "e1ebea25-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Shibikom Desalegn X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "d9ebea25-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Solomon Abirdew X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "daebea25-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Tagay Taye Fitale",
+            "gender": "Male"
+          },
+          {
+            "user_id": "dbebea25-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Tekilil Wolde X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ddebea25-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Tesfaye Minuta Sahle",
+            "gender": "Male"
+          },
+          {
+            "user_id": "deebea25-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Yenenesh Hailu X",
+            "gender": "Female"
+          }
+        ]
+      },
+      {
+        "name": "Wildlife and Ecotourism Management",
+        "pis": [
+          {
+            "user_id": "dcafe558-3f72-ee11-93bd-425bff47fdcf",
+            "name": "Abera Aboset Bedasa",
+            "gender": "Male"
+          },
+          {
+            "user_id": "37e7fd03-3d4a-ec11-b31e-9e87ee2bf542",
+            "name": "Melese Moareta X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "34e7fd03-3d4a-ec11-b31e-9e87ee2bf542",
+            "name": "Guta Diriba Bekele",
+            "gender": "Male"
+          },
+          {
+            "user_id": "31e7fd03-3d4a-ec11-b31e-9e87ee2bf542",
+            "name": "Abel Feyisa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "32e7fd03-3d4a-ec11-b31e-9e87ee2bf542",
+            "name": "Belete Tilahun X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3be7fd03-3d4a-ec11-b31e-9e87ee2bf542",
+            "name": "Chalachew Alemneh X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "33e7fd03-3d4a-ec11-b31e-9e87ee2bf542",
+            "name": "Dereje Chukala X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5a137c78-c793-ec11-b44e-9e87ee2bf542",
+            "name": "Felekech Geremew X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "3ae7fd03-3d4a-ec11-b31e-9e87ee2bf542",
+            "name": "Geleta Shasho Gashie",
+            "gender": "Male"
+          },
+          {
+            "user_id": "35e7fd03-3d4a-ec11-b31e-9e87ee2bf542",
+            "name": "Hailu Tilahun X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "39e7fd03-3d4a-ec11-b31e-9e87ee2bf542",
+            "name": "Kalayu kiros X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "36e7fd03-3d4a-ec11-b31e-9e87ee2bf542",
+            "name": "Kassahun Abie Terefe",
+            "gender": "Male"
+          },
+          {
+            "user_id": "94326f3d-3e72-ee11-93bd-425bff47fdcf",
+            "name": "Mebrat Teklemariam Gebrekidan",
+            "gender": "Female"
+          },
+          {
+            "user_id": "a78db79a-156a-ec11-b3b9-9e87ee2bf542",
+            "name": "Tamenut Desalegn Zenebe",
+            "gender": "Male"
+          },
+          {
+            "user_id": "38e7fd03-3d4a-ec11-b31e-9e87ee2bf542",
+            "name": "Tesfanesh Endashaw X",
+            "gender": "Female"
+          }
+        ]
+      },
+      {
+        "name": "Horticulture",
+        "pis": [
+          {
+            "user_id": "e04cb3a3-211a-ed11-9142-425bff47fdcf",
+            "name": "Arif Abrahim Sali",
+            "gender": "Male"
+          },
+          {
+            "user_id": "23151cda-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Addisu Tamene X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "22151cda-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Abreham Mulatu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4328bedd-38c9-f011-a597-7e43ff4f35bf",
+            "name": "Abreham Mulatu xxxxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "24151cda-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Addisalem Mebratu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2e151cda-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Alemu Bade X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2d151cda-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Ashenafi Mitiku X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "25151cda-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Bewuket Gashaw Adnew",
+            "gender": "Male"
+          },
+          {
+            "user_id": "26151cda-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Birhanu Tsegaye X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2f151cda-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Dejene Abera X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "27151cda-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Gizachew W/Senbet X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "28151cda-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Kibebe Fikre Yirga",
+            "gender": "Male"
+          },
+          {
+            "user_id": "29151cda-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Kifle Zerga X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "466439b8-5f72-ee11-93c0-425bff47fdcf",
+            "name": "Mekonnen Gebru Tekle",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2a151cda-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Nurawel Ahmed X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2b151cda-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Tesfaye Walle X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "044eddf8-9478-ee11-a31b-7e43ff4f35bf",
+            "name": "Yekite Terefe xxx",
+            "gender": "Female"
+          },
+          {
+            "user_id": "2c151cda-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Zenebe Woldu X",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Animal Production and Technology",
+        "pis": [
+          {
+            "user_id": "d6b561c3-f100-ed11-911b-425bff47fdcf",
+            "name": "Dr. Metages Yirgalem Tindashe",
+            "gender": "Male"
+          },
+          {
+            "user_id": "70ae8c73-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Mosa Mitiku Asmani",
+            "gender": "Male"
+          },
+          {
+            "user_id": "72ae8c73-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Shimelis Mengistu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "68ae8c73-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Belachew Zerfu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "69ae8c73-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Dirsha Demam X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "321a2631-5683-ec11-b417-9e87ee2bf542",
+            "name": "Dr. Faris Delil Yesuf",
+            "gender": "Male"
+          },
+          {
+            "user_id": "79ae8c73-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Dr. Zena Kidane Abera",
+            "gender": "Male"
+          },
+          {
+            "user_id": "6bae8c73-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Feki Misbah X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "6cae8c73-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Kedir Adem X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c955b04f-2ac9-f011-a597-7e43ff4f35bf",
+            "name": "Kibebew Babege Woldeyes",
+            "gender": "Male"
+          },
+          {
+            "user_id": "6dae8c73-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Mahmoud Hassen X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "6eae8c73-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Melese Etifu Meranga",
+            "gender": "Male"
+          },
+          {
+            "user_id": "6fae8c73-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Minyahel Tilahun X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "71ae8c73-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Shiferaw Mulugeta X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "6aae8c73-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Sisay Mihiretu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "73ae8c73-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Tagesse Sawo X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "74ae8c73-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Tena Alemu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "75ae8c73-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Tesfaye Feyisa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "76ae8c73-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Tesfaye Shewage X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "657ae0e2-1c6a-ec11-b3ba-9e87ee2bf542",
+            "name": "Wassihun B. X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "77ae8c73-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Wondossen Ayalew X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "78ae8c73-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Yeshihareg Afera X",
+            "gender": "Female"
+          }
+        ]
+      },
+      {
+        "name": "Agribusiness and Value Chain Management",
+        "pis": [
+          {
+            "user_id": "8ab798c9-3f72-ee11-93bd-425bff47fdcf",
+            "name": "Deninesh Cheru xxx",
+            "gender": "Female"
+          },
+          {
+            "user_id": "16ab1326-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Metadel Demesie Melss",
+            "gender": "Female"
+          },
+          {
+            "user_id": "3fc4d4d2-a06e-ec11-b3d4-9e87ee2bf542",
+            "name": "Abera Ejira X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2076f9fa-9261-ed11-919b-425bff47fdcf",
+            "name": "Abera Guluma Kabo",
+            "gender": "Male"
+          },
+          {
+            "user_id": "12ab1326-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Abera Ejara Negesa",
+            "gender": "Male"
+          },
+          {
+            "user_id": "09ab1326-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Banchamlak Hagena X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "0eab1326-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Bizualem Assefa Gashaw",
+            "gender": "Male"
+          },
+          {
+            "user_id": "10ab1326-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Dires Mamo X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0bab1326-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Dubale Abate X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "11ab1326-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Edilu Ashu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "68f31bac-034d-ec11-b337-9e87ee2bf542",
+            "name": "Emnet Gashaw Tefera",
+            "gender": "Female"
+          },
+          {
+            "user_id": "0dab1326-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Henok Tesfaye X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "14ab1326-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Lalisa Fikadu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "15ab1326-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Maritu Wodaynew X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "0cab1326-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Metadel kassaw Adera",
+            "gender": "Male"
+          },
+          {
+            "user_id": "13ab1326-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Saron Mebratu X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "0aab1326-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Sebele Tigistu X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "aff45fc7-5e72-ee11-93c0-425bff47fdcf",
+            "name": "Temesgen Fisha xxx",
+            "gender": "Female"
+          },
+          {
+            "user_id": "0fab1326-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Tibebu Legesse X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "08ab1326-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Yonnas Addis Mihretie",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2b68f79f-3f72-ee11-93bd-425bff47fdcf",
+            "name": "Zalalam Lule Bimeraw",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Plant Science",
+        "pis": [
+          {
+            "user_id": "8be0d772-fd73-ee11-a30f-7e43ff4f35bf",
+            "name": "Frehiwot Goshu yirga",
+            "gender": "Female"
+          },
+          {
+            "user_id": "61370a5e-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Meshu Shewarega Foyate",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5c370a5e-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Abdirshikur Reshid X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "60370a5e-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Adugnaw Mintesnot X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "570ae060-a18b-ee11-a32f-7e43ff4f35bf",
+            "name": "Chigign Adamu",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5f370a5e-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Dr. Getachew Mekonnen X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5e370a5e-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Firehiwot Goshu X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "66370a5e-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Girma Wolde Feleke",
+            "gender": "Male"
+          },
+          {
+            "user_id": "63370a5e-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Melese Mengistu Asfaw",
+            "gender": "Male"
+          },
+          {
+            "user_id": "37f2a1a6-7687-ed11-91da-425bff47fdcf",
+            "name": "Selamawit Mengesha X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "5b370a5e-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Tatek Tamiru Geletu",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a4c15c8c-2095-f011-a54d-7e43ff4f35bf",
+            "name": "Tigist Fentahun xxxxx",
+            "gender": "Female"
+          },
+          {
+            "user_id": "64370a5e-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Wondimu Bekele Bedada",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a5b61a07-b547-ec11-a3e1-00155d010503",
+            "name": "Worku Mengesha Estifo",
+            "gender": "Male"
+          },
+          {
+            "user_id": "62370a5e-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Yemane W/Eyesus X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5d370a5e-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Zekia Fitret X",
+            "gender": "Female"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "College of Social Science and Humanities",
+    "departments": [
+      {
+        "name": "English and Literature",
+        "pis": [
+          {
+            "user_id": "301db31c-ff69-ec11-b3b9-9e87ee2bf542",
+            "name": "Habtamu Adem X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c48399a3-0d75-ec11-b3e8-9e87ee2bf542",
+            "name": "Anteneh Kebede X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "13b6b5ef-884b-ec11-b325-9e87ee2bf542",
+            "name": "Yigermu Kifle Teklemariam",
+            "gender": "Female"
+          },
+          {
+            "user_id": "14b6b5ef-884b-ec11-b325-9e87ee2bf542",
+            "name": "Redwan Neja Ali",
+            "gender": "Male"
+          },
+          {
+            "user_id": "02b6b5ef-884b-ec11-b325-9e87ee2bf542",
+            "name": "Anwar Naser X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "00b6b5ef-884b-ec11-b325-9e87ee2bf542",
+            "name": "Abera Tsegaye X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "91f85e6b-0d75-ec11-b3e8-9e87ee2bf542",
+            "name": "Addisu Sewbihon X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "01b6b5ef-884b-ec11-b325-9e87ee2bf542",
+            "name": "Amenti Dida X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "7fbb487e-ff92-ec11-b44b-9e87ee2bf542",
+            "name": "Assefa Mebratu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "03b6b5ef-884b-ec11-b325-9e87ee2bf542",
+            "name": "Cherent Zerga X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "e9bd36d5-2c6a-ec11-b3ba-9e87ee2bf542",
+            "name": "Dr. Esubalew Getnet x",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8dffe964-ff92-ec11-b44b-9e87ee2bf542",
+            "name": "Esayas Teshome X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "05b6b5ef-884b-ec11-b325-9e87ee2bf542",
+            "name": "Esubalew Getnet X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "06b6b5ef-884b-ec11-b325-9e87ee2bf542",
+            "name": "F/Mariyam Yirgu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "1ecd3077-aa78-ee11-a31b-7e43ff4f35bf",
+            "name": "Fikadu Mamo xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c282fab3-4772-ee11-93be-425bff47fdcf",
+            "name": "Fikremariam Yirgu xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "1a6709f5-86af-ee11-a350-7e43ff4f35bf",
+            "name": "Gemechu Bayisa xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "07b6b5ef-884b-ec11-b325-9e87ee2bf542",
+            "name": "Haymanot Amare X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "aeaba979-4972-ee11-93be-425bff47fdcf",
+            "name": "Kamil Nuredin xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "08b6b5ef-884b-ec11-b325-9e87ee2bf542",
+            "name": "Kemil Nuredin X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "12b6b5ef-884b-ec11-b325-9e87ee2bf542",
+            "name": "Marta Bizuayehu X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "15b6b5ef-884b-ec11-b325-9e87ee2bf542",
+            "name": "Meseret Dawit X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "5203bfbf-0d75-ec11-b3e8-9e87ee2bf542",
+            "name": "Mitiku Tasisa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0ab6b5ef-884b-ec11-b325-9e87ee2bf542",
+            "name": "Samuel Mekonen X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9963b0a7-ed92-ec11-b44a-9e87ee2bf542",
+            "name": "Seifu Bogale X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "61ace396-0601-ed11-911b-425bff47fdcf",
+            "name": "Senbeta Tadesse Dengela",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0cb6b5ef-884b-ec11-b325-9e87ee2bf542",
+            "name": "Seyfu Bogale X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0db6b5ef-884b-ec11-b325-9e87ee2bf542",
+            "name": "Shashetu Bayu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0eb6b5ef-884b-ec11-b325-9e87ee2bf542",
+            "name": "Shewa Tafa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0fb6b5ef-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tadesse Abebe X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "10b6b5ef-884b-ec11-b325-9e87ee2bf542",
+            "name": "Temsgen Erabo X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "04b6b5ef-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tiglu Geza X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "11b6b5ef-884b-ec11-b325-9e87ee2bf542",
+            "name": "Tsedale Tesema X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "09b6b5ef-884b-ec11-b325-9e87ee2bf542",
+            "name": "Zemzem T/Abe X",
+            "gender": "Female"
+          }
+        ]
+      },
+      {
+        "name": "Civics and Ethical Studies",
+        "pis": [
+          {
+            "user_id": "839c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Admasu Bogale Adam",
+            "gender": "Male"
+          },
+          {
+            "user_id": "799c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Adafrew Adane X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ec79c900-1804-ed11-912b-425bff47fdcf",
+            "name": "Frito Kassa X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "769c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Abdo Windisa Nure X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "779c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Abdulaziz Ali Hussen X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8a9c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Abdulkerim Shafi X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "789c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Abebe Neme X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "7a9c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Bekalu Wachiso X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "7b9c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Daniel Mekonnen X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "7c9c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Eyerusalem Ayalew X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "7d9c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Getachew Melaku X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "7e9c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Gidafie Teshome X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4c5f5f4c-4972-ee11-93be-425bff47fdcf",
+            "name": "Habtamu Misganaw Tadesse",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8c9c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Hana Delka X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "7f9c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Jemal Seid Mohamned",
+            "gender": "Male"
+          },
+          {
+            "user_id": "809c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Jemberu Mola Gidyelew",
+            "gender": "Male"
+          },
+          {
+            "user_id": "32a922be-7579-ee11-a31d-7e43ff4f35bf",
+            "name": "Kebebush Markos xxx",
+            "gender": "Female"
+          },
+          {
+            "user_id": "819c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Lamesginew Negalign X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "e773060d-016a-ec11-b3b9-9e87ee2bf542",
+            "name": "Limenih Minase Kebede",
+            "gender": "Male"
+          },
+          {
+            "user_id": "829c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Mihret Negera X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "849c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Mohammed Seid Ahmed",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8b9c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Nahom Solomon X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "859c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Remla Reshid X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "869c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Robel Fantu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "7df28f5b-9b9e-f011-a56f-7e43ff4f35bf",
+            "name": "Tigist Dansa xxxxx",
+            "gender": "Female"
+          },
+          {
+            "user_id": "879c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Tilahun Tadesse X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "889c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Wassihun G/Egziabher X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "899c7b4a-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Zerfu Luku Chena",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Sociology",
+        "pis": [
+          {
+            "user_id": "ff18d156-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Girum Melkamu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "328e500a-ff83-ec11-b418-9e87ee2bf542",
+            "name": "Abinet Shiferaw X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "26e9d772-f900-ed11-911b-425bff47fdcf",
+            "name": "Habtamu Wondimu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "96cbaaa5-fc69-ec11-b3b9-9e87ee2bf542",
+            "name": "Abdu Mubarik Asfa",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ad08cd89-4872-ee11-93be-425bff47fdcf",
+            "name": "Abrham Belay Mekonen",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c3f60e81-1d84-ec11-b418-9e87ee2bf542",
+            "name": "Agumas Getnet X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8c24df83-3a48-ec11-a3e3-00155d010503",
+            "name": "Aschale Kassie Haile",
+            "gender": "Male"
+          },
+          {
+            "user_id": "7784b291-7cb1-ef11-a438-7e43ff4f35bf",
+            "name": "Ashenafi Kebede xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5cc9e17a-6f72-ee11-93c2-425bff47fdcf",
+            "name": "Belete Endris Seid",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f518d156-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Bereket Alemu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "fa18d156-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Dagnachaw Terefe Degf",
+            "gender": "Male"
+          },
+          {
+            "user_id": "fe18d156-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Ebabu Admasu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0019d156-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Eskedar Tateq X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "87133046-6f72-ee11-93c2-425bff47fdcf",
+            "name": "Gebeyaw Abebe Simegn",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f818d156-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Getachew Admas Endalew",
+            "gender": "Male"
+          },
+          {
+            "user_id": "fb18d156-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Helen Getachew X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "f418d156-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Kasahun Dejene Zeleke",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ed7d7a62-f674-ec11-b3e8-9e87ee2bf542",
+            "name": "Kelil Demsis X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "fc18d156-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Konjit Tesfaye X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "f718d156-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Lidya Adane X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "e146fcfc-1d84-ec11-b418-9e87ee2bf542",
+            "name": "Mengestu Gemedi X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a61e48f1-fd69-ec11-b3b9-9e87ee2bf542",
+            "name": "Metages Endale Worku",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8cea8fdf-1d84-ec11-b418-9e87ee2bf542",
+            "name": "Semahagn Gashaw X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0119d156-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Semere Beyene X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f618d156-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Shalom Ali X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "4ecd34be-1d84-ec11-b418-9e87ee2bf542",
+            "name": "Solomon Balager X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c16d8330-ef92-ec11-b44a-9e87ee2bf542",
+            "name": "Wubit Delelegn X",
+            "gender": "Female"
+          }
+        ]
+      },
+      {
+        "name": "Geography and Environmental Studies",
+        "pis": [
+          {
+            "user_id": "0e460a64-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Sewale Lewoyehu Debasu",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5b8793e2-4972-ee11-93be-425bff47fdcf",
+            "name": "Amare Melku Adugna",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0a460a64-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Befikadu Melese X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "0d460a64-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Behailu Getu Desta",
+            "gender": "Male"
+          },
+          {
+            "user_id": "e03ffaaf-4972-ee11-93be-425bff47fdcf",
+            "name": "Dessie Erkie xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0b460a64-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Elias Tamiru X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "50df6862-4a72-ee11-93be-425bff47fdcf",
+            "name": "Fekadu Mersh xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4f12882a-f700-ed11-911b-425bff47fdcf",
+            "name": "Getahun Kebede Ertabo",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0c460a64-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Habtamu G/ Tsdik X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "52dc4167-f700-ed11-911b-425bff47fdcf",
+            "name": "Haile Desalegn X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "49bd8e8e-ef92-ec11-b44a-9e87ee2bf542",
+            "name": "Mathewos Amerga x",
+            "gender": "Male"
+          },
+          {
+            "user_id": "711a6227-fa00-ed11-911b-425bff47fdcf",
+            "name": "Meareg Fikadu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0f460a64-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Melaku Atalay X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "55fd2035-4a72-ee11-93be-425bff47fdcf",
+            "name": "Solomon Eshete W/kiros",
+            "gender": "Male"
+          },
+          {
+            "user_id": "836f270b-4a72-ee11-93be-425bff47fdcf",
+            "name": "Zewdu Markos Wolamo",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Governance and Development Studies",
+        "pis": [
+          {
+            "user_id": "a955bd17-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Tano Geter X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9e55bd17-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Yisak Bekele Teklu",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a255bd17-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Abebe Amare X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a655bd17-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Aklilu Kidane X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a455bd17-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Alex Birhanu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "67d1b16e-106a-ec11-b3b9-9e87ee2bf542",
+            "name": "Bayush Mekonnen X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "a855bd17-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Gifawosen Markos X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "9f55bd17-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Gizachew Asrat X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a555bd17-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Hayalu Godefay X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "aa55bd17-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Maereg Fikadu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a155bd17-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Mekonnen Mengesha X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a755bd17-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Tamiru Berafie X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ab55bd17-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Teka Wordofa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f610763f-8b84-ef11-a41f-7e43ff4f35bf",
+            "name": "Teshome Sirani xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "5b5e6e7a-6d72-ee11-93c2-425bff47fdcf",
+            "name": "Tigist Ewunete xxx",
+            "gender": "Female"
+          },
+          {
+            "user_id": "a355bd17-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Yoseph Yonas X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a2ea45aa-6d72-ee11-93c2-425bff47fdcf",
+            "name": "Zelalem Dendir xxx",
+            "gender": "Male"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "College of Business and Economics",
+    "departments": [
+      {
+        "name": "Management",
+        "pis": [
+          {
+            "user_id": "8f5d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Tafess Akinda X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "1a988757-034d-ec11-b337-9e87ee2bf542",
+            "name": "Habtamu Gedion Alynalem",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a2c97bc9-e163-ed11-91a3-425bff47fdcf",
+            "name": "Hana Kassahun X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "7d5d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Alemayehu Takele X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "7e5d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Alemu Tereda X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "7f5d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Amdemichael Birhanu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "805d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Berhanu Tereda Mengesha",
+            "gender": "Male"
+          },
+          {
+            "user_id": "815d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Demelash Shalo X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "825d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Dereje Kefale Tadesse",
+            "gender": "Male"
+          },
+          {
+            "user_id": "835d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Edmealem Esubalew X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "845d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Endalk Filfil X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "855d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Fuad Hussein X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "865d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Kasayenesh Gutema X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "f9271314-db6a-ec11-b3be-9e87ee2bf542",
+            "name": "Mehariamlak Kifle X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "875d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Mikias Mitiku X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "885d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Minda Yirga X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "895d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Samuel Gemechu Gonfa",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8a5d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Sintayehu Fesiha X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "49ef0d82-0e91-ef11-a42a-7e43ff4f35bf",
+            "name": "Sisay Mengistu xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8b5d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Tadesse Gezahegn X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "915d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Tamru Yihun Mewahaign",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8c5d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Tasew Shegeda X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8d5d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Tegbew Addis X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8e5d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Tilahun Damtew X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "e135289a-0e91-ef11-a42a-7e43ff4f35bf",
+            "name": "Tilahun Kidane Diko",
+            "gender": "Male"
+          },
+          {
+            "user_id": "925d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Wubye Mezgebu X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "905d0e07-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Wuletaw Fente X",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Accounting and Finance",
+        "pis": [
+          {
+            "user_id": "ec947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Birihanu Dereja X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "fc947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "ABDU MOHAMMED X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a5c73656-0801-ed11-911b-425bff47fdcf",
+            "name": "Abdulselam Fetu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ed947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Alemayehu Alemayehu Gebre X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "fa947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Andargachew Haile X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a4d8d652-e191-ef11-a42d-7e43ff4f35bf",
+            "name": "Aster Ketema xxx",
+            "gender": "Female"
+          },
+          {
+            "user_id": "f9947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Birihanu Yiriga X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f5947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Chernet Bereda X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f1947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Dagnachew Abera X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "fb947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Delelegn Eyob X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f8947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Demelash Getinet Fiseha",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f0947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Desta Yohannes X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f6947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Idiris Ali X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a1d62c44-b193-f011-a54b-7e43ff4f35bf",
+            "name": "Kassahun Wolde Assfaw",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ef947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Kasu Biribirsa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "e8947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Kefiyalew Belachew X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ee947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Kirubel Asgedew X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "ff947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "kumar Manoj X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f4947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Lackech Estifanos X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "c691297b-2b04-ed11-912b-425bff47fdcf",
+            "name": "Mahlet Dera X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "ea947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Meyad Diriba X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f7947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Mitiku Melese X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "eb947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Mulualem H/michael X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "e9947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Muridu Sirage X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "fd947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Nesrya Nesrya kedir X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "f2947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Sitina Akimel X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "fe947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Teferi Tadesse X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f3947b17-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Tewodros Engida X",
+            "gender": "Male"
+          }
+        ]
+      },
+      {
+        "name": "Economics",
+        "pis": [
+          {
+            "user_id": "78bbbaf1-3948-ec11-a3e3-00155d010503",
+            "name": "Endalkachew Kabtamu Mekonen",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8db26592-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Abebe Mengesha X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "88b26592-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Abiy Alemayehu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "89b26592-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Amsalu Bichenu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "95b26592-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Asemamawu Beleta X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "92b26592-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Debele Gelana X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "93b26592-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Endlkih Kabtamu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "90b26592-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Felmata Kebede X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8cb26592-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Getnet Girma X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "961bc783-14b3-ef11-a438-7e43ff4f35bf",
+            "name": "Girum Tenkir xxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8eb26592-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Hayatu Mude X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "b0ce391d-7caa-ec11-b490-9e87ee2bf542",
+            "name": "Hulunayehu Yizengaw X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8bb26592-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Hundaol Abdissa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8ab26592-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Lema Shallo X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "97b26592-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Mellese Getu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8fb26592-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Naol Kebede X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "91b26592-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Nithuh Mengist X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "98b26592-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Sirnivasan X X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "96b26592-3b4a-ec11-b31e-9e87ee2bf542",
+            "name": "Wogeyehu Tsegaye X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "827b9436-0c85-ed11-91d7-425bff47fdcf",
+            "name": "Zewudu Mirani X",
+            "gender": "Male"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "College of Education and Behavioral Sciences",
+    "departments": [
+      {
+        "name": "Psychology",
+        "pis": [
+          {
+            "user_id": "45a61549-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Tekalign Deksissa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "47a61549-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Alebel Addis X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "46a61549-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Desalegn Alemu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3a94807e-216a-ec11-b3ba-9e87ee2bf542",
+            "name": "Esmaiel Seid X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "19c90bba-7f6e-ee11-93a3-425bff47fdcf",
+            "name": "Abreham Fikadu Degefa",
+            "gender": "Female"
+          },
+          {
+            "user_id": "43a61549-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Abrham Fekadu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "40a61549-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Cheramlak Firesenbet Woldemariam",
+            "gender": "Male"
+          },
+          {
+            "user_id": "f507e236-738f-ef11-a428-7e43ff4f35bf",
+            "name": "Deme Taye Gizaw",
+            "gender": "Female"
+          },
+          {
+            "user_id": "fa4cb782-7f6e-ee11-93a3-425bff47fdcf",
+            "name": "Demelash Yibeltal Anteneh",
+            "gender": "Male"
+          },
+          {
+            "user_id": "48a61549-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Getu Degu Aimero",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3ea61549-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Henok Legesse X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2d2cf4c5-3948-ec11-a3e3-00155d010503",
+            "name": "Israel Atrif Fereja",
+            "gender": "Male"
+          },
+          {
+            "user_id": "41a61549-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Israel Atrif X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "1a67251c-6d87-ed11-91da-425bff47fdcf",
+            "name": "Kebede Geleta X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "42a61549-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Melaku Bekele X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "23f69708-806e-ee11-93a3-425bff47fdcf",
+            "name": "Mestawet Mechal Andiegzer",
+            "gender": "Female"
+          },
+          {
+            "user_id": "c60dbed4-22c5-f011-a593-7e43ff4f35bf",
+            "name": "Sherefa Kedir xxxx",
+            "gender": "Male"
+          },
+          {
+            "user_id": "3fa61549-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Temesgen Melaku Derbie",
+            "gender": "Male"
+          },
+          {
+            "user_id": "44a61549-3c4a-ec11-b31e-9e87ee2bf542",
+            "name": "Yadesa Deriba Dugo",
+            "gender": "Male"
+          },
+          {
+            "user_id": "8965de3c-806e-ee11-93a3-425bff47fdcf",
+            "name": "Zinash Eshetu Biru",
+            "gender": "Female"
+          }
+        ]
+      },
+      {
+        "name": "Educational Planning and  Management",
+        "pis": [
+          {
+            "user_id": "6cc79f54-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Meskerem Alemayehu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "fd18d156-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Bogale Kessie X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "6bc79f54-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Cheramalk Fikadu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "cca3e1f0-a267-f011-a509-7e43ff4f35bf",
+            "name": "Elsabet Gebeyehu xxx",
+            "gender": "Female"
+          },
+          {
+            "user_id": "68c79f54-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Fikadu Dabesa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a055bd17-6d4b-ec11-b322-9e87ee2bf542",
+            "name": "Girma Senbetie X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "6ac79f54-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Habite Neri X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "07192ec2-e063-ed11-91a3-425bff47fdcf",
+            "name": "Jabe Bekele Hirgo",
+            "gender": "Male"
+          },
+          {
+            "user_id": "67c79f54-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Misgana Tekle X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "69c79f54-8a4b-ec11-b325-9e87ee2bf542",
+            "name": "Tsegaye Eyasu X",
+            "gender": "Male"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "School of Law",
+    "departments": [
+      {
+        "name": "Law",
+        "pis": [
+          {
+            "user_id": "2a6ae943-894b-ec11-b325-9e87ee2bf542",
+            "name": "W/Mariam Kenennisa Edea",
+            "gender": "Male"
+          },
+          {
+            "user_id": "48d46b38-6069-ec11-b3b8-9e87ee2bf542",
+            "name": "Samuel Alemayehu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "306ae943-894b-ec11-b325-9e87ee2bf542",
+            "name": "Abedelmejed Gebi X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2f6ae943-894b-ec11-b325-9e87ee2bf542",
+            "name": "Adisu Kotecho X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "236ae943-894b-ec11-b325-9e87ee2bf542",
+            "name": "Anteneh Gezahgene X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2e6ae943-894b-ec11-b325-9e87ee2bf542",
+            "name": "Anteneh Tesfaye X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "a619903f-6673-ec11-b3e0-9e87ee2bf542",
+            "name": "Awot Halefom X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "266ae943-894b-ec11-b325-9e87ee2bf542",
+            "name": "Daniel Dendebo X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "276ae943-894b-ec11-b325-9e87ee2bf542",
+            "name": "Daniel Mitiku X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "246ae943-894b-ec11-b325-9e87ee2bf542",
+            "name": "Endalamawe Chekole X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "296ae943-894b-ec11-b325-9e87ee2bf542",
+            "name": "Esa Yesuf X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "c37aaa22-6673-ec11-b3e0-9e87ee2bf542",
+            "name": "Girum Getu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "eca6bcfb-6573-ec11-b3e0-9e87ee2bf542",
+            "name": "Haile Bysa X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0c5a778f-6573-ec11-b3e0-9e87ee2bf542",
+            "name": "Hailu Nega X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2b6ae943-894b-ec11-b325-9e87ee2bf542",
+            "name": "Kacha Mulatu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "70073a67-ca71-ec11-b3db-9e87ee2bf542",
+            "name": "Kegnu Mulu XX",
+            "gender": "Male"
+          },
+          {
+            "user_id": "286ae943-894b-ec11-b325-9e87ee2bf542",
+            "name": "Kegnu Mulu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "51879192-6069-ec11-b3b8-9e87ee2bf542",
+            "name": "Merga Fikadu X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0b7d024a-3a48-ec11-a3e3-00155d010503",
+            "name": "Misganu Degif Ergne",
+            "gender": "Male"
+          },
+          {
+            "user_id": "4fcc7ed2-6573-ec11-b3e0-9e87ee2bf542",
+            "name": "Nahom Teketel X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "0986c65c-6573-ec11-b3e0-9e87ee2bf542",
+            "name": "Rabel Desalegn X",
+            "gender": "Female"
+          },
+          {
+            "user_id": "256ae943-894b-ec11-b325-9e87ee2bf542",
+            "name": "Teshome Habesha X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2d6ae943-894b-ec11-b325-9e87ee2bf542",
+            "name": "Yeneneh Haile X",
+            "gender": "Male"
+          },
+          {
+            "user_id": "2c6ae943-894b-ec11-b325-9e87ee2bf542",
+            "name": "Yeuwelsewu Yetbarek X",
+            "gender": "Male"
+          }
+        ]
+      }
+    ]
+  }
+]
