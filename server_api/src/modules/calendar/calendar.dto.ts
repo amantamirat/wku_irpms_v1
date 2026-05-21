@@ -1,4 +1,4 @@
-import { CalendarStatus } from "./calendar.state-machine";
+import { CalendarStatus } from "./calendar.model";
 
 
 export interface CreateCalendarDTO {

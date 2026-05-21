@@ -76,7 +76,7 @@ export class GrantService {
         if (data.amount !== undefined && data.amount !== grantDoc.amount) {
             // Find all allocations tied to this grant
             const allocations = await this.allocationRepo.find({ grant: id });
-            const totalAllocated = allocations.reduce((sum, a) => sum + (a.totalBudget || 0), 0);
+            const totalAllocated = allocations.reduce((sum, a) => sum + (a.allocatedAmount || 0), 0);
 
             // 🔥 Protection: Prevent reducing grant below what is already allocated
             if (data.amount < totalAllocated) {
@@ -113,7 +113,10 @@ export class GrantService {
 
         if (next === GrantStatus.planned) {
             if (await this.allocationRepo.exists({ grant: id })) {
-                throw new AppError(ERROR_CODES.ALLOCATION_ALREADY_EXISTS);
+                throw new AppError(
+                    ERROR_CODES.GRANT_IN_USE,
+                    'This grant is already being used by grant allocations.'
+                );
             }
         }
         if (next === GrantStatus.active) {
@@ -126,20 +129,37 @@ export class GrantService {
 
     async delete(id: string) {
         const grantDoc = await this.repository.findById(id);
-        if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
-        if (grantDoc.status !== GrantStatus.planned)
-            throw new AppError(ERROR_CODES.GRANT_NOT_PLANNED);
+        if (!grantDoc) {
+            throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+        }
 
-        if (await this.grantStageRepo.exists({ grant: id }))
-            throw new AppError(ERROR_CODES.STAGE_ALREADY_EXISTS);
+        if (grantDoc.status !== GrantStatus.planned) {
+            throw new AppError(
+                ERROR_CODES.GRANT_NOT_PLANNED,
+                'Only grants in planned status can be deleted.'
+            );
+        }
 
-        if (await this.constraintRepo.exists({ grant: id }))
-            throw new AppError(ERROR_CODES.CONSTRAINT_ALREADY_EXISTS);
+        if (await this.grantStageRepo.exists({ grant: id })) {
+            throw new AppError(
+                ERROR_CODES.GRANT_IN_USE,
+                'Cannot delete grant because it has defined evaluation stages.'
+            );
+        }
 
-        if (await this.compositionRepo.exists({ grant: id }))
-            throw new AppError(ERROR_CODES.COMPOSITION_ALREADY_EXISTS);
+        if (await this.constraintRepo.exists({ grant: id })) {
+            throw new AppError(
+                ERROR_CODES.GRANT_IN_USE,
+                'Cannot delete grant because it has evaluation constraints configured.'
+            );
+        }
 
-
+        if (await this.compositionRepo.exists({ grant: id })) {
+            throw new AppError(
+                ERROR_CODES.GRANT_IN_USE,
+                'Cannot delete grant because it is used in grant compositions.'
+            );
+        }
         return await this.repository.delete(id);
     }
 }

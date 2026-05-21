@@ -11,13 +11,13 @@ export interface GetGrantAllocationsDTO {
 export interface CreateGrantAllocationDTO {
     grant: string;        // ObjectId as string
     calendar: string;     // ObjectId as string
-    totalBudget: number;
+    allocatedAmount: number;
 }
 
 export interface UpdateGrantAllocationDTO {
     id: string;
     data: Partial<{
-        totalBudget: number;
+        allocatedAmount: number;
     }>;
     userId?: string;
 }

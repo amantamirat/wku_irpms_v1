@@ -16,12 +16,6 @@ export enum ThemeLevel {
     //crossCutting="Cross Cutting"
 }
 
-export const themeLevelIndex: Record<ThemeLevel, number> = {
-    [ThemeLevel.broad]: 0,
-    [ThemeLevel.divison]: 1,
-    [ThemeLevel.narrow]: 2,
-    [ThemeLevel.deep]: 3,
-};
 
 
 
@@ -36,6 +30,14 @@ export type Thematic = {
     createdAt?: Date;
     updatedAt?: Date;
 }
+
+export const themeLevelIndex: Record<ThemeLevel, number> = {
+    [ThemeLevel.broad]: 0,
+    [ThemeLevel.divison]: 1,
+    [ThemeLevel.narrow]: 2,
+    [ThemeLevel.deep]: 3,
+};
+
 
 export interface GetThematicsOptions {
     //directorate?: string | Organization;

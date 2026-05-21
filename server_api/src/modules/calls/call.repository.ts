@@ -86,6 +86,7 @@ export class CallRepository implements ICallRepository {
 
         if (dtoData.title) updateData.title = dtoData.title;
         if (dtoData.description) updateData.description = dtoData.description;
+        if (dtoData.budget) updateData.budget = dtoData.budget;
 
         return Call.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),

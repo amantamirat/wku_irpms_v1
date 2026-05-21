@@ -5,10 +5,12 @@ import { checkPermission, checkTransitionPermission, verifyActiveAccount } from 
 import { CalendarController } from './calendar.controller';
 import { CalendarRepository } from './calendar.repository';
 import { CalendarService } from './calendar.service';
+import { EnrollmentRepository } from '../users/enrollments/enrollment.repository';
 
 const repository = new CalendarRepository();
-const grantAllocRepository = new GrantAllocationRepository();
-const service = new CalendarService(repository, grantAllocRepository);
+const grantAllocRepo = new GrantAllocationRepository();
+const enrollmentRepo = new EnrollmentRepository();
+const service = new CalendarService(repository, grantAllocRepo, enrollmentRepo);
 const controller = new CalendarController(service);
 
 const router: Router = Router();

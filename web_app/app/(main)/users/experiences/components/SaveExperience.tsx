@@ -27,7 +27,7 @@ const SaveExperienceDialog = ({
     onComplete,
     onHide
 }: EntitySaveDialogProps<Experience>) => {
-    
+
     const [localExperience, setLocalExperience] = useState<Experience>({ ...item });
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [positions, setPositions] = useState<Position[]>([]);
@@ -78,8 +78,11 @@ const SaveExperienceDialog = ({
             const method = localExperience._id ? ExperienceApi.update : ExperienceApi.create;
             const saved = await method(localExperience);
 
-            toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Experience record saved' });
-            onComplete?.(saved);
+            //toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Experience record saved' });
+            onComplete?.({
+                ...saved, organization: localExperience.organization,
+                position: localExperience.position
+            });
         } catch (err: any) {
             toast.current?.show({ severity: 'error', summary: 'Error', detail: err.message });
         } finally {

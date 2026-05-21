@@ -88,9 +88,11 @@ export class GrantStageRepository implements IGrantStageRepository {
             updateData.name = dtoData.name;
         }
 
+        /*
         if (dtoData.order !== undefined) {
             updateData.order = dtoData.order;
         }
+            */
 
         if (dtoData.minReviewers !== undefined) {
             updateData.minReviewers = dtoData.minReviewers;

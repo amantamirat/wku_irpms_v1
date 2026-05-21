@@ -23,7 +23,7 @@ export class ExperienceRepository implements IExperienceRepository {
         const query: any = {};
 
         if (filters.user) {
-            query.applicant = new mongoose.Types.ObjectId(filters.user);
+            query.user = new mongoose.Types.ObjectId(filters.user);
         }
 
         if (filters.organization) {

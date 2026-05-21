@@ -19,13 +19,8 @@ export interface UpdateStageDTO {
     id: string;
     data: Partial<{
         name: string;
-        order: number;
-        evaluation: string;
         minReviewers: number;
         maxReviewers: number;
-
-        // NEW
-        //decisionMode: DecisionMode;
         minAcceptanceScore: number;
     }>;
 }

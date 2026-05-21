@@ -5,6 +5,7 @@ import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { successResponse, errorResponse } from "../../../common/helpers/response";
 import { AuthenticatedRequest } from "../../auth/auth.middleware";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
+import { AllocationStatus } from "./grant.allocation.model";
 
 
 export class GrantAllocationController {
@@ -34,11 +35,12 @@ export class GrantAllocationController {
      */
     get = async (req: Request, res: Response) => {
         try {
-            const { grant, calendar, populate } = req.query;
+            const { grant, calendar, status, populate } = req.query;
 
             const options: GetGrantAllocationsDTO = {
                 ...(grant && { grant: String(grant) }),
                 ...(calendar && { calendar: String(calendar) }),
+                ...(status && { status: status as AllocationStatus }),
                 ...(populate !== undefined && { populate: populate === "true" }),
             };
 
@@ -66,11 +68,11 @@ export class GrantAllocationController {
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.params;
-            const { totalBudget } = req.body;
+            const { allocatedAmount } = req.body;
 
             const dto: UpdateGrantAllocationDTO = {
                 id: String(id),
-                data: { totalBudget },
+                data: { allocatedAmount },
             };
 
             const updated = await this.service.update(dto);

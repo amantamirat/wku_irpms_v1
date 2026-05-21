@@ -10,7 +10,8 @@ export const ExperienceApi: EntityApi<Experience, GetExperiencesOptions | undefi
         const query = new URLSearchParams();
         if (options) {
             const sanitized = sanitizeExperience(options);
-            if (sanitized.user) query.append("user", sanitized.user as string);
+            if (sanitized.user)
+                query.append("user", sanitized.user as string);
         }
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Experience[];

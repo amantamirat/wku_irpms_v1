@@ -26,9 +26,9 @@ export class EnrollmentController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { user } = req.query;
+            const { student } = req.query;
             const students = await this.service.get({
-                student: user ? user as string : undefined
+                student: student ? student as string : undefined
             });
             successResponse(res, 200, 'Enrollments fetched successfully', students);
         } catch (err: any) {

@@ -31,7 +31,7 @@ export class ThematicService {
         }
     }
 
-    async getThematics(options: GetThematicsDTO) {
+    async getAll(options: GetThematicsDTO) {
         return await this.repository.find(options);
     }
 

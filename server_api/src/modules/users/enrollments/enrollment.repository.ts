@@ -86,7 +86,7 @@ export class EnrollmentRepository implements IEnrollmentRepository {
         }
 
         if (filters.student) {
-            query.applicant = new mongoose.Types.ObjectId(filters.student);
+            query.student = new mongoose.Types.ObjectId(filters.student);
         }
 
         if (filters.program) {

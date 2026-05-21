@@ -11,7 +11,7 @@ interface ExperienceManagerProps {
     user?: User;
 }
 
-const ExperienceManager = ({ user: user }: ExperienceManagerProps) => {
+const ExperienceManager = ({ user }: ExperienceManagerProps) => {
     /**
      * Initialize the Entity Manager for Experiences.
      * The manager handles the CRUD lifecycle, permissions, and dialog state.
@@ -20,7 +20,6 @@ const ExperienceManager = ({ user: user }: ExperienceManagerProps) => {
         title: user ? `Experiences for ${user.name}` : "Manage Experiences",
         itemName: "Experience",
         api: ExperienceApi,
-
         /** Table Columns configuration */
         columns: [
             { header: "Organization", field: "organization.name" }, // assumes organization populated
@@ -40,9 +39,9 @@ const ExperienceManager = ({ user: user }: ExperienceManagerProps) => {
         /** Integration with the Save Dialog and Permission system */
         SaveDialog: SaveExperience,
         permissionPrefix: "experience",
-        query() {
-            user
-        },
+        query: () => ({
+            user: user,
+        }),
     });
 
     /**

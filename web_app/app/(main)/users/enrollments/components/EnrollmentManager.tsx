@@ -62,6 +62,10 @@ const EnrollmentManager = ({ student: student }: EnrollmentManagerProps) => {
             program: undefined
         }),
 
+        query: () => ({
+            student: student,
+        }),
+
         /** Dialog and Permissions */
         SaveDialog: SaveEnrollmentDialog,
         permissionPrefix: "enrollment",

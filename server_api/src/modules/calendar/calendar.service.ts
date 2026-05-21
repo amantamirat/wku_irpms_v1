@@ -5,13 +5,16 @@ import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { IGrantAllocationRepository } from "../grants/allocations/grant.allocation.repository";
 import { CreateCalendarDTO, GetCalendarDTO, UpdateCalendarDTO } from "./calendar.dto";
 import { CalendarRepository } from "./calendar.repository";
-import { CALENDAR_TRANSITIONS, CalendarStatus } from "./calendar.state-machine";
+import { CalendarStatus } from "./calendar.model";
+import { IEnrollmentRepository } from "../users/enrollments/enrollment.repository";
 
 
 export class CalendarService {
 
-    constructor(private readonly repository: CalendarRepository,
+    constructor(
+        private readonly repository: CalendarRepository,
         private readonly allocationRepo: IGrantAllocationRepository,
+        private readonly enrollmentRepo: IEnrollmentRepository,
     ) {
     }
 
@@ -73,7 +76,15 @@ export class CalendarService {
 
         if (next === CalendarStatus.planned) {
             if (await this.allocationRepo.exists({ calendar: id })) {
-                throw new AppError(ERROR_CODES.CALL_ALREADY_EXISTS);
+                throw new AppError(ERROR_CODES.CALENDAR_IN_USE,
+                    'This fiscal calendar is already being used by grant allocations.'
+                );
+            }
+            if (await this.enrollmentRepo.exists({ calendar: id })) {
+                throw new AppError(
+                    ERROR_CODES.CALENDAR_IN_USE,
+                    'This academic calendar is already being used by student enrollments.'
+                );
             }
         }
 
@@ -91,3 +102,9 @@ export class CalendarService {
         return await this.repository.delete(id);
     }
 }
+export const CALENDAR_TRANSITIONS: Record<CalendarStatus, CalendarStatus[]> = {
+    [CalendarStatus.planned]: [CalendarStatus.active],
+    [CalendarStatus.active]: [CalendarStatus.closed, CalendarStatus.planned],
+    [CalendarStatus.closed]: [CalendarStatus.active]
+};
+

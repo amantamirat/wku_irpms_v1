@@ -19,6 +19,13 @@ export class ThemeService {
         private readonly settingService: SettingService
     ) { }
 
+    async validateThematic(thematicId: string) {
+        const thematicDoc = await this.thematicRepo.findById(thematicId);
+        if (!thematicDoc) throw new Error(ERROR_CODES.THEMATIC_NOT_FOUND);
+        if (thematicDoc.status !== ThematicStatus.draft) throw new Error(ERROR_CODES.THEMATIC_NOT_DRAFT);
+        return thematicDoc;
+    }
+
     async create(dto: CreateThemeDTO) {
         const { parent } = dto;
         dto.level = 0;
@@ -28,9 +35,7 @@ export class ThemeService {
             dto.level = parentDoc.level + 1;
             dto.thematicArea = String(parentDoc.thematicArea);
         }
-        const thematicDoc = await this.thematicRepo.findById(dto.thematicArea);
-        if (!thematicDoc) throw new Error(ERROR_CODES.THEMATIC_NOT_FOUND);
-        if (thematicDoc.status !== ThematicStatus.draft) throw new Error(ERROR_CODES.THEMATIC_NOT_DRAFT);
+        const thematicDoc = await this.validateThematic(dto.thematicArea);
         const levelIndex = themeLevelIndex[thematicDoc.level];
         if (levelIndex < dto.level) {
             throw new Error(ERROR_CODES.INVALID_THEME_LEVEL);
@@ -51,9 +56,11 @@ export class ThemeService {
 
     async update(dto: UpdateThemeDTO) {
         const { id, data } = dto;
+        const themeDoc = await this.repository.findById(id);
+        if (!themeDoc) throw new Error(ERROR_CODES.THEME_NOT_FOUND);
+        await this.validateThematic(String(themeDoc.thematicArea));
         try {
             const themeDoc = await this.repository.update(id, data);
-            if (!themeDoc) throw new Error(ERROR_CODES.THEME_NOT_FOUND);
             return themeDoc;
         } catch (err: any) {
             if (err?.code === 11000) {
@@ -65,17 +72,18 @@ export class ThemeService {
 
     async delete(dto: DeleteDto) {
         const { id } = dto;
-
         const themeDoc = await this.repository.findById(id);
         if (!themeDoc) throw new AppError(ERROR_CODES.THEME_NOT_FOUND);
-
-        const thematicDoc = await this.thematicRepo.findById(String(themeDoc.thematicArea));
-        if (!thematicDoc) throw new AppError(ERROR_CODES.THEMATIC_NOT_FOUND);
-
-        if (thematicDoc.status !== ThematicStatus.draft) throw new AppError(ERROR_CODES.THEMATIC_NOT_DRAFT);
-
+        await this.validateThematic(String(themeDoc.thematicArea));
+        const exists = await this.repository.exists({ parent: id });
+        if (exists) {
+            throw new AppError(
+                ERROR_CODES.THEME_IN_USE,
+                `Cannot delete "${themeDoc.title}" because it contains child themes.`
+            );
+        }
         const deleted = await this.repository.delete(id);
-        if (deleted) await this.repository.deleteMany({ theme: id });
+        //if (deleted) await this.repository.deleteMany({ theme: id });
         return deleted;
     }
 
@@ -121,12 +129,8 @@ export class ThemeService {
     }
 
     async importThemes(thematicId: string, data: IThemeImportDTO[]) {
-        const thematic = await this.thematicRepo.findById(thematicId);
-        if (!thematic) throw new Error(ERROR_CODES.THEMATIC_NOT_FOUND);
-        if (thematic.status !== ThematicStatus.draft) throw new Error(ERROR_CODES.THEMATIC_NOT_DRAFT);
-
+        const thematic = await this.validateThematic(thematicId);        
         const maxLevel = themeLevelIndex[thematic.level];
-
         // Start a Database Session
         const session = await mongoose.startSession();
         session.startTransaction();

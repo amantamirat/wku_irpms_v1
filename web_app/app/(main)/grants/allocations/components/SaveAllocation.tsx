@@ -12,11 +12,12 @@ import { classNames } from 'primereact/utils';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
 import { Grant } from '../../models/grant.model';
 import { GrantApi } from '../../api/grant.api';
-import { Calendar } from '@/app/(main)/calendars/models/calendar.model';
+import { Calendar, CalendarStatus } from '@/app/(main)/calendars/models/calendar.model';
 import { CalendarApi } from '@/app/(main)/calendars/api/calendar.api';
 
 import { GrantAllocation, validateGrantAllocation, sanitizeGrantAllocation } from '../models/grant.allocation.model';
 import { GrantAllocationApi } from '../api/grant.allocation.api';
+import { GrantStatus } from '../../models/grant.state-machine';
 
 const SaveAllocation = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<GrantAllocation>) => {
     const toast = useRef<Toast>(null);
@@ -32,13 +33,13 @@ const SaveAllocation = ({ visible, item, onComplete, onHide }: EntitySaveDialogP
     // Load Grants if not passed in via props
     useEffect(() => {
         if (isGrantPredefined || !visible) return;
-        GrantApi.getAll().then(setGrants).catch(console.error);
+        GrantApi.getAll({ status: GrantStatus.active }).then(setGrants).catch(console.error);
     }, [isGrantPredefined, visible]);
 
     // Load Calendars if not passed in via props
     useEffect(() => {
         if (isCalendarPredefined || !visible) return;
-        CalendarApi.getAll().then(setCalendars).catch(console.error);
+        CalendarApi.getAll({ status: CalendarStatus.active }).then(setCalendars).catch(console.error);
     }, [isCalendarPredefined, visible]);
 
     useEffect(() => {
@@ -154,13 +155,13 @@ const SaveAllocation = ({ visible, item, onComplete, onHide }: EntitySaveDialogP
                     <label htmlFor="totalBudget" className="font-bold">Allocated Amount</label>
                     <InputNumber
                         id="totalBudget"
-                        value={localAllocation.totalBudget}
-                        onValueChange={(e) => setLocalAllocation({ ...localAllocation, totalBudget: e.value || 0 })}
+                        value={localAllocation.allocatedAmount}
+                        onValueChange={(e) => setLocalAllocation({ ...localAllocation, allocatedAmount: e.value || 0 })}
                         mode="currency"
-                        currency="ETB" 
+                        currency="ETB"
                         locale="en-US"
                         min={0}
-                        className={classNames({ 'p-invalid': submitted && localAllocation.totalBudget <= 0 })}
+                        className={classNames({ 'p-invalid': submitted && localAllocation.allocatedAmount <= 0 })}
                     />
                     {localAllocation._id && (
                         <small className="text-secondary block mt-1">

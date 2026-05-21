@@ -16,7 +16,7 @@ import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { ICallRepository } from "../calls/call.repository";
 import { CallStatus } from "../calls/call.status";
 import { IGrantAllocationRepository } from "../grants/allocations/grant.allocation.repository";
-import { AllocationStatus } from "../grants/allocations/grant.allocation.model";
+import { AllocationStatus, IGrantAllocation } from "../grants/allocations/grant.allocation.model";
 import { ConstraintValidator } from "../grants/constraints/constraint.validator";
 import { CollaboratorStatus } from "./collaborators/collaborator.model";
 import { ICollaboratorRepository } from "./collaborators/collaborator.repository";
@@ -35,7 +35,7 @@ import { NotificationService } from "../notifications/notification.service";
 export class ProjectService {
 
     constructor(
-        private readonly projRepo: IProjectRepository,
+        private readonly projectRepo: IProjectRepository,
         private readonly projAuth: ProjectAuth,
         private readonly allocRepo: IGrantAllocationRepository,
         private readonly callRepo: ICallRepository,
@@ -61,14 +61,14 @@ export class ProjectService {
     async create(dto: CreateProjectDTO, options?: { skipValidation?: boolean }, session?: ClientSession) {
         const { grantAllocation, title, summary, themes, applicant } = dto
         if (!options?.skipValidation) {
-            const grantAllocDoc = await this.allocRepo.findById(grantAllocation);
-            if (!grantAllocDoc) throw new Error(ERROR_CODES.ALLOCATION_NOT_FOUND);
-            if (grantAllocDoc.status !== AllocationStatus.active) throw new Error(ERROR_CODES.ALLOCATION_NOT_ACTIVE);
-            const grantId = String(grantAllocDoc.grant);
+            const allocDoc = await this.allocRepo.findById(grantAllocation);
+            if (!allocDoc) throw new Error(ERROR_CODES.ALLOCATION_NOT_FOUND);
+            if (allocDoc.status !== AllocationStatus.active) throw new Error(ERROR_CODES.ALLOCATION_NOT_ACTIVE);
+            const grantId = String(allocDoc.grant);
             await this.validator.validateMetadata(grantId, title, summary);
             await this.validator.validateThemes(grantId, themes);
         }
-        const created = await this.projRepo.create(dto, session);
+        const created = await this.projectRepo.create(dto, session);
         if (created) {
             await this.collabService.create({
                 project: String(created._id),
@@ -160,11 +160,11 @@ export class ProjectService {
 
 
     async getProjects(options: GetProjectsDTO) {
-        return this.projRepo.find(options);
+        return this.projectRepo.find(options);
     }
 
     async getById(id: string) {
-        const proj = await this.projRepo.findById(id);
+        const proj = await this.projectRepo.findById(id);
         if (!proj) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
         return proj;
     }
@@ -174,15 +174,48 @@ export class ProjectService {
     // ---------------------------------------------------
     async update(dto: UpdateProjectDTO) {
         const { id, data, applicantId } = dto;
-        await this.validateProject(id, applicantId);
-        return this.projRepo.update(id, data);
+
+        const projectDoc = await this.validateProject(id, applicantId);
+
+        const allocDoc = projectDoc.grantAllocation as unknown as IGrantAllocation;
+        const grantId = String(allocDoc.grant);
+
+        // Resolve next values
+        const nextTitle = data.title ?? projectDoc.title;
+        const nextSummary = data.summary ?? projectDoc.summary;
+
+        // Validate metadata only if changed
+        if (
+            nextTitle !== projectDoc.title ||
+            nextSummary !== projectDoc.summary
+        ) {
+            await this.validator.validateMetadata(
+                grantId,
+                nextTitle,
+                nextSummary
+            );
+        }
+
+        const nextThemes = data.themes ?? projectDoc.themes.map(String);
+
+        const themesChanged =
+            JSON.stringify(projectDoc.themes.map(String).sort()) !==
+            JSON.stringify(nextThemes.map(String).sort());
+
+        if (themesChanged) {
+            await this.validator.validateThemes(
+                grantId,
+                nextThemes
+            );
+        }
+        return this.projectRepo.update(id, data);
     }
 
 
     async transitionState(dto: TransitionRequestDto) {
         const { id, current, next } = dto;
 
-        const projectDoc = await this.projRepo.findById(id);
+        const projectDoc = await this.projectRepo.findById(id);
         if (!projectDoc) {
             throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
         }
@@ -245,7 +278,7 @@ export class ProjectService {
             );
         }
 
-        return await this.projRepo.updateStatus(id, to);
+        return await this.projectRepo.updateStatus(id, to);
     }
 
 
@@ -257,6 +290,6 @@ export class ProjectService {
         await this.validateProject(id, applicantId ?? '');
         await this.collabRepo.deleteByProject(id);
         await this.phaseRepo.deleteByProject(id);
-        return this.projRepo.delete(id);
+        return this.projectRepo.delete(id);
     }
 }

@@ -1,8 +1,12 @@
 import { Document } from 'mongoose';
 import mongoose, { Schema } from 'mongoose';
 import { COLLECTIONS } from '../../common/constants/collections.enum';
-import { CalendarStatus } from './calendar.state-machine';
 
+export enum CalendarStatus {
+  planned = 'planned',
+  active = 'active',
+  closed = 'closed'
+}
 
 export interface ICalendar extends Document {
   year: number;
@@ -40,3 +44,4 @@ const CalendarSchema = new Schema<ICalendar>({
 });
 
 export const Calendar = mongoose.model<ICalendar>(COLLECTIONS.CALENDAR, CalendarSchema);
+

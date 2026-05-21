@@ -69,7 +69,7 @@ export class GrantAllocationRepository implements IGrantAllocationRepository {
             grant: new mongoose.Types.ObjectId(dto.grant),
             calendar: new mongoose.Types.ObjectId(dto.calendar),
 
-            totalBudget: dto.totalBudget,
+            allocatedAmount: dto.allocatedAmount,
 
             reservedBudget: 0,
             usedBudget: 0
@@ -82,8 +82,8 @@ export class GrantAllocationRepository implements IGrantAllocationRepository {
 
         const updateData: Partial<IGrantAllocation> = {};
 
-        if (dtoData.totalBudget !== undefined)
-            updateData.totalBudget = dtoData.totalBudget;
+        if (dtoData.allocatedAmount !== undefined)
+            updateData.allocatedAmount = dtoData.allocatedAmount;
 
         return GrantAllocation.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
@@ -141,7 +141,7 @@ export class GrantAllocationRepository implements IGrantAllocationRepository {
                     $gte: [
                         {
                             $subtract: [
-                                "$totalBudget",
+                                "$allocatedAmount",
                                 { $ifNull: ["$reservedBudget", 0] }
                             ]
                         },

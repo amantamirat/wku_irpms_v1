@@ -8,7 +8,7 @@ import {
   UpdateCalendarDTO,
 } from './calendar.dto';
 import { CalendarService } from './calendar.service';
-import { CalendarStatus } from './calendar.state-machine';
+import { CalendarStatus } from "./calendar.model";
 
 
 export class CalendarController {

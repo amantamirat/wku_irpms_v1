@@ -43,7 +43,7 @@ const PublicationManager = ({ author }: PublicationManagerProps) => {
                 field: "publisher",
                 sortable: true
             },
-            // Dynamic column: Hide Author name if we are viewing a specific applicant's list
+            // Dynamic column: Hide Author name if we are viewing a specific author's list
             ...(!author ? [{
                 header: "Author",
                 field: "author.name",

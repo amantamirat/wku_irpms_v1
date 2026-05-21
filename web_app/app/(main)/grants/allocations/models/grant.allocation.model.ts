@@ -7,7 +7,7 @@ export type GrantAllocation = {
     _id?: string;
     grant: string | Grant;
     calendar: string | Calendar;
-    totalBudget: number;
+    allocatedAmount: number;
     reservedBudget?:number;
     usedBudget?: number;
     status?: AllocationStatus;
@@ -34,7 +34,7 @@ export const validateGrantAllocation = (allocation: GrantAllocation): { valid: b
         return { valid: false, message: "Calendar reference is required." };
     }
 
-    if (allocation.totalBudget === undefined || allocation.totalBudget < 0) {
+    if (allocation.allocatedAmount === undefined || allocation.allocatedAmount < 0) {
         return { valid: false, message: "Total budget must be a non-negative number." };
     }
 
@@ -62,6 +62,6 @@ export const sanitizeGrantAllocation = (allocation: Partial<GrantAllocation>): P
 export const createEmptyGrantAllocation = (allocation?: Partial<GrantAllocation>): GrantAllocation => ({
     grant: allocation?.grant ?? "",
     calendar: allocation?.calendar ?? "",
-    totalBudget: 0,
+    allocatedAmount: 0,
     usedBudget: 0
 });

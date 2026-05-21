@@ -111,14 +111,14 @@ export class ConstraintValidator {
         }
     }
 
-    async validatePhaseCount(grant: string, phases: any[]) {
+    async validatePhaseCount(grant: string, phases: any[], options?: { skipMin?: boolean; skipMax?: boolean }) {
         const constraints = await this.getConstraints(grant, [
             ConstraintType.PHASE_COUNT
         ]);
         for (const c of constraints) {
             switch (c.constraint) {
                 case ConstraintType.PHASE_COUNT:
-                    this.validateRange(phases.length, c, "Phase count");
+                    this.validateRange(phases.length, c, "Phase count", options);
                     break;
             }
         }
@@ -128,7 +128,7 @@ export class ConstraintValidator {
      * Validates the project's cumulative totals and counts.
      * Use in: Final submission or ProjectService.apply
      */
-    async validateProjectTotals(grant: string, phases: any[]) {
+    async validateProjectTotals(grant: string, phases: any[], options?: { skipMin?: boolean; skipMax?: boolean }) {
         const constraints = await this.getConstraints(grant, [
             ConstraintType.BUDGET_TOTAL,
             ConstraintType.TIME_TOTAL,
@@ -140,17 +140,14 @@ export class ConstraintValidator {
         for (const c of constraints) {
             switch (c.constraint) {
                 case ConstraintType.BUDGET_TOTAL:
-                    this.validateRange(totalBudget, c, "Total project budget");
+                    this.validateRange(totalBudget, c, "Total project budget", options);
                     break;
                 case ConstraintType.TIME_TOTAL:
-                    this.validateRange(totalDuration, c, "Total project duration");
+                    this.validateRange(totalDuration, c, "Total project duration", options);
                     break;
             }
         }
     }
-
-
-
     /**
      * Validates everything related to phases: Count, Total Budget/Time, and Individual Phase limits.
      * Use in: PhaseService.create, PhaseService.update, PhaseService.delete

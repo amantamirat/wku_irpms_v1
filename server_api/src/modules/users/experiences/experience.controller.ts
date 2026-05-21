@@ -39,7 +39,7 @@ export class ExperienceController {
     // --- Get Experiences ---
     get = async (req: Request, res: Response) => {
         try {
-            const { user } = req.query;
+            const { user, organization } = req.query;
 
             const filter: GetExperiencesDTO = {
                 user: user ? user as string : undefined

@@ -126,7 +126,7 @@ export const OpenCallCard = ({ call }: CallCardProps) => {
                                 style: 'currency',
                                 currency: 'ETB',
                                 maximumFractionDigits: 0
-                            }).format(allocation?.totalBudget || 0)}
+                            }).format(allocation?.allocatedAmount || 0)}
                         </span>
                     </div>
 

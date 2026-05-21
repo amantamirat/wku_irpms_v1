@@ -1,0 +1,164 @@
+[
+  {
+    "title": "Alignment with Strategic Goals",
+    "weight": 15,
+    "formType": "Single",
+    "options": [
+      {
+        "title": "Highly Aligned",
+        "score": 15
+      },
+      {
+        "title": "Moderately Aligned",
+        "score": 10
+      },
+      {
+        "title": "Weak Alignment",
+        "score": 5
+      }
+    ]
+  },
+  {
+    "title": "Research Problem Significance",
+    "weight": 10,
+    "formType": "Single",
+    "options": [
+      {
+        "title": "Highly Significant and Relevant",
+        "score": 10
+      },
+      {
+        "title": "Moderately Significant",
+        "score": 7
+      },
+      {
+        "title": "Low Significance",
+        "score": 3
+      }
+    ]
+  },
+  {
+    "title": "Innovation and Originality",
+    "weight": 15,
+    "formType": "Single",
+    "options": [
+      {
+        "title": "Highly Innovative",
+        "score": 15
+      },
+      {
+        "title": "Moderately Innovative",
+        "score": 10
+      },
+      {
+        "title": "Limited Innovation",
+        "score": 5
+      }
+    ]
+  },
+  {
+    "title": "Methodological Rigor",
+    "weight": 20,
+    "formType": "Single",
+    "options": [
+      {
+        "title": "Excellent Methodology",
+        "score": 20
+      },
+      {
+        "title": "Good with Minor Issues",
+        "score": 15
+      },
+      {
+        "title": "Weak Methodology",
+        "score": 5
+      }
+    ]
+  },
+  {
+    "title": "Feasibility and Work Plan",
+    "weight": 10,
+    "formType": "Single",
+    "options": [
+      {
+        "title": "Highly Feasible",
+        "score": 10
+      },
+      {
+        "title": "Moderately Feasible",
+        "score": 7
+      },
+      {
+        "title": "Unclear or Unrealistic",
+        "score": 3
+      }
+    ]
+  },
+  {
+    "title": "Investigator Experience and Capacity",
+    "weight": 10,
+    "formType": "Single",
+    "options": [
+      {
+        "title": "Highly Qualified Team",
+        "score": 10
+      },
+      {
+        "title": "Adequately Qualified",
+        "score": 7
+      },
+      {
+        "title": "Insufficient Experience",
+        "score": 3
+      }
+    ]
+  },
+  {
+    "title": "Budget Justification",
+    "weight": 10,
+    "formType": "Single",
+    "options": [
+      {
+        "title": "Well Justified and Realistic",
+        "score": 10
+      },
+      {
+        "title": "Mostly Reasonable",
+        "score": 7
+      },
+      {
+        "title": "Poorly Justified",
+        "score": 3
+      }
+    ]
+  },
+  {
+    "title": "Compliance Checklist",
+    "weight": 10,
+    "formType": "Multi",
+    "options": [
+      {
+        "title": "Ethics Clearance Attached",
+        "score": 3
+      },
+      {
+        "title": "Data Management Plan Included",
+        "score": 2
+      },
+      {
+        "title": "Timeline Provided",
+        "score": 2
+      },
+      {
+        "title": "Budget Breakdown Attached",
+        "score": 3
+      }
+    ]
+  },
+  {
+    "title": "Reviewer Comments and Recommendations",
+    "weight": 0,
+    "formType": "Open",
+    "isRequired": false
+  }
+]

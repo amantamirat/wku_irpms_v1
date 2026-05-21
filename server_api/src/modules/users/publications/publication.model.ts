@@ -1,6 +1,11 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
 
+export enum Status {
+    draft = 'draft',
+    approved = 'approved'
+}
+
 export enum PublicationType {
     JournalArticle = "Journal Article",
     ConferencePaper = "Conference Paper",

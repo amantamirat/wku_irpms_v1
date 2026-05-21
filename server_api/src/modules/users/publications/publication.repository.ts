@@ -29,7 +29,7 @@ export class PublicationRepository implements IPublicationRepository {
 
         // Filter by applicant if provided
         if (filters.author) {
-            query.applicant = new mongoose.Types.ObjectId(filters.author);
+            query.author = new mongoose.Types.ObjectId(filters.author);
         }
 
         // Filter by type if provided

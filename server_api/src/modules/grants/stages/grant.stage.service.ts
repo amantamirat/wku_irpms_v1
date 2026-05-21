@@ -18,6 +18,14 @@ export class GrantStageService {
     ) {
 
     }
+
+    async validateGrant(grantId: string) {
+        const grantDoc = await this.grantRepository.findById(grantId);
+        if (!grantDoc) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
+        if (grantDoc.status !== GrantStatus.planned)
+            throw new AppError(ERROR_CODES.GRANT_NOT_PLANNED);
+        return grantDoc;
+    }
     /**
      * Create a new stage
      */
@@ -37,11 +45,7 @@ export class GrantStageService {
         }
 
         // 2. Grant validation
-        const grantDoc = await this.grantRepository.findById(grant);
-        if (!grantDoc) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
-        if (grantDoc.status !== GrantStatus.planned) {
-            throw new AppError(ERROR_CODES.GRANT_NOT_PLANNED);
-        }
+        const grantDoc = await this.validateGrant(grant);
 
         // 3. Evaluation validation
         const evalDoc = await this.evalRepository.findById(evaluation);
@@ -49,7 +53,6 @@ export class GrantStageService {
         if (evalDoc.status !== EvalStatus.published) throw new AppError(ERROR_CODES.EVALUATION_NOT_PUBLISHED);
 
         const totalWeight = evalDoc.weight;
-
         // 4. NEW: MinAcceptance logic validation
 
         if (minAcceptanceScore > totalWeight) {
@@ -91,8 +94,55 @@ export class GrantStageService {
      */
     async update(dto: UpdateStageDTO) {
         const { id, data } = dto;
-        const stage = await this.repository.findById(id);
-        if (!stage) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+
+        // 1. Existing stage validation
+        const stageDoc = await this.repository.findById(id);
+        if (!stageDoc) {
+            throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        }
+
+        // 2. Merge existing + incoming values
+        const minReviewers =
+            data.minReviewers ?? stageDoc.minReviewers;
+
+        const maxReviewers =
+            data.maxReviewers ?? stageDoc.maxReviewers;
+
+        const minAcceptanceScore =
+            data.minAcceptanceScore ?? stageDoc.minAcceptanceScore;
+
+        // 3. Reviewer validation
+        if (minReviewers > maxReviewers) {
+            throw new AppError(ERROR_CODES.INVALID_REVIEWER_RANGE);
+        }
+
+        // 4. Evaluation validation
+        const evalDoc = await this.evalRepository.findById(
+            stageDoc.evaluation.toString()
+        );
+
+        if (!evalDoc) {
+            throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
+        }
+
+        // 5. Minimum score validation
+        if (minAcceptanceScore > evalDoc.weight) {
+            throw new AppError(
+                ERROR_CODES.MIN_SCORE_EXCEEDS_EVALUATION_WEIGHT
+            );
+        }
+
+        // Optional:
+        // prevent negative values
+        if (
+            minReviewers < 0 ||
+            maxReviewers < 0 ||
+            minAcceptanceScore < 0
+        ) {
+            throw new AppError(ERROR_CODES.INVALID_STAGE_CONFIGURATION);
+        }
+
+        // 6. Update
         return await this.repository.update(id, data);
     }
 
@@ -102,15 +152,11 @@ export class GrantStageService {
     async delete(id: string) {
         const stageDoc = await this.repository.findById(id);
         if (!stageDoc) throw new Error(ERROR_CODES.STAGE_NOT_FOUND);
-
         const { grant, order } = stageDoc;
-
-        const grantDoc = await this.grantRepository.findById(String(grant));
-        if (!grantDoc) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
-        if (grantDoc.status !== GrantStatus.planned) throw new AppError(ERROR_CODES.GRANT_NOT_PLANNED);
-
+        await this.validateGrant(String(grant));
+        //check the project        
         const deleted = await this.repository.delete(id);
-        // Re-arrange orders of remaining stages
+        // Re-arrange orders of remaining selection stages
         if (deleted) {
             await this.repository.updateMany(
                 {

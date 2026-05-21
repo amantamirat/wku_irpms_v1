@@ -11,6 +11,7 @@ export interface CreateCallDTO {
     organization?: string;
     title: string;
     description?: string;
+    budget: number;
     status?: CallStatus;
     userId?: string;
 }
@@ -21,6 +22,7 @@ export interface UpdateCallDTO {
     data: Partial<{
         title: string;
         description: string;
+        budget: number;
     }>;
     userId?: string;
 }

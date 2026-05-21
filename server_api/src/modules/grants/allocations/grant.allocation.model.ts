@@ -11,7 +11,7 @@ export interface IGrantAllocation extends Document {
     _id: string;
     grant: mongoose.Types.ObjectId;
     calendar: mongoose.Types.ObjectId;
-    totalBudget: number;   // total budget for this grant in this calendar    
+    allocatedAmount: number;   // allocated budget from this grant for this calendar    
     reservedBudget?: number; // committed to granted projects
     // optional but VERY useful for performance
     usedBudget?: number;   // cached used amount (updated via logic)
@@ -33,7 +33,7 @@ const GrantAllocationSchema = new Schema<IGrantAllocation>({
         required: true,
         immutable: true,
     },
-    totalBudget: {
+    allocatedAmount: {
         type: Number,
         required: true,
         min: 0,

@@ -12,7 +12,7 @@ import { GrantStatus } from "../grant.model";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AllocationStatus } from "./grant.allocation.model";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
-import { CalendarStatus } from "../../calendar/calendar.state-machine";
+import { CalendarStatus } from "../../calendar/calendar.model";
 import { ICallRepository } from "../../calls/call.repository";
 import { IProjectRepository } from "../../projects/project.repository";
 
@@ -23,7 +23,7 @@ export class GrantAllocationService {
         private readonly grantRepo: IGrantRepository,
         private readonly calendarRepo: ICalendarRepository,
         private readonly callRepo: ICallRepository,
-        private readonly projecrRepo: IProjectRepository,
+        private readonly projectRepo: IProjectRepository,
     ) { }
 
     /**
@@ -31,15 +31,16 @@ export class GrantAllocationService {
      */
 
     async create(dto: CreateGrantAllocationDTO) {
-        const { grant, calendar, totalBudget } = dto;
-
-        const grantDoc = await this.grantRepo.findById(grant);
-        if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
-        if (grantDoc.status !== GrantStatus.active) throw new AppError(ERROR_CODES.GRANT_NOT_ACTIVE);
+        const { grant, calendar, allocatedAmount } = dto;
 
         const calendarDoc = await this.calendarRepo.findById(dto.calendar);
         if (!calendarDoc) throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
         if (calendarDoc.status !== CalendarStatus.active) throw new AppError(ERROR_CODES.CALENDAR_NOT_ACTIVE);
+
+
+        const grantDoc = await this.grantRepo.findById(grant);
+        if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+        if (grantDoc.status !== GrantStatus.active) throw new AppError(ERROR_CODES.GRANT_NOT_ACTIVE);
 
 
         // 1. Unique constraint: One allocation per grant per calendar
@@ -47,12 +48,12 @@ export class GrantAllocationService {
         if (exists) throw new AppError(ERROR_CODES.ALLOCATION_ALREADY_EXISTS);
 
         // 2. Calculation: Sum existing allocations
-        const currentAllocations = await this.repository.find({ grant });
-        const totalAllocatedSoFar = currentAllocations.reduce((sum, a) => sum + (a.totalBudget || 0), 0);
+        const grantAllocations = await this.repository.find({ grant });
+        const totalAllocated = grantAllocations.reduce((sum, a) => sum + (a.allocatedAmount || 0), 0);
 
         // 3. Validation
-        if (totalAllocatedSoFar + totalBudget > grantDoc.amount) {
-            const remaining = grantDoc.amount - totalAllocatedSoFar;
+        if (totalAllocated + allocatedAmount > grantDoc.amount) {
+            const remaining = grantDoc.amount - totalAllocated;
             throw new AppError(
                 ERROR_CODES.ALLOCATION_EXCEEDS_GRANT_AMOUNT,
                 `Budget exceeds grant capacity. Max available: ${remaining}`
@@ -89,7 +90,7 @@ export class GrantAllocationService {
         if (!currentAllocation) throw new AppError(ERROR_CODES.ALLOCATION_NOT_FOUND);
 
         // 2. Budget Floor Check (Can't go below what's already spent)
-        if (data.totalBudget !== undefined && data.totalBudget < (currentAllocation.usedBudget || 0)) {
+        if (data.allocatedAmount !== undefined && data.allocatedAmount < (currentAllocation.usedBudget || 0)) {
             throw new AppError(
                 ERROR_CODES.INVALID_BUDGET_REDUCTION,
                 `Cannot reduce totalBudget below usedBudget of ${currentAllocation.usedBudget}.`
@@ -97,28 +98,28 @@ export class GrantAllocationService {
         }
 
         // 3. Grant Ceiling Check
-        if (data.totalBudget !== undefined && data.totalBudget !== currentAllocation.totalBudget) {
+        if (data.allocatedAmount !== undefined && data.allocatedAmount !== currentAllocation.allocatedAmount) {
 
             const grant = String(currentAllocation.grant);
             const grantDoc = await this.grantRepo.findById(grant);
             if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
 
             // Fetch ALL allocations for this grant (including the one we're updating)
-            const allAllocations = await this.repository.find({ grant });
+            const grantAllocations = await this.repository.find({ grant });
 
             // Calculate current total across the whole grant
-            const currentTotalSum = allAllocations.reduce((sum, a) => sum + (a.totalBudget || 0), 0);
+            const currentTotalSum = grantAllocations.reduce((sum, a) => sum + (a.allocatedAmount || 0), 0);
 
             /**
              * Projected total = current total - old allocation + new allocation
              */
-            const projectedTotal = currentTotalSum - currentAllocation.totalBudget + data.totalBudget;
+            const projectedTotal = currentTotalSum - currentAllocation.allocatedAmount + data.allocatedAmount;
 
             if (projectedTotal > grantDoc.amount) {
-                const remaining = grantDoc.amount - (currentTotalSum - currentAllocation.totalBudget);
+                const remaining = grantDoc.amount - (currentTotalSum - currentAllocation.allocatedAmount);
                 throw new AppError(
                     ERROR_CODES.ALLOCATION_EXCEEDS_GRANT_AMOUNT,
-                    `Cannot update allocation to ${data.totalBudget}. Only ${remaining} remaining for this grant.`
+                    `Cannot update allocation to ${data.allocatedAmount}. Only ${remaining} remaining for this grant.`
                 );
             }
         }
@@ -148,11 +149,18 @@ export class GrantAllocationService {
         );
 
         if (next === AllocationStatus.planned) {
+            //what about used
             if (await this.callRepo.exists({ grantAllocation: id })) {
-                throw new AppError(ERROR_CODES.CALL_ALREADY_EXISTS);
+                throw new AppError(
+                    ERROR_CODES.ALLOCATION_IN_USE,
+                    'This allocation cannot be set to planned because it is already linked to a call.'
+                );
             }
-            if (await this.projecrRepo.exists({ grantAllocation: id })) {
-                throw new AppError(ERROR_CODES.PROJECT_ALREADY_EXISTS);
+            if (await this.projectRepo.exists({ grantAllocation: id })) {
+                throw new AppError(
+                    ERROR_CODES.ALLOCATION_IN_USE,
+                    'This allocation cannot be set to planned because it is already linked to a research project.'
+                );
             }
         }
         if (next === GrantStatus.active) {
@@ -184,7 +192,7 @@ export class GrantAllocationService {
         const allocation = await this.repository.findById(allocationId);
         if (!allocation) throw new AppError(ERROR_CODES.ALLOCATION_NOT_FOUND);
 
-        const remaining = allocation.totalBudget - (allocation.usedBudget || 0);
+        const remaining = allocation.allocatedAmount - (allocation.usedBudget || 0);
         if (amount > remaining) throw new AppError(ERROR_CODES.BUDGET_EXCEEDED);
 
         return true;
