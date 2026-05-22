@@ -997,6 +997,16 @@
   },
   {
     "category": "Publication Management",
+    "name": "publication:transition.pending.verified",
+    "description": "Verify a pending publication and mark it as verified"
+  },
+  {
+    "category": "Publication Management",
+    "name": "publication:transition.verified.pending",
+    "description": "Revert a verified publication back to pending status for further review"
+  },
+  {
+    "category": "Publication Management",
     "name": "publication:delete",
     "description": "Delete publications"
   },

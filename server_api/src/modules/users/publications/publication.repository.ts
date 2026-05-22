@@ -5,7 +5,7 @@ import {
     GetPublicationsOptions,
     ExistsPublicationDTO
 } from "./publication.dto";
-import { IPublication, Publication } from "./publication.model";
+import { IPublication, Publication, PublicationStatus } from "./publication.model";
 
 
 export interface IPublicationRepository {
@@ -13,6 +13,7 @@ export interface IPublicationRepository {
     find(filters: GetPublicationsOptions): Promise<Partial<IPublication>[]>;
     create(data: CreatePublicationDTO): Promise<IPublication>;
     update(id: string, data: UpdatePublicationDTO["data"]): Promise<IPublication | null>;
+    updateStatus(id: string, newStatus: PublicationStatus): Promise<IPublication | null>;
     delete(id: string): Promise<IPublication | null>;
 }
 
@@ -84,6 +85,14 @@ export class PublicationRepository implements IPublicationRepository {
             { new: true }
         )
             .lean<IPublication>();
+    }
+
+    async updateStatus(id: string, newStatus: PublicationStatus) {
+        return Publication.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            { $set: { status: newStatus } },
+            { new: true }
+        ).exec();
     }
 
     async exists(filters: ExistsPublicationDTO): Promise<boolean> {

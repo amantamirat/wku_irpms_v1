@@ -18,21 +18,23 @@ const ProjectPage = () => {
     }, [projects]);
 
     return (
-        <div className="flex flex-column gap-4 p-4 bg-gray-50 min-h-screen">
+        // Changed bg-gray-50 to surface-ground to respect dark mode
+        <div className="flex flex-column gap-4 p-4 bg-surface-ground min-h-screen">
 
             {/* HEADER */}
             <div className="flex justify-content-between align-items-end">
                 <div>
-                    <h2 className="text-2xl font-bold text-900 m-0 line-height-2">
+                    {/* Changed text-900 to text-color */}
+                    <h2 className="text-2xl font-bold text-color m-0 line-height-2">
                         Project Dashboard
                     </h2>
-                    <p className="text-500 text-sm m-0">
+                    {/* Changed text-500 to text-color-secondary */}
+                    <p className="text-color-secondary text-sm m-0">
                         Overview and management of all submitted projects
                     </p>
                 </div>
             </div>
 
-            {/* SUMMARY CARDS - More compact and professional */}
             {/* SUMMARY CARDS - Compact & Professional */}
             {projects.length > 0 && (
                 <div className="flex flex-wrap gap-3">
@@ -44,15 +46,16 @@ const ProjectPage = () => {
 
                         return (
                             <div key={status} className="flex-1 min-w-min" style={{ maxWidth: '240px' }}>
-                                <div className="bg-white border-round-lg shadow-1 hover:shadow-2 transition-duration-200 border-left-3"
+                                {/* Changed border-round-lg to surface-card and proper border tokens */}
+                                <div className="surface-card border-round-lg shadow-1 hover:shadow-2 transition-duration-200 border-left-3 border-transparent"
                                     style={{ borderLeftColor: `var(--${config.color?.split('-')[1] || 'blue'}-500)` }}>
                                     <div className="p-3">
                                         <div className="flex align-items-center justify-content-between gap-4">
                                             <div>
-                                                <span className="block text-500 font-semibold text-xs uppercase tracking-wider mb-1">
+                                                <span className="block text-color-secondary font-semibold text-xs uppercase tracking-wider mb-1">
                                                     {status}
                                                 </span>
-                                                <div className="text-xl font-bold text-900">
+                                                <div className="text-xl font-bold text-color">
                                                     {count}
                                                 </div>
                                             </div>
@@ -69,12 +72,13 @@ const ProjectPage = () => {
             )}
 
             {/* TABLE SECTION */}
-            <div className="bg-white border-round-xl shadow-1 overflow-hidden">
+            {/* Changed classes to surface-card and surface-border */}
+            <div className="surface-card border-round-xl shadow-1 overflow-hidden border-1 surface-border">
                 {/* TABLE HEADER */}
                 <div className="px-4 py-3 border-bottom-1 surface-border flex justify-content-between align-items-center">
                     <div>
-                        <h3 className="text-lg font-bold text-900 m-0">Project List</h3>
-                        <span className="text-500 text-xs uppercase font-medium">Total: {projects.length} Items</span>
+                        <h3 className="text-lg font-bold text-color m-0">Project List</h3>
+                        <span className="text-color-secondary text-xs uppercase font-medium">Total: {projects.length} Items</span>
                     </div>
                 </div>
 
@@ -86,10 +90,10 @@ const ProjectPage = () => {
 
             {/* EMPTY STATE */}
             {projects.length === 0 && (
-                <div className="flex flex-column align-items-center justify-content-center py-8 bg-white border-round-xl border-1 surface-border border-dashed">
-                    <i className="pi pi-folder-open text-400 text-5xl mb-3"></i>
-                    <div className="text-900 font-medium text-xl mb-1">No projects found</div>
-                    <div className="text-500">Your project list is currently empty.</div>
+                <div className="flex flex-column align-items-center justify-content-center py-8 border-round-xl border-1 surface-border border-dashed surface-card">
+                    <i className="pi pi-folder-open text-color-secondary text-5xl mb-3"></i>
+                    <div className="text-color font-medium text-xl mb-1">No projects found</div>
+                    <div className="text-color-secondary">Your project list is currently empty.</div>
                 </div>
             )}
         </div>

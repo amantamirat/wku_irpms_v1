@@ -1,104 +1,123 @@
 import { Gender, Accessibility } from "@/app/(main)/users/models/user.model";
-import { Position } from "@/app/(main)/positions/models/position.model";
-import { PublicationType } from "@/app/(main)/users/publications/models/publication.model";
 import { AcademicLevel } from "@/app/(main)/organizations/models/organization.model";
-import { Specialization } from "@/app/(main)/specializations/models/specialization.model";
 import { Grant } from "../../models/grant.model";
 
 export enum OperationMode {
   COUNT = "COUNT",
-  PERCENTAGE = "PERCENTAGE"
+  RATIO = "RATIO" // Replaced PERCENTAGE to perfectly match your backend enum
 }
 
+export enum TargetScope {
+  PI_ONLY = "PI_ONLY",
+  CO_ONLY = "CO_ONLY",
+  ALL_MEMBERS = "ALL_MEMBERS",
+  TEAM_AGGREGATE = "TEAM_AGGREGATE"
+}
 
 export type Range = {
   min: number;
   max: number;
 };
 
-export type Composition = {
-  _id?: string;
-
-  grant?: string | Grant;
-
-  title?: string;
-
+export type ProfileRule = {
   gender?: Gender;
-
   age?: Range;
   experienceYears?: Range;
-
   accessibility?: Accessibility[];
-
-  maxSubmission?: number;
-  minCompletion?: number;
-
   academicLevels?: AcademicLevel[];
-
-  specializations?: string[] | Specialization[];
-
-  positions?: string[] | Position[];
-
-  publicationTypes?: PublicationType[];
-
-  programTypes?: AcademicLevel[];
-
-  isPI?: boolean;
-
-  opMode?: OperationMode;
-  minCount: number;
-
-  createdAt?: Date;
-  updatedAt?: Date;
 };
 
+export type ProjectHistoryRule = {
+  submission?: Range;
+  rejection?: Range;
+  completion?: Range;
+};
 
+export type Composition = {
+  _id?: string;
+  grant: string | Grant;
+  description: string;
+  targetScope: TargetScope;
+
+  profileRule?: ProfileRule;
+  projectHistoryRule?: ProjectHistoryRule;
+
+  mode?: OperationMode;
+  threshold?: Range;
+
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+};
+
+// --- Helper Validation Function for Ranges ---
+const isValidRange = (range: Range | undefined, fieldName: string): { valid: boolean; message?: string } => {
+  if (!range) return { valid: true };
+  const { min, max } = range;
+
+  if (min < 0 || max < 0) {
+    return { valid: false, message: `${fieldName} values cannot be negative.` };
+  }
+  if (min > max) {
+    return { valid: false, message: `Minimum ${fieldName.toLowerCase()} cannot be greater than maximum.` };
+  }
+  return { valid: true };
+};
 
 export const validateComposition = (
   composition: Composition
 ): { valid: boolean; message?: string } => {
 
-  if (!composition.title || composition.title.trim().length === 0) {
-    return { valid: false, message: "Title is required." };
+  if (!composition.description || composition.description.trim().length === 0) {
+    return { valid: false, message: "Description is required." };
   }
 
   if (!composition.grant) {
-    return { valid: false, message: "Grant is required." };
+    return { valid: false, message: "Grant reference is required." };
   }
 
-  if (!composition.minCount || composition.minCount < 1) {
-    return { valid: false, message: "Minimum count must be at least 1." };
+  if (!composition.targetScope) {
+    return { valid: false, message: "Target scope is required." };
   }
 
-  // 🔹 Validate age range
-  if (composition.age) {
-    const { min, max } = composition.age;
-
-    if (min < 0 || max < 0) {
-      return { valid: false, message: "Age cannot be negative." };
+  // 🔹 NEW: If target scope is TEAM_AGGREGATE, mode and threshold fields are explicitly required
+  if (composition.targetScope === TargetScope.TEAM_AGGREGATE) {
+    if (!composition.mode) {
+      return { valid: false, message: "Evaluation Mode is required when Target Scope is set to Team Aggregate." };
     }
-
-    if (min > max) {
-      return { valid: false, message: "Minimum age cannot be greater than maximum age." };
+    if (!composition.threshold) {
+      return { valid: false, message: "Threshold Range configuration is required for Team Aggregate rules." };
     }
   }
 
-  // 🔹 Validate experience range
-  if (composition.experienceYears) {
-    const { min, max } = composition.experienceYears;
+  // 🔹 Validate Threshold Range if Operation Mode is present
+  if (composition.mode && composition.threshold) {
+    const rangeCheck = isValidRange(composition.threshold, "Threshold");
+    if (!rangeCheck.valid) return rangeCheck;
+  }
 
-    if (min < 0 || max < 0) {
-      return { valid: false, message: "Experience years cannot be negative." };
-    }
+  // 🔹 Validate Profile Rule Ranges
+  if (composition.profileRule) {
+    const ageCheck = isValidRange(composition.profileRule.age, "Age");
+    if (!ageCheck.valid) return ageCheck;
 
-    if (min > max) {
-      return { valid: false, message: "Minimum experience cannot be greater than maximum experience." };
-    }
+    const expCheck = isValidRange(composition.profileRule.experienceYears, "Experience years");
+    if (!expCheck.valid) return expCheck;
+  }
+
+  // 🔹 Validate Project History Rule Ranges
+  if (composition.projectHistoryRule) {
+    const subCheck = isValidRange(composition.projectHistoryRule.submission, "Submission history");
+    if (!subCheck.valid) return subCheck;
+
+    const rejCheck = isValidRange(composition.projectHistoryRule.rejection, "Rejection history");
+    if (!rejCheck.valid) return rejCheck;
+
+    const compCheck = isValidRange(composition.projectHistoryRule.completion, "Completion history");
+    if (!compCheck.valid) return compCheck;
   }
 
   return { valid: true };
 };
-
 
 export function sanitizeComposition(
   composition: Partial<Composition>
@@ -106,31 +125,14 @@ export function sanitizeComposition(
   return {
     ...composition,
 
-    // 🔹 Grant (object → _id)
+    // 🔹 Map Grant object down to its string _id representation if populated
     grant:
       typeof composition.grant === "object" && composition.grant !== null
         ? (composition.grant as Grant)._id
         : composition.grant,
-
-    // 🔹 Specializations (array of objects → array of _id)
-    specializations: composition.specializations?.map((item) =>
-      typeof item === "object" && item !== null
-        ? (item as Specialization)._id!
-        : item
-    ),
-
-    // 🔹 Positions (array of objects → array of _id)
-    positions: composition.positions?.map((item) =>
-      typeof item === "object" && item !== null
-        ? (item as Position)._id!
-        : item
-    ),
   };
 }
-
 
 export interface GetCompositionsOptions {
   grant?: Grant | string;
 }
-
-

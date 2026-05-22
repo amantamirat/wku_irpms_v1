@@ -125,11 +125,12 @@ const SaveRole = (props: EntitySaveDialogProps<Role>) => {
                         <span>{isEdit ? 'Modify Role' : 'Create System Role'}</span>
                     </div>
                 }
-                style={{ width: '550px' }}
+                style={{ width: '600px' }}
                 modal
                 className="p-fluid"
                 footer={footer}
                 onHide={onHide}
+                maximizable
             >
                 {isEdit && (
                     <Message 

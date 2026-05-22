@@ -6,6 +6,8 @@ import { PublicationApi } from "../api/publication.api";
 import { GetPublicationsOptions, Publication } from "../models/publication.model";
 import { User } from "../../models/user.model";
 import SavePublicationDialog from "./SavePublication";
+import { PUBLICATION_STATUS_ORDER, PUBLICATION_TRANSITIONS, PublicationStatus } from '../models/publication.state-machine';
+import MyBadge from '@/templates/MyBadge';
 
 interface PublicationManagerProps {
     author?: User;
@@ -49,6 +51,14 @@ const PublicationManager = ({ author }: PublicationManagerProps) => {
                 field: "author.name",
                 sortable: true
             }] : []),
+
+            {
+                field: "status",
+                header: "Status",
+                sortable: true,
+                body: (c: Publication) =>
+                    <MyBadge type="status" value={c.status ?? "Unknown"} />
+            }
         ],
 
         /** Default values for new records */
@@ -57,6 +67,7 @@ const PublicationManager = ({ author }: PublicationManagerProps) => {
             title: "",
             type: undefined,
             abstract: "",
+            status: PublicationStatus.pending
         }),
 
         /** Integration with the Save Dialog and Permission system */
@@ -66,6 +77,12 @@ const PublicationManager = ({ author }: PublicationManagerProps) => {
             author: author,
             populate: author ? false : true
         }),
+
+        workflow: {
+            statusField: "status",
+            transitions: PUBLICATION_TRANSITIONS,
+            statusOrder: PUBLICATION_STATUS_ORDER
+        },
     });
 
     /**

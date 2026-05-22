@@ -49,7 +49,7 @@ const Page = () => {
             </div>
 
             {/* CONTROL PANEL */}
-            <div className="bg-white border-round-xl shadow-1 p-4 mb-4 flex flex-column md:flex-row md:align-items-end md:justify-content-between gap-4">
+            <div className="border-round-xl shadow-1 p-4 mb-4 flex flex-column md:flex-row md:align-items-end md:justify-content-between gap-4">
 
                 <div className="flex flex-column gap-2">
                     <label className="text-700 font-medium text-sm">
@@ -82,7 +82,7 @@ const Page = () => {
             </div>
 
             {/* MAIN CONTENT */}
-            <div className="bg-white border-round-xl shadow-1 p-4 md:p-5">
+            <div className="border-round-xl shadow-1 p-4 md:p-5">
 
                 {selectedAlloc ? (
                     grantStages.length > 0 ? (

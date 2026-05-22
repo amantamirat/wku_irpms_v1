@@ -3,7 +3,7 @@ import { PublicationController } from './publication.controller';
 import { PERMISSIONS } from '../../../common/constants/permissions';
 import { PublicationService } from './publication.service';
 import { PublicationRepository } from './publication.repository';
-import { verifyActiveAccount, checkPermission } from '../../auth/auth.middleware';
+import { verifyActiveAccount, checkPermission, checkTransitionPermission } from '../../auth/auth.middleware';
 import { UserRepository } from '../user.repository';
 
 const publicationRepository = new PublicationRepository();
@@ -34,6 +34,10 @@ router.put('/:id',
     checkPermission([PERMISSIONS.PUBLICATION.UPDATE]),
     controller.update
 );
+
+router.patch('/:id', verifyActiveAccount,
+    checkTransitionPermission("publication"),
+    controller.transitionState);
 
 router.delete('/:id',
     verifyActiveAccount,

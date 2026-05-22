@@ -15,5 +15,6 @@ export interface UpdateSpecializationDTO {
 }
 
 export interface GetSpecializationsOptions {
+    ids?:string[],
     academicLevel?: AcademicLevel;
 }

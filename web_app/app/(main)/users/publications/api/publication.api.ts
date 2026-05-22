@@ -5,6 +5,7 @@ import {
     sanitizePublication
 } from "../models/publication.model";
 import { EntityApi } from "@/api/EntityApi";
+import { TransitionRequestDto } from "@/types/util";
 
 const endPoint = '/publications';
 
@@ -38,6 +39,14 @@ export const PublicationApi: EntityApi<Publication, GetPublicationsOptions | und
         const sanitized = sanitizePublication(publication);
         const updatedPublication = await ApiClient.put(url, sanitized);
         return updatedPublication as Publication;
+    },
+
+    async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
+        const query = new URLSearchParams();
+        query.append("id", id);
+        const url = `${endPoint}/${id}`;
+        const updated = await ApiClient.patch(url, dto);
+        return updated;
     },
 
     async delete(publication: Publication): Promise<boolean> {

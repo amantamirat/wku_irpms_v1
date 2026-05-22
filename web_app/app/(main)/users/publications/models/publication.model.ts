@@ -1,4 +1,6 @@
 import { User } from "../../models/user.model";
+import { PublicationStatus } from "./publication.state-machine";
+
 
 /* =======================
    Publication Type Enum
@@ -34,6 +36,7 @@ export type Publication = {
     publisher?: string;
     publicationId?: string;
     document?: File | null;
+    status: PublicationStatus;
     createdAt?: Date;
     updatedAt?: Date;
 };
@@ -81,5 +84,5 @@ export const sanitizePublication = (
 export interface GetPublicationsOptions {
     author?: string | User;
     type?: PublicationType;
-    populate?:boolean;
+    populate?: boolean;
 }

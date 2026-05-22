@@ -8,6 +8,7 @@ import { successResponse, errorResponse } from '../../../common/helpers/response
 import { AuthenticatedRequest } from '../../auth/auth.middleware';
 import { AppError } from '../../../common/errors/app.error';
 import { ERROR_CODES } from '../../../common/errors/error.codes';
+import { TransitionRequestDto } from '../../../common/dtos/transition.dto';
 
 export class PublicationController {
 
@@ -80,10 +81,27 @@ export class PublicationController {
         }
     };
 
+    transitionState = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            const { id } = req.params;
+            const { current, next } = req.body;
+            const dto: TransitionRequestDto = {
+                id: String(id),
+                current: current,
+                next: next
+            };
+            const updated = await this.service.transitionState(dto);
+            successResponse(res, 200, "Publication status updated successfully", updated);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.auth) {
-                throw new Error('User not authorized');
+                throw new Error(ERROR_CODES.UNAUTHORIZED);
             }
 
             const { id } = req.params;

@@ -130,6 +130,6 @@ export const STATUS_BUTTON_CONFIG: Record<string, StatusButtonConfig> = {
     verified: {
         icon: "pi pi-check-circle", // Represents approval / verification
         severity: "success",
-        action: "Verify Collaborator"
+        action: "Verify"
     },
 };

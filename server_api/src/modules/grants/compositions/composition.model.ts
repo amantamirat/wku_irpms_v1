@@ -2,39 +2,81 @@ import mongoose, { Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
 import { Accessibility, Gender } from "../../users/user.model";
 import { AcademicLevel } from "../../../common/constants/enums";
-import { PublicationType } from "../../users/publications/publication.model";
-import { IRange, RangeSchema } from "./range.model";
 
 export enum OperationMode {
-    COUNT = "COUNT",
-    RATIO = "RATIO"
+  COUNT = "COUNT",
+  RATIO = "RATIO"
 }
+export enum TargetScope {
+  PI_ONLY = "PI_ONLY",
+  CO_ONLY = "CO_ONLY",
+  ALL_MEMBERS = "ALL_MEMBERS",
+  TEAM_AGGREGATE = "TEAM_AGGREGATE"
+}
+
+
+export interface IRange {
+  min: number;
+  max: number;
+}
+export const RangeSchema = new Schema<IRange>(
+  {
+    min: { type: Number, default: 0, required: true },
+    max: { type: Number, default: Infinity, required: true },
+  },
+  { _id: false } // prevents extra _id for subdocument
+);
+
+
+export interface IProfileRule {
+  gender?: Gender;
+  age?: IRange;
+  experienceYears?: IRange;
+  accessibility?: Accessibility[];
+  academicLevels?: AcademicLevel[];
+  //specializations?: mongoose.Types.ObjectId[];
+}
+
+const ProfileRuleSchema = new Schema<IProfileRule>(
+  {
+    gender: { type: String },
+    age: RangeSchema,
+    experienceYears: RangeSchema,
+    accessibility: { type: [String], enum: Object.values(Accessibility), default: [] },
+    academicLevels: { type: [String], enum: Object.values(AcademicLevel), default: [] },
+    // specializations: [{ type: Schema.Types.ObjectId, ref: COLLECTIONS.SPECIALIZATION }],
+  },
+  { _id: false }
+);
+
+export interface IProjectHistoryRule {
+  submission?: IRange; //submitted, accepted, finilization, granted
+  rejection?: IRange;
+  completion?: IRange;
+}
+
+const ProjectHistoryRuleSchema = new Schema<IProjectHistoryRule>(
+  {
+    submission: RangeSchema,
+    rejection: RangeSchema,
+    completion: RangeSchema,
+  },
+  { _id: false }
+);
 
 export interface IComposition extends Document {
   grant: mongoose.Types.ObjectId;
-  title: string;
+  description?: string;
+  // Scope: Who exactly needs to satisfy this specific rule block?
+  targetScope: TargetScope;
 
-  gender?: Gender;
-
-  age?: IRange;                // minAge & maxAge
-  experienceYears?: IRange;    // minExperienceYears (could extend with min/max if needed)
-
-  accessibility?: Accessibility[];
-
-  maxSubmission?: number;
-  minCompletion?: number;
-
-  academicLevels?: AcademicLevel[];
-  specializations?: mongoose.Types.ObjectId[];
-
-  positions?: mongoose.Types.ObjectId[];
-
-  publicationTypes?: PublicationType[];
-  programTypes?: AcademicLevel[];
-
-  isPI?: boolean;
-
-  minCount: number;
+  profileRule?: IProfileRule;
+  projectHistoryRule?: IProjectHistoryRule;
+  //required for aggrigation only
+  mode?: OperationMode;
+  threshold?: IRange;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 
@@ -47,40 +89,39 @@ const CompositionSchema = new Schema<IComposition>(
       immutable: true,
       index: true,
     },
-    title: { type: String, required: true },
+    description: { type: String, required: true },
 
-    gender: { type: String, enum: Object.values(Gender) },
+    targetScope: {
+      type: String,
+      enum: Object.values(TargetScope),
+      required: true,
+      immutable: true,
+    },
 
-    age: { type: RangeSchema },              // min/max age
-    experienceYears: { type: RangeSchema },  // min/max experience
+    profileRule: ProfileRuleSchema,
+    projectHistoryRule: ProjectHistoryRuleSchema,
 
-    accessibility: { type: [String], enum: Object.values(Accessibility), default: [] },
+    mode: {
+      type: String,
+      enum: Object.values(OperationMode),
+    },
 
-    maxSubmission: { type: Number },
-    minCompletion: { type: Number },
-
-    academicLevels: { type: [String], enum: Object.values(AcademicLevel), default: [] },
-    specializations: [{ type: Schema.Types.ObjectId, ref: COLLECTIONS.SPECIALIZATION }],
-    positions: [{ type: Schema.Types.ObjectId, ref: COLLECTIONS.POSITION }],
-
-    publicationTypes: { type: [String], enum: Object.values(PublicationType), default: [] },
-    programTypes: { type: [String], enum: Object.values(AcademicLevel), default: [] },
-
-    isPI: { type: Boolean, default: false },
-
-    minCount: { type: Number, required: true, min: 1 },
+    threshold: RangeSchema,
   },
   { timestamps: true }
 );
 
 
 CompositionSchema.index(
-  { grant: 1, isPI: 1 },
-  { unique: true, partialFilterExpression: { isPI: true } }
+  { grant: 1, targetScope: 1 },
+  { unique: true }
 );
 
 
 export const Composition = mongoose.model<IComposition>(
-  COLLECTIONS.COMPOSITION_NEW,
+  COLLECTIONS.COMPOSITION,
   CompositionSchema
 );
+
+
+

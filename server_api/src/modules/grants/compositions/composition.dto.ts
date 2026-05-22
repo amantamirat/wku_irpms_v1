@@ -1,78 +1,68 @@
 import { Accessibility, Gender } from "../../users/user.model";
 import { AcademicLevel } from "../../../common/constants/enums";
-import { PublicationType } from "../../users/publications/publication.model";
+import { OperationMode, TargetScope } from "./composition.model";
 
-// Sub-DTO for ranges
+/* ---------------- RANGE ---------------- */
+
 export interface RangeDTO {
-    min: number;
-    max: number;
+  min: number;
+  max: number;
 }
 
-// DTO for creating a new Composition
+/* ---------------- PROFILE RULE ---------------- */
+
+export interface ProfileRuleDTO {
+  gender?: Gender;
+  age?: RangeDTO;
+  experienceYears?: RangeDTO;
+  accessibility?: Accessibility[];
+  academicLevels?: AcademicLevel[];
+}
+
+/* ---------------- PROJECT HISTORY RULE ---------------- */
+
+export interface ProjectHistoryRuleDTO {
+  submission?: RangeDTO;
+  rejection?: RangeDTO;
+  completion?: RangeDTO;
+}
+
+/* ---------------- CREATE DTO ---------------- */
+
 export interface CreateCompositionDTO {
-    grant: string; // grant ObjectId as string
-    title: string;
+  grant: string;
 
-    gender?: Gender;
+  description: string;
 
-    age?: RangeDTO;                 // min/max age
-    experienceYears?: RangeDTO;     // min/max experience
+  targetScope: TargetScope;
 
-    accessibility?: Accessibility[];
+  profileRule?: ProfileRuleDTO;
 
-    maxSubmission?: number;
-    minCompletion?: number;
+  projectHistoryRule?: ProjectHistoryRuleDTO;
 
-    academicLevels?: AcademicLevel[];
-    specializations?: string[];
+  mode?: OperationMode;
 
-    positions?: string[];
-
-    publicationTypes?: PublicationType[];
-
-    programTypes?: AcademicLevel[];
-
-    isPI?: boolean;
-
-    minCount: number;
+  threshold?: RangeDTO;
 }
 
-// DTO for updating an existing Composition
+/* ---------------- UPDATE DTO ---------------- */
+
 export interface UpdateCompositionDTO {
-    id: string; // composition id to update
-    data: Partial<{
-        title: string;
-        gender?: Gender;
+  id: string;
 
-        age?: RangeDTO;
-        experienceYears?: RangeDTO;
+  data: Partial<CreateCompositionDTO>;
 
-        accessibility?: Accessibility[];
-
-        maxSubmission?: number;
-        minCompletion?: number;
-
-        academicLevels?: AcademicLevel[];
-        specializations?: string[];
-
-        positions?: string[];
-
-        publicationTypes?: PublicationType[];
-
-        programTypes?: AcademicLevel[];
-
-        //isPI?: boolean;
-
-        minCount?: number;
-    }>;
-    userId: string; // who is performing the update
+  userId: string;
 }
+
+/* ---------------- QUERY DTOS ---------------- */
 
 export interface GetCompositionDTO {
-    grant?: string;
-    populate?: boolean;
+  grant?: string;
+  targetScope?: TargetScope;
+  populate?: boolean;
 }
 
 export interface ExistsCompositionDTO {
-    grant?: string;
+  grant?: string;
 }

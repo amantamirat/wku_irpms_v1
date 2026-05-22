@@ -1,9 +1,9 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
 
-export enum Status {
-    draft = 'draft',
-    approved = 'approved'
+export enum PublicationStatus {
+    pending = 'pending',
+    verified = 'verified'
 }
 
 export enum PublicationType {
@@ -38,6 +38,7 @@ export interface IPublication extends Document {
         mimetype: string;
         size: number;
     };
+    status: PublicationStatus
 }
 
 const PublicationSchema = new Schema<IPublication>(
@@ -97,6 +98,12 @@ const PublicationSchema = new Schema<IPublication>(
             path: String,
             mimetype: String,
             size: Number,
+        },
+        status: {
+            type: String,
+            enum: Object.values(PublicationStatus),
+            default: PublicationStatus.pending,
+            required: true
         },
     },
     {

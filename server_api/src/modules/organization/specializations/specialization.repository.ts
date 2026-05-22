@@ -22,18 +22,17 @@ export class SpecializationRepository implements ISpecializationRepository {
     async find(filters: GetSpecializationsOptions) {
         const query: any = {};
 
+        if (filters.ids?.length) {
+            query._id = { $in: filters.ids };
+        }
+
         if (filters.academicLevel) {
             query.academicLevel = filters.academicLevel;
         }
 
-        /*
-
-        if (filters.name) {
-            query.name = { $regex: filters.name, $options: "i" }; // case-insensitive search
-        }
-        */
-
-        return Specialization.find(query).lean<ISpecialization[]>().exec();
+        return Specialization.find(query)
+            .lean<ISpecialization[]>()
+            .exec();
     }
 
     async create(dto: CreateSpecializationDTO) {
