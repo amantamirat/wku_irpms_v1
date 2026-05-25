@@ -18,6 +18,11 @@ export interface IProjectRepository {
     update(id: string, data: UpdateProjectDTO["data"]): Promise<IProject | null>;
     updateStatus(id: string, newStatus: ProjectStatus, session?: ClientSession): Promise<IProject | null>;
     incrementTotals(projectId: string, delta: { duration: number; budget: number }, session?: ClientSession): Promise<IProject | null>;
+    updateTotalCollabs(
+        projectId: string,
+        delta: number,
+        session?: ClientSession
+    ): Promise<IProject | null>;
     updateCurrentStage(
         id: string,
         currentStage: string,
@@ -161,6 +166,25 @@ export class ProjectRepository implements IProjectRepository {
             {
                 session,          // <-- attach session here
                 new: true         // optional: return updated document
+            }
+        );
+    }
+
+    async updateTotalCollabs(
+        projectId: string,
+        delta: number,
+        session?: ClientSession
+    ) {
+        return Project.findByIdAndUpdate(
+            projectId,
+            {
+                $inc: {
+                    totalCollabs: delta
+                }
+            },
+            {
+                session,
+                new: true
             }
         );
     }

@@ -120,7 +120,7 @@ const SaveCollaborator = ({
                             options={isEditMode ? [localCollaborator.applicant as User] : applicants}
                             onChange={(e) => setLocalCollaborator({ ...localCollaborator, applicant: e.value })}
                             dataKey="_id"
-                            optionLabel="first_name"
+                            optionLabel="name"
                             itemTemplate={userTemplate}
                             valueTemplate={(option) =>
                                 option ? userTemplate(option) : <span className="p-placeholder">Select a Person</span>

@@ -1,5 +1,8 @@
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
+import { CollaboratorRepository, ICollaboratorRepository } from "../../projects/collaborators/collaborator.repository";
+import { IPhaseRepository, PhaseRepository } from "../../projects/phase/phase.repository";
+import { IProject } from "../../projects/project.model";
 import { IThemeRepository, ThemeRepository } from "../../thematics/themes/theme.repository";
 import { ConstraintType } from "./constraint.model";
 import { ConstraintRepository, IConstraintRepository } from "./constraint.repository";
@@ -8,6 +11,7 @@ export class ConstraintValidator {
     constructor(
         private readonly constraintRepo: IConstraintRepository = new ConstraintRepository(),
         private readonly themeRepo: IThemeRepository = new ThemeRepository(),
+        private readonly phaseRepo: IPhaseRepository = new PhaseRepository(),
     ) { }
     // =====================================================
     // PRIVATE HELPERS
@@ -141,19 +145,19 @@ export class ConstraintValidator {
     /**
        * Validates Totoal Project Budget Limit.
        */
-    async validateTotalBudget(grant: string, budget: number, options?: { skipMin?: boolean; skipMax?: boolean }) {
+    async validateTotalBudget(grant: string, totalBudget: number, options?: { skipMin?: boolean; skipMax?: boolean }) {
         const constraint = await this.constraintRepo.findOne(grant, ConstraintType.BUDGET_TOTAL);
         if (!constraint) return;
-        this.validateRange(budget, constraint, "Total project budget", options);
+        this.validateRange(totalBudget, constraint, "Total project budget", options);
     }
 
     /**
        * Validates Totoal Project Duration.
        */
-    async validateTotalDuration(grant: string, duration: number, options?: { skipMin?: boolean; skipMax?: boolean }) {
+    async validateTotalDuration(grant: string, totalDuration: number, options?: { skipMin?: boolean; skipMax?: boolean }) {
         const constraint = await this.constraintRepo.findOne(grant, ConstraintType.TIME_TOTAL);
         if (!constraint) return;
-        this.validateRange(duration, constraint, "Total project duration", options);
+        this.validateRange(totalDuration, constraint, "Total project duration", options);
     }
     /**
      * Validates the project's cumulative totals and counts.
@@ -264,6 +268,16 @@ export class ConstraintValidator {
             this.validateParticipantCount(grant, dto.participantCount),
             this.validateThemes(grant, dto.themes || [])
         ]);
+    }
+
+
+    async validateProject(grant: string, projectDoc: IProject) {
+        const participantCount = projectDoc.totalCollabs ?? 0;
+        const phases = await this.phaseRepo.find({ project: String(projectDoc._id) });
+        const themes = projectDoc.themes.map(thm => thm.toString());
+        const title = projectDoc.title;
+        const summary = projectDoc.summary;
+        await this.validateAll(grant, { participantCount, phases, themes, title, summary });
     }
 
 }

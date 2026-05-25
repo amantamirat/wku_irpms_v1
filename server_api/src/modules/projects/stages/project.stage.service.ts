@@ -6,7 +6,6 @@ import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 
 import { IGrantStageRepository } from "../../grants/stages/grant.stage.repository";
-import { IProjectRepository } from "../project.repository";
 import { IProjectStageRepository } from "./project.stage.repository";
 
 import { ClientSession } from "mongoose";
@@ -14,6 +13,8 @@ import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { CallStageStatus } from "../../calls/stages/call.stage.model";
 import { ICallStageRepository } from "../../calls/stages/call.stage.repository";
 import { IGrantAllocation } from "../../grants/allocations/grant.allocation.model";
+import { CompositionValidator } from "../../grants/compositions/composition.validator";
+import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
 import { IGrantStage } from "../../grants/stages/grant.stage.model";
 import { NotificationService } from "../../notifications/notification.service";
 import { IReviewerRepository } from "../../reviewers/reviewer.repository";
@@ -27,9 +28,6 @@ import {
 } from "./project.stage.dto";
 import { ProjectStageStatus } from "./project.stage.model";
 import { IProjectSynchronizer } from "./project.stage.synchronizer";
-import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
-import { CompositionValidator } from "../../grants/compositions/composition.validator";
-import { string } from "joi";
 
 export class ProjectStageService {
 
@@ -41,8 +39,8 @@ export class ProjectStageService {
         private readonly reviewerRepo: IReviewerRepository,
         private readonly synchronizer: IProjectSynchronizer,
         private readonly notificationService: NotificationService,
-        //private readonly constraintValidator: ConstraintValidator = new ConstraintValidator(),
-        //private readonly compositionValidator: CompositionValidator = new CompositionValidator(),
+        private readonly constValidator: ConstraintValidator = new ConstraintValidator(),
+        private readonly compValidator: CompositionValidator = new CompositionValidator(),
 
     ) {
     }
@@ -65,6 +63,7 @@ export class ProjectStageService {
         const { project, projectTitle, stageName, applicantId } = dto;
         if (!options?.skipValidation) {
             const projectDoc = await this.validateProject(project, applicantId, session);
+            dto.projectTitle= projectDoc.title;
             const grantAllocDoc = projectDoc.grantAllocation as unknown as IGrantAllocation;
             const grantId = String(grantAllocDoc.grant);
             let nextOrder = 1;
@@ -94,7 +93,7 @@ export class ProjectStageService {
             if (!nextGrantStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
             const nextGrantStageId = String(nextGrantStageDoc._id);
             dto.grantStage = nextGrantStageId;
-            
+            dto.stageName = nextGrantStageDoc.name;
             if (projectDoc.call) {
                 const nextCallStageDoc = await this.callStageRepo.findOne(
                     { callId: String(projectDoc.call), grantStageId: nextGrantStageId },
@@ -111,10 +110,11 @@ export class ProjectStageService {
                 }
                 dto.callStage = String(nextCallStageDoc._id)
             }
-
-            //validateall
+            if (nextOrder === 1) {
+                await this.constValidator.validateProject(grantId, projectDoc);
+                await this.compValidator.validateProjectAggregate(grantId, project);
+            }
         }
-
 
         try {
             const created = await this.repository.create(dto, session);

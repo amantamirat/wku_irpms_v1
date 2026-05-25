@@ -25,7 +25,7 @@ const SaveReviewerDialog = ({
     const toast = useRef<Toast>(null);
 
     const [localReviewer, setLocalReviewer] = useState<Reviewer>({ ...item });
-    const [applicants, setApplicants] = useState<User[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
     const [submitted, setSubmitted] = useState(false);
 
     const isEditMode = !!item?._id;
@@ -36,18 +36,17 @@ const SaveReviewerDialog = ({
     }, [item, visible]);
 
     useEffect(() => {
-        const fetchApplicants = async () => {
+        const fetchUsers = async () => {
             try {
                 if (visible) {
-                    // Fetching all applicants directly as requested (no workspace filter)
                     const data = await UserApi.getAll({});
-                    setApplicants(data);
+                    setUsers(data);
                 }
             } catch (err) {
-                console.error("Failed to fetch applicants:", err);
+                console.error("Failed to fetch users:", err);
             }
         };
-        fetchApplicants();
+        fetchUsers();
     }, [visible]);
 
     const saveReviewer = async () => {
@@ -122,21 +121,21 @@ const SaveReviewerDialog = ({
                     {/* Applicant selection only shown in Create Mode */}
                     {!isEditMode && (
                         <div className="field col-12">
-                            <label htmlFor="applicant" className="font-bold">
-                                Reviewer (Applicant)
+                            <label htmlFor="user" className="font-bold">
+                                Reviewer
                             </label>
                             <Dropdown
-                                id="applicant"
+                                id="user"
                                 value={localReviewer.reviewer}
-                                options={applicants}
+                                options={users}
                                 onChange={(e) => setLocalReviewer({ ...localReviewer, reviewer: e.value })}
                                 dataKey="_id"
-                                optionLabel="first_name"
+                                optionLabel="name"
                                 itemTemplate={userTemplate}
                                 valueTemplate={(option) =>
                                     option ? userTemplate(option) : <span className="p-placeholder">Select a Reviewer</span>
                                 }
-                                placeholder="Select an Applicant"
+                                placeholder="Select a Reviewer"
                                 filter
                                 className={classNames({
                                     'p-invalid': submitted && !localReviewer.reviewer

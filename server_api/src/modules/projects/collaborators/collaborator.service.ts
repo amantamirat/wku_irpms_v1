@@ -65,6 +65,7 @@ export class CollaboratorService {
         }
         try {
             const created = await this.collabRepo.create(dto, session);
+            await this.projectRepo.updateTotalCollabs(project, 1, session);
             if (!dto.isLeadPI) {
                 await this.notificationService.notifyProjectInvitation(
                     applicant, projectTitle ?? project, dto.role, userId, session
@@ -146,10 +147,11 @@ export class CollaboratorService {
         const projectDoc = await this.validateProject(project, applicantId ?? "");
 
         const grantId = (projectDoc.grantAllocation as any).grant;
-        const countCollabs = await this.collabRepo.countByProject(project);
+        const countCollabs = projectDoc.totalCollabs ?? 0;
         await this.constraintValidator.validateParticipantCount(grantId, countCollabs - 1);
 
         const deleted = this.collabRepo.delete(id);
+        await this.projectRepo.updateTotalCollabs(project, -1);
         if (!collabDoc.isLeadPI) {
             await this.notificationService.notifyProjectRemoval(
                 String(collabDoc.applicant), projectDoc.title, collabDoc.role

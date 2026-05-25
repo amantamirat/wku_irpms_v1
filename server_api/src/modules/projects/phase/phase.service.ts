@@ -80,9 +80,6 @@ export class PhaseService {
     // ---------------------------------------------------
     // UPDATE
     // ---------------------------------------------------
-    // ---------------------------------------------------
-    // UPDATE
-    // ---------------------------------------------------
     async update(dto: UpdatePhaseDto) {
         const { id, data, userId } = dto;
         const phaseDoc = await this.phaseRepo.findById(id);
@@ -112,7 +109,7 @@ export class PhaseService {
         const newDuration = updated?.duration ?? 0;
         const newBudget = updated?.budget ?? 0;
 
-        // ✅ Adjust totals (delta)
+        // Adjust totals (delta)
         await this.projRepo.incrementTotals(
             projectId,
             {

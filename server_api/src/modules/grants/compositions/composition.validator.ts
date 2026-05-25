@@ -2,6 +2,7 @@ import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { ISpecializationRepository, SpecializationRepository } from "../../organization/specializations/specialization.repository";
 import { CollaboratorDto } from "../../projects/collaborators/collaborator.dto";
+import { CollaboratorRepository, ICollaboratorRepository } from "../../projects/collaborators/collaborator.repository";
 import { ExperienceRepository, IExperienceRepository } from "../../users/experiences/experience.repository";
 import { IUser } from "../../users/user.model";
 import { IUserRepository, UserRepository } from "../../users/user.repository";
@@ -13,7 +14,8 @@ export class CompositionValidator {
         private readonly compositionRepo: ICompositionRepository = new CompositionRepository(),
         private readonly userRepo: IUserRepository = new UserRepository(),
         private readonly exprRepo: IExperienceRepository = new ExperienceRepository(),
-        private readonly specRepo: ISpecializationRepository = new SpecializationRepository()
+        private readonly specRepo: ISpecializationRepository = new SpecializationRepository(),
+        private readonly collabRepo: ICollaboratorRepository = new CollaboratorRepository(),
     ) { }
 
     // =====================================================
@@ -97,6 +99,15 @@ export class CompositionValidator {
         }
 
         await Promise.all(validationTasks);
+    }
+
+    async validateProjectAggregate(grant: string, project: string): Promise<void> {
+        const collabs = await this.collabRepo.find({ project });
+        const applicantIds = collabs.map(c => c.applicant.toString());
+        const users = await this.userRepo.findAll({
+            ids: applicantIds
+        });
+        await this.validateAggregate(grant, users);
     }
 
     // =====================================================
