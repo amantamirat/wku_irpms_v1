@@ -1,7 +1,0 @@
-import { CallStatus } from "./call.status";
-
-export const CALL_TRANSITIONS: Record<CallStatus, CallStatus[]> = {
-    [CallStatus.planned]: [CallStatus.active],
-    [CallStatus.active]: [CallStatus.closed, CallStatus.planned],
-    [CallStatus.closed]: [CallStatus.active]
-};

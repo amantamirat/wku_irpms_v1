@@ -14,6 +14,7 @@ export type Call = {
     grantAllocation: string | GrantAllocation; // The new single source of truth
     organization?: string | Organization;
     title: string;
+    budget?: number;
     description?: string | null;
     status: CallStatus;
     createdAt?: Date;

@@ -6,8 +6,8 @@ import { IEvaluationRepository } from "../../evaluations/evaluation.repository";
 import { IGrantStageRepository } from "../../grants/stages/grant.stage.repository";
 import { IProjectStageRepository } from "../../projects/stages/project.stage.repository";
 import { ICallRepository } from "../call.repository";
-import { CALL_TRANSITIONS } from "../call.state-machine";
-import { CallStatus } from "../call.status";
+import { CALL_TRANSITIONS } from "../call.service";
+import { CallStatus } from "../call.model";
 import { CreateStageDTO, GetStageDTO, UpdateStageDTO } from "./call.stage.dto";
 import { ICallStageRepository } from "./call.stage.repository";
 import { STAGE_TRANSITIONS } from "./call.stage.state-machine";
@@ -53,7 +53,7 @@ export class StageService {
 
 
     async getFirstStage(callId: string) {
-        const stage = await this.repository.findOne(callId, 1);
+        const stage = await this.repository.findOne({ callId, order: 1 });
         if (!stage) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
         return stage;
     }

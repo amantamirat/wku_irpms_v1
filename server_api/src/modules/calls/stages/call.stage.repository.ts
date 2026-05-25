@@ -5,7 +5,7 @@ import { ICallStage, CallStage, CallStageStatus } from "./call.stage.model";
 export interface ICallStageRepository {
     findById(id: string): Promise<ICallStage | null>;
     find(filters: GetStageDTO): Promise<Partial<ICallStage>[]>;
-    findOne(callId: string, order: number, session?: ClientSession): Promise<ICallStage | null>;
+    findOne(filter: { callId: string; order?: number; grantStageId?: string }, session?: ClientSession): Promise<ICallStage | null>;
     create(dto: CreateStageDTO): Promise<ICallStage>;
     createMany(dtos: CreateStageDTO[]): Promise<ICallStage[]>;
     update(id: string, data: UpdateStageDTO["data"]): Promise<ICallStage | null>;
@@ -57,16 +57,27 @@ export class CallStageRepository implements ICallStageRepository {
 
 
 
-    async findOne(callId: string, order: number, session?: ClientSession) {
-        const query = CallStage.findOne({ call: callId, order });
+    async findOne(
+        filter: { callId: string; order?: number; grantStageId?: string },
+        session?: ClientSession
+    ) {
+        const query: any = { call: filter.callId };
 
-        if (session) {
-            query.session(session);
+        if (filter.order !== undefined) {
+            query.order = filter.order;
         }
 
-        return query
-            .lean<ICallStage>()
-            .exec();
+        if (filter.grantStageId !== undefined) {
+            query.grantStage = filter.grantStageId;
+        }
+
+        const q = CallStage.findOne(query);
+
+        if (session) {
+            q.session(session);
+        }
+
+        return q.lean<ICallStage>().exec();
     }
 
 

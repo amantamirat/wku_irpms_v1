@@ -22,7 +22,7 @@ export class PhaseService {
         private readonly projRepo: IProjectRepository,
         private readonly allocRepo: IGrantAllocationRepository,
         private readonly projAuth: ProjectAuth,
-        private readonly validator: ConstraintValidator,
+        private readonly constValidator: ConstraintValidator,
         private readonly synchrnonizer?: IPhaseSynchronizer
     ) { }
 
@@ -45,11 +45,11 @@ export class PhaseService {
         if (!options?.skipValidation) {
             const projectDoc = await this.validateProject(project, applicantId ?? "", session);
             const grantId = String((projectDoc.grantAllocation as any).grant);
-            await this.validator.validateIndividualPhases(grantId, [dto]);
             const existingPhases = await this.phaseRepo.find({ project }, session);
             const proposedPhases = [...existingPhases, dto];
-            await this.validator.validateProjectTotals(grantId, proposedPhases, { skipMin: true });
-            await this.validator.validatePhaseCount(grantId, proposedPhases, { skipMin: true });
+            await this.constValidator.validatePhases(grantId, proposedPhases, { skipMin: true })
+            //  await this.validator.validateProjectTotals(grantId, proposedPhases, { skipMin: true });
+            // await this.validator.validatePhaseCount(grantId, proposedPhases, );
         }
         try {
             const count = await this.phaseRepo.countByProject(project, session);
@@ -98,11 +98,11 @@ export class PhaseService {
         const grantId = String((projectDoc.grantAllocation as any).grant);
 
         const updatedPhase = { ...phaseDoc.toObject(), ...data };
-        await this.validator.validateIndividualPhases(grantId, [updatedPhase]);
+        await this.constValidator.validateIndividualPhase(grantId, [updatedPhase]);
         const existingPhases = await this.phaseRepo.find({ project: projectId });
 
-        const proposedPhases = existingPhases.map(p => String(p._id) === id ? updatedPhase : p);
-        await this.validator.validateProjectTotals(grantId, proposedPhases, { skipMin: true });
+        const updatedPhases = existingPhases.map(p => String(p._id) === id ? updatedPhase : p);
+        await this.constValidator.validatePhases(grantId, updatedPhases);
 
         const oldDuration = phaseDoc.duration ?? 0;
         const oldBudget = phaseDoc.budget ?? 0;
@@ -225,8 +225,8 @@ export class PhaseService {
 
         const allPhases = await this.phaseRepo.find({ project: projectId });
         const proposedPhases = allPhases.filter(p => String(p._id) !== id);
-        await this.validator.validateProjectTotals(grantId, proposedPhases);
-        await this.validator.validatePhaseCount(grantId, proposedPhases);
+        //   await this.validator.validateProjectTotals(grantId, proposedPhases);
+        // await this.validator.validatePhaseCount(grantId, proposedPhases);
 
         // ✅ Decrement totals BEFORE delete
         await this.projRepo.incrementTotals(projectId, {

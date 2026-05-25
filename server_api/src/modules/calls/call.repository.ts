@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { CreateCallDTO, ExistsCallDTO, GetCallsOptions, UpdateCallDTO } from "./call.dto";
 import { Call, ICall } from "./call.model";
-import { CallStatus } from "./call.status";
+import { CallStatus } from "./call.model";
 import { GrantAllocation } from "../grants/allocations/grant.allocation.model";
 
 export interface ICallRepository {

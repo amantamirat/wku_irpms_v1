@@ -45,17 +45,28 @@ export class UserRepository implements IUserRepository {
     // -------------------------
     async findAll(filter: GetUsersDTO): Promise<IUser[]> {
         const query: any = {};
+
+        // Handle single workspace filter
         if (filter.workspace) {
             query.workspace = new mongoose.Types.ObjectId(filter.workspace);
         }
-        let dbQuery = User.find(query);
-        if (filter.populate) {
-            dbQuery = dbQuery
-                .populate("workspace")
-            //.populate("specializations")
+
+        // Handle array of user IDs filter
+        if (filter.ids && filter.ids.length > 0) {
+            query._id = {
+                $in: filter.ids.map(id => new mongoose.Types.ObjectId(id))
+            };
         }
-        return dbQuery.
-            lean<IUser[]>()
+
+        let dbQuery = User.find(query);
+
+        if (filter.populate) {
+            dbQuery = dbQuery.populate("workspace");
+            // .populate("specializations")
+        }
+
+        return dbQuery
+            .lean<IUser[]>()
             .exec();
     }
     // -------------------------

@@ -27,7 +27,7 @@ const notificationService = new NotificationService(
     new NotificationRepository(),
     new SettingService(new SettingRepository())
 );
-const service = new ProjectStageService(projectStageRepo, projectRepo, projAuth,
+const service = new ProjectStageService(projectStageRepo, projAuth,
     grantStageRepo, callStageRepo,
     reviewerRepoRepo, synchronizer, notificationService);
 const controller = new ProjectStageController(service);

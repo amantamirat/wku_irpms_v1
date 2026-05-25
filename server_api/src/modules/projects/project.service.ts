@@ -14,7 +14,7 @@ import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { ICallRepository } from "../calls/call.repository";
-import { CallStatus } from "../calls/call.status";
+import { CallStatus } from "../calls/call.model";
 import { IGrantAllocationRepository } from "../grants/allocations/grant.allocation.repository";
 import { AllocationStatus, IGrantAllocation } from "../grants/allocations/grant.allocation.model";
 import { ConstraintValidator } from "../grants/constraints/constraint.validator";
@@ -30,6 +30,9 @@ import { PROJECT_TRANSITIONS } from "./project.state-machine";
 import { IProjectStageRepository } from "./stages/project.stage.repository";
 import { ProjectStageService } from "./stages/project.stage.service";
 import { NotificationService } from "../notifications/notification.service";
+import { CompositionValidator } from "../grants/compositions/composition.validator";
+import { ICallStageRepository } from "../calls/stages/call.stage.repository";
+import { CallStageStatus } from "../calls/stages/call.stage.model";
 
 
 export class ProjectService {
@@ -39,14 +42,16 @@ export class ProjectService {
         private readonly projAuth: ProjectAuth,
         private readonly allocRepo: IGrantAllocationRepository,
         private readonly callRepo: ICallRepository,
+        private readonly callStageRepo: ICallStageRepository,
         private readonly collabRepo: ICollaboratorRepository,
         private readonly collabService: CollaboratorService,
         private readonly phaseRepo: IPhaseRepository,
         private readonly phaseService: PhaseService,
         private readonly projectStageRepo: IProjectStageRepository,
         private readonly projectStageService: ProjectStageService,
-        private readonly validator: ConstraintValidator,
-        private readonly notificationService: NotificationService
+        private readonly constValidator: ConstraintValidator,
+        private readonly notificationService: NotificationService,
+        private readonly compValidator = new CompositionValidator()
     ) { }
 
 
@@ -65,8 +70,9 @@ export class ProjectService {
             if (!allocDoc) throw new Error(ERROR_CODES.ALLOCATION_NOT_FOUND);
             if (allocDoc.status !== AllocationStatus.active) throw new Error(ERROR_CODES.ALLOCATION_NOT_ACTIVE);
             const grantId = String(allocDoc.grant);
-            await this.validator.validateMetadata(grantId, title, summary);
-            await this.validator.validateThemes(grantId, themes);
+            await this.compValidator.validatePI(grantId, applicant);
+            await this.constValidator.validateMetadata(grantId, title, summary);
+            await this.constValidator.validateThemes(grantId, themes);
         }
         const created = await this.projectRepo.create(dto, session);
         if (created) {
@@ -76,8 +82,7 @@ export class ProjectService {
                 applicant: applicant,
                 role: "Principal Investigator",
                 userId: applicant
-            },
-                options,
+            }, { skipValidation: true },
                 session);
         }
         return created;
@@ -87,30 +92,34 @@ export class ProjectService {
     async apply(dto: ApplyProjectDTO) {
         const { call, title, summary, applicant, collaborators, phases, themes, docPath } = dto;
         const lead = collaborators.find(c => c.isLeadPI);
-        if (!lead) throw new AppError(ERROR_CODES.LEAD_PI_REQUIRED);
+        if (!lead) throw new AppError(ERROR_CODES.LEAD_PI_NOT_FOUND);
         if (lead.applicant !== applicant) throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
         const callDoc = await this.callRepo.findById(call);
         if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
         if (callDoc.status !== CallStatus.active) throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
 
-        const grantAllocation = String(callDoc.grantAllocation);
-        const grantAllocDoc = await this.allocRepo.findById(grantAllocation);
-        if (!grantAllocDoc) throw new Error(ERROR_CODES.ALLOCATION_NOT_FOUND);
-        if (grantAllocDoc.status !== AllocationStatus.active) throw new Error(ERROR_CODES.ALLOCATION_NOT_ACTIVE);
+        const callStageDoc = await this.callStageRepo.findOne({ callId: call, order: 1 });
+        if (!callStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        if (callStageDoc.status !== CallStageStatus.active) throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
+        if (callStageDoc.deadline < new Date()) throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
 
-        const grantId = String(grantAllocDoc.grant);
-        await this.validator.validateAll(grantId, {
-            collaborators, phases, themes, title, summary
-        });
+        const allocation = String(callDoc.grantAllocation);
+        const allocDoc = await this.allocRepo.findById(allocation);
+        if (!allocDoc) throw new Error(ERROR_CODES.ALLOCATION_NOT_FOUND);
+        if (allocDoc.status !== AllocationStatus.active) throw new Error(ERROR_CODES.ALLOCATION_NOT_ACTIVE);
+        const grantId = String(allocDoc.grant);
+        await this.constValidator.validateAll(grantId, { participantCount: collaborators.length, phases, themes, title, summary });
+        await this.compValidator.validateAll(grantId, collaborators);
+        const skipValidation = { skipValidation: true };
 
         //Start a Mongo Database Session
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
             const createdProj = await this.create(
-                { call, grantAllocation, title, summary, applicant, themes },
-                { skipValidation: true }, session);
+                { call, grantAllocation: allocation, title, summary, applicant, themes },
+                skipValidation, session);
 
             const projectId = String(createdProj._id);
 
@@ -124,7 +133,7 @@ export class ProjectService {
                     projectTitle: title,
                     role: collab.role,
                     userId: applicant
-                }, { skipValidation: true }, session);
+                }, skipValidation, session);
             }
 
             const orderedPhases = [...phases].sort((a, b) => a.order - b.order);
@@ -139,15 +148,21 @@ export class ProjectService {
                         duration: phase.duration,
                         description: phase.description,
                         applicantId: applicant
-                    }, { skipValidation: true },
-                    session
-                );
+                    }, skipValidation, session);
             }
 
             await this.projectStageService.create(
-                { project: projectId, documentPath: docPath, applicantId: applicant },
-                session
-            );
+                {
+                    project: projectId,
+                    projectTitle: title,
+                    callStage: String(callStageDoc._id),
+                    grantStage: String(callStageDoc.grantStage),
+                    stageName: callDoc.title,
+                    documentPath: docPath,
+                    applicantId: applicant
+                },
+                skipValidation,
+                session);
             await session.commitTransaction();
             return createdProj;
         } catch (error) {
@@ -189,7 +204,7 @@ export class ProjectService {
             nextTitle !== projectDoc.title ||
             nextSummary !== projectDoc.summary
         ) {
-            await this.validator.validateMetadata(
+            await this.constValidator.validateMetadata(
                 grantId,
                 nextTitle,
                 nextSummary
@@ -203,7 +218,7 @@ export class ProjectService {
             JSON.stringify(nextThemes.map(String).sort());
 
         if (themesChanged) {
-            await this.validator.validateThemes(
+            await this.constValidator.validateThemes(
                 grantId,
                 nextThemes
             );

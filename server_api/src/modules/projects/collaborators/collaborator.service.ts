@@ -20,6 +20,7 @@ import { CollaboratorStatus } from "./collaborator.model";
 import { ClientSession } from "mongoose";
 import { ProjectAuth } from "../project.auth";
 import { NotificationService } from "../../notifications/notification.service";
+import { CompositionValidator } from "../../grants/compositions/composition.validator";
 
 
 export class CollaboratorService {
@@ -29,8 +30,9 @@ export class CollaboratorService {
         private readonly projectRepo: IProjectRepository,
         private readonly projAuth: ProjectAuth,
         private readonly userRepo: IUserRepository,
-        private readonly validator: ConstraintValidator,
+        private readonly constraintValidator: ConstraintValidator,
         private readonly notificationService: NotificationService,
+        private readonly compValidator: CompositionValidator = new CompositionValidator(),
     ) {
     }
 
@@ -47,23 +49,19 @@ export class CollaboratorService {
 
     async create(dto: CreateCollaboratorDto, options?: { skipValidation?: boolean }, session?: ClientSession) {
         const { applicant, project, projectTitle, userId } = dto;
-
-        if (!options?.skipValidation) {
-            const projectDoc = await this.validateProject(project, userId ?? "", session);
-            const grantId = (projectDoc.grantAllocation as any).grant;
-
-            const appDoc = await this.userRepo.findById(applicant);
-            if (!appDoc) throw new Error(ERROR_CODES.USER_NOT_FOUND);
-            const countCollabs = await this.collabRepo.countByProject(project, session);
-
-            await this.validator.validateParticipants(grantId, countCollabs + 1, {
-                skipMin: true
-            });
-        }
-
         if (userId === applicant) {
             dto.isLeadPI = true;
             dto.status = CollaboratorStatus.verified;
+        }
+        if (!options?.skipValidation) {
+            const projectDoc = await this.validateProject(project, userId ?? "", session);
+            const grantId = (projectDoc.grantAllocation as any).grant;
+            if (dto.isLeadPI) {
+                await this.compValidator.validatePI(grantId, applicant);
+            } else {
+                await this.compValidator.validateCoPI(grantId, applicant);
+            }
+            await this.constraintValidator.validateParticipantCount(grantId, await this.collabRepo.countByProject(project, session) + 1, { skipMin: true });
         }
         try {
             const created = await this.collabRepo.create(dto, session);
@@ -149,7 +147,7 @@ export class CollaboratorService {
 
         const grantId = (projectDoc.grantAllocation as any).grant;
         const countCollabs = await this.collabRepo.countByProject(project);
-        await this.validator.validateParticipants(grantId, countCollabs - 1);
+        await this.constraintValidator.validateParticipantCount(grantId, countCollabs - 1);
 
         const deleted = this.collabRepo.delete(id);
         if (!collabDoc.isLeadPI) {

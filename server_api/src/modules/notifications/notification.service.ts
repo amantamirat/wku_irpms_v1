@@ -127,13 +127,12 @@ export class NotificationService {
  * Specific Business Helper: Notify user about a project stage status change.*/
     async notifyStatusChange(
         recipientId: string,
-        projectDoc: any, // Pass the whole project for context
+        projectTitle: string, // Pass the whole project for context
         stageName: string,
         newStatus: ProjectStageStatus,
         nextStageInfo?: { name: string, deadline?: Date }, // New optional param
         session?: ClientSession
     ) {
-        const projectTitle = projectDoc.title || "Project";
         let message: string;
         let type: NotificationType = NotificationType.INFO;
 

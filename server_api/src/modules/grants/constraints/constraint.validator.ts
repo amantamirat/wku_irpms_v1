@@ -9,7 +9,6 @@ export class ConstraintValidator {
         private readonly constraintRepo: IConstraintRepository = new ConstraintRepository(),
         private readonly themeRepo: IThemeRepository = new ThemeRepository(),
     ) { }
-
     // =====================================================
     // PRIVATE HELPERS
     // =====================================================
@@ -51,154 +50,50 @@ export class ConstraintValidator {
         }
     }
 
-    private validatePerPhase(phases: any[], field: string, constraint: any, label: string) {
-        for (const [i, phase] of (phases ?? []).entries()) {
-            const value = phase[field] ?? 0;
-            if (value < constraint.min || value > constraint.max) {
-                throw new AppError(
-                    `${label} in Phase ${i + 1} (${value}) must be between ${constraint.min} and ${constraint.max}`
-                );
-            }
-        }
+    async validateProjectTitle(grant: string, title: string) {
+        const constraint = await this.constraintRepo.findOne(grant, ConstraintType.PROJECT_TITLE);
+        if (!constraint) return
+        this.validateText(title, constraint, "Project Title");
     }
 
-    // =====================================================
-    // GROUPED VALIDATION FUNCTIONS
-    // =====================================================
-
+    async validateProjectSummary(grant: string, summary?: string) {
+        const constraint = await this.constraintRepo.findOne(grant, ConstraintType.PROJECT_SUMMARY);
+        if (!constraint) return;
+        if (!summary) throw new AppError("Project Summary Required");
+        this.validateText(summary, constraint, "Project Summary");
+    }
     /**
      * Validates Project Title and Summary word counts.
      * Use in: ProjectService.create, ProjectService.update
      */
     async validateMetadata(grant: string, title: string, summary?: string) {
-        const constraints = await this.getConstraints(grant, [
-            ConstraintType.PROJECT_TITLE,
-            ConstraintType.PROJECT_SUMMARY
-        ]);
-
-        for (const c of constraints) {
-            if (c.constraint === ConstraintType.PROJECT_TITLE) {
-                this.validateText(title, c, "Project title");
-            }
-            if (c.constraint === ConstraintType.PROJECT_SUMMARY) {
-                this.validateText(summary, c, "Project summary");
-            }
-        }
+        await this.validateProjectTitle(grant, title);
+        await this.validateProjectSummary(grant, summary);
     }
-
 
     // =====================================================
-    // GROUPED VALIDATION FUNCTIONS
+    // THEME VALIDATION AND RECURSION LOGIC
     // =====================================================
+    private async countThemeLevels(themes: string[]) {
+        const levelBuckets: Record<number, Set<string>> = { 0: new Set(), 1: new Set(), 2: new Set(), 3: new Set() };
 
-    /**
-     * Validates individual phase limits.
-     * Use in: PhaseService.create, PhaseService.update
-     */
-    async validateIndividualPhases(grant: string, phases: any[]) {
-        const constraints = await this.getConstraints(grant, [
-            ConstraintType.BUDGET_PHASE,
-            ConstraintType.TIME_PHASE
-        ]);
+        for (const thm of themes) {
+            let current = await this.themeRepo.findById(thm);
+            if (!current) throw new AppError(ERROR_CODES.THEME_NOT_FOUND);
 
-        for (const c of constraints) {
-            if (c.constraint === ConstraintType.BUDGET_PHASE) {
-                this.validatePerPhase(phases, "budget", c, "Phase budget");
-            }
-            if (c.constraint === ConstraintType.TIME_PHASE) {
-                this.validatePerPhase(phases, "duration", c, "Phase duration");
+            while (current) {
+                levelBuckets[current.level].add(current._id.toString());
+                if (!current.parent) break;
+                current = await this.themeRepo.findById(String(current.parent));
             }
         }
-    }
 
-    async validatePhaseCount(grant: string, phases: any[], options?: { skipMin?: boolean; skipMax?: boolean }) {
-        const constraints = await this.getConstraints(grant, [
-            ConstraintType.PHASE_COUNT
-        ]);
-        for (const c of constraints) {
-            switch (c.constraint) {
-                case ConstraintType.PHASE_COUNT:
-                    this.validateRange(phases.length, c, "Phase count", options);
-                    break;
-            }
-        }
-    }
-
-    /**
-     * Validates the project's cumulative totals and counts.
-     * Use in: Final submission or ProjectService.apply
-     */
-    async validateProjectTotals(grant: string, phases: any[], options?: { skipMin?: boolean; skipMax?: boolean }) {
-        const constraints = await this.getConstraints(grant, [
-            ConstraintType.BUDGET_TOTAL,
-            ConstraintType.TIME_TOTAL,
-        ]);
-
-        const totalBudget = phases.reduce((sum, p) => sum + (p.budget ?? 0), 0);
-        const totalDuration = phases.reduce((sum, p) => sum + (p.duration ?? 0), 0);
-
-        for (const c of constraints) {
-            switch (c.constraint) {
-                case ConstraintType.BUDGET_TOTAL:
-                    this.validateRange(totalBudget, c, "Total project budget", options);
-                    break;
-                case ConstraintType.TIME_TOTAL:
-                    this.validateRange(totalDuration, c, "Total project duration", options);
-                    break;
-            }
-        }
-    }
-    /**
-     * Validates everything related to phases: Count, Total Budget/Time, and Individual Phase limits.
-     * Use in: PhaseService.create, PhaseService.update, PhaseService.delete
-     */
-    async validatePhases(grant: string, phases: any[]) {
-        const constraints = await this.getConstraints(grant, [
-            ConstraintType.PHASE_COUNT,
-            ConstraintType.BUDGET_TOTAL,
-            ConstraintType.TIME_TOTAL,
-            ConstraintType.BUDGET_PHASE,
-            ConstraintType.TIME_PHASE
-        ]);
-
-        const totalBudget = phases.reduce((sum, p) => sum + (p.budget ?? 0), 0);
-        const totalDuration = phases.reduce((sum, p) => sum + (p.duration ?? 0), 0);
-
-        for (const c of constraints) {
-            switch (c.constraint) {
-                case ConstraintType.PHASE_COUNT:
-                    this.validateRange(phases.length, c, "Phase count");
-                    break;
-                case ConstraintType.BUDGET_TOTAL:
-                    this.validateRange(totalBudget, c, "Total project budget");
-                    break;
-                case ConstraintType.TIME_TOTAL:
-                    this.validateRange(totalDuration, c, "Total project duration");
-                    break;
-                case ConstraintType.BUDGET_PHASE:
-                    this.validatePerPhase(phases, "budget", c, "Phase budget");
-                    break;
-                case ConstraintType.TIME_PHASE:
-                    this.validatePerPhase(phases, "duration", c, "Phase duration");
-                    break;
-            }
-        }
-    }
-
-    /**
-     * Validates Participant (Collaborator) counts.
-     * Use in: CollaboratorService.create, CollaboratorService.delete
-     */
-    async validateParticipants(
-        grant: string,
-        count: number,
-        options?: { skipMin?: boolean; skipMax?: boolean }
-    ) {
-        const constraints = await this.getConstraints(grant, [ConstraintType.PARTICIPANT]);
-
-        for (const c of constraints) {
-            this.validateRange(count, c, "Participant count", options);
-        }
+        return {
+            themeCount: levelBuckets[0].size,
+            subThemeCount: levelBuckets[1].size,
+            focusAreaCount: levelBuckets[2].size,
+            indicatorCount: levelBuckets[3].size,
+        };
     }
 
     /**
@@ -234,13 +129,130 @@ export class ConstraintValidator {
             }
         }
     }
+    /**
+    * Validates Participant (Collaborator) counts.
+    * Use in: CollaboratorService.create, CollaboratorService.delete
+    */
+    async validateParticipantCount(grant: string, count: number, options?: { skipMin?: boolean; skipMax?: boolean }) {
+        const constraint = await this.constraintRepo.findOne(grant, ConstraintType.PARTICIPANT);
+        if (!constraint) return;
+        this.validateRange(count, constraint, "Participant count", options);
+    }
+    /**
+       * Validates Totoal Project Budget Limit.
+       */
+    async validateTotalBudget(grant: string, budget: number, options?: { skipMin?: boolean; skipMax?: boolean }) {
+        const constraint = await this.constraintRepo.findOne(grant, ConstraintType.BUDGET_TOTAL);
+        if (!constraint) return;
+        this.validateRange(budget, constraint, "Total project budget", options);
+    }
 
+    /**
+       * Validates Totoal Project Duration.
+       */
+    async validateTotalDuration(grant: string, duration: number, options?: { skipMin?: boolean; skipMax?: boolean }) {
+        const constraint = await this.constraintRepo.findOne(grant, ConstraintType.TIME_TOTAL);
+        if (!constraint) return;
+        this.validateRange(duration, constraint, "Total project duration", options);
+    }
+    /**
+     * Validates the project's cumulative totals and counts.
+     */
+    async validateProjectTotals(grant: string, totalBudget: number, totalDuration: number, options?: { skipMin?: boolean; skipMax?: boolean }) {
+        await this.validateTotalBudget(grant, totalBudget, options);
+        await this.validateTotalDuration(grant, totalDuration, options);
+    }
+    /**
+        * Validates Phase count.*/
+    async validatePhaseCount(grant: string, phaseCount: number, options?: { skipMin?: boolean; skipMax?: boolean }) {
+        const constraint = await this.constraintRepo.findOne(grant, ConstraintType.PHASE_COUNT);
+        if (!constraint) return;
+        this.validateRange(phaseCount, constraint, "Phase count", options);
+    }
+
+    /**
+       * Validates Phase Duration.
+       */
+    async validatePhaseDuration(grant: string, phaseDuration: number, constraint?: any
+    ) {
+        const c =
+            constraint && constraint.constraint === ConstraintType.TIME_PHASE
+                ? constraint
+                : await this.constraintRepo.findOne(grant, ConstraintType.TIME_PHASE);
+
+        if (!c) return;
+        this.validateRange(phaseDuration, c, "Phase duration");
+    }
+
+    /**
+ * Validates Phase Budget.
+ */
+    async validatePhaseBudget(
+        grant: string,
+        phaseBudget: number,
+        constraint?: any
+    ) {
+        const c =
+            constraint && constraint.constraint === ConstraintType.BUDGET_PHASE
+                ? constraint
+                : await this.constraintRepo.findOne(grant, ConstraintType.BUDGET_PHASE);
+
+        if (!c) return;
+
+        this.validateRange(phaseBudget, c, "Phase budget");
+    }
+    /**
+    * Validates Individual Phase Budget and Duration.
+    */
+    async validateIndividualPhase(
+        grant: string,
+        phases: any[]
+    ) {
+        const constraints = await this.getConstraints(grant, [
+            ConstraintType.BUDGET_PHASE,
+            ConstraintType.TIME_PHASE
+        ]);
+
+        const budgetConstraint = constraints.find(
+            c => c.constraint === ConstraintType.BUDGET_PHASE
+        );
+
+        const durationConstraint = constraints.find(
+            c => c.constraint === ConstraintType.TIME_PHASE
+        );
+
+        for (const phase of phases) {
+            await this.validatePhaseBudget(
+                grant,
+                phase.budget,
+                budgetConstraint,
+            );
+
+            await this.validatePhaseDuration(
+                grant,
+                phase.duration,
+                durationConstraint,
+            );
+        }
+    }
+
+    /**
+    * Validates everything related to phases: Count, Total Budget/Time, and Individual Phase limits.
+    * Use in: PhaseService.create, PhaseService.update, PhaseService.delete
+    */
+    async validatePhases(grant: string, phases: any[], options?: { skipMin?: boolean; skipMax?: boolean }) {
+        await this.validatePhaseCount(grant, phases.length, options);
+        await this.validateIndividualPhase(grant, phases);
+        const totalBudget = phases.reduce((sum, p) => sum + (p.budget ?? 0), 0);
+        const totalDuration = phases.reduce((sum, p) => sum + (p.duration ?? 0), 0);
+        await this.validateProjectTotals(grant, totalBudget, totalDuration, options);
+    }
     /**
      * Runs all validations at once. 
      * Use in: ProjectService.apply (Initial submission)
      */
     async validateAll(grant: string, dto: {
-        collaborators: any[],
+        participantCount: number,
         phases: any[],
         themes?: string[],
         title: string,
@@ -249,33 +261,9 @@ export class ConstraintValidator {
         await Promise.all([
             this.validateMetadata(grant, dto.title, dto.summary),
             this.validatePhases(grant, dto.phases),
-            this.validateParticipants(grant, dto.collaborators.length),
+            this.validateParticipantCount(grant, dto.participantCount),
             this.validateThemes(grant, dto.themes || [])
         ]);
     }
 
-    // =====================================================
-    // THEME RECURSION LOGIC
-    // =====================================================
-    private async countThemeLevels(themes: string[]) {
-        const levelBuckets: Record<number, Set<string>> = { 0: new Set(), 1: new Set(), 2: new Set(), 3: new Set() };
-
-        for (const thm of themes) {
-            let current = await this.themeRepo.findById(thm);
-            if (!current) throw new AppError(ERROR_CODES.THEME_NOT_FOUND);
-
-            while (current) {
-                levelBuckets[current.level].add(current._id.toString());
-                if (!current.parent) break;
-                current = await this.themeRepo.findById(String(current.parent));
-            }
-        }
-
-        return {
-            themeCount: levelBuckets[0].size,
-            subThemeCount: levelBuckets[1].size,
-            focusAreaCount: levelBuckets[2].size,
-            indicatorCount: levelBuckets[3].size,
-        };
-    }
 }

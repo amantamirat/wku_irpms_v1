@@ -51,13 +51,13 @@ const constValidator = new ConstraintValidator(new ConstraintRepository(), new T
 const collabService = new CollaboratorService(collabRepo, projectRepo, projAuth, appRepo, constValidator, notificationService);
 const phaseService = new PhaseService(phaseRepo, projectRepo, grantAllocRepo, projAuth, constValidator);
 const projectStageService = new ProjectStageService(
-    projStageRepo, projectRepo, projAuth, grantStageRepo,
+    projStageRepo, projAuth, grantStageRepo,
     callStageRepo, new ReviewerRepository(), synchronizer, notificationService
 );
 
 
 
-const service = new ProjectService(projectRepo, projAuth, grantAllocRepo, callRepo,
+const service = new ProjectService(projectRepo, projAuth, grantAllocRepo, callRepo, callStageRepo,
     collabRepo, collabService,
     phaseRepo, phaseService,
     projStageRepo, projectStageService

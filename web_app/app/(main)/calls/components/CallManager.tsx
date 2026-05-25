@@ -12,11 +12,19 @@ import { Calendar } from "../../calendars/models/calendar.model";
 import { Grant } from "../../grants/models/grant.model";
 
 interface CallManagerProps {
-    // If passed, these will usually come as IDs or full objects depending on the parent view
     grantAllocation?: string | GrantAllocation;
     calendar?: string | Calendar;
     grant?: string | Grant;
 }
+
+// Simple currency formatter utility
+const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'ETB', // Adjust currency code as necessary
+        maximumFractionDigits: 0
+    }).format(amount);
+};
 
 const CallManager = ({ grantAllocation, calendar, grant }: CallManagerProps) => {
 
@@ -50,6 +58,15 @@ const CallManager = ({ grantAllocation, calendar, grant }: CallManagerProps) => 
                 }
             },
 
+            /* --- Added Budget Column --- */
+            {
+                header: "Budget",
+                field: "budget",
+                sortable: true,
+                style: { width: '150px', textAlign: 'right' },
+                body: (c: Call) => c.budget !== undefined ? formatCurrency(c.budget) : "-"
+            },
+
             {
                 field: "status",
                 header: "Status",
@@ -62,35 +79,19 @@ const CallManager = ({ grantAllocation, calendar, grant }: CallManagerProps) => 
 
         createNew: () => ({
             ...createEmptyCall(),
-
-            // 1. Set the direct allocation if available
-            grantAllocation: typeof grantAllocation === 'object'
-                ? grantAllocation?._id
-                : grantAllocation,
-
-            // 2. Pass filters to help SaveCall fetch the right allocations
-            // We flatten these as well so SaveCall receives a clean string ID
-            _filterCalendar: typeof calendar === 'object'
-                ? (calendar as any)?._id
-                : calendar,
-
-            _filterGrant: typeof grant === 'object'
-                ? (grant as any)?._id
-                : grant
+            budget: 0, // Fallback initialization value for the form structure
+            grantAllocation: grantAllocation,
         } as any),
 
         SaveDialog: SaveCall,
         permissionPrefix: "call",
 
         query: () => ({
-            // Ensure we pass the ID string if an object was provided via props
             grantAllocation: typeof grantAllocation === 'object' ? grantAllocation._id : grantAllocation,
-            // Flatten Calendar (handles string | Calendar)
             calendar: typeof calendar === 'object'
                 ? (calendar as any)?._id
                 : calendar,
 
-            // Flatten Grant (handles string | Grant)
             grant: typeof grant === 'object'
                 ? (grant as any)?._id
                 : grant,

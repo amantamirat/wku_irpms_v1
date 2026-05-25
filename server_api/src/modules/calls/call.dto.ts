@@ -1,4 +1,4 @@
-import { CallStatus } from "./call.status";
+import { CallStatus } from "./call.model";
 
 export interface FindByIdOptions {
     populate?: {

@@ -3,7 +3,7 @@ import { CallService } from './call.service';
 import { CreateCallDTO, UpdateCallDTO } from './call.dto';
 import { AuthenticatedRequest } from '../auth/auth.middleware';
 import { successResponse, errorResponse } from '../../common/helpers/response';
-import { CallStatus } from './call.status';
+import { CallStatus } from "./call.model";
 import { TransitionRequestDto } from '../../common/dtos/transition.dto';
 import { ERROR_CODES } from '../../common/errors/error.codes';
 

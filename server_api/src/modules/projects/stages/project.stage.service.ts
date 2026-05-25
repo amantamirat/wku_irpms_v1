@@ -27,18 +27,23 @@ import {
 } from "./project.stage.dto";
 import { ProjectStageStatus } from "./project.stage.model";
 import { IProjectSynchronizer } from "./project.stage.synchronizer";
+import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
+import { CompositionValidator } from "../../grants/compositions/composition.validator";
+import { string } from "joi";
 
 export class ProjectStageService {
 
     constructor(
         private readonly repository: IProjectStageRepository,
-        private readonly projectRepo: IProjectRepository,
         private readonly projAuth: ProjectAuth,
         private readonly grantStageRepo: IGrantStageRepository,
         private readonly callStageRepo: ICallStageRepository,
         private readonly reviewerRepo: IReviewerRepository,
         private readonly synchronizer: IProjectSynchronizer,
         private readonly notificationService: NotificationService,
+        //private readonly constraintValidator: ConstraintValidator = new ConstraintValidator(),
+        //private readonly compositionValidator: CompositionValidator = new CompositionValidator(),
+
     ) {
     }
 
@@ -47,7 +52,7 @@ export class ProjectStageService {
         if (
             projectDoc.status !== ProjectStatus.draft
             && projectDoc.status !== ProjectStatus.submitted
-           // && projectDoc.status !== ProjectStatus.completed
+            // && projectDoc.status !== ProjectStatus.completed
         ) {
             throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
         }
@@ -56,67 +61,68 @@ export class ProjectStageService {
     /**
      * Create project stage (submission)
      */
-    async create(dto: CreateProjectStageDTO, session?: ClientSession) {
-        const { project, applicantId } = dto;
-        const projectDoc = await this.validateProject(project, applicantId, session);
-
-        let nextOrder = 1;
-        if (projectDoc.currentStage) {
-            if (projectDoc.status === ProjectStatus.completed) {
-                nextOrder = 0;//verification
+    async create(dto: CreateProjectStageDTO, options?: { skipValidation?: boolean }, session?: ClientSession) {
+        const { project, projectTitle, stageName, applicantId } = dto;
+        if (!options?.skipValidation) {
+            const projectDoc = await this.validateProject(project, applicantId, session);
+            const grantAllocDoc = projectDoc.grantAllocation as unknown as IGrantAllocation;
+            const grantId = String(grantAllocDoc.grant);
+            let nextOrder = 1;
+            if (projectDoc.currentStage) {
+                if (projectDoc.status === ProjectStatus.completed) {
+                    nextOrder = 0;//verification
+                }
+                else {
+                    const currentStageDoc = await this.repository
+                        .findById(String(projectDoc.currentStage), {
+                            populate: {
+                                grantStage: true
+                            }
+                        }, session);
+                    if (!currentStageDoc) {
+                        throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+                    }
+                    if (currentStageDoc.status !== ProjectStageStatus.accepted) {
+                        throw new AppError(ERROR_CODES.CURRENT_STAGE_NOT_ACCEPTED);
+                    }
+                    nextOrder = (currentStageDoc.grantStage as unknown as IGrantStage).order + 1;
+                }
             }
-            else {
-                const currentStageDoc = await this.repository
-                    .findById(String(projectDoc.currentStage), {
-                        populate: {
-                            grantStage: true
-                        }
-                    }, session);
 
-                if (!currentStageDoc) {
+
+            const nextGrantStageDoc = await this.grantStageRepo.findOne(grantId, nextOrder, session);
+            if (!nextGrantStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+            const nextGrantStageId = String(nextGrantStageDoc._id);
+            dto.grantStage = nextGrantStageId;
+            
+            if (projectDoc.call) {
+                const nextCallStageDoc = await this.callStageRepo.findOne(
+                    { callId: String(projectDoc.call), grantStageId: nextGrantStageId },
+                    session
+                );
+                if (!nextCallStageDoc) {
                     throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
                 }
-
-                if (currentStageDoc.status !== ProjectStageStatus.accepted) {
-                    throw new AppError(ERROR_CODES.CURRENT_STAGE_NOT_ACCEPTED);
+                if (nextCallStageDoc.status !== CallStageStatus.active) {
+                    throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
                 }
-                nextOrder = (currentStageDoc.grantStage as unknown as IGrantStage).order + 1;
-
+                if (nextCallStageDoc.deadline < new Date()) {
+                    throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
+                }
+                dto.callStage = String(nextCallStageDoc._id)
             }
+
+            //validateall
         }
 
-        const grantAllocDoc = projectDoc.grantAllocation as unknown as IGrantAllocation;
-        const grantStageDoc = await this.grantStageRepo.
-            findOne(String(grantAllocDoc.grant), nextOrder, session);
-        if (!grantStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-
-        dto.grantStage = String(grantStageDoc._id);
-
-        if (projectDoc.call) {
-            const callStageDoc = await this.callStageRepo.findOne(
-                String(projectDoc.call), nextOrder,
-                session
-            );
-            if (!callStageDoc) {
-                throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-            }
-            if (callStageDoc.status !== CallStageStatus.active) {
-                throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
-            }
-            if (callStageDoc.deadline < new Date()) {
-                throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
-            }
-
-            dto.callStage = String(callStageDoc._id)
-        }
 
         try {
             const created = await this.repository.create(dto, session);
             await this.synchronizer.sync(project, session);
             await this.notificationService.notifyStatusChange(
-                String(projectDoc.applicant),
-                projectDoc,
-                grantStageDoc?.name || "Stage",
+                applicantId,
+                projectTitle ?? "Project",
+                stageName || "Stage",
                 ProjectStageStatus.submitted,
                 undefined,
                 session
@@ -294,7 +300,7 @@ export class ProjectStageService {
 
                 if (nextGrantStage) {
                     const nextCallStage = projectData.call
-                        ? await this.callStageRepo.findOne(String(projectData.call), nextOrder)
+                        ? await this.callStageRepo.findOne({ callId: String(projectData.call), order: nextOrder })
                         : null;
 
                     nextStageInfo = {

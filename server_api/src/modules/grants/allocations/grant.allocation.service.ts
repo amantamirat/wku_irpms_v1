@@ -82,6 +82,9 @@ export class GrantAllocationService {
     /**
      * Update allocation (only totalBudget)
      * */
+    /**
+ * Update allocation (considering usedBudget and sub-call budgets)
+ * */
     async update(dto: UpdateGrantAllocationDTO) {
         const { id, data } = dto;
 
@@ -89,17 +92,30 @@ export class GrantAllocationService {
         const currentAllocation = await this.repository.findById(id);
         if (!currentAllocation) throw new AppError(ERROR_CODES.ALLOCATION_NOT_FOUND);
 
-        // 2. Budget Floor Check (Can't go below what's already spent)
-        if (data.allocatedAmount !== undefined && data.allocatedAmount < (currentAllocation.usedBudget || 0)) {
-            throw new AppError(
-                ERROR_CODES.INVALID_BUDGET_REDUCTION,
-                `Cannot reduce totalBudget below usedBudget of ${currentAllocation.usedBudget}.`
-            );
-        }
-
-        // 3. Grant Ceiling Check
+        // Only perform budget checks if allocatedAmount is actually being changed
         if (data.allocatedAmount !== undefined && data.allocatedAmount !== currentAllocation.allocatedAmount) {
 
+            // 2. Budget Floor Check (Can't go below what's already spent/distributed)
+            if (data.allocatedAmount < (currentAllocation.usedBudget || 0)) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_BUDGET_REDUCTION,
+                    `Cannot reduce allocatedAmount below usedBudget of ${currentAllocation.usedBudget}.`
+                );
+            }
+
+            // 3. NEW: Call Budget Floor Check (Can't go below what's committed to active strategic Calls)
+            // Fetch all calls tied to this specific allocation
+            const activeCalls = await this.callRepo.find({ grantAllocation: id });
+            const totalCommittedToCalls = activeCalls.reduce((sum, c) => sum + (c.budget || 0), 0);
+
+            if (data.allocatedAmount < totalCommittedToCalls) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_BUDGET_REDUCTION,
+                    `Cannot reduce allocation to ${data.allocatedAmount}. Strategic Calls already claim ${totalCommittedToCalls} of this footprint.`
+                );
+            }
+
+            // 4. Grant Ceiling Check
             const grant = String(currentAllocation.grant);
             const grantDoc = await this.grantRepo.findById(grant);
             if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
@@ -185,18 +201,7 @@ export class GrantAllocationService {
         return await this.repository.delete(id);
     }
 
-    /**
-     * Check if there is enough remaining budget
-     */
-    async checkBudget(allocationId: string, amount: number) {
-        const allocation = await this.repository.findById(allocationId);
-        if (!allocation) throw new AppError(ERROR_CODES.ALLOCATION_NOT_FOUND);
 
-        const remaining = allocation.allocatedAmount - (allocation.usedBudget || 0);
-        if (amount > remaining) throw new AppError(ERROR_CODES.BUDGET_EXCEEDED);
-
-        return true;
-    }
 
 }
 

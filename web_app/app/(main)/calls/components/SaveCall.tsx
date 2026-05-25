@@ -6,6 +6,7 @@ import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
+import { InputNumber } from 'primereact/inputnumber'; // <-- Import InputNumber
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
@@ -34,8 +35,6 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<E
         if (isAllocationPredefined || !visible) return;
         const loadAllocations = async () => {
             try {
-
-                // Construct query based on provided filters
                 const query: any = {
                     status: AllocationStatus.active,
                     populate: true
@@ -47,7 +46,6 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<E
                 const data = await GrantAllocationApi.getAll(query);
                 setAllocations(data);
 
-                // UX WIN: If there's only one possible choice, select it automatically
                 if (data.length === 1 && !localCall.grantAllocation) {
                     setLocalCall(prev => ({ ...prev, grantAllocation: data[0] }));
                 }
@@ -72,8 +70,15 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<E
     const saveCall = async () => {
         try {
             setSubmitted(true);
+            
+            // Basic layout validation
             const validation = validateCall(localCall);
             if (!validation.valid) throw new Error(validation.message);
+            
+            // Frontend safety check: Ensure user filled in a positive number
+            if (localCall.budget === undefined || localCall.budget === null || localCall.budget <= 0) {
+                throw new Error("Please provide a valid funding budget amount greater than 0.");
+            }
 
             const payload = sanitizeCall(localCall);
             let saved: Call;
@@ -104,7 +109,6 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<E
         onHide();
     };
 
-    
     const footer = (
         <>
             <Button label="Cancel" icon="pi pi-times" text onClick={hide} />
@@ -130,7 +134,6 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<E
 
                     {isAllocationPredefined ? (
                         <InputText
-                            // CRITICAL: Ensure we only pass a STRING to value, never the object
                             value={getAllocationLabel(localCall.grantAllocation)}
                             disabled
                         />
@@ -139,12 +142,9 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<E
                             id="grantAllocation"
                             value={localCall.grantAllocation}
                             options={allocations}
-                            // CRITICAL: optionLabel must point to a string field or be a string. 
-                            // Since we don't have a single string field, we use dataKey and templates.
                             optionLabel="_id"
                             dataKey="_id"
                             onChange={(e) => setLocalCall({ ...localCall, grantAllocation: e.value })}
-                            // These ensure React only sees <span>text</span> and not {object}
                             valueTemplate={(option, props) => option ? allocationOptionTemplate(option) : props.placeholder}
                             itemTemplate={allocationOptionTemplate}
                             placeholder="Select Year and Grant Source"
@@ -163,20 +163,25 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<E
                     />
                 </div>
 
-                {
-                    /**
-                     * 
-                     * <div className="field">
-                                    <label htmlFor="status" className="font-bold">Status</label>
-                                    <Dropdown
-                                        id="status"
-                                        value={localCall.status}
-                                        options={Object.values(CallStatus)}
-                                        onChange={(e) => setLocalCall({ ...localCall, status: e.value })}
-                                    />
-                                </div>
-                     */
-                }
+                {/* --- Added Budget Field --- */}
+                <div className="field">
+                    <label htmlFor="budget" className="font-bold">Allocated Budget</label>
+                    <InputNumber
+                        id="budget"
+                        value={localCall.budget ?? null}
+                        onValueChange={(e) => setLocalCall({ ...localCall, budget: e.value ?? 0 })}
+                        mode="currency"
+                        currency="ETB" // Matches Manager datagrid layout context
+                        locale="en-US"
+                        min={0}
+                        maxFractionDigits={0}
+                        placeholder="Enter strategic pool limit"
+                        className={classNames({ 'p-invalid': submitted && (!localCall.budget || localCall.budget <= 0) })}
+                    />
+                    {submitted && (!localCall.budget || localCall.budget <= 0) && (
+                        <small className="p-error font-semibold block mt-1">A valid operational budget is required.</small>
+                    )}
+                </div>
 
                 <div className="field">
                     <label htmlFor="description" className="font-bold">Description / Instructions</label>

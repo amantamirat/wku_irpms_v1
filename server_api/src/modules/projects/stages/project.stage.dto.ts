@@ -15,8 +15,10 @@ export interface GetProjectStageDTO {
 
 export interface CreateProjectStageDTO {
     project: string;
+    projectTitle?: string;
     grantStage?: string;
     callStage?: string;
+    stageName?: string;
     grant?: string;
     call?: string;
     documentPath: string;
@@ -40,7 +42,7 @@ export interface UpdateStatusDTO {
 export interface ExistsStageDTO {
     grantStage?: string;
     callStage?: string;
-    project?:string;
+    project?: string;
 }
 
 export interface SubmitProjectDTO {

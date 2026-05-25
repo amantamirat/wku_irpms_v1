@@ -1,10 +1,12 @@
 import { AppError } from "../../../common/errors/app.error";
+import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { ISpecializationRepository, SpecializationRepository } from "../../organization/specializations/specialization.repository";
+import { CollaboratorDto } from "../../projects/collaborators/collaborator.dto";
 import { ExperienceRepository, IExperienceRepository } from "../../users/experiences/experience.repository";
 import { IUser } from "../../users/user.model";
 import { IUserRepository, UserRepository } from "../../users/user.repository";
 import { IComposition, OperationMode, TargetScope } from "./composition.model";
-import { ICompositionRepository, CompositionRepository } from "./composition.repository";
+import { CompositionRepository, ICompositionRepository } from "./composition.repository";
 
 export class CompositionValidator {
     constructor(
@@ -15,56 +17,139 @@ export class CompositionValidator {
     ) { }
 
     // =====================================================
-    // CORE VALIDATION FUNCTION
+    // ALL-IN-ONE SYSTEM SUBMISSION VALIDATOR
     // =====================================================
 
     /**
-     * Evaluates an individual team member against composition rule constraints 
-     * established for a specific grant program based on their role (PI or Co-Investigator).
-     * 
-     * @param grant Target grant ID containing composition profiles
-     * @param user Raw user database reference making up the applicant team member
-     * @param isPI Flag indicating whether this user is the Principal Investigator
-     */
-    async validateCollab(grant: string, user: IUser, isPI: boolean): Promise<void> {
-        // 1. Fetch active compliance frameworks assigned to the tracking grant
-        const rules = await this.compositionRepo.find({ grant });
-        if (!rules || rules.length === 0) return;
+    * Runs all team composition rules validation at once based on the list of collaborators. 
+    * Use in: ProjectService.apply (Initial submission or full validation) 
+    */
+    async validateAll(grant: string, collaborators: CollaboratorDto[]) {
+        // 1. Identify and validate presence of the Lead PI
+        const lead = collaborators.find(c => c.isLeadPI);
+        if (!lead) {
+            throw new AppError(ERROR_CODES.LEAD_PI_NOT_FOUND);
+        }
 
-        for (const rule of rules) {
-            // Check rules meant only for the Principal Investigator
-            if (rule.targetScope === TargetScope.PI_ONLY && isPI) {
-                await this.validateIndividual(user, rule);
-            }
+        const piId = lead.applicant;
 
-            // Check rules meant only for Co-Investigators / regular team members
-            if (rule.targetScope === TargetScope.CO_ONLY && !isPI) {
-                await this.validateIndividual(user, rule);
-            }
+        // 2. Identify all Co-PI IDs (everyone else who isn't the Lead PI)
+        const coPiIds = collaborators
+            .filter(c => !c.isLeadPI)
+            .map(c => c.applicant);
 
-            // Check rules applicable to everyone regardless of rank
-            if (rule.targetScope === TargetScope.ALL_MEMBERS) {
-                await this.validateIndividual(user, rule);
+        // Get a unique set of all member IDs to avoid duplicate queries
+        const allMemberIds = Array.from(new Set([piId, ...coPiIds]));
+
+        // 3. Concurrently fetch all raw user entities and necessary rule contexts
+        const [users, piRule, coRule, memberRule, aggregateRule] = await Promise.all([
+            this.userRepo.findAll({ ids: allMemberIds }),
+            this.compositionRepo.findOne(grant, TargetScope.PI_ONLY),
+            this.compositionRepo.findOne(grant, TargetScope.CO_ONLY),
+            this.compositionRepo.findOne(grant, TargetScope.ALL_MEMBERS),
+            this.compositionRepo.findOne(grant, TargetScope.TEAM_AGGREGATE)
+        ]);
+
+        // 4. Map database results to ensure users actually exist
+        const userMap = new Map<string, IUser>();
+        for (const user of users) {
+            userMap.set(String((user as any)._id), user);
+        }
+
+        const piUser = userMap.get(piId);
+        if (!piUser) throw new AppError(ERROR_CODES.USER_NOT_FOUND);
+
+        const coPiUsers: IUser[] = [];
+        for (const id of coPiIds) {
+            const coPi = userMap.get(id);
+            if (!coPi) throw new AppError(ERROR_CODES.USER_NOT_FOUND);
+            coPiUsers.push(coPi);
+        }
+
+        // Gather total distinct profiles involved in this scope
+        const allDistinctUsers = Array.from(userMap.values());
+
+        // 5. Queue targeted assertions into a parallel promise execution pool
+        const validationTasks: Promise<void>[] = [];
+
+        // Validate PI individual contexts
+        if (piRule) {
+            validationTasks.push(this.validateIndividual(piUser, piRule));
+        }
+
+        // Validate Co-PI individual contexts
+        if (coRule && coPiUsers.length > 0) {
+            for (const coPi of coPiUsers) {
+                validationTasks.push(this.validateIndividual(coPi, coRule));
             }
         }
+
+        // Validate generic conditions across all checked profiles
+        if (memberRule) {
+            for (const member of allDistinctUsers) {
+                validationTasks.push(this.validateIndividual(member, memberRule));
+            }
+        }
+
+        // Run full composite team validation balances
+        if (aggregateRule) {
+            validationTasks.push(this.executeAggregateValidation(aggregateRule, allDistinctUsers));
+        }
+
+        await Promise.all(validationTasks);
+    }
+
+    // =====================================================
+    // CORE VALIDATION FUNCTIONS
+    // =====================================================
+
+    private async validateUser(userid: string) {
+        const user = await this.userRepo.findById(userid);
+        if (!user) { throw new AppError(ERROR_CODES.USER_NOT_FOUND); }
+        return user;
+    }
+
+    async validatePI(grant: string, userid: string): Promise<void> {
+        const user = await this.validateUser(userid);
+        const rule = await this.compositionRepo.findOne(grant, TargetScope.PI_ONLY);
+        if (!rule) return;
+        await this.validateIndividual(user, rule);
+        await this.validateMember(grant, user);
+    }
+
+    async validateCoPI(grant: string, userid: string): Promise<void> {
+        const user = await this.validateUser(userid);
+        const rule = await this.compositionRepo.findOne(grant, TargetScope.CO_ONLY);
+        if (!rule) return;
+        await this.validateIndividual(user, rule);
+        await this.validateMember(grant, user);
+    }
+
+    private async validateMember(grant: string, user: IUser): Promise<void> {
+        const rule = await this.compositionRepo.findOne(grant, TargetScope.ALL_MEMBERS);
+        if (!rule) return;
+        await this.validateIndividual(user, rule);
     }
 
     // =====================================================
     // AGGREGATE TEAM VALIDATION
     // =====================================================
 
-    /**
-     * Transforms individual matching structures into collective aggregate metrics.
-     * Note: If you choose to use team rules later, this loop has been fixed to handle async matches.
-     */
     async validateAggregate(grant: string, users: IUser[]): Promise<void> {
         const rule = await this.compositionRepo.findOne(grant, TargetScope.TEAM_AGGREGATE);
-        if (!rule) { return }
+        if (!rule) return;
+        await this.executeAggregateValidation(rule, users);
+    }
+
+    /**
+     * Shared extraction handler executing core arithmetic metrics evaluation.
+     */
+    private async executeAggregateValidation(rule: IComposition, users: IUser[]): Promise<void> {
         let qualifyingCount = 0;
 
         for (const user of users) {
             const matchesProfile = await this.matchesProfileCriteria(user, rule.profileRule);
-            const matchesHistory = true//this.matchesHistoryCriteria(user, rule.projectHistoryRule);
+            const matchesHistory = true; // this.matchesHistoryCriteria(user, rule.projectHistoryRule);
             if (matchesProfile && matchesHistory) {
                 qualifyingCount++;
             }
@@ -105,12 +190,10 @@ export class CompositionValidator {
 
     /**
      * Validates that an individual team member satisfies the restriction profiles.
-     * Updated to be async to resolve database criteria rules.
      */
     private async validateIndividual(user: IUser, rule: IComposition): Promise<void> {
-        // 🔹 Fixed: Correctly awaiting the async profile matching logic
         const matchesProfile = await this.matchesProfileCriteria(user, rule.profileRule);
-        const matchesHistory = true;//await this.matchesHistoryCriteria(user, rule.projectHistoryRule);
+        const matchesHistory = true; // await this.matchesHistoryCriteria(user, rule.projectHistoryRule);
 
         if (!matchesProfile || !matchesHistory) {
             throw new AppError(
@@ -165,39 +248,6 @@ export class CompositionValidator {
 
         return true;
     }
-
-    /*
-
-    private matchesHistoryCriteria(user: any, criterion: any): boolean {
-        if (!criterion) return true;
-
-        const history = user.projectHistory || {};
-
-        if (criterion.submission) {
-            const subs = history.submissionCount ?? 0;
-            if (subs < (criterion.submission.min ?? 0) || subs > (criterion.submission.max ?? Infinity)) {
-                return false;
-            }
-        }
-
-        if (criterion.completion) {
-            const comps = history.completionCount ?? 0;
-            if (comps < (criterion.completion.min ?? 0) || comps > (criterion.completion.max ?? Infinity)) {
-                return false;
-            }
-        }
-
-        if (criterion.rejection) {
-            const rejs = history.rejectionCount ?? 0;
-            if (rejs < (criterion.rejection.min ?? 0) || rejs > (criterion.rejection.max ?? Infinity)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-*/
-
 
     // =====================================================
     // HELPER UTILITIES

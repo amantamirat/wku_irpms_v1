@@ -44,7 +44,8 @@ export interface UpdateOwnershipsDTO {
 }
 
 export interface GetUsersDTO {
-    workspace: string;
+    ids?: string[];
+    workspace?: string;
     populate?: boolean;
 }
 
