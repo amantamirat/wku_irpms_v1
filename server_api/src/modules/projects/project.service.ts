@@ -281,16 +281,20 @@ export class ProjectService {
         }
 
         if (from === ProjectStatus.approved && to === ProjectStatus.granted) {
+            /*
             await this.allocRepo.reserveBudget(
                 projectDoc.grantAllocation.toString(),
                 projectDoc.totalBudget || 0
             );
+            */
         }
         if (from === ProjectStatus.granted && to === ProjectStatus.approved) {
+            /*
             await this.allocRepo.releaseReservedBudget(
                 projectDoc.grantAllocation.toString(),
                 projectDoc.totalBudget || 0
             );
+            */
         }
 
         return await this.projectRepo.updateStatus(id, to);

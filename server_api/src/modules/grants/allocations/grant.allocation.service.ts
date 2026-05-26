@@ -79,27 +79,24 @@ export class GrantAllocationService {
         return allocation;
     }
 
-    /**
-     * Update allocation (only totalBudget)
-     * */
+
     /**
  * Update allocation (considering usedBudget and sub-call budgets)
  * */
     async update(dto: UpdateGrantAllocationDTO) {
         const { id, data } = dto;
-
         // 1. Fetch the specific allocation we are changing
-        const currentAllocation = await this.repository.findById(id);
-        if (!currentAllocation) throw new AppError(ERROR_CODES.ALLOCATION_NOT_FOUND);
+        const allocDoc = await this.repository.findById(id);
+        if (!allocDoc) throw new AppError(ERROR_CODES.ALLOCATION_NOT_FOUND);
 
         // Only perform budget checks if allocatedAmount is actually being changed
-        if (data.allocatedAmount !== undefined && data.allocatedAmount !== currentAllocation.allocatedAmount) {
+        if (data.allocatedAmount !== undefined && data.allocatedAmount !== allocDoc.allocatedAmount) {
 
             // 2. Budget Floor Check (Can't go below what's already spent/distributed)
-            if (data.allocatedAmount < (currentAllocation.usedBudget || 0)) {
+            if (data.allocatedAmount < (allocDoc.usedBudget || 0)) {
                 throw new AppError(
                     ERROR_CODES.INVALID_BUDGET_REDUCTION,
-                    `Cannot reduce allocatedAmount below usedBudget of ${currentAllocation.usedBudget}.`
+                    `Cannot reduce allocatedAmount below usedBudget of ${allocDoc.usedBudget}.`
                 );
             }
 
@@ -116,7 +113,7 @@ export class GrantAllocationService {
             }
 
             // 4. Grant Ceiling Check
-            const grant = String(currentAllocation.grant);
+            const grant = String(allocDoc.grant);
             const grantDoc = await this.grantRepo.findById(grant);
             if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
 
@@ -129,10 +126,10 @@ export class GrantAllocationService {
             /**
              * Projected total = current total - old allocation + new allocation
              */
-            const projectedTotal = currentTotalSum - currentAllocation.allocatedAmount + data.allocatedAmount;
+            const projectedTotal = currentTotalSum - allocDoc.allocatedAmount + data.allocatedAmount;
 
             if (projectedTotal > grantDoc.amount) {
-                const remaining = grantDoc.amount - (currentTotalSum - currentAllocation.allocatedAmount);
+                const remaining = grantDoc.amount - (currentTotalSum - allocDoc.allocatedAmount);
                 throw new AppError(
                     ERROR_CODES.ALLOCATION_EXCEEDS_GRANT_AMOUNT,
                     `Cannot update allocation to ${data.allocatedAmount}. Only ${remaining} remaining for this grant.`

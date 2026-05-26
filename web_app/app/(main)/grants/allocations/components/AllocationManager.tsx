@@ -79,6 +79,24 @@ const AllocationManager = ({
                     currencyFormatter.format(a.allocatedAmount || 0)
             },
             /**
+            * USED
+            */
+            {
+                header: "Used Budget",
+                field: "usedBudget",
+
+                body: (a: GrantAllocation) => {
+
+                    const used = a.usedBudget || 0;
+
+                    return (
+                        <span>
+                            {currencyFormatter.format(used)}
+                        </span>
+                    );
+                }
+            },
+            /**
              * STATUS
              */
             {

@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 import { Response } from "express";
 import { errorResponse, successResponse } from "../../common/helpers/response";
 import { AuthenticatedRequest } from "../auth/auth.middleware";
@@ -46,7 +47,9 @@ export class ProjectController {
       } catch {
         throw new Error("Invalid project format");
       }
-
+      // Convert absolute system path to a clean relative path for your DB entry
+      // e.g., "uploads/projects/1715623-28392.pdf"     
+      const relativeDocPath = path.relative(process.cwd(), req.file.path).replace(/\\/g, '/');
       const dto: ApplyProjectDTO = {
         call: project.call,
         title: project.title,
@@ -55,13 +58,17 @@ export class ProjectController {
         collaborators: project.collaborators || [],
         themes: project.themes || [],
         phases: project.phases || [],
-        docPath: `uploads/${req.file.filename}`,
+        docPath: relativeDocPath, // Saved cleanly to your DB
       };
       const submitted = await this.service.apply(dto);
       successResponse(res, 201, "Project submitted successfully", submitted);
+
     } catch (err: any) {
-      if (req.file) {
-        fs.unlink(`uploads/${req.file.filename}`, () => { });
+      // If the service/validation layer fails, delete the file from the exact spot it landed
+      if (req.file && req.file.path) {
+        fs.unlink(req.file.path, (unlinkErr) => {
+          if (unlinkErr) console.error(`Failed to delete orphaned file at ${req.file?.path}:`, unlinkErr);
+        });
       }
       errorResponse(res, 400, err.message, err);
     }

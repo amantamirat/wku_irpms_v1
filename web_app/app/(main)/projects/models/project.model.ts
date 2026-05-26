@@ -29,6 +29,7 @@ export type Project = {
     applicant?: string | User;
     totalBudget?: number;
     totalDuration?: number;
+    totalCollabs?: number;
     themes?: Theme[] | string[];
     currentStage?: string;
     createdAt?: Date;

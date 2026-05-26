@@ -85,7 +85,6 @@ export class PhaseService {
         const phaseDoc = await this.phaseRepo.findById(id);
         if (!phaseDoc)
             throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
-
         if (phaseDoc.status !== PhaseStatus.proposed)
             throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
 

@@ -100,7 +100,7 @@
             "calendar:read",
             "reviewer:read",
             "reviewer:transition.pending.accepted",
-            "reviewer:transition.accepted.sumitted",
+            "reviewer:transition.accepted.submitted",
             "criterion:read",
             "result:*"
         ],

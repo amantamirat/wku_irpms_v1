@@ -18,12 +18,7 @@ export interface IGrantAllocationRepository {
     updateStatus(id: string, newStatus: AllocationStatus): Promise<IGrantAllocation | null>;
     exists(filters: ExistsGrantAllocationDTO): Promise<boolean>;
     delete(id: string): Promise<IGrantAllocation | null>;
-
-    // Reservation operations
-    reserveBudget(allocationId: string, amount: number): Promise<IGrantAllocation>;
-    releaseReservedBudget(allocationId: string, amount: number): Promise<void>;
-
-    // Actual usage operations
+    //Budget Operations
     consumeBudget(allocationId: string, amount: number): Promise<IGrantAllocation>;
     reverseConsumedBudget(allocationId: string, amount: number): Promise<IGrantAllocation>;
 }
@@ -64,14 +59,10 @@ export class GrantAllocationRepository implements IGrantAllocationRepository {
     }
 
     async create(dto: CreateGrantAllocationDTO) {
-
         const data: Partial<IGrantAllocation> = {
             grant: new mongoose.Types.ObjectId(dto.grant),
             calendar: new mongoose.Types.ObjectId(dto.calendar),
-
             allocatedAmount: dto.allocatedAmount,
-
-            reservedBudget: 0,
             usedBudget: 0
         };
 
@@ -79,7 +70,6 @@ export class GrantAllocationRepository implements IGrantAllocationRepository {
     }
 
     async update(id: string, dtoData: UpdateGrantAllocationDTO["data"]) {
-
         const updateData: Partial<IGrantAllocation> = {};
 
         if (dtoData.allocatedAmount !== undefined)
@@ -93,7 +83,6 @@ export class GrantAllocationRepository implements IGrantAllocationRepository {
     }
 
     async updateStatus(id: string, newStatus: AllocationStatus) {
-
         return GrantAllocation.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: { status: newStatus } },
@@ -102,7 +91,6 @@ export class GrantAllocationRepository implements IGrantAllocationRepository {
     }
 
     async exists(filters: ExistsGrantAllocationDTO): Promise<boolean> {
-
         const query: any = {};
 
         if (filters.grant)
@@ -115,7 +103,6 @@ export class GrantAllocationRepository implements IGrantAllocationRepository {
             query.status = filters.status;
 
         const result = await GrantAllocation.exists(query).exec();
-
         return result !== null;
     }
 
@@ -126,36 +113,28 @@ export class GrantAllocationRepository implements IGrantAllocationRepository {
     }
 
     /**
-     * Reserve budget for granted projects
-     *
-     * Checks:
-     * totalBudget - reservedBudget >= amount
+     * Consume budget directly.
+     * * Condition: allocatedAmount - usedBudget >= amount
      */
-    async reserveBudget(allocationId: string, amount: number) {
-
+    async consumeBudget(allocationId: string, amount: number) {
         const updated = await GrantAllocation.findOneAndUpdate(
             {
                 _id: new mongoose.Types.ObjectId(allocationId),
-
                 $expr: {
                     $gte: [
                         {
                             $subtract: [
                                 "$allocatedAmount",
-                                { $ifNull: ["$reservedBudget", 0] }
+                                { $ifNull: ["$usedBudget", 0] }
                             ]
                         },
                         amount
                     ]
                 }
             },
-
             {
-                $inc: {
-                    reservedBudget: amount
-                }
+                $inc: { usedBudget: amount }
             },
-
             { new: true }
         );
 
@@ -166,82 +145,18 @@ export class GrantAllocationRepository implements IGrantAllocationRepository {
     }
 
     /**
-     * Release reserved budget
-     *
-     * Example:
-     * project cancelled/rejected after granted
+     * Reverse consumed budget.
+     * * Condition: usedBudget >= amount
      */
-    async releaseReservedBudget(
-        allocationId: string,
-        amount: number
-    ) {
-
-        await GrantAllocation.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(allocationId),
-
-            {
-                $inc: {
-                    reservedBudget: -amount
-                }
-            }
-        );
-    }
-
-    /**
-     * Consume actual budget
-     *
-     * Usually called when:
-     * phase becomes active/completed
-     *
-     * Moves money:
-     * reserved -> used
-     */
-    async consumeBudget(
-        allocationId: string,
-        amount: number
-    ) {
-
+    async reverseConsumedBudget(allocationId: string, amount: number) {
         const updated = await GrantAllocation.findOneAndUpdate(
             {
                 _id: new mongoose.Types.ObjectId(allocationId),
-
-                reservedBudget: { $gte: amount }
-            },
-
-            {
-                $inc: {
-                    reservedBudget: -amount,
-                    usedBudget: amount
-                }
-            },
-
-            { new: true }
-        );
-
-        if (!updated)
-            throw new AppError(ERROR_CODES.BUDGET_EXCEEDED);
-
-        return updated;
-    }
-
-    async reverseConsumedBudget(
-        allocationId: string,
-        amount: number
-    ) {
-
-        const updated = await GrantAllocation.findOneAndUpdate(
-            {
-                _id: allocationId,
                 usedBudget: { $gte: amount }
             },
-
             {
-                $inc: {
-                    usedBudget: -amount,
-                    reservedBudget: amount
-                }
+                $inc: { usedBudget: -amount }
             },
-
             { new: true }
         );
 

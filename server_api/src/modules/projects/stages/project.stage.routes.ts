@@ -35,6 +35,11 @@ const router = express.Router();
 
 router.post("/", verifyActiveAccount,
     checkPermission("project.stage:create"),
+    (req, res, next) => {
+        // Set the dynamic subfolder for this specific endpoint
+        req.headers["x-upload-folder"] = "applications";
+        next();
+    },
     upload.single("document"), controller.create);
 
 router.get("/", verifyActiveAccount,

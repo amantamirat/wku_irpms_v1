@@ -1,34 +1,37 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import ProjectManager from '../components/ProjectManager';
 import { Project } from '../models/project.model';
 import { PROJECT_STATUS_ORDER } from '../models/project.state-machine';
 import { STATUS_BUTTON_CONFIG } from '@/components/status-button.config';
 
 const ProjectPage = () => {
-    const [projects, setProjects] = useState<Project[]>([]);
+    // Keep track of only the necessary aggregations instead of storing the whole array
+    const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
+    const [totalProjects, setTotalProjects] = useState<number | null>(null);
 
-    const statusCounts = useMemo(() => {
-        return projects.reduce((acc, project) => {
+    // Single callback to handle the data emission from ProjectManager
+    const handleItemsChange = (updatedProjects: Project[]) => {
+        const counts = updatedProjects.reduce((acc, project) => {
             const status = project.status || "Draft";
             acc[status] = (acc[status] || 0) + 1;
             return acc;
         }, {} as Record<string, number>);
-    }, [projects]);
+
+        setStatusCounts(counts);
+        setTotalProjects(updatedProjects.length);
+    };
 
     return (
-        // Changed bg-gray-50 to surface-ground to respect dark mode
         <div className="flex flex-column gap-4 p-4 bg-surface-ground min-h-screen">
 
             {/* HEADER */}
             <div className="flex justify-content-between align-items-end">
                 <div>
-                    {/* Changed text-900 to text-color */}
                     <h2 className="text-2xl font-bold text-color m-0 line-height-2">
                         Project Dashboard
                     </h2>
-                    {/* Changed text-500 to text-color-secondary */}
                     <p className="text-color-secondary text-sm m-0">
                         Overview and management of all submitted projects
                     </p>
@@ -36,7 +39,7 @@ const ProjectPage = () => {
             </div>
 
             {/* SUMMARY CARDS - Compact & Professional */}
-            {projects.length > 0 && (
+            {totalProjects !== null && totalProjects > 0 && (
                 <div className="flex flex-wrap gap-3">
                     {PROJECT_STATUS_ORDER.map((status) => {
                         const count = statusCounts[status] || 0;
@@ -46,7 +49,6 @@ const ProjectPage = () => {
 
                         return (
                             <div key={status} className="flex-1 min-w-min" style={{ maxWidth: '240px' }}>
-                                {/* Changed border-round-lg to surface-card and proper border tokens */}
                                 <div className="surface-card border-round-lg shadow-1 hover:shadow-2 transition-duration-200 border-left-3 border-transparent"
                                     style={{ borderLeftColor: `var(--${config.color?.split('-')[1] || 'blue'}-500)` }}>
                                     <div className="p-3">
@@ -72,24 +74,25 @@ const ProjectPage = () => {
             )}
 
             {/* TABLE SECTION */}
-            {/* Changed classes to surface-card and surface-border */}
             <div className="surface-card border-round-xl shadow-1 overflow-hidden border-1 surface-border">
                 {/* TABLE HEADER */}
                 <div className="px-4 py-3 border-bottom-1 surface-border flex justify-content-between align-items-center">
                     <div>
                         <h3 className="text-lg font-bold text-color m-0">Project List</h3>
-                        <span className="text-color-secondary text-xs uppercase font-medium">Total: {projects.length} Items</span>
+                        {totalProjects !== null && (
+                            <span className="text-color-secondary text-xs uppercase font-medium">Total: {totalProjects} Items</span>
+                        )}
                     </div>
                 </div>
 
                 {/* TABLE CONTENT */}
                 <div className="p-2">
-                    <ProjectManager onItemsChange={setProjects} />
+                    <ProjectManager onItemsChange={handleItemsChange} />
                 </div>
             </div>
 
             {/* EMPTY STATE */}
-            {projects.length === 0 && (
+            {totalProjects === 0 && (
                 <div className="flex flex-column align-items-center justify-content-center py-8 border-round-xl border-1 surface-border border-dashed surface-card">
                     <i className="pi pi-folder-open text-color-secondary text-5xl mb-3"></i>
                     <div className="text-color font-medium text-xl mb-1">No projects found</div>

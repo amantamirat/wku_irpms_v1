@@ -2,16 +2,19 @@ import fs from "fs";
 import path from "path";
 import multer from "multer";
 
-const uploadDir = path.join(__dirname, "../../", "uploads"); 
-
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-    console.log(`Created uploads directory at ${uploadDir}`);
-}
+// ✅ CRITICAL FIX: Use process.cwd() to target the root uploads directory
+const baseUploadDir = path.join(process.cwd(), "uploads"); 
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, uploadDir);
+        const subFolder = (req.headers["x-upload-folder"] as string) || "general";
+        const targetDir = path.join(baseUploadDir, subFolder);
+
+        if (!fs.existsSync(targetDir)) {
+            fs.mkdirSync(targetDir, { recursive: true });
+        }
+
+        cb(null, targetDir);
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);

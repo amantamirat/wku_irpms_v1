@@ -60,10 +60,10 @@ export class ProjectStageService {
      * Create project stage (submission)
      */
     async create(dto: CreateProjectStageDTO, options?: { skipValidation?: boolean }, session?: ClientSession) {
-        const { project, projectTitle, stageName, applicantId } = dto;
+        const { project, applicantId } = dto;
         if (!options?.skipValidation) {
             const projectDoc = await this.validateProject(project, applicantId, session);
-            dto.projectTitle= projectDoc.title;
+            dto.projectTitle = projectDoc.title;
             const grantAllocDoc = projectDoc.grantAllocation as unknown as IGrantAllocation;
             const grantId = String(grantAllocDoc.grant);
             let nextOrder = 1;
@@ -121,8 +121,8 @@ export class ProjectStageService {
             await this.synchronizer.sync(project, session);
             await this.notificationService.notifyStatusChange(
                 applicantId,
-                projectTitle ?? "Project",
-                stageName || "Stage",
+                dto.projectTitle ?? "Project",
+                dto.stageName ?? "Stage",
                 ProjectStageStatus.submitted,
                 undefined,
                 session
@@ -246,14 +246,14 @@ export class ProjectStageService {
         ) {
             const totalScore = projStageDoc.totalScore;
 
-            if (totalScore === undefined || totalScore === null) {
+            const grantStageDoc = projStageDoc.grantStage as unknown as IGrantStage;
+
+            if ((totalScore === undefined || totalScore === null) && grantStageDoc.minReviewers > 0) {
                 throw new AppError(
                     ERROR_CODES.SCORE_NOT_COMPUTED,
                     "Total score not computed. Please calculate score first."
                 );
             }
-
-            const grantStageDoc = projStageDoc.grantStage as unknown as IGrantStage;
 
             const countApproved = await this.reviewerRepo.countByProjectStage(id, ReviewerStatus.approved);
 
@@ -267,7 +267,7 @@ export class ProjectStageService {
             if (to === ProjectStageStatus.accepted) {
                 const minAcceptanceScore = grantStageDoc.minAcceptanceScore ?? 0;
 
-                if (totalScore < minAcceptanceScore) {
+                if ((totalScore ?? 0) < minAcceptanceScore) {
                     throw new AppError(
                         ERROR_CODES.SCORE_BELOW_THRESHOLD,
                         `Cannot accept. Minimum required score is ${minAcceptanceScore}, but got ${totalScore}.`
@@ -306,7 +306,7 @@ export class ProjectStageService {
                     nextStageInfo = {
                         name: nextGrantStage.name,
                         deadline: //nextCallStage?.status === CallStageStatus.active ?
-                            nextCallStage?.deadline //: undefined
+                        nextCallStage?.deadline //: undefined
                     };
                 }
             }
@@ -314,7 +314,7 @@ export class ProjectStageService {
 
             await this.notificationService.notifyStatusChange(
                 String(projectData.applicant),
-                projectData,
+                projectData.title,
                 stageData?.name || "Stage",
                 to,
                 nextStageInfo
@@ -339,20 +339,6 @@ export class ProjectStageService {
         if (await this.reviewerRepo.exist({ projectStage: id })) {
             throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
         }
-
-        // ✅ DELETE FILE FIRST
-        if (projectStageDoc.documentPath) {
-            const filePath = path.resolve(projectStageDoc.documentPath);
-
-            fs.unlink(filePath, (err) => {
-                if (err) {
-                    console.error("File deletion failed:", err.message);
-                    // optional: don't throw, just log (avoid breaking delete flow)
-                }
-            });
-        }
-
-        // ✅ DELETE DB RECORD
         const deleted = await this.repository.delete(id);
         await this.synchronizer.sync(project);
         return deleted;

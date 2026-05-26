@@ -7,7 +7,7 @@ import MyBadge from "@/templates/MyBadge";
 import { Project, ProjectStatus } from "../../models/project.model";
 import { PHASE_TRANSITIONS, PHASE_STATUS_ORDER } from "../models/phase.state-machine";
 import SavePhase from "./SavePhase";
-import { useState, useMemo, useRef, useCallback } from "react";
+import { useMemo, useRef, useCallback } from "react";
 
 interface PhaseManagerProps {
     project?: Project;
@@ -20,22 +20,28 @@ const PhaseManager = ({ project, updateProject }: PhaseManagerProps) => {
         project.status === ProjectStatus.draft ||
         project.status === ProjectStatus.finalization
     ), [project?.status]);
-    // We only care about the ID for the API query
+    
     const projectId = project?._id;
 
-    // Use a ref for the callback so the Manager never has to re-render when updateProject changes
+    // 💡 FIX 1: Keep a mutable reference to the full project object. 
+    // This gives us access to current project fields without breaking useCallback/useMemo.
+    const projectRef = useRef(project);
+    projectRef.current = project;
+
     const updateProjectRef = useRef(updateProject);
     updateProjectRef.current = updateProject;
 
+    // 💡 FIX 2: Safely compute state transformations using the mutable ref
     const handleItemsChange = useCallback((newPhases: Phase[]) => {
-        if (!project || !updateProjectRef.current) return;
+        const currentProject = projectRef.current;
+        if (!currentProject || !updateProjectRef.current) return;
 
         // 1. Calculate Totals
         const totalDuration = newPhases.reduce((acc, curr) => acc + (curr.duration || 0), 0);
         const totalBudget = newPhases.reduce((acc, curr) => acc + (curr.budget || 0), 0);
 
         // 2. Determine New Status based on Phase logic
-        let newStatus = project.status;
+        let newStatus = currentProject.status;
 
         if (newPhases.length > 0) {
             if (newPhases.some(p => p.status === PhaseStatus.active)) {
@@ -46,27 +52,26 @@ const PhaseManager = ({ project, updateProject }: PhaseManagerProps) => {
             }
         }
 
-        // 3. Check for any significant changes to avoid unnecessary re-renders/loops
+        // 3. Compare against the absolute latest values to prevent update loops
         const hasTotalsChanged =
-            project.totalDuration !== totalDuration ||
-            project.totalBudget !== totalBudget;
+            currentProject.totalDuration !== totalDuration ||
+            currentProject.totalBudget !== totalBudget;
 
-        const hasStatusChanged = project.status !== newStatus;
+        const hasStatusChanged = currentProject.status !== newStatus;
 
         if (hasTotalsChanged || hasStatusChanged) {
             updateProjectRef.current({
-                ...project,
+                ...currentProject, // Uses the fresh instance! No dropped state.
                 totalDuration,
                 totalBudget,
-                status: newStatus // Sync the derived status
+                status: newStatus 
             });
         }
-    }, [projectId]);// Only depends on the ID, not the whole project object
+    }, [projectId]); 
 
 
 
-    // ✅ CRITICAL: The Manager must be memoized ONLY on the Project ID.
-    // If you put the whole 'project' object here, it will refresh every time you type.
+    // ✅ CRITICAL MEMOIZATION LOOP: Unchanged & protected from typing refreshes.
     const Manager = useMemo(() => createEntityManager<Phase, GetPhaseOptions | undefined>({
         title: "Project Phases",
         itemName: "Phase",
@@ -116,7 +121,7 @@ const PhaseManager = ({ project, updateProject }: PhaseManagerProps) => {
             }
         ],
         createNew: canManagePhases ? () => ({
-            project: project,
+            project: projectRef.current, // Safely use reference
             title: '',
             order: 1,
             duration: 0,
@@ -135,7 +140,7 @@ const PhaseManager = ({ project, updateProject }: PhaseManagerProps) => {
         },
         hideDefaultActions: !canManagePhases,
         hideSearch: true
-    }), [projectId, canManagePhases]); // 👈 DO NOT add 'project' or 'handleItemsChange' here
+    }), [projectId, canManagePhases]); 
 
     return <Manager />;
 };

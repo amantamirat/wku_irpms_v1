@@ -44,12 +44,18 @@ export class CallService {
         const allocCalls = await this.repository.find({ grantAllocation });
         const totalBudgetUsedByCalls = allocCalls.reduce((sum, c) => sum + (c.budget || 0), 0);
 
-        // 5. BUDGET VALIDATION: Check against the parent Grant Allocation limit
-        if (totalBudgetUsedByCalls + budget > allocDoc.allocatedAmount) {
-            const remaining = allocDoc.allocatedAmount - totalBudgetUsedByCalls;
+        // ==========================================
+        // 5. FIXED BUDGET VALIDATION: Accounts for usedBudget
+        // ==========================================
+        const actualAllocationHeadroom = allocDoc.allocatedAmount - (allocDoc.usedBudget || 0);
+
+        if (totalBudgetUsedByCalls + budget > actualAllocationHeadroom) {
+            const remaining = actualAllocationHeadroom - totalBudgetUsedByCalls;
+            const maxAvailable = remaining > 0 ? remaining : 0;
+
             throw new AppError(
                 ERROR_CODES.CALL_BUDGET_EXCEEDS_ALLOCATION,
-                `Call budget exceeds remaining grant allocation. Max available: ${remaining}`
+                `Call budget exceeds remaining grant allocation headroom. Max available: ${maxAvailable}`
             );
         }
 
@@ -112,12 +118,19 @@ export class CallService {
                 .filter(c => String(c._id) !== String(id))
                 .reduce((sum, c) => sum + (c.budget || 0), 0);
 
+            // Calculate the actual available headroom left inside the grant allocation pool
+            const actualAllocationHeadroom = allocDoc.allocatedAmount - (allocDoc.usedBudget || 0);
+
             // Validate the new proposed budget against the remaining space
-            if (totalBudgetUsedByOthers + data.budget > allocDoc.allocatedAmount) {
-                const remaining = allocDoc.allocatedAmount - totalBudgetUsedByOthers;
+            if (totalBudgetUsedByOthers + data.budget > actualAllocationHeadroom) {
+                const remaining = actualAllocationHeadroom - totalBudgetUsedByOthers;
+
+                // Fallback to 0 if the math drops below zero due to dynamic changes elsewhere
+                const maxAvailableForThisCall = remaining > 0 ? remaining : 0;
+
                 throw new AppError(
                     ERROR_CODES.CALL_BUDGET_EXCEEDS_ALLOCATION,
-                    `Updated budget exceeds allocation capacity. Max available for this call: ${remaining}`
+                    `Updated budget exceeds allocation capacity. Max available for this call: ${maxAvailableForThisCall}`
                 );
             }
         }

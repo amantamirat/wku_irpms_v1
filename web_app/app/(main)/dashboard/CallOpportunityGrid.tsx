@@ -28,7 +28,6 @@ const CallOpportunityGrid = () => {
             <div className="grid mt-2">
                 {[1, 2, 3].map((i) => (
                     <div key={i} className="col-12 md:col-6 p-2">
-                        {/* Assuming OpenCallCard has the skeleton we built earlier */}
                         <div className="card h-10rem surface-100 animate-pulse"></div>
                     </div>
                 ))}

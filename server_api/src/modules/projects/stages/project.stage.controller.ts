@@ -1,12 +1,8 @@
-import { Request, Response } from "express";
 import fs from "fs";
+import path from "path";
+import { Request, Response } from "express";
 import { errorResponse, successResponse } from "../../../common/helpers/response";
-
-import {
-    CreateProjectStageDTO,
-    GetProjectStageDTO
-} from "./project.stage.dto";
-
+import { CreateProjectStageDTO, GetProjectStageDTO } from "./project.stage.dto";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
@@ -31,20 +27,21 @@ export class ProjectStageController {
             if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
 
             const { project } = req.body;
-
+            const relativeDocPath = path.relative(process.cwd(), req.file.path).replace(/\\/g, '/');
             const dto: CreateProjectStageDTO = {
                 project,
                 grantStage: '',
-                documentPath: `uploads/${req.file.filename}`,
+                documentPath: relativeDocPath,
                 applicantId: req.auth.userId
             };
-
             const created = await this.service.create(dto);
             successResponse(res, 201, "Project document created successfully", created);
 
         } catch (err: any) {
-            if (req.file) {
-                fs.unlink(`uploads/${req.file.filename}`, () => { });
+            if (req.file && req.file.path) {
+                fs.unlink(req.file.path, (unlinkErr) => {
+                    if (unlinkErr) console.error(`Failed to delete orphaned file at ${req.file?.path}:`, unlinkErr);
+                });
             }
             errorResponse(res, 400, err.message, err);
         }
@@ -140,16 +137,27 @@ export class ProjectStageController {
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.auth) throw new AppError(ERROR_CODES.UNAUTHORIZED);
+
             const { id } = req.params;
             const dto: DeleteDto = {
                 id,
                 userId: req.auth.userId,
             };
 
+            // Your service deletes the record and returns the deleted document metadata
             const deletedDoc = await this.service.delete(dto);
 
             if (deletedDoc?.documentPath) {
-                fs.unlink(deletedDoc.documentPath, () => { });
+                // ✅ CRITICAL FIX: Joins project root with the stored "uploads/projects/filename.pdf"
+                const absolutePath = path.join(process.cwd(), deletedDoc.documentPath);
+
+                fs.unlink(absolutePath, (unlinkErr) => {
+                    if (unlinkErr) {
+                        console.error(`Failed to delete physical file at ${absolutePath}:`, unlinkErr);
+                    } else {
+                        console.log(`Successfully deleted physical file: ${absolutePath}`);
+                    }
+                });
             }
 
             successResponse(
