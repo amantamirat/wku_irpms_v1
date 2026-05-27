@@ -40,7 +40,7 @@ export class CollaboratorService {
         const projectDoc = await this.projAuth.authProject(project, applicant, session);
         if (
             projectDoc.status !== ProjectStatus.draft &&
-            projectDoc.status !== ProjectStatus.finalization
+            projectDoc.status !== ProjectStatus.accepted
         ) {
             throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
         }
@@ -123,8 +123,7 @@ export class CollaboratorService {
             const projectStatus = projectDoc.status;
             if (projectStatus !== ProjectStatus.draft &&
                 projectStatus !== ProjectStatus.submitted &&
-                projectStatus !== ProjectStatus.accepted &&
-                projectStatus !== ProjectStatus.finalization
+                projectStatus !== ProjectStatus.accepted
             ) {
                 throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
             }

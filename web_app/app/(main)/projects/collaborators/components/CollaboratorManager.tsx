@@ -28,7 +28,7 @@ const CollaboratorManager = ({
 
     const canManageTeam = useMemo(() => project && (
         project.status === ProjectStatus.draft ||
-        project.status === ProjectStatus.finalization
+        project.status === ProjectStatus.accepted
     ), [project?.status]);
 
     const columns = useMemo(() => {

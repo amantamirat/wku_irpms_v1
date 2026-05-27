@@ -6,7 +6,7 @@ export type Status =
     | "refused"
     | "accepted"
     | "rejected"
-    | "finalization"
+    | "terminated"
     | "approved"
     | "granted"
     | "completed"
@@ -67,6 +67,12 @@ export const STATUS_BUTTON_CONFIG: Record<string, StatusButtonConfig> = {
         icon: "pi pi-times-circle",
         severity: "danger",
         action: "Refuse",
+        color: 'bg-red-100 text-red-700'
+    },
+    terminated: {
+        icon: "pi pi-times-circle",
+        severity: "danger",
+        action: "Terminate",
         color: 'bg-red-100 text-red-700'
     },
     accepted: {

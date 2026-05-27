@@ -250,20 +250,15 @@ export class ProjectService {
         if (to === ProjectStatus.draft ||
             to === ProjectStatus.submitted ||
             to === ProjectStatus.rejected ||
-            (from !== ProjectStatus.finalization && to === ProjectStatus.accepted)
+            (from === ProjectStatus.submitted && to === ProjectStatus.accepted) ||
+            to === ProjectStatus.active ||
+            to === ProjectStatus.terminated ||
+            to === ProjectStatus.completed
         ) {
-            throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
+            throw new AppError(ERROR_CODES.INVALID_OPERTATION);
         }
 
-        if (to === ProjectStatus.finalization) {
-            await this.notificationService.notifyProjectFinalization(
-                String(projectDoc.applicant),
-                projectDoc,
-                undefined // senderId if available
-            )
-        }
-
-        if (from === ProjectStatus.finalization && to === ProjectStatus.approved) {
+        if (to === ProjectStatus.granted) {
             const phases = await this.phaseRepo.find({ project: id });
             if (!phases.every(p => p.status === PhaseStatus.approved))
                 throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_APPROVED);
@@ -271,30 +266,6 @@ export class ProjectService {
             const collabs = await this.collabRepo.find({ project: id });
             if (!collabs.every(c => c.status === CollaboratorStatus.verified))
                 throw new AppError(ERROR_CODES.COLLABORATORS_NOT_FULLY_VERIFIED);
-
-        }
-
-        if (from === ProjectStatus.active && to === ProjectStatus.granted) {
-            const phases = await this.phaseRepo.find({ project: id });
-            if (!phases.every(p => p.status === PhaseStatus.approved))
-                throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_APPROVED);
-        }
-
-        if (from === ProjectStatus.approved && to === ProjectStatus.granted) {
-            /*
-            await this.allocRepo.reserveBudget(
-                projectDoc.grantAllocation.toString(),
-                projectDoc.totalBudget || 0
-            );
-            */
-        }
-        if (from === ProjectStatus.granted && to === ProjectStatus.approved) {
-            /*
-            await this.allocRepo.releaseReservedBudget(
-                projectDoc.grantAllocation.toString(),
-                projectDoc.totalBudget || 0
-            );
-            */
         }
 
         return await this.projectRepo.updateStatus(id, to);

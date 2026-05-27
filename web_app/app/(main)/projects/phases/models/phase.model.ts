@@ -2,9 +2,9 @@ import { Project } from "../../models/project.model";
 
 export enum PhaseStatus {
     proposed = 'proposed',
-    reviewed = 'reviewed',
     approved = 'approved',
     active = 'active',
+    terminated = 'terminated',
     completed = 'completed',
 }
 
@@ -42,7 +42,7 @@ export const validatePhase = (phase: Phase): { valid: boolean; message?: string 
         return { valid: false, message: 'Project is required.' };
     }
 
-     if (!phase.title) {
+    if (!phase.title) {
         return { valid: false, message: 'Title is required.' };
     }
 

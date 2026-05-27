@@ -239,7 +239,6 @@ export class ProjectStageService {
             to,
             PROJECT_STAGE_TRANSITIONS
         );
-
         if (
             to === ProjectStageStatus.accepted ||
             to === ProjectStageStatus.rejected
@@ -286,9 +285,17 @@ export class ProjectStageService {
 
         const updated = await this.repository.updateStatus(id, to);
         // Trigger Notification using the populated data
-        await this.synchronizer.sync(projectData._id);
+        const syncedProjectDoc = await this.synchronizer.sync(projectData._id);
 
-        if (projectData?.applicant) {
+        if (syncedProjectDoc.status === ProjectStatus.accepted) {
+            await this.notificationService.notifyProjectFinalization(
+                String(syncedProjectDoc.applicant),
+                syncedProjectDoc,
+                undefined // senderId if available
+            )
+        } else if (syncedProjectDoc.status === ProjectStatus.submitted ||
+            syncedProjectDoc.status === ProjectStatus.rejected
+        ) {
             let nextStageInfo = undefined;
             // Discover next stage only if current stage was accepted
             if (to === ProjectStageStatus.accepted) {
@@ -306,7 +313,7 @@ export class ProjectStageService {
                     nextStageInfo = {
                         name: nextGrantStage.name,
                         deadline: //nextCallStage?.status === CallStageStatus.active ?
-                        nextCallStage?.deadline //: undefined
+                            nextCallStage?.deadline //: undefined
                     };
                 }
             }
@@ -319,6 +326,8 @@ export class ProjectStageService {
                 to,
                 nextStageInfo
             ).catch(err => console.error("Notification failed", err));
+
+
         }
         return updated;
     }

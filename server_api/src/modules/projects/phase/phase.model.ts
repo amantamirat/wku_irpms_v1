@@ -4,9 +4,9 @@ import { COLLECTIONS } from "../../../common/constants/collections.enum";
 
 export enum PhaseStatus {
     proposed = 'proposed',
-    reviewed = 'reviewed',
     approved = 'approved',
     active = 'active',
+    terminated = 'terminated',
     completed = 'completed'
 }
 

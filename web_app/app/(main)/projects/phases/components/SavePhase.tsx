@@ -63,6 +63,7 @@ const SavePhase = ({ visible, item: phase, onHide, onComplete }: EntitySaveDialo
                             onValueChange={(e) => updateField("order", e.value)} 
                             min={1} 
                             required
+                            disabled
                         />
                     </div>
                     <div className="field col-12 md:col-9">

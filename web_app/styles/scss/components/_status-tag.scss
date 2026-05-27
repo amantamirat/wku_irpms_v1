@@ -32,6 +32,7 @@
     &.status-suspended,
     &.status-rejected,
     &.status-refused,
+    &.status-terminated,
     &.status-locked {
         background: #FFCDD2;
         color: #d80517;
@@ -45,9 +46,9 @@
         color: #4A148C;
     }
 
-    
 
-    
+
+
 
     &.status-finalization {
         background: #f1f3f5;

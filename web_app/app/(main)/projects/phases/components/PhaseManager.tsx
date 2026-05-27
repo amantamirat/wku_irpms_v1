@@ -18,9 +18,9 @@ const PhaseManager = ({ project, updateProject }: PhaseManagerProps) => {
 
     const canManagePhases = useMemo(() => project && (
         project.status === ProjectStatus.draft ||
-        project.status === ProjectStatus.finalization
+        project.status === ProjectStatus.accepted
     ), [project?.status]);
-    
+
     const projectId = project?._id;
 
     // 💡 FIX 1: Keep a mutable reference to the full project object. 
@@ -44,7 +44,10 @@ const PhaseManager = ({ project, updateProject }: PhaseManagerProps) => {
         let newStatus = currentProject.status;
 
         if (newPhases.length > 0) {
-            if (newPhases.some(p => p.status === PhaseStatus.active)) {
+            if (newPhases.some(p => p.status === PhaseStatus.terminated)) {
+                newStatus = ProjectStatus.terminated;
+            }
+            else if (newPhases.some(p => p.status === PhaseStatus.active)) {
                 newStatus = ProjectStatus.active;
             }
             else if (newPhases.every(p => p.status === PhaseStatus.completed)) {
@@ -64,10 +67,10 @@ const PhaseManager = ({ project, updateProject }: PhaseManagerProps) => {
                 ...currentProject, // Uses the fresh instance! No dropped state.
                 totalDuration,
                 totalBudget,
-                status: newStatus 
+                status: newStatus
             });
         }
-    }, [projectId]); 
+    }, [projectId]);
 
 
 
@@ -139,8 +142,10 @@ const PhaseManager = ({ project, updateProject }: PhaseManagerProps) => {
             statusOrder: PHASE_STATUS_ORDER
         },
         hideDefaultActions: !canManagePhases,
+        disableEditRow: (row) => row.status !== PhaseStatus.proposed,
+        disableDeleteRow: (row) => row.status !== PhaseStatus.proposed,
         hideSearch: true
-    }), [projectId, canManagePhases]); 
+    }), [projectId, canManagePhases]);
 
     return <Manager />;
 };

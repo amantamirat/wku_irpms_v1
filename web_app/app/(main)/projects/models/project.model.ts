@@ -11,11 +11,11 @@ export enum ProjectStatus {
     draft = 'draft',
     submitted = "submitted",
     rejected = "rejected",
-    accepted = "accepted",
-    finalization = "finalization",
-    approved = "approved",
+    accepted = "accepted", //add time when should the budget and duration will be modified
     granted = "granted",
+    refused = 'refused',
     active = "active",
+    terminated = 'terminated',
     completed = 'completed'
 }
 

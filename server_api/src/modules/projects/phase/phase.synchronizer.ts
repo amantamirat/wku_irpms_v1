@@ -2,12 +2,11 @@ import { ClientSession } from "mongoose";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
-import { IGrantStageRepository } from "../../grants/stages/grant.stage.repository";
 import { ProjectStatus } from "../project.model";
 import { IProjectRepository } from "../project.repository";
 import { PROJECT_TRANSITIONS } from "../project.state-machine";
-import { IPhaseRepository } from "./phase.repository";
 import { PhaseStatus } from "./phase.model";
+import { IPhaseRepository } from "./phase.repository";
 
 
 export interface IPhaseSynchronizer {
@@ -47,7 +46,7 @@ export class PhaseSynchronizer
         if (phases.some(p => (p.status === PhaseStatus.active))) {
             newStatus = ProjectStatus.active
         }
-
+        
         else if (phases.every(p => p.status === PhaseStatus.completed)) {
             newStatus = ProjectStatus.completed
         }

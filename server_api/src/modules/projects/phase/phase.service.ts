@@ -10,10 +10,10 @@ import { IProjectRepository } from "../project.repository";
 import { ProjectStatus } from "../project.model";
 import { CreatePhaseDto, GetPhasesOptions, PhaseDto, UpdatePhaseDto } from "./phase.dto";
 import { IPhaseRepository } from "./phase.repository";
-import { PHASE_TRANSITIONS } from "./phase.state-machine";
-import { PhaseStatus } from "./phase.model";
+import { IPhase, PhaseStatus } from "./phase.model";
 import { IGrantAllocationRepository } from "../../grants/allocations/grant.allocation.repository";
 import { IPhaseSynchronizer } from "./phase.synchronizer";
+import { PROJECT_TRANSITIONS } from "../project.state-machine";
 
 export class PhaseService {
 
@@ -30,7 +30,7 @@ export class PhaseService {
         const projectDoc = await this.projAuth.authProject(project, applicant, session);
         if (
             projectDoc.status !== ProjectStatus.draft &&
-            projectDoc.status !== ProjectStatus.finalization
+            projectDoc.status !== ProjectStatus.accepted
         ) {
             throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
         }
@@ -93,7 +93,7 @@ export class PhaseService {
         const projectDoc = await this.validateProject(projectId, userId);
         const grantId = String((projectDoc.grantAllocation as any).grant);
 
-        const updatedPhase = { ...phaseDoc.toObject(), ...data };
+        const updatedPhase = { ...phaseDoc, ...data };
         await this.constValidator.validateIndividualPhase(grantId, [updatedPhase]);
         const existingPhases = await this.phaseRepo.find({ project: projectId });
 
@@ -124,87 +124,263 @@ export class PhaseService {
     // TRANSITION
     // ---------------------------------------------------
     async transitionState(dto: TransitionRequestDto) {
-        if (!this.synchrnonizer)
-            throw new AppError(ERROR_CODES.NULL_SYNCHRONIZER);
 
         const { id, next, current } = dto;
 
-        const phaseDoc = await this.phaseRepo.findById(id);
-        if (!phaseDoc) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
+        const currentPhaseDoc = await this.phaseRepo.findById(id);
 
-        const from = phaseDoc.status as PhaseStatus;
+        if (!currentPhaseDoc)
+            throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
+
+        const from = currentPhaseDoc.status as PhaseStatus;
         const to = next as PhaseStatus;
 
         if (current && current !== from)
             throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
 
-        TransitionHelper.validateTransition(from, to, PHASE_TRANSITIONS);
+        TransitionHelper.validateTransition(
+            from,
+            to,
+            PHASE_TRANSITIONS
+        );
 
-        const projectId = String(phaseDoc.project);
+        const projectId = String(currentPhaseDoc.project);
+
         const projectDoc = await this.projRepo.findById(projectId);
-        if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
+
+        if (!projectDoc)
+            throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
+
         const projectStatus = projectDoc.status;
 
-        if (to === PhaseStatus.reviewed || to === PhaseStatus.proposed) {
-            if (projectStatus !== ProjectStatus.finalization)
-                throw new AppError(ERROR_CODES.PROJECT_NOT_IN_FINALIZATION);
-        }
+        const countPhases = await this.phaseRepo.countByProject(projectId);
 
-        if (to === PhaseStatus.approved) {
-            if (from === PhaseStatus.proposed)
-                throw new AppError(ERROR_CODES.PROJECT_NOT_IN_FINALIZATION);
-            if (from === PhaseStatus.active)  //revese back
-                await this.allocRepo.reverseConsumedBudget(projectDoc.grantAllocation.toString(),
-                    phaseDoc.budget);
-        }
+        const isFirstOrder = currentPhaseDoc.order === 1;
+        const isLastOrder = currentPhaseDoc.order === countPhases;
 
-        let prevPhase, nextPhase;
+        let prevPhase: IPhase | null = null;
+        let nextPhase: IPhase | null = null;
 
-        if (phaseDoc.order > 1) {
-            prevPhase = await this.phaseRepo.findOne(projectId, phaseDoc.order - 1);
+        if (!isFirstOrder) {
+
+            prevPhase = await this.phaseRepo.findOne(
+                projectId,
+                currentPhaseDoc.order - 1
+            );
+
             if (!prevPhase)
                 throw new AppError(ERROR_CODES.PREVIOUS_PHASE_NOT_FOUND);
         }
-        nextPhase = await this.phaseRepo.findOne(projectId, phaseDoc.order + 1);
 
-        if (to === PhaseStatus.active) {
-            if (prevPhase) {
-                if (prevPhase.status !== PhaseStatus.completed)
-                    throw new AppError(ERROR_CODES.PREVIOUS_PHASE_NOT_COMPLETED);
-            }
-            if (nextPhase) {
-                if (nextPhase.status !== PhaseStatus.approved)
-                    throw new AppError(ERROR_CODES.NEXT_PHASE_NOT_APPROVED);
+        if (!isLastOrder) {
+
+            nextPhase = await this.phaseRepo.findOne(
+                projectId,
+                currentPhaseDoc.order + 1
+            );
+
+            if (!nextPhase)
+                throw new AppError(ERROR_CODES.NEXT_PHASE_NOT_FOUND);
+        }
+
+        let newProjectStatus = projectStatus;
+
+        /**
+         * PROPOSED <-> APPROVED
+         */
+        if (
+            (from === PhaseStatus.approved && to === PhaseStatus.proposed) ||
+            (from === PhaseStatus.proposed && to === PhaseStatus.approved)
+        ) {
+
+            if (projectStatus !== ProjectStatus.accepted)
+                throw new AppError(ERROR_CODES.PROJECT_NOT_ACCEPTED);
+
+            if (
+                prevPhase &&
+                prevPhase.status !== PhaseStatus.approved
+            ) {
+                throw new AppError(ERROR_CODES.PREVIOUS_PHASE_NOT_APPROVED);
             }
 
-            if (from === PhaseStatus.approved) {
+            if (
+                nextPhase &&
+                nextPhase.status !== PhaseStatus.proposed
+            ) {
+                throw new AppError(ERROR_CODES.NEXT_PHASE_NOT_PROPSED);
+            }
+
+        }
+
+        /**
+         * ACTIVE / COMPLETED / TERMINATED FLOW
+         */
+        else {
+
+            /**
+             * TERMINATION
+             */
+            if (to === PhaseStatus.terminated) {
+
                 if (projectStatus !== ProjectStatus.active)
                     throw new AppError(ERROR_CODES.PROJECT_NOT_ACTIVATED);
 
-                await this.allocRepo.consumeBudget(
-                    projectDoc.grantAllocation.toString(),
-                    phaseDoc.budget
-                );
+                if (from !== PhaseStatus.active)
+                    throw new AppError(ERROR_CODES.INVALID_STATE_TRANSITION, "Invalid Phase Transition");
+
+                newProjectStatus = ProjectStatus.terminated;
             }
-        }
-        if (to === PhaseStatus.completed) {
-            if (prevPhase) {
-                if (prevPhase.status !== PhaseStatus.completed)
+
+            /**
+             * REOPEN TERMINATED
+             */
+            else if (
+                from === PhaseStatus.terminated &&
+                to === PhaseStatus.active
+            ) {
+
+                if (projectStatus !== ProjectStatus.terminated)
+                    throw new AppError(ERROR_CODES.PROJECT_NOT_TERMINATED);
+
+                newProjectStatus = ProjectStatus.active;
+            }
+
+            /**
+             * NORMAL FLOW VALIDATION
+             */
+            else {
+
+                if (
+                    prevPhase &&
+                    prevPhase.status !== PhaseStatus.completed
+                ) {
                     throw new AppError(ERROR_CODES.PREVIOUS_PHASE_NOT_COMPLETED);
-            }
-            if (nextPhase) {
-                if (nextPhase.status !== PhaseStatus.approved)
+                }
+
+                if (
+                    nextPhase &&
+                    nextPhase.status !== PhaseStatus.approved
+                ) {
                     throw new AppError(ERROR_CODES.NEXT_PHASE_NOT_APPROVED);
+                }
+
+                /**
+                 * PROJECT STATUS SYNC
+                 */
+
+                // first phase activates project
+                if (
+                    isFirstOrder &&
+                    from === PhaseStatus.approved &&
+                    to === PhaseStatus.active
+                ) {
+
+                    if (projectStatus !== ProjectStatus.granted)
+                        throw new AppError(ERROR_CODES.PROJECT_NOT_GRANTED);
+
+                    newProjectStatus = ProjectStatus.active;
+                }
+
+                // rollback first phase
+                else if (
+                    isFirstOrder &&
+                    from === PhaseStatus.active &&
+                    to === PhaseStatus.approved
+                ) {
+
+                    if (projectStatus !== ProjectStatus.active)
+                        throw new AppError(ERROR_CODES.PROJECT_NOT_ACTIVATED);
+
+                    newProjectStatus = ProjectStatus.granted;
+                }
+
+                // last phase completes project
+                if (
+                    isLastOrder &&
+                    from === PhaseStatus.active &&
+                    to === PhaseStatus.completed
+                ) {
+
+                    if (projectStatus !== ProjectStatus.active)
+                        throw new AppError(ERROR_CODES.PROJECT_NOT_ACTIVATED);
+
+                    newProjectStatus = ProjectStatus.completed;
+                }
+
+                // rollback completion
+                else if (
+                    isLastOrder &&
+                    from === PhaseStatus.completed &&
+                    to === PhaseStatus.active
+                ) {
+
+                    if (projectStatus !== ProjectStatus.completed)
+                        throw new AppError(ERROR_CODES.PROJECT_NOT_COMPLETED);
+
+                    newProjectStatus = ProjectStatus.active;
+                }
+
+                /**
+                 * BUDGET SYNC
+                 */
+
+                if (
+                    from === PhaseStatus.approved &&
+                    to === PhaseStatus.active
+                ) {
+
+                    await this.allocRepo.consumeBudget(
+                        projectDoc.grantAllocation.toString(),
+                        currentPhaseDoc.budget
+                    );
+
+                }
+
+                else if (
+                    from === PhaseStatus.active &&
+                    to === PhaseStatus.approved
+                ) {
+                    await this.allocRepo.reverseConsumedBudget(
+                        projectDoc.grantAllocation.toString(),
+                        currentPhaseDoc.budget
+                    );
+
+                }
             }
         }
 
-        const updated = await this.phaseRepo.updateStatus(id, to);
+        /**
+         * UPDATE PHASE
+         */
 
-        await this.synchrnonizer.sync(projectId);
+        const updated = await this.phaseRepo.updateStatus(
+            id,
+            to
+        );
+
+        /**
+         * UPDATE PROJECT STATUS
+         */
+
+        if (
+            updated &&
+            newProjectStatus !== projectStatus
+        ) {
+
+            TransitionHelper.validateTransition(
+                projectStatus,
+                newProjectStatus,
+                PROJECT_TRANSITIONS
+            );
+
+            await this.projRepo.updateStatus(
+                projectId,
+                newProjectStatus
+            );
+        }
 
         return updated;
     }
-
     // ---------------------------------------------------
     // DELETE
     // ---------------------------------------------------
@@ -246,3 +422,28 @@ export class PhaseService {
         return deleted;
     }
 }
+
+export const PHASE_TRANSITIONS: Record<PhaseStatus, PhaseStatus[]> = {
+    [PhaseStatus.proposed]: [
+        PhaseStatus.approved
+    ],
+
+    [PhaseStatus.approved]: [
+        PhaseStatus.active,
+        PhaseStatus.proposed
+    ],
+
+    [PhaseStatus.active]: [
+        PhaseStatus.completed,
+        PhaseStatus.terminated,
+        PhaseStatus.approved
+    ],
+
+    [PhaseStatus.completed]: [
+        PhaseStatus.active
+    ],
+
+    [PhaseStatus.terminated]: [
+        PhaseStatus.active
+    ]
+};

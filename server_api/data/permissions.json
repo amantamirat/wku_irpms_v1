@@ -729,43 +729,23 @@
   },
   {
     "category": "Project Management",
-    "name": "project:transition.accepted.finalization",
-    "description": "Move accepted project to budget and collaboration finalization"
-  },
-  {
-    "category": "Project Management",
-    "name": "project:transition.finalization.accepted",
-    "description": "Return project from finalization to accepted status"
-  },
-  {
-    "category": "Project Management",
-    "name": "project:transition.finalization.approved",
+    "name": "project:transition.accepted.granted",
     "description": "Approve finalized project for funding"
   },
   {
     "category": "Project Management",
-    "name": "project:transition.approved.finalization",
-    "description": "Return approved project for further finalization"
+    "name": "project:transition.granted.accepted",
+    "description": "Return granted project for further finalization"
   },
   {
     "category": "Project Management",
-    "name": "project:transition.approved.granted",
-    "description": "Release or allocate funding to approved project"
+    "name": "project:transition.accepted.refused",
+    "description": "Refuse finalized project for funding"
   },
   {
     "category": "Project Management",
-    "name": "project:transition.granted.approved",
-    "description": "Return funded project to approved status"
-  },
-  {
-    "category": "Project Management",
-    "name": "project:transition.granted.active",
-    "description": "Start execution of a granted project phase"
-  },
-  {
-    "category": "Project Management",
-    "name": "project:transition.active.granted",
-    "description": "Pause or revert an active project phase back to granted state"
+    "name": "project:transition.refused.accepted",
+    "description": "Return refused project for further finalization agreement"
   },
   {
     "category": "Project Management",
@@ -819,23 +799,13 @@
   },
   {
     "category": "Phase Management",
-    "name": "phase:transition.proposed.reviewed",
-    "description": "Move phase from proposed to reviewed"
+    "name": "phase:transition.proposed.approved",
+    "description": "Move phase from proposed to approved"
   },
   {
     "category": "Phase Management",
-    "name": "phase:transition.reviewed.proposed",
-    "description": "Revert phase from reviewed to proposed"
-  },
-  {
-    "category": "Phase Management",
-    "name": "phase:transition.reviewed.approved",
-    "description": "Move phase from reviewed to approved"
-  },
-  {
-    "category": "Phase Management",
-    "name": "phase:transition.approved.reviewed",
-    "description": "Revert phase from approved to reviewed"
+    "name": "phase:transition.approved.proposed",
+    "description": "Revert phase from approved to proposed"
   },
   {
     "category": "Phase Management",
@@ -856,6 +826,16 @@
     "category": "Phase Management",
     "name": "phase:transition.completed.active",
     "description": "Revert phase from completed to active"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:transition.active.terminated",
+    "description": "Terminate an active phase"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:transition.terminated.active",
+    "description": "Reopen a terminated phase back to active"
   },
   {
     "category": "Phase Management",
