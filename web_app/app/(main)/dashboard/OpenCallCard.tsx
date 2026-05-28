@@ -2,19 +2,14 @@
 import { Button } from 'primereact/button';
 import { Card } from 'primereact/card';
 import { Divider } from 'primereact/divider';
-import { Skeleton } from 'primereact/skeleton';
 import { Tag } from 'primereact/tag';
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 // Date Utilities
 import { format, differenceInCalendarDays, isPast } from 'date-fns';
 
-// Types & APIs
+// Types
 import { Call } from '../calls/models/call.model';
-import { CallStageApi } from '../calls/stages/api/call.stage.api';
-import { CallStage } from '../calls/stages/models/call.stage.model';
-import { GrantAllocation } from '../grants/allocations/models/grant.allocation.model';
 import { Grant } from '../grants/models/grant.model';
 import { Calendar } from '../calendars/models/calendar.model';
 import { Organization } from '../organizations/models/organization.model';
@@ -25,29 +20,11 @@ interface CallCardProps {
 }
 
 export const OpenCallCard = ({ call }: CallCardProps) => {
-    const [firstStage, setFirstStage] = useState<CallStage>();
-    const [loading, setLoading] = useState(true);
     const router = useRouter();
 
-    useEffect(() => {
-        const fetchFirstStage = async () => {
-            if (!call._id) return;
-            try {
-                setLoading(true);
-                const data = await CallStageApi.getFirstStage(call._id);
-                setFirstStage(data);
-            } catch (error) {
-                console.error("Failed to fetch first stage", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchFirstStage();
-    }, [call._id]);
-
     // --- Date Logic via date-fns ---
-    const deadline = firstStage?.deadline ? new Date(firstStage.deadline) : null;
+    const firstDeadlineRaw = call.deadlines?.[0]?.submission;
+    const deadline = firstDeadlineRaw ? new Date(firstDeadlineRaw) : null;
     const today = new Date();
 
     // Calculate actual days remaining
@@ -55,29 +32,14 @@ export const OpenCallCard = ({ call }: CallCardProps) => {
     const isClosed = deadline ? isPast(deadline) && daysLeft < 0 : false;
     const isUrgent = daysLeft >= 0 && daysLeft < 5;
 
-    // Data Mapping
-    const allocation = call.grantAllocation as GrantAllocation;
+    // Direct Data Mapping (No intermediate allocation layer)
+    const grant = call.grant as Grant;
+    const calendar = call.calendar as Calendar;
     const organization = call.organization as Organization;
-    const grant = allocation?.grant as Grant;
-    const calendar = allocation?.calendar as Calendar;
 
     const proceedToApply = () => {
         router.push(`/projects/apply/${call._id}`);
     };
-
-    if (loading) {
-        return (
-            <Card className="h-full border-1 border-300">
-                <div className="flex justify-content-between mb-3">
-                    <Skeleton width="4rem" height="1.5rem" />
-                    <Skeleton width="6rem" height="1.5rem" />
-                </div>
-                <Skeleton width="80%" height="1.5rem" className="mb-2" />
-                <Skeleton width="100%" height="4rem" className="mb-4" />
-                <Skeleton width="100%" height="3rem" />
-            </Card>
-        );
-    }
 
     return (
         <Card className="h-full border-1 border-300 shadow-hover transition-all transition-duration-300 hover:border-primary flex flex-column">

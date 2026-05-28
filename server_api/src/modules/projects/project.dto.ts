@@ -13,6 +13,7 @@ export interface Options {
 export interface GetProjectsDTO {
     grant?: string;
     applicant?: string;
+    call?: string;
     status?: ProjectStatus;
     options?: Options;
     //calendar?: string;

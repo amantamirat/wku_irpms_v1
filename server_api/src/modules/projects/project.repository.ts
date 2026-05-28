@@ -89,6 +89,11 @@ export class ProjectRepository implements IProjectRepository {
             query.grant = new mongoose.Types.ObjectId(filters.grant);
         }
 
+        // call
+        if (filters.call) {
+            query.call = new mongoose.Types.ObjectId(filters.call);
+        }
+
         let dbQuery = Project.find(query);
 
         const populate = filters.options?.populate;

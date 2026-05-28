@@ -70,7 +70,7 @@ const SaveCallStage = ({
 
                 const call = localStage.call as Call;
 
-                const grantAlloc = call.grantAllocation as GrantAllocation;
+                const grantAlloc = call.grant as GrantAllocation;
 
                 if (!grantAlloc?.grant) return;
 

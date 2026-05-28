@@ -3,13 +3,17 @@ import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
+import { CalendarStatus } from "../calendar/calendar.model";
+import { CalendarRepository, ICalendarRepository } from "../calendar/calendar.repository";
 import { AllocationStatus } from "../grants/allocations/grant.allocation.model";
 import { IGrantAllocationRepository } from "../grants/allocations/grant.allocation.repository";
 import { GrantStatus, IGrant } from "../grants/grant.model";
+import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
+import { StageCategory } from "../grants/stages/grant.stage.model";
 import { IGrantStageRepository } from "../grants/stages/grant.stage.repository";
 import { CreateCallDTO, GetCallsOptions, UpdateCallDTO } from "./call.dto";
 import { CallStatus } from "./call.model";
-import { CallRepository } from "./call.repository";
+import { CallRepository, ICallRepository } from "./call.repository";
 import { CallStageStatus } from "./stages/call.stage.model";
 import { ICallStageRepository } from "./stages/call.stage.repository";
 
@@ -20,44 +24,75 @@ export class CallService {
         private readonly allocationRepo: IGrantAllocationRepository,
         private readonly grantStageRepo: IGrantStageRepository,
         private readonly callStageRepo: ICallStageRepository,
+        private readonly grantRepo: IGrantRepository = new GrantRepository(),
+        private readonly calendarRepo: ICalendarRepository = new CalendarRepository(),
     ) {
     }
 
     async create(dto: CreateCallDTO) {
-        const { grantAllocation, budget } = dto;
+        const { grant, budget, deadlines } = dto;
 
-        // 1. Fetch parent allocation & validate
-        const allocDoc = await this.allocationRepo.findById(grantAllocation, true);
-        if (!allocDoc) throw new AppError(ERROR_CODES.ALLOCATION_NOT_FOUND);
-        if (allocDoc.status !== AllocationStatus.active) throw new AppError(ERROR_CODES.ALLOCATION_NOT_ACTIVE);
-
-        // 2. Extract and validate grant
-        const grantDoc = allocDoc.grant as unknown as IGrant;
+        // 1. Fetch parent grant & validate
+        const grantDoc = await this.grantRepo.findById(grant);
         if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
         if (grantDoc.status !== GrantStatus.active) throw new AppError(ERROR_CODES.GRANT_NOT_ACTIVE);
 
-        // 3. Ensure grant stages exist
-        const grantStages = (await this.grantStageRepo.find({ grant: String(grantDoc._id) }));
-        if (grantStages.length === 0) throw new AppError(ERROR_CODES.EMPTY_GRANT_STAGES);
+        // 2. Validate that deadlines exist on the DTO before checking length
+        if (!deadlines || !Array.isArray(deadlines)) {
+            throw new AppError(ERROR_CODES.DEADLINES_REQUIRED);
+        }
+
+        // 3. Count selection stages and enforce strict matching
+        const countStages = await this.grantStageRepo.countStages(grant, StageCategory.selection);
+
+        if (deadlines.length !== countStages) {
+            throw new AppError(
+                ERROR_CODES.INVALID_DEADLINES_COUNT,
+                `The number of deadlines (${deadlines.length}) must match the number of selection stages (${countStages}).`
+            );
+        }
+
+        for (const deadline of deadlines) {
+            const subDate = new Date(deadline.submission);
+            const evalDate = new Date(deadline.evaluation);
+            if (subDate >= evalDate) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_DEADLINE_DATES,
+                    "Submission date must be earlier than the evaluation date."
+                );
+            }
+        }
+
+        const calendarDoc = await this.calendarRepo.findById(dto.calendar);
+        if (!calendarDoc) throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
+        if (calendarDoc.status !== CalendarStatus.active) throw new AppError(ERROR_CODES.CALENDAR_NOT_ACTIVE);
 
         // 4. Calculate existing budgets allocated to other Calls
-        const allocCalls = await this.repository.find({ grantAllocation });
-        const totalBudgetUsedByCalls = allocCalls.reduce((sum, c) => sum + (c.budget || 0), 0);
+        const grantCalls = await this.repository.find({ grant });
+        const totalBudgetUsedByCalls = grantCalls.reduce((sum, c) => sum + (c.budget || 0), 0);
 
         // ==========================================
         // 5. FIXED BUDGET VALIDATION: Accounts for usedBudget
         // ==========================================
-        const actualAllocationHeadroom = allocDoc.allocatedAmount - (allocDoc.usedBudget || 0);
+        const actualAllocationHeadroom = grantDoc.amount - (grantDoc.usedBudget || 0);
 
         if (totalBudgetUsedByCalls + budget > actualAllocationHeadroom) {
             const remaining = actualAllocationHeadroom - totalBudgetUsedByCalls;
             const maxAvailable = remaining > 0 ? remaining : 0;
-
             throw new AppError(
                 ERROR_CODES.CALL_BUDGET_EXCEEDS_ALLOCATION,
                 `Call budget exceeds remaining grant allocation headroom. Max available: ${maxAvailable}`
             );
         }
+
+
+
+
+
+
+
+
+
 
         // 6. Create the Call
         const created = await this.repository.create({
@@ -66,6 +101,7 @@ export class CallService {
             status: CallStatus.planned
         });
 
+        /*
         // 7. Generate Call Stages with incremental deadlines
         const callStagesPayload = grantStages.map(gs => {
             // Fix: Use a clean baseline date for each map iteration 
@@ -82,7 +118,7 @@ export class CallService {
         });
 
         await this.callStageRepo.createMany(callStagesPayload);
-
+*/
         return created;
     }
 
@@ -107,11 +143,11 @@ export class CallService {
         if (data.budget !== undefined && data.budget !== currentCall.budget) {
 
             // Fetch the parent allocation ceiling
-            const allocDoc = await this.allocationRepo.findById(String(currentCall.grantAllocation));
+            const allocDoc = await this.allocationRepo.findById(String(currentCall.grant));
             if (!allocDoc) throw new AppError(ERROR_CODES.ALLOCATION_NOT_FOUND);
 
             // Fetch ALL calls under this allocation
-            const allocCalls = await this.repository.find({ grantAllocation: String(currentCall.grantAllocation) });
+            const allocCalls = await this.repository.find({ grant: String(currentCall.grant) });
 
             // Exclude the CURRENT call from the sum so we don't calculate against ourselves
             const totalBudgetUsedByOthers = allocCalls

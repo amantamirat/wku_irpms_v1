@@ -12,7 +12,6 @@ import { Calendar } from "../../calendars/models/calendar.model";
 import { Grant } from "../../grants/models/grant.model";
 
 interface CallManagerProps {
-    grantAllocation?: string | GrantAllocation;
     calendar?: string | Calendar;
     grant?: string | Grant;
 }
@@ -26,7 +25,7 @@ const formatCurrency = (amount: number) => {
     }).format(amount);
 };
 
-const CallManager = ({ grantAllocation, calendar, grant }: CallManagerProps) => {
+const CallManager = ({ calendar, grant }: CallManagerProps) => {
 
     const Manager = createEntityManager<Call, GetCallsOptions | undefined>({
         title: "Strategic Calls Management",
@@ -39,9 +38,9 @@ const CallManager = ({ grantAllocation, calendar, grant }: CallManagerProps) => 
             {
                 header: "Calendar",
                 body: (c: Call) => {
-                    const alloc = c.grantAllocation as GrantAllocation;
-                    if (typeof alloc === "object" && alloc?.calendar) {
-                        return typeof alloc.calendar === "object" ? alloc.calendar.year : alloc.calendar;
+                    const calendar = c.calendar as Calendar;
+                    if (typeof calendar === "object") {
+                        return calendar.year;
                     }
                     return "-";
                 }
@@ -50,11 +49,29 @@ const CallManager = ({ grantAllocation, calendar, grant }: CallManagerProps) => 
             {
                 header: "Grant Source",
                 body: (c: Call) => {
-                    const alloc = c.grantAllocation as GrantAllocation;
-                    if (typeof alloc === "object" && alloc?.grant) {
-                        return typeof alloc.grant === "object" ? alloc.grant.title : alloc.grant;
+                    const grant = c.grant as Grant;
+                    if (typeof grant === "object") {
+                        return grant.title;
                     }
-                    return "Unassigned";
+                    return "-";
+                }
+            },
+
+            {
+                header: "Deadline",
+                body: (c: Call) => {
+                    const firstDeadline = c.deadlines?.[0]?.submission;
+                    if (!firstDeadline) return "-";
+
+                    // Format to a readable style: e.g., MM/DD/YYYY, HH:MM
+                    return new Date(firstDeadline).toLocaleString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false
+                    });
                 }
             },
 
@@ -80,18 +97,17 @@ const CallManager = ({ grantAllocation, calendar, grant }: CallManagerProps) => 
         createNew: () => ({
             ...createEmptyCall(),
             budget: 0, // Fallback initialization value for the form structure
-            grantAllocation: grantAllocation,
+            grant: grant,
+            calendar: calendar
         } as any),
 
         SaveDialog: SaveCall,
         permissionPrefix: "call",
 
         query: () => ({
-            grantAllocation: typeof grantAllocation === 'object' ? grantAllocation._id : grantAllocation,
             calendar: typeof calendar === 'object'
                 ? (calendar as any)?._id
                 : calendar,
-
             grant: typeof grant === 'object'
                 ? (grant as any)?._id
                 : grant,

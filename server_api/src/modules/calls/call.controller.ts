@@ -13,8 +13,8 @@ export class CallController {
 
     create = async (req: Request, res: Response) => {
         try {
-            const { grantAllocation, title, budget, description } = req.body;
-            const dto: CreateCallDTO = { grantAllocation, title, description, budget };
+            const { grant, calendar, title, budget, deadlines, description } = req.body;
+            const dto: CreateCallDTO = { grant, calendar, title, deadlines, description, budget };
             const call = await this.service.create(dto);
             successResponse(res, 201, "Call created successfully", call);
         } catch (err: any) {
@@ -24,9 +24,8 @@ export class CallController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { grantAllocation, calendar, grant, status, populate } = req.query;
+            const { calendar, grant, status, populate } = req.query;
             const calls = await this.service.getCalls({
-                grantAllocation: grantAllocation as string,
                 calendar: calendar as string,
                 grant: grant as string,
                 status: status as CallStatus,

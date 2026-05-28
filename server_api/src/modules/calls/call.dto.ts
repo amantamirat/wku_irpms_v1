@@ -2,16 +2,23 @@ import { CallStatus } from "./call.model";
 
 export interface FindByIdOptions {
     populate?: {
-        grantAllocation?: boolean;
+        grant?: boolean;
     };
 }
 
+export interface CallDeadlineDTO {
+    submission: string; // ISO date string (e.g., "2026-12-31T23:59:59.000Z")
+    evaluation: string; // ISO date string
+}
+
 export interface CreateCallDTO {
-    grantAllocation: string;
+    grant: string;
     organization?: string;
+    calendar: string;
     title: string;
     description?: string;
     budget: number;
+    deadlines: CallDeadlineDTO[];
     status?: CallStatus;
     userId?: string;
 }
@@ -23,13 +30,13 @@ export interface UpdateCallDTO {
         title: string;
         description: string;
         budget: number;
+        deadlines: CallDeadlineDTO[];
     }>;
     userId?: string;
 }
 
 // Options for querying calls
 export interface GetCallsOptions {
-    grantAllocation?: string;
     calendar?: string;
     grant?: string;
     status?: CallStatus;

@@ -3,6 +3,8 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { useMemo } from "react";
 import { Call } from "../models/call.model";
 import StageManager from "../stages/components/CallStageManager";
+import ProjectManager from "../../projects/components/ProjectManager";
+import { PERMISSIONS } from "@/types/permissions";
 
 
 interface CallDetailProps {
@@ -17,17 +19,19 @@ const CallDetail = ({ call }: CallDetailProps) => {
      * Define tabs in a scalable configuration array
      */
     const tabs = useMemo(() => [
+        /*
         {
             header: "Stages",
             permission: "call.stage:read",
             content: <StageManager call={call} />
         },
-        /*
+        */
+
         {
             header: "Projects",
             permission: PERMISSIONS.PROJECT.READ,
-            content: <ProjectManager grant={call} />
-        }*/
+            content: <ProjectManager call={call} />
+        }
     ], [call]);
 
     /**

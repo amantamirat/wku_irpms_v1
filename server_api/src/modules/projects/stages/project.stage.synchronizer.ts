@@ -11,6 +11,7 @@ import {
     ProjectStageStatus
 } from "./project.stage.model";
 import { IProjectStageRepository } from "./project.stage.repository";
+import { StageCategory } from "../../grants/stages/grant.stage.model";
 
 export interface IProjectSynchronizer {
     sync(
@@ -84,7 +85,7 @@ export class ProjectStageSynchronizer
                 if (!grantStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
 
                 const totalStages = await this.grantStageRepo.
-                    countSelectionStages(String(grantStageDoc.grant), session);
+                    countStages(String(grantStageDoc.grant), StageCategory.selection, session);
 
                 if (grantStageDoc.order >= totalStages) {
                     newStatus = ProjectStatus.accepted; // last stage accepted

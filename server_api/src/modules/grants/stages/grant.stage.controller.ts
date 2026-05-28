@@ -3,6 +3,7 @@ import { GrantStageService } from './grant.stage.service';
 import { CreateStageDTO, GetStageDTO, UpdateStageDTO } from './grant.stage.dto';
 import { successResponse, errorResponse } from '../../../common/helpers/response';
 import { AuthenticatedRequest } from '../../auth/auth.middleware';
+import { StageCategory } from './grant.stage.model';
 
 
 export class StageController {
@@ -33,12 +34,13 @@ export class StageController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { grant, evaluation, order, populate } = req.query;
+            const { grant, evaluation, category, order, populate } = req.query;
 
             const dto: GetStageDTO = {
                 grant: grant as string,
                 evaluation: evaluation as string,
                 order: order ? Number(order) : undefined,
+                category: category ? category as StageCategory : undefined,
                 ...(populate !== undefined && { populate: populate === "true" })
             };
 

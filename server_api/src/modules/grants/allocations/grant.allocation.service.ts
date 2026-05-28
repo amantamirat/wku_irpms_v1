@@ -102,7 +102,7 @@ export class GrantAllocationService {
 
             // 3. NEW: Call Budget Floor Check (Can't go below what's committed to active strategic Calls)
             // Fetch all calls tied to this specific allocation
-            const activeCalls = await this.callRepo.find({ grantAllocation: id });
+            const activeCalls = await this.callRepo.find({ grant: id });
             const totalCommittedToCalls = activeCalls.reduce((sum, c) => sum + (c.budget || 0), 0);
 
             if (data.allocatedAmount < totalCommittedToCalls) {

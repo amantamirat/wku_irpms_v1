@@ -40,7 +40,7 @@ const ProjectApplyPage = () => {
                 const callData = await CallApi.getById!(callId as string, true);
                 setCall(callData);
 
-                const grantId = (callData as any).grantAllocation.grant._id;
+                const grantId = (callData as any).grant._id;
                 if (grantId) {
                     const cons = await ConstraintApi.getAll({ grant: grantId });
                     setConstraints(cons || []);

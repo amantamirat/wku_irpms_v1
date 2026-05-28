@@ -80,11 +80,12 @@ export class ProjectController {
   // -----------------------
   get = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { applicant, grant, status, populate } = req.query;
+      const { applicant, grant, call, status, populate } = req.query;
 
       const projects = await this.service.getProjects({
         applicant: applicant ? String(applicant) : undefined,
         grant: grant ? String(grant) : undefined,
+        call: call ? String(call) : undefined,
         status: status ? (status as ProjectStatus) : undefined,
 
         options: populate === "true"

@@ -9,7 +9,7 @@ export interface IGrantStageRepository {
     create(dto: CreateStageDTO): Promise<IGrantStage>;
     update(id: string, data: UpdateStageDTO["data"]): Promise<IGrantStage | null>;
     updateMany(filter: any, update: any): Promise<any>;
-    countSelectionStages(grantId: string, session?: ClientSession): Promise<number>;
+    countStages(grantId: string, category: StageCategory, session?: ClientSession): Promise<number>;
     exists(filters: ExistsStageDTO): Promise<boolean>;
     delete(id: string): Promise<IGrantStage | null>;
 }
@@ -46,6 +46,10 @@ export class GrantStageRepository implements IGrantStageRepository {
 
         if (filters.order) {
             query.order = filters.order;
+        }
+
+        if (filters.category) {
+            query.category = filters.category;
         }
 
         let dbQuery = GrantStage.find(query).sort({ order: 1 });
@@ -129,13 +133,14 @@ export class GrantStageRepository implements IGrantStageRepository {
         return GrantStage.updateMany(filter, update).exec();
     }
 
-    async countSelectionStages(
+    async countStages(
         grantId: string,
+        category: StageCategory,
         session?: ClientSession
     ) {
         let dbQuery = GrantStage.countDocuments({
             grant: new mongoose.Types.ObjectId(grantId),
-            category: StageCategory.selection
+            category: category
         });
 
         if (session) {

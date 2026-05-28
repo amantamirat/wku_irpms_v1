@@ -29,10 +29,10 @@ export interface GetStageDTO {
     grant?: string;
     evaluation?: string;
     order?: number;
+    category?: StageCategory;
     populate?: boolean;
-
     // optional filtering (useful later)
-  //  decisionMode?: DecisionMode;
+    //  decisionMode?: DecisionMode;
 }
 
 export interface ExistsStageDTO {

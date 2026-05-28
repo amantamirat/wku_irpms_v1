@@ -31,25 +31,21 @@ export class GrantService {
     async create(dto: CreateGrantDTO) {
         const { fundingSource, organization } = dto;
 
-        const orgDoc = await this.organizationRepo.findById(organization);
-        if (!orgDoc) throw new AppError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
+        const organizationDoc = await this.organizationRepo.findById(organization);
+        if (!organizationDoc) throw new AppError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
 
         if (fundingSource === FundingSource.INTERNAL)
-            if (orgDoc.type !== Unit.directorate) {
+            if (organizationDoc.type !== Unit.directorate) {
                 throw new AppError(ERROR_CODES.DIRECTORATE_NOT_FOUND);
             }
         if (fundingSource === FundingSource.EXTERNAL) {
-            if (orgDoc.type !== Unit.external) {
+            if (organizationDoc.type !== Unit.external) {
                 throw new AppError(ERROR_CODES.EXTERNAL_NOT_FOUND);
             }
-            /*
-            if ((orgDoc as IExternal).ownership === Ownership.Internal) {
-                throw new AppError(ERROR_CODES.EXTERNAL_NOT_FOUND);
-            }*/
         }
-        const thematicsDoc = await this.thematicRepository.findById(dto.thematic);
-        if (!thematicsDoc) throw new AppError(ERROR_CODES.THEMATIC_NOT_FOUND);
-        if (thematicsDoc.status !== ThematicStatus.published) throw new AppError(ERROR_CODES.THEMATIC_NOT_PUBLISHED);
+        const thematicDoc = await this.thematicRepository.findById(dto.thematic);
+        if (!thematicDoc) throw new AppError(ERROR_CODES.THEMATIC_NOT_FOUND);
+        if (thematicDoc.status !== ThematicStatus.published) throw new AppError(ERROR_CODES.THEMATIC_NOT_PUBLISHED);
 
         const created = await this.repository.create(dto);
         return created;
@@ -74,6 +70,13 @@ export class GrantService {
 
         // If the admin is trying to change the total amount
         if (data.amount !== undefined && data.amount !== grantDoc.amount) {
+
+            if (data.amount < (grantDoc.usedBudget || 0)) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_BUDGET_REDUCTION,
+                    `Cannot reduce allocatedAmount below usedBudget of ${grantDoc.usedBudget}.`
+                );
+            }
             // Find all allocations tied to this grant
             const allocations = await this.allocationRepo.find({ grant: id });
             const totalAllocated = allocations.reduce((sum, a) => sum + (a.allocatedAmount || 0), 0);

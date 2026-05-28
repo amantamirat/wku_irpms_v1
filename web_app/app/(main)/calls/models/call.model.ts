@@ -9,20 +9,27 @@ export enum CallStatus {
     closed = "closed"
 }
 
+export type CallDeadline = {
+    submission: string | Date;
+    evaluation: string | Date;
+};
+
+// 2. Update your main Call type
 export type Call = {
     _id?: string;
-    grantAllocation: string | GrantAllocation; // The new single source of truth
+    grant: string | Grant; // The new single source of truth
+    calendar?: string | Calendar;
     organization?: string | Organization;
     title: string;
     budget?: number;
     description?: string | null;
+    deadlines?: CallDeadline[]; // <-- Added the deadlines array here
     status: CallStatus;
     createdAt?: Date;
     updatedAt?: Date;
 };
 
 export interface GetCallsOptions {
-    grantAllocation?: string;
     status?: CallStatus;
     calendar?: string;
     grant?: string;
@@ -33,8 +40,11 @@ export const validateCall = (call: Call): { valid: boolean; message?: string } =
     if (!call.title || call.title.trim().length === 0) {
         return { valid: false, message: "Title is required." };
     }
-    if (!call.grantAllocation) {
-        return { valid: false, message: "Grant Allocation (Year/Grant) is required." };
+    if (!call.grant) {
+        return { valid: false, message: "Grant  is required." };
+    }
+    if (!call.calendar) {
+        return { valid: false, message: "Call Year is required." };
     }
     if (!call.status) {
         return { valid: false, message: "Status is required." };
@@ -45,9 +55,12 @@ export const validateCall = (call: Call): { valid: boolean; message?: string } =
 export const sanitizeCall = (call: Partial<Call>): Partial<Call> => {
     const sanitized: any = { ...call };
 
+    if (typeof sanitized.grant === "object" && sanitized.grant !== null) {
+        sanitized.grant = sanitized.grant._id;
+    }
 
-    if (typeof sanitized.grantAllocation === "object" && sanitized.grantAllocation !== null) {
-        sanitized.grantAllocation = sanitized.grantAllocation._id;
+    if (typeof sanitized.calendar === "object" && sanitized.calendar !== null) {
+        sanitized.calendar = sanitized.calendar._id;
     }
 
     if (typeof sanitized.organization === "object" && sanitized.organization !== null) {
@@ -66,6 +79,6 @@ export const sanitizeCall = (call: Partial<Call>): Partial<Call> => {
 export const createEmptyCall = (call?: Partial<Call>): Call => ({
     title: "",
     status: CallStatus.planned,
-    grantAllocation: call?.grantAllocation ?? '',
+    grant: call?.grant ?? '',
     description: ""
 });

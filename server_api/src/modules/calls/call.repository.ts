@@ -18,18 +18,13 @@ export interface ICallRepository {
 export class CallRepository implements ICallRepository {
 
     async findById(id: string, populate?: boolean) {
-        const query = Call.findById(new mongoose.Types.ObjectId(id)).lean<ICall>();
+        let dbQuery = Call.findById(new mongoose.Types.ObjectId(id));
         if (populate) {
-            query.populate({
-                path: 'grantAllocation',
-                populate: [
-                    { path: 'grant' },
-                    { path: 'calendar' }
-                ]
-            });
+            dbQuery = dbQuery.populate("grant");
+            dbQuery = dbQuery.populate("calendar");
+            dbQuery = dbQuery.populate("organization");
         }
-
-        return query.exec();
+        return dbQuery.lean<ICall>().exec();
     }
 
     async find(filters: GetCallsOptions) {
@@ -40,34 +35,22 @@ export class CallRepository implements ICallRepository {
             query.status = filters.status;
         }
 
-        // 2. Handle Filtering by GrantAllocation OR its children (Calendar/Grant)
-        if (filters.grantAllocation) {
-            // Direct match
-            query.grantAllocation = new mongoose.Types.ObjectId(filters.grantAllocation);
-        } else if (filters.calendar || filters.grant) {
-            // Find all Allocation IDs that match the calendar or grant
-            const allocationQuery: any = {};
-            if (filters.calendar) allocationQuery.calendar = filters.calendar;
-            if (filters.grant) allocationQuery.grant = filters.grant;
-
-            const matchingAllocations = await GrantAllocation.find(allocationQuery).select('_id').lean();
-            const allocationIds = matchingAllocations.map(a => a._id);
-
-            // Tell the Call query: "Find calls where grantAllocation is one of these IDs"
-            query.grantAllocation = { $in: allocationIds };
+        if (filters.grant) {
+            query.grant = filters.grant;
         }
+
+        if (filters.calendar) {
+            query.calendar = filters.calendar;
+        }
+
 
         let dbQuery = Call.find(query);
 
         // 3. Deep Population (Same as your current logic)
         if (filters.populate) {
-            dbQuery = dbQuery.populate("organization").populate({
-                path: 'grantAllocation',
-                populate: [
-                    { path: 'grant' },
-                    { path: 'calendar' }
-                ]
-            });
+            dbQuery = dbQuery.populate("grant");
+            dbQuery = dbQuery.populate("calendar");
+            dbQuery = dbQuery.populate("organization");
         }
 
         return dbQuery.lean<ICall[]>().exec();
@@ -76,7 +59,8 @@ export class CallRepository implements ICallRepository {
     async create(dto: CreateCallDTO) {
         return Call.create({
             ...dto,
-            grantAllocation: new mongoose.Types.ObjectId(dto.grantAllocation),
+            grant: new mongoose.Types.ObjectId(dto.grant),
+            calendar: new mongoose.Types.ObjectId(dto.calendar),
             organization: new mongoose.Types.ObjectId(dto.organization),
         });
     }

@@ -34,7 +34,6 @@ export type Project = {
     currentStage?: string;
     createdAt?: Date;
     updatedAt?: Date;
-
     //used for apply for call
     collaborators?: Collaborator[];// | string[];
     phases?: Phase[];
@@ -45,6 +44,7 @@ export type Project = {
 export interface GetProjectsOptions {
     grant?: string | Grant;
     applicant?: string | User;
+    call?: string | Call;
     workspace?: string | Organization;
     calendar?: string;
     populate?: boolean;
@@ -89,6 +89,10 @@ export const sanitize = (project: Partial<Project>): Partial<Project> => {
             typeof project.applicant === 'object' && project.applicant !== null
                 ? (project.applicant as any)._id
                 : project.applicant,
+        call:
+            typeof project.call === 'object' && project.call !== null
+                ? (project.call as any)._id
+                : project.call,
         /*
                 workspace:
             typeof project.workspace === 'object' && project.workspace !== null

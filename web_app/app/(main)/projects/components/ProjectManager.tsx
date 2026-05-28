@@ -13,16 +13,18 @@ import { GetProjectsOptions, Project, ProjectStatus } from "../models/project.mo
 import { PROJECT_STATUS_ORDER, PROJECT_TRANSITIONS } from "../models/project.state-machine";
 import ProjectDetail from "./ProjectDetail";
 import SaveProject from "./SaveProject";
+import { Call } from "../../calls/models/call.model";
 
 interface ProjectManagerProps {
     grant?: Grant;
     calendar?: Calendar;
     applicant?: User;
+    call?: Call;
     workspace?: Organization;
     onItemsChange?: (items: Project[]) => void;
 }
 
-const ProjectManager = ({ applicant, grant, calendar, workspace, onItemsChange }: ProjectManagerProps) => {
+const ProjectManager = ({ applicant, grant, calendar, call, workspace, onItemsChange }: ProjectManagerProps) => {
     const { getUser } = useAuth();
     const activeUser = getUser();
 
@@ -89,6 +91,7 @@ const ProjectManager = ({ applicant, grant, calendar, workspace, onItemsChange }
             SaveDialog: SaveProject,
             permissionPrefix: "project",
             query: () => ({
+                call,
                 populate: true,
                 workspace: workspaceId,
                 applicant: applicantId,
@@ -104,14 +107,14 @@ const ProjectManager = ({ applicant, grant, calendar, workspace, onItemsChange }
             disableDeleteRow: (row) => row.status !== ProjectStatus.draft,
             expandable: {
                 template: (project, actions) => (
-                    <ProjectDetail 
-                        project={project} 
-                        updateProject={(updated) => actions.updateItem(updated)} 
+                    <ProjectDetail
+                        project={project}
+                        updateProject={(updated) => actions.updateItem(updated)}
                     />
                 )
             }
         });
-    }, [grantId, calendarId, workspaceId, applicantId, columns, onItemsChange]);
+    }, [call, grantId, calendarId, workspaceId, applicantId, columns, onItemsChange]);
 
     return <Manager />;
 };

@@ -1,8 +1,5 @@
-export enum CalendarStatus {
-    planned = 'planned',
-    active = 'active',
-    closed = 'closed'
-}
+import { CalendarStatus } from "./calendar.model";
+
 
 export const CALENDAR_STATUS_ORDER: CalendarStatus[] = [
     CalendarStatus.planned,

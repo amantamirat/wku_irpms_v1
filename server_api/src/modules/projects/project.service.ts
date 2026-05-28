@@ -107,7 +107,7 @@ export class ProjectService {
         if (callStageDoc.status !== CallStageStatus.active) throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
         if (callStageDoc.deadline < new Date()) throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
 
-        const allocation = String(callDoc.grantAllocation);
+        const allocation = String(callDoc.grant);
         const allocDoc = await this.allocRepo.findById(allocation);
         if (!allocDoc) throw new Error(ERROR_CODES.ALLOCATION_NOT_FOUND);
         if (allocDoc.status !== AllocationStatus.active) throw new Error(ERROR_CODES.ALLOCATION_NOT_ACTIVE);

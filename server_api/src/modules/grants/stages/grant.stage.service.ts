@@ -61,7 +61,7 @@ export class GrantStageService {
         try {
             let nextOrder = 0;
             if (category === StageCategory.selection) {
-                const stages = await this.repository.countSelectionStages(grant);
+                const stages = await this.repository.countStages(grant, category);
                 nextOrder = stages + 1;
             }
             const stage = await this.repository.create({

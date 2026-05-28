@@ -38,16 +38,19 @@ const GrantDetail = ({ grant }: GrantDetailProps) => {
         },
 
         {
-            header: "Allocations",
-            permission: "grant.allocation:read",
-            content: <AllocationManager grant={grant} />
-        },
-
-        {
             header: "Calls",
             permission: PERMISSIONS.CALL.READ,
             content: <CallManager grant={grant} />
-        }
+        },
+
+        {
+            header: "Allocations",
+            permission: "grant.allocation:read",
+            content: <AllocationManager grant={grant} 
+            />
+        },
+
+        
     ], [grant]);
 
     /**

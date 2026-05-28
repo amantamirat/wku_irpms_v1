@@ -12,6 +12,7 @@ import { buildTree } from '@/app/(main)/thematics/models/thematic.node';
 import { Project } from '../../models/project.model';
 import { Constraint, ProjectConstraintType } from '@/app/(main)/grants/constraints/models/constraint.model';
 import { Theme } from '@/app/(main)/thematics/themes/models/theme.model';
+import { Grant } from '@/app/(main)/grants/models/grant.model';
 
 interface BasicInfoStepProps {
     data: Partial<Project>;
@@ -122,11 +123,10 @@ export const BasicInfoStep = ({ data, call, constraints, onUpdate, onNext }: Bas
         return Math.min((current / max) * 100, 100);
     };
 
-
     useEffect(() => {
         const loadThemes = async () => {
             try {
-                const thematicId = (call.grantAllocation as any)?.grant?.thematic;
+                const thematicId = (call.grant as Grant)?.thematic;
                 if (thematicId) {
                     const tData = await ThemeApi.getAll({ thematicArea: thematicId });
                     setAllThemes(tData);

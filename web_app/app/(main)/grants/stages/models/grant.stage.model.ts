@@ -33,6 +33,7 @@ export interface GetStagesDTO {
     grant?: string | Grant;
     evaluation?: string | Evaluation;
     order?: number;
+    category?: StageCategory;
     populate?: boolean;
 }
 
