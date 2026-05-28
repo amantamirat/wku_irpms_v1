@@ -141,7 +141,7 @@ export class ProjectStageRepository implements IProjectStageRepository {
         const data: Partial<IProjectStage> = {
             project: new mongoose.Types.ObjectId(dto.project),
             grantStage: new mongoose.Types.ObjectId(dto.grantStage),
-            callStage: new mongoose.Types.ObjectId(dto.callStage),
+            //callStage: new mongoose.Types.ObjectId(dto.callStage),
             documentPath: dto.documentPath
         };
         return ProjectStage.create([data], { session }).then(res => res[0]);

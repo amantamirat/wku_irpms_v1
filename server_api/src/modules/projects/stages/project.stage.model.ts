@@ -4,9 +4,6 @@ import { COLLECTIONS } from "../../../common/constants/collections.enum";
 
 export enum ProjectStageStatus {
     submitted = 'submitted',
-    //shortlisted = 'shortlisted',
-    //refused = 'refused',
-    //reviewed = 'reviewed',
     accepted = 'accepted',
     rejected = 'rejected'
 }
@@ -14,7 +11,7 @@ export enum ProjectStageStatus {
 export interface IProjectStage extends Document {
     _id: mongoose.Types.ObjectId;
     grantStage: mongoose.Types.ObjectId;
-    callStage?: mongoose.Types.ObjectId;
+    //callStage?: mongoose.Types.ObjectId;
     project: mongoose.Types.ObjectId;
     documentPath: string;
     totalScore: number | null;
@@ -30,12 +27,13 @@ const ProjecStageSchema = new Schema<IProjectStage>({
         immutable: true,
         required: true
     },
+    /*
     callStage: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.CALL_STAGE,
         immutable: true,
         //required: true
-    },
+    },*/
     project: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.PROJECT,
@@ -60,6 +58,7 @@ const ProjecStageSchema = new Schema<IProjectStage>({
 }, { timestamps: true });
 
 ProjecStageSchema.index({ project: 1, grantStage: 1 }, { unique: true });
+/*
 ProjecStageSchema.index(
     { project: 1, callStage: 1 },
     {
@@ -67,5 +66,6 @@ ProjecStageSchema.index(
         partialFilterExpression: { callStage: { $exists: true, $ne: null } }
     }
 );
+*/
 export const ProjectStage = model<IProjectStage>(COLLECTIONS.PROJECT_STAGE, ProjecStageSchema);
 

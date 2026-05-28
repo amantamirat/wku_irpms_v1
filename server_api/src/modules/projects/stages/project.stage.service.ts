@@ -28,6 +28,7 @@ import {
 } from "./project.stage.dto";
 import { ProjectStageStatus } from "./project.stage.model";
 import { IProjectSynchronizer } from "./project.stage.synchronizer";
+import { CallRepository, ICallRepository } from "../../calls/call.repository";
 
 export class ProjectStageService {
 
@@ -41,6 +42,7 @@ export class ProjectStageService {
         private readonly notificationService: NotificationService,
         private readonly constValidator: ConstraintValidator = new ConstraintValidator(),
         private readonly compValidator: CompositionValidator = new CompositionValidator(),
+        private readonly callRepo: ICallRepository = new CallRepository(),
 
     ) {
     }
@@ -50,7 +52,6 @@ export class ProjectStageService {
         if (
             projectDoc.status !== ProjectStatus.draft
             && projectDoc.status !== ProjectStatus.submitted
-            // && projectDoc.status !== ProjectStatus.completed
         ) {
             throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
         }
@@ -94,20 +95,14 @@ export class ProjectStageService {
             dto.grantStage = nextGrantStageId;
             dto.stageName = nextGrantStageDoc.name;
             if (projectDoc.call) {
-                const nextCallStageDoc = await this.callStageRepo.findOne(
-                    { callId: String(projectDoc.call), grantStageId: nextGrantStageId },
-                    session
-                );
-                if (!nextCallStageDoc) {
-                    throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+                const callDoc = await this.callRepo.findById(String(projectDoc.call));
+                const deadline = callDoc?.deadlines?.[nextOrder - 1]?.submission;
+                if (!deadline) {
+                    throw new AppError(ERROR_CODES.DEADLINE_NOT_FOUND);
                 }
-                if (nextCallStageDoc.status !== CallStageStatus.active) {
-                    throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
-                }
-                if (nextCallStageDoc.deadline < new Date()) {
+                if (deadline < new Date()) {
                     throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
                 }
-                dto.callStage = String(nextCallStageDoc._id)
             }
             if (nextOrder === 1) {
                 await this.constValidator.validateProject(grantId, projectDoc);

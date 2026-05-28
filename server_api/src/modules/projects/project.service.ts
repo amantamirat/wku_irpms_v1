@@ -35,6 +35,7 @@ import { ICallStageRepository } from "../calls/stages/call.stage.repository";
 import { CallStageStatus } from "../calls/stages/call.stage.model";
 import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
 import { GrantStatus } from "../grants/grant.model";
+import { GrantStageRepository, IGrantStageRepository } from "../grants/stages/grant.stage.repository";
 
 
 export class ProjectService {
@@ -55,6 +56,7 @@ export class ProjectService {
         private readonly notificationService: NotificationService,
         private readonly compValidator = new CompositionValidator(),
         private readonly grantRepo: IGrantRepository = new GrantRepository(),
+        private readonly grantStageRepo: IGrantStageRepository = new GrantStageRepository(),
     ) { }
 
 
@@ -101,27 +103,30 @@ export class ProjectService {
         const callDoc = await this.callRepo.findById(call);
         if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
         if (callDoc.status !== CallStatus.active) throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
+        const deadline = callDoc?.deadlines?.[0]?.submission;
+        if (!deadline) {
+            throw new AppError(ERROR_CODES.DEADLINE_NOT_FOUND);
+        }
+        if (deadline < new Date()) {
+            throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
+        }
 
-        const callStageDoc = await this.callStageRepo.findOne({ callId: call, order: 1 });
-        if (!callStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-        if (callStageDoc.status !== CallStageStatus.active) throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
-        if (callStageDoc.deadline < new Date()) throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
-
-        const allocation = String(callDoc.grant);
-        const allocDoc = await this.allocRepo.findById(allocation);
-        if (!allocDoc) throw new Error(ERROR_CODES.ALLOCATION_NOT_FOUND);
-        if (allocDoc.status !== AllocationStatus.active) throw new Error(ERROR_CODES.ALLOCATION_NOT_ACTIVE);
-        const grantId = String(allocDoc.grant);
+        const grantId = String(callDoc.grant);
         await this.constValidator.validateAll(grantId, { participantCount: collaborators.length, phases, themes, title, summary });
         await this.compValidator.validateAll(grantId, collaborators);
         const skipValidation = { skipValidation: true };
+
+        const grantStage = await this.grantStageRepo.findOne(grantId, 1);
+        if (!grantStage) {
+            throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        }
 
         //Start a Mongo Database Session
         const session = await mongoose.startSession();
         session.startTransaction();
         try {
             const createdProj = await this.create(
-                { call, grant: allocation, title, summary, applicant, themes },
+                { call, grant: grantId, title, summary, applicant, themes },
                 skipValidation, session);
 
             const projectId = String(createdProj._id);
@@ -158,8 +163,7 @@ export class ProjectService {
                 {
                     project: projectId,
                     projectTitle: title,
-                    callStage: String(callStageDoc._id),
-                    grantStage: String(callStageDoc.grantStage),
+                    grantStage: String(grantStage._id),
                     stageName: callDoc.title,
                     documentPath: docPath,
                     applicantId: applicant

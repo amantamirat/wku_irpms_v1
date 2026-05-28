@@ -39,7 +39,7 @@ export class CallService {
 
         // 2. Validate that deadlines exist on the DTO before checking length
         if (!deadlines || !Array.isArray(deadlines)) {
-            throw new AppError(ERROR_CODES.DEADLINES_REQUIRED);
+            throw new AppError(ERROR_CODES.DEADLINE_NOT_FOUND);
         }
 
         // 3. Count selection stages and enforce strict matching
