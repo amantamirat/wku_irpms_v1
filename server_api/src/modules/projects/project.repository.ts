@@ -4,7 +4,7 @@ import { Project, IProject } from "./project.model";
 import {
     CreateProjectDTO,
     ExistsProjectDTO,
-    FindByIdOptions,
+    Options,
     GetProjectsDTO,
     UpdateProjectDTO
 } from "./project.dto";
@@ -12,7 +12,7 @@ import { GrantAllocation } from "../grants/allocations/grant.allocation.model";
 import { ProjectStatus } from "./project.model";
 
 export interface IProjectRepository {
-    findById(id: string, options?: FindByIdOptions, session?: ClientSession): Promise<IProject | null>;
+    findById(id: string, options?: Options, session?: ClientSession): Promise<IProject | null>;
     find(filters: GetProjectsDTO): Promise<Partial<IProject>[]>;
     create(dto: CreateProjectDTO, session?: ClientSession): Promise<IProject>;
     update(id: string, data: UpdateProjectDTO["data"]): Promise<IProject | null>;
@@ -41,7 +41,7 @@ export class ProjectRepository implements IProjectRepository {
 
     async findById(
         id: string,
-        options?: FindByIdOptions,
+        options?: Options,
         session?: ClientSession
     ) {
         let dbQuery = Project.findById(new mongoose.Types.ObjectId(id));
@@ -52,8 +52,8 @@ export class ProjectRepository implements IProjectRepository {
             dbQuery = dbQuery.populate("applicant");
         }
 
-        if (populate?.grantAllocation) {
-            dbQuery = dbQuery.populate("grantAllocation");
+        if (populate?.grant) {
+            dbQuery = dbQuery.populate("grant");
         }
 
         if (populate?.currentStage) {
@@ -68,51 +68,49 @@ export class ProjectRepository implements IProjectRepository {
         return dbQuery.lean<IProject>().exec();
     }
 
-    async find(filters: GetProjectsDTO) {
+    async find(
+        filters: GetProjectsDTO,
+        session?: ClientSession
+    ) {
         const query: any = {};
 
-        // 1. Handle Status & Applicant
+        // status
         if (filters.status) {
             query.status = filters.status;
         }
 
+        // applicant
         if (filters.applicant) {
             query.applicant = new mongoose.Types.ObjectId(filters.applicant);
         }
 
-        if (filters.workspace) {
-            query.workspace = new mongoose.Types.ObjectId(filters.workspace);
-        }
-
-        if (filters.grantAllocation) {
-            query.grantAllocation = new mongoose.Types.ObjectId(filters.grantAllocation);
-        } else if (filters.calendar || filters.grant) {
-            const allocationQuery: any = {};
-            if (filters.calendar) allocationQuery.calendar = filters.calendar;
-            if (filters.grant) allocationQuery.grant = filters.grant;
-            const matchingAllocations = await GrantAllocation.find(allocationQuery)
-                .select('_id')
-                .lean();
-            const allocationIds = matchingAllocations.map(a => a._id);
-            // Tell the Project query: "Find projects where grantAllocation is one of these IDs"
-            query.grantAllocation = { $in: allocationIds };
+        // grant
+        if (filters.grant) {
+            query.grant = new mongoose.Types.ObjectId(filters.grant);
         }
 
         let dbQuery = Project.find(query);
 
-        // 3. Deep Population
-        if (filters.populate) {
-            dbQuery = dbQuery
-                .populate("applicant")
-                .populate({
-                    path: 'grantAllocation',
-                    populate: [
-                        { path: 'grant' },
-                        { path: 'calendar' }
-                    ]
-                })
+        const populate = filters.options?.populate;
 
-            //.populate("themes");
+        // applicant populate
+        if (populate?.applicant) {
+            dbQuery = dbQuery.populate("applicant");
+        }
+
+        // grant populate
+        if (populate?.grant) {
+            dbQuery = dbQuery.populate("grant");
+        }
+
+        // currentStage populate
+        if (populate?.currentStage) {
+            dbQuery = dbQuery.populate("currentStage");
+        }
+
+        // session
+        if (session) {
+            dbQuery = dbQuery.session(session);
         }
 
         return dbQuery.lean<IProject[]>().exec();
@@ -122,7 +120,7 @@ export class ProjectRepository implements IProjectRepository {
         const data = {
             ...dto,
             call: dto.call ? new mongoose.Types.ObjectId(dto.call) : undefined,
-            grantAllocation: new mongoose.Types.ObjectId(dto.grantAllocation),
+            grant: new mongoose.Types.ObjectId(dto.grant),
             applicant: new mongoose.Types.ObjectId(dto.applicant),
             themes: dto.themes?.map(thm => new mongoose.Types.ObjectId(thm)),
         };

@@ -14,6 +14,8 @@ import { IPhase, PhaseStatus } from "./phase.model";
 import { IGrantAllocationRepository } from "../../grants/allocations/grant.allocation.repository";
 import { IPhaseSynchronizer } from "./phase.synchronizer";
 import { PROJECT_TRANSITIONS } from "../project.state-machine";
+import { GrantAllocation } from "../../grants/allocations/grant.allocation.model";
+import { GrantRepository, IGrantRepository } from "../../grants/grant.repository";
 
 export class PhaseService {
 
@@ -23,7 +25,8 @@ export class PhaseService {
         private readonly allocRepo: IGrantAllocationRepository,
         private readonly projAuth: ProjectAuth,
         private readonly constValidator: ConstraintValidator,
-        private readonly synchrnonizer?: IPhaseSynchronizer
+        private readonly synchrnonizer?: IPhaseSynchronizer,
+        private readonly grantRepo: IGrantRepository = new GrantRepository(),
     ) { }
 
     async validateProject(project: string, applicant: string, session?: ClientSession) {
@@ -44,12 +47,10 @@ export class PhaseService {
         const { project, applicantId } = dto;
         if (!options?.skipValidation) {
             const projectDoc = await this.validateProject(project, applicantId ?? "", session);
-            const grantId = String((projectDoc.grantAllocation as any).grant);
+            const grantId = String(projectDoc.grant);
             const existingPhases = await this.phaseRepo.find({ project }, session);
             const proposedPhases = [...existingPhases, dto];
             await this.constValidator.validatePhases(grantId, proposedPhases, { skipMin: true })
-            //  await this.validator.validateProjectTotals(grantId, proposedPhases, { skipMin: true });
-            // await this.validator.validatePhaseCount(grantId, proposedPhases, );
         }
         try {
             const count = await this.phaseRepo.countByProject(project, session);
@@ -91,7 +92,7 @@ export class PhaseService {
         const projectId = String(phaseDoc.project);
 
         const projectDoc = await this.validateProject(projectId, userId);
-        const grantId = String((projectDoc.grantAllocation as any).grant);
+        const grantId = String(projectDoc.grant);
 
         const updatedPhase = { ...phaseDoc, ...data };
         await this.constValidator.validateIndividualPhase(grantId, [updatedPhase]);
@@ -329,8 +330,8 @@ export class PhaseService {
                     to === PhaseStatus.active
                 ) {
 
-                    await this.allocRepo.consumeBudget(
-                        projectDoc.grantAllocation.toString(),
+                    await this.grantRepo.consumeBudget(
+                        projectDoc.grant.toString(),
                         currentPhaseDoc.budget
                     );
 
@@ -340,8 +341,8 @@ export class PhaseService {
                     from === PhaseStatus.active &&
                     to === PhaseStatus.approved
                 ) {
-                    await this.allocRepo.reverseConsumedBudget(
-                        projectDoc.grantAllocation.toString(),
+                    await this.grantRepo.reverseConsumedBudget(
+                        projectDoc.grant.toString(),
                         currentPhaseDoc.budget
                     );
 
@@ -393,7 +394,7 @@ export class PhaseService {
 
         const projectId = String(phaseDoc.project);
         const projectDoc = await this.validateProject(projectId, applicantId ?? "");
-        const grantId = String((projectDoc.grantAllocation as any).grant);
+        const grantId = String((projectDoc.grant as any).grant);
 
         const allPhases = await this.phaseRepo.find({ project: projectId });
         const proposedPhases = allPhases.filter(p => String(p._id) !== id);

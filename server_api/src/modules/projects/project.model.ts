@@ -15,7 +15,7 @@ export enum ProjectStatus {
 
 export interface IProject extends Document {
     _id: mongoose.Types.ObjectId;
-    grantAllocation: mongoose.Types.ObjectId;
+    grant: mongoose.Types.ObjectId;
     call?: mongoose.Types.ObjectId;
     title: string;
     summary?: string;
@@ -31,9 +31,9 @@ export interface IProject extends Document {
 }
 
 const ProjectSchema = new Schema<IProject>({
-    grantAllocation: {
+    grant: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.GRANT_ALLOCATION,
+        ref: COLLECTIONS.GRANT,
         required: true,
         immutable: true
     },

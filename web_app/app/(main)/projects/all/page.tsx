@@ -1,18 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import ProjectManager from '../components/ProjectManager';
 import { Project } from '../models/project.model';
 import { PROJECT_STATUS_ORDER } from '../models/project.state-machine';
 import { STATUS_BUTTON_CONFIG } from '@/components/status-button.config';
 
 const ProjectPage = () => {
-    // Keep track of only the necessary aggregations instead of storing the whole array
     const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
     const [totalProjects, setTotalProjects] = useState<number | null>(null);
 
-    // Single callback to handle the data emission from ProjectManager
-    const handleItemsChange = (updatedProjects: Project[]) => {
+    // ✅ Memoize this callback so it doesn't change on every render pass
+    const handleItemsChange = useCallback((updatedProjects: Project[]) => {
         const counts = updatedProjects.reduce((acc, project) => {
             const status = project.status || "Draft";
             acc[status] = (acc[status] || 0) + 1;
@@ -21,11 +20,10 @@ const ProjectPage = () => {
 
         setStatusCounts(counts);
         setTotalProjects(updatedProjects.length);
-    };
+    }, []); // Empty array means this function reference stays perfectly stable
 
     return (
         <div className="flex flex-column gap-4 p-4 bg-surface-ground min-h-screen">
-
             {/* HEADER */}
             <div className="flex justify-content-between align-items-end">
                 <div>
@@ -38,14 +36,14 @@ const ProjectPage = () => {
                 </div>
             </div>
 
-            {/* SUMMARY CARDS - Compact & Professional */}
+            {/* SUMMARY CARDS */}
             {totalProjects !== null && totalProjects > 0 && (
                 <div className="flex flex-wrap gap-3">
                     {PROJECT_STATUS_ORDER.map((status) => {
                         const count = statusCounts[status] || 0;
                         const config = STATUS_BUTTON_CONFIG[status.toLowerCase()] || STATUS_BUTTON_CONFIG.draft;
 
-                        if (count === 0 && status.toLowerCase() !== 'draft') return null;
+                        if (count === 0) return null;
 
                         return (
                             <div key={status} className="flex-1 min-w-min" style={{ maxWidth: '240px' }}>
@@ -75,7 +73,6 @@ const ProjectPage = () => {
 
             {/* TABLE SECTION */}
             <div className="surface-card border-round-xl shadow-1 overflow-hidden border-1 surface-border">
-                {/* TABLE HEADER */}
                 <div className="px-4 py-3 border-bottom-1 surface-border flex justify-content-between align-items-center">
                     <div>
                         <h3 className="text-lg font-bold text-color m-0">Project List</h3>
@@ -85,7 +82,6 @@ const ProjectPage = () => {
                     </div>
                 </div>
 
-                {/* TABLE CONTENT */}
                 <div className="p-2">
                     <ProjectManager onItemsChange={handleItemsChange} />
                 </div>

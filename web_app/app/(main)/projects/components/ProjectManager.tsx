@@ -1,11 +1,10 @@
 'use client';
+
 import { createEntityManager } from "@/components/createEntityManager";
 import { useAuth } from "@/contexts/auth-context";
 import MyBadge from "@/templates/MyBadge";
 import { useMemo } from "react";
 import { Calendar } from "../../calendars/models/calendar.model";
-import { getAllocationLabel } from "../../grants/allocations/components/AllocationTempletes";
-import { GrantAllocation } from "../../grants/allocations/models/grant.allocation.model";
 import { Grant } from "../../grants/models/grant.model";
 import { Organization } from "../../organizations/models/organization.model";
 import { User } from "../../users/models/user.model";
@@ -16,7 +15,6 @@ import ProjectDetail from "./ProjectDetail";
 import SaveProject from "./SaveProject";
 
 interface ProjectManagerProps {
-    grantAllocation?: GrantAllocation;
     grant?: Grant;
     calendar?: Calendar;
     applicant?: User;
@@ -24,43 +22,31 @@ interface ProjectManagerProps {
     onItemsChange?: (items: Project[]) => void;
 }
 
-const ProjectManager = ({ grantAllocation, applicant, grant, calendar, workspace, onItemsChange }: ProjectManagerProps) => {
+const ProjectManager = ({ applicant, grant, calendar, workspace, onItemsChange }: ProjectManagerProps) => {
     const { getUser } = useAuth();
     const activeUser = getUser();
 
+    // Pure primitive strings extracted out of components to keep checks bulletproof
+    const grantId = typeof grant === 'object' ? (grant as any)?._id : grant;
+    const calendarId = typeof calendar === 'object' ? (calendar as any)?._id : calendar;
+    const workspaceId = workspace?._id;
+    const applicantId = applicant?._id;
+
     const columns = useMemo(() => {
         const cols: any[] = [
-            {
-                header: "Allocation",
-                field: "grantAllocation.grant.title",
-                sortable: true,
-                body: (r: Project) => (
-                    <div
-                        className="text-900 font-medium truncate"
-                        style={{ maxWidth: '200px' }}
-                        title={getAllocationLabel(r.grantAllocation)}
-                    >
-                        {getAllocationLabel(r.grantAllocation)}
-                    </div>
-                )
-            },
+            { header: "Grant Source", field: "grant.title", sortable: true },
             {
                 header: "Title",
                 field: "title",
                 sortable: true,
                 body: (row: Project) => (
-                    <div
-                        className="text-700 truncate text-sm"
-                        style={{ maxWidth: '250px' }}
-                        title={row.title}
-                    >
+                    <div className="text-700 truncate text-sm" style={{ maxWidth: '250px' }} title={row.title}>
                         {row.title}
                     </div>
                 )
             }
         ];
 
-        // ✅ Add Applicant column ONLY if not provided
         if (!applicant) {
             cols.push({
                 header: "Applicant",
@@ -68,36 +54,32 @@ const ProjectManager = ({ grantAllocation, applicant, grant, calendar, workspace
                 sortable: true,
                 body: (p: Project) => (
                     <span className="text-600">
-                        {typeof p.applicant === "object"
-                            ? p.applicant?.name
-                            : p.applicant}
+                        {typeof p.applicant === "object" ? p.applicant?.name : p.applicant}
                     </span>
                 )
             });
         }
 
-        // Always include status
         cols.push({
             field: "status",
             header: "Status",
             sortable: true,
-            body: (p: Project) => (
-                <MyBadge type="status" value={p.status ?? "Draft"} />
-            )
+            body: (p: Project) => <MyBadge type="status" value={p.status ?? "Draft"} />
         });
 
         return cols;
     }, [applicant]);
 
-    const Manager = useMemo(() =>
-        createEntityManager<Project, GetProjectsOptions | undefined>({
+    // Construct the manager cleanly
+    const Manager = useMemo(() => {
+        return createEntityManager<Project, GetProjectsOptions | undefined>({
             title: "Manage Projects",
             itemName: "Project",
             api: ProjectApi,
             onItemsChange: onItemsChange,
             columns: columns,
             createNew: () => ({
-                grantAllocation: grantAllocation ?? undefined,
+                grant: grant ?? undefined,
                 applicant: activeUser ?? undefined,
                 workspace: workspace ?? undefined,
                 title: "",
@@ -108,11 +90,10 @@ const ProjectManager = ({ grantAllocation, applicant, grant, calendar, workspace
             permissionPrefix: "project",
             query: () => ({
                 populate: true,
-                grantAllocation: grantAllocation?._id,
-                workspace: workspace?._id,
-                applicant: applicant?._id,
-                calendar: typeof calendar === 'object' ? (calendar as any)?._id : calendar,
-                grant: typeof grant === 'object' ? (grant as any)?._id : grant,
+                workspace: workspaceId,
+                applicant: applicantId,
+                calendar: calendarId,
+                grant: grantId,
             }),
             workflow: {
                 statusField: "status",
@@ -122,18 +103,17 @@ const ProjectManager = ({ grantAllocation, applicant, grant, calendar, workspace
             hideDefaultActions: !applicant,
             disableDeleteRow: (row) => row.status !== ProjectStatus.draft,
             expandable: {
-                template: (project, actions) => <ProjectDetail project={project}
-                    updateProject={(updated: Project) => {
-                        actions.updateItem(updated);
-                    }}
-                />
+                template: (project, actions) => (
+                    <ProjectDetail 
+                        project={project} 
+                        updateProject={(updated) => actions.updateItem(updated)} 
+                    />
+                )
             }
-        }), [grantAllocation?._id, workspace?._id, applicant?._id, activeUser?._id]);
+        });
+    }, [grantId, calendarId, workspaceId, applicantId, columns, onItemsChange]);
 
-
-    return (
-        <Manager />
-    );
+    return <Manager />;
 };
 
 export default ProjectManager;

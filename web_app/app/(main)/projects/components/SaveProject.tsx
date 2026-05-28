@@ -12,13 +12,13 @@ import { useEffect, useRef, useState } from 'react';
 
 import { ThemeApi } from '@/app/(main)/thematics/themes/api/theme.api';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
-import { GrantAllocationApi } from '../../grants/allocations/api/grant.allocation.api';
-import { allocationOptionTemplate, getAllocationLabel } from '../../grants/allocations/components/AllocationTempletes';
-import { GrantAllocation } from '../../grants/allocations/models/grant.allocation.model';
-import { AllocationStatus } from '../../grants/allocations/models/grant.allocation.state-machine';
+// Updated to target your Grant API, template, and status configs directly
+import { GrantApi } from '../../grants/api/grant.api';
+import { Grant } from '../../grants/models/grant.model';
 import { buildTree, ThemeNode } from '../../thematics/models/thematic.node';
 import { ProjectApi } from '../api/project.api';
 import { Project, validateProject } from '../models/project.model';
+import { GrantStatus } from '../../grants/models/grant.state-machine';
 
 interface ExtendedProject extends Project {
     _filterCalendar?: string;
@@ -34,47 +34,43 @@ const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
     });
 
     const [submitted, setSubmitted] = useState(false);
-    const [allocations, setAllocations] = useState<GrantAllocation[]>([]);
-    //const [applicants, setApplicants] = useState<Applicant[]>([]);
+    const [grants, setGrants] = useState<Grant[]>([]); // 🟢 Changed from allocations to grants
     const [themeNodes, setThemeNodes] = useState<ThemeNode[]>([]);
-    const isAllocationPredefined = !!item.grantAllocation;
-    //const isApplicantPredefined = !!item.applicant;
+    const isGrantPredefined = !!item.grant; // 🟢 Changed from isAllocationPredefined
     const isEditMode = !!item._id;
 
     useEffect(() => {
         setLocalProject({ ...item, themes: item.themes || [] });
     }, [item]);
 
-    // 1. Initial Load: Fetch Allocations and Applicants
+    // 1. Initial Load: Fetch Active Grants
     useEffect(() => {
         const loadInitialData = async () => {
             if (!visible) return;
             try {
-                const [aData] = await Promise.all([
-                    (!isAllocationPredefined && !isEditMode)
-                        ? GrantAllocationApi.getAll({ status: AllocationStatus.active, populate: true })
+                const [gData] = await Promise.all([
+                    (!isGrantPredefined && !isEditMode)
+                        ? GrantApi.getAll({ status: GrantStatus.active, populate: true }) // 🟢 Changed to fetch Grants
                         : Promise.resolve([])
-                    /*
-                (!isApplicantPredefined && !isEditMode)
-                    ? ApplicantApi.getAll({})
-                    : Promise.resolve([])*/
                 ]);
 
-                if (aData.length) setAllocations(aData);
-                //if (appData.length) setApplicants(appData);
+                if (gData.length) setGrants(gData);
             } catch (err) {
                 console.error('Initial data load error:', err);
             }
         };
         loadInitialData();
-    }, [visible]);
+    }, [visible, isGrantPredefined, isEditMode]);
 
-    // 2. Reactive Load: Fetch Themes whenever the Allocation changes
+    // 2. Reactive Load: Fetch Themes whenever the selected Grant changes
     useEffect(() => {
-        const fetchThemesForAllocation = async () => {
-            // Drill down into the allocation to find the thematic area ID
-            const allocation = localProject.grantAllocation as GrantAllocation;
-            const thematicId = (typeof allocation?.grant === 'object') ? allocation.grant?.thematic : null;
+        const fetchThemesForGrant = async () => {
+            const selectedGrant = localProject.grant;
+
+            // Extract the thematic context directly from your updated Grant object structure
+            const thematicId = (typeof selectedGrant === 'object' && selectedGrant !== null)
+                ? (selectedGrant as any).thematic
+                : null;
 
             if (visible && thematicId) {
                 try {
@@ -89,8 +85,8 @@ const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
             }
         };
 
-        fetchThemesForAllocation();
-    }, [localProject.grantAllocation, visible]);
+        fetchThemesForGrant();
+    }, [localProject.grant, visible]);
 
     const getThemeSelectionKeys = () => {
         const selection: any = {};
@@ -120,7 +116,7 @@ const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
             if (onComplete) onComplete({
                 ...saved,
                 applicant: localProject.applicant,
-                grantAllocation: localProject.grantAllocation
+                grant: localProject.grant
             });
         } catch (err: any) {
             toast.current?.show({ severity: 'error', summary: 'Error', detail: err.message });
@@ -148,27 +144,25 @@ const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
                 maximizable
             >
                 <div className="formgrid grid">
-                    {/* Allocation Field */}
+                    {/* Grant / Funding Source Field */}
                     <div className="field col-12 md:col-6">
-                        <label className="font-bold">Funding Allocation</label>
-                        {isAllocationPredefined ? (
-                            <InputText value={getAllocationLabel(localProject.grantAllocation)} disabled className="surface-100" />
+                        <label className="font-bold">Grant Source</label>
+                        {isGrantPredefined ? (
+                            <InputText value={(localProject.grant as Grant).title} disabled className="surface-100" />
                         ) : (
                             <Dropdown
-                                value={localProject.grantAllocation}
-                                options={allocations}
+                                value={localProject.grant}
+                                options={grants}
                                 dataKey="_id"
-                                optionLabel="_id"
+                                optionLabel="title" // 🟢 Shows the Grant title directly
                                 onChange={(e) =>
                                     setLocalProject({
                                         ...localProject,
-                                        grantAllocation: e.value,
-                                        themes: [] // Reset themes when allocation changes
+                                        grant: e.value,
+                                        themes: [] // Reset themes when selected grant changes
                                     })}
-                                valueTemplate={(option, props) => option ? allocationOptionTemplate(option) : props.placeholder}
-                                itemTemplate={allocationOptionTemplate}
-                                placeholder="Select Allocation"
-                                className={classNames({ 'p-invalid': submitted && !localProject.grantAllocation })}
+                                placeholder="Select Grant"
+                                className={classNames({ 'p-invalid': submitted && !localProject.grant })}
                             />
                         )}
                     </div>
@@ -177,19 +171,6 @@ const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
                     <div className="field col-12 md:col-6">
                         <label className="font-bold">Applicant</label>
                         <InputText value={(localProject.applicant as any)?.name || 'Selected Applicant'} disabled className="surface-100" />
-                        {
-                            /**
-                             * <Dropdown
-                                value={localProject.applicant}
-                                options={applicants}
-                                dataKey="_id"
-                                optionLabel="name"
-                                onChange={(e) => setLocalProject({ ...localProject, applicant: e.value })}
-                                placeholder="Select an Applicant"
-                                className={classNames({ 'p-invalid': submitted && !localProject.applicant })}
-                            />
-                             */
-                        }
                     </div>
                 </div>
 
@@ -211,8 +192,8 @@ const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
                         onChange={onThemeChange}
                         display="chip"
                         selectionMode="checkbox"
-                        placeholder={localProject.grantAllocation ? "Select one or more themes" : "Please select an allocation first"}
-                        disabled={!localProject.grantAllocation}
+                        placeholder={localProject.grant ? "Select one or more themes" : "Please select a grant first"}
+                        disabled={!localProject.grant}
                         className={classNames('w-full', { 'p-invalid': submitted && (!localProject.themes || localProject.themes.length === 0) })}
                         filter
                         scrollHeight="300px"

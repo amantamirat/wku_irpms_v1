@@ -21,7 +21,7 @@ export enum ProjectStatus {
 
 export type Project = {
     _id?: string;
-    grantAllocation?: string | GrantAllocation;
+    grant?: string | Grant;
     call?: string | Call;
     title: string;
     summary?: string;
@@ -43,16 +43,15 @@ export type Project = {
 }
 
 export interface GetProjectsOptions {
-    grantAllocation?: string | GrantAllocation;
+    grant?: string | Grant;
     applicant?: string | User;
     workspace?: string | Organization;
     calendar?: string;
-    grant?: string;
     populate?: boolean;
 }
 
 export const validateProject = (project: Project): { valid: boolean; message?: string } => {
-    if (!project.grantAllocation) {
+    if (!project.grant) {
         return { valid: false, message: 'Grant is required.' };
     }
     if (!project.title || project.title.trim().length === 0) {
@@ -82,10 +81,10 @@ export const validateApplyProject = (project: Project): { valid: boolean; messag
 export const sanitize = (project: Partial<Project>): Partial<Project> => {
     return {
         ...project,
-        grantAllocation:
-            typeof project.grantAllocation === 'object' && project.grantAllocation !== null
-                ? (project.grantAllocation as any)._id
-                : project.grantAllocation,
+        grant:
+            typeof project.grant === 'object' && project.grant !== null
+                ? (project.grant as any)._id
+                : project.grant,
         applicant:
             typeof project.applicant === 'object' && project.applicant !== null
                 ? (project.applicant as any)._id

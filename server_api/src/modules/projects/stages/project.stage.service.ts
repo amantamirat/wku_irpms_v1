@@ -64,8 +64,7 @@ export class ProjectStageService {
         if (!options?.skipValidation) {
             const projectDoc = await this.validateProject(project, applicantId, session);
             dto.projectTitle = projectDoc.title;
-            const grantAllocDoc = projectDoc.grantAllocation as unknown as IGrantAllocation;
-            const grantId = String(grantAllocDoc.grant);
+            const grantId = String(projectDoc.grant);
             let nextOrder = 1;
             if (projectDoc.currentStage) {
                 if (projectDoc.status === ProjectStatus.completed) {

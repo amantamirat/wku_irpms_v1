@@ -10,7 +10,7 @@ export class ProjectAuth {
 
     async authProject(project: string, applicant: string, session?: ClientSession) {
         const projectDoc = await this.projectRepo.findById(
-            project, { populate: { grantAllocation: true } }, session);
+            project, undefined, session);
 
         if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
 

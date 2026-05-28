@@ -33,6 +33,8 @@ import { NotificationService } from "../notifications/notification.service";
 import { CompositionValidator } from "../grants/compositions/composition.validator";
 import { ICallStageRepository } from "../calls/stages/call.stage.repository";
 import { CallStageStatus } from "../calls/stages/call.stage.model";
+import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
+import { GrantStatus } from "../grants/grant.model";
 
 
 export class ProjectService {
@@ -51,7 +53,8 @@ export class ProjectService {
         private readonly projectStageService: ProjectStageService,
         private readonly constValidator: ConstraintValidator,
         private readonly notificationService: NotificationService,
-        private readonly compValidator = new CompositionValidator()
+        private readonly compValidator = new CompositionValidator(),
+        private readonly grantRepo: IGrantRepository = new GrantRepository(),
     ) { }
 
 
@@ -64,12 +67,12 @@ export class ProjectService {
     }
 
     async create(dto: CreateProjectDTO, options?: { skipValidation?: boolean }, session?: ClientSession) {
-        const { grantAllocation, title, summary, themes, applicant } = dto
+        const { grant, title, summary, themes, applicant } = dto
         if (!options?.skipValidation) {
-            const allocDoc = await this.allocRepo.findById(grantAllocation);
-            if (!allocDoc) throw new Error(ERROR_CODES.ALLOCATION_NOT_FOUND);
-            if (allocDoc.status !== AllocationStatus.active) throw new Error(ERROR_CODES.ALLOCATION_NOT_ACTIVE);
-            const grantId = String(allocDoc.grant);
+            const grantDoc = await this.grantRepo.findById(grant);
+            if (!grantDoc) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
+            if (grantDoc.status !== GrantStatus.active) throw new Error(ERROR_CODES.GRANT_NOT_ACTIVE);
+            const grantId = String(grantDoc._id);
             await this.compValidator.validatePI(grantId, applicant);
             await this.constValidator.validateMetadata(grantId, title, summary);
             await this.constValidator.validateThemes(grantId, themes);
@@ -118,7 +121,7 @@ export class ProjectService {
         session.startTransaction();
         try {
             const createdProj = await this.create(
-                { call, grantAllocation: allocation, title, summary, applicant, themes },
+                { call, grant: allocation, title, summary, applicant, themes },
                 skipValidation, session);
 
             const projectId = String(createdProj._id);
@@ -192,7 +195,7 @@ export class ProjectService {
 
         const projectDoc = await this.validateProject(id, applicantId);
 
-        const allocDoc = projectDoc.grantAllocation as unknown as IGrantAllocation;
+        const allocDoc = projectDoc.grant as unknown as IGrantAllocation;
         const grantId = String(allocDoc.grant);
 
         // Resolve next values

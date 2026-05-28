@@ -87,12 +87,17 @@ export default function ProjectDetail({ project, updateProject }: ProjectDetailP
                     <div className="flex flex-wrap gap-3 text-xs font-medium text-500 uppercase">
                         <span className="flex align-items-center bg-gray-100 px-2 py-1 border-round">
                             <i className="pi pi-tag mr-2 text-primary"></i>
-                            {getDisplayName((project?.grantAllocation as any)?.grant, 'title')}
+                            {getDisplayName((project?.grant), 'title')}
                         </span>
-                        <span className="flex align-items-center bg-gray-100 px-2 py-1 border-round">
+                        {
+                            /**
+                             *  <span className="flex align-items-center bg-gray-100 px-2 py-1 border-round">
                             <i className="pi pi-calendar mr-2 text-primary"></i>
-                            {getDisplayName((project?.grantAllocation as any)?.calendar, 'year')}
+                            {getDisplayName((project?.grant as any)?.calendar, 'year')}
                         </span>
+                             */
+                        }
+                       
                         <span className="flex align-items-center bg-gray-100 px-2 py-1 border-round">
                             <i className="pi pi-user mr-2 text-primary"></i>
                             {getDisplayName(project?.applicant, 'name')}

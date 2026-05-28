@@ -2,22 +2,23 @@ import { CollaboratorDto } from "./collaborators/collaborator.dto";
 import { PhaseDto } from "./phase/phase.dto";
 import { ProjectStatus } from "./project.model";
 
-export interface FindByIdOptions {
+export interface Options {
     populate?: {
         applicant?: boolean;
-        grantAllocation?: boolean;
+        grant?: boolean;
         currentStage?: boolean;
     };
 }
 
 export interface GetProjectsDTO {
-    grantAllocation?: string;
-    applicant?: string;
-    calendar?: string;
     grant?: string;
-    workspace?: string;
+    applicant?: string;
     status?: ProjectStatus;
-    populate?: boolean;
+    options?: Options;
+    //calendar?: string;
+    //workspace?: string;
+
+    //populate?: boolean;
     //directorate?: string;
     //skip?: number;
     //limit?: number;
@@ -26,7 +27,7 @@ export interface GetProjectsDTO {
 // CREATE Project
 export interface CreateProjectDTO {
     call?: string;
-    grantAllocation: string;
+    grant: string;
     title: string;
     summary?: string;
     applicant: string;

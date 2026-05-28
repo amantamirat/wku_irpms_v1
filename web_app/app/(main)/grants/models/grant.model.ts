@@ -15,6 +15,7 @@ export type Grant = {
     thematic?: string | Thematic;
     description?: string;
     amount: number;
+    usedBudget?: number;
     status?: GrantStatus;
     createdAt?: Date;
     updatedAt?: Date;

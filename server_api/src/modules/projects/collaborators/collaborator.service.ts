@@ -55,7 +55,7 @@ export class CollaboratorService {
         }
         if (!options?.skipValidation) {
             const projectDoc = await this.validateProject(project, userId ?? "", session);
-            const grantId = (projectDoc.grantAllocation as any).grant;
+            const grantId = String(projectDoc.grant);
             if (dto.isLeadPI) {
                 await this.compValidator.validatePI(grantId, applicant);
             } else {
@@ -145,7 +145,7 @@ export class CollaboratorService {
         const project = String(collabDoc.project);
         const projectDoc = await this.validateProject(project, applicantId ?? "");
 
-        const grantId = (projectDoc.grantAllocation as any).grant;
+        const grantId = String(projectDoc.grant);
         const countCollabs = projectDoc.totalCollabs ?? 0;
         await this.constraintValidator.validateParticipantCount(grantId, countCollabs - 1);
 

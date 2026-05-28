@@ -32,18 +32,11 @@ const ProjectStageManager = ({ project, grantStage, grantAllocation, callStage, 
 
     // 1. Fetch all GrantStages for the project's grant
     useEffect(() => {
-        let grantId: string | undefined;
-        if (project?.grantAllocation && typeof project.grantAllocation !== "string") {
-            const grantValue = project.grantAllocation.grant;
-            grantId = typeof grantValue === "string" ? grantValue : grantValue?._id;
-        }
-
-        if (!grantId) return;
-
-        GrantStageApi.getAll({ grant: grantId })
+        if (!project?.grant) return;
+        GrantStageApi.getAll({ grant: project?.grant })
             .then(setGrantStages)
             .catch(err => console.error("Failed to fetch grant stages", err));
-    }, [project?.grantAllocation]);
+    }, [project?.grant]);
 
     // 2. Load the full current ProjectStage object if it's currently just an ID
     useEffect(() => {

@@ -20,6 +20,7 @@ export interface IGrant extends Document {
     amount: number;
     thematic: mongoose.Types.ObjectId;
     description?: string;
+    usedBudget: number;   // global used amount
     status: GrantStatus;
     createdAt?: Date;
     updatedAt?: Date;
@@ -57,6 +58,12 @@ const GrantSchema = new Schema<IGrant>({
     },
     description: {
         type: String,
+    },
+    usedBudget: {
+        type: Number,
+        default: 0,
+        required: true,
+        min: 0,
     },
     status: {
         type: String, enum: Object.values(GrantStatus),

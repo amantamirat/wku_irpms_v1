@@ -6,6 +6,8 @@ import {
     GetGrantsDTO,
     UpdateGrantDTO
 } from "./grant.dto";
+import { AppError } from "../../common/errors/app.error";
+import { ERROR_CODES } from "../../common/errors/error.codes";
 
 export interface IGrantRepository {
     findById(id: string, populate?: boolean): Promise<IGrant | null>;
@@ -15,6 +17,9 @@ export interface IGrantRepository {
     updateStatus(id: string, newStatus: GrantStatus): Promise<IGrant | null>;
     exists(filters: ExistsGrantDTO): Promise<boolean>;
     delete(id: string): Promise<IGrant | null>;
+    //Budget Operations
+    consumeBudget(grantId: string, amount: number): Promise<IGrant>;
+    reverseConsumedBudget(grantId: string, amount: number): Promise<IGrant>;
 }
 
 // MongoDB implementation
@@ -120,5 +125,59 @@ export class GrantRepository implements IGrantRepository {
         return Grant.findByIdAndDelete(
             new mongoose.Types.ObjectId(id)
         ).exec();
+    }
+
+    /**
+         * Consume budget directly.
+         * * Condition: allocatedAmount - usedBudget >= amount
+    */
+    async consumeBudget(grantId: string, amount: number) {
+        const updated = await Grant.findOneAndUpdate(
+            {
+                _id: new mongoose.Types.ObjectId(grantId),
+                $expr: {
+                    $gte: [
+                        {
+                            $subtract: [
+                                "$amount",
+                                { $ifNull: ["$usedBudget", 0] }
+                            ]
+                        },
+                        amount
+                    ]
+                }
+            },
+            {
+                $inc: { usedBudget: amount }
+            },
+            { new: true }
+        );
+
+        if (!updated)
+            throw new AppError(ERROR_CODES.BUDGET_EXCEEDED);
+
+        return updated;
+    }
+
+    /**
+     * Reverse consumed budget.
+     * * Condition: usedBudget >= amount
+     */
+    async reverseConsumedBudget(grantId: string, amount: number) {
+        const updated = await Grant.findOneAndUpdate(
+            {
+                _id: new mongoose.Types.ObjectId(grantId),
+                usedBudget: { $gte: amount }
+            },
+            {
+                $inc: { usedBudget: -amount }
+            },
+            { new: true }
+        );
+
+        if (!updated)
+            throw new AppError(ERROR_CODES.INVALID_BUDGET_REVERSAL);
+
+        return updated;
     }
 }

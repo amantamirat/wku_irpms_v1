@@ -15,6 +15,14 @@ interface GrantManagerProps {
     thematic?: Thematic;
 }
 
+const currencyFormatter = new Intl.NumberFormat(
+    'en-US',
+    {
+        style: 'currency',
+        currency: 'ETB'
+    }
+);
+
 const GrantManager = ({ organization, thematic }: GrantManagerProps) => {
 
     const Manager = createEntityManager<Grant, GetGrantOptions | undefined>({
@@ -48,6 +56,19 @@ const GrantManager = ({ organization, thematic }: GrantManagerProps) => {
                 sortable: true,
                 body: (rowData: Grant) =>
                     rowData.amount?.toLocaleString()
+            },
+            {
+                header: "Used",
+                field: "usedBudget",
+
+                body: (a: Grant) => {
+                    const used = a.usedBudget || 0;
+                    return (
+                        <span>
+                            {currencyFormatter.format(used)}
+                        </span>
+                    );
+                }
             },
             {
                 field: "status",

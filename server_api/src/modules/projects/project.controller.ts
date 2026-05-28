@@ -8,6 +8,7 @@ import { ApplyProjectDTO, CreateProjectDTO, UpdateProjectDTO } from "./project.d
 import { DeleteDto } from "../../common/dtos/delete.dto";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
+import { ProjectStatus } from "./project.model";
 
 export class ProjectController {
 
@@ -20,10 +21,10 @@ export class ProjectController {
     try {
       if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
-      const { grantAllocation, title, summary, themes } = req.body;
+      const { grant, title, summary, themes } = req.body;
 
       const dto: CreateProjectDTO = {
-        grantAllocation: grantAllocation,
+        grant: grant,
         title,
         summary,
         applicant: req.auth.userId,
@@ -79,15 +80,22 @@ export class ProjectController {
   // -----------------------
   get = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { grantAllocation, applicant, grant, calendar, workspace, populate } = req.query;
+      const { applicant, grant, status, populate } = req.query;
 
       const projects = await this.service.getProjects({
-        grantAllocation: grantAllocation ? grantAllocation as string : undefined,
-        applicant: applicant ? applicant as string : undefined,
-        grant: grant ? grant as string : undefined,
-        calendar: calendar ? calendar as string : undefined,
-        workspace: workspace ? workspace as string : undefined,
-        ...(populate !== undefined && { populate: populate === "true" })
+        applicant: applicant ? String(applicant) : undefined,
+        grant: grant ? String(grant) : undefined,
+        status: status ? (status as ProjectStatus) : undefined,
+
+        options: populate === "true"
+          ? {
+            populate: {
+              applicant: true,
+              grant: true,
+              currentStage: true
+            }
+          }
+          : undefined
       });
 
       successResponse(res, 200, "Projects fetched successfully", projects);
@@ -99,8 +107,8 @@ export class ProjectController {
   getById = async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id } = req.params;
-      const grant = await this.service.getById(id);
-      successResponse(res, 200, 'Project fetched successfully', grant);
+      const project = await this.service.getById(id);
+      successResponse(res, 200, 'Project fetched successfully', project);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }

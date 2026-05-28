@@ -27,6 +27,8 @@ export class StageService {
      * Create a new stage
      */
     async create(dto: CreateStageDTO) {
+        throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
+        /*
         const { call, grantStage } = dto;
 
         const callDoc = await this.callRepo.findById(call);
@@ -43,6 +45,7 @@ export class StageService {
             }
             throw err;
         }
+            */
     }
     /**
      * Get all stages or by call
