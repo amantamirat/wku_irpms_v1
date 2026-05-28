@@ -11,6 +11,7 @@ import { GrantStatus, IGrant } from "../grants/grant.model";
 import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
 import { StageCategory } from "../grants/stages/grant.stage.model";
 import { IGrantStageRepository } from "../grants/stages/grant.stage.repository";
+import { IProjectRepository, ProjectRepository } from "../projects/project.repository";
 import { CreateCallDTO, GetCallsOptions, UpdateCallDTO } from "./call.dto";
 import { CallStatus } from "./call.model";
 import { CallRepository, ICallRepository } from "./call.repository";
@@ -26,6 +27,7 @@ export class CallService {
         private readonly callStageRepo: ICallStageRepository,
         private readonly grantRepo: IGrantRepository = new GrantRepository(),
         private readonly calendarRepo: ICalendarRepository = new CalendarRepository(),
+        private readonly projectRepo: IProjectRepository = new ProjectRepository(),
     ) {
     }
 
@@ -69,30 +71,21 @@ export class CallService {
 
         // 4. Calculate existing budgets allocated to other Calls
         const grantCalls = await this.repository.find({ grant });
-        const totalBudgetUsedByCalls = grantCalls.reduce((sum, c) => sum + (c.budget || 0), 0);
+        const totalCallsBudget = grantCalls.reduce((sum, c) => sum + (c.budget || 0), 0);
 
         // ==========================================
-        // 5. FIXED BUDGET VALIDATION: Accounts for usedBudget
+        // 5. FIXED BUDGET VALIDATION: Accounts for usedBudget //actualAllocationHeadroom
         // ==========================================
         const actualAllocationHeadroom = grantDoc.amount - (grantDoc.usedBudget || 0);
 
-        if (totalBudgetUsedByCalls + budget > actualAllocationHeadroom) {
-            const remaining = actualAllocationHeadroom - totalBudgetUsedByCalls;
-            const maxAvailable = remaining > 0 ? remaining : 0;
+        if (totalCallsBudget + budget > actualAllocationHeadroom) {
+            const remaining = actualAllocationHeadroom - totalCallsBudget;
+            //const maxAvailable = remaining > 0 ? remaining : 0;
             throw new AppError(
                 ERROR_CODES.CALL_BUDGET_EXCEEDS_ALLOCATION,
-                `Call budget exceeds remaining grant allocation headroom. Max available: ${maxAvailable}`
+                `Call budget exceeds remaining grant allocation headroom. Max available: ${remaining}`
             );
         }
-
-
-
-
-
-
-
-
-
 
         // 6. Create the Call
         const created = await this.repository.create({
@@ -101,24 +94,6 @@ export class CallService {
             status: CallStatus.planned
         });
 
-        /*
-        // 7. Generate Call Stages with incremental deadlines
-        const callStagesPayload = grantStages.map(gs => {
-            // Fix: Use a clean baseline date for each map iteration 
-            // so it scales sequentially based strictly on the order index.
-            const deadlineDate = new Date();
-            deadlineDate.setDate(deadlineDate.getDate() + (gs.order * 7));
-
-            return {
-                call: String(created._id),
-                grantStage: gs._id,
-                order: gs.order,
-                deadline: deadlineDate
-            };
-        });
-
-        await this.callStageRepo.createMany(callStagesPayload);
-*/
         return created;
     }
 
@@ -135,44 +110,23 @@ export class CallService {
     async update(dto: UpdateCallDTO) {
         const { id, data } = dto;
 
-        // 1. Fetch the existing Call first so we know its context
-        const currentCall = await this.repository.findById(id);
-        if (!currentCall) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+        const callDoc = await this.repository.findById(id);
+        if (!callDoc) {
+            throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+        }
 
-        // 2. ONLY run budget validation if the user is actually trying to change the budget
-        if (data.budget !== undefined && data.budget !== currentCall.budget) {
-
-            // Fetch the parent allocation ceiling
-            const allocDoc = await this.allocationRepo.findById(String(currentCall.grant));
-            if (!allocDoc) throw new AppError(ERROR_CODES.ALLOCATION_NOT_FOUND);
-
-            // Fetch ALL calls under this allocation
-            const allocCalls = await this.repository.find({ grant: String(currentCall.grant) });
-
-            // Exclude the CURRENT call from the sum so we don't calculate against ourselves
-            const totalBudgetUsedByOthers = allocCalls
-                .filter(c => String(c._id) !== String(id))
-                .reduce((sum, c) => sum + (c.budget || 0), 0);
-
-            // Calculate the actual available headroom left inside the grant allocation pool
-            const actualAllocationHeadroom = allocDoc.allocatedAmount - (allocDoc.usedBudget || 0);
-
-            // Validate the new proposed budget against the remaining space
-            if (totalBudgetUsedByOthers + data.budget > actualAllocationHeadroom) {
-                const remaining = actualAllocationHeadroom - totalBudgetUsedByOthers;
-
-                // Fallback to 0 if the math drops below zero due to dynamic changes elsewhere
-                const maxAvailableForThisCall = remaining > 0 ? remaining : 0;
-
+        // Validate only if budget is changing
+        if (data.budget !== undefined && data.budget !== callDoc.budget) {
+            // Cannot reduce below already used budget
+            if (data.budget < (callDoc.usedBudget || 0)) {
                 throw new AppError(
-                    ERROR_CODES.CALL_BUDGET_EXCEEDS_ALLOCATION,
-                    `Updated budget exceeds allocation capacity. Max available for this call: ${maxAvailableForThisCall}`
+                    ERROR_CODES.INVALID_GRANT_REDUCTION,
+                    `Cannot reduce budget below used budget of ${callDoc.usedBudget}.`
                 );
             }
         }
-        // 3. Save the updates safely
-        const updated = await this.repository.update(id, data);
-        return updated;
+
+        return await this.repository.update(id, data);
     }
 
     async transitionState(dto: TransitionRequestDto) {
@@ -196,9 +150,19 @@ export class CallService {
         );
 
         if (next === CallStatus.planned) {
-            const activeStageExsit = await this.callStageRepo.exists({ call: id, status: CallStageStatus.active });
-            if (activeStageExsit) {
-                throw new AppError(ERROR_CODES.ACTIVE_CALL_STAGE_EXIST);
+
+            if (callDoc.usedBudget > 0) {
+                throw new AppError(
+                    ERROR_CODES.CALL_IN_USE,
+                    'This call is already being used.'
+                );
+            }
+
+            if (await this.projectRepo.exists({ call: id })) {
+                throw new AppError(
+                    ERROR_CODES.CALL_IN_USE,
+                    'This call is already being used by projects.'
+                );
             }
         }
 
@@ -212,7 +176,7 @@ export class CallService {
         if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
         if (callDoc.status !== CallStatus.planned) throw new AppError(ERROR_CODES.CALL_NOT_PLANNED);
         const deleted = await this.repository.delete(id);
-        await this.callStageRepo.deleteByCall(id);
+        //await this.callStageRepo.deleteByCall(id);
         return deleted;
     }
 }

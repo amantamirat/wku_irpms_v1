@@ -66,3 +66,11 @@ export interface GetGrantOptions {
     status?: GrantStatus;
     populate?: boolean;
 }
+
+export const etbCurrencyFormatter = new Intl.NumberFormat(
+    'en-US',
+    {
+        style: 'currency',
+        currency: 'ETB'
+    }
+);

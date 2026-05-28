@@ -22,6 +22,7 @@ export type Call = {
     organization?: string | Organization;
     title: string;
     budget?: number;
+    usedBudget?: number;
     description?: string | null;
     deadlines?: CallDeadline[]; // <-- Added the deadlines array here
     status: CallStatus;

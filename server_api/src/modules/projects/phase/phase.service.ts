@@ -16,6 +16,7 @@ import { IPhaseSynchronizer } from "./phase.synchronizer";
 import { PROJECT_TRANSITIONS } from "../project.state-machine";
 import { GrantAllocation } from "../../grants/allocations/grant.allocation.model";
 import { GrantRepository, IGrantRepository } from "../../grants/grant.repository";
+import { CallRepository, ICallRepository } from "../../calls/call.repository";
 
 export class PhaseService {
 
@@ -27,6 +28,7 @@ export class PhaseService {
         private readonly constValidator: ConstraintValidator,
         private readonly synchrnonizer?: IPhaseSynchronizer,
         private readonly grantRepo: IGrantRepository = new GrantRepository(),
+        private readonly callRepo: ICallRepository = new CallRepository(),
     ) { }
 
     async validateProject(project: string, applicant: string, session?: ClientSession) {
@@ -335,6 +337,13 @@ export class PhaseService {
                         currentPhaseDoc.budget
                     );
 
+                    if (projectDoc.call) {
+                        await this.callRepo.consumeBudget(
+                            String(projectDoc.call),
+                            currentPhaseDoc.budget
+                        );
+                    }
+
                 }
 
                 else if (
@@ -345,6 +354,13 @@ export class PhaseService {
                         projectDoc.grant.toString(),
                         currentPhaseDoc.budget
                     );
+
+                    if (projectDoc.call) {
+                        await this.callRepo.reverseConsumedBudget(
+                            String(projectDoc.call),
+                            currentPhaseDoc.budget
+                        );
+                    }
 
                 }
             }

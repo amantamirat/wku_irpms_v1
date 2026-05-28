@@ -2,18 +2,18 @@ import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
-import { IGrantAllocationRepository } from "../grants/allocations/grant.allocation.repository";
-import { CreateCalendarDTO, GetCalendarDTO, UpdateCalendarDTO } from "./calendar.dto";
-import { CalendarRepository } from "./calendar.repository";
-import { CalendarStatus } from "./calendar.model";
+import { ICallRepository } from "../calls/call.repository";
 import { IEnrollmentRepository } from "../users/enrollments/enrollment.repository";
+import { CreateCalendarDTO, GetCalendarDTO, UpdateCalendarDTO } from "./calendar.dto";
+import { CalendarStatus } from "./calendar.model";
+import { CalendarRepository } from "./calendar.repository";
 
 
 export class CalendarService {
 
     constructor(
         private readonly repository: CalendarRepository,
-        private readonly allocationRepo: IGrantAllocationRepository,
+        private readonly callRepo: ICallRepository,
         private readonly enrollmentRepo: IEnrollmentRepository,
     ) {
     }
@@ -75,9 +75,9 @@ export class CalendarService {
         );
 
         if (next === CalendarStatus.planned) {
-            if (await this.allocationRepo.exists({ calendar: id })) {
+            if (await this.callRepo.exists({ calendar: id })) {
                 throw new AppError(ERROR_CODES.CALENDAR_IN_USE,
-                    'This fiscal calendar is already being used by grant allocations.'
+                    'This fiscal calendar is already being used by calls.'
                 );
             }
             if (await this.enrollmentRepo.exists({ calendar: id })) {

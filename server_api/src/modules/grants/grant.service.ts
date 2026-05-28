@@ -3,9 +3,9 @@ import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
-import { Ownership } from "../organization/organization.enum";
-import { IExternal } from "../organization/organization.model";
+import { CallRepository, ICallRepository } from "../calls/call.repository";
 import { IOrganizationRepository } from "../organization/organization.repository";
+import { IProjectRepository, ProjectRepository } from "../projects/project.repository";
 import { IThematicRepository } from "../thematics/thematic.repository";
 import { ThematicStatus } from "../thematics/thematic.state-machine";
 import { IGrantAllocationRepository } from "./allocations/grant.allocation.repository";
@@ -25,7 +25,9 @@ export class GrantService {
         private readonly constraintRepo: IConstraintRepository,
         private readonly compositionRepo: ICompositionRepository,
         private readonly grantStageRepo: IGrantStageRepository,
-        private readonly allocationRepo: IGrantAllocationRepository
+        private readonly allocationRepo: IGrantAllocationRepository,
+        private readonly callRepo: ICallRepository = new CallRepository(),
+        private readonly projectRepo: IProjectRepository = new ProjectRepository(),
     ) { }
 
     async create(dto: CreateGrantDTO) {
@@ -71,21 +73,18 @@ export class GrantService {
         // If the admin is trying to change the total amount
         if (data.amount !== undefined && data.amount !== grantDoc.amount) {
 
-            if (data.amount < (grantDoc.usedBudget || 0)) {
-                throw new AppError(
-                    ERROR_CODES.INVALID_BUDGET_REDUCTION,
-                    `Cannot reduce allocatedAmount below usedBudget of ${grantDoc.usedBudget}.`
-                );
-            }
-            // Find all allocations tied to this grant
-            const allocations = await this.allocationRepo.find({ grant: id });
-            const totalAllocated = allocations.reduce((sum, a) => sum + (a.allocatedAmount || 0), 0);
+            const calls = await this.callRepo.find({ grant: id });
+            const totalAllocated = calls.reduce((sum, a) => sum + (a.budget || 0), 0);
 
-            // 🔥 Protection: Prevent reducing grant below what is already allocated
-            if (data.amount < totalAllocated) {
+            const minimumAllowed = Math.max(
+                totalAllocated,
+                grantDoc.usedBudget || 0
+            );
+
+            if (data.amount < minimumAllowed) {
                 throw new AppError(
                     ERROR_CODES.INVALID_GRANT_REDUCTION,
-                    `Cannot reduce grant to ${data.amount}. Total allocated is currently ${totalAllocated}.`
+                    `Cannot reduce grant below ${minimumAllowed}.`
                 );
             }
         }
@@ -95,12 +94,12 @@ export class GrantService {
     async transitionState(dto: TransitionRequestDto) {
         const { id, current, next } = dto;
 
-        const grant = await this.repository.findById(id);
-        if (!grant) {
+        const grantDoc = await this.repository.findById(id);
+        if (!grantDoc) {
             throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
         }
 
-        const from = grant.status as GrantStatus;
+        const from = grantDoc.status as GrantStatus;
         const to = next as GrantStatus;
 
         // optional UI consistency check
@@ -115,10 +114,23 @@ export class GrantService {
         );
 
         if (next === GrantStatus.planned) {
-            if (await this.allocationRepo.exists({ grant: id })) {
+            if (grantDoc.usedBudget > 0) {
                 throw new AppError(
                     ERROR_CODES.GRANT_IN_USE,
-                    'This grant is already being used by grant allocations.'
+                    'This grant is already being used.'
+                );
+            }
+            if (await this.callRepo.exists({ grant: id })) {
+                throw new AppError(
+                    ERROR_CODES.GRANT_IN_USE,
+                    'This grant is already being used by calls.'
+                );
+            }
+
+            if (await this.projectRepo.exists({ grant: id })) {
+                throw new AppError(
+                    ERROR_CODES.GRANT_IN_USE,
+                    'This grant is already being used by projects.'
                 );
             }
         }

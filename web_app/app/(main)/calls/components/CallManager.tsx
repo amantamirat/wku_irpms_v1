@@ -9,21 +9,14 @@ import { CALL_STATUS_ORDER, CALL_TRANSITIONS } from "../models/call.state-machin
 import CallDetail from "./CallDetail";
 import { GrantAllocation } from "../../grants/allocations/models/grant.allocation.model";
 import { Calendar } from "../../calendars/models/calendar.model";
-import { Grant } from "../../grants/models/grant.model";
+import { etbCurrencyFormatter, Grant } from "../../grants/models/grant.model";
 
 interface CallManagerProps {
     calendar?: string | Calendar;
     grant?: string | Grant;
 }
 
-// Simple currency formatter utility
-const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'ETB', // Adjust currency code as necessary
-        maximumFractionDigits: 0
-    }).format(amount);
-};
+
 
 const CallManager = ({ calendar, grant }: CallManagerProps) => {
 
@@ -80,8 +73,21 @@ const CallManager = ({ calendar, grant }: CallManagerProps) => {
                 header: "Budget",
                 field: "budget",
                 sortable: true,
-                style: { width: '150px', textAlign: 'right' },
-                body: (c: Call) => c.budget !== undefined ? formatCurrency(c.budget) : "-"
+                //style: { width: '150px', textAlign: 'right' },
+                body: (c: Call) => etbCurrencyFormatter.format(c.budget ?? 0)
+            },
+
+            {
+                header: "Used",
+                field: "usedBudget",
+                body: (c: Call) => {
+                    const used = c.usedBudget || 0;
+                    return (
+                        <span>
+                            {etbCurrencyFormatter.format(used)}
+                        </span>
+                    );
+                }
             },
 
             {

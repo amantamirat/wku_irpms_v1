@@ -258,12 +258,15 @@ export class ProjectRepository implements IProjectRepository {
 
     async exists(filters: ExistsProjectDTO): Promise<boolean> {
         const query: any = {};
-        const { applicant, grantAllocation } = filters;
+        const { applicant, grant, call } = filters;
         if (applicant) {
             query.applicant = new mongoose.Types.ObjectId(applicant);
         }
-        if (grantAllocation) {
-            query.grantAllocation = new mongoose.Types.ObjectId(grantAllocation);
+        if (grant) {
+            query.grant = new mongoose.Types.ObjectId(grant);
+        }
+        if (call) {
+            query.call = new mongoose.Types.ObjectId(call);
         }
         const result = await Project.exists(query).exec();
         return result !== null;

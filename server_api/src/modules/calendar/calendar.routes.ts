@@ -6,11 +6,12 @@ import { CalendarController } from './calendar.controller';
 import { CalendarRepository } from './calendar.repository';
 import { CalendarService } from './calendar.service';
 import { EnrollmentRepository } from '../users/enrollments/enrollment.repository';
+import { CallRepository } from '../calls/call.repository';
 
 const repository = new CalendarRepository();
-const grantAllocRepo = new GrantAllocationRepository();
+const callRepo = new CallRepository();
 const enrollmentRepo = new EnrollmentRepository();
-const service = new CalendarService(repository, grantAllocRepo, enrollmentRepo);
+const service = new CalendarService(repository, callRepo, enrollmentRepo);
 const controller = new CalendarController(service);
 
 const router: Router = Router();

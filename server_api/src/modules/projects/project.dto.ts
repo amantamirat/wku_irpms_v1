@@ -65,6 +65,7 @@ export interface UpdateProjectDTO {
 
 export interface ExistsProjectDTO {
     applicant?: string;
-    grantAllocation?: string;
+    grant?: string;
+    call?: string;
 }
 

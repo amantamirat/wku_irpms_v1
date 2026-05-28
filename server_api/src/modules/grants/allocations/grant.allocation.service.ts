@@ -163,13 +163,13 @@ export class GrantAllocationService {
 
         if (next === AllocationStatus.planned) {
             //what about used
-            if (await this.callRepo.exists({ grantAllocation: id })) {
+            if (await this.callRepo.exists({ grant: id })) {
                 throw new AppError(
                     ERROR_CODES.ALLOCATION_IN_USE,
                     'This allocation cannot be set to planned because it is already linked to a call.'
                 );
             }
-            if (await this.projectRepo.exists({ grantAllocation: id })) {
+            if (await this.projectRepo.exists({ grant: id })) {
                 throw new AppError(
                     ERROR_CODES.ALLOCATION_IN_USE,
                     'This allocation cannot be set to planned because it is already linked to a research project.'

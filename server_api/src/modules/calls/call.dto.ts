@@ -44,5 +44,6 @@ export interface GetCallsOptions {
 }
 
 export interface ExistsCallDTO {
-    grantAllocation?: string;
+    grant?: string;
+    calendar?: string;
 }

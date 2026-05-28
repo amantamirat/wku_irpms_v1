@@ -56,7 +56,7 @@ const AppMenu = () => {
         },
 
         {
-            label: 'Grant Calls',
+            label: 'Grants & Calls',
             visible: hasPermission(
                 [
                     "calendar:create",
@@ -73,7 +73,12 @@ const AppMenu = () => {
                     to: '/calls',
                     visible: hasPermission("call:create")
                 },
-
+                {
+                    label: 'Calendars',
+                    icon: PrimeIcons.CALENDAR,
+                    to: '/calendars',
+                    visible: hasPermission("calendar:create")
+                },
                 {
                     label: 'Grants',
                     icon: 'pi pi-bitcoin',
@@ -91,12 +96,6 @@ const AppMenu = () => {
                     icon: 'pi pi-fw pi-tags',
                     to: '/thematics',
                     visible: hasPermission("thematic:create")
-                },
-                {
-                    label: 'Calendars',
-                    icon: PrimeIcons.CALENDAR,
-                    to: '/calendars',
-                    visible: hasPermission("calendar:create")
                 }
             ]
         },

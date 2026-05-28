@@ -2,7 +2,7 @@
 
 import { createEntityManager } from "@/components/createEntityManager";
 import { GrantApi } from "../api/grant.api";
-import { createEmptyGrant, GetGrantOptions, Grant } from "../models/grant.model";
+import { createEmptyGrant, etbCurrencyFormatter, GetGrantOptions, Grant } from "../models/grant.model";
 import { GRANT_STATUS_ORDER, GRANT_TRANSITIONS } from "../models/grant.state-machine";
 import GrantDetail from "./GrantDetail";
 import SaveGrant from "./SaveGrant";
@@ -14,14 +14,6 @@ interface GrantManagerProps {
     organization?: Organization;
     thematic?: Thematic;
 }
-
-const currencyFormatter = new Intl.NumberFormat(
-    'en-US',
-    {
-        style: 'currency',
-        currency: 'ETB'
-    }
-);
 
 const GrantManager = ({ organization, thematic }: GrantManagerProps) => {
 
@@ -55,7 +47,7 @@ const GrantManager = ({ organization, thematic }: GrantManagerProps) => {
                 field: "amount",
                 sortable: true,
                 body: (rowData: Grant) =>
-                    rowData.amount?.toLocaleString()
+                    etbCurrencyFormatter.format(rowData.amount)
             },
             {
                 header: "Used",
@@ -65,7 +57,7 @@ const GrantManager = ({ organization, thematic }: GrantManagerProps) => {
                     const used = a.usedBudget || 0;
                     return (
                         <span>
-                            {currencyFormatter.format(used)}
+                            {etbCurrencyFormatter.format(used)}
                         </span>
                     );
                 }

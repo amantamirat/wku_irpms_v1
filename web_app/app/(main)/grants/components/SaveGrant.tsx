@@ -232,7 +232,7 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                             onValueChange={(e) => updateField('amount', e.value ?? 0)}
                             mode="currency"
                             currency="ETB"
-                            locale="am-ET"
+                            locale="en-US"
                         />
                     </div>
 
