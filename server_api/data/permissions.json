@@ -859,49 +859,49 @@
     "name": "phase:document:delete"
   },
   {
-    "category": "Project Stage Management",
-    "name": "project.stage:create",
-    "description": "Create project stage (submit document)"
+    "category": "Project Application Management",
+    "name": "project.application:create",
+    "description": "Create project application (submit document)"
   },
   {
-    "category": "Project Stage Management",
-    "name": "project.stage:read",
-    "description": "Read project stage entries"
+    "category": "Project Application Management",
+    "name": "project.application:read",
+    "description": "Read project application entries"
   },
   {
-    "category": "Project Stage Management",
-    "name": "project.stage:update",
-    "description": "Update project stage (before review)"
+    "category": "Project Application Management",
+    "name": "project.application:update",
+    "description": "Update project application (before review)"
   },
   {
-    "category": "Project Stage Management",
-    "name": "project.stage:calculateTotalScore",
-    "description": "Calculate and store total score for a project stage based on approved reviewer evaluations"
+    "category": "Project Application Management",
+    "name": "project.application:calculateTotalScore",
+    "description": "Calculate and store total score for a project application based on approved reviewer evaluations"
   },
   {
-    "category": "Project Stage Management",
-    "name": "project.stage:delete",
-    "description": "Delete project stage entries"
+    "category": "Project Application Management",
+    "name": "project.application:delete",
+    "description": "Delete project application entries"
   },
   {
-    "category": "Project Stage Management",
-    "name": "project.stage:transition.submitted.accepted",
-    "description": "Accept a submitted project"
+    "category": "Project Application Management",
+    "name": "project.application:transition.submitted.accepted",
+    "description": "Accept a submitted project application"
   },
   {
-    "category": "Project Stage Management",
-    "name": "project.stage:transition.submitted.rejected",
-    "description": "Reject a submitted project"
+    "category": "Project Application Management",
+    "name": "project.application:transition.submitted.rejected",
+    "description": "Reject a submitted project application"
   },
   {
-    "category": "Project Stage Management",
-    "name": "project.stage:transition.accepted.submitted",
-    "description": "Revert an accepted project back to submitted"
+    "category": "Project Application Management",
+    "name": "project.application:transition.accepted.submitted",
+    "description": "Revert an accepted project application back to submitted"
   },
   {
-    "category": "Project Stage Management",
-    "name": "project.stage:transition.rejected.submitted",
-    "description": "Reopen a rejected project and move it back to submitted"
+    "category": "Project Application Management",
+    "name": "project.application:transition.rejected.submitted",
+    "description": "Reopen a rejected project application and move it back to submitted"
   },
   {
     "category": "Report Management",

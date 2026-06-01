@@ -2,19 +2,19 @@ import fs from "fs";
 import path from "path";
 import { Request, Response } from "express";
 import { errorResponse, successResponse } from "../../../common/helpers/response";
-import { CreateProjectStageDTO, GetProjectStageDTO } from "./project.stage.dto";
+import { CreateProjectApplicationDTO, GetProjectApplicationDTO } from "./project.application.dto";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { AuthenticatedRequest } from "../../auth/auth.middleware";
-import { ProjectStageService } from "./project.stage.service";
+import { ProjectApplicationService } from "./project.application.service";
 
 export class ProjectStageController {
 
 
 
-    constructor(private readonly service: ProjectStageService) {
+    constructor(private readonly service: ProjectApplicationService) {
     }
     // ---------------------------------------------------
     // CREATE
@@ -28,7 +28,7 @@ export class ProjectStageController {
 
             const { project } = req.body;
             const relativeDocPath = path.relative(process.cwd(), req.file.path).replace(/\\/g, '/');
-            const dto: CreateProjectStageDTO = {
+            const dto: CreateProjectApplicationDTO = {
                 project,
                 grantStage: '',
                 documentPath: relativeDocPath,
@@ -101,7 +101,7 @@ export class ProjectStageController {
         try {
             const { project, grantStage, status, populate, skip, limit } = req.query;
 
-            const dto: GetProjectStageDTO = {
+            const dto: GetProjectApplicationDTO = {
                 project: project as string,
                 grantStage: grantStage as string,
                 //grantAllocation: grantAllocation as string,

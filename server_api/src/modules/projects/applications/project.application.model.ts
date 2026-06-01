@@ -2,38 +2,30 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
 
-export enum ProjectStageStatus {
+export enum ApplicationStatus {
     submitted = 'submitted',
     accepted = 'accepted',
     rejected = 'rejected'
 }
 
-export interface IProjectStage extends Document {
+export interface IProjectApplication extends Document {
     _id: mongoose.Types.ObjectId;
     grantStage: mongoose.Types.ObjectId;
-    //callStage?: mongoose.Types.ObjectId;
     project: mongoose.Types.ObjectId;
     documentPath: string;
     totalScore: number | null;
-    status: ProjectStageStatus;
+    status: ApplicationStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
-const ProjecStageSchema = new Schema<IProjectStage>({
+const ProjecApplicationSchema = new Schema<IProjectApplication>({
     grantStage: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.GRANT_STAGE,
         immutable: true,
         required: true
     },
-    /*
-    callStage: {
-        type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.CALL_STAGE,
-        immutable: true,
-        //required: true
-    },*/
     project: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.PROJECT,
@@ -51,21 +43,13 @@ const ProjecStageSchema = new Schema<IProjectStage>({
     },
     status: {
         type: String,
-        enum: Object.values(ProjectStageStatus),
-        default: ProjectStageStatus.submitted,
+        enum: Object.values(ApplicationStatus),
+        default: ApplicationStatus.submitted,
         required: true
     },
 }, { timestamps: true });
 
-ProjecStageSchema.index({ project: 1, grantStage: 1 }, { unique: true });
-/*
-ProjecStageSchema.index(
-    { project: 1, callStage: 1 },
-    {
-        unique: true,
-        partialFilterExpression: { callStage: { $exists: true, $ne: null } }
-    }
-);
-*/
-export const ProjectStage = model<IProjectStage>(COLLECTIONS.PROJECT_STAGE, ProjecStageSchema);
+ProjecApplicationSchema.index({ project: 1, grantStage: 1 }, { unique: true });
+
+export const ProjectApplication = model<IProjectApplication>(COLLECTIONS.PROJECT_APPLICATION, ProjecApplicationSchema);
 

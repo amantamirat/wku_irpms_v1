@@ -84,7 +84,7 @@ const ProjectSchema = new Schema<IProject>({
 
     currentStage: {
         type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.PROJECT_STAGE,
+        ref: COLLECTIONS.PROJECT_APPLICATION,
         unique: true,
         sparse: true // allows multiple docs with undefined currentStage
     },

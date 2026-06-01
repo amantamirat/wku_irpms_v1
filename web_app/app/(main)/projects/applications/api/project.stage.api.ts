@@ -1,11 +1,11 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
 import { TransitionRequestDto } from "@/types/util";
-import { GetProjectStageOptions, ProjectStage, sanitizeProjectStage } from "../models/project.stage.model";
+import { GetProjectApplicationOptions, ProjectApplication, sanitizeProjectApplication } from "../models/project.application.model";
 
-const end_point = "/project/stages";
+const end_point = "/project/applications";
 
-export const ProjectStageApi: EntityApi<ProjectStage, GetProjectStageOptions | undefined>
+export const ProjectApplicationApi: EntityApi<ProjectApplication, GetProjectApplicationOptions | undefined>
     & {
         calculateTotalScore: (id: string) => Promise<number>;
     } = {
@@ -17,7 +17,7 @@ export const ProjectStageApi: EntityApi<ProjectStage, GetProjectStageOptions | u
         const query = new URLSearchParams();
 
         if (options) {
-            const sanitized = sanitizeProjectStage(options);
+            const sanitized = sanitizeProjectApplication(options);
 
             if (options.project) {
                 query.append("project", sanitized.project as string);
@@ -53,7 +53,7 @@ export const ProjectStageApi: EntityApi<ProjectStage, GetProjectStageOptions | u
     // ---------------------------
     // Get By Id
     // ---------------------------
-    async getById(id: string): Promise<ProjectStage> {
+    async getById(id: string): Promise<ProjectApplication> {
         return ApiClient.get(`${end_point}/${id}`);
     },
 
@@ -61,7 +61,7 @@ export const ProjectStageApi: EntityApi<ProjectStage, GetProjectStageOptions | u
     // Create
     // ---------------------------
     async create(stage) {
-        const sanitized = sanitizeProjectStage(stage);
+        const sanitized = sanitizeProjectApplication(stage);
         const formData = new FormData();
         formData.append("project", sanitized.project as string);
         if (stage.file)
@@ -74,7 +74,7 @@ export const ProjectStageApi: EntityApi<ProjectStage, GetProjectStageOptions | u
     // ---------------------------
     async update(stage) {
         // if (!stage._id) throw new Error("_id required");
-        return ApiClient.put(`${end_point}/${stage._id}`, sanitizeProjectStage(stage));
+        return ApiClient.put(`${end_point}/${stage._id}`, sanitizeProjectApplication(stage));
     },
 
     // ---------------------------

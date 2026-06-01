@@ -5,7 +5,7 @@ import { SocketService } from "./socket.service";
 import { ClientSession } from "mongoose";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
-import { ProjectStageStatus } from "../projects/stages/project.stage.model";
+import { ApplicationStatus } from "../projects/applications/project.application.model";
 import { SettingKey } from "../settings/setting.model";
 import { SettingService } from "../settings/setting.service";
 
@@ -129,7 +129,7 @@ export class NotificationService {
         recipientId: string,
         projectTitle: string, // Pass the whole project for context
         stageName: string,
-        newStatus: ProjectStageStatus,
+        newStatus: ApplicationStatus,
         nextStageInfo?: { name: string, deadline?: Date }, // New optional param
         session?: ClientSession
     ) {
@@ -137,12 +137,12 @@ export class NotificationService {
         let type: NotificationType = NotificationType.INFO;
 
         switch (newStatus) {
-            case ProjectStageStatus.submitted:
+            case ApplicationStatus.submitted:
                 message = `Your application "${projectTitle}" for ${stageName} has been submitted successfully.`;
                 type = NotificationType.SUCCESS;
                 break;
 
-            case ProjectStageStatus.accepted:
+            case ApplicationStatus.accepted:
                 message = `Congratulations! Your application "${projectTitle}" for ${stageName} has been accepted.`;
                 // Add "Next Step" info if available
                 if (nextStageInfo) {
@@ -154,7 +154,7 @@ export class NotificationService {
                 type = NotificationType.SUCCESS;
                 break;
 
-            case ProjectStageStatus.rejected:
+            case ApplicationStatus.rejected:
                 message = `We regret to inform you that your application "${projectTitle}" for ${stageName} was not selected.`;
                 type = NotificationType.ERROR;
                 break;

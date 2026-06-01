@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { Reviewer, IReviewer } from "./reviewer.model";
 import { CreateReviewerDTO, ExistsReviewersDTO, GetReviewersDTO, UpdateReviewerDTO } from "./reviewer.dto";
 import { ReviewerStatus } from "./reviewer.state-machine";
-import { ProjectStageStatus } from "../projects/stages/project.stage.model";
+import { ApplicationStatus } from "../projects/applications/project.application.model";
 
 export interface IReviewerRepository {
     findById(id: string): Promise<IReviewer | null>;

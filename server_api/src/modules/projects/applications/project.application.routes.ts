@@ -3,11 +3,11 @@ import { upload } from "../../../util/multer";
 import { GrantStageRepository } from "../../grants/stages/grant.stage.repository";
 import { checkPermission, checkTransitionPermission, verifyActiveAccount } from "../../auth/auth.middleware";
 import { ProjectRepository } from "../project.repository";
-import { ProjectStageController } from "./project.stage.controller";
-import { ProjectStageRepository } from "./project.stage.repository";
-import { ProjectStageService } from "./project.stage.service";
+import { ProjectStageController } from "./project.application.controller";
+import { ProjectApplicationRepository } from "./project.application.repository";
+import { ProjectApplicationService } from "./project.application.service";
 import { GrantAllocationRepository } from "../../grants/allocations/grant.allocation.repository";
-import { ProjectStageSynchronizer } from "./project.stage.synchronizer";
+import { ProjectStageSynchronizer } from "./project.application.synchronizer";
 import { ReviewerRepository } from "../../reviewers/reviewer.repository";
 import { SettingRepository } from "../../settings/setting.repository";
 import { SettingService } from "../../settings/setting.service";
@@ -16,7 +16,7 @@ import { NotificationRepository } from "../../notifications/notification.reposit
 import { ProjectAuth } from "../project.auth";
 import { CallStageRepository } from "../../calls/stages/call.stage.repository";
 
-const projectStageRepo = new ProjectStageRepository();
+const projectStageRepo = new ProjectApplicationRepository();
 const projectRepo = new ProjectRepository();
 const projAuth = new ProjectAuth(projectRepo);
 const grantStageRepo = new GrantStageRepository();
@@ -27,51 +27,67 @@ const notificationService = new NotificationService(
     new NotificationRepository(),
     new SettingService(new SettingRepository())
 );
-const service = new ProjectStageService(projectStageRepo, projAuth,
+const service = new ProjectApplicationService(projectStageRepo, projAuth,
     grantStageRepo, callStageRepo,
     reviewerRepoRepo, synchronizer, notificationService);
 const controller = new ProjectStageController(service);
 const router = express.Router();
 
-router.post("/", verifyActiveAccount,
-    checkPermission("project.stage:create"),
+router.post(
+    "/",
+    verifyActiveAccount,
+    checkPermission("project.application:create"),
     (req, res, next) => {
         // Set the dynamic subfolder for this specific endpoint
         req.headers["x-upload-folder"] = "applications";
         next();
     },
-    upload.single("document"), controller.create);
+    upload.single("document"),
+    controller.create
+);
 
-router.get("/", verifyActiveAccount,
-    checkPermission("project.stage:read"),
-    controller.get);
+router.get(
+    "/",
+    verifyActiveAccount,
+    checkPermission("project.application:read"),
+    controller.get
+);
 
-router.get('/:id', verifyActiveAccount,
-    checkPermission("project.stage:read"),
+router.get(
+    "/:id",
+    verifyActiveAccount,
+    checkPermission("project.application:read"),
     controller.getById
 );
 
 router.post(
     "/:id/calculate-score",
     verifyActiveAccount,
-    checkPermission("project.stage:calculateTotalScore"),
+    checkPermission("project.application:calculateTotalScore"),
     controller.calculateTotalScore
 );
 
 /*
-router.patch("/", verifyActiveAccount,
+router.patch(
+    "/",
+    verifyActiveAccount,
     checkStatusPermission("document"),
-    controller.updateStatus);
+    controller.updateStatus
+);
 */
 
 router.patch(
-    '/:id/transition', // Often better to have a specific sub-route for transitions
+    "/:id/transition",
     verifyActiveAccount,
-    checkTransitionPermission("project.stage"),
+    checkTransitionPermission("project.application"),
     controller.transitionState
 );
-router.delete("/:id", verifyActiveAccount,
-    checkPermission("project.stage:delete"),
-    controller.delete);
+
+router.delete(
+    "/:id",
+    verifyActiveAccount,
+    checkPermission("project.application:delete"),
+    controller.delete
+);
 
 export default router;

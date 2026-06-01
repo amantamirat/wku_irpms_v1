@@ -3,8 +3,8 @@ import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { IUserRepository } from "../users/user.repository";
 import { ICollaboratorRepository } from "../projects/collaborators/collaborator.repository";
-import { IProjectStageRepository } from "../projects/stages/project.stage.repository";
-import { ProjectStageStatus } from "../projects/stages/project.stage.model";
+import { IProjectApplicationRepository } from "../projects/applications/project.application.repository";
+import { ApplicationStatus } from "../projects/applications/project.application.model";
 import { CreateReviewerDTO, GetReviewersDTO, UpdateReviewerDTO } from "./reviewer.dto";
 import { IReviewerRepository } from "./reviewer.repository";
 
@@ -24,7 +24,7 @@ export class ReviewerService {
 
     constructor(
         private readonly repository: IReviewerRepository,
-        private readonly projectStageRepo: IProjectStageRepository,
+        private readonly projectStageRepo: IProjectApplicationRepository,
         private readonly userRepo: IUserRepository,
         private readonly collaboratorRepo: ICollaboratorRepository,
         private readonly resultRepo: IResultRepository,
@@ -46,7 +46,7 @@ export class ReviewerService {
         if (!projectStageDoc) throw new AppError(ERROR_CODES.PROJECT_STAGE_NOT_FOUND);
 
         const projectStageStatus = projectStageDoc.status;
-        if (projectStageStatus !== ProjectStageStatus.submitted)
+        if (projectStageStatus !== ApplicationStatus.submitted)
             throw new AppError(ERROR_CODES.INVALID_DOC_STATUS);
 
         const grantStageDoc = projectStageDoc.grantStage as unknown as IGrantStage;
@@ -115,7 +115,7 @@ export class ReviewerService {
         });
         if (!projectStageDoc) throw new AppError(ERROR_CODES.PROJECT_STAGE_NOT_FOUND);
 
-        if (projectStageDoc.status !== ProjectStageStatus.submitted
+        if (projectStageDoc.status !== ApplicationStatus.submitted
         ) {
             throw new AppError(ERROR_CODES.INVALID_STAGE_STATUS);
         }

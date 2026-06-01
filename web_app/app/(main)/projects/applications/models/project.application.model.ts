@@ -2,37 +2,36 @@ import { CallStage } from "@/app/(main)/calls/stages/models/call.stage.model";
 import { GrantStage } from "@/app/(main)/grants/stages/models/grant.stage.model";
 import { Project } from "../../models/project.model";
 
-export enum ProjectStageStatus {
+export enum ApplicationStatus {
     submitted = 'submitted',
     accepted = 'accepted',
     rejected = 'rejected'
 }
 
-export type ProjectStage = {
+export type ProjectApplication = {
     _id?: string;
     project: string | Project;
     grantStage?: string | GrantStage;
-    //callStage?: string | CallStage;
     documentPath?: string;
     file?: File;
     totalScore?: number | null;
-    status: ProjectStageStatus;
+    status: ApplicationStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
 
 
-export interface GetProjectStageOptions {
+export interface GetProjectApplicationOptions {
     project?: string | Project;
     grantStage?: string | GrantStage;
    // callStage?: string | CallStage;
     //grantAllocation?: string;
-    status?: ProjectStageStatus;
+    status?: ApplicationStatus;
     populate?: boolean;
 }
 
-export const validateProjectStage = (ps: Partial<ProjectStage>): { valid: boolean; message?: string } => {
+export const validateProjectApplication = (ps: Partial<ProjectApplication>): { valid: boolean; message?: string } => {
     if (!ps.project) {
         return { valid: false, message: "Project is required." };
     }
@@ -48,7 +47,7 @@ export const validateProjectStage = (ps: Partial<ProjectStage>): { valid: boolea
 }
 
 
-export const sanitizeProjectStage = (ps: Partial<ProjectStage>): Partial<ProjectStage> => {
+export const sanitizeProjectApplication = (ps: Partial<ProjectApplication>): Partial<ProjectApplication> => {
     return {
         ...ps,
         project:
@@ -65,12 +64,12 @@ export const sanitizeProjectStage = (ps: Partial<ProjectStage>): Partial<Project
 /**
  * Create empty project stage
  */
-export const createEmptyProjectStage = (
-    stage?: Partial<ProjectStage>
-): ProjectStage => ({
+export const createEmptyProjectApplication = (
+    stage?: Partial<ProjectApplication>
+): ProjectApplication => ({
     project: stage?.project ?? "",
     grantStage: stage?.grantStage ?? "",
-    status: stage?.status ?? ProjectStageStatus.submitted,
+    status: stage?.status ?? ApplicationStatus.submitted,
 });
 
 

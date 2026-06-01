@@ -28,9 +28,9 @@ const AppMenu = () => {
                 {
                     label: 'Applications',
                     icon: 'pi pi-list',
-                    to: '/projects/stages/applications',
-                    visible: hasPermission("project.stage:read") &&
-                        hasPermission("grant.allocation:read")
+                    to: '/projects/applications/grant',
+                    visible: hasPermission("project.application:read") &&
+                        hasPermission("grant:read")
                 },
                 {
                     label: 'Projects',

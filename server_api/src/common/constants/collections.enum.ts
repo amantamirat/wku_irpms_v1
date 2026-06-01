@@ -32,7 +32,7 @@ export enum COLLECTIONS {
   PROJECT = "projects",
   COLLABORATOR = "collaborators",
   PHASE = "phases",
-  PROJECT_STAGE = "projectstages",
+  PROJECT_APPLICATION = "projectapplications",
   //BREAKDOWN = "breakdowns",
   PHASE_DOCUMENT = "phasedocuments",
   //PROJECT_THEMEM = "prothemes",

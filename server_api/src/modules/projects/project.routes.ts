@@ -18,12 +18,12 @@ import { SettingRepository } from '../settings/setting.repository';
 import { ConstraintRepository } from '../grants/constraints/constraint.repository';
 import { ThemeRepository } from '../thematics/themes/theme.repository';
 import { ConstraintValidator } from '../grants/constraints/constraint.validator';
-import { ProjectStageRepository } from './stages/project.stage.repository';
+import { ProjectApplicationRepository } from './applications/project.application.repository';
 import { CallStageRepository } from '../calls/stages/call.stage.repository';
-import { ProjectStageSynchronizer } from './stages/project.stage.synchronizer';
+import { ProjectStageSynchronizer } from './applications/project.application.synchronizer';
 import { ProjectAuth } from './project.auth';
 import { PhaseService } from './phase/phase.service';
-import { ProjectStageService } from './stages/project.stage.service';
+import { ProjectApplicationService } from './applications/project.application.service';
 import { GrantStageRepository } from '../grants/stages/grant.stage.repository';
 import { ReviewerRepository } from '../reviewers/reviewer.repository';
 
@@ -36,7 +36,7 @@ const callStageRepo = new CallStageRepository();
 const appRepo = new UserRepository();
 const collabRepo = new CollaboratorRepository();
 const phaseRepo = new PhaseRepository();
-const projStageRepo = new ProjectStageRepository();
+const projStageRepo = new ProjectApplicationRepository();
 const grantStageRepo = new GrantStageRepository();
 
 const notificationService = new NotificationService(
@@ -50,7 +50,7 @@ const synchronizer = new ProjectStageSynchronizer(projectRepo, projStageRepo, gr
 const constValidator = new ConstraintValidator(new ConstraintRepository(), new ThemeRepository());
 const collabService = new CollaboratorService(collabRepo, projectRepo, projAuth, appRepo, constValidator, notificationService);
 const phaseService = new PhaseService(phaseRepo, projectRepo, grantAllocRepo, projAuth, constValidator);
-const projectStageService = new ProjectStageService(
+const projectStageService = new ProjectApplicationService(
     projStageRepo, projAuth, grantStageRepo,
     callStageRepo, new ReviewerRepository(), synchronizer, notificationService
 );

@@ -10,12 +10,12 @@ import { Tag } from 'primereact/tag';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ProjectStageApi } from '../api/project.stage.api';
-import { ProjectStage, sanitizeProjectStage, validateProjectStage } from '../models/project.stage.model';
+import { ProjectApplicationApi } from '../api/project.stage.api';
+import { ProjectApplication, sanitizeProjectApplication, validateProjectApplication } from '../models/project.application.model';
 
-const SaveProjectStage = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<ProjectStage>) => {
+const SaveProjectApplication = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<ProjectApplication>) => {
     const toast = useRef<Toast>(null);
-    const [localStage, setLocalStage] = useState<Partial<ProjectStage>>({ ...item });
+    const [localStage, setLocalStage] = useState<Partial<ProjectApplication>>({ ...item });
     const [submitted, setSubmitted] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
 
@@ -40,7 +40,7 @@ const SaveProjectStage = ({ visible, item, onHide, onComplete }: EntitySaveDialo
 
     const saveStage = async () => {
         setSubmitted(true);
-        const validation = validateProjectStage(localStage);
+        const validation = validateProjectApplication(localStage);
         
         if (!validation.valid) {
             toast.current?.show({ severity: 'error', summary: 'Validation Failed', detail: validation.message });
@@ -49,11 +49,11 @@ const SaveProjectStage = ({ visible, item, onHide, onComplete }: EntitySaveDialo
 
         try {
             setIsUploading(true);
-            const payload = sanitizeProjectStage(localStage);
+            const payload = sanitizeProjectApplication(localStage);
             
             const saved = localStage._id 
-                ? await ProjectStageApi.update(payload) 
-                : await ProjectStageApi.create(payload as ProjectStage);
+                ? await ProjectApplicationApi.update(payload) 
+                : await ProjectApplicationApi.create(payload as ProjectApplication);
 
             toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Document submitted successfully' });
             onComplete?.(saved);
@@ -176,4 +176,4 @@ const SaveProjectStage = ({ visible, item, onHide, onComplete }: EntitySaveDialo
     );
 };
 
-export default SaveProjectStage;
+export default SaveProjectApplication;

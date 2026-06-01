@@ -1,16 +1,13 @@
 'use client';
-import { GrantAllocationApi } from '@/app/(main)/grants/allocations/api/grant.allocation.api';
-import { allocationOptionTemplate, getAllocationLabel } from '@/app/(main)/grants/allocations/components/AllocationTempletes';
-import { GrantAllocation } from '@/app/(main)/grants/allocations/models/grant.allocation.model';
+import { GrantApi } from '@/app/(main)/grants/api/grant.api';
+import { etbCurrencyFormatter, Grant } from '@/app/(main)/grants/models/grant.model';
+import { GrantStatus } from '@/app/(main)/grants/models/grant.state-machine';
 import { GrantStageApi } from '@/app/(main)/grants/stages/api/grant.stage.api';
 import { GrantStage } from '@/app/(main)/grants/stages/models/grant.stage.model';
 import { Dropdown } from 'primereact/dropdown';
 import { TabPanel, TabView } from 'primereact/tabview';
 import { useEffect, useState } from "react";
-import ProjectStageManager from '../components/ProjectStageManager';
-import { etbCurrencyFormatter, Grant } from '@/app/(main)/grants/models/grant.model';
-import { GrantApi } from '@/app/(main)/grants/api/grant.api';
-import { GrantStatus } from '@/app/(main)/grants/models/grant.state-machine';
+import ProjectApplicationManager from '../components/ProjectApplicationManager';
 
 const Page = () => {
     const [grants, setGrants] = useState<Grant[]>([]);
@@ -118,7 +115,7 @@ const Page = () => {
                                         }
                                     >
                                         <div className="mt-3">
-                                            <ProjectStageManager
+                                            <ProjectApplicationManager
                                                 grantStage={stage}
                                                 //grantAllocation={selectedGrant}
                                                 hideReviewer={false}

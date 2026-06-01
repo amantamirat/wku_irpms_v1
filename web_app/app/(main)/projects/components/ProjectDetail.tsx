@@ -9,7 +9,7 @@ import { TabPanel, TabView } from "primereact/tabview";
 import CollaboratorManager from "../collaborators/components/CollaboratorManager";
 import { Project } from "../models/project.model";
 import PhaseManager from "../phases/components/PhaseManager";
-import ProjectStageManager from "../stages/components/ProjectStageManager";
+import ProjectApplicationManager from "../applications/components/ProjectApplicationManager";
 
 interface ProjectDetailProps {
     project: Project;
@@ -66,10 +66,10 @@ export default function ProjectDetail({ project, updateProject }: ProjectDetailP
             content: <CollaboratorManager project={project} />
         },
         {
-            header: "Stages",
+            header: "Applications",
             icon: "pi pi-map",
-            permission: "project.stage:read",
-            content: <ProjectStageManager project={project} hideReviewer={true} updateProject={updateProject} />
+            permission: "project.application:read",
+            content: <ProjectApplicationManager project={project} hideReviewer={true} updateProject={updateProject} />
         }
     ];
 

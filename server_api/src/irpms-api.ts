@@ -34,7 +34,7 @@ import collaboratorRoutes from './modules/projects/collaborators/collaborator.ro
 import phaseRoutes from './modules/projects/phase/phase.routes';
 import phaseDocRoutes from './modules/projects/phase/documents/phase.doc.routes';
 
-import projectStageRoutes from './modules/projects/stages/project.stage.routes';
+import projectApplicationRoutes from './modules/projects/applications/project.application.routes';
 import reviewerRoutes from './modules/reviewers/reviewer.routes';
 import resultRoutes from './modules/reviewers/results/result.routes';
 
@@ -102,7 +102,7 @@ app.use("/api/project/phases", phaseRoutes);
 app.use("/api/project/phase/documents", phaseDocRoutes);
 app.use("/api/project/collaborators", collaboratorRoutes);
 //app.use("/api/collaborator/assignments", assignmentRoutes);
-app.use("/api/project/stages", projectStageRoutes);
+app.use("/api/project/applications", projectApplicationRoutes);
 
 app.use("/api/reports", reportRoutes);
 

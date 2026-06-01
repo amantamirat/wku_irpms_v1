@@ -7,7 +7,7 @@ import { Dialog } from "primereact/dialog";
 import { useMemo, useState } from "react";
 
 import { User } from "@/app/(main)/users/models/user.model";
-import { ProjectStage, ProjectStageStatus } from "../../projects/stages/models/project.stage.model";
+import { ProjectApplication, ApplicationStatus } from "../../projects/applications/models/project.application.model";
 import { ReviewerApi } from "../api/reviewer.api";
 import { GetReviewersOptions, Reviewer, ReviewerStatus } from "../models/reviewer.model";
 import { REVIEWER_STATUS_ORDER, REVIEWER_TRANSITIONS } from "../models/reviewer.state-machine";
@@ -16,7 +16,7 @@ import EvaluatorManager from "../results/components/evaluator/EvaluatorManager";
 import SaveReviewerDialog from "./SaveReviewerDialog";
 
 interface ReviewerManagerProps {
-    projectStage?: ProjectStage;
+    projectStage?: ProjectApplication;
     reviewer?: User;
     status?: ReviewerStatus | ReviewerStatus[];
     reviewers?: Reviewer[];
@@ -36,7 +36,7 @@ const ReviewerManager = ({
 }: ReviewerManagerProps) => {
 
     const canManage = useMemo(() => projectStage && (
-        projectStage.status === ProjectStageStatus.submitted
+        projectStage.status === ApplicationStatus.submitted
     ), [projectStage?.status]);
 
     const { getUser } = useAuth();

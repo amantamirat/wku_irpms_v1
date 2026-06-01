@@ -4,7 +4,7 @@ import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { IEvaluationRepository } from "../../evaluations/evaluation.repository";
 import { IGrantStageRepository } from "../../grants/stages/grant.stage.repository";
-import { IProjectStageRepository } from "../../projects/stages/project.stage.repository";
+import { IProjectApplicationRepository } from "../../projects/applications/project.application.repository";
 import { ICallRepository } from "../call.repository";
 import { CALL_TRANSITIONS } from "../call.service";
 import { CallStatus } from "../call.model";
@@ -19,7 +19,7 @@ export class StageService {
         private readonly repository: ICallStageRepository,
         private readonly callRepo: ICallRepository,
         private readonly grantStageRepo: IGrantStageRepository,
-        private readonly projectStageRepo: IProjectStageRepository
+        private readonly projectStageRepo: IProjectApplicationRepository
     ) {
 
     }
@@ -98,10 +98,12 @@ export class StageService {
         );
 
         if (next === CallStatus.planned) {
-            const projStageExsit = await this.projectStageRepo.exists({ callStage: id });
+            /*
+            const projStageExsit = await this..exists({ call: id });
             if (projStageExsit) {
                 throw new AppError(ERROR_CODES.STAGE_ALREADY_EXISTS, "Projects already has been Sumitted!");
             }
+                */
         }
 
         if (next === CallStatus.active) {

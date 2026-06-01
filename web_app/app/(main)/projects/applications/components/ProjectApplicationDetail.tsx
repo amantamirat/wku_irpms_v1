@@ -1,11 +1,11 @@
 import { useAuth } from "@/contexts/auth-context";
 import { TabPanel, TabView } from "primereact/tabview";
 import { useMemo } from "react";
-import { ProjectStage } from "../models/project.stage.model";
+import { ProjectApplication } from "../models/project.application.model";
 import ReviewerManager from "@/app/(main)/reviewers/components/ReviewerManager";
 
 interface ProjectStageDetailProps {
-    projectStage: ProjectStage;
+    projectStage: ProjectApplication;
     hideReviewer?: boolean;
 }
 

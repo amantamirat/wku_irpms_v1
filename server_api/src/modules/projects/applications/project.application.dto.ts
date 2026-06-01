@@ -1,20 +1,18 @@
 // project-stage.dto.ts
 import { PhaseDto } from "../phase/phase.dto";
-import { ProjectStageStatus } from "./project.stage.model";
+import { ApplicationStatus } from "./project.application.model";
 
-export interface GetProjectStageDTO {
+export interface GetProjectApplicationDTO {
     project?: string;
     grantStage?: string;
     call?: string;
-    //grantAllocation?: string;
-    //callStage?: string;
-    status?: ProjectStageStatus;
+    status?: ApplicationStatus;
     populate?: boolean;
     skip?: number;
     limit?: number;
 }
 
-export interface CreateProjectStageDTO {
+export interface CreateProjectApplicationDTO {
     project: string;
     projectTitle?: string;
     grantStage?: string;
@@ -26,23 +24,22 @@ export interface CreateProjectStageDTO {
     applicantId: string;
 }
 
-export interface UpdateStageDTO {
+export interface UpdateApplicationDTO {
     id: string;
     data: Partial<{
-        //status: ProjectStageStatus;
         totalScore: number | null;
     }>;
     applicantId: string;
 }
 
-export interface UpdateStatusDTO {
+export interface UpdateApplicationStatusDTO {
     documents: string[];
-    status: ProjectStageStatus;
+    status: ApplicationStatus;
 }
 
-export interface ExistsStageDTO {
+export interface ExistsApplicationDTO {
     grantStage?: string;
-    callStage?: string;
+    //callStage?: string;
     project?: string;
 }
 

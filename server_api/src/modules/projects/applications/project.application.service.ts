@@ -6,7 +6,7 @@ import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 
 import { IGrantStageRepository } from "../../grants/stages/grant.stage.repository";
-import { IProjectStageRepository } from "./project.stage.repository";
+import { IProjectApplicationRepository } from "./project.application.repository";
 
 import { ClientSession } from "mongoose";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
@@ -22,18 +22,18 @@ import { ReviewerStatus } from "../../reviewers/reviewer.state-machine";
 import { ProjectAuth } from "../project.auth";
 import { ProjectStatus } from "../project.model";
 import {
-    CreateProjectStageDTO,
-    GetProjectStageDTO,
-    UpdateStageDTO
-} from "./project.stage.dto";
-import { ProjectStageStatus } from "./project.stage.model";
-import { IProjectSynchronizer } from "./project.stage.synchronizer";
+    CreateProjectApplicationDTO,
+    GetProjectApplicationDTO,
+    UpdateApplicationDTO
+} from "./project.application.dto";
+import { ApplicationStatus } from "./project.application.model";
+import { IProjectSynchronizer } from "./project.application.synchronizer";
 import { CallRepository, ICallRepository } from "../../calls/call.repository";
 
-export class ProjectStageService {
+export class ProjectApplicationService {
 
     constructor(
-        private readonly repository: IProjectStageRepository,
+        private readonly repository: IProjectApplicationRepository,
         private readonly projAuth: ProjectAuth,
         private readonly grantStageRepo: IGrantStageRepository,
         private readonly callStageRepo: ICallStageRepository,
@@ -60,7 +60,7 @@ export class ProjectStageService {
     /**
      * Create project stage (submission)
      */
-    async create(dto: CreateProjectStageDTO, options?: { skipValidation?: boolean }, session?: ClientSession) {
+    async create(dto: CreateProjectApplicationDTO, options?: { skipValidation?: boolean }, session?: ClientSession) {
         const { project, applicantId } = dto;
         if (!options?.skipValidation) {
             const projectDoc = await this.validateProject(project, applicantId, session);
@@ -81,7 +81,7 @@ export class ProjectStageService {
                     if (!currentStageDoc) {
                         throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
                     }
-                    if (currentStageDoc.status !== ProjectStageStatus.accepted) {
+                    if (currentStageDoc.status !== ApplicationStatus.accepted) {
                         throw new AppError(ERROR_CODES.CURRENT_STAGE_NOT_ACCEPTED);
                     }
                     nextOrder = (currentStageDoc.grantStage as unknown as IGrantStage).order + 1;
@@ -117,7 +117,7 @@ export class ProjectStageService {
                 applicantId,
                 dto.projectTitle ?? "Project",
                 dto.stageName ?? "Stage",
-                ProjectStageStatus.submitted,
+                ApplicationStatus.submitted,
                 undefined,
                 session
             ).catch(err => console.error("Notification failed", err));
@@ -133,7 +133,7 @@ export class ProjectStageService {
     /**
      * Get project stages
      */
-    async get(dto: GetProjectStageDTO) {
+    async get(dto: GetProjectApplicationDTO) {
         return await this.repository.find(dto);
     }
 
@@ -149,7 +149,7 @@ export class ProjectStageService {
     /**
      * Update stage 
      */
-    async update(dto: UpdateStageDTO) {
+    async update(dto: UpdateApplicationDTO) {
         throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
     }
 
@@ -219,8 +219,8 @@ export class ProjectStageService {
             throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
         }
 
-        const from = projStageDoc.status as ProjectStageStatus;
-        const to = next as ProjectStageStatus;
+        const from = projStageDoc.status as ApplicationStatus;
+        const to = next as ApplicationStatus;
 
         // Prevent race condition
         if (current && current !== from) {
@@ -234,8 +234,8 @@ export class ProjectStageService {
             PROJECT_STAGE_TRANSITIONS
         );
         if (
-            to === ProjectStageStatus.accepted ||
-            to === ProjectStageStatus.rejected
+            to === ApplicationStatus.accepted ||
+            to === ApplicationStatus.rejected
         ) {
             const totalScore = projStageDoc.totalScore;
 
@@ -257,7 +257,7 @@ export class ProjectStageService {
                 );
             }
 
-            if (to === ProjectStageStatus.accepted) {
+            if (to === ApplicationStatus.accepted) {
                 const minAcceptanceScore = grantStageDoc.minAcceptanceScore ?? 0;
 
                 if ((totalScore ?? 0) < minAcceptanceScore) {
@@ -269,7 +269,7 @@ export class ProjectStageService {
             }
         }
 
-        if (to === ProjectStageStatus.submitted) {
+        if (to === ApplicationStatus.submitted) {
             /*
             if (await this.reviewerRepo.exist({ projectStage: id })) {
                 throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
@@ -292,7 +292,7 @@ export class ProjectStageService {
         ) {
             let nextStageInfo = undefined;
             // Discover next stage only if current stage was accepted
-            if (to === ProjectStageStatus.accepted) {
+            if (to === ApplicationStatus.accepted) {
                 const grantStageDoc = projStageDoc.grantStage as unknown as IGrantStage;
                 const nextOrder = grantStageDoc.order + 1
                 const grantId = grantStageDoc.grant;
@@ -334,7 +334,7 @@ export class ProjectStageService {
 
         const projectStageDoc = await this.repository.findById(id);
         if (!projectStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-        if (projectStageDoc.status !== ProjectStageStatus.submitted) throw new AppError(ERROR_CODES.DOC_NOT_SUBMITTED);
+        if (projectStageDoc.status !== ApplicationStatus.submitted) throw new AppError(ERROR_CODES.DOC_NOT_SUBMITTED);
 
         const project = String(projectStageDoc.project);
         await this.validateProject(project, applicantId ?? "");
@@ -348,8 +348,8 @@ export class ProjectStageService {
     }
 }
 
-export const PROJECT_STAGE_TRANSITIONS: Record<ProjectStageStatus, ProjectStageStatus[]> = {
-    [ProjectStageStatus.submitted]: [ProjectStageStatus.accepted, ProjectStageStatus.rejected],
-    [ProjectStageStatus.accepted]: [ProjectStageStatus.submitted],
-    [ProjectStageStatus.rejected]: [ProjectStageStatus.submitted]
+export const PROJECT_STAGE_TRANSITIONS: Record<ApplicationStatus, ApplicationStatus[]> = {
+    [ApplicationStatus.submitted]: [ApplicationStatus.accepted, ApplicationStatus.rejected],
+    [ApplicationStatus.accepted]: [ApplicationStatus.submitted],
+    [ApplicationStatus.rejected]: [ApplicationStatus.submitted]
 };

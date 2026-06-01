@@ -8,15 +8,15 @@ import { GrantStage } from "@/app/(main)/grants/stages/models/grant.stage.model"
 import { createEntityManager } from "@/components/createEntityManager";
 import MyBadge from "@/templates/MyBadge";
 import { Project, ProjectStatus } from "../../models/project.model";
-import { ProjectStageApi } from "../api/project.stage.api";
-import { GetProjectStageOptions, ProjectStage, ProjectStageStatus, createEmptyProjectStage } from "../models/project.stage.model";
-import { PROJECT_STAGE_STATUS_ORDER, PROJECT_STAGE_TRANSITIONS } from "../models/project.stage.state-machine";
-import ProjectStageDetail from "./ProjectStageDetail";
-import SaveProjectStage from "./SaveProjectStage";
+import { ProjectApplicationApi } from "../api/project.stage.api";
+import { GetProjectApplicationOptions, ProjectApplication, ApplicationStatus, createEmptyProjectApplication } from "../models/project.application.model";
+import { PROJECT_STAGE_STATUS_ORDER, PROJECT_STAGE_TRANSITIONS } from "../models/application.state-machine";
+import ProjectStageDetail from "./ProjectApplicationDetail";
+import SaveProjectApplication from "./SaveProjectApplication";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { GrantStageApi } from "@/app/(main)/grants/stages/api/grant.stage.api";
 
-interface ProjectStageManagerProps {
+interface ProjectApplicationManagerProps {
     project?: Project;
     grantStage?: string | GrantStage;
     callStage?: string | CallStage;
@@ -24,11 +24,11 @@ interface ProjectStageManagerProps {
     updateProject?: (project: Project) => void;
 }
 
-const ProjectStageManager = ({ project, grantStage, callStage, hideReviewer, updateProject }: ProjectStageManagerProps) => {
+const ProjectApplicationManager = ({ project, grantStage, callStage, hideReviewer, updateProject }: ProjectApplicationManagerProps) => {
     const confirm = useConfirmDialog();
 
     const [grantStages, setGrantStages] = useState<GrantStage[] | null>(null);
-    const [currentProjectStage, setCurrentProjectStage] = useState<ProjectStage | undefined>(undefined);
+    const [currentProjectStage, setCurrentProjectStage] = useState<ProjectApplication | undefined>(undefined);
 
     // 1. Fetch all GrantStages for the project's grant
     useEffect(() => {
@@ -50,7 +50,7 @@ const ProjectStageManager = ({ project, grantStage, callStage, hideReviewer, upd
                 if (typeof project.currentStage !== "string") {
                     setCurrentProjectStage(project.currentStage);
                 } else {
-                    const stage = await ProjectStageApi.getById!(project.currentStage);
+                    const stage = await ProjectApplicationApi.getById!(project.currentStage);
                     setCurrentProjectStage(stage);
                 }
             } catch (error) {
@@ -102,7 +102,7 @@ const ProjectStageManager = ({ project, grantStage, callStage, hideReviewer, upd
     updateProjectRef.current = updateProject;
 
     // 💡 FIX 2: Safely compute state transformations using the mutable ref
-    const handleItemsChange = useCallback((projectStages: ProjectStage[]) => {
+    const handleItemsChange = useCallback((projectStages: ProjectApplication[]) => {
         const currentProject = projectRef.current;
         if (!currentProject || !updateProjectRef.current) return;
 
@@ -112,13 +112,13 @@ const ProjectStageManager = ({ project, grantStage, callStage, hideReviewer, upd
         if (projectStages.length > 0) {
 
 
-            if (projectStages.some(p => p.status === ProjectStageStatus.rejected)) {
+            if (projectStages.some(p => p.status === ApplicationStatus.rejected)) {
                 newStatus = ProjectStatus.rejected;
             }
-            else if (projectStages.some(p => p.status === ProjectStageStatus.submitted)) {
+            else if (projectStages.some(p => p.status === ApplicationStatus.submitted)) {
                 newStatus = ProjectStatus.submitted;
             }
-            else if (projectStages.every(p => p.status === ProjectStageStatus.accepted)
+            else if (projectStages.every(p => p.status === ApplicationStatus.accepted)
                 && projectStages.length === grantStages?.length
             ) {
                 newStatus = ProjectStatus.accepted;
@@ -140,7 +140,7 @@ const ProjectStageManager = ({ project, grantStage, callStage, hideReviewer, upd
             cols.push({
                 header: "Project",
                 field: "project.title",
-                body: (ps: ProjectStage) => {
+                body: (ps: ProjectApplication) => {
                     const title = typeof ps.project === "object" ? ps.project.title : "Unknown Project";
                     return <div className="truncate text-sm font-medium" style={{ maxWidth: '300px' }} title={title}>{title}</div>;
                 }
@@ -149,13 +149,13 @@ const ProjectStageManager = ({ project, grantStage, callStage, hideReviewer, upd
         if (project && !grantStage && !callStage) {
             cols.push({
                 header: "Stage Name",
-                body: (ps: ProjectStage) => typeof ps.grantStage === "object" ? (ps.grantStage as GrantStage)?.name : "General"
+                body: (ps: ProjectApplication) => typeof ps.grantStage === "object" ? (ps.grantStage as GrantStage)?.name : "General"
             });
         }
         cols.push(
             {
                 header: "Document",
-                body: (ps: ProjectStage) => ps.documentPath ? (
+                body: (ps: ProjectApplication) => ps.documentPath ? (
                     <a href={`${BASE_URL}/${ps.documentPath.replace(/^\\/, "")}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline flex items-center">
                         <i className="pi pi-file-pdf mr-1 text-red-500"></i> View PDF
                     </a>
@@ -163,32 +163,32 @@ const ProjectStageManager = ({ project, grantStage, callStage, hideReviewer, upd
             },
             {
                 header: "Score",
-                body: (ps: ProjectStage) => <span className="font-bold text-lg">{typeof ps?.totalScore === "number" ? ps.totalScore : "—"}</span>
+                body: (ps: ProjectApplication) => <span className="font-bold text-lg">{typeof ps?.totalScore === "number" ? ps.totalScore : "—"}</span>
             },
             {
                 header: "Status",
-                body: (ps: ProjectStage) => <MyBadge type="status" value={ps.status ?? ProjectStageStatus.submitted} />
+                body: (ps: ProjectApplication) => <MyBadge type="status" value={ps.status ?? ApplicationStatus.submitted} />
             }
         );
         return cols;
     }, [project, grantStage, callStage]);
 
     const Manager = useMemo(() =>
-        createEntityManager<ProjectStage, GetProjectStageOptions | undefined>({
+        createEntityManager<ProjectApplication, GetProjectApplicationOptions | undefined>({
             title: nextStage ? `Submit ${nextStage.name}` : "Project Submissions",
             itemName: nextStage ? nextStage.name : "Application Stage",
-            api: ProjectStageApi,
+            api: ProjectApplicationApi,
             columns: columns,
             onItemsChange: handleItemsChange,
             createNew: (canCreateStage && nextStage)
-                ? () => createEmptyProjectStage({
+                ? () => createEmptyProjectApplication({
                     project: project,
                     grantStage: nextStage
                 })
                 : undefined,
 
-            SaveDialog: canCreateStage ? SaveProjectStage : undefined,
-            permissionPrefix: "project.stage",
+            SaveDialog: canCreateStage ? SaveProjectApplication : undefined,
+            permissionPrefix: "project.application",
             query: () => ({
                 project: project,
                 grantStage: typeof grantStage === "object" ? grantStage._id : grantStage,
@@ -208,11 +208,11 @@ const ProjectStageManager = ({ project, grantStage, callStage, hideReviewer, upd
                     severity: "info",
                     tooltip: "Recalculate Scores",
                     permissions: ["project.stage:calculateTotalScore"],
-                    onClick: (row: ProjectStage) => {
+                    onClick: (row: ProjectApplication) => {
                         confirm.ask({
                             operation: "calculate score",
                             onConfirmAsync: async () => {
-                                const score = await ProjectStageApi.calculateTotalScore(row._id!);
+                                const score = await ProjectApplicationApi.calculateTotalScore(row._id!);
                                 row.totalScore = score;
                             }
                         });
@@ -221,7 +221,7 @@ const ProjectStageManager = ({ project, grantStage, callStage, hideReviewer, upd
             ],
             hideEditAction: true,
             hideDeleteAction: !project,
-            disableDeleteRow: (ps: ProjectStage) => ps.status !== ProjectStageStatus.submitted
+            disableDeleteRow: (ps: ProjectApplication) => ps.status !== ApplicationStatus.submitted
         }),
         [columns, project, grantStage, canCreateStage, nextStage]
     );
@@ -229,4 +229,4 @@ const ProjectStageManager = ({ project, grantStage, callStage, hideReviewer, upd
     return <Manager />;
 };
 
-export default ProjectStageManager;
+export default ProjectApplicationManager;

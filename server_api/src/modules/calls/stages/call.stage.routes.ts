@@ -4,7 +4,7 @@ import { PERMISSIONS } from '../../../common/constants/permissions';
 import { verifyActiveAccount, checkPermission, checkStatusPermission, checkTransitionPermission } from '../../auth/auth.middleware';
 import { StageService } from './call.stage.service';
 import { EvaluationRepository } from '../../evaluations/evaluation.repository';
-import { ProjectStageRepository } from '../../projects/stages/project.stage.repository';
+import { ProjectApplicationRepository } from '../../projects/applications/project.application.repository';
 import { CallRepository } from '../call.repository';
 import { CallStageRepository } from './call.stage.repository';
 import { GrantStageRepository } from '../../grants/stages/grant.stage.repository';
@@ -12,7 +12,7 @@ import { GrantStageRepository } from '../../grants/stages/grant.stage.repository
 const repository = new CallStageRepository();
 const callRepository = new CallRepository();
 const stageRepository = new GrantStageRepository();
-const projStageRepository = new ProjectStageRepository();
+const projStageRepository = new ProjectApplicationRepository();
 
 const service = new StageService(repository, callRepository, stageRepository, projStageRepository);
 const controller = new StageController(service);

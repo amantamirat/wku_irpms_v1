@@ -27,8 +27,8 @@ import { PhaseService } from "./phase/phase.service";
 import { ProjectAuth } from "./project.auth";
 import { ProjectStatus } from "./project.model";
 import { PROJECT_TRANSITIONS } from "./project.state-machine";
-import { IProjectStageRepository } from "./stages/project.stage.repository";
-import { ProjectStageService } from "./stages/project.stage.service";
+import { IProjectApplicationRepository } from "./applications/project.application.repository";
+import { ProjectApplicationService } from "./applications/project.application.service";
 import { NotificationService } from "../notifications/notification.service";
 import { CompositionValidator } from "../grants/compositions/composition.validator";
 import { ICallStageRepository } from "../calls/stages/call.stage.repository";
@@ -50,8 +50,8 @@ export class ProjectService {
         private readonly collabService: CollaboratorService,
         private readonly phaseRepo: IPhaseRepository,
         private readonly phaseService: PhaseService,
-        private readonly projectStageRepo: IProjectStageRepository,
-        private readonly projectStageService: ProjectStageService,
+        private readonly projectStageRepo: IProjectApplicationRepository,
+        private readonly projectStageService: ProjectApplicationService,
         private readonly constValidator: ConstraintValidator,
         private readonly notificationService: NotificationService,
         private readonly compValidator = new CompositionValidator(),

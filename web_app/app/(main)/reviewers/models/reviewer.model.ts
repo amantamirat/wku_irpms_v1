@@ -1,5 +1,5 @@
 import { User } from "@/app/(main)/users/models/user.model";
-import { ProjectStage } from "../../projects/stages/models/project.stage.model";
+import { ProjectApplication } from "../../projects/applications/models/project.application.model";
 
 export enum ReviewerStatus {
     pending = 'pending',
@@ -10,7 +10,7 @@ export enum ReviewerStatus {
 
 export type Reviewer = {
     _id?: string;
-    projectStage?: string | ProjectStage;
+    projectStage?: string | ProjectApplication;
     reviewer?: string | User;
     weight?: number;
     score?: number;
@@ -22,7 +22,7 @@ export type Reviewer = {
 
 export interface GetReviewersOptions {
     reviewer?: string | User;
-    projectStage?: string | ProjectStage;
+    projectStage?: string | ProjectApplication;
     status?: ReviewerStatus | ReviewerStatus[];
     populate?: boolean;
 }
