@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BASE_URL } from "@/api/ApiClient";
 import { CallStage } from "@/app/(main)/calls/stages/models/call.stage.model";
 import { GrantAllocation } from "@/app/(main)/grants/allocations/models/grant.allocation.model";
@@ -19,12 +19,12 @@ import { GrantStageApi } from "@/app/(main)/grants/stages/api/grant.stage.api";
 interface ProjectStageManagerProps {
     project?: Project;
     grantStage?: string | GrantStage;
-    grantAllocation?: string | GrantAllocation;
     callStage?: string | CallStage;
     hideReviewer?: boolean;
+    updateProject?: (project: Project) => void;
 }
 
-const ProjectStageManager = ({ project, grantStage, grantAllocation, callStage, hideReviewer }: ProjectStageManagerProps) => {
+const ProjectStageManager = ({ project, grantStage, callStage, hideReviewer, updateProject }: ProjectStageManagerProps) => {
     const confirm = useConfirmDialog();
 
     const [grantStages, setGrantStages] = useState<GrantStage[] | null>(null);
@@ -95,6 +95,45 @@ const ProjectStageManager = ({ project, grantStage, grantAllocation, callStage, 
         project.status === ProjectStatus.completed // This allows the verification stage to be created
     );
 
+    const projectRef = useRef(project);
+    projectRef.current = project;
+
+    const updateProjectRef = useRef(updateProject);
+    updateProjectRef.current = updateProject;
+
+    // 💡 FIX 2: Safely compute state transformations using the mutable ref
+    const handleItemsChange = useCallback((projectStages: ProjectStage[]) => {
+        const currentProject = projectRef.current;
+        if (!currentProject || !updateProjectRef.current) return;
+
+        // 2. Determine New Status based on Phase logic
+        let newStatus = currentProject.status;
+
+        if (projectStages.length > 0) {
+
+
+            if (projectStages.some(p => p.status === ProjectStageStatus.rejected)) {
+                newStatus = ProjectStatus.rejected;
+            }
+            else if (projectStages.some(p => p.status === ProjectStageStatus.submitted)) {
+                newStatus = ProjectStatus.submitted;
+            }
+            else if (projectStages.every(p => p.status === ProjectStageStatus.accepted)
+                && projectStages.length === grantStages?.length
+            ) {
+                newStatus = ProjectStatus.accepted;
+            }
+        }
+        const hasStatusChanged = currentProject.status !== newStatus;
+
+        if (hasStatusChanged) {
+            updateProjectRef.current({
+                ...currentProject, // Uses the fresh instance! No dropped state.
+                status: newStatus
+            });
+        }
+    }, [project, grantStages]);
+
     const columns = useMemo(() => {
         const cols: any[] = [];
         if (!project) {
@@ -140,7 +179,7 @@ const ProjectStageManager = ({ project, grantStage, grantAllocation, callStage, 
             itemName: nextStage ? nextStage.name : "Application Stage",
             api: ProjectStageApi,
             columns: columns,
-
+            onItemsChange: handleItemsChange,
             createNew: (canCreateStage && nextStage)
                 ? () => createEmptyProjectStage({
                     project: project,
@@ -153,7 +192,6 @@ const ProjectStageManager = ({ project, grantStage, grantAllocation, callStage, 
             query: () => ({
                 project: project,
                 grantStage: typeof grantStage === "object" ? grantStage._id : grantStage,
-                grantAllocation: typeof grantAllocation === "object" ? grantAllocation._id : grantAllocation,
                 populate: true
             }),
             workflow: {
@@ -185,7 +223,7 @@ const ProjectStageManager = ({ project, grantStage, grantAllocation, callStage, 
             hideDeleteAction: !project,
             disableDeleteRow: (ps: ProjectStage) => ps.status !== ProjectStageStatus.submitted
         }),
-        [columns, project, grantStage, grantAllocation, canCreateStage, nextStage]
+        [columns, project, grantStage, canCreateStage, nextStage]
     );
 
     return <Manager />;

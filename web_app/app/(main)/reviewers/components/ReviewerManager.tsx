@@ -7,7 +7,7 @@ import { Dialog } from "primereact/dialog";
 import { useMemo, useState } from "react";
 
 import { User } from "@/app/(main)/users/models/user.model";
-import { ProjectStage } from "../../projects/stages/models/project.stage.model";
+import { ProjectStage, ProjectStageStatus } from "../../projects/stages/models/project.stage.model";
 import { ReviewerApi } from "../api/reviewer.api";
 import { GetReviewersOptions, Reviewer, ReviewerStatus } from "../models/reviewer.model";
 import { REVIEWER_STATUS_ORDER, REVIEWER_TRANSITIONS } from "../models/reviewer.state-machine";
@@ -34,6 +34,10 @@ const ReviewerManager = ({
     hideSearch,
     hideReviewer,
 }: ReviewerManagerProps) => {
+
+    const canManage = useMemo(() => projectStage && (
+        projectStage.status === ProjectStageStatus.submitted
+    ), [projectStage?.status]);
 
     const { getUser } = useAuth();
     const activeUser = getUser();
@@ -131,7 +135,7 @@ const ReviewerManager = ({
             // ------------------
             onItemsChange,
 
-            createNew: projectStage
+            createNew: canManage
                 ? (): Reviewer => ({
                     projectStage,
                     reviewer: reviewer ?? undefined,
@@ -140,7 +144,7 @@ const ReviewerManager = ({
                 })
                 : undefined,
 
-            SaveDialog: projectStage ? SaveReviewerDialog : undefined,
+            SaveDialog: canManage ? SaveReviewerDialog : undefined,
             permissionPrefix: "reviewer",
 
             query: () => query,

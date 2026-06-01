@@ -74,22 +74,7 @@ export class ProjectStageRepository implements IProjectStageRepository {
             query.status = options.status;
         }
 
-        // 2. Filter by Grant Allocation (Inside the Project)
-        if (options.grantAllocation) {
-            const projectQuery = Project.find({
-                grant: new mongoose.Types.ObjectId(options.grantAllocation)
-            }).select("_id").lean();
-
-            if (session) {
-                projectQuery.session(session);
-            }
-
-            const projectsInAllocation = await projectQuery;
-
-            const projectIds = projectsInAllocation.map(p => p._id);
-
-            query.project = { $in: projectIds };
-        }
+       
 
         // Main query
         const dbQuery = ProjectStage.find(query);

@@ -8,6 +8,7 @@ export enum CallStatus {
 }
 
 export interface ICallDeadline {
+    grantStage: mongoose.Types.ObjectId;
     submission: Date;
     evaluation: Date;
 }

@@ -118,7 +118,7 @@ export class CallRepository implements ICallRepository {
                     $gte: [
                         {
                             $subtract: [
-                                "$amount",
+                                "$budget",
                                 { $ifNull: ["$usedBudget", 0] }
                             ]
                         },

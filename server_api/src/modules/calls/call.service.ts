@@ -4,30 +4,24 @@ import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { CalendarStatus } from "../calendar/calendar.model";
-import { CalendarRepository, ICalendarRepository } from "../calendar/calendar.repository";
-import { AllocationStatus } from "../grants/allocations/grant.allocation.model";
-import { IGrantAllocationRepository } from "../grants/allocations/grant.allocation.repository";
-import { GrantStatus, IGrant } from "../grants/grant.model";
-import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
+import { ICalendarRepository } from "../calendar/calendar.repository";
+import { GrantStatus } from "../grants/grant.model";
+import { IGrantRepository } from "../grants/grant.repository";
 import { StageCategory } from "../grants/stages/grant.stage.model";
 import { IGrantStageRepository } from "../grants/stages/grant.stage.repository";
-import { IProjectRepository, ProjectRepository } from "../projects/project.repository";
+import { IProjectRepository } from "../projects/project.repository";
 import { CreateCallDTO, GetCallsOptions, UpdateCallDTO } from "./call.dto";
 import { CallStatus } from "./call.model";
-import { CallRepository, ICallRepository } from "./call.repository";
-import { CallStageStatus } from "./stages/call.stage.model";
-import { ICallStageRepository } from "./stages/call.stage.repository";
+import { CallRepository } from "./call.repository";
 
 export class CallService {
 
     constructor(
-        private readonly repository: CallRepository,
-        private readonly allocationRepo: IGrantAllocationRepository,
+        private readonly repository: CallRepository,        
+        private readonly grantRepo: IGrantRepository,
         private readonly grantStageRepo: IGrantStageRepository,
-        private readonly callStageRepo: ICallStageRepository,
-        private readonly grantRepo: IGrantRepository = new GrantRepository(),
-        private readonly calendarRepo: ICalendarRepository = new CalendarRepository(),
-        private readonly projectRepo: IProjectRepository = new ProjectRepository(),
+        private readonly calendarRepo: ICalendarRepository,
+        private readonly projectRepo: IProjectRepository,
     ) {
     }
 
@@ -55,11 +49,15 @@ export class CallService {
         }
 
         for (const deadline of deadlines) {
+            const grantStageDoc = await this.grantStageRepo.findById(deadline.grantStage);
+            if(!grantStageDoc){
+                throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+            }
             const subDate = new Date(deadline.submission);
             const evalDate = new Date(deadline.evaluation);
             if (subDate >= evalDate) {
                 throw new AppError(
-                    ERROR_CODES.INVALID_DEADLINE_DATES,
+                    ERROR_CODES.INVALID_DEADLINE_DATE,
                     "Submission date must be earlier than the evaluation date."
                 );
             }

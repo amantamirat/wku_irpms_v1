@@ -69,7 +69,7 @@ export default function ProjectDetail({ project, updateProject }: ProjectDetailP
             header: "Stages",
             icon: "pi pi-map",
             permission: "project.stage:read",
-            content: <ProjectStageManager project={project} hideReviewer={true} />
+            content: <ProjectStageManager project={project} hideReviewer={true} updateProject={updateProject} />
         }
     ];
 
@@ -85,7 +85,7 @@ export default function ProjectDetail({ project, updateProject }: ProjectDetailP
                         {project?.title || 'Untitled Project'}
                     </h1>
                     <div className="flex flex-wrap gap-3 text-xs font-medium text-500 uppercase">
-                        <span className="flex align-items-center bg-gray-100 px-2 py-1 border-round">
+                        <span className="flex align-items-center px-2 py-1 border-round">
                             <i className="pi pi-tag mr-2 text-primary"></i>
                             {getDisplayName((project?.grant), 'title')}
                         </span>
@@ -98,7 +98,7 @@ export default function ProjectDetail({ project, updateProject }: ProjectDetailP
                              */
                         }
                        
-                        <span className="flex align-items-center bg-gray-100 px-2 py-1 border-round">
+                        <span className="flex align-items-center px-2 py-1 border-round">
                             <i className="pi pi-user mr-2 text-primary"></i>
                             {getDisplayName(project?.applicant, 'name')}
                         </span>

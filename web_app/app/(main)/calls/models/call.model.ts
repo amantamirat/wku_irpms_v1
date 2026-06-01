@@ -1,6 +1,7 @@
 import { Calendar } from "../../calendars/models/calendar.model";
 import { GrantAllocation } from "../../grants/allocations/models/grant.allocation.model";
 import { Grant } from "../../grants/models/grant.model";
+import { GrantStage } from "../../grants/stages/models/grant.stage.model";
 import { Organization } from "../../organizations/models/organization.model";
 
 export enum CallStatus {
@@ -10,6 +11,7 @@ export enum CallStatus {
 }
 
 export type CallDeadline = {
+    grantStage: string | GrantStage;
     submission: string | Date;
     evaluation: string | Date;
 };
@@ -68,7 +70,17 @@ export const sanitizeCall = (call: Partial<Call>): Partial<Call> => {
         sanitized.organization = sanitized.organization._id;
     }
 
-    // 3. Ensure optional fields are handled correctly
+    if (Array.isArray(sanitized.deadlines)) {
+        sanitized.deadlines = sanitized.deadlines.map((deadline: any) => ({
+            ...deadline,
+            grantStage:
+                typeof deadline.grantStage === "object" &&
+                    deadline.grantStage !== null
+                    ? deadline.grantStage._id
+                    : deadline.grantStage
+        }));
+    }
+
     if (sanitized.description === "") {
         sanitized.description = null;
     }

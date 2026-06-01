@@ -5,8 +5,9 @@ import { ProjectStageStatus } from "./project.stage.model";
 export interface GetProjectStageDTO {
     project?: string;
     grantStage?: string;
-    grantAllocation?: string;
-    callStage?: string;
+    call?: string;
+    //grantAllocation?: string;
+    //callStage?: string;
     status?: ProjectStageStatus;
     populate?: boolean;
     skip?: number;

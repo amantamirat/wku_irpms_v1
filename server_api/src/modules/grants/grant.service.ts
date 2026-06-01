@@ -25,9 +25,8 @@ export class GrantService {
         private readonly constraintRepo: IConstraintRepository,
         private readonly compositionRepo: ICompositionRepository,
         private readonly grantStageRepo: IGrantStageRepository,
-        private readonly allocationRepo: IGrantAllocationRepository,
-        private readonly callRepo: ICallRepository = new CallRepository(),
-        private readonly projectRepo: IProjectRepository = new ProjectRepository(),
+        private readonly callRepo: ICallRepository,
+        private readonly projectRepo: IProjectRepository,
     ) { }
 
     async create(dto: CreateGrantDTO) {

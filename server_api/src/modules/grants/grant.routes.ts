@@ -10,6 +10,8 @@ import { GrantController } from './grant.controller';
 import { GrantRepository } from './grant.repository';
 import { GrantService } from './grant.service';
 import { GrantStageRepository, IGrantStageRepository } from './stages/grant.stage.repository';
+import { CallRepository } from '../calls/call.repository';
+import { ProjectRepository } from '../projects/project.repository';
 
 const repository: GrantRepository = new GrantRepository();
 const organizationRepo: IOrganizationRepository = new OrganizationRepository();
@@ -17,10 +19,11 @@ const thematicRepository: IThematicRepository = new ThematicRepository();
 const constraintRepo: IConstraintRepository = new ConstraintRepository();
 const compositionRepo: ICompositionRepository = new CompositionRepository();
 const grantStageRepo: IGrantStageRepository = new GrantStageRepository();
-const allocationRepo = new GrantAllocationRepository()
+const callRepo = new CallRepository();
+const projectRepo = new ProjectRepository();
 
 const service = new GrantService(repository, organizationRepo, thematicRepository, constraintRepo,
-  compositionRepo, grantStageRepo, allocationRepo
+  compositionRepo, grantStageRepo, callRepo, projectRepo
 );
 const controller = new GrantController(service);
 const router = Router();

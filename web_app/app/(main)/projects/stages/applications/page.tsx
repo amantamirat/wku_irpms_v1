@@ -8,32 +8,35 @@ import { Dropdown } from 'primereact/dropdown';
 import { TabPanel, TabView } from 'primereact/tabview';
 import { useEffect, useState } from "react";
 import ProjectStageManager from '../components/ProjectStageManager';
+import { etbCurrencyFormatter, Grant } from '@/app/(main)/grants/models/grant.model';
+import { GrantApi } from '@/app/(main)/grants/api/grant.api';
+import { GrantStatus } from '@/app/(main)/grants/models/grant.state-machine';
 
 const Page = () => {
-    const [allocations, setAllocations] = useState<GrantAllocation[]>([]);
-    const [selectedAlloc, setSelectedAlloc] = useState<GrantAllocation | null>(null);
+    const [grants, setGrants] = useState<Grant[]>([]);
+    const [selectedGrant, setSelectedGrant] = useState<Grant | null>(null);
     const [grantStages, setGrantStages] = useState<GrantStage[]>([]);
     const [activeIndex, setActiveIndex] = useState(0);
 
     useEffect(() => {
-        const fetchAlloc = async () => {
-            const data = await GrantAllocationApi.getAll({ populate: true });
-            setAllocations(data);
-            if (data?.length) setSelectedAlloc(data[0]);
+        const fetchGrant = async () => {
+            const data = await GrantApi.getAll({ status: GrantStatus.active, populate: true });
+            setGrants(data);
+            if (data?.length) setSelectedGrant(data[0]);
         };
-        fetchAlloc();
+        fetchGrant();
     }, []);
 
     useEffect(() => {
-        if (selectedAlloc) {
+        if (selectedGrant) {
             const fetchStages = async () => {
-                const data = await GrantStageApi.getAll({ grant: selectedAlloc.grant });
+                const data = await GrantStageApi.getAll({ grant: selectedGrant });
                 setGrantStages(data);
                 setActiveIndex(0);
             };
             fetchStages();
         }
-    }, [selectedAlloc]);
+    }, [selectedGrant]);
 
     return (
         <div className="p-4 md:p-5 surface-ground min-h-screen">
@@ -53,26 +56,24 @@ const Page = () => {
 
                 <div className="flex flex-column gap-2">
                     <label className="text-700 font-medium text-sm">
-                        Select Grant Allocation
+                        Select Grant Source
                     </label>
 
                     <Dropdown
-                        value={selectedAlloc}
-                        options={allocations}
-                        onChange={(e) => setSelectedAlloc(e.value)}
-                        itemTemplate={allocationOptionTemplate}
-                        valueTemplate={allocationOptionTemplate}
-                        optionLabel="grant.title"
-                        placeholder="Choose allocation..."
+                        value={selectedGrant}
+                        options={grants}
+                        onChange={(e) => setSelectedGrant(e.value)}
+                        optionLabel="title"
+                        placeholder="Choose grant..."
                         className="w-full md:w-20rem"
                         showClear
                     />
                 </div>
 
-                {selectedAlloc && (
+                {selectedGrant && (
                     <div className="text-right">
                         <div className="text-900 font-semibold">
-                            {getAllocationLabel(selectedAlloc)}
+                            {selectedGrant.title}({etbCurrencyFormatter.format(selectedGrant.amount)})
                         </div>
                         <div className="text-500 text-sm">
                             Active Workflow
@@ -84,7 +85,7 @@ const Page = () => {
             {/* MAIN CONTENT */}
             <div className="border-round-xl shadow-1 p-4 md:p-5">
 
-                {selectedAlloc ? (
+                {selectedGrant ? (
                     grantStages.length > 0 ? (
                         <>
                             {/* SECTION TITLE */}
@@ -119,9 +120,9 @@ const Page = () => {
                                         <div className="mt-3">
                                             <ProjectStageManager
                                                 grantStage={stage}
-                                                grantAllocation={selectedAlloc}
+                                                //grantAllocation={selectedGrant}
                                                 hideReviewer={false}
-                                                //hideDeleteAction={true}
+                                            //hideDeleteAction={true}
                                             />
                                         </div>
                                     </TabPanel>

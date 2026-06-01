@@ -4,9 +4,6 @@ import { Project } from "../../models/project.model";
 
 export enum ProjectStageStatus {
     submitted = 'submitted',
-    //shortlisted = 'shortlisted',
-    //refused = 'refused',
-    //reviewed = 'reviewed',
     accepted = 'accepted',
     rejected = 'rejected'
 }
@@ -15,7 +12,7 @@ export type ProjectStage = {
     _id?: string;
     project: string | Project;
     grantStage?: string | GrantStage;
-    callStage?: string | CallStage;
+    //callStage?: string | CallStage;
     documentPath?: string;
     file?: File;
     totalScore?: number | null;
@@ -29,8 +26,8 @@ export type ProjectStage = {
 export interface GetProjectStageOptions {
     project?: string | Project;
     grantStage?: string | GrantStage;
-    callStage?: string | CallStage;
-    grantAllocation?: string;
+   // callStage?: string | CallStage;
+    //grantAllocation?: string;
     status?: ProjectStageStatus;
     populate?: boolean;
 }

@@ -26,6 +26,7 @@ export enum COLLECTIONS {
   OPTION = "options",
   CALENDAR = "calendars",
   CALL = "calls",
+  VERIFICATION = "verifications",
   CALL_STAGE = "callstages",
 
   PROJECT = "projects",

@@ -27,6 +27,7 @@ export const ProjectStageApi: EntityApi<ProjectStage, GetProjectStageOptions | u
                 query.append("grantStage", sanitized.grantStage as string);
             }
 
+            /*
             if (options.grantAllocation) {
                 query.append("grantAllocation", options.grantAllocation);
             }
@@ -34,6 +35,7 @@ export const ProjectStageApi: EntityApi<ProjectStage, GetProjectStageOptions | u
             if (options.callStage) {
                 query.append("callStage", sanitized.callStage as string);
             }
+                */
 
             if (options.status) {
                 query.append("status", sanitized.status as string);

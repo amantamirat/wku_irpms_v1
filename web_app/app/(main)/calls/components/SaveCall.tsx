@@ -7,7 +7,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { InputNumber } from 'primereact/inputnumber';
-import { Calendar as PrimeCalendar } from 'primereact/calendar'; // Imported Calendar for date selection
+import { Calendar as PrimeCalendar } from 'primereact/calendar';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
@@ -23,8 +23,7 @@ import { GrantStatus } from '../../grants/models/grant.state-machine';
 import { GrantStage, StageCategory } from '../../grants/stages/models/grant.stage.model';
 import { GrantStageApi } from '../../grants/stages/api/grant.stage.api';
 
-
-// Extend local state type to keep track of stage names for rendering
+// Extend local state type to keep track of stage names for rendering while keeping grantStage intact
 interface LocalDeadline extends CallDeadline {
     stageName: string;
 }
@@ -43,6 +42,12 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
 
     const isGrantPredefined = !!item.grant;
     const isCalendarPredefined = !!item.calendar;
+
+    // Helper to extract string ID from potentially populated objects
+    const getTargetId = (target: any): string | undefined => {
+        if (!target) return undefined;
+        return typeof target === 'object' ? target._id : target;
+    };
 
     // 1. Load dynamic options for Calendars and Grants
     useEffect(() => {
@@ -81,8 +86,7 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
         if (!visible) return;
 
         const fetchStagesAndSyncDeadlines = async () => {
-            const currentGrant = localCall.grant;
-            const grantId = typeof currentGrant === 'object' ? currentGrant?._id : currentGrant;
+            const grantId = getTargetId(localCall.grant);
 
             if (!grantId) {
                 setFormDeadlines([]);
@@ -97,12 +101,16 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
                 });
 
                 // Sort by order to keep the timeline chronological
-                const sortedStages = stages.sort((a, b) => a.order! - b.order!);
+                const sortedStages = stages.sort((a, b) => (a.order || 0) - (b.order || 0));
 
-                // Map stages into deadline forms. If editing, preserve existing values by index matching.
-                const mappedDeadlines: LocalDeadline[] = sortedStages.map((stage, idx) => {
-                    const existingDeadline = localCall.deadlines?.[idx];
+                // Map stages into deadline forms matching by grantStage identifier
+                const mappedDeadlines: LocalDeadline[] = sortedStages.map((stage) => {
+                    const existingDeadline = localCall.deadlines?.find(
+                        d => getTargetId(d.grantStage) === stage._id
+                    );
+
                     return {
+                        grantStage: stage, // Keeps full object or change to stage._id depending on API preference
                         stageName: stage.name,
                         submission: existingDeadline?.submission ? new Date(existingDeadline.submission) : null as any,
                         evaluation: existingDeadline?.evaluation ? new Date(existingDeadline.evaluation) : null as any,
@@ -128,10 +136,14 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
         updated[index] = { ...updated[index], [field]: value || (null as any) };
         setFormDeadlines(updated);
 
-        // Sync back to localCall object
+        // Sync back to localCall object matches your new CallDeadline structure
         setLocalCall(prev => ({
             ...prev,
-            deadlines: updated.map(({ submission, evaluation }) => ({ submission, evaluation }))
+            deadlines: updated.map(({ grantStage, submission, evaluation }) => ({ 
+                grantStage, 
+                submission, 
+                evaluation 
+            }))
         }));
     };
 
@@ -154,12 +166,12 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
 
             // Validate that all deadlines are filled and chronologically sound
             for (let i = 0; i < formDeadlines.length; i++) {
-                const item = formDeadlines[i];
-                if (!item.submission || !item.evaluation) {
-                    throw new Error(`Please fill out both submission and evaluation deadlines for stage: "${item.stageName}"`);
+                const deadlineItem = formDeadlines[i];
+                if (!deadlineItem.submission || !deadlineItem.evaluation) {
+                    throw new Error(`Please fill out both submission and evaluation deadlines for stage: "${deadlineItem.stageName}"`);
                 }
-                if (new Date(item.submission) >= new Date(item.evaluation)) {
-                    throw new Error(`In "${item.stageName}", submission deadline must be earlier than the evaluation deadline.`);
+                if (new Date(deadlineItem.submission) >= new Date(deadlineItem.evaluation)) {
+                    throw new Error(`In "${deadlineItem.stageName}", submission deadline must be earlier than the evaluation deadline.`);
                 }
             }
 
@@ -208,7 +220,7 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
             <Toast ref={toast} />
             <Dialog
                 visible={visible}
-                style={{ width: '600px' }} // Increased width slightly to fit twin date pickers beautifully
+                style={{ width: '600px' }}
                 header={localCall._id ? 'Edit Call' : 'New Strategic Call'}
                 modal
                 className="p-fluid"
@@ -297,14 +309,12 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
                 {/* Dynamic Selection Stage Deadlines Section */}
                 {formDeadlines.length > 0 && (
                     <div className="field mt-4">
-                        {/* Changed h4 to a clean, uppercase label style */}
                         <div className="text-sm font-bold uppercase tracking-wider text-600 border-bottom-1 surface-border pb-2 mb-3">
                             Required Stage Deadlines ({formDeadlines.length})
                         </div>
 
                         {formDeadlines.map((deadline, index) => (
                             <div key={index} className="surface-card p-3 border-round border-1 surface-border mb-3 shadow-1">
-                                {/* Changed h5 to a standard text-base element with slightly dialed-back text color weights */}
                                 <div className="text-base font-bold text-primary-600 mb-3">
                                     {index + 1}. Stage: {deadline.stageName}
                                 </div>
@@ -337,6 +347,7 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
                         ))}
                     </div>
                 )}
+                
                 {/* Description */}
                 <div className="field">
                     <label htmlFor="description" className="font-bold">Description / Instructions</label>

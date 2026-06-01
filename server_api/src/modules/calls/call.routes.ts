@@ -7,12 +7,17 @@ import { CallController } from './call.controller';
 import { CallRepository } from './call.repository';
 import { CallService } from './call.service';
 import { CallStageRepository } from './stages/call.stage.repository';
+import { GrantRepository } from '../grants/grant.repository';
+import { CalendarRepository } from '../calendar/calendar.repository';
+import { ProjectRepository } from '../projects/project.repository';
 
 const repository = new CallRepository();
-const grantAllocRepo = new GrantAllocationRepository();
+const grantRepo = new GrantRepository();
 const grantStageRepo = new GrantStageRepository();
-const callStageRepo = new CallStageRepository();
-const service = new CallService(repository, grantAllocRepo, grantStageRepo, callStageRepo);
+const calendarRepo = new CalendarRepository();
+const projectRepo =  new ProjectRepository();
+
+const service = new CallService(repository, grantRepo, grantStageRepo, calendarRepo, projectRepo);
 const controller = new CallController(service);
 const router = Router();
 
