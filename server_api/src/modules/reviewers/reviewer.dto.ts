@@ -1,14 +1,14 @@
 
 // reviewer.dto.ts
 export interface GetReviewersDTO {
-    projectStage?: string;
+    projectApplication?: string;
     reviewer?: string;
     populate?: boolean;
     status?: string | string[]; // Add this
 }
 
 export interface CreateReviewerDTO {
-    projectStage: string;
+    projectApplication: string;
     reviewer: string;
     weight: number;
     userId?: string;
@@ -27,6 +27,6 @@ export interface UpdateReviewerDTO {
 
 export interface ExistsReviewersDTO {
     reviewer?: string;
-    projectStage?: string;
+    projectApplication?: string;
 }
 

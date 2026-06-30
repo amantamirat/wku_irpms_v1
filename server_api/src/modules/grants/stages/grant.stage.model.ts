@@ -21,9 +21,8 @@ export interface IGrantStage extends Document {
 
     minReviewers: number;
     maxReviewers: number;
-
-    //decisionMode: DecisionMode;
     minAcceptanceScore: number;
+    verificationDeadline?: Date; // ✅ NEW
 
     createdAt?: Date;
     updatedAt?: Date;
@@ -51,7 +50,7 @@ const GrantStageSchema = new Schema<IGrantStage>(
             type: String,
             enum: Object.values(StageCategory),
             default: StageCategory.selection,
-            immutable:true
+            immutable: true
         },
         evaluation: {
             type: Schema.Types.ObjectId,
@@ -73,13 +72,6 @@ const GrantStageSchema = new Schema<IGrantStage>(
             max: 10,
             default: 3,
         },
-        /*
-        decisionMode: {
-            type: String,
-            enum: Object.values(DecisionMode),
-            default: DecisionMode.MANUAL,
-        },
-        */
         minAcceptanceScore: {
             type: Number,
             min: 0,
@@ -87,6 +79,10 @@ const GrantStageSchema = new Schema<IGrantStage>(
             default: 50,
             required: true
         },
+        // ✅ NEW FIELD
+        verificationDeadline: {
+            type: Date
+        }
     },
     { timestamps: true }
 );

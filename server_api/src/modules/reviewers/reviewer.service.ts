@@ -35,22 +35,22 @@ export class ReviewerService {
     }
 
     async create(dto: CreateReviewerDTO) {
-        const { projectStage, reviewer, weight } = dto;
+        const { projectApplication, reviewer, weight } = dto;
 
-        const projectStageDoc = await this.projectStageRepo.findById(projectStage, {
+        const projectStageDoc = await this.projectStageRepo.findById(projectApplication, {
             populate: {
                 grantStage: true,
                 project: true
             }
         });
-        if (!projectStageDoc) throw new AppError(ERROR_CODES.PROJECT_STAGE_NOT_FOUND);
+        if (!projectStageDoc) throw new AppError(ERROR_CODES.PROJECT_APPLICATION_NOT_FOUND);
 
         const projectStageStatus = projectStageDoc.status;
         if (projectStageStatus !== ApplicationStatus.submitted)
             throw new AppError(ERROR_CODES.INVALID_DOC_STATUS);
 
         const grantStageDoc = projectStageDoc.grantStage as unknown as IGrantStage;
-        const countReviewers = await this.repository.countByProjectStage(projectStage);
+        const countReviewers = await this.repository.countByProjectStage(projectApplication);
         const maxReviewers = grantStageDoc.maxReviewers;
         if (maxReviewers !== undefined && countReviewers >= maxReviewers) {
             throw new AppError(ERROR_CODES.REVIEWER_LIMIT_REACHED, `Reviewer limit reached. Maximum allowed is ${maxReviewers}.`);
@@ -108,12 +108,12 @@ export class ReviewerService {
         }
 
 
-        const projectStageDoc = await this.projectStageRepo.findById(String(reviewerDoc.projectStage), {
+        const projectStageDoc = await this.projectStageRepo.findById(String(reviewerDoc.projectApplication), {
             populate: {
                 grantStage: true
             }
         });
-        if (!projectStageDoc) throw new AppError(ERROR_CODES.PROJECT_STAGE_NOT_FOUND);
+        if (!projectStageDoc) throw new AppError(ERROR_CODES.PROJECT_APPLICATION_NOT_FOUND);
 
         if (projectStageDoc.status !== ApplicationStatus.submitted
         ) {

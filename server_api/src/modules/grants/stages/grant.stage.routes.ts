@@ -20,6 +20,15 @@ router.post(
     controller.create
 );
 
+//Move the specific route before /:id:
+router.get(
+    '/upcoming-verifications',
+    verifyActiveAccount,
+    //checkPermission(["grant.stage:read"]),
+    controller.getUpcomingVerification
+);
+
+
 router.get('/:id', verifyActiveAccount,
     checkPermission(["grant.stage:read"]),
     controller.getById
@@ -32,6 +41,7 @@ router.get(
     checkPermission(["grant.stage:read"]),
     controller.get
 );
+
 
 // Update 
 router.put(

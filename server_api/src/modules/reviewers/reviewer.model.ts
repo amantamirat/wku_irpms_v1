@@ -4,7 +4,7 @@ import { ReviewerStatus } from "./reviewer.state-machine";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
 
 export interface IReviewer extends Document {
-    projectStage: mongoose.Types.ObjectId;
+    projectApplication: mongoose.Types.ObjectId;
     reviewer: mongoose.Types.ObjectId;
     score?: number;
     weight?: number;
@@ -14,7 +14,7 @@ export interface IReviewer extends Document {
 }
 
 const ReviewerSchema = new Schema<IReviewer>({
-    projectStage: {
+    projectApplication: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.PROJECT_APPLICATION,
         required: true,
@@ -43,5 +43,5 @@ const ReviewerSchema = new Schema<IReviewer>({
     },
 }, { timestamps: true });
 
-ReviewerSchema.index({ projectStage: 1, reviewer: 1 }, { unique: true });
+ReviewerSchema.index({ projectApplication: 1, reviewer: 1 }, { unique: true });
 export const Reviewer = model<IReviewer>(COLLECTIONS.REVIEWER, ReviewerSchema);

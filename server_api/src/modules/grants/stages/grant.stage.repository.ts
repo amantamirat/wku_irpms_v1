@@ -6,6 +6,7 @@ export interface IGrantStageRepository {
     findById(id: string, session?: ClientSession): Promise<IGrantStage | null>;
     find(filters: GetStageDTO): Promise<IGrantStage[]>;
     findOne(grantId: string, order: number, session?: ClientSession): Promise<IGrantStage | null>;
+    findUpcomingVerifications(grantId?: string): Promise<IGrantStage[]>;
     create(dto: CreateStageDTO): Promise<IGrantStage>;
     update(id: string, data: UpdateStageDTO["data"]): Promise<IGrantStage | null>;
     updateMany(filter: any, update: any): Promise<any>;
@@ -75,6 +76,29 @@ export class GrantStageRepository implements IGrantStageRepository {
             .exec();
     }
 
+
+    async findUpcomingVerifications(
+        grantId?: string
+    ): Promise<IGrantStage[]> {
+
+        const query: any = {
+            category: StageCategory.verification,
+            verificationDeadline: {
+                $gte: new Date()
+            }
+        };
+
+        if (grantId) {
+            query.grant = new mongoose.Types.ObjectId(grantId);
+        }
+
+        return GrantStage.find(query)
+            .sort({ verificationDeadline: 1 })
+            .populate('grant')
+            .lean<IGrantStage[]>()
+            .exec();
+    }
+
     async create(dto: CreateStageDTO) {
         return GrantStage.create({
             ...dto, grant: new mongoose.Types.ObjectId(dto.grant),
@@ -106,21 +130,16 @@ export class GrantStageRepository implements IGrantStageRepository {
             updateData.maxReviewers = dtoData.maxReviewers;
         }
 
-        /*
-        if (dtoData.decisionMode !== undefined) {
-            updateData.decisionMode = dtoData.decisionMode;
-        }*/
-
         // NEW: acceptance threshold
         if (dtoData.minAcceptanceScore !== undefined) {
             updateData.minAcceptanceScore = dtoData.minAcceptanceScore;
         }
 
-        /*
-        if (dtoData.evaluation !== undefined) {
-            updateData.evaluation = new mongoose.Types.ObjectId(dtoData.evaluation);
+
+        if (dtoData.verificationDeadline !== undefined) {
+            updateData.verificationDeadline = dtoData.verificationDeadline;
         }
-        */
+
 
         return GrantStage.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),

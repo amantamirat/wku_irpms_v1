@@ -7,6 +7,7 @@ import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
+import { Calendar } from 'primereact/calendar'; // <-- Added Calendar import
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState, useMemo } from 'react';
@@ -24,6 +25,7 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
         ...item,
         category: item.category ?? StageCategory.selection,
         minAcceptanceScore: item.minAcceptanceScore ?? 0,
+        verificationDeadline: item.verificationDeadline ? new Date(item.verificationDeadline) : undefined, // <-- Handle initial date conversion
     });
 
     const [submitted, setSubmitted] = useState(false);
@@ -58,6 +60,7 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
             ...item,
             category: item.category ?? StageCategory.selection,
             minAcceptanceScore: item.minAcceptanceScore ?? 0,
+            verificationDeadline: item.verificationDeadline ? new Date(item.verificationDeadline) : undefined, // <-- Keep sync on item change
         });
     }, [item]);
 
@@ -71,6 +74,7 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
             ...item,
             category: StageCategory.selection,
             minAcceptanceScore: 0,
+            verificationDeadline: undefined, // <-- Clear deadline
         });
     };
 
@@ -81,6 +85,11 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
             // 1. Custom Weight Validation
             if (localStage.minAcceptanceScore > maxPossibleScore) {
                 throw new Error(`Min Acceptance Score cannot exceed the Evaluation weight (${maxPossibleScore})`);
+            }
+
+            // Optional: You can add front-end validation for missing deadline if category is verification
+            if (localStage.category === StageCategory.verification && !localStage.verificationDeadline) {
+                throw new Error('Verification Deadline is required for Verification stages.');
             }
 
             const validation = validateGrantStage(localStage);
@@ -148,6 +157,39 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                     )}
                 </div>
 
+                {/* Category Mode */}
+                <div className="field">
+                    <label className="font-bold">Category</label>
+                    <Dropdown
+                        value={localStage.category}
+                        options={[
+                            { label: 'Selection', value: StageCategory.selection },
+                            { label: 'Verification', value: StageCategory.verification },
+                        ]}
+                        onChange={(e) => {
+                            const nextCategory = e.value;
+                            setLocalStage((p) => {
+                                // Determine the automatic name based on the chosen category
+                                let updatedName = p.name;
+
+                                if (nextCategory === StageCategory.verification) {
+                                    updatedName = 'Verification';
+                                } else if (nextCategory === StageCategory.selection && p.name === 'Verification') {
+                                    // Reset it if they switch back to Selection and the name was still "Verification"
+                                    updatedName = '';
+                                }
+
+                                return {
+                                    ...p,
+                                    category: nextCategory,
+                                    name: updatedName
+                                };
+                            });
+                        }}
+                        disabled={!!localStage._id}
+                    />
+                </div>
+
                 {/* Name */}
                 <div className="field">
                     <label className="font-bold">Stage Name</label>
@@ -174,7 +216,6 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                                 setLocalStage((p) => ({
                                     ...p,
                                     evaluation: e.value,
-                                    // Reset score if it exceeds new evaluation weight
                                     minAcceptanceScore: p.minAcceptanceScore > (e.value?.weight || 100) ? 0 : p.minAcceptanceScore
                                 }));
                             }}
@@ -200,24 +241,7 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                     </div>
                 </div>
 
-                {/* Category Mode */}
-                {
-                    <div className="field">
-                        <label className="font-bold">Category</label>
-                        <Dropdown
-                            value={localStage.category}
-                            options={[
-                                { label: 'Selection', value: StageCategory.selection },
-                                { label: 'Verification', value: StageCategory.verification },
-                            ]}
-                            onChange={(e) => setLocalStage((p) => ({ ...p, category: e.value }))}
-                        />
-                    </div>
-
-                }
-
-
-                {/* Min Acceptance Score - Now visible in both modes */}
+                {/* Min Acceptance Score */}
                 <div className="field">
                     <label className="font-bold">
                         Min Acceptance Score {localStage.evaluation && `(Max: ${maxPossibleScore})`}
@@ -238,6 +262,23 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                         <small className="p-error">Score cannot exceed {maxPossibleScore}</small>
                     )}
                 </div>
+
+                {/* Verification Deadline - Only shows when category is 'verification' */}
+                {localStage.category === StageCategory.verification && (
+                    <div className="field">
+                        <label className="font-bold">Verification Deadline</label>
+                        <Calendar
+                            value={localStage.verificationDeadline}
+                            onChange={(e) => setLocalStage((p) => ({ ...p, verificationDeadline: e.value as Date }))}
+                            showIcon
+                            placeholder="Select a Deadline Date"
+                            className={classNames({ 'p-invalid': submitted && !localStage.verificationDeadline })}
+                        />
+                        {submitted && !localStage.verificationDeadline && (
+                            <small className="p-error">Verification deadline is required.</small>
+                        )}
+                    </div>
+                )}
             </Dialog>
         </>
     );

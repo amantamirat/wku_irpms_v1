@@ -125,6 +125,7 @@ const PORT = process.env.SERVER_PORT || 5000;
 
     const seedService = new SeedService();
     await seedService.runAllSeeds();
+    //await seedService.seedUsers();
 
     // 2. Create the HTTP server explicitly using your Express app
     const httpServer = http.createServer(app);

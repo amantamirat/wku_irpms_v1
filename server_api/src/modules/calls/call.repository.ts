@@ -54,6 +54,9 @@ export class CallRepository implements ICallRepository {
             dbQuery = dbQuery.populate("grant");
             dbQuery = dbQuery.populate("calendar");
             dbQuery = dbQuery.populate("organization");
+            dbQuery = dbQuery.populate({
+                path: "deadlines.grantStage"
+            });
         }
 
         return dbQuery.lean<ICall[]>().exec();

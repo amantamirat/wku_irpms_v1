@@ -200,7 +200,7 @@ const ProjectApplicationManager = ({ project, grantStage, callStage, hideReviewe
                 transitions: PROJECT_STAGE_TRANSITIONS
             },
             expandable: {
-                template: (ps) => <ProjectStageDetail projectStage={ps} hideReviewer={hideReviewer} />
+                template: (ps) => <ProjectStageDetail projectApplication={ps} hideReviewer={hideReviewer} />
             },
             extraActions: [
                 {

@@ -22,6 +22,7 @@ export interface UpdateStageDTO {
         minReviewers: number;
         maxReviewers: number;
         minAcceptanceScore: number;
+        verificationDeadline: Date;
     }>;
 }
 

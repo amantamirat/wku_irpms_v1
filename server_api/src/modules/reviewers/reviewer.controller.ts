@@ -23,10 +23,10 @@ export class ReviewerController {
         try {
             if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
-            const { projectStage, reviewer, weight } = req.body;
+            const { projectApplication, reviewer, weight } = req.body;
 
             const dto: CreateReviewerDTO = {
-                projectStage,
+                projectApplication,
                 reviewer,
                 weight,
                 userId: req.auth.userId
@@ -43,10 +43,10 @@ export class ReviewerController {
     // -----------------------
     get = async (req: Request, res: Response) => {
         try {
-            const { projectStage, reviewer, populate, status } = req.query;
+            const { projectApplication, reviewer, populate, status } = req.query;
 
             const filter: GetReviewersDTO = {
-                projectStage: projectStage ? String(projectStage) : undefined,
+                projectApplication: projectApplication ? String(projectApplication) : undefined,
                 reviewer: reviewer ? String(reviewer) : undefined,
                 ...(populate !== undefined && { populate: populate === "true" }),
 

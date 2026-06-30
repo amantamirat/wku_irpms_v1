@@ -13,6 +13,14 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ProjectApplicationApi } from '../api/project.stage.api';
 import { ProjectApplication, sanitizeProjectApplication, validateProjectApplication } from '../models/project.application.model';
 
+// Assuming Project type has a 'title' or 'name' property based on your requirements
+interface Project {
+    _id: string;
+    title?: string;
+    name?: string;
+    [key: string]: any;
+}
+
 const SaveProjectApplication = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<ProjectApplication>) => {
     const toast = useRef<Toast>(null);
     const [localStage, setLocalStage] = useState<Partial<ProjectApplication>>({ ...item });
@@ -24,6 +32,12 @@ const SaveProjectApplication = ({ visible, item, onHide, onComplete }: EntitySav
         const gs = localStage.grantStage;
         return (typeof gs === 'object' && gs !== null) ? (gs as GrantStage) : null;
     }, [localStage.grantStage]);
+
+    // Memoize the Project object to display its title if available
+    const projectInfo = useMemo(() => {
+        const proj = localStage.project;
+        return (typeof proj === 'object' && proj !== null) ? (proj as Project) : null;
+    }, [localStage.project]);
 
     useEffect(() => {
         if (visible) {
@@ -92,7 +106,13 @@ const SaveProjectApplication = ({ visible, item, onHide, onComplete }: EntitySav
                             <span className="font-bold text-xl">
                                 {localStage._id ? 'Edit Submission' : (stageInfo?.name || 'New Submission')}
                             </span>
-                            <small className="text-500 font-medium">Step {stageInfo?.order ?? 'N/A'} of the Grant Process</small>
+                            {/* Project Title Display */}
+                            {projectInfo && (
+                                <span className="text-sm font-semibold text-700 mt-1">
+                                    Project: {projectInfo.title || projectInfo.name || 'Untitled Project'}
+                                </span>
+                            )}
+                            <small className="text-500 font-medium mt-1">Step {stageInfo?.order ?? 'N/A'} of the Grant Process</small>
                         </div>
                     </div>
                 }

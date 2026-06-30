@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
-import { Reviewer, IReviewer } from "./reviewer.model";
 import { CreateReviewerDTO, ExistsReviewersDTO, GetReviewersDTO, UpdateReviewerDTO } from "./reviewer.dto";
+import { IReviewer, Reviewer } from "./reviewer.model";
 import { ReviewerStatus } from "./reviewer.state-machine";
-import { ApplicationStatus } from "../projects/applications/project.application.model";
 
 export interface IReviewerRepository {
     findById(id: string): Promise<IReviewer | null>;
@@ -25,8 +24,8 @@ export class ReviewerRepository implements IReviewerRepository {
     async find(options: GetReviewersDTO) {
         const query: any = {};
 
-        if (options.projectStage) {
-            query.projectStage = new mongoose.Types.ObjectId(options.projectStage);
+        if (options.projectApplication) {
+            query.projectStage = new mongoose.Types.ObjectId(options.projectApplication);
         }
 
         if (options.reviewer) {
@@ -51,7 +50,7 @@ export class ReviewerRepository implements IReviewerRepository {
                 path: 'reviewer'
             });
             reviewerQuery = reviewerQuery.populate({
-                path: "projectStage",
+                path: "projectApplication",
                 populate: {
                     path: "grantStage project",
                 },
@@ -64,7 +63,7 @@ export class ReviewerRepository implements IReviewerRepository {
 
     async create(dto: CreateReviewerDTO) {
         const data: Partial<IReviewer> = {
-            projectStage: new mongoose.Types.ObjectId(dto.projectStage),
+            projectApplication: new mongoose.Types.ObjectId(dto.projectApplication),
             reviewer: new mongoose.Types.ObjectId(dto.reviewer),
         };
         return Reviewer.create(data);
@@ -99,7 +98,7 @@ export class ReviewerRepository implements IReviewerRepository {
         status?: ReviewerStatus
     ) {
         return Reviewer.countDocuments({
-            projectStage: new mongoose.Types.ObjectId(projectStageId),
+            projectApplication: new mongoose.Types.ObjectId(projectStageId),
             ...(status !== undefined && { status }),
         });
     }
@@ -108,8 +107,8 @@ export class ReviewerRepository implements IReviewerRepository {
         if (filters.reviewer) {
             query.applicant = new mongoose.Types.ObjectId(filters.reviewer);
         }
-        if (filters.projectStage) {
-            query.projectStage = new mongoose.Types.ObjectId(filters.projectStage);
+        if (filters.projectApplication) {
+            query.projectApplication = new mongoose.Types.ObjectId(filters.projectApplication);
         }
         const result = await Reviewer.exists(query).exec();
         return result !== null;

@@ -28,6 +28,7 @@ export interface ICall extends Document {
 }
 
 const CallDeadlineSchema = new mongoose.Schema({
+    grantStage: { type: Schema.Types.ObjectId, ref: COLLECTIONS.GRANT_STAGE, required: true },
     submission: { type: Date, required: true },
     evaluation: { type: Date, required: true }
 }, { _id: false });

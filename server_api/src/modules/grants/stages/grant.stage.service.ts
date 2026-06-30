@@ -1,12 +1,12 @@
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
+import { CallRepository, ICallRepository } from "../../calls/call.repository";
 import { IEvaluationRepository } from "../../evaluations/evaluation.repository";
 import { EvalStatus } from "../../evaluations/evaluation.state-machine";
 import { GrantStatus } from "../grant.model";
 import { IGrantRepository } from "../grant.repository";
 import { CreateStageDTO, GetStageDTO, UpdateStageDTO } from "./grant.stage.dto";
 import { StageCategory } from "./grant.stage.model";
-//import { DecisionMode } from "./grant.stage.model";
 import { IGrantStageRepository } from "./grant.stage.repository";
 
 export class GrantStageService {
@@ -61,7 +61,7 @@ export class GrantStageService {
         try {
             let nextOrder = 0;
             if (category === StageCategory.selection) {
-                const stages = await this.repository.countStages(grant, category);
+                const stages = await this.repository.countStages(grant, StageCategory.selection);
                 nextOrder = stages + 1;
             }
             const stage = await this.repository.create({
@@ -84,14 +84,22 @@ export class GrantStageService {
         return await this.repository.find(dto);
     }
 
+
+    /**
+     * Get all stages or by call
+     */
+    async getUpcomingVerification() {
+        return await this.repository.findUpcomingVerifications();
+    }
+
     async getById(id: string) {
         const stage = await this.repository.findById(id);
         if (!stage) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
         return stage;
     }
     /**
-     * Update a stage
-     */
+ * Update a stage
+ */
     async update(dto: UpdateStageDTO) {
         const { id, data } = dto;
 
@@ -101,7 +109,15 @@ export class GrantStageService {
             throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
         }
 
-        // 2. Merge existing + incoming values
+        // 2. Ensure this is a verification stage if updating verificationDeadline
+        if (
+            data.verificationDeadline !== undefined &&
+            stageDoc.category !== StageCategory.verification
+        ) {
+            throw new AppError(ERROR_CODES.INVALID_STAGE_CATEGORY);
+        }
+
+        // 3. Merge existing + incoming values
         const minReviewers =
             data.minReviewers ?? stageDoc.minReviewers;
 
@@ -111,12 +127,12 @@ export class GrantStageService {
         const minAcceptanceScore =
             data.minAcceptanceScore ?? stageDoc.minAcceptanceScore;
 
-        // 3. Reviewer validation
+        // 4. Reviewer validation
         if (minReviewers > maxReviewers) {
             throw new AppError(ERROR_CODES.INVALID_REVIEWER_RANGE);
         }
 
-        // 4. Evaluation validation
+        // 5. Evaluation validation
         const evalDoc = await this.evalRepository.findById(
             stageDoc.evaluation.toString()
         );
@@ -125,15 +141,14 @@ export class GrantStageService {
             throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
         }
 
-        // 5. Minimum score validation
+        // 6. Minimum score validation
         if (minAcceptanceScore > evalDoc.weight) {
             throw new AppError(
                 ERROR_CODES.MIN_SCORE_EXCEEDS_EVALUATION_WEIGHT
             );
         }
 
-        // Optional:
-        // prevent negative values
+        // 7. Prevent negative values
         if (
             minReviewers < 0 ||
             maxReviewers < 0 ||
@@ -142,7 +157,16 @@ export class GrantStageService {
             throw new AppError(ERROR_CODES.INVALID_STAGE_CONFIGURATION);
         }
 
-        // 6. Update
+        // 8. Optional: validate verification deadline
+        if (data.verificationDeadline) {
+            const deadline = new Date(data.verificationDeadline);
+
+            if (deadline.getTime() < Date.now()) {
+                throw new AppError(ERROR_CODES.INVALID_VERIFICATION_DEADLINE);
+            }
+        }
+
+        // 9. Update
         return await this.repository.update(id, data);
     }
 

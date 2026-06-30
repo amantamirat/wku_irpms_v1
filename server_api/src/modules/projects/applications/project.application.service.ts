@@ -164,7 +164,7 @@ export class ProjectApplicationService {
         const grantStageDoc = projStageDoc.grantStage as unknown as IGrantStage;
 
         const approvedReviews = await this.reviewerRepo.find({
-            projectStage: id,
+            projectApplication: id,
             status: ReviewerStatus.approved
         });
 
@@ -339,7 +339,7 @@ export class ProjectApplicationService {
         const project = String(projectStageDoc.project);
         await this.validateProject(project, applicantId ?? "");
 
-        if (await this.reviewerRepo.exist({ projectStage: id })) {
+        if (await this.reviewerRepo.exist({ projectApplication: id })) {
             throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
         }
         const deleted = await this.repository.delete(id);

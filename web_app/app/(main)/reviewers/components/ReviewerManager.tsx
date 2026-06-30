@@ -16,7 +16,7 @@ import EvaluatorManager from "../results/components/evaluator/EvaluatorManager";
 import SaveReviewerDialog from "./SaveReviewerDialog";
 
 interface ReviewerManagerProps {
-    projectStage?: ProjectApplication;
+    projectApplication?: ProjectApplication;
     reviewer?: User;
     status?: ReviewerStatus | ReviewerStatus[];
     reviewers?: Reviewer[];
@@ -26,7 +26,7 @@ interface ReviewerManagerProps {
 }
 
 const ReviewerManager = ({
-    projectStage,
+    projectApplication,
     reviewer,
     status,
     reviewers,
@@ -35,9 +35,9 @@ const ReviewerManager = ({
     hideReviewer,
 }: ReviewerManagerProps) => {
 
-    const canManage = useMemo(() => projectStage && (
-        projectStage.status === ApplicationStatus.submitted
-    ), [projectStage?.status]);
+    const canManage = useMemo(() => projectApplication && (
+        projectApplication.status === ApplicationStatus.submitted
+    ), [projectApplication?.status]);
 
     const { getUser } = useAuth();
     const activeUser = getUser();
@@ -75,19 +75,19 @@ const ReviewerManager = ({
             });
         }
 
-        if (!projectStage) {
+        if (!projectApplication) {
             cols.push({
                 header: "Project",
-                field: "projectStage.project.title",
+                field: "projectApplication.project.title",
                 sortable: true,
                 body: (r: Reviewer) => (
                     <div className="truncate text-sm" style={{ maxWidth: '250px' }}>
                         <span className="mr-1">
-                            {(r.projectStage as any)?.project?.title || "-"}
+                            {(r.projectApplication as any)?.project?.title || "-"}
                         </span>
-                        {(r.projectStage as any)?.grantStage?.name && (
+                        {(r.projectApplication as any)?.grantStage?.name && (
                             <span className="text-gray-500">
-                                [{(r.projectStage as any)?.grantStage?.name}]
+                                [{(r.projectApplication as any)?.grantStage?.name}]
                             </span>
                         )}
                     </div>
@@ -115,14 +115,14 @@ const ReviewerManager = ({
         );
 
         return cols;
-    }, [projectStage, reviewer, activeUser?._id, loadingEval, activeEvaluation]);
+    }, [projectApplication, reviewer, activeUser?._id, loadingEval, activeEvaluation]);
 
     const query = useMemo(() => ({
         reviewer: reviewer?._id,
-        projectStage: projectStage?._id,
+        projectApplication: projectApplication?._id,
         status,
         populate: true
-    }), [reviewer?._id, projectStage?._id, status]);
+    }), [reviewer?._id, projectApplication?._id, status]);
 
     const Manager = useMemo(() =>
         createEntityManager<Reviewer, GetReviewersOptions>({
@@ -137,7 +137,7 @@ const ReviewerManager = ({
 
             createNew: canManage
                 ? (): Reviewer => ({
-                    projectStage,
+                    projectApplication,
                     reviewer: reviewer ?? undefined,
                     weight: 1,
                     status: ReviewerStatus.pending
@@ -172,13 +172,13 @@ const ReviewerManager = ({
                     }
                 },
             ],
-            hideDefaultActions: !projectStage,
+            hideDefaultActions: !projectApplication,
             disableDeleteRow: (row: Reviewer) =>
                 row.status !== ReviewerStatus.pending,
             hideSearch
         }),
         // Added reviewers to the dependency array
-        [columns, projectStage?._id, reviewer?._id, status, query]
+        [columns, projectApplication?._id, reviewer?._id, status, query]
     );
 
     return (
@@ -189,7 +189,7 @@ const ReviewerManager = ({
                 visible={!!activeEvaluation}
                 maximized
                 onHide={() => setActiveEvaluation(null)}
-                header={`Evaluating: ${(activeEvaluation?.reviewer.projectStage as any)?.project?.title || 'Proposal'}`}
+                header={`Evaluating: ${(activeEvaluation?.reviewer.projectApplication as any)?.project?.title || 'Proposal'}`}
                 pt={{
                     root: { className: 'surface-ground' },
                     content: { className: 'p-0' }

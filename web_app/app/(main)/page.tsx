@@ -7,6 +7,7 @@ import DeadlineCalendar from "./dashboard/DeadlineCalendar";
 import QuickLinks from "./dashboard/QuickLinks";
 import PendingEvaluations from "./dashboard/PendingEvaluation";
 import PendingCollaborations from "./dashboard/PendingCollaborations";
+import UpcomingVerifications from "./dashboard/UpcomingVerifications";
 
 
 const Dashboard = () => {
@@ -52,8 +53,8 @@ const Dashboard = () => {
             {/* 🟠 RIGHT COLUMN: Utilities */}
             <div className="col-12 lg:col-4">
                 <div className="card">
-                    <h5>Upcoming Deadlines</h5>
-                    <DeadlineCalendar />
+                    <h5>Upcoming Verfications</h5>
+                    <UpcomingVerifications />
                 </div>
             </div>
 

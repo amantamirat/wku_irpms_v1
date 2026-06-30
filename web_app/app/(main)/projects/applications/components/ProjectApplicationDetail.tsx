@@ -5,11 +5,11 @@ import { ProjectApplication } from "../models/project.application.model";
 import ReviewerManager from "@/app/(main)/reviewers/components/ReviewerManager";
 
 interface ProjectStageDetailProps {
-    projectStage: ProjectApplication;
+    projectApplication: ProjectApplication;
     hideReviewer?: boolean;
 }
 
-const ProjectStageDetail = ({ projectStage, hideReviewer }: ProjectStageDetailProps) => {
+const ProjectStageDetail = ({ projectApplication, hideReviewer }: ProjectStageDetailProps) => {
 
     const { hasPermission } = useAuth();
 
@@ -20,10 +20,10 @@ const ProjectStageDetail = ({ projectStage, hideReviewer }: ProjectStageDetailPr
         {
             header: "Reviewers",
             permission: "reviewer:read",
-            content: <ReviewerManager projectStage={projectStage} hideReviewer={hideReviewer} />
+            content: <ReviewerManager projectApplication={projectApplication} hideReviewer={hideReviewer} />
         },
 
-    ], [projectStage]);
+    ], [projectApplication]);
 
     /**
      * Filter tabs based on permissions

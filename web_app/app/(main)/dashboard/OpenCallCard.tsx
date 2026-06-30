@@ -9,10 +9,12 @@ import { useRouter } from 'next/navigation';
 import { format, differenceInCalendarDays, isPast } from 'date-fns';
 
 // Types
-import { Call } from '../calls/models/call.model';
+import { Call, CallDeadline } from '../calls/models/call.model';
 import { Grant } from '../grants/models/grant.model';
 import { Calendar } from '../calendars/models/calendar.model';
 import { Organization } from '../organizations/models/organization.model';
+import { GrantStage } from '../grants/stages/models/grant.stage.model';
+
 
 interface CallCardProps {
     call: Call;
@@ -22,20 +24,29 @@ interface CallCardProps {
 export const OpenCallCard = ({ call }: CallCardProps) => {
     const router = useRouter();
 
-    // --- Date Logic via date-fns ---
-    const firstDeadlineRaw = call.deadlines?.[0]?.submission;
-    const deadline = firstDeadlineRaw ? new Date(firstDeadlineRaw) : null;
-    const today = new Date();
-
-    // Calculate actual days remaining
-    const daysLeft = deadline ? differenceInCalendarDays(deadline, today) : 0;
-    const isClosed = deadline ? isPast(deadline) && daysLeft < 0 : false;
-    const isUrgent = daysLeft >= 0 && daysLeft < 5;
-
-    // Direct Data Mapping (No intermediate allocation layer)
+    // Direct Data Mapping 
     const grant = call.grant as Grant;
     const calendar = call.calendar as Calendar;
     const organization = call.organization as Organization;
+
+    // --- Chronological Deadline Processing ---
+    // Sort all available deadlines based on their grantStage.order sequence
+    const sortedDeadlines = [...(call.deadlines || [])].sort((a, b) => {
+        const orderA = typeof a.grantStage === 'object' ? (a.grantStage as GrantStage)?.order || 0 : 0;
+        const orderB = typeof b.grantStage === 'object' ? (b.grantStage as GrantStage)?.order || 0 : 0;
+        return orderA - orderB;
+    });
+
+    // Extract Stage 1 (or the earliest chronologically sorted stage available)
+    const primaryDeadlineItem = sortedDeadlines[0];
+    const firstDeadlineRaw = primaryDeadlineItem?.submission;
+    const deadline = firstDeadlineRaw ? new Date(firstDeadlineRaw) : null;
+    const today = new Date();
+
+    // Calculate actual days remaining for the primary initial submission
+    const daysLeft = deadline ? differenceInCalendarDays(deadline, today) : 0;
+    const isClosed = deadline ? isPast(deadline) && daysLeft < 0 : false;
+    const isUrgent = daysLeft >= 0 && daysLeft < 5;
 
     const proceedToApply = () => {
         router.push(`/projects/apply/${call._id}`);
@@ -77,8 +88,8 @@ export const OpenCallCard = ({ call }: CallCardProps) => {
                 {call.description}
             </p>
 
-            {/* HIGHLIGHT SECTION: Financials & Timeline */}
-            <div className={`p-3 border-round mb-4 ${isUrgent ? 'bg-orange-50' : 'bg-blue-50'}`}>
+            {/* HIGHLIGHT SECTION: Financials & Primary Stage Timeline */}
+            <div className={`p-3 border-round mb-3 ${isUrgent ? 'bg-orange-50' : 'bg-blue-50'}`}>
                 <div className="flex flex-column gap-2">
                     {/* Budget */}
                     <div className="flex align-items-center gap-2">
@@ -92,11 +103,13 @@ export const OpenCallCard = ({ call }: CallCardProps) => {
                         </span>
                     </div>
 
-                    {/* Deadline Date */}
+                    {/* Initial Stage Deadline Date */}
                     <div className="flex align-items-center gap-2">
                         <i className={`pi pi-calendar text-sm ${isUrgent ? 'text-orange-600' : 'text-blue-600'}`}></i>
-                        <span className="text-xs font-medium text-800">
-                            Ends: {deadline ? format(deadline, 'MMM dd, yyyy') : 'N/A'}
+                        <span className="text-xs font-semibold text-800">
+                            {typeof primaryDeadlineItem?.grantStage === 'object' 
+                                ? `${(primaryDeadlineItem.grantStage as GrantStage).name} Ends` 
+                                : 'Ends'}: {deadline ? format(deadline, 'MMM dd, yyyy') : 'N/A'}
                         </span>
                     </div>
                 </div>
@@ -109,6 +122,31 @@ export const OpenCallCard = ({ call }: CallCardProps) => {
                     </span>
                 </div>
             </div>
+
+            {/* ADDITIONAL SUBSEQUENT DEADLINES (If available) */}
+            {sortedDeadlines.length > 1 && (
+                <div className="surface-100 p-2 border-round border-1 surface-border mb-4">
+                    <span className="block text-xs font-bold uppercase text-500 tracking-wider mb-2 px-1">
+                        Subsequent Stage Timelines
+                    </span>
+                    <div className="flex flex-column gap-2 px-1">
+                        {sortedDeadlines.slice(1).map((item: CallDeadline, idx: number) => {
+                            const stageName = typeof item.grantStage === 'object' 
+                                ? (item.grantStage as GrantStage).name 
+                                : `Stage ${idx + 2}`;
+                            
+                            return (
+                                <div key={idx} className="flex justify-content-between text-xs text-600 border-bottom-1 surface-border pb-1 last:border-none">
+                                    <span className="font-medium">{stageName}:</span>
+                                    <span className="text-800 font-semibold">
+                                        {item.submission ? format(new Date(item.submission), 'MMM dd, yyyy') : 'N/A'}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
 
             <Divider className="my-3 mt-auto" />
 

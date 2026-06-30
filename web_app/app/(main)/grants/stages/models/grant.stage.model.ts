@@ -25,6 +25,7 @@ export type GrantStage = {
     // NEW FIELDS
     //decisionMode?: DecisionMode;
     minAcceptanceScore: number;
+    verificationDeadline?: Date;
 
     createdAt?: Date;
     updatedAt?: Date;

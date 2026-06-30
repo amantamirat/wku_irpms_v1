@@ -62,6 +62,15 @@ export class StageController {
         }
     };
 
+    getUpcomingVerification = async (req: Request, res: Response) => {
+        try {
+            const verifications = await this.service.getUpcomingVerification();
+            successResponse(res, 200, 'stage fetched', verifications);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    }
+
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.params;
