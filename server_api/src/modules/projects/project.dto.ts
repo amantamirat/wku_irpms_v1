@@ -25,6 +25,17 @@ export interface GetProjectsDTO {
     //limit?: number;
 }
 
+
+export interface CreateGrantProjectDTO {
+    grant: string;
+    title: string;
+    summary?: string;
+    applicant: string;
+    themes: string[];
+    collaborators: CollaboratorDto[];
+    phases: PhaseDto[];
+}
+
 // CREATE Project
 export interface CreateProjectDTO {
     call?: string;

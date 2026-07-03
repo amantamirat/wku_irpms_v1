@@ -4,7 +4,7 @@ import { Response } from "express";
 import { errorResponse, successResponse } from "../../common/helpers/response";
 import { AuthenticatedRequest } from "../auth/auth.middleware";
 import { ProjectService } from "./project.service";
-import { ApplyProjectDTO, CreateProjectDTO, UpdateProjectDTO } from "./project.dto";
+import { ApplyProjectDTO, CreateGrantProjectDTO, CreateProjectDTO, UpdateProjectDTO } from "./project.dto";
 import { DeleteDto } from "../../common/dtos/delete.dto";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
@@ -14,6 +14,34 @@ export class ProjectController {
 
 
   constructor(private readonly service: ProjectService) { }
+
+  createFromGrant = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      // 1. Authentication Guard
+      if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
+
+      const { grant, title, summary, themes, collaborators, phases } = req.body;
+
+      // 2. Construct the DTO using the authenticated user's ID as the applicant
+      const dto: CreateGrantProjectDTO = {
+        grant,
+        title,
+        summary,
+        applicant: req.auth.userId,
+        themes: themes || [],
+        collaborators: collaborators || [],
+        phases: phases || []
+      };
+
+      // 3. Delegate execution to the new service method
+      const created = await this.service.createFromGrant(dto);
+      // 4. Send clean success framework response
+      successResponse(res, 201, "Grant project created successfully", created);
+    } catch (err: any) {
+      // 5. Catch validations or database transaction rollbacks safely
+      errorResponse(res, 400, err.message, err);
+    }
+  };
   // -----------------------
   // Create
   // -----------------------

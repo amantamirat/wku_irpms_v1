@@ -66,6 +66,8 @@ const controller = new ProjectController(service);
 const router: Router = Router();
 
 //create
+
+
 router.post('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.PROJECT.CREATE]),
     controller.create);
@@ -81,6 +83,13 @@ router.post(
     },
     upload.single("file"),
     controller.apply
+);
+
+router.post(
+    '/from-grant',
+    verifyActiveAccount,
+    checkPermission([PERMISSIONS.PROJECT.CREATE]),
+    controller.createFromGrant
 );
 
 router.get('/', verifyActiveAccount,

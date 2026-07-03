@@ -64,12 +64,6 @@ export default function ProjectDetail({ project, updateProject }: ProjectDetailP
             icon: "pi pi-users",
             permission: PERMISSIONS.COLLABORATOR.READ,
             content: <CollaboratorManager project={project} />
-        },
-        {
-            header: "Applications",
-            icon: "pi pi-map",
-            permission: "project.application:read",
-            content: <ProjectApplicationManager project={project} hideReviewer={true} updateProject={updateProject} />
         }
     ];
 
@@ -89,14 +83,7 @@ export default function ProjectDetail({ project, updateProject }: ProjectDetailP
                             <i className="pi pi-tag mr-2 text-primary"></i>
                             {getDisplayName((project?.grant), 'title')}
                         </span>
-                        {
-                            /**
-                             *  <span className="flex align-items-center bg-gray-100 px-2 py-1 border-round">
-                            <i className="pi pi-calendar mr-2 text-primary"></i>
-                            {getDisplayName((project?.grant as any)?.calendar, 'year')}
-                        </span>
-                             */
-                        }
+                        
                        
                         <span className="flex align-items-center px-2 py-1 border-round">
                             <i className="pi pi-user mr-2 text-primary"></i>

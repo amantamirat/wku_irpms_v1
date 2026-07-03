@@ -1,6 +1,7 @@
 // project.service.ts
 import {
     ApplyProjectDTO,
+    CreateGrantProjectDTO,
     CreateProjectDTO,
     GetProjectsDTO,
     UpdateProjectDTO,
@@ -32,7 +33,6 @@ import { ProjectApplicationService } from "./applications/project.application.se
 import { NotificationService } from "../notifications/notification.service";
 import { CompositionValidator } from "../grants/compositions/composition.validator";
 import { ICallStageRepository } from "../calls/stages/call.stage.repository";
-import { CallStageStatus } from "../calls/stages/call.stage.model";
 import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
 import { GrantStatus } from "../grants/grant.model";
 import { GrantStageRepository, IGrantStageRepository } from "../grants/stages/grant.stage.repository";
@@ -68,6 +68,89 @@ export class ProjectService {
         return projectDoc;
     }
 
+
+    async createFromGrant(dto: CreateGrantProjectDTO) {
+        const { grant, title, summary, applicant, themes, collaborators, phases } = dto;
+
+        // 1. Authorization & Role Validation
+        const lead = collaborators.find(c => c.isLeadPI);
+        if (!lead) throw new AppError(ERROR_CODES.LEAD_PI_NOT_FOUND);
+        if (lead.applicant !== applicant) throw new AppError(ERROR_CODES.UNAUTHORIZED);
+
+        // 2. Validate the Grant itself
+        const grantDoc = await this.grantRepo.findById(grant);
+        if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+        if (grantDoc.status !== GrantStatus.active) throw new AppError(ERROR_CODES.GRANT_NOT_ACTIVE);
+
+        // 3. Complete structural and compliance validation rules
+        await this.constValidator.validateAll(grant, { participantCount: collaborators.length, phases, themes, title, summary });
+        await this.compValidator.validateAll(grant, collaborators);
+
+        const skipValidation = { skipValidation: true };
+
+        // 4. Start a Mongo Database Transaction Session
+        const session = await mongoose.startSession();
+        session.startTransaction();
+
+        try {
+            // Direct creation of the core project repository document
+            // This replaces the "this.create" internal method dependency
+            const createdProj = await this.projectRepo.create(
+                { grant, title, summary, applicant, themes },
+                session
+            );
+            const projectId = String(createdProj._id);
+
+            // Explicitly create the Lead PI Collaborator record here instead
+            await this.collabService.create({
+                project: projectId,
+                projectTitle: title,
+                applicant: applicant,
+                role: "Principal Investigator", // Or lead.role if dynamic
+                userId: applicant
+            }, skipValidation, session);
+
+            // Create secondary Collaborators (skipping the lead, who we just added above)
+            for (const collab of collaborators) {
+                if (collab.applicant === applicant) {
+                    continue;
+                }
+                await this.collabService.create({
+                    project: projectId,
+                    applicant: collab.applicant,
+                    projectTitle: title,
+                    role: collab.role,
+                    userId: applicant
+                }, skipValidation, session);
+            }
+
+            // Sort and create project Phases
+            const orderedPhases = [...phases].sort((a, b) => a.order - b.order);
+            for (const phase of orderedPhases) {
+                await this.phaseService.create({
+                    project: projectId,
+                    order: phase.order,
+                    title: phase.title,
+                    budget: phase.budget,
+                    duration: phase.duration,
+                    description: phase.description,
+                    applicantId: applicant
+                }, skipValidation, session);
+            }
+
+            // Commit transaction and return project
+            await session.commitTransaction();
+            return createdProj;
+
+        } catch (error) {
+            await session.abortTransaction();
+            throw error;
+        } finally {
+            session.endSession();
+        }
+    }
+
+    ///*
     async create(dto: CreateProjectDTO, options?: { skipValidation?: boolean }, session?: ClientSession) {
         const { grant, title, summary, themes, applicant } = dto
         if (!options?.skipValidation) {
@@ -92,6 +175,7 @@ export class ProjectService {
         }
         return created;
     }
+    //*/
 
 
     async apply(dto: ApplyProjectDTO) {
@@ -241,6 +325,7 @@ export class ProjectService {
         if (!projectDoc) {
             throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
         }
+        const isCallProject = !!projectDoc.call;
         const from = projectDoc.status as ProjectStatus;
         const to = next as ProjectStatus;
 
@@ -254,7 +339,7 @@ export class ProjectService {
             PROJECT_TRANSITIONS
         );
 
-        if (to === ProjectStatus.draft ||
+        if (to === ProjectStatus.draft && isCallProject ||
             to === ProjectStatus.submitted ||
             to === ProjectStatus.rejected ||
             (from === ProjectStatus.submitted && to === ProjectStatus.accepted) ||
@@ -262,6 +347,7 @@ export class ProjectService {
             to === ProjectStatus.terminated ||
             to === ProjectStatus.completed
         ) {
+
             throw new AppError(ERROR_CODES.INVALID_OPERTATION);
         }
 

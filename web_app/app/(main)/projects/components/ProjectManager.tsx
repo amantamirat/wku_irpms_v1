@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/auth-context";
 import MyBadge from "@/templates/MyBadge";
 import { useMemo } from "react";
 import { Calendar } from "../../calendars/models/calendar.model";
+import { Call } from "../../calls/models/call.model";
 import { Grant } from "../../grants/models/grant.model";
 import { Organization } from "../../organizations/models/organization.model";
 import { User } from "../../users/models/user.model";
@@ -12,8 +13,7 @@ import { ProjectApi } from "../api/project.api";
 import { GetProjectsOptions, Project, ProjectStatus } from "../models/project.model";
 import { PROJECT_STATUS_ORDER, PROJECT_TRANSITIONS } from "../models/project.state-machine";
 import ProjectDetail from "./ProjectDetail";
-import SaveProject from "./SaveProject";
-import { Call } from "../../calls/models/call.model";
+import ProjectWizard from "./ProjectWizard";
 
 interface ProjectManagerProps {
     grant?: Grant;
@@ -88,7 +88,7 @@ const ProjectManager = ({ applicant, grant, calendar, call, workspace, onItemsCh
                 summary: "",
                 themes: []
             }),
-            SaveDialog: SaveProject,
+            SaveDialog: ProjectWizard,
             permissionPrefix: "project",
             query: () => ({
                 call,
@@ -103,7 +103,7 @@ const ProjectManager = ({ applicant, grant, calendar, call, workspace, onItemsCh
                 transitions: PROJECT_TRANSITIONS,
                 statusOrder: PROJECT_STATUS_ORDER
             },
-            hideDefaultActions: !applicant,
+            //hideDefaultActions: !applicant,
             disableDeleteRow: (row) => row.status !== ProjectStatus.draft,
             expandable: {
                 template: (project, actions) => (

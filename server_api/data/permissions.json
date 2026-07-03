@@ -729,6 +729,16 @@
   },
   {
     "category": "Project Management",
+    "name": "project:transition.draft.accepted",
+    "description": "Accept grant projects"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:transition.accepted.draft",
+    "description": "return back to draft an accepted grant projects"
+  },
+  {
+    "category": "Project Management",
     "name": "project:transition.accepted.granted",
     "description": "Approve finalized project for funding"
   },

@@ -14,7 +14,8 @@ export const PROJECT_STATUS_ORDER: ProjectStatus[] = [
 
 export const PROJECT_TRANSITIONS: Record<ProjectStatus, ProjectStatus[]> = {
     [ProjectStatus.draft]: [
-        ProjectStatus.submitted
+        ProjectStatus.submitted,
+        ProjectStatus.accepted
     ],
 
     [ProjectStatus.submitted]: [
@@ -28,6 +29,7 @@ export const PROJECT_TRANSITIONS: Record<ProjectStatus, ProjectStatus[]> = {
     ],
 
     [ProjectStatus.accepted]: [
+        ProjectStatus.draft,
         ProjectStatus.granted,
         ProjectStatus.refused,
         ProjectStatus.submitted
