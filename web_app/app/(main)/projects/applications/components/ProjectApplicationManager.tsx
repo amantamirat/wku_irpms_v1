@@ -175,8 +175,8 @@ const ProjectApplicationManager = ({ project, grantStage, callStage, hideReviewe
 
     const Manager = useMemo(() =>
         createEntityManager<ProjectApplication, GetProjectApplicationOptions | undefined>({
-            title: nextStage ? `Submit ${nextStage.name}` : "Project Submissions",
-            itemName: nextStage ? nextStage.name : "Application Stage",
+            title: nextStage ? `Submit ${nextStage.name}` : "Applications",
+            itemName: nextStage ? nextStage.name : "Application",
             api: ProjectApplicationApi,
             columns: columns,
             onItemsChange: handleItemsChange,

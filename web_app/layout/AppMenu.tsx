@@ -28,14 +28,14 @@ const AppMenu = () => {
                 {
                     label: 'Applications',
                     icon: 'pi pi-list',
-                    to: '/projects/applications/grant',
+                    to: '/projects/applications',
                     visible: hasPermission("project.application:read") &&
                         hasPermission("grant:read")
                 },
                 {
                     label: 'Projects',
                     icon: "pi pi-folder-open",
-                    to: '/projects/all',
+                    to: '/projects',
                     visible: hasPermission("project:create")
                 },
                 {
@@ -68,16 +68,16 @@ const AppMenu = () => {
             ),
             items: [
                 {
-                    label: 'Calls',
-                    icon: 'pi pi-fw pi-megaphone',
-                    to: '/calls',
-                    visible: hasPermission("call:create")
-                },
-                {
                     label: 'Calendars',
                     icon: PrimeIcons.CALENDAR,
                     to: '/calendars',
                     visible: hasPermission("calendar:create")
+                },
+                {
+                    label: 'Calls',
+                    icon: 'pi pi-fw pi-megaphone',
+                    to: '/calls',
+                    visible: hasPermission("call:create")
                 },
                 {
                     label: 'Grants',

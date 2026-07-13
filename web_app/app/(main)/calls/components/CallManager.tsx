@@ -126,11 +126,15 @@ const CallManager = ({ calendar, grant }: CallManagerProps) => {
             statusOrder: CALL_STATUS_ORDER
         },
 
-        expandable: {
+        /** 
+         * expandable: {
             template: (call) => (
                 <CallDetail call={call} />
             )
         }
+        */
+
+        
     });
 
     return <Manager />;

@@ -40,17 +40,20 @@ const GrantDetail = ({ grant }: GrantDetailProps) => {
         {
             header: "Calls",
             permission: PERMISSIONS.CALL.READ,
-            content: <CallManager grant={grant} />
+            disabled: true,
+            content: <CallManager grant={grant}
+            />
         },
 
         {
             header: "Allocations",
             permission: "grant.allocation:read",
-            content: <AllocationManager grant={grant} 
+            disabled: true,
+            content: <AllocationManager grant={grant}
             />
         },
 
-        
+
     ], [grant]);
 
     /**
@@ -63,7 +66,8 @@ const GrantDetail = ({ grant }: GrantDetailProps) => {
     return (
         <TabView>
             {allowedTabs.map((tab, index) => (
-                <TabPanel key={index} header={tab.header}>
+                <TabPanel key={index} header={tab.header}
+                    disabled={tab.disabled}>
                     {tab.content}
                 </TabPanel>
             ))}

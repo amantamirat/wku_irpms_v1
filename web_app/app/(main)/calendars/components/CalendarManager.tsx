@@ -43,9 +43,10 @@ export default createEntityManager<Calendar, undefined>({
         transitions: CALENDAR_TRANSITIONS,
         statusOrder: CALENDAR_STATUS_ORDER
     },
+    /*
     expandable: {
         template: (calendar) => (
             <CalendarDetail calendar={calendar} />
         )
-    }
+    }*/
 });
