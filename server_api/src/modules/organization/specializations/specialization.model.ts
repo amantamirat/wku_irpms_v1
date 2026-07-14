@@ -13,7 +13,8 @@ export interface ISpecialization extends Document {
 const SpecializationSchema = new Schema<ISpecialization>({
     name: {
         type: String,
-        required: true
+        required: true,
+        trim: true,
     },
     academicLevel: {
         type: String,
@@ -21,5 +22,10 @@ const SpecializationSchema = new Schema<ISpecialization>({
         required: true
     },
 }, { timestamps: true });
+
+SpecializationSchema.index(
+  { name: 1, academicLevel: 1 },
+  { unique: true }
+);
 
 export const Specialization = mongoose.model<ISpecialization>(COLLECTIONS.SPECIALIZATION, SpecializationSchema);

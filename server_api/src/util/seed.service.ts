@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import fs from 'fs/promises';
 import path from 'path';
-import { Unit } from '../common/constants/enums';
+import { AcademicLevel, Unit } from '../common/constants/enums';
 import { Gender } from "../modules/users/user.model";
 import { UserRepository } from "../modules/users/user.repository";
 import { OrganizationRepository } from '../modules/organization/organization.repository';
@@ -11,6 +11,7 @@ import { SettingKey } from '../modules/settings/setting.model';
 import { SettingRepository } from '../modules/settings/setting.repository';
 import { AccountRepository } from "../modules/accounts/account.repository";
 import { AccountStatus } from '../modules/accounts/account.model';
+import { SpecializationRepository } from "../modules/organization/specializations/specialization.repository";
 
 export class SeedService {
     constructor(
@@ -19,7 +20,8 @@ export class SeedService {
         private roleRepo = new RoleRepository(),
         private accRepo = new AccountRepository(),
         private userRepo = new UserRepository(),
-        private organRepo = new OrganizationRepository()
+        private organRepo = new OrganizationRepository(),
+        private specializationRepo = new SpecializationRepository()
     ) { }
 
     async runAllSeeds() {
@@ -36,6 +38,9 @@ export class SeedService {
 
         // 4. Create the janitor (Admin User)
         await this.seedAdmin();
+
+        // 4. Create the specializations
+        // await this.seedSpecializations();
 
         console.log("✅ System Bootstrap Finished.");
     }
@@ -257,6 +262,48 @@ export class SeedService {
             } catch (error) {
                 console.error(`Failed to seed data for college ${collegeData.name}:`, error);
             }
+        }
+    }
+
+
+
+
+    async seedSpecializations(): Promise<void> {
+        try {
+            const filePath = path.join(
+                process.cwd(),
+                "data",
+                "specializations.json"
+            );
+
+            const rawData = await fs.readFile(filePath, "utf-8");
+            const specializations = JSON.parse(rawData);
+
+            let seeded = false;
+
+            for (const item of specializations) {
+                if (!item.name || !item.academicLevel) continue;
+
+                const exists = await this.specializationRepo.findByNameAndLevel(
+                    item.name,
+                    item.academicLevel
+                );
+
+                if (exists) continue;
+
+                await this.specializationRepo.create({
+                    name: item.name,
+                    academicLevel: item.academicLevel as AcademicLevel
+                });
+
+                seeded = true;
+            }
+
+            if (seeded) {
+                console.log("✅ Specializations seeded");
+            }
+        } catch (error) {
+            console.error("❌ Error seeding specializations:", error);
         }
     }
 }

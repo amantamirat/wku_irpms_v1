@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { CreateSpecializationDTO, UpdateSpecializationDTO, GetSpecializationsOptions } from "./specialization.dto";
 import { Specialization, ISpecialization } from "./specialization.model";
+import { AcademicLevel } from "../../../common/constants/enums";
 
 export interface ISpecializationRepository {
     findById(id: string): Promise<ISpecialization | null>;
@@ -8,6 +9,7 @@ export interface ISpecializationRepository {
     create(dto: CreateSpecializationDTO): Promise<ISpecialization>;
     update(id: string, data: UpdateSpecializationDTO["data"]): Promise<ISpecialization | null>;
     delete(id: string): Promise<ISpecialization | null>;
+    findByNameAndLevel(name: string, academicLevel: AcademicLevel): Promise<ISpecialization | null>;
 }
 
 // MongoDB implementation
@@ -55,7 +57,12 @@ export class SpecializationRepository implements ISpecializationRepository {
         ).exec();
     }
 
-
+    async findByNameAndLevel(name: string, academicLevel: AcademicLevel) {
+        return Specialization.findOne({
+            name,
+            academicLevel
+        });
+    }
 
     async delete(id: string) {
         return Specialization.findByIdAndDelete(new mongoose.Types.ObjectId(id)).exec();
