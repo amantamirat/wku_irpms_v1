@@ -1,7 +1,7 @@
 import { CollaboratorStatus } from "./collaborator.model";
 
 export interface CollaboratorDto {
-    applicant: string; //user
+    applicant: string; //memeber
     role: string;
     isLeadPI?: boolean;
 }

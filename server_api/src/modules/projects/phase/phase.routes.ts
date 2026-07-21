@@ -17,7 +17,7 @@ const allocRepo = new GrantAllocationRepository();
 const projAuth = new ProjectAuth(projectRepo);
 const synch = new PhaseSynchronizer(projectRepo, repo);
 const validator = new ConstraintValidator(new ConstraintRepository(), new ThemeRepository());
-const service = new PhaseService(repo, projectRepo, allocRepo, projAuth, validator, synch);
+const service = new PhaseService(repo, projectRepo, projAuth, validator);
 const controller = new PhaseController(service);
 const router: Router = Router();
 

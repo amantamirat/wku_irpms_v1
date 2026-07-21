@@ -1,4 +1,4 @@
-export interface LegacyProjectSeedDTO {
+export interface LegacyProjectDTO {
     Project_Title: string;
     Academic_Year: string;
 
@@ -12,6 +12,21 @@ export interface LegacyProjectSeedDTO {
 
     Theme: string;
     SubTheme: string;
+}
+
+
+export interface LegacyUserSeedDTO {
+    Id: string;
+    Name: string;
+    Gender?: string;
+    IsWorking?: string;
+    AdminRole?: string;
+    Department?: string;
+    CollCode?: string | null;
+    InterArea?: string | null;
+    OnDuty?: string;
+    CanEdit?: number;
+    Highlight?: number;
 }
 
 

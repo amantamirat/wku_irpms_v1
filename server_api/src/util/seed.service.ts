@@ -4,7 +4,6 @@ import path from 'path';
 import { AcademicLevel, Unit } from '../common/constants/enums';
 import { Gender } from "../modules/users/user.model";
 import { UserRepository } from "../modules/users/user.repository";
-import { OrganizationRepository } from '../modules/organization/organization.repository';
 import { PermissionRepository } from "../modules/permissions/permission.repository";
 import { RoleRepository } from '../modules/permissions/roles/role.repository';
 import { SettingKey } from '../modules/settings/setting.model';
@@ -21,7 +20,6 @@ export class SeedService {
         private roleRepo = new RoleRepository(),
         private accRepo = new AccountRepository(),
         private userRepo = new UserRepository(),
-        private organRepo = new OrganizationRepository(),
         private specializationRepo = new SpecializationRepository(),
         private positionRepo = new PositionRepository(),
     ) { }
@@ -49,7 +47,7 @@ export class SeedService {
 
     async seedSettings() {
         try {
-            const filePath = path.join(process.cwd(), 'data', 'defaultSettings.json');
+            const filePath = path.join(process.cwd(), 'data/system', 'defaultSettings.json');
             const rawData = await fs.readFile(filePath, 'utf-8');
             const settings = JSON.parse(rawData);
 
@@ -79,7 +77,7 @@ export class SeedService {
     }
 
     async seedPermissions() {
-        const filePath = path.join(process.cwd(), 'data', 'permissions.json');
+        const filePath = path.join(process.cwd(), 'data/system', 'permissions.json');
         const rawData = await fs.readFile(filePath, 'utf-8');
         const permissions = JSON.parse(rawData);
 
@@ -98,7 +96,7 @@ export class SeedService {
 
 
     async seedRoles() {
-        const filePath = path.join(process.cwd(), 'data', 'roles.json');
+        const filePath = path.join(process.cwd(), 'data/system', 'roles.json');
         const rawData = await fs.readFile(filePath, 'utf-8');
         const roles = JSON.parse(rawData);
 
@@ -212,60 +210,7 @@ export class SeedService {
     }
 
 
-    async seedUsers(): Promise<void> {
 
-        const filePath = path.join(process.cwd(), 'data/irms_users', 'data.json');
-        const rawData = await fs.readFile(filePath, 'utf-8');
-        const jsonData = JSON.parse(rawData);
-
-        const defaultRoles = await this.roleRepo.findDefaults();
-        const roles = defaultRoles.map(role => String(role._id));
-
-        for (const collegeData of jsonData) {
-            try {
-                // 1. Create the College
-                const college = await this.organRepo.create({
-                    type: Unit.college,
-                    name: collegeData.name
-                });
-
-                console.log(`Successfully seeded college: ${college.name}`);
-
-                // Check if departments exist
-                if (collegeData.departments && Array.isArray(collegeData.departments)) {
-                    for (const deptData of collegeData.departments) {
-
-                        // 2. Create the Department (Pass college.id as parent)
-                        const department = await this.organRepo.create({
-                            type: Unit.department,
-                            name: deptData.name,
-                            parent: String(college._id) // Assuming your repo returns the created object with an 'id'
-                        });
-
-                        console.log(`-- Seeded department: ${department.name}`);
-
-                        // Check if PIs exist
-                        if (deptData.pis && Array.isArray(deptData.pis)) {
-                            for (const piData of deptData.pis) {
-
-                                // 3. Create the User (Pass department.id as workspace)
-                                await this.userRepo.create({
-                                    name: piData.name,
-                                    gender: piData.gender, // e.g., "Male" or "Female"
-                                    workspace: String(department._id), // Affiliation
-                                    roles: roles,
-                                    //birthDate: new Date(),
-                                });
-                            }
-                            console.log(`---- Seeded ${deptData.pis.length} users for ${deptData.name}`);
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error(`Failed to seed data for college ${collegeData.name}:`, error);
-            }
-        }
-    }
 
 
 
@@ -274,7 +219,7 @@ export class SeedService {
         try {
             const filePath = path.join(
                 process.cwd(),
-                "data",
+                "data/sample",
                 "specializations.json"
             );
 
@@ -314,7 +259,7 @@ export class SeedService {
         try {
             const filePath = path.join(
                 process.cwd(),
-                "data",
+                "data/sample",
                 "positions.json"
             );
 

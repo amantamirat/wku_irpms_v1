@@ -31,9 +31,9 @@ export class CollaboratorService {
         private readonly projAuth: ProjectAuth,
         private readonly userRepo: IUserRepository,
         private readonly constraintValidator: ConstraintValidator,
+        private readonly notificationService: NotificationService,
         private readonly compValidator: CompositionValidator = new CompositionValidator(),
-        private readonly notificationService?: NotificationService,
-
+        
     ) {
     }
 
