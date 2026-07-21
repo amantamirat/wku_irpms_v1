@@ -27,6 +27,7 @@ export interface GetProjectsDTO {
 
 
 export interface CreateGrantProjectDTO {
+    calendar?: string;
     grant: string;
     title: string;
     summary?: string;
@@ -39,6 +40,7 @@ export interface CreateGrantProjectDTO {
 // CREATE Project
 export interface CreateProjectDTO {
     call?: string;
+    calendar?: string;
     grant: string;
     title: string;
     summary?: string;

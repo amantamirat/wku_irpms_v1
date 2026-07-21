@@ -9,6 +9,7 @@ import {
 
 export interface IPositionRepository {
     findById(id: string): Promise<PositionDocument | null>;
+    findByName(name: string): Promise<PositionDocument | null>;
     find(filters: GetPositionsDTO): Promise<PositionDocument[]>;
     create(dto: CreatePositionDTO): Promise<PositionDocument>;
     update(id: string, dtoData: UpdatePositionDTO["data"]): Promise<PositionDocument | null>;
@@ -22,6 +23,10 @@ export class PositionRepository implements IPositionRepository {
         return Position.findById(new mongoose.Types.ObjectId(id))
             .lean<PositionDocument>()
             .exec();
+    }
+
+    async findByName(name: string) {
+        return Position.findOne({ name });
     }
 
     async find(filters: GetPositionsDTO) {

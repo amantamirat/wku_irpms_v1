@@ -8,6 +8,7 @@ import {
 
 export interface IThematicRepository {
     findById(id: string): Promise<IThematic | null>;
+    findOne(dto: GetThematicsDTO): Promise<IThematic | null>;
     find(filters: GetThematicsDTO): Promise<Partial<IThematic>[]>;
     create(dto: CreateThematicDTO): Promise<IThematic>;
     update(id: string, data: UpdateThematicDTO["data"]): Promise<IThematic | null>;
@@ -19,6 +20,23 @@ export class ThematicRepository implements IThematicRepository {
 
     async findById(id: string) {
         return Thematic.findById(new mongoose.Types.ObjectId(id))
+            .lean<IThematic>()
+            .exec();
+    }
+
+
+    async findOne({ title, status }: GetThematicsDTO) {
+        const filter: Record<string, any> = {};
+
+        if (title) {
+            filter.title = title;
+        }
+
+        if (status) {
+            filter.status = status;
+        }
+
+        return Thematic.findOne(filter)
             .lean<IThematic>()
             .exec();
     }
@@ -35,7 +53,7 @@ export class ThematicRepository implements IThematicRepository {
 
     async create(dto: CreateThematicDTO) {
         return Thematic.create({
-            ...dto, 
+            ...dto,
         });
     }
 

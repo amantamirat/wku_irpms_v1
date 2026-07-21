@@ -21,6 +21,7 @@ export interface UpdateCalendarDTO {
 }
 
 export interface GetCalendarDTO {
+    year?: number;
     status?: CalendarStatus;
 }
 

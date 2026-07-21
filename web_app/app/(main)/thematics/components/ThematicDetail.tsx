@@ -34,6 +34,7 @@ const ThematicDetail = ({ thematic }: ThematicDetailProps) => {
         {
             header: "Grants",
             permission: "grant:read",
+            disabled: true,
             content: <GrantManager thematic={thematic} />
         },
     ], [thematic]);
@@ -48,7 +49,9 @@ const ThematicDetail = ({ thematic }: ThematicDetailProps) => {
     return (
         <TabView>
             {allowedTabs.map((tab, index) => (
-                <TabPanel key={index} header={tab.header}>
+                <TabPanel key={index} header={tab.header}
+                    disabled={tab.disabled}
+                >
                     {tab.content}
                 </TabPanel>
             ))}

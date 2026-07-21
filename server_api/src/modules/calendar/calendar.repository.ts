@@ -6,6 +6,7 @@ import { CreateCalendarDTO, GetCalendarDTO, UpdateCalendarDTO } from "./calendar
 export interface ICalendarReadRepository {
     findById(id: string): Promise<ICalendar | null>;
     find(option: GetCalendarDTO): Promise<ICalendar[]>;
+    findOne(dto: GetCalendarDTO): Promise<ICalendar | null>;
 }
 
 export interface ICalendarRepository extends ICalendarReadRepository {
@@ -18,6 +19,22 @@ export class CalendarRepository implements ICalendarRepository {
 
     async findById(id: string) {
         return Calendar.findById(new mongoose.Types.ObjectId(id))
+            .lean<ICalendar>()
+            .exec();
+    }
+
+    async findOne({ year, status }: GetCalendarDTO) {
+        const filter: Record<string, any> = {};
+
+        if (year) {
+            filter.year = year;
+        }
+
+        if (status) {
+            filter.status = status;
+        }
+
+        return Calendar.findOne(filter)
             .lean<ICalendar>()
             .exec();
     }

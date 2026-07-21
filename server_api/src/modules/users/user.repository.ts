@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 
 export interface IUserRepository {
     findById(id: string): Promise<IUser | null>;
+    findOne({ workspace, name }: GetUsersDTO): Promise<IUser | null>;
     findAll(filter?: GetUsersDTO): Promise<IUser[]>;
     create(data: CreateUserDTO): Promise<IUser>;
     update(id: string, data: UpdateUserDTO["data"]): Promise<IUser | null>;
@@ -36,6 +37,23 @@ export class UserRepository implements IUserRepository {
                 exec();
         }
         return User.findById(new mongoose.Types.ObjectId(id))
+            .lean<IUser>()
+            .exec();
+    }
+
+
+    async findOne({ workspace, name }: GetUsersDTO) {
+        const filter: Record<string, any> = {};
+
+        if (workspace) {
+            filter.workspace = new mongoose.Types.ObjectId(workspace);
+        }
+
+        if (name) {
+            filter.name = name;
+        }
+
+        return User.findOne(filter)
             .lean<IUser>()
             .exec();
     }

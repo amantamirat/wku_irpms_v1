@@ -18,6 +18,7 @@ export interface UpdateThemeDTO {
 export interface GetThemeDTO {
     parent?: string;
     thematicArea?: string;
+    title?:string;
     level?: number;
     populate?: boolean;
 }

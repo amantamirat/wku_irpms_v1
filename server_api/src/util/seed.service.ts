@@ -12,6 +12,7 @@ import { SettingRepository } from '../modules/settings/setting.repository';
 import { AccountRepository } from "../modules/accounts/account.repository";
 import { AccountStatus } from '../modules/accounts/account.model';
 import { SpecializationRepository } from "../modules/organization/specializations/specialization.repository";
+import { PositionRepository } from "../modules/positions/position.repository";
 
 export class SeedService {
     constructor(
@@ -21,7 +22,8 @@ export class SeedService {
         private accRepo = new AccountRepository(),
         private userRepo = new UserRepository(),
         private organRepo = new OrganizationRepository(),
-        private specializationRepo = new SpecializationRepository()
+        private specializationRepo = new SpecializationRepository(),
+        private positionRepo = new PositionRepository(),
     ) { }
 
     async runAllSeeds() {
@@ -306,4 +308,42 @@ export class SeedService {
             console.error("❌ Error seeding specializations:", error);
         }
     }
+
+
+    async seedPositions(): Promise<void> {
+        try {
+            const filePath = path.join(
+                process.cwd(),
+                "data",
+                "positions.json"
+            );
+
+            const rawData = await fs.readFile(filePath, "utf-8");
+            const positions = JSON.parse(rawData);
+
+            let seeded = false;
+
+            for (const item of positions) {
+                if (!item.name) continue;
+
+                const exists = await this.positionRepo.findByName(item.name);
+
+                if (exists) continue;
+
+                await this.positionRepo.create({
+                    name: item.name
+                });
+
+                seeded = true;
+            }
+
+            if (seeded) {
+                console.log("✅ Positions seeded");
+            }
+        } catch (error) {
+            console.error("❌ Error seeding positions:", error);
+        }
+    }
+
+
 }

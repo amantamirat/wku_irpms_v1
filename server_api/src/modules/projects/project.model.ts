@@ -16,6 +16,7 @@ export enum ProjectStatus {
 export interface IProject extends Document {
     _id: mongoose.Types.ObjectId;
     grant: mongoose.Types.ObjectId;
+    calendar?: mongoose.Types.ObjectId;
     call?: mongoose.Types.ObjectId;
     title: string;
     summary?: string;
@@ -37,7 +38,11 @@ const ProjectSchema = new Schema<IProject>({
         required: true,
         immutable: true
     },
-
+    calendar: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.CALENDAR,
+        //immutable: true,
+    },
     call: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.CALL,

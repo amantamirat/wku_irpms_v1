@@ -31,8 +31,9 @@ export class CollaboratorService {
         private readonly projAuth: ProjectAuth,
         private readonly userRepo: IUserRepository,
         private readonly constraintValidator: ConstraintValidator,
-        private readonly notificationService: NotificationService,
         private readonly compValidator: CompositionValidator = new CompositionValidator(),
+        private readonly notificationService?: NotificationService,
+
     ) {
     }
 
@@ -66,7 +67,7 @@ export class CollaboratorService {
         try {
             const created = await this.collabRepo.create(dto, session);
             await this.projectRepo.updateTotalCollabs(project, 1, session);
-            if (!dto.isLeadPI) {
+            if (!dto.isLeadPI && this.notificationService) {
                 await this.notificationService.notifyProjectInvitation(
                     applicant, projectTitle ?? project, dto.role, userId, session
                 );
@@ -151,7 +152,7 @@ export class CollaboratorService {
 
         const deleted = this.collabRepo.delete(id);
         await this.projectRepo.updateTotalCollabs(project, -1);
-        if (!collabDoc.isLeadPI) {
+        if (!collabDoc.isLeadPI && this.notificationService) {
             await this.notificationService.notifyProjectRemoval(
                 String(collabDoc.applicant), projectDoc.title, collabDoc.role
             );

@@ -11,6 +11,7 @@ import { ERROR_CODES } from "../../common/errors/error.codes";
 
 export interface IGrantRepository {
     findById(id: string, populate?: boolean): Promise<IGrant | null>;
+    findOne(title: string): Promise<IGrant | null>;
     find(filters: GetGrantsDTO): Promise<Partial<IGrant>[]>;
     create(dto: CreateGrantDTO): Promise<IGrant>;
     update(id: string, data: UpdateGrantDTO["data"]): Promise<IGrant | null>;
@@ -33,6 +34,13 @@ export class GrantRepository implements IGrantRepository {
                 .populate("thematic")
         }
         return dbQuery
+            .lean<IGrant>()
+            .exec();
+    }
+
+
+    async findOne(title: string): Promise<IGrant | null> {
+        return Grant.findOne({ title })
             .lean<IGrant>()
             .exec();
     }

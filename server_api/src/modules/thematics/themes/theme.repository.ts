@@ -5,6 +5,7 @@ import { CreateThemeDTO, ExistsThemeDTO, GetThemeDTO, UpdateThemeDTO } from "./t
 export interface IThemeRepository {
     findById(id: string): Promise<ITheme | null>;
     find(filters: GetThemeDTO): Promise<ITheme[]>;
+    findOne(dto: GetThemeDTO): Promise<ITheme | null>;
     create(dto: CreateThemeDTO, session?: mongoose.ClientSession): Promise<ITheme>;
     update(id: string, data: UpdateThemeDTO["data"]): Promise<ITheme | null>;
     exists(filters: ExistsThemeDTO): Promise<boolean>;
@@ -16,6 +17,27 @@ export class ThemeRepository implements IThemeRepository {
 
     async findById(id: string) {
         return Theme.findById(new mongoose.Types.ObjectId(id))
+            .lean<ITheme>()
+            .exec();
+    }
+
+
+    async findOne(dto: GetThemeDTO) {
+        const filter: Record<string, any> = {};
+
+        if (dto.thematicArea) {
+            filter.thematicArea = new mongoose.Types.ObjectId(dto.thematicArea);
+        }
+
+        if (dto.title) {
+            filter.title = dto.title;
+        }
+
+        if (dto.level !== undefined) {
+            filter.level = dto.level;
+        }
+
+        return Theme.findOne(filter)
             .lean<ITheme>()
             .exec();
     }

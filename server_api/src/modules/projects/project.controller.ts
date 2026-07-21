@@ -20,10 +20,11 @@ export class ProjectController {
       // 1. Authentication Guard
       if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
-      const { grant, title, summary, themes, collaborators, phases } = req.body;
+      const { calendar, grant, title, summary, themes, collaborators, phases } = req.body;
 
       // 2. Construct the DTO using the authenticated user's ID as the applicant
       const dto: CreateGrantProjectDTO = {
+        calendar,
         grant,
         title,
         summary,

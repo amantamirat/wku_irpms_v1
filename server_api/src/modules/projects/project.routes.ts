@@ -49,7 +49,7 @@ const synchronizer = new ProjectStageSynchronizer(projectRepo, projStageRepo, gr
 
 const constValidator = new ConstraintValidator(new ConstraintRepository(), new ThemeRepository());
 const collabService = new CollaboratorService(collabRepo, projectRepo, projAuth, appRepo, constValidator, notificationService);
-const phaseService = new PhaseService(phaseRepo, projectRepo, grantAllocRepo, projAuth, constValidator);
+const phaseService = new PhaseService(phaseRepo, projectRepo, projAuth, constValidator);
 const projectStageService = new ProjectApplicationService(
     projStageRepo, projAuth, grantStageRepo,
     callStageRepo, new ReviewerRepository(), synchronizer, notificationService

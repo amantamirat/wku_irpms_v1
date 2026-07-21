@@ -23,10 +23,8 @@ export class PhaseService {
     constructor(
         private readonly phaseRepo: IPhaseRepository,
         private readonly projRepo: IProjectRepository,
-        private readonly allocRepo: IGrantAllocationRepository,
         private readonly projAuth: ProjectAuth,
         private readonly constValidator: ConstraintValidator,
-        private readonly synchrnonizer?: IPhaseSynchronizer,
         private readonly grantRepo: IGrantRepository = new GrantRepository(),
         private readonly callRepo: ICallRepository = new CallRepository(),
     ) { }

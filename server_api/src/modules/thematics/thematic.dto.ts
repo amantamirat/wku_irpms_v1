@@ -18,5 +18,6 @@ export interface UpdateThematicDTO {
 }
 
 export interface GetThematicsDTO {
-    status: ThematicStatus;
+    title?: string;
+    status?: ThematicStatus;
 }

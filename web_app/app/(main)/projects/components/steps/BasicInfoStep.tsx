@@ -9,12 +9,14 @@ import { classNames } from 'primereact/utils';
 import { useEffect, useState } from 'react';
 import { ThemeApi } from '@/app/(main)/thematics/themes/api/theme.api';
 import { GrantApi } from '@/app/(main)/grants/api/grant.api';
+import { CalendarApi } from '@/app/(main)/calendars/api/calendar.api'; // Added import
 import { ConstraintApi } from '@/app/(main)/grants/constraints/api/constraint.api';
 import { Constraint } from '@/app/(main)/grants/constraints/models/constraint.model';
 import { Grant } from '@/app/(main)/grants/models/grant.model';
 import { GrantStatus } from '@/app/(main)/grants/models/grant.state-machine';
 import { ThemeNode, buildTree } from '@/app/(main)/thematics/models/thematic.node';
 import { Project } from '../../models/project.model';
+import { Calendar } from '@/app/(main)/calendars/models/calendar.model';
 
 interface BasicInfoStepProps {
     data: Project;
@@ -27,22 +29,27 @@ interface BasicInfoStepProps {
 export const BasicInfoStep = ({ data, onUpdate, onConstraintsChange, onNext, isEditModeOnly }: BasicInfoStepProps) => {
     const [submitted, setSubmitted] = useState(false);
     const [grants, setGrants] = useState<Grant[]>([]);
+    const [calendars, setCalendars] = useState<Calendar[]>([]); // Added state for calendars
     const [themeNodes, setThemeNodes] = useState<ThemeNode[]>([]);
 
-    // --- Load Active Grants ---
+    // --- Load Active Grants & Calendars ---
     useEffect(() => {
-        const loadGrants = async () => {
+        const loadInitialData = async () => {
             try {
                 // Only load all active grants if we aren't editing an existing project
                 if (!isEditModeOnly) {
                     const gData = await GrantApi.getAll({ status: GrantStatus.active, populate: true });
                     setGrants(gData);
                 }
+                
+                // Fetch calendars from the calendar API
+                const cData = await CalendarApi.getAll();
+                setCalendars(cData || []);
             } catch (err) {
-                console.error('Failed to load grants:', err);
+                console.error('Failed to load initial form data:', err);
             }
         };
-        loadGrants();
+        loadInitialData();
     }, [isEditModeOnly]);
 
     // --- Reactive Load: Fetch Themes & Constraints by Grant ID ---
@@ -100,7 +107,8 @@ export const BasicInfoStep = ({ data, onUpdate, onConstraintsChange, onNext, isE
 
     const handleForward = () => {
         setSubmitted(true);
-        if (!data.grant || !data.title || !data.themes || data.themes.length === 0) {
+        // Added data.calendar validation checking
+        if (!data.grant || !data.calendar || !data.title || !data.themes || data.themes.length === 0) {
             return;
         }
         onNext();
@@ -113,7 +121,6 @@ export const BasicInfoStep = ({ data, onUpdate, onConstraintsChange, onNext, isE
                 <div className="field col-12 md:col-6">
                     <label className="font-bold">Grant Source</label>
                     {isEditModeOnly ? (
-                        /* Only switches to a read-only InputText if explicitly locked in via Edit Mode */
                         <InputText value={typeof data.grant === 'object' ? (data.grant as any)?.title : 'Bound Grant Framework'} disabled className="surface-100" />
                     ) : (
                         <Dropdown
@@ -140,6 +147,21 @@ export const BasicInfoStep = ({ data, onUpdate, onConstraintsChange, onNext, isE
                     <label className="font-bold">Lead Profile Context</label>
                     <InputText value={(data.collaborators?.[0]?.applicant as any)?.name || 'Principal Investigator Account'} disabled className="surface-100" />
                 </div>
+            </div>
+
+            {/* Calendar Selection Dropdown (New Field) */}
+            <div className="field">
+                <label htmlFor="calendar" className="font-bold">Project Calendar Framework</label>
+                <Dropdown
+                    id="calendar"
+                    value={data.calendar}
+                    options={calendars}
+                    dataKey="_id"
+                    optionLabel="year" // Update to match your entity label property (e.g., 'title' or 'name')
+                    onChange={(e) => onUpdate({ calendar: e.value })}
+                    placeholder="Select Calendar Framework"
+                    className={classNames({ 'p-invalid': submitted && !data.calendar })}
+                />
             </div>
 
             {/* Title Input */}

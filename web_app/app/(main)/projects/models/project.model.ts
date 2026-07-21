@@ -6,6 +6,7 @@ import { Organization } from "../../organizations/models/organization.model";
 import { sanitizeTheme, Theme } from "../../thematics/themes/models/theme.model";
 import { Collaborator, sanitizeCollaborator } from "../collaborators/models/collaborator.model";
 import { Phase, sanitizePhase } from "../phases/models/phase.model";
+import { Calendar } from "../../calendars/models/calendar.model";
 
 export enum ProjectStatus {
     draft = 'draft',
@@ -22,6 +23,7 @@ export enum ProjectStatus {
 export type Project = {
     _id?: string;
     grant?: string | Grant;
+    calendar?: string | Calendar;
     call?: string | Call;
     title: string;
     summary?: string;
@@ -89,6 +91,10 @@ export const sanitize = (project: Partial<Project>): Partial<Project> => {
             typeof project.applicant === 'object' && project.applicant !== null
                 ? (project.applicant as any)._id
                 : project.applicant,
+        calendar:
+            typeof project.calendar === 'object' && project.calendar !== null
+                ? (project.calendar as any)._id
+                : project.calendar,
         call:
             typeof project.call === 'object' && project.call !== null
                 ? (project.call as any)._id

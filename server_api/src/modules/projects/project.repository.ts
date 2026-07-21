@@ -10,6 +10,7 @@ import {
 } from "./project.dto";
 import { GrantAllocation } from "../grants/allocations/grant.allocation.model";
 import { ProjectStatus } from "./project.model";
+import { Calendar } from "../calendar/calendar.model";
 
 export interface IProjectRepository {
     findById(id: string, options?: Options, session?: ClientSession): Promise<IProject | null>;
@@ -124,6 +125,7 @@ export class ProjectRepository implements IProjectRepository {
     async create(dto: CreateProjectDTO, session?: ClientSession) {
         const data = {
             ...dto,
+            calendar: dto.calendar ? new mongoose.Types.ObjectId(dto.calendar) : undefined,
             call: dto.call ? new mongoose.Types.ObjectId(dto.call) : undefined,
             grant: new mongoose.Types.ObjectId(dto.grant),
             applicant: new mongoose.Types.ObjectId(dto.applicant),
