@@ -6,6 +6,7 @@ export interface Options {
     populate?: {
         applicant?: boolean;
         grant?: boolean;
+        calendar?: boolean;
         currentStage?: boolean;
     };
 }

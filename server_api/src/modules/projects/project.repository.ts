@@ -114,6 +114,10 @@ export class ProjectRepository implements IProjectRepository {
             dbQuery = dbQuery.populate("currentStage");
         }
 
+        if (populate?.calendar) {
+            dbQuery = dbQuery.populate("calendar");
+        }
+
         // session
         if (session) {
             dbQuery = dbQuery.session(session);

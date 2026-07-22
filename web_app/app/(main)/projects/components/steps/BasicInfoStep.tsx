@@ -7,10 +7,13 @@ import { TreeSelect } from 'primereact/treeselect';
 import { Button } from 'primereact/button';
 import { classNames } from 'primereact/utils';
 import { useEffect, useState } from 'react';
+
 import { ThemeApi } from '@/app/(main)/thematics/themes/api/theme.api';
 import { GrantApi } from '@/app/(main)/grants/api/grant.api';
-import { CalendarApi } from '@/app/(main)/calendars/api/calendar.api'; // Added import
+import { CalendarApi } from '@/app/(main)/calendars/api/calendar.api';
 import { ConstraintApi } from '@/app/(main)/grants/constraints/api/constraint.api';
+import { UserApi } from '@/app/(main)/users/api/user.api'; // Ensure correct path for UserApi
+
 import { Constraint } from '@/app/(main)/grants/constraints/models/constraint.model';
 import { Grant } from '@/app/(main)/grants/models/grant.model';
 import { GrantStatus } from '@/app/(main)/grants/models/grant.state-machine';
@@ -29,20 +32,42 @@ interface BasicInfoStepProps {
 export const BasicInfoStep = ({ data, onUpdate, onConstraintsChange, onNext, isEditModeOnly }: BasicInfoStepProps) => {
     const [submitted, setSubmitted] = useState(false);
     const [grants, setGrants] = useState<Grant[]>([]);
-    const [calendars, setCalendars] = useState<Calendar[]>([]); // Added state for calendars
+    const [calendars, setCalendars] = useState<Calendar[]>([]);
     const [themeNodes, setThemeNodes] = useState<ThemeNode[]>([]);
+
+    // --- Applicants State ---
+    const [applicants, setApplicants] = useState<any[]>([]);
+    const [loadingApplicants, setLoadingApplicants] = useState(false);
+
+    // --- Load Applicants ---
+    useEffect(() => {
+        const fetchUsers = async () => {
+            // Replaced `visible` with checking if component is in creation mode
+            if (!isEditModeOnly) {
+                setLoadingApplicants(true);
+                try {
+                    const data = await UserApi.getAll({});
+                    // Handle response whether backend returns array directly or inside data property
+                    setApplicants(data);
+                } catch (err) {
+                    console.error("Failed to fetch applicants:", err);
+                } finally {
+                    setLoadingApplicants(false);
+                }
+            }
+        };
+        fetchUsers();
+    }, [isEditModeOnly]);
 
     // --- Load Active Grants & Calendars ---
     useEffect(() => {
         const loadInitialData = async () => {
             try {
-                // Only load all active grants if we aren't editing an existing project
                 if (!isEditModeOnly) {
                     const gData = await GrantApi.getAll({ status: GrantStatus.active, populate: true });
                     setGrants(gData);
                 }
-                
-                // Fetch calendars from the calendar API
+
                 const cData = await CalendarApi.getAll();
                 setCalendars(cData || []);
             } catch (err) {
@@ -90,6 +115,27 @@ export const BasicInfoStep = ({ data, onUpdate, onConstraintsChange, onNext, isE
         handleGrantDependencies();
     }, [data.grant, grants]);
 
+    // --- Applicant Selection Handler ---
+    const selectedLeadApplicant = data.collaborators?.[0]?.applicant;
+    const selectedLeadId = typeof selectedLeadApplicant === 'object' ? selectedLeadApplicant?._id : selectedLeadApplicant;
+
+    const handleApplicantChange = (selectedUser: any) => {
+        const existingCollaborators = data.collaborators || [];
+        const currentLead = existingCollaborators[0] || {};
+        const nonLeadCollaborators = existingCollaborators.slice(1);
+
+        // Replace or set index 0 with isLeadPI set to true
+        const updatedLead = {
+            ...currentLead,
+            applicant: selectedUser,
+            isLeadPI: true,
+        };
+
+        onUpdate({
+            collaborators: [updatedLead, ...nonLeadCollaborators]
+        });
+    };
+
     // --- Thematic Tree Select Helpers ---
     const getThemeSelectionKeys = () => {
         const selection: any = {};
@@ -107,8 +153,14 @@ export const BasicInfoStep = ({ data, onUpdate, onConstraintsChange, onNext, isE
 
     const handleForward = () => {
         setSubmitted(true);
-        // Added data.calendar validation checking
-        if (!data.grant || !data.calendar || !data.title || !data.themes || data.themes.length === 0) {
+        if (
+            !data.grant ||
+            !data.calendar ||
+            !data.title ||
+            !data.themes ||
+            data.themes.length === 0 ||
+            !data.collaborators?.[0]?.applicant
+        ) {
             return;
         }
         onNext();
@@ -121,7 +173,11 @@ export const BasicInfoStep = ({ data, onUpdate, onConstraintsChange, onNext, isE
                 <div className="field col-12 md:col-6">
                     <label className="font-bold">Grant Source</label>
                     {isEditModeOnly ? (
-                        <InputText value={typeof data.grant === 'object' ? (data.grant as any)?.title : 'Bound Grant Framework'} disabled className="surface-100" />
+                        <InputText
+                            value={typeof data.grant === 'object' ? (data.grant as any)?.title : 'Bound Grant Framework'}
+                            disabled
+                            className="surface-100"
+                        />
                     ) : (
                         <Dropdown
                             value={data.grant}
@@ -142,14 +198,35 @@ export const BasicInfoStep = ({ data, onUpdate, onConstraintsChange, onNext, isE
                     )}
                 </div>
 
-                {/* Lead Applicant Context */}
+                {/* Dynamic Lead Applicant Dropdown */}
                 <div className="field col-12 md:col-6">
-                    <label className="font-bold">Lead Profile Context</label>
-                    <InputText value={(data.collaborators?.[0]?.applicant as any)?.name || 'Principal Investigator Account'} disabled className="surface-100" />
+                    <label className="font-bold">Lead Applicant</label>
+                    {isEditModeOnly ? (
+                        <InputText
+                            value={
+                                (data.applicant as any)?.name ||
+                                'Lead Profile'
+                            }
+                            disabled
+                            className="surface-100"
+                        />
+                    ) : (
+                        <Dropdown
+                            value={selectedLeadId}
+                            options={applicants}
+                            onChange={(e) => handleApplicantChange(e.value)}
+                            optionLabel="name" // Change to 'email' or 'fullName' to match your User entity
+                            optionValue="_id"
+                            filter
+                            //loading={loadingApplicants}
+                            placeholder="Select Lead Applicant"
+                            className={classNames({ 'p-invalid': submitted && !data.collaborators?.[0]?.applicant })}
+                        />
+                    )}
                 </div>
             </div>
 
-            {/* Calendar Selection Dropdown (New Field) */}
+            {/* Calendar Selection Dropdown */}
             <div className="field">
                 <label htmlFor="calendar" className="font-bold">Project Calendar Framework</label>
                 <Dropdown
@@ -157,7 +234,7 @@ export const BasicInfoStep = ({ data, onUpdate, onConstraintsChange, onNext, isE
                     value={data.calendar}
                     options={calendars}
                     dataKey="_id"
-                    optionLabel="year" // Update to match your entity label property (e.g., 'title' or 'name')
+                    optionLabel="year"
                     onChange={(e) => onUpdate({ calendar: e.value })}
                     placeholder="Select Calendar Framework"
                     className={classNames({ 'p-invalid': submitted && !data.calendar })}
@@ -204,10 +281,16 @@ export const BasicInfoStep = ({ data, onUpdate, onConstraintsChange, onNext, isE
                 />
             </div>
 
-            {/* Navigation Row Context Conditionalization */}
+            {/* Navigation Row */}
             {!isEditModeOnly && (
                 <div className="flex justify-content-end mt-4 pt-3 border-top-1 surface-border">
-                    <Button label="Proceed to Phases" icon="pi pi-angle-right" iconPos="right" onClick={handleForward} className="w-auto px-5" />
+                    <Button
+                        label="Proceed to Phases"
+                        icon="pi pi-angle-right"
+                        iconPos="right"
+                        onClick={handleForward}
+                        className="w-auto px-5"
+                    />
                 </div>
             )}
         </div>

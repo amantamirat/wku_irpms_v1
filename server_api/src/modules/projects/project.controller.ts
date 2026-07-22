@@ -20,7 +20,7 @@ export class ProjectController {
       // 1. Authentication Guard
       if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
-      const { calendar, grant, title, summary, themes, collaborators, phases } = req.body;
+      const { calendar, grant, applicant, title, summary, themes, collaborators, phases } = req.body;
 
       // 2. Construct the DTO using the authenticated user's ID as the applicant
       const dto: CreateGrantProjectDTO = {
@@ -28,7 +28,7 @@ export class ProjectController {
         grant,
         title,
         summary,
-        applicant: req.auth.userId,
+        applicant,
         themes: themes || [],
         collaborators: collaborators || [],
         phases: phases || []
@@ -50,13 +50,14 @@ export class ProjectController {
     try {
       if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
-      const { grant, title, summary, themes } = req.body;
+      const { grant, calendar, title, summary, themes, applicant } = req.body;
 
       const dto: CreateProjectDTO = {
         grant: grant,
+        calendar,
         title,
         summary,
-        applicant: req.auth.userId,
+        applicant,
         themes: themes
       };
       const created = await this.service.create(dto);
@@ -122,6 +123,7 @@ export class ProjectController {
             populate: {
               applicant: true,
               grant: true,
+              calendar: true,
               currentStage: true
             }
           }

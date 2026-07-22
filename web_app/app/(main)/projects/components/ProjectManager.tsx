@@ -37,6 +37,7 @@ const ProjectManager = ({ applicant, grant, calendar, call, workspace, onItemsCh
     const columns = useMemo(() => {
         const cols: any[] = [
             { header: "Grant Source", field: "grant.title", sortable: true },
+            { header: "Calendar", field: "calendar.year", sortable: true },
             {
                 header: "Title",
                 field: "title",
@@ -51,7 +52,7 @@ const ProjectManager = ({ applicant, grant, calendar, call, workspace, onItemsCh
 
         if (!applicant) {
             cols.push({
-                header: "Applicant",
+                header: "Lead PI",
                 field: "applicant.name",
                 sortable: true,
                 body: (p: Project) => (

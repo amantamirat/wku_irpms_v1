@@ -27,6 +27,7 @@ export interface IProject extends Document {
     themes: mongoose.Types.ObjectId[];
     currentStage?: mongoose.Types.ObjectId;
     status: ProjectStatus;
+    createdBy?: mongoose.Types.ObjectId; // User who created the record
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -41,6 +42,7 @@ const ProjectSchema = new Schema<IProject>({
     calendar: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.CALENDAR,
+        required: true,
         //immutable: true,
     },
     call: {
@@ -99,7 +101,13 @@ const ProjectSchema = new Schema<IProject>({
         enum: Object.values(ProjectStatus),
         default: ProjectStatus.draft,
         required: true
-    }
+    },
+
+    createdBy: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.USER,
+    },
+
 
 }, { timestamps: true });
 

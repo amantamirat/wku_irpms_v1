@@ -39,7 +39,7 @@ const SaveCollaborator = ({
 
     // Professional Fetching: Only load users if we are ADDING a new collaborator
     useEffect(() => {
-        const fetchApplicants = async () => {
+        const fetchUsers = async () => {
             if (visible && !isEditMode) {
                 setLoading(true);
                 try {
@@ -52,7 +52,7 @@ const SaveCollaborator = ({
                 }
             }
         };
-        fetchApplicants();
+        fetchUsers();
     }, [visible, isEditMode]);
 
     const validate = () => {

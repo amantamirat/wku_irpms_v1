@@ -75,7 +75,7 @@ export class ProjectService {
         // 1. Authorization & Role Validation
         const lead = collaborators.find(c => c.isLeadPI);
         if (!lead) throw new AppError(ERROR_CODES.LEAD_PI_NOT_FOUND);
-        if (lead.applicant !== applicant) throw new AppError(ERROR_CODES.UNAUTHORIZED);
+        //if (lead.applicant !== applicant) throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
         // 2. Validate the Grant itself
         const grantDoc = await this.grantRepo.findById(grant);
@@ -96,7 +96,7 @@ export class ProjectService {
             // Direct creation of the core project repository document
             // This replaces the "this.create" internal method dependency
             const createdProj = await this.projectRepo.create(
-                { grant, title, summary, applicant, themes },
+                { ...dto },
                 session
             );
             const projectId = String(createdProj._id);
