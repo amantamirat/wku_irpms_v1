@@ -1,29 +1,13 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
-import { IOrganizationRepository, OrganizationRepository } from '../organization/organization.repository';
-import { IThematicRepository, ThematicRepository } from '../thematics/thematic.repository';
+import { callRepo, compositionRepo, constraintRepo, grantRepo, organizationRepo, projectRepo, thematicRepo } from '../../core/container';
 import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../auth/auth.middleware';
-import { GrantAllocationRepository } from './allocations/grant.allocation.repository';
-import { CompositionRepository, ICompositionRepository } from './compositions/composition.repository';
-import { ConstraintRepository, IConstraintRepository } from './constraints/constraint.repository';
 import { GrantController } from './grant.controller';
-import { GrantRepository } from './grant.repository';
 import { GrantService } from './grant.service';
-import { GrantStageRepository, IGrantStageRepository } from './stages/grant.stage.repository';
-import { CallRepository } from '../calls/call.repository';
-import { ProjectRepository } from '../projects/project.repository';
 
-const repository: GrantRepository = new GrantRepository();
-const organizationRepo: IOrganizationRepository = new OrganizationRepository();
-const thematicRepository: IThematicRepository = new ThematicRepository();
-const constraintRepo: IConstraintRepository = new ConstraintRepository();
-const compositionRepo: ICompositionRepository = new CompositionRepository();
-const grantStageRepo: IGrantStageRepository = new GrantStageRepository();
-const callRepo = new CallRepository();
-const projectRepo = new ProjectRepository();
 
-const service = new GrantService(repository, organizationRepo, thematicRepository, constraintRepo,
-  compositionRepo, grantStageRepo, callRepo, projectRepo
+const service = new GrantService(grantRepo, organizationRepo, thematicRepo, constraintRepo,
+  compositionRepo, callRepo, projectRepo
 );
 const controller = new GrantController(service);
 const router = Router();
@@ -48,7 +32,7 @@ router.get(
 router.get('/:id', verifyActiveAccount,
   checkPermission([PERMISSIONS.GRANT.READ]),
   controller.getById);
-  
+
 
 router.put(
   '/:id',

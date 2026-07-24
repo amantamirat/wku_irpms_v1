@@ -26,7 +26,7 @@ import grantAllocationsRoutes from './modules/grants/allocations/grant.allocatio
 
 import calendarRoutes from './modules/calendar/calendar.routes';
 import callRoutes from './modules/calls/call.routes';
-import callStageRoutes from './modules/calls/stages/call.stage.routes';
+import callStageRoutes from './modules/calls/stages/stage.routes';
 
 import projectRoutes from './modules/projects/project.routes';
 import collaboratorRoutes from './modules/projects/collaborators/collaborator.routes';
@@ -34,7 +34,7 @@ import collaboratorRoutes from './modules/projects/collaborators/collaborator.ro
 import phaseRoutes from './modules/projects/phase/phase.routes';
 import phaseDocRoutes from './modules/projects/phase/documents/phase.doc.routes';
 
-import projectApplicationRoutes from './modules/projects/applications/project.application.routes';
+import projectApplicationRoutes from './modules/projects/applications/application.routes';
 import reviewerRoutes from './modules/reviewers/reviewer.routes';
 import resultRoutes from './modules/reviewers/results/result.routes';
 
@@ -51,7 +51,7 @@ import path from 'path';
 import { SeedService } from './util/seed.service';
 import { SocketService } from './modules/notifications/socket.service';
 import { LegacySeeder } from './util/legacy/legacy.seeder';
-import { calendarRepo, grantRepo, newProjectService, organizationRepo, themeRepo, userRepo } from './core/container';
+import { calendarRepo, grantRepo, organizationRepo, projectService, themeRepo, userRepo } from './core/container';
 
 dotenv.config();
 const app: Application = express();
@@ -136,12 +136,12 @@ const PORT = process.env.SERVER_PORT || 5000;
       grantRepo,
       themeRepo,
       calendarRepo,
-      newProjectService
+      projectService
     );
     //seeder.seedProjects("Internal Thematic Grant");
     //seeder.seedColleges();
     //seeder.seedDepartments();
-    //seeder.seedUsers();
+   // seeder.seedUsers();
 
     // 2. Create the HTTP server explicitly using your Express app
     const httpServer = http.createServer(app);

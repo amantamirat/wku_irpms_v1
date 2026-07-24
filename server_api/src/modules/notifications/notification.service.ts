@@ -5,7 +5,7 @@ import { SocketService } from "./socket.service";
 import { ClientSession } from "mongoose";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
-import { ApplicationStatus } from "../projects/applications/project.application.model";
+import { ApplicationStatus } from "../projects/applications/application.model";
 import { SettingKey } from "../settings/setting.model";
 import { SettingService } from "../settings/setting.service";
 

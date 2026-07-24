@@ -26,6 +26,7 @@ const ApplyWizard = ({ call, constraints, onComplete }: ApplyWizardProps) => {
         title: '',
         summary: '',
         themes: [],
+        applicant: activeAppUser?._id,
         collaborators: [{ applicant: activeAppUser as any, role: "Principal Investigator", isLeadPI: true }],
         phases: [{ title: '', order: 1, budget: 0, duration: 0, description: '' }]
     });

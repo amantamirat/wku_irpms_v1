@@ -4,18 +4,22 @@ import { Response } from "express";
 import { errorResponse, successResponse } from "../../common/helpers/response";
 import { AuthenticatedRequest } from "../auth/auth.middleware";
 import { ProjectService } from "./project.service";
-import { ApplyProjectDTO, CreateGrantProjectDTO, CreateProjectDTO, UpdateProjectDTO } from "./project.dto";
 import { DeleteDto } from "../../common/dtos/delete.dto";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { ProjectStatus } from "./project.model";
+import { CreateProjectDTO, ApplyProjectDTO, UpdateProjectDTO } from "./project.dto";
 
 export class ProjectController {
 
 
   constructor(private readonly service: ProjectService) { }
 
-  createFromGrant = async (req: AuthenticatedRequest, res: Response) => {
+  // -----------------------
+  // Create
+  // -----------------------
+
+  create = async (req: AuthenticatedRequest, res: Response) => {
     try {
       // 1. Authentication Guard
       if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
@@ -23,7 +27,7 @@ export class ProjectController {
       const { calendar, grant, applicant, title, summary, themes, collaborators, phases } = req.body;
 
       // 2. Construct the DTO using the authenticated user's ID as the applicant
-      const dto: CreateGrantProjectDTO = {
+      const dto: CreateProjectDTO = {
         calendar,
         grant,
         title,
@@ -31,11 +35,12 @@ export class ProjectController {
         applicant,
         themes: themes || [],
         collaborators: collaborators || [],
-        phases: phases || []
+        phases: phases || [],
+        userId: req.auth.userId
       };
 
       // 3. Delegate execution to the new service method
-      const created = await this.service.createFromGrant(dto);
+      const created = await this.service.create(dto);
       // 4. Send clean success framework response
       successResponse(res, 201, "Grant project created successfully", created);
     } catch (err: any) {
@@ -43,29 +48,8 @@ export class ProjectController {
       errorResponse(res, 400, err.message, err);
     }
   };
-  // -----------------------
-  // Create
-  // -----------------------
-  create = async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
-      const { grant, calendar, title, summary, themes, applicant } = req.body;
 
-      const dto: CreateProjectDTO = {
-        grant: grant,
-        calendar,
-        title,
-        summary,
-        applicant,
-        themes: themes
-      };
-      const created = await this.service.create(dto);
-      successResponse(res, 201, "Project created successfully", created);
-    } catch (err: any) {
-      errorResponse(res, 400, err.message, err);
-    }
-  };
 
   apply = async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -83,13 +67,15 @@ export class ProjectController {
       const relativeDocPath = path.relative(process.cwd(), req.file.path).replace(/\\/g, '/');
       const dto: ApplyProjectDTO = {
         call: project.call,
+        grant: "",
         title: project.title,
         summary: project.summary,
-        applicant: req.auth.userId,
+        applicant: project.applicant,
         collaborators: project.collaborators || [],
         themes: project.themes || [],
         phases: project.phases || [],
         docPath: relativeDocPath, // Saved cleanly to your DB
+        userId: req.auth.userId,
       };
       const submitted = await this.service.apply(dto);
       successResponse(res, 201, "Project submitted successfully", submitted);

@@ -10,11 +10,12 @@ export enum CallStatus {
     closed = "closed"
 }
 
+/*
 export type CallDeadline = {
     grantStage: string | GrantStage;
     submission: string | Date;
     evaluation: string | Date;
-};
+};*/
 
 // 2. Update your main Call type
 export type Call = {
@@ -23,10 +24,10 @@ export type Call = {
     calendar?: string | Calendar;
     organization?: string | Organization;
     title: string;
-    budget?: number;
-    usedBudget?: number;
+    //allocatedBudget?: number;
+    //usedBudget?: number;
     description?: string | null;
-    deadlines?: CallDeadline[]; // <-- Added the deadlines array here
+    deadline?: Date;
     status: CallStatus;
     createdAt?: Date;
     updatedAt?: Date;

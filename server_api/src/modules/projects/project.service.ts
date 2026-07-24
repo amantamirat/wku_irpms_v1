@@ -1,7 +1,6 @@
 // project.service.ts
 import {
     ApplyProjectDTO,
-    CreateGrantProjectDTO,
     CreateProjectDTO,
     GetProjectsDTO,
     UpdateProjectDTO,
@@ -28,11 +27,11 @@ import { PhaseService } from "./phase/phase.service";
 import { ProjectAuth } from "./project.auth";
 import { ProjectStatus } from "./project.model";
 import { PROJECT_TRANSITIONS } from "./project.state-machine";
-import { IProjectApplicationRepository } from "./applications/project.application.repository";
-import { ProjectApplicationService } from "./applications/project.application.service";
+import { IApplicationRepository } from "./applications/application.repository";
+import { ApplicationService } from "./applications/application.service";
 import { NotificationService } from "../notifications/notification.service";
 import { CompositionValidator } from "../grants/compositions/composition.validator";
-import { ICallStageRepository } from "../calls/stages/call.stage.repository";
+import { IStageRepository } from "../calls/stages/stage.repository";
 import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
 import { GrantStatus } from "../grants/grant.model";
 import { GrantStageRepository, IGrantStageRepository } from "../grants/stages/grant.stage.repository";
@@ -42,194 +41,68 @@ export class ProjectService {
 
     constructor(
         private readonly projectRepo: IProjectRepository,
-        private readonly projAuth: ProjectAuth,
-        private readonly allocRepo: IGrantAllocationRepository,
-        private readonly callRepo: ICallRepository,
-        private readonly callStageRepo: ICallStageRepository,
         private readonly collabRepo: ICollaboratorRepository,
-        private readonly collabService: CollaboratorService,
         private readonly phaseRepo: IPhaseRepository,
+        private readonly grantRepo: IGrantRepository,
+        private readonly callRepo: ICallRepository,
+        private readonly stageRepo: IStageRepository,
+        private readonly collabService: CollaboratorService,
         private readonly phaseService: PhaseService,
-        private readonly projectStageRepo: IProjectApplicationRepository,
-        private readonly projectStageService: ProjectApplicationService,
+        private readonly applicationService: ApplicationService,
         private readonly constValidator: ConstraintValidator,
-        private readonly notificationService: NotificationService,
-        private readonly compValidator = new CompositionValidator(),
-        private readonly grantRepo: IGrantRepository = new GrantRepository(),
-        private readonly grantStageRepo: IGrantStageRepository = new GrantStageRepository(),
+        private readonly compValidator: CompositionValidator,
+
+        private readonly projAuth: ProjectAuth = new ProjectAuth(projectRepo),
+        private readonly notificationService?: NotificationService,
     ) { }
 
 
     async validateProject(project: string, applicant: string, session?: ClientSession) {
-        const projectDoc = await this.projAuth.authProject(project, applicant, session);
+        const projectDoc = await this.projAuth.authProject(project, applicant);
         if (projectDoc.status !== ProjectStatus.draft) {
             throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
         }
         return projectDoc;
     }
 
+    async create(dto: CreateProjectDTO, options?: { skipValidation?: boolean }) {
+        const { grant, title, summary, applicant, collaborators, phases, themes, userId } = dto;
 
-    async createFromGrant(dto: CreateGrantProjectDTO) {
-        const { grant, title, summary, applicant, themes, collaborators, phases } = dto;
-
-        // 1. Authorization & Role Validation
-        const lead = collaborators.find(c => c.isLeadPI);
-        if (!lead) throw new AppError(ERROR_CODES.LEAD_PI_NOT_FOUND);
-        //if (lead.applicant !== applicant) throw new AppError(ERROR_CODES.UNAUTHORIZED);
-
-        // 2. Validate the Grant itself
-        const grantDoc = await this.grantRepo.findById(grant);
-        if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
-        if (grantDoc.status !== GrantStatus.active) throw new AppError(ERROR_CODES.GRANT_NOT_ACTIVE);
-
-        // 3. Complete structural and compliance validation rules
-        await this.constValidator.validateAll(grant, { participantCount: collaborators.length, phases, themes, title, summary });
-        await this.compValidator.validateAll(grant, collaborators);
-
-        const skipValidation = { skipValidation: true };
-
-        // 4. Start a Mongo Database Transaction Session
-        const session = await mongoose.startSession();
-        session.startTransaction();
-
-        try {
-            // Direct creation of the core project repository document
-            // This replaces the "this.create" internal method dependency
-            const createdProj = await this.projectRepo.create(
-                { ...dto },
-                session
-            );
-            const projectId = String(createdProj._id);
-
-            // Explicitly create the Lead PI Collaborator record here instead
-            await this.collabService.create({
-                project: projectId,
-                projectTitle: title,
-                applicant: applicant,
-                role: "Principal Investigator", // Or lead.role if dynamic
-                userId: applicant
-            }, skipValidation, session);
-
-            // Create secondary Collaborators (skipping the lead, who we just added above)
-            for (const collab of collaborators) {
-                if (collab.applicant === applicant) {
-                    continue;
-                }
-                await this.collabService.create({
-                    project: projectId,
-                    applicant: collab.applicant,
-                    projectTitle: title,
-                    role: collab.role,
-                    userId: applicant
-                }, skipValidation, session);
-            }
-
-            // Sort and create project Phases
-            const orderedPhases = [...phases].sort((a, b) => a.order - b.order);
-            for (const phase of orderedPhases) {
-                await this.phaseService.create({
-                    project: projectId,
-                    order: phase.order,
-                    title: phase.title,
-                    budget: phase.budget,
-                    duration: phase.duration,
-                    description: phase.description,
-                    applicantId: applicant
-                }, skipValidation, session);
-            }
-
-            // Commit transaction and return project
-            await session.commitTransaction();
-            return createdProj;
-
-        } catch (error) {
-            await session.abortTransaction();
-            throw error;
-        } finally {
-            session.endSession();
-        }
-    }
-
-    ///*
-    async create(dto: CreateProjectDTO, options?: { skipValidation?: boolean }, session?: ClientSession) {
-        const { grant, title, summary, themes, applicant } = dto
         if (!options?.skipValidation) {
             const grantDoc = await this.grantRepo.findById(grant);
             if (!grantDoc) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
             if (grantDoc.status !== GrantStatus.active) throw new Error(ERROR_CODES.GRANT_NOT_ACTIVE);
             const grantId = String(grantDoc._id);
+            //check title uniqueness 
             await this.compValidator.validatePI(grantId, applicant);
             await this.constValidator.validateMetadata(grantId, title, summary);
             await this.constValidator.validateThemes(grantId, themes);
         }
-        const created = await this.projectRepo.create(dto, session);
-        if (created) {
-            await this.collabService.create({
-                project: String(created._id),
-                projectTitle: title,
-                applicant: applicant,
-                role: "Principal Investigator",
-                userId: applicant
-            }, { skipValidation: true },
-                session);
+        const created = await this.projectRepo.create(dto);
+        if (!created) {
+            throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
         }
-        return created;
-    }
-    //*/
-
-
-    async apply(dto: ApplyProjectDTO) {
-        const { call, title, summary, applicant, collaborators, phases, themes, docPath } = dto;
-        const lead = collaborators.find(c => c.isLeadPI);
-        if (!lead) throw new AppError(ERROR_CODES.LEAD_PI_NOT_FOUND);
-        if (lead.applicant !== applicant) throw new AppError(ERROR_CODES.UNAUTHORIZED);
-
-        const callDoc = await this.callRepo.findById(call);
-        if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
-        if (callDoc.status !== CallStatus.active) throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
-        const deadline = callDoc?.deadlines?.[0]?.submission;
-        if (!deadline) {
-            throw new AppError(ERROR_CODES.DEADLINE_NOT_FOUND);
-        }
-        if (deadline < new Date()) {
-            throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
-        }
-
-        const grantId = String(callDoc.grant);
-        await this.constValidator.validateAll(grantId, { participantCount: collaborators.length, phases, themes, title, summary });
-        await this.compValidator.validateAll(grantId, collaborators);
-        const skipValidation = { skipValidation: true };
-
-        const grantStage = await this.grantStageRepo.findOne(grantId, 1);
-        if (!grantStage) {
-            throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-        }
-
-        //Start a Mongo Database Session
-        const session = await mongoose.startSession();
-        session.startTransaction();
-        try {
-            const createdProj = await this.create(
-                { call, grant: grantId, title, summary, applicant, themes },
-                skipValidation, session);
-
-            const projectId = String(createdProj._id);
-
+        const projectId = String(created._id);
+        if (collaborators?.length) {
             for (const collab of collaborators) {
-                if (collab.applicant === applicant) {
-                    continue;
-                }
-                await this.collabService.create({
-                    project: projectId,
-                    applicant: collab.applicant,
-                    projectTitle: title,
-                    role: collab.role,
-                    userId: applicant
-                }, skipValidation, session);
+                await this.collabService.create(
+                    {
+                        project: projectId,
+                        projectTitle: title,
+                        applicant: collab.applicant,
+                        isLeadPI: applicant === collab.applicant,
+                        status: userId === collab.applicant ? CollaboratorStatus.verified : CollaboratorStatus.pending,
+                        role: collab.isLeadPI
+                            ? "Principal Investigator"
+                            : collab.role
+                    }, options);
             }
-
-            const orderedPhases = [...phases].sort((a, b) => a.order - b.order);
-
+        }
+        // Create phases
+        if (phases?.length) {
+            const orderedPhases = [...phases].sort(
+                (a, b) => a.order - b.order
+            );
             for (const phase of orderedPhases) {
                 await this.phaseService.create(
                     {
@@ -238,29 +111,48 @@ export class ProjectService {
                         title: phase.title,
                         budget: phase.budget,
                         duration: phase.duration,
-                        description: phase.description,
-                        applicantId: applicant
-                    }, skipValidation, session);
+                        description: phase.description
+                    }, options);
             }
+        }
+        return created;
+    }
 
-            await this.projectStageService.create(
-                {
-                    project: projectId,
-                    projectTitle: title,
-                    grantStage: String(grantStage._id),
-                    stageName: callDoc.title,
-                    documentPath: docPath,
-                    applicantId: applicant
-                },
-                skipValidation,
-                session);
-            await session.commitTransaction();
+
+    async apply(dto: ApplyProjectDTO) {
+        const { call, title, summary, applicant, collaborators, phases, themes, userId, docPath } = dto;
+        const lead = collaborators.find(c => c.isLeadPI);
+        if (!lead) throw new AppError(ERROR_CODES.LEAD_PI_NOT_FOUND);
+        if (lead.applicant !== userId) throw new AppError(ERROR_CODES.UNAUTHORIZED);
+
+        const callDoc = await this.callRepo.findById(call);
+        if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+        if (callDoc.status !== CallStatus.active) throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
+
+        const stageDoc = await this.stageRepo.findOne(String(callDoc._id), 1);
+        if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        const deadline = stageDoc.deadline;
+        if (deadline < new Date()) {
+            throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
+        }
+
+        const calendarId = String(callDoc.calendar);
+        const grantId = String(callDoc.grant);
+        await this.constValidator.validateAll(grantId, { participantCount: collaborators.length, phases, themes, title, summary });
+        await this.compValidator.validateAll(grantId, collaborators);
+        const skipValidation = { skipValidation: true };
+        try {
+            const createdProj = await this.create({ ...dto, grant: grantId, calendar: calendarId },
+                skipValidation);
+            const projectId = String(createdProj._id);
+            await this.applicationService.create({
+                project: projectId, stage: String(stageDoc._id), documentPath: docPath, userId: userId
+            }, skipValidation);
             return createdProj;
         } catch (error) {
-            await session.abortTransaction();
             throw error;
         } finally {
-            session.endSession();
+
         }
     }
 

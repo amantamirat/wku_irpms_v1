@@ -3,18 +3,18 @@ import React, { useEffect, useState } from 'react';
 import { Skeleton } from 'primereact/skeleton';
 import { Tag } from 'primereact/tag';
 import { format } from 'date-fns'; // Recommended for date formatting
-import { CallStageApi } from '../calls/stages/api/call.stage.api';
-import { CallStage } from '../calls/stages/models/call.stage.model';
+import { StageApi } from '../calls/stages/api/stage.api';
+import { Stage } from '../calls/stages/models/stage.model';
 
 const DeadlineCalendar = () => {
-    const [stages, setStages] = useState<CallStage[]>([]);
+    const [stages, setStages] = useState<Stage[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchDeadlines = async () => {
             try {
                 // Fetch stages - you might want to add a filter for 'active' or 'upcoming'
-                const data = await CallStageApi.getAll({ populate: true });
+                const data = await StageApi.getAll({ populate: true });
 
                 // Sort by deadline ascending
                 const sorted = data
@@ -58,7 +58,7 @@ const DeadlineCalendar = () => {
                                 {typeof stage.call === 'object' ? stage.call.title : 'Project Stage'}
                             </div>
                             <div className="text-600 text-sm">
-                                {typeof stage.grantStage === 'object' ? stage.grantStage.name : `Stage ${stage.order}`}
+                                {typeof stage.name === 'object' ? stage.name.name : `Stage ${stage.order}`}
                             </div>
                         </div>
                         {isUrgent && <Tag severity="warning" value="Soon" />}

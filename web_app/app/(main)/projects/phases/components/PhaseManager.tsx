@@ -73,14 +73,21 @@ const PhaseManager = ({ project, updateProject }: PhaseManagerProps) => {
     }, [projectId]);
 
 
-
-    // ✅ CRITICAL MEMOIZATION LOOP: Unchanged & protected from typing refreshes.
-    const Manager = useMemo(() => createEntityManager<Phase, GetPhaseOptions | undefined>({
-        title: "Project Phases",
-        itemName: "Phase",
-        api: PhaseApi,
-        onItemsChange: handleItemsChange,
-        columns: [
+    const columns = useMemo(() => {
+        const cols: any[] = [];
+        if (!project) {
+            cols.push({
+                header: "Project",
+                field: "project.title",
+                sortable: true,
+                body: (p: Phase) => (
+                    <div className="truncate text-sm" style={{ maxWidth: '250px' }}>
+                        {typeof p.project === "object" ? p.project?.title : "Loading ..."}
+                    </div>
+                )
+            });
+        }
+        cols.push(
             {
                 header: "Title",
                 field: "title",
@@ -122,7 +129,19 @@ const PhaseManager = ({ project, updateProject }: PhaseManagerProps) => {
                 sortable: true,
                 body: (p: Phase) => <MyBadge type="status" value={p.status ?? "Proposed"} />
             }
-        ],
+        );
+        return cols;
+    }, [project]);
+
+
+
+    // ✅ CRITICAL MEMOIZATION LOOP: Unchanged & protected from typing refreshes.
+    const Manager = useMemo(() => createEntityManager<Phase, GetPhaseOptions | undefined>({
+        title: "Project Phases",
+        itemName: "Phase",
+        api: PhaseApi,
+        onItemsChange: handleItemsChange,
+        columns: columns,
         createNew: canManagePhases ? () => ({
             project: projectRef.current, // Safely use reference
             title: '',
@@ -135,6 +154,7 @@ const PhaseManager = ({ project, updateProject }: PhaseManagerProps) => {
         permissionPrefix: "phase",
         query: () => ({
             project: projectId,
+            populate: !projectId ? true : false
         }),
         workflow: {
             statusField: "status",
@@ -144,7 +164,7 @@ const PhaseManager = ({ project, updateProject }: PhaseManagerProps) => {
         hideDefaultActions: !canManagePhases,
         disableEditRow: (row) => row.status !== PhaseStatus.proposed,
         disableDeleteRow: (row) => row.status !== PhaseStatus.proposed,
-        hideSearch: true
+        hideSearch: !projectId ? false : true
     }), [projectId, canManagePhases]);
 
     return <Manager />;

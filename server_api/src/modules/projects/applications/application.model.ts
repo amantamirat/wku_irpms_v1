@@ -8,10 +8,10 @@ export enum ApplicationStatus {
     rejected = 'rejected'
 }
 
-export interface IProjectApplication extends Document {
+export interface IApplication extends Document {
     _id: mongoose.Types.ObjectId;
-    grantStage: mongoose.Types.ObjectId;
     project: mongoose.Types.ObjectId;
+    stage: mongoose.Types.ObjectId;
     documentPath: string;
     totalScore: number | null;
     status: ApplicationStatus;
@@ -19,16 +19,16 @@ export interface IProjectApplication extends Document {
     updatedAt?: Date;
 }
 
-const ProjecApplicationSchema = new Schema<IProjectApplication>({
-    grantStage: {
-        type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.GRANT_STAGE,
-        immutable: true,
-        required: true
-    },
+const ApplicationSchema = new Schema<IApplication>({
     project: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.PROJECT,
+        immutable: true,
+        required: true
+    },
+    stage: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.STAGE,
         immutable: true,
         required: true
     },
@@ -49,7 +49,6 @@ const ProjecApplicationSchema = new Schema<IProjectApplication>({
     },
 }, { timestamps: true });
 
-ProjecApplicationSchema.index({ project: 1, grantStage: 1 }, { unique: true });
-
-export const ProjectApplication = model<IProjectApplication>(COLLECTIONS.PROJECT_APPLICATION, ProjecApplicationSchema);
+ApplicationSchema.index({ project: 1, stage: 1 }, { unique: true });
+export const Application = model<IApplication>(COLLECTIONS.APPLICATION, ApplicationSchema);
 

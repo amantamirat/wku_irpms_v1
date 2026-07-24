@@ -18,8 +18,6 @@ export interface CreateCallDTO {
     calendar: string;
     title: string;
     description?: string;
-    budget: number;
-    deadlines: CallDeadlineDTO[];
     status?: CallStatus;
     userId?: string;
 }
@@ -31,7 +29,7 @@ export interface UpdateCallDTO {
         title: string;
         description: string;
         budget: number;
-        deadlines: CallDeadlineDTO[];
+        deadline: Date | null;
     }>;
     userId?: string;
 }

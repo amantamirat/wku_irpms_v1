@@ -14,6 +14,7 @@ import { ConstraintRepository } from '../../grants/constraints/constraint.reposi
 import { ConstraintValidator } from '../../grants/constraints/constraint.validator';
 import { ThemeRepository } from '../../thematics/themes/theme.repository';
 import { ProjectAuth } from '../project.auth';
+import { collabService } from '../../../core/container';
 
 const repository = new CollaboratorRepository();
 const projectRepo = new ProjectRepository();
@@ -24,11 +25,11 @@ const notificationService = new NotificationService(
     new SettingService(new SettingRepository())
 );
 const constValidator = new ConstraintValidator(new ConstraintRepository(), new ThemeRepository());
-
+/*
 const service = new CollaboratorService(
     repository, projectRepo, projAuth, appRepository, constValidator, notificationService
-)
-const controller = new CollaboratorController(service);
+)*/
+const controller = new CollaboratorController(collabService);
 const router: Router = Router();
 
 router.post('/', verifyActiveAccount,

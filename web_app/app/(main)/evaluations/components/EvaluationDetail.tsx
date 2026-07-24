@@ -21,11 +21,6 @@ const EvaluationDetail = ({ evaluation }: EvaluationDetailProps) => {
             header: "Critera",
             permission: "criterion:read",
             content: <CriterionManager evaluation={evaluation} />
-        },
-        {
-            header: "Grant Stage",
-            permission: "grant.stage:read",
-            content: <GrantStageManager evaluation={evaluation} />
         }
     ], [evaluation]);
 

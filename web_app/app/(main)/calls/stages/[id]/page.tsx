@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { CallStage } from "../models/call.stage.model";
-import { CallStageApi } from "../api/call.stage.api";
+import { Stage } from "../models/stage.model";
+import { StageApi } from "../api/stage.api";
 import StageDetail from "../components/StageDetail";
 
 
@@ -11,13 +11,13 @@ export default function StageDetailPage() {
     const params = useParams();
     const id = params.id as string;
 
-    const [stage, setStage] = useState<CallStage | null>(null);
+    const [stage, setStage] = useState<Stage | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchStage = async () => {
             try {
-                const data = await CallStageApi.getById!(id);
+                const data = await StageApi.getById!(id);
                 setStage(data);
             } finally {
                 setLoading(false);

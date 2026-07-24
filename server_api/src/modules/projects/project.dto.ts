@@ -27,8 +27,9 @@ export interface GetProjectsDTO {
 }
 
 
-export interface CreateGrantProjectDTO {
+export interface CreateProjectDTO {
     calendar?: string;
+    call?:string;
     grant: string;
     title: string;
     summary?: string;
@@ -36,9 +37,10 @@ export interface CreateGrantProjectDTO {
     themes: string[];
     collaborators: CollaboratorDto[];
     phases: PhaseDto[];
+    userId?: string;
 }
 
-// CREATE Project
+/*
 export interface CreateProjectDTO {
     call?: string;
     calendar?: string;
@@ -51,15 +53,10 @@ export interface CreateProjectDTO {
     totalDuration?: number;
     status?: ProjectStatus;
 }
+*/
 
-export interface ApplyProjectDTO {
+export interface ApplyProjectDTO extends CreateProjectDTO {
     call: string;
-    title: string;
-    summary?: string;
-    applicant: string;
-    themes: string[];
-    collaborators: CollaboratorDto[];
-    phases: PhaseDto[];
     docPath: string;
 }
 

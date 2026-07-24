@@ -126,7 +126,7 @@ export class ProjectRepository implements IProjectRepository {
         return dbQuery.lean<IProject[]>().exec();
     }
 
-    async create(dto: CreateProjectDTO, session?: ClientSession) {
+    async create(dto: CreateProjectDTO) {
         const data = {
             ...dto,
             calendar: dto.calendar ? new mongoose.Types.ObjectId(dto.calendar) : undefined,
@@ -136,9 +136,9 @@ export class ProjectRepository implements IProjectRepository {
             themes: dto.themes?.map(thm => new mongoose.Types.ObjectId(thm)),
         };
 
-        const created = await Project.create([data], { session });
+        const created = await Project.create(data);
 
-        return created[0];
+        return created;
     }
 
     async update(id: string, dtoData: UpdateProjectDTO["data"]): Promise<IProject | null> {

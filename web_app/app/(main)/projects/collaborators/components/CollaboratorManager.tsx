@@ -12,7 +12,7 @@ import { useMemo } from "react";
 
 interface CollaboratorManagerProps {
     project?: Project;
-    applicant?: User;
+    member?: User;
     collaborations?: Collaborator[]; // Added this
     onItemsChange?: (items: Collaborator[]) => void; // Added this
     hideSearch?: boolean; // Added this
@@ -20,7 +20,7 @@ interface CollaboratorManagerProps {
 
 const CollaboratorManager = ({ 
     project, 
-    applicant, 
+    member: member, 
     collaborations, 
     onItemsChange,
     hideSearch 
@@ -34,7 +34,7 @@ const CollaboratorManager = ({
     const columns = useMemo(() => {
         const cols: any[] = [];
 
-        if (!applicant) {
+        if (!member) {
             cols.push({
                 header: "Member",
                 field: "applicant.name",
@@ -94,7 +94,7 @@ const CollaboratorManager = ({
             }
         );
         return cols;
-    }, [applicant, project]);
+    }, [member, project]);
 
     const Manager = useMemo(() => 
         createEntityManager<Collaborator, GetCollaboratorsOptions | undefined>({
@@ -107,7 +107,7 @@ const CollaboratorManager = ({
             createNew: canManageTeam
                 ? () => ({
                     project: project,
-                    applicant: applicant ?? undefined,
+                    applicant: member ?? undefined,
                     isLeadPI: false,
                     status: CollaboratorStatus.pending
                 })
@@ -117,10 +117,10 @@ const CollaboratorManager = ({
             permissionPrefix: "collaborator",
             query: () => ({
                 project: project?._id,
-                applicant: applicant?._id,
+                applicant: member?._id,
                 populate: true,
             }),
-            workflow: applicant ? {
+            workflow: member ? {
                 statusField: "status",
                 transitions: COLLAB_TRANSITIONS,
                 statusOrder: COLLAB_STATUS_ORDER
@@ -130,7 +130,7 @@ const CollaboratorManager = ({
             disableDeleteRow: (row) => row.status === CollaboratorStatus.verified,
             hideSearch: hideSearch || !!project
         }), 
-    [columns, project, applicant, collaborations, canManageTeam, hideSearch, onItemsChange]);
+    [columns, project, member, collaborations, canManageTeam, hideSearch, onItemsChange]);
 
     return <Manager />;
 };

@@ -22,7 +22,7 @@ export interface PhaseDto {
 // ---------- CREATE DTO ----------
 export interface CreatePhaseDto extends PhaseDto {
     project: string;         // Hex String ID
-    applicantId?: string;     // Made required: needed for authorization check
+    userId?: string;     // Made required: needed for authorization check
 }
 
 // ---------- UPDATE DTO ----------

@@ -11,11 +11,11 @@ import { CompositionRepository, ICompositionRepository } from "./composition.rep
 
 export class CompositionValidator {
     constructor(
-        private readonly compositionRepo: ICompositionRepository = new CompositionRepository(),
-        private readonly userRepo: IUserRepository = new UserRepository(),
-        private readonly exprRepo: IExperienceRepository = new ExperienceRepository(),
-        private readonly specRepo: ISpecializationRepository = new SpecializationRepository(),
-        private readonly collabRepo: ICollaboratorRepository = new CollaboratorRepository(),
+        private readonly compositionRepo: ICompositionRepository,
+        private readonly userRepo: IUserRepository,
+        private readonly exprRepo: IExperienceRepository,
+        private readonly specRepo: ISpecializationRepository,
+        private readonly collabRepo: ICollaboratorRepository,
     ) { }
 
     // =====================================================

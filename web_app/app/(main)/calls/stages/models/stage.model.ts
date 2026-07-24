@@ -1,23 +1,29 @@
 import { Call } from "@/app/(main)/calls/models/call.model";
-import { CallStageStatus } from "./call.stage.state-machine";
+import { CallStageStatus } from "./stage.state-machine";
 import { GrantStage } from "@/app/(main)/grants/stages/models/grant.stage.model";
+import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
 
-export type CallStage = {
+export type Stage = {
     _id?: string;
     call: string | Call;
-    grantStage?: string | GrantStage;
+    name?: string;
     order: number;
     deadline: Date;
-    status: CallStageStatus;
+    evaluation?: string | Evaluation;
+    minReviewers?: number;
+    maxReviewers?: number;
+    minAcceptanceScore?: number;
+    //verificationDeadline?: Date;
+    status?: CallStageStatus;
     createdAt?: Date;
     updatedAt?: Date;
 };
 
-export interface GetCallStagesDTO {
+export interface GetStagesDTO {
     call?: string | Call;
-    grantStage?: string | GrantStage;
-    order?:number;
-    status?:CallStageStatus;
+    name?: string;
+    order?: number;
+    status?: CallStageStatus;
     populate?: boolean;
 }
 
@@ -25,14 +31,14 @@ export interface GetCallStagesDTO {
  * Validate call stage fields before submission
  */
 export const validateCallStage = (
-    stage: CallStage
+    stage: Stage
 ): { valid: boolean; message?: string } => {
 
     if (!stage.call) {
         return { valid: false, message: "Call reference is required." };
     }
 
-    if (!stage.grantStage) {
+    if (!stage.name) {
         return { valid: false, message: "Grant stage reference is required." };
     }
 
@@ -51,18 +57,18 @@ export const validateCallStage = (
  * Prepare call stage object for backend submission
  */
 export const sanitizeCallStage = (
-    stage: Partial<CallStage>
-): Partial<CallStage> => {
+    stage: Partial<Stage>
+): Partial<Stage> => {
     return {
         ...stage,
         call:
             typeof stage.call === "object" && stage.call !== null
                 ? (stage.call as Call)._id
                 : stage.call,
-        grantStage:
-            typeof stage.grantStage === "object" && stage.grantStage !== null
-                ? (stage.grantStage as GrantStage)._id
-                : stage.grantStage,
+        evaluation:
+            typeof stage.evaluation === "object" && stage.evaluation !== null
+                ? (stage.evaluation as Evaluation)._id
+                : stage.evaluation,
     };
 };
 
@@ -70,11 +76,14 @@ export const sanitizeCallStage = (
  * Create empty call stage
  */
 export const createEmptyCallStage = (
-    stage?: Partial<CallStage>
-): CallStage => ({
+    stage?: Partial<Stage>
+): Stage => ({
     call: stage?.call ?? "",
-    grantStage: stage?.grantStage ?? "",
+    name: stage?.name ?? "",
     order: 1,
     deadline: stage?.deadline ?? new Date(),
-    status: stage?.status ?? CallStageStatus.planned,
+    minReviewers: 1,
+    maxReviewers: 3,
+    minAcceptanceScore: 50,
+    //status: stage?.status ?? CallStageStatus.planned,
 });

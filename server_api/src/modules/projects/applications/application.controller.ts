@@ -2,19 +2,19 @@ import fs from "fs";
 import path from "path";
 import { Request, Response } from "express";
 import { errorResponse, successResponse } from "../../../common/helpers/response";
-import { CreateProjectApplicationDTO, GetProjectApplicationDTO } from "./project.application.dto";
+import { CreateApplicationDTO, GetApplicationDTO } from "./application.dto";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { AuthenticatedRequest } from "../../auth/auth.middleware";
-import { ProjectApplicationService } from "./project.application.service";
+import { ApplicationService } from "./application.service";
 
-export class ProjectStageController {
+export class ApplicationController {
 
 
 
-    constructor(private readonly service: ProjectApplicationService) {
+    constructor(private readonly service: ApplicationService) {
     }
     // ---------------------------------------------------
     // CREATE
@@ -28,11 +28,11 @@ export class ProjectStageController {
 
             const { project } = req.body;
             const relativeDocPath = path.relative(process.cwd(), req.file.path).replace(/\\/g, '/');
-            const dto: CreateProjectApplicationDTO = {
+            const dto: CreateApplicationDTO = {
                 project,
-                grantStage: '',
+                stage: '',
                 documentPath: relativeDocPath,
-                applicantId: req.auth.userId
+                userId: req.auth.userId
             };
             const created = await this.service.create(dto);
             successResponse(res, 201, "Project document created successfully", created);
@@ -101,9 +101,9 @@ export class ProjectStageController {
         try {
             const { project, grantStage, status, populate, skip, limit } = req.query;
 
-            const dto: GetProjectApplicationDTO = {
+            const dto: GetApplicationDTO = {
                 project: project as string,
-                grantStage: grantStage as string,
+                stage: grantStage as string,
                 //grantAllocation: grantAllocation as string,
                 //callStage: callStage as string,
                 status: status as any,

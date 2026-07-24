@@ -3,9 +3,8 @@ import path from 'path';
 import { IGrantRepository } from "../../modules/grants/grant.repository";
 import { IOrganizationRepository } from "../../modules/organization/organization.repository";
 import { CollaboratorDto } from "../../modules/projects/collaborators/collaborator.dto";
-import { NewProjectService } from '../../modules/projects/new.project.service';
 import { PhaseDto } from "../../modules/projects/phase/phase.dto";
-import { CreateGrantProjectDTO } from "../../modules/projects/project.dto";
+import { CreateProjectDTO } from "../../modules/projects/project.dto";
 import { IThemeRepository } from "../../modules/thematics/themes/theme.repository";
 import { IUserRepository } from "../../modules/users/user.repository";
 import { ExtractedMember, LegacyProjectDTO } from "./legacy.dto";
@@ -14,6 +13,7 @@ import { ERROR_CODES } from '../../common/errors/error.codes';
 import { Unit } from '../../common/constants/enums';
 import { ICalendarRepository } from '../../modules/calendar/calendar.repository';
 import { IProjectRepository } from '../../modules/projects/project.repository';
+import { ProjectService } from '../../modules/projects/project.service';
 
 export class LegacySeeder {
 
@@ -23,7 +23,7 @@ export class LegacySeeder {
         private readonly grantRepo: IGrantRepository,
         private readonly themeRepo: IThemeRepository,
         private readonly calendarRepo: ICalendarRepository,
-        private readonly projectService: NewProjectService
+        private readonly projectService: ProjectService
     ) {
 
     }
@@ -158,7 +158,7 @@ export class LegacySeeder {
     private async mapToCreateProjectDTO(
         item: LegacyProjectDTO,
         thematicId: string
-    ): Promise<CreateGrantProjectDTO> {
+    ): Promise<CreateProjectDTO> {
 
         const year =
             Number(item.Academic_Year
@@ -238,9 +238,9 @@ export class LegacySeeder {
                     String(grantDoc.thematic)
                 );
                 if (dto) {
-                    //console.log({ ...dto, grant: String(grantDoc._id) });
                     await this.projectService
-                        .create({ ...dto, grant: String(grantDoc._id) });
+                        .create({ ...dto, grant: String(grantDoc._id) }, { skipValidation: true }
+                        );
                     seeded = true;
                 }
             } catch (error) {
@@ -385,6 +385,7 @@ export class LegacySeeder {
             if (userExists)
                 continue;
 
+            //use service
             await this.userRepo.create({
                 name: parsed.name,
                 workspace: String(department._id),

@@ -1,13 +1,13 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
-import { CallStage, GetCallStagesDTO, sanitizeCallStage } from "../models/call.stage.model";
+import { Stage, StagesDTO, sanitizeCallStage } from "../models/stage.model";
 import { TransitionRequestDto } from "@/types/util";
 
 const end_point = "/call/stages";
 
-export const CallStageApi: EntityApi<CallStage, GetCallStagesDTO | undefined>
+export const StageApi: EntityApi<Stage, StagesDTO | undefined>
     & {
-        getFirstStage: (callId: string) => Promise<CallStage>;
+        getFirstStage: (callId: string) => Promise<Stage>;
     }
     = {
 
@@ -24,8 +24,8 @@ export const CallStageApi: EntityApi<CallStage, GetCallStagesDTO | undefined>
                 query.append("call", sanitized.call as string);
             }
 
-            if (options.grantStage) {
-                query.append("grantStage", sanitized.grantStage as string);
+            if (options.name) {
+                query.append("grantStage", sanitized.name as string);
             }
 
             if (sanitized.order !== undefined) {
@@ -48,12 +48,12 @@ export const CallStageApi: EntityApi<CallStage, GetCallStagesDTO | undefined>
     // ---------------------------
     // Get By Id
     // ---------------------------
-    async getById(id: string): Promise<CallStage> {
+    async getById(id: string): Promise<Stage> {
         return ApiClient.get(`${end_point}/${id}`);
     },
 
 
-    async getFirstStage(callId: string): Promise<CallStage> {
+    async getFirstStage(callId: string): Promise<Stage> {
         return ApiClient.get(`${end_point}/first-stage/${callId}`);
     },
 

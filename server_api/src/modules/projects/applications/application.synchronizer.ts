@@ -7,10 +7,10 @@ import { ProjectStatus } from "../project.model";
 import { IProjectRepository } from "../project.repository";
 import { PROJECT_TRANSITIONS } from "../project.state-machine";
 import {
-    IProjectApplication,
+    IApplication,
     ApplicationStatus
-} from "./project.application.model";
-import { IProjectApplicationRepository } from "./project.application.repository";
+} from "./application.model";
+import { IApplicationRepository } from "./application.repository";
 import { StageCategory } from "../../grants/stages/grant.stage.model";
 
 export interface IProjectSynchronizer {
@@ -25,7 +25,7 @@ export class ProjectStageSynchronizer
 
     constructor(
         private readonly projectRepo: IProjectRepository,
-        private readonly projectStageRepo: IProjectApplicationRepository,
+        private readonly projectStageRepo: IApplicationRepository,
         private readonly grantStageRepo: IGrantStageRepository
     ) { }
 
@@ -74,14 +74,14 @@ export class ProjectStageSynchronizer
 
             newStatus = ProjectStatus.submitted;
 
-            const currentStageDoc = projectDoc.currentStage as unknown as IProjectApplication;
+            const currentStageDoc = projectDoc.currentStage as unknown as IApplication;
 
             if (currentStageDoc.status === ApplicationStatus.rejected) {
                 newStatus = ProjectStatus.rejected;
             }
             else if (currentStageDoc.status === ApplicationStatus.accepted) {
 
-                const grantStageDoc = await this.grantStageRepo.findById(String(currentStageDoc.grantStage), session);
+                const grantStageDoc = await this.grantStageRepo.findById(String(currentStageDoc.stage), session);
                 if (!grantStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
 
                 const totalStages = await this.grantStageRepo.

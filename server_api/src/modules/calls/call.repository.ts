@@ -1,6 +1,4 @@
 import mongoose from "mongoose";
-import { AppError } from "../../common/errors/app.error";
-import { ERROR_CODES } from "../../common/errors/error.codes";
 import { CreateCallDTO, ExistsCallDTO, GetCallsOptions, UpdateCallDTO } from "./call.dto";
 import { Call, CallStatus, ICall } from "./call.model";
 
@@ -12,9 +10,6 @@ export interface ICallRepository {
     updateStatus(id: string, newStatus: CallStatus): Promise<ICall | null>;
     exists(filters: ExistsCallDTO): Promise<boolean>;
     delete(id: string): Promise<ICall | null>;
-    //Local Budget Operations
-    consumeBudget(callId: string, amount: number): Promise<ICall>;
-    reverseConsumedBudget(callId: string, amount: number): Promise<ICall>;
 }
 
 // MongoDB implementation
@@ -54,9 +49,6 @@ export class CallRepository implements ICallRepository {
             dbQuery = dbQuery.populate("grant");
             dbQuery = dbQuery.populate("calendar");
             dbQuery = dbQuery.populate("organization");
-            dbQuery = dbQuery.populate({
-                path: "deadlines.grantStage"
-            });
         }
 
         return dbQuery.lean<ICall[]>().exec();
@@ -76,7 +68,7 @@ export class CallRepository implements ICallRepository {
 
         if (dtoData.title) updateData.title = dtoData.title;
         if (dtoData.description) updateData.description = dtoData.description;
-        if (dtoData.budget) updateData.budget = dtoData.budget;
+        if (dtoData.deadline) updateData.deadline = dtoData.deadline;
 
         return Call.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
@@ -109,57 +101,6 @@ export class CallRepository implements ICallRepository {
     async delete(id: string) {
         return Call.findByIdAndDelete(id).exec();
     }
-    /**
-             * Consume budget directly.
-             * * Condition: allocatedAmount - usedBudget >= amount
-        */
-    async consumeBudget(callId: string, amount: number) {
-        const updated = await Call.findOneAndUpdate(
-            {
-                _id: new mongoose.Types.ObjectId(callId),
-                $expr: {
-                    $gte: [
-                        {
-                            $subtract: [
-                                "$budget",
-                                { $ifNull: ["$usedBudget", 0] }
-                            ]
-                        },
-                        amount
-                    ]
-                }
-            },
-            {
-                $inc: { usedBudget: amount }
-            },
-            { new: true }
-        );
 
-        if (!updated)
-            throw new AppError(ERROR_CODES.BUDGET_EXCEEDED);
 
-        return updated;
-    }
-
-    /**
-     * Reverse consumed budget.
-     * * Condition: usedBudget >= amount
-     */
-    async reverseConsumedBudget(callId: string, amount: number) {
-        const updated = await Call.findOneAndUpdate(
-            {
-                _id: new mongoose.Types.ObjectId(callId),
-                usedBudget: { $gte: amount }
-            },
-            {
-                $inc: { usedBudget: -amount }
-            },
-            { new: true }
-        );
-
-        if (!updated)
-            throw new AppError(ERROR_CODES.INVALID_BUDGET_REVERSAL);
-
-        return updated;
-    }
 }

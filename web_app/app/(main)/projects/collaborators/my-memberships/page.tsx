@@ -18,7 +18,7 @@ const CollaboratorPage = () => {
             </div>
             {user &&
                 <Fieldset legend={user.name}>
-                    <CollaboratorManager applicant={user} />
+                    <CollaboratorManager member={user} />
                 </Fieldset>
             }
         </div>

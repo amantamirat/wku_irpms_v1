@@ -3,8 +3,8 @@ import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { IUserRepository } from "../users/user.repository";
 import { ICollaboratorRepository } from "../projects/collaborators/collaborator.repository";
-import { IProjectApplicationRepository } from "../projects/applications/project.application.repository";
-import { ApplicationStatus } from "../projects/applications/project.application.model";
+import { IApplicationRepository } from "../projects/applications/application.repository";
+import { ApplicationStatus } from "../projects/applications/application.model";
 import { CreateReviewerDTO, GetReviewersDTO, UpdateReviewerDTO } from "./reviewer.dto";
 import { IReviewerRepository } from "./reviewer.repository";
 
@@ -24,7 +24,7 @@ export class ReviewerService {
 
     constructor(
         private readonly repository: IReviewerRepository,
-        private readonly projectStageRepo: IProjectApplicationRepository,
+        private readonly projectStageRepo: IApplicationRepository,
         private readonly userRepo: IUserRepository,
         private readonly collaboratorRepo: ICollaboratorRepository,
         private readonly resultRepo: IResultRepository,
@@ -49,7 +49,7 @@ export class ReviewerService {
         if (projectStageStatus !== ApplicationStatus.submitted)
             throw new AppError(ERROR_CODES.INVALID_DOC_STATUS);
 
-        const grantStageDoc = projectStageDoc.grantStage as unknown as IGrantStage;
+        const grantStageDoc = projectStageDoc.stage as unknown as IGrantStage;
         const countReviewers = await this.repository.countByProjectStage(projectApplication);
         const maxReviewers = grantStageDoc.maxReviewers;
         if (maxReviewers !== undefined && countReviewers >= maxReviewers) {
@@ -142,7 +142,7 @@ export class ReviewerService {
             const existingResults = await this.resultRepo.find({ reviewer: id });
             if (existingResults.length === 0) {
 
-                const grantStageDoc = projectStageDoc.grantStage as any;
+                const grantStageDoc = projectStageDoc.stage as any;
 
                 const criteria = await this.criterionRepo.find({ evaluation: String(grantStageDoc.evaluation) });
                 await this.resultRepo.insertMany(

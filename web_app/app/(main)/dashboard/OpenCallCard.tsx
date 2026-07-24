@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { format, differenceInCalendarDays, isPast } from 'date-fns';
 
 // Types
-import { Call, CallDeadline } from '../calls/models/call.model';
+import { Call } from '../calls/models/call.model';
 import { Grant } from '../grants/models/grant.model';
 import { Calendar } from '../calendars/models/calendar.model';
 import { Organization } from '../organizations/models/organization.model';
@@ -28,19 +28,7 @@ export const OpenCallCard = ({ call }: CallCardProps) => {
     const grant = call.grant as Grant;
     const calendar = call.calendar as Calendar;
     const organization = call.organization as Organization;
-
-    // --- Chronological Deadline Processing ---
-    // Sort all available deadlines based on their grantStage.order sequence
-    const sortedDeadlines = [...(call.deadlines || [])].sort((a, b) => {
-        const orderA = typeof a.grantStage === 'object' ? (a.grantStage as GrantStage)?.order || 0 : 0;
-        const orderB = typeof b.grantStage === 'object' ? (b.grantStage as GrantStage)?.order || 0 : 0;
-        return orderA - orderB;
-    });
-
-    // Extract Stage 1 (or the earliest chronologically sorted stage available)
-    const primaryDeadlineItem = sortedDeadlines[0];
-    const firstDeadlineRaw = primaryDeadlineItem?.submission;
-    const deadline = firstDeadlineRaw ? new Date(firstDeadlineRaw) : null;
+    const deadline = call.deadline;
     const today = new Date();
 
     // Calculate actual days remaining for the primary initial submission
@@ -92,7 +80,9 @@ export const OpenCallCard = ({ call }: CallCardProps) => {
             <div className={`p-3 border-round mb-3 ${isUrgent ? 'bg-orange-50' : 'bg-blue-50'}`}>
                 <div className="flex flex-column gap-2">
                     {/* Budget */}
-                    <div className="flex align-items-center gap-2">
+                    {
+                        /**
+                         * <div className="flex align-items-center gap-2">
                         <i className={`pi pi-wallet text-sm ${isUrgent ? 'text-orange-600' : 'text-blue-600'}`}></i>
                         <span className={`text-xs font-bold ${isUrgent ? 'text-orange-800' : 'text-blue-800'}`}>
                             Budget: {new Intl.NumberFormat('en-ET', {
@@ -102,14 +92,16 @@ export const OpenCallCard = ({ call }: CallCardProps) => {
                             }).format(call.budget || 0)}
                         </span>
                     </div>
+                         * 
+                         */
+                    }
 
-                    {/* Initial Stage Deadline Date */}
+
+                    {/* Call Deadline Date & Time */}
                     <div className="flex align-items-center gap-2">
-                        <i className={`pi pi-calendar text-sm ${isUrgent ? 'text-orange-600' : 'text-blue-600'}`}></i>
+                        <i className={`pi pi-clock text-sm ${isUrgent ? 'text-orange-600' : 'text-blue-600'}`}></i>
                         <span className="text-xs font-semibold text-800">
-                            {typeof primaryDeadlineItem?.grantStage === 'object' 
-                                ? `${(primaryDeadlineItem.grantStage as GrantStage).name} Ends` 
-                                : 'Ends'}: {deadline ? format(deadline, 'MMM dd, yyyy') : 'N/A'}
+                            Deadline: {deadline ? format(new Date(deadline), 'MMM dd, yyyy - hh:mm a') : 'N/A'}
                         </span>
                     </div>
                 </div>
@@ -124,17 +116,19 @@ export const OpenCallCard = ({ call }: CallCardProps) => {
             </div>
 
             {/* ADDITIONAL SUBSEQUENT DEADLINES (If available) */}
-            {sortedDeadlines.length > 1 && (
+            {
+                /**
+                 * {sortedDeadlines.length > 1 && (
                 <div className="surface-100 p-2 border-round border-1 surface-border mb-4">
                     <span className="block text-xs font-bold uppercase text-500 tracking-wider mb-2 px-1">
                         Subsequent Stage Timelines
                     </span>
                     <div className="flex flex-column gap-2 px-1">
                         {sortedDeadlines.slice(1).map((item: CallDeadline, idx: number) => {
-                            const stageName = typeof item.grantStage === 'object' 
-                                ? (item.grantStage as GrantStage).name 
+                            const stageName = typeof item.grantStage === 'object'
+                                ? (item.grantStage as GrantStage).name
                                 : `Stage ${idx + 2}`;
-                            
+
                             return (
                                 <div key={idx} className="flex justify-content-between text-xs text-600 border-bottom-1 surface-border pb-1 last:border-none">
                                     <span className="font-medium">{stageName}:</span>
@@ -147,6 +141,8 @@ export const OpenCallCard = ({ call }: CallCardProps) => {
                     </div>
                 </div>
             )}
+                 */
+            }
 
             <Divider className="my-3 mt-auto" />
 

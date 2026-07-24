@@ -1,24 +1,10 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../../common/constants/permissions';
+import { phaseService } from '../../../core/container';
 import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../../auth/auth.middleware';
 import { PhaseController } from './phase.controller';
-import { PhaseService } from './phase.service';
-import { PhaseRepository } from './phase.repository';
-import { ProjectRepository } from '../project.repository';
-import { ConstraintRepository } from '../../grants/constraints/constraint.repository';
-import { ConstraintValidator } from '../../grants/constraints/constraint.validator';
-import { ThemeRepository } from '../../thematics/themes/theme.repository';
-import { ProjectAuth } from '../project.auth';
-import { GrantAllocationRepository } from '../../grants/allocations/grant.allocation.repository';
-import { PhaseSynchronizer } from './phase.synchronizer';
-const repo = new PhaseRepository();
-const projectRepo = new ProjectRepository();
-const allocRepo = new GrantAllocationRepository();
-const projAuth = new ProjectAuth(projectRepo);
-const synch = new PhaseSynchronizer(projectRepo, repo);
-const validator = new ConstraintValidator(new ConstraintRepository(), new ThemeRepository());
-const service = new PhaseService(repo, projectRepo, projAuth, validator);
-const controller = new PhaseController(service);
+
+const controller = new PhaseController(phaseService);
 const router: Router = Router();
 
 router.post('/', verifyActiveAccount,

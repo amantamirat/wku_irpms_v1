@@ -17,6 +17,27 @@ const AppMenu = () => {
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
         },
         {
+            label: 'Project',
+            items: [{
+                label: 'All Projects',
+                icon: "pi pi-folder-open",
+                to: '/projects',
+                visible: hasPermission("project:create")
+            },
+            {
+                label: 'Collaborators',
+                to: '/projects/collaborators/all',
+                icon: 'pi pi-share-alt',
+                visible: hasPermission("collaborator:read")
+            },
+            {
+                label: 'Phases',
+                to: '/projects/phases/all',
+                icon: PrimeIcons.COMPASS,
+                visible: hasPermission("phase:read")
+            }]
+        },
+        {
             label: 'Applications',
             visible: hasPermission(
                 [
@@ -26,25 +47,18 @@ const AppMenu = () => {
             ),
             items: [
                 {
+                    label: 'Calls',
+                    icon: 'pi pi-fw pi-megaphone',
+                    to: '/calls',
+                    visible: hasPermission("call:create")
+                },
+                {
                     label: 'Applications',
                     icon: 'pi pi-list',
                     to: '/projects/applications',
                     visible: hasPermission("project.application:read") &&
                         hasPermission("grant:read")
                 },
-                {
-                    label: 'Projects',
-                    icon: "pi pi-folder-open",
-                    to: '/projects',
-                    visible: hasPermission("project:create")
-                },
-                {
-                    label: 'Collaborators',
-                    to: '/projects/collaborators/all',
-                    icon: 'pi pi-share-alt',
-                    visible: hasPermission("collaborator:read")
-                },
-
                 {
                     label: 'Reviewers',
                     to: '/reviewers/all',
@@ -56,14 +70,13 @@ const AppMenu = () => {
         },
 
         {
-            label: 'Grants & Calls',
+            label: 'Grants',
             visible: hasPermission(
                 [
                     "calendar:create",
                     "grant:create",
                     "evaluation:create",
                     "thematic:create",
-                    "call:create",
                 ]
             ),
             items: [
@@ -72,12 +85,6 @@ const AppMenu = () => {
                     icon: PrimeIcons.CALENDAR,
                     to: '/calendars',
                     visible: hasPermission("calendar:create")
-                },
-                {
-                    label: 'Calls',
-                    icon: 'pi pi-fw pi-megaphone',
-                    to: '/calls',
-                    visible: hasPermission("call:create")
                 },
                 {
                     label: 'Grants',

@@ -28,17 +28,16 @@ export class CollaboratorService {
     constructor(
         private readonly collabRepo: ICollaboratorRepository,
         private readonly projectRepo: IProjectRepository,
-        private readonly projAuth: ProjectAuth,
-        private readonly userRepo: IUserRepository,
         private readonly constraintValidator: ConstraintValidator,
-        private readonly notificationService: NotificationService,
-        private readonly compValidator: CompositionValidator = new CompositionValidator(),
-        
+        private readonly compositionValidator: CompositionValidator,
+        private readonly notificationService?: NotificationService,
+        private readonly projAuth: ProjectAuth = new ProjectAuth(projectRepo),
+
     ) {
     }
 
     async validateProject(project: string, applicant: string, session?: ClientSession) {
-        const projectDoc = await this.projAuth.authProject(project, applicant, session);
+        const projectDoc = await this.projAuth.authProject(project, applicant);
         if (
             projectDoc.status !== ProjectStatus.draft &&
             projectDoc.status !== ProjectStatus.accepted
@@ -48,28 +47,24 @@ export class CollaboratorService {
         return projectDoc;
     }
 
-    async create(dto: CreateCollaboratorDto, options?: { skipValidation?: boolean }, session?: ClientSession) {
+    async create(dto: CreateCollaboratorDto, options?: { skipValidation?: boolean }) {
         const { applicant, project, projectTitle, userId } = dto;
-        if (userId === applicant) {
-            dto.isLeadPI = true;
-            dto.status = CollaboratorStatus.verified;
-        }
         if (!options?.skipValidation) {
-            const projectDoc = await this.validateProject(project, userId ?? "", session);
+            const projectDoc = await this.validateProject(project, userId ?? "");
             const grantId = String(projectDoc.grant);
             if (dto.isLeadPI) {
-                await this.compValidator.validatePI(grantId, applicant);
+                await this.compositionValidator.validatePI(grantId, applicant);
             } else {
-                await this.compValidator.validateCoPI(grantId, applicant);
+                await this.compositionValidator.validateCoPI(grantId, applicant);
             }
-            await this.constraintValidator.validateParticipantCount(grantId, await this.collabRepo.countByProject(project, session) + 1, { skipMin: true });
+            await this.constraintValidator.validateParticipantCount(grantId, await this.collabRepo.countByProject(project) + 1, { skipMin: true });
         }
         try {
-            const created = await this.collabRepo.create(dto, session);
-            await this.projectRepo.updateTotalCollabs(project, 1, session);
-            if (!dto.isLeadPI && this.notificationService) {
+            const created = await this.collabRepo.create(dto);
+            await this.projectRepo.updateTotalCollabs(project, 1);
+            if (this.notificationService && dto.status !== CollaboratorStatus.verified) {
                 await this.notificationService.notifyProjectInvitation(
-                    applicant, projectTitle ?? project, dto.role, userId, session
+                    applicant, projectTitle ?? project, dto.role, userId
                 );
             }
             return created;

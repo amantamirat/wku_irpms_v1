@@ -5,7 +5,7 @@ import { PERMISSIONS } from '../../common/constants/permissions';
 import { ReviewerRepository } from './reviewer.repository';
 import { UserRepository } from '../users/user.repository';
 import { CollaboratorRepository } from '../projects/collaborators/collaborator.repository';
-import { ProjectApplicationRepository } from '../projects/applications/project.application.repository';
+import { ApplicationRepository } from '../projects/applications/application.repository';
 import { SettingRepository } from '../settings/setting.repository';
 import { SettingService } from '../settings/setting.service';
 import { ReviewerService } from './reviewer.service';
@@ -16,7 +16,7 @@ import { NotificationService } from '../notifications/notification.service';
 import { NotificationRepository } from '../notifications/notification.repository';
 
 const repo = new ReviewerRepository();
-const psRepo = new ProjectApplicationRepository();
+const psRepo = new ApplicationRepository();
 const appRepo = new UserRepository();
 const collabRepo = new CollaboratorRepository();
 const resultRepo = new ResultRepository();

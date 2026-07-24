@@ -1,23 +1,12 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
-import { GrantAllocationRepository } from '../grants/allocations/grant.allocation.repository';
-import { GrantStageRepository } from '../grants/stages/grant.stage.repository';
+import { calendarRepo, callRepo, grantRepo, projectRepo } from '../../core/container';
 import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../auth/auth.middleware';
 import { CallController } from './call.controller';
-import { CallRepository } from './call.repository';
 import { CallService } from './call.service';
-import { CallStageRepository } from './stages/call.stage.repository';
-import { GrantRepository } from '../grants/grant.repository';
-import { CalendarRepository } from '../calendar/calendar.repository';
-import { ProjectRepository } from '../projects/project.repository';
 
-const repository = new CallRepository();
-const grantRepo = new GrantRepository();
-const grantStageRepo = new GrantStageRepository();
-const calendarRepo = new CalendarRepository();
-const projectRepo =  new ProjectRepository();
 
-const service = new CallService(repository, grantRepo, grantStageRepo, calendarRepo, projectRepo);
+const service = new CallService(callRepo, grantRepo, calendarRepo, projectRepo);
 const controller = new CallController(service);
 const router = Router();
 

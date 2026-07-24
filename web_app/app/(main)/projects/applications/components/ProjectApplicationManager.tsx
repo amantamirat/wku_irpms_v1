@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BASE_URL } from "@/api/ApiClient";
-import { CallStage } from "@/app/(main)/calls/stages/models/call.stage.model";
+import { Stage } from "@/app/(main)/calls/stages/models/stage.model";
 import { GrantAllocation } from "@/app/(main)/grants/allocations/models/grant.allocation.model";
 import { GrantStage } from "@/app/(main)/grants/stages/models/grant.stage.model";
 import { createEntityManager } from "@/components/createEntityManager";
@@ -19,7 +19,7 @@ import { GrantStageApi } from "@/app/(main)/grants/stages/api/grant.stage.api";
 interface ProjectApplicationManagerProps {
     project?: Project;
     grantStage?: string | GrantStage;
-    callStage?: string | CallStage;
+    callStage?: string | Stage;
     hideReviewer?: boolean;
     updateProject?: (project: Project) => void;
 }

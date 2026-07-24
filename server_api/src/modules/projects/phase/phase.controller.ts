@@ -35,7 +35,7 @@ export class PhaseController {
                 description,
                 project: project as string,
                 //breakdown,    // Passed to service for validation
-                applicantId: req.auth.userId,
+                userId: req.auth.userId,
             };
 
             const created = await this.service.create(data);

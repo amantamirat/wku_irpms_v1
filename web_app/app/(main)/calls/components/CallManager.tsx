@@ -51,11 +51,11 @@ const CallManager = ({ calendar, grant }: CallManagerProps) => {
             },
 
             {
+
                 header: "Deadline",
                 body: (c: Call) => {
-                    const firstDeadline = c.deadlines?.[0]?.submission;
+                    const firstDeadline = c.deadline;
                     if (!firstDeadline) return "-";
-
                     // Format to a readable style: e.g., MM/DD/YYYY, HH:MM
                     return new Date(firstDeadline).toLocaleString('en-US', {
                         year: 'numeric',
@@ -65,28 +65,6 @@ const CallManager = ({ calendar, grant }: CallManagerProps) => {
                         minute: '2-digit',
                         hour12: false
                     });
-                }
-            },
-
-            /* --- Added Budget Column --- */
-            {
-                header: "Budget",
-                field: "budget",
-                sortable: true,
-                //style: { width: '150px', textAlign: 'right' },
-                body: (c: Call) => etbCurrencyFormatter.format(c.budget ?? 0)
-            },
-
-            {
-                header: "Used",
-                field: "usedBudget",
-                body: (c: Call) => {
-                    const used = c.usedBudget || 0;
-                    return (
-                        <span>
-                            {etbCurrencyFormatter.format(used)}
-                        </span>
-                    );
                 }
             },
 
@@ -102,7 +80,7 @@ const CallManager = ({ calendar, grant }: CallManagerProps) => {
 
         createNew: () => ({
             ...createEmptyCall(),
-            budget: 0, // Fallback initialization value for the form structure
+            //budget: 0, // Fallback initialization value for the form structure
             grant: grant,
             calendar: calendar
         } as any),
@@ -126,15 +104,14 @@ const CallManager = ({ calendar, grant }: CallManagerProps) => {
             statusOrder: CALL_STATUS_ORDER
         },
 
-        /** 
-         * expandable: {
+        expandable: {
             template: (call) => (
                 <CallDetail call={call} />
             )
         }
-        */
 
-        
+
+
     });
 
     return <Manager />;

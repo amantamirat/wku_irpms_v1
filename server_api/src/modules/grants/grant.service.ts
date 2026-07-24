@@ -23,7 +23,6 @@ export class GrantService {
         private readonly thematicRepository: IThematicRepository,
         private readonly constraintRepo: IConstraintRepository,
         private readonly compositionRepo: ICompositionRepository,
-        private readonly grantStageRepo: IGrantStageRepository,
         private readonly callRepo: ICallRepository,
         private readonly projectRepo: IProjectRepository,
     ) { }
@@ -72,7 +71,7 @@ export class GrantService {
         if (data.amount !== undefined && data.amount !== grantDoc.amount) {
 
             const calls = await this.callRepo.find({ grant: id });
-            const totalAllocated = calls.reduce((sum, a) => sum + (a.budget || 0), 0);
+            const totalAllocated = 0//calls.reduce((sum, a) => sum + (a.budget || 0), 0);
 
             const minimumAllowed = Math.max(
                 totalAllocated,
@@ -133,9 +132,11 @@ export class GrantService {
             }
         }
         if (next === GrantStatus.active) {
+            /*
             if (!await this.grantStageRepo.exists({ grant: id })) {
                 throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
             }
+            */
         }
         return await this.repository.updateStatus(id, to);
     }
@@ -152,14 +153,7 @@ export class GrantService {
                 'Only grants in planned status can be deleted.'
             );
         }
-
-        if (await this.grantStageRepo.exists({ grant: id })) {
-            throw new AppError(
-                ERROR_CODES.GRANT_IN_USE,
-                'Cannot delete grant because it has defined evaluation stages.'
-            );
-        }
-
+        
         if (await this.constraintRepo.exists({ grant: id })) {
             throw new AppError(
                 ERROR_CODES.GRANT_IN_USE,

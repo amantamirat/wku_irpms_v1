@@ -8,9 +8,9 @@ export class ProjectAuth {
         private readonly projectRepo: IProjectRepository
     ) { }
 
-    async authProject(project: string, applicant: string, session?: ClientSession) {
+    async authProject(project: string, applicant: string) {
         const projectDoc = await this.projectRepo.findById(
-            project, undefined, session);
+            project, undefined);
 
         if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
 

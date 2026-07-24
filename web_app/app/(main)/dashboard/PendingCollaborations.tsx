@@ -66,7 +66,7 @@ const PendingCollaborations = ({ user }: PendingCollaborationsProps) => {
                 </div>
             ) : (
                 <CollaboratorManager
-                    applicant={user}
+                    member={user}
                     collaborations={collaborations || []}
                     //onItemsChange={handleRefresh}
                     hideSearch

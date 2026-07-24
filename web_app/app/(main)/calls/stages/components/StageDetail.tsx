@@ -4,11 +4,11 @@ import { PERMISSIONS } from "@/types/permissions";
 import { TabPanel, TabView } from "primereact/tabview";
 
 import ProjectDocManager from "@/app/(main)/projects/documents/components/ProjectDocManager";
-import { CallStage } from "../models/call.stage.model";
+import { Stage } from "../models/stage.model";
 
 
 interface StageDetailProps {
-    stage: CallStage;
+    stage: Stage;
 }
 
 const StageDetail = ({ stage }: StageDetailProps) => {

@@ -4,33 +4,32 @@ import { EntitySaveDialogProps } from '@/components/createEntityManager';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
+import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
-import { InputNumber } from 'primereact/inputnumber';
-import { Calendar as PrimeCalendar } from 'primereact/calendar';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 
 // API & Models
-import { GrantApi } from '../../grants/api/grant.api';
-import { Grant } from '../../grants/models/grant.model';
 import { CalendarApi } from '../../calendars/api/calendar.api';
 import { Calendar, CalendarStatus } from '../../calendars/models/calendar.model';
-import { CallApi } from '../api/call.api';
-import { Call, sanitizeCall, validateCall, CallDeadline } from '../models/call.model';
+import { GrantApi } from '../../grants/api/grant.api';
+import { Grant } from '../../grants/models/grant.model';
 import { GrantStatus } from '../../grants/models/grant.state-machine';
-import { GrantStage, StageCategory } from '../../grants/stages/models/grant.stage.model';
-import { GrantStageApi } from '../../grants/stages/api/grant.stage.api';
+import { CallApi } from '../api/call.api';
+import { Call, sanitizeCall, validateCall } from '../models/call.model';
 
+/*
 // Extend local state type to keep track of stage names for rendering while keeping grantStage intact
 interface LocalDeadline extends CallDeadline {
     stageName: string;
 }
+    */
 
 const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<Call>) => {
     const toast = useRef<Toast>(null);
-    const [localCall, setLocalCall] = useState<Call>({ ...item, deadlines: item.deadlines || [] });
+    const [localCall, setLocalCall] = useState<Call>({ ...item });
     const [submitted, setSubmitted] = useState(false);
 
     // Resource options states
@@ -38,7 +37,7 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
     const [calendars, setCalendars] = useState<Calendar[]>([]);
 
     // Tracks the current selection stages with their respective deadlines
-    const [formDeadlines, setFormDeadlines] = useState<LocalDeadline[]>([]);
+    //const [formDeadlines, setFormDeadlines] = useState<LocalDeadline[]>([]);
 
     const isGrantPredefined = !!item.grant;
     const isCalendarPredefined = !!item.calendar;
@@ -80,77 +79,80 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
 
         loadDropdownData();
     }, [visible, isGrantPredefined, isCalendarPredefined]);
+    /*
+        // 2. Fetch Grant Stages whenever the selected Grant changes
+        useEffect(() => {
+            if (!visible) return;
+    
+            const fetchStagesAndSyncDeadlines = async () => {
+                const grantId = getTargetId(localCall.grant);
+    
+                if (!grantId) {
+                    setFormDeadlines([]);
+                    return;
+                }
+    
+                try {
+                    // Fetch selection stages for this grant
+                    const stages: GrantStage[] = await GrantStageApi.getAll({
+                        grant: grantId,
+                        category: StageCategory.selection
+                    });
+    
+                    // Sort by order to keep the timeline chronological
+                    const sortedStages = stages.sort((a, b) => (a.order || 0) - (b.order || 0));
+    
+                    // Map stages into deadline forms matching by grantStage identifier
+                    const mappedDeadlines: LocalDeadline[] = sortedStages.map((stage) => {
+                        const existingDeadline = localCall.deadlines?.find(
+                            d => getTargetId(d.grantStage) === stage._id
+                        );
+    
+                        return {
+                            grantStage: stage, // Keeps full object or change to stage._id depending on API preference
+                            stageName: stage.name,
+                            submission: existingDeadline?.submission ? new Date(existingDeadline.submission) : null as any,
+                            evaluation: existingDeadline?.evaluation ? new Date(existingDeadline.evaluation) : null as any,
+                        };
+                    });
+    
+                    setFormDeadlines(mappedDeadlines);
+                } catch (err) {
+                    console.error('Failed to load grant selection stages:', err);
+                }
+            };
+    
+            fetchStagesAndSyncDeadlines();
+        }, [localCall.grant, visible]);
+        */
 
-    // 2. Fetch Grant Stages whenever the selected Grant changes
-    useEffect(() => {
-        if (!visible) return;
 
-        const fetchStagesAndSyncDeadlines = async () => {
-            const grantId = getTargetId(localCall.grant);
-
-            if (!grantId) {
-                setFormDeadlines([]);
-                return;
-            }
-
-            try {
-                // Fetch selection stages for this grant
-                const stages: GrantStage[] = await GrantStageApi.getAll({
-                    grant: grantId,
-                    category: StageCategory.selection
-                });
-
-                // Sort by order to keep the timeline chronological
-                const sortedStages = stages.sort((a, b) => (a.order || 0) - (b.order || 0));
-
-                // Map stages into deadline forms matching by grantStage identifier
-                const mappedDeadlines: LocalDeadline[] = sortedStages.map((stage) => {
-                    const existingDeadline = localCall.deadlines?.find(
-                        d => getTargetId(d.grantStage) === stage._id
-                    );
-
-                    return {
-                        grantStage: stage, // Keeps full object or change to stage._id depending on API preference
-                        stageName: stage.name,
-                        submission: existingDeadline?.submission ? new Date(existingDeadline.submission) : null as any,
-                        evaluation: existingDeadline?.evaluation ? new Date(existingDeadline.evaluation) : null as any,
-                    };
-                });
-
-                setFormDeadlines(mappedDeadlines);
-            } catch (err) {
-                console.error('Failed to load grant selection stages:', err);
-            }
-        };
-
-        fetchStagesAndSyncDeadlines();
-    }, [localCall.grant, visible]);
-
+    /*
     useEffect(() => {
         setLocalCall({ ...item, deadlines: item.deadlines || [] });
     }, [item]);
-
-    // Handle single date mutation inside the array
-    const handleDeadlineChange = (index: number, field: 'submission' | 'evaluation', value: Date | null) => {
-        const updated = [...formDeadlines];
-        updated[index] = { ...updated[index], [field]: value || (null as any) };
-        setFormDeadlines(updated);
-
-        // Sync back to localCall object matches your new CallDeadline structure
-        setLocalCall(prev => ({
-            ...prev,
-            deadlines: updated.map(({ grantStage, submission, evaluation }) => ({ 
-                grantStage, 
-                submission, 
-                evaluation 
-            }))
-        }));
-    };
+        // Handle single date mutation inside the array
+        const handleDeadlineChange = (index: number, field: 'submission' | 'evaluation', value: Date | null) => {
+            const updated = [...formDeadlines];
+            updated[index] = { ...updated[index], [field]: value || (null as any) };
+            setFormDeadlines(updated);
+    
+            // Sync back to localCall object matches your new CallDeadline structure
+            setLocalCall(prev => ({
+                ...prev,
+                deadlines: updated.map(({ grantStage, submission, evaluation }) => ({
+                    grantStage,
+                    submission,
+                    evaluation
+                }))
+            }));
+        };
+       */
 
     const clearForm = () => {
         setSubmitted(false);
-        setFormDeadlines([]);
-        setLocalCall({ ...item, deadlines: item.deadlines || [] });
+        //setFormDeadlines([]);
+        //setLocalCall({ ...item, deadlines: item.deadlines || [] });
     };
 
     const saveCall = async () => {
@@ -160,7 +162,10 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
             const validation = validateCall(localCall);
             if (!validation.valid) throw new Error(validation.message);
 
-            if (localCall.budget === undefined || localCall.budget === null || localCall.budget <= 0) {
+
+
+            /*
+             if (localCall.budget === undefined || localCall.budget === null || localCall.budget <= 0) {
                 throw new Error("Please provide a valid funding budget amount greater than 0.");
             }
 
@@ -174,6 +179,7 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
                     throw new Error(`In "${deadlineItem.stageName}", submission deadline must be earlier than the evaluation deadline.`);
                 }
             }
+                */
 
             const payload = sanitizeCall(localCall);
             let saved: Call;
@@ -286,7 +292,7 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
                     />
                 </div>
 
-                {/* Budget Allocation */}
+                {/* Budget Allocation
                 <div className="field">
                     <label htmlFor="budget" className="font-bold">Allocated Budget</label>
                     <InputNumber
@@ -305,49 +311,9 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
                         <small className="p-error font-semibold block mt-1">A valid operational budget is required.</small>
                     )}
                 </div>
+                */}
 
-                {/* Dynamic Selection Stage Deadlines Section */}
-                {formDeadlines.length > 0 && (
-                    <div className="field mt-4">
-                        <div className="text-sm font-bold uppercase tracking-wider text-600 border-bottom-1 surface-border pb-2 mb-3">
-                            Required Stage Deadlines ({formDeadlines.length})
-                        </div>
 
-                        {formDeadlines.map((deadline, index) => (
-                            <div key={index} className="surface-card p-3 border-round border-1 surface-border mb-3 shadow-1">
-                                <div className="text-base font-bold text-primary-600 mb-3">
-                                    {index + 1}. Stage: {deadline.stageName}
-                                </div>
-
-                                <div className="grid formgrid">
-                                    <div className="field col-12 md:col-6 mb-0">
-                                        <label className="text-xs font-semibold text-500">Submission Deadline</label>
-                                        <PrimeCalendar
-                                            value={deadline.submission ? new Date(deadline.submission) : null}
-                                            onChange={(e) => handleDeadlineChange(index, 'submission', e.value ?? null)}
-                                            showTime
-                                            hourFormat="24"
-                                            placeholder="Select Date & Time"
-                                            className={classNames({ 'p-invalid': submitted && !deadline.submission })}
-                                        />
-                                    </div>
-                                    <div className="field col-12 md:col-6 mb-0">
-                                        <label className="text-xs font-semibold text-500">Evaluation Deadline</label>
-                                        <PrimeCalendar
-                                            value={deadline.evaluation ? new Date(deadline.evaluation) : null}
-                                            onChange={(e) => handleDeadlineChange(index, 'evaluation', e.value ?? null)}
-                                            showTime
-                                            hourFormat="24"
-                                            placeholder="Select Date & Time"
-                                            className={classNames({ 'p-invalid': submitted && !deadline.evaluation })}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-                
                 {/* Description */}
                 <div className="field">
                     <label htmlFor="description" className="font-bold">Description / Instructions</label>

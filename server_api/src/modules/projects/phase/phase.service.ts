@@ -4,33 +4,29 @@ import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
-import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
-import { ProjectAuth } from "../project.auth";
-import { IProjectRepository } from "../project.repository";
-import { ProjectStatus } from "../project.model";
-import { CreatePhaseDto, GetPhasesOptions, PhaseDto, UpdatePhaseDto } from "./phase.dto";
-import { IPhaseRepository } from "./phase.repository";
-import { IPhase, PhaseStatus } from "./phase.model";
-import { IGrantAllocationRepository } from "../../grants/allocations/grant.allocation.repository";
-import { IPhaseSynchronizer } from "./phase.synchronizer";
-import { PROJECT_TRANSITIONS } from "../project.state-machine";
-import { GrantAllocation } from "../../grants/allocations/grant.allocation.model";
-import { GrantRepository, IGrantRepository } from "../../grants/grant.repository";
 import { CallRepository, ICallRepository } from "../../calls/call.repository";
+import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
+import { GrantRepository, IGrantRepository } from "../../grants/grant.repository";
+import { ProjectAuth } from "../project.auth";
+import { ProjectStatus } from "../project.model";
+import { IProjectRepository } from "../project.repository";
+import { PROJECT_TRANSITIONS } from "../project.state-machine";
+import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto } from "./phase.dto";
+import { IPhase, PhaseStatus } from "./phase.model";
+import { IPhaseRepository } from "./phase.repository";
 
 export class PhaseService {
 
     constructor(
         private readonly phaseRepo: IPhaseRepository,
         private readonly projRepo: IProjectRepository,
-        private readonly projAuth: ProjectAuth,
+        private readonly grantRepo: IGrantRepository,
         private readonly constValidator: ConstraintValidator,
-        private readonly grantRepo: IGrantRepository = new GrantRepository(),
-        private readonly callRepo: ICallRepository = new CallRepository(),
+        private readonly projAuth: ProjectAuth = new ProjectAuth(projRepo),
     ) { }
 
     async validateProject(project: string, applicant: string, session?: ClientSession) {
-        const projectDoc = await this.projAuth.authProject(project, applicant, session);
+        const projectDoc = await this.projAuth.authProject(project, applicant);
         if (
             projectDoc.status !== ProjectStatus.draft &&
             projectDoc.status !== ProjectStatus.accepted
@@ -40,33 +36,37 @@ export class PhaseService {
         return projectDoc;
     }
 
-    // ---------------------------------------------------
-    // CREATE
-    // ---------------------------------------------------
-    async create(dto: CreatePhaseDto, options?: { skipValidation?: boolean }, session?: ClientSession) {
-        const { project, applicantId } = dto;
+    async create(dto: CreatePhaseDto, options?: { skipValidation?: boolean }) {
+        const { project, userId } = dto;
         if (!options?.skipValidation) {
-            const projectDoc = await this.validateProject(project, applicantId ?? "", session);
+            const projectDoc = await this.validateProject(project, userId ?? "");
             const grantId = String(projectDoc.grant);
-            const existingPhases = await this.phaseRepo.find({ project }, session);
+            const existingPhases = await this.phaseRepo.find({ project });
             const proposedPhases = [...existingPhases, dto];
             await this.constValidator.validatePhases(grantId, proposedPhases, { skipMin: true })
         }
         try {
-            const count = await this.phaseRepo.countByProject(project, session);
+            // Determine the next phase order
+            const count = await this.phaseRepo.countByProject(project);
             const order = count + 1;
-            const created = await this.phaseRepo.create({ ...dto, order }, session);
-            // ✅ Increment totals
-            await this.projRepo.incrementTotals(project, {
-                duration: created.duration ?? 0,
-                budget: created.budget ?? 0
-            }, session);
+            // Create the phase
+            const created = await this.phaseRepo.create({
+                ...dto,
+                order
+            });
 
+            if (created) {
+                await this.projRepo.incrementTotals(project, {
+                    duration: created.duration ?? 0,
+                    budget: created.budget ?? 0
+                });
+            }
             return created;
         } catch (err: any) {
             if (err?.code === 11000) {
                 throw new AppError(ERROR_CODES.PHASE_ALREADY_EXISTS);
             }
+
             throw err;
         }
     }
@@ -335,12 +335,15 @@ export class PhaseService {
                         currentPhaseDoc.budget
                     );
 
-                    if (projectDoc.call) {
+                    {/**
+                        if (projectDoc.call) {
                         await this.callRepo.consumeBudget(
                             String(projectDoc.call),
                             currentPhaseDoc.budget
                         );
                     }
+                        */}
+
 
                 }
 
@@ -353,12 +356,18 @@ export class PhaseService {
                         currentPhaseDoc.budget
                     );
 
-                    if (projectDoc.call) {
+                    {
+                        /**
+                         *  if (projectDoc.call) {
                         await this.callRepo.reverseConsumedBudget(
                             String(projectDoc.call),
                             currentPhaseDoc.budget
                         );
                     }
+                         */
+                    }
+
+
 
                 }
             }
