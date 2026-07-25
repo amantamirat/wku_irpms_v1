@@ -7,7 +7,7 @@ import { ApplicationController } from "./application.controller";
 import { ApplicationRepository } from "./application.repository";
 import { ApplicationService } from "./application.service";
 import { GrantAllocationRepository } from "../../grants/allocations/grant.allocation.repository";
-import { ProjectStageSynchronizer } from "./application.synchronizer";
+import { ApplicationSynchronizer } from "./application.synchronizer";
 import { ReviewerRepository } from "../../reviewers/reviewer.repository";
 import { SettingRepository } from "../../settings/setting.repository";
 import { SettingService } from "../../settings/setting.service";
@@ -23,7 +23,7 @@ const projAuth = new ProjectAuth(projectRepo);
 const grantStageRepo = new GrantStageRepository();
 const callStageRepo = new StageRepository();
 const reviewerRepoRepo = new ReviewerRepository();
-const synchronizer = new ProjectStageSynchronizer(projectRepo, projectStageRepo, grantStageRepo);
+//const synchronizer = new ApplicationSynchronizer(projectRepo, projectStageRepo, grantStageRepo);
 const notificationService = new NotificationService(
     new NotificationRepository(),
     new SettingService(new SettingRepository())
@@ -43,6 +43,19 @@ router.post(
     },
     upload.single("document"),
     controller.create
+);
+
+router.post(
+    "/apply",
+    verifyActiveAccount,
+    // checkPermission("project:apply"),
+    (req, res, next) => {
+        // Set the dynamic subfolder for this specific endpoint
+        req.headers["x-upload-folder"] = "applications";
+        next();
+    },
+    upload.single("file"),
+    controller.apply
 );
 
 router.get(

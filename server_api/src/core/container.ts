@@ -56,7 +56,9 @@ export const compositionValidator = new CompositionValidator(compositionRepo, us
 // Services
 export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, constraintValidator, compositionValidator);
 export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, constraintValidator);
-export const applicationService = new ApplicationService(applicationRepo, projectRepo, stageRepo, reviewerRepo);
-export const projectService = new ProjectService(projectRepo, collaboratorRepo, phaseRepo, grantRepo, callRepo, stageRepo,
-    collabService, phaseService, applicationService, constraintValidator, compositionValidator
+export const projectService = new ProjectService(projectRepo, collaboratorRepo, phaseRepo, grantRepo,
+    collabService, phaseService, constraintValidator, compositionValidator
+);
+export const applicationService = new ApplicationService(applicationRepo, projectRepo, callRepo, stageRepo, reviewerRepo,
+    projectService, constraintValidator, compositionValidator
 );

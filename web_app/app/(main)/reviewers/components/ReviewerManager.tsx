@@ -7,7 +7,7 @@ import { Dialog } from "primereact/dialog";
 import { useMemo, useState } from "react";
 
 import { User } from "@/app/(main)/users/models/user.model";
-import { ProjectApplication, ApplicationStatus } from "../../projects/applications/models/project.application.model";
+import { Application, ApplicationStatus } from "../../projects/applications/models/application.model";
 import { ReviewerApi } from "../api/reviewer.api";
 import { GetReviewersOptions, Reviewer, ReviewerStatus } from "../models/reviewer.model";
 import { REVIEWER_STATUS_ORDER, REVIEWER_TRANSITIONS } from "../models/reviewer.state-machine";
@@ -16,7 +16,7 @@ import EvaluatorManager from "../results/components/evaluator/EvaluatorManager";
 import SaveReviewerDialog from "./SaveReviewerDialog";
 
 interface ReviewerManagerProps {
-    projectApplication?: ProjectApplication;
+    projectApplication?: Application;
     reviewer?: User;
     status?: ReviewerStatus | ReviewerStatus[];
     reviewers?: Reviewer[];

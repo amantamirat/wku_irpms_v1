@@ -9,8 +9,12 @@
 
 .status-badge {
 
+    &.status-draft {
+        background: #ECEFF1;
+        color: #455A64;
+    }
+
     &.status-pending,
-    &.status-draft,
     &.status-proposed,
     &.status-planned,
     &.status-submitted {

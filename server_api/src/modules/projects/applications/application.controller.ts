@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { Request, Response } from "express";
 import { errorResponse, successResponse } from "../../../common/helpers/response";
-import { CreateApplicationDTO, GetApplicationDTO } from "./application.dto";
+import { ApplyProjectDTO, CreateApplicationDTO, GetApplicationDTO } from "./application.dto";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
@@ -38,6 +38,47 @@ export class ApplicationController {
             successResponse(res, 201, "Project document created successfully", created);
 
         } catch (err: any) {
+            if (req.file && req.file.path) {
+                fs.unlink(req.file.path, (unlinkErr) => {
+                    if (unlinkErr) console.error(`Failed to delete orphaned file at ${req.file?.path}:`, unlinkErr);
+                });
+            }
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
+
+    apply = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
+
+            let project;
+            try {
+                project = JSON.parse(req.body.project);
+            } catch {
+                throw new Error("Invalid project format");
+            }
+            // Convert absolute system path to a clean relative path for your DB entry
+            // e.g., "uploads/projects/1715623-28392.pdf"     
+            const relativeDocPath = path.relative(process.cwd(), req.file.path).replace(/\\/g, '/');
+            const dto: ApplyProjectDTO = {
+                call: project.call,
+                grant: "",
+                title: project.title,
+                summary: project.summary,
+                applicant: project.applicant,
+                collaborators: project.collaborators || [],
+                themes: project.themes || [],
+                phases: project.phases || [],
+                docPath: relativeDocPath, // Saved cleanly to your DB
+                userId: req.auth.userId,
+            };
+            const submitted = await this.service.apply(dto);
+            successResponse(res, 201, "Project submitted successfully", submitted);
+
+        } catch (err: any) {
+            // If the service/validation layer fails, delete the file from the exact spot it landed
             if (req.file && req.file.path) {
                 fs.unlink(req.file.path, (unlinkErr) => {
                     if (unlinkErr) console.error(`Failed to delete orphaned file at ${req.file?.path}:`, unlinkErr);

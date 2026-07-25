@@ -3,7 +3,7 @@ import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
 
 export enum ApplicationStatus {
-    submitted = 'submitted',
+    pending = 'pending',
     accepted = 'accepted',
     rejected = 'rejected'
 }
@@ -44,7 +44,7 @@ const ApplicationSchema = new Schema<IApplication>({
     status: {
         type: String,
         enum: Object.values(ApplicationStatus),
-        default: ApplicationStatus.submitted,
+        default: ApplicationStatus.pending,
         required: true
     },
 }, { timestamps: true });

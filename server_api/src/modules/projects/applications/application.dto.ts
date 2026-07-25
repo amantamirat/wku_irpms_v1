@@ -1,5 +1,6 @@
 // project-stage.dto.ts
 import { PhaseDto } from "../phase/phase.dto";
+import { CreateProjectDTO } from "../project.dto";
 import { ApplicationStatus } from "./application.model";
 
 export interface GetApplicationDTO {
@@ -37,17 +38,6 @@ export interface ExistsApplicationDTO {
     project?: string;
 }
 
-export interface SubmitProjectDTO {
-    call: string;
-    title: string;
-    summary?: string;
-    applicant: string;
-    collaborators: string[];
-    phases: PhaseDto[];
-    themes: string[];
-    documentPath: string;
-}
-
 export interface FindByIdOptions {
     populate?: {
         project?: boolean;
@@ -55,3 +45,8 @@ export interface FindByIdOptions {
     };
 }
 
+
+export interface ApplyProjectDTO extends CreateProjectDTO {
+    call: string;
+    docPath: string;
+}

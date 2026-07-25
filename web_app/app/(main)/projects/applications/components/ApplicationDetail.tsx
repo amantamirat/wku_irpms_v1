@@ -1,15 +1,15 @@
 import { useAuth } from "@/contexts/auth-context";
 import { TabPanel, TabView } from "primereact/tabview";
 import { useMemo } from "react";
-import { ProjectApplication } from "../models/project.application.model";
+import { Application } from "../models/application.model";
 import ReviewerManager from "@/app/(main)/reviewers/components/ReviewerManager";
 
-interface ProjectStageDetailProps {
-    projectApplication: ProjectApplication;
+interface ApplicationDetailProps {
+    application: Application;
     hideReviewer?: boolean;
 }
 
-const ProjectStageDetail = ({ projectApplication, hideReviewer }: ProjectStageDetailProps) => {
+const ApplicationDetail = ({ application, hideReviewer }: ApplicationDetailProps) => {
 
     const { hasPermission } = useAuth();
 
@@ -20,10 +20,10 @@ const ProjectStageDetail = ({ projectApplication, hideReviewer }: ProjectStageDe
         {
             header: "Reviewers",
             permission: "reviewer:read",
-            content: <ReviewerManager projectApplication={projectApplication} hideReviewer={hideReviewer} />
+            content: <ReviewerManager projectApplication={application} hideReviewer={hideReviewer} />
         },
 
-    ], [projectApplication]);
+    ], [application]);
 
     /**
      * Filter tabs based on permissions
@@ -43,5 +43,5 @@ const ProjectStageDetail = ({ projectApplication, hideReviewer }: ProjectStageDe
     );
 };
 
-export default ProjectStageDetail;
+export default ApplicationDetail;
 

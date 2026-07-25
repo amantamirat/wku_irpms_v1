@@ -1,11 +1,13 @@
+import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
-import { IApplicationRepository } from "./application.repository";
-import { ClientSession } from "mongoose";
-import { DeleteDto } from "../../../common/dtos/delete.dto";
+import { CallStatus } from "../../calls/call.model";
+import { ICallRepository } from "../../calls/call.repository";
 import { IStageRepository } from "../../calls/stages/stage.repository";
+import { CompositionValidator } from "../../grants/compositions/composition.validator";
+import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
 import { IGrantStage } from "../../grants/stages/grant.stage.model";
 import { NotificationService } from "../../notifications/notification.service";
 import { IReviewerRepository } from "../../reviewers/reviewer.repository";
@@ -13,24 +15,31 @@ import { ReviewerStatus } from "../../reviewers/reviewer.state-machine";
 import { ProjectAuth } from "../project.auth";
 import { ProjectStatus } from "../project.model";
 import { IProjectRepository } from "../project.repository";
+import { ProjectService } from "../project.service";
 import {
+    ApplyProjectDTO,
     CreateApplicationDTO,
     GetApplicationDTO,
     UpdateApplicationDTO
 } from "./application.dto";
 import { ApplicationStatus } from "./application.model";
-import { IProjectSynchronizer } from "./application.synchronizer";
+import { IApplicationRepository } from "./application.repository";
+import { ApplicationSynchronizer as ProjectSynchronizer } from "./application.synchronizer";
 
 export class ApplicationService {
 
     constructor(
         private readonly repository: IApplicationRepository,
-        private readonly projRepo: IProjectRepository,
+        private readonly projectRepo: IProjectRepository,
+        private readonly callRepo: ICallRepository,
         private readonly stageRepo: IStageRepository,
         private readonly reviewerRepo: IReviewerRepository,
-        private readonly synchronizer?: IProjectSynchronizer,
+        private readonly projectService: ProjectService,
+        private readonly constValidator: ConstraintValidator,
+        private readonly compValidator: CompositionValidator,
+        private readonly synchronizer = new ProjectSynchronizer(projectRepo, repository, stageRepo),
         private readonly notificationService?: NotificationService,
-        private readonly projAuth: ProjectAuth = new ProjectAuth(projRepo),
+        private readonly projAuth: ProjectAuth = new ProjectAuth(projectRepo),
 
     ) {
     }
@@ -64,18 +73,16 @@ export class ApplicationService {
         }
         try {
             const created = await this.repository.create(dto);
-
-            if (this.synchronizer && this.notificationService) {
-                await this.synchronizer.sync(project);
+            await this.synchronizer.sync(project);
+            if (this.notificationService) {
                 await this.notificationService.notifyStatusChange(
                     userId,
                     "Project",
                     "Stage",
-                    ApplicationStatus.submitted,
+                    ApplicationStatus.pending,
                     undefined
                 ).catch(err => console.error("Notification failed", err));
             }
-
             return created;
         } catch (err: any) {
             if (err?.code === 11000) {
@@ -83,6 +90,38 @@ export class ApplicationService {
             }
             throw err;
         }
+    }
+
+
+
+    async apply(dto: ApplyProjectDTO) {
+        const { call, title, summary, applicant, collaborators, phases, themes, userId, docPath } = dto;
+        const lead = collaborators.find(c => c.isLeadPI);
+        if (!lead) throw new AppError(ERROR_CODES.LEAD_PI_NOT_FOUND);
+        if (lead.applicant !== userId) throw new AppError(ERROR_CODES.UNAUTHORIZED);
+
+        const callDoc = await this.callRepo.findById(call);
+        if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+        if (callDoc.status !== CallStatus.active) throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
+
+        const stageDoc = await this.stageRepo.findOne(String(callDoc._id), 1);
+        if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        const deadline = stageDoc.deadline;
+        if (deadline < new Date()) {
+            throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
+        }
+
+        const calendarId = String(callDoc.calendar);
+        const grantId = String(callDoc.grant);
+        await this.constValidator.validateAll(grantId, { participantCount: collaborators.length, phases, themes, title, summary });
+        await this.compValidator.validateAll(grantId, collaborators);
+        const skipValidation = { skipValidation: true };
+        const createdProj = await this.projectService.create({ ...dto, grant: grantId, calendar: calendarId },
+            skipValidation);
+        const projectId = String(createdProj._id);
+        return await this.create({
+            project: projectId, stage: String(stageDoc._id), documentPath: docPath, userId: userId
+        }, skipValidation);
     }
 
     /**
@@ -224,7 +263,7 @@ export class ApplicationService {
             }
         }
 
-        if (to === ApplicationStatus.submitted) {
+        if (to === ApplicationStatus.pending) {
             /*
             if (await this.reviewerRepo.exist({ projectStage: id })) {
                 throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
@@ -287,26 +326,35 @@ export class ApplicationService {
      * Delete 
      */
     async delete(dto: DeleteDto) {
-        const { id, userId: applicantId } = dto;
-
-        const projectStageDoc = await this.repository.findById(id);
-        if (!projectStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-        if (projectStageDoc.status !== ApplicationStatus.submitted) throw new AppError(ERROR_CODES.DOC_NOT_SUBMITTED);
-
-        const project = String(projectStageDoc.project);
-        await this.validateProject(project, applicantId ?? "");
+        const { id, userId } = dto;
+        const appDoc = await this.repository.findById(id);
+        if (!appDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
+        if (appDoc.status !== ApplicationStatus.pending) throw new AppError(ERROR_CODES.APPLICATION_NOT_PENDING);
 
         if (await this.reviewerRepo.exist({ projectApplication: id })) {
             throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
         }
+
+        const project = String(appDoc.project);
+        //await this.validateProject(project, userId ?? "");
+
+
         const deleted = await this.repository.delete(id);
-        // await this.synchronizer.sync(project);
+        if (deleted) {
+            const stageDoc = await this.stageRepo.findById(String(appDoc.stage));
+            await this.synchronizer.sync(project);
+            if (stageDoc?.order === 1) {
+                await this.projectService.delete({ id: project });
+            } 
+        }
         return deleted;
     }
+
+
 }
 
 export const PROJECT_STAGE_TRANSITIONS: Record<ApplicationStatus, ApplicationStatus[]> = {
-    [ApplicationStatus.submitted]: [ApplicationStatus.accepted, ApplicationStatus.rejected],
-    [ApplicationStatus.accepted]: [ApplicationStatus.submitted],
-    [ApplicationStatus.rejected]: [ApplicationStatus.submitted]
+    [ApplicationStatus.pending]: [ApplicationStatus.accepted, ApplicationStatus.rejected],
+    [ApplicationStatus.accepted]: [ApplicationStatus.pending],
+    [ApplicationStatus.rejected]: [ApplicationStatus.pending]
 };

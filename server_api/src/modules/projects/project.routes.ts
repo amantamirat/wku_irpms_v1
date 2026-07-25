@@ -44,18 +44,7 @@ router.post('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.PROJECT.CREATE]),
     controller.create);
 
-router.post(
-    "/apply",
-    verifyActiveAccount,
-    // checkPermission("project:apply"),
-    (req, res, next) => {
-        // Set the dynamic subfolder for this specific endpoint
-        req.headers["x-upload-folder"] = "applications";
-        next();
-    },
-    upload.single("file"),
-    controller.apply
-);
+
 
 router.post(
     '/from-grant',

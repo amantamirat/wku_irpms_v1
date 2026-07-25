@@ -6,7 +6,6 @@ import { TransitionRequestDto } from "@/types/util";
 const end_point = "/projects";
 
 interface IProjectApi extends EntityApi<Project, GetProjectsOptions | undefined> {
-    apply: (project: Partial<Project>) => Promise<Project>;
     transitionState: (id: string, dto: TransitionRequestDto) => Promise<Project>;
     createFromGrant: (project: Partial<Project>) => Promise<Project>;
 }
@@ -52,25 +51,7 @@ export const ProjectApi: IProjectApi = {
         return createdData as Project;
     },
 
-    async apply(project: Partial<Project>): Promise<Project> {
-        const formData = new FormData();
-        const sanitized = sanitize(project);
-
-        // 1. Separate the file from the rest of the data
-        if (sanitized.file) {
-            // Backend usually expects 'document' or 'file' - 
-            // Based on your controller, make sure Multer is configured for this key
-            formData.append("file", sanitized.file);
-            delete sanitized.file;
-        }
-
-        // 2. Wrap the REST of the project data into a single stringified JSON object
-        // This satisfies: project = JSON.parse(req.body.project);
-        formData.append("project", JSON.stringify(sanitized));
-
-        const created = await ApiClient.post(`${end_point}/apply`, formData);
-        return created as Project;
-    },
+   
 
     async update(project: Partial<Project>): Promise<Project> {
         if (!project._id) throw new Error("_id required");

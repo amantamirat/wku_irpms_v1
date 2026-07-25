@@ -1,16 +1,16 @@
-import { GrantStage } from "@/app/(main)/grants/stages/models/grant.stage.model";
+import { Stage } from "@/app/(main)/calls/stages/models/stage.model";
 import { Project } from "../../models/project.model";
 
 export enum ApplicationStatus {
-    submitted = 'submitted',
+    pending = 'pending',
     accepted = 'accepted',
     rejected = 'rejected'
 }
 
-export type ProjectApplication = {
+export type Application = {
     _id?: string;
     project: string | Project;
-    grantStage?: string | GrantStage;
+    stage?: string | Stage;
     documentPath?: string;
     file?: File;
     totalScore?: number | null;
@@ -23,14 +23,12 @@ export type ProjectApplication = {
 
 export interface GetProjectApplicationOptions {
     project?: string | Project;
-    grantStage?: string | GrantStage;
-   // callStage?: string | CallStage;
-    //grantAllocation?: string;
+    stage?: string | Stage;
     status?: ApplicationStatus;
     populate?: boolean;
 }
 
-export const validateProjectApplication = (ps: Partial<ProjectApplication>): { valid: boolean; message?: string } => {
+export const validateProjectApplication = (ps: Partial<Application>): { valid: boolean; message?: string } => {
     if (!ps.project) {
         return { valid: false, message: "Project is required." };
     }
@@ -46,29 +44,29 @@ export const validateProjectApplication = (ps: Partial<ProjectApplication>): { v
 }
 
 
-export const sanitizeProjectApplication = (ps: Partial<ProjectApplication>): Partial<ProjectApplication> => {
+export const sanitizeProjectApplication = (ps: Partial<Application>): Partial<Application> => {
     return {
         ...ps,
         project:
             typeof ps.project === "object" && ps.project !== null
                 ? (ps.project as Project)._id
                 : ps.project,
-        grantStage:
-            typeof ps.grantStage === "object" && ps.grantStage !== null
-                ? (ps.grantStage as any)._id
-                : ps.grantStage,
+        stage:
+            typeof ps.stage === "object" && ps.stage !== null
+                ? (ps.stage as any)._id
+                : ps.stage,
     };
 }
 
 /**
  * Create empty project stage
  */
-export const createEmptyProjectApplication = (
-    stage?: Partial<ProjectApplication>
-): ProjectApplication => ({
+export const createEmptyApplication = (
+    stage?: Partial<Application>
+): Application => ({
     project: stage?.project ?? "",
-    grantStage: stage?.grantStage ?? "",
-    status: stage?.status ?? ApplicationStatus.submitted,
+    stage: stage?.stage ?? "",
+    status: stage?.status ?? ApplicationStatus.pending,
 });
 
 

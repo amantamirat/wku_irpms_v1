@@ -7,7 +7,7 @@ export interface Options {
         applicant?: boolean;
         grant?: boolean;
         calendar?: boolean;
-        currentStage?: boolean;
+        currentApplication?: boolean;
     };
 }
 
@@ -37,27 +37,8 @@ export interface CreateProjectDTO {
     themes: string[];
     collaborators: CollaboratorDto[];
     phases: PhaseDto[];
+    createdBy?:string;
     userId?: string;
-}
-
-/*
-export interface CreateProjectDTO {
-    call?: string;
-    calendar?: string;
-    grant: string;
-    title: string;
-    summary?: string;
-    applicant: string;
-    themes: string[];
-    totalBudget?: number;
-    totalDuration?: number;
-    status?: ProjectStatus;
-}
-*/
-
-export interface ApplyProjectDTO extends CreateProjectDTO {
-    call: string;
-    docPath: string;
 }
 
 // UPDATE Project
@@ -71,7 +52,7 @@ export interface UpdateProjectDTO {
         totalCollabs: number;
         themes: string[];
     }>;
-    applicantId: string;
+    userId: string;
 }
 
 export interface ExistsProjectDTO {

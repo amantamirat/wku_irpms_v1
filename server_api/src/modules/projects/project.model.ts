@@ -25,7 +25,7 @@ export interface IProject extends Document {
     totalCollabs?: number;
     applicant: mongoose.Types.ObjectId;
     themes: mongoose.Types.ObjectId[];
-    currentStage?: mongoose.Types.ObjectId;
+    currentApplication?: mongoose.Types.ObjectId;
     status: ProjectStatus;
     createdBy?: mongoose.Types.ObjectId; // User who created the record
     createdAt?: Date;
@@ -89,7 +89,7 @@ const ProjectSchema = new Schema<IProject>({
         required: true
     }],
 
-    currentStage: {
+    currentApplication: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.APPLICATION,
         unique: true,
@@ -107,7 +107,6 @@ const ProjectSchema = new Schema<IProject>({
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.USER,
     },
-
 
 }, { timestamps: true });
 

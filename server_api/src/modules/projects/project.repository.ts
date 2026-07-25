@@ -1,21 +1,18 @@
 // project.repository.ts
 import mongoose, { ClientSession } from "mongoose";
-import { Project, IProject } from "./project.model";
 import {
     CreateProjectDTO,
     ExistsProjectDTO,
-    Options,
     GetProjectsDTO,
+    Options,
     UpdateProjectDTO
 } from "./project.dto";
-import { GrantAllocation } from "../grants/allocations/grant.allocation.model";
-import { ProjectStatus } from "./project.model";
-import { Calendar } from "../calendar/calendar.model";
+import { IProject, Project, ProjectStatus } from "./project.model";
 
 export interface IProjectRepository {
-    findById(id: string, options?: Options, session?: ClientSession): Promise<IProject | null>;
+    findById(id: string, options?: Options): Promise<IProject | null>;
     find(filters: GetProjectsDTO): Promise<Partial<IProject>[]>;
-    create(dto: CreateProjectDTO, session?: ClientSession): Promise<IProject>;
+    create(dto: CreateProjectDTO): Promise<IProject>;
     update(id: string, data: UpdateProjectDTO["data"]): Promise<IProject | null>;
     updateStatus(id: string, newStatus: ProjectStatus, session?: ClientSession): Promise<IProject | null>;
     incrementTotals(projectId: string, delta: { duration: number; budget: number }, session?: ClientSession): Promise<IProject | null>;
@@ -24,12 +21,12 @@ export interface IProjectRepository {
         delta: number,
         session?: ClientSession
     ): Promise<IProject | null>;
-    updateCurrentStage(
+    updateCurrentApplication(
         id: string,
         currentStage: string,
         session?: ClientSession
     ): Promise<IProject | null>;
-    clearCurrentStage(
+    clearCurrentApplication(
         project: string,
         session?: ClientSession
     ): Promise<IProject | null>;
@@ -42,8 +39,7 @@ export class ProjectRepository implements IProjectRepository {
 
     async findById(
         id: string,
-        options?: Options,
-        session?: ClientSession
+        options?: Options
     ) {
         let dbQuery = Project.findById(new mongoose.Types.ObjectId(id));
 
@@ -57,13 +53,8 @@ export class ProjectRepository implements IProjectRepository {
             dbQuery = dbQuery.populate("grant");
         }
 
-        if (populate?.currentStage) {
-            dbQuery = dbQuery.populate("currentStage");
-        }
-
-        // ✅ attach session if provided
-        if (session) {
-            dbQuery = dbQuery.session(session);
+        if (populate?.currentApplication) {
+            dbQuery = dbQuery.populate("currentApplication");
         }
 
         return dbQuery.lean<IProject>().exec();
@@ -110,8 +101,8 @@ export class ProjectRepository implements IProjectRepository {
         }
 
         // currentStage populate
-        if (populate?.currentStage) {
-            dbQuery = dbQuery.populate("currentStage");
+        if (populate?.currentApplication) {
+            dbQuery = dbQuery.populate("currentApplication");
         }
 
         if (populate?.calendar) {
@@ -217,7 +208,7 @@ export class ProjectRepository implements IProjectRepository {
 
     // ✅ add inside ProjectRepository
 
-    async updateCurrentStage(
+    async updateCurrentApplication(
         id: string,
         currentStage: string,
         session?: ClientSession
@@ -241,7 +232,7 @@ export class ProjectRepository implements IProjectRepository {
         ).exec();
     }
 
-    async clearCurrentStage(
+    async clearCurrentApplication(
         project: string,
         session?: ClientSession
     ) {
@@ -249,7 +240,7 @@ export class ProjectRepository implements IProjectRepository {
             new mongoose.Types.ObjectId(project),
             {
                 $unset: {
-                    currentStage: 1
+                    currentApplication: 1
                 }
             },
             { new: true }

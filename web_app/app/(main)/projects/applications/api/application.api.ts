@@ -1,13 +1,17 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
 import { TransitionRequestDto } from "@/types/util";
-import { GetProjectApplicationOptions, ProjectApplication, sanitizeProjectApplication } from "../models/project.application.model";
+import { GetProjectApplicationOptions, Application, sanitizeProjectApplication } from "../models/application.model";
+import { Project, sanitize } from "../../models/project.model";
 
 const end_point = "/project/applications";
 
-export const ProjectApplicationApi: EntityApi<ProjectApplication, GetProjectApplicationOptions | undefined>
+
+
+export const ApplicationApi: EntityApi<Application, GetProjectApplicationOptions | undefined>
     & {
         calculateTotalScore: (id: string) => Promise<number>;
+        apply: (project: Partial<Project>) => Promise<Application>;
     } = {
 
     // ---------------------------
@@ -23,8 +27,8 @@ export const ProjectApplicationApi: EntityApi<ProjectApplication, GetProjectAppl
                 query.append("project", sanitized.project as string);
             }
 
-            if (options.grantStage) {
-                query.append("grantStage", sanitized.grantStage as string);
+            if (options.stage) {
+                query.append("stage", sanitized.stage as string);
             }
 
             /*
@@ -53,7 +57,7 @@ export const ProjectApplicationApi: EntityApi<ProjectApplication, GetProjectAppl
     // ---------------------------
     // Get By Id
     // ---------------------------
-    async getById(id: string): Promise<ProjectApplication> {
+    async getById(id: string): Promise<Application> {
         return ApiClient.get(`${end_point}/${id}`);
     },
 
@@ -67,6 +71,27 @@ export const ProjectApplicationApi: EntityApi<ProjectApplication, GetProjectAppl
         if (stage.file)
             formData.append("document", stage.file);
         return ApiClient.post(`${end_point}`, formData);
+    },
+
+
+    async apply(project: Partial<Project>): Promise<Application> {
+        const formData = new FormData();
+        const sanitized = sanitize(project);
+
+        // 1. Separate the file from the rest of the data
+        if (sanitized.file) {
+            // Backend usually expects 'document' or 'file' - 
+            // Based on your controller, make sure Multer is configured for this key
+            formData.append("file", sanitized.file);
+            delete sanitized.file;
+        }
+
+        // 2. Wrap the REST of the project data into a single stringified JSON object
+        // This satisfies: project = JSON.parse(req.body.project);
+        formData.append("project", JSON.stringify(sanitized));
+
+        const created = await ApiClient.post(`${end_point}/apply`, formData);
+        return created as Application;
     },
 
     // ---------------------------

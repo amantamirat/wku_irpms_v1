@@ -137,7 +137,7 @@ export class NotificationService {
         let type: NotificationType = NotificationType.INFO;
 
         switch (newStatus) {
-            case ApplicationStatus.submitted:
+            case ApplicationStatus.pending:
                 message = `Your application "${projectTitle}" for ${stageName} has been submitted successfully.`;
                 type = NotificationType.SUCCESS;
                 break;

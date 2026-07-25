@@ -1,40 +1,33 @@
 // project.service.ts
 import {
-    ApplyProjectDTO,
     CreateProjectDTO,
     GetProjectsDTO,
     UpdateProjectDTO,
 } from "./project.dto";
 import { IProjectRepository } from "./project.repository";
 
-import mongoose, { ClientSession } from "mongoose";
 import { DeleteDto } from "../../common/dtos/delete.dto";
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
-import { ICallRepository } from "../calls/call.repository";
 import { CallStatus } from "../calls/call.model";
-import { IGrantAllocationRepository } from "../grants/allocations/grant.allocation.repository";
-import { AllocationStatus, IGrantAllocation } from "../grants/allocations/grant.allocation.model";
+import { ICallRepository } from "../calls/call.repository";
+import { IStageRepository } from "../calls/stages/stage.repository";
+import { CompositionValidator } from "../grants/compositions/composition.validator";
 import { ConstraintValidator } from "../grants/constraints/constraint.validator";
+import { GrantStatus } from "../grants/grant.model";
+import { IGrantRepository } from "../grants/grant.repository";
+import { NotificationService } from "../notifications/notification.service";
+import { ApplicationService } from "./applications/application.service";
 import { CollaboratorStatus } from "./collaborators/collaborator.model";
 import { ICollaboratorRepository } from "./collaborators/collaborator.repository";
 import { CollaboratorService } from "./collaborators/collaborator.service";
 import { PhaseStatus } from "./phase/phase.model";
 import { IPhaseRepository } from "./phase/phase.repository";
 import { PhaseService } from "./phase/phase.service";
-import { ProjectAuth } from "./project.auth";
 import { ProjectStatus } from "./project.model";
 import { PROJECT_TRANSITIONS } from "./project.state-machine";
-import { IApplicationRepository } from "./applications/application.repository";
-import { ApplicationService } from "./applications/application.service";
-import { NotificationService } from "../notifications/notification.service";
-import { CompositionValidator } from "../grants/compositions/composition.validator";
-import { IStageRepository } from "../calls/stages/stage.repository";
-import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
-import { GrantStatus } from "../grants/grant.model";
-import { GrantStageRepository, IGrantStageRepository } from "../grants/stages/grant.stage.repository";
 
 
 export class ProjectService {
@@ -44,24 +37,19 @@ export class ProjectService {
         private readonly collabRepo: ICollaboratorRepository,
         private readonly phaseRepo: IPhaseRepository,
         private readonly grantRepo: IGrantRepository,
-        private readonly callRepo: ICallRepository,
-        private readonly stageRepo: IStageRepository,
         private readonly collabService: CollaboratorService,
-        private readonly phaseService: PhaseService,
-        private readonly applicationService: ApplicationService,
+        private readonly phaseService: PhaseService,        
         private readonly constValidator: ConstraintValidator,
         private readonly compValidator: CompositionValidator,
-
-        private readonly projAuth: ProjectAuth = new ProjectAuth(projectRepo),
         private readonly notificationService?: NotificationService,
     ) { }
 
 
-    async validateProject(project: string, applicant: string, session?: ClientSession) {
-        const projectDoc = await this.projAuth.authProject(project, applicant);
-        if (projectDoc.status !== ProjectStatus.draft) {
-            throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
-        }
+    async validateProject(project: string) {
+        const projectDoc = await this.projectRepo.findById(project);
+        if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
+        if (projectDoc.status !== ProjectStatus.draft)
+            throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
         return projectDoc;
     }
 
@@ -78,7 +66,7 @@ export class ProjectService {
             await this.constValidator.validateMetadata(grantId, title, summary);
             await this.constValidator.validateThemes(grantId, themes);
         }
-        const created = await this.projectRepo.create(dto);
+        const created = await this.projectRepo.create({ ...dto, createdBy: userId });
         if (!created) {
             throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
         }
@@ -119,44 +107,6 @@ export class ProjectService {
     }
 
 
-    async apply(dto: ApplyProjectDTO) {
-        const { call, title, summary, applicant, collaborators, phases, themes, userId, docPath } = dto;
-        const lead = collaborators.find(c => c.isLeadPI);
-        if (!lead) throw new AppError(ERROR_CODES.LEAD_PI_NOT_FOUND);
-        if (lead.applicant !== userId) throw new AppError(ERROR_CODES.UNAUTHORIZED);
-
-        const callDoc = await this.callRepo.findById(call);
-        if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
-        if (callDoc.status !== CallStatus.active) throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
-
-        const stageDoc = await this.stageRepo.findOne(String(callDoc._id), 1);
-        if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-        const deadline = stageDoc.deadline;
-        if (deadline < new Date()) {
-            throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
-        }
-
-        const calendarId = String(callDoc.calendar);
-        const grantId = String(callDoc.grant);
-        await this.constValidator.validateAll(grantId, { participantCount: collaborators.length, phases, themes, title, summary });
-        await this.compValidator.validateAll(grantId, collaborators);
-        const skipValidation = { skipValidation: true };
-        try {
-            const createdProj = await this.create({ ...dto, grant: grantId, calendar: calendarId },
-                skipValidation);
-            const projectId = String(createdProj._id);
-            await this.applicationService.create({
-                project: projectId, stage: String(stageDoc._id), documentPath: docPath, userId: userId
-            }, skipValidation);
-            return createdProj;
-        } catch (error) {
-            throw error;
-        } finally {
-
-        }
-    }
-
-
     async getProjects(options: GetProjectsDTO) {
         return this.projectRepo.find(options);
     }
@@ -171,17 +121,12 @@ export class ProjectService {
     // UPDATE
     // ---------------------------------------------------
     async update(dto: UpdateProjectDTO) {
-        const { id, data, applicantId } = dto;
-
-        const projectDoc = await this.validateProject(id, applicantId);
-
-        const allocDoc = projectDoc.grant as unknown as IGrantAllocation;
-        const grantId = String(allocDoc.grant);
-
+        const { id, data, userId: userId } = dto;
+        const projectDoc = await this.validateProject(id);
+        const grantId = String(projectDoc.grant);
         // Resolve next values
         const nextTitle = data.title ?? projectDoc.title;
         const nextSummary = data.summary ?? projectDoc.summary;
-
         // Validate metadata only if changed
         if (
             nextTitle !== projectDoc.title ||
@@ -193,7 +138,6 @@ export class ProjectService {
                 nextSummary
             );
         }
-
         const nextThemes = data.themes ?? projectDoc.themes.map(String);
 
         const themesChanged =
@@ -217,7 +161,7 @@ export class ProjectService {
         if (!projectDoc) {
             throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
         }
-        const isCallProject = !!projectDoc.call;
+
         const from = projectDoc.status as ProjectStatus;
         const to = next as ProjectStatus;
 
@@ -231,10 +175,8 @@ export class ProjectService {
             PROJECT_TRANSITIONS
         );
 
-        if (to === ProjectStatus.draft && isCallProject ||
-            to === ProjectStatus.submitted ||
+        if (to === ProjectStatus.submitted ||
             to === ProjectStatus.rejected ||
-            (from === ProjectStatus.submitted && to === ProjectStatus.accepted) ||
             to === ProjectStatus.active ||
             to === ProjectStatus.terminated ||
             to === ProjectStatus.completed
@@ -242,6 +184,13 @@ export class ProjectService {
 
             throw new AppError(ERROR_CODES.INVALID_OPERTATION);
         }
+
+        if (to === ProjectStatus.draft) {
+            if (projectDoc.currentApplication) {
+                throw new AppError(ERROR_CODES.APPLICATION_ALREADY_EXISTS);
+            }
+        }
+
 
         if (to === ProjectStatus.granted) {
             const phases = await this.phaseRepo.find({ project: id });
@@ -261,8 +210,8 @@ export class ProjectService {
     // DELETE
     // ---------------------------------------------------
     async delete(dto: DeleteDto) {
-        const { id, userId: applicantId } = dto;
-        await this.validateProject(id, applicantId ?? '');
+        const { id, userId } = dto;
+        await this.validateProject(id);
         await this.collabRepo.deleteByProject(id);
         await this.phaseRepo.deleteByProject(id);
         return this.projectRepo.delete(id);

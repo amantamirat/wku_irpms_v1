@@ -870,48 +870,48 @@
   },
   {
     "category": "Project Application Management",
-    "name": "project.application:create",
-    "description": "Create project application (submit document)"
+    "name": "application:create",
+    "description": "Create application (submit document)"
   },
   {
     "category": "Project Application Management",
-    "name": "project.application:read",
-    "description": "Read project application entries"
+    "name": "application:read",
+    "description": "Read application entries"
   },
   {
     "category": "Project Application Management",
-    "name": "project.application:update",
-    "description": "Update project application (before review)"
+    "name": "application:update",
+    "description": "Update application (before review)"
   },
   {
     "category": "Project Application Management",
-    "name": "project.application:calculateTotalScore",
-    "description": "Calculate and store total score for a project application based on approved reviewer evaluations"
+    "name": "application:calculateTotalScore",
+    "description": "Calculate and store total score for an application based on approved reviewer evaluations"
   },
   {
     "category": "Project Application Management",
-    "name": "project.application:delete",
-    "description": "Delete project application entries"
+    "name": "application:delete",
+    "description": "Delete application entries"
   },
   {
     "category": "Project Application Management",
-    "name": "project.application:transition.submitted.accepted",
-    "description": "Accept a submitted project application"
+    "name": "application:transition.pending.accepted",
+    "description": "Accept a pending application"
   },
   {
     "category": "Project Application Management",
-    "name": "project.application:transition.submitted.rejected",
-    "description": "Reject a submitted project application"
+    "name": "application:transition.pending.rejected",
+    "description": "Reject a pending application"
   },
   {
     "category": "Project Application Management",
-    "name": "project.application:transition.accepted.submitted",
-    "description": "Revert an accepted project application back to submitted"
+    "name": "application:transition.accepted.pending",
+    "description": "Revert an accepted application back to pending"
   },
   {
     "category": "Project Application Management",
-    "name": "project.application:transition.rejected.submitted",
-    "description": "Reopen a rejected project application and move it back to submitted"
+    "name": "application:transition.rejected.pending",
+    "description": "Reopen a rejected application and move it back to pending"
   },
   {
     "category": "Report Management",

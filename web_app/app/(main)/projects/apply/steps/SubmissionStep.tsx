@@ -6,6 +6,7 @@ import { Message } from 'primereact/message';
 import { Project } from '../../models/project.model';
 import { ProjectApi } from '../../api/project.api';
 import { useRouter } from 'next/navigation'; // Using Next.js router
+import { ApplicationApi } from '../../applications/api/application.api';
 
 interface SubmissionStepProps {
     data: Partial<Project>;
@@ -37,7 +38,7 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
         setError(null);
 
         try {
-            const result = await ProjectApi.apply({
+            const result = await ApplicationApi.apply({
                 ...data,
                 file: selectedFile,
             });
@@ -176,8 +177,8 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                     onClick={submitFinalProject}
 
                     className={`px-6 shadow-3 transition-all duration-500 ${success
-                            ? 'p-button-info opacity-100'
-                            : 'p-button-success'
+                        ? 'p-button-info opacity-100'
+                        : 'p-button-success'
                         }`}
 
                     // Keeps the button locked so no double-submissions occur

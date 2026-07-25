@@ -10,8 +10,9 @@ import { Tag } from 'primereact/tag';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ProjectApplicationApi } from '../api/project.stage.api';
-import { ProjectApplication, sanitizeProjectApplication, validateProjectApplication } from '../models/project.application.model';
+import { ApplicationApi } from '../api/application.api';
+import { Application, sanitizeProjectApplication, validateProjectApplication } from '../models/application.model';
+import { Stage } from '@/app/(main)/calls/stages/models/stage.model';
 
 // Assuming Project type has a 'title' or 'name' property based on your requirements
 interface Project {
@@ -21,17 +22,17 @@ interface Project {
     [key: string]: any;
 }
 
-const SaveProjectApplication = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<ProjectApplication>) => {
+const SaveProjectApplication = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<Application>) => {
     const toast = useRef<Toast>(null);
-    const [localStage, setLocalStage] = useState<Partial<ProjectApplication>>({ ...item });
+    const [localStage, setLocalStage] = useState<Partial<Application>>({ ...item });
     const [submitted, setSubmitted] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
 
     // Memoize the GrantStage object for easier access
     const stageInfo = useMemo(() => {
-        const gs = localStage.grantStage;
-        return (typeof gs === 'object' && gs !== null) ? (gs as GrantStage) : null;
-    }, [localStage.grantStage]);
+        const gs = localStage.stage;
+        return (typeof gs === 'object' && gs !== null) ? (gs as Stage) : null;
+    }, [localStage.stage]);
 
     // Memoize the Project object to display its title if available
     const projectInfo = useMemo(() => {
@@ -66,8 +67,8 @@ const SaveProjectApplication = ({ visible, item, onHide, onComplete }: EntitySav
             const payload = sanitizeProjectApplication(localStage);
             
             const saved = localStage._id 
-                ? await ProjectApplicationApi.update(payload) 
-                : await ProjectApplicationApi.create(payload as ProjectApplication);
+                ? await ApplicationApi.update(payload) 
+                : await ApplicationApi.create(payload as Application);
 
             toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Document submitted successfully' });
             onComplete?.(saved);
@@ -128,8 +129,8 @@ const SaveProjectApplication = ({ visible, item, onHide, onComplete }: EntitySav
                         <div className="surface-100 p-2 border-round flex-1 flex flex-column align-items-center border-1 border-200">
                             <span className="text-xs text-500 uppercase font-bold mb-1">Process</span>
                             <Tag 
-                                severity={stageInfo?.category === StageCategory.selection ? 'info' : 'success'} 
-                                value={stageInfo?.category || 'General'} 
+                                severity={'success'} 
+                                value={'General'} 
                             />
                         </div>
                         <div className="surface-100 p-2 border-round flex-1 flex flex-column align-items-center border-1 border-200">
@@ -186,7 +187,7 @@ const SaveProjectApplication = ({ visible, item, onHide, onComplete }: EntitySav
                         <ul className="text-xs mt-2 pl-3 text-600 mb-0 line-height-3">
                             <li>Maximum file size permitted is <strong>15MB</strong>.</li>
                             <li>Only <strong>PDF</strong> files are accepted for technical review.</li>
-                            <li>This is a <strong>{stageInfo?.category || 'standard'}</strong> stage; ensure all data is accurate.</li>
+                            <li>This is a <strong>{'standard'}</strong> stage; ensure all data is accurate.</li>
                             <li>A minimum score of <strong>{stageInfo?.minAcceptanceScore || 0}</strong> is required to pass.</li>
                         </ul>
                     </div>

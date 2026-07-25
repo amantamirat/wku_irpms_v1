@@ -24,7 +24,7 @@ export class ReviewerService {
 
     constructor(
         private readonly repository: IReviewerRepository,
-        private readonly projectStageRepo: IApplicationRepository,
+        private readonly applicationRepo: IApplicationRepository,
         private readonly userRepo: IUserRepository,
         private readonly collaboratorRepo: ICollaboratorRepository,
         private readonly resultRepo: IResultRepository,
@@ -37,19 +37,19 @@ export class ReviewerService {
     async create(dto: CreateReviewerDTO) {
         const { projectApplication, reviewer, weight } = dto;
 
-        const projectStageDoc = await this.projectStageRepo.findById(projectApplication, {
+        const projectAppDoc = await this.applicationRepo.findById(projectApplication, {
             populate: {
                 grantStage: true,
                 project: true
             }
         });
-        if (!projectStageDoc) throw new AppError(ERROR_CODES.PROJECT_APPLICATION_NOT_FOUND);
+        if (!projectAppDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
 
-        const projectStageStatus = projectStageDoc.status;
-        if (projectStageStatus !== ApplicationStatus.submitted)
+        const projectStageStatus = projectAppDoc.status;
+        if (projectStageStatus !== ApplicationStatus.pending)
             throw new AppError(ERROR_CODES.INVALID_DOC_STATUS);
 
-        const grantStageDoc = projectStageDoc.stage as unknown as IGrantStage;
+        const grantStageDoc = projectAppDoc.stage as unknown as IGrantStage;
         const countReviewers = await this.repository.countByProjectStage(projectApplication);
         const maxReviewers = grantStageDoc.maxReviewers;
         if (maxReviewers !== undefined && countReviewers >= maxReviewers) {
@@ -58,7 +58,7 @@ export class ReviewerService {
         const applicantDoc = await this.userRepo.findById(reviewer);
         if (!applicantDoc) throw new Error(ERROR_CODES.USER_NOT_FOUND);
 
-        const projectDoc = projectStageDoc.project as unknown as IProject;
+        const projectDoc = projectAppDoc.project as unknown as IProject;
         const collaborators = await this.collaboratorRepo.find({ project: String(projectDoc._id) });
         if (collaborators.find(c => String(c.applicant) === reviewer)) {
             throw new AppError(ERROR_CODES.INVALID_REVIEWER, `Reviewr ${applicantDoc.name} is already a collaborator in the project.`);
@@ -108,14 +108,14 @@ export class ReviewerService {
         }
 
 
-        const projectStageDoc = await this.projectStageRepo.findById(String(reviewerDoc.projectApplication), {
+        const projectStageDoc = await this.applicationRepo.findById(String(reviewerDoc.projectApplication), {
             populate: {
                 grantStage: true
             }
         });
-        if (!projectStageDoc) throw new AppError(ERROR_CODES.PROJECT_APPLICATION_NOT_FOUND);
+        if (!projectStageDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
 
-        if (projectStageDoc.status !== ApplicationStatus.submitted
+        if (projectStageDoc.status !== ApplicationStatus.pending
         ) {
             throw new AppError(ERROR_CODES.INVALID_STAGE_STATUS);
         }

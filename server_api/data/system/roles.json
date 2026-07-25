@@ -84,9 +84,9 @@
             "theme:read",
             "project_theme:*",
             "phase:*",
-            "project.application:read",
-            "project.application:create",
-            "project.application:delete",
+            "application:read",
+            "application:create",
+            "application:delete",
             "reviewer:read"
         ],
         "isDefault": true

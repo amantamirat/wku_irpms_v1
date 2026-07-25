@@ -9,7 +9,7 @@ import { TabPanel, TabView } from "primereact/tabview";
 import CollaboratorManager from "../collaborators/components/CollaboratorManager";
 import { Project } from "../models/project.model";
 import PhaseManager from "../phases/components/PhaseManager";
-import ProjectApplicationManager from "../applications/components/ProjectApplicationManager";
+import ApplicationManager from "../applications/components/ApplicationManager";
 
 interface ProjectDetailProps {
     project: Project;
