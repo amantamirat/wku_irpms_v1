@@ -18,7 +18,7 @@ export const CollaboratorApi: EntityApi<Collaborator, GetCollaboratorsOptions | 
         if (options) {
             const sanitized = sanitizeCollaborator(options);
             if (sanitized.project) query.append("project", sanitized.project as string);
-            if (sanitized.applicant) query.append("applicant", sanitized.applicant as string);
+            if (sanitized.member) query.append("member", sanitized.member as string);
             if (sanitized.status) query.append("status", sanitized.status);
             if (options.populate !== undefined) {
                 query.append("populate", String(options.populate));

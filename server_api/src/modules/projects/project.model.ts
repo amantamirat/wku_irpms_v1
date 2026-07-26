@@ -23,7 +23,7 @@ export interface IProject extends Document {
     totalBudget?: number;
     totalDuration?: number;
     totalCollabs?: number;
-    applicant: mongoose.Types.ObjectId;
+    leadPI: mongoose.Types.ObjectId;
     themes: mongoose.Types.ObjectId[];
     currentApplication?: mongoose.Types.ObjectId;
     status: ProjectStatus;
@@ -77,7 +77,7 @@ const ProjectSchema = new Schema<IProject>({
         min: 0
     },
 
-    applicant: {
+    leadPI: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.USER,
         required: true

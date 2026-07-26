@@ -20,15 +20,15 @@ export type CallDeadline = {
 // 2. Update your main Call type
 export type Call = {
     _id?: string;
-    grant: string | Grant; // The new single source of truth
+    grant?: string | Grant; // The new single source of truth
     calendar?: string | Calendar;
     organization?: string | Organization;
-    title: string;
+    title?: string;
     //allocatedBudget?: number;
     //usedBudget?: number;
     description?: string | null;
     deadline?: Date;
-    status: CallStatus;
+    status?: CallStatus;
     createdAt?: Date;
     updatedAt?: Date;
 };
@@ -40,7 +40,7 @@ export interface GetCallsOptions {
     populate?: boolean;
 }
 
-export const validateCall = (call: Call): { valid: boolean; message?: string } => {
+export const validateCall = (call: Partial<Call>): { valid: boolean; message?: string } => {
     if (!call.title || call.title.trim().length === 0) {
         return { valid: false, message: "Title is required." };
     }

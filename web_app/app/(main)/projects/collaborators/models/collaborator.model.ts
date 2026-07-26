@@ -9,7 +9,7 @@ export enum CollaboratorStatus {
 export type Collaborator = {
     _id?: string;
     project?: string | Project;
-    applicant?: string | User;
+    member?: string | User;
     role?: string;
     isLeadPI?: boolean;
     status?: CollaboratorStatus;
@@ -19,7 +19,7 @@ export type Collaborator = {
 
 export interface GetCollaboratorsOptions {
     project?: string | Project;
-    applicant?: string | User;
+    member?: string | User;
     status?: CollaboratorStatus;
     populate?: boolean;
 }
@@ -31,10 +31,10 @@ export const sanitizeCollaborator = (collaborator: Partial<Collaborator>): Colla
             typeof collaborator.project === "object" && collaborator.project !== null
                 ? (collaborator.project as Project)._id
                 : collaborator.project,
-        applicant:
-            typeof collaborator.applicant === "object" && collaborator.applicant !== null
-                ? (collaborator.applicant as User)._id
-                : collaborator.applicant,
+        member:
+            typeof collaborator.member === "object" && collaborator.member !== null
+                ? (collaborator.member as User)._id
+                : collaborator.member,
     } as Collaborator;
 }
 

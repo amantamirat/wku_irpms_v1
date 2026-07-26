@@ -42,7 +42,7 @@ const CollaboratorManager = ({
                 body: (c: Collaborator) => (
                     <div className="flex align-items-center gap-2">
                         <span className="font-medium">
-                            {typeof c.applicant === "object" ? c.applicant?.name : "Unknown Member"}
+                            {typeof c.member === "object" ? c.member?.name : "Unknown Member"}
                         </span>
                         {c.isLeadPI && <Badge value="Lead PI" severity="info" />}
                     </div>
@@ -67,7 +67,7 @@ const CollaboratorManager = ({
                 field: "project.applicant.name",
                 sortable: true,
                 body: (c: Collaborator) => {
-                    const lead = typeof c.project === "object" ? c.project?.applicant : null;
+                    const lead = typeof c.project === "object" ? c.project?.leadPI : null;
                     return (
                         <div className="truncate text-sm" style={{ maxWidth: "250px" }}>
                             {(lead as any)?.name ?? "Loading..."}
@@ -107,7 +107,7 @@ const CollaboratorManager = ({
             createNew: canManageTeam
                 ? () => ({
                     project: project,
-                    applicant: member ?? undefined,
+                    member: member ?? undefined,
                     isLeadPI: false,
                     status: CollaboratorStatus.pending
                 })
@@ -117,7 +117,7 @@ const CollaboratorManager = ({
             permissionPrefix: "collaborator",
             query: () => ({
                 project: project?._id,
-                applicant: member?._id,
+                member: member?._id,
                 populate: true,
             }),
             workflow: member ? {

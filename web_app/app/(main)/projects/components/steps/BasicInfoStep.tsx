@@ -116,7 +116,7 @@ export const BasicInfoStep = ({ data, onUpdate, onConstraintsChange, onNext, isE
     }, [data.grant, grants]);
 
     // --- Applicant Selection Handler ---
-    const selectedLeadApplicant = data.collaborators?.[0]?.applicant;
+    const selectedLeadApplicant = data.collaborators?.[0]?.member;
     const selectedLeadId = typeof selectedLeadApplicant === 'object' ? selectedLeadApplicant?._id : selectedLeadApplicant;
 
     const handleApplicantChange = (selectedUser: any) => {
@@ -159,7 +159,7 @@ export const BasicInfoStep = ({ data, onUpdate, onConstraintsChange, onNext, isE
             !data.title ||
             !data.themes ||
             data.themes.length === 0 ||
-            !data.collaborators?.[0]?.applicant
+            !data.collaborators?.[0]?.member
         ) {
             return;
         }
@@ -220,7 +220,7 @@ export const BasicInfoStep = ({ data, onUpdate, onConstraintsChange, onNext, isE
                             filter
                             //loading={loadingApplicants}
                             placeholder="Select Lead Applicant"
-                            className={classNames({ 'p-invalid': submitted && !data.collaborators?.[0]?.applicant })}
+                            className={classNames({ 'p-invalid': submitted && !data.collaborators?.[0]?.member })}
                         />
                     )}
                 </div>

@@ -35,7 +35,7 @@ const router = express.Router();
 router.post(
     "/",
     verifyActiveAccount,
-    checkPermission("project.application:create"),
+    checkPermission("application:create"),
     (req, res, next) => {
         // Set the dynamic subfolder for this specific endpoint
         req.headers["x-upload-folder"] = "applications";
@@ -61,21 +61,21 @@ router.post(
 router.get(
     "/",
     verifyActiveAccount,
-    checkPermission("project.application:read"),
+    checkPermission("application:read"),
     controller.get
 );
 
 router.get(
     "/:id",
     verifyActiveAccount,
-    checkPermission("project.application:read"),
+    checkPermission("application:read"),
     controller.getById
 );
 
 router.post(
     "/:id/calculate-score",
     verifyActiveAccount,
-    checkPermission("project.application:calculateTotalScore"),
+    checkPermission("application:calculateTotalScore"),
     controller.calculateTotalScore
 );
 
@@ -91,14 +91,14 @@ router.patch(
 router.patch(
     "/:id/transition",
     verifyActiveAccount,
-    checkTransitionPermission("project.application"),
+    checkTransitionPermission("application"),
     controller.transitionState
 );
 
 router.delete(
     "/:id",
     verifyActiveAccount,
-    checkPermission("project.application:delete"),
+    checkPermission("application:delete"),
     controller.delete
 );
 

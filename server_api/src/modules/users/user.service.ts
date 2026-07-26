@@ -15,9 +15,9 @@ import { PublicationRepository } from "./publications/publication.repository";
 export class UserService {
 
     constructor(
-        private repo: IUserRepository = new UserRepository(),
-        private orgnRepo: IOrganizationRepository = new OrganizationRepository(),
-        private roleRepository: IRoleRepository = new RoleRepository(),
+        private repo: IUserRepository,
+        private orgnRepo: IOrganizationRepository,
+        private roleRepository: IRoleRepository,
         private projectRepo: IProjectRepository = new ProjectRepository(),
         private collabRepo: ICollaboratorRepository = new CollaboratorRepository(),
         private reviewerRepo = new ReviewerRepository(),
@@ -52,6 +52,10 @@ export class UserService {
     // -------------------------
     async getAll(filter: GetUsersDTO) {
         return await this.repo.findAll(filter);
+    }
+
+    async findOne({ workspace, name }: GetUsersDTO) {
+        return await this.repo.findOne({ workspace, name });
     }
     // -------------------------
     // UPDATE
@@ -138,7 +142,7 @@ export class UserService {
         }
 
         // 1. Check for Project Applications
-        const projectExists = await this.projectRepo.exists({ applicant: id });
+        const projectExists = await this.projectRepo.exists({ leadPI: id });
         if (projectExists) {
             throw new AppError(
                 ERROR_CODES.USER_IN_USE,
@@ -147,7 +151,7 @@ export class UserService {
         }
 
         // 2. Check for Project Collaborations
-        const collabExist = await this.collabRepo.exists({ applicant: id });
+        const collabExist = await this.collabRepo.exists({ member: id });
         if (collabExist) {
             throw new AppError(
                 ERROR_CODES.USER_IN_USE,

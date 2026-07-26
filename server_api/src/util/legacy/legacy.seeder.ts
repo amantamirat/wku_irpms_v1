@@ -14,15 +14,16 @@ import { Unit } from '../../common/constants/enums';
 import { ICalendarRepository } from '../../modules/calendar/calendar.repository';
 import { IProjectRepository } from '../../modules/projects/project.repository';
 import { ProjectService } from '../../modules/projects/project.service';
+import { UserService } from '../../modules/users/user.service';
 
 export class LegacySeeder {
 
     constructor(
-        private readonly userRepo: IUserRepository,
         private readonly organRepo: IOrganizationRepository,
         private readonly grantRepo: IGrantRepository,
         private readonly themeRepo: IThemeRepository,
         private readonly calendarRepo: ICalendarRepository,
+        private readonly userService: UserService,
         private readonly projectService: ProjectService
     ) {
 
@@ -104,7 +105,7 @@ export class LegacySeeder {
             const parsedMemberName = this.parseName(member.name).name;
 
             const user =
-                await this.userRepo.findOne({
+                await this.userService.findOne({
                     workspace: String(affliation._id),
                     name: parsedMemberName
                 });
@@ -117,7 +118,7 @@ export class LegacySeeder {
 
 
             collaborators.push({
-                applicant: String(user._id),
+                member: String(user._id),
                 role:
                     parsedMemberName === parsedPIName
                         ? "Principal Investigator"
@@ -208,7 +209,7 @@ export class LegacySeeder {
             calendar: String(calendar._id),
             title: item.Project_Title,
             summary: `Imported project ${item.Academic_Year}`,
-            applicant: pi.applicant,
+            leadPI: pi.member,
             themes: [
                 String(theme._id)
             ],
@@ -378,7 +379,7 @@ export class LegacySeeder {
             const parsed = this.parseName(item.Name);
 
             const userExists =
-                await this.userRepo.findOne({
+                await this.userService.findOne({
                     workspace: String(department._id),
                     name: parsed.name
                 });
@@ -386,7 +387,7 @@ export class LegacySeeder {
                 continue;
 
             //use service
-            await this.userRepo.create({
+            await this.userService.create({
                 name: parsed.name,
                 workspace: String(department._id),
                 gender: item.Gender

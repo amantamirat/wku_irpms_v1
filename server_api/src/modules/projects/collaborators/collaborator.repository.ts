@@ -38,8 +38,8 @@ export class CollaboratorRepository implements ICollaboratorRepository {
             query.project = new mongoose.Types.ObjectId(filters.project);
         }
 
-        if (filters.applicant) {
-            query.applicant = new mongoose.Types.ObjectId(filters.applicant);
+        if (filters.member) {
+            query.member = new mongoose.Types.ObjectId(filters.member);
         }
 
         if (filters.status) {
@@ -50,8 +50,8 @@ export class CollaboratorRepository implements ICollaboratorRepository {
 
         if (filters.populate) {
             dbQuery = dbQuery.populate([
-                { path: 'applicant', populate: { path: 'workspace' } },
-                { path: 'project', populate: { path: 'applicant' } }
+                { path: 'member', populate: { path: 'workspace' } },
+                { path: 'project', populate: { path: 'leadPI' } }
             ]);
         }
 
@@ -65,7 +65,7 @@ export class CollaboratorRepository implements ICollaboratorRepository {
         const data: Partial<ICollaborator> = {
             ...dto,
             project: new mongoose.Types.ObjectId(dto.project),
-            applicant: new mongoose.Types.ObjectId(dto.applicant),
+            member: new mongoose.Types.ObjectId(dto.member),
         };
         return Collaborator.create([data], { session }).then(res => res[0]);
     }
@@ -74,7 +74,7 @@ export class CollaboratorRepository implements ICollaboratorRepository {
     async createMany(dtos: CreateCollaboratorDto[]) {
         const data: Partial<ICollaborator>[] = dtos.map(dto => ({
             project: new mongoose.Types.ObjectId(dto.project),
-            applicant: new mongoose.Types.ObjectId(dto.applicant),
+            member: new mongoose.Types.ObjectId(dto.member),
         }));
         return Collaborator.insertMany(data, { ordered: true });
     }
@@ -104,9 +104,9 @@ export class CollaboratorRepository implements ICollaboratorRepository {
 
     async exists(filters: ExistsCollabDTO): Promise<boolean> {
         const query: any = {};
-        const { applicant } = filters;
-        if (applicant) {
-            query.applicant = new mongoose.Types.ObjectId(applicant);
+        const { member } = filters;
+        if (member) {
+            query.member = new mongoose.Types.ObjectId(member);
         }
         const result = await Collaborator.exists(query).exec();
         return result !== null;

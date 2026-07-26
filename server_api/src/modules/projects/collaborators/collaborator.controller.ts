@@ -21,12 +21,12 @@ export class CollaboratorController {
     // -----------------------
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.auth) throw new Error('User not found!');
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
-            const { project, applicant, role, isLeadPI } = req.body;
+            const { project, member, role, isLeadPI } = req.body;
 
             const dto: CreateCollaboratorDto = {
-                applicant: applicant as string,
+                member: member as string,
                 project: project as string,
                 //isLeadPI: isLeadPI ? true : undefined,
                 role,
@@ -45,10 +45,10 @@ export class CollaboratorController {
     // -----------------------
     get = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const { project, applicant, status, populate } = req.query;
+            const { project,  member, status, populate } = req.query;
             const collaborators = await this.service.get({
                 project: project ? (project as string) : undefined,
-                applicant: applicant ? (applicant as string) : undefined,
+                member: member ? (member as string) : undefined,
                 status: status ? (status as CollaboratorStatus) : undefined,
                 ...(populate !== undefined && { populate: populate === "true" })
             });

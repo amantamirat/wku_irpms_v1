@@ -51,7 +51,7 @@ import path from 'path';
 import { SeedService } from './util/seed.service';
 import { SocketService } from './modules/notifications/socket.service';
 import { LegacySeeder } from './util/legacy/legacy.seeder';
-import { calendarRepo, grantRepo, organizationRepo, projectService, themeRepo, userRepo } from './core/container';
+import { calendarRepo, grantRepo, organizationRepo, projectService, themeRepo, userRepo, userService } from './core/container';
 
 dotenv.config();
 const app: Application = express();
@@ -131,17 +131,17 @@ const PORT = process.env.SERVER_PORT || 5000;
     //await seedService.seedPositions();
 
     const seeder = new LegacySeeder(
-      userRepo,
       organizationRepo,
       grantRepo,
       themeRepo,
       calendarRepo,
+      userService,
       projectService
     );
-    //seeder.seedProjects("Internal Thematic Grant");
+    //seeder.seedProjects("Thematic Grant");
     //seeder.seedColleges();
     //seeder.seedDepartments();
-   // seeder.seedUsers();
+    //seeder.seedUsers();
 
     // 2. Create the HTTP server explicitly using your Express app
     const httpServer = http.createServer(app);

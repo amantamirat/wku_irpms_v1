@@ -67,7 +67,7 @@ export class ApplicationController {
                 grant: "",
                 title: project.title,
                 summary: project.summary,
-                applicant: project.applicant,
+                leadPI: project.leadPI,
                 collaborators: project.collaborators || [],
                 themes: project.themes || [],
                 phases: project.phases || [],

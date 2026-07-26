@@ -16,7 +16,7 @@ export enum CollaboratorStatus {
 
 export interface ICollaborator extends Document {
     project: mongoose.Types.ObjectId;
-    applicant: mongoose.Types.ObjectId;//member//user
+    member: mongoose.Types.ObjectId;//member//user
     role: string;
     isLeadPI?: boolean;
     status: CollaboratorStatus;
@@ -31,7 +31,7 @@ const CollaboratorSchema = new Schema<ICollaborator>({
         immutable: true,
         required: true
     },
-    applicant: {
+    member: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.USER,
         immutable: true,
@@ -52,6 +52,6 @@ const CollaboratorSchema = new Schema<ICollaborator>({
     },
 }, { timestamps: true });
 
-CollaboratorSchema.index({ project: 1, applicant: 1 }, { unique: true });
+CollaboratorSchema.index({ project: 1, member: 1 }, { unique: true });
 export const Collaborator = model<ICollaborator>(COLLECTIONS.COLLABORATOR, CollaboratorSchema);
 

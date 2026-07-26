@@ -32,7 +32,7 @@ export class ProjectController {
         grant,
         title,
         summary,
-        applicant,
+        leadPI: applicant,
         themes: themes || [],
         collaborators: collaborators || [],
         phases: phases || [],
@@ -57,7 +57,7 @@ export class ProjectController {
       const { applicant, grant, call, status, populate } = req.query;
 
       const projects = await this.service.getProjects({
-        applicant: applicant ? String(applicant) : undefined,
+        leadPI: applicant ? String(applicant) : undefined,
         grant: grant ? String(grant) : undefined,
         call: call ? String(call) : undefined,
         status: status ? (status as ProjectStatus) : undefined,
@@ -65,7 +65,7 @@ export class ProjectController {
         options: populate === "true"
           ? {
             populate: {
-              applicant: true,
+              leadPI: true,
               grant: true,
               calendar: true,
               currentApplication: true

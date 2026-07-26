@@ -53,11 +53,11 @@ const ProjectManager = ({ applicant, grant, calendar, call, workspace, onItemsCh
         if (!applicant) {
             cols.push({
                 header: "Lead PI",
-                field: "applicant.name",
+                field: "leadPI.name",
                 sortable: true,
                 body: (p: Project) => (
                     <span className="text-600">
-                        {typeof p.applicant === "object" ? p.applicant?.name : p.applicant}
+                        {typeof p.leadPI === "object" ? p.leadPI?.name : p.leadPI}
                     </span>
                 )
             });

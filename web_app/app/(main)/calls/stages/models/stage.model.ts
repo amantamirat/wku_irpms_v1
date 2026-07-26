@@ -5,7 +5,7 @@ import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
 
 export type Stage = {
     _id?: string;
-    call: string | Call;
+    call?: string | Call;
     name?: string;
     order: number;
     deadline: Date;

@@ -4,7 +4,7 @@ import { ProjectStatus } from "./project.model";
 
 export interface Options {
     populate?: {
-        applicant?: boolean;
+        leadPI?: boolean;
         grant?: boolean;
         calendar?: boolean;
         currentApplication?: boolean;
@@ -13,7 +13,7 @@ export interface Options {
 
 export interface GetProjectsDTO {
     grant?: string;
-    applicant?: string;
+    leadPI?: string;
     call?: string;
     status?: ProjectStatus;
     options?: Options;
@@ -33,7 +33,7 @@ export interface CreateProjectDTO {
     grant: string;
     title: string;
     summary?: string;
-    applicant: string;
+    leadPI: string;
     themes: string[];
     collaborators: CollaboratorDto[];
     phases: PhaseDto[];
@@ -56,7 +56,7 @@ export interface UpdateProjectDTO {
 }
 
 export interface ExistsProjectDTO {
-    applicant?: string;
+    leadPI?: string;
     grant?: string;
     call?: string;
 }

@@ -31,7 +31,7 @@ const ProjectWizard = ({ item, onComplete, onHide, visible }: EntitySaveDialogPr
         title: '',
         summary: '',
         themes: [],
-        collaborators: [{ applicant: activeAppUser as any, role: "Principal Investigator", isLeadPI: true }],
+        collaborators: [{ member: activeAppUser as any, role: "Principal Investigator", isLeadPI: true }],
         phases: [{ title: '', order: 1, budget: 0, duration: 0, description: '' }]
     });
 
@@ -49,7 +49,7 @@ const ProjectWizard = ({ item, onComplete, onHide, visible }: EntitySaveDialogPr
                 title: item?.title || '',
                 summary: item?.summary || '',
                 themes: item?.themes || [],
-                collaborators: item?.collaborators || [{ applicant: activeAppUser as any, role: "Principal Investigator", isLeadPI: true }],
+                collaborators: item?.collaborators || [{ member: activeAppUser as any, role: "Principal Investigator", isLeadPI: true }],
                 phases: item?.phases || [{ title: '', order: 1, budget: 0, duration: 0, description: '' }]
             });
             setActiveIndex(0);
@@ -81,7 +81,7 @@ const ProjectWizard = ({ item, onComplete, onHide, visible }: EntitySaveDialogPr
             toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Project created successfully' });
             if (onComplete) onComplete({
                 ...saved,
-                applicant: formData.applicant,
+                leadPI: formData.leadPI,
                 grant: formData.grant
             });
             onHide();
@@ -103,7 +103,7 @@ const ProjectWizard = ({ item, onComplete, onHide, visible }: EntitySaveDialogPr
             toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Project updated successfully' });
             if (onComplete) onComplete({
                 ...saved,
-                applicant: formData.applicant,
+                leadPI: formData.leadPI,
                 grant: formData.grant
             });
             onHide();

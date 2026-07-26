@@ -54,7 +54,7 @@ export class ProjectService {
     }
 
     async create(dto: CreateProjectDTO, options?: { skipValidation?: boolean }) {
-        const { grant, title, summary, applicant, collaborators, phases, themes, userId } = dto;
+        const { grant, title, summary, leadPI, collaborators, phases, themes, userId } = dto;
 
         if (!options?.skipValidation) {
             const grantDoc = await this.grantRepo.findById(grant);
@@ -62,7 +62,7 @@ export class ProjectService {
             if (grantDoc.status !== GrantStatus.active) throw new Error(ERROR_CODES.GRANT_NOT_ACTIVE);
             const grantId = String(grantDoc._id);
             //check title uniqueness 
-            await this.compValidator.validatePI(grantId, applicant);
+            await this.compValidator.validatePI(grantId, leadPI);
             await this.constValidator.validateMetadata(grantId, title, summary);
             await this.constValidator.validateThemes(grantId, themes);
         }
@@ -77,9 +77,9 @@ export class ProjectService {
                     {
                         project: projectId,
                         projectTitle: title,
-                        applicant: collab.applicant,
-                        isLeadPI: applicant === collab.applicant,
-                        status: userId === collab.applicant ? CollaboratorStatus.verified : CollaboratorStatus.pending,
+                        member: collab.member,
+                        isLeadPI: leadPI === collab.member,
+                        status: userId === collab.member ? CollaboratorStatus.verified : CollaboratorStatus.pending,
                         role: collab.isLeadPI
                             ? "Principal Investigator"
                             : collab.role

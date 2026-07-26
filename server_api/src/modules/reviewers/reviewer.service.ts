@@ -60,7 +60,7 @@ export class ReviewerService {
 
         const projectDoc = projectAppDoc.project as unknown as IProject;
         const collaborators = await this.collaboratorRepo.find({ project: String(projectDoc._id) });
-        if (collaborators.find(c => String(c.applicant) === reviewer)) {
+        if (collaborators.find(c => String(c.member) === reviewer)) {
             throw new AppError(ERROR_CODES.INVALID_REVIEWER, `Reviewr ${applicantDoc.name} is already a collaborator in the project.`);
         }
         try {

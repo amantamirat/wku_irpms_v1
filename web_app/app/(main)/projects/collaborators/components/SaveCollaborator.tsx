@@ -56,7 +56,7 @@ const SaveCollaborator = ({
     }, [visible, isEditMode]);
 
     const validate = () => {
-        if (!localCollaborator.applicant) return { valid: false, message: "Collaborator is required" };
+        if (!localCollaborator.member) return { valid: false, message: "Collaborator is required" };
         if (!localCollaborator.role) return { valid: false, message: "Role is required" };
         return { valid: true };
     };
@@ -81,7 +81,7 @@ const SaveCollaborator = ({
                 // Pass back the saved object merged with the selected applicant for UI immediate update
                 onComplete({
                     ...saved,
-                    applicant: localCollaborator.applicant,
+                    member: localCollaborator.member,
                 });
             }
         } catch (err: any) {
@@ -115,10 +115,10 @@ const SaveCollaborator = ({
                         <label htmlFor="applicant" className="font-bold">Collaborator</label>
                         <Dropdown
                             id="applicant"
-                            value={localCollaborator.applicant}
+                            value={localCollaborator.member}
                             // In edit mode, we just use the current applicant as the only option
-                            options={isEditMode ? [localCollaborator.applicant as User] : applicants}
-                            onChange={(e) => setLocalCollaborator({ ...localCollaborator, applicant: e.value })}
+                            options={isEditMode ? [localCollaborator.member as User] : applicants}
+                            onChange={(e) => setLocalCollaborator({ ...localCollaborator, member: e.value })}
                             dataKey="_id"
                             optionLabel="name"
                             itemTemplate={userTemplate}
@@ -129,9 +129,9 @@ const SaveCollaborator = ({
                             //loading={loading}
                             placeholder="Search by name..."
                             filter
-                            className={classNames({ 'p-invalid': submitted && !localCollaborator.applicant })}
+                            className={classNames({ 'p-invalid': submitted && !localCollaborator.member })}
                         />
-                        {submitted && !localCollaborator.applicant && (
+                        {submitted && !localCollaborator.member && (
                             <small className="p-error">Please select a team member.</small>
                         )}
                     </div>

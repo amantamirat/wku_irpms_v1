@@ -22,7 +22,7 @@ const PendingCollaborations = ({ user }: PendingCollaborationsProps) => {
 
         try {
             const data = await CollaboratorApi.getAll({
-                applicant: user._id,
+                member: user._id,
                 status: CollaboratorStatus.pending,
                 populate: true
             });

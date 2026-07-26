@@ -28,7 +28,7 @@ export type Project = {
     title: string;
     summary?: string;
     status?: ProjectStatus;
-    applicant?: string | User;
+    leadPI?: string | User;
     totalBudget?: number;
     totalDuration?: number;
     totalCollabs?: number;
@@ -87,10 +87,10 @@ export const sanitize = (project: Partial<Project>): Partial<Project> => {
             typeof project.grant === 'object' && project.grant !== null
                 ? (project.grant as any)._id
                 : project.grant,
-        applicant:
-            typeof project.applicant === 'object' && project.applicant !== null
-                ? (project.applicant as any)._id
-                : project.applicant,
+        leadPI:
+            typeof project.leadPI === 'object' && project.leadPI !== null
+                ? (project.leadPI as any)._id
+                : project.leadPI,
         calendar:
             typeof project.calendar === 'object' && project.calendar !== null
                 ? (project.calendar as any)._id

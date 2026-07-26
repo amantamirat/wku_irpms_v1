@@ -1,7 +1,7 @@
 import { CollaboratorStatus } from "./collaborator.model";
 
 export interface CollaboratorDto {
-    applicant: string; //memeber
+    member: string; //memeber
     role: string;
     isLeadPI?: boolean;
 }
@@ -27,12 +27,12 @@ export interface UpdateCollaboratorDto {
 // Options for querying collaborators
 export interface GetCollaboratorsOptions {
     project?: string;
-    applicant?: string;
+    member?: string;
     status?: CollaboratorStatus,
     populate?: boolean;
 }
 
 export interface ExistsCollabDTO {
-    applicant?: string;
+    member?: string;
 }
 

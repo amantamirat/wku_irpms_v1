@@ -10,6 +10,7 @@ import { ConstraintValidator } from "../modules/grants/constraints/constraint.va
 import { GrantRepository } from "../modules/grants/grant.repository";
 import { OrganizationRepository } from "../modules/organization/organization.repository";
 import { SpecializationRepository } from "../modules/organization/specializations/specialization.repository";
+import { RoleRepository } from "../modules/permissions/roles/role.repository";
 import { ApplicationRepository } from "../modules/projects/applications/application.repository";
 import { ApplicationService } from "../modules/projects/applications/application.service";
 import { CollaboratorRepository } from "../modules/projects/collaborators/collaborator.repository";
@@ -23,6 +24,7 @@ import { ThematicRepository } from "../modules/thematics/thematic.repository";
 import { ThemeRepository } from "../modules/thematics/themes/theme.repository";
 import { ExperienceRepository } from "../modules/users/experiences/experience.repository";
 import { UserRepository } from "../modules/users/user.repository";
+import { UserService } from "../modules/users/user.service";
 
 // calendar repos
 export const calendarRepo = new CalendarRepository();
@@ -32,6 +34,8 @@ export const organizationRepo = new OrganizationRepository();
 export const userRepo = new UserRepository();
 export const exprienceRepo = new ExperienceRepository();
 export const specializationRepo = new SpecializationRepository();
+//account repos
+export const roleRepo = new RoleRepository();
 //grant repos
 export const grantRepo = new GrantRepository();
 export const thematicRepo = new ThematicRepository();
@@ -62,3 +66,6 @@ export const projectService = new ProjectService(projectRepo, collaboratorRepo, 
 export const applicationService = new ApplicationService(applicationRepo, projectRepo, callRepo, stageRepo, reviewerRepo,
     projectService, constraintValidator, compositionValidator
 );
+
+export const userService = new UserService(userRepo, organizationRepo, roleRepo);
+

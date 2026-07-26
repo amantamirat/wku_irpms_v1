@@ -45,8 +45,8 @@ export class ProjectRepository implements IProjectRepository {
 
         const populate = options?.populate;
 
-        if (populate?.applicant) {
-            dbQuery = dbQuery.populate("applicant");
+        if (populate?.leadPI) {
+            dbQuery = dbQuery.populate("leadPI");
         }
 
         if (populate?.grant) {
@@ -72,8 +72,8 @@ export class ProjectRepository implements IProjectRepository {
         }
 
         // applicant
-        if (filters.applicant) {
-            query.applicant = new mongoose.Types.ObjectId(filters.applicant);
+        if (filters.leadPI) {
+            query.leadPI = new mongoose.Types.ObjectId(filters.leadPI);
         }
 
         // grant
@@ -91,8 +91,8 @@ export class ProjectRepository implements IProjectRepository {
         const populate = filters.options?.populate;
 
         // applicant populate
-        if (populate?.applicant) {
-            dbQuery = dbQuery.populate("applicant");
+        if (populate?.leadPI) {
+            dbQuery = dbQuery.populate("leadPI");
         }
 
         // grant populate
@@ -123,7 +123,7 @@ export class ProjectRepository implements IProjectRepository {
             calendar: dto.calendar ? new mongoose.Types.ObjectId(dto.calendar) : undefined,
             call: dto.call ? new mongoose.Types.ObjectId(dto.call) : undefined,
             grant: new mongoose.Types.ObjectId(dto.grant),
-            applicant: new mongoose.Types.ObjectId(dto.applicant),
+            leadPI: new mongoose.Types.ObjectId(dto.leadPI),
             themes: dto.themes?.map(thm => new mongoose.Types.ObjectId(thm)),
         };
 
@@ -255,9 +255,9 @@ export class ProjectRepository implements IProjectRepository {
 
     async exists(filters: ExistsProjectDTO): Promise<boolean> {
         const query: any = {};
-        const { applicant, grant, call } = filters;
-        if (applicant) {
-            query.applicant = new mongoose.Types.ObjectId(applicant);
+        const { leadPI, grant, call } = filters;
+        if (leadPI) {
+            query.leadPI = new mongoose.Types.ObjectId(leadPI);
         }
         if (grant) {
             query.grant = new mongoose.Types.ObjectId(grant);

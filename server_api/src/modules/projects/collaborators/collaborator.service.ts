@@ -48,7 +48,7 @@ export class CollaboratorService {
     }
 
     async create(dto: CreateCollaboratorDto, options?: { skipValidation?: boolean }) {
-        const { applicant, project, projectTitle, userId } = dto;
+        const { member: applicant, project, projectTitle, userId } = dto;
         if (!options?.skipValidation) {
             const projectDoc = await this.validateProject(project, userId ?? "");
             const grantId = String(projectDoc.grant);
@@ -149,7 +149,7 @@ export class CollaboratorService {
         await this.projectRepo.updateTotalCollabs(project, -1);
         if (!collabDoc.isLeadPI && this.notificationService) {
             await this.notificationService.notifyProjectRemoval(
-                String(collabDoc.applicant), projectDoc.title, collabDoc.role
+                String(collabDoc.member), projectDoc.title, collabDoc.role
             );
         }
         return deleted;

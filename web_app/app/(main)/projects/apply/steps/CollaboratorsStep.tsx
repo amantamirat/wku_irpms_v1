@@ -57,7 +57,7 @@ export const CollaboratorsStep = ({ data, constraints, onUpdate, onNext, onBack 
             collabs.length <= (collabLimit.max ?? Infinity)
         );
 
-        const hasEmptyRows = collabs.some(c => !c.applicant || !c.role);
+        const hasEmptyRows = collabs.some(c => !c.member || !c.role);
 
         return {
             isCountValid,
@@ -136,7 +136,7 @@ export const CollaboratorsStep = ({ data, constraints, onUpdate, onNext, onBack 
             >
                 <Column header="Collaborator" style={{ width: '40%' }} body={(rowData, options) => {
                     const selectedIds = data.collaborators?.map(c =>
-                        typeof c.applicant === 'object' ? c.applicant?._id : c.applicant
+                        typeof c.member === 'object' ? c.member?._id : c.member
                     ).filter(id => id) || [];
 
                     const availableApplicants = applicants.filter(app => {

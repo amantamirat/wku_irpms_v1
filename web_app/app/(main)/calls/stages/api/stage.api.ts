@@ -1,11 +1,11 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
-import { Stage, StagesDTO, sanitizeCallStage } from "../models/stage.model";
+import { Stage, GetStagesDTO, sanitizeCallStage } from "../models/stage.model";
 import { TransitionRequestDto } from "@/types/util";
 
 const end_point = "/call/stages";
 
-export const StageApi: EntityApi<Stage, StagesDTO | undefined>
+export const StageApi: EntityApi<Stage, GetStagesDTO | undefined>
     & {
         getFirstStage: (callId: string) => Promise<Stage>;
     }

@@ -95,10 +95,10 @@ export class ApplicationService {
 
 
     async apply(dto: ApplyProjectDTO) {
-        const { call, title, summary, applicant, collaborators, phases, themes, userId, docPath } = dto;
+        const { call, title, summary, leadPI: applicant, collaborators, phases, themes, userId, docPath } = dto;
         const lead = collaborators.find(c => c.isLeadPI);
         if (!lead) throw new AppError(ERROR_CODES.LEAD_PI_NOT_FOUND);
-        if (lead.applicant !== userId) throw new AppError(ERROR_CODES.UNAUTHORIZED);
+        if (lead.member !== userId) throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
         const callDoc = await this.callRepo.findById(call);
         if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);

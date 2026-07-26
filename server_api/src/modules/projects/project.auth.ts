@@ -14,7 +14,7 @@ export class ProjectAuth {
 
         if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
 
-        if (String(projectDoc.applicant) !== applicant)
+        if (String(projectDoc.leadPI) !== applicant)
             throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
         return projectDoc;

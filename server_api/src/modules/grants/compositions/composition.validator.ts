@@ -33,12 +33,12 @@ export class CompositionValidator {
             throw new AppError(ERROR_CODES.LEAD_PI_NOT_FOUND);
         }
 
-        const piId = lead.applicant;
+        const piId = lead.member;
 
         // 2. Identify all Co-PI IDs (everyone else who isn't the Lead PI)
         const coPiIds = collaborators
             .filter(c => !c.isLeadPI)
-            .map(c => c.applicant);
+            .map(c => c.member);
 
         // Get a unique set of all member IDs to avoid duplicate queries
         const allMemberIds = Array.from(new Set([piId, ...coPiIds]));
@@ -103,7 +103,7 @@ export class CompositionValidator {
 
     async validateProjectAggregate(grant: string, project: string): Promise<void> {
         const collabs = await this.collabRepo.find({ project });
-        const applicantIds = collabs.map(c => c.applicant.toString());
+        const applicantIds = collabs.map(c => c.member.toString());
         const users = await this.userRepo.findAll({
             ids: applicantIds
         });
