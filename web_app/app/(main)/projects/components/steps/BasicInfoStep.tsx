@@ -204,7 +204,7 @@ export const BasicInfoStep = ({ data, onUpdate, onConstraintsChange, onNext, isE
                     {isEditModeOnly ? (
                         <InputText
                             value={
-                                (data.applicant as any)?.name ||
+                                (data.leadPI as any)?.name ||
                                 'Lead Profile'
                             }
                             disabled

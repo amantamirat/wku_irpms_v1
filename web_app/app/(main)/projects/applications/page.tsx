@@ -1,17 +1,13 @@
 'use client';
-import { GrantApi } from '@/app/(main)/grants/api/grant.api';
-import { etbCurrencyFormatter, Grant } from '@/app/(main)/grants/models/grant.model';
-import { GrantStatus } from '@/app/(main)/grants/models/grant.state-machine';
-import { GrantStageApi } from '@/app/(main)/grants/stages/api/grant.stage.api';
-import { GrantStage } from '@/app/(main)/grants/stages/models/grant.stage.model';
+
+import { CallApi } from '@/app/(main)/calls/api/call.api';
+import { Call, CallStatus } from '@/app/(main)/calls/models/call.model';
+import { StageApi } from '@/app/(main)/calls/stages/api/stage.api';
+import { Stage } from '@/app/(main)/calls/stages/models/stage.model';
 import { Dropdown } from 'primereact/dropdown';
 import { TabPanel, TabView } from 'primereact/tabview';
 import { useEffect, useState } from "react";
 import ApplicationManager from './components/ApplicationManager';
-import { Stage } from '@/app/(main)/calls/stages/models/stage.model';
-import { Call, CallStatus } from '@/app/(main)/calls/models/call.model';
-import { CallApi } from '@/app/(main)/calls/api/call.api';
-import { StageApi } from '@/app/(main)/calls/stages/api/stage.api';
 
 const Page = () => {
     const [calls, setCalls] = useState<Call[]>([]);

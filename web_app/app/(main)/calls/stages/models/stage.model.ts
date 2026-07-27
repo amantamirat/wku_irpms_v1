@@ -1,6 +1,5 @@
 import { Call } from "@/app/(main)/calls/models/call.model";
 import { CallStageStatus } from "./stage.state-machine";
-import { GrantStage } from "@/app/(main)/grants/stages/models/grant.stage.model";
 import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
 
 export type Stage = {

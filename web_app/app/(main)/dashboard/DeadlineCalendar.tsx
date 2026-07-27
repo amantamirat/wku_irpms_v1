@@ -58,7 +58,7 @@ const DeadlineCalendar = () => {
                                 {typeof stage.call === 'object' ? stage.call.title : 'Project Stage'}
                             </div>
                             <div className="text-600 text-sm">
-                                {typeof stage.name === 'object' ? stage.name.name : `Stage ${stage.order}`}
+                                {typeof stage.name === 'object' ? stage.name : `Stage ${stage.order}`}
                             </div>
                         </div>
                         {isUrgent && <Tag severity="warning" value="Soon" />}

@@ -1,7 +1,6 @@
 'use client';
 
 import { BASE_URL } from '@/api/ApiClient';
-import { GrantStage, StageCategory } from '@/app/(main)/grants/stages/models/grant.stage.model';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';

@@ -6,8 +6,6 @@ import CallManager from "../../calls/components/CallManager";
 import CompositionManager from "../compositions/components/CompositionManager";
 import ConstraintManager from "../constraints/components/ConstraintManager";
 import { Grant } from "../models/grant.model";
-import GrantStageManager from "../stages/components/GrantStageManager";
-import AllocationManager from "../allocations/components/AllocationManager";
 
 
 interface GrantDetailProps {
@@ -38,25 +36,6 @@ const GrantDetail = ({ grant }: GrantDetailProps) => {
             content: <CallManager grant={grant}
             />
         },
-        {
-            header: "Stages",
-            permission: "grant.stage:read",
-            disabled: true,
-            content: <GrantStageManager grant={grant} />
-        },
-
-
-
-
-
-        {
-            header: "Allocations",
-            permission: "grant.allocation:read",
-            disabled: true,
-            content: <AllocationManager grant={grant}
-            />
-        },
-
 
     ], [grant]);
 

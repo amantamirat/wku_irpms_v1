@@ -36,7 +36,7 @@ const ReviewerManager = ({
 }: ReviewerManagerProps) => {
 
     const canManage = useMemo(() => projectApplication && (
-        projectApplication.status === ApplicationStatus.submitted
+        projectApplication.status === ApplicationStatus.pending
     ), [projectApplication?.status]);
 
     const { getUser } = useAuth();

@@ -8,7 +8,6 @@ import { ICallRepository } from "../../calls/call.repository";
 import { IStageRepository } from "../../calls/stages/stage.repository";
 import { CompositionValidator } from "../../grants/compositions/composition.validator";
 import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
-import { IGrantStage } from "../../grants/stages/grant.stage.model";
 import { NotificationService } from "../../notifications/notification.service";
 import { IReviewerRepository } from "../../reviewers/reviewer.repository";
 import { ReviewerStatus } from "../../reviewers/reviewer.state-machine";
@@ -155,7 +154,7 @@ export class ApplicationService {
         });
         if (!projStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
 
-        const grantStageDoc = projStageDoc.stage as unknown as IGrantStage;
+        const grantStageDoc = projStageDoc.stage as unknown as any;
 
         const approvedReviews = await this.reviewerRepo.find({
             projectApplication: id,
@@ -233,7 +232,7 @@ export class ApplicationService {
         ) {
             const totalScore = projStageDoc.totalScore;
 
-            const grantStageDoc = projStageDoc.stage as unknown as IGrantStage;
+            const grantStageDoc = projStageDoc.stage as unknown as any;
 
             if ((totalScore === undefined || totalScore === null) && grantStageDoc.minReviewers > 0) {
                 throw new AppError(

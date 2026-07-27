@@ -87,7 +87,7 @@ export default function ProjectDetail({ project, updateProject }: ProjectDetailP
                        
                         <span className="flex align-items-center px-2 py-1 border-round">
                             <i className="pi pi-user mr-2 text-primary"></i>
-                            {getDisplayName(project?.applicant, 'name')}
+                            {getDisplayName(project?.leadPI, 'name')}
                         </span>
                     </div>
                 </div>

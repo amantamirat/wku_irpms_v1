@@ -3,7 +3,6 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { useMemo } from "react";
 import { Evaluation } from "../models/evaluation.model";
 import CriterionManager from "./CriterionManager";
-import GrantStageManager from "../../grants/stages/components/GrantStageManager";
 
 interface EvaluationDetailProps {
     evaluation: Evaluation;

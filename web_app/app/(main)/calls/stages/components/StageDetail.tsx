@@ -2,9 +2,8 @@ import { useAuth } from "@/contexts/auth-context";
 import { useMemo } from "react";
 import { PERMISSIONS } from "@/types/permissions";
 import { TabPanel, TabView } from "primereact/tabview";
-
-import ProjectDocManager from "@/app/(main)/projects/documents/components/ProjectDocManager";
 import { Stage } from "../models/stage.model";
+import ApplicationManager from "@/app/(main)/projects/applications/components/ApplicationManager";
 
 
 interface StageDetailProps {
@@ -19,9 +18,9 @@ const StageDetail = ({ stage }: StageDetailProps) => {
      */
     const tabs = useMemo(() => [
         {
-            header: "Documents",
+            header: "Applications",
             permission: PERMISSIONS.DOCUMENT.READ,
-            content: <ProjectDocManager stage={stage} />
+            content: <ApplicationManager stage={stage} />
         }
     ], [stage]);
 

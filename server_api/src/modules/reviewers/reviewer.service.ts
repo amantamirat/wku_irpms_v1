@@ -15,7 +15,6 @@ import { ReviewerStatus } from "./reviewer.state-machine";
 import { IResultRepository } from "./results/result.repository";
 import { ICriterionRepository } from "../evaluations/criteria/criterion.repository";
 import { FormType } from "../evaluations/criteria/criterion.model";
-import { IGrantStage } from "../grants/stages/grant.stage.model";
 import { IProject } from "../projects/project.model";
 //import { IProjectStageSynchronizer } from "./reviewer.synchronizer";
 import { NotificationService } from "../notifications/notification.service";
@@ -49,7 +48,7 @@ export class ReviewerService {
         if (projectStageStatus !== ApplicationStatus.pending)
             throw new AppError(ERROR_CODES.INVALID_DOC_STATUS);
 
-        const grantStageDoc = projectAppDoc.stage as unknown as IGrantStage;
+        const grantStageDoc = projectAppDoc.stage as unknown as any;
         const countReviewers = await this.repository.countByProjectStage(projectApplication);
         const maxReviewers = grantStageDoc.maxReviewers;
         if (maxReviewers !== undefined && countReviewers >= maxReviewers) {

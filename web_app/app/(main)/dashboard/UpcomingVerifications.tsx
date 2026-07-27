@@ -4,20 +4,19 @@ import React, { useEffect, useState } from 'react';
 import { Skeleton } from 'primereact/skeleton';
 import { Tag } from 'primereact/tag';
 import { format } from 'date-fns';
-import { GrantStage } from '../grants/stages/models/grant.stage.model';
-import { GrantStageApi } from '../grants/stages/api/grant.stage.api';
 
 
 const UpcomingVerifications = () => {
-    const [stages, setStages] = useState<GrantStage[]>([]);
+    const [stages, setStages] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const loadUpcomingVerifications = async () => {
             try {
-                const data = await GrantStageApi.getUpcomingVerification();
+                //const data = []
+                //await StageApi.getUpcomingVerification();
 
-                setStages(data.slice(0, 5));
+                //setStages(data.slice(0, 5));
             } catch (error) {
                 console.error(
                     'Failed to load upcoming verifications',

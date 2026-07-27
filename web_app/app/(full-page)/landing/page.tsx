@@ -17,7 +17,7 @@ const LandingPage = () => {
     const [isHidden, setIsHidden] = useState(false);
     const { layoutConfig } = useContext(LayoutContext);
     const menuRef = useRef<HTMLElement | null>(null);
-    const { session: user, loading } = useAuth();
+    const { session, loading } = useAuth();
 
     if (loading) return <div className="flex justify-content-center mt-5"><ProgressSpinner /></div>;
 
@@ -60,7 +60,7 @@ const LandingPage = () => {
                             
                         </ul>
                         <div className="flex justify-content-between lg:block border-top-1 lg:border-top-none surface-border py-3 lg:py-0 mt-3 lg:mt-0">
-                            {!user ? (
+                            {!session ? (
                                 <>
                                     <Link href="/auth/login" passHref>
                                         <Button label="Login" text rounded className="border-none font-light line-height-2 text-blue-500"></Button>
@@ -70,7 +70,7 @@ const LandingPage = () => {
                                     </Link>
                                 </>
                             ) : (
-                                <p>Welcome back, {user.email}!</p>
+                                <p>Welcome back, {session.user.name}!</p>
                             )}
                         </div>
                     </div>

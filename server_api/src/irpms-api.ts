@@ -19,10 +19,9 @@ import criterionRoutes from './modules/evaluations/criteria/criterion.routes';
 import templateRoutes from './modules/templates/template.routes';
 
 import grantRoutes from './modules/grants/grant.routes';
-import grantStageRoutes from './modules/grants/stages/grant.stage.routes';
 import constraintRoutes from './modules/grants/constraints/constraint.routes';
 import compositionRoutes from './modules/grants/compositions/composition.routes';
-import grantAllocationsRoutes from './modules/grants/allocations/grant.allocation.routes';
+
 
 import calendarRoutes from './modules/calendar/calendar.routes';
 import callRoutes from './modules/calls/call.routes';
@@ -85,10 +84,9 @@ app.use("/api/evaluations", evaluationRoutes);
 app.use("/api/criteria", criterionRoutes);
 app.use("/api/templates", templateRoutes);
 
-app.use("/api/grants/stages", grantStageRoutes);
 app.use("/api/grants/constraints", constraintRoutes);
 app.use("/api/grants/compositions", compositionRoutes);
-app.use("/api/grants/allocations", grantAllocationsRoutes);
+
 //"More specific routes must come first"
 // 🚨 KEEP THIS LAST
 app.use("/api/grants", grantRoutes);

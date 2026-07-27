@@ -1,12 +1,11 @@
-import { User } from "../../users/models/user.model";
+import { Calendar } from "../../calendars/models/calendar.model";
 import { Call } from "../../calls/models/call.model";
-import { GrantAllocation } from "../../grants/allocations/models/grant.allocation.model";
 import { Grant } from "../../grants/models/grant.model";
 import { Organization } from "../../organizations/models/organization.model";
-import { sanitizeTheme, Theme } from "../../thematics/themes/models/theme.model";
+import { Theme } from "../../thematics/themes/models/theme.model";
+import { User } from "../../users/models/user.model";
 import { Collaborator, sanitizeCollaborator } from "../collaborators/models/collaborator.model";
 import { Phase, sanitizePhase } from "../phases/models/phase.model";
-import { Calendar } from "../../calendars/models/calendar.model";
 
 export enum ProjectStatus {
     draft = 'draft',

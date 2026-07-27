@@ -22,8 +22,8 @@ export const ReviewerApi: EntityApi<Reviewer, GetReviewersOptions | undefined> =
                 query.append("reviewer", sanitized.reviewer as string);
             }
 
-            if (sanitized.projectStage) {
-                query.append("projectStage", sanitized.projectStage as string);
+            if (sanitized.projectApplication) {
+                query.append("application", sanitized.projectApplication as string);
             }
 
             // NEW: Handle Status Array or String

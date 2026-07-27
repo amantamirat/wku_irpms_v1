@@ -10,7 +10,7 @@ import { AuthApi } from '../api/auth.service';
 
 
 export default function RequestActivationPage() {
-  const { session: user, logout } = useAuth();
+  const { session, logout } = useAuth();
   const router = useRouter();
   const msgs = useRef<Messages>(null);
   const [processing, setProcessing] = useState(false);
@@ -20,10 +20,10 @@ export default function RequestActivationPage() {
   const handleActivate = async () => {
     try {
       setProcessing(true);
-      if (!user || !user.email) {
+      if (!session || !session.user.email) {
         throw new Error('Activation failed.');
       }
-      const res = await AuthApi.sendVerificationCode(user?.email ?? "");
+      const res = await AuthApi.sendVerificationCode(session?.user.email ?? "");
       if (res.success) {
         msgs.current?.clear();
         msgs.current?.show({ severity: 'success', summary: 'Almost There!', detail: 'Verfication code has been sent to your email.' });
@@ -57,7 +57,7 @@ export default function RequestActivationPage() {
                 </p>
               </div>
               <div className="mb-4 text-center">
-                <div className="text-xl mt-2"><strong>Email:</strong> {user?.email}</div>
+                <div className="text-xl mt-2"><strong>Email:</strong> {session?.user.email}</div>
               </div>
               <Messages ref={msgs} />
               <Button

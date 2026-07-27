@@ -115,7 +115,7 @@ const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
             toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Project saved' });
             if (onComplete) onComplete({
                 ...saved,
-                applicant: localProject.applicant,
+                leadPI: localProject.leadPI,
                 grant: localProject.grant
             });
         } catch (err: any) {
@@ -169,8 +169,8 @@ const SaveProject = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
 
                     {/* Applicant Field */}
                     <div className="field col-12 md:col-6">
-                        <label className="font-bold">Applicant</label>
-                        <InputText value={(localProject.applicant as any)?.name || 'Selected Applicant'} disabled className="surface-100" />
+                        <label className="font-bold">Lead PI</label>
+                        <InputText value={(localProject.leadPI as any)?.name || 'Selected Applicant'} disabled className="surface-100" />
                     </div>
                 </div>
 

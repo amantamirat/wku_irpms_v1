@@ -2,8 +2,6 @@
 
 import { BASE_URL } from "@/api/ApiClient";
 import { Stage } from "@/app/(main)/calls/stages/models/stage.model";
-import { GrantStageApi } from "@/app/(main)/grants/stages/api/grant.stage.api";
-import { GrantStage } from "@/app/(main)/grants/stages/models/grant.stage.model";
 import { createEntityManager } from "@/components/createEntityManager";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import MyBadge from "@/templates/MyBadge";
