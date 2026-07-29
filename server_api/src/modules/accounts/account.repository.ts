@@ -38,7 +38,7 @@ export class AccountRepository implements IAccountRepository {
     async findByEmail(email: string): Promise<IAccount | null> {
         return await Account.findOne(
             { email }
-        ).select('+password').lean();
+        ).select('+password');
     }
 
     async findAll() {

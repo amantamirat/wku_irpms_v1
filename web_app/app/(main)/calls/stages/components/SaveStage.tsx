@@ -17,9 +17,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 // API & Models
 import { CallApi } from '@/app/(main)/calls/api/call.api';
 import { Call } from '@/app/(main)/calls/models/call.model';
+import { TemplateApi } from '@/app/(main)/templates/api/template.api'; // Adjust path as needed
+import { Template } from '@/app/(main)/templates/models/template.model'; // Adjust path as needed
 import { StageApi } from '../api/stage.api';
 import { Stage } from '../models/stage.model';
-
 
 const stageOptions = [
     { label: 'Concept Note', value: 'Concept Note' },
@@ -30,7 +31,6 @@ const stageOptions = [
     { label: 'Verification & Audit', value: 'Verification & Audit' },
     { label: 'Final Selection', value: 'Final Selection' }
 ];
-
 
 const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<Stage>) => {
     const toast = useRef<Toast>(null);
@@ -43,6 +43,7 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
     const [submitted, setSubmitted] = useState(false);
     const [calls, setCalls] = useState<Call[] | undefined>(undefined);
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
+    const [templates, setTemplates] = useState<Template[]>([]);
 
     const isCallPredefined = !!item?.call;
 
@@ -59,10 +60,14 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
         }
     }, [isCallPredefined]);
 
-    // Fetch published evaluations
+    // Fetch published evaluations and templates
     useEffect(() => {
         EvaluationApi.getAll({ status: EvaluationStatus.published })
             .then(setEvaluations)
+            .catch(console.error);
+
+        TemplateApi.getAll()
+            .then(setTemplates)
             .catch(console.error);
     }, []);
 
@@ -120,7 +125,11 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                 life: 2000,
             });
 
-            onComplete?.({ ...saved, evaluation: localStage.evaluation });
+            onComplete?.({ 
+                ...saved, 
+                evaluation: localStage.evaluation,
+                template: localStage.template 
+            });
         } catch (err: any) {
             toast.current?.show({
                 severity: 'error',
@@ -171,7 +180,6 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                 </div>
 
                 {/* Stage Name */}
-                {/* Stage Name */}
                 <div className="field">
                     <label className="font-bold">Stage Name</label>
                     <Dropdown
@@ -203,6 +211,20 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                     {submitted && !localStage.deadline && <small className="p-error">Deadline is required.</small>}
                 </div>
 
+                {/* Template Selection */}
+                <div className="field">
+                    <label className="font-bold">Submission Template</label>
+                    <Dropdown
+                        value={localStage.template}
+                        dataKey="_id"
+                        options={templates}
+                        optionLabel="name" // Change to "name" or appropriate property if needed
+                        placeholder="Select a Template (Optional)"
+                        showClear
+                        onChange={(e) => setLocalStage((p) => ({ ...p, template: e.value }))}
+                    />
+                </div>
+
                 {/* Evaluation Selection */}
                 <div className="field">
                     <label className="font-bold">Evaluation</label>
@@ -212,6 +234,7 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                         options={evaluations}
                         optionLabel="title"
                         placeholder="Select an Evaluation"
+                        showClear
                         onChange={(e) => {
                             setLocalStage((p) => ({
                                 ...p,
@@ -274,7 +297,6 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                         min={0}
                     />
                 </div>
-
 
             </Dialog>
         </>

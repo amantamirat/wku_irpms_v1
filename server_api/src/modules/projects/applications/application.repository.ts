@@ -87,7 +87,7 @@ export class ApplicationRepository implements IApplicationRepository {
                 .populate({
                     path: "project",
                     populate: {
-                        path: "applicant",
+                        path: "leadPI",
                     }
                 })
                 .populate("stage");

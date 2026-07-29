@@ -18,7 +18,7 @@ import { ProjectApi } from "../api/project.api";
 const ProjectWizard = ({ item, onComplete, onHide, visible }: EntitySaveDialogProps<Project>) => {
     const toast = useRef<Toast>(null);
     const { getUser } = useAuth();
-    const activeAppUser = getUser();
+    const appUser = getUser();
 
     const isEditMode = !!item?._id;
 
@@ -31,7 +31,7 @@ const ProjectWizard = ({ item, onComplete, onHide, visible }: EntitySaveDialogPr
         title: '',
         summary: '',
         themes: [],
-        collaborators: [{ member: activeAppUser as any, role: "Principal Investigator", isLeadPI: true }],
+        collaborators: [{ member: appUser as any, role: "Principal Investigator", isLeadPI: true }],
         phases: [{ title: '', order: 1, budget: 0, duration: 0, description: '' }]
     });
 
@@ -49,13 +49,13 @@ const ProjectWizard = ({ item, onComplete, onHide, visible }: EntitySaveDialogPr
                 title: item?.title || '',
                 summary: item?.summary || '',
                 themes: item?.themes || [],
-                collaborators: item?.collaborators || [{ member: activeAppUser as any, role: "Principal Investigator", isLeadPI: true }],
+                collaborators: item?.collaborators || [{ member: appUser as any, role: "Principal Investigator", isLeadPI: true }],
                 phases: item?.phases || [{ title: '', order: 1, budget: 0, duration: 0, description: '' }]
             });
             setActiveIndex(0);
             setSubmitted(false);
         }
-    }, [item, visible, activeAppUser]);
+    }, [item, visible, appUser]);
 
     const updateFormData = (data: Partial<Project>) => {
         setFormData(prev => ({ ...prev, ...data }));

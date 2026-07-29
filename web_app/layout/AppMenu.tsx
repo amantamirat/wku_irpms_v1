@@ -19,7 +19,7 @@ const AppMenu = () => {
         {
             label: 'Project',
             items: [{
-                label: 'All Projects',
+                label: 'Projects',
                 icon: "pi pi-folder-open",
                 to: '/projects',
                 visible: hasPermission("project:create")
@@ -47,17 +47,29 @@ const AppMenu = () => {
             ),
             items: [
                 {
+                    label: 'Applications',
+                    icon: 'pi pi-list',
+                    to: '/projects/applications',
+                    visible: hasPermission("application:read") &&
+                        hasPermission("call:read")
+                },
+                {
                     label: 'Calls',
                     icon: 'pi pi-fw pi-megaphone',
                     to: '/calls',
                     visible: hasPermission("call:create")
                 },
                 {
-                    label: 'Applications',
-                    icon: 'pi pi-list',
-                    to: '/projects/applications',
-                    visible: hasPermission("application:read") &&
-                        hasPermission("grant:read")
+                    label: 'Evaluations',
+                    icon: 'pi pi-chart-bar',
+                    to: '/evaluations',
+                    visible: hasPermission("evaluation:create")
+                },
+                {
+                    label: 'Templates',
+                    icon: 'pi pi-file-pdf',
+                    to: '/templates',
+                    visible: hasPermission("template:create")
                 },
                 {
                     label: 'Reviewers',
@@ -75,7 +87,6 @@ const AppMenu = () => {
                 [
                     "calendar:create",
                     "grant:create",
-                    "evaluation:create",
                     "thematic:create",
                 ]
             ),
@@ -92,12 +103,7 @@ const AppMenu = () => {
                     to: '/grants',
                     visible: hasPermission("grant:create")
                 },
-                {
-                    label: 'Evaluations',
-                    icon: 'pi pi-chart-bar',
-                    to: '/evaluations',
-                    visible: hasPermission("evaluation:create")
-                },
+
                 {
                     label: 'Thematics',
                     icon: 'pi pi-fw pi-tags',

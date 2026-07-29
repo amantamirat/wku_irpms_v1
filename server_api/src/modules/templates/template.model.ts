@@ -1,46 +1,96 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
-import { ISection, SectionSchema } from "./sections/section.model";
 
 
-export enum TemplateStatus {
-    draft = 'draft',
-    published = 'published',
+export interface ITemplateSection {
+    name: string;
+    aliases: string[];
+    required: boolean;
+    minWords?: number;
+    maxWords?: number;
+    order?: number;
+    guidelines?: string;
 }
 
 export interface ITemplate extends Document {
-    name: string; // Proposal, Concept Note, etc.
+    name: string;
     description?: string;
-    sections: ISection[];
-    status: TemplateStatus;
+    minPages?: number;
+    maxPages?: number;
+    sections: ITemplateSection[];
     createdAt?: Date;
     updatedAt?: Date;
 }
 
-const TemplateSchema = new Schema<ITemplate>({
-    name: {
-        type: String,
-        required: true,
-        trim: true
+const TemplateSectionSchema = new Schema<ITemplateSection>(
+    {
+        name: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+        aliases: {
+            type: [String],
+            default: [],
+        },
+        required: {
+            type: Boolean,
+            default: true,
+        },
+        minWords: {
+            type: Number,
+            min: 0,
+        },
+        maxWords: {
+            type: Number,
+            min: 0,
+        },
+        order: {
+            type: Number,
+            min: 1,
+        },
+        guidelines: {
+            type: String,
+            trim: true,
+        }
     },
-    description: {
-        type: String,
-        default: ''
-    },
-    sections: {
-        type: [SectionSchema],
-        default: []
-    },
-    status: {
-        type: String,
-        enum: Object.values(TemplateStatus),
-        default: TemplateStatus.draft
+    {
+        _id: false,
     }
-}, {
-    timestamps: true
-});
+);
 
-export const TemplateModel = mongoose.model<ITemplate>(
+const TemplateSchema = new Schema<ITemplate>(
+    {
+        name: {
+            type: String,
+            required: true,
+            trim: true,
+            unique: true,
+        },
+        description: {
+            type: String,
+            trim: true,
+        },
+        minPages: {
+            type: Number,
+            min: 1,
+        },
+        maxPages: {
+            type: Number,
+            min: 1,
+        },
+        sections: {
+            type: [TemplateSectionSchema],
+            default: [],
+            required: true,
+        },
+    },
+    {
+        timestamps: true,
+    }
+);
+
+export const Template = mongoose.model<ITemplate>(
     COLLECTIONS.TEMPLATE,
     TemplateSchema
 );

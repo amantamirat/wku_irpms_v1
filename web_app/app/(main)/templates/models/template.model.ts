@@ -1,79 +1,86 @@
-export enum TemplateStatus {
-    draft = 'draft',
-    published = 'published',
-}
-
-/* ---------------- FIELD ---------------- */
-export type Field = {
-    _id?: string;
-    label: string;
-    fieldType: "text" | "textarea" | "number" | "file";
-    isRequired?: boolean;
-    placeholder?: string;
-    order: number;
+export type TemplateSection = {
+    name: string;
+    aliases: string[];
+    required: boolean;
+    guidelines?: string; // Prompts/rules for AI check (e.g., "Must list primary methodology")
+    minWords?: number;
+    maxWords?: number;
+    order?: number;
 };
 
-/* ---------------- SECTION ---------------- */
-export type Section = {
-    _id?: string;
-    title: string;
-    description?: string;
-    order: number;
-    isRequired?: boolean;
-    fields: Field[];
-};
-
-/* ---------------- TEMPLATE ---------------- */
 export type Template = {
     _id?: string;
     name: string;
     description?: string;
-    sections: Section[];
-    status?: TemplateStatus;
-    createdAt?: Date;
-    updatedAt?: Date;
+    minPages?: number;
+    maxPages?: number;
+    sections: TemplateSection[];
 };
-
-
-export interface GetTemplatesOptions {
-    status?: TemplateStatus;
-    name?: string;
-}
 
 export const validateTemplate = (
     template: Template
 ): { valid: boolean; message?: string } => {
-
-    if (!template.name || template.name.trim().length === 0) {
-        return { valid: false, message: "Template name is required." };
+    if (!template.name || template.name.trim() === '') {
+        return { valid: false, message: 'Template Name is required.' };
     }
 
     if (!template.sections || template.sections.length === 0) {
-        return { valid: false, message: "At least one section is required." };
+        return { valid: false, message: 'At least one section is required.' };
     }
 
     for (const section of template.sections) {
-        if (!section.title || section.title.trim().length === 0) {
-            return { valid: false, message: "Section title is required." };
+        if (!section.name || section.name.trim() === '') {
+            return { valid: false, message: 'All section names are required.' };
         }
 
-        if (!section.fields || section.fields.length === 0) {
-            return { valid: false, message: `Section "${section.title}" must have at least one field.` };
-        }
-
-        for (const field of section.fields) {
-            if (!field.label || field.label.trim().length === 0) {
-                return { valid: false, message: "Field label is required." };
-            }
+        if (
+            section.minWords &&
+            section.maxWords &&
+            section.minWords > section.maxWords
+        ) {
+            return {
+                valid: false,
+                message: `Invalid word range for section "${section.name}".`
+            };
         }
     }
 
     return { valid: true };
 };
 
+export function sanitizeTemplate(
+    template: Partial<Template>
+): Partial<Template> {
 
-export function sanitizeTemplate(template: Partial<Template>): Partial<Template> {
     return {
-        ...template
+        ...template,
+
+        sections: template.sections?.map(section => ({
+            name: section.name,
+            aliases: section.aliases ?? [],
+            required: section.required ?? true,
+            minWords: section.minWords,
+            maxWords: section.maxWords,
+            order: section.order,
+            guidelines: section.guidelines
+        })),
     };
 }
+
+export const createEmptyTemplate = (): Template => ({
+    name: "",
+    description: "",
+    minPages: 3,
+    maxPages: 5,
+    sections: [
+        {
+            name: "Abstract / Executive Summary",
+            aliases: ["Abstract", "Summary"],
+            required: true,
+            guidelines: "Must summarize project scope, objectives, and expected outcomes.",
+            minWords: 150,
+            maxWords: 500,
+            order: 1
+        }
+    ]
+});

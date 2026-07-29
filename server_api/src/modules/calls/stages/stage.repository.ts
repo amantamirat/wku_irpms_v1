@@ -1,12 +1,16 @@
 import mongoose, { ClientSession } from "mongoose";
-import { CreateStageDTO, ExistsStageDTO, GetStageDTO, UpdateStageDTO } from "./stage.dto";
+import {
+    CreateStageDTO,
+    ExistsStageDTO,
+    GetStageDTO,
+    UpdateStageDTO
+} from "./stage.dto";
 import { IStage, Stage } from "./stage.model";
 
 export interface IStageRepository {
     findById(id: string, session?: ClientSession): Promise<IStage | null>;
     find(filters: GetStageDTO): Promise<IStage[]>;
     findOne(callId: string, order: number, session?: ClientSession): Promise<IStage | null>;
-    //findUpcomingVerifications(grantId?: string): Promise<IStage[]>;
     create(dto: CreateStageDTO): Promise<IStage>;
     update(id: string, data: UpdateStageDTO["data"]): Promise<IStage | null>;
     updateMany(filter: any, update: any): Promise<any>;
@@ -15,24 +19,14 @@ export interface IStageRepository {
     delete(id: string): Promise<IStage | null>;
 }
 
-
 export class StageRepository implements IStageRepository {
 
-    async findById(
-        id: string,
-        session?: ClientSession
-    ) {
-        let dbQuery = Stage.findById(
-            new mongoose.Types.ObjectId(id)
-        );
+    async findById(id: string, session?: ClientSession) {
+        let query = Stage.findById(id);
 
-        if (session) {
-            dbQuery = dbQuery.session(session);
-        }
+        if (session) query = query.session(session);
 
-        return dbQuery
-            .lean<IStage>()
-            .exec();
+        return query.lean<IStage>().exec();
     }
 
     async find(filters: GetStageDTO) {
@@ -41,11 +35,12 @@ export class StageRepository implements IStageRepository {
         if (filters.call) {
             query.call = new mongoose.Types.ObjectId(filters.call);
         }
+
         if (filters.evaluation) {
             query.evaluation = new mongoose.Types.ObjectId(filters.evaluation);
         }
 
-        if (filters.order) {
+        if (filters.order !== undefined) {
             query.order = filters.order;
         }
 
@@ -53,67 +48,50 @@ export class StageRepository implements IStageRepository {
 
         if (filters.populate) {
             dbQuery = dbQuery
-                .populate('call')
-                .populate('evaluation');
+                .populate("call")
+                .populate("evaluation")
+                .populate("template");
         }
 
         return dbQuery.lean<IStage[]>().exec();
     }
 
     async findOne(callId: string, order: number, session?: ClientSession) {
-        const query = Stage.findOne({ call: callId, order });
+        let query = Stage.findOne({ call: callId, order });
 
-        if (session) {
-            query.session(session);
-        }
+        if (session) query = query.session(session);
 
-        return query
-            .lean<IStage>()
-            .exec();
+        return query.lean<IStage>().exec();
     }
-
-
 
     async create(dto: CreateStageDTO) {
         return Stage.create({
-            ...dto, call: new mongoose.Types.ObjectId(dto.call),
-            evaluation: new mongoose.Types.ObjectId(dto.evaluation)
+            ...dto,
+            call: new mongoose.Types.ObjectId(dto.call),
+            evaluation: new mongoose.Types.ObjectId(dto.evaluation),
+            template: dto.template
+                ? new mongoose.Types.ObjectId(dto.template)
+                : undefined,
         });
     }
 
-    async update(
-        id: string,
-        dtoData: UpdateStageDTO["data"]
-    ): Promise<IStage | null> {
-        const updateData: Partial<IStage> = {};
+    async update(id: string, data: UpdateStageDTO["data"]) {
 
-        if (dtoData.name !== undefined) {
-            updateData.name = dtoData.name;
-        }
+        const updateData: any = { ...data };
 
-        /*
-        if (dtoData.order !== undefined) {
-            updateData.order = dtoData.order;
+        if (data.template !== undefined) {
+            updateData.template = data.template
+                ? new mongoose.Types.ObjectId(data.template)
+                : null;
         }
-            */
-
-        if (dtoData.minReviewers !== undefined) {
-            updateData.minReviewers = dtoData.minReviewers;
-        }
-
-        if (dtoData.maxReviewers !== undefined) {
-            updateData.maxReviewers = dtoData.maxReviewers;
-        }
-        if (dtoData.minAcceptanceScore !== undefined) {
-            updateData.minAcceptanceScore = dtoData.minAcceptanceScore;
-        }
-
-        if (dtoData.deadline) updateData.deadline = dtoData.deadline;
 
         return Stage.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(id),
+            id,
             { $set: updateData },
-            { new: true }
+            {
+                new: true,
+                runValidators: true,
+            }
         ).exec();
     }
 
@@ -121,42 +99,35 @@ export class StageRepository implements IStageRepository {
         return Stage.updateMany(filter, update).exec();
     }
 
-    async countStages(
-        callId: string,
-        session?: ClientSession
-    ) {
-        let dbQuery = Stage.countDocuments({
+    async countStages(callId: string, session?: ClientSession) {
+        let query = Stage.countDocuments({
             call: new mongoose.Types.ObjectId(callId),
-            //category: category
         });
 
-        if (session) {
-            dbQuery = dbQuery.session(session);
-        }
-        return dbQuery.exec();
+        if (session) query = query.session(session);
+
+        return query.exec();
     }
 
-    async exists(filters: ExistsStageDTO): Promise<boolean> {
+    async exists(filters: ExistsStageDTO) {
         const query: any = {};
 
-        const { call: call, evaluation, order } = filters;
-
-        if (call) {
-            query.call = new mongoose.Types.ObjectId(call);
+        if (filters.call) {
+            query.call = new mongoose.Types.ObjectId(filters.call);
         }
 
-        if (evaluation) {
-            query.evaluation = new mongoose.Types.ObjectId(evaluation);
+        if (filters.evaluation) {
+            query.evaluation = new mongoose.Types.ObjectId(filters.evaluation);
         }
 
-        if (order !== undefined) {
-            query.order = order;
+        if (filters.order !== undefined) {
+            query.order = filters.order;
         }
 
-        const result = await Stage.exists(query).exec();
-        return result !== null;
+        return (await Stage.exists(query).exec()) !== null;
     }
+
     async delete(id: string) {
-        return await Stage.findByIdAndDelete(id).exec();
+        return Stage.findByIdAndDelete(id).exec();
     }
 }

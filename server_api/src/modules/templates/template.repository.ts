@@ -1,96 +1,53 @@
-import { ITemplate, TemplateModel, TemplateStatus } from "./template.model";
-import {
-    CreateTemplateDTO,
-    GetTemplatesDTO,
-    UpdateTemplateDTO
-} from "./template.dto";
-import mongoose from "mongoose";
-
-export interface ITemplateRepository {
-    findById(id: string): Promise<ITemplate | null>;
-    find(filters: GetTemplatesDTO): Promise<Partial<ITemplate>[]>;
-    create(dto: CreateTemplateDTO): Promise<ITemplate>;
-    update(id: string, data: UpdateTemplateDTO["data"]): Promise<ITemplate | null>;
-    delete(id: string): Promise<ITemplate | null>;
-}
+import { FilterQuery } from "mongoose";
+import { ITemplate, Template } from "./template.model";
+import { CreateTemplateDTO, UpdateTemplateDTO } from "./template.dto";
 
 
-export class TemplateRepository implements ITemplateRepository {
+export class TemplateRepository {
 
-    async findById(id: string) {
-        return TemplateModel.findById(new mongoose.Types.ObjectId(id))
-            .lean<ITemplate>()
-            .exec();
+    async create(dto: CreateTemplateDTO): Promise<ITemplate> {
+        return await Template.create(dto);
     }
 
-    async find(filters: GetTemplatesDTO) {
-        const query: any = {};
+    async findById(id: string): Promise<ITemplate | null> {
+        return await Template.findById(id);
+    }
 
-        if (filters.status) {
-            query.status = filters.status;
+    async findOne(filter: FilterQuery<ITemplate>): Promise<ITemplate | null> {
+        return await Template.findOne(filter);
+    }
+
+    async findAll(filter: FilterQuery<ITemplate> = {}): Promise<ITemplate[]> {
+        return await Template.find(filter).sort({ name: 1 });
+    }
+
+    async exists(name: string, excludeId?: string): Promise<boolean> {
+        const query: FilterQuery<ITemplate> = { name };
+
+        if (excludeId) {
+            query._id = { $ne: excludeId };
         }
 
-        if (filters.name) {
-            query.name = { $regex: filters.name, $options: "i" };
-        }
-
-        return TemplateModel.find(query)
-            .lean<ITemplate[]>()
-            .exec();
+        return (await Template.exists(query)) !== null;
     }
 
-    async create(dto: CreateTemplateDTO) {
-
-        const data: Partial<ITemplate> = {
-            name: dto.name,
-            description: dto.description ?? '',
-            status: dto.status || TemplateStatus.draft,
-
-            sections: dto.sections.map(section => ({
-                title: section.title,
-                description: section.description ?? '',
-                order: section.order,
-                isRequired: section.isRequired ?? true, // ✅ fix here
-
-                fields: section.fields.map(field => ({
-                    label: field.label,
-                    fieldType: field.fieldType,
-                    order: field.order,
-                    isRequired: field.isRequired ?? false, // ✅ fix
-                    placeholder: field.placeholder ?? ''
-                }))
-            }))
-        };
-
-        return TemplateModel.create(data);
+    async update(id: string, dto: UpdateTemplateDTO): Promise<ITemplate | null> {
+        return await Template.findByIdAndUpdate(
+            id,
+            dto,
+            {
+                new: true,
+                runValidators: true,
+            }
+        );
     }
 
-    async update(
-        id: string,
-        dtoData: UpdateTemplateDTO["data"]
-    ): Promise<ITemplate | null> {
-
-        const updateData: any = {};
-
-        if (dtoData.name) updateData.name = dtoData.name;
-        if (dtoData.description) updateData.description = dtoData.description;
-        if (dtoData.status) updateData.status = dtoData.status;
-
-        // ⚠️ Important: sections handling (simple version)
-        if (dtoData.sections) {
-            updateData.sections = dtoData.sections;
-        }
-
-        return TemplateModel.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(id),
-            { $set: updateData },
-            { new: true }
-        ).exec();
+    async delete(id: string): Promise<ITemplate | null> {
+        return await Template.findByIdAndDelete(id);
     }
 
-    async delete(id: string) {
-        return TemplateModel.findByIdAndDelete(
-            new mongoose.Types.ObjectId(id)
-        ).exec();
+    async count(filter: FilterQuery<ITemplate> = {}): Promise<number> {
+        return await Template.countDocuments(filter);
     }
+
 }

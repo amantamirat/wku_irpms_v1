@@ -4,6 +4,9 @@ export interface CreateStageDTO {
     name: string;
     order?: number;
     deadline: Date;
+
+    template?: string;
+
     evaluation: string;
     minReviewers: number;
     maxReviewers: number;
@@ -15,6 +18,9 @@ export interface UpdateStageDTO {
     data: Partial<{
         name: string;
         deadline: Date;
+
+        template: string | null;
+
         minReviewers: number;
         maxReviewers: number;
         minAcceptanceScore: number;

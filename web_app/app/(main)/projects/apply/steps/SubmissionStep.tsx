@@ -1,12 +1,28 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from 'primereact/button';
 import { FileUpload, FileUploadSelectEvent } from 'primereact/fileupload';
 import { Message } from 'primereact/message';
-import { Project } from '../../models/project.model';
-import { ProjectApi } from '../../api/project.api';
-import { useRouter } from 'next/navigation'; // Using Next.js router
+import { useState } from 'react';
 import { ApplicationApi } from '../../applications/api/application.api';
+import { Project } from '../../models/project.model';
+
+// Validation Interfaces
+export interface SectionValidationResult {
+    name: string;
+    found: boolean;
+    passed: boolean;
+    wordCount: number;
+    issues: string[];
+}
+
+export interface TemplateValidationResult {
+    valid: boolean;
+    score: number;
+    pages: number;
+    issues: string[];
+    sections: SectionValidationResult[];
+}
 
 interface SubmissionStepProps {
     data: Partial<Project>;
@@ -18,24 +34,34 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+    
+    // Updated error state to support structured validation results
     const [error, setError] = useState<string | null>(null);
+    const [validationDetails, setValidationDetails] = useState<TemplateValidationResult | null>(null);
+    
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+    const clearErrors = () => {
+        setError(null);
+        setValidationDetails(null);
+    };
 
     const onFileSelect = (e: FileUploadSelectEvent) => {
         const file = e.files[0];
         setSelectedFile(file);
-        setError(null);
+        clearErrors();
     };
 
     const onFileRemove = () => {
         setSelectedFile(null);
+        clearErrors();
     };
 
     const submitFinalProject = async () => {
         if (!selectedFile) return;
 
         setLoading(true);
-        setError(null);
+        clearErrors();
 
         try {
             const result = await ApplicationApi.apply({
@@ -43,21 +69,26 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                 file: selectedFile,
             });
 
-            // 1. Stop loading and show success UI
             setLoading(false);
             setSuccess(true);
 
-            // 2. Delayed Redirection (3 seconds)
-            // This allows the user to actually read the success message
             setTimeout(() => {
                 onComplete(result);
-                router.push('/'); // Redirect to home
+                router.push('/');
             }, 2000);
 
         } catch (err: any) {
             setLoading(false);
             setSuccess(false);
-            setError(err?.message || "Submission failed. Please try again later.");
+
+            // Capture structured validation results if present
+            if (err?.details?.sections) {
+                setValidationDetails(err.details as TemplateValidationResult);
+                setError("Document validation failed. Please address the issues listed below.");
+            } else {
+                setError(err?.message || "Submission failed. Please try again later.");
+            }
+
             console.error("Submission failed", err);
         }
     };
@@ -72,7 +103,7 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                 </p>
             </div>
 
-            {/* FEEDBACK MESSAGES */}
+            {/* FEEDBACK MESSAGES & VALIDATION REPORT */}
             <div className="mb-4">
                 {success && (
                     <Message
@@ -89,8 +120,61 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                         )}
                     />
                 )}
-                {error && (
+
+                {/* Generic Error Message */}
+                {error && !validationDetails && (
                     <Message severity="error" text={error} className="w-full shadow-2" />
+                )}
+
+                {/* Structured Validation Failure Display */}
+                {validationDetails && (
+                    <div className="surface-card border-left-3 border-red-500 shadow-2 p-4 border-round-lg">
+                        <div className="flex align-items-center text-red-700 font-bold text-lg mb-2">
+                            <i className="pi pi-exclamation-triangle mr-2 text-xl"></i>
+                            Document Validation Failed
+                        </div>
+                        <p className="text-700 text-sm mt-0 mb-3">
+                            Your document does not meet the template requirements (Score: <strong>{validationDetails.score}%</strong>). Please update the PDF and re-upload.
+                        </p>
+
+                        {/* Top-Level Document Issues */}
+                        {validationDetails.issues?.length > 0 && (
+                            <div className="mb-3 bg-red-50 p-3 border-round border-1 border-red-200">
+                                <span className="font-semibold text-red-800 text-xs uppercase block mb-1">General Issues:</span>
+                                <ul className="m-0 pl-3 text-sm text-red-700">
+                                    {validationDetails.issues.map((issue, idx) => (
+                                        <li key={idx} className="mb-1">{issue}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        {/* Section-by-Section Breakdowns */}
+                        <div className="surface-50 p-3 border-round border-1 border-200">
+                            <span className="font-semibold text-800 text-xs uppercase block mb-2">Section Breakdown:</span>
+                            <div className="flex flex-column gap-2">
+                                {validationDetails.sections.map((section, idx) => (
+                                    <div key={idx} className="bg-white p-2 border-round border-1 border-300">
+                                        <div className="flex align-items-center justify-content-between">
+                                            <div className="flex align-items-center">
+                                                <i className={`pi ${section.passed ? 'pi-check-circle text-green-500' : 'pi-times-circle text-red-500'} mr-2`}></i>
+                                                <span className="font-medium text-sm text-900">{section.name}</span>
+                                            </div>
+                                            <span className="text-xs text-500">{section.wordCount} words</span>
+                                        </div>
+
+                                        {section.issues.length > 0 && (
+                                            <ul className="m-0 pt-2 pl-4 text-xs text-red-600">
+                                                {section.issues.map((issue, iIdx) => (
+                                                    <li key={iIdx}>{issue}</li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
                 )}
             </div>
 
@@ -168,20 +252,13 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                     disabled={loading || success}
                 />
                 <Button
-                    // Technical labeling: Shows the transition of the process
                     label={success ? 'Finalizing...' : loading ? 'Uploading Proposal...' : 'Submit Final Application'}
-
-                    // Maintain the spinner for both loading and the redirect pause
                     icon={(loading || success) ? 'pi pi-spin pi-spinner' : 'pi pi-check-circle'}
-
                     onClick={submitFinalProject}
-
                     className={`px-6 shadow-3 transition-all duration-500 ${success
                         ? 'p-button-info opacity-100'
                         : 'p-button-success'
                         }`}
-
-                    // Keeps the button locked so no double-submissions occur
                     disabled={!selectedFile || loading || success}
                 />
             </div>

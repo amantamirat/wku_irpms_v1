@@ -120,7 +120,7 @@ const ProjectApplyPage = () => {
 
             {/* Header */}
             <div className="flex flex-column md:flex-row justify-content-between align-items-start md:align-items-center mb-4 card shadow-1 p-3 surface-card border-round-xl">
-                
+
                 <div className="flex align-items-center gap-3">
                     <Button
                         icon="pi pi-arrow-left"
@@ -164,7 +164,7 @@ const ProjectApplyPage = () => {
                             <ApplyWizard
                                 call={call}
                                 constraints={constraints}
-                                onComplete={(data) => console.log('Final Data', data)}
+                            //onComplete={(data) => console.log('Final Data', data)}
                             />
                         ) : (
                             <div className="flex align-items-center justify-content-center p-8">

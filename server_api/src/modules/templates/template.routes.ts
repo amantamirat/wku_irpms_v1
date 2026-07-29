@@ -6,14 +6,16 @@ import { TemplateService } from "./template.service";
 import {
   verifyActiveAccount,
   checkPermission,
-  checkTransitionPermission
 } from "../auth/auth.middleware";
+import { templateRepo } from "../../core/container";
 
-const repository = new TemplateRepository();
-const service = new TemplateService(repository);
+
+
+const service = new TemplateService(templateRepo);
 const controller = new TemplateController(service);
 
 const router = Router();
+
 
 /**
  * @route POST /templates
@@ -27,17 +29,19 @@ router.post(
   controller.create
 );
 
+
 /**
  * @route GET /templates
- * @desc Get templates
+ * @desc Get all templates
  * @access Protected
  */
 router.get(
   "/",
   verifyActiveAccount,
   checkPermission("template:read"),
-  controller.getAll
+  controller.get
 );
+
 
 /**
  * @route GET /templates/:id
@@ -51,9 +55,10 @@ router.get(
   controller.getById
 );
 
+
 /**
  * @route PUT /templates/:id
- * @desc Update a template
+ * @desc Update template
  * @access Protected
  */
 router.put(
@@ -63,21 +68,10 @@ router.put(
   controller.update
 );
 
-/**
- * @route PATCH /templates/:id
- * @desc Transition template state (draft ↔ published)
- * @access Protected
- */
-router.patch(
-  "/:id",
-  verifyActiveAccount,
-  checkTransitionPermission("template"),
-  controller.transitionState
-);
 
 /**
  * @route DELETE /templates/:id
- * @desc Delete a template
+ * @desc Delete template
  * @access Protected
  */
 router.delete(
@@ -86,5 +80,6 @@ router.delete(
   checkPermission("template:delete"),
   controller.delete
 );
+
 
 export default router;

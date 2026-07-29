@@ -1,25 +1,36 @@
-import { CreateSectionDTO, UpdateSectionDTO } from "./sections/section.dto";
-import { TemplateStatus } from "./template.model";
+export interface CreateTemplateSectionDTO {
+    name: string;
+    aliases?: string[];
+    required?: boolean;
+    minWords?: number;
+    maxWords?: number;
+    order?: number;
+    guidelines?: string;
+}
 
 export interface CreateTemplateDTO {
     name: string;
     description?: string;
-    sections: CreateSectionDTO[];
-    status?: TemplateStatus; // optional → default = draft
+    minPages?: number;
+    maxPages?: number;
+    sections: CreateTemplateSectionDTO[];
 }
 
+
+export interface UpdateTemplateSectionDTO {
+    name?: string;
+    aliases?: string[];
+    required?: boolean;
+    minWords?: number;
+    maxWords?: number;
+    order?: number;
+    guidelines?: string;
+}
 
 export interface UpdateTemplateDTO {
-    id: string;
-    data: Partial<{
-        name: string;
-        description: string;
-        sections: UpdateSectionDTO[];
-        status: TemplateStatus;
-    }>;
-}
-
-export interface GetTemplatesDTO {
-    status?: TemplateStatus;
-    name?: string; // optional search/filter
+    name?: string;
+    description?: string;
+    minPages?: number;
+    maxPages?: number;
+    sections?: UpdateTemplateSectionDTO[];
 }

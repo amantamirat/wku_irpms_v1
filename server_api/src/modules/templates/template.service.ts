@@ -1,128 +1,89 @@
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
-import { DeleteDto } from "../../common/dtos/delete.dto";
-import { TransitionRequestDto } from "../../common/dtos/transition.dto";
-import { TransitionHelper } from "../../common/helpers/transition.helper";
-
-import { ITemplateRepository } from "./template.repository";
-import {
-    CreateTemplateDTO,
-    GetTemplatesDTO,
-    UpdateTemplateDTO
-} from "./template.dto";
-import { TemplateStatus } from "./template.model";
-
-export const TEMPLATE_TRANSITIONS = {
-    draft: [TemplateStatus.published],
-    published: [TemplateStatus.draft]
-};
+import { CreateTemplateDTO, CreateTemplateSectionDTO, UpdateTemplateDTO, UpdateTemplateSectionDTO } from "./template.dto";
+import { TemplateRepository } from "./template.repository";
 
 export class TemplateService {
-
     constructor(
-        private readonly repository: ITemplateRepository
+        private readonly repository = new TemplateRepository()
     ) { }
 
-    // ---------------- CREATE ----------------
     async create(dto: CreateTemplateDTO) {
-        try {
-            return await this.repository.create(dto);
-        } catch (err: any) {
-            if (err?.code === 11000) {
-                throw new AppError(ERROR_CODES.TEMPLATE_ALREADY_EXISTS);
-            }
-            throw err;
-        }
+        await this.validateName(dto.name);
+        this.validateSections(dto.sections);
+        return this.repository.create(dto);
     }
 
-    // ---------------- GET ----------------
-    async get(options: GetTemplatesDTO) {
-        return await this.repository.find(options);
+    async findAll() {
+        return this.repository.findAll();
     }
 
-    // ---------------- TRANSITION ----------------
-    async transitionState(dto: TransitionRequestDto) {
-        const { id, current, next } = dto;
-
+    async findById(id: string) {
         const template = await this.repository.findById(id);
         if (!template) {
             throw new AppError(ERROR_CODES.TEMPLATE_NOT_FOUND);
         }
-
-        const from = template.status as TemplateStatus;
-        const to = next as TemplateStatus;
-
-        if (current && current !== from) {
-            throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
-        }
-
-        TransitionHelper.validateTransition(
-            from,
-            to,
-            TEMPLATE_TRANSITIONS
-        );
-
-        // 🔥 Important validation before publish
-        if (to === TemplateStatus.published) {
-            if (!template.sections || template.sections.length === 0) {
-                throw new AppError(
-                    ERROR_CODES.TEMPLATE_INVALID,
-                    "Template must have at least one section"
-                );
-            }
-
-            template.sections.forEach(section => {
-                if (section.isRequired && (!section.fields || section.fields.length === 0)) {
-                    throw new AppError(
-                        ERROR_CODES.TEMPLATE_INVALID,
-                        `Section "${section.title}" must have at least one field`
-                    );
-                }
-            });
-        }
-
-        return await this.repository.update(id, {
-            status: to
-        });
+        return template;
     }
 
-    // ---------------- UPDATE ----------------
-    async update(dto: UpdateTemplateDTO) {
-        const { id, data } = dto;
+    async update(id: string, dto: UpdateTemplateDTO) {
 
-        const existing = await this.repository.findById(id);
-        if (!existing) {
-            throw new AppError(ERROR_CODES.TEMPLATE_NOT_FOUND);
+        const template = await this.findById(id);
+
+        if (dto.name && dto.name !== template.name) {
+            await this.validateName(dto.name, id);
         }
 
-        // 🔥 Restriction: prevent editing published template
-        if (existing.status === TemplateStatus.published) {
-            if (data.sections) {
-                throw new AppError(
-                    ERROR_CODES.TEMPLATE_LOCKED,
-                    "Cannot modify sections of a published template"
-                );
-            }
+        if (dto.sections) {
+            this.validateSections(dto.sections);
         }
 
-        // ⚠️ For now: full replace (safe if frontend sends full structure)
-        return await this.repository.update(id, data);
+        return this.repository.update(id, dto);
     }
 
-    // ---------------- DELETE ----------------
-    async delete(dto: DeleteDto) {
-        const { id } = dto;
+    async delete(id: string) {
+        await this.findById(id);
+        return this.repository.delete(id);
+    }
 
-        const template = await this.repository.findById(id);
-        if (!template) {
-            throw new AppError(ERROR_CODES.TEMPLATE_NOT_FOUND);
+    // private helpers
+    private async validateName(name: string, excludeId?: string) {
+        const exists = await this.repository.exists(name, excludeId);
+        if (exists) {
+            throw new AppError(ERROR_CODES.TEMPLATE_ALREADY_EXISTS);
+        }
+    }
+
+    private validateSections(
+        sections: (CreateTemplateSectionDTO | UpdateTemplateSectionDTO)[]
+    ) {
+        if (!sections.length) {
+            throw new AppError(ERROR_CODES.TEMPLATE_SECTION_REQUIRED);
         }
 
-        // Only allow delete in draft
-        if (template.status !== TemplateStatus.draft) {
-            throw new AppError(ERROR_CODES.TEMPLATE_NOT_DRAFT);
-        }
+        const names = new Set<string>();
 
-        return await this.repository.delete(id);
+        for (const section of sections) {
+
+            if (!section.name) {
+                throw new AppError(ERROR_CODES.TEMPLATE_SECTION_NAME_REQUIRED);
+            }
+
+            const name = section.name.trim().toLowerCase();
+
+            if (names.has(name)) {
+                throw new AppError(ERROR_CODES.TEMPLATE_DUPLICATE_SECTION);
+            }
+
+            names.add(name);
+
+            if (
+                section.minWords &&
+                section.maxWords &&
+                section.minWords > section.maxWords
+            ) {
+                throw new AppError(ERROR_CODES.INVALID_WORD_RANGE);
+            }
+        }
     }
 }

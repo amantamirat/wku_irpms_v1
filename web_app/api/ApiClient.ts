@@ -1,4 +1,5 @@
 import { AuthApi } from "@/app/(full-page)/auth/api/auth.service";
+import { ApiError } from "./ApiError";
 
 
 export const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -12,17 +13,34 @@ const getAuthToken = (): string | null => {
 
 const handleError = async (response: Response) => {
     if (!response.ok) {
+
         let errorMessage = `Request failed with status ${response.status}`;
+
         try {
             const errorData = await response.json();
-            if (errorData.message) {
-                errorMessage = errorData.message;
+
+            throw new ApiError(
+                errorData.message || errorMessage,
+                {
+                    code: errorData.code,
+                    details: errorData.details,
+                    status: response.status
+                }
+            );
+
+        } catch (error) {
+            // If it is already ApiError, preserve it
+            if (error instanceof ApiError) {
+                throw error;
             }
-        } catch {
             const text = await response.text();
-            if (text) errorMessage = text;
+            throw new ApiError(
+                text || errorMessage,
+                {
+                    status: response.status
+                }
+            );
         }
-        throw new Error(errorMessage);
     }
     return response;
 };

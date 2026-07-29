@@ -17,6 +17,7 @@ export interface IStage extends Document {
     maxReviewers: number;
     minAcceptanceScore: number;
     deadline: Date;
+    template?: mongoose.Types.ObjectId;
     status: StageStatus;
     createdAt?: Date;
     updatedAt?: Date;
@@ -68,6 +69,10 @@ const StageSchema = new Schema<IStage>(
             required: true
         },
         deadline: { type: Date, required: true },
+        template: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.TEMPLATE,
+        },
         status: { type: String, enum: Object.values(StageStatus), default: StageStatus.planned, required: true },
     },
     { timestamps: true }

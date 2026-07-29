@@ -23,6 +23,7 @@
     "multer": "^2.0.2",
     "node-cache": "^5.1.2",
     "nodemailer": "^7.0.10",
+    "pdf-parse": "^1.1.1",
     "socket.io": "^4.8.3"
   },
   "devDependencies": {
@@ -32,6 +33,7 @@
     "@types/multer": "^2.0.0",
     "@types/node": "^22.15.2",
     "@types/nodemailer": "^6.4.17",
+    "@types/pdf-parse": "^1.1.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }

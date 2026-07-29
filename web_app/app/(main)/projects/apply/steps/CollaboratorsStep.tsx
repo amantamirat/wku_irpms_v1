@@ -26,24 +26,24 @@ export const CollaboratorsStep = ({ data, constraints, onUpdate, onNext, onBack 
     const { hasPermission } = useAuth();
     const canReadUsers = hasPermission(["user:read"]);
 
-    const [applicants, setApplicants] = useState<User[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
 
     useEffect(() => {
         if (canReadUsers) {
-            const fetchApplicants = async () => {
+            const fetchUsers = async () => {
                 setLoading(true);
                 try {
                     const res = await UserApi.getAll({});
-                    setApplicants(res);
+                    setUsers(res);
                 } catch (err) {
                     console.error("Failed to fetch applicants", err);
                 } finally {
                     setLoading(false);
                 }
             };
-            fetchApplicants();
+            fetchUsers();
         }
     }, [canReadUsers]);
 
@@ -75,7 +75,7 @@ export const CollaboratorsStep = ({ data, constraints, onUpdate, onNext, onBack 
         if (isMaxReached) return;
         const newCollabs = [...(data.collaborators || [])];
         newCollabs.push({
-            applicant: '',
+            member: '',
             role: '',
             isLeadPI: false
         } as any);
@@ -132,30 +132,31 @@ export const CollaboratorsStep = ({ data, constraints, onUpdate, onNext, onBack 
                 value={data.collaborators}
                 className="p-datatable-sm shadow-1 border-round-lg overflow-hidden"
                 emptyMessage="No collaborators added. Individual projects can proceed."
-                responsiveLayout="stack"
+                //responsiveLayout="stack"
             >
                 <Column header="Collaborator" style={{ width: '40%' }} body={(rowData, options) => {
                     const selectedIds = data.collaborators?.map(c =>
                         typeof c.member === 'object' ? c.member?._id : c.member
                     ).filter(id => id) || [];
 
-                    const availableApplicants = applicants.filter(app => {
-                        const isCurrent = (typeof rowData.applicant === 'object' ? rowData.applicant?._id : rowData.applicant) === app._id;
-                        return !selectedIds.includes(app._id) || isCurrent;
+                    const availableUsers = users.filter(usr => {
+                        const isCurrent = (typeof rowData.member === 'object' ? rowData.member?._id : rowData.member) === usr._id;
+                        return !selectedIds.includes(usr._id) || isCurrent;
                     });
 
                     return (
                         <>
 
                             <Dropdown
-                                value={typeof rowData.applicant === 'object' ? rowData.applicant?._id : rowData.applicant}
-                                options={availableApplicants}
+                                value={typeof rowData.member === 'object' ? rowData.member?._id : rowData.member}
+                                options={availableUsers}
                                 optionLabel="name"
                                 optionValue="_id"
-                                onChange={(e) => updateCollaborator(options.rowIndex, 'applicant', e.value)}
-                                placeholder="Select Applicant"
+                                //dataKey="_id"
+                                onChange={(e) => updateCollaborator(options.rowIndex, 'member', e.value)}
+                                placeholder="Select Member"
                                 filter
-                                className={classNames("w-full", { 'p-invalid': submitted && !rowData.applicant })}
+                                className={classNames("w-full", { 'p-invalid': submitted && !rowData.member })}
                                 disabled={rowData.isLeadPI}
                             />
                             {!canReadUsers && (
@@ -180,9 +181,13 @@ export const CollaboratorsStep = ({ data, constraints, onUpdate, onNext, onBack 
                     />
                 )} />
 
-                <Column header="Lead" headerClassName="text-center" bodyClassName="text-center" style={{ width: '10%' }} body={(rowData) => (
+                {
+                    /**
+                     * <Column header="Lead" headerClassName="text-center" bodyClassName="text-center" style={{ width: '10%' }} body={(rowData) => (
                     <Checkbox checked={rowData.isLeadPI} disabled={true} />
                 )} />
+                     */
+                }
 
                 <Column style={{ width: '4rem' }} body={(rowData, options) => (
                     <Button

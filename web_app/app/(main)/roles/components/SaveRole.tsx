@@ -6,16 +6,15 @@ import { Button } from 'primereact/button';
 import { Checkbox } from 'primereact/checkbox';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
+import { Message } from 'primereact/message';
 import { Toast } from 'primereact/toast';
 import { TreeNode } from 'primereact/treenode';
 import { TreeSelect } from 'primereact/treeselect';
-import { Message } from 'primereact/message';
 import { classNames } from 'primereact/utils';
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { RoleApi } from '../api/role.api';
 import { Role, validateRole } from '../models/role.model';
 import { PermissionApi } from '../permissions/api/permission.api';
-import { Permission } from '../permissions/models/permission.model';
 
 const SaveRole = (props: EntitySaveDialogProps<Role>) => {
     const { visible, item, onComplete, onHide } = props;

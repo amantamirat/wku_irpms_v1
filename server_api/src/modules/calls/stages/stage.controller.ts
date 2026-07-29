@@ -13,20 +13,36 @@ export class StageController {
 
     create = async (req: Request, res: Response) => {
         try {
-            const { call, name, evaluation, minReviewers, maxReviewers, deadline, minAcceptanceScore } = req.body;
+            const {
+                call,
+                name,
+                template,
+                evaluation,
+                minReviewers,
+                maxReviewers,
+                deadline,
+                minAcceptanceScore,
+            } = req.body;
 
             const dto: CreateStageDTO = {
                 call,
                 name,
-                evaluation: evaluation as string,
+                template,
+                evaluation,
                 minReviewers,
                 maxReviewers,
                 deadline,
-                minAcceptanceScore
+                minAcceptanceScore,
             };
 
             const stage = await this.service.create(dto);
-            successResponse(res, 201, 'Stage created successfully', stage);
+
+            successResponse(
+                res,
+                201,
+                "Stage created successfully",
+                stage
+            );
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
@@ -75,8 +91,10 @@ export class StageController {
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.params;
+
             const {
                 name,
+                template,
                 order,
                 minReviewers,
                 maxReviewers,
@@ -88,6 +106,7 @@ export class StageController {
                 id,
                 data: {
                     ...(name !== undefined && { name }),
+                    ...(template !== undefined && { template }),
                     ...(order !== undefined && { order }),
                     ...(minReviewers !== undefined && { minReviewers }),
                     ...(maxReviewers !== undefined && { maxReviewers }),
@@ -97,12 +116,17 @@ export class StageController {
             };
 
             const updated = await this.service.update(dto);
-            successResponse(res, 200, "Stage updated successfully", updated);
+
+            successResponse(
+                res,
+                200,
+                "Stage updated successfully",
+                updated
+            );
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     };
-
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.params;

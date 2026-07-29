@@ -1,58 +1,44 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import {
-    Template,
-    GetTemplatesOptions,
-    sanitizeTemplate
-} from "../models/template.model";
-import { TransitionRequestDto } from "@/types/util";
+import { Template, sanitizeTemplate } from "../models/template.model";
 
-const end_point = "/templates";
 
-export const TemplateApi: EntityApi<Template, GetTemplatesOptions | undefined> = {
+export const TemplateApi: EntityApi<Template> = {
 
-    async getAll(options) {
-        const query = new URLSearchParams();
-
-        if (options) {
-            if (options.status) {
-                query.append("status", String(options.status));
-            }
-            if (options.name) {
-                query.append("name", options.name);
-            }
-        }
-
-        const qs = query.toString();
-        return ApiClient.get(`${end_point}${qs ? `?${qs}` : ""}`);
+    async getAll() {
+        return ApiClient.get('/templates/');
     },
 
-    async getById(id: string) {
-        if (!id) throw new Error("id required");
-        return ApiClient.get(`${end_point}/${id}`);
-    },
 
     async create(template) {
         const sanitized = sanitizeTemplate(template);
-        return ApiClient.post(end_point, sanitized);
+
+        return ApiClient.post(
+            '/templates/',
+            sanitized
+        );
     },
+
 
     async update(template) {
-        if (!template._id) throw new Error("_id required");
+        if (!template._id) {
+            throw new Error("_id required");
+        }
 
-        const sanitized = sanitizeTemplate(template);
-        return ApiClient.put(`${end_point}/${template._id}`, sanitized);
+        return ApiClient.put(
+            `/templates/${template._id}`,
+            sanitizeTemplate(template)
+        );
     },
+
 
     async delete(template) {
-        if (!template._id) throw new Error("_id required");
-        return ApiClient.delete(`${end_point}/${template._id}`);
-    },
+        if (!template._id) {
+            throw new Error("_id required");
+        }
 
-    async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
-        if (!id) throw new Error("id required");
-
-        const url = `${end_point}/${id}`;
-        return ApiClient.patch(url, dto);
+        return ApiClient.delete(
+            `/templates/${template._id}`
+        );
     }
 };

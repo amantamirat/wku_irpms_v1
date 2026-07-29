@@ -11,6 +11,8 @@ import { ConstraintValidator } from "../../grants/constraints/constraint.validat
 import { NotificationService } from "../../notifications/notification.service";
 import { IReviewerRepository } from "../../reviewers/reviewer.repository";
 import { ReviewerStatus } from "../../reviewers/reviewer.state-machine";
+import { PdfExtractorService } from "../../templates/services/pdf-extractor.service";
+import { TemplateValidationService } from "../../templates/services/template-validation.service";
 import { ProjectAuth } from "../project.auth";
 import { ProjectStatus } from "../project.model";
 import { IProjectRepository } from "../project.repository";
@@ -36,9 +38,11 @@ export class ApplicationService {
         private readonly projectService: ProjectService,
         private readonly constValidator: ConstraintValidator,
         private readonly compValidator: CompositionValidator,
+        private readonly templateValidator: TemplateValidationService,
         private readonly synchronizer = new ProjectSynchronizer(projectRepo, repository, stageRepo),
         private readonly notificationService?: NotificationService,
         private readonly projAuth: ProjectAuth = new ProjectAuth(projectRepo),
+
 
     ) {
     }
@@ -94,7 +98,7 @@ export class ApplicationService {
 
 
     async apply(dto: ApplyProjectDTO) {
-        const { call, title, summary, leadPI: applicant, collaborators, phases, themes, userId, docPath } = dto;
+        const { call, title, summary, leadPI, collaborators, phases, themes, userId, docPath } = dto;
         const lead = collaborators.find(c => c.isLeadPI);
         if (!lead) throw new AppError(ERROR_CODES.LEAD_PI_NOT_FOUND);
         if (lead.member !== userId) throw new AppError(ERROR_CODES.UNAUTHORIZED);
@@ -109,6 +113,20 @@ export class ApplicationService {
         if (deadline < new Date()) {
             throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
         }
+
+        const templateId = String(stageDoc.template);
+
+        const result = await this.templateValidator.validate(templateId, docPath);
+        if (!result.valid) {
+            throw new AppError(
+                ERROR_CODES.INVALID_DOCUMENT,
+                "Document validation failed",
+                400,
+                result
+            );
+        }
+
+
 
         const calendarId = String(callDoc.calendar);
         const grantId = String(callDoc.grant);
@@ -344,7 +362,7 @@ export class ApplicationService {
             await this.synchronizer.sync(project);
             if (stageDoc?.order === 1) {
                 await this.projectService.delete({ id: project });
-            } 
+            }
         }
         return deleted;
     }

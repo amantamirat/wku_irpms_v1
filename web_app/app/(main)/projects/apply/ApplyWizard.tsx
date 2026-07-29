@@ -9,6 +9,7 @@ import { CollaboratorsStep } from './steps/CollaboratorsStep';
 import { SubmissionStep } from './steps/SubmissionStep';
 import { useAuth } from '@/contexts/auth-context';
 import { Constraint } from '../../grants/constraints/models/constraint.model';
+import { User } from '../../users/models/user.model';
 
 
 interface ApplyWizardProps {
@@ -18,17 +19,17 @@ interface ApplyWizardProps {
 }
 
 const ApplyWizard = ({ call, constraints, onComplete }: ApplyWizardProps) => {
-    const { getUser: getUser } = useAuth();
-    const activeAppUser = getUser();
+    const { getUser } = useAuth();
+    const appUser = getUser();
     const [activeIndex, setActiveIndex] = useState(0);
     const [formData, setFormData] = useState<Partial<Project>>({
         call: call._id,
         title: '',
         summary: '',
         themes: [],
-        leadPI: activeAppUser?._id,
-        collaborators: [{ member: activeAppUser as any, role: "Principal Investigator", isLeadPI: true }],
-        phases: [{ title: '', order: 1, budget: 0, duration: 0, description: '' }]
+        leadPI: appUser?._id,
+        collaborators: [{ member: appUser?._id, role: "Principal Investigator", isLeadPI: true }],
+        phases: [{ title: 'Phase 1', order: 1, budget: 1000, duration: 10, description: '' }]
     });
 
     const wizardSteps = [
