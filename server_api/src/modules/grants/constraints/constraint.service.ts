@@ -1,4 +1,4 @@
-import { ConstraintRepository, IConstraintRepository } from "./constraint.repository";
+import { ConstraintRepositoryOLD, IConstraintRepository } from "./constraint.repository";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { GrantRepository, IGrantRepository } from "../grant.repository";

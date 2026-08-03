@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { ApplicationApi } from '../../applications/api/application.api';
 import { Project } from '../../models/project.model';
 
-// Validation Interfaces
+// Document/Template Validation Interfaces
 export interface SectionValidationResult {
     name: string;
     found: boolean;
@@ -24,6 +24,12 @@ export interface TemplateValidationResult {
     sections: SectionValidationResult[];
 }
 
+// Backend Grant Constraint Validation Interface
+export interface ConstraintValidationResult {
+    valid: boolean;
+    errors: string[];
+}
+
 interface SubmissionStepProps {
     data: Partial<Project>;
     onBack: () => void;
@@ -35,15 +41,17 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     
-    // Updated error state to support structured validation results
+    // Error States
     const [error, setError] = useState<string | null>(null);
     const [validationDetails, setValidationDetails] = useState<TemplateValidationResult | null>(null);
+    const [constraintDetails, setConstraintDetails] = useState<ConstraintValidationResult | null>(null);
     
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     const clearErrors = () => {
         setError(null);
         setValidationDetails(null);
+        setConstraintDetails(null);
     };
 
     const onFileSelect = (e: FileUploadSelectEvent) => {
@@ -81,11 +89,18 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
             setLoading(false);
             setSuccess(false);
 
-            // Capture structured validation results if present
+            // 1. Capture Template/PDF Section Validation Errors
             if (err?.details?.sections) {
                 setValidationDetails(err.details as TemplateValidationResult);
                 setError("Document validation failed. Please address the issues listed below.");
-            } else {
+            } 
+            // 2. Capture Grant Constraint Validation Errors
+            else if (err?.details?.errors && Array.isArray(err.details.errors)) {
+                setConstraintDetails(err.details as ConstraintValidationResult);
+                setError(err?.message || "Grant constraint validation failed.");
+            } 
+            // 3. Generic Error Handling
+            else {
                 setError(err?.message || "Submission failed. Please try again later.");
             }
 
@@ -121,12 +136,32 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                     />
                 )}
 
-                {/* Generic Error Message */}
-                {error && !validationDetails && (
+                {/* Generic Error Message (Only when detailed UI blocks are absent) */}
+                {error && !validationDetails && !constraintDetails && (
                     <Message severity="error" text={error} className="w-full shadow-2" />
                 )}
 
-                {/* Structured Validation Failure Display */}
+                {/* Constraint Validation Failure Display */}
+                {constraintDetails && (
+                    <div className="surface-card border-left-3 border-orange-500 shadow-2 p-4 border-round-lg mb-3">
+                        <div className="flex align-items-center text-orange-700 font-bold text-lg mb-2">
+                            <i className="pi pi-shield mr-2 text-xl"></i>
+                            Grant Requirement Check Failed
+                        </div>
+                        <p className="text-700 text-sm mt-0 mb-3">
+                            Your proposal submission does not satisfy all grant guidelines/constraints:
+                        </p>
+                        <div className="bg-orange-50 p-3 border-round border-1 border-orange-200">
+                            <ul className="m-0 pl-3 text-sm text-orange-900">
+                                {constraintDetails.errors.map((errItem, idx) => (
+                                    <li key={idx} className="mb-1 font-medium">{errItem}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+                )}
+
+                {/* Structured Document Validation Failure Display */}
                 {validationDetails && (
                     <div className="surface-card border-left-3 border-red-500 shadow-2 p-4 border-round-lg">
                         <div className="flex align-items-center text-red-700 font-bold text-lg mb-2">
@@ -255,10 +290,11 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                     label={success ? 'Finalizing...' : loading ? 'Uploading Proposal...' : 'Submit Final Application'}
                     icon={(loading || success) ? 'pi pi-spin pi-spinner' : 'pi pi-check-circle'}
                     onClick={submitFinalProject}
-                    className={`px-6 shadow-3 transition-all duration-500 ${success
-                        ? 'p-button-info opacity-100'
-                        : 'p-button-success'
-                        }`}
+                    className={`px-6 shadow-3 transition-all duration-500 ${
+                        success
+                            ? 'p-button-info opacity-100'
+                            : 'p-button-success'
+                    }`}
                     disabled={!selectedFile || loading || success}
                 />
             </div>

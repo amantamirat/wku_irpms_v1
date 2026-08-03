@@ -24,7 +24,7 @@ export class ProjectController {
       // 1. Authentication Guard
       if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
-      const { calendar, grant, applicant, title, summary, themes, collaborators, phases } = req.body;
+      const { calendar, grant, leadPI, title, summary, themes, collaborators, phases } = req.body;
 
       // 2. Construct the DTO using the authenticated user's ID as the applicant
       const dto: CreateProjectDTO = {
@@ -32,7 +32,7 @@ export class ProjectController {
         grant,
         title,
         summary,
-        leadPI: applicant,
+        leadPI,
         themes: themes || [],
         collaborators: collaborators || [],
         phases: phases || [],
@@ -42,7 +42,7 @@ export class ProjectController {
       // 3. Delegate execution to the new service method
       const created = await this.service.create(dto);
       // 4. Send clean success framework response
-      successResponse(res, 201, "Grant project created successfully", created);
+      successResponse(res, 201, "Project created successfully", created);
     } catch (err: any) {
       // 5. Catch validations or database transaction rollbacks safely
       errorResponse(res, 400, err.message, err);

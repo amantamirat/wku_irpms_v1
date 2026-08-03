@@ -45,14 +45,6 @@ router.post('/', verifyActiveAccount,
     controller.create);
 
 
-
-router.post(
-    '/from-grant',
-    verifyActiveAccount,
-    checkPermission([PERMISSIONS.PROJECT.CREATE]),
-    controller.create
-);
-
 router.get('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.PROJECT.READ]),
     controller.get);

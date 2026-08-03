@@ -6,8 +6,11 @@ import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { CallStatus } from "../../calls/call.model";
 import { ICallRepository } from "../../calls/call.repository";
 import { IStageRepository } from "../../calls/stages/stage.repository";
+import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
 import { CompositionValidator } from "../../grants/compositions/composition.validator";
-import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
+import { ConstraintValidatorOLD } from "../../grants/constraints/constraint.validator";
+import { GrantStatus } from "../../grants/grant.model";
+import { IGrantRepository } from "../../grants/grant.repository";
 import { NotificationService } from "../../notifications/notification.service";
 import { IReviewerRepository } from "../../reviewers/reviewer.repository";
 import { ReviewerStatus } from "../../reviewers/reviewer.state-machine";
@@ -32,12 +35,14 @@ export class ApplicationService {
     constructor(
         private readonly repository: IApplicationRepository,
         private readonly projectRepo: IProjectRepository,
+        private readonly grantRepo: IGrantRepository,
         private readonly callRepo: ICallRepository,
         private readonly stageRepo: IStageRepository,
         private readonly reviewerRepo: IReviewerRepository,
         private readonly projectService: ProjectService,
-        private readonly constValidator: ConstraintValidator,
+        //private readonly constValidator: ConstraintValidatorOLD,
         private readonly compValidator: CompositionValidator,
+        private readonly constraintValidator: ConstraintValidationService,
         private readonly templateValidator: TemplateValidationService,
         private readonly synchronizer = new ProjectSynchronizer(projectRepo, repository, stageRepo),
         private readonly notificationService?: NotificationService,
@@ -114,25 +119,46 @@ export class ApplicationService {
             throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
         }
 
-        const templateId = String(stageDoc.template);
+        const grantId = String(callDoc.grant);
+        const grantDoc = await this.grantRepo.findById(grantId);
+        if (!grantDoc) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
+        if (grantDoc.status !== GrantStatus.active) throw new Error(ERROR_CODES.GRANT_NOT_ACTIVE);
 
-        const result = await this.templateValidator.validate(templateId, docPath);
-        if (!result.valid) {
-            throw new AppError(
-                ERROR_CODES.INVALID_DOCUMENT,
-                "Document validation failed",
-                400,
-                result
-            );
+        if (grantDoc.constraint) {
+            const constraintId = String(grantDoc.constraint);
+            const result = await this.constraintValidator.validateProject(constraintId, dto);
+            if (!result.valid) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_CONSTRAINT,
+                    "Constraint validation failed",
+                    400,
+                    result
+                );
+            }
+        }
+
+        if (stageDoc.template) {
+            const templateId = String(stageDoc.template);
+            const result = await this.templateValidator.validate(templateId, docPath);
+            if (!result.valid) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_DOCUMENT,
+                    "Document validation failed",
+                    400,
+                    result
+                );
+            }
         }
 
 
 
-        const calendarId = String(callDoc.calendar);
-        const grantId = String(callDoc.grant);
-        await this.constValidator.validateAll(grantId, { participantCount: collaborators.length, phases, themes, title, summary });
+
+
+
+        // await this.constValidator.validateAll(grantId, { participantCount: collaborators.length, phases, themes, title, summary });
         await this.compValidator.validateAll(grantId, collaborators);
         const skipValidation = { skipValidation: true };
+        const calendarId = String(callDoc.calendar);
         const createdProj = await this.projectService.create({ ...dto, grant: grantId, calendar: calendarId },
             skipValidation);
         const projectId = String(createdProj._id);

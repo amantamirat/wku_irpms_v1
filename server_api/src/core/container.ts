@@ -2,11 +2,13 @@
 import { CalendarRepository } from "../modules/calendar/calendar.repository";
 import { CallRepository } from "../modules/calls/call.repository";
 import { StageRepository } from "../modules/calls/stages/stage.repository";
+import { ConstraintRepository } from "../modules/constraints/constraint.repository";
+import { ConstraintValidationService } from "../modules/constraints/services/constraint-validator.service";
 import { EvaluationRepository } from "../modules/evaluations/evaluation.repository";
 import { CompositionRepository } from "../modules/grants/compositions/composition.repository";
 import { CompositionValidator } from "../modules/grants/compositions/composition.validator";
-import { ConstraintRepository } from "../modules/grants/constraints/constraint.repository";
-import { ConstraintValidator } from "../modules/grants/constraints/constraint.validator";
+import { ConstraintRepositoryOLD } from "../modules/grants/constraints/constraint.repository";
+import { ConstraintValidatorOLD } from "../modules/grants/constraints/constraint.validator";
 import { GrantRepository } from "../modules/grants/grant.repository";
 import { OrganizationRepository } from "../modules/organization/organization.repository";
 import { SpecializationRepository } from "../modules/organization/specializations/specialization.repository";
@@ -45,6 +47,8 @@ export const grantRepo = new GrantRepository();
 export const thematicRepo = new ThematicRepository();
 export const themeRepo = new ThemeRepository();
 export const constraintRepo = new ConstraintRepository();
+
+export const constraintRepoOld = new ConstraintRepositoryOLD();
 export const compositionRepo = new CompositionRepository();
 // project repos
 export const projectRepo = new ProjectRepository();
@@ -63,19 +67,21 @@ export const templateValidtor = new TemplateValidationService(
 );
 
 
+//validator services 
+export const constraintValidator = new ConstraintValidationService(constraintRepo, themeRepo);
+
 //grant validators
-export const constraintValidator = new ConstraintValidator(constraintRepo, themeRepo);
+export const constraintValidatorOLD = new ConstraintValidatorOLD(constraintRepoOld, themeRepo);
 export const compositionValidator = new CompositionValidator(compositionRepo, userRepo, exprienceRepo, specializationRepo, collaboratorRepo);
 
 // Services
-export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, constraintValidator, compositionValidator);
-export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, constraintValidator);
+export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, constraintValidatorOLD, compositionValidator);
+export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, constraintValidatorOLD);
 export const projectService = new ProjectService(projectRepo, collaboratorRepo, phaseRepo, grantRepo,
-    collabService, phaseService, constraintValidator, compositionValidator
+    collabService, phaseService, constraintValidatorOLD, compositionValidator
 );
-export const applicationService = new ApplicationService(applicationRepo, projectRepo, callRepo, stageRepo, reviewerRepo,
-    projectService, constraintValidator, compositionValidator, templateValidtor
-);
+export const applicationService = new ApplicationService(applicationRepo, projectRepo, grantRepo, callRepo, stageRepo, reviewerRepo,
+    projectService, compositionValidator, constraintValidator, templateValidtor);
 
 export const userService = new UserService(userRepo, organizationRepo, roleRepo);
 

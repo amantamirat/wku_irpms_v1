@@ -10,8 +10,8 @@ import { ProjectRepository } from '../project.repository';
 import { CollaboratorController } from './collaborator.controller';
 import { CollaboratorRepository } from './collaborator.repository';
 import { CollaboratorService } from './collaborator.service';
-import { ConstraintRepository } from '../../grants/constraints/constraint.repository';
-import { ConstraintValidator } from '../../grants/constraints/constraint.validator';
+import { ConstraintRepositoryOLD } from '../../grants/constraints/constraint.repository';
+import { ConstraintValidatorOLD } from '../../grants/constraints/constraint.validator';
 import { ThemeRepository } from '../../thematics/themes/theme.repository';
 import { ProjectAuth } from '../project.auth';
 import { collabService } from '../../../core/container';
@@ -24,7 +24,7 @@ const notificationService = new NotificationService(
     new NotificationRepository(),
     new SettingService(new SettingRepository())
 );
-const constValidator = new ConstraintValidator(new ConstraintRepository(), new ThemeRepository());
+const constValidator = new ConstraintValidatorOLD(new ConstraintRepositoryOLD(), new ThemeRepository());
 /*
 const service = new CollaboratorService(
     repository, projectRepo, projAuth, appRepository, constValidator, notificationService

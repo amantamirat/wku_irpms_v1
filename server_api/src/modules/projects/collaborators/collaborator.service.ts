@@ -14,7 +14,7 @@ import { ICollaboratorRepository } from "./collaborator.repository";
 
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
-import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
+import { ConstraintValidatorOLD } from "../../grants/constraints/constraint.validator";
 import { ProjectStatus } from "../project.model";
 import { CollaboratorStatus } from "./collaborator.model";
 import { ClientSession } from "mongoose";
@@ -28,7 +28,7 @@ export class CollaboratorService {
     constructor(
         private readonly collabRepo: ICollaboratorRepository,
         private readonly projectRepo: IProjectRepository,
-        private readonly constraintValidator: ConstraintValidator,
+        private readonly constraintValidator: ConstraintValidatorOLD,
         private readonly compositionValidator: CompositionValidator,
         private readonly notificationService?: NotificationService,
         private readonly projAuth: ProjectAuth = new ProjectAuth(projectRepo),
@@ -37,10 +37,10 @@ export class CollaboratorService {
     }
 
     async validateProject(project: string, applicant: string, session?: ClientSession) {
-        const projectDoc = await this.projAuth.authProject(project, applicant);
+        const projectDoc = await this.projectRepo.findById(project);
         if (
-            projectDoc.status !== ProjectStatus.draft &&
-            projectDoc.status !== ProjectStatus.accepted
+            projectDoc?.status !== ProjectStatus.draft &&
+            projectDoc?.status !== ProjectStatus.accepted
         ) {
             throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
         }

@@ -5,7 +5,7 @@ import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { CallRepository, ICallRepository } from "../../calls/call.repository";
-import { ConstraintValidator } from "../../grants/constraints/constraint.validator";
+import { ConstraintValidatorOLD } from "../../grants/constraints/constraint.validator";
 import { GrantRepository, IGrantRepository } from "../../grants/grant.repository";
 import { ProjectAuth } from "../project.auth";
 import { ProjectStatus } from "../project.model";
@@ -21,15 +21,15 @@ export class PhaseService {
         private readonly phaseRepo: IPhaseRepository,
         private readonly projRepo: IProjectRepository,
         private readonly grantRepo: IGrantRepository,
-        private readonly constValidator: ConstraintValidator,
+        private readonly constValidator: ConstraintValidatorOLD,
         private readonly projAuth: ProjectAuth = new ProjectAuth(projRepo),
     ) { }
 
     async validateProject(project: string, applicant: string, session?: ClientSession) {
-        const projectDoc = await this.projAuth.authProject(project, applicant);
+        const projectDoc = await this.projRepo.findById(project);
         if (
-            projectDoc.status !== ProjectStatus.draft &&
-            projectDoc.status !== ProjectStatus.accepted
+            projectDoc?.status !== ProjectStatus.draft &&
+            projectDoc?.status !== ProjectStatus.accepted
         ) {
             throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
         }

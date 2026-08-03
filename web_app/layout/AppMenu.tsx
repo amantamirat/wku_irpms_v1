@@ -278,6 +278,12 @@ const AppMenu = () => {
                     )
                 },*/
                 {
+                    label: 'Constraints',
+                    icon: 'pi pi-fw pi-sliders-h',
+                    to: '/constraints',
+                    visible: hasPermission("constraint:create")
+                },
+                {
                     label: 'Specializations',
                     icon: 'pi pi-fw pi-filter-fill',
                     to: '/specializations',

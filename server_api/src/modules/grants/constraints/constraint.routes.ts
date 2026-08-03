@@ -3,11 +3,11 @@ import { PERMISSIONS } from '../../../common/constants/permissions';
 import { checkPermission, verifyActiveAccount } from '../../auth/auth.middleware';
 import { GrantRepository, IGrantRepository } from '../grant.repository';
 import { ConstraintController } from './constraint.controller';
-import { ConstraintRepository } from './constraint.repository';
+import { ConstraintRepositoryOLD } from './constraint.repository';
 import { ConstraintService } from './constraint.service';
 
 
-const repository = new ConstraintRepository();
+const repository = new ConstraintRepositoryOLD();
 const grantRepository: IGrantRepository = new GrantRepository();
 const service = new ConstraintService(repository, grantRepository);
 const controller = new ConstraintController(service);

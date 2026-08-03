@@ -10,6 +10,8 @@ import { InputTextarea } from 'primereact/inputtextarea';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 
+import { ConstraintApi } from '../../constraints/api/constraint.api';
+import { Constraint } from '../../constraints/models/constraint.model';
 import { OrganizationApi } from '../../organizations/api/organization.api';
 import { Organization, OrgnUnit } from '../../organizations/models/organization.model';
 import { ThematicApi } from '../../thematics/api/thematic.api';
@@ -24,12 +26,14 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
 
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [thematics, setThematics] = useState<Thematic[]>([]);
+    const [constraints, setConstraints] = useState<Constraint[]>([]);
     const [localGrant, setLocalGrant] = useState<Grant>({ ...item });
     const [submitted, setSubmitted] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
     const isOrganizationPredefined = !!item.organization;
     const isThematicPredefined = !!item.thematic;
+    const isEdit = !!item._id;
 
     // Helper to dynamically update form state keys
     const updateField = (key: keyof Grant, value: any) => {
@@ -57,10 +61,15 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                     setThematics(thematicData);
                 }
 
+
+                const constraintData = await ConstraintApi.getAll();
+                setConstraints(constraintData);
+
+
                 // Load Organizations if Funding Source is already established
                 if (localGrant.fundingSource && !isOrganizationPredefined) {
-                    const unitType = localGrant.fundingSource === FundingSource.INTERNAL 
-                        ? OrgnUnit.directorate 
+                    const unitType = localGrant.fundingSource === FundingSource.INTERNAL
+                        ? OrgnUnit.directorate
                         : OrgnUnit.external;
                     const orgData = await OrganizationApi.getAll({ type: unitType });
                     setOrganizations(orgData);
@@ -110,6 +119,7 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                 ...saved,
                 organization: localGrant.organization,
                 thematic: localGrant.thematic,
+                constraint: localGrant.constraint,
             });
         } catch (err: any) {
             toast.current?.show({
@@ -132,20 +142,20 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
     // Dialog footer actions context setup
     const footerActions = (
         <div className="flex justify-content-end gap-2">
-            <Button 
-                type="button" 
-                label="Cancel" 
-                icon="pi pi-times" 
-                text 
-                onClick={handleHide} 
-                disabled={isSaving} 
+            <Button
+                type="button"
+                label="Cancel"
+                icon="pi pi-times"
+                text
+                onClick={handleHide}
+                disabled={isSaving}
             />
-            <Button 
-                type="submit" 
-                form="grant-form" 
-                label="Save" 
-                icon="pi pi-check" 
-                loading={isSaving} 
+            <Button
+                type="submit"
+                form="grant-form"
+                label="Save"
+                icon="pi pi-check"
+                loading={isSaving}
             />
         </div>
     );
@@ -164,7 +174,7 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                 onHide={handleHide}
             >
                 <form id="grant-form" onSubmit={handleSave} className="flex flex-column gap-3 mt-2">
-                    
+
                     {/* Funding Source Dropdown */}
                     <div className="field">
                         <label htmlFor="source" className="font-semibold block mb-2">Source</label>
@@ -178,6 +188,7 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                                     fundingSource: e.value,
                                     organization: undefined,
                                     thematic: undefined,
+                                    constraint: undefined,
                                 }));
                             }}
                             placeholder="Select Funding Source"
@@ -257,6 +268,25 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                             )}
                         </div>
                     )}
+
+                    {/* Dynamic Constraint Field Setup */}
+                    <div className="field">
+                        <label htmlFor="constraint" className="font-semibold block mb-2">Constraint</label>
+                        <Dropdown
+                            id="constraint"
+                            value={localGrant.constraint}
+                            options={constraints}
+                            optionLabel="name"
+                            optionValue='_id'
+                            //dataKey="_id"
+                            onChange={(e) => updateField('constraint', e.value)}
+                            placeholder="Select Constraint"
+                            //disabled={isEdit}
+                            showClear
+                        />
+
+                    </div>
+
 
                     {/* Detailed Metadata Input Area Wrapper */}
                     <div className="field">

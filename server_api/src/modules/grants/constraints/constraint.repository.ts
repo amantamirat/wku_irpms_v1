@@ -17,7 +17,7 @@ export interface IConstraintRepository {
     delete(id: string): Promise<IConstraint | null>;
 }
 
-export class ConstraintRepository implements IConstraintRepository {
+export class ConstraintRepositoryOLD implements IConstraintRepository {
 
     // =====================================================
     // HELPERS

@@ -15,7 +15,7 @@ import { CallStatus } from "../calls/call.model";
 import { ICallRepository } from "../calls/call.repository";
 import { IStageRepository } from "../calls/stages/stage.repository";
 import { CompositionValidator } from "../grants/compositions/composition.validator";
-import { ConstraintValidator } from "../grants/constraints/constraint.validator";
+import { ConstraintValidatorOLD } from "../grants/constraints/constraint.validator";
 import { GrantStatus } from "../grants/grant.model";
 import { IGrantRepository } from "../grants/grant.repository";
 import { NotificationService } from "../notifications/notification.service";
@@ -38,8 +38,8 @@ export class ProjectService {
         private readonly phaseRepo: IPhaseRepository,
         private readonly grantRepo: IGrantRepository,
         private readonly collabService: CollaboratorService,
-        private readonly phaseService: PhaseService,        
-        private readonly constValidator: ConstraintValidator,
+        private readonly phaseService: PhaseService,
+        private readonly constValidator: ConstraintValidatorOLD,
         private readonly compValidator: CompositionValidator,
         private readonly notificationService?: NotificationService,
     ) { }
@@ -62,9 +62,9 @@ export class ProjectService {
             if (grantDoc.status !== GrantStatus.active) throw new Error(ERROR_CODES.GRANT_NOT_ACTIVE);
             const grantId = String(grantDoc._id);
             //check title uniqueness 
-            await this.compValidator.validatePI(grantId, leadPI);
-            await this.constValidator.validateMetadata(grantId, title, summary);
-            await this.constValidator.validateThemes(grantId, themes);
+            // await this.compValidator.validatePI(grantId, leadPI);
+            //await this.constValidator.validateMetadata(grantId, title, summary);
+            // await this.constValidator.validateThemes(grantId, themes);
         }
         const created = await this.projectRepo.create({ ...dto, createdBy: userId });
         if (!created) {

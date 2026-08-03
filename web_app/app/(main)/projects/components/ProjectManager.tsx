@@ -13,7 +13,7 @@ import { ProjectApi } from "../api/project.api";
 import { GetProjectsOptions, Project, ProjectStatus } from "../models/project.model";
 import { PROJECT_STATUS_ORDER, PROJECT_TRANSITIONS } from "../models/project.state-machine";
 import ProjectDetail from "./ProjectDetail";
-import ProjectWizard from "./ProjectWizard";
+import ProjectWizard from "./newsteps/ProjectWizard";
 
 interface ProjectManagerProps {
     grant?: Grant;

@@ -7,7 +7,6 @@ const end_point = "/projects";
 
 interface IProjectApi extends EntityApi<Project, GetProjectsOptions | undefined> {
     transitionState: (id: string, dto: TransitionRequestDto) => Promise<Project>;
-    createFromGrant: (project: Partial<Project>) => Promise<Project>;
 }
 
 export const ProjectApi: IProjectApi = {
@@ -38,20 +37,13 @@ export const ProjectApi: IProjectApi = {
         return data as Project;
     },
 
-
-    async createFromGrant(project: Partial<Project>): Promise<Project> {
-        const sanitized = sanitize(project);
-        const createdData = await ApiClient.post(`${end_point}/from-grant`, sanitized);
-        return createdData as Project;
-    },
-
     async create(project: Partial<Project>): Promise<Project> {
         const sanitized = sanitize(project);
         const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as Project;
     },
 
-   
+
 
     async update(project: Partial<Project>): Promise<Project> {
         if (!project._id) throw new Error("_id required");

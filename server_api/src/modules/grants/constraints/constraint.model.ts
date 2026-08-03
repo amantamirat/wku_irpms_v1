@@ -55,7 +55,7 @@ const ConstraintSchema = new Schema<IConstraint>(
 );
 
 ConstraintSchema.index({ grant: 1, constraint: 1 }, { unique: true });
-export const Constraint = model<IConstraint>(COLLECTIONS.CONSTRAINT, ConstraintSchema);
+export const Constraint = model<IConstraint>(COLLECTIONS.CONSTRAINT_OLD, ConstraintSchema);
 
 
 

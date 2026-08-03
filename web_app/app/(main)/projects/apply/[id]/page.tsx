@@ -19,7 +19,7 @@ import { Constraint } from '@/app/(main)/grants/constraints/models/constraint.mo
 import ApplyWizard from '../ApplyWizard';
 import { CallPreview } from '../CallPreview';
 
-const ProjectApplyPage = () => {
+const ApplyPage = () => {
     const { id: callId } = useParams();
     const router = useRouter();
 
@@ -179,4 +179,4 @@ const ProjectApplyPage = () => {
     );
 };
 
-export default ProjectApplyPage;
+export default ApplyPage;

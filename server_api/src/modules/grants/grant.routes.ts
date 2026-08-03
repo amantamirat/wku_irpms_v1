@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
-import { callRepo, compositionRepo, constraintRepo, grantRepo, organizationRepo, projectRepo, thematicRepo } from '../../core/container';
+import { callRepo, compositionRepo, constraintRepoOld, grantRepo, organizationRepo, projectRepo, thematicRepo } from '../../core/container';
 import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../auth/auth.middleware';
 import { GrantController } from './grant.controller';
 import { GrantService } from './grant.service';
 
 
-const service = new GrantService(grantRepo, organizationRepo, thematicRepo, constraintRepo,
+const service = new GrantService(grantRepo, organizationRepo, thematicRepo, constraintRepoOld,
   compositionRepo, callRepo, projectRepo
 );
 const controller = new GrantController(service);

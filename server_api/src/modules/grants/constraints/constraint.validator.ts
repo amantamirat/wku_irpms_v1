@@ -5,11 +5,11 @@ import { IPhaseRepository, PhaseRepository } from "../../projects/phase/phase.re
 import { IProject } from "../../projects/project.model";
 import { IThemeRepository, ThemeRepository } from "../../thematics/themes/theme.repository";
 import { ConstraintType } from "./constraint.model";
-import { ConstraintRepository, IConstraintRepository } from "./constraint.repository";
+import { ConstraintRepositoryOLD, IConstraintRepository } from "./constraint.repository";
 
-export class ConstraintValidator {
+export class ConstraintValidatorOLD {
     constructor(
-        private readonly constraintRepo: IConstraintRepository = new ConstraintRepository(),
+        private readonly constraintRepo: IConstraintRepository = new ConstraintRepositoryOLD(),
         private readonly themeRepo: IThemeRepository = new ThemeRepository(),
         private readonly phaseRepo: IPhaseRepository = new PhaseRepository(),
     ) { }

@@ -1,5 +1,6 @@
 import { Organization } from "../../organizations/models/organization.model";
 import { Thematic } from "../../thematics/models/thematic.model";
+import { Constraint } from "../../constraints/models/constraint.model";
 import { GrantStatus } from "./grant.state-machine";
 
 export enum FundingSource {
@@ -13,6 +14,7 @@ export type Grant = {
     organization?: string | Organization;
     title?: string;
     thematic?: string | Thematic;
+    constraint?: string | Constraint;
     description?: string;
     amount: number;
     usedBudget?: number;
@@ -42,6 +44,10 @@ export function sanitize(grant: Partial<Grant>): Partial<Grant> {
                 ? (grant.organization as Organization)._id
                 : grant.organization,
         thematic: typeof grant.thematic === "object" ? (grant.thematic as Thematic)._id : grant.thematic,
+        constraint:
+            typeof grant.constraint === "object" && grant.constraint !== null
+                ? (grant.constraint as Constraint)._id
+                : grant.constraint,
     };
 }
 
