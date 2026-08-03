@@ -95,7 +95,7 @@ export class CallService {
         if (next === CallStatus.active) {
             if (!callDoc.deadline) {
                 throw new AppError(
-                    ERROR_CODES.DEADLINE_NOT_FOUND
+                    ERROR_CODES.CALL_DEADLINE_NOT_SET
                 );
             }
         }

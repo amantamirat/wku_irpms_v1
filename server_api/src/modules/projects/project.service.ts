@@ -21,8 +21,9 @@ import { CollaboratorService } from "./collaborators/collaborator.service";
 import { PhaseStatus } from "./phase/phase.model";
 import { IPhaseRepository } from "./phase/phase.repository";
 import { PhaseService } from "./phase/phase.service";
-import { ProjectStatus } from "./project.model";
+import { IProject, ProjectStatus } from "./project.model";
 import { PROJECT_TRANSITIONS } from "./project.state-machine";
+import { ConstraintValidationService } from "../constraints/services/constraint-validator.service";
 
 
 export class ProjectService {
@@ -35,6 +36,7 @@ export class ProjectService {
         private readonly collabService: CollaboratorService,
         private readonly phaseService: PhaseService,
         private readonly compValidator: CompositionValidator,
+        private readonly constValidator?: ConstraintValidationService,
         private readonly notificationService?: NotificationService,
     ) { }
 
@@ -54,11 +56,18 @@ export class ProjectService {
             const grantDoc = await this.grantRepo.findById(grant);
             if (!grantDoc) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
             if (grantDoc.status !== GrantStatus.active) throw new Error(ERROR_CODES.GRANT_NOT_ACTIVE);
-            const grantId = String(grantDoc._id);
-            //check title uniqueness 
-            // await this.compValidator.validatePI(grantId, leadPI);
-            //await this.constValidator.validateMetadata(grantId, title, summary);
-            // await this.constValidator.validateThemes(grantId, themes);
+            const constraintId = String(grantDoc.constraint);
+            if (constraintId && this.constValidator) {
+                const result = await this.constValidator.validateProject(constraintId, dto);
+                if (!result.valid) {
+                    throw new AppError(
+                        ERROR_CODES.INVALID_CONSTRAINT,
+                        "Constraint validation failed",
+                        400,
+                        result
+                    );
+                }
+            }
         }
         const created = await this.projectRepo.create({ ...dto, createdBy: userId });
         if (!created) {

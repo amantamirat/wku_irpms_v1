@@ -13,7 +13,6 @@ import { IGrantRepository } from "../../grants/grant.repository";
 import { NotificationService } from "../../notifications/notification.service";
 import { IReviewerRepository } from "../../reviewers/reviewer.repository";
 import { ReviewerStatus } from "../../reviewers/reviewer.state-machine";
-import { PdfExtractorService } from "../../templates/services/pdf-extractor.service";
 import { TemplateValidationService } from "../../templates/services/template-validation.service";
 import { ProjectAuth } from "../project.auth";
 import { ProjectStatus } from "../project.model";
@@ -51,6 +50,12 @@ export class ApplicationService {
     ) {
     }
 
+    async getProject(id: string): Promise<any> {
+        const projectDoc = await this.projectRepo.findById(id);
+        if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
+        return projectDoc;
+    }
+
     async validateProject(project: string, applicant: string) {
         const projectDoc = await this.projAuth.authProject(project, applicant);
         if (
@@ -65,9 +70,9 @@ export class ApplicationService {
      * Create project stage (submission)
      */
     async create(dto: CreateApplicationDTO, options?: { skipValidation?: boolean }) {
-        const { project, userId } = dto;
+        const { project, documentPath, userId } = dto;
         if (!options?.skipValidation) {
-            const projectDoc = await this.validateProject(project, userId);
+            const projectDoc = await this.getProject(project);
             const callId = String(projectDoc.call);
             const count = await this.repository.countByProject(project);
             let nextOrder = count + 1;
@@ -76,6 +81,19 @@ export class ApplicationService {
             const deadline = nextStageDoc.deadline;
             if (deadline < new Date()) {
                 throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
+            }
+
+            if (nextStageDoc.template) {
+                const templateId = String(nextStageDoc.template);
+                const result = await this.templateValidator.validate(templateId, documentPath);
+                if (!result.valid) {
+                    throw new AppError(
+                        ERROR_CODES.INVALID_DOCUMENT,
+                        "Document validation failed",
+                        400,
+                        result
+                    );
+                }
             }
         }
         try {
@@ -110,11 +128,18 @@ export class ApplicationService {
         const callDoc = await this.callRepo.findById(call);
         if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
         if (callDoc.status !== CallStatus.active) throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
+        const deadline = callDoc.deadline;
+        if (!deadline) {
+            throw new AppError(ERROR_CODES.CALL_DEADLINE_NOT_SET);
+        }
+        if (deadline < new Date()) {
+            throw new AppError(ERROR_CODES.CALL_DEADLINE_PASSED);
+        }
 
         const stageDoc = await this.stageRepo.findOne(String(callDoc._id), 1);
         if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-        const deadline = stageDoc.deadline;
-        if (deadline < new Date()) {
+        const stageDeadline = stageDoc.deadline;
+        if (stageDeadline < new Date()) {
             throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
         }
 
@@ -148,11 +173,6 @@ export class ApplicationService {
                 );
             }
         }
-
-
-
-
-
 
         // await this.constValidator.validateAll(grantId, { participantCount: collaborators.length, phases, themes, title, summary });
         await this.compValidator.validateAll(grantId, collaborators);

@@ -30,7 +30,7 @@ router.get('/:id', verifyActiveAccount,
 );
 // Update call
 router.put(
-    '/',
+    '/:id',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.CALL.UPDATE]),
     controller.update
