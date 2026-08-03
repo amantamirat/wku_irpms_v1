@@ -1,5 +1,5 @@
 import { User } from "@/app/(main)/users/models/user.model";
-import { Application } from "../../projects/applications/models/application.model";
+import { Application } from "../../applications/models/application.model";
 
 export enum ReviewerStatus {
     pending = 'pending',

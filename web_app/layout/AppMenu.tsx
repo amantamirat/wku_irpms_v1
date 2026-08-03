@@ -49,9 +49,8 @@ const AppMenu = () => {
                 {
                     label: 'Applications',
                     icon: 'pi pi-list',
-                    to: '/projects/applications',
-                    visible: hasPermission("application:read") &&
-                        hasPermission("call:read")
+                    to: '/applications',
+                    visible: hasPermission("application:read")
                 },
                 {
                     label: 'Calls',

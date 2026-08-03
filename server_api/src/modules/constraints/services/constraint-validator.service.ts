@@ -39,43 +39,10 @@ export class ConstraintValidationService {
 
         // Participants count
         this.validateParticipants(constraint, dto.collaborators.length, errors);
-
         //Project Phases & budget and duration
         this.validatePhasesInternal(constraint, dto.phases, errors);
-
-        const counts = await this.countThemeLevels(dto.themes);
-
-        this.validateThemeLevel(
-            "Theme",
-            counts[0]?.size ?? 0,
-            constraint.minThemes,
-            constraint.maxThemes,
-            errors
-        );
-
-        this.validateThemeLevel(
-            "Sub-theme",
-            counts[1]?.size ?? 0,
-            constraint.minSubThemes,
-            constraint.maxSubThemes,
-            errors
-        );
-
-        this.validateThemeLevel(
-            "Focus Area",
-            counts[2]?.size ?? 0,
-            constraint.minFocusAreas,
-            constraint.maxFocusAreas,
-            errors
-        );
-
-        this.validateThemeLevel(
-            "Indicator",
-            counts[3]?.size ?? 0,
-            constraint.minIndicators,
-            constraint.maxIndicators,
-            errors
-        );
+        //Project themes
+        this.validateThemeInternal(constraint, dto.themes, errors);
 
         return {
             valid: errors.length === 0,
@@ -98,8 +65,19 @@ export class ConstraintValidationService {
         const constraint = await this.getConstraint(constraintId);
 
         const errors: string[] = [];
+
         this.validatePhasesInternal(constraint, phases, errors);
 
+        return {
+            valid: errors.length === 0,
+            errors
+        };
+    }
+
+    async validateThemes(constraintId: string, selectedThemes: string[]): Promise<ConstraintValidationResult> {
+        const constraint = await this.getConstraint(constraintId);
+        const errors: string[] = [];
+        await this.validateThemeInternal(constraint, selectedThemes, errors);
         return {
             valid: errors.length === 0,
             errors
@@ -220,6 +198,43 @@ export class ConstraintValidationService {
                 );
             }
         }
+    }
+
+    private async validateThemeInternal(constraint: IConstraint, selectedThemes: string[], errors: string[]) {
+        const counts = await this.countThemeLevels(selectedThemes);
+
+        this.validateThemeLevel(
+            "Theme",
+            counts[0]?.size ?? 0,
+            constraint.minThemes,
+            constraint.maxThemes,
+            errors
+        );
+
+        this.validateThemeLevel(
+            "Sub-theme",
+            counts[1]?.size ?? 0,
+            constraint.minSubThemes,
+            constraint.maxSubThemes,
+            errors
+        );
+
+        this.validateThemeLevel(
+            "Focus Area",
+            counts[2]?.size ?? 0,
+            constraint.minFocusAreas,
+            constraint.maxFocusAreas,
+            errors
+        );
+
+        this.validateThemeLevel(
+            "Indicator",
+            counts[3]?.size ?? 0,
+            constraint.minIndicators,
+            constraint.maxIndicators,
+            errors
+        );
+
     }
 
     private validateThemeLevel(label: string, count: number, min: number | undefined, max: number | undefined, errors: string[])

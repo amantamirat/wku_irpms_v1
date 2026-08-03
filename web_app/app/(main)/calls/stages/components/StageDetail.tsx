@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { PERMISSIONS } from "@/types/permissions";
 import { TabPanel, TabView } from "primereact/tabview";
 import { Stage } from "../models/stage.model";
-import ApplicationManager from "@/app/(main)/projects/applications/components/ApplicationManager";
+import ApplicationManager from "@/app/(main)/applications/components/ApplicationManager";
 
 
 interface StageDetailProps {

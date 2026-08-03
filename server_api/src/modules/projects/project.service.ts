@@ -41,13 +41,7 @@ export class ProjectService {
     ) { }
 
 
-    async validateProject(project: string) {
-        const projectDoc = await this.projectRepo.findById(project);
-        if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
-        if (projectDoc.status !== ProjectStatus.draft)
-            throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
-        return projectDoc;
-    }
+
 
     async create(dto: CreateProjectDTO, options?: { skipValidation?: boolean }) {
         const { grant, title, summary, leadPI, collaborators, phases, themes, userId } = dto;
@@ -124,9 +118,12 @@ export class ProjectService {
     // UPDATE
     // ---------------------------------------------------
     async update(dto: UpdateProjectDTO) {
-        const { id, data, userId: userId } = dto;
-        const projectDoc = await this.validateProject(id);
-        const grantId = String(projectDoc.grant);
+        const { id, data, userId } = dto;
+        const projectDoc = await this.getById(id);
+        if (projectDoc.status !== ProjectStatus.draft)
+            throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+
+
         // Resolve next values
         const nextTitle = data.title ?? projectDoc.title;
         const nextSummary = data.summary ?? projectDoc.summary;
@@ -150,12 +147,21 @@ export class ProjectService {
             JSON.stringify(nextThemes.map(String).sort());
 
         if (themesChanged) {
-            /*
-            await this.constValidator.validateThemes(
-                grantId,
-                nextThemes
-            );
-            */
+            const grantId = String(projectDoc.grant);
+            const grantDoc = await this.grantRepo.findById(grantId);
+            if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+            const constraintId = String(grantDoc.constraint);
+            if (constraintId && this.constValidator) {
+                const result = await this.constValidator.validateThemes(constraintId, nextThemes);
+                if (!result.valid) {
+                    throw new AppError(
+                        ERROR_CODES.INVALID_CONSTRAINT,
+                        "Theme validation failed",
+                        400,
+                        result
+                    );
+                }
+            }
         }
         return this.projectRepo.update(id, data);
     }
@@ -164,10 +170,7 @@ export class ProjectService {
     async transitionState(dto: TransitionRequestDto) {
         const { id, current, next } = dto;
 
-        const projectDoc = await this.projectRepo.findById(id);
-        if (!projectDoc) {
-            throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
-        }
+        const projectDoc = await this.getById(id);
 
         const from = projectDoc.status as ProjectStatus;
         const to = next as ProjectStatus;
@@ -218,7 +221,10 @@ export class ProjectService {
     // ---------------------------------------------------
     async delete(dto: DeleteDto) {
         const { id, userId } = dto;
-        await this.validateProject(id);
+        const projectDoc = await this.getById(id);
+        if (projectDoc.status !== ProjectStatus.draft) {
+            throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+        }
         await this.collabRepo.deleteByProject(id);
         await this.phaseRepo.deleteByProject(id);
         return this.projectRepo.delete(id);

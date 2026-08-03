@@ -2,7 +2,7 @@ import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
 import { TransitionRequestDto } from "@/types/util";
 import { GetProjectApplicationOptions, Application, sanitizeProjectApplication } from "../models/application.model";
-import { Project, sanitize } from "../../models/project.model";
+import { Project, sanitize } from "../../projects/models/project.model";
 
 const end_point = "/project/applications";
 

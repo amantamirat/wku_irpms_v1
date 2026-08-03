@@ -1,23 +1,22 @@
 'use client';
+import { useAuth } from '@/contexts/auth-context';
 import { Steps } from 'primereact/steps';
 import { useState } from 'react';
-import { Call } from '../../calls/models/call.model';
-import { Project } from '../models/project.model';
-import { SubmissionStep } from './steps/SubmissionStep';
-import { useAuth } from '@/contexts/auth-context';
-import { Constraint } from '../../grants/constraints/models/constraint.model';
-import { BasicInfoStep } from '../components/newsteps/BasicInfoStep';
-import { PhasesStep } from '../components/newsteps/PhasesStep';
-import { CollaboratorsStep } from '../components/newsteps/CollaboratorsStep';
+import { Call } from '../../../calls/models/call.model';
+import { BasicInfoStep } from '../../../projects/components/wirzard/BasicInfoStep';
+import { CollaboratorsStep } from '../../../projects/components/wirzard/CollaboratorsStep';
+import { PhasesStep } from '../../../projects/components/wirzard/PhasesStep';
+import { Project } from '../../../projects/models/project.model';
+import { SubmissionStep } from './SubmissionStep';
 
 
 interface ApplyWizardProps {
     call: Call;
-    constraints: Constraint[];
+    //constraints: Constraint[];
     onComplete?: (data: any) => void;
 }
 
-const ApplyWizard = ({ call, constraints, onComplete }: ApplyWizardProps) => {
+const ApplyWizard = ({ call, onComplete }: ApplyWizardProps) => {
     const { getUser } = useAuth();
     const appUser = getUser();
     const [activeIndex, setActiveIndex] = useState(0);

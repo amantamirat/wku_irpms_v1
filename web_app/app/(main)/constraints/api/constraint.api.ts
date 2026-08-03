@@ -9,6 +9,9 @@ export const ConstraintApi: EntityApi<Constraint> = {
         return ApiClient.get('/constraints/');
     },
 
+    async getById(id: string): Promise<Constraint> {
+        return ApiClient.get(`/constraints/${id}`);
+    },
 
     async create(constraint) {
         return ApiClient.post(

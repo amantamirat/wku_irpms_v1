@@ -6,7 +6,7 @@ import { createEntityManager } from "@/components/createEntityManager";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import MyBadge from "@/templates/MyBadge";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Project, ProjectStatus } from "../../models/project.model";
+import { Project, ProjectStatus } from "../../projects/models/project.model";
 import { ApplicationApi } from "../api/application.api";
 import { Application, ApplicationStatus, createEmptyApplication, GetProjectApplicationOptions } from "../models/application.model";
 import { APPLICATION_STATUS_ORDER, APPLICATION_TRANSITIONS } from "../models/application.state-machine";

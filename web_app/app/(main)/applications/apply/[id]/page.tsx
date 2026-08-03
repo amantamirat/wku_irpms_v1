@@ -12,19 +12,24 @@ import { Sidebar } from 'primereact/sidebar';
 // API and Models
 import { CallApi } from '@/app/(main)/calls/api/call.api';
 import { Call } from '@/app/(main)/calls/models/call.model';
-import { ConstraintApi } from '@/app/(main)/grants/constraints/api/constraint.api';
-import { Constraint } from '@/app/(main)/grants/constraints/models/constraint.model';
 
 // Local Components
-import ApplyWizard from '../ApplyWizard';
-import { CallPreview } from '../CallPreview';
+import ApplyWizard from '../wizard/ApplyWizard';
+import { GrantApi } from '@/app/(main)/grants/api/grant.api';
+import { Grant } from '@/app/(main)/grants/models/grant.model';
+import { Constraint } from '@/app/(main)/constraints/models/constraint.model';
+import { ConstraintApi } from '@/app/(main)/constraints/api/constraint.api';
+import { ConstraintView } from '@/app/(main)/constraints/components/ConstraintView';
 
 const ApplyPage = () => {
     const { id: callId } = useParams();
     const router = useRouter();
 
     const [call, setCall] = useState<Call | null>(null);
-    const [constraints, setConstraints] = useState<Constraint[]>([]);
+    const [grant, setGrant] = useState<Grant | null>(null);
+    const [constraint, setConstraint] = useState<Constraint | null>(null);
+
+
     const [loading, setLoading] = useState(true);
     const [showSidebar, setShowSidebar] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -37,14 +42,17 @@ const ApplyPage = () => {
                 setLoading(true);
                 setError(null);
 
-                const callData = await CallApi.getById!(callId as string, true);
+                const callData = await CallApi.getById!(callId as string);
                 setCall(callData);
 
-                const grantId = (callData as any).grant._id;
-                if (grantId) {
-                    const cons = await ConstraintApi.getAll({ grant: grantId });
-                    setConstraints(cons || []);
+                const grantData = await GrantApi.getById!(callData.grant as string);
+                setGrant(grantData);
+
+                if (grantData.constraint) {
+                    const constraintData = await ConstraintApi.getById!(grantData.constraint as string);
+                    setConstraint(constraintData);
                 }
+
             } catch (err: any) {
                 console.error("Initialization error:", err);
                 setError("Failed to load application context. Please verify the call ID.");
@@ -107,7 +115,19 @@ const ApplyPage = () => {
                 }
             >
                 <div className="px-3 pb-4">
-                    {call && <CallPreview call={call} constraints={constraints} />}
+                    {constraint ? (
+                        <ConstraintView constraint={constraint} />
+                    ) : (
+                        <div className="flex flex-column align-items-center justify-content-center py-8 text-center">
+                            <i className="pi pi-exclamation-circle text-4xl text-orange-500 mb-3"></i>
+                            <p className="text-lg font-semibold text-color m-0">
+                                No rules defined
+                            </p>
+                            <p className="text-sm text-color-secondary mt-1">
+                                There are no constraint profiles configured for this grant yet.
+                            </p>
+                        </div>
+                    )}
                 </div>
             </Sidebar>
 
@@ -147,7 +167,7 @@ const ApplyPage = () => {
                     <Button
                         label="View Rules"
                         icon="pi pi-info-circle"
-                        badge={constraints.length > 0 ? constraints.length.toString() : undefined}
+                        //  badge={constraints.length > 0 ? constraints.length.toString() : undefined}
                         badgeClassName="p-badge-info"
                         className="p-button-rounded p-button-outlined"
                         onClick={() => setShowSidebar(true)}
@@ -163,7 +183,7 @@ const ApplyPage = () => {
                         {call ? (
                             <ApplyWizard
                                 call={call}
-                                constraints={constraints}
+                            // constraints={constraints}
                             //onComplete={(data) => console.log('Final Data', data)}
                             />
                         ) : (

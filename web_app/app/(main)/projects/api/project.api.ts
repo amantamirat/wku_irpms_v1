@@ -43,8 +43,6 @@ export const ProjectApi: IProjectApi = {
         return createdData as Project;
     },
 
-
-
     async update(project: Partial<Project>): Promise<Project> {
         if (!project._id) throw new Error("_id required");
         const sanitized = sanitize(project);

@@ -7,7 +7,7 @@ import { Dialog } from "primereact/dialog";
 import { useMemo, useState } from "react";
 
 import { User } from "@/app/(main)/users/models/user.model";
-import { Application, ApplicationStatus } from "../../projects/applications/models/application.model";
+import { Application, ApplicationStatus } from "../../applications/models/application.model";
 import { ReviewerApi } from "../api/reviewer.api";
 import { GetReviewersOptions, Reviewer, ReviewerStatus } from "../models/reviewer.model";
 import { REVIEWER_STATUS_ORDER, REVIEWER_TRANSITIONS } from "../models/reviewer.state-machine";

@@ -869,47 +869,47 @@
     "name": "phase:document:delete"
   },
   {
-    "category": "Project Application Management",
+    "category": "Application Management",
     "name": "application:create",
     "description": "Create application (submit document)"
   },
   {
-    "category": "Project Application Management",
+    "category": "Application Management",
     "name": "application:read",
     "description": "Read application entries"
   },
   {
-    "category": "Project Application Management",
+    "category": "Application Management",
     "name": "application:update",
     "description": "Update application (before review)"
   },
   {
-    "category": "Project Application Management",
+    "category": "Application Management",
     "name": "application:calculateTotalScore",
     "description": "Calculate and store total score for an application based on approved reviewer evaluations"
   },
   {
-    "category": "Project Application Management",
+    "category": "Application Management",
     "name": "application:delete",
     "description": "Delete application entries"
   },
   {
-    "category": "Project Application Management",
+    "category": "Application Management",
     "name": "application:transition.pending.accepted",
     "description": "Accept a pending application"
   },
   {
-    "category": "Project Application Management",
+    "category": "Application Management",
     "name": "application:transition.pending.rejected",
     "description": "Reject a pending application"
   },
   {
-    "category": "Project Application Management",
+    "category": "Application Management",
     "name": "application:transition.accepted.pending",
     "description": "Revert an accepted application back to pending"
   },
   {
-    "category": "Project Application Management",
+    "category": "Application Management",
     "name": "application:transition.rejected.pending",
     "description": "Reopen a rejected application and move it back to pending"
   },

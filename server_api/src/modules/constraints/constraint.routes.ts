@@ -31,6 +31,20 @@ router.post(
 
 
 /**
+ * @route GET /constraints/:id
+ * @desc Get constraint by ID
+ * @access Protected
+ */
+router.get(
+    "/:id",
+    verifyActiveAccount,
+    checkPermission("constraint:read"),
+    controller.getById
+);
+
+
+
+/**
  * @route GET /constraints
  * @desc Get all constraint profiles
  * @access Protected
@@ -43,17 +57,6 @@ router.get(
 );
 
 
-/**
- * @route GET /constraints/:id
- * @desc Get constraint by ID
- * @access Protected
- */
-router.get(
-    "/:id",
-    verifyActiveAccount,
-    checkPermission("constraint:read"),
-    controller.getById
-);
 
 
 /**

@@ -1,5 +1,5 @@
 import { Stage } from "@/app/(main)/calls/stages/models/stage.model";
-import { Project } from "../../models/project.model";
+import { Project } from "../../projects/models/project.model";
 
 export enum ApplicationStatus {
     pending = 'pending',

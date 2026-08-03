@@ -36,7 +36,7 @@ export const OpenCallCard = ({ call }: CallCardProps) => {
     const isUrgent = daysLeft >= 0 && daysLeft < 5;
 
     const proceedToApply = () => {
-        router.push(`/projects/apply/${call._id}`);
+        router.push(`/applications/apply/${call._id}`);
     };
 
     return (

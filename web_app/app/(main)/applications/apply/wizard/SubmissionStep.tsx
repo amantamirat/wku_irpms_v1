@@ -4,8 +4,8 @@ import { Button } from 'primereact/button';
 import { FileUpload, FileUploadSelectEvent } from 'primereact/fileupload';
 import { Message } from 'primereact/message';
 import { useState } from 'react';
-import { ApplicationApi } from '../../applications/api/application.api';
-import { Project } from '../../models/project.model';
+import { ApplicationApi } from '../../api/application.api';
+import { Project } from '../../../projects/models/project.model';
 
 // Document/Template Validation Interfaces
 export interface SectionValidationResult {
@@ -65,7 +65,7 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
         clearErrors();
     };
 
-    const submitFinalProject = async () => {
+    const submitFinalApplication = async () => {
         if (!selectedFile) return;
 
         setLoading(true);
@@ -149,7 +149,7 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                             Grant Requirement Check Failed
                         </div>
                         <p className="text-700 text-sm mt-0 mb-3">
-                            Your proposal submission does not satisfy all grant guidelines/constraints:
+                            Your application submission does not satisfy all grant guidelines/constraints:
                         </p>
                         <div className="bg-orange-50 p-3 border-round border-1 border-orange-200">
                             <ul className="m-0 pl-3 text-sm text-orange-900">
@@ -236,7 +236,7 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                     emptyTemplate={
                         <div className="flex flex-column align-items-center">
                             <i className="pi pi-upload mt-3 p-5 border-2 border-dashed border-300 border-circle text-400"></i>
-                            <span className="my-3 text-600">Drag and drop the proposal PDF here.</span>
+                            <span className="my-3 text-600">Drag and drop the application document PDF here.</span>
                         </div>
                     }
                 />
@@ -289,7 +289,7 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                 <Button
                     label={success ? 'Finalizing...' : loading ? 'Uploading Proposal...' : 'Submit Final Application'}
                     icon={(loading || success) ? 'pi pi-spin pi-spinner' : 'pi pi-check-circle'}
-                    onClick={submitFinalProject}
+                    onClick={submitFinalApplication}
                     className={`px-6 shadow-3 transition-all duration-500 ${
                         success
                             ? 'p-button-info opacity-100'

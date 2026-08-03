@@ -172,7 +172,7 @@ const ProjectWizard = ({ item, onComplete, onHide, visible }: EntitySaveDialogPr
                         <div className="min-h-20rem mt-2">
                             <BasicInfoStep
                                 data={formData}
-                                onUpdate={updateFormData}                               
+                                onUpdate={updateFormData}
                                 onNext={() => { }} // Block navigation out of Basic Info block during edit states
                                 isEditModeOnly={true} // Extracted variable flag configuration reference
                             />
