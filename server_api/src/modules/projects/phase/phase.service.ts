@@ -4,9 +4,8 @@ import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
-import { CallRepository, ICallRepository } from "../../calls/call.repository";
-import { ConstraintValidatorOLD } from "../../grants/constraints/constraint.validator";
-import { GrantRepository, IGrantRepository } from "../../grants/grant.repository";
+import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
+import { IGrantRepository } from "../../grants/grant.repository";
 import { ProjectAuth } from "../project.auth";
 import { ProjectStatus } from "../project.model";
 import { IProjectRepository } from "../project.repository";
@@ -21,7 +20,7 @@ export class PhaseService {
         private readonly phaseRepo: IPhaseRepository,
         private readonly projRepo: IProjectRepository,
         private readonly grantRepo: IGrantRepository,
-        private readonly constValidator: ConstraintValidatorOLD,
+        private readonly constraintValidator: ConstraintValidationService,
         private readonly projAuth: ProjectAuth = new ProjectAuth(projRepo),
     ) { }
 
@@ -41,9 +40,17 @@ export class PhaseService {
         if (!options?.skipValidation) {
             const projectDoc = await this.validateProject(project, userId ?? "");
             const grantId = String(projectDoc.grant);
+            const grantDoc = await this.grantRepo.findById(grantId);
+            if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+            const constraintId = String(grantDoc.constraint);
             const existingPhases = await this.phaseRepo.find({ project });
             const proposedPhases = [...existingPhases, dto];
-            await this.constValidator.validatePhases(grantId, proposedPhases, { skipMin: true })
+            const constraintValidationResult = await this.constraintValidator.validatePhases(constraintId, proposedPhases);
+            if (!constraintValidationResult.valid) {
+                throw new AppError(ERROR_CODES.INVALID_CONSTRAINT,
+                    "invalid phases", 400, constraintValidationResult);
+            }
+
         }
         try {
             // Determine the next phase order
@@ -94,12 +101,22 @@ export class PhaseService {
         const projectDoc = await this.validateProject(projectId, userId);
         const grantId = String(projectDoc.grant);
 
+        const grantDoc = await this.grantRepo.findById(grantId);
+        if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+
+        const constraintId = String(grantDoc.constraint);
+
         const updatedPhase = { ...phaseDoc, ...data };
-        await this.constValidator.validateIndividualPhase(grantId, [updatedPhase]);
+        //await this.constValidator.validateIndividualPhase(grantId, [updatedPhase]);
         const existingPhases = await this.phaseRepo.find({ project: projectId });
 
         const updatedPhases = existingPhases.map(p => String(p._id) === id ? updatedPhase : p);
-        await this.constValidator.validatePhases(grantId, updatedPhases);
+        //await this.constValidator.validatePhases(grantId, updatedPhases);
+        const constraintValidationResult = await this.constraintValidator.validatePhases(constraintId, updatedPhases);
+        if (!constraintValidationResult.valid) {
+            throw new AppError(ERROR_CODES.INVALID_CONSTRAINT,
+                "invalid phases", 400, constraintValidationResult);
+        }
 
         const oldDuration = phaseDoc.duration ?? 0;
         const oldBudget = phaseDoc.budget ?? 0;

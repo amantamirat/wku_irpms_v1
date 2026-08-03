@@ -7,8 +7,6 @@ import { ConstraintValidationService } from "../modules/constraints/services/con
 import { EvaluationRepository } from "../modules/evaluations/evaluation.repository";
 import { CompositionRepository } from "../modules/grants/compositions/composition.repository";
 import { CompositionValidator } from "../modules/grants/compositions/composition.validator";
-import { ConstraintRepositoryOLD } from "../modules/grants/constraints/constraint.repository";
-import { ConstraintValidatorOLD } from "../modules/grants/constraints/constraint.validator";
 import { GrantRepository } from "../modules/grants/grant.repository";
 import { OrganizationRepository } from "../modules/organization/organization.repository";
 import { SpecializationRepository } from "../modules/organization/specializations/specialization.repository";
@@ -48,7 +46,6 @@ export const thematicRepo = new ThematicRepository();
 export const themeRepo = new ThemeRepository();
 export const constraintRepo = new ConstraintRepository();
 
-export const constraintRepoOld = new ConstraintRepositoryOLD();
 export const compositionRepo = new CompositionRepository();
 // project repos
 export const projectRepo = new ProjectRepository();
@@ -70,15 +67,13 @@ export const templateValidtor = new TemplateValidationService(
 //validator services 
 export const constraintValidator = new ConstraintValidationService(constraintRepo, themeRepo);
 
-//grant validators
-export const constraintValidatorOLD = new ConstraintValidatorOLD(constraintRepoOld, themeRepo);
 export const compositionValidator = new CompositionValidator(compositionRepo, userRepo, exprienceRepo, specializationRepo, collaboratorRepo);
 
 // Services
-export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, constraintValidatorOLD, compositionValidator);
-export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, constraintValidatorOLD);
+export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, constraintValidator, compositionValidator);
+export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, constraintValidator);
 export const projectService = new ProjectService(projectRepo, collaboratorRepo, phaseRepo, grantRepo,
-    collabService, phaseService, constraintValidatorOLD, compositionValidator
+    collabService, phaseService, compositionValidator
 );
 export const applicationService = new ApplicationService(applicationRepo, projectRepo, grantRepo, callRepo, stageRepo, reviewerRepo,
     projectService, compositionValidator, constraintValidator, templateValidtor);

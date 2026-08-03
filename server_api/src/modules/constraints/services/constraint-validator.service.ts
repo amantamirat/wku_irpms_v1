@@ -1,5 +1,6 @@
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
+import { CreatePhaseDto } from "../../projects/phase/phase.dto";
 import { CreateProjectDTO } from "../../projects/project.dto";
 import { ThemeRepository } from "../../thematics/themes/theme.repository";
 import { IConstraint } from "../constraint.model";
@@ -10,6 +11,11 @@ export interface ConstraintValidationResult {
     errors: string[];
 }
 
+type PhaseValidationInput = Pick<
+    CreatePhaseDto,
+    "title" | "budget" | "duration"
+>;
+
 export class ConstraintValidationService {
 
     constructor(
@@ -17,35 +23,25 @@ export class ConstraintValidationService {
         private readonly themeRepo: ThemeRepository,
     ) { }
 
-    async validateProject(constraintId: string, dto: CreateProjectDTO): Promise<ConstraintValidationResult> {
-        const constraint = await this.constraintRepo.findById(constraintId);
 
+    private async getConstraint(constraintId: string): Promise<IConstraint> {
+        const constraint = await this.constraintRepo.findById(constraintId);
         if (!constraint) {
             throw new AppError(ERROR_CODES.CONSTRAINT_NOT_FOUND);
         }
+        return constraint;
+    }
+
+    async validateProject(constraintId: string, dto: CreateProjectDTO): Promise<ConstraintValidationResult> {
+        const constraint = await this.getConstraint(constraintId);
 
         const errors: string[] = [];
 
         // Participants count
         this.validateParticipants(constraint, dto.collaborators.length, errors);
 
-        // Phases count
-        this.validatePhaseCount(constraint, dto.phases.length, errors);
-
-        // Project budget
-        const projectBudget = dto.phases.reduce(
-            (sum, phase) => sum + phase.budget, 0);
-
-        this.validateProjectBudget(constraint, projectBudget, errors);
-
-        // Project duration
-        const projectDuration = dto.phases.reduce(
-            (sum, phase) => sum + phase.duration, 0);
-
-        this.validateProjectDuration(constraint, projectDuration, errors);
-
-        //Phase budget and duration
-        this.validatePhases(constraint, dto.phases, errors);
+        //Project Phases & budget and duration
+        this.validatePhasesInternal(constraint, dto.phases, errors);
 
         const counts = await this.countThemeLevels(dto.themes);
 
@@ -81,6 +77,28 @@ export class ConstraintValidationService {
             errors
         );
 
+        return {
+            valid: errors.length === 0,
+            errors
+        };
+    }
+
+    async validateParticipantCount(constraintId: string, count: number): Promise<ConstraintValidationResult> {
+        const constraint = await this.getConstraint(constraintId);
+
+        const errors: string[] = [];
+        this.validateParticipants(constraint, count, errors);
+        return {
+            valid: errors.length === 0,
+            errors
+        };
+    }
+
+    async validatePhases(constraintId: string, phases: PhaseValidationInput[]): Promise<ConstraintValidationResult> {
+        const constraint = await this.getConstraint(constraintId);
+
+        const errors: string[] = [];
+        this.validatePhasesInternal(constraint, phases, errors);
 
         return {
             valid: errors.length === 0,
@@ -103,6 +121,7 @@ export class ConstraintValidationService {
             errors.push(`Maximum participants is ${constraint.maxParticipants}.`);
         }
     }
+
 
     private validatePhaseCount(constraint: IConstraint, count: number, errors: string[]) {
         if (
@@ -147,8 +166,22 @@ export class ConstraintValidationService {
         }
     }
 
+    private validatePhasesInternal(constraint: IConstraint, phases: PhaseValidationInput[], errors: string[]) {
+        // Phases count
+        this.validatePhaseCount(constraint, phases.length, errors);
 
-    private validatePhases(constraint: IConstraint, phases: CreateProjectDTO["phases"], errors: string[]) {
+        // Project budget
+        const projectBudget = phases.reduce(
+            (sum, phase) => sum + phase.budget, 0);
+
+        this.validateProjectBudget(constraint, projectBudget, errors);
+
+        // Project duration
+        const projectDuration = phases.reduce(
+            (sum, phase) => sum + phase.duration, 0);
+
+        this.validateProjectDuration(constraint, projectDuration, errors);
+
         for (const phase of phases) {
 
             if (

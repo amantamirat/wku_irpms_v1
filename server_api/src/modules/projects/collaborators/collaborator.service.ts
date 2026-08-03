@@ -14,13 +14,13 @@ import { ICollaboratorRepository } from "./collaborator.repository";
 
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
-import { ConstraintValidatorOLD } from "../../grants/constraints/constraint.validator";
 import { ProjectStatus } from "../project.model";
 import { CollaboratorStatus } from "./collaborator.model";
 import { ClientSession } from "mongoose";
 import { ProjectAuth } from "../project.auth";
 import { NotificationService } from "../../notifications/notification.service";
 import { CompositionValidator } from "../../grants/compositions/composition.validator";
+import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
 
 
 export class CollaboratorService {
@@ -28,7 +28,7 @@ export class CollaboratorService {
     constructor(
         private readonly collabRepo: ICollaboratorRepository,
         private readonly projectRepo: IProjectRepository,
-        private readonly constraintValidator: ConstraintValidatorOLD,
+        private readonly constraintValidator: ConstraintValidationService,
         private readonly compositionValidator: CompositionValidator,
         private readonly notificationService?: NotificationService,
         private readonly projAuth: ProjectAuth = new ProjectAuth(projectRepo),
@@ -57,7 +57,10 @@ export class CollaboratorService {
             } else {
                 await this.compositionValidator.validateCoPI(grantId, applicant);
             }
-            await this.constraintValidator.validateParticipantCount(grantId, await this.collabRepo.countByProject(project) + 1, { skipMin: true });
+            const validationResult = await this.constraintValidator.validateParticipantCount(grantId, await this.collabRepo.countByProject(project) + 1);
+            if (!validationResult.valid) {
+                throw new AppError(ERROR_CODES.INVALID_CONSTRAINT, "participant count", 400, validationResult);
+            }
         }
         try {
             const created = await this.collabRepo.create(dto);
@@ -143,7 +146,10 @@ export class CollaboratorService {
 
         const grantId = String(projectDoc.grant);
         const countCollabs = projectDoc.totalCollabs ?? 0;
-        await this.constraintValidator.validateParticipantCount(grantId, countCollabs - 1);
+        const validationResult = await this.constraintValidator.validateParticipantCount(grantId, countCollabs - 1);
+        if (!validationResult.valid) {
+            throw new AppError(ERROR_CODES.INVALID_CONSTRAINT, "participant count", 400, validationResult);
+        }
 
         const deleted = this.collabRepo.delete(id);
         await this.projectRepo.updateTotalCollabs(project, -1);

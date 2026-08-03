@@ -9,7 +9,6 @@ import { IProjectRepository } from "../projects/project.repository";
 import { IThematicRepository } from "../thematics/thematic.repository";
 import { ThematicStatus } from "../thematics/thematic.state-machine";
 import { ICompositionRepository } from "./compositions/composition.repository";
-import { IConstraintRepository } from "./constraints/constraint.repository";
 import { CreateGrantDTO, GetGrantsDTO, UpdateGrantDTO } from "./grant.dto";
 import { FundingSource, GrantStatus } from "./grant.model";
 import { IGrantRepository } from "./grant.repository";
@@ -21,7 +20,6 @@ export class GrantService {
         private readonly repository: IGrantRepository,
         private readonly organizationRepo: IOrganizationRepository,
         private readonly thematicRepository: IThematicRepository,
-        private readonly constraintRepo: IConstraintRepository,
         private readonly compositionRepo: ICompositionRepository,
         private readonly callRepo: ICallRepository,
         private readonly projectRepo: IProjectRepository,
@@ -151,13 +149,6 @@ export class GrantService {
             throw new AppError(
                 ERROR_CODES.GRANT_NOT_PLANNED,
                 'Only grants in planned status can be deleted.'
-            );
-        }
-        
-        if (await this.constraintRepo.exists({ grant: id })) {
-            throw new AppError(
-                ERROR_CODES.GRANT_IN_USE,
-                'Cannot delete grant because it has evaluation constraints configured.'
             );
         }
 

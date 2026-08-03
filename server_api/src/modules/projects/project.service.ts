@@ -11,15 +11,10 @@ import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
-import { CallStatus } from "../calls/call.model";
-import { ICallRepository } from "../calls/call.repository";
-import { IStageRepository } from "../calls/stages/stage.repository";
 import { CompositionValidator } from "../grants/compositions/composition.validator";
-import { ConstraintValidatorOLD } from "../grants/constraints/constraint.validator";
 import { GrantStatus } from "../grants/grant.model";
 import { IGrantRepository } from "../grants/grant.repository";
 import { NotificationService } from "../notifications/notification.service";
-import { ApplicationService } from "./applications/application.service";
 import { CollaboratorStatus } from "./collaborators/collaborator.model";
 import { ICollaboratorRepository } from "./collaborators/collaborator.repository";
 import { CollaboratorService } from "./collaborators/collaborator.service";
@@ -39,7 +34,6 @@ export class ProjectService {
         private readonly grantRepo: IGrantRepository,
         private readonly collabService: CollaboratorService,
         private readonly phaseService: PhaseService,
-        private readonly constValidator: ConstraintValidatorOLD,
         private readonly compValidator: CompositionValidator,
         private readonly notificationService?: NotificationService,
     ) { }
@@ -132,11 +126,13 @@ export class ProjectService {
             nextTitle !== projectDoc.title ||
             nextSummary !== projectDoc.summary
         ) {
+            /*
             await this.constValidator.validateMetadata(
                 grantId,
                 nextTitle,
                 nextSummary
             );
+            */
         }
         const nextThemes = data.themes ?? projectDoc.themes.map(String);
 
@@ -145,10 +141,12 @@ export class ProjectService {
             JSON.stringify(nextThemes.map(String).sort());
 
         if (themesChanged) {
+            /*
             await this.constValidator.validateThemes(
                 grantId,
                 nextThemes
             );
+            */
         }
         return this.projectRepo.update(id, data);
     }

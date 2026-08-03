@@ -20,7 +20,6 @@ import templateRoutes from './modules/templates/template.routes';
 
 import grantRoutes from './modules/grants/grant.routes';
 import constraintRoutes from './modules/constraints/constraint.routes';
-import constraintRoutesOLD from './modules/grants/constraints/constraint.routes';
 import compositionRoutes from './modules/grants/compositions/composition.routes';
 
 
@@ -86,7 +85,7 @@ app.use("/api/criteria", criterionRoutes);
 app.use("/api/templates", templateRoutes);
 app.use("/api/constraints", constraintRoutes);
 
-app.use("/api/grants/constraints", constraintRoutesOLD);
+
 app.use("/api/grants/compositions", compositionRoutes);
 
 //"More specific routes must come first"

@@ -8,7 +8,6 @@ import { ICallRepository } from "../../calls/call.repository";
 import { IStageRepository } from "../../calls/stages/stage.repository";
 import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
 import { CompositionValidator } from "../../grants/compositions/composition.validator";
-import { ConstraintValidatorOLD } from "../../grants/constraints/constraint.validator";
 import { GrantStatus } from "../../grants/grant.model";
 import { IGrantRepository } from "../../grants/grant.repository";
 import { NotificationService } from "../../notifications/notification.service";

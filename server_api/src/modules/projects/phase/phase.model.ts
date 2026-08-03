@@ -15,7 +15,7 @@ export interface IPhase extends Document {
     _id: mongoose.Types.ObjectId;
     project: mongoose.Types.ObjectId;
     order: number;
-    title: String;
+    title: string;
     duration: number;
     startDate?: Date;
     endDate?: Date;
