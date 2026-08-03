@@ -4,7 +4,6 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { useMemo } from "react";
 import CallManager from "../../calls/components/CallManager";
 import CompositionManager from "../compositions/components/CompositionManager";
-import ConstraintManager from "../constraints/components/ConstraintManager";
 import { Grant } from "../models/grant.model";
 
 
@@ -19,11 +18,6 @@ const GrantDetail = ({ grant }: GrantDetailProps) => {
      * Define tabs in a scalable configuration array
      */
     const tabs = useMemo(() => [
-        {
-            header: "Constraints",
-            permission: PERMISSIONS.CONSTRAINT.READ,
-            content: <ConstraintManager grant={grant} />
-        },
         {
             header: "Compositions",
             permission: "constraint:read",
