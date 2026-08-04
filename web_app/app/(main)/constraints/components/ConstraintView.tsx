@@ -92,7 +92,7 @@ export const ConstraintView: React.FC<ConstraintViewProps> = ({
             {/* Cautionary Note */}
             <div className="mt-4 p-3 bg-yellow-50 border-left-3 border-yellow-500 border-round-right">
                 <p className="m-0 text-xs text-yellow-800 line-height-2">
-                    <strong>Note:</strong> Proposals associated with this call must comply with these bounds to qualify for submission.
+                    <strong>Note:</strong> Application associated with this call must comply with these bounds to qualify for submission.
                 </p>
             </div>
         </div>

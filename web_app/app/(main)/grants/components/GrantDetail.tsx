@@ -3,7 +3,6 @@ import { PERMISSIONS } from "@/types/permissions";
 import { TabPanel, TabView } from "primereact/tabview";
 import { useMemo } from "react";
 import CallManager from "../../calls/components/CallManager";
-import CompositionManager from "../compositions/components/CompositionManager";
 import { Grant } from "../models/grant.model";
 
 
@@ -18,11 +17,6 @@ const GrantDetail = ({ grant }: GrantDetailProps) => {
      * Define tabs in a scalable configuration array
      */
     const tabs = useMemo(() => [
-        {
-            header: "Compositions",
-            permission: "constraint:read",
-            content: <CompositionManager grant={grant} />
-        },
         {
             header: "Calls",
             permission: PERMISSIONS.CALL.READ,

@@ -1,0 +1,68 @@
+import mongoose, { Document, Schema } from "mongoose";
+import { COLLECTIONS } from "../../common/constants/collections.enum";
+
+export interface IRange {
+  min: number;
+  max: number;
+}
+export const RangeSchema = new Schema<IRange>(
+  {
+    min: { type: Number, default: 0, required: true },
+    max: { type: Number, default: Infinity, required: true },
+  },
+  { _id: false } // prevents extra _id for subdocument
+);
+
+export interface IComposition extends Document {
+  name: string;
+  description?: string;
+  leadProfileRule?: mongoose.Types.ObjectId;
+  leadHistoryRule?: mongoose.Types.ObjectId;
+  memberRequirements: mongoose.Types.ObjectId[];
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+
+
+const TeamCompositionSchema = new Schema<IComposition>(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true
+    },
+    description: {
+      type: String,
+      trim: true
+    },
+    leadProfileRule: {
+      type: Schema.Types.ObjectId,
+      ref: COLLECTIONS.ELIGIBILITY_PROFILE
+    },
+    leadHistoryRule: {
+      type: Schema.Types.ObjectId,
+      ref: COLLECTIONS.HISTORY_RULE
+    },
+    memberRequirements: {
+      type: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: COLLECTIONS.MEMBER_REQUIREMENT
+        }
+      ],
+      default: []
+    }
+  },
+  {
+    timestamps: true
+  });
+
+
+
+export const Composition =
+  mongoose.model<IComposition>(
+    COLLECTIONS.COMPOSITION,
+    TeamCompositionSchema
+  );

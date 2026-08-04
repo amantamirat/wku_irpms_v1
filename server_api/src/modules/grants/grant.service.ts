@@ -8,7 +8,7 @@ import { IOrganizationRepository } from "../organization/organization.repository
 import { IProjectRepository } from "../projects/project.repository";
 import { IThematicRepository } from "../thematics/thematic.repository";
 import { ThematicStatus } from "../thematics/thematic.state-machine";
-import { ICompositionRepository } from "./compositions/composition.repository";
+import { CompositionRepository } from "../compositions/composition.repository";
 import { CreateGrantDTO, GetGrantsDTO, UpdateGrantDTO } from "./grant.dto";
 import { FundingSource, GrantStatus } from "./grant.model";
 import { IGrantRepository } from "./grant.repository";
@@ -20,7 +20,7 @@ export class GrantService {
         private readonly repository: IGrantRepository,
         private readonly organizationRepo: IOrganizationRepository,
         private readonly thematicRepository: IThematicRepository,
-        private readonly compositionRepo: ICompositionRepository,
+        private readonly compositionRepo: CompositionRepository,
         private readonly callRepo: ICallRepository,
         private readonly projectRepo: IProjectRepository,
     ) { }
@@ -151,13 +151,17 @@ export class GrantService {
                 'Only grants in planned status can be deleted.'
             );
         }
-
-        if (await this.compositionRepo.exists({ grant: id })) {
+        /**
+         * if (await this.compositionRepo.exists({ grant: id })) {
             throw new AppError(
                 ERROR_CODES.GRANT_IN_USE,
                 'Cannot delete grant because it is used in grant compositions.'
             );
         }
+         * 
+         */
+
+
         return await this.repository.delete(id);
     }
 }

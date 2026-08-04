@@ -19,7 +19,7 @@ import { CollaboratorStatus } from "./collaborator.model";
 import { ClientSession } from "mongoose";
 import { ProjectAuth } from "../project.auth";
 import { NotificationService } from "../../notifications/notification.service";
-import { CompositionValidator } from "../../grants/compositions/composition.validator";
+//import { CompositionValidator } from "../../compositions/composition.validator";
 import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
 
 
@@ -29,7 +29,7 @@ export class CollaboratorService {
         private readonly collabRepo: ICollaboratorRepository,
         private readonly projectRepo: IProjectRepository,
         private readonly constraintValidator: ConstraintValidationService,
-        private readonly compositionValidator: CompositionValidator,
+        //private readonly compositionValidator: CompositionValidator,
         private readonly notificationService?: NotificationService,
         private readonly projAuth: ProjectAuth = new ProjectAuth(projectRepo),
 
@@ -53,9 +53,9 @@ export class CollaboratorService {
             const projectDoc = await this.validateProject(project, userId ?? "");
             const grantId = String(projectDoc.grant);
             if (dto.isLeadPI) {
-                await this.compositionValidator.validatePI(grantId, applicant);
+               // await this.compositionValidator.validatePI(grantId, applicant);
             } else {
-                await this.compositionValidator.validateCoPI(grantId, applicant);
+              //  await this.compositionValidator.validateCoPI(grantId, applicant);
             }
             const validationResult = await this.constraintValidator.validateParticipantCount(grantId, await this.collabRepo.countByProject(project) + 1);
             if (!validationResult.valid) {

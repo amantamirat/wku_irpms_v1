@@ -3,8 +3,9 @@ import { CompositionService } from "./composition.service";
 import { CompositionController } from "./composition.controller";
 import { PERMISSIONS } from "../../common/constants/permissions";
 import { verifyActiveAccount, checkPermission } from "../auth/auth.middleware";
+import { compositionRepo } from "../../core/container";
 
-const service = new CompositionService();
+const service = new CompositionService(compositionRepo);
 const controller = new CompositionController(service);
 
 const router: Router = Router();

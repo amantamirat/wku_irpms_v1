@@ -7,7 +7,7 @@ import { CallStatus } from "../../calls/call.model";
 import { ICallRepository } from "../../calls/call.repository";
 import { IStageRepository } from "../../calls/stages/stage.repository";
 import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
-import { CompositionValidator } from "../../grants/compositions/composition.validator";
+//import { CompositionValidator } from "../../compositions/composition.validator";
 import { GrantStatus } from "../../grants/grant.model";
 import { IGrantRepository } from "../../grants/grant.repository";
 import { NotificationService } from "../../notifications/notification.service";
@@ -39,7 +39,7 @@ export class ApplicationService {
         private readonly reviewerRepo: IReviewerRepository,
         private readonly projectService: ProjectService,
         //private readonly constValidator: ConstraintValidatorOLD,
-        private readonly compValidator: CompositionValidator,
+        //private readonly compValidator: CompositionValidator,
         private readonly constraintValidator: ConstraintValidationService,
         private readonly templateValidator: TemplateValidationService,
         private readonly synchronizer = new ProjectSynchronizer(projectRepo, repository, stageRepo),
@@ -175,7 +175,7 @@ export class ApplicationService {
         }
 
         // await this.constValidator.validateAll(grantId, { participantCount: collaborators.length, phases, themes, title, summary });
-        await this.compValidator.validateAll(grantId, collaborators);
+        // await this.compValidator.validateAll(grantId, collaborators);
         const skipValidation = { skipValidation: true };
         const calendarId = String(callDoc.calendar);
         const createdProj = await this.projectService.create({ ...dto, grant: grantId, calendar: calendarId },

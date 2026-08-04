@@ -1,19 +1,18 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Composition, GetCompositionsOptions, sanitizeComposition } from "../models/composition.model";
+import { Composition, sanitizeComposition } from "../models/composition.model";
 import { EntityApi } from "@/api/EntityApi";
 
-const end_point = '/grants/compositions';
-export const CompositionApi: EntityApi<Composition, GetCompositionsOptions | undefined> = {
+const end_point = '/compositions';
+export const CompositionApi: EntityApi<Composition> = {
     async create(composition: Partial<Composition>): Promise<Composition> {
         const sanitized = sanitizeComposition(composition);
         const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as Composition;
     },
 
-    async getAll(options: GetCompositionsOptions): Promise<Composition[]> {
-        const sanitized = sanitizeComposition(options);
+    async getAll(populate): Promise<Composition[]> {
         const query = new URLSearchParams();
-        if (options.grant) query.append("grant", sanitized.grant as string);
+        if (populate) query.append("populate", String(populate));
         const data = await ApiClient.get(`${end_point}?${query.toString()}`);
         return data as Composition[];
     },

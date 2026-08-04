@@ -5,8 +5,8 @@ import { StageRepository } from "../modules/calls/stages/stage.repository";
 import { ConstraintRepository } from "../modules/constraints/constraint.repository";
 import { ConstraintValidationService } from "../modules/constraints/services/constraint-validator.service";
 import { EvaluationRepository } from "../modules/evaluations/evaluation.repository";
-import { CompositionRepository } from "../modules/grants/compositions/composition.repository";
-import { CompositionValidator } from "../modules/grants/compositions/composition.validator";
+import { CompositionRepository } from "../modules/compositions/composition.repository";
+//import { CompositionValidator } from "../modules/compositions/composition.validator";
 import { GrantRepository } from "../modules/grants/grant.repository";
 import { OrganizationRepository } from "../modules/organization/organization.repository";
 import { SpecializationRepository } from "../modules/organization/specializations/specialization.repository";
@@ -29,6 +29,9 @@ import { ThemeRepository } from "../modules/thematics/themes/theme.repository";
 import { ExperienceRepository } from "../modules/users/experiences/experience.repository";
 import { UserRepository } from "../modules/users/user.repository";
 import { UserService } from "../modules/users/user.service";
+import { ProfileRepository } from "../modules/compositions/profile/profile.repository";
+import { HistoryRepository } from "../modules/compositions/history/history.repository";
+import { RequirementRepository } from "../modules/compositions/requirements/requirement.repository";
 
 // calendar repos
 export const calendarRepo = new CalendarRepository();
@@ -46,6 +49,9 @@ export const thematicRepo = new ThematicRepository();
 export const themeRepo = new ThemeRepository();
 export const constraintRepo = new ConstraintRepository();
 
+export const profileRepo = new ProfileRepository();
+export const historyRepo = new HistoryRepository();
+export const requirementRepo = new RequirementRepository();
 export const compositionRepo = new CompositionRepository();
 // project repos
 export const projectRepo = new ProjectRepository();
@@ -67,16 +73,15 @@ export const templateValidtor = new TemplateValidationService(
 //validator services 
 export const constraintValidator = new ConstraintValidationService(constraintRepo, themeRepo);
 
-export const compositionValidator = new CompositionValidator(compositionRepo, userRepo, exprienceRepo, specializationRepo, collaboratorRepo);
+//export const compositionValidator = new CompositionValidator(compositionRepo, userRepo, exprienceRepo, specializationRepo, collaboratorRepo);
 
 // Services
-export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, constraintValidator, compositionValidator);
+export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, constraintValidator);
 export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, constraintValidator);
-export const projectService = new ProjectService(projectRepo, collaboratorRepo, phaseRepo, grantRepo,
-    collabService, phaseService, compositionValidator
-);
+export const projectService = new ProjectService(projectRepo, collaboratorRepo, phaseRepo,
+    grantRepo, collabService, phaseService);
 export const applicationService = new ApplicationService(applicationRepo, projectRepo, grantRepo, callRepo, stageRepo, reviewerRepo,
-    projectService, compositionValidator, constraintValidator, templateValidtor);
+    projectService, constraintValidator, templateValidtor);
 
 export const userService = new UserService(userRepo, organizationRepo, roleRepo);
 

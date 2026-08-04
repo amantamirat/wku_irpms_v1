@@ -13,8 +13,8 @@ import { useMemo } from "react";
 interface CollaboratorManagerProps {
     project?: Project;
     member?: User;
-    collaborations?: Collaborator[]; // Added this
-    onItemsChange?: (items: Collaborator[]) => void; // Added this
+    collaborations?: Collaborator[]; 
+    onItemsChange?: (items: Collaborator[]) => void;
     hideSearch?: boolean; // Added this
 }
 
@@ -37,7 +37,7 @@ const CollaboratorManager = ({
         if (!member) {
             cols.push({
                 header: "Member",
-                field: "applicant.name",
+                field: "member.name",
                 sortable: true,
                 body: (c: Collaborator) => (
                     <div className="flex align-items-center gap-2">

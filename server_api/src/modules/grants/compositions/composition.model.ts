@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { COLLECTIONS } from "../../../common/constants/collections.enum";
-import { Accessibility, Gender } from "../../users/user.model";
-import { AcademicLevel } from "../../../common/constants/enums";
+import { COLLECTIONS } from "../../common/constants/collections.enum";
+import { Accessibility, Gender } from "../users/user.model";
+import { AcademicLevel } from "../../common/constants/enums";
 
 export enum OperationMode {
   COUNT = "COUNT",

@@ -1,6 +1,6 @@
-import { AppError } from "../../../common/errors/app.error";
-import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { IGrantRepository, GrantRepository } from "../grant.repository";
+import { AppError } from "../../common/errors/app.error";
+import { ERROR_CODES } from "../../common/errors/error.codes";
+import { IGrantRepository, GrantRepository } from "../grants/grant.repository";
 import { CreateCompositionDTO, GetCompositionDTO, UpdateCompositionDTO } from "./composition.dto";
 import { ICompositionRepository, CompositionRepository } from "./composition.repository";
 

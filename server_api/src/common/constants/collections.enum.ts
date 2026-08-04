@@ -14,8 +14,10 @@ export enum COLLECTIONS {
   GRANT = "grants",
   GRANT_STAGE = "grantstages",
   CONSTRAINT = "constraints",
-  CONSTRAINT_OLD = "constraints2",
   COMPOSITION = "compositions",
+  ELIGIBILITY_PROFILE = "eligibility_profiles",
+  HISTORY_RULE = "history_rules",
+  MEMBER_REQUIREMENT = "member_requirements",
   GRANT_ALLOCATION = "grantallocations",
 
 

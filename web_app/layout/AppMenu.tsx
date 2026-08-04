@@ -282,6 +282,13 @@ const AppMenu = () => {
                     to: '/constraints',
                     visible: hasPermission("constraint:create")
                 },
+
+                {
+                    label: 'Compositions',
+                    icon: 'pi pi-fw pi-user-edit',
+                    to: '/compositions',
+                    visible: hasPermission("composition:create")
+                },
                 {
                     label: 'Specializations',
                     icon: 'pi pi-fw pi-filter-fill',

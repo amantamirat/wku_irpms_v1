@@ -19,9 +19,13 @@ import criterionRoutes from './modules/evaluations/criteria/criterion.routes';
 import templateRoutes from './modules/templates/template.routes';
 
 import grantRoutes from './modules/grants/grant.routes';
-import constraintRoutes from './modules/constraints/constraint.routes';
-import compositionRoutes from './modules/grants/compositions/composition.routes';
 
+import constraintRoutes from './modules/constraints/constraint.routes';
+import compositionRoutes from './modules/compositions/composition.routes';
+
+import profileRoutes from './modules/compositions/profile/profile.routes';
+import historyRoutes from './modules/compositions/history/history.routes';
+import requirementRoutes from './modules/compositions/requirements/requirement.routes';
 
 import calendarRoutes from './modules/calendar/calendar.routes';
 import callRoutes from './modules/calls/call.routes';
@@ -86,7 +90,10 @@ app.use("/api/templates", templateRoutes);
 app.use("/api/constraints", constraintRoutes);
 
 
-app.use("/api/grants/compositions", compositionRoutes);
+app.use("/api/compositions", compositionRoutes);
+app.use("/api/team/profiles", profileRoutes);
+app.use("/api/team/histories", historyRoutes);
+app.use("/api/team/requirements", requirementRoutes)
 
 //"More specific routes must come first"
 // 🚨 KEEP THIS LAST

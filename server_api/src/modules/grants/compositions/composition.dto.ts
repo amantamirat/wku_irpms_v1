@@ -1,5 +1,5 @@
-import { Accessibility, Gender } from "../../users/user.model";
-import { AcademicLevel } from "../../../common/constants/enums";
+import { Accessibility, Gender } from "../users/user.model";
+import { AcademicLevel } from "../../common/constants/enums";
 import { OperationMode, TargetScope } from "./composition.model";
 
 /* ---------------- RANGE ---------------- */

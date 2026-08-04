@@ -1,41 +1,43 @@
 import { Router } from "express";
-import { CompositionService } from "./composition.service";
-import { CompositionController } from "./composition.controller";
-import { PERMISSIONS } from "../../common/constants/permissions";
-import { verifyActiveAccount, checkPermission } from "../auth/auth.middleware";
 
-const service = new CompositionService();
-const controller = new CompositionController(service);
+import { RequirementService } from "./requirement.service";
+import { requirementRepo } from "../../../core/container";
+import { RequirementController } from "./requirement.controller";
+import { checkPermission, verifyActiveAccount } from "../../auth/auth.middleware";
+import { PERMISSIONS } from "../../../common/constants/permissions";
+
+const service = new RequirementService(requirementRepo);
+const controller = new RequirementController(service);
 
 const router: Router = Router();
 
 //----------------------------------------
-// CREATE COMPOSITION
+// CREATE
 //----------------------------------------
 router.post(
     "/",
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.CONSTRAINT.CREATE]),
+    checkPermission([PERMISSIONS.COMPOSITION.CREATE]),
     controller.create
 );
 
 //----------------------------------------
-// GET COMPOSITIONS
+// GET 
 //----------------------------------------
 router.get(
     "/",
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.CONSTRAINT.READ]),
+    checkPermission([PERMISSIONS.COMPOSITION.READ]),
     controller.get
 );
 
 //----------------------------------------
-// UPDATE COMPOSITION
+// UPDATE 
 //----------------------------------------
 router.put(
     "/:id",
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.CONSTRAINT.UPDATE]),
+    checkPermission([PERMISSIONS.COMPOSITION.UPDATE]),
     controller.update
 );
 
@@ -45,7 +47,7 @@ router.put(
 router.delete(
     "/:id",
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.CONSTRAINT.DELETE]),
+    checkPermission([PERMISSIONS.COMPOSITION.DELETE]),
     controller.delete
 );
 

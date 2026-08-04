@@ -11,7 +11,7 @@ import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
-import { CompositionValidator } from "../grants/compositions/composition.validator";
+//import { CompositionValidator } from "../compositions/composition.validator";
 import { GrantStatus } from "../grants/grant.model";
 import { IGrantRepository } from "../grants/grant.repository";
 import { NotificationService } from "../notifications/notification.service";
@@ -35,7 +35,7 @@ export class ProjectService {
         private readonly grantRepo: IGrantRepository,
         private readonly collabService: CollaboratorService,
         private readonly phaseService: PhaseService,
-        private readonly compValidator: CompositionValidator,
+        //private readonly compValidator?: CompositionValidator,
         private readonly constValidator?: ConstraintValidationService,
         private readonly notificationService?: NotificationService,
     ) { }
