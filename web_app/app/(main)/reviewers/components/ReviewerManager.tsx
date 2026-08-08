@@ -12,11 +12,11 @@ import { ReviewerApi } from "../api/reviewer.api";
 import { GetReviewersOptions, Reviewer, ReviewerStatus } from "../models/reviewer.model";
 import { REVIEWER_STATUS_ORDER, REVIEWER_TRANSITIONS } from "../models/reviewer.state-machine";
 
-import EvaluatorManager from "../results/components/evaluator/EvaluatorManager";
-import SaveReviewerDialog from "./SaveReviewerDialog";
+import EvaluatorManager from "../evaluator/EvaluatorManager";
+import SaveReviewerDialog from "../application/SaveReviewerDialog";
 
 interface ReviewerManagerProps {
-    projectApplication?: Application;
+    application?: Application;
     reviewer?: User;
     status?: ReviewerStatus | ReviewerStatus[];
     reviewers?: Reviewer[];
@@ -26,7 +26,7 @@ interface ReviewerManagerProps {
 }
 
 const ReviewerManager = ({
-    projectApplication,
+    application,
     reviewer,
     status,
     reviewers,
@@ -35,9 +35,9 @@ const ReviewerManager = ({
     hideReviewer,
 }: ReviewerManagerProps) => {
 
-    const canManage = useMemo(() => projectApplication && (
-        projectApplication.status === ApplicationStatus.pending
-    ), [projectApplication?.status]);
+    const canManage = useMemo(() => application && (
+        application.status === ApplicationStatus.pending
+    ), [application?.status]);
 
     const { getUser } = useAuth();
     const activeUser = getUser();
@@ -75,7 +75,7 @@ const ReviewerManager = ({
             });
         }
 
-        if (!projectApplication) {
+        if (!application) {
             cols.push({
                 header: "Project",
                 field: "projectApplication.project.title",
@@ -83,11 +83,11 @@ const ReviewerManager = ({
                 body: (r: Reviewer) => (
                     <div className="truncate text-sm" style={{ maxWidth: '250px' }}>
                         <span className="mr-1">
-                            {(r.projectApplication as any)?.project?.title || "-"}
+                            {(r.application as any)?.project?.title || "-"}
                         </span>
-                        {(r.projectApplication as any)?.grantStage?.name && (
+                        {(r.application as any)?.grantStage?.name && (
                             <span className="text-gray-500">
-                                [{(r.projectApplication as any)?.grantStage?.name}]
+                                [{(r.application as any)?.grantStage?.name}]
                             </span>
                         )}
                     </div>
@@ -115,14 +115,14 @@ const ReviewerManager = ({
         );
 
         return cols;
-    }, [projectApplication, reviewer, activeUser?._id, loadingEval, activeEvaluation]);
+    }, [application, reviewer, activeUser?._id, loadingEval, activeEvaluation]);
 
     const query = useMemo(() => ({
         reviewer: reviewer?._id,
-        projectApplication: projectApplication?._id,
+        projectApplication: application?._id,
         status,
         populate: true
-    }), [reviewer?._id, projectApplication?._id, status]);
+    }), [reviewer?._id, application?._id, status]);
 
     const Manager = useMemo(() =>
         createEntityManager<Reviewer, GetReviewersOptions>({
@@ -137,7 +137,7 @@ const ReviewerManager = ({
 
             createNew: canManage
                 ? (): Reviewer => ({
-                    projectApplication,
+                    application: application,
                     reviewer: reviewer ?? undefined,
                     weight: 1,
                     status: ReviewerStatus.pending
@@ -172,13 +172,13 @@ const ReviewerManager = ({
                     }
                 },
             ],
-            hideDefaultActions: !projectApplication,
+            hideDefaultActions: !application,
             disableDeleteRow: (row: Reviewer) =>
                 row.status !== ReviewerStatus.pending,
             hideSearch
         }),
         // Added reviewers to the dependency array
-        [columns, projectApplication?._id, reviewer?._id, status, query]
+        [columns, application?._id, reviewer?._id, status, query]
     );
 
     return (
@@ -189,7 +189,7 @@ const ReviewerManager = ({
                 visible={!!activeEvaluation}
                 maximized
                 onHide={() => setActiveEvaluation(null)}
-                header={`Evaluating: ${(activeEvaluation?.reviewer.projectApplication as any)?.project?.title || 'Proposal'}`}
+                header={`Evaluating: ${(activeEvaluation?.reviewer.application as any)?.project?.title || 'Proposal'}`}
                 pt={{
                     root: { className: 'surface-ground' },
                     content: { className: 'p-0' }
@@ -198,7 +198,7 @@ const ReviewerManager = ({
                 {activeEvaluation && (
                     <EvaluatorManager
                         reviewer={activeEvaluation.reviewer}
-                        canEvaluate={activeEvaluation.canEvaluate}
+                        editMode={activeEvaluation.canEvaluate}
                         onClose={() => setActiveEvaluation(null)}
                     />
                 )}

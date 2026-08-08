@@ -60,7 +60,7 @@ export class ThematicController {
                 id: String(id),
                 current: current,
                 next: next,
-                applicantId: req.auth.userId,
+                userId: req.auth.userId,
             };
             const updated = await this.service.transitionState(dto);
             successResponse(res, 200, "Eval status updated successfully", updated);

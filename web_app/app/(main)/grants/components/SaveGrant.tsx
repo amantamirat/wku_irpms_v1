@@ -118,8 +118,7 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
             onComplete?.({
                 ...saved,
                 organization: localGrant.organization,
-                thematic: localGrant.thematic,
-                constraint: localGrant.constraint,
+                thematic: localGrant.thematic
             });
         } catch (err: any) {
             toast.current?.show({
@@ -269,23 +268,7 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                         </div>
                     )}
 
-                    {/* Dynamic Constraint Field Setup */}
-                    <div className="field">
-                        <label htmlFor="constraint" className="font-semibold block mb-2">Constraint</label>
-                        <Dropdown
-                            id="constraint"
-                            value={localGrant.constraint}
-                            options={constraints}
-                            optionLabel="name"
-                            optionValue='_id'
-                            //dataKey="_id"
-                            onChange={(e) => updateField('constraint', e.value)}
-                            placeholder="Select Constraint"
-                            //disabled={isEdit}
-                            showClear
-                        />
-
-                    </div>
+                    
 
 
                     {/* Detailed Metadata Input Area Wrapper */}

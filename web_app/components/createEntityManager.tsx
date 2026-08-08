@@ -19,15 +19,14 @@ export function createEntityManager<
     T extends { _id?: string },
     TQuery = undefined
 >(config: {
-    title: string
+    title?: string
     itemName?: string
-    api: EntityApi<T, TQuery>
+    api?: EntityApi<T, TQuery>
     columns: any[]
     createNew?: () => T
     SaveDialog?: React.ComponentType<EntitySaveDialogProps<T>>
     permissionPrefix: string
     query?: () => TQuery
-
     items?: T[];
     onItemsChange?: (items: T[]) => void;
 
@@ -94,6 +93,9 @@ export function createEntityManager<
                 setAll(config.items);
                 return;
             }
+            if (!config.api) {
+                return
+            }
             const query = config.query ? config.query() : undefined;
             const data = await config.api.getAll(query);
             setAll(data);
@@ -138,6 +140,10 @@ export function createEntityManager<
 
             if (!row._id) return;
 
+            if (!config.api) {
+                return
+            }
+
             if (!config.api.transitionState) return;
 
             const updated = await config.api.transitionState?.(row._id, dto);
@@ -148,6 +154,9 @@ export function createEntityManager<
         };
 
         const deleteItem = async (row: T) => {
+            if (!config.api) {
+                return
+            }
             const ok = await config.api.delete(row)
             if (ok) { removeItem(row); config.onDeleteComplete?.(row); }
         }
@@ -274,7 +283,7 @@ export function createEntityManager<
                     />
                 )}
 
-                {showImportDialog && (
+                {(showImportDialog && config.api) && (
                     <ImportDialog
                         api={config.api}
                         parentId={config.importConfig?.importId}

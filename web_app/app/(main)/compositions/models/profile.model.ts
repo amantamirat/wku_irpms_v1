@@ -1,14 +1,14 @@
 import { Gender, Accessibility } from "@/app/(main)/users/models/user.model";
 import { AcademicLevel } from "@/app/(main)/organizations/models/organization.model";
-import { isValidRange, Range } from "./composition.model";
+import { isValidRange, IRange } from "./composition.model";
 
 export type EligibilityProfile = {
     _id?: string;
     name: string;
     description?: string;
     gender?: Gender;
-    age?: Range;
-    experienceYears?: Range;
+    age?: IRange;
+    experienceYears?: IRange;
     accessibility?: Accessibility[];
     academicLevels?: AcademicLevel[];
     createdAt?: string | Date;

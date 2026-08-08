@@ -136,6 +136,7 @@ export class ApplicationService {
             throw new AppError(ERROR_CODES.CALL_DEADLINE_PASSED);
         }
 
+
         const stageDoc = await this.stageRepo.findOne(String(callDoc._id), 1);
         if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
         const stageDeadline = stageDoc.deadline;
@@ -143,13 +144,14 @@ export class ApplicationService {
             throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
         }
 
-        const grantId = String(callDoc.grant);
-        const grantDoc = await this.grantRepo.findById(grantId);
-        if (!grantDoc) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
-        if (grantDoc.status !== GrantStatus.active) throw new Error(ERROR_CODES.GRANT_NOT_ACTIVE);
 
-        if (grantDoc.constraint) {
-            const constraintId = String(grantDoc.constraint);
+        //const grantId = String(callDoc.grant);
+        // const grantDoc = await this.grantRepo.findById(grantId);
+        // if (!grantDoc) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
+        // if (grantDoc.status !== GrantStatus.active) throw new Error(ERROR_CODES.GRANT_NOT_ACTIVE);
+
+        if (callDoc.constraint) {
+            const constraintId = String(callDoc.constraint);
             const result = await this.constraintValidator.validateProject(constraintId, dto);
             if (!result.valid) {
                 throw new AppError(
@@ -174,11 +176,9 @@ export class ApplicationService {
             }
         }
 
-        // await this.constValidator.validateAll(grantId, { participantCount: collaborators.length, phases, themes, title, summary });
-        // await this.compValidator.validateAll(grantId, collaborators);
         const skipValidation = { skipValidation: true };
         const calendarId = String(callDoc.calendar);
-        const createdProj = await this.projectService.create({ ...dto, grant: grantId, calendar: calendarId },
+        const createdProj = await this.projectService.create({ ...dto, grant: String(callDoc.grant), calendar: calendarId },
             skipValidation);
         const projectId = String(createdProj._id);
         return await this.create({
@@ -220,7 +220,7 @@ export class ApplicationService {
         const grantStageDoc = projStageDoc.stage as unknown as any;
 
         const approvedReviews = await this.reviewerRepo.find({
-            projectApplication: id,
+            application: id,
             status: ReviewerStatus.approved
         });
 
@@ -393,7 +393,7 @@ export class ApplicationService {
         if (!appDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
         if (appDoc.status !== ApplicationStatus.pending) throw new AppError(ERROR_CODES.APPLICATION_NOT_PENDING);
 
-        if (await this.reviewerRepo.exist({ projectApplication: id })) {
+        if (await this.reviewerRepo.exist({ application: id })) {
             throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
         }
 

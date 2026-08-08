@@ -4,10 +4,16 @@ import { EntityApi } from "@/api/EntityApi";
 
 const end_point = '/compositions';
 export const CompositionApi: EntityApi<Composition> = {
+    
     async create(composition: Partial<Composition>): Promise<Composition> {
         const sanitized = sanitizeComposition(composition);
         const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as Composition;
+    },
+
+    async getById(id: string, populate?: boolean): Promise<Composition> {
+        const query = populate !== undefined ? `?populate=${populate}` : '';
+        return ApiClient.get(`${end_point}/${id}${query}`);
     },
 
     async getAll(populate): Promise<Composition[]> {

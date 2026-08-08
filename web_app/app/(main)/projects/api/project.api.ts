@@ -31,12 +31,17 @@ export const ProjectApi: IProjectApi = {
         return data as Project[];
     },
 
-    async getById(id: string): Promise<Project> {
-        const url = `${end_point}/${id}`;
+    async getById(
+        id: string,
+        populate?: boolean
+    ): Promise<Project> {
+        const query = populate !== undefined
+            ? `?populate=${populate}`
+            : '';
+        const url = `${end_point}/${id}${query}`;
         const data = await ApiClient.get(url);
         return data as Project;
     },
-
     async create(project: Partial<Project>): Promise<Project> {
         const sanitized = sanitize(project);
         const createdData = await ApiClient.post(end_point, sanitized);

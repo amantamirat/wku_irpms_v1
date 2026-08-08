@@ -4,28 +4,14 @@ import { IRange, RangeSchema } from "../composition.model";
 
 
 export interface IHistoryRule extends Document {
-
     name: string;
-
     description?: string;
-
-
     submitted?: IRange;
-
-
     rejected?: IRange;
-
-
     completed?: IRange;
-
-
     granted?: IRange;
-
-
     createdAt?: Date;
-
     updatedAt?: Date;
-
 }
 
 

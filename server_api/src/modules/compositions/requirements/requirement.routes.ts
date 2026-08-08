@@ -21,6 +21,13 @@ router.post(
     controller.create
 );
 
+router.get(
+    "/:id",
+    verifyActiveAccount,
+    checkPermission([PERMISSIONS.COMPOSITION.READ]),
+    controller.getById
+)
+
 //----------------------------------------
 // GET 
 //----------------------------------------

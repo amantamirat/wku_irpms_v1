@@ -26,7 +26,7 @@ const AppMenu = () => {
             },
             {
                 label: 'Collaborators',
-                to: '/projects/collaborators/all',
+                to: '/collaborators/all',
                 icon: 'pi pi-share-alt',
                 visible: hasPermission("collaborator:read")
             },
@@ -49,7 +49,7 @@ const AppMenu = () => {
                 {
                     label: 'Applications',
                     icon: 'pi pi-list',
-                    to: '/applications',
+                    to: '/applications/stage',
                     visible: hasPermission("application:read")
                 },
                 {

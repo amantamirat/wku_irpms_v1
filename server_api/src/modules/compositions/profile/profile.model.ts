@@ -6,23 +6,14 @@ import { IRange, RangeSchema } from "../composition.model";
 
 
 export interface IEligibilityProfile extends Document {
-
     name: string;
-
     description?: string;
-
     gender?: Gender;
-
     age?: IRange;
-
     experienceYears?: IRange;
-
     accessibility?: Accessibility[];
-
     academicLevels?: AcademicLevel[];
-
     createdAt?: Date;
-
     updatedAt?: Date;
 }
 

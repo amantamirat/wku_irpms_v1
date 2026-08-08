@@ -60,6 +60,12 @@ export class CallRepository implements ICallRepository {
             grant: new mongoose.Types.ObjectId(dto.grant),
             calendar: new mongoose.Types.ObjectId(dto.calendar),
             organization: new mongoose.Types.ObjectId(dto.organization),
+            constraint: dto.constraint
+                ? new mongoose.Types.ObjectId(dto.constraint)
+                : undefined,
+            composition: dto.composition
+                ? new mongoose.Types.ObjectId(dto.composition)
+                : undefined,
         });
     }
 
@@ -69,6 +75,17 @@ export class CallRepository implements ICallRepository {
         if (dtoData.title) updateData.title = dtoData.title;
         if (dtoData.description) updateData.description = dtoData.description;
         if (dtoData.deadline) updateData.deadline = dtoData.deadline;
+        if (dtoData.constraint !== undefined) {
+            updateData.constraint = dtoData.constraint
+                ? new mongoose.Types.ObjectId(dtoData.constraint)
+                : undefined;
+        }
+
+        if (dtoData.composition !== undefined) {
+            updateData.composition = dtoData.composition
+                ? new mongoose.Types.ObjectId(dtoData.composition)
+                : undefined;
+        }
 
         return Call.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),

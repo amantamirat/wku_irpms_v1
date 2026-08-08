@@ -11,21 +11,20 @@ import { SubmissionStep } from './SubmissionStep';
 
 
 interface ApplyWizardProps {
-    call: Call;
-    //constraints: Constraint[];
+    project?: Partial<Project>;
     onComplete?: (data: any) => void;
 }
 
-const ApplyWizard = ({ call, onComplete }: ApplyWizardProps) => {
+const ApplyWizard = ({ project, onComplete }: ApplyWizardProps) => {
     const { getUser } = useAuth();
     const appUser = getUser();
     const [activeIndex, setActiveIndex] = useState(0);
     const [formData, setFormData] = useState<Project>({
-        call: call._id,
+        ...project,
         title: '',
         summary: '',
         themes: [],
-        leadPI: appUser?._id,
+        leadPI: appUser ? appUser : "",
         collaborators: [{ member: appUser?._id, role: "Principal Investigator", isLeadPI: true }],
         phases: [{ title: 'Phase 1', order: 1, budget: 1000, duration: 10, description: '' }]
     });
@@ -59,7 +58,7 @@ const ApplyWizard = ({ call, onComplete }: ApplyWizardProps) => {
                 return (
                     <BasicInfoStep
                         data={formData}
-                        call={call}
+                        //call={call}
                         //constraints={constraints}
                         onUpdate={updateFormData}
                         onNext={handleNext}

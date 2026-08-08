@@ -2,6 +2,7 @@ import { CollaboratorDto } from "./collaborators/collaborator.dto";
 import { PhaseDto } from "./phase/phase.dto";
 import { ProjectStatus } from "./project.model";
 
+/*
 export interface Options {
     populate?: {
         leadPI?: boolean;
@@ -9,14 +10,15 @@ export interface Options {
         calendar?: boolean;
         currentApplication?: boolean;
     };
-}
+}*/
 
 export interface GetProjectsDTO {
     grant?: string;
     leadPI?: string;
     call?: string;
     status?: ProjectStatus;
-    options?: Options;
+    populate?: boolean;
+    //options?: Options;
     //calendar?: string;
     //workspace?: string;
 
@@ -29,7 +31,7 @@ export interface GetProjectsDTO {
 
 export interface CreateProjectDTO {
     calendar?: string;
-    call?:string;
+    call?: string;
     grant: string;
     title: string;
     summary?: string;
@@ -37,7 +39,7 @@ export interface CreateProjectDTO {
     themes: string[];
     collaborators: CollaboratorDto[];
     phases: PhaseDto[];
-    createdBy?:string;
+    createdBy?: string;
     userId?: string;
 }
 

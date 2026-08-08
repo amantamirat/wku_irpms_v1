@@ -4,7 +4,7 @@ import { Grant } from "../../grants/models/grant.model";
 import { Organization } from "../../organizations/models/organization.model";
 import { Theme } from "../../thematics/themes/models/theme.model";
 import { User } from "../../users/models/user.model";
-import { Collaborator, sanitizeCollaborator } from "../collaborators/models/collaborator.model";
+import { Collaborator, sanitizeCollaborator } from "../../collaborators/models/collaborator.model";
 import { Phase, sanitizePhase } from "../phases/models/phase.model";
 
 export enum ProjectStatus {
@@ -44,7 +44,7 @@ export type Project = {
 
 export interface GetProjectsOptions {
     grant?: string | Grant;
-    applicant?: string | User;
+    leadPI?: string | User;
     call?: string | Call;
     workspace?: string | Organization;
     calendar?: string;

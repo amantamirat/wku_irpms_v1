@@ -1,34 +1,33 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { TreeSelect } from 'primereact/treeselect';
-import { Button } from 'primereact/button';
 import { classNames } from 'primereact/utils';
+import { useEffect, useMemo, useState } from 'react';
 
-import { ThemeApi } from '@/app/(main)/thematics/themes/api/theme.api';
-import { GrantApi } from '@/app/(main)/grants/api/grant.api';
 import { CalendarApi } from '@/app/(main)/calendars/api/calendar.api';
+import { GrantApi } from '@/app/(main)/grants/api/grant.api';
+import { ThemeApi } from '@/app/(main)/thematics/themes/api/theme.api';
 import { UserApi } from '@/app/(main)/users/api/user.api';
 
+import { Calendar } from '@/app/(main)/calendars/models/calendar.model';
 import { Grant } from '@/app/(main)/grants/models/grant.model';
 import { GrantStatus } from '@/app/(main)/grants/models/grant.state-machine';
 import { ThemeNode, buildTree } from '@/app/(main)/thematics/models/thematic.node';
 import { Project } from '../../models/project.model';
-import { Calendar } from '@/app/(main)/calendars/models/calendar.model';
-import { Call } from '@/app/(main)/calls/models/call.model';
 
 interface BasicInfoStepProps {
-    data: Project;
-    call?: Call; // Strictly a Call object or undefined
+    data: Partial<Project>;
+    //call?: Call; // Strictly a Call object or undefined
     onUpdate: (data: Partial<Project>) => void;
     onNext: () => void;
     isEditModeOnly?: boolean;
 }
 
-export const BasicInfoStep = ({ data, call, onUpdate, onNext, isEditModeOnly }: BasicInfoStepProps) => {
+export const BasicInfoStep = ({ data, onUpdate, onNext, isEditModeOnly }: BasicInfoStepProps) => {
     const [submitted, setSubmitted] = useState(false);
     const [grants, setGrants] = useState<Grant[]>([]);
     const [calendars, setCalendars] = useState<Calendar[]>([]);
@@ -40,25 +39,25 @@ export const BasicInfoStep = ({ data, call, onUpdate, onNext, isEditModeOnly }: 
 
     // 1. Resolve active Call object directly from prop or data.call
     const activeCall = useMemo(() => {
-        if (call) return call;
-        if (data.call && typeof data.call === 'object') return data.call as Call;
+        //if (call) return call;
+        if (data.call) return data.call;
         return null;
-    }, [call, data.call]);
+    }, [data.call]);
 
     const hasCall = Boolean(activeCall);
 
     // 2. Resolve Active Grant & Calendar
     const activeGrant = useMemo(() => {
         if (data.grant) return data.grant;
-        if (activeCall?.grant) return activeCall.grant;
+        //if (activeCall?.grant) return activeCall.grant;
         return null;
-    }, [data.grant, activeCall?.grant]);
+    }, [data.grant]);
 
     const activeCalendar = useMemo(() => {
         if (data.calendar) return data.calendar;
-        if (activeCall?.calendar) return activeCall.calendar;
+        //if (activeCall?.calendar) return activeCall.calendar;
         return null;
-    }, [data.calendar, activeCall?.calendar]);
+    }, [data.calendar]);
 
     const hasActiveGrant = Boolean(activeGrant);
 
@@ -68,6 +67,7 @@ export const BasicInfoStep = ({ data, call, onUpdate, onNext, isEditModeOnly }: 
     const isLeadLocked = isEditModeOnly || hasCall;
 
     // 3. Sync Call, Grant, and Calendar back to project state
+    /*
     useEffect(() => {
         if (activeCall) {
             const updates: Partial<Project> = {};
@@ -87,6 +87,7 @@ export const BasicInfoStep = ({ data, call, onUpdate, onNext, isEditModeOnly }: 
             }
         }
     }, [activeCall]);
+    */
 
     // 4. Load Applicants
     useEffect(() => {
@@ -138,12 +139,10 @@ export const BasicInfoStep = ({ data, call, onUpdate, onNext, isEditModeOnly }: 
 
             if (grantId) {
                 let fullGrantObject = typeof activeGrant === 'object' ? (activeGrant as Grant) : null;
-                
+
                 if (!fullGrantObject) {
                     fullGrantObject = grants.find(g => g._id === grantId) || null;
                 }
-
-                
 
                 const thematicId = fullGrantObject ? (fullGrantObject as any).thematic : null;
 

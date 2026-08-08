@@ -54,24 +54,14 @@ export class ProjectController {
   // -----------------------
   get = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { applicant, grant, call, status, populate } = req.query;
+      const { leadPI, grant, call, status, populate } = req.query;
 
       const projects = await this.service.getProjects({
-        leadPI: applicant ? String(applicant) : undefined,
+        leadPI: leadPI ? String(leadPI) : undefined,
         grant: grant ? String(grant) : undefined,
         call: call ? String(call) : undefined,
         status: status ? (status as ProjectStatus) : undefined,
-
-        options: populate === "true"
-          ? {
-            populate: {
-              leadPI: true,
-              grant: true,
-              calendar: true,
-              currentApplication: true
-            }
-          }
-          : undefined
+        populate: populate === "true"
       });
 
       successResponse(res, 200, "Projects fetched successfully", projects);
@@ -83,7 +73,8 @@ export class ProjectController {
   getById = async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id } = req.params;
-      const project = await this.service.getById(id);
+      const { populate } = req.query;
+      const project = await this.service.getById(id, populate === "true");
       successResponse(res, 200, 'Project fetched successfully', project);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
@@ -122,7 +113,7 @@ export class ProjectController {
         id: String(id),
         current: current,
         next: next,
-        applicantId: req.auth.userId,
+        userId: req.auth.userId,
       };
       const updated = await this.service.transitionState(dto);
       successResponse(res, 200, "Project status updated successfully", updated);

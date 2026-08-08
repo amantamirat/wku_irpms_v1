@@ -83,9 +83,6 @@ export class GrantRepository implements IGrantRepository {
             amount: dto.amount,
             thematic: new mongoose.Types.ObjectId(dto.thematic),
             description: dto.description,
-            constraint: dto.constraint
-                ? new mongoose.Types.ObjectId(dto.constraint)
-                : undefined,
         };
 
         return Grant.create(data);
@@ -106,12 +103,6 @@ export class GrantRepository implements IGrantRepository {
 
         if (dtoData.amount !== undefined)
             updateData.amount = dtoData.amount;
-
-        if (dtoData.constraint !== undefined) {
-            updateData.constraint = dtoData.constraint
-                ? new mongoose.Types.ObjectId(dtoData.constraint)
-                : undefined;
-        }
 
         return Grant.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),

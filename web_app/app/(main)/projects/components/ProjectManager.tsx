@@ -21,14 +21,12 @@ interface ProjectManagerProps {
     applicant?: User;
     call?: Call;
     workspace?: Organization;
+    //populate?: boolean;
     onItemsChange?: (items: Project[]) => void;
 }
 
 const ProjectManager = ({ applicant, grant, calendar, call, workspace, onItemsChange }: ProjectManagerProps) => {
-    const { getUser } = useAuth();
-    const activeUser = getUser();
 
-    // Pure primitive strings extracted out of components to keep checks bulletproof
     const grantId = typeof grant === 'object' ? (grant as any)?._id : grant;
     const calendarId = typeof calendar === 'object' ? (calendar as any)?._id : calendar;
     const workspaceId = workspace?._id;
@@ -36,7 +34,7 @@ const ProjectManager = ({ applicant, grant, calendar, call, workspace, onItemsCh
 
     const columns = useMemo(() => {
         const cols: any[] = [
-           // { header: "Grant Source", field: "grant.title", sortable: true },
+            // { header: "Grant Source", field: "grant.title", sortable: true },
             { header: "Calendar", field: "calendar.year", sortable: true },
             {
                 header: "Title",
@@ -83,7 +81,7 @@ const ProjectManager = ({ applicant, grant, calendar, call, workspace, onItemsCh
             columns: columns,
             createNew: () => ({
                 grant: grant ?? undefined,
-                applicant: activeUser ?? undefined,
+                applicant: applicant ?? undefined,
                 workspace: workspace ?? undefined,
                 title: "",
                 summary: "",
@@ -95,7 +93,7 @@ const ProjectManager = ({ applicant, grant, calendar, call, workspace, onItemsCh
                 call,
                 populate: true,
                 workspace: workspaceId,
-                applicant: applicantId,
+                leadPI: applicantId,
                 calendar: calendarId,
                 grant: grantId,
             }),

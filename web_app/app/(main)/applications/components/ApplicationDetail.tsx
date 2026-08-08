@@ -20,7 +20,7 @@ const ApplicationDetail = ({ application, hideReviewer }: ApplicationDetailProps
         {
             header: "Reviewers",
             permission: "reviewer:read",
-            content: <ReviewerManager projectApplication={application} hideReviewer={hideReviewer} />
+            content: <ReviewerManager application={application} hideReviewer={hideReviewer} />
         },
 
     ], [application]);

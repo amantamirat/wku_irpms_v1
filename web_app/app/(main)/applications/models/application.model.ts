@@ -25,7 +25,7 @@ export interface GetProjectApplicationOptions {
     project?: string | Project;
     stage?: string | Stage;
     status?: ApplicationStatus;
-    populate?: boolean;
+    //populate?: boolean;
 }
 
 export const validateProjectApplication = (ps: Partial<Application>): { valid: boolean; message?: string } => {

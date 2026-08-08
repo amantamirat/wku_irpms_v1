@@ -4,13 +4,12 @@ import {
     CreateProjectDTO,
     ExistsProjectDTO,
     GetProjectsDTO,
-    Options,
     UpdateProjectDTO
 } from "./project.dto";
 import { IProject, Project, ProjectStatus } from "./project.model";
 
 export interface IProjectRepository {
-    findById(id: string, options?: Options): Promise<IProject | null>;
+    findById(id: string, populate?: boolean): Promise<IProject | null>;
     find(filters: GetProjectsDTO): Promise<Partial<IProject>[]>;
     create(dto: CreateProjectDTO): Promise<IProject>;
     update(id: string, data: UpdateProjectDTO["data"]): Promise<IProject | null>;
@@ -39,84 +38,51 @@ export class ProjectRepository implements IProjectRepository {
 
     async findById(
         id: string,
-        options?: Options
-    ) {
+        populate?: boolean
+    ): Promise<IProject | null> {
         let dbQuery = Project.findById(new mongoose.Types.ObjectId(id));
 
-        const populate = options?.populate;
-
-        if (populate?.leadPI) {
-            dbQuery = dbQuery.populate("leadPI");
-        }
-
-        if (populate?.grant) {
-            dbQuery = dbQuery.populate("grant");
-        }
-
-        if (populate?.currentApplication) {
-            dbQuery = dbQuery.populate("currentApplication");
+        if (populate) {
+            dbQuery = dbQuery
+                .populate("leadPI")
+                .populate("calendar")
+                .populate("grant")
+                .populate("themes");
         }
 
         return dbQuery.lean<IProject>().exec();
     }
 
-    async find(
-        filters: GetProjectsDTO,
-        session?: ClientSession
-    ) {
-        const query: any = {};
+    async find(filters: GetProjectsDTO) {
+        const query: Record<string, any> = {};
 
-        // status
         if (filters.status) {
             query.status = filters.status;
         }
 
-        // applicant
         if (filters.leadPI) {
             query.leadPI = new mongoose.Types.ObjectId(filters.leadPI);
         }
 
-        // grant
         if (filters.grant) {
             query.grant = new mongoose.Types.ObjectId(filters.grant);
         }
 
-        // call
         if (filters.call) {
             query.call = new mongoose.Types.ObjectId(filters.call);
         }
 
         let dbQuery = Project.find(query);
 
-        const populate = filters.options?.populate;
-
-        // applicant populate
-        if (populate?.leadPI) {
-            dbQuery = dbQuery.populate("leadPI");
+        if (filters.populate) {
+            dbQuery = dbQuery
+                .populate("leadPI")
+                .populate("grant")
+                .populate("calendar")
+                .populate("themes");
         }
-
-        // grant populate
-        if (populate?.grant) {
-            dbQuery = dbQuery.populate("grant");
-        }
-
-        // currentStage populate
-        if (populate?.currentApplication) {
-            dbQuery = dbQuery.populate("currentApplication");
-        }
-
-        if (populate?.calendar) {
-            dbQuery = dbQuery.populate("calendar");
-        }
-
-        // session
-        if (session) {
-            dbQuery = dbQuery.session(session);
-        }
-
         return dbQuery.lean<IProject[]>().exec();
     }
-
     async create(dto: CreateProjectDTO) {
         const data = {
             ...dto,

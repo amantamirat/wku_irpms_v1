@@ -88,13 +88,6 @@ export const ConstraintView: React.FC<ConstraintViewProps> = ({
                     No active limits or parameters defined for this constraint model.
                 </div>
             )}
-
-            {/* Cautionary Note */}
-            <div className="mt-4 p-3 bg-yellow-50 border-left-3 border-yellow-500 border-round-right">
-                <p className="m-0 text-xs text-yellow-800 line-height-2">
-                    <strong>Note:</strong> Application associated with this call must comply with these bounds to qualify for submission.
-                </p>
-            </div>
         </div>
     );
 };

@@ -81,7 +81,7 @@ export class CalendarController {
         id: String(id),
         current: current,
         next: next,
-        applicantId: req.auth.userId,
+        userId: req.auth.userId,
       };
       const updated = await this.service.transitionState(dto);
       successResponse(res, 200, "Calendar status updated successfully", updated);

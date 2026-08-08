@@ -11,7 +11,7 @@ const end_point = '/project/reviewers';
 
 export const ReviewerApi: EntityApi<Reviewer, GetReviewersOptions | undefined> = {
 
-    async getAll(options?: GetReviewersOptions): Promise<Reviewer[]> {
+    async getAll(options?: GetReviewersOptions, populate?: boolean): Promise<Reviewer[]> {
         const query = new URLSearchParams();
 
         if (options) {
@@ -22,8 +22,8 @@ export const ReviewerApi: EntityApi<Reviewer, GetReviewersOptions | undefined> =
                 query.append("reviewer", sanitized.reviewer as string);
             }
 
-            if (sanitized.projectApplication) {
-                query.append("application", sanitized.projectApplication as string);
+            if (sanitized.application) {
+                query.append("application", sanitized.application as string);
             }
 
             // NEW: Handle Status Array or String
@@ -36,8 +36,8 @@ export const ReviewerApi: EntityApi<Reviewer, GetReviewersOptions | undefined> =
                 }
             }
 
-            if (options.populate !== undefined) {
-                query.append("populate", String(options.populate));
+            if (populate !== undefined) {
+                query.append("populate", String(populate));
             }
         }
 

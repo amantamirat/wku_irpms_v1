@@ -11,7 +11,7 @@ export class ProfileRepository {
         return EligibilityProfile.find().sort({ createdAt: -1 });
     }
 
-    async findById(id: string) {
+    async findById(id: string): Promise<IEligibilityProfile | null> {
         return EligibilityProfile.findById(id);
     }
 

@@ -7,8 +7,8 @@ export interface IRange {
 }
 export const RangeSchema = new Schema<IRange>(
   {
-    min: { type: Number, default: 0, required: true },
-    max: { type: Number, default: Infinity, required: true },
+    min: { type: Number, default: 0 },
+    max: { type: Number, default: Infinity },
   },
   { _id: false } // prevents extra _id for subdocument
 );
@@ -16,9 +16,9 @@ export const RangeSchema = new Schema<IRange>(
 export interface IComposition extends Document {
   name: string;
   description?: string;
-  leadProfileRule?: mongoose.Types.ObjectId;
-  leadHistoryRule?: mongoose.Types.ObjectId;
-  memberRequirements: mongoose.Types.ObjectId[];
+  leadProfileRule?: mongoose.Types.ObjectId;//profile
+  leadHistoryRule?: mongoose.Types.ObjectId;//history
+  memberRequirements?: mongoose.Types.ObjectId[];
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -101,7 +101,7 @@ export class ApplicationController {
                 id: String(id),
                 current: current,
                 next: next,
-                applicantId: req.auth.userId,
+                userId: req.auth.userId,
             };
 
             const updated = await this.service.transitionState(dto);
@@ -140,11 +140,11 @@ export class ApplicationController {
     // ---------------------------------------------------
     get = async (req: Request, res: Response) => {
         try {
-            const { project, grantStage, status, populate, skip, limit } = req.query;
+            const { project, stage, status, populate, skip, limit } = req.query;
 
             const dto: GetApplicationDTO = {
                 project: project as string,
-                stage: grantStage as string,
+                stage: stage as string,
                 //grantAllocation: grantAllocation as string,
                 //callStage: callStage as string,
                 status: status as any,

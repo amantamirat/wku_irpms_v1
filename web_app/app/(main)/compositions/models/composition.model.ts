@@ -2,7 +2,7 @@ import { HistoryRule } from "./history.model";
 import { EligibilityProfile } from "./profile.model";
 import { MemberRequirement } from "./requirement.model";
 
-export type Range = {
+export type IRange = {
   min: number;
   max: number;
 };
@@ -20,7 +20,7 @@ export type Composition = {
 
 // --- Helper Validation Function for Ranges ---
 export const isValidRange = (
-  range: Range | undefined,
+  range: IRange | undefined,
   fieldName: string
 ): { valid: boolean; message?: string } => {
   if (!range) return { valid: true };
@@ -57,6 +57,7 @@ export const validateComposition = (
   }
 
 
+  /*
   if (!composition.memberRequirements ||
     composition.memberRequirements.length === 0) {
 
@@ -65,6 +66,7 @@ export const validateComposition = (
       message: "At least one member requirement is required.",
     };
   }
+    */
 
 
   return {

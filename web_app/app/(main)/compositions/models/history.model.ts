@@ -1,13 +1,13 @@
-import { isValidRange, Range } from "./composition.model";
+import { isValidRange, IRange } from "./composition.model";
 
 export type HistoryRule = {
     _id?: string;
     name: string;
     description?: string;
-    submitted?: Range;
-    rejected?: Range;
-    completed?: Range;
-    granted?: Range;
+    submitted?: IRange;
+    rejected?: IRange;
+    completed?: IRange;
+    granted?: IRange;
     createdAt?: string | Date;
     updatedAt?: string | Date;
 };

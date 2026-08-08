@@ -52,6 +52,33 @@ export class CompositionController {
         }
     };
 
+
+    // ✅ Get  By Id
+    getById = async (req: Request, res: Response) => {
+        try {
+            const {
+                id
+            } = req.params;
+            const composition =
+                await this.service.getById(id);
+            successResponse(
+                res,
+                200,
+                "Composition requirement fetched successfully",
+                composition
+            );
+
+        } catch (err: any) {
+            errorResponse(
+                res,
+                400,
+                err.message,
+                err
+            );
+        }
+
+    };
+
     // ✅ Update Composition
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {

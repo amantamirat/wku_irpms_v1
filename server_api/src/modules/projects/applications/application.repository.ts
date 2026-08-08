@@ -72,7 +72,7 @@ export class ApplicationRepository implements IApplicationRepository {
             query.status = options.status;
         }
 
-       
+
 
         // Main query
         const dbQuery = Application.find(query);
@@ -84,12 +84,14 @@ export class ApplicationRepository implements IApplicationRepository {
         // 3. Populate
         if (options.populate) {
             dbQuery
-                .populate({
-                    path: "project",
-                    populate: {
-                        path: "leadPI",
-                    }
-                })
+                /*
+                    .populate({
+                        path: "project",
+                        populate: {
+                            path: "leadPI",
+                        }
+                    })*/
+                .populate("project")
                 .populate("stage");
         }
 
@@ -183,13 +185,13 @@ export class ApplicationRepository implements IApplicationRepository {
     async exists(filters: ExistsApplicationDTO): Promise<boolean> {
         const query: any = {};
 
-        const { stage: grantStage, project } = filters;
+        const { stage, project } = filters;
 
-        if (grantStage) {
-            query.grantStage = new mongoose.Types.ObjectId(grantStage);
+        if (stage) {
+            query.grantStage = new mongoose.Types.ObjectId(stage);
         }
 
-        
+
         if (project) {
             query.project = new mongoose.Types.ObjectId(project);
         }

@@ -1,4 +1,6 @@
 import { Calendar } from "../../calendars/models/calendar.model";
+import { Composition } from "../../compositions/models/composition.model";
+import { Constraint } from "../../constraints/models/constraint.model";
 import { Grant } from "../../grants/models/grant.model";
 import { Organization } from "../../organizations/models/organization.model";
 
@@ -8,22 +10,15 @@ export enum CallStatus {
     closed = "closed"
 }
 
-/*
-export type CallDeadline = {
-    grantStage: string | GrantStage;
-    submission: string | Date;
-    evaluation: string | Date;
-};*/
 
-// 2. Update your main Call type
 export type Call = {
     _id?: string;
     grant?: string | Grant; // The new single source of truth
     calendar?: string | Calendar;
     organization?: string | Organization;
     title?: string;
-    //allocatedBudget?: number;
-    //usedBudget?: number;
+    constraint?: string | Constraint;
+    composition?: string | Composition;
     description?: string | null;
     deadline?: Date;
     status?: CallStatus;
@@ -54,38 +49,37 @@ export const validateCall = (call: Partial<Call>): { valid: boolean; message?: s
     return { valid: true };
 };
 
-export const sanitizeCall = (call: Partial<Call>): Partial<Call> => {
-    const sanitized: any = { ...call };
+export function sanitizeCall(call: Partial<Call>): Partial<Call> {
+    return {
+        ...call,
 
-    if (typeof sanitized.grant === "object" && sanitized.grant !== null) {
-        sanitized.grant = sanitized.grant._id;
-    }
+        grant:
+            typeof call.grant === "object" && call.grant !== null
+                ? call.grant._id
+                : call.grant,
 
-    if (typeof sanitized.calendar === "object" && sanitized.calendar !== null) {
-        sanitized.calendar = sanitized.calendar._id;
-    }
+        calendar:
+            typeof call.calendar === "object" && call.calendar !== null
+                ? call.calendar._id
+                : call.calendar,
 
-    if (typeof sanitized.organization === "object" && sanitized.organization !== null) {
-        sanitized.organization = sanitized.organization._id;
-    }
+        organization:
+            typeof call.organization === "object" && call.organization !== null
+                ? call.organization._id
+                : call.organization,
 
-    if (Array.isArray(sanitized.deadlines)) {
-        sanitized.deadlines = sanitized.deadlines.map((deadline: any) => ({
-            ...deadline,
-            grantStage:
-                typeof deadline.grantStage === "object" &&
-                    deadline.grantStage !== null
-                    ? deadline.grantStage._id
-                    : deadline.grantStage
-        }));
-    }
+        constraint:
+            typeof call.constraint === "object" && call.constraint !== null
+                ? call.constraint._id
+                : call.constraint,
 
-    if (sanitized.description === "") {
-        sanitized.description = null;
-    }
-
-    return sanitized as Partial<Call>;
-};
+        composition:
+            typeof call.composition === "object" && call.composition !== null
+                ? call.composition._id
+                : call.composition,
+        description: call.description === "" ? null : call.description,
+    };
+}
 
 
 export const createEmptyCall = (call?: Partial<Call>): Call => ({

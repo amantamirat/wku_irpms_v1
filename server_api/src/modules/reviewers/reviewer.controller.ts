@@ -23,10 +23,10 @@ export class ReviewerController {
         try {
             if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
-            const { projectApplication, reviewer, weight } = req.body;
+            const {  application, reviewer, weight } = req.body;
 
             const dto: CreateReviewerDTO = {
-                projectApplication,
+                application: application,
                 reviewer,
                 weight,
                 userId: req.auth.userId
@@ -43,10 +43,10 @@ export class ReviewerController {
     // -----------------------
     get = async (req: Request, res: Response) => {
         try {
-            const { projectApplication, reviewer, populate, status } = req.query;
+            const { application, reviewer, populate, status } = req.query;
 
             const filter: GetReviewersDTO = {
-                projectApplication: projectApplication ? String(projectApplication) : undefined,
+                application: application ? String(application) : undefined,
                 reviewer: reviewer ? String(reviewer) : undefined,
                 ...(populate !== undefined && { populate: populate === "true" }),
 
@@ -90,7 +90,7 @@ export class ReviewerController {
                 id: String(id),
                 current: current,
                 next: next,
-                applicantId: req.auth.userId,
+                userId: req.auth.userId,
             };
             const updated = await this.service.transitionState(dto);
             successResponse(res, 200, "Reviewer status updated successfully", updated);

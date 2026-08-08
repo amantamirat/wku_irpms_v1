@@ -10,6 +10,11 @@ export const HistoryApi: EntityApi<HistoryRule> = {
         return createdData as HistoryRule;
     },
 
+    async getById(id: string, populate?: boolean): Promise<HistoryRule> {
+        const query = populate !== undefined ? `?populate=${populate}` : '';
+        return ApiClient.get(`${end_point}/${id}${query}`);
+    },
+
     async getAll(populate): Promise<HistoryRule[]> {
         const query = new URLSearchParams();
         if (populate) query.append("populate", String(populate));

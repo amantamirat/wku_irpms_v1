@@ -21,6 +21,9 @@ import { Composition } from "./models/composition.model";
 import { HistoryRule } from "./models/history.model";
 import { EligibilityProfile } from "./models/profile.model";
 import { MemberRequirement } from "./models/requirement.model";
+import { HistoryRuleView } from "./components/HistoryRuleView";
+import { EligibilityProfileView } from "./components/EligibilityProfileView";
+import { MemberRequirementView } from "./components/MemberRequirementView";
 
 // --- Helpers for Compositions Tab ---
 const renderEntityName = (
@@ -144,6 +147,11 @@ const ProfilesTab = createEntityManager<EligibilityProfile>({
     createNew: () => ({ name: "", description: "" }),
     query: () => undefined,
     SaveDialog: SaveProfile,
+    expandable: {
+        template: (profile) => (
+            <EligibilityProfileView profile={profile} />
+        )
+    },
     permissionPrefix: "composition"
 });
 
@@ -170,6 +178,11 @@ const HistoryTab = createEntityManager<HistoryRule>({
     createNew: () => ({ name: "", description: "" }),
     query: () => undefined,
     SaveDialog: SaveHistory,
+    expandable: {
+        template: (hist) => (
+            <HistoryRuleView historyRule={hist} />
+        )
+    },
     permissionPrefix: "composition"
 });
 
@@ -226,6 +239,11 @@ const RequirementsTab = createEntityManager<MemberRequirement>({
     }),
     query: () => undefined,
     SaveDialog: SaveRequirement,
+    expandable: {
+        template: (requirement) => (
+            <MemberRequirementView requirement={requirement} />
+        )
+    },
     permissionPrefix: "composition"
 });
 

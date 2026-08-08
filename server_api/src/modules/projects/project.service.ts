@@ -11,19 +11,18 @@ import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
-//import { CompositionValidator } from "../compositions/composition.validator";
 import { GrantStatus } from "../grants/grant.model";
 import { IGrantRepository } from "../grants/grant.repository";
-import { NotificationService } from "../notifications/notification.service";
 import { CollaboratorStatus } from "./collaborators/collaborator.model";
 import { ICollaboratorRepository } from "./collaborators/collaborator.repository";
 import { CollaboratorService } from "./collaborators/collaborator.service";
 import { PhaseStatus } from "./phase/phase.model";
 import { IPhaseRepository } from "./phase/phase.repository";
 import { PhaseService } from "./phase/phase.service";
-import { IProject, ProjectStatus } from "./project.model";
+import { ProjectStatus } from "./project.model";
 import { PROJECT_TRANSITIONS } from "./project.state-machine";
 import { ConstraintValidationService } from "../constraints/services/constraint-validator.service";
+import { ICallRepository } from "../calls/call.repository";
 
 
 export class ProjectService {
@@ -35,9 +34,9 @@ export class ProjectService {
         private readonly grantRepo: IGrantRepository,
         private readonly collabService: CollaboratorService,
         private readonly phaseService: PhaseService,
-        //private readonly compValidator?: CompositionValidator,
+        private readonly callRepo: ICallRepository,
         private readonly constValidator?: ConstraintValidationService,
-        private readonly notificationService?: NotificationService,
+        //private readonly notificationService?: NotificationService,
     ) { }
 
 
@@ -50,18 +49,6 @@ export class ProjectService {
             const grantDoc = await this.grantRepo.findById(grant);
             if (!grantDoc) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
             if (grantDoc.status !== GrantStatus.active) throw new Error(ERROR_CODES.GRANT_NOT_ACTIVE);
-            const constraintId = String(grantDoc.constraint);
-            if (constraintId && this.constValidator) {
-                const result = await this.constValidator.validateProject(constraintId, dto);
-                if (!result.valid) {
-                    throw new AppError(
-                        ERROR_CODES.INVALID_CONSTRAINT,
-                        "Constraint validation failed",
-                        400,
-                        result
-                    );
-                }
-            }
         }
         const created = await this.projectRepo.create({ ...dto, createdBy: userId });
         if (!created) {
@@ -108,8 +95,8 @@ export class ProjectService {
         return this.projectRepo.find(options);
     }
 
-    async getById(id: string) {
-        const proj = await this.projectRepo.findById(id);
+    async getById(id: string, populate?: boolean) {
+        const proj = await this.projectRepo.findById(id, populate);
         if (!proj) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
         return proj;
     }
@@ -123,43 +110,27 @@ export class ProjectService {
         if (projectDoc.status !== ProjectStatus.draft)
             throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
 
-
-        // Resolve next values
-        const nextTitle = data.title ?? projectDoc.title;
-        const nextSummary = data.summary ?? projectDoc.summary;
-        // Validate metadata only if changed
-        if (
-            nextTitle !== projectDoc.title ||
-            nextSummary !== projectDoc.summary
-        ) {
-            /*
-            await this.constValidator.validateMetadata(
-                grantId,
-                nextTitle,
-                nextSummary
-            );
-            */
-        }
         const nextThemes = data.themes ?? projectDoc.themes.map(String);
-
         const themesChanged =
             JSON.stringify(projectDoc.themes.map(String).sort()) !==
             JSON.stringify(nextThemes.map(String).sort());
 
-        if (themesChanged) {
-            const grantId = String(projectDoc.grant);
-            const grantDoc = await this.grantRepo.findById(grantId);
-            if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
-            const constraintId = String(grantDoc.constraint);
-            if (constraintId && this.constValidator) {
-                const result = await this.constValidator.validateThemes(constraintId, nextThemes);
-                if (!result.valid) {
-                    throw new AppError(
-                        ERROR_CODES.INVALID_CONSTRAINT,
-                        "Theme validation failed",
-                        400,
-                        result
-                    );
+        if (projectDoc.call && themesChanged) {
+            const callDoc = await this.callRepo.findById(String(projectDoc.call));
+            if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+
+            if (callDoc.constraint) {
+                const constraintId = String(callDoc.constraint);
+                if (constraintId && this.constValidator) {
+                    const result = await this.constValidator.validateThemes(constraintId, nextThemes);
+                    if (!result.valid) {
+                        throw new AppError(
+                            ERROR_CODES.INVALID_CONSTRAINT,
+                            "Theme validation failed",
+                            400,
+                            result
+                        );
+                    }
                 }
             }
         }

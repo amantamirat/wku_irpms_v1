@@ -10,7 +10,7 @@ export enum ReviewerStatus {
 
 export type Reviewer = {
     _id?: string;
-    projectApplication?: string | Application;
+    application?: string | Application;
     reviewer?: string | User;
     weight?: number;
     score?: number;
@@ -22,14 +22,13 @@ export type Reviewer = {
 
 export interface GetReviewersOptions {
     reviewer?: string | User;
-    projectApplication?: string | Application;
+    application?: string | Application;
     status?: ReviewerStatus | ReviewerStatus[];
-    populate?: boolean;
 }
 
 export const validateReviewer = (reviewer: Reviewer): { valid: boolean; message?: string } => {
-    if (!reviewer.projectApplication) {
-        return { valid: false, message: 'Project Application is required.' };
+    if (!reviewer.application) {
+        return { valid: false, message: 'Application is required.' };
     }
     if (!reviewer.reviewer) {
         return { valid: false, message: 'Reviewer is required.' };
@@ -40,10 +39,10 @@ export const validateReviewer = (reviewer: Reviewer): { valid: boolean; message?
 export const sanitizeReviewer = (reviewer: Partial<Reviewer | GetReviewersOptions>): Reviewer => {
     return {
         ...reviewer,
-        projectApplication:
-            typeof reviewer.projectApplication === "object" && reviewer.projectApplication !== null
-                ? (reviewer.projectApplication as any)._id
-                : reviewer.projectApplication,
+        application:
+            typeof reviewer.application === "object" && reviewer.application !== null
+                ? (reviewer.application as any)._id
+                : reviewer.application,
         reviewer:
             typeof reviewer.reviewer === "object" && reviewer.reviewer !== null
                 ? (reviewer.reviewer as User)._id

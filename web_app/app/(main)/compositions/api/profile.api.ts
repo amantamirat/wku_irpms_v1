@@ -10,6 +10,11 @@ export const ProfileApi: EntityApi<EligibilityProfile> = {
         return createdData as EligibilityProfile;
     },
 
+    async getById(id: string, populate?: boolean): Promise<EligibilityProfile> {
+        const query = populate !== undefined ? `?populate=${populate}` : '';
+        return ApiClient.get(`${end_point}/${id}${query}`);
+    },
+
     async getAll(populate): Promise<EligibilityProfile[]> {
         const query = new URLSearchParams();
         if (populate) query.append("populate", String(populate));

@@ -34,7 +34,7 @@ export class ReviewerService {
     }
 
     async create(dto: CreateReviewerDTO) {
-        const { projectApplication, reviewer, weight } = dto;
+        const { application: projectApplication, reviewer, weight } = dto;
 
         const projectAppDoc = await this.applicationRepo.findById(projectApplication, {
             populate: {
@@ -98,7 +98,7 @@ export class ReviewerService {
     }
 
     async transitionState(dto: TransitionRequestDto) {
-        const { id, current, next, applicantId } = dto;
+        const { id, current, next, userId: applicantId } = dto;
         if (!applicantId) return;
         //chek projectstage status
         const reviewerDoc = await this.repository.findById(id);
@@ -107,7 +107,7 @@ export class ReviewerService {
         }
 
 
-        const projectStageDoc = await this.applicationRepo.findById(String(reviewerDoc.projectApplication), {
+        const projectStageDoc = await this.applicationRepo.findById(String(reviewerDoc.application), {
             populate: {
                 grantStage: true
             }

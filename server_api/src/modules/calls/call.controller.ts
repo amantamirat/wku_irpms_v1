@@ -13,8 +13,8 @@ export class CallController {
 
     create = async (req: Request, res: Response) => {
         try {
-            const { grant, calendar, title, description } = req.body;
-            const dto: CreateCallDTO = { grant, calendar, title, description };
+            const { grant, calendar, title, description, constraint, composition } = req.body;
+            const dto: CreateCallDTO = { grant, calendar, title, constraint, composition, description };
             const call = await this.service.create(dto);
             successResponse(res, 201, "Call created successfully", call);
         } catch (err: any) {
@@ -55,10 +55,10 @@ export class CallController {
             if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const userId = req.auth.userId;
             const { id } = req.params;
-            const { title, description } = req.body;
+            const { title, description, constraint, composition } = req.body;
             const dto: UpdateCallDTO = {
                 id: String(id),
-                data: { title, description },
+                data: { title, description, constraint, composition },
                 userId: userId,
             };
             const updated = await this.service.update(dto);
@@ -77,7 +77,7 @@ export class CallController {
                 id: String(id),
                 current: current,
                 next: next,
-                applicantId: req.auth.userId,
+                userId: req.auth.userId,
             };
             const updated = await this.service.transitionState(dto);
             successResponse(res, 200, "Call status updated successfully", updated);

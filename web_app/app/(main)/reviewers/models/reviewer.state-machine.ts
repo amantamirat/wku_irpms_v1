@@ -13,3 +13,14 @@ export const REVIEWER_TRANSITIONS: Record<ReviewerStatus, ReviewerStatus[]> = {
     [ReviewerStatus.submitted]: [ReviewerStatus.approved, ReviewerStatus.accepted],
     [ReviewerStatus.approved]: [ReviewerStatus.submitted]
 };
+
+export const REVIEWER_USER_TRANSITIONS: Partial<Record<ReviewerStatus, ReviewerStatus[]>> = {
+    [ReviewerStatus.pending]: [ReviewerStatus.accepted],
+    [ReviewerStatus.accepted]: [ReviewerStatus.submitted, ReviewerStatus.pending],
+};
+
+export const REVIEWER_ADMIN_TRANSITIONS: Partial<Record<ReviewerStatus, ReviewerStatus[]>> = {
+    [ReviewerStatus.submitted]: [ReviewerStatus.approved, ReviewerStatus.accepted],
+    [ReviewerStatus.approved]: [ReviewerStatus.submitted]
+};
+

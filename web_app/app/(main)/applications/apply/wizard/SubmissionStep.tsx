@@ -146,10 +146,10 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                     <div className="surface-card border-left-3 border-orange-500 shadow-2 p-4 border-round-lg mb-3">
                         <div className="flex align-items-center text-orange-700 font-bold text-lg mb-2">
                             <i className="pi pi-shield mr-2 text-xl"></i>
-                            Grant Requirement Check Failed
+                            Call Requirement Check Failed
                         </div>
                         <p className="text-700 text-sm mt-0 mb-3">
-                            Your application submission does not satisfy all grant guidelines/constraints:
+                            Your application submission does not satisfy all call guidelines/constraints:
                         </p>
                         <div className="bg-orange-50 p-3 border-round border-1 border-orange-200">
                             <ul className="m-0 pl-3 text-sm text-orange-900">

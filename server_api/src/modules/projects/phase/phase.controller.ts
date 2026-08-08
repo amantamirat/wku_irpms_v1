@@ -106,7 +106,7 @@ export class PhaseController {
                 id: String(id),
                 current: current,
                 next: next,
-                applicantId: req.auth.userId,
+                userId: req.auth.userId,
             };
 
             const updated = await this.service.transitionState(dto);

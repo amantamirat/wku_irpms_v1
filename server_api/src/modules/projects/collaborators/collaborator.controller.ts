@@ -92,7 +92,7 @@ export class CollaboratorController {
                 id: String(id),
                 current: current,
                 next: next,
-                applicantId: req.auth.userId,
+                userId: req.auth.userId,
             };
             const updated = await this.service.transitionState(dto);
             successResponse(res, 200, "Collaborator status updated successfully", updated);

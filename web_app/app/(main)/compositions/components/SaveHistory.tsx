@@ -11,7 +11,7 @@ import { classNames } from 'primereact/utils';
 
 import { HistoryRule } from '../models/history.model';
 import { HistoryApi } from '../api/history.api';
-import { Range, isValidRange } from '../models/composition.model';
+import { IRange, isValidRange } from '../models/composition.model';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
 
 const SaveHistory: React.FC<EntitySaveDialogProps<HistoryRule>> = ({
@@ -38,7 +38,7 @@ const SaveHistory: React.FC<EntitySaveDialogProps<HistoryRule>> = ({
       return { valid: false, message: 'Rule Name is required.' };
     }
 
-    const metrics: { range?: Range; label: string }[] = [
+    const metrics: { range?: IRange; label: string }[] = [
       { range: localHistory.submitted, label: 'Submitted Projects' },
       { range: localHistory.rejected, label: 'Rejected Projects' },
       { range: localHistory.completed, label: 'Completed Projects' },

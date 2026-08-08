@@ -17,7 +17,7 @@ export const ApplicationApi: EntityApi<Application, GetProjectApplicationOptions
     // ---------------------------
     // Fetch / Query
     // ---------------------------
-    async getAll(options) {
+    async getAll(options, populate) {
         const query = new URLSearchParams();
 
         if (options) {
@@ -45,8 +45,8 @@ export const ApplicationApi: EntityApi<Application, GetProjectApplicationOptions
                 query.append("status", sanitized.status as string);
             }
 
-            if (options.populate !== undefined) {
-                query.append("populate", String(options.populate));
+            if (populate !== undefined) {
+                query.append("populate", String(populate));
             }
         }
 

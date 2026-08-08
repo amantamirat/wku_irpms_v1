@@ -14,19 +14,18 @@ import { CallApi } from '@/app/(main)/calls/api/call.api';
 import { Call } from '@/app/(main)/calls/models/call.model';
 
 // Local Components
-import ApplyWizard from '../wizard/ApplyWizard';
-import { GrantApi } from '@/app/(main)/grants/api/grant.api';
-import { Grant } from '@/app/(main)/grants/models/grant.model';
-import { Constraint } from '@/app/(main)/constraints/models/constraint.model';
 import { ConstraintApi } from '@/app/(main)/constraints/api/constraint.api';
 import { ConstraintView } from '@/app/(main)/constraints/components/ConstraintView';
+import { Constraint } from '@/app/(main)/constraints/models/constraint.model';
+import ApplyWizard from '../wizard/ApplyWizard';
+import { Project } from '@/app/(main)/projects/models/project.model';
 
 const ApplyPage = () => {
     const { id: callId } = useParams();
     const router = useRouter();
 
     const [call, setCall] = useState<Call | null>(null);
-    const [grant, setGrant] = useState<Grant | null>(null);
+    const [project, setProject] = useState<Partial<Project> | null>(null);
     const [constraint, setConstraint] = useState<Constraint | null>(null);
 
 
@@ -42,14 +41,16 @@ const ApplyPage = () => {
                 setLoading(true);
                 setError(null);
 
-                const callData = await CallApi.getById!(callId as string);
+                const callData = await CallApi.getById!(callId as string, true);
                 setCall(callData);
+                setProject({
+                    call: callData,
+                    grant: callData.grant,
+                    calendar: callData.calendar,
+                });
 
-                const grantData = await GrantApi.getById!(callData.grant as string);
-                setGrant(grantData);
-
-                if (grantData.constraint) {
-                    const constraintData = await ConstraintApi.getById!(grantData.constraint as string);
+                if (callData.constraint) {
+                    const constraintData = await ConstraintApi.getById!(callData.constraint as string);
                     setConstraint(constraintData);
                 }
 
@@ -109,14 +110,22 @@ const ApplyPage = () => {
                     <div className="flex align-items-center gap-2">
                         <i className="pi pi-shield text-primary text-xl"></i>
                         <span className="font-bold text-xl text-color">
-                            Grant Requirements
+                            Call Requirements
                         </span>
                     </div>
                 }
             >
                 <div className="px-3 pb-4">
                     {constraint ? (
-                        <ConstraintView constraint={constraint} />
+                        <>
+                            <ConstraintView constraint={constraint} />
+                            {/* Cautionary Note */}
+                            <div className="mt-4 p-3 bg-yellow-50 border-left-3 border-yellow-500 border-round-right">
+                                <p className="m-0 text-xs text-yellow-800 line-height-2">
+                                    <strong>Note:</strong> Applicants must satisfy all criteria outlined above to meet profile eligibility.
+                                </p>
+                            </div>
+                        </>
                     ) : (
                         <div className="flex flex-column align-items-center justify-content-center py-8 text-center">
                             <i className="pi pi-exclamation-circle text-4xl text-orange-500 mb-3"></i>
@@ -180,10 +189,9 @@ const ApplyPage = () => {
                 <div className={`col-12 ${showSidebar ? 'lg:col-8 xl:col-9' : 'lg:col-12'} transition-all transition-duration-300`}>
 
                     <div className="card shadow-2 border-top-3 border-primary surface-card min-h-screen p-0 md:p-4">
-                        {call ? (
+                        {call && project ? (
                             <ApplyWizard
-                                call={call}
-                            // constraints={constraints}
+                                project={project}
                             //onComplete={(data) => console.log('Final Data', data)}
                             />
                         ) : (

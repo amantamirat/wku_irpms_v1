@@ -14,7 +14,6 @@ export interface CreateGrantDTO {
     title: string;
     amount: number;
     thematic: string;
-    constraint?: string;
     description?: string;
 }
 
@@ -24,7 +23,6 @@ export interface UpdateGrantDTO {
         title: string;
         description: string;
         amount: number;
-        constraint?: string;
     }>;
     userId?: string;
 }

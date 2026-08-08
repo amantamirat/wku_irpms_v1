@@ -77,9 +77,9 @@ export const constraintValidator = new ConstraintValidationService(constraintRep
 
 // Services
 export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, constraintValidator);
-export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, constraintValidator);
+export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, callRepo, constraintValidator);
 export const projectService = new ProjectService(projectRepo, collaboratorRepo, phaseRepo,
-    grantRepo, collabService, phaseService);
+    grantRepo, collabService, phaseService, callRepo);
 export const applicationService = new ApplicationService(applicationRepo, projectRepo, grantRepo, callRepo, stageRepo, reviewerRepo,
     projectService, constraintValidator, templateValidtor);
 

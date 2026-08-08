@@ -17,6 +17,11 @@ export const MemberRequirementApi: EntityApi<MemberRequirement> = {
         return data as MemberRequirement[];
     },
 
+    async getById(id: string, populate?: boolean): Promise<MemberRequirement> {
+        const query = populate !== undefined ? `?populate=${populate}` : '';
+        return ApiClient.get(`${end_point}/${id}${query}`);
+    },
+
     async update(data: Partial<MemberRequirement>): Promise<MemberRequirement> {
         if (!data._id) {
             throw new Error("_id required.");

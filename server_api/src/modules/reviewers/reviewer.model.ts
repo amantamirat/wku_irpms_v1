@@ -4,7 +4,7 @@ import { ReviewerStatus } from "./reviewer.state-machine";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
 
 export interface IReviewer extends Document {
-    projectApplication: mongoose.Types.ObjectId;
+    application: mongoose.Types.ObjectId;
     reviewer: mongoose.Types.ObjectId;
     score?: number;
     weight?: number;
@@ -14,7 +14,7 @@ export interface IReviewer extends Document {
 }
 
 const ReviewerSchema = new Schema<IReviewer>({
-    projectApplication: {
+    application: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.APPLICATION,
         required: true,

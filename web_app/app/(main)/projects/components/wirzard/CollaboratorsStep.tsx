@@ -10,7 +10,7 @@ import { classNames } from 'primereact/utils';
 import { Project } from '../../models/project.model';
 import { User } from '@/app/(main)/users/models/user.model';
 import { UserApi } from '@/app/(main)/users/api/user.api';
-import { roleOptions } from '../../collaborators/models/collaborator.model';
+import { roleOptions } from '../../../collaborators/models/collaborator.model';
 import { Constraint } from '@/app/(main)/constraints/models/constraint.model';
 import { useAuth } from '@/contexts/auth-context';
 

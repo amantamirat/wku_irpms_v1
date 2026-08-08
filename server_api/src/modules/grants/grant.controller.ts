@@ -62,10 +62,10 @@ export class GrantController {
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.params;
-            const { title, description, amount, constraint } = req.body;
+            const { title, description, amount } = req.body;
             const dto: UpdateGrantDTO = {
                 id: String(id),
-                data: { title, description, amount, constraint }
+                data: { title, description, amount }
             };
             const updated = await this.service.update(dto);
             successResponse(res, 200, "Grant updated successfully", updated);
@@ -83,7 +83,7 @@ export class GrantController {
                 id: String(id),
                 current: current,
                 next: next,
-                applicantId: req.auth.userId,
+                userId: req.auth.userId,
             };
             const updated = await this.service.transitionState(dto);
             successResponse(res, 200, "Grant status updated successfully", updated);

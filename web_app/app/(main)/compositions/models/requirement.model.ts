@@ -1,5 +1,5 @@
 import { EligibilityProfile } from "./profile.model";
-import { isValidRange, Range } from "./composition.model";
+import { isValidRange, IRange } from "./composition.model";
 import { HistoryRule } from "./history.model";
 
 export enum AggregationMode {
@@ -14,7 +14,7 @@ export type MemberRequirement = {
     profile?: string | EligibilityProfile;
     historyRule?: string | HistoryRule;
     mode: AggregationMode;
-    threshold: Range;
+    threshold: IRange;
     createdAt?: string | Date;
     updatedAt?: string | Date;
 };

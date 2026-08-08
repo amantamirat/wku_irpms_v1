@@ -7,29 +7,19 @@ export enum CallStatus {
     closed = "closed"
 }
 
-export interface ICallDeadline {
-    grantStage: mongoose.Types.ObjectId;
-    submission: Date;
-    evaluation: Date;
-}
-
 export interface ICall extends Document {
     organization: mongoose.Types.ObjectId;
     calendar: mongoose.Types.ObjectId;
     grant: mongoose.Types.ObjectId;
     title: string;
     description?: string;
+    constraint?: mongoose.Types.ObjectId;
+    composition?: mongoose.Types.ObjectId;
     deadline?: Date | null;
     status: CallStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
-
-const CallDeadlineSchema = new mongoose.Schema({
-    grantStage: { type: Schema.Types.ObjectId, ref: COLLECTIONS.GRANT_STAGE, required: true },
-    submission: { type: Date, required: true },
-    evaluation: { type: Date, required: true }
-}, { _id: false });
 
 const CallSchema = new Schema<ICall>(
     {
@@ -42,6 +32,17 @@ const CallSchema = new Schema<ICall>(
         grant: { type: Schema.Types.ObjectId, ref: COLLECTIONS.GRANT, required: true },
         organization: { type: Schema.Types.ObjectId, ref: COLLECTIONS.ORGANIZATION, required: true },
         title: { type: String, required: true },
+        constraint: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.CONSTRAINT,
+            required: false,
+        },
+
+        composition: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.COMPOSITION,
+            required: false,
+        },
         description: { type: String },
         deadline: { type: Date },
         status: { type: String, enum: Object.values(CallStatus), required: true },

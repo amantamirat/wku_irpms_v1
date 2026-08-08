@@ -20,7 +20,7 @@ export default function QuickLinks() {
 
     const links: QuickLinkItem[] = useMemo(() => [
         {
-            href: '/projects/my-projects',
+            href: '/dashboard/my-projects/',
             label: 'My Projects',
             description: 'Manage your research, project and deliverables',
             icon: 'pi pi-briefcase',
@@ -29,8 +29,8 @@ export default function QuickLinks() {
         },
         {
             // Update: Changed from /reviewers/my-evaluations to your actual path
-            href: '/reviewers/my-evaluations', 
-            label: 'Review Panel',
+            href: '/dashboard/my-evaluations',
+            label: 'My Evaluations',
             description: 'Evaluate submitted proposals and scores',
             icon: 'pi pi-check-square',
             permission: PERMISSIONS.REVIEWER.READ,
@@ -38,14 +38,14 @@ export default function QuickLinks() {
         },
         {
             // Update: Ensure this matches your CollaboratorPage route
-            href: '/projects/collaborators/my-memberships',
+            href: '/dashboard/my-memberships',
             label: 'My Memberships',
             description: 'View teams and joint project efforts',
             icon: 'pi pi-users',
             permission: PERMISSIONS.COLLABORATOR.READ,
             color: 'bg-purple-100 text-purple-700'
         },
-        
+
         {
             href: '/reports/financial',
             label: 'Grant Tracking',
@@ -66,7 +66,7 @@ export default function QuickLinks() {
             <div className="grid">
                 {allowedLinks.map((link, index) => (
                     <div key={index} className="col-12 md:col-6 lg:col-3">
-                        <div 
+                        <div
                             className="p-3 shadow-1 border-round surface-card h-full cursor-pointer hover:shadow-3 transition-duration-200 p-ripple"
                             onClick={() => router.push(link.href)}
                         >

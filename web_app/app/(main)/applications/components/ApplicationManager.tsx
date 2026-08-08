@@ -17,12 +17,11 @@ import { StageApi } from "@/app/(main)/calls/stages/api/stage.api";
 interface ApplicationManagerProps {
     project?: Project;
     stage?: string | Stage;
-    callStage?: string | Stage;
     hideReviewer?: boolean;
     updateProject?: (project: Project) => void;
 }
 
-const ApplicationManager = ({ project, stage: grantStage, callStage, hideReviewer, updateProject }: ApplicationManagerProps) => {
+const ApplicationManager = ({ project, stage, hideReviewer, updateProject }: ApplicationManagerProps) => {
     const confirm = useConfirmDialog();
 
     const [stages, setStages] = useState<Stage[] | null>(null);
@@ -144,7 +143,7 @@ const ApplicationManager = ({ project, stage: grantStage, callStage, hideReviewe
                 }
             });
         }
-        if (project && !grantStage && !callStage) {
+        if (project && !stage) {
             cols.push({
                 header: "Stage Name",
                 body: (ps: Application) => typeof ps.stage === "object" ? (ps.stage as Stage)?.name : "General"
@@ -169,7 +168,7 @@ const ApplicationManager = ({ project, stage: grantStage, callStage, hideReviewe
             }
         );
         return cols;
-    }, [project, grantStage, callStage]);
+    }, [project, stage]);
 
     const Manager = useMemo(() =>
         createEntityManager<Application, GetProjectApplicationOptions | undefined>({
@@ -189,7 +188,7 @@ const ApplicationManager = ({ project, stage: grantStage, callStage, hideReviewe
             permissionPrefix: "project.application",
             query: () => ({
                 project: project,
-                stage: typeof grantStage === "object" ? grantStage._id : grantStage,
+                stage: typeof stage === "object" ? stage._id : stage,
                 populate: true
             }),
             workflow: {
@@ -221,7 +220,7 @@ const ApplicationManager = ({ project, stage: grantStage, callStage, hideReviewe
             //hideDeleteAction: !project,
             disableDeleteRow: (ps: Application) => ps.status !== ApplicationStatus.pending
         }),
-        [columns, project, grantStage, canCreateStage, nextStage]
+        [columns, project, stage, canCreateStage, nextStage]
     );
 
     return <Manager />;
