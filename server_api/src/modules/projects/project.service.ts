@@ -23,6 +23,7 @@ import { ProjectStatus } from "./project.model";
 import { PROJECT_TRANSITIONS } from "./project.state-machine";
 import { ConstraintValidationService } from "../constraints/services/constraint-validator.service";
 import { ICallRepository } from "../calls/call.repository";
+import { NotificationService } from "../notifications/notification.service";
 
 
 export class ProjectService {
@@ -38,8 +39,6 @@ export class ProjectService {
         private readonly constValidator?: ConstraintValidationService,
         //private readonly notificationService?: NotificationService,
     ) { }
-
-
 
 
     async create(dto: CreateProjectDTO, options?: { skipValidation?: boolean }) {
@@ -156,8 +155,7 @@ export class ProjectService {
             PROJECT_TRANSITIONS
         );
 
-        if (to === ProjectStatus.submitted ||
-            to === ProjectStatus.rejected ||
+        if (to === ProjectStatus.rejected ||
             to === ProjectStatus.active ||
             to === ProjectStatus.terminated ||
             to === ProjectStatus.completed
@@ -167,8 +165,20 @@ export class ProjectService {
         }
 
         if (to === ProjectStatus.draft) {
-            if (projectDoc.currentApplication) {
-                throw new AppError(ERROR_CODES.APPLICATION_ALREADY_EXISTS);
+            if (projectDoc.call) {
+                throw new AppError(
+                    ERROR_CODES.UNSUPPORTED_OPERTATION,
+                    "Projects associated with a call cannot be moved to draft status."
+                );
+            }
+        }
+
+        if (to === ProjectStatus.submitted) {
+            if (!projectDoc.call) {
+                throw new AppError(
+                    ERROR_CODES.UNSUPPORTED_OPERTATION,
+                    "Only projects associated with a call can be submitted."
+                );
             }
         }
 

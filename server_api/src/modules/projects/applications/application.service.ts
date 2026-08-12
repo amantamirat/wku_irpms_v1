@@ -5,18 +5,13 @@ import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { CallStatus } from "../../calls/call.model";
 import { ICallRepository } from "../../calls/call.repository";
-import { IStageRepository } from "../../calls/stages/stage.repository";
+import { StageService } from "../../calls/stages/stage.service";
 import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
-//import { CompositionValidator } from "../../compositions/composition.validator";
-import { GrantStatus } from "../../grants/grant.model";
-import { IGrantRepository } from "../../grants/grant.repository";
 import { NotificationService } from "../../notifications/notification.service";
 import { IReviewerRepository } from "../../reviewers/reviewer.repository";
 import { ReviewerStatus } from "../../reviewers/reviewer.state-machine";
 import { TemplateValidationService } from "../../templates/services/template-validation.service";
-import { ProjectAuth } from "../project.auth";
 import { ProjectStatus } from "../project.model";
-import { IProjectRepository } from "../project.repository";
 import { ProjectService } from "../project.service";
 import {
     ApplyProjectDTO,
@@ -26,66 +21,80 @@ import {
 } from "./application.dto";
 import { ApplicationStatus } from "./application.model";
 import { IApplicationRepository } from "./application.repository";
-import { ApplicationSynchronizer as ProjectSynchronizer } from "./application.synchronizer";
+import { ApplicationSynchronizer } from "./application.synchronizer";
 
 export class ApplicationService {
 
     constructor(
         private readonly repository: IApplicationRepository,
-        private readonly projectRepo: IProjectRepository,
-        private readonly grantRepo: IGrantRepository,
         private readonly callRepo: ICallRepository,
-        private readonly stageRepo: IStageRepository,
+        private readonly stageService: StageService,
         private readonly reviewerRepo: IReviewerRepository,
         private readonly projectService: ProjectService,
-        //private readonly constValidator: ConstraintValidatorOLD,
-        //private readonly compValidator: CompositionValidator,
         private readonly constraintValidator: ConstraintValidationService,
         private readonly templateValidator: TemplateValidationService,
-        private readonly synchronizer = new ProjectSynchronizer(projectRepo, repository, stageRepo),
+        private readonly synchronizer: ApplicationSynchronizer,
         private readonly notificationService?: NotificationService,
-        private readonly projAuth: ProjectAuth = new ProjectAuth(projectRepo),
-
-
     ) {
     }
 
-    async getProject(id: string): Promise<any> {
-        const projectDoc = await this.projectRepo.findById(id);
-        if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
-        return projectDoc;
-    }
-
-    async validateProject(project: string, applicant: string) {
-        const projectDoc = await this.projAuth.authProject(project, applicant);
-        if (
-            projectDoc.status !== ProjectStatus.draft
-            && projectDoc.status !== ProjectStatus.submitted
-        ) {
-            throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
-        }
-        return projectDoc;
-    }
     /**
-     * Create project stage (submission)
+     * Create project application
      */
-    async create(dto: CreateApplicationDTO, options?: { skipValidation?: boolean }) {
-        const { project, documentPath, userId } = dto;
-        if (!options?.skipValidation) {
-            const projectDoc = await this.getProject(project);
-            const callId = String(projectDoc.call);
-            const count = await this.repository.countByProject(project);
-            let nextOrder = count + 1;
-            const nextStageDoc = await this.stageRepo.findOne(callId, nextOrder);
-            if (!nextStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-            const deadline = nextStageDoc.deadline;
-            if (deadline < new Date()) {
-                throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
-            }
+    async create(
+        dto: CreateApplicationDTO, options?: { skipValidation?: boolean }
+    ) {
+        const { project, stage, documentPath } = dto;
 
-            if (nextStageDoc.template) {
-                const templateId = String(nextStageDoc.template);
-                const result = await this.templateValidator.validate(templateId, documentPath);
+        const projectDoc = await this.projectService.getById(project);
+
+        const stageDoc = await this.stageService.getById(stage);
+
+        const currentAppId = String(projectDoc.currentApplication);
+
+        if (currentAppId) {
+            const currentApp = await this.repository.findById(currentAppId);
+
+            if (!currentApp) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
+
+            const expectedNextStage = await this.stageService.getNextStage(String(currentApp.stage));
+            if (
+                !expectedNextStage ||
+                String(expectedNextStage._id) !== String(stage)
+            ) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_STAGE,
+                    "The provided stage is not the valid next stage for this project"
+                );
+            }
+        } else {
+            // First application must be Stage 1
+            if (stageDoc.order !== 1) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_STAGE,
+                    "First application must be submitted for Stage 1"
+                );
+            }
+        }
+
+        if (!options?.skipValidation) {
+            // Deadline
+            if (
+                stageDoc.deadline &&
+                new Date(stageDoc.deadline) < new Date()
+            ) {
+                throw new AppError(
+                    ERROR_CODES.STAGE_DEADLINE_PASSED
+                );
+            }
+            // Template
+            if (stageDoc.template) {
+                const result =
+                    await this.templateValidator.validate(
+                        String(stageDoc.template),
+                        documentPath
+                    );
+
                 if (!result.valid) {
                     throw new AppError(
                         ERROR_CODES.INVALID_DOCUMENT,
@@ -96,28 +105,30 @@ export class ApplicationService {
                 }
             }
         }
+
         try {
             const created = await this.repository.create(dto);
+
             await this.synchronizer.sync(project);
+
             if (this.notificationService) {
-                await this.notificationService.notifyStatusChange(
-                    userId,
-                    "Project",
-                    "Stage",
-                    ApplicationStatus.pending,
-                    undefined
-                ).catch(err => console.error("Notification failed", err));
+                await this.notificationService.notifyApplicationSubmitted(
+                    String(projectDoc.leadPI),
+                    projectDoc.title,
+                    stageDoc.name
+                );
             }
             return created;
+
         } catch (err: any) {
             if (err?.code === 11000) {
-                throw new AppError(ERROR_CODES.STAGE_ALREADY_EXISTS);
+                throw new AppError(
+                    ERROR_CODES.STAGE_ALREADY_EXISTS
+                );
             }
             throw err;
         }
     }
-
-
 
     async apply(dto: ApplyProjectDTO) {
         const { call, title, summary, leadPI, collaborators, phases, themes, userId, docPath } = dto;
@@ -128,27 +139,14 @@ export class ApplicationService {
         const callDoc = await this.callRepo.findById(call);
         if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
         if (callDoc.status !== CallStatus.active) throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
+
         const deadline = callDoc.deadline;
-        if (!deadline) {
-            throw new AppError(ERROR_CODES.CALL_DEADLINE_NOT_SET);
-        }
-        if (deadline < new Date()) {
-            throw new AppError(ERROR_CODES.CALL_DEADLINE_PASSED);
-        }
+        if (!deadline) throw new AppError(ERROR_CODES.CALL_DEADLINE_NOT_SET);
+        if (deadline < new Date()) throw new AppError(ERROR_CODES.CALL_DEADLINE_PASSED);
 
-
-        const stageDoc = await this.stageRepo.findOne(String(callDoc._id), 1);
-        if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        const stageDoc = await this.stageService.getFirstStage(String(callDoc._id));
         const stageDeadline = stageDoc.deadline;
-        if (stageDeadline < new Date()) {
-            throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
-        }
-
-
-        //const grantId = String(callDoc.grant);
-        // const grantDoc = await this.grantRepo.findById(grantId);
-        // if (!grantDoc) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
-        // if (grantDoc.status !== GrantStatus.active) throw new Error(ERROR_CODES.GRANT_NOT_ACTIVE);
+        if (stageDeadline < new Date()) throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
 
         if (callDoc.constraint) {
             const constraintId = String(callDoc.constraint);
@@ -178,12 +176,28 @@ export class ApplicationService {
 
         const skipValidation = { skipValidation: true };
         const calendarId = String(callDoc.calendar);
-        const createdProj = await this.projectService.create({ ...dto, grant: String(callDoc.grant), calendar: calendarId },
-            skipValidation);
-        const projectId = String(createdProj._id);
-        return await this.create({
-            project: projectId, stage: String(stageDoc._id), documentPath: docPath, userId: userId
-        }, skipValidation);
+        let projectId;
+        try {
+            const createdProj = await this.projectService.create({ ...dto, grant: String(callDoc.grant), calendar: calendarId },
+                skipValidation);
+            projectId = String(createdProj._id);
+            return await this.create({
+                project: projectId, stage: String(stageDoc._id), documentPath: docPath, userId: userId
+            }, skipValidation);
+
+        } catch (error) {
+            if (projectId) {
+                try {
+                    await this.projectService.delete({ id: projectId });
+                } catch (rollbackError) {
+                    console.error(
+                        `Failed to rollback project ${projectId}`,
+                        rollbackError
+                    );
+                }
+            }
+            throw error;
+        }
     }
 
     /**
@@ -210,24 +224,20 @@ export class ApplicationService {
     }
 
     async calculateTotalScore(id: string) {
-        const projStageDoc = await this.repository.findById(id, {
-            populate: {
-                grantStage: true
-            }
-        });
-        if (!projStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        const applicationDoc = await this.repository.findById(id);
+        if (!applicationDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
 
-        const grantStageDoc = projStageDoc.stage as unknown as any;
+        const stageDoc = await this.stageService.getById(String(applicationDoc.stage));
 
         const approvedReviews = await this.reviewerRepo.find({
             application: id,
             status: ReviewerStatus.approved
         });
 
-        if (approvedReviews.length < grantStageDoc.minReviewers) {
+        if (approvedReviews.length < stageDoc.minReviewers) {
             throw new AppError(
                 ERROR_CODES.INSUFFICIENT_REVIEWS,
-                `At least ${grantStageDoc.minReviewers} completed reviews are required before computing score.`
+                `At least ${stageDoc.minReviewers} completed reviews are required before computing score.`
             );
         }
 
@@ -245,7 +255,7 @@ export class ApplicationService {
             ) / totalWeight;
 
         // persist if changed (with float-safe comparison)
-        if (Math.abs((projStageDoc.totalScore ?? 0) - score) > 0.0001) {
+        if (Math.abs((applicationDoc.totalScore ?? 0) - score) > 0.0001) {
             await this.repository.update(id, { totalScore: score });
         }
 
@@ -253,21 +263,27 @@ export class ApplicationService {
     }
 
     /**
-     * Transition stage status (state machine)
+     * Transition stage status (state machine) use current application
      */
     async transitionState(dto: TransitionRequestDto) {
         const { id, current, next } = dto;
 
-        const projStageDoc = await this.repository.findById(id, {
-            populate: {
-                grantStage: true,
-                project: true
-            }
-        });
-        if (!projStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        const applicationDoc = await this.repository.findById(id);
+        if (!applicationDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
 
-        const projectData = projStageDoc.project as any;
-        const projStatus = projectData.status;
+        const projectId = String(applicationDoc.project);
+        const projectDoc = await this.projectService.getById(projectId);
+        if (!projectDoc.currentApplication) {
+            throw new AppError(ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND);
+        }
+        if (String(projectDoc.currentApplication) !== id) {
+            throw new AppError(ERROR_CODES.INVALID_APPLICATION);
+        }
+
+        const stageId = String(applicationDoc.stage);
+        const stageDoc = await this.stageService.getById(stageId);
+
+        const projStatus = projectDoc.status;
 
         if (projStatus !== ProjectStatus.draft && projStatus !== ProjectStatus.submitted
             && projStatus !== ProjectStatus.rejected && projStatus !== ProjectStatus.accepted
@@ -275,14 +291,13 @@ export class ApplicationService {
             throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
         }
 
-        const from = projStageDoc.status as ApplicationStatus;
+        const from = applicationDoc.status as ApplicationStatus;
         const to = next as ApplicationStatus;
 
         // Prevent race condition
         if (current && current !== from) {
             throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
         }
-
         // Validate state transition
         TransitionHelper.validateTransition(
             from,
@@ -293,29 +308,27 @@ export class ApplicationService {
             to === ApplicationStatus.accepted ||
             to === ApplicationStatus.rejected
         ) {
-            const totalScore = projStageDoc.totalScore;
+            const totalScore = applicationDoc.totalScore;
 
-            const grantStageDoc = projStageDoc.stage as unknown as any;
-
-            if ((totalScore === undefined || totalScore === null) && grantStageDoc.minReviewers > 0) {
+            if ((totalScore === undefined || totalScore === null) && stageDoc.minReviewers > 0) {
                 throw new AppError(
                     ERROR_CODES.SCORE_NOT_COMPUTED,
                     "Total score not computed. Please calculate score first."
                 );
             }
 
+            /*
             const countApproved = await this.reviewerRepo.countByProjectStage(id, ReviewerStatus.approved);
 
-            if (countApproved < grantStageDoc.minReviewers) {
+            if (countApproved < stageDoc.minReviewers) {
                 throw new AppError(
                     ERROR_CODES.INSUFFICIENT_REVIEWS,
-                    `At least ${grantStageDoc.minReviewers} completed reviews are required before computing score.`
+                    `At least ${stageDoc.minReviewers} completed reviews are required before computing score.`
                 );
             }
-
+*/
             if (to === ApplicationStatus.accepted) {
-                const minAcceptanceScore = grantStageDoc.minAcceptanceScore ?? 0;
-
+                const minAcceptanceScore = stageDoc.minAcceptanceScore ?? 0;
                 if ((totalScore ?? 0) < minAcceptanceScore) {
                     throw new AppError(
                         ERROR_CODES.SCORE_BELOW_THRESHOLD,
@@ -326,92 +339,197 @@ export class ApplicationService {
         }
 
         if (to === ApplicationStatus.pending) {
-            /*
-            if (await this.reviewerRepo.exist({ projectStage: id })) {
+            
+            if (await this.reviewerRepo.exist({ application: id })) {
                 throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
             }
-            */
+
         }
 
         const updated = await this.repository.updateStatus(id, to);
-        /**
-         * const syncedProjectDoc = await this.synchronizer.sync(projectData._id);
 
-        if (syncedProjectDoc.status === ProjectStatus.accepted) {
-            await this.notificationService.notifyProjectFinalization(
-                String(syncedProjectDoc.applicant),
-                syncedProjectDoc,
-                undefined // senderId if available
-            )
-        } else if (syncedProjectDoc.status === ProjectStatus.submitted ||
-            syncedProjectDoc.status === ProjectStatus.rejected
-        ) {
-            let nextStageInfo = undefined;
-            // Discover next stage only if current stage was accepted
-            if (to === ApplicationStatus.accepted) {
-                const grantStageDoc = projStageDoc.stage as unknown as IGrantStage;
-                const nextOrder = grantStageDoc.order + 1
-                const grantId = grantStageDoc.grant;
+        const synced = await this.synchronizer.sync(projectId);
 
-                const nextGrantStage = await this.grantStageRepo.findOne(String(grantId), nextOrder);
+        if (this.notificationService) {
+            const leadUser = String(projectDoc.leadPI);
+            const title = projectDoc.title;
+            const stageName = stageDoc.name;
 
-                if (nextGrantStage) {
-                    const nextCallStage = projectData.call
-                        ? await this.stageRepo.findOne(String(projectData.call), nextOrder)
-                        : null;
+            if (to === ApplicationStatus.rejected) {
+                await this.notificationService.notifyApplicationRejected(
+                    leadUser,
+                    title,
+                    stageName
+                );
+            } else if (to === ApplicationStatus.accepted) {
+                let nextStageInfo:
+                    | { name: string; deadline?: Date }
+                    | undefined;
+
+                try {
+                    const nextStage =
+                        await this.stageService.getNextStage(stageId);
 
                     nextStageInfo = {
-                        name: nextGrantStage.name,
-                        deadline: //nextCallStage?.status === CallStageStatus.active ?
-                            new Date()//nextCallStage?.deadline //: undefined
+                        name: nextStage.name,
+                        deadline: nextStage.deadline
+                            ? new Date(nextStage.deadline)
+                            : undefined
                     };
+                } catch (err: any) {
+                    // No next stage means this may be the final stage.
+                    // Only ignore the expected "next stage not found" error.
+                    if (
+                        err?.code !==
+                        ERROR_CODES.NEXT_STAGE_NOT_FOUND
+                    ) {
+                        throw err;
+                    }
                 }
-            }
-            const stageData = projStageDoc.stage as any;
 
-            await this.notificationService.notifyStatusChange(
-                String(projectData.applicant),
-                projectData.title,
-                stageData?.name || "Stage",
-                to,
-                nextStageInfo
-            ).catch(err => console.error("Notification failed", err));
+                await this.notificationService.notifyApplicationAccepted(
+                    leadUser,
+                    title,
+                    stageName,
+                    nextStageInfo
+                );
+            }
+            else if (to === ApplicationStatus.pending) {
+                await this.notificationService.notifyApplicationReturnedToPending(
+                    leadUser,
+                    title,
+                    stageName,
+                );
+            }
         }
-         * 
-         */
-        // Trigger Notification using the populated data
 
         return updated;
+    }
+
+    async withdraw(dto: { id: string; userId: string }) {
+        const { id, userId } = dto;
+
+        const applicationDoc = await this.repository.findById(id);
+
+        if (!applicationDoc) {
+            throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
+        }
+
+        if (applicationDoc.status !== ApplicationStatus.pending) {
+            throw new AppError(ERROR_CODES.APPLICATION_NOT_PENDING);
+        }
+
+        const projectId = String(applicationDoc.project);
+
+        const projectDoc = await this.projectService.getById(projectId);
+
+        // Only project lead can withdraw
+        if (String(projectDoc.leadPI) !== String(userId)) {
+            throw new AppError(ERROR_CODES.UNAUTHORIZED);
+        }
+
+        // Only the current application can be withdrawn
+        if (!projectDoc.currentApplication) {
+            throw new AppError(
+                ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND
+            );
+        }
+
+        if (String(projectDoc.currentApplication) !== String(id)) {
+            throw new AppError(ERROR_CODES.INVALID_APPLICATION);
+        }
+
+        // Cannot withdraw once reviewers exist
+        if (await this.reviewerRepo.exist({ application: id })) {
+            throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
+        }
+
+        // All business validation is already done above
+        const deleted = await this.delete(
+            { id, userId },
+            { skipValidation: true }
+        );
+
+        if (deleted) {
+            await this.notificationService?.notifyApplicationWithdrawn(
+                userId,
+                projectDoc.title,
+                "Last"
+            );
+        }
+
+        return deleted;
     }
 
     /**
      * Delete 
      */
-    async delete(dto: DeleteDto) {
+    async delete(
+        dto: DeleteDto,
+        options?: { skipValidation?: boolean }
+    ) {
         const { id, userId } = dto;
-        const appDoc = await this.repository.findById(id);
-        if (!appDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
-        if (appDoc.status !== ApplicationStatus.pending) throw new AppError(ERROR_CODES.APPLICATION_NOT_PENDING);
 
-        if (await this.reviewerRepo.exist({ application: id })) {
-            throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
+        const applicationDoc = await this.repository.findById(id);
+
+        if (!applicationDoc) {
+            throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
         }
 
-        const project = String(appDoc.project);
-        //await this.validateProject(project, userId ?? "");
+        const projectId = String(applicationDoc.project);
 
+        if (!options?.skipValidation) {
+            if (applicationDoc.status !== ApplicationStatus.pending) {
+                throw new AppError(
+                    ERROR_CODES.APPLICATION_NOT_PENDING
+                );
+            }
+
+            const projectDoc =
+                await this.projectService.getById(projectId);
+
+            if (!projectDoc.currentApplication) {
+                throw new AppError(
+                    ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND
+                );
+            }
+
+            if (
+                String(projectDoc.currentApplication) !== String(id)
+            ) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_APPLICATION
+                );
+            }
+
+            if (
+                await this.reviewerRepo.exist({
+                    application: id
+                })
+            ) {
+                throw new AppError(
+                    ERROR_CODES.REVIEWER_ALREADY_EXISTS
+                );
+            }
+        }
+
+        const stageDoc =
+            await this.stageService.getById(
+                String(applicationDoc.stage)
+            );
 
         const deleted = await this.repository.delete(id);
+
         if (deleted) {
-            const stageDoc = await this.stageRepo.findById(String(appDoc.stage));
-            await this.synchronizer.sync(project);
-            if (stageDoc?.order === 1) {
-                await this.projectService.delete({ id: project });
+            await this.synchronizer.sync(projectId);
+            if (stageDoc.order === 1) {
+                await this.projectService.delete({
+                    id: projectId
+                });
             }
         }
         return deleted;
     }
-
 
 }
 

@@ -1,9 +1,7 @@
 // collaborator.service.ts
-import { SYSTEM } from "../../../common/constants/system.constant";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { IUserRepository } from "../../users/user.repository";
 import { IProjectRepository } from "../project.repository";
 import {
     CreateCollaboratorDto,
@@ -12,13 +10,12 @@ import {
 } from "./collaborator.dto";
 import { ICollaboratorRepository } from "./collaborator.repository";
 
+import { ClientSession } from "mongoose";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
+import { NotificationService } from "../../notifications/notification.service";
 import { ProjectStatus } from "../project.model";
 import { CollaboratorStatus } from "./collaborator.model";
-import { ClientSession } from "mongoose";
-import { ProjectAuth } from "../project.auth";
-import { NotificationService } from "../../notifications/notification.service";
 //import { CompositionValidator } from "../../compositions/composition.validator";
 import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
 
@@ -29,10 +26,7 @@ export class CollaboratorService {
         private readonly collabRepo: ICollaboratorRepository,
         private readonly projectRepo: IProjectRepository,
         private readonly constraintValidator: ConstraintValidationService,
-        //private readonly compositionValidator: CompositionValidator,
         private readonly notificationService?: NotificationService,
-        private readonly projAuth: ProjectAuth = new ProjectAuth(projectRepo),
-
     ) {
     }
 
@@ -53,9 +47,9 @@ export class CollaboratorService {
             const projectDoc = await this.validateProject(project, userId ?? "");
             const grantId = String(projectDoc.grant);
             if (dto.isLeadPI) {
-               // await this.compositionValidator.validatePI(grantId, applicant);
+                // await this.compositionValidator.validatePI(grantId, applicant);
             } else {
-              //  await this.compositionValidator.validateCoPI(grantId, applicant);
+                //  await this.compositionValidator.validateCoPI(grantId, applicant);
             }
             const validationResult = await this.constraintValidator.validateParticipantCount(grantId, await this.collabRepo.countByProject(project) + 1);
             if (!validationResult.valid) {

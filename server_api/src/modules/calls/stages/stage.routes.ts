@@ -2,14 +2,12 @@ import { Router } from 'express';
 import { checkPermission, verifyActiveAccount } from '../../auth/auth.middleware';
 import { StageController } from './stage.controller';
 import { StageService } from './stage.service';
-import { StageRepository } from './stage.repository';
 
-import { EvaluationRepository } from '../../evaluations/evaluation.repository';
-import { CallRepository } from '../call.repository';
+import { callRepo, evalRepo, stageRepo } from '../../../core/container';
 
-const stageRepo = new StageRepository();
-const callRepo = new CallRepository();
-const evalRepo = new EvaluationRepository();
+//const stageRepo = new StageRepository();
+//const callRepo = new CallRepository();
+//const evalRepo = new EvaluationRepository();
 const service = new StageService(stageRepo, callRepo, evalRepo);
 const controller = new StageController(service);
 const router = Router();
@@ -22,6 +20,10 @@ router.post(
 );
 
 
+router.get('/next/:id', verifyActiveAccount,
+    checkPermission(["call.stage:read"]),
+    controller.getNext
+);
 
 
 router.get('/:id', verifyActiveAccount,

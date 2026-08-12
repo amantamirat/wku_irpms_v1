@@ -1,17 +1,16 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
 import { TransitionRequestDto } from "@/types/util";
-import { GetProjectApplicationOptions, Application, sanitizeProjectApplication } from "../models/application.model";
+import { GetProjectApplicationOptions, Application, sanitizeApplication } from "../models/application.model";
 import { Project, sanitize } from "../../projects/models/project.model";
 
 const end_point = "/project/applications";
-
-
 
 export const ApplicationApi: EntityApi<Application, GetProjectApplicationOptions | undefined>
     & {
         calculateTotalScore: (id: string) => Promise<number>;
         apply: (project: Partial<Project>) => Promise<Application>;
+        withdraw: (id: string) => Promise<boolean>;
     } = {
 
     // ---------------------------
@@ -21,7 +20,7 @@ export const ApplicationApi: EntityApi<Application, GetProjectApplicationOptions
         const query = new URLSearchParams();
 
         if (options) {
-            const sanitized = sanitizeProjectApplication(options);
+            const sanitized = sanitizeApplication(options);
 
             if (options.project) {
                 query.append("project", sanitized.project as string);
@@ -30,16 +29,6 @@ export const ApplicationApi: EntityApi<Application, GetProjectApplicationOptions
             if (options.stage) {
                 query.append("stage", sanitized.stage as string);
             }
-
-            /*
-            if (options.grantAllocation) {
-                query.append("grantAllocation", options.grantAllocation);
-            }
-
-            if (options.callStage) {
-                query.append("callStage", sanitized.callStage as string);
-            }
-                */
 
             if (options.status) {
                 query.append("status", sanitized.status as string);
@@ -64,12 +53,13 @@ export const ApplicationApi: EntityApi<Application, GetProjectApplicationOptions
     // ---------------------------
     // Create
     // ---------------------------
-    async create(stage) {
-        const sanitized = sanitizeProjectApplication(stage);
+    async create(application) {
+        const sanitized = sanitizeApplication(application);
         const formData = new FormData();
         formData.append("project", sanitized.project as string);
-        if (stage.file)
-            formData.append("document", stage.file);
+        formData.append("stage", sanitized.stage as string);
+        if (application.file)
+            formData.append("document", application.file);
         return ApiClient.post(`${end_point}`, formData);
     },
 
@@ -97,9 +87,9 @@ export const ApplicationApi: EntityApi<Application, GetProjectApplicationOptions
     // ---------------------------
     // Update
     // ---------------------------
-    async update(stage) {
+    async update(application) {
         // if (!stage._id) throw new Error("_id required");
-        return ApiClient.put(`${end_point}/${stage._id}`, sanitizeProjectApplication(stage));
+        return ApiClient.put(`${end_point}/${application._id}`, sanitizeApplication(application));
     },
 
     // ---------------------------
@@ -114,11 +104,17 @@ export const ApplicationApi: EntityApi<Application, GetProjectApplicationOptions
         const res = await ApiClient.post(`${end_point}/${id}/calculate-score`, {});
         return res.totalScore;
     },
+
+    async withdraw(id) {
+        return ApiClient.post(
+            `${end_point}/${id}/withdraw`, {}
+        );
+    },
+
     // ---------------------------
     // Delete
     // ---------------------------
-    async delete(stage) {
-        //if (!stage._id) throw new Error("_id required");
-        return ApiClient.delete(`${end_point}/${stage._id}`);
+    async delete(application) {
+        return ApiClient.delete(`${end_point}/${application._id}`);
     },
 };

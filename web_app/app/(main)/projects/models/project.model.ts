@@ -6,12 +6,14 @@ import { Theme } from "../../thematics/themes/models/theme.model";
 import { User } from "../../users/models/user.model";
 import { Collaborator, sanitizeCollaborator } from "../../collaborators/models/collaborator.model";
 import { Phase, sanitizePhase } from "../phases/models/phase.model";
+import { Application } from "../../applications/models/application.model";
 
 export enum ProjectStatus {
     draft = 'draft',
     submitted = "submitted",
     rejected = "rejected",
     accepted = "accepted", //add time when should the budget and duration will be modified
+    //approved="approved",
     granted = "granted",
     refused = 'refused',
     active = "active",
@@ -39,6 +41,7 @@ export type Project = {
     collaborators?: Collaborator[];// | string[];
     phases?: Phase[];
     file?: File;
+    currentApplication?: string | Application;
     //workspace?: string | Organization;
 }
 

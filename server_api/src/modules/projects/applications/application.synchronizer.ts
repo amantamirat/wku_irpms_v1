@@ -20,9 +20,9 @@ export class ApplicationSynchronizer {
         if (!projectDoc) {
             throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
         }
-
+        
         const latestApplication = await this.applicationRepo.findLatestByProject(project);
-
+        
         /**
          * Synchronize currentApplication
          */

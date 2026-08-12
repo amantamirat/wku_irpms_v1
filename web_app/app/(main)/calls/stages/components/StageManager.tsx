@@ -2,7 +2,6 @@
 
 import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
 import { createEntityManager } from "@/components/createEntityManager";
-import MyBadge from "@/templates/MyBadge";
 import { Call } from "../../models/call.model";
 import { StageApi } from "../api/stage.api";
 import {
@@ -10,10 +9,6 @@ import {
     GetStagesDTO,
     Stage
 } from "../models/stage.model";
-import {
-    CALL_STAGE_STATUS_ORDER,
-    CALL_STAGE_TRANSITIONS
-} from "../models/stage.state-machine";
 import SaveStage from "./SaveStage";
 
 interface StageManagerProps {

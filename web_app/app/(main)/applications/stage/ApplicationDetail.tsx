@@ -2,16 +2,21 @@ import { useAuth } from "@/contexts/auth-context";
 import { TabPanel, TabView } from "primereact/tabview";
 import { useMemo } from "react";
 import { Application } from "../models/application.model";
-import ReviewerManager from "@/app/(main)/reviewers/components/ReviewerManager";
+import ReviewerManager from "../../reviewers/application/Manager";
+import ProjectDetail from "../../projects/components/ProjectDetail";
 
 interface ApplicationDetailProps {
     application: Application;
-    hideReviewer?: boolean;
 }
 
-const ApplicationDetail = ({ application, hideReviewer }: ApplicationDetailProps) => {
+const ApplicationDetail = ({ application }: ApplicationDetailProps) => {
 
     const { hasPermission } = useAuth();
+
+    // Safely extract project ID whether application.project is an object or string ID
+    const projectId = typeof application?.project === "object" && application.project !== null
+        ? application.project._id
+        : (application?.project as string);
 
     /**
      * Define tabs in a scalable configuration array
@@ -20,10 +25,14 @@ const ApplicationDetail = ({ application, hideReviewer }: ApplicationDetailProps
         {
             header: "Reviewers",
             permission: "reviewer:read",
-            content: <ReviewerManager application={application} hideReviewer={hideReviewer} />
+            content: <ReviewerManager application={application} />
         },
-
-    ], [application]);
+        {
+            header: "Project",
+            permission: "project:read",
+            content: projectId ? <ProjectDetail project={projectId} /> : null
+        },
+    ], [application, projectId]);
 
     /**
      * Filter tabs based on permissions
@@ -44,4 +53,3 @@ const ApplicationDetail = ({ application, hideReviewer }: ApplicationDetailProps
 };
 
 export default ApplicationDetail;
-

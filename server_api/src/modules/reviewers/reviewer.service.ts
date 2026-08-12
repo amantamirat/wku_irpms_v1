@@ -18,6 +18,7 @@ import { FormType } from "../evaluations/criteria/criterion.model";
 import { IProject } from "../projects/project.model";
 //import { IProjectStageSynchronizer } from "./reviewer.synchronizer";
 import { NotificationService } from "../notifications/notification.service";
+import { IStage } from "../calls/stages/stage.model";
 
 export class ReviewerService {
 
@@ -34,38 +35,38 @@ export class ReviewerService {
     }
 
     async create(dto: CreateReviewerDTO) {
-        const { application: projectApplication, reviewer, weight } = dto;
+        const { application, reviewer, weight } = dto;
 
-        const projectAppDoc = await this.applicationRepo.findById(projectApplication, {
+        const projectAppDoc = await this.applicationRepo.findById(application, {
             populate: {
-                grantStage: true,
+                stage: true,
                 project: true
             }
         });
         if (!projectAppDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
 
-        const projectStageStatus = projectAppDoc.status;
-        if (projectStageStatus !== ApplicationStatus.pending)
+        const applicationStatus = projectAppDoc.status;
+        if (applicationStatus !== ApplicationStatus.pending)
             throw new AppError(ERROR_CODES.INVALID_DOC_STATUS);
 
-        const grantStageDoc = projectAppDoc.stage as unknown as any;
-        const countReviewers = await this.repository.countByProjectStage(projectApplication);
-        const maxReviewers = grantStageDoc.maxReviewers;
+        const stageDoc = projectAppDoc.stage as unknown as IStage;
+        const countReviewers = await this.repository.countByProjectStage(application);
+        const maxReviewers = stageDoc.maxReviewers;
         if (maxReviewers !== undefined && countReviewers >= maxReviewers) {
             throw new AppError(ERROR_CODES.REVIEWER_LIMIT_REACHED, `Reviewer limit reached. Maximum allowed is ${maxReviewers}.`);
         }
-        const applicantDoc = await this.userRepo.findById(reviewer);
-        if (!applicantDoc) throw new Error(ERROR_CODES.USER_NOT_FOUND);
+        const userDoc = await this.userRepo.findById(reviewer);
+        if (!userDoc) throw new Error(ERROR_CODES.USER_NOT_FOUND);
 
         const projectDoc = projectAppDoc.project as unknown as IProject;
         const collaborators = await this.collaboratorRepo.find({ project: String(projectDoc._id) });
         if (collaborators.find(c => String(c.member) === reviewer)) {
-            throw new AppError(ERROR_CODES.INVALID_REVIEWER, `Reviewr ${applicantDoc.name} is already a collaborator in the project.`);
+            throw new AppError(ERROR_CODES.INVALID_REVIEWER, `Reviewr ${userDoc.name} is already a collaborator in the project.`);
         }
         try {
             const created = await this.repository.create(dto);
             await this.notificationService.notifyReviewerAssigned(
-                reviewer, projectDoc.title, grantStageDoc.name
+                reviewer, projectDoc.title, stageDoc.name
             );
             //await this.synchronizer.sync(projectStage);
             return created;
@@ -107,14 +108,14 @@ export class ReviewerService {
         }
 
 
-        const projectStageDoc = await this.applicationRepo.findById(String(reviewerDoc.application), {
+        const applicationDoc = await this.applicationRepo.findById(String(reviewerDoc.application), {
             populate: {
-                grantStage: true
+                stage: true
             }
         });
-        if (!projectStageDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
+        if (!applicationDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
 
-        if (projectStageDoc.status !== ApplicationStatus.pending
+        if (applicationDoc.status !== ApplicationStatus.pending
         ) {
             throw new AppError(ERROR_CODES.INVALID_STAGE_STATUS);
         }
@@ -141,9 +142,9 @@ export class ReviewerService {
             const existingResults = await this.resultRepo.find({ reviewer: id });
             if (existingResults.length === 0) {
 
-                const grantStageDoc = projectStageDoc.stage as any;
+                const stageDoc = applicationDoc.stage as any;
 
-                const criteria = await this.criterionRepo.find({ evaluation: String(grantStageDoc.evaluation) });
+                const criteria = await this.criterionRepo.find({ evaluation: String(stageDoc.evaluation) });
                 await this.resultRepo.insertMany(
                     criteria.map(c => ({
                         reviewer: id,

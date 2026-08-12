@@ -7,19 +7,20 @@ import { PERMISSIONS } from "@/types/permissions";
 import { format } from "date-fns";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { TabPanel, TabView } from "primereact/tabview";
-
 import { Project } from "../models/project.model";
-import PhaseManager from "../phases/components/PhaseManager";
 import { ProjectApi } from "../api/project.api";
 import CollaboratorManager from "../../collaborators/project/Manager";
-import ApplicationManager from "../../applications/project/ApplicationManager";
+import ApplicationManager from "../../applications/project/Manager";
+import PhaseManager from "../phases/project/Manager";
+
 
 interface ProjectDetailProps {
     project: string | Project;
     updateProject?: (project: Project) => void;
+    enableEditing?:boolean;
 }
 
-export default function ProjectDetail({ project, updateProject }: ProjectDetailProps) {
+export default function ProjectDetail({ project, updateProject, enableEditing }: ProjectDetailProps) {
     const { hasPermission } = useAuth();
 
     const [projectData, setProjectData] = useState<Project | null>(
@@ -119,13 +120,14 @@ export default function ProjectDetail({ project, updateProject }: ProjectDetailP
             header: "Phases",
             icon: "pi pi-list",
             permission: PERMISSIONS.PHASE.READ,
-            content: <PhaseManager project={projectData} updateProject={handleUpdateProject} />
+            content: <PhaseManager project={projectData} enableEditing={enableEditing} />
+            // content: <PhaseManager project={projectData} updateProject={handleUpdateProject} />
         },
         {
             header: "Collaborators",
             icon: "pi pi-users",
             permission: PERMISSIONS.COLLABORATOR.READ,
-            content: <CollaboratorManager project={projectData} />
+            content: <CollaboratorManager project={projectData} enableEditing={enableEditing} />
         }
     ];
 
@@ -135,8 +137,8 @@ export default function ProjectDetail({ project, updateProject }: ProjectDetailP
             header: "Applications",
             icon: "pi pi-folder-open",
             // Use PERMISSIONS.APPLICATION?.READ or PERMISSIONS.PROJECT?.READ based on your setup
-            permission: (PERMISSIONS as any).APPLICATION?.READ || PERMISSIONS.PROJECT.READ, 
-            content: <ApplicationManager project={projectData} />
+            permission: (PERMISSIONS as any).APPLICATION?.READ || PERMISSIONS.PROJECT.READ,
+            content: <ApplicationManager project={projectData} enableEditing={enableEditing} />
         });
     }
 

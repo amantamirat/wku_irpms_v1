@@ -7,7 +7,7 @@ const end_point = "/call/stages";
 
 export const StageApi: EntityApi<Stage, GetStagesDTO | undefined>
     & {
-        getFirstStage: (callId: string) => Promise<Stage>;
+        getNext: (stageId: string) => Promise<Stage | null>;
     }
     = {
 
@@ -53,9 +53,25 @@ export const StageApi: EntityApi<Stage, GetStagesDTO | undefined>
     },
 
 
-    async getFirstStage(callId: string): Promise<Stage> {
-        return ApiClient.get(`${end_point}/first-stage/${callId}`);
+    async getNext(id: string): Promise<Stage | null> {
+        try {
+            return await ApiClient.get(`${end_point}/next/${id}`);
+        } catch (err: any) {
+            if (err.message === "NEXT_STAGE_NOT_FOUND") {
+                // return null;
+            }
+            //console.log(err.code);
+            if (err.code === "NEXT_STAGE_NOT_FOUND") {
+                return null;
+            }
+            throw err;
+        }
     },
+
+    /*
+        async getFirstStage(callId: string): Promise<Stage> {
+            return ApiClient.get(`${end_point}/first-stage/${callId}`);
+        },*/
 
     // ---------------------------
     // Create

@@ -43,5 +43,5 @@ const ReviewerSchema = new Schema<IReviewer>({
     },
 }, { timestamps: true });
 
-ReviewerSchema.index({ projectApplication: 1, reviewer: 1 }, { unique: true });
+ReviewerSchema.index({ application: 1, reviewer: 1 }, { unique: true });
 export const Reviewer = model<IReviewer>(COLLECTIONS.REVIEWER, ReviewerSchema);

@@ -16,7 +16,7 @@ export interface IApplicationRepository {
         grantStageId?: string,
         callStageId?: string,
     ): Promise<IApplication | null>;
-    findLatestByProject(projectId: string, session?: ClientSession): Promise<IApplication | null>;
+    findLatestByProject(projectId: string): Promise<IApplication | null>;
     create(dto: CreateApplicationDTO, session?: ClientSession): Promise<IApplication>;
     update(id: string, status: UpdateApplicationDTO["data"]): Promise<IApplication | null>;
     updateStatus(id: string, newStatus: ApplicationStatus): Promise<IApplication | null>;
@@ -44,7 +44,7 @@ export class ApplicationRepository implements IApplicationRepository {
             dbQuery = dbQuery.populate("project");
         }
 
-        if (populate?.grantStage) {
+        if (populate?.stage) {
             dbQuery = dbQuery.populate("stage");
         }
 
@@ -165,17 +165,12 @@ export class ApplicationRepository implements IApplicationRepository {
     }
 
     async findLatestByProject(
-        project: string,
-        session?: ClientSession
+        project: string
     ) {
         let dbQuery = Application.findOne({
             project: new mongoose.Types.ObjectId(project)
         })
             .sort({ createdAt: -1 });
-
-        if (session) {
-            dbQuery = dbQuery.session(session);
-        }
 
         return dbQuery
             .lean<IApplication>()

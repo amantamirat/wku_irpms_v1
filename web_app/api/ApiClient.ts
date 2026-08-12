@@ -62,7 +62,7 @@ export const ApiClient = {
             const result = await response.json().catch(() => ({}));
             return result.data ?? result;
         } catch (error) {
-            console.error("[ApiClient.get] Error:", error);
+            console.log("[ApiClient.get] Error:", error);
             throw error;
         }
     },
@@ -84,7 +84,7 @@ export const ApiClient = {
             const result = await response.json().catch(() => ({}));
             return result.data ?? result;
         } catch (error) {
-            console.error("[ApiClient.post] Error:", error);
+            console.log("[ApiClient.post] Error:", error);
             throw error;
         }
     },
@@ -107,7 +107,7 @@ export const ApiClient = {
             const result = await response.json().catch(() => ({}));
             return result.data ?? result;
         } catch (error) {
-            console.error("[ApiClient.put] Error:", error);
+            console.log("[ApiClient.put] Error:", error);
             throw error;
         }
     },
@@ -130,7 +130,7 @@ export const ApiClient = {
             const result = await response.json().catch(() => ({}));
             return result.data ?? result;
         } catch (error) {
-            console.error("[ApiClient.patch] Error:", error);
+            console.log("[ApiClient.patch] Error:", error);
             throw error;
         }
     },
@@ -151,7 +151,7 @@ export const ApiClient = {
             const result = await response.json().catch(() => ({}));
             return result.data ?? result;
         } catch (error) {
-            console.error("[ApiClient.delete] Error:", error);
+            console.log("[ApiClient.delete] Error:", error);
             throw error;
         }
     },

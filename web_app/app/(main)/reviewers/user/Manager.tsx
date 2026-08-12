@@ -2,13 +2,13 @@
 
 import { createEntityManager } from "@/components/createEntityManager";
 import MyBadge from "@/templates/MyBadge";
-import { Dialog } from "primereact/dialog";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { User } from "../../users/models/user.model";
 import { ReviewerApi } from "../api/reviewer.api";
 import { Reviewer, ReviewerStatus } from "../models/reviewer.model";
 import { REVIEWER_STATUS_ORDER, REVIEWER_USER_TRANSITIONS } from "../models/reviewer.state-machine";
-import EvaluatorManager from "../evaluator/EvaluatorManager";
+import EvaluationDialog from "../components/EvaluationDialog";
+
 
 interface ReviewerManagerProps {
     user: User;
@@ -107,29 +107,16 @@ const ReviewerManager = ({ user, enableEvaluation }: ReviewerManagerProps) => {
         return <div className="p-4 text-center">Loading reviewers...</div>;
     }
 
-
-    const isEditMode = enableEvaluation && selectedReviewer?.status === ReviewerStatus.accepted;
-
     return (
         <>
             <Manager />
 
-            <Dialog
-                header="Evaluation Details"
-                visible={Boolean(selectedReviewer)}
-                maximized
-                modal
-                onHide={handleCloseDialog}
-                contentClassName="p-0"
-            >
-                {selectedReviewer && (
-                    <EvaluatorManager
-                        reviewer={selectedReviewer}
-                        editMode={isEditMode}
-                        onClose={handleCloseDialog}
-                    />
-                )}
-            </Dialog>
+            
+            <EvaluationDialog
+                reviewer={selectedReviewer}
+                enableEvaluation={enableEvaluation}
+                onClose={handleCloseDialog}
+            />
         </>
     );
 };

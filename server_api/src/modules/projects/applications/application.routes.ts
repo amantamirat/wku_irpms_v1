@@ -1,26 +1,14 @@
 import express from "express";
+import { applicationService } from "../../../core/container";
 import { upload } from "../../../util/multer";
 import { checkPermission, checkTransitionPermission, verifyActiveAccount } from "../../auth/auth.middleware";
-import { ProjectRepository } from "../project.repository";
-import { ApplicationController } from "./application.controller";
-import { ApplicationRepository } from "./application.repository";
-import { ApplicationService } from "./application.service";
-import { ApplicationSynchronizer } from "./application.synchronizer";
-import { ReviewerRepository } from "../../reviewers/reviewer.repository";
+import { NotificationRepository } from "../../notifications/notification.repository";
+import { NotificationService } from "../../notifications/notification.service";
 import { SettingRepository } from "../../settings/setting.repository";
 import { SettingService } from "../../settings/setting.service";
-import { NotificationService } from "../../notifications/notification.service";
-import { NotificationRepository } from "../../notifications/notification.repository";
-import { ProjectAuth } from "../project.auth";
-import { StageRepository } from "../../calls/stages/stage.repository";
-import { applicationService } from "../../../core/container";
+import { ApplicationController } from "./application.controller";
 
-const projectStageRepo = new ApplicationRepository();
-const projectRepo = new ProjectRepository();
-const projAuth = new ProjectAuth(projectRepo);
-const callStageRepo = new StageRepository();
-const reviewerRepoRepo = new ReviewerRepository();
-//const synchronizer = new ApplicationSynchronizer(projectRepo, projectStageRepo, grantStageRepo);
+
 const notificationService = new NotificationService(
     new NotificationRepository(),
     new SettingService(new SettingRepository())
@@ -97,6 +85,13 @@ router.delete(
     verifyActiveAccount,
     checkPermission("application:delete"),
     controller.delete
+);
+
+router.post(
+    "/:id/withdraw",
+    verifyActiveAccount,
+    checkPermission("application:withdraw"),
+    controller.withdraw
 );
 
 export default router;

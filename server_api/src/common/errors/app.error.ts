@@ -11,7 +11,7 @@ export class AppError extends Error {
         details?: unknown
     ) {
         super(message || code);
-
+        
         this.code = code;
         this.statusCode = statusCode;
         this.details = details;

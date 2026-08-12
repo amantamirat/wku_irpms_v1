@@ -1,19 +1,17 @@
-import { ClientSession } from "mongoose";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
+import { ICallRepository } from "../../calls/call.repository";
 import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
 import { IGrantRepository } from "../../grants/grant.repository";
-import { ProjectAuth } from "../project.auth";
 import { ProjectStatus } from "../project.model";
 import { IProjectRepository } from "../project.repository";
 import { PROJECT_TRANSITIONS } from "../project.state-machine";
 import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto } from "./phase.dto";
 import { IPhase, PhaseStatus } from "./phase.model";
 import { IPhaseRepository } from "./phase.repository";
-import { ICallRepository } from "../../calls/call.repository";
 
 export class PhaseService {
 
@@ -22,11 +20,10 @@ export class PhaseService {
         private readonly projRepo: IProjectRepository,
         private readonly grantRepo: IGrantRepository,
         private readonly callRepo: ICallRepository,
-        private readonly constraintValidator: ConstraintValidationService,
-        private readonly projAuth: ProjectAuth = new ProjectAuth(projRepo),
+        private readonly constraintValidator: ConstraintValidationService
     ) { }
 
-    async validateProject(project: string, applicant: string, session?: ClientSession) {
+    async validateProject(project: string, user: string) {
         const projectDoc = await this.projRepo.findById(project);
         if (
             projectDoc?.status !== ProjectStatus.draft &&

@@ -109,6 +109,20 @@ export class StageService {
         return stage;
     }
 
+    async getFirstStage(callId: string) {
+        const firstStage = await this.repository.findOne(callId, 1);
+        if (!firstStage) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        return firstStage;
+    }
+
+    async getNextStage(id: string) {
+        const stage = await this.repository.findById(id);
+        if (!stage) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        const nextStage = await this.repository.findOne(String(stage.call), stage.order + 1);
+        if (!nextStage) throw new AppError(ERROR_CODES.NEXT_STAGE_NOT_FOUND);
+        return nextStage;
+    }
+
 
     /**
  * Update a stage

@@ -18,27 +18,38 @@ const AppMenu = () => {
         },
         {
             label: 'Project',
-            items: [{
-                label: 'Projects',
-                icon: "pi pi-folder-open",
-                to: '/projects',
-                visible: hasPermission("project:create")
-            },
-            {
-                label: 'Collaborators',
-                to: '/collaborators/all',
-                icon: 'pi pi-share-alt',
-                visible: hasPermission("collaborator:read")
-            },
-            {
-                label: 'Phases',
-                to: '/projects/phases/all',
-                icon: PrimeIcons.COMPASS,
-                visible: hasPermission("phase:read")
-            }]
+            items: [
+                {
+                    label: 'Projects',
+                    icon: "pi pi-folder-open",
+                    to: '/projects',
+                    visible: hasPermission("project:create")
+                },
+                {
+                    label: 'Applications',
+                    icon: 'pi pi-list',
+                    to: '/applications/stage',
+                    visible: hasPermission("application:read")
+                },
+                /*
+                {
+                    label: 'Collaborators',
+                    to: '/collaborators/all',
+                    icon: 'pi pi-share-alt',
+                    visible: hasPermission("collaborator:read")
+                },
+                */
+                /*
+                 {
+                     label: 'Phases',
+                     to: '/projects/phases/all',
+                     icon: PrimeIcons.COMPASS,
+                     visible: hasPermission("phase:read")
+                 }*/
+            ]
         },
         {
-            label: 'Applications',
+            label: 'Calls',
             visible: hasPermission(
                 [
                     "call:create",
@@ -46,12 +57,7 @@ const AppMenu = () => {
                 ]
             ),
             items: [
-                {
-                    label: 'Applications',
-                    icon: 'pi pi-list',
-                    to: '/applications/stage',
-                    visible: hasPermission("application:read")
-                },
+
                 {
                     label: 'Calls',
                     icon: 'pi pi-fw pi-megaphone',
@@ -70,12 +76,13 @@ const AppMenu = () => {
                     to: '/templates',
                     visible: hasPermission("template:create")
                 },
+                /*
                 {
                     label: 'Reviewers',
                     to: '/reviewers/all',
                     icon: 'pi pi-check-square',
                     visible: hasPermission("reviewer:read")
-                },
+                },*/
 
             ]
         },

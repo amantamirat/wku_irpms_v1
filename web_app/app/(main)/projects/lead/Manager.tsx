@@ -11,9 +11,10 @@ import ProjectDetail from "../../projects/components/ProjectDetail";
 
 interface ProjectManagerProps {
     user: User;
+    enableEditing?:boolean;
 }
 
-const ProjectManager = ({ user }: ProjectManagerProps) => {
+const ProjectManager = ({ user, enableEditing }: ProjectManagerProps) => {
     const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
 
@@ -69,7 +70,7 @@ const ProjectManager = ({ user }: ProjectManagerProps) => {
             hideDefaultActions: true,
             expandable: {
                 template: (project) => {
-                    return <ProjectDetail project={project} />;
+                    return <ProjectDetail project={project} enableEditing={enableEditing} />;
                 }
             }
         });

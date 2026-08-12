@@ -40,7 +40,7 @@ const MyProjectsPage = () => {
                 {/* Main Content Card */}
                 <Card className="shadow-1 border-none border-round-xl surface-card">
                     {appUser ? (
-                        <ProjectManager user={appUser} />
+                        <ProjectManager user={appUser} enableEditing = {true}/>
                     ) : (
                         <div className="p-5 text-center text-500">
                             <i className="pi pi-spin pi-spinner text-2xl mb-2 block text-primary"></i>

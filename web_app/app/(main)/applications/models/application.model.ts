@@ -44,7 +44,7 @@ export const validateProjectApplication = (ps: Partial<Application>): { valid: b
 }
 
 
-export const sanitizeProjectApplication = (ps: Partial<Application>): Partial<Application> => {
+export const sanitizeApplication = (ps: Partial<Application>): Partial<Application> => {
     return {
         ...ps,
         project:

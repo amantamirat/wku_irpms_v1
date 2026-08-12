@@ -22,8 +22,7 @@ export interface IProjectRepository {
     ): Promise<IProject | null>;
     updateCurrentApplication(
         id: string,
-        currentStage: string,
-        session?: ClientSession
+        application: string
     ): Promise<IProject | null>;
     clearCurrentApplication(
         project: string,
@@ -176,14 +175,13 @@ export class ProjectRepository implements IProjectRepository {
 
     async updateCurrentApplication(
         id: string,
-        currentStage: string,
-        session?: ClientSession
+        application: string
     ) {
         const update =
 
         {
             $set: {
-                currentStage: new mongoose.Types.ObjectId(currentStage)
+                currentApplication: new mongoose.Types.ObjectId(application)
             }
         }
 
@@ -192,15 +190,13 @@ export class ProjectRepository implements IProjectRepository {
             new mongoose.Types.ObjectId(id),
             update,
             {
-                new: true,
-                session
+                new: true
             }
         ).exec();
     }
 
     async clearCurrentApplication(
-        project: string,
-        session?: ClientSession
+        project: string
     ) {
         let dbQuery = Project.findByIdAndUpdate(
             new mongoose.Types.ObjectId(project),
@@ -212,9 +208,7 @@ export class ProjectRepository implements IProjectRepository {
             { new: true }
         );
 
-        if (session) {
-            dbQuery = dbQuery.session(session);
-        }
+
 
         return dbQuery.exec();
     }

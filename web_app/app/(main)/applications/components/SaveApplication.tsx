@@ -8,71 +8,87 @@ import { FileUpload, FileUploadSelectEvent } from 'primereact/fileupload';
 import { Tag } from 'primereact/tag';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ApplicationApi } from '../api/application.api';
-import { Application, sanitizeProjectApplication, validateProjectApplication } from '../models/application.model';
-import { Stage } from '@/app/(main)/calls/stages/models/stage.model';
+import { Application, sanitizeApplication, validateProjectApplication } from '../models/application.model';
+import { Project } from '../../projects/models/project.model';
+import { Stage } from '../../calls/stages/models/stage.model';
 
-// Assuming Project type has a 'title' or 'name' property based on your requirements
-interface Project {
-    _id: string;
-    title?: string;
-    name?: string;
-    [key: string]: any;
-}
-
-const SaveProjectApplication = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<Application>) => {
+const SaveApplication = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<Application>) => {
     const toast = useRef<Toast>(null);
-    const [localStage, setLocalStage] = useState<Partial<Application>>({ ...item });
+    const [localApplication, setLocalApplication] = useState<Partial<Application>>({ ...item });
     const [submitted, setSubmitted] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
 
-    // Memoize the GrantStage object for easier access
-    const stageInfo = useMemo(() => {
-        const gs = localStage.stage;
-        return (typeof gs === 'object' && gs !== null) ? (gs as Stage) : null;
-    }, [localStage.stage]);
-
-    // Memoize the Project object to display its title if available
-    const projectInfo = useMemo(() => {
-        const proj = localStage.project;
-        return (typeof proj === 'object' && proj !== null) ? (proj as Project) : null;
-    }, [localStage.project]);
-
+    // Synchronize local state when dialog opens or item changes
     useEffect(() => {
         if (visible) {
-            setLocalStage({ ...item });
+            setLocalApplication({ ...item });
             setSubmitted(false);
         }
     }, [item, visible]);
 
+    // Extract project and stage directly from the local application
+    const projectInfo = localApplication.project as Project;
+    const stageInfo = localApplication.stage as Stage;
+
+    // Direct check to ensure both nested objects/IDs are present
+    const isReady = Boolean(projectInfo?._id) && Boolean(stageInfo?._id);
+
     const onFileSelect = (e: FileUploadSelectEvent) => {
         if (e.files && e.files.length > 0) {
-            setLocalStage((prev) => ({ ...prev, file: e.files[0] }));
+            setLocalApplication((prev) => ({ ...prev, file: e.files[0] }));
         }
     };
 
     const saveStage = async () => {
         setSubmitted(true);
-        const validation = validateProjectApplication(localStage);
-        
+
+        if (!isReady) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Missing Data',
+                detail: 'Project and Stage must be present in the application before submitting.'
+            });
+            return;
+        }
+
+        const validation = validateProjectApplication(localApplication);
+
         if (!validation.valid) {
-            toast.current?.show({ severity: 'error', summary: 'Validation Failed', detail: validation.message });
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Validation Failed',
+                detail: validation.message
+            });
             return;
         }
 
         try {
             setIsUploading(true);
-            const payload = sanitizeProjectApplication(localStage);
-            
-            const saved = localStage._id 
-                ? await ApplicationApi.update(payload) 
+            const payload = sanitizeApplication(localApplication);
+
+            const saved = localApplication._id
+                ? await ApplicationApi.update(payload)
                 : await ApplicationApi.create(payload as Application);
 
-            toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Document submitted successfully' });
-            onComplete?.(saved);
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Document submitted successfully'
+            });
+
+            onComplete?.({
+                ...saved,
+                project: projectInfo,
+                stage: stageInfo
+            });
         } catch (err: any) {
-            toast.current?.show({ severity: 'error', summary: 'Submission Error', detail: err.message });
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Submission Error',
+                detail: err?.message || 'An unexpected error occurred'
+            });
         } finally {
             setIsUploading(false);
         }
@@ -81,12 +97,13 @@ const SaveProjectApplication = ({ visible, item, onHide, onComplete }: EntitySav
     const footer = (
         <div className="flex justify-content-end gap-2">
             <Button label="Cancel" icon="pi pi-times" text onClick={onHide} disabled={isUploading} />
-            <Button 
-                label={localStage._id ? "Update Submission" : "Complete Submission"} 
-                icon="pi pi-cloud-upload" 
-                onClick={saveStage} 
-                severity="success" 
-                loading={isUploading} 
+            <Button
+                label={localApplication._id ? "Update Submission" : "Complete Submission"}
+                icon="pi pi-cloud-upload"
+                onClick={saveStage}
+                severity="success"
+                loading={isUploading}
+                disabled={!isReady}
             />
         </div>
     );
@@ -104,15 +121,16 @@ const SaveProjectApplication = ({ visible, item, onHide, onComplete }: EntitySav
                         </div>
                         <div className="flex flex-column">
                             <span className="font-bold text-xl">
-                                {localStage._id ? 'Edit Submission' : (stageInfo?.name || 'New Submission')}
+                                {localApplication._id ? 'Edit Submission' : (stageInfo?.name || 'New Submission')}
                             </span>
-                            {/* Project Title Display */}
                             {projectInfo && (
                                 <span className="text-sm font-semibold text-700 mt-1">
-                                    Project: {projectInfo.title || projectInfo.name || 'Untitled Project'}
+                                    Project: {projectInfo.title || 'Untitled Project'}
                                 </span>
                             )}
-                            <small className="text-500 font-medium mt-1">Step {stageInfo?.order ?? 'N/A'} of the Grant Process</small>
+                            <small className="text-500 font-medium mt-1">
+                                Step {stageInfo?.order ?? 'N/A'} of the Grant Process
+                            </small>
                         </div>
                     </div>
                 }
@@ -121,79 +139,95 @@ const SaveProjectApplication = ({ visible, item, onHide, onComplete }: EntitySav
                 footer={footer}
                 onHide={onHide}
             >
-                <div className="flex flex-column gap-3 mt-1">
-                    
-                    {/* Visual Indicators for the Stage */}
-                    <div className="flex gap-2">
-                        <div className="surface-100 p-2 border-round flex-1 flex flex-column align-items-center border-1 border-200">
-                            <span className="text-xs text-500 uppercase font-bold mb-1">Process</span>
-                            <Tag 
-                                severity={'success'} 
-                                value={'General'} 
-                            />
-                        </div>
-                        <div className="surface-100 p-2 border-round flex-1 flex flex-column align-items-center border-1 border-200">
-                            <span className="text-xs text-500 uppercase font-bold mb-1">Min. Score</span>
-                            <span className="text-lg font-bold text-primary">{stageInfo?.minAcceptanceScore ?? 0}</span>
-                        </div>
+                {/* Fallback Guard if Project or Stage is missing from the item */}
+                {!isReady ? (
+                    <div className="p-4 border-1 border-round border-red-200 bg-red-50 text-red-700 flex align-items-center gap-3">
+                        <i className="pi pi-exclamation-triangle text-2xl"></i>
+                        <span className="text-sm font-medium">
+                            Cannot render form: The application record is missing its associated Project or Stage.
+                        </span>
                     </div>
+                ) : (
+                    <div className="flex flex-column gap-3 mt-1">
+                        <div className="flex gap-2">
+                            <div className="surface-100 p-2 border-round flex-1 flex flex-column align-items-center border-1 border-200">
+                                <span className="text-xs text-500 uppercase font-bold mb-1">Process</span>
+                                <Tag severity="success" value="General" />
+                            </div>
+                            <div className="surface-100 p-2 border-round flex-1 flex flex-column align-items-center border-1 border-200">
+                                <span className="text-xs text-500 uppercase font-bold mb-1">Min. Score</span>
+                                <span className="text-lg font-bold text-primary">
+                                    {stageInfo?.minAcceptanceScore ?? 0}
+                                </span>
+                            </div>
+                        </div>
 
-                    <div className="field">
-                        <label className="font-bold block mb-2">Technical Documentation</label>
-                        
-                        {/* File Preview if editing */}
-                        {localStage.documentPath && !localStage.file && (
-                            <div className="p-3 border-1 border-round border-300 surface-50 mb-3 flex align-items-center justify-content-between">
-                                <div className="flex align-items-center">
-                                    <i className="pi pi-file-pdf text-red-500 text-2xl mr-3"></i>
-                                    <span className="text-sm font-medium">Existing Submission</span>
+                        <div className="field">
+                            <label className="font-bold block mb-2">Technical Documentation</label>
+
+                            {localApplication.documentPath && !localApplication.file && (
+                                <div className="p-3 border-1 border-round border-300 surface-50 mb-3 flex align-items-center justify-content-between">
+                                    <div className="flex align-items-center">
+                                        <i className="pi pi-file-pdf text-red-500 text-2xl mr-3"></i>
+                                        <span className="text-sm font-medium">Existing Submission</span>
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        icon="pi pi-external-link"
+                                        text
+                                        onClick={() =>
+                                            window.open(
+                                                `${BASE_URL}/${localApplication.documentPath?.replace(/^\\/, '')}`,
+                                                '_blank'
+                                            )
+                                        }
+                                    />
                                 </div>
-                                <Button 
-                                    type="button" 
-                                    icon="pi pi-external-link" 
-                                    text 
-                                    onClick={() => window.open(`${BASE_URL}/${localStage.documentPath?.replace(/^\\/, "")}`, '_blank')}
-                                />
-                            </div>
-                        )}
+                            )}
 
-                        <FileUpload
-                            mode="basic"
-                            name="file"
-                            accept="application/pdf"
-                            maxFileSize={15000000}
-                            onSelect={onFileSelect}
-                            auto={false}
-                            chooseLabel={localStage.file ? "Replace Document" : "Select PDF Document"}
-                            className={classNames('w-full', { 'p-invalid': submitted && !localStage.file && !localStage._id })}
-                        />
-                        
-                        {localStage.file && (
-                            <div className="mt-2 flex align-items-center text-green-600 animate-fadein">
-                                <i className="pi pi-check-circle mr-2"></i>
-                                <small className="font-bold">Ready: {localStage.file.name}</small>
-                            </div>
-                        )}
+                            <FileUpload
+                                mode="basic"
+                                name="file"
+                                accept="application/pdf"
+                                maxFileSize={15000000}
+                                onSelect={onFileSelect}
+                                auto={false}
+                                chooseLabel={localApplication.file ? 'Replace Document' : 'Select PDF Document'}
+                                className={classNames('w-full', {
+                                    'p-invalid': submitted && !localApplication.file && !localApplication._id
+                                })}
+                            />
 
-                        {submitted && !localStage.file && !localStage._id && (
-                            <small className="p-error block mt-2">A PDF document is required for this stage.</small>
-                        )}
+                            {localApplication.file && (
+                                <div className="mt-2 flex align-items-center text-green-600 animate-fadein">
+                                    <i className="pi pi-check-circle mr-2"></i>
+                                    <small className="font-bold">Ready: {localApplication.file.name}</small>
+                                </div>
+                            )}
+
+                            {submitted && !localApplication.file && !localApplication._id && (
+                                <small className="p-error block mt-2">A PDF document is required for this stage.</small>
+                            )}
+                        </div>
+
+                        <div className="surface-100 p-3 border-round border-1 border-200">
+                            <span className="text-xs font-bold text-700 uppercase tracking-wider">
+                                Submission Guidelines
+                            </span>
+                            <ul className="text-xs mt-2 pl-3 text-600 mb-0 line-height-3">
+                                <li>Maximum file size permitted is <strong>15MB</strong>.</li>
+                                <li>Only <strong>PDF</strong> files are accepted for technical review.</li>
+                                <li>This is a <strong>standard</strong> stage; ensure all data is accurate.</li>
+                                <li>
+                                    A minimum score of <strong>{stageInfo?.minAcceptanceScore || 0}</strong> is required to pass.
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-
-                    {/* The Rules / Guidelines Placeholder */}
-                    <div className="surface-100 p-3 border-round border-1 border-200">
-                        <span className="text-xs font-bold text-700 uppercase tracking-wider">Submission Guidelines</span>
-                        <ul className="text-xs mt-2 pl-3 text-600 mb-0 line-height-3">
-                            <li>Maximum file size permitted is <strong>15MB</strong>.</li>
-                            <li>Only <strong>PDF</strong> files are accepted for technical review.</li>
-                            <li>This is a <strong>{'standard'}</strong> stage; ensure all data is accurate.</li>
-                            <li>A minimum score of <strong>{stageInfo?.minAcceptanceScore || 0}</strong> is required to pass.</li>
-                        </ul>
-                    </div>
-                </div>
+                )}
             </Dialog>
         </>
     );
 };
 
-export default SaveProjectApplication;
+export default SaveApplication;

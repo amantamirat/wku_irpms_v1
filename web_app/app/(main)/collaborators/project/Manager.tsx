@@ -1,22 +1,29 @@
 'use client';
 
-import { User } from "@/app/(main)/users/models/user.model";
 import { createEntityManager } from "@/components/createEntityManager";
 import MyBadge from "@/templates/MyBadge";
 import { useEffect, useMemo, useState } from "react";
+import { Project, ProjectStatus } from "../../projects/models/project.model";
 import { CollaboratorApi } from "../api/collaborator.api";
-import { Collaborator } from "../models/collaborator.model";
-import { COLLAB_STATUS_ORDER, COLLAB_TRANSITIONS } from "../models/collaborator.state-machine";
-import { Project } from "../../projects/models/project.model";
+import SaveCollaborator from "../components/SaveCollaborator";
+import { Collaborator, CollaboratorStatus } from "../models/collaborator.model";
 
 
 interface CollaboratorManagerProps {
     project: Project;
+    enableEditing?: boolean;
 }
 
-const CollaboratorManager = ({ project }: CollaboratorManagerProps) => {
+const CollaboratorManager = ({ project, enableEditing }: CollaboratorManagerProps) => {
     const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
+
+    const canManage = useMemo(() => (
+        enableEditing &&
+        (project.status === ProjectStatus.draft ||
+        project.status === ProjectStatus.accepted)
+    ), [project.status, enableEditing]);
+    
 
 
     useEffect(() => {
@@ -68,12 +75,15 @@ const CollaboratorManager = ({ project }: CollaboratorManagerProps) => {
                 }
             ],
             items: collaborators,
-            workflow: {
-                statusField: "status",
-                statusOrder: COLLAB_STATUS_ORDER,
-                transitions: COLLAB_TRANSITIONS
-            },
             permissionPrefix: "collaborator",
+            createNew: canManage
+                ? () => ({
+                    project: project,
+                    isLeadPI: false,
+                    status: CollaboratorStatus.pending
+                })
+                : undefined,
+            SaveDialog: canManage ? SaveCollaborator : undefined,
             hideSearch: true,
             hideDefaultActions: true,
         });

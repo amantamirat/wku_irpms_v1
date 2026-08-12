@@ -1,13 +1,11 @@
-import { INotificationRepository } from "./notification.repository";
-import { CreateNotificationDTO, GetNotificationsDTO } from "./notification.dto";
-import { NotificationType } from "./notification.model";
-import { SocketService } from "./socket.service";
-import { ClientSession } from "mongoose";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
-import { ApplicationStatus } from "../projects/applications/application.model";
 import { SettingKey } from "../settings/setting.model";
 import { SettingService } from "../settings/setting.service";
+import { CreateNotificationDTO, GetNotificationsDTO } from "./notification.dto";
+import { NotificationType } from "./notification.model";
+import { INotificationRepository } from "./notification.repository";
+import { SocketService } from "./socket.service";
 
 export class NotificationService {
     constructor(private readonly repository: INotificationRepository,
@@ -20,7 +18,7 @@ export class NotificationService {
      */
     // notification.service.ts
 
-    async notify(dto: CreateNotificationDTO, session?: ClientSession) {
+    async notify(dto: CreateNotificationDTO) {
         // 1. Fetch the expiry setting (e.g., 720 hours = 30 days)
         const expiryHr = await this.settingService.getSettingValue(SettingKey.NOTIFICATION_EXPIRY_HOURS, 720);
 
@@ -32,7 +30,7 @@ export class NotificationService {
         const notification = await this.repository.create({
             ...dto,
             expiresAt: expiryDate
-        } as any, session);
+        } as any);
         // TODO: Integration point for Real-time updates
         SocketService.sendNotification(dto.recipient, notification);
 
@@ -82,7 +80,7 @@ export class NotificationService {
      * Specific Business Helper: Notify a user they've been invited.
      * Keeps the CollaboratorService code clean.
      */
-    async notifyProjectInvitation(recipientId: string, projectTitle: string, role?: string, senderId?: string, session?: ClientSession) {
+    async notifyProjectInvitation(recipientId: string, projectTitle: string, role?: string, senderId?: string) {
         return this.notify({
             recipient: recipientId,
             sender: senderId,
@@ -90,7 +88,7 @@ export class NotificationService {
             message: `You have been added as a ${role ?? 'collaborator'} to "${projectTitle}".`,
             type: NotificationType.INFO,
             link: '/projects/collaborators/my-memberships'
-        }, session);
+        });
     }
 
     async notifyProjectRemoval(recipientId: string, projectTitle: string, role?: string, senderId?: string) {
@@ -105,11 +103,118 @@ export class NotificationService {
     }
 
 
+    async notifyApplicationSubmitted(
+        recipientId: string,
+        projectTitle: string,
+        stageName: string,
+        senderId?: string
+    ) {
+        return this.notify({
+            recipient: recipientId,
+            sender: senderId,
+            title: "Application Submitted",
+            message:
+                `Your application "${projectTitle}" for the "${stageName}" stage ` +
+                `has been submitted successfully.`,
+            type: NotificationType.SUCCESS,
+            link: "/dashboard/my-projects"
+        });
+    }
+
+
+    async notifyApplicationAccepted(
+        recipientId: string,
+        projectTitle: string,
+        stageName: string,
+        nextStageInfo?: {
+            name: string;
+            deadline?: Date;
+        },
+        senderId?: string
+    ) {
+        let message =
+            `Congratulations! Your application "${projectTitle}" for the ` +
+            `"${stageName}" stage has been accepted.`;
+
+        if (nextStageInfo) {
+            const deadlineStr = nextStageInfo.deadline
+                ? ` by ${nextStageInfo.deadline.toLocaleDateString()}`
+                : "";
+
+            message +=
+                ` Please prepare for the next stage: ` +
+                `"${nextStageInfo.name}"${deadlineStr}.`;
+        }
+
+        return this.notify({
+            recipient: recipientId,
+            sender: senderId,
+            title: "Application Accepted",
+            message,
+            type: NotificationType.SUCCESS,
+            link: "/dashboard/my-projects"
+        });
+    }
+
+    async notifyApplicationRejected(
+        recipientId: string,
+        projectTitle: string,
+        stageName: string,
+        senderId?: string
+    ) {
+        return this.notify({
+            recipient: recipientId,
+            sender: senderId,
+            title: "Application Rejected",
+            message:
+                `We regret to inform you that your application "${projectTitle}" ` +
+                `for the "${stageName}" stage was not selected.`,
+            type: NotificationType.ERROR,
+            link: "/dashboard/my-projects"
+        });
+    }
+
+    async notifyApplicationReturnedToPending(
+        recipientId: string,
+        projectTitle: string,
+        stageName: string,
+        senderId?: string
+    ) {
+        return this.notify({
+            recipient: recipientId,
+            sender: senderId,
+            title: "Application Returned for Review",
+            message:
+                `Your application "${projectTitle}" for the "${stageName}" ` +
+                `stage has been returned to pending status for further review.`,
+            type: NotificationType.INFO,
+            link: "/dashboard/my-projects"
+        });
+    }
+
+    async notifyApplicationWithdrawn(
+        recipientId: string,
+        projectTitle: string,
+        stageName: string,
+        senderId?: string
+    ) {
+        return this.notify({
+            recipient: recipientId,
+            sender: senderId,
+            title: "Application Withdrawn",
+            message:
+                `Your application "${projectTitle}" for the "${stageName}" ` +
+                `stage has been withdrawn successfully.`,
+            type: NotificationType.WARNING,
+            link: "/dashboard/my-projects"
+        });
+    }
+
+
     async notifyProjectFinalization(
         recipientId: string,
         projectDoc: any,
-        senderId?: string,
-        session?: ClientSession
+        senderId?: string
     ) {
         return this.notify({
             recipient: recipientId,
@@ -120,56 +225,57 @@ export class NotificationService {
                 `Please review phase timelines, budgets, and mark phases as reviewed.`,
             type: NotificationType.INFO,
             link: `/projects/${projectDoc._id}`
-        }, session);
+        });
     }
 
     /**
  * Specific Business Helper: Notify user about a project stage status change.*/
-    async notifyStatusChange(
-        recipientId: string,
-        projectTitle: string, // Pass the whole project for context
-        stageName: string,
-        newStatus: ApplicationStatus,
-        nextStageInfo?: { name: string, deadline?: Date }, // New optional param
-        session?: ClientSession
-    ) {
-        let message: string;
-        let type: NotificationType = NotificationType.INFO;
-
-        switch (newStatus) {
-            case ApplicationStatus.pending:
-                message = `Your application "${projectTitle}" for ${stageName} has been submitted successfully.`;
-                type = NotificationType.SUCCESS;
-                break;
-
-            case ApplicationStatus.accepted:
-                message = `Congratulations! Your application "${projectTitle}" for ${stageName} has been accepted.`;
-                // Add "Next Step" info if available
-                if (nextStageInfo) {
-                    const deadlineStr = nextStageInfo.deadline
-                        ? ` by ${nextStageInfo.deadline.toLocaleDateString()}`
-                        : "";
-                    message += ` Please prepare for the next stage: "${nextStageInfo.name}"${deadlineStr}.`;
-                }
-                type = NotificationType.SUCCESS;
-                break;
-
-            case ApplicationStatus.rejected:
-                message = `We regret to inform you that your application "${projectTitle}" for ${stageName} was not selected.`;
-                type = NotificationType.ERROR;
-                break;
-            default:
-                message = `Your application "${projectTitle}" for ${stageName} is now marked as ${newStatus}.`;
+    /*
+        async notifyStatusChange(
+            recipientId: string,
+            projectTitle: string, // Pass the whole project for context
+            stageName: string,
+            newStatus: ApplicationStatus,
+            nextStageInfo?: { name: string, deadline?: Date } // New optional param        
+        ) {
+            let message: string;
+            let type: NotificationType = NotificationType.INFO;
+    
+            switch (newStatus) {
+                case ApplicationStatus.pending:
+                    message = `Your application "${projectTitle}" for ${stageName} has been submitted successfully.`;
+                    type = NotificationType.SUCCESS;
+                    break;
+    
+                case ApplicationStatus.accepted:
+                    message = `Congratulations! Your application "${projectTitle}" for ${stageName} has been accepted.`;
+                    // Add "Next Step" info if available
+                    if (nextStageInfo) {
+                        const deadlineStr = nextStageInfo.deadline
+                            ? ` by ${nextStageInfo.deadline.toLocaleDateString()}`
+                            : "";
+                        message += ` Please prepare for the next stage: "${nextStageInfo.name}"${deadlineStr}.`;
+                    }
+                    type = NotificationType.SUCCESS;
+                    break;
+    
+                case ApplicationStatus.rejected:
+                    message = `We regret to inform you that your application "${projectTitle}" for ${stageName} was not selected.`;
+                    type = NotificationType.ERROR;
+                    break;
+                default:
+                    message = `Your application "${projectTitle}" for ${stageName} is now marked as ${newStatus}.`;
+            }
+    
+            return this.notify({
+                recipient: recipientId,
+                title: "Project Update",
+                message,
+                type,
+                link: `/dashboard/my-projects`
+            });
         }
-
-        return this.notify({
-            recipient: recipientId,
-            title: "Project Update",
-            message,
-            type,
-            link: `/projects/my-projects`
-        }, session);
-    }
+            */
 
 
     async notifyReviewerAssigned(
@@ -184,7 +290,7 @@ export class NotificationService {
             title: "Reviewer Assignment",
             message: `You have been assigned as a reviewer for "${projectTitle}" in the "${stageName}" stage.`,
             type: NotificationType.INFO,
-            link: '/reviewers/my-evaluations'
+            link: '/dashboard/my-evaluations'
         });
     }
 

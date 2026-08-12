@@ -1,14 +1,14 @@
 'use client';
 
 import { createEntityManager } from "@/components/createEntityManager";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Application, ApplicationStatus } from "../../applications/models/application.model";
 import { ReviewerApi } from "../api/reviewer.api";
 import { Reviewer, ReviewerStatus } from "../models/reviewer.model";
 import MyBadge from "@/templates/MyBadge";
-import SaveReviewerDialog from "./SaveReviewerDialog";
-import { REVIEWER_ADMIN_TRANSITIONS, REVIEWER_STATUS_ORDER, REVIEWER_TRANSITIONS } from "../models/reviewer.state-machine";
-
+import SaveReviewerDialog from "../components/SaveReviewerDialog";
+import { REVIEWER_ADMIN_TRANSITIONS, REVIEWER_STATUS_ORDER } from "../models/reviewer.state-machine";
+import EvaluationDialog from "../components/EvaluationDialog";
 
 interface ReviewerManagerProps {
     application: Application;
@@ -17,29 +17,36 @@ interface ReviewerManagerProps {
 const ReviewerManager = ({ application }: ReviewerManagerProps) => {
     const [reviewers, setReviewers] = useState<Reviewer[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
+    
+    // State to hold the reviewer selected for viewing
+    const [selectedReviewer, setSelectedReviewer] = useState<Reviewer | null>(null);
 
     const canManage = useMemo(() => application && (
         application.status === ApplicationStatus.pending
-    ), [application.status]);
+    ), [application?.status]);
 
-    useEffect(() => {
-        const fetchReviewers = async () => {
-            if (!application) return;
-            setLoading(true);
-            try {
-                const data = await ReviewerApi.getAll({ application }, true);
-                setReviewers(Array.isArray(data) ? data : []);
-            } catch (error) {
-                console.error("Error fetching reviewers for stage:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchReviewers();
+    const fetchReviewers = useCallback(async () => {
+        if (!application) return;
+        setLoading(true);
+        try {
+            const data = await ReviewerApi.getAll({ application }, true);
+            setReviewers(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error("Error fetching reviewers for stage:", error);
+        } finally {
+            setLoading(false);
+        }
     }, [application]);
 
-    // useMemo prevents component re-creation on every render cycle
+    useEffect(() => {
+        fetchReviewers();
+    }, [fetchReviewers]);
+
+    // Simple close handler without re-fetching API
+    const handleCloseDialog = () => {
+        setSelectedReviewer(null);
+    };
+
     const Manager = useMemo(() => {
         return createEntityManager<Reviewer>({
             title: "Reviewers",
@@ -58,9 +65,7 @@ const ReviewerManager = ({ application }: ReviewerManagerProps) => {
                 {
                     header: "Reviewer Name",
                     field: "reviewer.name",
-                    body: (r: Reviewer, options: any) => {
-                        return (r.reviewer as any)?.name || "N/A";
-                    }
+                    body: (r: Reviewer) => (r.reviewer as any)?.name || "N/A"
                 },
                 {
                     header: "Status",
@@ -78,15 +83,35 @@ const ReviewerManager = ({ application }: ReviewerManagerProps) => {
                 transitions: REVIEWER_ADMIN_TRANSITIONS
             },
             permissionPrefix: "reviewer",
+            extraActions: [
+                {
+                    icon: "pi pi-eye",
+                    severity: "secondary",
+                    tooltip: "View Evaluation",
+                    disabled: (row: Reviewer) => row.status === ReviewerStatus.pending,
+                    onClick: (row: Reviewer) => {
+                        setSelectedReviewer(row);
+                    }
+                }
+            ],
             hideSearch: true,
         });
-    }, [reviewers]);
+    }, [reviewers, canManage, application]);
 
     if (loading) {
         return <div className="p-4 text-center">Loading reviewers...</div>;
     }
 
-    return <Manager />;
+    return (
+        <>
+            <Manager />
+            <EvaluationDialog
+                reviewer={selectedReviewer}
+                enableEvaluation={false} // Read-only view mode
+                onClose={handleCloseDialog}
+            />
+        </>
+    );
 };
 
 export default ReviewerManager;

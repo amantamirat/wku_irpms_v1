@@ -78,6 +78,17 @@ export class StageController {
         }
     };
 
+
+    getNext = async (req: Request, res: Response) => {
+        try {
+            const { id } = req.params;
+            const nextStage = await this.service.getNextStage(id);
+            successResponse(res, 200, 'next stage fetched', nextStage);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
     /*
     getUpcomingVerification = async (req: Request, res: Response) => {
         try {

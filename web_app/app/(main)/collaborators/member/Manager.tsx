@@ -74,8 +74,7 @@ const CollaboratorManager = ({ user }: CollaboratorManagerProps) => {
                             </div>
                         );
                     }
-                },
-                
+                },                
                 {
                     header: "Status",
                     field: "status",

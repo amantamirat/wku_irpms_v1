@@ -6,7 +6,6 @@ import { ConstraintRepository } from "../modules/constraints/constraint.reposito
 import { ConstraintValidationService } from "../modules/constraints/services/constraint-validator.service";
 import { EvaluationRepository } from "../modules/evaluations/evaluation.repository";
 import { CompositionRepository } from "../modules/compositions/composition.repository";
-//import { CompositionValidator } from "../modules/compositions/composition.validator";
 import { GrantRepository } from "../modules/grants/grant.repository";
 import { OrganizationRepository } from "../modules/organization/organization.repository";
 import { SpecializationRepository } from "../modules/organization/specializations/specialization.repository";
@@ -32,6 +31,17 @@ import { UserService } from "../modules/users/user.service";
 import { ProfileRepository } from "../modules/compositions/profile/profile.repository";
 import { HistoryRepository } from "../modules/compositions/history/history.repository";
 import { RequirementRepository } from "../modules/compositions/requirements/requirement.repository";
+import { ApplicationSynchronizer } from "../modules/projects/applications/application.synchronizer";
+import { NotificationRepository } from "../modules/notifications/notification.repository";
+import { SettingRepository } from "../modules/settings/setting.repository";
+import { SettingService } from "../modules/settings/setting.service";
+import { NotificationService } from "../modules/notifications/notification.service";
+import { StageService } from "../modules/calls/stages/stage.service";
+
+export const notificationRepo = new NotificationRepository();
+export const settingRepo = new SettingRepository();
+export const settingService = new SettingService(settingRepo);
+export const notificationService = new NotificationService(notificationRepo, settingService);
 
 // calendar repos
 export const calendarRepo = new CalendarRepository();
@@ -68,20 +78,20 @@ export const templateRepo = new TemplateRepository();
 export const templateValidtor = new TemplateValidationService(
     new PdfExtractorService(), new TemplateParserService(), templateRepo
 );
-
-
 //validator services 
-export const constraintValidator = new ConstraintValidationService(constraintRepo, themeRepo);
+export const constraintValidator = new ConstraintValidationService(
+    constraintRepo, themeRepo);
 
-//export const compositionValidator = new CompositionValidator(compositionRepo, userRepo, exprienceRepo, specializationRepo, collaboratorRepo);
 
 // Services
+export const stageService = new StageService(stageRepo, callRepo, evalRepo);
 export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, constraintValidator);
 export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, callRepo, constraintValidator);
 export const projectService = new ProjectService(projectRepo, collaboratorRepo, phaseRepo,
     grantRepo, collabService, phaseService, callRepo);
-export const applicationService = new ApplicationService(applicationRepo, projectRepo, grantRepo, callRepo, stageRepo, reviewerRepo,
-    projectService, constraintValidator, templateValidtor);
+
+export const applicationService = new ApplicationService(applicationRepo, callRepo, stageService, reviewerRepo,
+    projectService, constraintValidator, templateValidtor, new ApplicationSynchronizer(projectRepo, applicationRepo, stageRepo), notificationService);
 
 export const userService = new UserService(userRepo, organizationRepo, roleRepo);
 

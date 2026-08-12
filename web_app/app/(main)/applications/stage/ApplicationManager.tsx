@@ -2,19 +2,21 @@
 
 import { BASE_URL } from "@/api/ApiClient";
 import { createEntityManager } from "@/components/createEntityManager";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import MyBadge from "@/templates/MyBadge";
 import { useEffect, useMemo, useState } from "react";
 import { Stage } from "../../calls/stages/models/stage.model";
-import ReviewerManager from "../../reviewers/application/Manager";
 import { ApplicationApi } from "../api/application.api";
-import { Application } from "../models/application.model";
+import { Application, ApplicationStatus } from "../models/application.model";
 import { APPLICATION_STATUS_ORDER, APPLICATION_TRANSITIONS } from "../models/application.state-machine";
-import MyBadge from "@/templates/MyBadge";
+import ApplicationDetail from "./ApplicationDetail";
 
 interface ApplicationManagerProps {
     stage: Stage;
 }
 
 const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
+    const confirm = useConfirmDialog();
     const [applications, setApplications] = useState<Application[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
 
@@ -46,7 +48,9 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
                     header: "Project", field: "project.title",
                     body: (ps: Application) => {
                         const title = typeof ps.project === "object" ? ps.project.title : "Unknown Project";
-                        return <div className="truncate text-sm font-medium" title={title}>{title}</div>;
+                        return <div
+                            className="truncate max-w-xs text-sm font-medium"
+                            title={title}>{title}</div>;
                     },
                     sortable: true
                 },
@@ -57,6 +61,10 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
                             <i className="pi pi-file-pdf mr-1 text-red-500"></i> View PDF
                         </a>
                     ) : <span className="text-gray-400 italic">No document</span>
+                },
+                {
+                    header: "Score",
+                    body: (app: Application) => <span className="font-bold">{typeof app?.totalScore === "number" ? app.totalScore : "—"}</span>
                 },
                 {
                     header: "Status",
@@ -70,10 +78,29 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
                 statusOrder: APPLICATION_STATUS_ORDER,
                 transitions: APPLICATION_TRANSITIONS
             },
-            hideDefaultActions: true,
+            hideEditAction: true,
+            disableDeleteRow: (row: Application) => row.status !== ApplicationStatus.pending,
             expandable: {
-                template: (ps) => <ReviewerManager application={ps} />
+                template: (app) => <ApplicationDetail application={app} />
             },
+            extraActions: [
+                {
+                    icon: "pi pi-calculator",
+                    severity: "info",
+                    tooltip: "Recalculate Scores",
+                    permissions: ["application:calculateTotalScore"],
+                    disabled: (row: Application) => row.status !== ApplicationStatus.pending,
+                    onClick: (row: Application) => {
+                        confirm.ask({
+                            operation: "calculate score",
+                            onConfirmAsync: async () => {
+                                const score = await ApplicationApi.calculateTotalScore(row._id!);
+                                row.totalScore = score;
+                            }
+                        });
+                    }
+                }
+            ],
         });
     }, [applications]);
 

@@ -21,16 +21,14 @@ export class ApplicationController {
     // ---------------------------------------------------
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.auth) {
-                throw new AppError(ERROR_CODES.UNAUTHORIZED);
-            }
+            if (!req.auth) throw new AppError(ERROR_CODES.UNAUTHORIZED);
             if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
+            const { project, stage } = req.body;
 
-            const { project } = req.body;
             const relativeDocPath = path.relative(process.cwd(), req.file.path).replace(/\\/g, '/');
             const dto: CreateApplicationDTO = {
                 project,
-                stage: '',
+                stage,
                 documentPath: relativeDocPath,
                 userId: req.auth.userId
             };
@@ -171,6 +169,62 @@ export class ApplicationController {
         }
     };
 
+
+    withdraw = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ) => {
+        try {
+            if (!req.auth) {
+                throw new AppError(ERROR_CODES.UNAUTHORIZED);
+            }
+
+            const { id } = req.params;
+
+            const dto = {
+                id,
+                userId: req.auth.userId
+            };
+
+            const withdrawnDoc =
+                await this.service.withdraw(dto);
+
+            if (withdrawnDoc?.documentPath) {
+                const absolutePath = path.join(
+                    process.cwd(),
+                    withdrawnDoc.documentPath
+                );
+
+                fs.unlink(absolutePath, (unlinkErr) => {
+                    if (unlinkErr) {
+                        console.error(
+                            `Failed to delete physical file at ${absolutePath}:`,
+                            unlinkErr
+                        );
+                    } else {
+                        console.log(
+                            `Successfully deleted physical file: ${absolutePath}`
+                        );
+                    }
+                });
+            }
+
+            successResponse(
+                res,
+                200,
+                "Application withdrawn successfully",
+                withdrawnDoc
+            );
+
+        } catch (err: any) {
+            errorResponse(
+                res,
+                400,
+                err.message,
+                err
+            );
+        }
+    };
 
     // ---------------------------------------------------
     // DELETE

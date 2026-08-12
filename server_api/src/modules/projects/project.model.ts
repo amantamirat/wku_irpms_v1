@@ -5,7 +5,8 @@ export enum ProjectStatus {
     draft = 'draft',
     submitted = "submitted",
     rejected = "rejected",
-    accepted = "accepted",// PI can revise budget/collaborators
+    accepted = "accepted",
+    //approved="approved",// PI can revise budget/collaborators
     granted = 'granted',
     refused = 'refused',
     active = 'active',

@@ -40,7 +40,7 @@ export interface ExistsApplicationDTO {
 export interface FindByIdOptions {
     populate?: {
         project?: boolean;
-        grantStage?: boolean;
+        stage?: boolean;
     };
 }
 
