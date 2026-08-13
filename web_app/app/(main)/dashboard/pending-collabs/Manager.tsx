@@ -7,7 +7,6 @@ import { Button } from "primereact/button";
 import { useMemo } from "react";
 import { CollaboratorApi } from "../../collaborators/api/collaborator.api";
 import { Collaborator } from "../../collaborators/models/collaborator.model";
-import { COLLAB_STATUS_ORDER, COLLAB_TRANSITIONS } from "../../collaborators/models/collaborator.state-machine";
 
 interface CollaboratorManagerProps {
     items: Collaborator[];
@@ -40,12 +39,6 @@ const PendingCollabManager = ({ items }: CollaboratorManagerProps) => {
                 }
             ],
             items: items,
-            /*
-            workflow: {
-                statusField: "status",
-                statusOrder: COLLAB_STATUS_ORDER,
-                transitions: COLLAB_TRANSITIONS
-            },*/
             permissionPrefix: "collaborator",
             hideSearch: true,
             hideDefaultActions: true,
@@ -63,7 +56,7 @@ const PendingCollabManager = ({ items }: CollaboratorManagerProps) => {
                     <h5 className="m-0 text-xl font-bold">Pending Invitations</h5>
                     <p className="text-500 text-sm m-0">Project teams you have been invited to join</p>
                 </div>
-                <Link href="dashboard/my-evaluations">
+                <Link href="dashboard/my-memberships">
                     <Button label="View All" icon="pi pi-arrow-right" iconPos="right" className="p-button-text p-button-sm" />
                 </Link>
             </div>

@@ -39,6 +39,7 @@ export interface CreateProjectDTO {
     themes: string[];
     collaborators: CollaboratorDto[];
     phases: PhaseDto[];
+    status?: ProjectStatus;
     createdBy?: string;
     userId?: string;
 }

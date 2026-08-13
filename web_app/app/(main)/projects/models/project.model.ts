@@ -12,8 +12,8 @@ export enum ProjectStatus {
     draft = 'draft',
     submitted = "submitted",
     rejected = "rejected",
-    accepted = "accepted", //add time when should the budget and duration will be modified
-    //approved="approved",
+    accepted = "accepted",
+    approved = "approved",//in this the budget and duration will be modified
     granted = "granted",
     refused = 'refused',
     active = "active",

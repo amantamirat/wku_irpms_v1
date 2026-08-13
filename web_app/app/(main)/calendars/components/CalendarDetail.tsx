@@ -1,10 +1,8 @@
 import { useAuth } from "@/contexts/auth-context";
-import { useMemo } from "react";
-import { PERMISSIONS } from "@/types/permissions";
 import { TabPanel, TabView } from "primereact/tabview";
+import { useMemo } from "react";
 import CallManager from "../../calls/components/CallManager";
 import { Calendar } from "../models/calendar.model";
-import ProjectManager from "../../projects/components/ProjectManager";
 
 
 interface CalendarDetailProps {

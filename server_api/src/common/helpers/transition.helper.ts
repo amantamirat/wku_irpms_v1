@@ -3,7 +3,7 @@ export class TransitionHelper {
     static validateTransition<T extends string>(
         current: T,
         next: T,
-        transitions: Record<T, T[]>
+        transitions: Partial<Record<T, T[]>>
     ): void {
 
         const allowed = transitions[current] ?? [];

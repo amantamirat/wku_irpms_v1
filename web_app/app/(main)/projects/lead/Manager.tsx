@@ -5,13 +5,14 @@ import { createEntityManager } from "@/components/createEntityManager";
 import MyBadge from "@/templates/MyBadge";
 import { useEffect, useMemo, useState } from "react";
 import { ProjectApi } from "../api/project.api";
-import { Project } from "../models/project.model";
+import { Project, ProjectStatus } from "../models/project.model";
 import ProjectDetail from "../../projects/components/ProjectDetail";
+import ProjectWizard from "../components/wirzard/ProjectWizard";
 
 
 interface ProjectManagerProps {
     user: User;
-    enableEditing?:boolean;
+    enableEditing?: boolean;
 }
 
 const ProjectManager = ({ user, enableEditing }: ProjectManagerProps) => {
@@ -67,7 +68,16 @@ const ProjectManager = ({ user, enableEditing }: ProjectManagerProps) => {
 
             permissionPrefix: "project",
             hideSearch: true,
+            //disableEditRow: (row) => row.status !== ProjectStatus.accepted,
+            //disableDeleteRow: (row) => row.status !== ProjectStatus.draft,
             hideDefaultActions: true,
+            createNew: enableEditing ? () => ({
+                leadPI: user,
+                title: "",
+                summary: "",
+                themes: []
+            }) : undefined,
+            SaveDialog: enableEditing ? ProjectWizard : undefined,
             expandable: {
                 template: (project) => {
                     return <ProjectDetail project={project} enableEditing={enableEditing} />;

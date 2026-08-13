@@ -4,7 +4,7 @@ import { STATUS_BUTTON_CONFIG } from "./status-button.config";
 interface StateTransitionButtonsProps<TStatus extends string> {
     id?: string;
     current: TStatus;
-    transitions: Record<TStatus, TStatus[]>;
+    transitions: Partial<Record<TStatus, TStatus[]>>;
     statusOrder: TStatus[];
     permissionPrefix: string;
     hasPermission: (permissions: string[]) => boolean;

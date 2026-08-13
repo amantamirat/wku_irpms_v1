@@ -6,8 +6,8 @@ export enum PhaseStatus {
     proposed = 'proposed',
     approved = 'approved',
     active = 'active',
-    terminated = 'terminated',
-    completed = 'completed'
+    completed = 'completed',
+    terminated = 'terminated',    
 }
 
 

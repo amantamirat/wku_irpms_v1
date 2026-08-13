@@ -8,15 +8,15 @@ import { PhaseApi } from "../api/phase.api";
 import SavePhase from "../components/SavePhase";
 import { Phase } from "../models/phase.model";
 import { PHASE_STATUS_ORDER, PHASE_TRANSITIONS } from "../models/phase.state-machine";
-
-
+import { ProjectApi } from "../../api/project.api";
 
 interface PhaseManagerProps {
     project: Project;
+    updateProject?: (project: Project) => void;
     enableEditing?: boolean;
 }
 
-const PhaseManager = ({ project, enableEditing }: PhaseManagerProps) => {
+const PhaseManager = ({ project, updateProject, enableEditing }: PhaseManagerProps) => {
     const [phases, setPhases] = useState<Phase[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
 
@@ -25,7 +25,6 @@ const PhaseManager = ({ project, enableEditing }: PhaseManagerProps) => {
         (project.status === ProjectStatus.draft ||
             project.status === ProjectStatus.accepted)
     ), [project.status, enableEditing]);
-
 
     useEffect(() => {
         const fetchPhases = async () => {
@@ -47,7 +46,6 @@ const PhaseManager = ({ project, enableEditing }: PhaseManagerProps) => {
     // useMemo prevents component re-creation on every render cycle
     const Manager = useMemo(() => {
         return createEntityManager<Phase>({
-            //title: "Evaluations",
             itemName: "Phase",
             api: PhaseApi,
             columns: [
@@ -94,7 +92,6 @@ const PhaseManager = ({ project, enableEditing }: PhaseManagerProps) => {
                 }
             ],
             items: phases,
-
             permissionPrefix: "phase",
             createNew: canManage
                 ? () => ({
@@ -111,10 +108,28 @@ const PhaseManager = ({ project, enableEditing }: PhaseManagerProps) => {
                 transitions: PHASE_TRANSITIONS,
                 statusOrder: PHASE_STATUS_ORDER
             },
+            // Handle phase transition completion
+            onTransitComplete: async (updatedPhase: Phase) => {
+                //console.log("Phase transition complete triggered:", updatedPhase)
+                // Refetch updated project from API (due to backend sync) & update parent Project state
+                if (updateProject && project) {
+                    try {
+                        const projectId = project._id;
+                        if (projectId) {
+                            const updatedProject = await ProjectApi.getById!(projectId, true);
+                            if (updatedProject) {
+                                updateProject(updatedProject);
+                            }
+                        }
+                    } catch (error) {
+                        console.error("Error updating project state after phase transition", error);
+                    }
+                }
+            },
             hideSearch: true,
             hideDefaultActions: true,
         });
-    }, [phases]);
+    }, [phases, project, updateProject, canManage]);
 
     if (loading) {
         return <div className="p-4 text-center">Loading phases...</div>;

@@ -11,8 +11,11 @@ import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
+import { ICallRepository } from "../calls/call.repository";
+import { ConstraintValidationService } from "../constraints/services/constraint-validator.service";
 import { GrantStatus } from "../grants/grant.model";
 import { IGrantRepository } from "../grants/grant.repository";
+import { NotificationService } from "../notifications/notification.service";
 import { CollaboratorStatus } from "./collaborators/collaborator.model";
 import { ICollaboratorRepository } from "./collaborators/collaborator.repository";
 import { CollaboratorService } from "./collaborators/collaborator.service";
@@ -20,10 +23,7 @@ import { PhaseStatus } from "./phase/phase.model";
 import { IPhaseRepository } from "./phase/phase.repository";
 import { PhaseService } from "./phase/phase.service";
 import { ProjectStatus } from "./project.model";
-import { PROJECT_TRANSITIONS } from "./project.state-machine";
-import { ConstraintValidationService } from "../constraints/services/constraint-validator.service";
-import { ICallRepository } from "../calls/call.repository";
-import { NotificationService } from "../notifications/notification.service";
+import { CALL_PROJECT_TRANSITIONS, STANDALONE_PROJECT_TRANSITIONS } from "./project.state-machine";
 
 
 export class ProjectService {
@@ -36,20 +36,23 @@ export class ProjectService {
         private readonly collabService: CollaboratorService,
         private readonly phaseService: PhaseService,
         private readonly callRepo: ICallRepository,
-        private readonly constValidator?: ConstraintValidationService,
-        //private readonly notificationService?: NotificationService,
+        private readonly constValidator: ConstraintValidationService,
+        private readonly notificationService: NotificationService
     ) { }
 
 
     async create(dto: CreateProjectDTO, options?: { skipValidation?: boolean }) {
-        const { grant, title, summary, leadPI, collaborators, phases, themes, userId } = dto;
+        const { call, grant, title, summary, leadPI, collaborators, phases, themes, userId } = dto;
 
         if (!options?.skipValidation) {
             const grantDoc = await this.grantRepo.findById(grant);
             if (!grantDoc) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
             if (grantDoc.status !== GrantStatus.active) throw new Error(ERROR_CODES.GRANT_NOT_ACTIVE);
         }
-        const created = await this.projectRepo.create({ ...dto, createdBy: userId });
+        const created = await this.projectRepo.create({
+            ...dto, status: call ? ProjectStatus.submitted : ProjectStatus.draft,
+            createdBy: userId
+        });
         if (!created) {
             throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
         }
@@ -149,39 +152,32 @@ export class ProjectService {
             throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
         }
 
+        const transitionsMap = projectDoc.call
+            ? CALL_PROJECT_TRANSITIONS
+            : STANDALONE_PROJECT_TRANSITIONS;
+
+        TransitionHelper.validateTransition(from, to, transitionsMap);
+
+        /*
         TransitionHelper.validateTransition(
             from,
             to,
             PROJECT_TRANSITIONS
         );
+        */
 
-        if (to === ProjectStatus.rejected ||
-            to === ProjectStatus.active ||
-            to === ProjectStatus.terminated ||
-            to === ProjectStatus.completed
-        ) {
-
-            throw new AppError(ERROR_CODES.INVALID_OPERTATION);
+        if (from !== ProjectStatus.granted && to === ProjectStatus.approved) {
+            await this.notificationService.notifyProjectFinalization(
+                String(projectDoc.leadPI), projectDoc.title
+            );
+        }
+        if (to === ProjectStatus.refused) {
+            await this.notificationService.notifyProjectRefusal(
+                String(projectDoc.leadPI), projectDoc.title
+            );
         }
 
-        if (to === ProjectStatus.draft) {
-            if (projectDoc.call) {
-                throw new AppError(
-                    ERROR_CODES.UNSUPPORTED_OPERTATION,
-                    "Projects associated with a call cannot be moved to draft status."
-                );
-            }
-        }
-
-        if (to === ProjectStatus.submitted) {
-            if (!projectDoc.call) {
-                throw new AppError(
-                    ERROR_CODES.UNSUPPORTED_OPERTATION,
-                    "Only projects associated with a call can be submitted."
-                );
-            }
-        }
-
+        //rollback notification remain
 
         if (to === ProjectStatus.granted) {
             const phases = await this.phaseRepo.find({ project: id });
@@ -191,6 +187,12 @@ export class ProjectService {
             const collabs = await this.collabRepo.find({ project: id });
             if (!collabs.every(c => c.status === CollaboratorStatus.verified))
                 throw new AppError(ERROR_CODES.COLLABORATORS_NOT_FULLY_VERIFIED);
+
+            //  await this.grantRepo.consumeBudget(String(projectDoc.grant), projectDoc.totalBudget ?? 0);
+        }
+
+        if (from === ProjectStatus.granted && to === ProjectStatus.approved) {
+            //   await this.grantRepo.reverseConsumedBudget(String(projectDoc.grant), projectDoc.totalBudget ?? 0);
         }
 
         return await this.projectRepo.updateStatus(id, to);
@@ -203,8 +205,14 @@ export class ProjectService {
     async delete(dto: DeleteDto) {
         const { id, userId } = dto;
         const projectDoc = await this.getById(id);
-        if (projectDoc.status !== ProjectStatus.draft) {
-            throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+        if (
+            projectDoc.status !== ProjectStatus.draft &&
+            projectDoc.status !== ProjectStatus.submitted
+        ) {
+            throw new AppError(
+                ERROR_CODES.INVALID_PROJECT_STATUS,
+                "The project must be in draft or submitted status to perform this operation."
+            );
         }
         await this.collabRepo.deleteByProject(id);
         await this.phaseRepo.deleteByProject(id);

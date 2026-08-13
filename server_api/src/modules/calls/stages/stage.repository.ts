@@ -1,4 +1,4 @@
-import mongoose, { ClientSession } from "mongoose";
+import { Types } from "mongoose";
 import {
     CreateStageDTO,
     ExistsStageDTO,
@@ -7,37 +7,42 @@ import {
 } from "./stage.dto";
 import { IStage, Stage } from "./stage.model";
 
+
 export interface IStageRepository {
-    findById(id: string, session?: ClientSession): Promise<IStage | null>;
+    findById(id: string): Promise<IStage | null>;
     find(filters: GetStageDTO): Promise<IStage[]>;
-    findOne(callId: string, order: number, session?: ClientSession): Promise<IStage | null>;
+    findOne(callId: string, order: number): Promise<IStage | null>;
+
+    getFirstStage(callId: string): Promise<IStage | null>;
+    getLastStage(callId: string): Promise<IStage | null>;
+    getNextStage(callId: string, currentOrder: number): Promise<IStage | null>;
+
     create(dto: CreateStageDTO): Promise<IStage>;
     update(id: string, data: UpdateStageDTO["data"]): Promise<IStage | null>;
     updateMany(filter: any, update: any): Promise<any>;
-    countStages(callId: string, session?: ClientSession): Promise<number>;
     exists(filters: ExistsStageDTO): Promise<boolean>;
     delete(id: string): Promise<IStage | null>;
 }
 
+
 export class StageRepository implements IStageRepository {
 
-    async findById(id: string, session?: ClientSession) {
-        let query = Stage.findById(id);
-
-        if (session) query = query.session(session);
-
-        return query.lean<IStage>().exec();
+    async findById(id: string): Promise<IStage | null> {
+        return Stage.findById(id)
+            .lean<IStage>()
+            .exec();
     }
 
-    async find(filters: GetStageDTO) {
+
+    async find(filters: GetStageDTO): Promise<IStage[]> {
         const query: any = {};
 
         if (filters.call) {
-            query.call = new mongoose.Types.ObjectId(filters.call);
+            query.call = new Types.ObjectId(filters.call);
         }
 
         if (filters.evaluation) {
-            query.evaluation = new mongoose.Types.ObjectId(filters.evaluation);
+            query.evaluation = new Types.ObjectId(filters.evaluation);
         }
 
         if (filters.order !== undefined) {
@@ -53,35 +58,79 @@ export class StageRepository implements IStageRepository {
                 .populate("template");
         }
 
-        return dbQuery.lean<IStage[]>().exec();
+        return dbQuery
+            .lean<IStage[]>()
+            .exec();
     }
 
-    async findOne(callId: string, order: number, session?: ClientSession) {
-        let query = Stage.findOne({ call: callId, order });
 
-        if (session) query = query.session(session);
-
-        return query.lean<IStage>().exec();
+    async findOne(
+        callId: string,
+        order: number
+    ): Promise<IStage | null> {
+        return Stage.findOne({
+            call: callId,
+            order
+        })
+            .lean<IStage>()
+            .exec();
     }
 
-    async create(dto: CreateStageDTO) {
+
+    async getFirstStage(callId: string): Promise<IStage | null> {
+        return Stage.findOne({
+            call: new Types.ObjectId(callId)
+        })
+            .sort({ order: 1 })
+            .lean<IStage>()
+            .exec();
+    }
+
+    async getLastStage(callId: string): Promise<IStage | null> {
+        return Stage.findOne({
+            call: new Types.ObjectId(callId)
+        })
+            .sort({ order: -1 })
+            .lean<IStage>()
+            .exec();
+    }
+
+    async getNextStage(
+        callId: string,
+        currentOrder: number
+    ): Promise<IStage | null> {
+        return Stage.findOne({
+            call: new Types.ObjectId(callId),
+            order: { $gt: currentOrder }
+        })
+            .sort({ order: 1 })
+            .lean<IStage>()
+            .exec();
+    }
+
+
+    async create(dto: CreateStageDTO): Promise<IStage> {
         return Stage.create({
             ...dto,
-            call: new mongoose.Types.ObjectId(dto.call),
-            evaluation: new mongoose.Types.ObjectId(dto.evaluation),
+            call: new Types.ObjectId(dto.call),
+            evaluation: new Types.ObjectId(dto.evaluation),
             template: dto.template
-                ? new mongoose.Types.ObjectId(dto.template)
+                ? new Types.ObjectId(dto.template)
                 : undefined,
         });
     }
 
-    async update(id: string, data: UpdateStageDTO["data"]) {
+
+    async update(
+        id: string,
+        data: UpdateStageDTO["data"]
+    ): Promise<IStage | null> {
 
         const updateData: any = { ...data };
 
         if (data.template !== undefined) {
             updateData.template = data.template
-                ? new mongoose.Types.ObjectId(data.template)
+                ? new Types.ObjectId(data.template)
                 : null;
         }
 
@@ -95,29 +144,28 @@ export class StageRepository implements IStageRepository {
         ).exec();
     }
 
-    async updateMany(filter: any, update: any) {
+
+    async updateMany(filter: any, update: any): Promise<any> {
         return Stage.updateMany(filter, update).exec();
     }
 
-    async countStages(callId: string, session?: ClientSession) {
-        let query = Stage.countDocuments({
-            call: new mongoose.Types.ObjectId(callId),
-        });
 
-        if (session) query = query.session(session);
-
-        return query.exec();
+    async countStages(callId: string): Promise<number> {
+        return Stage.countDocuments({
+            call: new Types.ObjectId(callId),
+        }).exec();
     }
 
-    async exists(filters: ExistsStageDTO) {
+
+    async exists(filters: ExistsStageDTO): Promise<boolean> {
         const query: any = {};
 
         if (filters.call) {
-            query.call = new mongoose.Types.ObjectId(filters.call);
+            query.call = new Types.ObjectId(filters.call);
         }
 
         if (filters.evaluation) {
-            query.evaluation = new mongoose.Types.ObjectId(filters.evaluation);
+            query.evaluation = new Types.ObjectId(filters.evaluation);
         }
 
         if (filters.order !== undefined) {
@@ -127,7 +175,8 @@ export class StageRepository implements IStageRepository {
         return (await Stage.exists(query).exec()) !== null;
     }
 
-    async delete(id: string) {
+
+    async delete(id: string): Promise<IStage | null> {
         return Stage.findByIdAndDelete(id).exec();
     }
 }

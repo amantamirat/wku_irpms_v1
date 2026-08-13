@@ -1,74 +1,78 @@
-import { EntityApi } from "@/api/EntityApi"
-import { useAuth } from "@/contexts/auth-context"
-import { useConfirmDialog } from "@/contexts/ConfirmDialogContext"
-import { useCrudList } from "@/hooks/useCrudList"
-import { useState, useEffect, useRef } from "react"
-import { ItemManager, RowAction } from "./ItemManager"
-import { StateTransitionButtons } from "./StateTransitionButtons"
-import { Button } from "primereact/button"
-import ImportDialog from "./ImportDialog"
+import { EntityApi } from "@/api/EntityApi";
+import { useAuth } from "@/contexts/auth-context";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import { useCrudList } from "@/hooks/useCrudList";
+import { useState, useEffect, useRef } from "react";
+import { ItemManager, RowAction } from "./ItemManager";
+import { StateTransitionButtons } from "./StateTransitionButtons";
+import { Button } from "primereact/button";
+import ImportDialog from "./ImportDialog";
 
 export interface EntitySaveDialogProps<T> {
-    visible: boolean
-    item: T
-    onComplete: (item: T) => void
-    onHide: () => void
+    visible: boolean;
+    item: T;
+    onComplete: (item: T) => void;
+    onHide: () => void;
+}
+
+// 1. Props interface for the generated EntityManager component
+export interface EntityManagerProps<T> {
+    items?: T[];
 }
 
 export function createEntityManager<
-    T extends { _id?: string },
+    T extends { _id?: string; id?: string },
     TQuery = undefined
 >(config: {
-    title?: string
-    itemName?: string
-    api?: EntityApi<T, TQuery>
-    columns: any[]
-    createNew?: () => T
-    SaveDialog?: React.ComponentType<EntitySaveDialogProps<T>>
-    permissionPrefix: string
-    query?: () => TQuery
+    title?: string;
+    itemName?: string;
+    api?: EntityApi<T, TQuery>;
+    columns: any[];
+    createNew?: () => T;
+    SaveDialog?: React.ComponentType<EntitySaveDialogProps<T>>;
+    permissionPrefix: string;
+    query?: () => TQuery;
     items?: T[];
     onItemsChange?: (items: T[]) => void;
 
     workflow?: {
-        statusField: keyof T
-        transitions: Record<string, string[]>
-        statusOrder: string[]
-    }
+        statusField: keyof T;
+        transitions: Partial<Record<string, string[]>> | ((row: T) => Partial<Record<string, string[]>>);
+        statusOrder: string[];
+    };
     expandable?: {
         template: (
             row: T,
             actions: {
-                updateItem: (item: T) => void
+                updateItem: (item: T) => void;
             }
-        ) => React.ReactNode,
-        allow?: (row: T) => boolean
-    }
+        ) => React.ReactNode;
+        allow?: (row: T) => boolean;
+    };
 
     importConfig?: {
         enable: boolean;
         importId?: string | undefined;
-    }
+    };
 
     toolbarEnd?: React.ReactNode;
     extraActions?: RowAction<T>[];
 
     disableEditRow?: (row: T) => boolean;
     disableDeleteRow?: (row: T) => boolean;
-    hideDefaultActions?: boolean; // Global toggle
-    hideEditAction?: boolean;    // Specific toggle
-    hideDeleteAction?: boolean;  // Specific toggle
+    hideDefaultActions?: boolean;
+    hideEditAction?: boolean;
+    hideDeleteAction?: boolean;
     hideSearch?: boolean;
     onCreateComplete?: (item: T) => void;
     onEditComplete?: (item: T) => void;
     onDeleteComplete?: (item: T) => void;
     onTransitComplete?: (item: T) => void;
 }) {
-
-    return function EntityManager() {
-
-        const { hasPermission } = useAuth()
-        const confirm = useConfirmDialog()
+    // 2. Accept props inside the component function
+    return function EntityManager(props: EntityManagerProps<T>) {
+        const { hasPermission } = useAuth();
+        const confirm = useConfirmDialog();
 
         const {
             items,
@@ -79,7 +83,7 @@ export function createEntityManager<
             setLoading,
             error,
             setError
-        } = useCrudList<T>()
+        } = useCrudList<T>();
 
         const [item, setItem] = useState<T | null>(null);
         const [showDialog, setShowDialog] = useState(false);
@@ -88,33 +92,42 @@ export function createEntityManager<
         const canImport = config.importConfig?.enable &&
             hasPermission([`${config.permissionPrefix}:import`]);
 
+        // Prioritize incoming prop items over config items
+        const externalItems = props.items ?? config.items;
+
         const refresh = async () => {
-            if (config.items) {
-                setAll(config.items);
+            if (externalItems) {
+                setAll(externalItems);
                 return;
             }
-            if (!config.api) {
-                return
-            }
+            if (!config.api) return;
+            
             const query = config.query ? config.query() : undefined;
             const data = await config.api.getAll(query);
             setAll(data);
         };
 
+        // Fetch on initial mount
         useEffect(() => {
             const fetchData = async () => {
                 try {
                     setLoading(true);
                     await refresh();
-
                 } catch (err: any) {
-                    setError(err.message)
+                    setError(err.message);
                 } finally {
-                    setLoading(false)
+                    setLoading(false);
                 }
-            }
+            };
             fetchData();
         }, []);
+
+        // 3. Reactively update state when external props.items change (prevents unmounting!)
+        useEffect(() => {
+            if (externalItems) {
+                setAll(externalItems);
+            }
+        }, [props.items]);
 
         const onItemsChangeRef = useRef(config.onItemsChange);
 
@@ -129,24 +142,20 @@ export function createEntityManager<
         const handleCreate = () => {
             if (config.createNew) {
                 setItem(config.createNew());
-                setShowDialog(true)
+                setShowDialog(true);
             }
-        }
+        };
 
         const transitionState = async (
             row: T,
             dto: { current: string; next: string }
         ) => {
+            const rowId = row._id ?? row.id;
+            if (!rowId) return;
 
-            if (!row._id) return;
+            if (!config.api || !config.api.transitionState) return;
 
-            if (!config.api) {
-                return
-            }
-
-            if (!config.api.transitionState) return;
-
-            const updated = await config.api.transitionState?.(row._id, dto);
+            const updated = await config.api.transitionState(rowId, dto);
             if (updated) {
                 updateItem({ ...row, [config.workflow!.statusField]: dto.next });
                 config?.onTransitComplete?.(updated);
@@ -154,15 +163,15 @@ export function createEntityManager<
         };
 
         const deleteItem = async (row: T) => {
-            if (!config.api) {
-                return
+            if (!config.api) return;
+            const ok = await config.api.delete(row);
+            if (ok) {
+                removeItem(row);
+                config.onDeleteComplete?.(row);
             }
-            const ok = await config.api.delete(row)
-            if (ok) { removeItem(row); config.onDeleteComplete?.(row); }
-        }
+        };
 
         const builtInActions: RowAction<T>[] = [
-            // Edit
             ...(!config.hideEditAction && !config.hideDefaultActions ? [{
                 icon: "pi pi-pencil",
                 severity: "success" as const,
@@ -175,7 +184,6 @@ export function createEntityManager<
                 }
             }] : []),
 
-            // Delete
             ...(!config.hideDeleteAction && !config.hideDefaultActions ? [{
                 icon: "pi pi-trash",
                 severity: "danger" as const,
@@ -185,7 +193,6 @@ export function createEntityManager<
                     confirm.ask({
                         item: config.itemName,
                         onConfirmAsync: () => deleteItem(row),
-
                     })
             }] : [])
         ];
@@ -198,18 +205,20 @@ export function createEntityManager<
         let columns = [...config.columns];
 
         if (config.workflow) {
-
             columns.push({
                 header: "",
                 body: (row: T) => {
-
+                    const transitions =
+                        typeof config.workflow!.transitions === "function"
+                            ? config.workflow!.transitions(row)
+                            : config.workflow!.transitions;
                     const current = row[config.workflow!.statusField] as string;
 
                     return (
                         <StateTransitionButtons
-                            id={row._id}
+                            id={row._id ?? row.id}
                             current={current}
-                            transitions={config.workflow!.transitions}
+                            transitions={transitions}
                             statusOrder={config.workflow!.statusOrder}
                             permissionPrefix={config.permissionPrefix}
                             hasPermission={hasPermission}
@@ -239,7 +248,7 @@ export function createEntityManager<
                         icon="pi pi-upload"
                         severity="secondary"
                         outlined
-                        className="ml-2" // Added margin if config.toolbarEnd exists
+                        className="ml-2"
                         onClick={() => setShowImportDialog(true)}
                     />
                 )}
@@ -277,7 +286,7 @@ export function createEntityManager<
                         onComplete={(saved: T) => {
                             updateItem(saved);
                             config.onCreateComplete?.(saved);
-                            setShowDialog(false)
+                            setShowDialog(false);
                         }}
                         onHide={() => setShowDialog(false)}
                     />
@@ -296,6 +305,6 @@ export function createEntityManager<
                     />
                 )}
             </>
-        )
-    }
+        );
+    };
 }

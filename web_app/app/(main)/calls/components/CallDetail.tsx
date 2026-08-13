@@ -3,8 +3,6 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { useMemo } from "react";
 import { Call } from "../models/call.model";
 import StageManager from "../stages/components/StageManager";
-import ProjectManager from "../../projects/components/ProjectManager";
-import { PERMISSIONS } from "@/types/permissions";
 
 
 interface CallDetailProps {
@@ -26,13 +24,13 @@ const CallDetail = ({ call }: CallDetailProps) => {
             content: <StageManager call={call} />
         },
 
-
-        {
-            header: "Projects",
-            permission: PERMISSIONS.PROJECT.READ,
-            disabled: true,
-            content: <ProjectManager call={call} />
-        }
+        /*
+                {
+                    header: "Projects",
+                    permission: PERMISSIONS.PROJECT.READ,
+                    disabled: true,
+                    content: <ProjectManager call={call} />
+                }*/
     ], [call]);
 
     /**
@@ -45,7 +43,7 @@ const CallDetail = ({ call }: CallDetailProps) => {
     return (
         <TabView>
             {allowedTabs.map((tab, index) => (
-                <TabPanel key={index} header={tab.header} disabled={tab.disabled}>
+                <TabPanel key={index} header={tab.header} >
                     {tab.content}
                 </TabPanel>
             ))}

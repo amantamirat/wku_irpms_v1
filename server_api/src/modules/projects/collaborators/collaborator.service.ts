@@ -95,7 +95,7 @@ export class CollaboratorService {
 
         const collabDoc = await this.collabRepo.findById(id);
         if (!collabDoc) throw new AppError(ERROR_CODES.COLLABORATOR_NOT_FOUND);
-        if (collabDoc.isLeadPI === true) throw new AppError(ERROR_CODES.USER_LEAD_PI);
+        // if (collabDoc.isLeadPI === true) throw new AppError(ERROR_CODES.USER_LEAD_PI);
 
         const from = collabDoc.status as CollaboratorStatus;
         const to = next as CollaboratorStatus;
@@ -115,8 +115,8 @@ export class CollaboratorService {
             if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
             const projectStatus = projectDoc.status;
             if (projectStatus !== ProjectStatus.draft &&
-                projectStatus !== ProjectStatus.submitted &&
-                projectStatus !== ProjectStatus.accepted
+                projectStatus !== ProjectStatus.submitted // &&
+                // projectStatus !== ProjectStatus.accepted
             ) {
                 throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
             }

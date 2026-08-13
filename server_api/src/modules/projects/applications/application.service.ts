@@ -5,7 +5,7 @@ import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { CallStatus } from "../../calls/call.model";
 import { ICallRepository } from "../../calls/call.repository";
-import { StageService } from "../../calls/stages/stage.service";
+import { IStageRepository } from "../../calls/stages/stage.repository";
 import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
 import { NotificationService } from "../../notifications/notification.service";
 import { IReviewerRepository } from "../../reviewers/reviewer.repository";
@@ -28,7 +28,7 @@ export class ApplicationService {
     constructor(
         private readonly repository: IApplicationRepository,
         private readonly callRepo: ICallRepository,
-        private readonly stageService: StageService,
+        private readonly stageRepo: IStageRepository,
         private readonly reviewerRepo: IReviewerRepository,
         private readonly projectService: ProjectService,
         private readonly constraintValidator: ConstraintValidationService,
@@ -48,16 +48,36 @@ export class ApplicationService {
 
         const projectDoc = await this.projectService.getById(project);
 
-        const stageDoc = await this.stageService.getById(stage);
+        if (!projectDoc.call)
+            throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+
+        const callId = String(projectDoc.call);
+
+        const stageDoc = await this.stageRepo.findById(stage);
+
+        if (!stageDoc)
+            throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
 
         const currentAppId = String(projectDoc.currentApplication);
 
         if (currentAppId) {
             const currentApp = await this.repository.findById(currentAppId);
 
-            if (!currentApp) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
+            if (!currentApp) {
+                throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
+            }
 
-            const expectedNextStage = await this.stageService.getNextStage(String(currentApp.stage));
+            if (currentApp.status !== ApplicationStatus.accepted) {
+                throw new AppError(
+                    ERROR_CODES.APPLICATION_NOT_ACCEPTED,
+                    "The current application must be accepted before proceeding."
+                );
+            }
+
+            const currentAppStageDoc = await this.stageRepo.findById(String(currentApp.stage));
+            if (!currentAppStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+
+            const expectedNextStage = await this.stageRepo.getNextStage(callId, currentAppStageDoc.order);
             if (
                 !expectedNextStage ||
                 String(expectedNextStage._id) !== String(stage)
@@ -68,8 +88,11 @@ export class ApplicationService {
                 );
             }
         } else {
-            // First application must be Stage 1
-            if (stageDoc.order !== 1) {
+            const firstStage = await this.stageRepo.getFirstStage(callId);
+            if (!firstStage)
+                throw new AppError(ERROR_CODES.FIRST_STAGE_NOT_FOUND);
+
+            if (String(firstStage._id) !== stage) {
                 throw new AppError(
                     ERROR_CODES.INVALID_STAGE,
                     "First application must be submitted for Stage 1"
@@ -144,9 +167,9 @@ export class ApplicationService {
         if (!deadline) throw new AppError(ERROR_CODES.CALL_DEADLINE_NOT_SET);
         if (deadline < new Date()) throw new AppError(ERROR_CODES.CALL_DEADLINE_PASSED);
 
-        const stageDoc = await this.stageService.getFirstStage(String(callDoc._id));
-        const stageDeadline = stageDoc.deadline;
-        if (stageDeadline < new Date()) throw new AppError(ERROR_CODES.STAGE_DEADLINE_PASSED);
+        const firstStage = await this.stageRepo.getFirstStage(call);
+        if (!firstStage)
+            throw new AppError(ERROR_CODES.FIRST_STAGE_NOT_FOUND);
 
         if (callDoc.constraint) {
             const constraintId = String(callDoc.constraint);
@@ -161,8 +184,8 @@ export class ApplicationService {
             }
         }
 
-        if (stageDoc.template) {
-            const templateId = String(stageDoc.template);
+        if (firstStage.template) {
+            const templateId = String(firstStage.template);
             const result = await this.templateValidator.validate(templateId, docPath);
             if (!result.valid) {
                 throw new AppError(
@@ -182,7 +205,7 @@ export class ApplicationService {
                 skipValidation);
             projectId = String(createdProj._id);
             return await this.create({
-                project: projectId, stage: String(stageDoc._id), documentPath: docPath, userId: userId
+                project: projectId, stage: String(firstStage._id), documentPath: docPath, userId: userId
             }, skipValidation);
 
         } catch (error) {
@@ -227,7 +250,9 @@ export class ApplicationService {
         const applicationDoc = await this.repository.findById(id);
         if (!applicationDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
 
-        const stageDoc = await this.stageService.getById(String(applicationDoc.stage));
+        const stageDoc = await this.stageRepo.findById(String(applicationDoc.stage));
+        if (!stageDoc)
+            throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
 
         const approvedReviews = await this.reviewerRepo.find({
             application: id,
@@ -281,7 +306,9 @@ export class ApplicationService {
         }
 
         const stageId = String(applicationDoc.stage);
-        const stageDoc = await this.stageService.getById(stageId);
+        const stageDoc = await this.stageRepo.findById(stageId);
+        if (!stageDoc)
+            throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
 
         const projStatus = projectDoc.status;
 
@@ -339,7 +366,7 @@ export class ApplicationService {
         }
 
         if (to === ApplicationStatus.pending) {
-            
+
             if (await this.reviewerRepo.exist({ application: id })) {
                 throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
             }
@@ -366,26 +393,16 @@ export class ApplicationService {
                     | { name: string; deadline?: Date }
                     | undefined;
 
-                try {
-                    const nextStage =
-                        await this.stageService.getNextStage(stageId);
+                const nextStage =
+                    await this.stageRepo.getNextStage(String(stageDoc.call), stageDoc.order);
 
+                if (nextStage)
                     nextStageInfo = {
                         name: nextStage.name,
                         deadline: nextStage.deadline
                             ? new Date(nextStage.deadline)
                             : undefined
                     };
-                } catch (err: any) {
-                    // No next stage means this may be the final stage.
-                    // Only ignore the expected "next stage not found" error.
-                    if (
-                        err?.code !==
-                        ERROR_CODES.NEXT_STAGE_NOT_FOUND
-                    ) {
-                        throw err;
-                    }
-                }
 
                 await this.notificationService.notifyApplicationAccepted(
                     leadUser,
@@ -395,9 +412,10 @@ export class ApplicationService {
                 );
             }
             else if (to === ApplicationStatus.pending) {
-                await this.notificationService.notifyApplicationReturnedToPending(
+                await this.notificationService.notifyRollback(
                     leadUser,
                     title,
+                    ApplicationStatus.pending,
                     stageName,
                 );
             }
@@ -498,7 +516,7 @@ export class ApplicationService {
                 String(projectDoc.currentApplication) !== String(id)
             ) {
                 throw new AppError(
-                    ERROR_CODES.INVALID_APPLICATION
+                    ERROR_CODES.INVALID_APPLICATION, "This application is not the current application for the project."
                 );
             }
 
@@ -513,16 +531,11 @@ export class ApplicationService {
             }
         }
 
-        const stageDoc =
-            await this.stageService.getById(
-                String(applicationDoc.stage)
-            );
-
         const deleted = await this.repository.delete(id);
 
         if (deleted) {
-            await this.synchronizer.sync(projectId);
-            if (stageDoc.order === 1) {
+            const synced = await this.synchronizer.sync(projectId);
+            if (synced && !synced.currentApplication) {
                 await this.projectService.delete({
                     id: projectId
                 });

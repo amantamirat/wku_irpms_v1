@@ -174,19 +174,58 @@ export class NotificationService {
         });
     }
 
-    async notifyApplicationReturnedToPending(
+    /**
+     async notifyApplicationReturnedToPending(
+     recipientId: string,
+projectTitle: string,
+
+stageName: string,
+
+senderId?: string
+
+) {
+
+return this.notify({
+
+recipient: recipientId,
+
+sender: senderId,
+
+title: "Application Returned for Review",
+
+message:
+
+`Your application "${projectTitle}" for the "${stageName}" ` +
+
+`stage has been returned to pending status for further review.`,
+
+type: NotificationType.INFO,
+
+link: "/dashboard/my-projects"
+
+});
+
+}
+     */
+
+    async notifyRollback(
         recipientId: string,
-        projectTitle: string,
-        stageName: string,
+        title: string,
+        status: string,
+        stageName?: string,
         senderId?: string
     ) {
+        const stageMessage = stageName
+            ? ` for the "${stageName}" stage`
+            : "";
+
         return this.notify({
             recipient: recipientId,
             sender: senderId,
-            title: "Application Returned for Review",
+            title: "Returned for Review",
             message:
-                `Your application "${projectTitle}" for the "${stageName}" ` +
-                `stage has been returned to pending status for further review.`,
+                `Your "${title}"${stageMessage} ` +
+                `has been returned to ${status} status for further review.`,
             type: NotificationType.INFO,
             link: "/dashboard/my-projects"
         });
@@ -213,7 +252,7 @@ export class NotificationService {
 
     async notifyProjectFinalization(
         recipientId: string,
-        projectDoc: any,
+        projectTitile: string,
         senderId?: string
     ) {
         return this.notify({
@@ -221,10 +260,27 @@ export class NotificationService {
             sender: senderId,
             title: "Project Requires Finalization",
             message:
-                `The project "${projectDoc.title}" requires final phase review and updates. ` +
-                `Please review phase timelines, budgets, and mark phases as reviewed.`,
+                `The project "${projectTitile}" has been approved and requires finalization before funding. ` +
+                `Please review and update the project phases, timelines, and budget, and ensure all required information is complete.`,
             type: NotificationType.INFO,
-            link: `/projects/${projectDoc._id}`
+            link: "/dashboard/my-projects"
+        });
+    }
+
+
+    async notifyProjectRefusal(
+        recipientId: string,
+        ptojectTitle: string,
+        senderId?: string
+    ) {
+        return this.notify({
+            recipient: recipientId,
+            sender: senderId,
+            title: "Project Refused",
+            message:
+                `We regret to inform you that your project "${ptojectTitle}" has been refused during finalization. `,
+            type: NotificationType.ERROR,
+            link: "/dashboard/my-projects"
         });
     }
 

@@ -27,9 +27,9 @@ export class StageService {
     }
 
     async syncCallDeadline(callId: string) {
-        const firstStage = await this.repository.findOne(callId, 1);
-        return await this.callRepository.update(callId, {
-            deadline: firstStage ? firstStage.deadline : null,
+        const firstStage = await this.repository.getFirstStage(callId);
+        return this.callRepository.update(callId, {
+            deadline: firstStage?.deadline ?? null,
         });
     }
 
@@ -49,41 +49,60 @@ export class StageService {
         if (minReviewers > maxReviewers) {
             throw new AppError(ERROR_CODES.INVALID_REVIEWER_RANGE);
         }
+
         // 2. Call validation
-        const callDoc = await this.validateCall(call);
+        await this.validateCall(call);
 
         // 3. Evaluation validation
         const evalDoc = await this.evalRepository.findById(evaluation);
-        if (!evalDoc) throw new Error(ERROR_CODES.EVALUATION_NOT_FOUND);
-        if (evalDoc.status !== EvalStatus.published) throw new AppError(ERROR_CODES.EVALUATION_NOT_PUBLISHED);
 
+        if (!evalDoc) {
+            throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
+        }
+
+        if (evalDoc.status !== EvalStatus.published) {
+            throw new AppError(
+                ERROR_CODES.EVALUATION_NOT_PUBLISHED
+            );
+        }
+
+        // 4. Minimum acceptance score validation
         const totalWeight = evalDoc.weight;
-        // 4. NEW: MinAcceptance logic validation
 
         if (minAcceptanceScore > totalWeight) {
-            throw new AppError(ERROR_CODES.MIN_SCORE_EXCEEDS_EVALUATION_WEIGHT);
+            throw new AppError(
+                ERROR_CODES.MIN_SCORE_EXCEEDS_EVALUATION_WEIGHT
+            );
         }
+
         try {
-            let nextOrder = 0;
+            // 5. Determine next stage order
+            const lastStage = await this.repository.getLastStage(call);
 
-            const stages = await this.repository.countStages(call);
-            nextOrder = stages + 1;
+            const nextOrder = lastStage
+                ? lastStage.order + 1
+                : 1;
 
+            // 6. Create stage
             const stage = await this.repository.create({
                 ...dto,
                 order: nextOrder
             });
 
-            if (nextOrder === 1) {
+            // 7. Sync deadline when first stage is created
+            if (!lastStage) {
                 await this.syncCallDeadline(call);
             }
 
-
             return stage;
+
         } catch (err: any) {
             if (err?.code === 11000) {
-                throw new AppError(ERROR_CODES.STAGE_ALREADY_EXISTS);
+                throw new AppError(
+                    ERROR_CODES.STAGE_ALREADY_EXISTS
+                );
             }
+
             throw err;
         }
     }
@@ -110,15 +129,15 @@ export class StageService {
     }
 
     async getFirstStage(callId: string) {
-        const firstStage = await this.repository.findOne(callId, 1);
+        const firstStage = await this.repository.getFirstStage(callId);
         if (!firstStage) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
         return firstStage;
     }
 
     async getNextStage(id: string) {
-        const stage = await this.repository.findById(id);
-        if (!stage) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-        const nextStage = await this.repository.findOne(String(stage.call), stage.order + 1);
+        const stageDoc = await this.repository.findById(id);
+        if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        const nextStage = await this.repository.getNextStage(String(stageDoc.call), stageDoc.order);
         if (!nextStage) throw new AppError(ERROR_CODES.NEXT_STAGE_NOT_FOUND);
         return nextStage;
     }

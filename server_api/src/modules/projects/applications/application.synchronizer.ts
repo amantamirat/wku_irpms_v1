@@ -16,13 +16,13 @@ export class ApplicationSynchronizer {
     ) { }
 
     async sync(project: string) {
+
         const projectDoc = await this.projectRepo.findById(project);
-        if (!projectDoc) {
+
+        if (!projectDoc)
             throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
-        }
-        
+
         const latestApplication = await this.applicationRepo.findLatestByProject(project);
-        
         /**
          * Synchronize currentApplication
          */
@@ -44,7 +44,6 @@ export class ApplicationSynchronizer {
                 );
             }
         }
-
         /**
          * Compute project status
          */
@@ -60,19 +59,18 @@ export class ApplicationSynchronizer {
                     break;
 
                 case ApplicationStatus.accepted: {
-                    const stage = await this.stageRepo.findById(
-                        String(latestApplication.stage)
+                    const lastStage = await this.stageRepo.getLastStage(
+                        String(projectDoc.call)
                     );
 
-                    if (!stage) {
-                        throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+                    if (!lastStage) {
+                        throw new AppError(ERROR_CODES.LAST_STAGE_NOT_FOUND);
                     }
 
-                    const totalStages = await this.stageRepo.countStages(
-                        String(stage.call)
-                    );
-
-                    if (stage.order >= totalStages) {
+                    if (
+                        String(latestApplication.stage) ===
+                        String(lastStage._id)
+                    ) {
                         newStatus = ProjectStatus.accepted;
                     }
 

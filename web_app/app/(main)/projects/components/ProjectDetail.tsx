@@ -17,7 +17,7 @@ import PhaseManager from "../phases/project/Manager";
 interface ProjectDetailProps {
     project: string | Project;
     updateProject?: (project: Project) => void;
-    enableEditing?:boolean;
+    enableEditing?: boolean;
 }
 
 export default function ProjectDetail({ project, updateProject, enableEditing }: ProjectDetailProps) {
@@ -120,8 +120,7 @@ export default function ProjectDetail({ project, updateProject, enableEditing }:
             header: "Phases",
             icon: "pi pi-list",
             permission: PERMISSIONS.PHASE.READ,
-            content: <PhaseManager project={projectData} enableEditing={enableEditing} />
-            // content: <PhaseManager project={projectData} updateProject={handleUpdateProject} />
+            content: <PhaseManager project={projectData} updateProject={handleUpdateProject} enableEditing={enableEditing} />
         },
         {
             header: "Collaborators",

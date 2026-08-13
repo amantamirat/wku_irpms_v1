@@ -729,33 +729,58 @@
   },
   {
     "category": "Project Management",
-    "name": "project:transition.draft.accepted",
-    "description": "Accept grant projects"
+    "name": "project:transition.draft.approved",
+    "description": "Approve a standalone project from draft status"
   },
   {
     "category": "Project Management",
-    "name": "project:transition.accepted.draft",
-    "description": "return back to draft an accepted grant projects"
+    "name": "project:transition.approved.draft",
+    "description": "Return an approved standalone project to draft status"
   },
   {
     "category": "Project Management",
-    "name": "project:transition.accepted.granted",
-    "description": "Approve finalized project for funding"
+    "name": "project:transition.approved.granted",
+    "description": "Grant an approved standalone project for funding"
   },
   {
     "category": "Project Management",
-    "name": "project:transition.granted.accepted",
-    "description": "Return granted project for further finalization"
+    "name": "project:transition.draft.refused",
+    "description": "Refuse a standalone project from draft status"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:transition.refused.draft",
+    "description": "Return a refused standalone project to draft status"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:transition.accepted.approved",
+    "description": "Approve an accepted call-associated project"
   },
   {
     "category": "Project Management",
     "name": "project:transition.accepted.refused",
-    "description": "Refuse finalized project for funding"
+    "description": "Refuse an accepted call-associated project"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:transition.approved.accepted",
+    "description": "Return an approved call-associated project to accepted status"
   },
   {
     "category": "Project Management",
     "name": "project:transition.refused.accepted",
-    "description": "Return refused project for further finalization agreement"
+    "description": "Return a refused call-associated project to accepted status"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:transition.approved.granted",
+    "description": "Grant an approved project for funding"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:transition.granted.approved",
+    "description": "Return a granted project to approved status"
   },
   {
     "category": "Project Management",

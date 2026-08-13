@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { Dropdown } from 'primereact/dropdown';
-import { GrantApi } from '@/app/(main)/grants/api/grant.api'; // Adjust path as needed
-import { Grant } from '@/app/(main)/grants/models/grant.model'; // Adjust path as needed
-import ProjectManager from './components/ProjectManager';
+import { GrantApi } from '@/app/(main)/grants/api/grant.api';
+import { Grant } from '@/app/(main)/grants/models/grant.model';
+//import ProjectManager from './components/ProjectManager';
+import ProjectManager from './grant/Manager';
 
 const Page = () => {
     const [grants, setGrants] = useState<Grant[]>([]);
