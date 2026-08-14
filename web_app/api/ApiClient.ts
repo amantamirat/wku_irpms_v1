@@ -46,8 +46,33 @@ const handleError = async (response: Response) => {
 };
 
 export const ApiClient = {
-    async get(endpoint: string): Promise<any> {
-        const url = `${BASE_URL}${endpoint}`;
+    async get<T = any>(
+        endpoint: string,
+        params?: Record<string, any>
+    ): Promise<T> {
+        let url = `${BASE_URL}${endpoint}`;
+
+        if (params) {
+            const searchParams = new URLSearchParams();
+
+            Object.entries(params).forEach(([key, value]) => {
+                // Automatically ignore undefined, null, or empty string values
+                if (value !== undefined && value !== null && value !== "") {
+                    if (value instanceof Date) {
+                        searchParams.append(key, value.toISOString());
+                    } else {
+                        searchParams.append(key, String(value));
+                    }
+                }
+            });
+
+            const queryString = searchParams.toString();
+            if (queryString) {
+                // Appends safely whether or not endpoint already contains '?'
+                url += (url.includes("?") ? "&" : "?") + queryString;
+            }
+        }
+
         const token = getAuthToken();
         try {
             const response = await fetch(url, {
@@ -60,7 +85,7 @@ export const ApiClient = {
 
             await handleError(response);
             const result = await response.json().catch(() => ({}));
-            return result.data ?? result;
+            return (result.data ?? result) as T;
         } catch (error) {
             console.log("[ApiClient.get] Error:", error);
             throw error;

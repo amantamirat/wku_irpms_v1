@@ -120,7 +120,7 @@ export default function ProjectDetail({ project, updateProject, enableEditing }:
             header: "Phases",
             icon: "pi pi-list",
             permission: PERMISSIONS.PHASE.READ,
-            content: <PhaseManager project={projectData} updateProject={handleUpdateProject} enableEditing={enableEditing} />
+            content: <PhaseManager project={projectData} updateProject={updateProject} enableEditing={enableEditing} />
         },
         {
             header: "Collaborators",

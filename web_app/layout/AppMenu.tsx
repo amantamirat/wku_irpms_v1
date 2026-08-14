@@ -329,7 +329,7 @@ const AppMenu = () => {
                 {
                     label: 'Overview',
                     icon: 'pi pi-circle-on',
-                    to: '/reports/overview',
+                    to: '/reports/',
                     visible: hasPermission([
                         PERMISSIONS.REPORT.OVERVIEW
                     ]),

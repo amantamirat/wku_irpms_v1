@@ -15,11 +15,13 @@ import { ReviewerApi } from "./reviewers/api/reviewer.api";
 import { Reviewer, ReviewerStatus } from "./reviewers/models/reviewer.model";
 import { CollaboratorApi } from "./collaborators/api/collaborator.api";
 import { Collaborator, CollaboratorStatus } from "./collaborators/models/collaborator.model";
+import { ReportDashboard } from "./reports/components/Dashboard";
+
 
 const Dashboard = () => {
     const { hasPermission, getUser } = useAuth();
     const appUser = getUser();
-    const isAdmin = hasPermission([PERMISSIONS.PERMISSION.READ]);
+    const isAdmin = hasPermission([PERMISSIONS.REPORT.OVERVIEW]);
     const isReviewer = hasPermission([PERMISSIONS.REVIEWER.READ]);
     const isResearcher = hasPermission([PERMISSIONS.PROJECT.READ]);
 
@@ -72,14 +74,17 @@ const Dashboard = () => {
 
     return (
         <div className="grid">
-            <div className="col-12">
-                {/* Stats row can go here */}
-            </div>
+            {/* 📊 REPORT OVERVIEW / STATS ROW */}
+            {isAdmin && (
+                <div className="col-12 mb-2">
+                    <ReportDashboard />
+                </div>
+            )}
 
             {/* 🔵 LEFT COLUMN: Core Work */}
             <div className="col-12 lg:col-8">
 
-                {/* 1. Collaboration Invitations - Only displays while loading OR when items exist */}
+                {/* 1. Collaboration Invitations */}
                 {isResearcher && appUser && (loadingCollabs || (pendingCollabs && pendingCollabs.length > 0)) && (
                     <div className="card border-none shadow-1 p-4 mb-4">
                         {loadingCollabs ? (
@@ -93,7 +98,7 @@ const Dashboard = () => {
                     </div>
                 )}
 
-                {/* 2. Reviewer Tasks - Only displays while loading OR when pending evaluations exist */}
+                {/* 2. Reviewer Tasks */}
                 {isReviewer && appUser && (loadingEvals || (pendingReviewees && pendingReviewees.length > 0)) && (
                     <div className="card border-none shadow-1 p-4 mb-4">
                         {loadingEvals ? (
