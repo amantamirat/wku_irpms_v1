@@ -32,8 +32,8 @@ export class ApplicationController {
                 documentPath: relativeDocPath,
                 userId: req.auth.userId
             };
-            const created = await this.service.create(dto);
-            successResponse(res, 201, "Project document created successfully", created);
+            const created = await this.service.createNextApplication(dto);
+            successResponse(res, 201, "Project application created successfully", created);
 
         } catch (err: any) {
             if (req.file && req.file.path) {
@@ -166,6 +166,31 @@ export class ApplicationController {
             successResponse(res, 200, 'doc fetched', doc);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
+        }
+    };
+
+
+    anonymize = async (req: Request, res: Response) => {
+        try {
+            const { id } = req.params;
+
+            const doc =
+                await this.service.anonymizeApplication(id);
+
+            successResponse(
+                res,
+                200,
+                "Application anonymized successfully",
+                doc
+            );
+
+        } catch (err: any) {
+            errorResponse(
+                res,
+                400,
+                err.message,
+                err
+            );
         }
     };
 

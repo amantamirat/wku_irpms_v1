@@ -18,6 +18,7 @@ import { ProjectStatus } from "../project.model";
 import { CollaboratorStatus } from "./collaborator.model";
 //import { CompositionValidator } from "../../compositions/composition.validator";
 import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
+import { ICallRepository } from "../../calls/call.repository";
 
 
 export class CollaboratorService {
@@ -25,12 +26,13 @@ export class CollaboratorService {
     constructor(
         private readonly collabRepo: ICollaboratorRepository,
         private readonly projectRepo: IProjectRepository,
+        private readonly callRepo: ICallRepository,
         private readonly constraintValidator: ConstraintValidationService,
         private readonly notificationService?: NotificationService,
     ) {
     }
 
-    async validateProject(project: string, applicant: string, session?: ClientSession) {
+    async validateProject(project: string, user: string) {
         const projectDoc = await this.projectRepo.findById(project);
         if (
             projectDoc?.status !== ProjectStatus.draft &&
@@ -45,15 +47,27 @@ export class CollaboratorService {
         const { member: applicant, project, projectTitle, userId } = dto;
         if (!options?.skipValidation) {
             const projectDoc = await this.validateProject(project, userId ?? "");
-            const grantId = String(projectDoc.grant);
-            if (dto.isLeadPI) {
-                // await this.compositionValidator.validatePI(grantId, applicant);
-            } else {
-                //  await this.compositionValidator.validateCoPI(grantId, applicant);
-            }
-            const validationResult = await this.constraintValidator.validateParticipantCount(grantId, await this.collabRepo.countByProject(project) + 1);
-            if (!validationResult.valid) {
-                throw new AppError(ERROR_CODES.INVALID_CONSTRAINT, "participant count", 400, validationResult);
+            const callId = String(projectDoc.call);
+            if (callId) {
+                const callDoc = await this.callRepo.findById(callId);
+                if (!callDoc) {
+                    throw new AppError(
+                        ERROR_CODES.CALL_NOT_FOUND
+                    );
+                }
+                if (callDoc.constraint) {
+                    const constraintId = String(callDoc.constraint);
+                    const result = await this.constraintValidator.validateParticipantCount(constraintId, await this.collabRepo.countByProject(project) + 1);
+                    if (!result.valid) {
+                        throw new AppError(ERROR_CODES.INVALID_CONSTRAINT, "participant count", 400, result);
+                    }
+                }
+
+                if (dto.isLeadPI) {
+                    // await this.compositionValidator.validatePI(grantId, applicant);
+                } else {
+                    //  await this.compositionValidator.validateCoPI(grantId, applicant);
+                }
             }
         }
         try {

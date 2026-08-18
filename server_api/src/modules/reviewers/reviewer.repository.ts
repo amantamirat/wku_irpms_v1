@@ -9,7 +9,7 @@ export interface IReviewerRepository {
     create(dto: CreateReviewerDTO): Promise<IReviewer>;
     update(id: string, data: UpdateReviewerDTO["data"]): Promise<IReviewer | null>;
     updateStatus(id: string, newStatus: ReviewerStatus): Promise<IReviewer | null>;
-    countByProjectStage(projectStageId: string, status?: ReviewerStatus): Promise<number>;
+    countByApplication(applicationId: string, status?: ReviewerStatus): Promise<number>;
     exist(filters: ExistsReviewersDTO): Promise<boolean>;
     delete(id: string): Promise<IReviewer | null>;
 }
@@ -101,12 +101,12 @@ export class ReviewerRepository implements IReviewerRepository {
         ).exec();
     }
 
-    async countByProjectStage(
-        projectStageId: string,
+    async countByApplication(
+        applicationId: string,
         status?: ReviewerStatus
     ) {
         return Reviewer.countDocuments({
-            application: new mongoose.Types.ObjectId(projectStageId),
+            application: new mongoose.Types.ObjectId(applicationId),
             ...(status !== undefined && { status }),
         });
     }

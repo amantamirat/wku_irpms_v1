@@ -7,7 +7,6 @@ import { IApplicationRepository } from "../projects/applications/application.rep
 import { ApplicationStatus } from "../projects/applications/application.model";
 import { CreateReviewerDTO, GetReviewersDTO, UpdateReviewerDTO } from "./reviewer.dto";
 import { IReviewerRepository } from "./reviewer.repository";
-
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { REVIEWER_TRANSITIONS } from "./reviewer.state-machine";
@@ -16,7 +15,6 @@ import { IResultRepository } from "./results/result.repository";
 import { ICriterionRepository } from "../evaluations/criteria/criterion.repository";
 import { FormType } from "../evaluations/criteria/criterion.model";
 import { IProject } from "../projects/project.model";
-//import { IProjectStageSynchronizer } from "./reviewer.synchronizer";
 import { NotificationService } from "../notifications/notification.service";
 import { IStage } from "../calls/stages/stage.model";
 
@@ -29,7 +27,6 @@ export class ReviewerService {
         private readonly collaboratorRepo: ICollaboratorRepository,
         private readonly resultRepo: IResultRepository,
         private readonly criterionRepo: ICriterionRepository,
-        //private readonly synchronizer: IProjectStageSynchronizer,
         private readonly notificationService: NotificationService,
     ) {
     }
@@ -50,7 +47,7 @@ export class ReviewerService {
             throw new AppError(ERROR_CODES.INVALID_DOC_STATUS);
 
         const stageDoc = projectAppDoc.stage as unknown as IStage;
-        const countReviewers = await this.repository.countByProjectStage(application);
+        const countReviewers = await this.repository.countByApplication(application);
         const maxReviewers = stageDoc.maxReviewers;
         if (maxReviewers !== undefined && countReviewers >= maxReviewers) {
             throw new AppError(ERROR_CODES.REVIEWER_LIMIT_REACHED, `Reviewer limit reached. Maximum allowed is ${maxReviewers}.`);
@@ -154,10 +151,7 @@ export class ReviewerService {
                     }))
                 );
             }
-        }
-
-
-        if (from === ReviewerStatus.accepted && to === ReviewerStatus.submitted) {
+        } else if (from === ReviewerStatus.accepted && to === ReviewerStatus.submitted) {
             if (String(reviewerDoc.reviewer) !== applicantId)
                 throw new AppError(ERROR_CODES.UNAUTHORIZED);
 

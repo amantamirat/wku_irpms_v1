@@ -65,6 +65,9 @@ export class OrganizationController {
     getById = async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
+            if (Array.isArray(id)) {
+            throw new Error('Invalid organization ID');
+        }
             const organization = await this.service.getById(id);
             successResponse(res, 200, 'Organization fetched successfully', organization);
         } catch (err: any) {
@@ -79,10 +82,15 @@ export class OrganizationController {
         try {
             if (!req.auth)
                 throw new Error(ERROR_CODES.UNAUTHORIZED);
+            
 
             const { id } = req.params;
             if (!id)
                 throw new Error("id not found!");
+
+            if (Array.isArray(id)) {
+            throw new Error('Invalid organization ID');
+        }
 
             const dto: UpdateOrganizationDTO = {
                 id,
@@ -109,6 +117,9 @@ export class OrganizationController {
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.params;
+            if (Array.isArray(id)) {
+            throw new Error('Invalid organization ID');
+        }
             const deleted = await this.service.delete(id);
             successResponse(res, 200, "Organization deleted successfully", deleted);
         } catch (err: any) {

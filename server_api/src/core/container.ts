@@ -38,6 +38,7 @@ import { SettingService } from "../modules/settings/setting.service";
 import { NotificationService } from "../modules/notifications/notification.service";
 import { StageService } from "../modules/calls/stages/stage.service";
 import { PhaseSynchronizer } from "../modules/projects/phase/phase.synchronizer";
+import { AnonymizerService } from "../modules/anonymizer/anonymizer.service";
 
 export const notificationRepo = new NotificationRepository();
 export const settingRepo = new SettingRepository();
@@ -86,7 +87,7 @@ export const constraintValidator = new ConstraintValidationService(
 
 // Services
 //export const stageService = new StageService(stageRepo, callRepo, evalRepo);
-export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, constraintValidator);
+export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, callRepo, constraintValidator);
 
 export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, callRepo, constraintValidator,
     new PhaseSynchronizer(projectRepo, phaseRepo)
@@ -95,7 +96,10 @@ export const projectService = new ProjectService(projectRepo, collaboratorRepo, 
     grantRepo, collabService, phaseService, callRepo, constraintValidator, notificationService);
 
 export const applicationService = new ApplicationService(applicationRepo, callRepo, stageRepo, reviewerRepo,
-    projectService, constraintValidator, templateValidtor, new ApplicationSynchronizer(projectRepo, applicationRepo, stageRepo), notificationService);
+    projectService, constraintValidator, templateValidtor,
+    new ApplicationSynchronizer(projectRepo, applicationRepo, stageRepo),
+    new AnonymizerService(applicationRepo, collaboratorRepo),
+    notificationService);
 
 export const userService = new UserService(userRepo, organizationRepo, roleRepo);
 

@@ -50,7 +50,7 @@ export class ProjectService {
             if (grantDoc.status !== GrantStatus.active) throw new Error(ERROR_CODES.GRANT_NOT_ACTIVE);
         }
         const created = await this.projectRepo.create({
-            ...dto, status: call ? ProjectStatus.submitted : ProjectStatus.draft,
+            ...dto, status: ProjectStatus.draft,
             createdBy: userId
         });
         if (!created) {

@@ -1,5 +1,6 @@
 import mongoose, { model, Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
+import { IUser } from "../../users/user.model";
 
 export enum CollaboratorRole {
     CO_I = "CO_I",
@@ -16,7 +17,7 @@ export enum CollaboratorStatus {
 
 export interface ICollaborator extends Document {
     project: mongoose.Types.ObjectId;
-    member: mongoose.Types.ObjectId;//member//user
+    member: mongoose.Types.ObjectId | IUser;//member//user
     role: string;
     isLeadPI?: boolean;
     status: CollaboratorStatus;

@@ -3,15 +3,17 @@ import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
+import { AnonymizerService } from "../../anonymizer/anonymizer.service";
 import { CallStatus } from "../../calls/call.model";
 import { ICallRepository } from "../../calls/call.repository";
+import { IStage } from "../../calls/stages/stage.model";
 import { IStageRepository } from "../../calls/stages/stage.repository";
 import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
 import { NotificationService } from "../../notifications/notification.service";
 import { IReviewerRepository } from "../../reviewers/reviewer.repository";
 import { ReviewerStatus } from "../../reviewers/reviewer.state-machine";
 import { TemplateValidationService } from "../../templates/services/template-validation.service";
-import { ProjectStatus } from "../project.model";
+import { IProject, ProjectStatus } from "../project.model";
 import { ProjectService } from "../project.service";
 import {
     ApplyProjectDTO,
@@ -34,143 +36,177 @@ export class ApplicationService {
         private readonly constraintValidator: ConstraintValidationService,
         private readonly templateValidator: TemplateValidationService,
         private readonly synchronizer: ApplicationSynchronizer,
+        private readonly anonymizerService: AnonymizerService,
         private readonly notificationService?: NotificationService,
     ) {
     }
 
     /**
-     * Create project application
-     */
-    async create(
-        dto: CreateApplicationDTO, options?: { skipValidation?: boolean }
+ * Create application for the next project stage
+ */
+    async createNextApplication(
+        dto: CreateApplicationDTO
     ) {
-        const { project, stage, documentPath } = dto;
+        const {
+            project,
+            stage,
+            documentPath
+        } = dto;
 
-        const projectDoc = await this.projectService.getById(project);
+        // Get project
+        const projectDoc =
+            await this.projectService.getById(project);
 
-        if (!projectDoc.call)
-            throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+        if (!projectDoc.call) {
+            throw new AppError(
+                ERROR_CODES.CALL_NOT_FOUND
+            );
+        }
 
         const callId = String(projectDoc.call);
 
-        const stageDoc = await this.stageRepo.findById(stage);
+        // Get requested stage
+        const stageDoc =
+            await this.stageRepo.findById(stage);
 
-        if (!stageDoc)
-            throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-
-        const currentAppId = String(projectDoc.currentApplication);
-
-        if (currentAppId) {
-            const currentApp = await this.repository.findById(currentAppId);
-
-            if (!currentApp) {
-                throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
-            }
-
-            if (currentApp.status !== ApplicationStatus.accepted) {
-                throw new AppError(
-                    ERROR_CODES.APPLICATION_NOT_ACCEPTED,
-                    "The current application must be accepted before proceeding."
-                );
-            }
-
-            const currentAppStageDoc = await this.stageRepo.findById(String(currentApp.stage));
-            if (!currentAppStageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-
-            const expectedNextStage = await this.stageRepo.getNextStage(callId, currentAppStageDoc.order);
-            if (
-                !expectedNextStage ||
-                String(expectedNextStage._id) !== String(stage)
-            ) {
-                throw new AppError(
-                    ERROR_CODES.INVALID_STAGE,
-                    "The provided stage is not the valid next stage for this project"
-                );
-            }
-        } else {
-            const firstStage = await this.stageRepo.getFirstStage(callId);
-            if (!firstStage)
-                throw new AppError(ERROR_CODES.FIRST_STAGE_NOT_FOUND);
-
-            if (String(firstStage._id) !== stage) {
-                throw new AppError(
-                    ERROR_CODES.INVALID_STAGE,
-                    "First application must be submitted for Stage 1"
-                );
-            }
+        if (!stageDoc) {
+            throw new AppError(
+                ERROR_CODES.STAGE_NOT_FOUND
+            );
         }
 
-        if (!options?.skipValidation) {
-            // Deadline
-            if (
-                stageDoc.deadline &&
-                new Date(stageDoc.deadline) < new Date()
-            ) {
-                throw new AppError(
-                    ERROR_CODES.STAGE_DEADLINE_PASSED
-                );
-            }
-            // Template
-            if (stageDoc.template) {
-                const result =
-                    await this.templateValidator.validate(
-                        String(stageDoc.template),
-                        documentPath
-                    );
-
-                if (!result.valid) {
-                    throw new AppError(
-                        ERROR_CODES.INVALID_DOCUMENT,
-                        "Document validation failed",
-                        400,
-                        result
-                    );
-                }
-            }
+        // A next-stage application requires
+        // an existing current application
+        if (!projectDoc.currentApplication) {
+            throw new AppError(
+                ERROR_CODES.APPLICATION_NOT_FOUND,
+                "Project does not have a current application."
+            );
         }
 
-        try {
-            const created = await this.repository.create(dto);
+        const currentApp =
+            await this.repository.findById(
+                String(projectDoc.currentApplication)
+            );
 
-            await this.synchronizer.sync(project);
-
-            if (this.notificationService) {
-                await this.notificationService.notifyApplicationSubmitted(
-                    String(projectDoc.leadPI),
-                    projectDoc.title,
-                    stageDoc.name
-                );
-            }
-            return created;
-
-        } catch (err: any) {
-            if (err?.code === 11000) {
-                throw new AppError(
-                    ERROR_CODES.STAGE_ALREADY_EXISTS
-                );
-            }
-            throw err;
+        if (!currentApp) {
+            throw new AppError(
+                ERROR_CODES.APPLICATION_NOT_FOUND
+            );
         }
+
+        // Current application must be accepted
+        if (
+            currentApp.status !==
+            ApplicationStatus.accepted
+        ) {
+            throw new AppError(
+                ERROR_CODES.APPLICATION_NOT_ACCEPTED,
+                "The current application must be accepted before proceeding."
+            );
+        }
+
+        // Get current application's stage
+        const currentStage =
+            await this.stageRepo.findById(
+                String(currentApp.stage)
+            );
+
+        if (!currentStage) {
+            throw new AppError(
+                ERROR_CODES.STAGE_NOT_FOUND
+            );
+        }
+
+        // Requested stage must be the next stage
+        const expectedNextStage =
+            await this.stageRepo.getNextStage(
+                callId,
+                currentStage.order
+            );
+
+        if (
+            !expectedNextStage ||
+            String(expectedNextStage._id) !==
+            String(stage)
+        ) {
+            throw new AppError(
+                ERROR_CODES.INVALID_STAGE,
+                "The provided stage is not the valid next stage for this project."
+            );
+        }
+
+        // Common stage validation
+        await this.validateStage(
+            stageDoc,
+            documentPath
+        );
+
+        // Actual creation
+        return this.internalCreate(
+            dto,
+            projectDoc,
+            stageDoc
+        );
     }
 
+
+    /**
+ * Apply to a call and create the project's first application
+ */
     async apply(dto: ApplyProjectDTO) {
-        const { call, title, summary, leadPI, collaborators, phases, themes, userId, docPath } = dto;
-        const lead = collaborators.find(c => c.isLeadPI);
-        if (!lead) throw new AppError(ERROR_CODES.LEAD_PI_NOT_FOUND);
-        if (lead.member !== userId) throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
-        const callDoc = await this.callRepo.findById(call);
-        if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
-        if (callDoc.status !== CallStatus.active) throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
+        const {
+            call,
+            userId,
+            collaborators,
+            docPath
+        } = dto;
 
-        const deadline = callDoc.deadline;
-        if (!deadline) throw new AppError(ERROR_CODES.CALL_DEADLINE_NOT_SET);
-        if (deadline < new Date()) throw new AppError(ERROR_CODES.CALL_DEADLINE_PASSED);
+        // Validate lead PI
+        const lead = collaborators.find(
+            c => c.isLeadPI
+        );
 
-        const firstStage = await this.stageRepo.getFirstStage(call);
-        if (!firstStage)
-            throw new AppError(ERROR_CODES.FIRST_STAGE_NOT_FOUND);
+        if (!lead) {
+            throw new AppError(
+                ERROR_CODES.LEAD_PI_NOT_FOUND
+            );
+        }
 
+        if (lead.member !== userId) {
+            throw new AppError(
+                ERROR_CODES.UNAUTHORIZED
+            );
+        }
+
+        // Validate call
+        const callDoc =
+            await this.callRepo.findById(call);
+
+        if (!callDoc) {
+            throw new AppError(
+                ERROR_CODES.CALL_NOT_FOUND
+            );
+        }
+
+        if (callDoc.status !== CallStatus.active) {
+            throw new AppError(
+                ERROR_CODES.CALL_NOT_ACTIVE
+            );
+        }
+
+        // Get first stage
+        const firstStage =
+            await this.stageRepo.getFirstStage(call);
+
+        if (!firstStage) {
+            throw new AppError(
+                ERROR_CODES.FIRST_STAGE_NOT_FOUND
+            );
+        }
+
+        // Validate project constraints
         if (callDoc.constraint) {
             const constraintId = String(callDoc.constraint);
             const result = await this.constraintValidator.validateProject(constraintId, dto);
@@ -183,10 +219,121 @@ export class ApplicationService {
                 );
             }
         }
+        // Validate first-stage requirements
+        await this.validateStage(
+            firstStage,
+            docPath
+        );
 
-        if (firstStage.template) {
-            const templateId = String(firstStage.template);
-            const result = await this.templateValidator.validate(templateId, docPath);
+        // Create project + first application
+        let projectDoc: IProject | undefined;
+
+        try {
+
+            projectDoc =
+                await this.projectService.create({
+                    ...dto,
+                    grant: String(callDoc.grant),
+                    calendar: String(callDoc.calendar)
+                },
+                    { skipValidation: true });
+
+            return await this.internalCreate(
+                {
+                    project: String(projectDoc._id),
+                    stage: String(firstStage._id),
+                    documentPath: docPath,
+                    userId
+                },
+                projectDoc,
+                firstStage
+            );
+
+        } catch (error) {
+
+            if (projectDoc?._id) {
+
+                try {
+                    await this.projectService.delete({
+                        id: String(projectDoc._id)
+                    });
+                } catch (rollbackError) {
+                    console.error(
+                        `Failed to rollback project ${projectDoc._id}`,
+                        rollbackError
+                    );
+                }
+            }
+
+            throw error;
+        }
+    }
+
+
+
+    private async internalCreate(
+        dto: CreateApplicationDTO,
+        projectDoc: IProject,
+        stageDoc: IStage
+    ) {
+        try {
+            const created = await this.repository.create(dto);
+
+            await this.synchronizer.sync(
+                String(projectDoc._id)
+            );
+
+            if (this.notificationService) {
+                await this.notificationService
+                    .notifyApplicationSubmitted(
+                        String(projectDoc.leadPI),
+                        projectDoc.title,
+                        stageDoc.name
+                    );
+            }
+
+            // no await here
+            this.anonymizerService.anonymizeApplication(String(created._id));
+
+            return created;
+
+        } catch (err: any) {
+
+            if (err?.code === 11000) {
+                throw new AppError(
+                    ERROR_CODES.STAGE_ALREADY_EXISTS
+                );
+            }
+
+            throw err;
+        }
+    }
+
+
+    private async validateStage(
+        stageDoc: IStage,
+        documentPath: string
+    ): Promise<void> {
+
+        // Deadline
+        if (
+            stageDoc.deadline &&
+            new Date(stageDoc.deadline) < new Date()
+        ) {
+            throw new AppError(
+                ERROR_CODES.STAGE_DEADLINE_PASSED
+            );
+        }
+
+        // Template
+        if (stageDoc.template) {
+
+            const result =
+                await this.templateValidator.validate(
+                    String(stageDoc.template),
+                    documentPath
+                );
+
             if (!result.valid) {
                 throw new AppError(
                     ERROR_CODES.INVALID_DOCUMENT,
@@ -195,31 +342,6 @@ export class ApplicationService {
                     result
                 );
             }
-        }
-
-        const skipValidation = { skipValidation: true };
-        const calendarId = String(callDoc.calendar);
-        let projectId;
-        try {
-            const createdProj = await this.projectService.create({ ...dto, grant: String(callDoc.grant), calendar: calendarId },
-                skipValidation);
-            projectId = String(createdProj._id);
-            return await this.create({
-                project: projectId, stage: String(firstStage._id), documentPath: docPath, userId: userId
-            }, skipValidation);
-
-        } catch (error) {
-            if (projectId) {
-                try {
-                    await this.projectService.delete({ id: projectId });
-                } catch (rollbackError) {
-                    console.error(
-                        `Failed to rollback project ${projectId}`,
-                        rollbackError
-                    );
-                }
-            }
-            throw error;
         }
     }
 
@@ -237,6 +359,14 @@ export class ApplicationService {
         const appDoc = await this.repository.findById(id);
         if (!appDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
         return appDoc;
+    }
+
+
+    /**
+     * Get by ID
+     */
+    async anonymizeApplication(id: string) {
+        return await this.anonymizerService.anonymizeApplication(id);
     }
 
     /**
@@ -343,17 +473,16 @@ export class ApplicationService {
                     "Total score not computed. Please calculate score first."
                 );
             }
-
             /*
-            const countApproved = await this.reviewerRepo.countByProjectStage(id, ReviewerStatus.approved);
-
+            const countApproved = await this.reviewerRepo.countByApplication(id, ReviewerStatus.approved);
             if (countApproved < stageDoc.minReviewers) {
                 throw new AppError(
                     ERROR_CODES.INSUFFICIENT_REVIEWS,
                     `At least ${stageDoc.minReviewers} completed reviews are required before computing score.`
                 );
             }
-*/
+            */
+
             if (to === ApplicationStatus.accepted) {
                 const minAcceptanceScore = stageDoc.minAcceptanceScore ?? 0;
                 if ((totalScore ?? 0) < minAcceptanceScore) {
@@ -365,11 +494,15 @@ export class ApplicationService {
             }
         }
 
+
         if (to === ApplicationStatus.pending) {
 
-            if (await this.reviewerRepo.exist({ application: id })) {
-                throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
-            }
+            await this.repository.update(id, { totalScore: null });
+
+            /*
+                        if (await this.reviewerRepo.exist({ application: id })) {
+                            throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
+                        }*/
 
         }
 

@@ -2,6 +2,7 @@ import { ProjectStatus } from "./project.model";
 
 export const PROJECT_TRANSITIONS: Record<ProjectStatus, ProjectStatus[]> = {
     [ProjectStatus.draft]: [
+        ProjectStatus.submitted,//just for internal system operation on apply //no back
         ProjectStatus.approved, //when call does not exist
         ProjectStatus.refused //when call does not exist
     ],

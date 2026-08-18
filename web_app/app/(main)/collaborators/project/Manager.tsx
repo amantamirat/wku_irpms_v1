@@ -21,7 +21,7 @@ const CollaboratorManager = ({ project, enableEditing }: CollaboratorManagerProp
     const canManage = useMemo(() => (
         enableEditing &&
         (project.status === ProjectStatus.draft ||
-        project.status === ProjectStatus.accepted)
+        project.status === ProjectStatus.approved)
     ), [project.status, enableEditing]);
     
 

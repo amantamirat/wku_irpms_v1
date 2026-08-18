@@ -9,6 +9,7 @@ const end_point = "/project/applications";
 export const ApplicationApi: EntityApi<Application, GetProjectApplicationOptions | undefined>
     & {
         calculateTotalScore: (id: string) => Promise<number>;
+        anonymize: (id: string) => Promise<Application>;
         apply: (project: Partial<Project>) => Promise<Application>;
         withdraw: (id: string) => Promise<boolean>;
     } = {
@@ -103,6 +104,12 @@ export const ApplicationApi: EntityApi<Application, GetProjectApplicationOptions
     async calculateTotalScore(id: string): Promise<number> {
         const res = await ApiClient.post(`${end_point}/${id}/calculate-score`, {});
         return res.totalScore;
+    },
+
+    async anonymize(id) {
+        return ApiClient.post(
+            `${end_point}/${id}/anonymize`, {}
+        );
     },
 
     async withdraw(id) {

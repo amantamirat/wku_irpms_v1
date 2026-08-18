@@ -1,6 +1,6 @@
 // project-stage.dto.ts
 import { CreateProjectDTO } from "../project.dto";
-import { ApplicationStatus } from "./application.model";
+import { AnonymizationStatus, ApplicationStatus } from "./application.model";
 
 export interface GetApplicationDTO {
     project?: string;
@@ -23,6 +23,8 @@ export interface UpdateApplicationDTO {
     id: string;
     data: Partial<{
         totalScore: number | null;
+        anonymizedDocumentPath:string;
+        anonymizationStatus: AnonymizationStatus;
     }>;
     userId: string;
 }

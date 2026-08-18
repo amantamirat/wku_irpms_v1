@@ -7,6 +7,14 @@ export enum ApplicationStatus {
     rejected = 'rejected'
 }
 
+export enum AnonymizationStatus {
+    pending = "pending",
+    processing = "processing",
+    completed = "completed",
+    manualReview = "manualReview",
+    failed = "failed"
+}
+
 export type Application = {
     _id?: string;
     project: string | Project;
@@ -14,6 +22,8 @@ export type Application = {
     documentPath?: string;
     file?: File;
     totalScore?: number | null;
+    anonymizationStatus: AnonymizationStatus;
+    anonymizedDocumentPath?: string;
     status: ApplicationStatus;
     createdAt?: Date;
     updatedAt?: Date;
@@ -44,17 +54,17 @@ export const validateProjectApplication = (ps: Partial<Application>): { valid: b
 }
 
 
-export const sanitizeApplication = (ps: Partial<Application>): Partial<Application> => {
+export const sanitizeApplication = (app: Partial<Application>): Partial<Application> => {
     return {
-        ...ps,
+        ...app,
         project:
-            typeof ps.project === "object" && ps.project !== null
-                ? (ps.project as Project)._id
-                : ps.project,
+            typeof app.project === "object" && app.project !== null
+                ? (app.project as Project)._id
+                : app.project,
         stage:
-            typeof ps.stage === "object" && ps.stage !== null
-                ? (ps.stage as any)._id
-                : ps.stage,
+            typeof app.stage === "object" && app.stage !== null
+                ? (app.stage as any)._id
+                : app.stage,
     };
 }
 
@@ -62,11 +72,12 @@ export const sanitizeApplication = (ps: Partial<Application>): Partial<Applicati
  * Create empty project stage
  */
 export const createEmptyApplication = (
-    stage?: Partial<Application>
+    app?: Partial<Application>
 ): Application => ({
-    project: stage?.project ?? "",
-    stage: stage?.stage ?? "",
-    status: stage?.status ?? ApplicationStatus.pending,
+    project: app?.project ?? "",
+    stage: app?.stage ?? "",
+    status: app?.status ?? ApplicationStatus.pending,
+    anonymizationStatus: app?.anonymizationStatus ?? AnonymizationStatus.pending
 });
 
 

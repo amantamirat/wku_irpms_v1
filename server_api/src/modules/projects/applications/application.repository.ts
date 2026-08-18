@@ -1,5 +1,6 @@
-// project-stage.repository.ts
-import mongoose, { ClientSession, HydratedDocument } from "mongoose";
+// application.repository.ts
+
+import mongoose, { HydratedDocument } from "mongoose";
 import {
     CreateApplicationDTO,
     ExistsApplicationDTO,
@@ -7,33 +8,71 @@ import {
     GetApplicationDTO,
     UpdateApplicationDTO
 } from "./application.dto";
-import { ApplicationStatus, IApplication, Application } from "./application.model";
+import {
+    ApplicationStatus,
+    IApplication,
+    Application
+} from "./application.model";
 
 export interface IApplicationRepository {
-    findById(id: string, options?: FindByIdOptions, session?: ClientSession): Promise<IApplication | null>;
-    find(filters: GetApplicationDTO, session?: ClientSession): Promise<IApplication[]>;
-    findOneByProjectAndStage(projectId: string,
-        grantStageId?: string,
-        callStageId?: string,
+
+    findById(
+        id: string,
+        options?: FindByIdOptions
     ): Promise<IApplication | null>;
-    findLatestByProject(projectId: string): Promise<IApplication | null>;
-    create(dto: CreateApplicationDTO, session?: ClientSession): Promise<IApplication>;
-    update(id: string, status: UpdateApplicationDTO["data"]): Promise<IApplication | null>;
-    updateStatus(id: string, newStatus: ApplicationStatus): Promise<IApplication | null>;
-    countByProject(projectId: string, session?: ClientSession): Promise<number>;
-    exists(filters: ExistsApplicationDTO): Promise<boolean>;
-    delete(id: string): Promise<IApplication | null>;
+
+    find(
+        filters: GetApplicationDTO
+    ): Promise<IApplication[]>;
+
+    /*
+    findOneByProjectAndStage(
+        projectId: string,
+        grantStageId?: string,
+        callStageId?: string
+    ): Promise<IApplication | null>;*/
+
+    findLatestByProject(
+        projectId: string
+    ): Promise<IApplication | null>;
+
+    create(
+        dto: CreateApplicationDTO
+    ): Promise<IApplication>;
+
+    update(
+        id: string,
+        data: UpdateApplicationDTO["data"]
+    ): Promise<IApplication | null>;
+
+    updateStatus(
+        id: string,
+        newStatus: ApplicationStatus
+    ): Promise<IApplication | null>;
+
+    countByProject(
+        projectId: string
+    ): Promise<number>;
+
+    exists(
+        filters: ExistsApplicationDTO
+    ): Promise<boolean>;
+
+    delete(
+        id: string
+    ): Promise<IApplication | null>;
 }
 
 
 // MongoDB implementation
-export class ApplicationRepository implements IApplicationRepository {
+export class ApplicationRepository
+    implements IApplicationRepository {
 
     async findById(
         id: string,
-        options?: FindByIdOptions,
-        session?: ClientSession
-    ) {
+        options?: FindByIdOptions
+    ): Promise<IApplication | null> {
+
         let dbQuery = Application.findById(
             new mongoose.Types.ObjectId(id)
         );
@@ -48,49 +87,38 @@ export class ApplicationRepository implements IApplicationRepository {
             dbQuery = dbQuery.populate("stage");
         }
 
-        // ✅ attach session if provided
-        if (session) {
-            dbQuery = dbQuery.session(session);
-        }
-
-        return dbQuery.lean<IApplication>().exec();
+        return dbQuery
+            .lean<IApplication>()
+            .exec();
     }
 
-    async find(options: GetApplicationDTO, session?: ClientSession) {
+
+    async find(
+        options: GetApplicationDTO
+    ): Promise<IApplication[]> {
+
         const query: any = {};
 
-        // 1. Direct Filters
+        // Direct filters
         if (options.project) {
-            query.project = new mongoose.Types.ObjectId(options.project);
+            query.project =
+                new mongoose.Types.ObjectId(options.project);
         }
 
         if (options.stage) {
-            query.stage = new mongoose.Types.ObjectId(options.stage);
+            query.stage =
+                new mongoose.Types.ObjectId(options.stage);
         }
 
         if (options.status) {
             query.status = options.status;
         }
 
-
-
-        // Main query
         const dbQuery = Application.find(query);
 
-        if (session) {
-            dbQuery.session(session);
-        }
-
-        // 3. Populate
+        // Populate
         if (options.populate) {
             dbQuery
-                /*
-                    .populate({
-                        path: "project",
-                        populate: {
-                            path: "leadPI",
-                        }
-                    })*/
                 .populate("project")
                 .populate("stage");
         }
@@ -100,101 +128,154 @@ export class ApplicationRepository implements IApplicationRepository {
             .exec();
     }
 
+    /*
     async findOneByProjectAndStage(
         projectId: string,
         stageId?: string,
         callStageId?: string
-    ) {
+    ): Promise<IApplication | null> {
+
         const query: any = {
-            project: new mongoose.Types.ObjectId(projectId)
+            project:
+                new mongoose.Types.ObjectId(projectId)
         };
 
         if (stageId) {
-            query.stage = new mongoose.Types.ObjectId(stageId);
+            query.stage =
+                new mongoose.Types.ObjectId(stageId);
         }
 
         if (callStageId) {
-            query.callStage = new mongoose.Types.ObjectId(callStageId);
+            query.callStage =
+                new mongoose.Types.ObjectId(callStageId);
         }
 
         return Application.findOne(query)
             .lean<IApplication>()
             .exec();
-    }
+    }*/
+    async create(
+        dto: CreateApplicationDTO
+    ): Promise<IApplication> {
 
-    async create(dto: CreateApplicationDTO, session?: ClientSession): Promise<HydratedDocument<IApplication>> {
         const data: Partial<IApplication> = {
-            project: new mongoose.Types.ObjectId(dto.project),
-            stage: new mongoose.Types.ObjectId(dto.stage),
-            documentPath: dto.documentPath
+            project:
+                new mongoose.Types.ObjectId(dto.project),
+
+            stage:
+                new mongoose.Types.ObjectId(dto.stage),
+
+            documentPath:
+                dto.documentPath
         };
-        return Application.create([data], { session }).then(res => res[0]);
+
+        return Application.create(data);
     }
 
-    async update(id: string, dtoData: UpdateApplicationDTO["data"]): Promise<IApplication | null> {
+
+    async update(
+        id: string,
+        dtoData: UpdateApplicationDTO["data"]
+    ): Promise<IApplication | null> {
+
         const updateData: Partial<IApplication> = {};
 
         if (dtoData.totalScore !== undefined) {
-            updateData.totalScore = dtoData.totalScore;
+            updateData.totalScore =
+                dtoData.totalScore;
         }
+
+        if (dtoData.anonymizedDocumentPath !== undefined) {
+            updateData.anonymizedDocumentPath =
+                dtoData.anonymizedDocumentPath;
+        }
+
+        if (dtoData.anonymizationStatus !== undefined) {
+            updateData.anonymizationStatus =
+                dtoData.anonymizationStatus;
+        }
+
         return Application.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },
             { new: true }
         ).exec();
-
     }
 
-    async updateStatus(id: string, newStatus: ApplicationStatus) {
+
+    async updateStatus(
+        id: string,
+        newStatus: ApplicationStatus
+    ): Promise<IApplication | null> {
+
         return Application.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
-            { $set: { status: newStatus } },
+            {
+                $set: {
+                    status: newStatus
+                }
+            },
             { new: true }
         ).exec();
     }
 
-    async countByProject(projectId: string, session?: ClientSession) {
-        let query = Application.countDocuments({
-            project: new mongoose.Types.ObjectId(projectId)
-        });
 
-        if (session) {
-            query = query.session(session);
-        }
-        return query.exec();
+    async countByProject(
+        projectId: string
+    ): Promise<number> {
+
+        return Application.countDocuments({
+            project:
+                new mongoose.Types.ObjectId(projectId)
+        }).exec();
     }
 
-    async findLatestByProject(
-        project: string
-    ) {
-        let dbQuery = Application.findOne({
-            project: new mongoose.Types.ObjectId(project)
-        })
-            .sort({ createdAt: -1 });
 
-        return dbQuery
+    async findLatestByProject(
+        projectId: string
+    ): Promise<IApplication | null> {
+
+        return Application.findOne({
+            project:
+                new mongoose.Types.ObjectId(projectId)
+        })
+            .sort({ createdAt: -1 })
             .lean<IApplication>()
             .exec();
     }
 
-    async exists(filters: ExistsApplicationDTO): Promise<boolean> {
+
+    async exists(
+        filters: ExistsApplicationDTO
+    ): Promise<boolean> {
+
         const query: any = {};
 
         const { stage, project } = filters;
 
         if (stage) {
-            query.grantStage = new mongoose.Types.ObjectId(stage);
+            query.grantStage =
+                new mongoose.Types.ObjectId(stage);
         }
-
 
         if (project) {
-            query.project = new mongoose.Types.ObjectId(project);
+            query.project =
+                new mongoose.Types.ObjectId(project);
         }
-        const result = await Application.exists(query).exec();
+
+        const result =
+            await Application.exists(query).exec();
+
         return result !== null;
     }
 
-    async delete(id: string) {
-        return Application.findByIdAndDelete(id).exec();
+
+    async delete(
+        id: string
+    ): Promise<IApplication | null> {
+
+        return Application.findByIdAndDelete(
+            new mongoose.Types.ObjectId(id)
+        ).exec();
     }
 }

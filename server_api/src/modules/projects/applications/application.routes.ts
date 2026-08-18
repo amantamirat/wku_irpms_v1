@@ -64,6 +64,14 @@ router.post(
     controller.calculateTotalScore
 );
 
+router.post(
+    "/:id/anonymize",
+    verifyActiveAccount,
+    //checkPermission("application:anonymize"),
+    checkPermission("application:calculateTotalScore"),
+    controller.anonymize
+);
+
 /*
 router.patch(
     "/",

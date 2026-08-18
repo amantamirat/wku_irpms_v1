@@ -23,7 +23,7 @@ const PhaseManager = ({ project, updateProject, enableEditing }: PhaseManagerPro
     const canManage = useMemo(() => (
         enableEditing &&
         (project.status === ProjectStatus.draft ||
-            project.status === ProjectStatus.accepted)
+            project.status === ProjectStatus.approved)
     ), [project.status, enableEditing]);
 
     useEffect(() => {
@@ -127,7 +127,7 @@ const PhaseManager = ({ project, updateProject, enableEditing }: PhaseManagerPro
                 }
             },
             hideSearch: true,
-            hideDefaultActions: true,
+            hideDefaultActions: !canManage,
         });
     }, [phases, project, updateProject, canManage]);
 
