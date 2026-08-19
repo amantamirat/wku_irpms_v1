@@ -13,7 +13,7 @@ export class VerificationConfigurationController {
 
     constructor(
         private readonly service: VerificationConfigurationService
-    ) {}
+    ) { }
 
 
     create = async (
@@ -70,6 +70,30 @@ export class VerificationConfigurationController {
         }
     };
 
+    getUpcoming = async (
+        req: Request,
+        res: Response
+    ) => {
+        try {
+            const configurations =
+                await this.service.getUpcoming();
+
+            successResponse(
+                res,
+                200,
+                "Upcoming verification configurations fetched successfully",
+                configurations
+            );
+
+        } catch (err: any) {
+            errorResponse(
+                res,
+                400,
+                err.message,
+                err
+            );
+        }
+    };
 
     getById = async (
         req: Request,

@@ -4,12 +4,7 @@ import { Verification } from "../models/verification.model";
 
 const ENDPOINT = "/verifications";
 
-export interface CreateVerificationDTO {
-    project: string;
-    configuration: string;
-    document: File;
-    remarks?: string;
-}
+
 
 export const VerificationApi: EntityApi<
     Verification,
@@ -44,10 +39,9 @@ export const VerificationApi: EntityApi<
     // Create / Submit Verification (Multipart Form Data)
     // POST /verifications
     // ---------------------------
-    async create(dto: CreateVerificationDTO): Promise<Verification> {
+    async create(dto: Verification): Promise<Verification> {
         const formData = new FormData();
 
-        // 1. Append the PDF document using 'document' (matches upload.single("document"))
         if (dto.document) {
             formData.append("document", dto.document);
         }

@@ -33,6 +33,13 @@ router.get(
     verificationConfController.getAll
 );
 
+router.get(
+    "/upcoming",
+    //verifyActiveAccount,
+    //checkPermission("verification-conf:read"),
+    verificationConfController.getUpcoming
+);
+
 /*
 //put the grant route first than id route
 router.get(

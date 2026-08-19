@@ -13,7 +13,7 @@ export class VerificationController {
 
     constructor(
         private readonly service: VerificationService
-    ) {}
+    ) { }
 
 
     create = async (
@@ -100,17 +100,17 @@ export class VerificationController {
         res: Response
     ) => {
         try {
-            const { projectId } = req.params;
+            const { configurationId } = req.params;
 
             const verifications =
                 await this.service.getByConfiguration(
-                    projectId
+                    configurationId
                 );
 
             successResponse(
                 res,
                 200,
-                "Project verifications fetched successfully",
+                "Configuration verifications fetched successfully",
                 verifications
             );
 

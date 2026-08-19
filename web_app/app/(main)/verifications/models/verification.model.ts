@@ -13,6 +13,7 @@ export interface Verification {
     attempt: number;
     status: VerificationStatus;
     submittedBy: string;
+    document?: File;
     documentPath: string;
     submittedAt?: string;
     reviewedAt?: string;

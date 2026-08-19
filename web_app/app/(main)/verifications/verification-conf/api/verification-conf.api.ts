@@ -10,36 +10,23 @@ export const VerificationConfigurationApi: EntityApi<
     undefined
 > & {
     transitionState: (id: string, dto: TransitionRequestDto) => Promise<any>;
+    getUpcoming: () => Promise<VerificationConfiguration[]>;
 } = {
     // ---------------------------
     // Fetch / Query
     // ---------------------------
     async getAll() {
         const query = new URLSearchParams();
-        /*
-                if (options) {
-                    const sanitized = sanitizeVerificationConfiguration(options);
-        
-                    if (sanitized.grant) {
-                        query.append("grant", sanitized.grant as string);
-                    }
-        
-                    if (sanitized.status) {
-                        query.append("status", sanitized.status as string);
-                    }
-        
-                    if (sanitized.template) {
-                        query.append("template", sanitized.template as string);
-                    }
-        
-                    if (options.populate !== undefined) {
-                        query.append("populate", String(options.populate));
-                    }
-                }
-                */
-
         const qs = query.toString();
-        return ApiClient.get(`${ENDPOINT}`);
+        return ApiClient.get(`${ENDPOINT}${qs ? `?${qs}` : ""}`);
+    },
+
+    // ---------------------------
+    // Get Upcoming Configurations
+    // GET /verification-configurations/upcoming
+    // ---------------------------
+    async getUpcoming(): Promise<VerificationConfiguration[]> {
+        return ApiClient.get(`${ENDPOINT}/upcoming`);
     },
 
     // ---------------------------

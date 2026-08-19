@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Dropdown } from 'primereact/dropdown';
+import { Button } from 'primereact/button';
 import { VerificationConfiguration } from './verification-conf/models/verification-conf.model';
 import { VerificationConfigurationApi } from './verification-conf/api/verification-conf.api';
 import VerificationManager from './components/Manager';
 
-
 const VerificationPage = () => {
+    const router = useRouter();
     const [configurations, setConfigurations] = useState<VerificationConfiguration[]>([]);
     const [selectedConfig, setSelectedConfig] = useState<VerificationConfiguration | null>(null);
     const [loadingConfigs, setLoadingConfigs] = useState<boolean>(false);
@@ -36,14 +38,23 @@ const VerificationPage = () => {
     return (
         <div className="p-4 md:p-5 surface-ground min-h-screen">
 
-            {/* HEADER */}
-            <div className="mb-4 flex flex-column gap-2">
-                <h2 className="text-2xl font-bold text-900 m-0">
-                    Verification Management
-                </h2>
-                <span className="text-600 text-sm">
-                    Select a verification configuration to review and manage submitted verifications
-                </span>
+            {/* HEADER WITH NAVIGATION BUTTON */}
+            <div className="mb-4 flex flex-column md:flex-row md:align-items-center justify-content-between gap-3">
+                <div className="flex flex-column gap-1">
+                    <h2 className="text-2xl font-bold text-900 m-0">
+                        Verification Management
+                    </h2>
+                    <span className="text-600 text-sm">
+                        Select a verification configuration to review and manage submitted verifications
+                    </span>
+                </div>
+
+                <Button
+                    label="Manage Configurations"
+                    icon="pi pi-cog"
+                    className="p-button-outlined p-button-secondary w-full md:w-auto"
+                    onClick={() => router.push('verifications/verification-conf')} // 👈 Update route path if needed
+                />
             </div>
 
             {/* CONTROL PANEL */}
@@ -56,7 +67,7 @@ const VerificationPage = () => {
                         value={selectedConfig}
                         options={configurations}
                         onChange={(e) => setSelectedConfig(e.value)}
-                        optionLabel="grant.title" // 👈 Accesses nested grant.title directly
+                        optionLabel="grant.title"
                         placeholder={loadingConfigs ? "Loading configurations..." : "Choose configuration..."}
                         className="w-full md:w-20rem"
                         showClear
@@ -86,9 +97,15 @@ const VerificationPage = () => {
                     <div className="flex flex-column align-items-center justify-content-center py-8 text-center">
                         <i className="pi pi-shield text-4xl text-300 mb-3" />
                         <h3 className="text-900 m-0 font-medium">No Configuration Selected</h3>
-                        <p className="text-500 mt-2 text-sm">
+                        <p className="text-500 mt-2 text-sm mb-4">
                             Please select a verification configuration above to view associated submissions.
                         </p>
+                        <Button
+                            label="Go to Configurations"
+                            icon="pi pi-cog"
+                            className="p-button-sm p-button-outlined"
+                            onClick={() => router.push('/verification-conf')}
+                        />
                     </div>
                 )}
             </div>

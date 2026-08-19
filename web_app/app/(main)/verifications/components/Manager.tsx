@@ -50,14 +50,7 @@ const VerificationManager = ({ configuration }: VerificationManagerProps) => {
             itemName: "Verification",
             api: VerificationApi,
             columns: [
-                {
-                    header: "Attempt",
-                    field: "attempt",
-                    sortable: true,
-                    body: (r: Verification) => (
-                        <span className="font-semibold text-700">#{r.attempt}</span>
-                    )
-                },
+                
                 {
                     header: "Project",
                     field: "project",
@@ -66,6 +59,14 @@ const VerificationManager = ({ configuration }: VerificationManagerProps) => {
                         <span className="text-700 truncate block style={{ maxWidth: '200px' }}">
                             {typeof r.project === "object" ? (r.project as any)?.title : r.project}
                         </span>
+                    )
+                },
+                {
+                    header: "Attempt",
+                    field: "attempt",
+                    sortable: true,
+                    body: (r: Verification) => (
+                        <span className="font-semibold text-700">#{r.attempt}</span>
                     )
                 },
                 {
@@ -94,6 +95,7 @@ const VerificationManager = ({ configuration }: VerificationManagerProps) => {
                         )
                     )
                 },
+                /*
                 {
                     header: "Submitted At",
                     field: "submittedAt",
@@ -112,7 +114,7 @@ const VerificationManager = ({ configuration }: VerificationManagerProps) => {
                             {r.remarks || "-"}
                         </div>
                     )
-                }
+                }*/
             ],
             permissionPrefix: "verification"
         });

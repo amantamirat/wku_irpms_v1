@@ -18,7 +18,7 @@ export interface IVerificationConfigurationRepository {
     ): Promise<IVerificationConfiguration | null>;
 
     findAll(): Promise<IVerificationConfiguration[]>;
-
+    findUpcoming(): Promise<IVerificationConfiguration[]>
     update(
         id: string,
         data: UpdateVerificationConfigurationDTO
@@ -54,8 +54,8 @@ export class VerificationConfigurationRepository
 
         return VerificationConfiguration
             .findById(id)
-            //.populate("grant")
-            //.populate("template");
+        .populate("grant")
+        //.populate("template");
     }
 
 
@@ -67,8 +67,8 @@ export class VerificationConfigurationRepository
             .findOne({
                 grant: grantId
             })
-            //.populate("grant")
-            //.populate("template");
+        //.populate("grant")
+        //.populate("template");
     }
 
 
@@ -79,6 +79,24 @@ export class VerificationConfigurationRepository
             .populate("grant")
             .populate("template")
             .sort({ createdAt: -1 });
+    }
+
+    async findUpcoming(): Promise<IVerificationConfiguration[]> {
+
+        return VerificationConfiguration
+            .find({
+                deadline: {
+                    $gt: new Date()
+                }
+            })
+            .populate({
+                path: "grant",
+                populate: {
+                    path: "organization"
+                }
+            })
+            //.populate("template")
+            .sort({ deadline: 1 });
     }
 
     async update(

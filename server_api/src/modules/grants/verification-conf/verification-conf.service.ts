@@ -79,6 +79,10 @@ export class VerificationConfigurationService {
         return this.repository.findAll();
     }
 
+    async getUpcoming(): Promise<IVerificationConfiguration[]> {
+        return this.repository.findUpcoming();
+    }
+
     async update(
         id: string,
         dto: UpdateVerificationConfigurationDTO
