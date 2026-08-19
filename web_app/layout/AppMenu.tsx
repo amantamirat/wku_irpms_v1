@@ -31,6 +31,12 @@ const AppMenu = () => {
                     to: '/applications/stage',
                     visible: hasPermission("application:read")
                 },
+                {
+                    label: 'Verifications',
+                    icon: 'pi pi-fw pi-check-square',
+                    to: '/verifications',
+                    // visible: hasPermission("verification:read")
+                },
                 /*
                 {
                     label: 'Collaborators',
@@ -63,12 +69,6 @@ const AppMenu = () => {
                     icon: 'pi pi-fw pi-megaphone',
                     to: '/calls',
                     visible: hasPermission("call:create")
-                },
-                {
-                    label: 'Verifications',
-                    icon: 'pi pi-fw pi-check-square',
-                    to: '/verifications',
-                    // visible: hasPermission("verification:read")
                 },
                 {
                     label: 'Evaluations',

@@ -6,7 +6,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
 import { VerificationConfiguration } from './verification-conf/models/verification-conf.model';
 import { VerificationConfigurationApi } from './verification-conf/api/verification-conf.api';
-import VerificationManager from './components/Manager';
+import VerificationManager from './conf/Manager';
 
 const VerificationPage = () => {
     const router = useRouter();

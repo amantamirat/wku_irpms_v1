@@ -351,5 +351,23 @@ link: "/dashboard/my-projects"
     }
 
 
+    async notifyVerificationSubmitted(
+        recipientId: string,
+        projectTitle: string,
+        senderId?: string
+    ) {
+        return this.notify({
+            recipient: recipientId,
+            sender: senderId,
+            title: "Verification Submitted",
+            message:
+                `A verification document for your project "${projectTitle}" ` +
+                `has been submitted successfully.`,
+            type: NotificationType.SUCCESS,
+            link: "/dashboard/my-projects"
+        });
+    }
+
+
 
 }

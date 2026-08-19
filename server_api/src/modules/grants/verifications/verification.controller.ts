@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { Request, Response } from "express";
 import { CreateVerificationDTO } from "./verification.dto";
 import {
@@ -36,16 +38,15 @@ export class VerificationController {
                 );
             }
 
-            const documentPath =
-                req.file.path;
-
+            const relativeDocPath = path.relative(process.cwd(), req.file.path).replace(/\\/g, '/');
+            
             const submittedBy =
                 String(req.auth.userId);
 
             const verification =
                 await this.service.create(
                     dto,
-                    documentPath,
+                    relativeDocPath,
                     submittedBy
                 );
 
@@ -57,6 +58,11 @@ export class VerificationController {
             );
 
         } catch (err: any) {
+            if (req.file && req.file.path) {
+                fs.unlink(req.file.path, (unlinkErr) => {
+                    if (unlinkErr) console.error(`Failed to delete orphaned file at ${req.file?.path}:`, unlinkErr);
+                });
+            }
             errorResponse(
                 res,
                 400,
@@ -111,6 +117,35 @@ export class VerificationController {
                 res,
                 200,
                 "Configuration verifications fetched successfully",
+                verifications
+            );
+
+        } catch (err: any) {
+            errorResponse(
+                res,
+                400,
+                err.message,
+                err
+            );
+        }
+    };
+
+    getByProject = async (
+        req: Request,
+        res: Response
+    ) => {
+        try {
+            const { projectId } = req.params;
+
+            const verifications =
+                await this.service.getByProject(
+                    projectId
+                );
+
+            successResponse(
+                res,
+                200,
+                "Project verifications fetched successfully",
                 verifications
             );
 

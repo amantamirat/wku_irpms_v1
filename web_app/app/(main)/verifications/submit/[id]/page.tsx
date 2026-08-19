@@ -161,7 +161,7 @@ export default function VerificationSubmitPage() {
     return (
         <div className="card p-5 max-w-3xl mx-auto mt-4 surface-card border-round shadow-2">
             <div className="text-center mb-5">
-                <i className={`pi ${success ? 'pi-check-circle text-green-500' : 'pi-shield text-primary'} text-6xl mb-3 transition-all duration-500`}></i>
+                <i className={`pi ${success ? 'pi-check-circle text-green-500' : 'pi-check-square text-primary'} text-6xl mb-3 transition-all duration-500`}></i>
                 <h3 className="m-0 text-900">{success ? 'Verification Submitted!' : 'Submit Verification Request'}</h3>
                 <p className="text-600">
                     {success ? 'Your verification document has been submitted successfully.' : 'Select your completed project and attach the required verification PDF.'}

@@ -1,6 +1,7 @@
 // reports/components/FinancialWidget.tsx
 'use client';
 
+import { etbCurrencyFormatter } from '@/utils/currencyUtil';
 import { IFinancialReport } from '../models/report.types';
 import { ProgressBar } from 'primereact/progressbar';
 
@@ -30,15 +31,18 @@ export const FinancialWidget = ({ data }: Props) => {
       <div className="grid text-center">
         <div className="col-4 border-right-1 surface-border">
           <div className="text-500 text-xs mb-1">Total Allocated</div>
-          <div className="text-lg font-bold text-900">${(data?.totalGrantAmount ?? 0).toLocaleString()}</div>
+          <div className="text-lg font-bold text-900">{etbCurrencyFormatter.format(data?.totalGrantAmount ?? 0)}</div>
         </div>
         <div className="col-4 border-right-1 surface-border">
           <div className="text-500 text-xs mb-1">Used Budget</div>
-          <div className="text-lg font-bold text-orange-600">${(data?.usedGrantBudget ?? 0).toLocaleString()}</div>
+          <div className="text-lg font-bold text-orange-600">{etbCurrencyFormatter.format(data?.usedGrantBudget ?? 0)}
+          </div>
         </div>
         <div className="col-4">
           <div className="text-500 text-xs mb-1">Remaining</div>
-          <div className="text-lg font-bold text-green-600">${(data?.remainingGrantBudget ?? 0).toLocaleString()}</div>
+          <div className="text-lg font-bold text-green-600">
+            {etbCurrencyFormatter.format(data?.remainingGrantBudget ?? 0)}
+          </div>
         </div>
       </div>
     </div>

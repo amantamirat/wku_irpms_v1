@@ -12,6 +12,8 @@ import { ProjectApi } from "../api/project.api";
 import CollaboratorManager from "../../collaborators/project/Manager";
 import ApplicationManager from "../../applications/project/Manager";
 import PhaseManager from "../phases/project/Manager";
+import { etbCurrencyFormatter } from "@/utils/currencyUtil";
+import VerificationManager from "../../verifications/project/Manager";
 
 
 interface ProjectDetailProps {
@@ -78,11 +80,13 @@ export default function ProjectDetail({ project, updateProject, enableEditing }:
     }
 
     // 1. Format Budget
+    /*
     const displayBudget = new Intl.NumberFormat('en-ET', {
         style: 'currency',
         currency: 'ETB',
         maximumFractionDigits: 0
     }).format(projectData?.totalBudget || 0);
+    */
 
     // 2. Format Total Duration
     let displayDuration = 'Not Specified';
@@ -119,7 +123,7 @@ export default function ProjectDetail({ project, updateProject, enableEditing }:
         {
             header: "Phases",
             icon: "pi pi-list",
-            permission: PERMISSIONS.PHASE.READ,
+            permission: "phase:read",
             content: <PhaseManager project={projectData} updateProject={updateProject} enableEditing={enableEditing} />
         },
         {
@@ -138,6 +142,19 @@ export default function ProjectDetail({ project, updateProject, enableEditing }:
             // Use PERMISSIONS.APPLICATION?.READ or PERMISSIONS.PROJECT?.READ based on your setup
             permission: (PERMISSIONS as any).APPLICATION?.READ || PERMISSIONS.PROJECT.READ,
             content: <ApplicationManager project={projectData} enableEditing={enableEditing} />
+        });
+    }
+
+
+    // 2. Conditionally add Application Manager tab if projectData.call exists
+    if (projectData?.currentVerification) {
+        tabs.push({
+            header: "Verifications",
+            icon: 'pi pi-fw pi-check-square',
+            // Use PERMISSIONS.APPLICATION?.READ or PERMISSIONS.PROJECT?.READ based on your setup
+            //permission: "verification:read",
+            permission: "project:read",
+            content: <VerificationManager project={project} />
         });
     }
 
@@ -197,7 +214,7 @@ export default function ProjectDetail({ project, updateProject, enableEditing }:
                 <div className="col-12 sm:col-6 md:col-3 p-2">
                     <div className="p-3 surface-100 border-round border-left-3 border-green-500 h-full">
                         <span className="block text-500 text-xs font-bold mb-1 uppercase">Budget Allocation</span>
-                        <div className="text-xl font-bold text-900">{displayBudget}</div>
+                        <div className="text-xl font-bold text-900">{etbCurrencyFormatter.format(projectData.totalBudget ?? 0)}</div>
                     </div>
                 </div>
 

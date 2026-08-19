@@ -1,5 +1,6 @@
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
+import { NotificationService } from "../../notifications/notification.service";
 import { ProjectStatus } from "../../projects/project.model";
 import { IProjectRepository } from "../../projects/project.repository";
 import { VerificationConfigurationStatus } from "../verification-conf/verification-conf.model";
@@ -14,14 +15,12 @@ export class VerificationService {
     constructor(
         private readonly repository: IVerificationRepository,
         private readonly verificationConfRepo: IVerificationConfigurationRepository,
-        private readonly projectRepo: IProjectRepository
+        private readonly projectRepo: IProjectRepository,
+        private readonly notificationService?: NotificationService,
     ) { }
-
-
     // --------------------------------------------------
     // CREATE VERIFICATION
     // --------------------------------------------------
-
     async create(
         dto: CreateVerificationDTO,
         documentPath: string,
@@ -79,7 +78,6 @@ export class VerificationService {
         // 5. Check deadline
         // ----------------------------------------------
         const now = new Date();
-
         if (
             now >
             new Date(configuration.deadline)
@@ -91,7 +89,6 @@ export class VerificationService {
         // ----------------------------------------------
         // 6. Check current verification
         // ----------------------------------------------
-
         let attempt = 1;
 
         if (project.currentVerification) {
@@ -109,7 +106,6 @@ export class VerificationService {
             // ------------------------------------------
             // Current verification is still active
             // ------------------------------------------
-
             if (
                 currentVerification.status ===
                 VerificationStatus.submitted
@@ -118,8 +114,6 @@ export class VerificationService {
                     ERROR_CODES.VERIFICATION_ALREADY_EXISTS
                 );
             }
-
-
             if (
                 currentVerification.status ===
                 VerificationStatus.under_review
@@ -128,12 +122,9 @@ export class VerificationService {
                     ERROR_CODES.VERIFICATION_ALREADY_EXISTS
                 );
             }
-
-
             // ------------------------------------------
             // Already successfully verified
             // ------------------------------------------
-
             if (
                 currentVerification.status ===
                 VerificationStatus.verified
@@ -142,12 +133,9 @@ export class VerificationService {
                     ERROR_CODES.VERIFICATION_ALREADY_VERIFIED
                 );
             }
-
-
             // ------------------------------------------
             // Previous attempt failed
             // ------------------------------------------
-
             if (
                 currentVerification.status ===
                 VerificationStatus.failed
@@ -156,12 +144,9 @@ export class VerificationService {
                     currentVerification.attempt + 1;
             }
         }
-
-
         // ----------------------------------------------
         // 7. Check maximum attempts
         // ----------------------------------------------
-
         if (
             attempt >
             configuration.maxAttempts
@@ -171,12 +156,9 @@ export class VerificationService {
                 "Maximum verification attempts reached. No further submissions are allowed."
             );
         }
-
-
         // ----------------------------------------------
         // 8. Create verification
         // ----------------------------------------------
-
         const verification =
             await this.repository.create({
                 project: String(project._id),
@@ -187,16 +169,25 @@ export class VerificationService {
                 documentPath
                 //submittedAt: now
             });
-
-
         // ----------------------------------------------
         // 9. Set as current verification
         // ----------------------------------------------
-
         await this.projectRepo.updateCurrentVerification(
             String(project._id),
             String(verification._id)
         );
+
+        // ----------------------------------------------
+        // 10. Send notification
+        // ----------------------------------------------
+
+        if (this.notificationService) {
+            await this.notificationService
+                .notifyVerificationSubmitted(
+                    String(project.leadPI),
+                    project.title
+                );
+        }
 
         return verification;
     }
@@ -226,7 +217,6 @@ export class VerificationService {
     // --------------------------------------------------
     // GET BY CONF
     // --------------------------------------------------
-
     async getByConfiguration(
         confId: string
     ): Promise<IVerification[]> {
@@ -240,9 +230,26 @@ export class VerificationService {
                 ERROR_CODES.VERIFICATION_CONFIGURATION_NOT_FOUND
             );
         }
-        return this.repository.findByConfiguration(
-            confId
-        );
+        return await this.repository.find({ configuration: confId });
+    }
+
+    // --------------------------------------------------
+    // GET BY PROJECT
+    // --------------------------------------------------
+    async getByProject(
+        projectId: string
+    ): Promise<IVerification[]> {
+        // Make sure project exists
+        const proj =
+            await this.projectRepo.findById(
+                projectId
+            );
+        if (!proj) {
+            throw new AppError(
+                ERROR_CODES.PROJECT_NOT_FOUND
+            );
+        }
+        return await this.repository.find({ project: projectId });
     }
 
 }

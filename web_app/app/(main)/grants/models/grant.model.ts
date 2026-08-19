@@ -1,6 +1,5 @@
 import { Organization } from "../../organizations/models/organization.model";
 import { Thematic } from "../../thematics/models/thematic.model";
-import { Constraint } from "../../constraints/models/constraint.model";
 import { GrantStatus } from "./grant.state-machine";
 
 export enum FundingSource {
@@ -68,11 +67,3 @@ export interface GetGrantOptions {
     status?: GrantStatus;
     populate?: boolean;
 }
-
-export const etbCurrencyFormatter = new Intl.NumberFormat(
-    'en-US',
-    {
-        style: 'currency',
-        currency: 'ETB'
-    }
-);

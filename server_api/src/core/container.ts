@@ -39,6 +39,8 @@ import { NotificationService } from "../modules/notifications/notification.servi
 import { StageService } from "../modules/calls/stages/stage.service";
 import { PhaseSynchronizer } from "../modules/projects/phase/phase.synchronizer";
 import { AnonymizerService } from "../modules/anonymizer/anonymizer.service";
+import { VerificationConfigurationRepository } from "../modules/grants/verification-conf/verification-conf.repository";
+import { VerificationRepository } from "../modules/grants/verifications/verification.repository";
 
 export const notificationRepo = new NotificationRepository();
 export const settingRepo = new SettingRepository();
@@ -75,6 +77,11 @@ export const stageRepo = new StageRepository();
 export const evalRepo = new EvaluationRepository();
 export const applicationRepo = new ApplicationRepository();
 export const reviewerRepo = new ReviewerRepository();
+
+export const verificationConfRepo = new VerificationConfigurationRepository();
+export const verificationRepo = new VerificationRepository();
+
+
 
 export const templateRepo = new TemplateRepository();
 export const templateValidtor = new TemplateValidationService(

@@ -1,14 +1,15 @@
 'use client';
 
 import { createEntityManager } from "@/components/createEntityManager";
-import { GrantApi } from "../api/grant.api";
-import { createEmptyGrant, etbCurrencyFormatter, GetGrantOptions, Grant } from "../models/grant.model";
-import { GRANT_STATUS_ORDER, GRANT_TRANSITIONS } from "../models/grant.state-machine";
-import GrantDetail from "./GrantDetail";
-import SaveGrant from "./SaveGrant";
 import MyBadge from "@/templates/MyBadge";
 import { Organization } from "../../organizations/models/organization.model";
 import { Thematic } from "../../thematics/models/thematic.model";
+import { GrantApi } from "../api/grant.api";
+import { createEmptyGrant, GetGrantOptions, Grant } from "../models/grant.model";
+import { GRANT_STATUS_ORDER, GRANT_TRANSITIONS } from "../models/grant.state-machine";
+import SaveGrant from "./SaveGrant";
+import { etbCurrencyFormatter } from "@/utils/currencyUtil";
+
 
 interface GrantManagerProps {
     organization?: Organization;
@@ -86,11 +87,12 @@ const GrantManager = ({ organization, thematic }: GrantManagerProps) => {
             populate: true,
         }),
 
+        /*
         expandable: {
             template: (grant) => (
                 <GrantDetail grant={grant} />
             )
-        },
+        },*/
 
         workflow: {
             statusField: "status",

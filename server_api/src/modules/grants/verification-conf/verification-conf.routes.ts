@@ -1,11 +1,10 @@
 import { Router } from "express";
-import { checkPermission, verifyActiveAccount } from "../../auth/auth.middleware";
+import { verificationConfRepo } from "../../../core/container";
+import { verifyActiveAccount } from "../../auth/auth.middleware";
 import { VerificationConfigurationController } from "./verification-conf.controller";
-import { VerificationConfigurationRepository } from "./verification-conf.repository";
 import { VerificationConfigurationService } from "./verification-conf.service";
 
-const verificationConfRepo =
-    new VerificationConfigurationRepository();
+
 
 const verificationConfService =
     new VerificationConfigurationService(

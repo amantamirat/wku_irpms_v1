@@ -1,12 +1,13 @@
+import { Application } from "../../applications/models/application.model";
 import { Calendar } from "../../calendars/models/calendar.model";
 import { Call } from "../../calls/models/call.model";
+import { Collaborator, sanitizeCollaborator } from "../../collaborators/models/collaborator.model";
 import { Grant } from "../../grants/models/grant.model";
 import { Organization } from "../../organizations/models/organization.model";
 import { Theme } from "../../thematics/themes/models/theme.model";
 import { User } from "../../users/models/user.model";
-import { Collaborator, sanitizeCollaborator } from "../../collaborators/models/collaborator.model";
+import { Verification } from "../../verifications/models/verification.model";
 import { Phase, sanitizePhase } from "../phases/models/phase.model";
-import { Application } from "../../applications/models/application.model";
 
 export enum ProjectStatus {
     draft = 'draft',
@@ -34,7 +35,7 @@ export type Project = {
     totalDuration?: number;
     totalCollabs?: number;
     themes?: Theme[] | string[];
-    currentStage?: string;
+    //currentStage?: string;
     createdAt?: Date;
     updatedAt?: Date;
     //used for apply for call
@@ -42,6 +43,7 @@ export type Project = {
     phases?: Phase[];
     file?: File;
     currentApplication?: string | Application;
+    currentVerification?: string | Verification;
     //workspace?: string | Organization;
 }
 

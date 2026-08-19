@@ -4,13 +4,12 @@ import { Verification } from "../models/verification.model";
 
 const ENDPOINT = "/verifications";
 
-
-
 export const VerificationApi: EntityApi<
     Verification,
     undefined
 > & {
     getByConfiguration: (configurationId: string) => Promise<Verification[]>;
+    getByProject: (projectId: string) => Promise<Verification[]>;
 } = {
     // ---------------------------
     // Fetch / Query
@@ -33,6 +32,14 @@ export const VerificationApi: EntityApi<
     // ---------------------------
     async getByConfiguration(configurationId: string): Promise<Verification[]> {
         return ApiClient.get(`${ENDPOINT}/configuration/${configurationId}`);
+    },
+
+    // ---------------------------
+    // Get By Project ID
+    // GET /verifications/project/:projectId
+    // ---------------------------
+    async getByProject(projectId: string): Promise<Verification[]> {
+        return ApiClient.get(`${ENDPOINT}/project/${projectId}`);
     },
 
     // ---------------------------

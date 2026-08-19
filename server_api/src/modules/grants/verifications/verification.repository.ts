@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { FilterQuery } from "mongoose";
 import {
     IVerification,
     Verification,
@@ -24,8 +24,8 @@ export interface IVerificationRepository {
         id: string
     ): Promise<IVerification | null>;
 
-    findByConfiguration(
-        configurationId: string
+    find(
+        filters?: FilterQuery<IVerification>
     ): Promise<IVerification[]>;
 
     update(
@@ -87,15 +87,14 @@ export class VerificationRepository
             .populate("submittedBy");
     }
 
-    async findByConfiguration(
-        configurationId: string
+    async find(
+        filters: FilterQuery<IVerification> = {}
     ): Promise<IVerification[]> {
 
         return Verification
-            .find({
-                configuration: configurationId
-            })
+            .find(filters)
             .populate("project")
+            .populate("configuration")
             .populate("submittedBy")
             .sort({
                 attempt: 1
@@ -122,7 +121,6 @@ export class VerificationRepository
     async delete(
         id: string
     ): Promise<IVerification | null> {
-
         return Verification.findByIdAndDelete(id);
     }
 }

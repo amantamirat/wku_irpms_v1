@@ -1,35 +1,19 @@
 import { Router } from "express";
-
 import {
-    checkPermission,
     verifyActiveAccount
 } from "../../auth/auth.middleware";
 
 import { VerificationController } from "./verification.controller";
-import { VerificationRepository } from "./verification.repository";
 import { VerificationService } from "./verification.serive";
-
-import {
-    VerificationConfigurationRepository
-} from "../verification-conf/verification-conf.repository";
-import { projectRepo } from "../../../core/container";
+import { notificationService, projectRepo, verificationConfRepo, verificationRepo } from "../../../core/container";
 import { upload } from "../../../util/multer";
-
-
-
-const verificationRepo =
-    new VerificationRepository();
-
-const verificationConfRepo =
-    new VerificationConfigurationRepository();
-
-
 
 const verificationService =
     new VerificationService(
         verificationRepo,
         verificationConfRepo,
-        projectRepo
+        projectRepo,
+        notificationService,
     );
 
 const verificationController =
@@ -63,6 +47,15 @@ router.get(
     verifyActiveAccount,
     //checkPermission("verification:read"),
     verificationController.getByConfiguration
+);
+
+
+// Get verifications by project
+router.get(
+    "/project/:projectId",
+    verifyActiveAccount,
+    //checkPermission("verification:read"),
+    verificationController.getByProject
 );
 
 

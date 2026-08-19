@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { VerificationApi } from "../api/verification.api";
 import { Verification } from "../models/verification.model";
 import { VerificationConfiguration } from "../verification-conf/models/verification-conf.model";
+import { BASE_URL } from "@/api/ApiClient";
 
 interface VerificationManagerProps {
     configuration: VerificationConfiguration;
@@ -50,7 +51,7 @@ const VerificationManager = ({ configuration }: VerificationManagerProps) => {
             itemName: "Verification",
             api: VerificationApi,
             columns: [
-                
+
                 {
                     header: "Project",
                     field: "project",
@@ -79,20 +80,19 @@ const VerificationManager = ({ configuration }: VerificationManagerProps) => {
                 },
                 {
                     header: "Document",
-                    field: "documentPath",
-                    body: (r: Verification) => (
-                        r.documentPath ? (
-                            <a
-                                href={r.documentPath}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-primary hover:underline text-sm font-medium"
-                            >
-                                View Document
-                            </a>
-                        ) : (
-                            <span className="text-400 text-sm">No Document</span>
-                        )
+                    body: (r: Verification) => r.documentPath ? (
+                        <a
+                            href={`${BASE_URL}/${r.documentPath.replace(/^\\/, "")}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline inline-flex items-center gap-1 font-medium text-sm"
+                        >
+                            <i className="pi pi-file-pdf text-red-500"></i> View PDF
+                        </a>
+                    ) : (
+                        <span className="text-gray-400 italic">
+                            No document
+                        </span>
                     )
                 },
                 /*
