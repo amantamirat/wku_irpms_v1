@@ -27,6 +27,7 @@ export interface IProject extends Document {
     leadPI: mongoose.Types.ObjectId;
     themes: mongoose.Types.ObjectId[];
     currentApplication?: mongoose.Types.ObjectId;
+    currentVerification?: mongoose.Types.ObjectId;
     status: ProjectStatus;
     createdBy?: mongoose.Types.ObjectId; // User who created the record
     createdAt?: Date;
@@ -94,7 +95,14 @@ const ProjectSchema = new Schema<IProject>({
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.APPLICATION,
         unique: true,
-        sparse: true // allows multiple docs with undefined currentStage
+        sparse: true // allows multiple docs with undefined
+    },
+
+    currentVerification: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.VERIFICATION,
+        unique: true,
+        sparse: true // allows multiple docs with undefined
     },
 
     status: {

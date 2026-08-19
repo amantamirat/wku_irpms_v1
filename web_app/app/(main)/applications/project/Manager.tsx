@@ -6,7 +6,7 @@ import MyBadge from "@/templates/MyBadge";
 import { useEffect, useMemo, useState } from "react";
 import { Project, ProjectStatus } from "../../projects/models/project.model";
 import { ApplicationApi } from "../api/application.api";
-import { Application, ApplicationStatus } from "../models/application.model";
+import { AnonymizationStatus, Application, ApplicationStatus } from "../models/application.model";
 import { Stage } from "../../calls/stages/models/stage.model";
 import { StageApi } from "../../calls/stages/api/stage.api";
 import SaveApplication from "../components/SaveApplication";
@@ -129,7 +129,8 @@ const ApplicationManager = ({ project, enableEditing }: ApplicationManagerProps)
                 ? () => ({
                     project: project,
                     stage: nextStage,
-                    status: ApplicationStatus.pending
+                    status: ApplicationStatus.pending,
+                    anonymizationStatus: AnonymizationStatus.pending
                 })
                 : undefined,
             SaveDialog: nextStage ? SaveApplication : undefined,

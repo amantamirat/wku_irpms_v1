@@ -19,6 +19,9 @@ import criterionRoutes from './modules/evaluations/criteria/criterion.routes';
 import templateRoutes from './modules/templates/template.routes';
 
 import grantRoutes from './modules/grants/grant.routes';
+import verificationConfRoutes from './modules/grants/verification-conf/verification-conf.routes';
+import verificationRoutes from './modules/grants/verifications/verification.routes';
+
 
 import constraintRoutes from './modules/constraints/constraint.routes';
 import compositionRoutes from './modules/compositions/composition.routes';
@@ -98,6 +101,10 @@ app.use("/api/team/requirements", requirementRoutes)
 //"More specific routes must come first"
 // 🚨 KEEP THIS LAST
 app.use("/api/grants", grantRoutes);
+
+console.log("Mounting verification configuration routes");
+app.use("/api/verification-configurations", verificationConfRoutes);
+app.use("/api/verifications", verificationRoutes);
 
 app.use("/api/calendars", calendarRoutes);
 app.use("/api/calls", callRoutes);

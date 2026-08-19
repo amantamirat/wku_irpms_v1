@@ -65,6 +65,12 @@ const AppMenu = () => {
                     visible: hasPermission("call:create")
                 },
                 {
+                    label: 'Verifications',
+                    icon: 'pi pi-fw pi-check-square',
+                    to: '/verifications',
+                    // visible: hasPermission("verification:read")
+                },
+                {
                     label: 'Evaluations',
                     icon: 'pi pi-chart-bar',
                     to: '/evaluations',

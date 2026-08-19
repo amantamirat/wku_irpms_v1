@@ -19,6 +19,7 @@ export enum COLLECTIONS {
   HISTORY_RULE = "history_rules",
   MEMBER_REQUIREMENT = "member_requirements",
   GRANT_ALLOCATION = "grantallocations",
+  VERIFICATION_CONFIGURATION = "verification_confs",
 
 
   THEMATIC = "thematics",

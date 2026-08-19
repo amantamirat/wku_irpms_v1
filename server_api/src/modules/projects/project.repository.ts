@@ -28,6 +28,14 @@ export interface IProjectRepository {
         project: string,
         session?: ClientSession
     ): Promise<IProject | null>;
+
+    updateCurrentVerification(
+        id: string,
+        verification: string
+    ): Promise<IProject | null>;
+    clearCurrentVerification(
+        project: string
+    ): Promise<IProject | null>;
     exists(filters: ExistsProjectDTO): Promise<boolean>;
     delete(id: string): Promise<IProject | null>;
 }
@@ -172,7 +180,6 @@ export class ProjectRepository implements IProjectRepository {
     }
 
     // ✅ add inside ProjectRepository
-
     async updateCurrentApplication(
         id: string,
         application: string
@@ -195,6 +202,27 @@ export class ProjectRepository implements IProjectRepository {
         ).exec();
     }
 
+    // ✅ add inside ProjectRepository
+    async updateCurrentVerification(
+        id: string,
+        verification: string
+    ) {
+        const update =
+
+        {
+            $set: {
+                currentVerification: new mongoose.Types.ObjectId(verification)
+            }
+        }
+        return Project.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            update,
+            {
+                new: true
+            }
+        ).exec();
+    }
+
     async clearCurrentApplication(
         project: string
     ) {
@@ -207,9 +235,22 @@ export class ProjectRepository implements IProjectRepository {
             },
             { new: true }
         );
+        return dbQuery.exec();
+    }
 
 
-
+    async clearCurrentVerification(
+        project: string
+    ) {
+        let dbQuery = Project.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(project),
+            {
+                $unset: {
+                    currentVerification: 1
+                }
+            },
+            { new: true }
+        );
         return dbQuery.exec();
     }
 

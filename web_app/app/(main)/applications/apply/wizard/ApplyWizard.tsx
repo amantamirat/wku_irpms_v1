@@ -2,7 +2,6 @@
 import { useAuth } from '@/contexts/auth-context';
 import { Steps } from 'primereact/steps';
 import { useState } from 'react';
-import { Call } from '../../../calls/models/call.model';
 import { BasicInfoStep } from '../../../projects/components/wirzard/BasicInfoStep';
 import { CollaboratorsStep } from '../../../projects/components/wirzard/CollaboratorsStep';
 import { PhasesStep } from '../../../projects/components/wirzard/PhasesStep';
