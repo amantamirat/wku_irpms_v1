@@ -5,10 +5,9 @@ import MyBadge from "@/templates/MyBadge";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { User } from "../../users/models/user.model";
 import { ReviewerApi } from "../api/reviewer.api";
-import { Reviewer, ReviewerStatus } from "../models/reviewer.model";
+import { Reviewer, ReviewerStatus, ReviewerTargetType } from "../models/reviewer.model";
 import { REVIEWER_STATUS_ORDER, REVIEWER_USER_TRANSITIONS } from "../models/reviewer.state-machine";
 import EvaluationDialog from "../components/EvaluationDialog";
-
 
 interface ReviewerManagerProps {
     user: User;
@@ -40,7 +39,7 @@ const ReviewerManager = ({ user, enableEvaluation }: ReviewerManagerProps) => {
 
     const handleCloseDialog = () => {
         setSelectedReviewer(null);
-        fetchReviewers(); // Refresh table state on dialog close
+        fetchReviewers();
     };
 
     const Manager = useMemo(() => {
@@ -50,24 +49,39 @@ const ReviewerManager = ({ user, enableEvaluation }: ReviewerManagerProps) => {
             api: ReviewerApi,
             columns: [
                 {
-                    header: "Application",
-                    field: "application.project.title",
-                    body: (reviewer: Reviewer, options: any) => {
-                        const title = typeof reviewer.application === "object" &&
-                            reviewer.application && "project" in reviewer.application &&
-                            typeof reviewer.application.project === "object" ?
-                            reviewer.application.project.title : "Unknown Project";
-
-                        const name = typeof reviewer.application === "object" &&
-                            reviewer.application && "stage" in reviewer.application &&
-                            typeof reviewer.application.stage === "object" ?
-                            reviewer.application.stage.name : "Unknown Stage";
+                    header: "Project",
+                    field: "project.title",
+                    body: (r: Reviewer) => {
+                        const projectObj = typeof r.project === "object" ? r.project : null;
+                        const title = projectObj?.title || "Unknown Project";
 
                         return (
                             <div className="truncate text-sm font-medium" title={title}>
                                 {title}
-                                <span className="text-gray-500"> [{name}]</span>
                             </div>
+                        );
+                    }
+                },
+                {
+                    header: "Stage",
+                    field: "targetType",
+                    body: (r: Reviewer) => {
+                        const targetType = r.targetType || (r.application ? ReviewerTargetType.APPLICATION : ReviewerTargetType.VERIFICATION);
+
+                        let tagLabel = String(targetType);
+
+                        if (targetType === ReviewerTargetType.APPLICATION) {
+                            const stageName = typeof r.application === "object" && typeof r.application?.stage === "object"
+                                ? r.application.stage?.name
+                                : null;
+
+                            tagLabel = stageName || ReviewerTargetType.APPLICATION;
+                        }
+
+                        return (
+                            <span className="text-sm text-gray-700 font-medium">
+                                {tagLabel}
+                            </span>
                         );
                     }
                 },
@@ -80,7 +94,6 @@ const ReviewerManager = ({ user, enableEvaluation }: ReviewerManagerProps) => {
                     )
                 }
             ],
-            items: reviewers,
             workflow: {
                 statusField: "status",
                 statusOrder: REVIEWER_STATUS_ORDER,
@@ -101,7 +114,7 @@ const ReviewerManager = ({ user, enableEvaluation }: ReviewerManagerProps) => {
             hideSearch: true,
             hideDefaultActions: true,
         });
-    }, [reviewers]);
+    }, []);
 
     if (loading) {
         return <div className="p-4 text-center">Loading reviewers...</div>;
@@ -109,9 +122,8 @@ const ReviewerManager = ({ user, enableEvaluation }: ReviewerManagerProps) => {
 
     return (
         <>
-            <Manager />
+            <Manager items={reviewers} />
 
-            
             <EvaluationDialog
                 reviewer={selectedReviewer}
                 enableEvaluation={enableEvaluation}

@@ -104,10 +104,19 @@ export class CollaboratorRepository implements ICollaboratorRepository {
 
     async exists(filters: ExistsCollabDTO): Promise<boolean> {
         const query: any = {};
-        const { member } = filters;
+        const { project, member } = filters;
+
+        if (!project && !member) {
+            return false;
+        }
+
+        if (project) {
+            query.project = new mongoose.Types.ObjectId(project);
+        }
         if (member) {
             query.member = new mongoose.Types.ObjectId(member);
         }
+
         const result = await Collaborator.exists(query).exec();
         return result !== null;
     }

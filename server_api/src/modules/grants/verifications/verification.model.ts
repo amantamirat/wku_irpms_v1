@@ -3,7 +3,7 @@ import { COLLECTIONS } from "../../../common/constants/collections.enum";
 
 export enum VerificationStatus {
     submitted = "submitted",
-    under_review = "under_review",
+    //under_review = "under_review",
     verified = "verified",
     failed = "failed"
 }
@@ -14,10 +14,12 @@ export interface IVerification extends Document {
     configuration: mongoose.Types.ObjectId;
     attempt: number;
     status: VerificationStatus;
-    submittedBy: mongoose.Types.ObjectId;
     documentPath: string;
+    totalScore: number | null;
+
     submittedAt?: Date;
     reviewedAt?: Date;
+    submittedBy?: mongoose.Types.ObjectId;
     remarks?: string;
     createdAt?: Date;
     updatedAt?: Date;
@@ -60,6 +62,12 @@ const VerificationSchema =
             documentPath: {
                 type: String,
                 required: true,
+            },
+
+            totalScore: {
+                type: Number,
+                min: 0,
+                default: null
             },
 
             submittedAt: {

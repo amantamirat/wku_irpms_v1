@@ -1065,5 +1065,25 @@
   {
     "category": "Position Management",
     "name": "position:delete"
+  },
+  {
+    "category": "Verification Management",
+    "name": "verification:create",
+    "description": "Create verification submissions"
+  },
+  {
+    "category": "Verification Management",
+    "name": "verification:read",
+    "description": "View verification submissions"
+  },
+  {
+    "category": "Verification Management",
+    "name": "verification:update",
+    "description": "Update verification submissions"
+  },
+  {
+    "category": "Verification Management",
+    "name": "verification:delete",
+    "description": "Delete verification submissions"
   }
 ]

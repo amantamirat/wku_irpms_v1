@@ -194,7 +194,7 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
                 }
             ],
         });
-    }, [applications, confirm]);
+    }, [applications]);
 
     if (loading) {
         return <div className="p-4 text-center">Loading applications...</div>;

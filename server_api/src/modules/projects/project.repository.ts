@@ -31,7 +31,7 @@ export interface IProjectRepository {
 
     updateCurrentVerification(
         id: string,
-        verification: string
+        verification: string | null
     ): Promise<IProject | null>;
     clearCurrentVerification(
         project: string
@@ -205,13 +205,13 @@ export class ProjectRepository implements IProjectRepository {
     // ✅ add inside ProjectRepository
     async updateCurrentVerification(
         id: string,
-        verification: string
+        verification: string | null
     ) {
         const update =
 
         {
             $set: {
-                currentVerification: new mongoose.Types.ObjectId(verification)
+                currentVerification: verification ? new mongoose.Types.ObjectId(verification) : null
             }
         }
         return Project.findByIdAndUpdate(

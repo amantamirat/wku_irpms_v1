@@ -5,6 +5,7 @@ export interface CreateVerificationConfigurationDTO {
     grant: string;
     deadline: Date;
     template?: string;
+    evaluation: string;
     minReviewers: number;
     maxReviewers: number;
     maxAttempts: number;
@@ -14,6 +15,7 @@ export interface CreateVerificationConfigurationDTO {
 export interface UpdateVerificationConfigurationDTO {
     deadline?: Date;
     template?: string;
+    evaluation?: string;
     minReviewers?: number;
     maxReviewers?: number;
     maxAttempts?: number;

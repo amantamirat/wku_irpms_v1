@@ -9,20 +9,14 @@ export enum VerificationConfigurationStatus {
 
 export interface IVerificationConfiguration extends Document {
     _id: string;
-
     grant: mongoose.Types.ObjectId;
-
-    deadline: Date;
-
-    template?: mongoose.Types.ObjectId;
-
+    evaluation: mongoose.Types.ObjectId;
     minReviewers: number;
     maxReviewers: number;
-
     maxAttempts: number;
-
+    deadline: Date;
+    template?: mongoose.Types.ObjectId;
     status: VerificationConfigurationStatus;
-
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -35,6 +29,12 @@ const VerificationConfigurationSchema =
                 ref: COLLECTIONS.GRANT,
                 required: true,
                 unique: true
+            },
+
+            evaluation: {
+                type: Schema.Types.ObjectId,
+                ref: COLLECTIONS.EVALUATION,
+                required: true
             },
 
             deadline: {

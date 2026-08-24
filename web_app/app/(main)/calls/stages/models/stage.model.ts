@@ -3,7 +3,6 @@ import { CallStageStatus } from "./stage.state-machine";
 import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
 import { Template } from "@/app/(main)/templates/models/template.model";
 
-
 export type Stage = {
     _id?: string;
     call?: string | Call;

@@ -160,7 +160,7 @@ export class UserService {
         }
 
         // 3. Check for Reviewer Assignments
-        const revExist = await this.reviewerRepo.exist({ reviewer: id });
+        const revExist = await this.reviewerRepo.exists({ reviewer: id });
         if (revExist) {
             throw new AppError(
                 ERROR_CODES.USER_IN_USE,

@@ -41,6 +41,7 @@ export class VerificationConfigurationRepository
             grant: data.grant,
             deadline: data.deadline,
             template: data.template,
+            evaluation: data.evaluation,
             minReviewers: data.minReviewers,
             maxReviewers: data.maxReviewers,
             maxAttempts: data.maxAttempts,

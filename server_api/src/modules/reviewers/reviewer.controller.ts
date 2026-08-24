@@ -5,10 +5,11 @@ import { errorResponse, successResponse } from "../../common/helpers/response";
 import { AuthenticatedRequest } from "../auth/auth.middleware";
 import {
     CreateReviewerDTO,
-    GetReviewersDTO,
+    FilterReviewersDto,
     UpdateReviewerDTO,
 } from "./reviewer.dto";
 import { ReviewerService } from "./reviewer.service";
+import { ReviewerStatus } from "./reviewer.state-machine";
 
 export class ReviewerController {
 
@@ -23,9 +24,11 @@ export class ReviewerController {
         try {
             if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
-            const {  application, reviewer, weight } = req.body;
+            const { targetType, verification, application, reviewer, weight } = req.body;
 
             const dto: CreateReviewerDTO = {
+                targetType: targetType,
+                verification: verification,
                 application: application,
                 reviewer,
                 weight,
@@ -43,17 +46,27 @@ export class ReviewerController {
     // -----------------------
     get = async (req: Request, res: Response) => {
         try {
-            const { application, reviewer, populate, status } = req.query;
+            const { application, verification, reviewer, populate, status } = req.query;
 
-            const filter: GetReviewersDTO = {
-                application: application ? String(application) : undefined,
-                reviewer: reviewer ? String(reviewer) : undefined,
-                ...(populate !== undefined && { populate: populate === "true" }),
+            const filter: FilterReviewersDto = {
+                application: application
+                    ? String(application)
+                    : undefined,
 
-                // Handle status: if it's an array, keep it; if it's a string, use it; else undefined
-                status: status ? (Array.isArray(status) ? status.map(String) : String(status)) : undefined
+                reviewer: reviewer
+                    ? String(reviewer)
+                    : undefined,
+
+                verification: verification
+                    ? String(verification)
+                    : undefined,
+
+                status: status
+                    ? Array.isArray(status)
+                        ? status as ReviewerStatus[]
+                        : status as ReviewerStatus
+                    : undefined
             };
-
             const reviewers = await this.service.getReviewers(filter);
             successResponse(res, 200, "Reviewers fetched successfully", reviewers);
         } catch (err: any) {

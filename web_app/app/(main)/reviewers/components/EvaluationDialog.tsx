@@ -1,9 +1,8 @@
 'use client';
-
 import React from "react";
 import { Dialog } from "primereact/dialog";
+import { Reviewer, ReviewerStatus, ReviewerTargetType } from "../models/reviewer.model";
 import EvaluatorManager from "../evaluator/EvaluatorManager";
-import { Reviewer, ReviewerStatus } from "../models/reviewer.model";
 
 interface EvaluationDialogProps {
     reviewer: Reviewer | null;
@@ -20,9 +19,23 @@ export const EvaluationDialog: React.FC<EvaluationDialogProps> = ({
     onClose,
     header = "Evaluation Details",
 }) => {
-    // Determine visibility based on explicit prop or presence of a reviewer
     const isVisible = visible ?? Boolean(reviewer);
     const isEditMode = enableEvaluation && reviewer?.status === ReviewerStatus.accepted;
+
+    const project = typeof reviewer?.project === "object" ? reviewer.project : null;
+    const application = typeof reviewer?.application === "object" ? reviewer.application : null;
+    const verification = typeof reviewer?.verification === "object" ? reviewer.verification : null;
+
+    const isApp = reviewer?.targetType === ReviewerTargetType.APPLICATION;
+    
+    const projectTitle = project?.title || "Unknown Project";
+    const contextName = isApp 
+        ? `Stage: ${(typeof application?.stage === "object" ? application.stage?.name : null) || "Application"}`
+        : `Verification (Attempt ${verification?.attempt ?? 1})`;
+    
+    const documentPath = isApp 
+        ? ((application as any)?.documentPath || "") 
+        : (verification?.documentPath || "");
 
     return (
         <Dialog
@@ -35,7 +48,10 @@ export const EvaluationDialog: React.FC<EvaluationDialogProps> = ({
         >
             {reviewer && (
                 <EvaluatorManager
-                    reviewer={reviewer}
+                    reviewerId={reviewer._id ?? ""}
+                    projectTitle={projectTitle}
+                    contextName={contextName}
+                    documentPath={documentPath}
                     editMode={isEditMode}
                     onClose={onClose}
                 />

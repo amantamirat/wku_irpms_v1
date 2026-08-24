@@ -33,6 +33,7 @@ export interface GetCollaboratorsOptions {
 }
 
 export interface ExistsCollabDTO {
+    project?: string;
     member?: string;
 }
 

@@ -1,22 +1,22 @@
 import { useAuth } from "@/contexts/auth-context";
 import { TabPanel, TabView } from "primereact/tabview";
 import { useMemo } from "react";
-import { Application } from "../models/application.model";
-import ApplicationReviewerManager from "../../reviewers/application/Manager";
 import ProjectDetail from "../../projects/components/ProjectDetail";
+import VerificationReviewerManager from "../../reviewers/verification/Manager";
+import { Verification } from "../models/verification.model";
 
-interface ApplicationDetailProps {
-    application: Application;
+interface VerificationDetailProps {
+    verification: Verification;
 }
 
-const ApplicationDetail = ({ application }: ApplicationDetailProps) => {
+const VrificationDetail = ({ verification: verfication }: VerificationDetailProps) => {
 
     const { hasPermission } = useAuth();
 
     // Safely extract project ID whether application.project is an object or string ID
-    const projectId = typeof application?.project === "object" && application.project !== null
-        ? application.project._id
-        : (application?.project as string);
+    const projectId = typeof verfication?.project === "object" && verfication.project !== null
+        ? verfication.project._id
+        : (verfication?.project as string);
 
     /**
      * Define tabs in a scalable configuration array
@@ -25,14 +25,14 @@ const ApplicationDetail = ({ application }: ApplicationDetailProps) => {
         {
             header: "Reviewers",
             permission: "reviewer:read",
-            content: <ApplicationReviewerManager application={application} />
+            content: <VerificationReviewerManager verification={verfication} />
         },
         {
             header: "Project",
             permission: "project:read",
             content: projectId ? <ProjectDetail project={projectId} /> : null
         },
-    ], [application, projectId]);
+    ], [verfication, projectId]);
 
     /**
      * Filter tabs based on permissions
@@ -52,4 +52,4 @@ const ApplicationDetail = ({ application }: ApplicationDetailProps) => {
     );
 };
 
-export default ApplicationDetail;
+export default VrificationDetail;

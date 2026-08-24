@@ -1,8 +1,7 @@
 'use client';
-
 import { createEntityManager } from "@/components/createEntityManager";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Application, ApplicationStatus } from "../../applications/models/application.model";
+import { Verification, VerificationStatus } from "../../verifications/models/verification.model";
 import { ReviewerApi } from "../api/reviewer.api";
 import { Reviewer, ReviewerStatus, ReviewerTargetType } from "../models/reviewer.model";
 import MyBadge from "@/templates/MyBadge";
@@ -10,56 +9,55 @@ import SaveReviewerDialog from "../components/SaveReviewerDialog";
 import { REVIEWER_ADMIN_TRANSITIONS, REVIEWER_STATUS_ORDER } from "../models/reviewer.state-machine";
 import EvaluationDialog from "../components/EvaluationDialog";
 
-interface ReviewerManagerProps {
-    application: Application;
+interface VerificationReviewerManagerProps {
+    verification: Verification;
 }
 
-const ApplicationReviewerManager = ({ application }: ReviewerManagerProps) => {
+const VerificationReviewerManager = ({ verification }: VerificationReviewerManagerProps) => {
     const [reviewers, setReviewers] = useState<Reviewer[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
-    
     // State to hold the reviewer selected for viewing
     const [selectedReviewer, setSelectedReviewer] = useState<Reviewer | null>(null);
 
-    const canManage = useMemo(() => application && (
-        application.status === ApplicationStatus.pending
-    ), [application?.status]);
+    // Adjust management rules based on your Verification workflow state
+    const canManage = useMemo(() => verification && (
+        verification.status === VerificationStatus.submitted
+    ), [verification?.status]);
 
     const fetchReviewers = useCallback(async () => {
-        if (!application) return;
+        if (!verification) return;
         setLoading(true);
         try {
-            const data = await ReviewerApi.getAll({ 
-                targetType: ReviewerTargetType.APPLICATION,
-                application 
+            const data = await ReviewerApi.getAll({
+                targetType: ReviewerTargetType.VERIFICATION,
+                verification: verification
             }, true);
             setReviewers(Array.isArray(data) ? data : []);
         } catch (error) {
-            console.error("Error fetching reviewers for application:", error);
+            console.error("Error fetching reviewers for verification:", error);
         } finally {
             setLoading(false);
         }
-    }, [application]);
+    }, [verification]);
 
     useEffect(() => {
         fetchReviewers();
     }, [fetchReviewers]);
 
-    // Simple close handler without re-fetching API
     const handleCloseDialog = () => {
         setSelectedReviewer(null);
     };
 
     const Manager = useMemo(() => {
         return createEntityManager<Reviewer>({
-            title: "Reviewers",
+            title: "Verification Reviewers",
             itemName: "Reviewer",
             api: ReviewerApi,
             createNew: canManage
                 ? (): Reviewer => ({
-                    targetType: ReviewerTargetType.APPLICATION,
-                    application: application,
-                    //project: application?.project,
+                    targetType: ReviewerTargetType.VERIFICATION,
+                    verification: verification,
+                    //project: verification?.project,
                     weight: 1,
                     status: ReviewerStatus.pending
                 })
@@ -100,8 +98,9 @@ const ApplicationReviewerManager = ({ application }: ReviewerManagerProps) => {
                 }
             ],
             hideSearch: true,
+            disableDeleteRow: (r) => r.status !== ReviewerStatus.pending
         });
-    }, [reviewers, canManage, application,setSelectedReviewer]);
+    }, [reviewers, canManage, verification]);
 
     if (loading) {
         return <div className="p-4 text-center">Loading reviewers...</div>;
@@ -119,4 +118,4 @@ const ApplicationReviewerManager = ({ application }: ReviewerManagerProps) => {
     );
 };
 
-export default ApplicationReviewerManager;
+export default VerificationReviewerManager;

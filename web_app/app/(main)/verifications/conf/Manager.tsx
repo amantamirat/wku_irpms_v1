@@ -7,6 +7,7 @@ import { VerificationApi } from "../api/verification.api";
 import { Verification } from "../models/verification.model";
 import { VerificationConfiguration } from "../verification-conf/models/verification-conf.model";
 import { BASE_URL } from "@/api/ApiClient";
+import VrificationDetail from "./VerificationDetail";
 
 interface VerificationManagerProps {
     configuration: VerificationConfiguration;
@@ -116,7 +117,11 @@ const VerificationManager = ({ configuration }: VerificationManagerProps) => {
                     )
                 }*/
             ],
-            permissionPrefix: "verification"
+            permissionPrefix: "verification",
+            hideEditAction: true,
+            expandable: {
+                template: (v) => <VrificationDetail verification={v} />
+            },
         });
     }, [handleUpdateVerification]);
 

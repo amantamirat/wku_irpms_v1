@@ -432,7 +432,7 @@ export class ApplicationService {
             throw new AppError(ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND);
         }
         if (String(projectDoc.currentApplication) !== id) {
-            throw new AppError(ERROR_CODES.INVALID_APPLICATION);
+            throw new AppError(ERROR_CODES.INVALID_APPLICATION_STATUS);
         }
 
         const stageId = String(applicationDoc.stage);
@@ -587,11 +587,11 @@ export class ApplicationService {
         }
 
         if (String(projectDoc.currentApplication) !== String(id)) {
-            throw new AppError(ERROR_CODES.INVALID_APPLICATION);
+            throw new AppError(ERROR_CODES.INVALID_APPLICATION_STATUS);
         }
 
         // Cannot withdraw once reviewers exist
-        if (await this.reviewerRepo.exist({ application: id })) {
+        if (await this.reviewerRepo.exists({ application: id })) {
             throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
         }
 
@@ -649,12 +649,12 @@ export class ApplicationService {
                 String(projectDoc.currentApplication) !== String(id)
             ) {
                 throw new AppError(
-                    ERROR_CODES.INVALID_APPLICATION, "This application is not the current application for the project."
+                    ERROR_CODES.INVALID_APPLICATION_STATUS, "This application is not the current application for the project."
                 );
             }
 
             if (
-                await this.reviewerRepo.exist({
+                await this.reviewerRepo.exists({
                     application: id
                 })
             ) {

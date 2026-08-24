@@ -11,21 +11,23 @@ const end_point = '/project/reviewers';
 
 export const ReviewerApi: EntityApi<Reviewer, GetReviewersOptions | undefined> = {
 
-    async getAll(options?: GetReviewersOptions, populate?: boolean): Promise<Reviewer[]> {
+    async getAll(options?: GetReviewersOptions): Promise<Reviewer[]> {
         const query = new URLSearchParams();
 
         if (options) {
             const sanitized = sanitizeReviewer(options);
-
-            // Map 'reviewer' to the 'reviewer' query param (Check if your backend expects 'reviewer' or 'applicant')
             if (sanitized.reviewer) {
                 query.append("reviewer", sanitized.reviewer as string);
             }
-
             if (sanitized.application) {
                 query.append("application", sanitized.application as string);
             }
-
+            if (sanitized.verification) {
+                query.append("verification", sanitized.verification as string);
+            }
+            if (sanitized.targetType) {
+                query.append("targetType", sanitized.targetType as string);
+            }
             // NEW: Handle Status Array or String
             if (options.status) {
                 if (Array.isArray(options.status)) {
@@ -35,10 +37,10 @@ export const ReviewerApi: EntityApi<Reviewer, GetReviewersOptions | undefined> =
                     query.append("status", options.status);
                 }
             }
-
+            /*
             if (populate !== undefined) {
                 query.append("populate", String(populate));
-            }
+            }*/
         }
 
         const url = query.toString()

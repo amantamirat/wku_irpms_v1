@@ -1,33 +1,25 @@
 import { Router } from 'express';
-import { ReviewerController } from './reviewer.controller';
-import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../auth/auth.middleware';
 import { PERMISSIONS } from '../../common/constants/permissions';
-import { ReviewerRepository } from './reviewer.repository';
-import { UserRepository } from '../users/user.repository';
-import { CollaboratorRepository } from '../projects/collaborators/collaborator.repository';
-import { ApplicationRepository } from '../projects/applications/application.repository';
-import { SettingRepository } from '../settings/setting.repository';
-import { SettingService } from '../settings/setting.service';
-import { ReviewerService } from './reviewer.service';
+import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../auth/auth.middleware';
 import { CriterionRepository } from '../evaluations/criteria/criterion.repository';
 import { ResultRepository } from './results/result.repository';
+import { ReviewerController } from './reviewer.controller';
+import { ReviewerService } from './reviewer.service';
 //import { ReviewerSynchronizer } from './reviewer.synchronizer';
-import { NotificationService } from '../notifications/notification.service';
-import { NotificationRepository } from '../notifications/notification.repository';
+import { applicationRepo, collaboratorRepo, notificationService, projectRepo, reviewerRepo, stageRepo, userRepo, verificationConfRepo, verificationRepo } from '../../core/container';
+import { ReviewerPolicy } from './reviewer.policy';
 
-const repo = new ReviewerRepository();
-const psRepo = new ApplicationRepository();
-const appRepo = new UserRepository();
-const collabRepo = new CollaboratorRepository();
+
 const resultRepo = new ResultRepository();
 const criterionRepo = new CriterionRepository();
-//const synchronizer = new ReviewerSynchronizer(repo, psRepo);
-const notificationService = new NotificationService(
-    new NotificationRepository(),
-    new SettingService(new SettingRepository())
+
+
+const policy = new ReviewerPolicy(reviewerRepo, projectRepo, applicationRepo, stageRepo, userRepo, collaboratorRepo,
+    verificationConfRepo, verificationRepo
 );
+
 const service = new ReviewerService(
-    repo, psRepo, appRepo, collabRepo, resultRepo, criterionRepo, notificationService);
+    reviewerRepo, resultRepo, criterionRepo, policy, notificationService);
 const controller = new ReviewerController(service);
 const router: Router = Router();
 

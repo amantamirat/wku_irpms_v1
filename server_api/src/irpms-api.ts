@@ -102,7 +102,6 @@ app.use("/api/team/requirements", requirementRoutes)
 // 🚨 KEEP THIS LAST
 app.use("/api/grants", grantRoutes);
 
-console.log("Mounting verification configuration routes");
 app.use("/api/verification-configurations", verificationConfRoutes);
 app.use("/api/verifications", verificationRoutes);
 

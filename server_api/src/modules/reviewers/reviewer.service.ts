@@ -5,8 +5,7 @@ import { IUserRepository } from "../users/user.repository";
 import { ICollaboratorRepository } from "../projects/collaborators/collaborator.repository";
 import { IApplicationRepository } from "../projects/applications/application.repository";
 import { ApplicationStatus } from "../projects/applications/application.model";
-import { CreateReviewerDTO, GetReviewersDTO, UpdateReviewerDTO } from "./reviewer.dto";
-import { IReviewerRepository } from "./reviewer.repository";
+import { CreateReviewerData, IReviewerRepository } from "./reviewer.repository";
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { REVIEWER_TRANSITIONS } from "./reviewer.state-machine";
@@ -17,66 +16,72 @@ import { FormType } from "../evaluations/criteria/criterion.model";
 import { IProject } from "../projects/project.model";
 import { NotificationService } from "../notifications/notification.service";
 import { IStage } from "../calls/stages/stage.model";
+import { PreparedReviewer, ReviewerPolicy } from "./reviewer.policy";
+import { ReviewerTargetType } from "./reviewer.model";
+import { CreateReviewerDTO, FilterReviewersDto, UpdateReviewerDTO } from "./reviewer.dto";
 
 export class ReviewerService {
 
     constructor(
         private readonly repository: IReviewerRepository,
-        private readonly applicationRepo: IApplicationRepository,
-        private readonly userRepo: IUserRepository,
-        private readonly collaboratorRepo: ICollaboratorRepository,
         private readonly resultRepo: IResultRepository,
         private readonly criterionRepo: ICriterionRepository,
+        private readonly policy: ReviewerPolicy,
         private readonly notificationService: NotificationService,
     ) {
     }
 
     async create(dto: CreateReviewerDTO) {
-        const { application, reviewer, weight } = dto;
+        const { targetType, application, verification, reviewer, weight } = dto;
 
-        const projectAppDoc = await this.applicationRepo.findById(application, {
-            populate: {
-                stage: true,
-                project: true
-            }
-        });
-        if (!projectAppDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
+        let prepared: PreparedReviewer;
 
-        const applicationStatus = projectAppDoc.status;
-        if (applicationStatus !== ApplicationStatus.pending)
-            throw new AppError(ERROR_CODES.INVALID_DOC_STATUS);
+        if (targetType === ReviewerTargetType.APPLICATION) {
+            if (!application)
+                throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
 
-        const stageDoc = projectAppDoc.stage as unknown as IStage;
-        const countReviewers = await this.repository.countByApplication(application);
-        const maxReviewers = stageDoc.maxReviewers;
-        if (maxReviewers !== undefined && countReviewers >= maxReviewers) {
-            throw new AppError(ERROR_CODES.REVIEWER_LIMIT_REACHED, `Reviewer limit reached. Maximum allowed is ${maxReviewers}.`);
-        }
-        const userDoc = await this.userRepo.findById(reviewer);
-        if (!userDoc) throw new Error(ERROR_CODES.USER_NOT_FOUND);
+            prepared = await this.policy.prepareApplicationReviewer(
+                application, reviewer);
 
-        const projectDoc = projectAppDoc.project as unknown as IProject;
-        const collaborators = await this.collaboratorRepo.find({ project: String(projectDoc._id) });
-        if (collaborators.find(c => String(c.member) === reviewer)) {
-            throw new AppError(ERROR_CODES.INVALID_REVIEWER, `Reviewr ${userDoc.name} is already a collaborator in the project.`);
-        }
-        try {
-            const created = await this.repository.create(dto);
-            await this.notificationService.notifyReviewerAssigned(
-                reviewer, projectDoc.title, stageDoc.name
+        } else if (targetType === ReviewerTargetType.VERIFICATION) {
+            if (!verification)
+                throw new AppError(ERROR_CODES.VERIFICATION_NOT_FOUND);
+
+            prepared = await this.policy.prepareVerificationReviewer(
+                verification, reviewer);
+
+        } else {
+            throw new AppError(
+                ERROR_CODES.INVALID_REVIEWER
             );
-            //await this.synchronizer.sync(projectStage);
+        }
+        // Add values coming from DTO
+        prepared.data.weight = weight;
+        try {
+            
+            const created = await this.repository.create(prepared.data);
+
+            await this.notificationService.notifyReviewerAssigned(
+                reviewer,
+                prepared.project.title,
+                prepared.contextName,
+            );
             return created;
+
         } catch (err: any) {
+
             if (err?.code === 11000) {
-                throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
+                throw new AppError(
+                    ERROR_CODES.REVIEWER_ALREADY_EXISTS
+                );
             }
+
             throw err;
         }
     }
 
-    async getReviewers(options: GetReviewersDTO) {
-        return this.repository.find(options);
+    async getReviewers(filter: FilterReviewersDto) {
+        return this.repository.find(filter, { populate: true });
     }
 
     // --- Update reviewer data (weight) ---
@@ -96,25 +101,20 @@ export class ReviewerService {
     }
 
     async transitionState(dto: TransitionRequestDto) {
-        const { id, current, next, userId: applicantId } = dto;
-        if (!applicantId) return;
-        //chek projectstage status
+        const { id, current, next, userId: userId } = dto;
+        if (!userId) return;
         const reviewerDoc = await this.repository.findById(id);
+
         if (!reviewerDoc) {
             throw new AppError(ERROR_CODES.REVIEWER_NOT_FOUND);
         }
 
+        if (reviewerDoc.application) {
+            await this.policy.validateApplication(String(reviewerDoc.application));
+        }
 
-        const applicationDoc = await this.applicationRepo.findById(String(reviewerDoc.application), {
-            populate: {
-                stage: true
-            }
-        });
-        if (!applicationDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
-
-        if (applicationDoc.status !== ApplicationStatus.pending
-        ) {
-            throw new AppError(ERROR_CODES.INVALID_STAGE_STATUS);
+        if (reviewerDoc.verification) {
+            await this.policy.validateVerification(String(reviewerDoc.verification));
         }
 
         const from = reviewerDoc.status as ReviewerStatus;
@@ -130,18 +130,14 @@ export class ReviewerService {
             REVIEWER_TRANSITIONS
         );
 
-
-
         if (from === ReviewerStatus.pending && to === ReviewerStatus.accepted) {
-            if (String(reviewerDoc.reviewer) !== applicantId)
+            if (String(reviewerDoc.reviewer) !== userId)
                 throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
             const existingResults = await this.resultRepo.find({ reviewer: id });
             if (existingResults.length === 0) {
 
-                const stageDoc = applicationDoc.stage as any;
-
-                const criteria = await this.criterionRepo.find({ evaluation: String(stageDoc.evaluation) });
+                const criteria = await this.criterionRepo.find({ evaluation: String(reviewerDoc.evaluation) });
                 await this.resultRepo.insertMany(
                     criteria.map(c => ({
                         reviewer: id,
@@ -152,7 +148,7 @@ export class ReviewerService {
                 );
             }
         } else if (from === ReviewerStatus.accepted && to === ReviewerStatus.submitted) {
-            if (String(reviewerDoc.reviewer) !== applicantId)
+            if (String(reviewerDoc.reviewer) !== userId)
                 throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
             const results = await this.resultRepo.find({ reviewer: id, populate: true });
@@ -186,10 +182,7 @@ export class ReviewerService {
         if (reviewerDoc.status !== ReviewerStatus.pending)
             throw new AppError(ERROR_CODES.REVIEWER_NOT_PENDING);
         const deleted = await this.repository.delete(id);
-
         await this.resultRepo.deleteByReviewer(id);
-
-        //await this.synchronizer.sync(String(reviewerDoc.projectStage));
         return deleted
     }
 }

@@ -27,7 +27,7 @@ export interface IProject extends Document {
     leadPI: mongoose.Types.ObjectId;
     themes: mongoose.Types.ObjectId[];
     currentApplication?: mongoose.Types.ObjectId;
-    currentVerification?: mongoose.Types.ObjectId;
+    currentVerification?: mongoose.Types.ObjectId | null;
     status: ProjectStatus;
     createdBy?: mongoose.Types.ObjectId; // User who created the record
     createdAt?: Date;

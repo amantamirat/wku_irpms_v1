@@ -1,5 +1,8 @@
 'use client';
 
+import { EvaluationApi } from '@/app/(main)/evaluations/api/evaluation.api';
+import { Evaluation } from '@/app/(main)/evaluations/models/evaluation.model';
+import { EvaluationStatus } from '@/app/(main)/evaluations/models/evaluation.state-machine';
 import { TemplateApi } from '@/app/(main)/templates/api/template.api';
 import { Template } from '@/app/(main)/templates/models/template.model';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
@@ -11,11 +14,11 @@ import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { GrantApi } from '../../../grants/api/grant.api';
 import { Grant } from '../../../grants/models/grant.model';
 import { VerificationConfigurationApi } from '../api/verification-conf.api';
-import { VerificationConfiguration, validateVerificationConfiguration, VerificationConfigurationStatus } from '../models/verification-conf.model';
+import { VerificationConfiguration, validateVerificationConfiguration } from '../models/verification-conf.model';
 
 const SaveVerificationConfiguration = ({
     visible,
@@ -33,25 +36,52 @@ const SaveVerificationConfiguration = ({
     const [submitted, setSubmitted] = useState(false);
     const [grants, setGrants] = useState<Grant[]>([]);
     const [templates, setTemplates] = useState<Template[]>([]);
+    const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
 
     const isGrantPredefined = !!item?.grant;
 
-    // Fetch Grants and Templates for dropdown options
+    // Helper to extract the max score from the selected evaluation
+    const maxPossibleScore = useMemo(() => {
+        const evalObj = localConfig.evaluation as Evaluation;
+        return evalObj?.weight ?? 100;
+    }, [localConfig.evaluation]);
+
+    // Fetch Grants, Templates, and Evaluations for dropdown options
     useEffect(() => {
         if (!isGrantPredefined) {
             GrantApi.getAll().then(setGrants).catch(console.error);
         }
 
         TemplateApi.getAll().then(setTemplates).catch(console.error);
+
+        EvaluationApi.getAll({ status: EvaluationStatus.published })
+            .then(setEvaluations)
+            .catch(console.error);
     }, [isGrantPredefined]);
 
-    // Sync local state when item prop changes
+    // Sync local state and resolve string IDs to objects once lists load
     useEffect(() => {
+        if (!item) return;
+
+        // Resolve evaluation string ID to object if evaluations are loaded
+        let resolvedEvaluation = item.evaluation;
+        if (resolvedEvaluation && typeof resolvedEvaluation === 'string' && evaluations.length > 0) {
+            resolvedEvaluation = evaluations.find((e) => e._id === resolvedEvaluation) || resolvedEvaluation;
+        }
+
+        // Resolve template string ID to object if templates are loaded
+        let resolvedTemplate = item.template;
+        if (resolvedTemplate && typeof resolvedTemplate === 'string' && templates.length > 0) {
+            resolvedTemplate = templates.find((t) => t._id === resolvedTemplate) || resolvedTemplate;
+        }
+
         setLocalConfig({
             ...item,
-            deadline: item?.deadline ? new Date(item.deadline) : undefined,
+            evaluation: resolvedEvaluation,
+            template: resolvedTemplate,
+            deadline: item.deadline ? new Date(item.deadline) : undefined,
         });
-    }, [item]);
+    }, [item, evaluations, templates]);
 
     // Reset form when dialog closes
     useEffect(() => {
@@ -70,10 +100,16 @@ const SaveVerificationConfiguration = ({
         try {
             setSubmitted(true);
 
+            // Min Acceptance Score Validation
+            if ((localConfig.minAcceptanceScore ?? 0) > maxPossibleScore) {
+                throw new Error(`Min Acceptance Score cannot exceed Evaluation weight (${maxPossibleScore})`);
+            }
+
             const validation = validateVerificationConfiguration(localConfig);
             if (!validation.valid) {
                 throw new Error(validation.message || 'Validation error');
             }
+
             let saved: VerificationConfiguration;
             if (localConfig._id) {
                 saved = await VerificationConfigurationApi.update(
@@ -94,6 +130,7 @@ const SaveVerificationConfiguration = ({
 
             onComplete?.({
                 ...saved,
+                evaluation: localConfig.evaluation,
                 template: localConfig.template,
             });
         } catch (err: any) {
@@ -136,7 +173,7 @@ const SaveVerificationConfiguration = ({
                     {isGrantPredefined ? (
                         <InputText
                             value={
-                                (localConfig.grant as unknown as Grant)?.title ||
+                                (localConfig.grant as Grant)?.title ||
                                 (localConfig.grant as string)
                             }
                             disabled
@@ -191,6 +228,35 @@ const SaveVerificationConfiguration = ({
                     )}
                 </div>
 
+                {/* Evaluation Selection */}
+                <div className="field">
+                    <label className="font-bold">Evaluation</label>
+                    <Dropdown
+                        value={localConfig.evaluation}
+                        dataKey="_id"
+                        options={evaluations}
+                        optionLabel="title"
+                        placeholder="Select an Evaluation"
+                        showClear
+                        className={classNames({
+                            'p-invalid': submitted && !localConfig.evaluation,
+                        })}
+                        onChange={(e) => {
+                            setLocalConfig((p) => ({
+                                ...p,
+                                evaluation: e.value,
+                                minAcceptanceScore:
+                                    (p.minAcceptanceScore ?? 0) > (e.value?.weight || 100)
+                                        ? 0
+                                        : p.minAcceptanceScore,
+                            }));
+                        }}
+                    />
+                    {submitted && !localConfig.evaluation && (
+                        <small className="p-error">Evaluation is required.</small>
+                    )}
+                </div>
+
                 {/* Template Selection */}
                 <div className="field">
                     <label className="font-bold">Template</label>
@@ -199,7 +265,6 @@ const SaveVerificationConfiguration = ({
                         dataKey="_id"
                         options={templates}
                         optionLabel="name"
-                        optionValue="_id"
                         placeholder="Select a Template (Optional)"
                         showClear
                         onChange={(e) =>
@@ -266,6 +331,34 @@ const SaveVerificationConfiguration = ({
                                 </small>
                             )}
                     </div>
+                </div>
+
+                {/* Min Acceptance Score */}
+                <div className="field">
+                    <label className="font-bold">
+                        Min Acceptance Score {localConfig.evaluation && `(Max: ${maxPossibleScore})`}
+                    </label>
+                    <InputNumber
+                        value={localConfig.minAcceptanceScore ?? 0}
+                        min={0}
+                        max={maxPossibleScore}
+                        onValueChange={(e) =>
+                            setLocalConfig((p) => ({
+                                ...p,
+                                minAcceptanceScore: e.value ?? 0,
+                            }))
+                        }
+                        className={classNames({
+                            'p-invalid':
+                                submitted &&
+                                (localConfig.minAcceptanceScore ?? 0) > maxPossibleScore,
+                        })}
+                    />
+                    {submitted && (localConfig.minAcceptanceScore ?? 0) > maxPossibleScore && (
+                        <small className="p-error">
+                            Score cannot exceed {maxPossibleScore}
+                        </small>
+                    )}
                 </div>
 
                 {/* Max Attempts */}

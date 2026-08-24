@@ -1,3 +1,5 @@
+import { Project } from "../../projects/models/project.model";
+
 export enum VerificationStatus {
     submitted = "submitted",
     under_review = "under_review",
@@ -8,7 +10,7 @@ export enum VerificationStatus {
 // Client-side API payload interface
 export interface Verification {
     _id: string;
-    project: string;
+    project: string | Project;
     configuration: string;
     attempt: number;
     status: VerificationStatus;

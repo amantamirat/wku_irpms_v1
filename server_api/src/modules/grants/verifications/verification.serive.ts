@@ -1,3 +1,4 @@
+import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { NotificationService } from "../../notifications/notification.service";
@@ -114,14 +115,7 @@ export class VerificationService {
                     ERROR_CODES.VERIFICATION_ALREADY_EXISTS
                 );
             }
-            if (
-                currentVerification.status ===
-                VerificationStatus.under_review
-            ) {
-                throw new AppError(
-                    ERROR_CODES.VERIFICATION_ALREADY_EXISTS
-                );
-            }
+
             // ------------------------------------------
             // Already successfully verified
             // ------------------------------------------
@@ -251,5 +245,88 @@ export class VerificationService {
         }
         return await this.repository.find({ project: projectId });
     }
+
+    /**
+ * Delete Verification
+ */
+    async delete(
+        dto: DeleteDto
+    ) {
+        const { id } = dto;
+
+        const verificationDoc =
+            await this.repository.findById(id);
+
+        if (!verificationDoc) {
+            throw new AppError(
+                ERROR_CODES.VERIFICATION_NOT_FOUND
+            );
+        }
+
+        if (
+            verificationDoc.status !==
+            VerificationStatus.submitted
+        ) {
+            throw new AppError(
+                ERROR_CODES.VERIFICATION_NOT_SUBMITTED
+            );
+        }
+
+        const projectId =
+            String(verificationDoc.project);
+
+        const projectDoc =
+            await this.projectRepo.findById(projectId);
+
+        if (!projectDoc) {
+            throw new AppError(
+                ERROR_CODES.PROJECT_NOT_FOUND
+            );
+        }
+
+        if (!projectDoc.currentVerification) {
+            throw new AppError(
+                ERROR_CODES.CURRENT_VERIFICATION_NOT_FOUND
+            );
+        }
+
+        if (
+            String(projectDoc.currentVerification) !==
+            String(id)
+        ) {
+            throw new AppError(
+                ERROR_CODES.INVALID_VERIFICATION,
+                "This verification is not the current verification for the project."
+            );
+        }
+
+        // ----------------------------------------------
+        // Determine the new current verification
+        // ----------------------------------------------
+
+        if (verificationDoc.attempt === 1) {
+            await this.projectRepo.clearCurrentVerification(projectId);
+        } else {
+            // ----------------------------------------------
+            // Update project current verification
+            // ----------------------------------------------
+            const previousVerification =
+                await this.repository.findOneByAttempt(
+                    projectId,
+                    verificationDoc.attempt - 1
+                );
+            await this.projectRepo.updateCurrentVerification(projectId,
+                previousVerification ? String(previousVerification._id) : null
+            );
+        }
+        // ----------------------------------------------
+        // Delete verification
+        // ----------------------------------------------
+        return this.repository.delete(id);
+    }
+
+
+
+
 
 }

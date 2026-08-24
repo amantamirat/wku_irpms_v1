@@ -1,4 +1,6 @@
+import { Template } from "@/app/(main)/templates/models/template.model";
 import { Grant } from "../../../grants/models/grant.model";
+import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
 
 export enum VerificationConfigurationStatus {
     active = "active",
@@ -9,9 +11,11 @@ export type VerificationConfiguration = {
     _id?: string;
     grant: string | Grant;
     deadline: Date | string;
-    template?: string;
+    template?: string | Template;
+    evaluation?: string | Evaluation;
     minReviewers: number;
     maxReviewers: number;
+    minAcceptanceScore?: number;
     maxAttempts: number;
     status: VerificationConfigurationStatus;
     createdAt?: Date;
@@ -34,6 +38,11 @@ export const validateVerificationConfiguration = (
         return { valid: false, message: "Invalid deadline date." };
     }
 
+    // Evaluation is now strictly required
+    if (!config.evaluation) {
+        return { valid: false, message: "Evaluation is required." };
+    }
+
     if (config.minReviewers === undefined || config.minReviewers < 1) {
         return { valid: false, message: "Minimum reviewers must be at least 1." };
     }
@@ -42,6 +51,21 @@ export const validateVerificationConfiguration = (
         return {
             valid: false,
             message: "Maximum reviewers must be greater than or equal to minimum reviewers.",
+        };
+    }
+
+    if (config.minAcceptanceScore === undefined || config.minAcceptanceScore < 0) {
+        return { valid: false, message: "Minimum acceptance score must be at least 0." };
+    }
+
+    const maxWeight = typeof config.evaluation === "object" && "weight" in config.evaluation
+        ? config.evaluation.weight
+        : undefined;
+
+    if (maxWeight !== undefined && config.minAcceptanceScore > maxWeight) {
+        return {
+            valid: false,
+            message: `Minimum acceptance score cannot exceed the evaluation max weight of ${maxWeight}.`,
         };
     }
 
@@ -75,6 +99,7 @@ export function sanitizeVerificationConfiguration(
         ...config,
         grant: extractId(config.grant) ?? "",
         template: extractId(config.template),
+        evaluation: extractId(config.evaluation),
         minReviewers: config.minReviewers !== undefined ? Number(config.minReviewers) : undefined,
         maxReviewers: config.maxReviewers !== undefined ? Number(config.maxReviewers) : undefined,
         maxAttempts: config.maxAttempts !== undefined ? Number(config.maxAttempts) : undefined,

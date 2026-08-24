@@ -4,8 +4,7 @@ import { createEntityManager } from "@/components/createEntityManager";
 import MyBadge from "@/templates/MyBadge";
 import { useMemo } from "react";
 import { ReviewerApi } from "../../reviewers/api/reviewer.api";
-import { Reviewer } from "../../reviewers/models/reviewer.model";
-import { REVIEWER_STATUS_ORDER, REVIEWER_USER_TRANSITIONS } from "../../reviewers/models/reviewer.state-machine";
+import { Reviewer, ReviewerTargetType } from "../../reviewers/models/reviewer.model";
 import Link from "next/link";
 import { Button } from "primereact/button";
 
@@ -17,25 +16,40 @@ const PendingEvalsManager = ({ items }: ReviewerManagerProps) => {
 
     const Manager = useMemo(() => {
         return createEntityManager<Reviewer>({
-            //title: "Pending Evaluations",
-            //itemName: "Reviewer",
             api: ReviewerApi,
             columns: [
                 {
-                    header: "Application",
-                    field: "application.project.title",
-                    body: (r: Reviewer, options: any) => {
-                        const title = typeof r.application === "object" &&
-                            typeof r.application.project === "object" ?
-                            r.application.project.title : "Unknown Project";
-                        const name = typeof r.application === "object" &&
-                            typeof r.application.stage === "object" ?
-                            r.application.stage.name : "Unknown Stage";
-                        return <div className="truncate text-sm font-medium" title={title}>{title}
-                            <span className="text-gray-500">
-                                [{name}]
-                            </span>
-                        </div>;
+                    header: "Project",
+                    field: "project.title",
+                    body: (r: Reviewer) => {
+                        // 1. Direct project object from reviewer
+                        const projectObj = typeof r.project === "object" ? r.project : null;
+                        const title = projectObj?.title || "Unknown Project";
+
+                        // 2. Extract target type or fallback
+                        const targetType = r.targetType || (r.application ? ReviewerTargetType.APPLICATION : ReviewerTargetType.VERIFICATION);
+
+                        // 3. Determine tag label logic
+                        let tagLabel = String(targetType);
+
+                        if (targetType === ReviewerTargetType.APPLICATION) {
+                            const stageName = typeof r.application === "object" && typeof r.application?.stage === "object"
+                                ? r.application.stage?.name
+                                : null;
+
+                            tagLabel = stageName || ReviewerTargetType.APPLICATION;
+                        }
+
+                        return (
+                            <div className="truncate text-sm font-medium" title={title}>
+                                {title}
+                                {tagLabel && (
+                                    <span className="text-gray-500 ml-1">
+                                        [{tagLabel}]
+                                    </span>
+                                )}
+                            </div>
+                        );
                     }
                 },
                 {
@@ -47,18 +61,11 @@ const PendingEvalsManager = ({ items }: ReviewerManagerProps) => {
                     )
                 }
             ],
-            items: items,
-            /*
-            workflow: {
-                statusField: "status",
-                statusOrder: REVIEWER_STATUS_ORDER,
-                transitions: REVIEWER_USER_TRANSITIONS
-            },*/
             permissionPrefix: "reviewer",
             hideSearch: true,
             hideDefaultActions: true,
         });
-    }, [items]);
+    }, []); // Empty dependencies ensure the component reference is never recreated
 
     if (!items) {
         return <div className="p-4 text-center">No pending evaluations...</div>;
@@ -75,7 +82,7 @@ const PendingEvalsManager = ({ items }: ReviewerManagerProps) => {
                     <Button label="View All" icon="pi pi-arrow-right" iconPos="right" className="p-button-text p-button-sm" />
                 </Link>
             </div>
-            <Manager />
+            <Manager items={items} />
         </div>
     );
 };

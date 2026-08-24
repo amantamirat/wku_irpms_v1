@@ -4,6 +4,8 @@ import {
     Verification,
     VerificationStatus
 } from "./verification.model";
+import { FindOptions } from "../../../common/dtos/filter.dto";
+
 
 export interface CreateVerificationData {
     project: string;
@@ -21,7 +23,12 @@ export interface IVerificationRepository {
     ): Promise<IVerification>;
 
     findById(
-        id: string
+        id: string, options?: FindOptions
+    ): Promise<IVerification | null>;
+
+    findOneByAttempt(
+        projectId: string,
+        attempt: number
     ): Promise<IVerification | null>;
 
     find(
@@ -77,15 +84,36 @@ export class VerificationRepository
     }
 
     async findById(
-        id: string
+        id: string,
+        options?: FindOptions
+    ): Promise<IVerification | null> {
+
+        const query = Verification.findById(id);
+
+        if (options?.populate) {
+            query
+                .populate("project")
+                .populate("configuration")
+                .populate("submittedBy");
+        }
+
+        return query;
+    }
+
+    async findOneByAttempt(
+        projectId: string,
+        attempt: number
     ): Promise<IVerification | null> {
 
         return Verification
-            .findById(id)
-            .populate("project")
-            .populate("configuration")
-            .populate("submittedBy");
-    }
+            .findOne({
+                project: new mongoose.Types.ObjectId(projectId),
+                attempt
+            })
+        //.populate("project")
+        //.populate("configuration")
+        //.populate("submittedBy");
+    };
 
     async find(
         filters: FilterQuery<IVerification> = {}

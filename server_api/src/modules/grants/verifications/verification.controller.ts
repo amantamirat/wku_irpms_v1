@@ -10,6 +10,7 @@ import { VerificationService } from "./verification.serive";
 import { AuthenticatedRequest } from "../../auth/auth.middleware";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
+import { DeleteDto } from "../../../common/dtos/delete.dto";
 
 export class VerificationController {
 
@@ -39,7 +40,7 @@ export class VerificationController {
             }
 
             const relativeDocPath = path.relative(process.cwd(), req.file.path).replace(/\\/g, '/');
-            
+
             const submittedBy =
                 String(req.auth.userId);
 
@@ -156,6 +157,44 @@ export class VerificationController {
                 err.message,
                 err
             );
+        }
+    };
+
+    delete = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            if (!req.auth) throw new AppError(ERROR_CODES.UNAUTHORIZED);
+
+            const { id } = req.params;
+            const dto: DeleteDto = {
+                id,
+                userId: req.auth.userId,
+            };
+
+            // Your service deletes the record and returns the deleted document metadata
+            const deletedDoc = await this.service.delete(dto);
+
+            if (deletedDoc?.documentPath) {
+                // ✅ CRITICAL FIX: Joins project root with the stored "uploads/projects/filename.pdf"
+                const absolutePath = path.join(process.cwd(), deletedDoc.documentPath);
+
+                fs.unlink(absolutePath, (unlinkErr) => {
+                    if (unlinkErr) {
+                        console.error(`Failed to delete physical file at ${absolutePath}:`, unlinkErr);
+                    } else {
+                        console.log(`Successfully deleted physical file: ${absolutePath}`);
+                    }
+                });
+            }
+
+            successResponse(
+                res,
+                200,
+                "Project document deleted successfully",
+                deletedDoc
+            );
+
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
         }
     };
 }

@@ -42,5 +42,6 @@ export enum COLLECTIONS {
   //PROJECT_THEMEM = "prothemes",
   COLLABORATOR_ASSIGNMENT = "collaboratorassignments",
   REVIEWER = "reviewers",
+  REVIEWER_NEW = "reviewers_news",
   RESULT = "results",
 }

@@ -130,7 +130,7 @@ export default function VerificationSubmitPage() {
             setSuccess(true);
 
             setTimeout(() => {
-                router.push('/verifications');
+                router.push('/');
             }, 2000);
 
         } catch (err: any) {

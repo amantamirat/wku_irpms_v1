@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+    checkPermission,
     verifyActiveAccount
 } from "../../auth/auth.middleware";
 
@@ -16,7 +17,7 @@ const verificationService =
         notificationService,
     );
 
-const verificationController =
+const controller =
     new VerificationController(
         verificationService
     );
@@ -37,7 +38,7 @@ router.post(
 
     upload.single("document"),
 
-    verificationController.create
+    controller.create
 );
 
 
@@ -46,7 +47,7 @@ router.get(
     "/configuration/:configurationId",
     verifyActiveAccount,
     //checkPermission("verification:read"),
-    verificationController.getByConfiguration
+    controller.getByConfiguration
 );
 
 
@@ -55,7 +56,7 @@ router.get(
     "/project/:projectId",
     verifyActiveAccount,
     //checkPermission("verification:read"),
-    verificationController.getByProject
+    controller.getByProject
 );
 
 
@@ -64,7 +65,14 @@ router.get(
     "/:id",
     verifyActiveAccount,
     //checkPermission("verification:read"),
-    verificationController.getById
+    controller.getById
+);
+
+router.delete(
+    "/:id",
+    verifyActiveAccount,
+    checkPermission("verification:delete"),
+    controller.delete
 );
 
 export default router;

@@ -35,7 +35,7 @@ const AppMenu = () => {
                     label: 'Verifications',
                     icon: 'pi pi-fw pi-check-square',
                     to: '/verifications',
-                    // visible: hasPermission("verification:read")
+                    visible: hasPermission("verification:read")
                 },
                 /*
                 {

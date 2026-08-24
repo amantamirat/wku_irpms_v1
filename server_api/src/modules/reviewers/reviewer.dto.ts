@@ -1,18 +1,29 @@
 
+
 // reviewer.dto.ts
-export interface GetReviewersDTO {
+
+import { ReviewerTargetType } from "./reviewer.model";
+import { ReviewerStatus } from "./reviewer.state-machine";
+
+
+
+export interface FilterReviewersDto {
     application?: string;
+    verification?: string;
     reviewer?: string;
-    populate?: boolean;
-    status?: string | string[]; // Add this
+    status?: ReviewerStatus | ReviewerStatus[];
 }
 
+
 export interface CreateReviewerDTO {
-    application: string;
+    targetType: ReviewerTargetType;
+    application?: string;
+    verification?: string;
     reviewer: string;
     weight: number;
     userId?: string;
 }
+
 
 export interface UpdateReviewerDTO {
     id: string;
@@ -23,10 +34,4 @@ export interface UpdateReviewerDTO {
     userId: string;
 }
 
-
-
-export interface ExistsReviewersDTO {
-    reviewer?: string;
-    application?: string;
-}
 

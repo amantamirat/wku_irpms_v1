@@ -337,16 +337,16 @@ link: "/dashboard/my-projects"
     async notifyReviewerAssigned(
         recipientId: string,
         projectTitle: string,
-        stageName: string,
+        contextName: string,
         senderId?: string
     ) {
         return this.notify({
             recipient: recipientId,
             sender: senderId,
             title: "Reviewer Assignment",
-            message: `You have been assigned as a reviewer for "${projectTitle}" in the "${stageName}" stage.`,
+            message: `You have been assigned as a reviewer for "${projectTitle}" in "${contextName}".`,
             type: NotificationType.INFO,
-            link: '/dashboard/my-evaluations'
+            link: "/dashboard/my-evaluations"
         });
     }
 
