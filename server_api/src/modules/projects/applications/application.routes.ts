@@ -57,12 +57,14 @@ router.get(
     controller.getById
 );
 
+/*
 router.post(
     "/:id/calculate-score",
     verifyActiveAccount,
     checkPermission("application:calculateTotalScore"),
     controller.calculateTotalScore
 );
+*/
 
 router.post(
     "/:id/anonymize",

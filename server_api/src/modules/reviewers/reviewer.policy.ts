@@ -75,7 +75,7 @@ export class ReviewerPolicy {
         const stageDoc = await this.stageRepo.findById(String(applicationDoc.stage));
         if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
 
-        const countReviewers = await this.repository.countByApplication(applicationId);
+        const countReviewers = await this.repository.count({ application: applicationId });
         const maxReviewers = stageDoc.maxReviewers;
         if (maxReviewers !== undefined && countReviewers >= maxReviewers) {
             throw new AppError(ERROR_CODES.REVIEWER_LIMIT_REACHED, `Reviewer limit reached. Maximum allowed is ${maxReviewers}.`);
@@ -133,7 +133,7 @@ export class ReviewerPolicy {
         }
         const verificationConf = await this.verificationConfRepo.findById(String(verificationDoc.configuration));
         if (!verificationConf) throw new AppError(ERROR_CODES.VERIFICATION_CONFIGURATION_NOT_FOUND);
-        const countReviewers = await this.repository.countByVerification(verificationId);
+        const countReviewers = await this.repository.count({ verification: verificationId });
         const maxReviewers = verificationConf.maxReviewers;
         if (maxReviewers !== undefined && countReviewers >= maxReviewers) {
             throw new AppError(ERROR_CODES.REVIEWER_LIMIT_REACHED, `Reviewer limit reached. Maximum allowed is ${maxReviewers}.`);

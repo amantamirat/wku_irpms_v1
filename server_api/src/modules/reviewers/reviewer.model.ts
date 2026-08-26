@@ -2,6 +2,8 @@
 import mongoose, { model, Schema } from "mongoose";
 import { ReviewerStatus } from "./reviewer.state-machine";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
+import { IStatusHistory } from "../../common/types/status-history";
+import { createStatusHistorySchema } from "../../common/schemas/status-history.schema";
 
 export enum ReviewerTargetType {
     APPLICATION = 'APPLICATION',
@@ -18,9 +20,15 @@ export interface IReviewer extends Document {
     score?: number;
     weight?: number;
     status: ReviewerStatus;
+    statusHistory: IStatusHistory<ReviewerStatus>[];
     createdAt?: Date;
     updatedAt?: Date;
 }
+
+const ReviewerStatusHistorySchema =
+    createStatusHistorySchema(
+        Object.values(ReviewerStatus)
+    );
 
 const ReviewerSchema = new Schema<IReviewer>({
     targetType: {
@@ -79,6 +87,11 @@ const ReviewerSchema = new Schema<IReviewer>({
         enum: Object.values(ReviewerStatus),
         default: ReviewerStatus.pending,
         required: true
+    },
+    
+    statusHistory: {
+        type: [ReviewerStatusHistorySchema],
+        default: []
     }
 
 }, { timestamps: true });

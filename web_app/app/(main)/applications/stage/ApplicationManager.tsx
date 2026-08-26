@@ -106,9 +106,11 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
             permissionPrefix: "application",
             workflow: {
                 statusField: "status",
+                updateFields: ["totalScore"],
                 statusOrder: APPLICATION_STATUS_ORDER,
                 transitions: APPLICATION_TRANSITIONS
             },
+            /*
             onTransitComplete: (item) => {
                 setApplications((prev) =>
                     prev.map((app) => (app._id === item._id ? {
@@ -117,44 +119,13 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
                                 null : item.totalScore, status: item.status
                     } : app))
                 );
-            },
+            },*/
             hideEditAction: true,
             disableDeleteRow: (row: Application) => row.status !== ApplicationStatus.pending,
             expandable: {
                 template: (app) => <ApplicationDetail application={app} />
             },
             extraActions: [
-                {
-                    icon: "pi pi-calculator",
-                    severity: "info",
-                    tooltip: "Recalculate Scores",
-                    permissions: ["application:calculateTotalScore"],
-                    disabled: (row: Application) =>
-                        row.status !== ApplicationStatus.pending,
-
-                    onClick: (row: Application) => {
-                        confirm.ask({
-                            operation: "calculate score",
-                            onConfirmAsync: async () => {
-                                const score =
-                                    await ApplicationApi.calculateTotalScore(
-                                        row._id!
-                                    );
-
-                                setApplications((prev) =>
-                                    prev.map((app) =>
-                                        app._id === row._id
-                                            ? {
-                                                ...app,
-                                                totalScore: score
-                                            }
-                                            : app
-                                    )
-                                );
-                            }
-                        });
-                    }
-                },
                 // Anonymize Action
                 {
                     icon: "pi pi-eye-slash",

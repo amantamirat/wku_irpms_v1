@@ -159,7 +159,7 @@ export class VerificationService {
                 configuration: configuration._id,
                 attempt,
                 status: VerificationStatus.submitted,
-                submittedBy,
+                //submittedBy,
                 documentPath
                 //submittedAt: now
             });

@@ -37,6 +37,7 @@ export function createEntityManager<
 
     workflow?: {
         statusField: keyof T;
+        updateFields?: (keyof T)[];
         transitions: Partial<Record<string, string[]>> | ((row: T) => Partial<Record<string, string[]>>);
         statusOrder: string[];
     };
@@ -101,7 +102,7 @@ export function createEntityManager<
                 return;
             }
             if (!config.api) return;
-            
+
             const query = config.query ? config.query() : undefined;
             const data = await config.api.getAll(query);
             setAll(data);
@@ -157,7 +158,20 @@ export function createEntityManager<
 
             const updated = await config.api.transitionState(rowId, dto);
             if (updated) {
-                updateItem({ ...row, [config.workflow!.statusField]: dto.next });
+                const updates: Partial<T> = {};
+                updates[config.workflow!.statusField] = dto.next as T[keyof T];
+                // Update additional configured fields
+                // Take additional field values from the API response
+                config.workflow!.updateFields?.forEach((field) => {
+                    if (field in updated) {
+                        updates[field] = updated[field];
+                    }
+                });
+                updateItem({
+                    ...row,
+                    ...updates,
+                });
+                // updateItem({ ...row, [config.workflow!.statusField]: dto.next });
                 config?.onTransitComplete?.(updated);
             }
         };

@@ -3,7 +3,6 @@ import { COLLECTIONS } from "../../../common/constants/collections.enum";
 
 export enum VerificationStatus {
     submitted = "submitted",
-    //under_review = "under_review",
     verified = "verified",
     failed = "failed"
 }
@@ -17,10 +16,10 @@ export interface IVerification extends Document {
     documentPath: string;
     totalScore: number | null;
 
-    submittedAt?: Date;
+    //submittedAt?: Date;
     reviewedAt?: Date;
-    submittedBy?: mongoose.Types.ObjectId;
-    remarks?: string;
+    //submittedBy?: mongoose.Types.ObjectId;
+    //remarks?: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -52,12 +51,20 @@ const VerificationSchema =
                 default: VerificationStatus.submitted,
                 required: true,
             },
-
+/*
             submittedBy: {
                 type: Schema.Types.ObjectId,
                 ref: COLLECTIONS.USER,
                 required: true,
             },
+            
+            submittedAt: {
+                type: Date,
+            },
+             remarks: {
+                type: String,
+            },
+            */
 
             documentPath: {
                 type: String,
@@ -70,17 +77,13 @@ const VerificationSchema =
                 default: null
             },
 
-            submittedAt: {
-                type: Date,
-            },
+            
 
             reviewedAt: {
                 type: Date,
             },
 
-            remarks: {
-                type: String,
-            },
+           
         },
         {
             timestamps: true,

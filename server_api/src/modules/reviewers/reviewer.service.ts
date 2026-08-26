@@ -1,24 +1,17 @@
 // reviewer.service.ts
+import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
-import { IUserRepository } from "../users/user.repository";
-import { ICollaboratorRepository } from "../projects/collaborators/collaborator.repository";
-import { IApplicationRepository } from "../projects/applications/application.repository";
-import { ApplicationStatus } from "../projects/applications/application.model";
-import { CreateReviewerData, IReviewerRepository } from "./reviewer.repository";
-import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
-import { REVIEWER_TRANSITIONS } from "./reviewer.state-machine";
-import { ReviewerStatus } from "./reviewer.state-machine";
-import { IResultRepository } from "./results/result.repository";
-import { ICriterionRepository } from "../evaluations/criteria/criterion.repository";
 import { FormType } from "../evaluations/criteria/criterion.model";
-import { IProject } from "../projects/project.model";
+import { ICriterionRepository } from "../evaluations/criteria/criterion.repository";
 import { NotificationService } from "../notifications/notification.service";
-import { IStage } from "../calls/stages/stage.model";
-import { PreparedReviewer, ReviewerPolicy } from "./reviewer.policy";
-import { ReviewerTargetType } from "./reviewer.model";
+import { IResultRepository } from "./results/result.repository";
 import { CreateReviewerDTO, FilterReviewersDto, UpdateReviewerDTO } from "./reviewer.dto";
+import { ReviewerTargetType } from "./reviewer.model";
+import { PreparedReviewer, ReviewerPolicy } from "./reviewer.policy";
+import { IReviewerRepository } from "./reviewer.repository";
+import { REVIEWER_TRANSITIONS, ReviewerStatus } from "./reviewer.state-machine";
 
 export class ReviewerService {
 
@@ -58,7 +51,7 @@ export class ReviewerService {
         // Add values coming from DTO
         prepared.data.weight = weight;
         try {
-            
+
             const created = await this.repository.create(prepared.data);
 
             await this.notificationService.notifyReviewerAssigned(
@@ -101,7 +94,7 @@ export class ReviewerService {
     }
 
     async transitionState(dto: TransitionRequestDto) {
-        const { id, current, next, userId: userId } = dto;
+        const { id, current, next, userId } = dto;
         if (!userId) return;
         const reviewerDoc = await this.repository.findById(id);
 
@@ -172,7 +165,7 @@ export class ReviewerService {
 
         }
 
-        const updated = await this.repository.updateStatus(id, to);
+        const updated = await this.repository.updateStatus(id, to, userId);
         return updated;
     }
 

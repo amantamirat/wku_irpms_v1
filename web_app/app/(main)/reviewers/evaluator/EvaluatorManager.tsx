@@ -1,4 +1,5 @@
 'use client';
+
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -6,6 +7,7 @@ import { BASE_URL } from "@/api/ApiClient";
 import { Criterion } from "@/app/(main)/evaluations/models/criterion.model";
 import { ResultApi } from "../results/api/result.api";
 import { Result } from "../results/models/result.model";
+import { ReviewerStatus } from "../models/reviewer.model";
 import { ActionToolbar } from "./ActionToolbar";
 import { CriterionCard } from "./CriterionCard";
 import { EvaluationSummary } from "./EvaluationSummary";
@@ -15,9 +17,11 @@ interface EvaluatorManagerProps {
     reviewerId: string;
     projectTitle: string;
     contextName: string;
-    documentPath: string;
+    documentPath?: string;
     editMode?: boolean;
+    reviewerStatus?: ReviewerStatus;
     onClose?: () => void;
+    onSubmitEvaluation?: () => Promise<void>;
 }
 
 const EvaluatorManager = ({
@@ -26,6 +30,9 @@ const EvaluatorManager = ({
     contextName,
     documentPath,
     editMode,
+    reviewerStatus,
+    onClose,
+    onSubmitEvaluation,
 }: EvaluatorManagerProps) => {
 
     const toast = useRef<Toast>(null);
@@ -35,6 +42,9 @@ const EvaluatorManager = ({
 
     const [loading, setLoading] = useState(false);
 
+    /* ---------------------------------------------------------
+       Data Fetching
+    --------------------------------------------------------- */
     useEffect(() => {
         const fetchResults = async () => {
             try {
@@ -43,12 +53,17 @@ const EvaluatorManager = ({
                     reviewer: reviewerId,
                     populate: true,
                 });
-                const criteria = res.map((r: any) => r.criterion);
-                setCriteria(criteria);
+                const fetchedCriteria = res.map((r: any) => r.criterion);
+                setCriteria(fetchedCriteria);
                 setLastResults(res);
                 setResults(res);
             } catch (err) {
                 console.error("Failed to fetch results", err);
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to load evaluation data.'
+                });
             } finally {
                 setLoading(false);
             }
@@ -59,12 +74,13 @@ const EvaluatorManager = ({
         }
     }, [reviewerId]);
 
-    // Helper to compare objects
+    /* ---------------------------------------------------------
+       Dirty State Detection
+    --------------------------------------------------------- */
     const isResultChanged = (original: Result, current: Result) => {
         return JSON.stringify(original) !== JSON.stringify(current);
     };
 
-    // Derived State: Compute which items are dirty
     const dirtyIds = useMemo(() => {
         const dirtySet = new Set<string>();
 
@@ -85,7 +101,7 @@ const EvaluatorManager = ({
     const isDirty = dirtyIds.size > 0;
 
     /* ---------------------------------------------------------
-       Logic: Calculate Scores & Progress
+       Metrics & Score Calculation
     --------------------------------------------------------- */
     const stats = useMemo(() => {
         const totalWeight = criteria.reduce((sum, c) => sum + (c.weight || 0), 0);
@@ -116,7 +132,22 @@ const EvaluatorManager = ({
     }, [results, criteria]);
 
     /* ---------------------------------------------------------
-       Handlers: Update Local State
+       Submission Validation
+    --------------------------------------------------------- */
+    const isComplete = useMemo(() => {
+        return criteria.length > 0 && stats.answeredCount === criteria.length;
+    }, [criteria, stats.answeredCount]);
+
+    // Submittable only when in edit mode, accepted status, complete criteria, and no pending un-saved edits
+    const isSubmittable = Boolean(
+        editMode &&
+        reviewerStatus === ReviewerStatus.accepted &&
+        isComplete &&
+        !isDirty
+    );
+
+    /* ---------------------------------------------------------
+       Handlers
     --------------------------------------------------------- */
     const handleUpdate = (criterionId: string, updates: Partial<Result>) => {
         setResults(prev => {
@@ -149,10 +180,43 @@ const EvaluatorManager = ({
             toast.current?.show({
                 severity: 'success',
                 summary: 'Saved',
-                detail: `${dirtyResults.length} item(s) updated`
+                detail: `${dirtyResults.length} item(s) updated successfully`
             });
         } catch (err) {
             console.error("Failed to save results", err);
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to save changes.'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const onSubmit = async () => {
+        try {
+            setLoading(true);
+
+            // Trigger the transition call passed down from parent container
+            if (onSubmitEvaluation) {
+                await onSubmitEvaluation();
+            }
+
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Submitted',
+                detail: 'Evaluation submitted successfully.'
+            });
+
+            if (onClose) onClose();
+        } catch (err) {
+            console.error("Failed to submit evaluation", err);
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to submit the evaluation.'
+            });
         } finally {
             setLoading(false);
         }
@@ -203,7 +267,7 @@ const EvaluatorManager = ({
                     </div>
                 </div>
 
-                {/* Center: The Scrollable List of Criteria Cards */}
+                {/* Center: Scrollable Criteria Cards */}
                 <div className="col-12 lg:col-6"
                     style={{
                         pointerEvents: isDisabled ? "none" : "auto",
@@ -232,12 +296,16 @@ const EvaluatorManager = ({
             </div>
 
             {/* Sticky Bottom Actions */}
-            <ActionToolbar
-                onSave={onSave}
-                onCancel={() => setResults(lastResults)}
-                isDirty={isDirty}
-                loading={loading}
-            />
+            {
+                <ActionToolbar
+                    onSave={onSave}
+                    onCancel={() => setResults(lastResults)}
+                    onSubmit={onSubmit}
+                    isDirty={isDirty}
+                    isSubmittable={isSubmittable}
+                    loading={loading}
+                />
+            }
         </div>
     );
 };

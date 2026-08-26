@@ -109,30 +109,6 @@ export class ApplicationController {
         }
     };
 
-
-    // ---------------------------------------------------
-    // CALCULATE TOTAL SCORE
-    // ---------------------------------------------------
-    calculateTotalScore = async (req: AuthenticatedRequest, res: Response) => {
-        try {
-            if (!req.auth) {
-                throw new AppError(ERROR_CODES.UNAUTHORIZED);
-            }
-            const { id } = req.params;
-
-            const score = await this.service.calculateTotalScore(String(id));
-
-            successResponse(
-                res,
-                200,
-                "Total score calculated successfully",
-                { totalScore: score }
-            );
-
-        } catch (err: any) {
-            errorResponse(res, 400, err.message, err);
-        }
-    };
     // ---------------------------------------------------
     // GET
     // ---------------------------------------------------

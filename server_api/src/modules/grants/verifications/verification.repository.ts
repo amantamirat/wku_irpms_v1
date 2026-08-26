@@ -10,7 +10,15 @@ import { FindOptions } from "../../../common/dtos/filter.dto";
 export interface CreateVerificationData {
     project: string;
     documentPath: string;
-    submittedBy: string;
+    //submittedBy: string;
+    configuration: string;
+    attempt: number;
+    status: VerificationStatus;
+}
+
+
+export interface FilterVerification {
+    project: string;
     configuration: string;
     attempt: number;
     status: VerificationStatus;
@@ -64,10 +72,7 @@ export class VerificationRepository
                     data.configuration
                 ),
 
-            submittedBy:
-                new mongoose.Types.ObjectId(
-                    data.submittedBy
-                ),
+
 
             attempt:
                 data.attempt,
@@ -94,7 +99,7 @@ export class VerificationRepository
             query
                 .populate("project")
                 .populate("configuration")
-                .populate("submittedBy");
+                //.populate("submittedBy");
         }
 
         return query;
@@ -123,7 +128,7 @@ export class VerificationRepository
             .find(filters)
             .populate("project")
             .populate("configuration")
-            .populate("submittedBy")
+            //.populate("submittedBy")
             .sort({
                 attempt: 1
             });

@@ -376,43 +376,48 @@ export class ApplicationService {
         throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
     }
 
-    async calculateTotalScore(id: string) {
-        const applicationDoc = await this.repository.findById(id);
-        if (!applicationDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
 
-        const stageDoc = await this.stageRepo.findById(String(applicationDoc.stage));
-        if (!stageDoc)
-            throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-
-        const approvedReviews = await this.reviewerRepo.find({
-            application: id,
-            status: ReviewerStatus.approved
-        });
-
-        if (approvedReviews.length < stageDoc.minReviewers) {
-            throw new AppError(
-                ERROR_CODES.INSUFFICIENT_REVIEWS,
-                `At least ${stageDoc.minReviewers} completed reviews are required before computing score.`
-            );
-        }
+    private async calculateTotalScore(id: string): Promise<number> {
+        //const applicationDoc = await this.repository.findById(id);
+        /*
+                if (!applicationDoc) {
+                    throw new AppError(
+                        ERROR_CODES.APPLICATION_NOT_FOUND
+                    );
+                }
+        */
+        const approvedReviews =
+            await this.reviewerRepo.find({
+                application: id,
+                status: ReviewerStatus.approved
+            });
 
         const totalWeight = approvedReviews.reduce(
-            (sum, r) => sum + (r.weight ?? 1),
+            (sum, review) =>
+                sum + (review.weight ?? 1),
             0
         );
 
-        if (totalWeight === 0) return 0;
+        if (totalWeight === 0) {
+            await this.repository.update(id, {
+                totalScore: 0
+            });
+
+            return 0;
+        }
 
         const score =
             approvedReviews.reduce(
-                (sum, r) => sum + (r.score ?? 0) * (r.weight ?? 1),
+                (sum, review) =>
+                    sum +
+                    (review.score ?? 0) *
+                    (review.weight ?? 1),
                 0
             ) / totalWeight;
 
-        // persist if changed (with float-safe comparison)
-        if (Math.abs((applicationDoc.totalScore ?? 0) - score) > 0.0001) {
-            await this.repository.update(id, { totalScore: score });
-        }
+        await this.repository.update(id, {
+            totalScore: score
+        });
 
         return score;
     }
@@ -465,24 +470,27 @@ export class ApplicationService {
             to === ApplicationStatus.accepted ||
             to === ApplicationStatus.rejected
         ) {
-            const totalScore = applicationDoc.totalScore;
+            const approvedCount =
+                await this.reviewerRepo.count({ application: id, status: ReviewerStatus.approved });
+            if (
+                approvedCount <
+                stageDoc.minReviewers
+            ) {
+                throw new AppError(
+                    ERROR_CODES.INSUFFICIENT_REVIEWS,
+                    `At least ${stageDoc.minReviewers} approved reviews are required before computing score.`
+                );
+            }
+            const totalScore = await this.calculateTotalScore(id);
+            // const totalScore = applicationDoc.totalScore;
 
-            if ((totalScore === undefined || totalScore === null) && stageDoc.minReviewers > 0) {
+            /*
+            if ((totalScore === undefined || totalScore === null) ) {
                 throw new AppError(
                     ERROR_CODES.SCORE_NOT_COMPUTED,
                     "Total score not computed. Please calculate score first."
                 );
-            }
-            /*
-            const countApproved = await this.reviewerRepo.countByApplication(id, ReviewerStatus.approved);
-            if (countApproved < stageDoc.minReviewers) {
-                throw new AppError(
-                    ERROR_CODES.INSUFFICIENT_REVIEWS,
-                    `At least ${stageDoc.minReviewers} completed reviews are required before computing score.`
-                );
-            }
-            */
-
+            }*/
             if (to === ApplicationStatus.accepted) {
                 const minAcceptanceScore = stageDoc.minAcceptanceScore ?? 0;
                 if ((totalScore ?? 0) < minAcceptanceScore) {
@@ -493,19 +501,9 @@ export class ApplicationService {
                 }
             }
         }
-
-
+        /*
         if (to === ApplicationStatus.pending) {
-
-            await this.repository.update(id, { totalScore: null });
-
-            /*
-                        if (await this.reviewerRepo.exist({ application: id })) {
-                            throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
-                        }*/
-
-        }
-
+        }*/
         const updated = await this.repository.updateStatus(id, to);
 
         const synced = await this.synchronizer.sync(projectId);
@@ -570,9 +568,7 @@ export class ApplicationService {
             throw new AppError(ERROR_CODES.APPLICATION_NOT_PENDING);
         }
 
-        const projectId = String(applicationDoc.project);
-
-        const projectDoc = await this.projectService.getById(projectId);
+        const projectDoc = await this.projectService.getById(String(applicationDoc.project));
 
         // Only project lead can withdraw
         if (String(projectDoc.leadPI) !== String(userId)) {
@@ -602,10 +598,11 @@ export class ApplicationService {
         );
 
         if (deleted) {
-            await this.notificationService?.notifyApplicationWithdrawn(
+            const stageDoc = await this.stageRepo.findById(String(applicationDoc.stage));
+            stageDoc && await this.notificationService?.notifyApplicationWithdrawn(
                 userId,
                 projectDoc.title,
-                "Last"
+                stageDoc?.name
             );
         }
 
